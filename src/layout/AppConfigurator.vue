@@ -8,6 +8,7 @@ import { ref } from 'vue';
 
 const { layoutConfig, isDarkTheme } = useLayout();
 
+
 const presets = {
     Aura,
     Lara,
@@ -76,6 +77,7 @@ const surfaces = ref([
         palette: { 0: '#ffffff', 50: '#fbfcfc', 100: '#F7F9F8', 200: '#EFF3F2', 300: '#DADEDD', 400: '#B1B7B6', 500: '#828787', 600: '#5F7274', 700: '#415B61', 800: '#29444E', 900: '#183240', 950: '#0c1920' }
     }
 ]);
+
 
 function getPresetExt() {
     const color = primaryColors.value.find((c) => c.name === layoutConfig.primary);

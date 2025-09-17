@@ -5,134 +5,360 @@ import AppMenuItem from './AppMenuItem.vue';
 
 const model = ref([
     {
-        label: 'Home',
-        items: [{ label: 'Dashboard', icon: 'pi pi-fw pi-home', to: '/' }]
-    },
-    {
-        label: 'UI Components',
+        label: 'Marketing',
+        icon: 'pi pi-fw pi-megaphone',
         items: [
-            { label: 'Form Layout', icon: 'pi pi-fw pi-id-card', to: '/uikit/formlayout' },
-            { label: 'Input', icon: 'pi pi-fw pi-check-square', to: '/uikit/input' },
-            { label: 'Button', icon: 'pi pi-fw pi-mobile', to: '/uikit/button', class: 'rotated-icon' },
-            { label: 'Table', icon: 'pi pi-fw pi-table', to: '/uikit/table' },
-            { label: 'List', icon: 'pi pi-fw pi-list', to: '/uikit/list' },
-            { label: 'Tree', icon: 'pi pi-fw pi-share-alt', to: '/uikit/tree' },
-            { label: 'Panel', icon: 'pi pi-fw pi-tablet', to: '/uikit/panel' },
-            { label: 'Overlay', icon: 'pi pi-fw pi-clone', to: '/uikit/overlay' },
-            { label: 'Media', icon: 'pi pi-fw pi-image', to: '/uikit/media' },
-            { label: 'Menu', icon: 'pi pi-fw pi-bars', to: '/uikit/menu' },
-            { label: 'Message', icon: 'pi pi-fw pi-comment', to: '/uikit/message' },
-            { label: 'File', icon: 'pi pi-fw pi-file', to: '/uikit/file' },
-            { label: 'Chart', icon: 'pi pi-fw pi-chart-bar', to: '/uikit/charts' },
-            { label: 'Timeline', icon: 'pi pi-fw pi-calendar', to: '/uikit/timeline' },
-            { label: 'Misc', icon: 'pi pi-fw pi-circle', to: '/uikit/misc' }
+            { 
+                label: 'Dashboard', 
+                icon: 'pi pi-fw pi-home', 
+                
+                to: '#' 
+            },
+            {
+                label: 'News Management',
+                icon: 'pi pi-fw pi-flag',
+                
+                to: '#'
+            },
+            {
+                label: 'Events Management',
+                icon: 'pi pi-fw pi-calendar',
+                
+                to: '#'
+            },
+            {
+                label: 'Campaign Management',
+                icon: 'pi pi-fw pi-megaphone',
+                
+                to: '#'
+            },
+            {
+                label: 'Game Management',
+                icon: 'pi pi-fw pi-star',
+                
+                to: '#'
+            },
+            {
+                label: 'Reward Catalogue',
+                icon: 'pi pi-fw pi-gift',
+                
+                to: '#'
+            },
+            {
+                label: 'Redemption Management',
+                icon: 'pi pi-fw pi-wallet',
+                
+                to: '#'
+            },
+            {
+                label: 'TC Members',
+                icon: 'pi pi-fw pi-users',
+                
+                items: [
+                    { 
+                        label: 'Member List', 
+                        icon: 'pi pi-fw pi-id-card', 
+                        to: '#'  
+                    },
+                    { 
+                        label: 'Referral Reward Point', 
+                        icon: 'pi pi-fw pi-share-alt', 
+                        to: '#' 
+                    }
+                ]
+            },
+            {
+                label: 'Report',
+                icon: 'pi pi-fw pi-chart-bar',
+                
+                items: [
+                    { 
+                        label: 'Member', 
+                        icon: 'pi pi-fw pi-user', 
+                        to: '#' 
+                    },
+                    { 
+                        label: 'Referral', 
+                        icon: 'pi pi-fw pi-users', 
+                        to: '#' 
+                    }
+                ]
+            }
         ]
     },
     {
-        label: 'Pages',
+        label: 'Technical',
+        icon: 'pi pi-fw pi-cog',
+        items: [
+            { 
+                label: 'Dashboard', 
+                icon: 'pi pi-fw pi-home', 
+                
+                to: '#' 
+            },
+            {
+                label: 'Warranty Claim',
+                icon: 'pi pi-fw pi-file',
+                
+                items: [
+                    { 
+                        label: 'Claim List', 
+                        icon: 'pi pi-fw pi-list', 
+                        to: '#' 
+                    },
+                    { 
+                        label: 'CTC List', 
+                        icon: 'pi pi-fw pi-book', 
+                        to: '#' 
+                    },
+                    { 
+                        label: 'Scrap List', 
+                        icon: 'pi pi-fw pi-trash', 
+                        to: '#' 
+                    },
+                    { 
+                        label: 'Invoice List', 
+                        icon: 'pi pi-fw pi-file-pdf', 
+                        to: '#' 
+                    }
+                ]
+            },
+            {
+                label: 'Products',
+                icon: 'pi pi-fw pi-box',
+                
+                items: [
+                    { 
+                        label: 'Product List', 
+                        icon: 'pi pi-fw pi-list', 
+                        to: '#' 
+                    },
+                    { 
+                        label: 'Bulk Update', 
+                        icon: 'pi pi-fw pi-refresh',
+                        to: '#' 
+                    },
+                    { 
+                        label: 'TWP Tire List', 
+                        icon: 'pi pi-fw pi-circle', 
+                        to: '#' 
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        label: 'OM',
         icon: 'pi pi-fw pi-briefcase',
-        to: '/pages',
         items: [
-            {
-                label: 'Landing',
-                icon: 'pi pi-fw pi-globe',
-                to: '/landing'
+            { 
+                label: 'Dashboard',
+                icon: 'pi pi-fw pi-home',
+                
+                to: '#' 
+            },
+            { 
+                label: 'Customer', 
+                icon: 'pi pi-fw pi-user', 
+                 
+                to: '/om/listEten' 
+            },
+            { 
+                label: 'Order', 
+                icon: 'pi pi-fw pi-shopping-cart', 
+                 
+                to: '#' 
+            },
+            { 
+                label: 'Back Order', 
+                icon: 'pi pi-fw pi-history', 
+                 
+                to: '#' 
+            },
+            { 
+                label: 'Return Order', 
+                icon: 'pi pi-fw pi-reply', 
+                 
+                to: '#' 
             },
             {
-                label: 'Auth',
-                icon: 'pi pi-fw pi-user',
+                label: 'Report',
+                icon: 'pi pi-fw pi-chart-line',
+                
                 items: [
-                    {
-                        label: 'Login',
-                        icon: 'pi pi-fw pi-sign-in',
-                        to: '/auth/login'
+                    { 
+                        label: 'Sales Forecast', 
+                        icon: 'pi pi-fw pi-chart-line', 
+                        to: '#' 
                     },
-                    {
-                        label: 'Error',
-                        icon: 'pi pi-fw pi-times-circle',
-                        to: '/auth/error'
+                    { 
+                        label: 'Direct Shipment', 
+                        icon: 'pi pi-fw pi-truck', 
+                        to: '#' 
                     },
-                    {
-                        label: 'Access Denied',
-                        icon: 'pi pi-fw pi-lock',
-                        to: '/auth/access'
+                    { 
+                        label: 'Back Order', 
+                        icon: 'pi pi-fw pi-history', 
+                        to: '#' 
+                    },
+                    { 
+                        label: 'Own Collection', 
+                        icon: 'pi pi-fw pi-box', 
+                        to: '#' 
                     }
                 ]
             },
+            { 
+                label: 'Sales Program',
+                icon: 'pi pi-fw pi-tags',
+                
+                to: '#' },
             {
-                label: 'Crud',
-                icon: 'pi pi-fw pi-pencil',
-                to: '/pages/crud'
+                label: 'Maintenance',
+                icon: 'pi pi-fw pi-cog',
+                
+                items: [
+                    { 
+                        label: 'Disable Order', 
+                        icon: 'pi pi-fw pi-ban', 
+                        to: '#' 
+                    },
+                    { 
+                        label: 'Month End Closing', 
+                        icon: 'pi pi-fw pi-calendar-times', 
+                        to: '#' 
+                    },
+                    { 
+                        label: 'Material Exception', 
+                        icon: 'pi pi-fw pi-exclamation-triangle', 
+                        to: '#' 
+                    }
+                ]
             },
-            {
-                label: 'Not Found',
-                icon: 'pi pi-fw pi-exclamation-circle',
-                to: '/pages/notfound'
-            },
-            {
-                label: 'Empty',
-                icon: 'pi pi-fw pi-circle-off',
-                to: '/pages/empty'
+            { 
+                label: 'Messaging',
+                icon: 'pi pi-fw pi-envelope', 
+                
+                to: '#' 
             }
         ]
     },
     {
-        label: 'Hierarchy',
+        label: 'SCM',
+        icon: 'pi pi-fw pi-sitemap',
         items: [
             {
-                label: 'Submenu 1',
-                icon: 'pi pi-fw pi-bookmark',
+                label: 'Warranty CTC',
+                icon: 'pi pi-fw pi-file',
+                
                 items: [
-                    {
-                        label: 'Submenu 1.1',
-                        icon: 'pi pi-fw pi-bookmark',
-                        items: [
-                            { label: 'Submenu 1.1.1', icon: 'pi pi-fw pi-bookmark' },
-                            { label: 'Submenu 1.1.2', icon: 'pi pi-fw pi-bookmark' },
-                            { label: 'Submenu 1.1.3', icon: 'pi pi-fw pi-bookmark' }
-                        ]
+                    { 
+                        label: 'Collection List', 
+                        icon: 'pi pi-fw pi-archive', 
+                        to: '#' 
                     },
-                    {
-                        label: 'Submenu 1.2',
-                        icon: 'pi pi-fw pi-bookmark',
-                        items: [{ label: 'Submenu 1.2.1', icon: 'pi pi-fw pi-bookmark' }]
+                    { 
+                        label: 'Return List', 
+                        icon: 'pi pi-fw pi-reply', 
+                        to: '#' 
                     }
                 ]
             },
             {
-                label: 'Submenu 2',
-                icon: 'pi pi-fw pi-bookmark',
+                label: 'Order',
+                icon: 'pi pi-fw pi-truck',
+                
                 items: [
-                    {
-                        label: 'Submenu 2.1',
-                        icon: 'pi pi-fw pi-bookmark',
-                        items: [
-                            { label: 'Submenu 2.1.1', icon: 'pi pi-fw pi-bookmark' },
-                            { label: 'Submenu 2.1.2', icon: 'pi pi-fw pi-bookmark' }
-                        ]
+                    { 
+                        label: 'Order Delivery', 
+                        icon: 'pi pi-fw pi-send', 
+                        to: '#' 
                     },
-                    {
-                        label: 'Submenu 2.2',
-                        icon: 'pi pi-fw pi-bookmark',
-                        items: [{ label: 'Submenu 2.2.1', icon: 'pi pi-fw pi-bookmark' }]
+                    { 
+                        label: 'Order Pickup', 
+                        icon: 'pi pi-fw pi-download', 
+                        to: '#' 
                     }
                 ]
+            },
+            {
+                label: 'Return',
+                
+                icon: 'pi pi-fw pi-refresh',
+                items: [
+                    { 
+                        label: 'Return Order List', 
+                        icon: 'pi pi-fw pi-list', 
+                        to: '#' 
+                    },
+                    { 
+                        label: 'Bulk Update', 
+                        icon: 'pi pi-fw pi-refresh', 
+                        to: '#' 
+                    }
+                ]
+            },
+            { 
+                label: 'Logistic Account', 
+                icon: 'pi pi-fw pi-briefcase', 
+                
+                to: '#' 
+            },
+            { 
+                label: 'Back Order', 
+                icon: 'pi pi-fw pi-history',
+                 
+                to: '#' 
             }
         ]
     },
     {
-        label: 'Get Started',
+        label: 'IT',
+        icon: 'pi pi-fw pi-desktop',
         items: [
             {
-                label: 'Documentation',
-                icon: 'pi pi-fw pi-book',
-                to: '/documentation'
+                label: 'Admin',
+                icon: 'pi pi-fw pi-lock',
+                
+                items: [
+                    { 
+                        label: 'User Group', 
+                        icon: 'pi pi-fw pi-users', 
+                        to: '#' 
+                    },
+                    { 
+                        label: 'User Account', 
+                        icon: 'pi pi-fw pi-user', 
+                        to: '#' 
+                    }
+                ]
             },
+            { 
+                label: 'Salesman', 
+                icon: 'pi pi-fw pi-id-card', 
+                
+                to: '#' },
             {
-                label: 'View Source',
-                icon: 'pi pi-fw pi-github',
-                url: 'https://github.com/primefaces/sakai-vue',
-                target: '_blank'
+                label: 'Setting',
+                icon: 'pi pi-fw pi-cog',
+                
+                items: [
+                    { 
+                        label: 'Maintenance Mode', 
+                        icon: 'pi pi-fw pi-power-off', 
+                        to: '#' 
+                    },
+                    { 
+                        label: 'Email Setting', 
+                        icon: 'pi pi-fw pi-envelope', 
+                        to: '#' 
+                    },
+                    { 
+                        label: 'Terms & Conditions', 
+                        icon: 'pi pi-fw pi-file', 
+                        to: '#' 
+                    }
+                ]
             }
         ]
     }

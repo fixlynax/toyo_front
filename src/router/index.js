@@ -103,7 +103,32 @@ const router = createRouter({
                     path: '/documentation',
                     name: 'documentation',
                     component: () => import('@/views/pages/Documentation.vue')
-                }
+                },
+                {
+                    path: '/om/listEten',
+                    name: 'listEten',
+                    component: () => import('@/views/om/listEten.vue')
+                },
+                {
+                    path: '/om/addEten',
+                    name: 'addEten',
+                    component: () => import('@/views/om/addEten.vue')
+                },
+                {
+                    path: '/om/detailEten',
+                    name: 'detailEten',
+                    component: () => import('@/views/om/detailEten.vue')
+                },
+                {
+                    path: '/om/comfirmationEten',
+                    name: 'comfirmationEten',
+                    component: () => import('@/views/om/comfirmationEten.vue')
+                },
+                {
+                    path: '/marketing/listCatalogue',
+                    name: 'listCatalogue',
+                    component: () => import('@/views/marketing/listCatalogue.vue')
+                },
             ]
         },
         {

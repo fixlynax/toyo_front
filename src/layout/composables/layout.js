@@ -1,11 +1,11 @@
 import { computed, reactive } from 'vue';
 
 const layoutConfig = reactive({
-    preset: 'Aura',
-    primary: 'emerald',
-    surface: null,
+    preset: 'Lara',
+    primary: 'blue',
+    surface: 'soho',
     darkTheme: false,
-    menuMode: 'static'
+    menuMode: 'static',
 });
 
 const layoutState = reactive({
@@ -16,6 +16,7 @@ const layoutState = reactive({
     staticMenuMobileActive: false,
     menuHoverActive: false,
     activeMenuItem: null
+
 });
 
 export function useLayout() {

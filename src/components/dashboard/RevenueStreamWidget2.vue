@@ -14,30 +14,31 @@ function setChartData() {
         labels: ['Jan', 'Feb', 'March', 'April', 'May', 'June', 'July', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
         datasets: [
             {
-                type: 'bar',
+                type: 'line',
                 label: 'Data 1',
-                backgroundColor: documentStyle.getPropertyValue('--p-primary-600'),
-                data: [4000, 10000, 15000, 4000, 8200, 6000, 7200, 5000, 0, 0, 0, 0], // Jan–Aug dummy, Sep–Dec = 0
-                barThickness: 32
-            },
-            {
-                type: 'bar',
-                label: 'Data 2',
+                borderColor: documentStyle.getPropertyValue('--p-primary-600'),
                 backgroundColor: documentStyle.getPropertyValue('--p-primary-400'),
-                data: [2100, 8400, 2400, 7500, 9200, 6800, 5400, 3000, 0, 0, 0, 0], // Jan–Aug dummy, Sep–Dec = 0
-                barThickness: 32
+                tension: 0.4, // smooth curve
+                fill: false,
+                data: [4000, 10000, 15000, 4000, 8200, 6000, 7200, 5000, 0, 0, 0, 0]
             },
             {
-                type: 'bar',
+                type: 'line',
+                label: 'Data 2',
+                borderColor: documentStyle.getPropertyValue('--p-primary-400'),
+                backgroundColor: documentStyle.getPropertyValue('--p-primary-300'),
+                tension: 0.4,
+                fill: false,
+                data: [2100, 8400, 2400, 7500, 9200, 6800, 5400, 3000, 0, 0, 0, 0]
+            },
+            {
+                type: 'line',
                 label: 'Data 3',
+                borderColor: documentStyle.getPropertyValue('--p-primary-200'),
                 backgroundColor: documentStyle.getPropertyValue('--p-primary-200'),
-                data: [4100, 5200, 3400, 7400, 8800, 5600, 6300, 4700, 0, 0, 0, 0], // Jan–Aug dummy, Sep–Dec = 0
-                borderRadius: {
-                    topLeft: 8,
-                    topRight: 8
-                },
-                borderSkipped: true,
-                barThickness: 32
+                tension: 0.4,
+                fill: false,
+                data: [4100, 5200, 3400, 7400, 8800, 5600, 6300, 4700, 0, 0, 0, 0]
             }
         ]
     };
@@ -90,7 +91,7 @@ onMounted(() => {
 
 <template>
     <div class="card">
-        <div class="font-semibold text-xl mb-4">Dummy Data 1</div>
+        <div class="font-semibold text-xl mb-4">Dummy Data 2</div>
         <Chart type="bar" :data="chartData" :options="chartOptions" class="h-80" />
     </div>
 </template>
