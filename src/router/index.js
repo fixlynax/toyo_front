@@ -129,16 +129,21 @@ const router = createRouter({
                     name: 'listCatalogue',
                     component: () => import('@/views/marketing/listCatalogue.vue')
                 },
-                 {
+                {
                     path: '/marketing/listEvent',
                     name: 'listEvent',
                     component: () => import('@/views/marketing/listEvent.vue')
                 },
-                 {
+                {
                     path: '/marketing/listNews',
                     name: 'listNews',
                     component: () => import('@/views/marketing/listNews.vue')
                 },
+                {
+                    path: '/marketing/listGame',
+                    name: 'listNews',
+                    component: () => import('@/views/marketing/listGame.vue')
+                }
             ]
         },
         {

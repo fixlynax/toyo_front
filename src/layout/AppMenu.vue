@@ -36,7 +36,7 @@ const model = ref([
                 label: 'Game Management',
                 icon: 'pi pi-fw pi-star',
                 
-                to: '#'
+                to: '/marketing/listGame'
             },
             {
                 label: 'Reward Catalogue',
