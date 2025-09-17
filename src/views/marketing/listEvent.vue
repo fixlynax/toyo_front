@@ -84,7 +84,7 @@ onBeforeMount(async () => {
             <!-- Columns -->
             <Column field="title" header="Title" style="min-width: 8rem">
                 <template #body="{ data }">
-                    <RouterLink to="/om/detailEten" class=" hover:underline font-bold">
+                    <RouterLink to="/marketing/createEvent" class=" hover:underline font-bold">
                         {{ data.title }}
                     </RouterLink>
                 </template>
