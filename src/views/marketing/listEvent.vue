@@ -73,7 +73,7 @@ onBeforeMount(async () => {
                     </div>
 
                     <!-- Right: Add eTEN Button -->
-                    <RouterLink to="/om/addEten">
+                    <RouterLink to="/marketing/createEvent">
                         <Button type="button" label="Create" />
                     </RouterLink>
                 </div>
@@ -82,19 +82,14 @@ onBeforeMount(async () => {
             <template #empty> No Event found. </template>
             <template #loading> Loading Event data. Please wait. </template>
             <!-- Columns -->
-            <Column field="title" header="Title" style="min-width: 6rem">
+            <Column field="title" header="Title" style="min-width: 8rem">
                 <template #body="{ data }">
                     <RouterLink to="/om/detailEten" class=" hover:underline font-bold">
                         {{ data.title }}
                     </RouterLink>
                 </template>
             </Column>
-            <Column field="description" header="Description" style="min-width: 6rem">
-                <template #body="{ data }">
-                        {{ data.desc }}
-                </template>
-            </Column>
-             <Column field="location" header="location" style="min-width: 6rem">
+             <Column field="location" header="Location" style="min-width: 6rem">
                 <template #body="{ data }">
                        {{ data.location }}
                 </template>

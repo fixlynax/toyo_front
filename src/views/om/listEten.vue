@@ -57,7 +57,7 @@ onBeforeMount(async () => {
 
 <template>
     <div class="card">
-        <div class="text-2xl font-bold text-gray-800 border-b pb-2">List eTEN</div>
+        <div class="text-2xl font-bold text-gray-800 border-b pb-2">List Customer</div>
         <DataTable :value="listData" :paginator="true" :rows="10" dataKey="id" :rowHover="true" :loading="loading">
             <template #header>
                 <div class="flex items-center justify-between gap-4 w-full flex-wrap">
@@ -73,7 +73,7 @@ onBeforeMount(async () => {
                     </div>
 
                     <!-- Right: Add eTEN Button -->
-                    <RouterLink to="/om/addEten">
+                    <RouterLink to="/om/createEten">
                         <Button type="button" label="Create" />
                     </RouterLink>
                 </div>
@@ -90,7 +90,6 @@ onBeforeMount(async () => {
                 </template>
             </Column>
             <Column field="custAccountNo" header="Acc No" style="min-width: 6rem" >
-              <template #footer="slotProps"></template>
             </Column>
             <Column field="companyName1" header="Company Name" style="min-width: 8rem" />
             <Column header="Location" style="min-width: 8rem">

@@ -110,9 +110,9 @@ const router = createRouter({
                     component: () => import('@/views/om/listEten.vue')
                 },
                 {
-                    path: '/om/addEten',
-                    name: 'addEten',
-                    component: () => import('@/views/om/addEten.vue')
+                    path: '/om/createEten',
+                    name: 'createEten',
+                    component: () => import('@/views/om/createEten.vue')
                 },
                 {
                     path: '/om/detailEten',
@@ -120,9 +120,9 @@ const router = createRouter({
                     component: () => import('@/views/om/detailEten.vue')
                 },
                 {
-                    path: '/om/comfirmationEten',
-                    name: 'comfirmationEten',
-                    component: () => import('@/views/om/comfirmationEten.vue')
+                    path: '/om/confirmationEten',
+                    name: 'confirmationEten',
+                    component: () => import('@/views/om/confirmationEten.vue')
                 },
                 {
                     path: '/marketing/listCatalogue',
@@ -141,9 +141,14 @@ const router = createRouter({
                 },
                 {
                     path: '/marketing/listGame',
-                    name: 'listNews',
+                    name: 'listGame',
                     component: () => import('@/views/marketing/listGame.vue')
-                }
+                },
+                {
+                    path: '/marketing/createEvent',
+                    name: 'createEvent',
+                    component: () => import('@/views/marketing/createEvent.vue')
+                },
             ]
         },
         {

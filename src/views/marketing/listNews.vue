@@ -82,26 +82,21 @@ onBeforeMount(async () => {
             <template #empty> No News found. </template>
             <template #loading> Loading News data. Please wait. </template>
             <!-- Columns -->
-            <Column field="title" header="Title" style="min-width: 6rem">
+            <Column field="title" header="Title" style="min-width: 8rem">
                 <template #body="{ data }">
                     <RouterLink to="/om/detailEten" class=" hover:underline font-bold">
                         {{ data.title }}
                     </RouterLink>
                 </template>
             </Column>
-            <Column field="description" header="Description" style="min-width: 6rem">
-                <template #body="{ data }">
-                        {{ data.desc }}
-                </template>
-            </Column>
-             <Column field="location" header="location" style="min-width: 6rem">
+             <Column field="location" header="Location" style="min-width: 6rem">
                 <template #body="{ data }">
                        {{ data.location }}
                 </template>
             </Column> 
-            <Column field="audience" header="Audience" style="min-width: 6rem">
+            <Column field="publishDate" header="Publish Date" style="min-width: 6rem">
                 <template #body="{ data }">
-                        {{ data.audience }}
+                        {{ data.publishDate }}
                 </template>
             </Column> 
             <Column header="Due Date" style="min-width: 8rem">

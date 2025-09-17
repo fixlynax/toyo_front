@@ -4,7 +4,7 @@ export const ListGameService = {
       {
         id: 1,
         gameNo: "GTY2025001",
-        type: "Online Quiz",
+        type: "SPIN",
         title: "Toyo Tires Knowledge Challenge",
         desc: "Test your knowledge about Toyo Tires’ history, technology, and innovations. Win exclusive merchandise!",
         imageURL: "https://example.com/images/game-quiz1.jpg",
@@ -26,7 +26,7 @@ export const ListGameService = {
       {
         id: 2,
         gameNo: "GTY2025002",
-        type: "Photo Contest",
+        type: "SPIN",
         title: "Toyo Tires Adventure Capture",
         desc: "Upload your best road trip photo featuring Toyo Tires and stand a chance to win cash vouchers.",
         imageURL: "https://example.com/images/game-photo1.jpg",
@@ -48,7 +48,7 @@ export const ListGameService = {
       {
         id: 3,
         gameNo: "GTY2025003",
-        type: "Lucky Draw",
+        type: "RANDOM",
         title: "Toyo Tires Purchase & Win",
         desc: "Buy any Toyo Tires product and enter the lucky draw for a chance to win exciting prizes.",
         imageURL: "https://example.com/images/game-lucky1.jpg",
@@ -70,7 +70,7 @@ export const ListGameService = {
       {
         id: 4,
         gameNo: "GTY2025004",
-        type: "Racing Simulator",
+        type: "SPIN",
         title: "Virtual Drift Challenge with Toyo Tires",
         desc: "Compete in a racing simulator drift challenge to show your skills and win Toyo merchandise.",
         imageURL: "https://example.com/images/game-drift1.jpg",
@@ -92,7 +92,7 @@ export const ListGameService = {
       {
         id: 5,
         gameNo: "GTY2025005",
-        type: "Social Media Challenge",
+        type: "RANDOM",
         title: "Toyo Tires Hashtag Hunt",
         desc: "Join the social media challenge by posting your Toyo Tires experience with #ToyoTiresMY.",
         imageURL: "https://example.com/images/game-hashtag1.jpg",
@@ -114,7 +114,7 @@ export const ListGameService = {
       {
         id: 6,
         gameNo: "GTY2025006",
-        type: "Innovation Hackathon",
+        type: "RANDOM",
         title: "Toyo Tires Future Mobility Game",
         desc: "A hackathon-style competition where participants design gamified solutions for future tire technologies.",
         imageURL: "https://example.com/images/game-hackathon1.jpg",

@@ -89,22 +89,17 @@ onBeforeMount(async () => {
                     </RouterLink>
                 </template>
             </Column>
-            <Column field="description" header="Description" style="min-width: 6rem">
+            <Column field="description" header="Title" style="min-width: 6rem">
                 <template #body="{ data }">
                         {{ data.title }}
                 </template>
             </Column>
-             <Column field="location" header="location" style="min-width: 6rem">
-                <template #body="{ data }">
-                       {{ data.desc }}
-                </template>
-            </Column> 
-            <Column field="audience" header="Audience" style="min-width: 6rem">
+            <Column field="type" header="Type" style="min-width: 6rem">
                 <template #body="{ data }">
                         {{ data.type }}
                 </template>
             </Column> 
-            <Column field="location" header="location" style="min-width: 6rem">
+            <Column field="location" header="Location" style="min-width: 6rem">
                 <template #body="{ data }">
                        {{ data.location }}
                 </template>

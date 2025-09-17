@@ -400,7 +400,7 @@ function goNext() {
 
                     <div class="flex flex-col md:flex-row justify-start mt-4">
                         <div class="w-40">
-                            <RouterLink to="/om/comfirmationEten">
+                            <RouterLink to="/om/confirmationEten">
                                 <Button label="Submit" class="w-full" />
                             </RouterLink>
                         </div>
