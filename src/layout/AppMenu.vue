@@ -18,13 +18,13 @@ const model = ref([
                 label: 'News Management',
                 icon: 'pi pi-fw pi-flag',
                 
-                to: '#'
+                to: '/marketing/ListNews'
             },
             {
                 label: 'Events Management',
                 icon: 'pi pi-fw pi-calendar',
                 
-                to: '#'
+                to: '/marketing/ListEvent'
             },
             {
                 label: 'Campaign Management',
