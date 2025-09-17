@@ -1,7 +1,7 @@
 <script setup>
 import { CustomerService } from '@/service/CustomerService';
 import { ProductService } from '@/service/ProductService';
-import { ListNewsService } from '@/service/ListNews';
+import { ListGameService } from '@/service/ListGame';
 import { FilterMatchMode, FilterOperator } from '@primevue/core/api';
 import { onBeforeMount, ref } from 'vue';
 
@@ -50,7 +50,7 @@ const loading = ref(true);
 
 // Fetch data on component mount
 onBeforeMount(async () => {
-    listData.value = await ListNewsService.getListNews();
+    listData.value = await ListGameService.getListGame();
     loading.value = false;
 });
 </script>
@@ -74,34 +74,39 @@ onBeforeMount(async () => {
 
                     <!-- Right: Add eTEN Button -->
                     <RouterLink to="/om/addEten">
-                        <Button type="button" label="Create" />
+                        <Button type="button" label="Create"></Button>
                     </RouterLink>
                 </div>
             </template>
 
-            <template #empty> No News found. </template>
-            <template #loading> Loading News data. Please wait. </template>
+            <template #empty> No Games found. </template>
+            <template #loading> Loading Games data. Please wait. </template>
             <!-- Columns -->
-            <Column field="title" header="Title" style="min-width: 6rem">
+            <Column field="gameNo" header="Game No" style="min-width: 6rem">
                 <template #body="{ data }">
                     <RouterLink to="/om/detailEten" class=" hover:underline font-bold">
-                        {{ data.title }}
+                        {{ data.gameNo }}
                     </RouterLink>
                 </template>
             </Column>
             <Column field="description" header="Description" style="min-width: 6rem">
                 <template #body="{ data }">
-                        {{ data.desc }}
+                        {{ data.title }}
                 </template>
             </Column>
              <Column field="location" header="location" style="min-width: 6rem">
                 <template #body="{ data }">
-                       {{ data.location }}
+                       {{ data.desc }}
                 </template>
             </Column> 
             <Column field="audience" header="Audience" style="min-width: 6rem">
                 <template #body="{ data }">
-                        {{ data.audience }}
+                        {{ data.type }}
+                </template>
+            </Column> 
+            <Column field="location" header="location" style="min-width: 6rem">
+                <template #body="{ data }">
+                       {{ data.location }}
                 </template>
             </Column> 
             <Column header="Due Date" style="min-width: 8rem">
