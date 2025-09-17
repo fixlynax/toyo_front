@@ -40,22 +40,6 @@ function initFilters1() {
     };
 }
 
-// Function to get severity for account status
-function getAccountStatusSeverity(status) {
-    switch (status) {
-        case 'Pending':
-            return 'info';
-        case 'Suspended':
-            return 'danger';
-        case 'Activate':
-            return 'success';
-        case 'Deactivated':
-            return 'danger';
-        default:
-            return null;
-    }
-}
-
 // Function to get severity for overall status
 function getOverallStatusSeverity(status) {
     return status === 1 ? 'success' : 'danger';
