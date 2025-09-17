@@ -134,6 +134,11 @@ const router = createRouter({
                     name: 'listEvent',
                     component: () => import('@/views/marketing/listEvent.vue')
                 },
+                 {
+                    path: '/marketing/listNews',
+                    name: 'listNews',
+                    component: () => import('@/views/marketing/listNews.vue')
+                },
             ]
         },
         {
