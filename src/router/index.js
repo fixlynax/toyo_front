@@ -129,6 +129,11 @@ const router = createRouter({
                     name: 'listCatalogue',
                     component: () => import('@/views/marketing/listCatalogue.vue')
                 },
+                 {
+                    path: '/marketing/listEvent',
+                    name: 'listEvent',
+                    component: () => import('@/views/marketing/listEvent.vue')
+                },
             ]
         },
         {
