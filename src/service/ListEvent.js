@@ -3,8 +3,8 @@ export const ListEventService = {
     return [
       {
         id: 1,
-        audience: "Public",
-        isSurvey: false,
+        audience: "TC",
+        isSurvey: 0,
         point1: 85,
         point2: 90,
         point3: 95,
@@ -24,8 +24,8 @@ export const ListEventService = {
       },
       {
         id: 2,
-        audience: "Car Enthusiasts",
-        isSurvey: true,
+        audience: "TC",
+        isSurvey: 1,
         point1: 78,
         point2: 85,
         point3: 88,
@@ -45,8 +45,8 @@ export const ListEventService = {
       },
       {
         id: 3,
-        audience: "Dealers & Partners",
-        isSurvey: false,
+        audience: "ALL",
+        isSurvey: 0,
         point1: 92,
         point2: 86,
         point3: 80,
@@ -66,8 +66,8 @@ export const ListEventService = {
       },
       {
         id: 4,
-        audience: "General Public",
-        isSurvey: false,
+        audience: "TC",
+        isSurvey: 0,
         point1: 70,
         point2: 75,
         point3: 88,
@@ -87,8 +87,8 @@ export const ListEventService = {
       },
       {
         id: 5,
-        audience: "Motorsport Fans",
-        isSurvey: false,
+        audience: "ETEN",
+        isSurvey: 0,
         point1: 95,
         point2: 88,
         point3: 82,
@@ -108,7 +108,7 @@ export const ListEventService = {
       },
       {
         id: 6,
-        audience: "Students & Youth",
+        audience: "TC",
         isSurvey: true,
         point1: 80,
         point2: 85,

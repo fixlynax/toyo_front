@@ -3,7 +3,7 @@ export const ListNewsService = {
     return [
       {
         id: 1,
-        audience: "Public",
+        audience: "TC",
         title: "Toyo Tires Launches Proxes Sport 2 in Malaysia",
         image1URL: "https://example.com/images/proxes1.jpg",
         image2URL: "https://example.com/images/proxes2.jpg",
@@ -19,7 +19,7 @@ export const ListNewsService = {
       },
       {
         id: 2,
-        audience: "Car Enthusiasts",
+        audience: "ETEN",
         title: "Toyo Tires Sponsors Sepang Drift Championship 2025",
         image1URL: "https://example.com/images/drift1.jpg",
         image2URL: "https://example.com/images/drift2.jpg",
@@ -35,7 +35,7 @@ export const ListNewsService = {
       },
       {
         id: 3,
-        audience: "Dealers & Partners",
+        audience: "ALL",
         title: "Toyo Tires Expands Dealer Network in Johor",
         image1URL: "https://example.com/images/dealer1.jpg",
         image2URL: "https://example.com/images/dealer2.jpg",
@@ -51,7 +51,7 @@ export const ListNewsService = {
       },
       {
         id: 4,
-        audience: "General Public",
+        audience: "TC",
         title: "Toyo Tires Green Mobility Initiative Launched",
         image1URL: "https://example.com/images/green1.jpg",
         image2URL: "https://example.com/images/green2.jpg",
@@ -67,7 +67,7 @@ export const ListNewsService = {
       },
       {
         id: 5,
-        audience: "Motorsport Fans",
+        audience: "TC",
         title: "Toyo Tires Announces Off-Road Rally Malaysia 2025",
         image1URL: "https://example.com/images/offroad1.jpg",
         image2URL: "https://example.com/images/offroad2.jpg",
@@ -83,7 +83,7 @@ export const ListNewsService = {
       },
       {
         id: 6,
-        audience: "Students & Youth",
+        audience: "TC",
         title: "Toyo Tires Partners with Universiti Malaya for Innovation Hackathon",
         image1URL: "https://example.com/images/hackathon1.jpg",
         image2URL: "https://example.com/images/hackathon2.jpg",
