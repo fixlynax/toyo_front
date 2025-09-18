@@ -50,7 +50,7 @@ const loading = ref(true);
 
 // Fetch data on component mount
 onBeforeMount(async () => {
-    listData.value = await ListNewsService.getListNews();
+    listData.value = await ListNewsService.getListNewsData();
     loading.value = false;
 });
 </script>
@@ -73,7 +73,7 @@ onBeforeMount(async () => {
                     </div>
 
                     <!-- Right: Add eTEN Button -->
-                    <RouterLink to="/om/addEten">
+                    <RouterLink to="/marketing/detailNews">
                         <Button type="button" label="Create" />
                     </RouterLink>
                 </div>
@@ -84,7 +84,7 @@ onBeforeMount(async () => {
             <!-- Columns -->
             <Column field="title" header="Title" style="min-width: 8rem">
                 <template #body="{ data }">
-                    <RouterLink to="/om/detailEten" class=" hover:underline font-bold">
+                    <RouterLink to="/marketing/detailNews" class=" hover:underline font-bold">
                         {{ data.title }}
                     </RouterLink>
                 </template>
