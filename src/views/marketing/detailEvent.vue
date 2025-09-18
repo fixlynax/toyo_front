@@ -58,7 +58,7 @@
                     <!-- Header -->
                     <div class="flex items-center justify-between border-b pb-2 mb-2">
                         <div class="text-2xl font-bold text-gray-800">ℹ️ Survey Info</div>
-                        <Button v-if="event.isSurvey === 1" icon="pi pi-plus" class="p-button-success" size="tiny" />
+                        <Button v-if="event.isSurvey === 1" icon="pi pi-plus" class="p-button-success" size="small" />
                     </div>
 
                     <div class="overflow-x-auto">
@@ -125,16 +125,24 @@
                                     <td class="px-4 py-2 text-right">{{ event.isSurvey ? 'Yes' : 'No' }}</td>
                                 </tr>
                                 <tr class="border-b">
-                                    <td class="px-4 py-2 font-medium">Point 1 (Silver)</td>
+                                    <td class="px-4 py-2 font-medium">Point Silver</td>
                                     <td class="px-4 py-2 text-right">{{ event.point1 }}</td>
                                 </tr>
                                 <tr class="border-b">
-                                    <td class="px-4 py-2 font-medium">Point 2 (Gold)</td>
+                                    <td class="px-4 py-2 font-medium">Point classic</td>
+                                    <td class="px-4 py-2 text-right">{{ event.point1 }}</td>
+                                </tr>
+                                <tr class="border-b">
+                                    <td class="px-4 py-2 font-medium">Point Silver</td>
                                     <td class="px-4 py-2 text-right">{{ event.point2 }}</td>
                                 </tr>
                                 <tr class="border-b">
-                                    <td class="px-4 py-2 font-medium">Point 3 (Platinum)</td>
+                                    <td class="px-4 py-2 font-medium">Point Gold</td>
                                     <td class="px-4 py-2 text-right">{{ event.point3 }}</td>
+                                </tr>
+                                <tr class="border-b">
+                                    <td class="px-4 py-2 font-medium">Point Platinum</td>
+                                    <td class="px-4 py-2 text-right">{{ event.point4 }}</td>
                                 </tr>
                                 <tr class="border-b">
                                     <td class="px-4 py-2 font-medium">Total Views</td>
@@ -156,9 +164,10 @@ const event = ref({
     id: 1,
     audience: 'TC',
     isSurvey: 1, // change to 0 to test "no survey"
-    point1: 85,
+    point1: 80,
     point2: 90,
     point3: 95,
+    point4: 105,
     title: 'Toyo Tires Drift Challenge 2025',
     image1URL: '/demo/images/event-toyo-1.jpg',
     image2URL: '/demo/images/event-toyo-2.jpg',

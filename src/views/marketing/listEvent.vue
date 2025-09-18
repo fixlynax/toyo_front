@@ -99,14 +99,14 @@ onBeforeMount(async () => {
                         {{ data.publishDate }}
                 </template>
             </Column> 
-            <Column header="Due Date" style="min-width: 8rem">
+            <Column header="Event Date" style="min-width: 8rem">
                 <template #body="{ data }">
                     {{ data.startDate }} - {{ data.endDate }}
                 </template>
             </Column> 
             <Column header="Status" style="min-width: 6rem">
                 <template #body="{ data }">
-                    <Tag :value="data.status === 1 ? 'Active' : 'Deactive'" :severity="getOverallStatusSeverity(data.status)" />
+                    <Tag :value="data.status === 1 ? 'Active' : 'Inactive'" :severity="getOverallStatusSeverity(data.status)" />
                 </template>
             </Column>
         </DataTable>

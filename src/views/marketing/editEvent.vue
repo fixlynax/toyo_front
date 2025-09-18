@@ -47,18 +47,22 @@
                         <Dropdown v-model="event.isSurvey" :options="surveyOptions" optionLabel="label" optionValue="value" class="w-full" />
                     </div>
 
-                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4 md:col-span-2">
+                    <div class="grid grid-cols-1 md:grid-cols-4 gap-4 md:col-span-2">
                         <div>
-                            <label class="block font-medium text-gray-700 mb-1">Silver Point</label>
+                            <label class="block font-medium text-gray-700 mb-1">Classic Point</label>
                             <InputNumber v-model="event.point1" class="w-full" />
                         </div>
                         <div>
-                            <label class="block font-medium text-gray-700 mb-1">Gold Point</label>
+                            <label class="block font-medium text-gray-700 mb-1">Silver Point</label>
                             <InputNumber v-model="event.point2" class="w-full" />
                         </div>
                         <div>
-                            <label class="block font-medium text-gray-700 mb-1">Platinum Point</label>
+                            <label class="block font-medium text-gray-700 mb-1">Gold Point</label>
                             <InputNumber v-model="event.point3" class="w-full" />
+                        </div>
+                        <div>
+                            <label class="block font-medium text-gray-700 mb-1">Platinum Point</label>
+                            <InputNumber v-model="event.point4" class="w-full" />
                         </div>
                     </div>
                 </div>
@@ -136,9 +140,10 @@ const event = ref({
     id: 1,
     audience: 'TC',
     isSurvey: 1, // change to 0 to test "no survey"
-    point1: 85,
+    point1: 80,
     point2: 90,
     point3: 95,
+    point4: 105,
     title: 'Toyo Tires Drift Challenge 2025',
     image1URL: '/demo/images/event-toyo-1.jpg',
     image2URL: '/demo/images/event-toyo-2.jpg',
