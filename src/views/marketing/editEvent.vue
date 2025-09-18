@@ -151,7 +151,7 @@ const event = ref({
     id: 1,
     audience: 'TC',
     isSurvey: 1, // change to 0 to test "no survey"
-    point1: 85,
+    point1: 80,
     point2: 90,
     point3: 95,
     point4: 100,

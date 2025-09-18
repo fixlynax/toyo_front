@@ -30,7 +30,7 @@
 
                 <!-- Upload Images -->
                 <div>
-                    <label class="block font-medium text-gray-700 mb-2">News Images</label>
+                    <label class="block font-medium text-gray-700 mb-2 ">News Images</label>
                     <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
                         <!-- Image 1 -->
                         <div class="relative">
