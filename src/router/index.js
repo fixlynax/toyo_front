@@ -149,6 +149,11 @@ const router = createRouter({
                     name: 'createEvent',
                     component: () => import('@/views/marketing/createEvent.vue')
                 },
+                {
+                    path: '/marketing/detailEvent',
+                    name: 'detailEvent',
+                    component: () => import('@/views/marketing/detailEvent.vue')
+                },
             ]
         },
         {
