@@ -45,19 +45,19 @@
 
                 <!-- Upload Images -->
                 <div>
-                    <label class="block font-medium text-gray-700 mb-2">News Images</label>
+                    <label class="block font-medium text-gray-700 mb-2 ">News Images</label>
                     <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
                         <div>
                             <FileUpload mode="basic" name="image1" accept="image/*" customUpload @select="onImageSelect($news, 'image1URL')" chooseLabel="Change Image 1" class="w-full" />
-                            <img v-if="news.image1URL" :src="news.image1URL" alt="Preview 1" class="mt-2 rounded-lg shadow-md object-cover w-full h-48" />
+                            <img v-if="news.image1URL" :src="news.image1URL" alt="Preview 1" class="mt-2 rounded-lg shadow-md object-cover w-full h-80" />
                         </div>
                         <div>
                             <FileUpload mode="basic" name="image2" accept="image/*" customUpload @select="onImageSelect($news, 'image2URL')" chooseLabel="Change Image 2" class="w-full" />
-                            <img v-if="news.image2URL" :src="news.image2URL" alt="Preview 2" class="mt-2 rounded-lg shadow-md object-cover w-full h-48" />
+                            <img v-if="news.image2URL" :src="news.image2URL" alt="Preview 2" class="mt-2 rounded-lg shadow-md object-cover w-full h-80" />
                         </div>
                         <div>
                             <FileUpload mode="basic" name="image3" accept="image/*" customUpload @select="onImageSelect($news, 'image3URL')" chooseLabel="Change Image 3" class="w-full" />
-                            <img v-if="news.image3URL" :src="news.image3URL" alt="Preview 3" class="mt-2 rounded-lg shadow-md object-cover w-full h-48" />
+                            <img v-if="news.image3URL" :src="news.image3URL" alt="Preview 3" class="mt-2 rounded-lg shadow-md object-cover w-full h-80" />
                         </div>
                     </div>
                 </div>
