@@ -40,10 +40,21 @@ function initFilters1() {
     };
 }
 
-// Function to get severity for overall status
-function getOverallStatusSeverity(status) {
-    return status === 1 ? 'success' : 'danger';
-}
+// Map status → label
+const getOverallStatusLabel = (status) => {
+    if (status === 0) return 'Draft';
+    if (status === 1) return 'Published';
+    if (status === 2) return 'Unpublished';
+    return 'Unknown';
+};
+
+// Map status → severity
+const getOverallStatusSeverity = (status) => {
+    if (status === 0) return 'info';
+    if (status === 1) return 'success';
+    if (status === 2) return 'warn';
+    return 'secondary';
+};
 
 const listData = ref([]);
 const loading = ref(true);
@@ -84,41 +95,29 @@ onBeforeMount(async () => {
             <!-- Columns -->
             <Column field="title" header="Title" style="min-width: 8rem">
                 <template #body="{ data }">
-                    <RouterLink to="/marketing/detailNews" class=" hover:underline font-bold">
+                    <RouterLink to="/marketing/detailNews" class="hover:underline font-bold">
                         {{ data.title }}
                     </RouterLink>
                 </template>
             </Column>
-             <Column field="location" header="Location" style="min-width: 6rem">
+            <Column field="location" header="Location" style="min-width: 6rem">
                 <template #body="{ data }">
-                       {{ data.location }}
+                    {{ data.location }}
                 </template>
-            </Column> 
+            </Column>
             <Column field="publishDate" header="Publish Date" style="min-width: 6rem">
                 <template #body="{ data }">
-                        {{ data.publishDate }}
+                    {{ data.publishDate }}
                 </template>
-            </Column> 
+            </Column>
             <Column header="Due Date" style="min-width: 8rem">
-                <template #body="{ data }">
-                    {{ data.startDate }} - {{ data.endDate }}
-                </template>
-            </Column> 
+                <template #body="{ data }"> {{ data.startDate }} - {{ data.endDate }} </template>
+            </Column>
             <Column header="Status" style="min-width: 6rem">
                 <template #body="{ data }">
-                    <Tag :value="data.status === 1 ? 'Active' : 'Deactive'" :severity="getOverallStatusSeverity(data.status)" />
+                    <Tag :value="getOverallStatusLabel(data.status)" :severity="getOverallStatusSeverity(data.status)" />
                 </template>
             </Column>
         </DataTable>
     </div>
 </template>
-
-<style scoped lang="scss">
-:deep(.p-datatable-frozen-tbody) {
-    font-weight: bold;
-}
-
-:deep(.p-datatable-scrollable .p-frozen-column) {
-    font-weight: bold;
-}
-</style>

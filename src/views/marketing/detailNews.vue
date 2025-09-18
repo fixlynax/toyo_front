@@ -6,62 +6,73 @@
                 <div class="card flex flex-col gap-6 w-full">
                     <!-- Header -->
                     <div class="flex items-center justify-between border-b pb-2">
-                        <div class="text-2xl font-bold text-gray-800">Event Details</div>
+                        <div class="text-2xl font-bold text-gray-800">Details News</div>
+
+                        <!-- Buttons -->
                         <div class="inline-flex items-center gap-2">
+                            <!-- Draft (status 0) -->
                             <Button 
-                                label="Edit" 
-                                icon="pi pi-pencil" 
-                                class="p-button-info" 
+                                v-if="news.status === 0"
+                                label="Save"  
+                                class="p-button-success" 
                                 size="small" 
                             />
-                            <Button 
-                                label="Delete" 
-                                icon="pi pi-trash" 
-                                class="p-button-danger" 
-                                size="small" 
-                            />
+
+                            <!-- Published (status 1) -->
+                            <template v-else-if="news.status === 1 || news.status === 2">
+                                <Button 
+                                    label="Edit"  
+                                    class="p-button-info" 
+                                    size="small" 
+                                />
+                                <Button 
+                                    label="Delete"  
+                                    class="p-button-danger" 
+                                    size="small" 
+                                />
+                            </template>
                         </div>
                     </div>
 
-                    <!-- Event Images -->
+                    <!-- news Images -->
                     <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mt-4">
                         <img 
-                            :src="event.image1URL" 
-                            alt="Event Image 1" 
+                            :src="news.image1URL" 
+                            alt="News Image 1" 
                             class="rounded-xl shadow-sm object-cover w-full h-40" 
                         />
                         <img 
-                            :src="event.image2URL" 
-                            alt="Event Image 2" 
+                            :src="news.image2URL" 
+                            alt="News Image 2" 
                             class="rounded-xl shadow-sm object-cover w-full h-40" 
                         />
                         <img 
-                            :src="event.image3URL" 
-                            alt="Event Image 3" 
+                            :src="news.image3URL" 
+                            alt="News Image 3" 
                             class="rounded-xl shadow-sm object-cover w-full h-40" 
                         />
                     </div>
 
-                    <!-- Event Info -->
+                    <!-- news Info -->
                     <div class="mt-6">
-                        <h1 class="text-2xl font-bold text-gray-800">{{ event.title }}</h1>
-                        <p class="text-lg font-medium">{{ event.desc }}</p>
+                        <h1 class="text-2xl font-bold text-gray-800">{{ news.title }}</h1>
+                        <p class="text-lg font-medium">{{ news.desc }}</p>
 
                         <div class="flex flex-col md:flex-row gap-4 mt-3">
                             <div class="w-full">
                                 <span class="block text-sm text-gray-500">Location</span>
-                                <p class="text-lg font-medium">{{ event.location }}</p>
+                                <p class="text-lg font-medium">{{ news.location }}</p>
                             </div>
                         </div>
 
                         <div class="flex flex-col md:flex-row gap-4 mt-3">
                             <div class="w-full">
                                 <span class="block text-sm text-gray-500">Start Date</span>
-                                <p class="text-lg font-medium">{{ event.startDate }}</p>
+                                <p class="text-lg font-medium">{{ news.startDate }}</p>
                             </div>
                             <div class="w-full">
                                 <span class="block text-sm text-gray-500">End Date</span>
-                                <p class="text-lg font-medium">{{ event.endDate }}</p>
+                                <p class="text-lg font-medium">{{ news.endDate }}</p>
                             </div>
                         </div>
                     </div>
@@ -76,8 +87,8 @@
                     <div class="flex items-center justify-between border-b pb-2 mb-2">
                         <div class="text-2xl font-bold text-gray-800">ℹ️ Advance Info</div>
                         <Tag 
-                            :value="event.status === 1 ? 'Active' : 'Inactive'" 
-                            :severity="event.status === 1 ? 'success' : 'danger'" 
+                            :value="statusLabel(news.status)" 
+                            :severity="statusSeverity(news.status)" 
                         />
                     </div>
 
@@ -86,15 +97,15 @@
                             <tbody>
                                 <tr class="border-b">
                                     <td class="px-4 py-2 font-medium">Published</td>
-                                    <td class="px-4 py-2 text-right">{{ event.publishDate }}</td>
+                                    <td class="px-4 py-2 text-right">{{ news.publishDate }}</td>
                                 </tr>
                                 <tr class="border-b">
                                     <td class="px-4 py-2 font-medium">Audience</td>
-                                    <td class="px-4 py-2 text-right">{{ event.audience }}</td>
+                                    <td class="px-4 py-2 text-right">{{ news.audience }}</td>
                                 </tr>
                                 <tr class="border-b">
                                     <td class="px-4 py-2 font-medium">Created</td>
-                                    <td class="px-4 py-2 text-right">{{ event.created }}</td>
+                                    <td class="px-4 py-2 text-right">{{ news.created }}</td>
                                 </tr>
                             </tbody>
                         </table>
@@ -106,9 +117,9 @@
 </template>
 
 <script setup>
-import { ref } from 'vue';
+import { ref } from 'vue'
 
-const event = ref({
+const news = ref({
     id: 1,
     audience: "TC",
     title: "Toyo Tires Launches Proxes Sport 2 in Malaysia",
@@ -120,8 +131,23 @@ const event = ref({
     publishDate: "2025-01-12",
     startDate: "2025-01-12",
     endDate: "2025-02-12",
-    status: 1,
+    status: 2, // 0=Draft, 1=Published, 2=Unpublished
     created: "2025-01-10",
     deleted: null,
-});
+})
+
+// helper functions for tag
+const statusLabel = (status) => {
+    if (status === 0) return 'Draft'
+    if (status === 1) return 'Published'
+    if (status === 2) return 'Unpublished'
+    return 'Unknown'
+}
+
+const statusSeverity = (status) => {
+    if (status === 0) return 'info'
+    if (status === 1) return 'success'
+    if (status === 2) return 'warn'
+    return 'secondary'
+}
 </script>

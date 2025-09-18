@@ -65,7 +65,7 @@
 
                 <!-- Upload Images -->
                 <div>
-                    <label class="block font-medium text-gray-700 mb-2">Upload Event Imagest</label>
+                    <label class="block font-medium text-gray-700 mb-2">Upload Event Image</label>
                     <!-- <h2 class="text-lg font-bold text-gray-800 mt-6 mb-2">Upload Event Images</h2> -->
                     <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
                         <div>

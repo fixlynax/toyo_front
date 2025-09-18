@@ -1,119 +1,80 @@
 <template>
     <Fluid>
         <div class="flex flex-col md:flex-row gap-8">
-            <!-- Event Create Card -->
             <div class="card flex flex-col gap-6 w-full">
                 <!-- Header -->
-                <div class="flex items-center justify-between border-b pb-2">
-                    <div class="text-2xl font-bold text-gray-800">Create News</div>
-                </div>
+                <div class="text-2xl font-bold text-gray-800 border-b pb-2">Create News</div>
 
-                <!-- Event Form -->
+                <!-- news Form -->
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div class="md:col-span-2">
-                        <label class="block text-sm font-medium text-gray-600">Title</label>
-                        <InputText v-model="event.title" class="w-full" />
+                        <label class="block font-medium text-gray-700">Title</label>
+                        <InputText v-model="news.title" class="w-full" />
                     </div>
 
-                    <!-- Description with PrimeVue Editor -->
                     <div class="md:col-span-2">
-                        <label class="block text-sm font-medium text-gray-600">Description</label>
-                        <InputText v-model="event.location" class="w-full" />      
+                        <label class="block font-medium text-gray-700">Description</label>
+                        <Textarea v-model="news.desc" rows="3" class="w-full" />
                     </div>
 
                     <div>
-                        <label class="block text-sm font-medium text-gray-600">Location</label>
-                        <InputText v-model="event.location" class="w-full" />
+                        <label class="block font-medium text-gray-700">Location</label>
+                        <InputText v-model="news.location" class="w-full" />
                     </div>
+
                     <div>
-                        <label class="block text-sm font-medium text-gray-600">Publish Date</label>
-                        <Calendar v-model="event.publishDate" dateFormat="yy-mm-dd" class="w-full" />
+                        <label class="block font-medium text-gray-700">Publish Date</label>
+                        <Calendar v-model="news.publishDate" dateFormat="yy-mm-dd" class="w-full" />
                     </div>
+
                     <div>
-                        <label class="block text-sm font-medium text-gray-600">Start Date</label>
-                        <Calendar v-model="event.startDate" dateFormat="yy-mm-dd" class="w-full" />
+                        <label class="block font-medium text-gray-700">Start Date</label>
+                        <Calendar v-model="news.startDate" dateFormat="yy-mm-dd" class="w-full" />
                     </div>
+
                     <div>
-                        <label class="block text-sm font-medium text-gray-600">End Date</label>
-                        <Calendar v-model="event.endDate" dateFormat="yy-mm-dd" class="w-full" />
+                        <label class="block font-medium text-gray-700">End Date</label>
+                        <Calendar v-model="news.endDate" dateFormat="yy-mm-dd" class="w-full" />
                     </div>
+
                     <div>
-                        <label class="block text-sm font-medium text-gray-600">Audience</label>
-                        <Dropdown v-model="event.audience" :options="audienceOptions" optionLabel="label" optionValue="value" class="w-full" />
+                        <label class="block font-medium text-gray-700">Audience</label>
+                        <Dropdown v-model="news.audience" :options="audienceOptions" optionLabel="label" optionValue="value" class="w-full" />
                     </div>
                 </div>
 
-                <!-- Image Upload Section -->
-                <div class="mt-6">
-                    <h2 class="text-lg font-bold text-gray-800 mb-2">Upload Event Images</h2>
+                <!-- Upload Images -->
+                <div>
+                    <label class="block font-medium text-gray-700 mb-2">Upload news Image</label>
                     <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
                         <div>
-                            <FileUpload 
-                                mode="basic" 
-                                name="image1" 
-                                accept="image/*" 
-                                customUpload 
-                                @select="onImageSelect($event, 'image1URL')" 
-                                chooseLabel="Upload Image 1" 
-                                class="w-full" />
-                            <img v-if="event.image1URL" :src="event.image1URL" alt="Preview 1" class="mt-2 rounded-lg shadow-md object-cover w-full h-48" />
+                            <FileUpload mode="basic" accept="image/*" customUpload @select="onImageSelect($event, 'image1URL')" chooseLabel="Upload Image 1" class="w-full" />
+                            <img v-if="news.image1URL" :src="news.image1URL" alt="Preview 1" class="mt-2 rounded-lg shadow-md object-cover w-full h-100" />
                         </div>
                         <div>
-                            <FileUpload 
-                                mode="basic" 
-                                name="image2" 
-                                accept="image/*" 
-                                customUpload 
-                                @select="onImageSelect($event, 'image2URL')" 
-                                chooseLabel="Upload Image 2" 
-                                class="w-full" />
-                            <img v-if="event.image2URL" :src="event.image2URL" alt="Preview 2" class="mt-2 rounded-lg shadow-md object-cover w-full h-48" />
+                            <FileUpload mode="basic" accept="image/*" customUpload @select="onImageSelect($event, 'image2URL')" chooseLabel="Upload Image 2" class="w-full" />
+                            <img v-if="news.image2URL" :src="news.image2URL" alt="Preview 2" class="mt-2 rounded-lg shadow-md object-cover w-full h-100" />
                         </div>
                         <div>
-                            <FileUpload 
-                                mode="basic" 
-                                name="image3" 
-                                accept="image/*" 
-                                customUpload 
-                                @select="onImageSelect($event, 'image3URL')" 
-                                chooseLabel="Upload Image 3" 
-                                class="w-full" />
-                            <img v-if="event.image3URL" :src="event.image3URL" alt="Preview 3" class="mt-2 rounded-lg shadow-md object-cover w-full h-48" />
+                            <FileUpload mode="basic" accept="image/*" customUpload @select="onImageSelect($event, 'image3URL')" chooseLabel="Upload Image 3" class="w-full" />
+                            <img v-if="news.image3URL" :src="news.image3URL" alt="Preview 3" class="mt-2 rounded-lg shadow-md object-cover w-full h-100" />
                         </div>
                     </div>
                 </div>
 
-                <!-- Survey Section -->
-                <div v-if="event.isSurvey === 1" class="mt-8">
-                    <!-- Header with Add Button -->
-                    <div class="flex items-center justify-between border-b pb-2 mb-4">
-                        <div class="text-xl font-bold text-gray-800">Survey Questions</div>
-                        <Button 
-                            icon="pi pi-plus" 
-                            label="Add Question" 
-                            class="p-button-success p-button-sm"
-                            :disabled="questions.length >= 10"
-                            @click="addQuestion" />
-                    </div>
-                </div>
-                    <!-- Action Buttons -->
-                    <div class="flex flex-col md:flex-row justify-end mt-4 gap-2">
+                <!-- Submit -->
+                <div class="flex justify-end mt-8 gap-2">
                     <div class="w-40">
-                        <RouterLink to="/marketing/listNews">
-                        <Button 
-                            label="Save as Draft" 
-                            class="w-full p-button-outlined p-button-info"
-                            @click="saveDraft"
-                        />
+                        <RouterLink to="/marketing/listnews">
+                            <Button label="Save as Draft" class="w-full p-button-outlined p-button-info" @click="saveDraft" />
                         </RouterLink>
                     </div>
                     <div class="w-40">
-                        <RouterLink to="/marketing/listNews">
+                        <RouterLink to="/marketing/detailnews">
                             <Button label="Submit" class="w-full" />
                         </RouterLink>
                     </div>
                 </div>
-
             </div>
         </div>
     </Fluid>
@@ -122,16 +83,6 @@
 <script setup>
 import { ref } from 'vue';
 
-// Editor toolbar config (disable image upload)
-const editorModules = {
-    toolbar: [
-        ['bold', 'italic', 'underline', 'strike'], 
-        [{ 'list': 'ordered'}, { 'list': 'bullet' }],
-        [{ 'align': [] }],
-        ['clean'] // remove formatting
-    ]
-};
-
 const audienceOptions = [
     { label: 'TC', value: 'TC' },
     { label: 'ETEN', value: 'ETEN' },
@@ -139,16 +90,13 @@ const audienceOptions = [
 ];
 
 const surveyOptions = [
-    { label: 'Yes', value: 1 },
-    { label: 'No', value: 0 }
+    { label: 'Yes', value: true },
+    { label: 'No', value: false }
 ];
 
-const event = ref({
-    audience: 'ALL',
-    isSurvey: 0,
-    point1: 0,
-    point2: 0,
-    point3: 0,
+const news = ref({
+    id: 1,
+    audience: 'ALL', // match option values
     title: '',
     image1URL: '',
     image2URL: '',
@@ -157,31 +105,19 @@ const event = ref({
     location: '',
     publishDate: '',
     startDate: '',
-    endDate: ''
+    endDate: '',
+    isSurvey: false,
+    point1: null,
+    point2: null,
+    point3: null
 });
 
-const questions = ref([]);
-
-const addQuestion = () => {
-    if (questions.value.length < 10) {
-        questions.value.push({
-            text: '',
-            options: ['Low', 'Average', 'High']
-        });
-    }
-};
-
-const removeQuestion = (index) => {
-    questions.value.splice(index, 1);
-};
-
-// File Upload Preview
-const onImageSelect = (eventFile, field) => {
-    const file = eventFile.files[0];
+const onImageSelect = (event, field) => {
+    const file = event.files[0];
     if (file) {
         const reader = new FileReader();
         reader.onload = (e) => {
-            event.value[field] = e.target.result; // preview as base64
+            news.value[field] = e.target.result;
         };
         reader.readAsDataURL(file);
     }
