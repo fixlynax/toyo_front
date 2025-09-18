@@ -9,16 +9,19 @@
     },
     "dependencies": {
         "@primeuix/themes": "^1.0.0",
+        "@primevue/themes": "^4.3.9",
         "chart.js": "3.3.2",
         "primeicons": "^7.0.0",
-        "primevue": "^4.3.1",
+        "primevue": "^4.3.9",
         "quill": "^2.0.3",
-        "tailwindcss-primeui": "^0.5.0",
+        "tailwindcss-primeui": "^0.5.1",
         "vue": "^3.4.34",
-        "vue-router": "^4.4.0"
+        "vue-router": "^4.4.0",
+        "vue3-quill": "^0.3.1"
     },
     "devDependencies": {
         "@primevue/auto-import-resolver": "^4.3.1",
+        "@primevue/nuxt-module": "^4.3.9",
         "@rushstack/eslint-patch": "^1.8.0",
         "@vitejs/plugin-vue": "^5.0.5",
         "@vue/eslint-config-prettier": "^9.0.0",

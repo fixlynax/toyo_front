@@ -3,7 +3,7 @@
         <div class="flex flex-col md:flex-row gap-8">
             <div class="card flex flex-col gap-6 w-full">
                 <!-- Header -->
-                <div class="text-2xl font-bold text-gray-800 border-b pb-2">Create Event</div>
+                <div class="text-2xl font-bold text-gray-800 border-b pb-2">Edit Event</div>
 
                 <!-- Event Form -->
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -65,19 +65,18 @@
 
                 <!-- Upload Images -->
                 <div>
-                    <label class="block font-medium text-gray-700 mb-2">Upload Event Imagest</label>
-                    <!-- <h2 class="text-lg font-bold text-gray-800 mt-6 mb-2">Upload Event Images</h2> -->
+                    <label class="block font-medium text-gray-700 mb-2">Event Images</label>
                     <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
                         <div>
-                            <FileUpload mode="basic" name="image1" accept="image/*" customUpload @select="onImageSelect($event, 'image1URL')" chooseLabel="Upload Image 1" class="w-full" />
+                            <FileUpload mode="basic" name="image1" accept="image/*" customUpload @select="onImageSelect($event, 'image1URL')" chooseLabel="Change Image 1" class="w-full" />
                             <img v-if="event.image1URL" :src="event.image1URL" alt="Preview 1" class="mt-2 rounded-lg shadow-md object-cover w-full h-48" />
                         </div>
                         <div>
-                            <FileUpload mode="basic" name="image2" accept="image/*" customUpload @select="onImageSelect($event, 'image2URL')" chooseLabel="Upload Image 2" class="w-full" />
+                            <FileUpload mode="basic" name="image2" accept="image/*" customUpload @select="onImageSelect($event, 'image2URL')" chooseLabel="Change Image 2" class="w-full" />
                             <img v-if="event.image2URL" :src="event.image2URL" alt="Preview 2" class="mt-2 rounded-lg shadow-md object-cover w-full h-48" />
                         </div>
                         <div>
-                            <FileUpload mode="basic" name="image3" accept="image/*" customUpload @select="onImageSelect($event, 'image3URL')" chooseLabel="Upload Image 3" class="w-full" />
+                            <FileUpload mode="basic" name="image3" accept="image/*" customUpload @select="onImageSelect($event, 'image3URL')" chooseLabel="Change Image 3" class="w-full" />
                             <img v-if="event.image3URL" :src="event.image3URL" alt="Preview 3" class="mt-2 rounded-lg shadow-md object-cover w-full h-48" />
                         </div>
                     </div>
@@ -110,7 +109,7 @@
                 <div class="flex justify-end mt-8">
                     <div class="w-40">
                         <RouterLink to="/marketing/detailEvent">
-                            <Button label="Submit" class="w-full" />
+                            <Button label="Update" class="w-full" />
                         </RouterLink>
                     </div>
                 </div>
@@ -134,23 +133,33 @@ const surveyOptions = [
 ];
 
 const event = ref({
-    audience: 'ALL',
-    isSurvey: 0,
-    point1: 0,
-    point2: 0,
-    point3: 0,
-    title: '',
-    image1URL: '',
-    image2URL: '',
-    image3URL: '',
-    desc: '',
-    location: '',
-    publishDate: '',
-    startDate: '',
-    endDate: ''
+    id: 1,
+    audience: 'TC',
+    isSurvey: 1, // change to 0 to test "no survey"
+    point1: 85,
+    point2: 90,
+    point3: 95,
+    title: 'Toyo Tires Drift Challenge 2025',
+    image1URL: '/demo/images/event-toyo-1.jpg',
+    image2URL: '/demo/images/event-toyo-2.jpg',
+    image3URL: '/demo/images/event-toyo-3.jpg',
+    desc: 'Experience the thrill of high-speed drifting powered by Toyo Tires. Join us for a weekend of motorsport excitement!',
+    location: 'Sepang International Circuit, Malaysia',
+    publishDate: '2025-01-10',
+    startDate: '2025-02-15',
+    endDate: '2025-02-16',
+    view: 542,
+    status: 1
 });
 
-const questions = ref([]);
+const questions = ref([
+    { text: 'How do you rate the durability of the tires?', options: ['Low', 'Average', 'High'] },
+    { text: 'How do you rate the comfort while driving?', options: ['Low', 'Average', 'High'] },
+    { text: 'How do you rate the performance in wet conditions?', options: ['Low', 'Average', 'High'] },
+    { text: 'How do you rate the performance in dry conditions?', options: ['Low', 'Average', 'High'] },
+    { text: 'How do you rate the value for money?', options: ['Low', 'Average', 'High'] },
+    { text: 'How satisfied are you overall with Toyo Tires?', options: ['Low', 'Average', 'High'] }
+]);
 
 const addQuestion = () => {
     if (questions.value.length < 10) {

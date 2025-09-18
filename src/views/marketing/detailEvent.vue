@@ -7,7 +7,12 @@
                 <div class="flex items-center justify-between border-b pb-2">
                     <div class="text-2xl font-bold text-gray-800">Event Details</div>
                     <div class="inline-flex items-center gap-2">
-                        <Button label="Edit" icon="pi pi-pencil" class="p-button-info" size="small" />
+                        <!-- Edit Event -->
+                        <RouterLink to="/marketing/editEvent">
+                            <Button label="Edit" icon="pi pi-pencil" class="p-button-info" size="small" />
+                        </RouterLink>
+
+                        <!-- Delete Event -->
                         <Button label="Delete" icon="pi pi-trash" class="p-button-danger" size="small" />
                     </div>
                 </div>
@@ -53,12 +58,7 @@
                     <!-- Header -->
                     <div class="flex items-center justify-between border-b pb-2 mb-2">
                         <div class="text-2xl font-bold text-gray-800">ℹ️ Survey Info</div>
-                        <Button 
-                            v-if="event.isSurvey === 1" 
-                            icon="pi pi-plus" 
-                            class="p-button-success" 
-                            size="tiny" 
-                        />
+                        <Button v-if="event.isSurvey === 1" icon="pi pi-plus" class="p-button-success" size="tiny" />
                     </div>
 
                     <div class="overflow-x-auto">
@@ -79,10 +79,7 @@
                                                         </ul>
                                                     </div>
                                                     <!-- Delete Button -->
-                                                    <Button 
-                                                        icon="pi pi-trash" 
-                                                        class="p-button-danger p-button-text p-button-sm" 
-                                                    />
+                                                    <Button icon="pi pi-trash" class="p-button-danger p-button-text p-button-sm" />
                                                 </div>
                                             </td>
                                         </tr>
@@ -96,9 +93,7 @@
 
                         <!-- No Survey Message -->
                         <template v-else>
-                            <div class="p-4 text-center text-gray-500 italic">
-                                🚫 This event does not have a survey.
-                            </div>
+                            <div class="p-4 text-center text-gray-500 italic">🚫 This event does not have a survey.</div>
                         </template>
                     </div>
                 </div>
