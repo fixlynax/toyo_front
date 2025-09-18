@@ -9,11 +9,11 @@
                     <div class="inline-flex items-center gap-2">
                         <!-- Edit Event -->
                         <RouterLink to="/marketing/editEvent">
-                            <Button label="Edit" icon="pi pi-pencil" class="p-button-info" size="small" />
+                            <Button label="Edit" class="p-button-info" size="small" />
                         </RouterLink>
 
                         <!-- Delete Event -->
-                        <Button label="Delete" icon="pi pi-trash" class="p-button-danger" size="small" />
+                        <Button label="Delete" class="p-button-danger" size="small" />
                     </div>
                 </div>
 

@@ -169,6 +169,11 @@ const router = createRouter({
                     name: 'editEvent',
                     component: () => import('@/views/marketing/editEvent.vue')
                 },
+                {
+                    path: '/marketing/editNews',
+                    name: 'editNews',
+                    component: () => import('@/views/marketing/editNews.vue')
+                },
 
             ]
         },

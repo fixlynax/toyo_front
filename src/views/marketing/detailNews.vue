@@ -11,46 +11,23 @@
                         <!-- Buttons -->
                         <div class="inline-flex items-center gap-2">
                             <!-- Draft (status 0) -->
-                            <Button 
-                                v-if="news.status === 0"
-                                label="Save"  
-                                class="p-button-success" 
-                                size="small" 
-                            />
+                            <Button v-if="news.status === 0" label="Save" class="p-button-success" size="small" />
 
                             <!-- Published (status 1) -->
                             <template v-else-if="news.status === 1 || news.status === 2">
-                                <Button 
-                                    label="Edit"  
-                                    class="p-button-info" 
-                                    size="small" 
-                                />
-                                <Button 
-                                    label="Delete"  
-                                    class="p-button-danger" 
-                                    size="small" 
-                                />
+                                <RouterLink to="/marketing/editNews">
+                                    <Button label="Edit" class="p-button-info" size="small" />
+                                </RouterLink>
+                                <Button label="Delete" class="p-button-danger" size="small" />
                             </template>
                         </div>
                     </div>
 
                     <!-- news Images -->
                     <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mt-4">
-                        <img 
-                            :src="news.image1URL" 
-                            alt="News Image 1" 
-                            class="rounded-xl shadow-sm object-cover w-full h-40" 
-                        />
-                        <img 
-                            :src="news.image2URL" 
-                            alt="News Image 2" 
-                            class="rounded-xl shadow-sm object-cover w-full h-40" 
-                        />
-                        <img 
-                            :src="news.image3URL" 
-                            alt="News Image 3" 
-                            class="rounded-xl shadow-sm object-cover w-full h-40" 
-                        />
+                        <img :src="news.image1URL" alt="News Image 1" class="rounded-xl shadow-sm object-cover w-full h-40" />
+                        <img :src="news.image2URL" alt="News Image 2" class="rounded-xl shadow-sm object-cover w-full h-40" />
+                        <img :src="news.image3URL" alt="News Image 3" class="rounded-xl shadow-sm object-cover w-full h-40" />
                     </div>
 
                     <!-- news Info -->
@@ -86,10 +63,7 @@
                     <!-- Header with Status on Right -->
                     <div class="flex items-center justify-between border-b pb-2 mb-2">
                         <div class="text-2xl font-bold text-gray-800">ℹ️ Advance Info</div>
-                        <Tag 
-                            :value="statusLabel(news.status)" 
-                            :severity="statusSeverity(news.status)" 
-                        />
+                        <Tag :value="statusLabel(news.status)" :severity="statusSeverity(news.status)" />
                     </div>
 
                     <div class="overflow-x-auto">
@@ -117,37 +91,37 @@
 </template>
 
 <script setup>
-import { ref } from 'vue'
+import { ref } from 'vue';
 
 const news = ref({
     id: 1,
-    audience: "TC",
-    title: "Toyo Tires Launches Proxes Sport 2 in Malaysia",
+    audience: 'TC',
+    title: 'Toyo Tires Launches Proxes Sport 2 in Malaysia',
     image1URL: '/demo/images/event-toyo-1.jpg',
     image2URL: '/demo/images/event-toyo-2.jpg',
     image3URL: '/demo/images/event-toyo-3.jpg',
-    desc: "Toyo Tires introduces its latest high-performance tire, Proxes Sport 2, designed for superior handling and grip on Malaysian roads.",
-    location: "Kuala Lumpur, Malaysia",
-    publishDate: "2025-01-12",
-    startDate: "2025-01-12",
-    endDate: "2025-02-12",
+    desc: 'Toyo Tires introduces its latest high-performance tire, Proxes Sport 2, designed for superior handling and grip on Malaysian roads.',
+    location: 'Kuala Lumpur, Malaysia',
+    publishDate: '2025-01-12',
+    startDate: '2025-01-12',
+    endDate: '2025-02-12',
     status: 2, // 0=Draft, 1=Published, 2=Unpublished
-    created: "2025-01-10",
-    deleted: null,
-})
+    created: '2025-01-10',
+    deleted: null
+});
 
 // helper functions for tag
 const statusLabel = (status) => {
-    if (status === 0) return 'Draft'
-    if (status === 1) return 'Published'
-    if (status === 2) return 'Unpublished'
-    return 'Unknown'
-}
+    if (status === 0) return 'Draft';
+    if (status === 1) return 'Published';
+    if (status === 2) return 'Unpublished';
+    return 'Unknown';
+};
 
 const statusSeverity = (status) => {
-    if (status === 0) return 'info'
-    if (status === 1) return 'success'
-    if (status === 2) return 'warn'
-    return 'secondary'
-}
+    if (status === 0) return 'info';
+    if (status === 1) return 'success';
+    if (status === 2) return 'warn';
+    return 'secondary';
+};
 </script>
