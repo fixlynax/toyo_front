@@ -2,99 +2,51 @@
     <Fluid>
         <div class="flex flex-col md:flex-row gap-8">
             <!-- Event Details Card -->
-            <div class="card flex flex-col gap-6 w-full">
-                <!-- Header -->
-                <div class="flex items-center justify-between border-b pb-2">
-                    <div class="text-2xl font-bold text-gray-800">Event Details</div>
-                    <div class="inline-flex items-center gap-2">
-                        <!-- Edit Event -->
-                        <RouterLink to="/marketing/editEvent">
-                            <Button label="Edit" class="p-button-info" size="small" />
-                        </RouterLink>
-
-                        <!-- Delete Event -->
-                        <Button label="Delete" class="p-button-danger" size="small" />
-                    </div>
-                </div>
-
-                <!-- Event Images -->
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mt-4">
-                    <img :src="event.image1URL" alt="Event Image 1" class="rounded-xl shadow-sm object-cover w-full h-80" />
-                    <img :src="event.image2URL" alt="Event Image 2" class="rounded-xl shadow-sm object-cover w-full h-80" />
-                    <img :src="event.image3URL" alt="Event Image 3" class="rounded-xl shadow-sm object-cover w-full h-80" />
-                </div>
-
-                <!-- Event Info -->
-                <div class="mt-6">
-                    <h1 class="text-2xl font-bold text-gray-800">{{ event.title }}</h1>
-                    <p class="text-lg font-medium">{{ event.desc }}</p>
-
-                    <div class="flex flex-col md:flex-row gap-4 mt-3">
-                        <div class="w-full">
-                            <span class="block text-sm text-gray-500">Location</span>
-                            <p class="text-lg font-medium">{{ event.location }}</p>
-                        </div>
-                    </div>
-
-                    <div class="flex flex-col md:flex-row gap-4 mt-3">
-                        <div class="w-full">
-                            <span class="block text-sm text-gray-500">Start Date</span>
-                            <p class="text-lg font-medium">{{ event.startDate }}</p>
-                        </div>
-                        <div class="w-full">
-                            <span class="block text-sm text-gray-500">End Date</span>
-                            <p class="text-lg font-medium">{{ event.endDate }}</p>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Main Content -->
-        <div class="flex flex-col md:flex-row gap-8 mt-8">
-            <!-- Left Content - Survey Questions -->
             <div class="md:w-2/3">
-                <div class="card flex flex-col w-full">
+                <div class="card flex flex-col gap-6 w-full">
                     <!-- Header -->
-                    <div class="flex items-center justify-between border-b pb-2 mb-2">
-                        <div class="text-2xl font-bold text-gray-800">ℹ️ Survey Info</div>
-                        <Button v-if="event.isSurvey === 1" icon="pi pi-plus" class="p-button-success" size="small" />
+                    <div class="flex items-center justify-between border-b pb-2">
+                        <div class="text-2xl font-bold text-gray-800">Event Details</div>
+                        <div class="inline-flex items-center gap-2">
+                            <!-- Edit Event -->
+                            <RouterLink to="/marketing/editEvent">
+                                <Button label="Edit" class="p-button-info" size="small" />
+                            </RouterLink>
+
+                            <!-- Delete Event -->
+                            <Button label="Delete" class="p-button-danger" size="small" />
+                        </div>
                     </div>
 
-                    <div class="overflow-x-auto">
-                        <!-- Survey Questions -->
-                        <template v-if="event.isSurvey === 1">
-                            <table class="w-full text-m text-left text-gray-800">
-                                <tbody>
-                                    <template v-if="questions.length > 0">
-                                        <tr v-for="(q, index) in questions" :key="index" class="border-b">
-                                            <td class="px-4 py-2 font-medium align-top w-10">{{ index + 1 }}</td>
-                                            <td class="px-4 py-2 text-left">
-                                                <div class="flex items-start justify-between">
-                                                    <!-- Question text + answers -->
-                                                    <div>
-                                                        <div class="font-bold">{{ q.text }}</div>
-                                                        <ul class="list-disc list-inside mt-1 text-gray-600">
-                                                            <li v-for="(ans, i) in q.options" :key="i">{{ ans }}</li>
-                                                        </ul>
-                                                    </div>
-                                                    <!-- Delete Button -->
-                                                    <Button icon="pi pi-trash" class="p-button-danger p-button-text p-button-sm" />
-                                                </div>
-                                            </td>
-                                        </tr>
-                                    </template>
-                                    <tr v-else>
-                                        <td class="px-4 py-2 text-gray-500 italic" colspan="2">No Questions</td>
-                                    </tr>
-                                </tbody>
-                            </table>
-                        </template>
+                    <!-- Event Images -->
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mt-4">
+                        <img :src="event.image1URL" alt="Event Image 1" class="rounded-xl shadow-sm object-cover w-full h-80" />
+                        <img :src="event.image2URL" alt="Event Image 2" class="rounded-xl shadow-sm object-cover w-full h-80" />
+                        <img :src="event.image3URL" alt="Event Image 3" class="rounded-xl shadow-sm object-cover w-full h-80" />
+                    </div>
 
-                        <!-- No Survey Message -->
-                        <template v-else>
-                            <div class="p-4 text-center text-gray-500 italic">🚫 This event does not have a survey.</div>
-                        </template>
+                    <!-- Event Info -->
+                    <div class="mt-6">
+                        <h1 class="text-2xl font-bold text-gray-800">{{ event.title }}</h1>
+                        <p class="text-lg font-medium">{{ event.desc }}</p>
+
+                        <div class="flex flex-col md:flex-row gap-4 mt-3">
+                            <div class="w-full">
+                                <span class="block text-sm text-gray-500">Location</span>
+                                <p class="text-lg font-medium">{{ event.location }}</p>
+                            </div>
+                        </div>
+
+                        <div class="flex flex-col md:flex-row gap-4 mt-3">
+                            <div class="w-full">
+                                <span class="block text-sm text-gray-500">Start Date</span>
+                                <p class="text-lg font-medium">{{ event.startDate }}</p>
+                            </div>
+                            <div class="w-full">
+                                <span class="block text-sm text-gray-500">End Date</span>
+                                <p class="text-lg font-medium">{{ event.endDate }}</p>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -124,23 +76,19 @@
                                     <td class="px-4 py-2 font-medium">Survey</td>
                                     <td class="px-4 py-2 text-right">{{ event.isSurvey ? 'Yes' : 'No' }}</td>
                                 </tr>
-                                <tr class="border-b">
-                                    <td class="px-4 py-2 font-medium">Point Silver</td>
+                                <tr v-if="event.isSurvey === 1" class="border-b">
+                                    <td class="px-4 py-2 font-medium">Point Classic</td>
                                     <td class="px-4 py-2 text-right">{{ event.point1 }}</td>
                                 </tr>
-                                <tr class="border-b">
-                                    <td class="px-4 py-2 font-medium">Point classic</td>
-                                    <td class="px-4 py-2 text-right">{{ event.point1 }}</td>
-                                </tr>
-                                <tr class="border-b">
+                                <tr v-if="event.isSurvey === 1" class="border-b">
                                     <td class="px-4 py-2 font-medium">Point Silver</td>
                                     <td class="px-4 py-2 text-right">{{ event.point2 }}</td>
                                 </tr>
-                                <tr class="border-b">
+                                <tr v-if="event.isSurvey === 1" class="border-b">
                                     <td class="px-4 py-2 font-medium">Point Gold</td>
                                     <td class="px-4 py-2 text-right">{{ event.point3 }}</td>
                                 </tr>
-                                <tr class="border-b">
+                                <tr v-if="event.isSurvey === 1" class="border-b">
                                     <td class="px-4 py-2 font-medium">Point Platinum</td>
                                     <td class="px-4 py-2 text-right">{{ event.point4 }}</td>
                                 </tr>
@@ -154,6 +102,55 @@
                 </div>
             </div>
         </div>
+
+        <!-- Main Content -->
+        <div class="flex flex-col md:flex-row gap-8 mt-8">
+            <!-- Left Content - Survey Questions -->
+            <div class="md:w-2/3" v-if="event.isSurvey === 1">
+                <div class="card flex flex-col w-full">
+                    <!-- Header -->
+                    <div class="flex items-center justify-between border-b pb-2 mb-2">
+                        <div class="text-2xl font-bold text-gray-800">ℹ️ Survey Info</div>
+                        <Button icon="pi pi-plus" class="p-button-success" size="small" />
+                    </div>
+
+                    <div class="overflow-x-auto">
+                        <!-- Survey Questions -->
+                        <table class="w-full text-m text-left text-gray-800">
+                            <tbody>
+                                <template v-if="questions.length > 0">
+                                    <tr v-for="(q, index) in questions" :key="index" class="border-b">
+                                        <td class="px-4 py-2 font-medium align-top w-10">{{ index + 1 }}</td>
+                                        <td class="px-4 py-2 text-left">
+                                            <div class="flex items-start justify-between">
+                                                <!-- Question text + answers -->
+                                                <div>
+                                                    <div class="font-bold">{{ q.text }}</div>
+                                                    <ul class="list-disc list-inside mt-1 text-gray-600">
+                                                        <li v-for="(ans, i) in q.options" :key="i">{{ ans }}</li>
+                                                    </ul>
+                                                </div>
+                                                <!-- Delete Button -->
+                                                <Button icon="pi pi-trash" class="p-button-danger p-button-text p-button-sm" />
+                                            </div>
+                                        </td>
+                                    </tr>
+                                </template>
+                                <tr v-else>
+                                    <td class="px-4 py-2 text-gray-500 italic" colspan="2">No Questions</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <div class="md:w-1/3 flex flex-col">
+                <div class="card flex flex-col w-full">
+                    <!-- Statistics for each question graph -->
+                </div>
+            </div>
+        </div>
     </Fluid>
 </template>
 
@@ -164,10 +161,10 @@ const event = ref({
     id: 1,
     audience: 'TC',
     isSurvey: 1, // change to 0 to test "no survey"
-    point1: 80,
+    point1: 85,
     point2: 90,
     point3: 95,
-    point4: 105,
+    point4: 100,
     title: 'Toyo Tires Drift Challenge 2025',
     image1URL: '/demo/images/event-toyo-1.jpg',
     image2URL: '/demo/images/event-toyo-2.jpg',
@@ -189,4 +186,44 @@ const questions = ref([
     { text: 'How do you rate the value for money?', options: ['Low', 'Average', 'High'] },
     { text: 'How satisfied are you overall with Toyo Tires?', options: ['Low', 'Average', 'High'] }
 ]);
+
+const participants = ref([
+    {
+        name: 'Participant 1',
+        answers: ['High', 'Average', 'High', 'High', 'Average', 'High']
+    },
+    {
+        name: 'Participant 2',
+        answers: ['Low', 'Low', 'Average', 'High', 'Low', 'Average']
+    },
+    {
+        name: 'Participant 3',
+        answers: ['High', 'High', 'High', 'High', 'High', 'High']
+    }
+    // Add more participants as needed
+]);
+
+const getStatistics = () => {
+    const stats = questions.value.map((question, qIndex) => {
+        const counts = question.options.reduce((acc, option) => {
+            acc[option] = 0;
+            return acc;
+        }, {});
+
+        // Count answers
+        participants.value.forEach((participant) => {
+            const answer = participant.answers[qIndex];
+            if (counts.hasOwnProperty(answer)) {
+                counts[answer]++;
+            }
+        });
+        return {
+            question: question.text,
+            counts
+        };
+    });
+    return stats;
+};
+
+const statistics = ref(getStatistics());
 </script>

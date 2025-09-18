@@ -99,7 +99,7 @@ onBeforeMount(async () => {
                         {{ data.publishDate }}
                 </template>
             </Column> 
-            <Column header="Event Date" style="min-width: 8rem">
+            <Column header="Period" style="min-width: 8rem">
                 <template #body="{ data }">
                     {{ data.startDate }} - {{ data.endDate }}
                 </template>
