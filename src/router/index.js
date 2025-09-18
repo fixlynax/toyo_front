@@ -159,6 +159,11 @@ const router = createRouter({
                     name: 'detailNews',
                     component: () => import('@/views/marketing/detailNews.vue')
                 },
+                {
+                    path: '/marketing/createNews',
+                    name: 'createNews',
+                    component: () => import('@/views/marketing/createNews.vue')
+                },
 
             ]
         },
