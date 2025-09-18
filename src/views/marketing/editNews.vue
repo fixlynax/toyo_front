@@ -18,75 +18,50 @@
                     </div>
 
                     <div>
-                        <label class="block font-medium text-gray-700">Location</label>
-                        <InputText v-model="news.location" class="w-full" />
-                    </div>
-
-                    <div>
                         <label class="block font-medium text-gray-700">Publish Date</label>
                         <Calendar v-model="news.publishDate" dateFormat="yy-mm-dd" class="w-full" />
                     </div>
 
                     <div>
-                        <label class="block font-medium text-gray-700">Start Date</label>
-                        <Calendar v-model="news.startDate" dateFormat="yy-mm-dd" class="w-full" />
-                    </div>
-
-                    <div>
-                        <label class="block font-medium text-gray-700">End Date</label>
-                        <Calendar v-model="news.endDate" dateFormat="yy-mm-dd" class="w-full" />
-                    </div>
-
-                    <div>
                         <label class="block font-medium text-gray-700">Audience</label>
                         <Dropdown v-model="news.audience" :options="audienceOptions" optionLabel="label" optionValue="value" class="w-full" />
-                    </div>     
+                    </div>
                 </div>
 
                 <!-- Upload Images -->
                 <div>
                     <label class="block font-medium text-gray-700 mb-2">News Images</label>
                     <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                        <div>
-                            <FileUpload mode="basic" name="image1" accept="image/*" customUpload @select="onImageSelect($news, 'image1URL')" chooseLabel="Change Image 1" class="w-full" />
-                            <img v-if="news.image1URL" :src="news.image1URL" alt="Preview 1" class="mt-2 rounded-lg shadow-md object-cover w-full h-48" />
-                        </div>
-                        <div>
-                            <FileUpload mode="basic" name="image2" accept="image/*" customUpload @select="onImageSelect($news, 'image2URL')" chooseLabel="Change Image 2" class="w-full" />
-                            <img v-if="news.image2URL" :src="news.image2URL" alt="Preview 2" class="mt-2 rounded-lg shadow-md object-cover w-full h-48" />
-                        </div>
-                        <div>
-                            <FileUpload mode="basic" name="image3" accept="image/*" customUpload @select="onImageSelect($news, 'image3URL')" chooseLabel="Change Image 3" class="w-full" />
-                            <img v-if="news.image3URL" :src="news.image3URL" alt="Preview 3" class="mt-2 rounded-lg shadow-md object-cover w-full h-48" />
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Survey Section -->
-                <div v-if="news.isSurvey === 1">
-                    <div class="flex items-center justify-between border-b pb-2 mb-4 mt-6">
-                        <div class="text-xl font-bold text-gray-800">📝 Survey Questions</div>
-                        <Button icon="pi pi-plus" label="Add Question" style="width: fit-content" class="p-button-success p-button-sm" :disabled="questions.length >= 10" @click="addQuestion" />
-                    </div>
-
-                    <div v-if="questions.length > 0" class="space-y-4">
-                        <div v-for="(q, index) in questions" :key="index" class="border rounded-lg p-4 shadow-sm bg-gray-50">
-                            <div class="flex items-center justify-between mb-2">
-                                <label class="font-semibold">Question {{ index + 1 }}</label>
-                                <Button icon="pi pi-trash" class="p-button-danger p-button-text p-button-sm" @click="removeQuestion(index)" />
+                        <!-- Image 1 -->
+                        <div class="relative">
+                            <FileUpload mode="basic" name="image1" accept="image/*" customUpload @select="onImageSelect($event, 'image1URL')" chooseLabel="Change Image 1" class="w-full" />
+                            <div v-if="news.image1URL" class="relative mt-2">
+                                <img :src="news.image1URL" alt="Preview 1" class="rounded-lg shadow-md object-cover w-full h-80" />
+                                <!-- Remove button -->
+                                <button @click="removeImage('image1URL')" class="absolute top-2 right-2 bg-red-500 text-white px-2 py-1 rounded-full hover:bg-red-600" title="Remove Image">&times;</button>
                             </div>
-                            <InputText v-model="q.text" placeholder="Enter your question" class="w-full mb-2" />
-                            <div class="grid grid-cols-1 md:grid-cols-3 gap-2">
-                                <InputText v-for="(ans, i) in q.options" :key="i" v-model="q.options[i]" placeholder="Answer" />
+                        </div>
+                        <!-- Image 2 -->
+                        <div class="relative">
+                            <FileUpload mode="basic" name="image2" accept="image/*" customUpload @select="onImageSelect($event, 'image2URL')" chooseLabel="Change Image 2" class="w-full" />
+                            <div v-if="news.image2URL" class="relative mt-2">
+                                <img :src="news.image2URL" alt="Preview 2" class="rounded-lg shadow-md object-cover w-full h-80" />
+                                <button @click="removeImage('image2URL')" class="absolute top-2 right-2 bg-red-500 text-white px-2 py-1 rounded-full hover:bg-red-600" title="Remove Image">&times;</button>
+                            </div>
+                        </div>
+                        <!-- Image 3 -->
+                        <div class="relative">
+                            <FileUpload mode="basic" name="image3" accept="image/*" customUpload @select="onImageSelect($event, 'image3URL')" chooseLabel="Change Image 3" class="w-full" />
+                            <div v-if="news.image3URL" class="relative mt-2">
+                                <img :src="news.image3URL" alt="Preview 3" class="rounded-lg shadow-md object-cover w-full h-80" />
+                                <button @click="removeImage('image3URL')" class="absolute top-2 right-2 bg-red-500 text-white px-2 py-1 rounded-full hover:bg-red-600" title="Remove Image">&times;</button>
                             </div>
                         </div>
                     </div>
-
-                    <div v-else class="text-gray-500 italic">No questions added yet.</div>
                 </div>
 
                 <!-- Submit -->
-                <div class="flex justify-end mt-8">
+                <div class="flex justify-end mt-2">
                     <div class="w-40">
                         <RouterLink to="/marketing/detailNews">
                             <Button label="Update" class="w-full" />
@@ -107,35 +82,33 @@ const audienceOptions = [
     { label: 'ALL', value: 'ALL' }
 ];
 
-const surveyOptions = [
-    { label: 'Yes', value: 1 },
-    { label: 'No', value: 0 }
-];
-
 const news = ref({
     id: 1,
-    audience: "TC",
-    title: "Toyo Tires Launches Proxes Sport 2 in Malaysia",
+    audience: 'TC',
+    title: 'Toyo Tires Launches Proxes Sport 2 in Malaysia',
     image1URL: '/demo/images/event-toyo-1.jpg',
     image2URL: '/demo/images/event-toyo-2.jpg',
     image3URL: '/demo/images/event-toyo-3.jpg',
-    desc: "Toyo Tires introduces its latest high-performance tire, Proxes Sport 2, designed for superior handling and grip on Malaysian roads.",
-    location: "Kuala Lumpur, Malaysia",
-    publishDate: "2025-01-12",
-    startDate: "2025-01-12",
-    endDate: "2025-02-12",
+    desc: 'Toyo Tires introduces its latest high-performance tire, Proxes Sport 2, designed for superior handling and grip on Malaysian roads.',
+    location: 'Kuala Lumpur, Malaysia',
+    publishDate: '2025-01-12',
+    startDate: '2025-01-12',
+    endDate: '2025-02-12',
     status: 2, // 0=Draft, 1=Published, 2=Unpublished
-    created: "2025-01-10",
-    deleted: null,
-})
-const onImageSelect = (newsFile, field) => {
-    const file = newsFile.files[0];
-    if (file) {
-        const reader = new FileReader();
-        reader.onload = (e) => {
-            news.value[field] = e.target.result;
-        };
-        reader.readAsDataURL(file);
-    }
+    created: '2025-01-10',
+    deleted: null
+});
+// Existing methods...
+const onImageSelect = (event, property) => {
+    const file = event.files[0];
+    const reader = new FileReader();
+    reader.onload = (e) => {
+        news.value[property] = e.target.result;
+    };
+    reader.readAsDataURL(file);
+};
+
+const removeImage = (property) => {
+    news.value[property] = null; // or '' if preferred
 };
 </script>

@@ -34,24 +34,6 @@
                     <div class="mt-6">
                         <h1 class="text-2xl font-bold text-gray-800">{{ news.title }}</h1>
                         <p class="text-lg font-medium">{{ news.desc }}</p>
-
-                        <div class="flex flex-col md:flex-row gap-4 mt-3">
-                            <div class="w-full">
-                                <span class="block text-sm text-gray-500">Location</span>
-                                <p class="text-lg font-medium">{{ news.location }}</p>
-                            </div>
-                        </div>
-
-                        <div class="flex flex-col md:flex-row gap-4 mt-3">
-                            <div class="w-full">
-                                <span class="block text-sm text-gray-500">Start Date</span>
-                                <p class="text-lg font-medium">{{ news.startDate }}</p>
-                            </div>
-                            <div class="w-full">
-                                <span class="block text-sm text-gray-500">End Date</span>
-                                <p class="text-lg font-medium">{{ news.endDate }}</p>
-                            </div>
-                        </div>
                     </div>
                 </div>
             </div>
@@ -78,11 +60,27 @@
                                     <td class="px-4 py-2 text-right">{{ news.audience }}</td>
                                 </tr>
                                 <tr class="border-b">
+                                    <td class="px-4 py-2 font-medium">Total View</td>
+                                    <td class="px-4 py-2 text-right">{{ news.view }}</td>
+                                </tr>
+                                <tr class="border-b">
                                     <td class="px-4 py-2 font-medium">Created</td>
                                     <td class="px-4 py-2 text-right">{{ news.created }}</td>
                                 </tr>
                             </tbody>
                         </table>
+                        <div class="flex justify-end mt-4">
+                            <div class="w-auto" v-if="news.status === 1">
+                                <RouterLink to="/marketing/detailEvent">
+                                    <Button label="Unpublish" class="p-button-danger" size="small" />
+                                </RouterLink>
+                            </div>
+                            <div class="w-auto" v-if="news.status === 0  || news.status === 2">
+                                <RouterLink to="/marketing/detailEvent">
+                                    <Button label="Publish" class="p-button-success" size="small" />
+                                </RouterLink>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -103,8 +101,9 @@ const news = ref({
     desc: 'Toyo Tires introduces its latest high-performance tire, Proxes Sport 2, designed for superior handling and grip on Malaysian roads.',
     location: 'Kuala Lumpur, Malaysia',
     publishDate: '2025-01-12',
-    startDate: '2025-01-12',
-    endDate: '2025-02-12',
+    startDate: '2025-01-15',
+    endDate: '2025-02-15',
+    view: 145,
     status: 2, // 0=Draft, 1=Published, 2=Unpublished
     created: '2025-01-10',
     deleted: null

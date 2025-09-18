@@ -100,18 +100,10 @@ onBeforeMount(async () => {
                     </RouterLink>
                 </template>
             </Column>
-            <Column field="location" header="Location" style="min-width: 6rem">
-                <template #body="{ data }">
-                    {{ data.location }}
-                </template>
-            </Column>
             <Column field="publishDate" header="Publish Date" style="min-width: 6rem">
                 <template #body="{ data }">
                     {{ data.publishDate }}
                 </template>
-            </Column>
-            <Column header="Due Date" style="min-width: 8rem">
-                <template #body="{ data }"> {{ data.startDate }} - {{ data.endDate }} </template>
             </Column>
             <Column header="Status" style="min-width: 6rem">
                 <template #body="{ data }">

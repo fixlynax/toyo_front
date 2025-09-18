@@ -47,18 +47,22 @@
                         <Dropdown v-model="event.isSurvey" :options="surveyOptions" optionLabel="label" optionValue="value" class="w-full" />
                     </div>
 
-                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4 md:col-span-2">
+                    <div v-if="event.isSurvey === 1" class="grid grid-cols-1 md:grid-cols-4 gap-4 md:col-span-2">
                         <div>
-                            <label class="block font-medium text-gray-700 mb-1">Silver Point</label>
+                            <label class="block font-medium text-gray-700 mb-1">Classic Point</label>
                             <InputNumber v-model="event.point1" class="w-full" />
                         </div>
                         <div>
-                            <label class="block font-medium text-gray-700 mb-1">Gold Point</label>
+                            <label class="block font-medium text-gray-700 mb-1">Silver Point</label>
                             <InputNumber v-model="event.point2" class="w-full" />
                         </div>
                         <div>
-                            <label class="block font-medium text-gray-700 mb-1">Platinum Point</label>
+                            <label class="block font-medium text-gray-700 mb-1">Gold Point</label>
                             <InputNumber v-model="event.point3" class="w-full" />
+                        </div>
+                        <div>
+                            <label class="block font-medium text-gray-700 mb-1">Platinum Point</label>
+                            <InputNumber v-model="event.point4" class="w-full" />
                         </div>
                     </div>
                 </div>
@@ -67,18 +71,29 @@
                 <div>
                     <label class="block font-medium text-gray-700 mb-2">Event Images</label>
                     <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                        <div>
+                        <div class="relative">
                             <FileUpload mode="basic" name="image1" accept="image/*" customUpload @select="onImageSelect($event, 'image1URL')" chooseLabel="Change Image 1" class="w-full" />
-                            <img v-if="event.image1URL" :src="event.image1URL" alt="Preview 1" class="mt-2 rounded-lg shadow-md object-cover w-full h-48" />
+                            <div v-if="event.image1URL" class="relative mt-2">
+                                <img :src="event.image1URL" alt="Preview 1" class="rounded-lg shadow-md object-cover w-full h-80" />
+                                <!-- Remove button -->
+                                <button @click="removeImage('image1URL')" class="absolute top-2 right-2 bg-red-500 text-white px-2 py-1 rounded-full hover:bg-red-600" title="Remove Image">&times;</button>
+                            </div>
                         </div>
-                        <div>
+                        <div class="relative">
                             <FileUpload mode="basic" name="image2" accept="image/*" customUpload @select="onImageSelect($event, 'image2URL')" chooseLabel="Change Image 2" class="w-full" />
-                            <img v-if="event.image2URL" :src="event.image2URL" alt="Preview 2" class="mt-2 rounded-lg shadow-md object-cover w-full h-48" />
+                            <div v-if="event.image2URL" class="relative mt-2">
+                                <img :src="event.image2URL" alt="Preview 2" class="rounded-lg shadow-md object-cover w-full h-80" />
+                                <!-- Remove button -->
+                                <button @click="removeImage('image2URL')" class="absolute top-2 right-2 bg-red-500 text-white px-2 py-1 rounded-full hover:bg-red-600" title="Remove Image">&times;</button>
+                            </div>
                         </div>
-                        <div>
+                        <div class="relative">
                             <FileUpload mode="basic" name="image3" accept="image/*" customUpload @select="onImageSelect($event, 'image3URL')" chooseLabel="Change Image 3" class="w-full" />
-                            <img v-if="event.image3URL" :src="event.image3URL" alt="Preview 3" class="mt-2 rounded-lg shadow-md object-cover w-full h-48" />
-                        </div>
+                            <div v-if="event.image3URL" class="relative mt-2">
+                                <img :src="event.image3URL" alt="Preview 3" class="rounded-lg shadow-md object-cover w-full h-80" />
+                                <!-- Remove button -->
+                                <button @click="removeImage('image3URL')" class="absolute top-2 right-2 bg-red-500 text-white px-2 py-1 rounded-full hover:bg-red-600" title="Remove Image">&times;</button>
+                            </div>                        </div>
                     </div>
                 </div>
 
@@ -106,7 +121,7 @@
                 </div>
 
                 <!-- Submit -->
-                <div class="flex justify-end mt-8">
+                <div class="flex justify-end mt-2">
                     <div class="w-40">
                         <RouterLink to="/marketing/detailEvent">
                             <Button label="Update" class="w-full" />
@@ -139,6 +154,7 @@ const event = ref({
     point1: 85,
     point2: 90,
     point3: 95,
+    point4: 100,
     title: 'Toyo Tires Drift Challenge 2025',
     image1URL: '/demo/images/event-toyo-1.jpg',
     image2URL: '/demo/images/event-toyo-2.jpg',
@@ -183,5 +199,9 @@ const onImageSelect = (eventFile, field) => {
         };
         reader.readAsDataURL(file);
     }
+};
+
+const removeImage = (property) => {
+    event.value[property] = null; // or '' if preferred
 };
 </script>
