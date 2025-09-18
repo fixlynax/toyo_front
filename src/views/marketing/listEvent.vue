@@ -73,7 +73,7 @@ onBeforeMount(async () => {
                     </div>
 
                     <!-- Right: Add eTEN Button -->
-                    <RouterLink to="/marketing/detailNews">
+                    <RouterLink to="/marketing/createEvent">
                         <Button type="button" label="Create" />
                     </RouterLink>
                 </div>
@@ -84,7 +84,7 @@ onBeforeMount(async () => {
             <!-- Columns -->
             <Column field="title" header="Title" style="min-width: 8rem">
                 <template #body="{ data }">
-                    <RouterLink to="/marketing/detailNews" class=" hover:underline font-bold">
+                    <RouterLink to="/marketing/detailEvent" class=" hover:underline font-bold">
                         {{ data.title }}
                     </RouterLink>
                 </template>
