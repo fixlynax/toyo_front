@@ -140,6 +140,11 @@ const router = createRouter({
                     component: () => import('@/views/marketing/listNews.vue')
                 },
                 {
+                    path: '/marketing/detailNews',
+                    name: 'detailNews',
+                    component: () => import('@/views/marketing/detailNews.vue')
+                },
+                {
                     path: '/marketing/listGame',
                     name: 'listGame',
                     component: () => import('@/views/marketing/listGame.vue')
