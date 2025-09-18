@@ -1,100 +1,124 @@
+<script setup>
+import { CustomerService } from '@/service/CustomerService';
+import { ProductService } from '@/service/ProductService';
+import { ListEventService } from '@/service/ListEvent';
+import { FilterMatchMode, FilterOperator } from '@primevue/core/api';
+import { onBeforeMount, ref } from 'vue';
+
+const customers1 = ref(null);
+const customers2 = ref(null);
+const customers3 = ref(null);
+const filters1 = ref(null);
+const loading1 = ref(null);
+const products = ref(null);
+const expandedRows = ref([]);
+
+onBeforeMount(() => {
+    ProductService.getProductsWithOrdersSmall().then((data) => (products.value = data));
+    CustomerService.getCustomersLarge().then((data) => {
+        customers1.value = data;
+        loading1.value = false;
+        customers1.value.forEach((customer) => (customer.date = new Date(customer.date)));
+    });
+    CustomerService.getCustomersLarge().then((data) => (customers2.value = data));
+    CustomerService.getCustomersMedium().then((data) => (customers3.value = data));
+
+    initFilters1();
+});
+
+function initFilters1() {
+    filters1.value = {
+        global: { value: null, matchMode: FilterMatchMode.CONTAINS },
+        name: { operator: FilterOperator.AND, constraints: [{ value: null, matchMode: FilterMatchMode.STARTS_WITH }] },
+        'country.name': { operator: FilterOperator.AND, constraints: [{ value: null, matchMode: FilterMatchMode.STARTS_WITH }] },
+        representative: { value: null, matchMode: FilterMatchMode.IN },
+        date: { operator: FilterOperator.AND, constraints: [{ value: null, matchMode: FilterMatchMode.DATE_IS }] },
+        balance: { operator: FilterOperator.AND, constraints: [{ value: null, matchMode: FilterMatchMode.EQUALS }] },
+        status: { operator: FilterOperator.OR, constraints: [{ value: null, matchMode: FilterMatchMode.EQUALS }] },
+        activity: { value: [0, 100], matchMode: FilterMatchMode.BETWEEN },
+        verified: { value: null, matchMode: FilterMatchMode.EQUALS }
+    };
+}
+
+// Function to get severity for overall status
+function getOverallStatusSeverity(status) {
+    return status === 1 ? 'success' : 'danger';
+}
+
+const listData = ref([]);
+const loading = ref(true);
+
+// Fetch data on component mount
+onBeforeMount(async () => {
+    listData.value = await ListEventService.getListEventData();
+    loading.value = false;
+});
+</script>
+
 <template>
-    <Fluid>
-        <div class="flex flex-col md:flex-row gap-8">
-            <!-- Event Create Card -->
-            <div class="card flex flex-col gap-6 w-full">
-                <!-- Header -->
-                <div class="flex items-center justify-between border-b pb-2">
-                    <div class="text-2xl font-bold text-gray-800">Create Event</div>
+    <div class="card">
+        <div class="text-2xl font-bold text-gray-800 border-b pb-2">List Event</div>
+        <DataTable :value="listData" :paginator="true" :rows="10" dataKey="id" :rowHover="true" :loading="loading">
+            <template #header>
+                <div class="flex items-center justify-between gap-4 w-full flex-wrap">
+                    <!-- Left: Search Field + Cog Button -->
+                    <div class="flex items-center gap-2 w-full max-w-md">
+                        <IconField class="flex-1">
+                            <InputIcon>
+                                <i class="pi pi-search" />
+                            </InputIcon>
+                            <InputText v-model="filters1['global'].value" placeholder="Quick Search" class="w-full" />
+                        </IconField>
+                        <Button type="button" icon="pi pi-cog" class="p-button" />
+                    </div>
+
+                    <!-- Right: Add eTEN Button -->
+                    <RouterLink to="/marketing/detailNews">
+                        <Button type="button" label="Create" />
+                    </RouterLink>
                 </div>
+            </template>
 
-                <!-- Event Form -->
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
-                    <div>
-                        <label class="block text-sm font-medium text-gray-600">Audience</label>
-                        <Dropdown v-model="event.audience" :options="audienceOptions" optionLabel="label" optionValue="value" class="w-full" />
-                    </div>
-                    <div>
-                        <label class="block text-sm font-medium text-gray-600">Survey</label>
-                        <Dropdown v-model="event.isSurvey" :options="surveyOptions" optionLabel="label" optionValue="value" class="w-full" />
-                    </div>
-                    <div>
-                        <label class="block text-sm font-medium text-gray-600">Silver Point</label>
-                        <InputNumber v-model="event.point1" class="w-full" />
-                    </div>
-                    <div>
-                        <label class="block text-sm font-medium text-gray-600">Gold Point</label>
-                        <InputNumber v-model="event.point2" class="w-full" />
-                    </div>
-                    <div>
-                        <label class="block text-sm font-medium text-gray-600">Platinum Point</label>
-                        <InputNumber v-model="event.point3" class="w-full" />
-                    </div>
-                    <div class="md:col-span-2">
-                        <label class="block text-sm font-medium text-gray-600">Title</label>
-                        <InputText v-model="event.title" class="w-full" />
-                    </div>
-                    <div class="md:col-span-2">
-                        <label class="block text-sm font-medium text-gray-600">Description</label>
-                        <Textarea v-model="event.desc" rows="3" class="w-full" />
-                    </div>
-                    <div>
-                        <label class="block text-sm font-medium text-gray-600">Location</label>
-                        <InputText v-model="event.location" class="w-full" />
-                    </div>
-                    <div>
-                        <label class="block text-sm font-medium text-gray-600">Publish Date</label>
-                        <Calendar v-model="event.publishDate" dateFormat="yy-mm-dd" class="w-full" />
-                    </div>
-                    <div>
-                        <label class="block text-sm font-medium text-gray-600">Start Date</label>
-                        <Calendar v-model="event.startDate" dateFormat="yy-mm-dd" class="w-full" />
-                    </div>
-                    <div>
-                        <label class="block text-sm font-medium text-gray-600">End Date</label>
-                        <Calendar v-model="event.endDate" dateFormat="yy-mm-dd" class="w-full" />
-                    </div>
-                </div>
-
-                <!-- Survey Section -->
-                <div v-if="event.isSurvey === 1" class="mt-8">
-                    <!-- Header with Add Button -->
-                    <div class="flex items-center justify-between border-b pb-2 mb-4">
-                        <div class="text-xl font-bold text-gray-800">Survey Questions</div>
-                        <Button 
-                            icon="pi pi-plus" 
-                            label="Add Question" 
-                            class="p-button-success p-button-sm"
-                            :disabled="questions.length >= 10"
-                            @click="addQuestion" />
-                    </div>
-
-                    <!-- Questions List -->
-                    <div v-if="questions.length > 0" class="space-y-4">
-                        <div v-for="(q, index) in questions" :key="index" class="border rounded-lg p-4 shadow-sm bg-gray-50">
-                            <div class="flex items-center justify-between mb-2">
-                                <label class="font-semibold">Question {{ index + 1 }}</label>
-                                <Button 
-                                    icon="pi pi-trash" 
-                                    class="p-button-danger p-button-text p-button-sm" 
-                                    @click="removeQuestion(index)" />
-                            </div>
-                            <InputText v-model="q.text" placeholder="Enter your question" class="w-full mb-2" />
-
-                            <div class="grid grid-cols-1 md:grid-cols-3 gap-2">
-                                <InputText v-for="(ans, i) in q.options" :key="i" v-model="q.options[i]" placeholder="Answer" />
-                            </div>
-                        </div>
-                    </div>
-
-                    <div v-else class="text-gray-500 italic">No questions added yet.</div>
-                </div>
-
-                <!-- No Survey Message -->
-                <div v-else class="mt-8 text-gray-500 italic">
-                    This event does not have a survey.
-                </div>
-            </div>
-        </div>
-    </Fluid>
+            <template #empty> No News found. </template>
+            <template #loading> Loading News data. Please wait. </template>
+            <!-- Columns -->
+            <Column field="title" header="Title" style="min-width: 8rem">
+                <template #body="{ data }">
+                    <RouterLink to="/marketing/detailNews" class=" hover:underline font-bold">
+                        {{ data.title }}
+                    </RouterLink>
+                </template>
+            </Column>
+             <Column field="location" header="Location" style="min-width: 6rem">
+                <template #body="{ data }">
+                       {{ data.location }}
+                </template>
+            </Column> 
+            <Column field="publishDate" header="Publish Date" style="min-width: 6rem">
+                <template #body="{ data }">
+                        {{ data.publishDate }}
+                </template>
+            </Column> 
+            <Column header="Due Date" style="min-width: 8rem">
+                <template #body="{ data }">
+                    {{ data.startDate }} - {{ data.endDate }}
+                </template>
+            </Column> 
+            <Column header="Status" style="min-width: 6rem">
+                <template #body="{ data }">
+                    <Tag :value="data.status === 1 ? 'Active' : 'Deactive'" :severity="getOverallStatusSeverity(data.status)" />
+                </template>
+            </Column>
+        </DataTable>
+    </div>
 </template>
+
+<style scoped lang="scss">
+:deep(.p-datatable-frozen-tbody) {
+    font-weight: bold;
+}
+
+:deep(.p-datatable-scrollable .p-frozen-column) {
+    font-weight: bold;
+}
+</style>

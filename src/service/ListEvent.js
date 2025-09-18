@@ -1,5 +1,6 @@
 export const ListEventService = { 
-  getListEtenData() {
+  // Main function to return all events
+  getListEventData() {
     return [
       {
         id: 1,
@@ -130,15 +131,18 @@ export const ListEventService = {
     ];
   },
 
+  // Return first 5 events
   getListEventMini() {
-    return Promise.resolve(this.getListEtenData().slice(0, 5));
+    return Promise.resolve(this.getListEventData().slice(0, 5));
   },
 
+  // Return first 10 events
   getListEventSmall() {
-    return Promise.resolve(this.getListEtenData().slice(0, 10));
+    return Promise.resolve(this.getListEventData().slice(0, 10));
   },
 
+  // Return all events
   getListEvent() {
-    return Promise.resolve(this.getListEtenData());
+    return Promise.resolve(this.getListEventData());
   },
 };
