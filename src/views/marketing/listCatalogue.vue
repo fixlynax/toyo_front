@@ -22,7 +22,6 @@
                 <div class="flex flex-col md:flex-row gap-4">
                     <div class="flex flex-wrap gap-2 w-full">
                         <label for="state">State</label>
-                        <Select id="state" v-model="dropdownItem" :options="dropdownItems" optionLabel="name" placeholder="Select One" class="w-full"></Select>
                     </div>
                     <div class="flex flex-wrap gap-2 w-full">
                         <label for="zip">Zip</label>

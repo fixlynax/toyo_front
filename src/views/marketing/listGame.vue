@@ -84,7 +84,7 @@ onBeforeMount(async () => {
             <!-- Columns -->
             <Column field="gameNo" header="Game No" style="min-width: 6rem">
                 <template #body="{ data }">
-                    <RouterLink to="/om/detailEten" class=" hover:underline font-bold">
+                    <RouterLink to="/marketing/detailGame" class=" hover:underline font-bold">
                         {{ data.gameNo }}
                     </RouterLink>
                 </template>

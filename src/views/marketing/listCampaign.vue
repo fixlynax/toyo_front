@@ -1,7 +1,7 @@
 <script setup>
 import { CustomerService } from '@/service/CustomerService';
 import { ProductService } from '@/service/ProductService';
-import { ListEventService } from '@/service/ListEvent';
+import { ListCampaignService } from '@/service/ListCampaign';
 import { FilterMatchMode, FilterOperator } from '@primevue/core/api';
 import { onBeforeMount, ref } from 'vue';
 
@@ -50,14 +50,14 @@ const loading = ref(true);
 
 // Fetch data on component mount
 onBeforeMount(async () => {
-    listData.value = await ListEventService.getListEventData();
+    listData.value = await ListCampaignService.getListCampaignData();
     loading.value = false;
 });
 </script>
 
 <template>
     <div class="card">
-        <div class="text-2xl font-bold text-gray-800 border-b pb-2">List Event</div>
+        <div class="text-2xl font-bold text-gray-800 border-b pb-2">List Campaign</div>
         <DataTable :value="listData" :paginator="true" :rows="10" dataKey="id" :rowHover="true" :loading="loading">
             <template #header>
                 <div class="flex items-center justify-between gap-4 w-full flex-wrap">
@@ -73,37 +73,40 @@ onBeforeMount(async () => {
                     </div>
 
                     <!-- Right: Add eTEN Button -->
-                    <RouterLink to="/marketing/createEvent">
+                    <RouterLink to="/marketing/createCampaign">
                         <Button type="button" label="Create" />
                     </RouterLink>
                 </div>
             </template>
 
-            <template #empty> No News found. </template>
-            <template #loading> Loading News data. Please wait. </template>
+            <template #empty> No Campaign found. </template>
+            <template #loading> Loading Campaign data. Please wait. </template>
             <!-- Columns -->
-            <Column field="title" header="Title" style="min-width: 8rem">
+            <Column field="campaignNo" header="Campaign No" style="min-width: 8rem">
                 <template #body="{ data }">
-                    <RouterLink to="/marketing/detailEvent" class=" hover:underline font-bold">
-                        {{ data.title }}
+                    <RouterLink to="/marketing/detailCampaign" class="hover:underline font-bold">
+                        {{ data.campaignNo }}
                     </RouterLink>
                 </template>
             </Column>
-             <Column field="location" header="Location" style="min-width: 6rem">
+            <Column field="title" header="Title" style="min-width: 8rem">
                 <template #body="{ data }">
-                       {{ data.location }}
+                    {{ data.title }}
                 </template>
-            </Column> 
+            </Column>
             <Column field="publishDate" header="Publish Date" style="min-width: 6rem">
                 <template #body="{ data }">
-                        {{ data.publishDate }}
+                    {{ data.publishDate }}
                 </template>
-            </Column> 
+            </Column>
             <Column header="Period" style="min-width: 8rem">
+                <template #body="{ data }"> {{ data.startDate }} - {{ data.endDate }} </template>
+            </Column>
+            <Column field="totalSub" header="Total Sub" style="min-width: 6rem">
                 <template #body="{ data }">
-                    {{ data.startDate }} - {{ data.endDate }}
+                    {{ data.totalSub }}
                 </template>
-            </Column> 
+            </Column>
             <Column header="Status" style="min-width: 6rem">
                 <template #body="{ data }">
                     <Tag :value="data.status === 1 ? 'Active' : 'Inactive'" :severity="getOverallStatusSeverity(data.status)" />
