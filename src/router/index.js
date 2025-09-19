@@ -120,11 +120,11 @@ const router = createRouter({
                     name: 'Detail-Game',
                     component: () => import('@/views/marketing/detailGame.vue')
                 },
-                // {
-                //     path: '/marketing/createGame',
-                //     name: 'Create-Game',
-                //     component: () => import('@/views/marketing/createGame.vue')
-                // },
+                {
+                    path: '/marketing/createGame',
+                    name: 'Create-Game',
+                    component: () => import('@/views/marketing/createGame.vue')
+                },
                 // {
                 //     path: '/marketing/editGame',
                 //     name: 'Edit-Game',
