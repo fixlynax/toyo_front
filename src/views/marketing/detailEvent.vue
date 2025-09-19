@@ -135,7 +135,7 @@
                 <!-- Participant List (only if survey enabled) -->
                 <div class="card flex flex-col w-full" v-if="event.isSurvey === 1">
                     <div class="text-2xl font-bold text-gray-800 border-b pb-3 mb-4">👨🏻‍💻 Participant List</div>
-                    <DataTable :value="participants" :paginator="true" :rows="5" dataKey="id" :rowHover="true" responsiveLayout="scroll" class="text-sm">
+                    <DataTable :value="participants" :paginator="true" :rows="11" dataKey="id" :rowHover="true" responsiveLayout="scroll" class="text-sm">
                         <Column header="User" style="min-width: 1rem">
                             <template #body="{ data }">
                                 <div class="flex flex-col">
@@ -266,6 +266,13 @@ const participants = ref([
         id: 10,
         fullName: 'Jason Lee',
         memberLevel: 'Platinum',
+        date: '2025-09-06',
+        point: 95
+    },
+    {
+        id: 11,
+        fullName: 'Hazrul Izhar',
+        memberLevel: 'Classic',
         date: '2025-09-06',
         point: 95
     }
