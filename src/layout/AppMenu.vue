@@ -28,7 +28,7 @@ const model = ref([
             },
             {
                 label: 'Campaign Management',
-                icon: 'pi pi-fw pi-megaphone',
+                icon: '/marketing/listCampaign',
                 
                 to: '#'
             },
@@ -42,7 +42,7 @@ const model = ref([
                 label: 'Reward Catalogue',
                 icon: 'pi pi-fw pi-gift',
                 
-                to: '#'
+                to: '/marketing/listCatalogue'
             },
             {
                 label: 'Redemption Management',
