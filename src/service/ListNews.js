@@ -33,7 +33,7 @@ export const ListNewsService = {
         status: 2,
         created: "2025-02-01",
         deleted: null,
-        view: 0,
+        view: 300,
       },
       {
         id: 3,
@@ -50,7 +50,7 @@ export const ListNewsService = {
         status: 0,
         created: "2025-03-10",
         deleted: null,
-        view: 0,
+        view: 700,
       },
       {
         id: 4,
@@ -67,7 +67,7 @@ export const ListNewsService = {
         status: 0,
         created: "2025-04-18",
         deleted: null,
-        view: 0,
+        view: 1000,
       },
       {
         id: 5,

@@ -73,7 +73,7 @@ onBeforeMount(async () => {
                     </div>
 
                     <!-- Right: Add eTEN Button -->
-                    <RouterLink to="/om/addEten">
+                    <RouterLink to="/marketing/CreateGame">
                         <Button type="button" label="Create"></Button>
                     </RouterLink>
                 </div>
@@ -89,7 +89,7 @@ onBeforeMount(async () => {
                     </RouterLink>
                 </template>
             </Column>
-            <Column field="description" header="Title" style="min-width: 6rem">
+            <Column field="gameName" header="Game Name" style="min-width: 6rem">
                 <template #body="{ data }">
                         {{ data.title }}
                 </template>
@@ -99,19 +99,14 @@ onBeforeMount(async () => {
                         {{ data.type }}
                 </template>
             </Column> 
-            <Column field="location" header="Location" style="min-width: 6rem">
+            <Column field="publishDate" header="Publish Date" style="min-width: 6rem">
                 <template #body="{ data }">
-                       {{ data.location }}
-                </template>
-            </Column> 
-            <Column header="Due Date" style="min-width: 8rem">
-                <template #body="{ data }">
-                    {{ data.startDate }} - {{ data.endDate }}
+                        {{ data.publishDate }}
                 </template>
             </Column> 
             <Column header="Status" style="min-width: 6rem">
                 <template #body="{ data }">
-                    <Tag :value="data.status === 1 ? 'Active' : 'Deactive'" :severity="getOverallStatusSeverity(data.status)" />
+                    <Tag :value="data.status === 1 ? 'Active' : 'Inactive'" :severity="getOverallStatusSeverity(data.status)" />
                 </template>
             </Column>
         </DataTable>
