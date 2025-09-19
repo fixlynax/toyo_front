@@ -105,6 +105,11 @@ onBeforeMount(async () => {
                     {{ data.publishDate }}
                 </template>
             </Column>
+            <Column field="publishDate" header="Viewer" style="min-width: 6rem">
+                <template #body="{ data }">
+                    {{ data.view }}
+                </template>
+            </Column>
             <Column header="Status" style="min-width: 6rem">
                 <template #body="{ data }">
                     <Tag :value="getOverallStatusLabel(data.status)" :severity="getOverallStatusSeverity(data.status)" />
