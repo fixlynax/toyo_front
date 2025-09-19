@@ -109,11 +109,27 @@ const router = createRouter({
                     name: 'List-Catalogue',
                     component: () => import('@/views/marketing/listCatalogue.vue')
                 },
+                // Game Management
                 {
                     path: '/marketing/listGame',
                     name: 'List-Game',
                     component: () => import('@/views/marketing/listGame.vue')
                 },
+                {
+                    path: '/marketing/detailGame',
+                    name: 'Detail-Game',
+                    component: () => import('@/views/marketing/detailGame.vue')
+                },
+                // {
+                //     path: '/marketing/createGame',
+                //     name: 'Create-Game',
+                //     component: () => import('@/views/marketing/createGame.vue')
+                // },
+                // {
+                //     path: '/marketing/editGame',
+                //     name: 'Edit-Game',
+                //     component: () => import('@/views/marketing/editGame.vue')
+                // },
                 // Eten Management
                 {
                     path: '/om/listEten',
