@@ -75,7 +75,7 @@
                                     <Button label="Unpublish" class="p-button-danger" size="small" />
                                 </RouterLink>
                             </div>
-                            <div class="w-auto" v-if="news.status === 0  || news.status === 2">
+                            <div class="w-auto" v-if="news.status === 2">
                                 <RouterLink to="/marketing/detailEvent">
                                     <Button label="Publish" class="p-button-success" size="small" />
                                 </RouterLink>
@@ -104,7 +104,7 @@ const news = ref({
     startDate: '2025-01-15',
     endDate: '2025-02-15',
     view: 145,
-    status: 2, // 0=Draft, 1=Published, 2=Unpublished
+    status: 0, // 0=Draft, 1=Published, 2=Unpublished
     created: '2025-01-10',
     deleted: null
 });

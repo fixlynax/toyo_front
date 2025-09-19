@@ -18,23 +18,8 @@
                     </div>
 
                     <div>
-                        <label class="block font-medium text-gray-700">Location</label>
-                        <InputText v-model="news.location" class="w-full" />
-                    </div>
-
-                    <div>
                         <label class="block font-medium text-gray-700">Publish Date</label>
                         <Calendar v-model="news.publishDate" dateFormat="yy-mm-dd" class="w-full" />
-                    </div>
-
-                    <div>
-                        <label class="block font-medium text-gray-700">Start Date</label>
-                        <Calendar v-model="news.startDate" dateFormat="yy-mm-dd" class="w-full" />
-                    </div>
-
-                    <div>
-                        <label class="block font-medium text-gray-700">End Date</label>
-                        <Calendar v-model="news.endDate" dateFormat="yy-mm-dd" class="w-full" />
                     </div>
 
                     <div>
@@ -71,7 +56,7 @@
                     </div>
                     <div class="w-40">
                         <RouterLink to="/marketing/detailnews">
-                            <Button label="Submit" class="w-full" />
+                            <Button label="Save & Publish" class="w-full" />
                         </RouterLink>
                     </div>
                 </div>

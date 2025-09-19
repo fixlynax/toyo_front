@@ -111,7 +111,7 @@
                     <!-- Header -->
                     <div class="flex items-center justify-between border-b pb-2 mb-2">
                         <div class="text-2xl font-bold text-gray-800">ℹ️ Survey Info</div>
-                        <Button icon="pi pi-plus" class="p-button-success" size="small" />
+                        <!-- <Button icon="pi pi-plus" class="p-button-success" size="small" /> -->
                     </div>
 
                     <div class="overflow-x-auto">
@@ -131,7 +131,7 @@
                                                     </ul>
                                                 </div>
                                                 <!-- Delete Button -->
-                                                <Button icon="pi pi-trash" class="p-button-danger p-button-text p-button-sm" />
+                                                <!-- <Button icon="pi pi-trash" class="p-button-danger p-button-text p-button-sm" /> -->
                                             </div>
                                         </td>
                                     </tr>
