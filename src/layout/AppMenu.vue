@@ -11,49 +11,41 @@ const model = ref([
             { 
                 label: 'Dashboard', 
                 icon: 'pi pi-fw pi-home', 
-                
-                to: '#' 
+                to: '/' 
             },
             {
                 label: 'News Management',
                 icon: 'pi pi-fw pi-flag',
-                
                 to: '/marketing/ListNews'
             },
             {
                 label: 'Events Management',
                 icon: 'pi pi-fw pi-calendar',
-                
                 to: '/marketing/ListEvent'
             },
             {
                 label: 'Campaign Management',
-                icon: '/marketing/listCampaign',
-                
-                to: '#'
+                icon: 'pi pi-fw pi-megaphone',
+                to: '/marketing/listCampaign'
             },
             {
                 label: 'Game Management',
                 icon: 'pi pi-fw pi-star',
-                
                 to: '/marketing/listGame'
             },
             {
                 label: 'Reward Catalogue',
                 icon: 'pi pi-fw pi-gift',
-                
                 to: '/marketing/listCatalogue'
             },
             {
                 label: 'Redemption Management',
                 icon: 'pi pi-fw pi-wallet',
-                
                 to: '#'
             },
             {
                 label: 'TC Members',
                 icon: 'pi pi-fw pi-users',
-                
                 items: [
                     { 
                         label: 'Member List', 
@@ -70,7 +62,6 @@ const model = ref([
             {
                 label: 'Report',
                 icon: 'pi pi-fw pi-chart-bar',
-                
                 items: [
                     { 
                         label: 'Member', 
@@ -93,13 +84,11 @@ const model = ref([
             { 
                 label: 'Dashboard', 
                 icon: 'pi pi-fw pi-home', 
-                
-                to: '#' 
+                to: '/' 
             },
             {
                 label: 'Warranty Claim',
                 icon: 'pi pi-fw pi-file',
-                
                 items: [
                     { 
                         label: 'Claim List', 
@@ -126,7 +115,6 @@ const model = ref([
             {
                 label: 'Products',
                 icon: 'pi pi-fw pi-box',
-                
                 items: [
                     { 
                         label: 'Product List', 
@@ -154,37 +142,31 @@ const model = ref([
             { 
                 label: 'Dashboard',
                 icon: 'pi pi-fw pi-home',
-                
-                to: '#' 
+                to: '/' 
             },
             { 
                 label: 'Customer', 
                 icon: 'pi pi-fw pi-user', 
-                 
                 to: '/om/listEten' 
             },
             { 
                 label: 'Order', 
                 icon: 'pi pi-fw pi-shopping-cart', 
-                 
                 to: '#' 
             },
             { 
                 label: 'Back Order', 
                 icon: 'pi pi-fw pi-history', 
-                 
                 to: '#' 
             },
             { 
                 label: 'Return Order', 
                 icon: 'pi pi-fw pi-reply', 
-                 
                 to: '#' 
             },
             {
                 label: 'Report',
                 icon: 'pi pi-fw pi-chart-line',
-                
                 items: [
                     { 
                         label: 'Sales Forecast', 
@@ -211,12 +193,10 @@ const model = ref([
             { 
                 label: 'Sales Program',
                 icon: 'pi pi-fw pi-tags',
-                
                 to: '#' },
             {
                 label: 'Maintenance',
                 icon: 'pi pi-fw pi-cog',
-                
                 items: [
                     { 
                         label: 'Disable Order', 
@@ -238,7 +218,6 @@ const model = ref([
             { 
                 label: 'Messaging',
                 icon: 'pi pi-fw pi-envelope', 
-                
                 to: '#' 
             }
         ]
@@ -250,7 +229,6 @@ const model = ref([
             {
                 label: 'Warranty CTC',
                 icon: 'pi pi-fw pi-file',
-                
                 items: [
                     { 
                         label: 'Collection List', 
@@ -267,7 +245,6 @@ const model = ref([
             {
                 label: 'Order',
                 icon: 'pi pi-fw pi-truck',
-                
                 items: [
                     { 
                         label: 'Order Delivery', 
@@ -283,7 +260,6 @@ const model = ref([
             },
             {
                 label: 'Return',
-                
                 icon: 'pi pi-fw pi-refresh',
                 items: [
                     { 
@@ -301,13 +277,11 @@ const model = ref([
             { 
                 label: 'Logistic Account', 
                 icon: 'pi pi-fw pi-briefcase', 
-                
                 to: '#' 
             },
             { 
                 label: 'Back Order', 
                 icon: 'pi pi-fw pi-history',
-                 
                 to: '#' 
             }
         ]
@@ -319,7 +293,6 @@ const model = ref([
             {
                 label: 'Admin',
                 icon: 'pi pi-fw pi-lock',
-                
                 items: [
                     { 
                         label: 'User Group', 
@@ -336,12 +309,11 @@ const model = ref([
             { 
                 label: 'Salesman', 
                 icon: 'pi pi-fw pi-id-card', 
-                
-                to: '#' },
+                to: '#' 
+            },
             {
                 label: 'Setting',
                 icon: 'pi pi-fw pi-cog',
-                
                 items: [
                     { 
                         label: 'Maintenance Mode', 
