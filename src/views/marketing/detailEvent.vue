@@ -145,8 +145,8 @@
                             </template>
                         </Column>
 
-                        <Column field="date" header="Date Taken" style="min-width: 8rem"></Column>
-                        <Column field="point" header="Point Earned" style="min-width: 8rem"></Column>
+                        <Column field="date" header="Date Taken" style="min-width: 6rem"></Column>
+                        <Column field="point" header="Point Earned" style="min-width: 6rem; text-align: center"></Column>
                     </DataTable>
                 </div>
             </div>
