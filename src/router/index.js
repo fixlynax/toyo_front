@@ -105,76 +105,84 @@ const router = createRouter({
                     component: () => import('@/views/pages/Documentation.vue')
                 },
                 {
+                    path: '/marketing/listCatalogue',
+                    name: 'List-Catalogue',
+                    component: () => import('@/views/marketing/listCatalogue.vue')
+                },
+                {
+                    path: '/marketing/listGame',
+                    name: 'List-Game',
+                    component: () => import('@/views/marketing/listGame.vue')
+                },
+                // Eten Management
+                {
                     path: '/om/listEten',
-                    name: 'listEten',
+                    name: 'List-Eten',
                     component: () => import('@/views/om/listEten.vue')
                 },
                 {
                     path: '/om/createEten',
-                    name: 'createEten',
+                    name: 'Create-Eten',
                     component: () => import('@/views/om/createEten.vue')
                 },
                 {
                     path: '/om/detailEten',
-                    name: 'detailEten',
+                    name: 'Detail-Eten',
                     component: () => import('@/views/om/detailEten.vue')
                 },
                 {
                     path: '/om/confirmationEten',
-                    name: 'confirmationEten',
+                    name: 'Confirmation-Eten',
                     component: () => import('@/views/om/confirmationEten.vue')
                 },
-                {
-                    path: '/marketing/listCatalogue',
-                    name: 'listCatalogue',
-                    component: () => import('@/views/marketing/listCatalogue.vue')
-                },
-                {
-                    path: '/marketing/listEvent',
-                    name: 'listEvent',
-                    component: () => import('@/views/marketing/listEvent.vue')
-                },
+                // News Managemnt
                 {
                     path: '/marketing/listNews',
-                    name: 'listNews',
+                    name: 'List-News',
                     component: () => import('@/views/marketing/listNews.vue')
                 },
                 {
-                    path: '/marketing/listGame',
-                    name: 'listGame',
-                    component: () => import('@/views/marketing/listGame.vue')
-                },
-                {
-                    path: '/marketing/createEvent',
-                    name: 'createEvent',
-                    component: () => import('@/views/marketing/createEvent.vue')
-                },
-                {
                     path: '/marketing/createNews',
-                    name: 'createNews',
+                    name: 'Create-News',
                     component: () => import('@/views/marketing/createNews.vue')
                 },
                 {
-                    path: '/marketing/detailEvent',
-                    name: 'detailEvent',
-                    component: () => import('@/views/marketing/detailEvent.vue')
-                },
-                {
                     path: '/marketing/detailNews',
-                    name: 'detailNews',
+                    name: 'Detail-News',
                     component: () => import('@/views/marketing/detailNews.vue')
                 },
                 {
-                    path: '/marketing/editEvent',
-                    name: 'editEvent',
-                    component: () => import('@/views/marketing/editEvent.vue')
-                },
-                {
                     path: '/marketing/editNews',
-                    name: 'editNews',
+                    name: 'Edit-News',
                     component: () => import('@/views/marketing/editNews.vue')
                 },
-
+                //Event Management
+                {
+                    path: '/marketing/listEvent',
+                    name: 'List-Event',
+                    component: () => import('@/views/marketing/listEvent.vue')
+                },
+                {
+                    path: '/marketing/createEvent',
+                    name: 'Create-Event',
+                    component: () => import('@/views/marketing/createEvent.vue')
+                },
+                {
+                    path: '/marketing/detailEvent',
+                    name: 'Detail-Event',
+                    component: () => import('@/views/marketing/detailEvent.vue')
+                },
+                {
+                    path: '/marketing/editEvent',
+                    name: 'Edit-Event',
+                    component: () => import('@/views/marketing/editEvent.vue')
+                },
+                // Campaign Management
+                {
+                    path: '/marketing/listCampaign',
+                    name: 'List-Campaign',
+                    component: () => import('@/views/marketing/listCampaign.vue')
+                },
             ]
         },
         {
