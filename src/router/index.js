@@ -209,6 +209,13 @@ const router = createRouter({
                 //     name: 'Edit-Campaign',
                 //     component: () => import('@/views/marketing/editCampaign.vue')
                 // },
+
+                // Member List
+                {
+                    path: '/marketing/listEtenUser',
+                    name: 'List-Member',
+                    component: () => import('@/views/marketing/listEtenUser.vue')
+                },
             ]
         },
         {

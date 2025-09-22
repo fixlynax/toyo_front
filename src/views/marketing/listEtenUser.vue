@@ -1,44 +1,7 @@
 <script setup>
-import { CustomerService } from '@/service/CustomerService';
-import { ProductService } from '@/service/ProductService';
 import { ListEtenService } from '@/service/ListEten';
-import { FilterMatchMode, FilterOperator } from '@primevue/core/api';
 import { onBeforeMount, ref } from 'vue';
 
-const customers1 = ref(null);
-const customers2 = ref(null);
-const customers3 = ref(null);
-const filters1 = ref(null);
-const loading1 = ref(null);
-const products = ref(null);
-const expandedRows = ref([]);
-
-onBeforeMount(() => {
-    ProductService.getProductsWithOrdersSmall().then((data) => (products.value = data));
-    CustomerService.getCustomersLarge().then((data) => {
-        customers1.value = data;
-        loading1.value = false;
-        customers1.value.forEach((customer) => (customer.date = new Date(customer.date)));
-    });
-    CustomerService.getCustomersLarge().then((data) => (customers2.value = data));
-    CustomerService.getCustomersMedium().then((data) => (customers3.value = data));
-
-    initFilters1();
-});
-
-function initFilters1() {
-    filters1.value = {
-        global: { value: null, matchMode: FilterMatchMode.CONTAINS },
-        name: { operator: FilterOperator.AND, constraints: [{ value: null, matchMode: FilterMatchMode.STARTS_WITH }] },
-        'country.name': { operator: FilterOperator.AND, constraints: [{ value: null, matchMode: FilterMatchMode.STARTS_WITH }] },
-        representative: { value: null, matchMode: FilterMatchMode.IN },
-        date: { operator: FilterOperator.AND, constraints: [{ value: null, matchMode: FilterMatchMode.DATE_IS }] },
-        balance: { operator: FilterOperator.AND, constraints: [{ value: null, matchMode: FilterMatchMode.EQUALS }] },
-        status: { operator: FilterOperator.OR, constraints: [{ value: null, matchMode: FilterMatchMode.EQUALS }] },
-        activity: { value: [0, 100], matchMode: FilterMatchMode.BETWEEN },
-        verified: { value: null, matchMode: FilterMatchMode.EQUALS }
-    };
-}
 
 // Function to get severity for overall status
 function getOverallStatusSeverity(status) {
@@ -67,7 +30,7 @@ onBeforeMount(async () => {
                             <InputIcon>
                                 <i class="pi pi-search" />
                             </InputIcon>
-                            <InputText v-model="filters1['global'].value" placeholder="Quick Search" class="w-full" />
+                            <InputText placeholder="Quick Search" class="w-full" />
                         </IconField>
                         <Button type="button" icon="pi pi-cog" class="p-button" />
                     </div>
@@ -89,11 +52,8 @@ onBeforeMount(async () => {
                     </RouterLink>
                 </template>
             </Column>
-            <Column field="custAccountNo" header="Acc No" style="min-width: 6rem" >
-            </Column>
-            <Column field="companyName1" header="Company Name" style="min-width: 8rem" >
-              <template #rowtogglericon="slotProps"></template>
-            </Column>
+            <Column field="custAccountNo" header="Acc No" style="min-width: 6rem" />
+            <Column field="companyName1" header="Company Name" style="min-width: 8rem" />
             <Column header="Location" style="min-width: 8rem">
                 <template #body="{ data }">
                     {{ data.city }}, {{ data.state }}
@@ -109,13 +69,3 @@ onBeforeMount(async () => {
         </DataTable>
     </div>
 </template>
-
-<style scoped lang="scss">
-:deep(.p-datatable-frozen-tbody) {
-    font-weight: bold;
-}
-
-:deep(.p-datatable-scrollable .p-frozen-column) {
-    font-weight: bold;
-}
-</style>
