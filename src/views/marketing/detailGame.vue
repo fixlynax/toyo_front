@@ -94,6 +94,10 @@
                                     <td class="px-4 py-2 text-right">{{ game.publishDate }}</td>
                                 </tr>
                                 <tr class="border-b">
+                                    <td class="px-4 py-2 font-medium">Type</td>
+                                    <td class="px-4 py-2 text-right">{{ game.type }}</td>
+                                </tr>
+                                <tr class="border-b">
                                     <td class="px-4 py-2 font-medium">Quota</td>
                                     <td class="px-4 py-2 text-right">{{ game.quota }}</td>
                                 </tr>
