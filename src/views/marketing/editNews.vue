@@ -30,7 +30,7 @@
 
                 <!-- Upload Images -->
                 <div>
-                    <label class="block font-medium text-gray-700 mb-2 ">News Images</label>
+                    <label class="block font-medium text-gray-700 mb-2">News Images</label>
                     <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
                         <!-- Image 1 -->
                         <div class="relative">
@@ -64,7 +64,8 @@
                 <div class="flex justify-end mt-2">
                     <div class="w-40">
                         <RouterLink to="/marketing/detailNews">
-                            <Button label="Update" class="w-full" />
+                            <Button v-if="news.status === 0" label="Save" class="w-full" />
+                            <Button v-else-if="news.status === 1 || news.status === 2" label="Update" class="w-full" />
                         </RouterLink>
                     </div>
                 </div>

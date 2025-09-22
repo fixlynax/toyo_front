@@ -124,7 +124,7 @@
                                     <td class="px-4 py-2 text-right">{{ event.point4 }}</td>
                                 </tr>
                                 <tr class="border-b">
-                                    <td class="px-4 py-2 font-medium">Total Views</td>
+                                    <td class="px-4 py-2 font-medium">Total Participants</td>
                                     <td class="px-4 py-2 text-right">{{ event.view }}</td>
                                 </tr>
                             </tbody>
@@ -152,8 +152,7 @@
             </div>
         </div>
 
-        <div class="flex flex-col md:flex-row gap-8 mt-8">
-            <!-- Left Content - Survey Statistic -->
+        <!-- <div class="flex flex-col md:flex-row gap-8 mt-8">
             <div class="w-full" v-if="event.isSurvey === 1">
                 <div class="card flex flex-col w-full">
                     <div class="flex items-center justify-between border-b pb-2 mb-2">
@@ -167,7 +166,7 @@
                     </div>
                 </div>
             </div>
-        </div>
+        </div> -->
     </Fluid>
 </template>
 
