@@ -141,11 +141,11 @@ const router = createRouter({
                     name: 'Create-Game',
                     component: () => import('@/views/marketing/createGame.vue')
                 },
-                // {
-                //     path: '/marketing/editGame',
-                //     name: 'Edit-Game',
-                //     component: () => import('@/views/marketing/editGame.vue')
-                // },
+                {
+                    path: '/marketing/editGame',
+                    name: 'Edit-Game',
+                    component: () => import('@/views/marketing/editGame.vue')
+                },
                 // Eten Management
                 {
                     path: '/om/listEten',
