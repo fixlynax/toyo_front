@@ -50,7 +50,7 @@ const model = ref([
                     { 
                         label: 'Member List', 
                         icon: 'pi pi-fw pi-id-card', 
-                        to: '#'  
+                        to: '/marketing/listEtenUser'  
                     },
                     { 
                         label: 'Referral Reward Point', 
