@@ -216,6 +216,11 @@ const router = createRouter({
                     name: 'List-Member',
                     component: () => import('@/views/marketing/listEtenUser.vue')
                 },
+                {
+                    path: '/marketing/detailEtenUser',
+                    name: 'Detail-Member',
+                    component: () => import('@/views/marketing/detailEtenUser.vue')
+                },
             ]
         },
         {

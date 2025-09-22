@@ -1,5 +1,5 @@
 <script setup>
-import { ListEtenService } from '@/service/ListEten';
+import { ListEtenUserService } from '@/service/ListEtenUser';
 import { onBeforeMount, ref } from 'vue';
 
 
@@ -13,14 +13,14 @@ const loading = ref(true);
 
 // Fetch data on component mount
 onBeforeMount(async () => {
-    listData.value = await ListEtenService.getListEten();
+    listData.value = await ListEtenUserService.getListEtenUserData();
     loading.value = false;
 });
 </script>
 
 <template>
     <div class="card">
-        <div class="text-2xl font-bold text-gray-800 border-b pb-2">List Customer</div>
+        <div class="text-2xl font-bold text-gray-800 border-b pb-2">List User</div>
         <DataTable :value="listData" :paginator="true" :rows="10" dataKey="id" :rowHover="true" :loading="loading">
             <template #header>
                 <div class="flex items-center justify-between gap-4 w-full flex-wrap">
@@ -45,25 +45,32 @@ onBeforeMount(async () => {
             <template #empty> No customers found. </template>
             <template #loading> Loading customers data. Please wait. </template>
             <!-- Columns -->
-            <Column field="memberCode" header="Mem Code" style="min-width: 6rem">
+            <Column field="etenUserID" header="Mem Code" style="min-width: 8rem">
                 <template #body="{ data }">
-                    <RouterLink to="/om/detailEten" class=" hover:underline font-bold">
-                        {{ data.memberCode }}
+                    <RouterLink to="/marketing/detailEtenUser" class=" hover:underline font-bold">
+                        {{ data.etenUserID }}
                     </RouterLink>
                 </template>
             </Column>
-            <Column field="custAccountNo" header="Acc No" style="min-width: 6rem" />
-            <Column field="companyName1" header="Company Name" style="min-width: 8rem" />
-            <Column header="Location" style="min-width: 8rem">
+            <Column header="Name" style="min-width: 8rem">
                 <template #body="{ data }">
-                    {{ data.city }}, {{ data.state }}
+                    {{ data.firstName }} {{ data.lastName }}
                 </template>
             </Column> 
-            <Column field="phoneNumber" header="Phone No" style="min-width: 8rem" />
-            <Column field="signboardType" header="Signboard" style="min-width: 8rem" />
+            <Column field="gender" header="Gender" style="min-width: 6rem" />
+            <Column header="Race" style="min-width: 6rem">
+                <template #body="{ data }">
+                    {{ data.race }}
+                </template>
+            </Column> 
+            <Column field="state" header="State" style="min-width: 6rem" />
+            <Column field="level" header="Level" style="min-width: 6rem" />
+            <Column field="memberSince" header="Mem Since" style="min-width: 8rem" />
+            <Column field="lastLogin" header="Last Login" style="min-width: 8rem" />
+
             <Column header="Status" style="min-width: 6rem">
                 <template #body="{ data }">
-                    <Tag :value="data.status === 1 ? 'Active' : 'Deactive'" :severity="getOverallStatusSeverity(data.status)" />
+                    <Tag :value="data.status === 1 ? 'Active' : 'Inactive'" :severity="getOverallStatusSeverity(data.status)" />
                 </template>
             </Column>
         </DataTable>
