@@ -26,13 +26,14 @@
             <!-- Catalogue Grid -->
             <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-6">
                 <!-- Catalogue Card -->
-                <div
+                <RouterLink
                     v-for="(item, index) in catalogueItems"
                     :key="index"
-                    class="flex flex-col rounded-2xl overflow-hidden shadow-md hover:shadow-xl transition-shadow duration-300 bg-white cursor-pointer transition-all duration-300 hover:shadow-2xl hover:scale-105 "
+                    to="/marketing/detailCatalogue"
+                    class="flex flex-col rounded-2xl overflow-hidden shadow-md hover:shadow-xl transition-shadow duration-300 bg-white cursor-pointer transition-all duration-300 hover:shadow-2xl hover:scale-105"
                 >
                     <!-- Top: Image Section -->
-                    <div class="w-full h-48 bg-gray-100 relative overflow-hidden rounded-t-2xl">
+                    <div class="w-full h-32 bg-gray-100 relative overflow-hidden rounded-t-2xl">
                         <!-- Status Badge -->
                         <div :class="['absolute top-2 right-2 whitespace-nowrap text-xs font-bold px-2 py-1 rounded-full shadow-md', item.status === 1 ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700']">
                             {{ item.status === 1 ? 'In Stock' : 'Out of Stock' }}
@@ -68,8 +69,12 @@
                     </div>
 
                     <!-- Action Button -->
-                    <button class="mt-2 mx-4 mb-4 px-4 py-2 bg-blue-600 text-white rounded-xl hover:bg-blue-700 transition-colors">Edit</button>
-                </div>
+                    <div class="mt-2 mx-4 mb-4">
+                        <RouterLink :to="`/marketing/editCatalogue/`">
+                            <button class="w-full px-4 py-2 bg-blue-600 text-white rounded-xl hover:bg-blue-700 transition-colors">Edit</button>
+                        </RouterLink>
+                    </div>
+                </RouterLink>
             </div>
         </div>
     </Fluid>
