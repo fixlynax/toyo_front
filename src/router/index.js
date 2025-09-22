@@ -110,11 +110,11 @@ const router = createRouter({
                     name: 'List-Catalogue',
                     component: () => import('@/views/marketing/listCatalogue.vue')
                 },
-                // {
-                //     path: '/marketing/detailCatalogue',
-                //     name: 'Detail-Catalogue',
-                //     component: () => import('@/views/marketing/detailCatalogue.vue')
-                // },
+                {
+                    path: '/marketing/detailCatalogue',
+                    name: 'Detail-Catalogue',
+                    component: () => import('@/views/marketing/detailCatalogue.vue')
+                },
                 // {
                 //     path: '/marketing/editCatalogue',
                 //     name: 'Edit-Catalogue',
