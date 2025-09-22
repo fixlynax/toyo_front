@@ -56,29 +56,29 @@
                         <div class="text-2xl font-bold text-gray-800">📋 Survey Info</div>
                     </div>
 
-                    <div class="overflow-x-auto">
-                        <table class="w-full text-m text-left text-gray-800">
-                            <tbody>
-                                <template v-if="questions.length > 0">
-                                    <tr v-for="(q, index) in questions" :key="index" class="border-b">
-                                        <td class="px-4 py-2 font-medium align-top w-10">{{ index + 1 }}</td>
-                                        <td class="px-4 py-2 text-left">
-                                            <div class="flex items-start justify-between">
-                                                <div>
-                                                    <div class="font-bold">{{ q.text }}</div>
-                                                    <ul class="list-disc list-inside mt-1 text-gray-600">
-                                                        <li v-for="(ans, i) in q.options" :key="i">{{ ans }}</li>
-                                                    </ul>
-                                                </div>
-                                            </div>
-                                        </td>
-                                    </tr>
-                                </template>
-                                <tr v-else>
-                                    <td class="px-4 py-2 text-gray-500 italic" colspan="2">No Questions</td>
-                                </tr>
-                            </tbody>
-                        </table>
+                    <
+                    <div class="space-y-6">
+                        <!-- Loop through each question -->
+                        <div v-for="(q, qIndex) in questions" :key="qIndex" class="border-b pb-4">
+                            <!-- Question Title and "Statistic" on the same line -->
+                            <div class="flex justify-between items-center mb-2">
+                                <div class="font-bold text-lg">Q{{ qIndex + 1 }}. {{ q.text }}</div>
+                                <div class="font-bold text-lg text-gray-700">Respondent</div>
+                            </div>
+
+                            <!-- Answers & Statistics -->
+                            <div class="space-y-1">
+                                <div v-for="(ans, aIndex) in q.options" :key="aIndex" class="flex justify-between px-2">
+                                    <!-- Left Side: Answer -->
+                                    <ul class="list-disc list-inside mt-1 text-gray-600">
+                                        <li>{{ ans }}</li>
+                                    </ul>
+
+                                    <!-- Right Side: Statistic -->
+                                    <span class="">{{ q.statistics[aIndex] }}</span>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -124,7 +124,7 @@
                                     <td class="px-4 py-2 text-right">{{ event.point4 }}</td>
                                 </tr>
                                 <tr class="border-b">
-                                    <td class="px-4 py-2 font-medium">Total Views</td>
+                                    <td class="px-4 py-2 font-medium">Total Participants</td>
                                     <td class="px-4 py-2 text-right">{{ event.view }}</td>
                                 </tr>
                             </tbody>
@@ -152,8 +152,7 @@
             </div>
         </div>
 
-        <div class="flex flex-col md:flex-row gap-8 mt-8">
-            <!-- Left Content - Survey Statistic -->
+        <!-- <div class="flex flex-col md:flex-row gap-8 mt-8">
             <div class="w-full" v-if="event.isSurvey === 1">
                 <div class="card flex flex-col w-full">
                     <div class="flex items-center justify-between border-b pb-2 mb-2">
@@ -167,7 +166,7 @@
                     </div>
                 </div>
             </div>
-        </div>
+        </div> -->
     </Fluid>
 </template>
 
@@ -197,12 +196,36 @@ const event = ref({
 });
 
 const questions = ref([
-    { text: 'How do you rate the durability of the tires?', options: ['Low', 'Average', 'High'] },
-    { text: 'How do you rate the comfort while driving?', options: ['Low', 'Average', 'High'] },
-    { text: 'How do you rate the performance in wet conditions?', options: ['Low', 'Average', 'High'] },
-    { text: 'How do you rate the performance in dry conditions?', options: ['Low', 'Average', 'High'] },
-    { text: 'How do you rate the value for money?', options: ['Low', 'Average', 'High'] },
-    { text: 'How satisfied are you overall with Toyo Tires?', options: ['Low', 'Average', 'High'] }
+    {
+        text: 'How do you rate the durability of the tires?',
+        options: ['Low', 'Average', 'High'],
+        statistics: [10, 20, 2]
+    },
+    {
+        text: 'How do you rate the comfort while driving?',
+        options: ['Low', 'Average', 'High'],
+        statistics: [5, 15, 8]
+    },
+    {
+        text: 'How do you rate the performance in wet conditions?',
+        options: ['Low', 'Average', 'High'],
+        statistics: [7, 12, 6]
+    },
+    {
+        text: 'How do you rate the performance in dry conditions?',
+        options: ['Low', 'Average', 'High'],
+        statistics: [3, 17, 9]
+    },
+    {
+        text: 'How do you rate the value for money?',
+        options: ['Low', 'Average', 'High'],
+        statistics: [4, 14, 11]
+    },
+    {
+        text: 'How satisfied are you overall with Toyo Tires?',
+        options: ['Low', 'Average', 'High'],
+        statistics: [2, 18, 9]
+    }
 ]);
 
 const participants = ref([

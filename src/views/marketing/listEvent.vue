@@ -84,26 +84,31 @@ onBeforeMount(async () => {
             <!-- Columns -->
             <Column field="title" header="Title" style="min-width: 8rem">
                 <template #body="{ data }">
-                    <RouterLink to="/marketing/detailEvent" class=" hover:underline font-bold">
+                    <RouterLink to="/marketing/detailEvent" class="hover:underline font-bold">
                         {{ data.title }}
                     </RouterLink>
                 </template>
             </Column>
-             <Column field="location" header="Location" style="min-width: 6rem">
+            <Column field="location" header="Location" style="min-width: 6rem">
                 <template #body="{ data }">
-                       {{ data.location }}
+                    {{ data.location }}
                 </template>
-            </Column> 
+            </Column>
             <Column field="publishDate" header="Publish Date" style="min-width: 6rem">
                 <template #body="{ data }">
-                        {{ data.publishDate }}
+                    {{ data.publishDate }}
                 </template>
-            </Column> 
+            </Column>
             <Column header="Period" style="min-width: 8rem">
+                <template #body="{ data }"> {{ data.startDate }} - {{ data.endDate }} </template>
+            </Column>
+            <Column field="publishDate" header="Survey" style="min-width: 6rem">
                 <template #body="{ data }">
-                    {{ data.startDate }} - {{ data.endDate }}
+                    <span v-if="data.isSurvey" class="font-bold">Yes</span>
+                    <!-- <span v-else>No</span> -->
                 </template>
-            </Column> 
+            </Column>
+
             <Column header="Status" style="min-width: 6rem">
                 <template #body="{ data }">
                     <Tag :value="data.status === 1 ? 'Active' : 'Inactive'" :severity="getOverallStatusSeverity(data.status)" />

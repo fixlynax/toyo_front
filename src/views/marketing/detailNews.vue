@@ -10,16 +10,10 @@
 
                         <!-- Buttons -->
                         <div class="inline-flex items-center gap-2">
-                            <!-- Draft (status 0) -->
-                            <Button v-if="news.status === 0" label="Save" class="p-button-success" size="small" />
-
-                            <!-- Published (status 1) -->
-                            <template v-else-if="news.status === 1 || news.status === 2">
-                                <RouterLink to="/marketing/editNews">
-                                    <Button label="Edit" class="p-button-info" size="small" />
-                                </RouterLink>
-                                <Button label="Delete" class="p-button-danger" size="small" />
-                            </template>
+                            <RouterLink to="/marketing/editNews">
+                                <Button label="Edit" class="p-button-info" size="small" />
+                            </RouterLink>
+                            <Button label="Delete" class="p-button-danger" size="small" />
                         </div>
                     </div>
 
