@@ -237,6 +237,11 @@ const router = createRouter({
                     name: 'Detail-Member',
                     component: () => import('@/views/marketing/detailEtenUser.vue')
                 },
+                {
+                    path: '/marketing/editEtenUser',
+                    name: 'Edit-Member',
+                    component: () => import('@/views/marketing/editEtenUser.vue')
+                },
             ]
         },
         {

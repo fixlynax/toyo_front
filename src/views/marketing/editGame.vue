@@ -170,7 +170,6 @@
                             </div>
                         </div>
                     </div>
-
                     <div v-else class="text-gray-500 italic">No prizes added yet.</div>
                 </div>
 
