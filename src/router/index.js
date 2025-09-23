@@ -215,6 +215,11 @@ const router = createRouter({
                     name: 'List-Campaign',
                     component: () => import('@/views/marketing/listCampaign.vue')
                 },
+                {
+                    path: '/marketing/detailCampaign',
+                    name: 'Detail-Campaign',
+                    component: () => import('@/views/marketing/detailCampaign.vue')
+                },
                 // {
                 //     path: '/marketing/createCampaign',
                 //     name: 'Create-Campaign',
