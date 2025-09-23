@@ -9,7 +9,7 @@
                         <div class="text-2xl font-bold text-gray-800">Game Details</div>
                         <div class="inline-flex items-center gap-2">
                             <!-- Edit Event -->
-                            <RouterLink to="/marketing/editEvent">
+                            <RouterLink to="/marketing/editGame">
                                 <Button label="Edit" class="p-button-info" size="small" />
                             </RouterLink>
 
