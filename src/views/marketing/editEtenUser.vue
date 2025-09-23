@@ -25,7 +25,7 @@
 
                     <div>
                         <label class="block font-medium text-gray-700">Country Code</label>
-                        <InputText v-model="memberDetail.countryCode" class="w-full" />
+                        <Dropdown v-model="memberDetail.countryCode" :options="codeOptions" optionLabel="label" optionValue="value" class="w-full" />
                     </div>
 
                     <div>
@@ -49,7 +49,7 @@
                     </div>
 
                     <div>
-                        <label class="block font-medium text-gray-700">Level</label>
+                        <label class="block font-medium text-gray-700"> Member Level</label>
                         <Dropdown v-model="memberDetail.level" :options="levelOptions" optionLabel="label" optionValue="value" class="w-full" />
                     </div>
 
@@ -59,14 +59,15 @@
                     </div>
 
                     <div>
-                        <label class="block font-medium text-gray-700">Password</label>
-                        <div class="flex items-center">
-                            <InputText :type="showPassword ? 'text' : 'password'" v-model="memberDetail.password" class="w-full" />
-                            <button type="button" @click="showPassword = !showPassword" class="ml-2 text-gray-500 hover:text-gray-700">
-                                <div class="text-lg font-medium">
-                                    <i v-if="showPassword" class="pi pi-eye-slash"></i>
-                                    <i v-else class="pi pi-eye"></i>
-                                </div>
+                        <label class="block font-medium text-gray-700 mb-1">Password</label>
+                        <div class="relative w-full">
+                            <!-- Input -->
+                            <InputText :type="showPassword ? 'text' : 'password'" v-model="memberDetail.password" class="w-full pr-10" />
+
+                            <!-- Eye toggle button inside input -->
+                            <button type="button" @click="showPassword = !showPassword" class="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-500 hover:text-gray-700">
+                                <i v-if="showPassword" class="pi pi-eye-slash"></i>
+                                <i v-else class="pi pi-eye"></i>
                             </button>
                         </div>
                     </div>
@@ -122,13 +123,12 @@
                         <label class="block font-medium text-gray-700">Is Master</label>
                         <Dropdown v-model="memberDetail.isMaster" :options="selectOptions" optionLabel="label" optionValue="value" class="w-full" />
                     </div>
-                     <div>
+                    <div>
                         <label class="block font-medium text-gray-700">Activation Code</label>
-                        <InputText disabled v-model="memberDetail.activationCode"class="w-full" />
+                        <InputText disabled v-model="memberDetail.activationCode" class="w-full" />
                     </div>
                 </div>
                 <!-- ✅ closes Account Info grid -->
-
 
                 <!-- Submit -->
                 <div class="flex justify-end mt-2">
@@ -188,11 +188,15 @@ const genderOptions = [
     { label: 'Female', value: 'Female' }
 ];
 
+const codeOptions = [
+    { label: '+60', value: '+60' },
+    { label: '+65', value: '+65' }
+];
+
 const selectOptions = [
     { label: 'Yes', value: 1 },
     { label: 'No', value: 0 }
 ];
-
 
 const memberDetail = ref({
     id: 10,
@@ -226,6 +230,4 @@ const memberDetail = ref({
 });
 
 const showPassword = ref(false);
-
-
 </script>
