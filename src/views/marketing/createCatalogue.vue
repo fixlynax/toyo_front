@@ -63,26 +63,6 @@
                             <Dropdown v-model="catalogue.isBirthday" :options="isBirthdayOptions" optionLabel="label" optionValue="value" placeholder="Select an option" class="w-full" />
                         </div>
                     </div>
-
-                    <!-- E-Voucher Specific Fields -->
-                    <div v-if="catalogue.type === 'E-Voucher'" class="grid grid-cols-1 md:grid-cols-2 gap-4 md:col-span-2">
-                        <div>
-                            <label class="block font-medium text-gray-700 mb-1">Value Type</label>
-                            <Dropdown v-model="catalogue.valueType" :options="valueOptions" optionLabel="label" optionValue="value" placeholder="Select an option" class="w-full" />
-                        </div>
-                        <div>
-                            <label class="block font-medium text-gray-700 mb-1">Value Amount</label>
-                            <InputNumber v-model="catalogue.valueAmount" class="w-full" />
-                        </div>
-                    </div>
-
-                    <!-- Item Specific Fields -->
-                    <div v-else-if="catalogue.type === 'Item'" class="grid grid-cols-1 md:grid-cols-2 gap-4 md:col-span-2">
-                        <div>
-                            <label class="block font-medium text-gray-700 mb-1">Quantity</label>
-                            <InputNumber v-model="catalogue.valueAmount" class="w-full" />
-                        </div>
-                    </div>
                 </div>
 
                 <!-- Upload Images -->
@@ -115,7 +95,7 @@
         </div>
 
         <!-- ======================== -->
-        <!-- PIN Section (E-Wallet)   -->
+        <!-- E-Wallet PIN Section     -->
         <!-- ======================== -->
         <div v-if="catalogue.type === 'E-Wallet'" class="mt-8">
             <div class="card flex flex-col w-full">
@@ -158,6 +138,66 @@
                     </Column>
                     <Column header="Status" style="min-width: 8rem">
                         <template #body="{ data }"> {{ data.status ? 'Used' : 'Available' }}</template>
+                    </Column>
+                </DataTable>
+            </div>
+        </div>
+
+        <!-- ======================== -->
+        <!-- E-Voucher Section        -->
+        <!-- ======================== -->
+        <div v-if="catalogue.type === 'E-Voucher'" class="mt-8">
+            <div class="card flex flex-col w-full">
+                <div class="flex items-center justify-between border-b pb-2 mb-2">
+                    <div class="text-2xl font-bold text-gray-800">🎟️ E-Voucher Management</div>
+                </div>
+
+                <DataTable 
+                    :value="catalogue.vouchers" 
+                    :paginator="true" 
+                    :rows="10" 
+                    dataKey="id" 
+                    :rowHover="true" 
+                    :loading="loading"
+                >
+                    <template #header>
+                        <div class="flex flex-col md:flex-row items-center justify-between gap-4 w-full">
+                            <div class="flex gap-4 w-full md:w-auto">
+                                <div class="w-32">
+                                    <label class="block font-medium text-gray-700 mb-1">Used</label>
+                                    <span class="text-gray-800 font-semibold">{{ catalogue.usedVouchers }}</span>
+                                </div>
+                                <div class="w-32">
+                                    <label class="block font-medium text-gray-700 mb-1">Total</label>
+                                    <span class="text-gray-800 font-semibold">{{ catalogue.totalVouchers }}</span>
+                                </div>
+                            </div>
+
+                            <div class="flex gap-2">
+                                <Button icon="pi pi-download" class="w-10 h-10" severity="primary" @click="downloadVouchers" />
+                                <Button icon="pi pi-upload" class="w-10 h-10" severity="success" @click="importVouchers" />
+                            </div>
+                        </div>
+                    </template>
+
+                    <template #empty> No vouchers found. </template>
+                    <template #loading> Loading vouchers data. Please wait. </template>
+
+                    <Column header="Voucher Code" style="min-width: 10rem">
+                        <template #body="{ data }"> {{ data.code }} </template>
+                    </Column>
+                    <Column header="Expiry" style="min-width: 8rem">
+                        <template #body="{ data }"> {{ data.expiry }}</template>
+                    </Column>
+                    <Column header="Date Used" style="min-width: 8rem">
+                        <template #body="{ data }"> {{ data.usedDate || '-' }}</template>
+                    </Column>
+                    <Column header="Status" style="min-width: 8rem">
+                        <template #body="{ data }">
+                            <span :class="data.status === 'Used' ? 'text-red-500 font-semibold' : 'text-green-500 font-semibold'">
+                                {{ data.status }}
+                            </span>
+                        </template>
                     </Column>
                 </DataTable>
             </div>
@@ -232,7 +272,7 @@
 
                 <div class="flex justify-end mt-2">
                     <div class="w-40">
-                            <Button label="Save" class="w-full" />
+                        <Button label="Save" class="w-full" />
                     </div>
                 </div>
             </div>
@@ -241,51 +281,64 @@
 </template>
 
 <script setup>
-import { ref } from 'vue';
+import { ref } from 'vue'
 
-// Catalogue Types
+/* Dropdown Options */
 const typeOptions = [
     { label: 'E-Wallet', value: 'E-Wallet' },
     { label: 'E-Voucher', value: 'E-Voucher' },
     { label: 'Item', value: 'Item' }
-];
+]
 
-// Yes / No
 const isBirthdayOptions = [
     { label: 'Yes', value: 1 },
     { label: 'No', value: 0 }
-];
+]
 
-// Purpose
 const purposeOptions = [
     { label: 'Catalogue', value: 'Catalogue' },
     { label: 'Campaign', value: 'Campaign' },
     { label: 'Game', value: 'Game' }
-];
+]
 
-// Value Type
-const valueOptions = [
-    { label: 'Amount', value: 'Amount' },
-    { label: 'Percentage', value: 'Percentage' }
-];
-
-// Birthday Reward Options
 const birthdayRewardTypeOptions = [
     { label: 'Points', value: 'Points' },
     { label: 'Reward', value: 'Reward' }
-];
+]
 
-// Example Reward Items
 const rewardItems = [
     { id: 1, title: 'Touch ’n Go Reload RM20' },
     { id: 2, title: 'Starbucks Voucher RM10' },
     { id: 3, title: 'Grab Food Credit RM15' }
-];
+]
 
-// Catalogue Data
+/* Catalogue State */
 const catalogue = ref({
+    title: '',
+    sku: '',
+    description: '',
+    terms: '',
+    instruction: '',
+    purpose: '',
+    expiry: null,
+    type: '',
+    isBirthday: 0,
+    image1URL: null,
 
-    // Birthday Reward Data
+    // E-Wallet Data
+    pins: [],
+    usedPins: 0,
+    totalqty: 0,
+
+    // E-Voucher Data
+    vouchers: [],
+    usedVouchers: 0,
+    totalVouchers: 0,
+
+    // Item Data
+    valueAmount: 0,
+
+    // Birthday Reward
     birthdayReward: {
         type: 'Points',
         points: {
@@ -294,29 +347,63 @@ const catalogue = ref({
             platinum: 0
         },
         itemId: null
-    }
-});
+    },
 
-// Image Upload Handlers
+    // Redeem Cost
+    point1: 0,
+    point2: 0,
+    point3: 0
+})
+
+const loading = ref(false)
+
+/* Image Handlers */
 const onImageSelect = (event, property) => {
-    const file = event.files[0];
-    const reader = new FileReader();
+    const file = event.files[0]
+    const reader = new FileReader()
     reader.onload = (e) => {
-        catalogue.value[property] = e.target.result;
-    };
-    reader.readAsDataURL(file);
-};
+        catalogue.value[property] = e.target.result
+    }
+    reader.readAsDataURL(file)
+}
 
 const removeImage = (property) => {
-    catalogue.value[property] = null;
-};
+    catalogue.value[property] = null
+}
 
-// PIN Actions
+/* E-Wallet Actions */
 const downloadPins = () => {
-    console.log('Downloading PINs for', catalogue.value.title);
-};
+    console.log('Downloading PINs for', catalogue.value.title)
+}
 
 const importPins = () => {
-    console.log('Importing PINs for', catalogue.value.title);
-};
+    console.log('Importing PINs for', catalogue.value.title)
+    // Example mock PIN
+    catalogue.value.pins.push({
+        id: catalogue.value.pins.length + 1,
+        pin: '1234-5678-ABCD',
+        expiry: '2025-12-31',
+        used: null,
+        status: false
+    })
+    catalogue.value.totalqty = catalogue.value.pins.length
+}
+
+/* E-Voucher Actions */
+const downloadVouchers = () => {
+    console.log('Downloading vouchers for', catalogue.value.title)
+}
+
+const importVouchers = () => {
+    console.log('Importing vouchers for', catalogue.value.title)
+    // Example mock voucher
+    catalogue.value.vouchers.push({
+        id: catalogue.value.vouchers.length + 1,
+        code: 'VOUCHER-' + (catalogue.value.vouchers.length + 1),
+        expiry: '2025-12-31',
+        usedDate: null,
+        status: 'Available'
+    })
+    catalogue.value.totalVouchers = catalogue.value.vouchers.length
+}
 </script>

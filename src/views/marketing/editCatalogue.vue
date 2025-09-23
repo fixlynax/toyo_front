@@ -52,14 +52,14 @@
                         </div>
                     </div>
 
-                    <!-- Type -->
+                    <!-- Type & Birthday -->
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4 md:col-span-2">
                         <div>
                             <label class="block font-medium text-gray-700 mb-1">Type</label>
                             <Dropdown v-model="catalogue.type" :options="typeOptions" optionLabel="label" optionValue="value" placeholder="Select a type" class="w-full" />
                         </div>
                         <div>
-                            <label class="block font-medium text-gray-700 mb-1">Is Birthday ?</label>
+                            <label class="block font-medium text-gray-700 mb-1">Is Birthday?</label>
                             <Dropdown v-model="catalogue.isBirthday" :options="isBirthday" optionLabel="label" optionValue="value" placeholder="Select an option" class="w-full" />
                         </div>
                     </div>
@@ -75,6 +75,8 @@
                             <InputNumber v-model="catalogue.valueAmount" class="w-full" />
                         </div>
                     </div>
+
+                    <!-- If Item -->
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4 md:col-span-2" v-else-if="catalogue.type === 'Item'">
                         <div>
                             <label class="block font-medium text-gray-700 mb-1">Quantity</label>
@@ -87,12 +89,10 @@
                 <div>
                     <label class="block font-medium text-gray-700 mb-2">Catalogue Images</label>
                     <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                        <!-- Image 1 -->
                         <div class="relative">
                             <FileUpload mode="basic" name="image1" accept="image/*" customUpload @select="onImageSelect($event, 'image1URL')" chooseLabel="Change Image 1" class="w-full" />
                             <div v-if="catalogue.image1URL" class="relative mt-2">
                                 <img :src="catalogue.image1URL" alt="Preview 1" class="rounded-lg shadow-md object-cover w-full h-80" />
-                                <!-- Remove button -->
                                 <button @click="removeImage('image1URL')" class="absolute top-2 right-2 bg-red-500 text-white px-2 py-1 rounded-full hover:bg-red-600" title="Remove Image">&times;</button>
                             </div>
                         </div>
@@ -102,19 +102,16 @@
         </div>
 
         <!-- ======================== -->
-        <!-- PIN Section (E-Wallet)   -->
+        <!-- E-Wallet Section (PIN)   -->
         <!-- ======================== -->
         <div v-if="catalogue.type === 'E-Wallet'" class="mt-8">
             <div class="card flex flex-col w-full">
-                <!-- Header with Actions -->
                 <div class="flex items-center justify-between border-b pb-2 mb-2">
                     <div class="text-2xl font-bold text-gray-800">🔑 List PIN</div>
                 </div>
-                <!-- PIN Table -->
                 <DataTable :value="catalogue.pins" :paginator="true" :rows="10" dataKey="id" :rowHover="true" :loading="loading">
                     <template #header>
                         <div class="flex flex-col md:flex-row items-center justify-between gap-4 w-full">
-                            <!-- Left: Total & Used -->
                             <div class="flex gap-4 w-full md:w-auto">
                                 <div class="w-32">
                                     <label class="block font-medium text-gray-700 mb-1">Used</label>
@@ -125,8 +122,6 @@
                                     <span class="text-gray-800 font-semibold">{{ catalogue.totalqty }}</span>
                                 </div>
                             </div>
-
-                            <!-- Right: Action Buttons -->
                             <div class="flex gap-2">
                                 <Button icon="pi pi-download" class="w-10 h-10" severity="primary" @click="downloadPins" />
                                 <Button icon="pi pi-upload" class="w-10 h-10" severity="success" @click="importPins" />
@@ -134,24 +129,85 @@
                         </div>
                     </template>
 
-                    <template #empty> No customers found. </template>
-                    <template #loading> Loading customers data. Please wait. </template>
-                    <!-- Columns -->
+                    <template #empty> No PINs found. </template>
+                    <template #loading> Loading PIN data. Please wait. </template>
+
                     <Column header="Pin" style="min-width: 8rem">
-                        <template #body="{ data }"> {{ data.pin }} </template>
+                        <template #body="{ data }">{{ data.pin }}</template>
+                    </Column>
+                    <Column header="Expiry" style="min-width: 8rem">
+                        <template #body="{ data }">{{ data.expiry }}</template>
+                    </Column>
+                    <Column header="Date Used" style="min-width: 8rem">
+                        <template #body="{ data }">{{ data.used }}</template>
+                    </Column>
+                    <Column header="Status" style="min-width: 8rem">
+                        <template #body="{ data }">{{ data.status ? 'Used' : '' }}</template>
+                    </Column>
+                </DataTable>
+            </div>
+        </div>
+
+        <!-- ======================== -->
+        <!-- E-Voucher Section        -->
+        <!-- ======================== -->
+        <div v-if="catalogue.type === 'E-Voucher'" class="mt-8">
+            <div class="card flex flex-col w-full">
+                <div class="flex items-center justify-between border-b pb-2 mb-2">
+                    <div class="text-2xl font-bold text-gray-800">🎟️ E-Voucher Management</div>
+                </div>
+
+                <DataTable 
+                    :value="catalogue.vouchers" 
+                    :paginator="true" 
+                    :rows="10" 
+                    dataKey="id" 
+                    :rowHover="true" 
+                    :loading="loading"
+                >
+                    <template #header>
+                        <div class="flex flex-col md:flex-row items-center justify-between gap-4 w-full">
+                            <div class="flex gap-4 w-full md:w-auto">
+                                <div class="w-32">
+                                    <label class="block font-medium text-gray-700 mb-1">Used</label>
+                                    <span class="text-gray-800 font-semibold">{{ catalogue.usedVouchers }}</span>
+                                </div>
+                                <div class="w-32">
+                                    <label class="block font-medium text-gray-700 mb-1">Total</label>
+                                    <span class="text-gray-800 font-semibold">{{ catalogue.totalVouchers }}</span>
+                                </div>
+                            </div>
+
+                            <div class="flex gap-2">
+                                <Button icon="pi pi-download" class="w-10 h-10" severity="primary" @click="downloadVouchers" />
+                                <Button icon="pi pi-upload" class="w-10 h-10" severity="success" @click="importVouchers" />
+                            </div>
+                        </div>
+                    </template>
+
+                    <template #empty> No vouchers found. </template>
+                    <template #loading> Loading vouchers data. Please wait. </template>
+
+                    <Column header="Voucher Code" style="min-width: 10rem">
+                        <template #body="{ data }"> {{ data.code }} </template>
                     </Column>
                     <Column header="Expiry" style="min-width: 8rem">
                         <template #body="{ data }"> {{ data.expiry }}</template>
                     </Column>
                     <Column header="Date Used" style="min-width: 8rem">
-                        <template #body="{ data }"> {{ data.used }}</template>
+                        <template #body="{ data }"> {{ data.usedDate || '-' }}</template>
                     </Column>
                     <Column header="Status" style="min-width: 8rem">
-                        <template #body="{ data }"> {{ data.status ? 'Used' : '' }}</template>
+                        <template #body="{ data }">
+                            <span :class="data.status === 'Used' ? 'text-red-500 font-semibold' : 'text-green-500 font-semibold'">
+                                {{ data.status }}
+                            </span>
+                        </template>
                     </Column>
                 </DataTable>
             </div>
         </div>
+
         <!-- ======================== -->
         <!-- Birthday Reward Section  -->
         <!-- ======================== -->
@@ -162,7 +218,6 @@
                 </div>
 
                 <div class="p-4 text-gray-600">
-                    <!-- Reward Type Selection -->
                     <div class="mb-4">
                         <label class="block font-medium text-gray-700 mb-1">Reward Type</label>
                         <Dropdown v-model="catalogue.birthdayReward.type" :options="birthdayRewardTypeOptions" optionLabel="label" optionValue="value" placeholder="Select reward type" class="w-full" />
@@ -196,7 +251,6 @@
         <!-- ======================== -->
         <!-- Cost Redeem Section      -->
         <!-- ======================== -->
-
         <div class="mt-8">
             <div class="card flex flex-col w-full">
                 <div class="flex items-center justify-between border-b pb-2 mb-2">
@@ -258,23 +312,20 @@ const valueOptions = [
     { label: 'Percentage', value: 'Percentage' }
 ];
 
-// Birthday Reward Options
 const birthdayRewardTypeOptions = [
     { label: 'Points', value: 'Points' },
     { label: 'Reward', value: 'Reward' }
 ];
 
-// Example Reward Items (shared inventory with Reward Catalog)
 const rewardItems = [
     { id: 1, title: 'Touch ’n Go Reload RM20' },
     { id: 2, title: 'Starbucks Voucher RM10' },
     { id: 3, title: 'Grab Food Credit RM15' }
 ];
 
-// Catalogue Data with PINs
 const catalogue = ref({
     id: 1,
-    type: 'E-Wallet',
+    type: 'E-Voucher',
     image1URL: 'https://assets.bharian.com.my/images/articles/tng13jan_BHfield_image_socialmedia.var_1610544082.jpg',
     title: 'Touch ’n Go Reload RM20',
     sku: 'TNG20',
@@ -291,46 +342,30 @@ const catalogue = ref({
     expiry: '2025-06-15',
     usedPins: 1,
     totalqty: 3,
-    isBirthday: 0,
+    isBirthday: 1,
 
-    // Dynamic PIN list
     pins: [
-        {
-            id: 1,
-            pin: 'TNGPIN2025001',
-            expiry: '2025-12-31',
-            used: '2025-06-15',
-            status: 0
-        },
-        {
-            id: 2,
-            pin: 'TNGPIN2025002',
-            expiry: '2025-12-31',
-            used: '2025-06-15',
-            status: 0
-        },
-        {
-            id: 3,
-            pin: 'TNGPIN2025003',
-            expiry: '2025-12-31',
-            used: '2025-06-15',
-            status: 1
-        }
+        { id: 1, pin: 'TNGPIN2025001', expiry: '2025-12-31', used: '2025-06-15', status: 0 },
+        { id: 2, pin: 'TNGPIN2025002', expiry: '2025-12-31', used: '', status: 0 },
+        { id: 3, pin: 'TNGPIN2025003', expiry: '2025-12-31', used: '2025-06-20', status: 1 }
     ],
 
-    // Birthday Reward Data
     birthdayReward: {
-        type: 'Points', // Default to Points
+        type: 'Points',
         points: {
             silver: 0,
             gold: 0,
             platinum: 0
         },
-        itemId: null // For reward selection
-    }
+        itemId: null
+    },
+
+    // NEW: E-Voucher properties
+    voucherCode: '',
+    voucherQty: 0,
+    voucherNotes: ''
 });
 
-// Image Handling
 const onImageSelect = (event, property) => {
     const file = event.files[0];
     const reader = new FileReader();
@@ -344,25 +379,11 @@ const removeImage = (property) => {
     catalogue.value[property] = null;
 };
 
-// Download PINs
 const downloadPins = () => {
     console.log('Downloading PINs for', catalogue.value.title);
-    // Implement actual file download here
 };
 
-// Import PINs
 const importPins = () => {
-    console.log('Opening import modal for', catalogue.value.title);
-    // Implement actual import logic here
-};
-
-// Save Birthday Reward
-const saveBirthdayReward = () => {
-    if (catalogue.value.birthdayReward.type === 'Points') {
-        console.log('Saving Points Birthday Reward', catalogue.value.birthdayReward.points);
-    } else if (catalogue.value.birthdayReward.type === 'Reward') {
-        console.log('Saving Reward Item Birthday Reward', catalogue.value.birthdayReward.itemId);
-    }
-    // Implement actual API call or saving logic here
+    console.log('Importing PINs for', catalogue.value.title);
 };
 </script>
