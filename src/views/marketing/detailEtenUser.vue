@@ -15,7 +15,7 @@
                             </div>
 
                             <!-- Create Button -->
-                            <RouterLink to="/om/confirmationEten">
+                            <RouterLink to="/marketing/editEtenUser">
                                 <Button type="button" label="Edit" />
                             </RouterLink>
                         </div>
