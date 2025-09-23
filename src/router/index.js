@@ -120,11 +120,11 @@ const router = createRouter({
                     name: 'Edit-Catalogue',
                     component: () => import('@/views/marketing/editCatalogue.vue')
                 },
-                // {
-                //     path: '/marketing/createCatalogue',
-                //     name: 'Create-Catalogue',
-                //     component: () => import('@/views/marketing/createCatalogue.vue')
-                // },
+                {
+                    path: '/marketing/createCatalogue',
+                    name: 'Create-Catalogue',
+                    component: () => import('@/views/marketing/createCatalogue.vue')
+                },
                 // Game Management
                 {
                     path: '/marketing/listGame',
@@ -214,6 +214,11 @@ const router = createRouter({
                     path: '/marketing/listCampaign',
                     name: 'List-Campaign',
                     component: () => import('@/views/marketing/listCampaign.vue')
+                },
+                {
+                    path: '/marketing/detailCampaign',
+                    name: 'Detail-Campaign',
+                    component: () => import('@/views/marketing/detailCampaign.vue')
                 },
                 // {
                 //     path: '/marketing/createCampaign',
