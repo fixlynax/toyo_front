@@ -90,6 +90,13 @@
                                     <td class="px-4 py-2 text-right">{{ catalogue.purpose }}</td>
                                 </tr>
                                 <tr class="border-b">
+                                    <td class="px-4 py-2 font-medium">Birthday Reward</td>
+                                    <td class="px-4 py-2 text-right">
+                                        {{ catalogue.isBirthday === 1 ? 'Yes' : 'No' }}
+                                    </td>
+                                </tr>
+
+                                <tr class="border-b">
                                     <td class="px-4 py-2 font-medium">Silver Point</td>
                                     <td class="px-4 py-2 text-right">{{ catalogue.point1 }}</td>
                                 </tr>
@@ -150,7 +157,7 @@ const catalogue = ref({
     totalqty: 500,
     availableqty: 420,
     expiry: '2025-12-31',
-    isBirthday: 0,
+    isBirthday: 1,
     status: 1,
     created: '2025-01-01',
     deleted: 0

@@ -115,11 +115,11 @@ const router = createRouter({
                     name: 'Detail-Catalogue',
                     component: () => import('@/views/marketing/detailCatalogue.vue')
                 },
-                // {
-                //     path: '/marketing/editCatalogue',
-                //     name: 'Edit-Catalogue',
-                //     component: () => import('@/views/marketing/editCatalogue.vue')
-                // },
+                {
+                    path: '/marketing/editCatalogue',
+                    name: 'Edit-Catalogue',
+                    component: () => import('@/views/marketing/editCatalogue.vue')
+                },
                 // {
                 //     path: '/marketing/createCatalogue',
                 //     name: 'Create-Catalogue',
