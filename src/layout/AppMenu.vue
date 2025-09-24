@@ -41,7 +41,7 @@ const model = ref([
             {
                 label: 'Redemption Management',
                 icon: 'pi pi-fw pi-wallet',
-                to: '#'
+                to: '/marketing/listRedemption'
             },
             {
                 label: 'TC Members',

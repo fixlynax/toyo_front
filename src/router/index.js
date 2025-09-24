@@ -249,11 +249,11 @@ const router = createRouter({
                 },
 
                 // Redemption Management
-                // {
-                //     path: '/marketing/listRedemption',
-                //     name: 'List-Redemption',
-                //     component: () => import('@/views/marketing/listRedemption.vue')
-                // },
+                {
+                    path: '/marketing/listRedemption',
+                    name: 'List-Redemption',
+                    component: () => import('@/views/marketing/listRedemption.vue')
+                },
                 // {
                 //     path: '/marketing/detailRedemption',
                 //     name: 'Detail-Redemption',
