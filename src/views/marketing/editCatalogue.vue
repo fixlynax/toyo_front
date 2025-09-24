@@ -436,5 +436,30 @@ const importPins = () => {
 onMounted(() => {
     loadPins();
 });
+
+// Handle Upload and Remove Image
+/**
+ * Handle image selection from PrimeVue FileUpload
+ * @param {Object} event - PrimeVue FileUpload event
+ * @param {String} property - The target property in catalogue (e.g., 'image1URL')
+ */
+const onImageSelect = (event, property) => {
+    const file = event.files ? event.files[0] : null;
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = (e) => {
+        catalogue.value[property] = e.target.result; // Update catalogue image preview
+    };
+    reader.readAsDataURL(file);
+};
+
+/**
+ * Remove the selected image
+ * @param {String} property - The target property in catalogue (e.g., 'image1URL')
+ */
+const removeImage = (property) => {
+    catalogue.value[property] = ''; // or null, depending on your preference
+};
 </script>
 

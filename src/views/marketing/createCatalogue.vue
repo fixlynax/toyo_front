@@ -99,10 +99,6 @@
                         <div class="flex flex-col md:flex-row items-center justify-between gap-4 w-full">
                             <div class="flex gap-4 w-full md:w-auto">
                                 <div class="w-32">
-                                    <label class="block font-medium text-gray-700 mb-1">Used</label>
-                                    <span class="text-gray-800 font-semibold">{{ catalogue.usedPins }}</span>
-                                </div>
-                                <div class="w-32">
                                     <label class="block font-medium text-gray-700 mb-1">Total</label>
                                     <span class="text-gray-800 font-semibold">{{ catalogue.totalqty }}</span>
                                 </div>
@@ -147,10 +143,6 @@
                     <template #header>
                         <div class="flex flex-col md:flex-row items-center justify-between gap-4 w-full">
                             <div class="flex gap-4 w-full md:w-auto">
-                                <div class="w-32">
-                                    <label class="block font-medium text-gray-700 mb-1">Used</label>
-                                    <span class="text-gray-800 font-semibold">{{ catalogue.usedVouchers }}</span>
-                                </div>
                                 <div class="w-32">
                                     <label class="block font-medium text-gray-700 mb-1">Total</label>
                                     <span class="text-gray-800 font-semibold">{{ catalogue.totalVouchers }}</span>
