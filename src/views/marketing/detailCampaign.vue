@@ -148,15 +148,15 @@
                                 </tr>
                                 <tr class="border-b">
                                     <td class="px-4 py-2 font-medium">Point Silver</td>
-                                    <td class="px-4 py-2 text-right">{{ campaign.Point1 }}</td>
+                                    <td class="px-4 py-2 text-right">{{ campaign.point1 }}</td>
                                 </tr>
                                 <tr class="border-b">
                                     <td class="px-4 py-2 font-medium">Point Gold</td>
-                                    <td class="px-4 py-2 text-right">{{ campaign.Point2 }}</td>
+                                    <td class="px-4 py-2 text-right">{{ campaign.point2 }}</td>
                                 </tr>
                                 <tr class="border-b">
                                     <td class="px-4 py-2 font-medium">Point Platinum</td>
-                                    <td class="px-4 py-2 text-right">{{ campaign.Point3 }}</td>
+                                    <td class="px-4 py-2 text-right">{{ campaign.point3 }}</td>
                                 </tr>
                                 <tr class="border-b">
                                     <td class="px-4 py-2 font-medium">Quota</td>
@@ -227,7 +227,7 @@ const campaign = ref({
     endDate: '2025-02-10',
     quota: 1000,
     maxPerUser: 1,
-    Point1: 10,
+    point1: 10,
     point2: 20,
     point3: 30,
     status: 1,

@@ -5,125 +5,196 @@
                 <!-- Header -->
                 <div class="text-2xl font-bold text-gray-800 border-b pb-2">Edit Campaign</div>
 
-                <!-- Event Form -->
+                <!-- Campaign Form -->
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <!-- Title -->
                     <div class="md:col-span-2">
                         <label class="block font-medium text-gray-700">Title</label>
-                        <InputText v-model="event.title" class="w-full" />
+                        <InputText v-model="campaign.title" class="w-full" />
                     </div>
 
+                    <!-- Description -->
                     <div class="md:col-span-2">
                         <label class="block font-medium text-gray-700">Description</label>
-                        <Textarea v-model="event.desc" rows="3" class="w-full" />
+                        <Textarea v-model="campaign.description" rows="3" class="w-full" />
                     </div>
 
-                    <div>
-                        <label class="block font-medium text-gray-700">Location</label>
-                        <InputText v-model="event.location" class="w-full" />
+                    <!-- Term Condition -->
+                    <div class="md:col-span-2">
+                        <label class="block font-medium text-gray-700">Term & Condition</label>
+                        <Textarea v-model="campaign.termCondition" rows="3" class="w-full" />
                     </div>
 
-                    <div>
-                        <label class="block font-medium text-gray-700">Publish Date</label>
-                        <Calendar v-model="event.publishDate" dateFormat="yy-mm-dd" class="w-full" />
-                    </div>
-
-                    <div>
-                        <label class="block font-medium text-gray-700">Start Date</label>
-                        <Calendar v-model="event.startDate" dateFormat="yy-mm-dd" class="w-full" />
-                    </div>
-
-                    <div>
-                        <label class="block font-medium text-gray-700">End Date</label>
-                        <Calendar v-model="event.endDate" dateFormat="yy-mm-dd" class="w-full" />
-                    </div>
-
-                    <div>
-                        <label class="block font-medium text-gray-700">Audience</label>
-                        <Dropdown v-model="event.audience" :options="audienceOptions" optionLabel="label" optionValue="value" class="w-full" />
-                    </div>
-
-                    <div>
-                        <label class="block font-medium text-gray-700">Survey</label>
-                        <Dropdown v-model="event.isSurvey" :options="surveyOptions" optionLabel="label" optionValue="value" class="w-full" />
-                    </div>
-
-                    <div v-if="event.isSurvey === 1" class="grid grid-cols-1 md:grid-cols-4 gap-4 md:col-span-2">
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4 md:col-span-2">
+                        <!-- Quota -->
                         <div>
-                            <label class="block font-medium text-gray-700 mb-1">Classic Point</label>
-                            <InputNumber v-model="event.point1" class="w-full" />
+                            <label class="block font-medium text-gray-700">Quota</label>
+                            <InputNumber v-model="campaign.quota" class="w-full" />
+                        </div>
+
+                        <!-- Max per user -->
+                        <div>
+                            <label class="block font-medium text-gray-700">Max Per User</label>
+                            <InputNumber v-model="campaign.maxPerUser" class="w-full" />
+                        </div>
+
+                        <!-- Gamification -->
+                        <div>
+                            <label class="block font-medium text-gray-700">Gamification</label>
+                            <Dropdown v-model="campaign.isGamification" :options="gamificationOnOff" optionLabel="label" optionValue="value" class="w-full" />
+                        </div>
+                    </div>
+
+                    <!-- Dates -->
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4 md:col-span-2">
+                        <div>
+                            <label class="block font-medium text-gray-700">Publish Date</label>
+                            <Calendar v-model="campaign.publishDate" dateFormat="yy-mm-dd" class="w-full" />
                         </div>
                         <div>
-                            <label class="block font-medium text-gray-700 mb-1">Silver Point</label>
-                            <InputNumber v-model="event.point2" class="w-full" />
+                            <label class="block font-medium text-gray-700">Start Date</label>
+                            <Calendar v-model="campaign.startDate" dateFormat="yy-mm-dd" class="w-full" />
                         </div>
                         <div>
-                            <label class="block font-medium text-gray-700 mb-1">Gold Point</label>
-                            <InputNumber v-model="event.point3" class="w-full" />
+                            <label class="block font-medium text-gray-700">End Date</label>
+                            <Calendar v-model="campaign.endDate" dateFormat="yy-mm-dd" class="w-full" />
+                        </div>
+                    </div>
+
+                    <!-- Points -->
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4 md:col-span-2">
+                        <div>
+                            <label class="block font-medium text-gray-700 mb-1">Point Silver</label>
+                            <InputNumber v-model="campaign.point1" class="w-full" />
                         </div>
                         <div>
-                            <label class="block font-medium text-gray-700 mb-1">Platinum Point</label>
-                            <InputNumber v-model="event.point4" class="w-full" />
+                            <label class="block font-medium text-gray-700 mb-1">Point Gold</label>
+                            <InputNumber v-model="campaign.point2" class="w-full" />
+                        </div>
+                        <div>
+                            <label class="block font-medium text-gray-700 mb-1">Point Platinum</label>
+                            <InputNumber v-model="campaign.point3" class="w-full" />
                         </div>
                     </div>
                 </div>
 
                 <!-- Upload Images -->
                 <div>
-                    <label class="block font-medium text-gray-700 mb-2">Event Images</label>
+                    <label class="block font-medium text-gray-700 mb-2">Campaign Images</label>
                     <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                        <div class="relative">
-                            <FileUpload mode="basic" name="image1" accept="image/*" customUpload @select="onImageSelect($event, 'image1URL')" chooseLabel="Change Image 1" class="w-full" />
-                            <div v-if="event.image1URL" class="relative mt-2">
-                                <img :src="event.image1URL" alt="Preview 1" class="rounded-lg shadow-md object-cover w-full h-80" />
-                                <!-- Remove button -->
-                                <button @click="removeImage('image1URL')" class="absolute top-2 right-2 bg-red-500 text-white px-2 py-1 rounded-full hover:bg-red-600" title="Remove Image">&times;</button>
+                        <div v-for="(field, idx) in ['image1Path', 'image2Path', 'image3Path']" :key="idx" class="relative">
+                            <FileUpload mode="basic" :name="field" accept="image/*" customUpload @select="onImageSelect($event, field)" :chooseLabel="`Change Image ${idx + 1}`" class="w-full" />
+                            <div v-if="campaign[field]" class="relative mt-2">
+                                <img :src="campaign[field]" :alt="`Preview ${idx + 1}`" class="rounded-lg shadow-md object-cover w-full h-80" />
+                                <button @click="removeImage(field)" class="absolute top-2 right-2 bg-red-500 text-white px-2 py-1 rounded-full">&times;</button>
                             </div>
                         </div>
-                        <div class="relative">
-                            <FileUpload mode="basic" name="image2" accept="image/*" customUpload @select="onImageSelect($event, 'image2URL')" chooseLabel="Change Image 2" class="w-full" />
-                            <div v-if="event.image2URL" class="relative mt-2">
-                                <img :src="event.image2URL" alt="Preview 2" class="rounded-lg shadow-md object-cover w-full h-80" />
-                                <!-- Remove button -->
-                                <button @click="removeImage('image2URL')" class="absolute top-2 right-2 bg-red-500 text-white px-2 py-1 rounded-full hover:bg-red-600" title="Remove Image">&times;</button>
-                            </div>
-                        </div>
-                        <div class="relative">
-                            <FileUpload mode="basic" name="image3" accept="image/*" customUpload @select="onImageSelect($event, 'image3URL')" chooseLabel="Change Image 3" class="w-full" />
-                            <div v-if="event.image3URL" class="relative mt-2">
-                                <img :src="event.image3URL" alt="Preview 3" class="rounded-lg shadow-md object-cover w-full h-80" />
-                                <!-- Remove button -->
-                                <button @click="removeImage('image3URL')" class="absolute top-2 right-2 bg-red-500 text-white px-2 py-1 rounded-full hover:bg-red-600" title="Remove Image">&times;</button>
-                            </div>                        </div>
                     </div>
                 </div>
 
-                <!-- Survey Section -->
-                <div v-if="event.isSurvey === 1">
-                    <div class="flex items-center justify-between border-b pb-2 mb-4 mt-6">
-                        <div class="text-xl font-bold text-gray-800">📝 Survey Questions</div>
-                        <Button icon="pi pi-plus" label="Add Question" style="width: fit-content" class="p-button-success p-button-sm" :disabled="questions.length >= 10" @click="addQuestion" />
+                <!-- Reward Options (only if gamification ON) -->
+                <div v-if="campaign.isGamification == 1">
+                    <div class="flex justify-between items-center border-b pb-2 mb-2">
+                        <div class="text-xl font-bold text-gray-800">🎁 Reward Options</div>
+                        <Button label="Add Reward" style="width: fit-content" icon="pi pi-plus" class="p-button-sm" @click="addReward" />
                     </div>
+                    <div class="space-y-6">
+                        <div v-for="(reward, rIndex) in rewards" :key="rIndex" class="border p-4 rounded-lg shadow-sm bg-gray-50">
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <!-- Reward Name -->
+                                <div>
+                                    <label class="block font-medium text-gray-700">Reward Name</label>
+                                    <InputText v-model="reward.name" class="w-full" />
+                                </div>
+                                <!-- Reward Quantity -->
+                                <div>
+                                    <label class="block font-medium text-gray-700">Quantity</label>
+                                    <InputNumber v-model="reward.quantity" class="w-full" />
+                                </div>
+                                <!-- Reward Type -->
+                                <div>
+                                    <label class="block font-medium text-gray-700">Type</label>
+                                    <Dropdown v-model="reward.type" :options="rewardTypes" optionLabel="label" optionValue="value" class="w-full" />
+                                </div>
 
-                    <div v-if="questions.length > 0" class="space-y-4">
-                        <div v-for="(q, index) in questions" :key="index" class="border rounded-lg p-4 shadow-sm bg-gray-50">
-                            <div class="flex items-center justify-between mb-2">
-                                <label class="font-semibold">Question {{ index + 1 }}</label>
-                                <Button icon="pi pi-trash" class="p-button-danger p-button-text p-button-sm" @click="removeQuestion(index)" />
+                                <!-- Conditional Fields -->
+                                <template v-if="reward.type === 'point'">
+                                    <div class="md:col-span-2 grid grid-cols-1 md:grid-cols-3 gap-4">
+                                        <div>
+                                            <label class="block font-medium text-gray-700">Silver Points</label>
+                                            <InputNumber v-model="reward.points.silver" class="w-full" />
+                                        </div>
+                                        <div>
+                                            <label class="block font-medium text-gray-700">Gold Points</label>
+                                            <InputNumber v-model="reward.points.gold" class="w-full" />
+                                        </div>
+                                        <div>
+                                            <label class="block font-medium text-gray-700">Platinum Points</label>
+                                            <InputNumber v-model="reward.points.platinum" class="w-full" />
+                                        </div>
+                                    </div>
+                                </template>
+
+                                <template v-else-if="reward.type === 'pin'">
+                                    <div>
+                                        <label class="block font-medium text-gray-700">Expiry Date</label>
+                                        <Calendar v-model="reward.expiry" dateFormat="yy-mm-dd" class="w-full" />
+                                    </div>
+                                </template>
                             </div>
-                            <InputText v-model="q.text" placeholder="Enter your question" class="w-full mb-2" />
-                            <div class="grid grid-cols-1 md:grid-cols-3 gap-2">
-                                <InputText v-for="(ans, i) in q.options" :key="i" v-model="q.options[i]" placeholder="Answer" />
+                            <div class="flex justify-end mt-2">
+                                <Button icon="pi pi-trash" class="p-button-danger p-button-sm" @click="removeReward(rIndex)" />
                             </div>
                         </div>
                     </div>
+                </div>
 
-                    <div v-else class="text-gray-500 italic">No questions added yet.</div>
+                <!-- Criteria (only if gamification ON) -->
+                <div v-if="campaign.isGamification == 1">
+                    <div class="flex justify-between items-center border-b pb-2 mb-2">
+                        <div class="text-xl font-bold text-gray-800">📋 Criteria</div>
+                        <Button label="Add Criteria" style="width: fit-content" icon="pi pi-plus" class="p-button-sm" @click="addCriteria" />
+                    </div>
+                    <div class="space-y-6">
+                        <div v-for="(criteria, cIndex) in criterias" :key="cIndex" class="border p-4 rounded-lg shadow-sm bg-gray-50">
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <!-- Title -->
+                                <div>
+                                    <label class="block font-medium text-gray-700">Title</label>
+                                    <InputText v-model="criteria.title" class="w-full" />
+                                </div>
+                                <!-- Type -->
+                                <div>
+                                    <label class="block font-medium text-gray-700">Type</label>
+                                    <Dropdown v-model="criteria.type" :options="criteriaTypes" optionLabel="label" optionValue="value" class="w-full" />
+                                </div>
+                                <!-- Pattern -->
+                                <div>
+                                    <label class="block font-medium text-gray-700">Pattern</label>
+                                    <InputText v-model="criteria.pattern" class="w-full" />
+                                </div>
+                                <!-- Size -->
+                                <div>
+                                    <label class="block font-medium text-gray-700">Size</label>
+                                    <InputText v-model="criteria.size" class="w-full" />
+                                </div>
+                                <!-- Min Qty -->
+                                <div>
+                                    <label class="block font-medium text-gray-700">Min Qty</label>
+                                    <InputNumber v-model="criteria.minQty" class="w-full" />
+                                </div>
+                            </div>
+                            <div class="flex justify-end mt-2">
+                                <Button icon="pi pi-trash" class="p-button-danger p-button-sm" @click="removeCriteria(cIndex)" />
+                            </div>
+                        </div>
+                    </div>
                 </div>
 
                 <!-- Submit -->
-                <div class="flex justify-end mt-2">
+                <div class="flex justify-end mt-4">
                     <div class="w-40">
-                        <RouterLink to="/marketing/detailEvent">
+                        <RouterLink to="/marketing/detailCampaign">
                             <Button label="Update" class="w-full" />
                         </RouterLink>
                     </div>
@@ -136,72 +207,64 @@
 <script setup>
 import { ref } from 'vue';
 
-const audienceOptions = [
-    { label: 'TC', value: 'TC' },
-    { label: 'ETEN', value: 'ETEN' },
-    { label: 'ALL', value: 'ALL' }
-];
-
-const surveyOptions = [
-    { label: 'Yes', value: 1 },
-    { label: 'No', value: 0 }
-];
-
-const event = ref({
+const campaign = ref({
     id: 1,
-    audience: 'TC',
-    isSurvey: 1, // change to 0 to test "no survey"
-    point1: 80,
-    point2: 90,
-    point3: 95,
-    point4: 100,
-    title: 'Toyo Tires Drift Challenge 2025',
-    image1URL: '/demo/images/event-toyo-1.jpg',
-    image2URL: '/demo/images/event-toyo-2.jpg',
-    image3URL: '/demo/images/event-toyo-3.jpg',
-    desc: 'Experience the thrill of high-speed drifting powered by Toyo Tires. Join us for a weekend of motorsport excitement!',
-    location: 'Sepang International Circuit, Malaysia',
-    publishDate: '2025-01-10',
-    startDate: '2025-02-15',
-    endDate: '2025-02-16',
-    view: 542,
+    campaignNo: 'CTY001',
+    title: 'Toyo Tires Safety Awareness Campaign',
+    description: 'Promoting road safety and awareness with Toyo Tires during festive season.',
+    termCondition: 'Valid for participants within Malaysia only. One entry per user.',
+    image1Path: '/demo/images/event-toyo-1.jpg',
+    image2Path: '/demo/images/event-toyo-2.jpg',
+    image3Path: '/demo/images/event-toyo-3.jpg',
+    publishDate: '2025-01-05',
+    startDate: '2025-01-10',
+    endDate: '2025-02-10',
+    isGamification: 1,
+    quota: 1000,
+    maxPerUser: 1,
+    point1: 10,
+    point2: 20,
+    point3: 30,
     status: 1
 });
 
-const questions = ref([
-    { text: 'How do you rate the durability of the tires?', options: ['Low', 'Average', 'High'] },
-    { text: 'How do you rate the comfort while driving?', options: ['Low', 'Average', 'High'] },
-    { text: 'How do you rate the performance in wet conditions?', options: ['Low', 'Average', 'High'] },
-    { text: 'How do you rate the performance in dry conditions?', options: ['Low', 'Average', 'High'] },
-    { text: 'How do you rate the value for money?', options: ['Low', 'Average', 'High'] },
-    { text: 'How satisfied are you overall with Toyo Tires?', options: ['Low', 'Average', 'High'] }
+// Rewards
+const rewardTypes = [
+    { label: 'Point', value: 'point' },
+    { label: 'Reward Pin', value: 'pin' }
+];
+
+const gamificationOnOff = [
+    { label: 'ON', value: 1 },
+    { label: 'OFF', value: 0 }
+];
+
+const rewards = ref([
+    {
+        name: 'RM50 Voucher',
+        quantity: 10,
+        type: 'point',
+        points: { silver: 100, gold: 200, platinum: 300 },
+        expiry: null
+    }
 ]);
 
-const addQuestion = () => {
-    if (questions.value.length < 10) {
-        questions.value.push({
-            text: '',
-            options: ['Low', 'Average', 'High']
-        });
-    }
-};
+const addReward = () =>
+    rewards.value.push({
+        name: '',
+        quantity: 0,
+        type: '',
+        points: { silver: 0, gold: 0, platinum: 0 },
+        expiry: null
+    });
+const removeReward = (index) => rewards.value.splice(index, 1);
 
-const removeQuestion = (index) => {
-    questions.value.splice(index, 1);
-};
-
-const onImageSelect = (eventFile, field) => {
-    const file = eventFile.files[0];
-    if (file) {
-        const reader = new FileReader();
-        reader.onload = (e) => {
-            event.value[field] = e.target.result;
-        };
-        reader.readAsDataURL(file);
-    }
-};
-
-const removeImage = (property) => {
-    event.value[property] = null; // or '' if preferred
-};
+// Criteria
+const criteriaTypes = [
+    { label: 'Tyre', value: 'tyre' },
+    { label: 'Rim', value: 'rim' }
+];
+const criterias = ref([{ title: 'Buy Tyre A', type: 'tyre', pattern: 'AT202', size: '195/55R15', minQty: 2 }]);
+const addCriteria = () => criterias.value.push({ title: '', type: '', pattern: '', size: '', minQty: 1 });
+const removeCriteria = (index) => criterias.value.splice(index, 1);
 </script>
