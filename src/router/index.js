@@ -254,11 +254,11 @@ const router = createRouter({
                     name: 'List-Redemption',
                     component: () => import('@/views/marketing/listRedemption.vue')
                 },
-                // {
-                //     path: '/marketing/detailRedemption',
-                //     name: 'Detail-Redemption',
-                //     component: () => import('@/views/marketing/detailRedemption.vue')
-                // },
+                {
+                    path: '/marketing/detailRedemption',
+                    name: 'Detail-Redemption',
+                    component: () => import('@/views/marketing/detailRedemption.vue')
+                },
             ]
         },
         {

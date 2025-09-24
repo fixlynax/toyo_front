@@ -95,7 +95,7 @@ onBeforeMount(async () => {
             <!-- Columns -->
             <Column field="refNo" header="Ref No" style="min-width: 8rem">
                 <template #body="{ data }">
-                    <RouterLink to="/marketing/detailNews" class="hover:underline font-bold">
+                    <RouterLink to="/marketing/detailRedemption" class="hover:underline font-bold">
                         {{ data.refno }}
                     </RouterLink>
                 </template>
