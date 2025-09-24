@@ -6,7 +6,7 @@
             <!-- ======================== -->
             <div class="card flex flex-col gap-6 w-full">
                 <!-- Header -->
-                <div class="text-2xl font-bold text-gray-800 border-b pb-2">Edit Catalogue</div>
+                <div class="text-2xl font-bold text-gray-800 border-b pb-2">Create Catalogue</div>
 
                 <!-- catalogue Form -->
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -62,6 +62,10 @@
                             <label class="block font-medium text-gray-700 mb-1">Is Birthday?</label>
                             <Dropdown v-model="catalogue.isBirthday" :options="isBirthdayOptions" optionLabel="label" optionValue="value" placeholder="Select an option" class="w-full" />
                         </div>
+                        <div v-if="catalogue.type === 'Item'">
+                            <label class="block font-medium text-gray-700 mb-1">Quantity</label>
+                            <InputNumber v-model="catalogue.valueAmount" class="w-full" />
+                        </div>
                     </div>
                 </div>
 
@@ -70,23 +74,10 @@
                     <label class="block font-medium text-gray-700 mb-2">Catalogue Images</label>
                     <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
                         <div class="relative">
-                            <FileUpload 
-                                mode="basic" 
-                                name="image1" 
-                                accept="image/*" 
-                                customUpload 
-                                @select="onImageSelect($event, 'image1URL')" 
-                                chooseLabel="Change Image 1" 
-                                class="w-full" 
-                            />
+                            <FileUpload mode="basic" name="image1" accept="image/*" customUpload @select="onImageSelect($event, 'image1URL')" chooseLabel="Change Image 1" class="w-full" />
                             <div v-if="catalogue.image1URL" class="relative mt-2">
                                 <img :src="catalogue.image1URL" alt="Preview 1" class="rounded-lg shadow-md object-cover w-full h-80" />
-                                <button 
-                                    @click="removeImage('image1URL')" 
-                                    class="absolute top-2 right-2 bg-red-500 text-white px-2 py-1 rounded-full hover:bg-red-600" 
-                                    title="Remove Image">
-                                    &times;
-                                </button>
+                                <button @click="removeImage('image1URL')" class="absolute top-2 right-2 bg-red-500 text-white px-2 py-1 rounded-full hover:bg-red-600" title="Remove Image">&times;</button>
                             </div>
                         </div>
                     </div>
@@ -152,14 +143,7 @@
                     <div class="text-2xl font-bold text-gray-800">🎟️ E-Voucher Management</div>
                 </div>
 
-                <DataTable 
-                    :value="catalogue.vouchers" 
-                    :paginator="true" 
-                    :rows="10" 
-                    dataKey="id" 
-                    :rowHover="true" 
-                    :loading="loading"
-                >
+                <DataTable :value="catalogue.vouchers" :paginator="true" :rows="10" dataKey="id" :rowHover="true" :loading="loading">
                     <template #header>
                         <div class="flex flex-col md:flex-row items-center justify-between gap-4 w-full">
                             <div class="flex gap-4 w-full md:w-auto">
@@ -281,36 +265,36 @@
 </template>
 
 <script setup>
-import { ref } from 'vue'
+import { ref } from 'vue';
 
 /* Dropdown Options */
 const typeOptions = [
     { label: 'E-Wallet', value: 'E-Wallet' },
     { label: 'E-Voucher', value: 'E-Voucher' },
     { label: 'Item', value: 'Item' }
-]
+];
 
 const isBirthdayOptions = [
     { label: 'Yes', value: 1 },
     { label: 'No', value: 0 }
-]
+];
 
 const purposeOptions = [
     { label: 'Catalogue', value: 'Catalogue' },
     { label: 'Campaign', value: 'Campaign' },
     { label: 'Game', value: 'Game' }
-]
+];
 
 const birthdayRewardTypeOptions = [
     { label: 'Points', value: 'Points' },
     { label: 'Reward', value: 'Reward' }
-]
+];
 
 const rewardItems = [
     { id: 1, title: 'Touch ’n Go Reload RM20' },
     { id: 2, title: 'Starbucks Voucher RM10' },
     { id: 3, title: 'Grab Food Credit RM15' }
-]
+];
 
 /* Catalogue State */
 const catalogue = ref({
@@ -353,31 +337,31 @@ const catalogue = ref({
     point1: 0,
     point2: 0,
     point3: 0
-})
+});
 
-const loading = ref(false)
+const loading = ref(false);
 
 /* Image Handlers */
 const onImageSelect = (event, property) => {
-    const file = event.files[0]
-    const reader = new FileReader()
+    const file = event.files[0];
+    const reader = new FileReader();
     reader.onload = (e) => {
-        catalogue.value[property] = e.target.result
-    }
-    reader.readAsDataURL(file)
-}
+        catalogue.value[property] = e.target.result;
+    };
+    reader.readAsDataURL(file);
+};
 
 const removeImage = (property) => {
-    catalogue.value[property] = null
-}
+    catalogue.value[property] = null;
+};
 
 /* E-Wallet Actions */
 const downloadPins = () => {
-    console.log('Downloading PINs for', catalogue.value.title)
-}
+    console.log('Downloading PINs for', catalogue.value.title);
+};
 
 const importPins = () => {
-    console.log('Importing PINs for', catalogue.value.title)
+    console.log('Importing PINs for', catalogue.value.title);
     // Example mock PIN
     catalogue.value.pins.push({
         id: catalogue.value.pins.length + 1,
@@ -385,17 +369,17 @@ const importPins = () => {
         expiry: '2025-12-31',
         used: null,
         status: false
-    })
-    catalogue.value.totalqty = catalogue.value.pins.length
-}
+    });
+    catalogue.value.totalqty = catalogue.value.pins.length;
+};
 
 /* E-Voucher Actions */
 const downloadVouchers = () => {
-    console.log('Downloading vouchers for', catalogue.value.title)
-}
+    console.log('Downloading vouchers for', catalogue.value.title);
+};
 
 const importVouchers = () => {
-    console.log('Importing vouchers for', catalogue.value.title)
+    console.log('Importing vouchers for', catalogue.value.title);
     // Example mock voucher
     catalogue.value.vouchers.push({
         id: catalogue.value.vouchers.length + 1,
@@ -403,7 +387,7 @@ const importVouchers = () => {
         expiry: '2025-12-31',
         usedDate: null,
         status: 'Available'
-    })
-    catalogue.value.totalVouchers = catalogue.value.vouchers.length
-}
+    });
+    catalogue.value.totalVouchers = catalogue.value.vouchers.length;
+};
 </script>

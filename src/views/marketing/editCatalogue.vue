@@ -109,7 +109,8 @@
                 <div class="flex items-center justify-between border-b pb-2 mb-2">
                     <div class="text-2xl font-bold text-gray-800">🔑 List PIN</div>
                 </div>
-                <DataTable :value="catalogue.pins" :paginator="true" :rows="10" dataKey="id" :rowHover="true" :loading="loading">
+
+                <DataTable :value="encodedPins" :paginator="true" :rows="10" dataKey="id" :rowHover="true" :loading="loading.value">
                     <template #header>
                         <div class="flex flex-col md:flex-row items-center justify-between gap-4 w-full">
                             <div class="flex gap-4 w-full md:w-auto">
@@ -136,15 +137,15 @@
                         <template #body="{ data }">{{ data.pin }}</template>
                     </Column>
                     <Column header="Expiry" style="min-width: 8rem">
-                        <template #body="{ data }">{{ data.expiry }}</template>
+                        <template #body="{ data }">{{ data.pinExpiryDate }}</template>
                     </Column>
                     <Column header="Date Used" style="min-width: 8rem">
-                        <template #body="{ data }">{{ data.used  ? data.used : '-' }}</template>
+                        <template #body="{ data }">{{ data.pinUsedDate || '-' }}</template>
                     </Column>
                     <Column header="Status" style="min-width: 8rem">
                         <template #body="{ data }">
-                            <span :class="data.status ? 'text-red-600 font-medium' : 'text-green-600 font-medium'">
-                                {{ data.status ? 'Used' : 'Available' }}
+                            <span :class="data.pinUsedStatus ? 'text-red-600 font-medium' : 'text-green-600 font-medium'">
+                                {{ data.pinUsedStatus ? 'Used' : 'Available' }}
                             </span>
                         </template>
                     </Column>
@@ -161,7 +162,7 @@
                     <div class="text-2xl font-bold text-gray-800">🎟️ E-Voucher Management</div>
                 </div>
 
-                <DataTable :value="catalogue.vouchers" :paginator="true" :rows="10" dataKey="id" :rowHover="true" :loading="loading">
+                <DataTable :value="catalogue.vouchers" :paginator="true" :rows="10" dataKey="id" :rowHover="true" :loading="loading.value">
                     <template #header>
                         <div class="flex flex-col md:flex-row items-center justify-between gap-4 w-full">
                             <div class="flex gap-4 w-full md:w-auto">
@@ -192,7 +193,7 @@
                         <template #body="{ data }"> {{ data.expiry }}</template>
                     </Column>
                     <Column header="Date Used" style="min-width: 8rem">
-                        <template #body="{ data }"> {{ data.usedDate || '-' }}</template>
+                        <template #body="{ data }"> {{ data.used || '-' }}</template>
                     </Column>
                     <Column header="Status" style="min-width: 8rem">
                         <template #body="{ data }">
@@ -285,7 +286,7 @@
 </template>
 
 <script setup>
-import { ref } from 'vue';
+import { ref, computed, onMounted } from 'vue';
 
 const typeOptions = [
     { label: 'E-Wallet', value: 'E-Wallet' },
@@ -320,9 +321,13 @@ const rewardItems = [
     { id: 3, title: 'Grab Food Credit RM15' }
 ];
 
+/**
+ * Catalogue Data
+ * PINs are stored decoded (plain text) in `catalogue.value.pins`
+ */
 const catalogue = ref({
     id: 1,
-    type: 'E-Voucher',
+    type: 'E-Wallet',
     image1URL: 'https://assets.bharian.com.my/images/articles/tng13jan_BHfield_image_socialmedia.var_1610544082.jpg',
     title: 'Touch ’n Go Reload RM20',
     sku: 'TNG20',
@@ -337,15 +342,12 @@ const catalogue = ref({
     purpose: 'Catalogue',
     status: 1,
     expiry: '2025-06-15',
-    usedPins: 1,
-    totalqty: 3,
+    usedPins: 2,
+    totalqty: 5,
     isBirthday: 1,
 
-    pins: [
-        { id: 1, pin: 'TNGPIN2025001', expiry: '2025-12-31', used: '2025-06-15', status: 0 },
-        { id: 2, pin: 'TNGPIN2025002', expiry: '2025-12-31', used: '', status: 0 },
-        { id: 3, pin: 'TNGPIN2025003', expiry: '2025-12-31', used: '2025-06-20', status: 1 }
-    ],
+    // PINs will be stored in plain text
+    pins: [],
 
     birthdayReward: {
         type: 'Points',
@@ -357,30 +359,82 @@ const catalogue = ref({
         itemId: null
     },
 
-    // NEW: E-Voucher properties
-    voucherCode: '',
-    voucherQty: 0,
-    voucherNotes: ''
+    vouchers: [],
+    usedVouchers: 0,
+    totalVouchers: 0
 });
 
-const onImageSelect = (event, property) => {
-    const file = event.files[0];
-    const reader = new FileReader();
-    reader.onload = (e) => {
-        catalogue.value[property] = e.target.result;
-    };
-    reader.readAsDataURL(file);
+const loading = ref(false);
+
+/**
+ * Utility: Encode text to Base64 and remove trailing '='
+ */
+const encodeBase64NoPadding = (text) => {
+    return btoa(text).replace(/=+$/, '');
 };
 
-const removeImage = (property) => {
-    catalogue.value[property] = null;
+/**
+ * Utility: Decode Base64 string safely by adding back '=' padding
+ */
+const decodeBase64WithPadding = (encoded) => {
+    const pad = encoded.length % 4;
+    if (pad) {
+        encoded += '='.repeat(4 - pad);
+    }
+    return atob(encoded);
 };
 
+/**
+ * Computed property:
+ * Show encoded PINs in UI while keeping storage plain text
+ */
+const encodedPins = computed(() => {
+    return catalogue.value.pins.map((pin) => ({
+        ...pin,
+        pin: encodeBase64NoPadding(pin.pin) // Encode only for display
+    }));
+});
+
+/**
+ * Load sample PINs into storage as plain text
+ */
+const loadPins = () => {
+    const decodedRawPins = [
+        { id: 1, pin: '1234-5678-9011', pinExpiryDate: '2025-12-31', pinUsedDate: '2025-12-31', pinUsedStatus: true },
+        { id: 2, pin: '9876-5432-1098', pinExpiryDate: '2025-11-30', pinUsedDate: '2025-05-22', pinUsedStatus: false },
+        { id: 3, pin: '5555-2222-3333', pinExpiryDate: '2025-10-31', pinUsedDate: null, pinUsedStatus: false },
+        { id: 4, pin: '3757-5432-5669', pinExpiryDate: '2025-11-30', pinUsedDate: '2025-12-31', pinUsedStatus: true },
+        { id: 5, pin: '4444-6666-7777', pinExpiryDate: '2025-11-30', pinUsedDate: null, pinUsedStatus: false }
+    ];
+
+    // Store plain text pins
+    catalogue.value.pins = decodedRawPins;
+};
+
+/**
+ * Download pins as plain JSON (decoded)
+ */
 const downloadPins = () => {
-    console.log('Downloading PINs for', catalogue.value.title);
+    const dataStr = JSON.stringify(catalogue.value.pins, null, 2); // plain text
+    const blob = new Blob([dataStr], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'pins.json';
+    a.click();
+    URL.revokeObjectURL(url);
 };
 
+/**
+ * Import pins (JSON format)
+ */
 const importPins = () => {
-    console.log('Importing PINs for', catalogue.value.title);
+    alert('Import PIN logic goes here.');
 };
+
+onMounted(() => {
+    loadPins();
+});
 </script>
+
