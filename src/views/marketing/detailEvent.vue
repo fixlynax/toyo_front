@@ -172,7 +172,6 @@
 
 <script setup>
 import { ref } from 'vue';
-import SurveyStatistic from '@/components/dashboard/SurveyStatistic.vue';
 
 const event = ref({
     id: 1,
