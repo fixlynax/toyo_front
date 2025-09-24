@@ -107,17 +107,17 @@ onBeforeMount(async () => {
             </Column>
             <Column field="itemName" header="Item Name" style="min-width: 6rem">
                 <template #body="{ data }">
-                    {{ data.audience }}
+                    {{ data.itemName }}
                 </template>
             </Column>
             <Column field="quantity" header="Quantity" style="min-width: 6rem">
                 <template #body="{ data }">
-                    {{ data.view }}
+                    {{ data.quantity }}
                 </template>
             </Column>
             <Column field="RedemptionDate" header="Redemption Date" style="min-width: 6rem">
                 <template #body="{ data }">
-                    {{ data.view }}
+                    {{ data.redemptionDate }}
                 </template>
             </Column>
             <Column header="Status" style="min-width: 6rem">
