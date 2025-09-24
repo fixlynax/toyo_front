@@ -220,16 +220,16 @@ const router = createRouter({
                     name: 'Detail-Campaign',
                     component: () => import('@/views/marketing/detailCampaign.vue')
                 },
-                // {
-                //     path: '/marketing/createCampaign',
-                //     name: 'Create-Campaign',
-                //     component: () => import('@/views/marketing/createCampaign.vue')
-                // },
-                // {
-                //     path: '/marketing/editCampaign',
-                //     name: 'Edit-Campaign',
-                //     component: () => import('@/views/marketing/editCampaign.vue')
-                // },
+                {
+                    path: '/marketing/createCampaign',
+                    name: 'Create-Campaign',
+                    component: () => import('@/views/marketing/createCampaign.vue')
+                },
+                {
+                    path: '/marketing/editCampaign',
+                    name: 'Edit-Campaign',
+                    component: () => import('@/views/marketing/editCampaign.vue')
+                },
 
                 // Member List
                 {
@@ -247,6 +247,18 @@ const router = createRouter({
                     name: 'Edit-Member',
                     component: () => import('@/views/marketing/editEtenUser.vue')
                 },
+
+                // Redemption Management
+                // {
+                //     path: '/marketing/listRedemption',
+                //     name: 'List-Redemption',
+                //     component: () => import('@/views/marketing/listRedemption.vue')
+                // },
+                // {
+                //     path: '/marketing/detailRedemption',
+                //     name: 'Detail-Redemption',
+                //     component: () => import('@/views/marketing/detailRedemption.vue')
+                // },
             ]
         },
         {
