@@ -16,9 +16,9 @@ const getOverallStatusLabel = (status) => {
 
 // Map status → severity
 const getOverallStatusSeverity = (status) => {
-    if (status === '0') return 'info';
+    if (status === '0') return 'warn';
     if (status === '1') return 'success';
-    if (status === '2') return 'warn';
+    if (status === '2') return 'danger';
     if (status === 'Shipped') return 'success';
     return 'secondary';
 };
