@@ -139,10 +139,14 @@
                         <template #body="{ data }">{{ data.expiry }}</template>
                     </Column>
                     <Column header="Date Used" style="min-width: 8rem">
-                        <template #body="{ data }">{{ data.used }}</template>
+                        <template #body="{ data }">{{ data.used  ? data.used : '-' }}</template>
                     </Column>
                     <Column header="Status" style="min-width: 8rem">
-                        <template #body="{ data }">{{ data.status ? 'Used' : '' }}</template>
+                        <template #body="{ data }">
+                            <span :class="data.status ? 'text-red-600 font-medium' : 'text-green-600 font-medium'">
+                                {{ data.status ? 'Used' : 'Available' }}
+                            </span>
+                        </template>
                     </Column>
                 </DataTable>
             </div>
@@ -157,14 +161,7 @@
                     <div class="text-2xl font-bold text-gray-800">🎟️ E-Voucher Management</div>
                 </div>
 
-                <DataTable 
-                    :value="catalogue.vouchers" 
-                    :paginator="true" 
-                    :rows="10" 
-                    dataKey="id" 
-                    :rowHover="true" 
-                    :loading="loading"
-                >
+                <DataTable :value="catalogue.vouchers" :paginator="true" :rows="10" dataKey="id" :rowHover="true" :loading="loading">
                     <template #header>
                         <div class="flex flex-col md:flex-row items-center justify-between gap-4 w-full">
                             <div class="flex gap-4 w-full md:w-auto">
