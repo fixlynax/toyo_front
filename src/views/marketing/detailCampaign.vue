@@ -9,7 +9,7 @@
                         <div class="text-2xl font-bold text-gray-800">Campaign Details</div>
                         <div class="inline-flex items-center gap-2">
                             <!-- Edit Event -->
-                            <RouterLink to="/marketing/editEvent">
+                            <RouterLink to="/marketing/editCampaign">
                                 <Button label="Edit" class="p-button-info" size="small" />
                             </RouterLink>
 
@@ -20,62 +20,99 @@
 
                     <!-- Event Images -->
                     <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mt-4">
-                        <img :src="event.image1URL" alt="Event Image 1" class="rounded-xl shadow-sm object-cover w-full h-80" />
-                        <img :src="event.image2URL" alt="Event Image 2" class="rounded-xl shadow-sm object-cover w-full h-80" />
-                        <img :src="event.image3URL" alt="Event Image 3" class="rounded-xl shadow-sm object-cover w-full h-80" />
+                        <img :src="campaign.image1Path" alt="Event Image 1" class="rounded-xl shadow-sm object-cover w-full h-80" />
+                        <img :src="campaign.image2Path" alt="Event Image 2" class="rounded-xl shadow-sm object-cover w-full h-80" />
+                        <img :src="campaign.image3Path" alt="Event Image 3" class="rounded-xl shadow-sm object-cover w-full h-80" />
                     </div>
 
                     <!-- Event Info -->
                     <div class="mt-6">
-                        <h1 class="text-2xl font-bold text-gray-800">{{ event.title }}</h1>
-                        <p class="text-lg font-medium">{{ event.desc }}</p>
+                        <h1 class="text-2xl font-bold text-gray-800">{{ campaign.title }}</h1>
+                        <p class="text-lg font-medium">{{ campaign.description }}</p>
 
                         <div class="flex flex-col md:flex-row gap-4 mt-3">
                             <div class="w-full">
-                                <span class="block text-sm text-gray-500">Location</span>
-                                <p class="text-lg font-medium">{{ event.location }}</p>
+                                <span class="block text-sm text-gray-500">Term Condition</span>
+                                <p class="text-lg font-medium">{{ campaign.termCondition }}</p>
                             </div>
                         </div>
 
                         <div class="flex flex-col md:flex-row gap-4 mt-3">
                             <div class="w-full">
                                 <span class="block text-sm text-gray-500">Start Date</span>
-                                <p class="text-lg font-medium">{{ event.startDate }}</p>
+                                <p class="text-lg font-medium">{{ campaign.startDate }}</p>
                             </div>
                             <div class="w-full">
                                 <span class="block text-sm text-gray-500">End Date</span>
-                                <p class="text-lg font-medium">{{ event.endDate }}</p>
+                                <p class="text-lg font-medium">{{ campaign.endDate }}</p>
                             </div>
                         </div>
                     </div>
                 </div>
 
-                <!-- Survey Info (only if enabled) -->
-                <div class="card flex flex-col w-full" v-if="event.isSurvey === 1">
-                    <div class="flex items-center justify-between border-b pb-2 mb-2">
-                        <div class="text-2xl font-bold text-gray-800">📋 Survey Info</div>
+                <div class="card flex flex-col w-full">
+                    <!-- Header -->
+                    <div class="flex items-center justify-between border-b pb-2 mb-4">
+                        <div class="text-2xl font-bold text-gray-800">🎁 Reward Options</div>
                     </div>
 
-                    <
-                    <div class="space-y-6">
-                        <!-- Loop through each question -->
-                        <div v-for="(q, qIndex) in questions" :key="qIndex" class="border-b pb-4">
-                            <!-- Question Title and "Statistic" on the same line -->
-                            <div class="flex justify-between items-center mb-2">
-                                <div class="font-bold text-lg">Q{{ qIndex + 1 }}. {{ q.text }}</div>
-                                <div class="font-bold text-lg text-gray-700">Respondent</div>
+                    <div class="space-y-8">
+                        <!-- Each Reward -->
+                        <div v-for="(reward, rIndex) in rewards" :key="rIndex" class="pb-6 border-b last:border-0">
+                            <!-- Top Row -->
+                            <div class="flex justify-between items-center mb-4">
+                                <div class="text-2xl font-bold text-gray-800">{{ reward.name }}</div>
+                                <Button icon="pi pi-trash" class="p-button-text p-button-danger" @click="removeReward(rIndex)" />
                             </div>
 
-                            <!-- Answers & Statistics -->
-                            <div class="space-y-1">
-                                <div v-for="(ans, aIndex) in q.options" :key="aIndex" class="flex justify-between px-2">
-                                    <!-- Left Side: Answer -->
-                                    <ul class="list-disc list-inside mt-1 text-gray-600">
-                                        <li>{{ ans }}</li>
-                                    </ul>
+                            <!-- Reward Image + Details -->
+                            <div class="flex flex-col md:flex-row gap-6 items-start">
+                                <!-- Image -->
+                                <img :src="reward.image" alt="Reward Image" class="rounded-xl shadow-sm object-cover w-full md:w-1/3 max-h-48" />
 
-                                    <!-- Right Side: Statistic -->
-                                    <span class="">{{ q.statistics[aIndex] }}</span>
+                                <!-- Info -->
+                                <div class="flex-1 space-y-3">
+                                    <!-- Type & Quantity -->
+                                    <div class="flex justify-between items-center">
+                                        <span class="text-gray-600 text-lg">Type</span>
+                                        <span class="font-semibold text-lg">{{ reward.type }}</span>
+                                    </div>
+                                    <div class="flex justify-between items-center">
+                                        <span class="text-gray-600 text-lg">Quantity</span>
+                                        <span class="font-semibold text-lg">{{ reward.balQty }}/{{ reward.totalQty }}</span>
+                                    </div>
+
+                                    <!-- Reward Pin -->
+                                    <template v-if="reward.type === 'Reward Pin'">
+                                        <div class="pt-4">
+                                            <div class="text-xl font-bold text-gray-800 mb-2">Reward Pin Details</div>
+                                            <div class="flex justify-between items-center">
+                                                <span class="text-gray-600 text-lg">Expiry</span>
+                                                <span class="font-semibold text-lg">{{ reward.expiry }}</span>
+                                            </div>
+                                        </div>
+                                    </template>
+
+                                    <!-- Points -->
+                                    <template v-else-if="reward.type === 'Point'">
+                                        <div class="pt-4">
+                                            <div class="text-xl font-bold text-gray-800 mb-3">Tier Points</div>
+                                            <div class="grid grid-cols-3 text-center gap-4">
+                                                <div>
+                                                    <div class="text-gray-500">Silver</div>
+                                                    <div class="font-semibold">{{ reward.tierPoints.silver }}</div>
+                                                </div>
+                                                <div>
+                                                    <div class="text-gray-500">Gold</div>
+                                                    <div class="font-semibold">{{ reward.tierPoints.gold }}</div>
+                                                </div>
+                                                <div>
+                                                    <div class="text-gray-500">Platinum</div>
+                                                    <div class="font-semibold">{{ reward.tierPoints.platinum }}</div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </template>
                                 </div>
                             </div>
                         </div>
@@ -89,222 +126,248 @@
                 <div class="card flex flex-col w-full">
                     <div class="flex items-center justify-between border-b pb-2 mb-2">
                         <div class="text-2xl font-bold text-gray-800">ℹ️ Advance Info</div>
-                        <Tag :value="event.status === 1 ? 'Active' : 'Inactive'" :severity="event.status === 1 ? 'success' : 'danger'" />
+                        <Tag :value="campaign.status === 1 ? 'Active' : 'Inactive'" :severity="campaign.status === 1 ? 'success' : 'danger'" />
                     </div>
 
                     <div class="overflow-x-auto">
                         <table class="w-full text-sm text-left text-gray-700">
                             <tbody>
                                 <tr class="border-b">
-                                    <td class="px-4 py-2 font-medium">Published</td>
-                                    <td class="px-4 py-2 text-right">{{ event.publishDate }}</td>
+                                    <td class="px-4 py-2 font-medium">Campaign No</td>
+                                    <td class="px-4 py-2 text-right font-bold">{{ campaign.campaignNo }}</td>
                                 </tr>
                                 <tr class="border-b">
-                                    <td class="px-4 py-2 font-medium">Audience</td>
-                                    <td class="px-4 py-2 text-right">{{ event.audience }}</td>
+                                    <td class="px-4 py-2 font-medium">Gamification</td>
+                                    <td class="px-4 py-2 text-right font-bold" :class="campaign.isGamification ? 'text-green-500' : 'text-red-500'">
+                                        {{ campaign.isGamification ? 'ON' : 'OFF' }}
+                                    </td>
                                 </tr>
                                 <tr class="border-b">
-                                    <td class="px-4 py-2 font-medium">Survey</td>
-                                    <td class="px-4 py-2 text-right">{{ event.isSurvey ? 'Yes' : 'No' }}</td>
+                                    <td class="px-4 py-2 font-medium">Max Per User</td>
+                                    <td class="px-4 py-2 text-right">{{ campaign.maxPerUser }}</td>
                                 </tr>
-                                <tr v-if="event.isSurvey === 1" class="border-b">
-                                    <td class="px-4 py-2 font-medium">Point Classic</td>
-                                    <td class="px-4 py-2 text-right">{{ event.point1 }}</td>
-                                </tr>
-                                <tr v-if="event.isSurvey === 1" class="border-b">
+                                <tr class="border-b">
                                     <td class="px-4 py-2 font-medium">Point Silver</td>
-                                    <td class="px-4 py-2 text-right">{{ event.point2 }}</td>
-                                </tr>
-                                <tr v-if="event.isSurvey === 1" class="border-b">
-                                    <td class="px-4 py-2 font-medium">Point Gold</td>
-                                    <td class="px-4 py-2 text-right">{{ event.point3 }}</td>
-                                </tr>
-                                <tr v-if="event.isSurvey === 1" class="border-b">
-                                    <td class="px-4 py-2 font-medium">Point Platinum</td>
-                                    <td class="px-4 py-2 text-right">{{ event.point4 }}</td>
+                                    <td class="px-4 py-2 text-right">{{ campaign.Point1 }}</td>
                                 </tr>
                                 <tr class="border-b">
-                                    <td class="px-4 py-2 font-medium">Total Participants</td>
-                                    <td class="px-4 py-2 text-right">{{ event.view }}</td>
+                                    <td class="px-4 py-2 font-medium">Point Gold</td>
+                                    <td class="px-4 py-2 text-right">{{ campaign.Point2 }}</td>
+                                </tr>
+                                <tr class="border-b">
+                                    <td class="px-4 py-2 font-medium">Point Platinum</td>
+                                    <td class="px-4 py-2 text-right">{{ campaign.Point3 }}</td>
+                                </tr>
+                                <tr class="border-b">
+                                    <td class="px-4 py-2 font-medium">Quota</td>
+                                    <td class="px-4 py-2 text-right">{{ campaign.quota }}</td>
+                                </tr>
+                                <tr class="border-b">
+                                    <td class="px-4 py-2 font-medium">Published</td>
+                                    <td class="px-4 py-2 text-right">{{ campaign.publishDate }}</td>
                                 </tr>
                             </tbody>
                         </table>
                     </div>
                 </div>
 
-                <!-- Participant List (only if survey enabled) -->
-                <div class="card flex flex-col w-full" v-if="event.isSurvey === 1">
-                    <div class="text-2xl font-bold text-gray-800 border-b pb-3 mb-4">👨🏻‍💻 Participant List</div>
-                    <DataTable :value="participants" :paginator="true" :rows="10" dataKey="id" :rowHover="true" responsiveLayout="scroll" class="text-sm">
-                        <Column header="User" style="min-width: 1rem">
+                <div class="card flex flex-col w-full">
+                    <div class="flex items-center justify-between border-b pb-2 mb-2">
+                        <div class="text-2xl font-bold text-gray-800">🚩 Criteria</div>
+                    </div>
+
+                    <DataTable :value="criteria" :paginator="true" :rows="7" dataKey="id" :rowHover="true" responsiveLayout="scroll" class="text-sm">
+                        <!-- Title + Type in one column -->
+                        <Column header="Title" style="min-width: 8rem">
                             <template #body="{ data }">
                                 <div class="flex flex-col">
-                                    <span class="font-bold text-gray-800">{{ data.fullName }}</span>
-                                    <span class="text-gray-600 text-xs mt-2">🎖️ {{ data.memberLevel }}</span>
+                                    <span class="font-bold text-gray-800">{{ data.title }}</span>
+                                    <span class="text-gray-600 text-xm mt-2">🔧 {{ data.type }}</span>
                                 </div>
                             </template>
                         </Column>
 
-                        <Column field="date" header="Date Taken" style="min-width: 6rem"></Column>
-                        <Column field="point" header="Point Earned" style="min-width: 6rem; text-align: center"></Column>
+                        <!-- Min Qty -->
+                        <Column header="Min Qty" style="min-width: 6rem">
+                            <template #body="{ data }">
+                                <div class="flex flex-col">
+                                    <span class="text-gray-800">{{ data.minQty }} pcs</span>
+                                </div>
+                            </template>
+                        </Column>
+
+                        <!-- Pattern -->
+                        <Column field="pattern" header="Pattern" style="min-width: 6rem"></Column>
+
+                        <!-- Size -->
+                        <Column field="size" header="Size" style="min-width: 6rem"></Column>
                     </DataTable>
                 </div>
             </div>
         </div>
-
-        <!-- <div class="flex flex-col md:flex-row gap-8 mt-8">
-            <div class="w-full" v-if="event.isSurvey === 1">
-                <div class="card flex flex-col w-full">
-                    <div class="flex items-center justify-between border-b pb-2 mb-2">
-                        <div class="text-2xl font-bold text-gray-800">📊 Survey Statistic</div>
-                    </div>
-
-                    <div class="grid grid-cols-12">
-                        <div class="col-span-12 xl:col-span-12">
-                            <SurveyStatistic />
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div> -->
     </Fluid>
 </template>
 
 <script setup>
 import { ref } from 'vue';
-import SurveyStatistic from '@/components/dashboard/SurveyStatistic.vue';
 
-const event = ref({
+const campaign = ref({
     id: 1,
-    audience: 'TC',
-    isSurvey: 1, // change to 0 to test "no survey"
-    point1: 85,
-    point2: 90,
-    point3: 95,
-    point4: 100,
-    title: 'Toyo Tires Drift Challenge 2025',
-    image1URL: '/demo/images/event-toyo-1.jpg',
-    image2URL: '/demo/images/event-toyo-2.jpg',
-    image3URL: '/demo/images/event-toyo-3.jpg',
-    desc: 'Experience the thrill of high-speed drifting powered by Toyo Tires. Join us for a weekend of motorsport excitement!',
-    location: 'Sepang International Circuit, Malaysia',
-    publishDate: '2025-01-10',
-    startDate: '2025-02-15',
-    endDate: '2025-02-16',
-    view: 542,
-    status: 1
+    campaignNo: 'CTY001',
+    eten_userID_list: 'E010001,E010002,E010003',
+    isGamification: 1,
+    title: 'Toyo Tires Safety Awareness Campaign',
+    description: 'Promoting road safety and awareness with Toyo Tires during festive season.',
+    image1Path: '/demo/images/event-toyo-1.jpg',
+    image2Path: '/demo/images/event-toyo-2.jpg',
+    image3Path: '/demo/images/event-toyo-3.jpg',
+    termCondition: 'Valid for participants within Malaysia only. One entry per user.',
+    publishDate: '2025-01-05',
+    startDate: '2025-01-10',
+    endDate: '2025-02-10',
+    quota: 1000,
+    maxPerUser: 1,
+    Point1: 10,
+    point2: 20,
+    point3: 30,
+    status: 1,
+    created: '2025-01-05',
+    deleted: null,
+    totalSub: 650 // Current total submissions
 });
 
-const questions = ref([
-    {
-        text: 'How do you rate the durability of the tires?',
-        options: ['Low', 'Average', 'High'],
-        statistics: [10, 20, 2]
-    },
-    {
-        text: 'How do you rate the comfort while driving?',
-        options: ['Low', 'Average', 'High'],
-        statistics: [5, 15, 8]
-    },
-    {
-        text: 'How do you rate the performance in wet conditions?',
-        options: ['Low', 'Average', 'High'],
-        statistics: [7, 12, 6]
-    },
-    {
-        text: 'How do you rate the performance in dry conditions?',
-        options: ['Low', 'Average', 'High'],
-        statistics: [3, 17, 9]
-    },
-    {
-        text: 'How do you rate the value for money?',
-        options: ['Low', 'Average', 'High'],
-        statistics: [4, 14, 11]
-    },
-    {
-        text: 'How satisfied are you overall with Toyo Tires?',
-        options: ['Low', 'Average', 'High'],
-        statistics: [2, 18, 9]
-    }
-]);
-
-const participants = ref([
+const criteria = [
     {
         id: 1,
-        fullName: 'Ahmad Faiz',
-        memberLevel: 'Gold',
-        date: '2025-09-01',
-        point: 90
+        title: 'Pattern A Small',
+        type: 'Tire',
+        pattern: 'Pattern A',
+        size: '15 inch',
+        minQty: 2
     },
     {
         id: 2,
-        fullName: 'Nur Aisyah',
-        memberLevel: 'Silver',
-        date: '2025-09-02',
-        point: 85
+        title: 'Pattern A Medium',
+        type: 'Tire',
+        pattern: 'Pattern A',
+        size: '16 inch',
+        minQty: 4
     },
     {
         id: 3,
-        fullName: 'Hafiz Din',
-        memberLevel: 'Platinum',
-        date: '2025-09-02',
-        point: 95
+        title: 'Pattern B Small',
+        type: 'Tire',
+        pattern: 'Pattern B',
+        size: '15 inch',
+        minQty: 2
     },
     {
         id: 4,
-        fullName: 'Lim Wei Jian',
-        memberLevel: 'Gold',
-        date: '2025-09-03',
-        point: 90
+        title: 'Pattern B Large',
+        type: 'Tire',
+        pattern: 'Pattern B',
+        size: '18 inch',
+        minQty: 4
     },
     {
         id: 5,
-        fullName: 'Siti Mariam',
-        memberLevel: 'Silver',
-        date: '2025-09-03',
-        point: 85
+        title: 'Pattern C Economy',
+        type: 'Tire',
+        pattern: 'Pattern C',
+        size: '14 inch',
+        minQty: 2
     },
     {
         id: 6,
-        fullName: 'Arjun Kumar',
-        memberLevel: 'Gold',
-        date: '2025-09-04',
-        point: 90
+        title: 'Pattern C Premium',
+        type: 'Tire',
+        pattern: 'Pattern C',
+        size: '17 inch',
+        minQty: 4
     },
     {
         id: 7,
-        fullName: 'Tan Li Ying',
-        memberLevel: 'Platinum',
-        date: '2025-09-04',
-        point: 95
+        title: 'Pattern D Standard',
+        type: 'Tire',
+        pattern: 'Pattern D',
+        size: '16 inch',
+        minQty: 2
     },
     {
         id: 8,
-        fullName: 'Mohd Amir',
-        memberLevel: 'Silver',
-        date: '2025-09-05',
-        point: 85
+        title: 'Pattern D Wide',
+        type: 'Tire',
+        pattern: 'Pattern D',
+        size: '19 inch',
+        minQty: 4
     },
     {
         id: 9,
-        fullName: 'Farah Nadiah',
-        memberLevel: 'Gold',
-        date: '2025-09-05',
-        point: 90
+        title: 'Pattern E Compact',
+        type: 'Tire',
+        pattern: 'Pattern E',
+        size: '13 inch',
+        minQty: 2
     },
     {
         id: 10,
-        fullName: 'Jason Lee',
-        memberLevel: 'Platinum',
-        date: '2025-09-06',
-        point: 95
-    },
+        title: 'Pattern E Sport',
+        type: 'Tire',
+        pattern: 'Pattern E',
+        size: '20 inch',
+        minQty: 4
+    }
+];
+
+const rewardTypes = [
+    { label: 'Point', value: 'point' },
+    { label: 'Reload Pin', value: 'reload' }
+];
+
+const rewards = ref([
+    // Example Reward: Points
     {
-        id: 11,
-        fullName: 'Hazrul Izhar',
-        memberLevel: 'Classic',
-        date: '2025-09-06',
-        point: 95
+        type: 'Point',
+        name: '500 Bonus Points',
+        image: '/demo/images/bonus-point.png',
+        totalQty: 30,
+        balQty: 17,
+        tierPoints: {
+            silver: 100,
+            gold: 200,
+            platinum: 300
+        },
+        // Not applicable for Points
+        expiry: null
+    },
+
+    // Example Reward: Reward Pin
+    {
+        type: 'Reward Pin',
+        name: 'RM10 E-Wallet Voucher',
+        image: 'https://assets.bharian.com.my/images/articles/tng13jan_BHfield_image_socialmedia.var_1610544082.jpg',
+        totalQty: 20,
+        balQty: 12,
+        expiry: '2025-12-31',
+        tierPoints: {
+            silver: null,
+            gold: null,
+            platinum: null
+        }
     }
 ]);
+
+function addReward() {
+    rewards.value.push({
+        type: null,
+        name: '',
+        image: null,
+        qty: 1,
+        tierPoints: { silver: 0, gold: 0, platinum: 0 }
+    });
+}
+
+function removeReward(index) {
+    rewards.value.splice(index, 1);
+}
 </script>
