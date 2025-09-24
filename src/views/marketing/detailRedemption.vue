@@ -1,207 +1,111 @@
 <template>
     <Fluid>
         <div class="flex flex-col md:flex-row gap-8">
-            <!-- LEFT SIDE (2/3) -->
-            <div class="md:w-2/3 flex flex-col">
-                <!-- Detail Event -->
-                <div class="card flex flex-col w-full">
+            <!-- ======================= -->
+            <!-- LEFT SECTION: Redemption & Shipping -->
+            <!-- ======================= -->
+            <div class="md:w-2/3 flex flex-col gap-8">
+                <!-- Redemption Details -->
+                <div class="card flex flex-col gap-6 w-full">
+                    <!-- Header Section -->
                     <div class="flex items-center justify-between border-b pb-2">
-                        <div class="text-2xl font-bold text-gray-800">Campaign Details</div>
-                        <div class="inline-flex items-center gap-2">
-                            <!-- Edit Event -->
-                            <RouterLink to="/marketing/editCampaign">
-                                <Button label="Edit" class="p-button-info" size="small" />
-                            </RouterLink>
+                        <h2 class="text-2xl font-bold text-gray-800">Details Redemption</h2>
 
-                            <!-- Delete Event -->
-                            <Button label="Delete" class="p-button-danger" size="small" />
-                        </div>
+                        <!-- Action Buttons -->
                     </div>
-
-                    <!-- Event Images -->
-                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mt-4">
-                        <img :src="campaign.image1Path" alt="Event Image 1" class="rounded-xl shadow-sm object-cover w-full h-80" />
-                        <img :src="campaign.image2Path" alt="Event Image 2" class="rounded-xl shadow-sm object-cover w-full h-80" />
-                        <img :src="campaign.image3Path" alt="Event Image 3" class="rounded-xl shadow-sm object-cover w-full h-80" />
-                    </div>
-
-                    <!-- Event Info -->
-                    <div class="mt-6">
-                        <h1 class="text-2xl font-bold text-gray-800">{{ campaign.title }}</h1>
-                        <p class="text-lg font-medium">{{ campaign.description }}</p>
-
-                        <div class="flex flex-col md:flex-row gap-4 mt-3">
-                            <div class="w-full">
-                                <span class="block text-sm text-gray-500">Term Condition</span>
-                                <p class="text-lg font-medium">{{ campaign.termCondition }}</p>
-                            </div>
+                    <!-- Recipient Info -->
+                    <div class="mt-2 grid grid-cols-2 gap-4 text-sm">
+                        <div>
+                            <p class="text-xl font-bold text-black-700">Recipient</p>
+                            <p class="text-lg text-black-900">{{ redemption.recipientName }}</p>
                         </div>
-
-                        <div class="flex flex-col md:flex-row gap-4 mt-3">
-                            <div class="w-full">
-                                <span class="block text-sm text-gray-500">Start Date</span>
-                                <p class="text-lg font-medium">{{ campaign.startDate }}</p>
-                            </div>
-                            <div class="w-full">
-                                <span class="block text-sm text-gray-500">End Date</span>
-                                <p class="text-lg font-medium">{{ campaign.endDate }}</p>
-                            </div>
+                        <div>
+                            <p class="text-xl font-bold text-black-700">Contact</p>
+                            <p class="text-lg text-black-500">{{ redemption.contactNumber }}</p>
                         </div>
                     </div>
                 </div>
 
-                <div class="card flex flex-col w-full">
-                    <!-- Header -->
-                    <div class="flex items-center justify-between border-b pb-2 mb-4">
-                        <div class="text-2xl font-bold text-gray-800">🎁 Reward Options</div>
+                <!-- Shipping Details (moved below Redemption) -->
+                <div class="card flex flex-col gap-6 w-full">
+                    <!-- Header Section -->
+                    <div class="flex items-center justify-between border-b pb-2">
+                        <h2 class="text-2xl font-bold text-gray-800">Shipping Details</h2>
+
+                        <!-- Action Buttons -->
+                        <div class="inline-flex items-center gap-2">
+                            <RouterLink to="/marketing/editredemption">
+                                <Button label="Edit Shipping" class="p-button-info" size="small" />
+                            </RouterLink>
+                        </div>
                     </div>
 
-                    <div class="space-y-8">
-                        <!-- Each Reward -->
-                        <div v-for="(reward, rIndex) in rewards" :key="rIndex" class="pb-6 border-b last:border-0">
-                            <!-- Top Row -->
-                            <div class="flex justify-between items-center mb-4">
-                                <div class="text-2xl font-bold text-gray-800">{{ reward.name }}</div>
-                                <Button icon="pi pi-trash" class="p-button-text p-button-danger" @click="removeReward(rIndex)" />
-                            </div>
-
-                            <!-- Reward Image + Details -->
-                            <div class="flex flex-col md:flex-row gap-6 items-start">
-                                <!-- Image -->
-                                <img :src="reward.image" alt="Reward Image" class="rounded-xl shadow-sm object-cover w-full md:w-1/3 max-h-48" />
-
-                                <!-- Info -->
-                                <div class="flex-1 space-y-3">
-                                    <!-- Type & Quantity -->
-                                    <div class="flex justify-between items-center">
-                                        <span class="text-gray-600 text-lg">Type</span>
-                                        <span class="font-semibold text-lg">{{ reward.type }}</span>
-                                    </div>
-                                    <div class="flex justify-between items-center">
-                                        <span class="text-gray-600 text-lg">Quantity</span>
-                                        <span class="font-semibold text-lg">{{ reward.balQty }}/{{ reward.totalQty }}</span>
-                                    </div>
-
-                                    <!-- Reward Pin -->
-                                    <template v-if="reward.type === 'Reward Pin'">
-                                        <div class="pt-4">
-                                            <div class="text-xl font-bold text-gray-800 mb-2">Reward Pin Details</div>
-                                            <div class="flex justify-between items-center">
-                                                <span class="text-gray-600 text-lg">Expiry</span>
-                                                <span class="font-semibold text-lg">{{ reward.expiry }}</span>
-                                            </div>
-                                        </div>
-                                    </template>
-
-                                    <!-- Points -->
-                                    <template v-else-if="reward.type === 'Point'">
-                                        <div class="pt-4">
-                                            <div class="text-xl font-bold text-gray-800 mb-3">Tier Points</div>
-                                            <div class="grid grid-cols-3 text-center gap-4">
-                                                <div>
-                                                    <div class="text-gray-500">Silver</div>
-                                                    <div class="font-semibold">{{ reward.tierPoints.silver }}</div>
-                                                </div>
-                                                <div>
-                                                    <div class="text-gray-500">Gold</div>
-                                                    <div class="font-semibold">{{ reward.tierPoints.gold }}</div>
-                                                </div>
-                                                <div>
-                                                    <div class="text-gray-500">Platinum</div>
-                                                    <div class="font-semibold">{{ reward.tierPoints.platinum }}</div>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </template>
-                                </div>
-                            </div>
+                    <!-- Recipient Info -->
+                    <div class="grid grid-cols-2 gap-4 text-sm">
+                        <div>
+                            <p class="text-xl font-bold text-gray-700">Recipient</p>
+                            <p class="text-lg text-black-900">{{ redemption.recipientName }}</p>
+                        </div>
+                        <div>
+                            <p class="text-xl font-bold text-gray-700">Contact</p>
+                            <p class="text-lg text-black-900">{{ redemption.contactNumber }}</p>
+                        </div>
+                        <div class="col-span-2">
+                            <p class="text-xl font-bold text-gray-700">Address</p>
+                            <p class="text-lg text-gray-900">{{ redemption.addLine1 }}, {{ redemption.addLine2 }}, {{ redemption.addCity }}, {{ redemption.addState }}, {{ redemption.addPostcode }}, {{ redemption.addCountry }}</p>
                         </div>
                     </div>
                 </div>
             </div>
 
-            <!-- RIGHT SIDE (1/3) -->
+            <!-- ======================= -->
+            <!-- RIGHT SECTION: Advance Info -->
+            <!-- ======================= -->
             <div class="md:w-1/3 flex flex-col">
-                <!-- Advance Info -->
                 <div class="card flex flex-col w-full">
+                    <!-- Header with Status Tag -->
                     <div class="flex items-center justify-between border-b pb-2 mb-2">
-                        <div class="text-2xl font-bold text-gray-800">ℹ️ Advance Info</div>
-                        <Tag :value="campaign.status === 1 ? 'Active' : 'Inactive'" :severity="campaign.status === 1 ? 'success' : 'danger'" />
+                        <h2 class="text-2xl font-bold text-gray-800">ℹ️ Advance Info</h2>
+                        <Tag :value="statusLabel(redemption.status)" :severity="statusSeverity(redemption.status)" />
                     </div>
 
+                    <!-- Info Table -->
                     <div class="overflow-x-auto">
                         <table class="w-full text-sm text-left text-gray-700">
                             <tbody>
                                 <tr class="border-b">
-                                    <td class="px-4 py-2 font-medium">Campaign No</td>
-                                    <td class="px-4 py-2 text-right font-bold">{{ campaign.campaignNo }}</td>
+                                    <td class="px-4 py-2 font-medium">Redeem Date</td>
+                                    <td class="px-4 py-2 text-right">{{ redemption.redemptionDate }}</td>
                                 </tr>
                                 <tr class="border-b">
-                                    <td class="px-4 py-2 font-medium">Gamification</td>
-                                    <td class="px-4 py-2 text-right font-bold" :class="campaign.isGamification ? 'text-green-500' : 'text-red-500'">
-                                        {{ campaign.isGamification ? 'ON' : 'OFF' }}
-                                    </td>
+                                    <td class="px-4 py-2 font-medium">Audience</td>
+                                    <td class="px-4 py-2 text-right">{{ redemption.recipientName }}</td>
                                 </tr>
                                 <tr class="border-b">
-                                    <td class="px-4 py-2 font-medium">Max Per User</td>
-                                    <td class="px-4 py-2 text-right">{{ campaign.maxPerUser }}</td>
+                                    <td class="px-4 py-2 font-medium">Tracking No.</td>
+                                    <td class="px-4 py-2 text-right">{{ redemption.trackingNumber }}</td>
                                 </tr>
                                 <tr class="border-b">
-                                    <td class="px-4 py-2 font-medium">Point Silver</td>
-                                    <td class="px-4 py-2 text-right">{{ campaign.Point1 }}</td>
+                                    <td class="px-4 py-2 font-medium">Courier</td>
+                                    <td class="px-4 py-2 text-right">{{ redemption.courierName }}</td>
                                 </tr>
                                 <tr class="border-b">
-                                    <td class="px-4 py-2 font-medium">Point Gold</td>
-                                    <td class="px-4 py-2 text-right">{{ campaign.Point2 }}</td>
-                                </tr>
-                                <tr class="border-b">
-                                    <td class="px-4 py-2 font-medium">Point Platinum</td>
-                                    <td class="px-4 py-2 text-right">{{ campaign.Point3 }}</td>
-                                </tr>
-                                <tr class="border-b">
-                                    <td class="px-4 py-2 font-medium">Quota</td>
-                                    <td class="px-4 py-2 text-right">{{ campaign.quota }}</td>
-                                </tr>
-                                <tr class="border-b">
-                                    <td class="px-4 py-2 font-medium">Published</td>
-                                    <td class="px-4 py-2 text-right">{{ campaign.publishDate }}</td>
+                                    <td class="px-4 py-2 font-medium">Created</td>
+                                    <td class="px-4 py-2 text-right">{{ redemption.created }}</td>
                                 </tr>
                             </tbody>
                         </table>
+
+                        <!-- Publish/Unpublish Buttons -->
+                        <div class="flex justify-end mt-4 space-x-2">
+                            <RouterLink v-if="redemption.status === 1" to="/marketing/detailEvent">
+                                <Button label="Unpublish" class="p-button-danger" size="small" />
+                            </RouterLink>
+                            <RouterLink v-else-if="redemption.status === 2" to="/marketing/detailEvent">
+                                <Button label="Publish" class="p-button-success" size="small" />
+                            </RouterLink>
+                        </div>
                     </div>
-                </div>
-
-                <div class="card flex flex-col w-full">
-                    <div class="flex items-center justify-between border-b pb-2 mb-2">
-                        <div class="text-2xl font-bold text-gray-800">🚩 Criteria</div>
-                    </div>
-
-                    <DataTable :value="criteria" :paginator="true" :rows="7" dataKey="id" :rowHover="true" responsiveLayout="scroll" class="text-sm">
-                        <!-- Title + Type in one column -->
-                        <Column header="Title" style="min-width: 8rem">
-                            <template #body="{ data }">
-                                <div class="flex flex-col">
-                                    <span class="font-bold text-gray-800">{{ data.title }}</span>
-                                    <span class="text-gray-600 text-xm mt-2">🔧 {{ data.type }}</span>
-                                </div>
-                            </template>
-                        </Column>
-
-                        <!-- Min Qty -->
-                        <Column header="Min Qty" style="min-width: 6rem">
-                            <template #body="{ data }">
-                                <div class="flex flex-col">
-                                    <span class="text-gray-800">{{ data.minQty }} pcs</span>
-                                </div>
-                            </template>
-                        </Column>
-
-                        <!-- Pattern -->
-                        <Column field="pattern" header="Pattern" style="min-width: 6rem"></Column>
-
-                        <!-- Size -->
-                        <Column field="size" header="Size" style="min-width: 6rem"></Column>
-                    </DataTable>
                 </div>
             </div>
         </div>
@@ -211,163 +115,46 @@
 <script setup>
 import { ref } from 'vue';
 
-const campaign = ref({
+const redemption = ref({
     id: 1,
-    campaignNo: 'CTY001',
-    eten_userID_list: 'E010001,E010002,E010003',
-    isGamification: 1,
-    title: 'Toyo Tires Safety Awareness Campaign',
-    description: 'Promoting road safety and awareness with Toyo Tires during festive season.',
-    image1Path: '/demo/images/event-toyo-1.jpg',
-    image2Path: '/demo/images/event-toyo-2.jpg',
-    image3Path: '/demo/images/event-toyo-3.jpg',
-    termCondition: 'Valid for participants within Malaysia only. One entry per user.',
-    publishDate: '2025-01-05',
-    startDate: '2025-01-10',
-    endDate: '2025-02-10',
-    quota: 1000,
-    maxPerUser: 1,
-    Point1: 10,
-    point2: 20,
-    point3: 30,
-    status: 1,
-    created: '2025-01-05',
-    deleted: null,
-    totalSub: 650 // Current total submissions
+    refno: 'TYO-MY-1001',
+    tc_userID: 'U1001',
+    memberLevel: 'Gold',
+    recipientName: 'Ahmad Faizal', //
+    contactNumber: '012-3456789', //
+    addLine1: 'No. 12, Jalan Melur', //
+    addLine2: 'Taman Melawati',
+    addCity: 'Kuala Lumpur',
+    addState: 'Selangor',
+    addPostcode: '53100',
+    addCountry: 'Malaysia',
+    totalPoint: 500,
+    itemName: 'Bluetooth Headphones', //
+    quantity: 1, //
+    redemptionDate: '2024-03-25', //
+    courierName: 'DHL Express', //
+    trackingNumber: 'DHLMY10001', //
+    shippedDate: '2024-04-01',
+    status: 'Shipped', //
+    adminID: 'admin01',
+    approvedBy: 'admin01',
+    verifiedDate: '2024-04-02',
+    created: '2024-03-25',
+    deleted: false
 });
 
-const criteria = [
-    {
-        id: 1,
-        title: 'Pattern A Small',
-        type: 'Tire',
-        pattern: 'Pattern A',
-        size: '15 inch',
-        minQty: 2
-    },
-    {
-        id: 2,
-        title: 'Pattern A Medium',
-        type: 'Tire',
-        pattern: 'Pattern A',
-        size: '16 inch',
-        minQty: 4
-    },
-    {
-        id: 3,
-        title: 'Pattern B Small',
-        type: 'Tire',
-        pattern: 'Pattern B',
-        size: '15 inch',
-        minQty: 2
-    },
-    {
-        id: 4,
-        title: 'Pattern B Large',
-        type: 'Tire',
-        pattern: 'Pattern B',
-        size: '18 inch',
-        minQty: 4
-    },
-    {
-        id: 5,
-        title: 'Pattern C Economy',
-        type: 'Tire',
-        pattern: 'Pattern C',
-        size: '14 inch',
-        minQty: 2
-    },
-    {
-        id: 6,
-        title: 'Pattern C Premium',
-        type: 'Tire',
-        pattern: 'Pattern C',
-        size: '17 inch',
-        minQty: 4
-    },
-    {
-        id: 7,
-        title: 'Pattern D Standard',
-        type: 'Tire',
-        pattern: 'Pattern D',
-        size: '16 inch',
-        minQty: 2
-    },
-    {
-        id: 8,
-        title: 'Pattern D Wide',
-        type: 'Tire',
-        pattern: 'Pattern D',
-        size: '19 inch',
-        minQty: 4
-    },
-    {
-        id: 9,
-        title: 'Pattern E Compact',
-        type: 'Tire',
-        pattern: 'Pattern E',
-        size: '13 inch',
-        minQty: 2
-    },
-    {
-        id: 10,
-        title: 'Pattern E Sport',
-        type: 'Tire',
-        pattern: 'Pattern E',
-        size: '20 inch',
-        minQty: 4
-    }
-];
+// helper functions for tag
+const statusLabel = (status) => {
+    if (status === 0) return 'Draft';
+    if (status === 1) return 'Published';
+    if (status === 2) return 'Unpublished';
+    return 'Unknown';
+};
 
-const rewardTypes = [
-    { label: 'Point', value: 'point' },
-    { label: 'Reload Pin', value: 'reload' }
-];
-
-const rewards = ref([
-    // Example Reward: Points
-    {
-        type: 'Point',
-        name: '500 Bonus Points',
-        image: '/demo/images/bonus-point.png',
-        totalQty: 30,
-        balQty: 17,
-        tierPoints: {
-            silver: 100,
-            gold: 200,
-            platinum: 300
-        },
-        // Not applicable for Points
-        expiry: null
-    },
-
-    // Example Reward: Reward Pin
-    {
-        type: 'Reward Pin',
-        name: 'RM10 E-Wallet Voucher',
-        image: 'https://assets.bharian.com.my/images/articles/tng13jan_BHfield_image_socialmedia.var_1610544082.jpg',
-        totalQty: 20,
-        balQty: 12,
-        expiry: '2025-12-31',
-        tierPoints: {
-            silver: null,
-            gold: null,
-            platinum: null
-        }
-    }
-]);
-
-function addReward() {
-    rewards.value.push({
-        type: null,
-        name: '',
-        image: null,
-        qty: 1,
-        tierPoints: { silver: 0, gold: 0, platinum: 0 }
-    });
-}
-
-function removeReward(index) {
-    rewards.value.splice(index, 1);
-}
+const statusSeverity = (status) => {
+    if (status === 0) return 'info';
+    if (status === 1) return 'success';
+    if (status === 2) return 'warn';
+    return 'secondary';
+};
 </script>

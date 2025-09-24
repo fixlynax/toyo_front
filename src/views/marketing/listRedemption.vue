@@ -68,7 +68,7 @@ onBeforeMount(async () => {
 
 <template>
     <div class="card">
-        <div class="text-2xl font-bold text-gray-800 border-b pb-2">List Redemption</div>
+        <div class="text-2xl font-bold text-gray-800 border-b pb-2">Details Redemption</div>
         <DataTable :value="listData" :paginator="true" :rows="10" dataKey="id" :rowHover="true" :loading="loading">
             <template #header>
                 <div class="flex items-center justify-between gap-4 w-full flex-wrap">
