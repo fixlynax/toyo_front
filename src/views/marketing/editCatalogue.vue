@@ -209,7 +209,7 @@
         <!-- ======================== -->
         <!-- Birthday Reward Section  -->
         <!-- ======================== -->
-        <div v-if="catalogue.isBirthday === 1" class="mt-8">
+        <!-- <div v-if="catalogue.isBirthday === 1" class="mt-8">
             <div class="card flex flex-col w-full">
                 <div class="flex items-center justify-between border-b pb-2 mb-2">
                     <div class="text-2xl font-bold text-gray-800">🎂 Birthday Reward</div>
@@ -219,10 +219,10 @@
                     <div class="mb-4">
                         <label class="block font-medium text-gray-700 mb-1">Reward Type</label>
                         <Dropdown v-model="catalogue.birthdayReward.type" :options="birthdayRewardTypeOptions" optionLabel="label" optionValue="value" placeholder="Select reward type" class="w-full" />
-                    </div>
+                    </div> -->
 
                     <!-- If Points -->
-                    <div v-if="catalogue.birthdayReward.type === 'Points'" class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <!-- <div v-if="catalogue.birthdayReward.type === 'Points'" class="grid grid-cols-1 md:grid-cols-3 gap-4">
                         <div>
                             <label class="block font-medium text-gray-700 mb-1">Silver Tier Points</label>
                             <InputNumber v-model="catalogue.birthdayReward.points.silver" class="w-full" />
@@ -235,16 +235,16 @@
                             <label class="block font-medium text-gray-700 mb-1">Platinum Tier Points</label>
                             <InputNumber v-model="catalogue.birthdayReward.points.platinum" class="w-full" />
                         </div>
-                    </div>
+                    </div> -->
 
                     <!-- If Reward -->
-                    <div v-else-if="catalogue.birthdayReward.type === 'Reward'" class="mt-4">
+                    <!-- <div v-else-if="catalogue.birthdayReward.type === 'Reward'" class="mt-4">
                         <label class="block font-medium text-gray-700 mb-1">Select Reward Item</label>
                         <Dropdown v-model="catalogue.birthdayReward.itemId" :options="rewardItems" optionLabel="title" optionValue="id" placeholder="Select a reward item" class="w-full" />
                     </div>
                 </div>
             </div>
-        </div>
+        </div> -->
 
         <!-- ======================== -->
         <!-- Cost Redeem Section      -->
