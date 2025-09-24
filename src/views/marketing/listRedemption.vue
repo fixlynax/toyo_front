@@ -5,6 +5,25 @@ import { onBeforeMount, ref } from 'vue';
 const listData = ref([]);
 const loading = ref(true);
 
+// Map status → label
+const getOverallStatusLabel = (status) => {
+    if (status === '0') return 'Pending';
+    if (status === '1') return 'Approved';
+    if (status === '2') return 'Rejected';
+    if (status === 'Shipped') return 'Shipped';
+    return 'Unknown';
+};
+
+// Map status → severity
+const getOverallStatusSeverity = (status) => {
+    if (status === '0') return 'info';
+    if (status === '1') return 'success';
+    if (status === '2') return 'warn';
+    if (status === 'Shipped') return 'success';
+    return 'secondary';
+};
+
+
 // Fetch data on component mount
 onBeforeMount(async () => {
     listData.value = await ListRedeemService.getListRedeemData();
@@ -68,7 +87,7 @@ onBeforeMount(async () => {
             </Column>
             <Column header="Status" style="min-width: 6rem">
                 <template #body="{ data }">
-                     {{ data.status }}
+                    <Tag :value="getOverallStatusLabel(data.status)" :severity="getOverallStatusSeverity(data.status)" />
                 </template>
             </Column>
         </DataTable>
