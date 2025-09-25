@@ -33,9 +33,11 @@ const getOverallStatusSeverity = (status) => {
     }
 };
 
-// Fetch data on component mount
+// Fetch data on component mount (only Pending)
 onBeforeMount(async () => {
-    listData.value = await listWarantyClaimService.getListWarantyData();
+    const allData = await listWarantyClaimService.getListWarantyData();
+    // Only show Pending claims
+    listData.value = allData.filter(item => item.status === 0);
     loading.value = false;
 });
 </script>
@@ -43,7 +45,14 @@ onBeforeMount(async () => {
 <template>
     <div class="card">
         <div class="text-2xl font-bold text-gray-800 border-b pb-2">Pending CTC List</div>
-        <DataTable :value="listData" :paginator="true" :rows="10" dataKey="id" :rowHover="true" :loading="loading">
+        <DataTable 
+            :value="listData" 
+            :paginator="true" 
+            :rows="10" 
+            dataKey="id" 
+            :rowHover="true" 
+            :loading="loading"
+        >
             <template #header>
                 <div class="flex items-center justify-between gap-4 w-full flex-wrap">
                     <!-- Left: Search Field + Cog Button -->
@@ -65,12 +74,13 @@ onBeforeMount(async () => {
                 </div>
             </template>
 
-            <template #empty> No News found. </template>
-            <template #loading> Loading News data. Please wait. </template>
+            <template #empty> No Pending Claims found. </template>
+            <template #loading> Loading claims data. Please wait. </template>
+            
             <!-- Columns -->
             <Column field="refNo" header="Ref No" style="min-width: 8rem">
                 <template #body="{ data }">
-                    <RouterLink to="/technical/detailWarantyClaim" class="hover:underline font-bold">
+                    <RouterLink to="" class="hover:underline font-bold">
                         {{ data.refNo }}
                     </RouterLink>
                 </template>

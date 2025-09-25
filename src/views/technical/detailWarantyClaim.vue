@@ -20,70 +20,68 @@
                             </RouterLink>
                         </div>
 
-                        <div class="font-semibold text-xl border-b pb-2 mt-8">👤 Account Details</div>
+                        <div class="font-semibold text-xl border-b pb-2 mt-8">👤Dealer Information</div>
                         <div class="flex flex-col md:flex-row gap-4">
                             <div class="w-full">
                                 <span class="text-sm text-gray-500">Dealer Name</span>
                                 <p class="text-lg font-medium">{{ warantyDetail.dealerName }}</p>
                             </div>
                             <div class="w-full">
-                                <span class="text-sm text-gray-500">Gender</span>
-                                <p class="text-lg font-medium">{{ memberDetail.gender }}</p>
+                                <span class="text-sm text-gray-500">Dealer Code</span>
+                                <p class="text-lg font-medium">{{ warantyDetail.dealerInfo.dealerCode }}</p>
+                            </div>
+                        </div>
+                        <div class="flex flex-col md:flex-row gap-4">
+                            <div class="w-full">
+                                <span class="text-sm text-gray-500">Contact Person</span>
+                                <p class="text-lg font-medium">{{ warantyDetail.dealerInfo.contactPerson }}</p>
+                            </div>
+                            <div class="w-full">
+                                <span class="text-sm text-gray-500">Contact Number</span>
+                                <p class="text-lg font-medium">{{ warantyDetail.dealerInfo.contactNo }}</p>
+                            </div>
+                        </div>
+                        <div class="flex flex-col md:flex-row gap-4">
+                            <div class="w-full">
+                                <span class="text-sm text-gray-500">Claim Type</span>
+                                <p class="text-lg font-medium">{{ warantyDetail.claimType }}</p>
+                            </div>
+                            <div class="w-full">
+                                <span class="text-sm text-gray-500">CTC Number</span>
+                                <p class="text-lg font-medium">{{ warantyDetail.summary.ctcNo }}</p>
+                            </div>
+                        </div>
+                        <div class="flex flex-col md:flex-row gap-4">
+                            <div class="w-full">
+                                <span class="text-sm text-gray-500">Scrap Number</span>
+                                <p class="text-lg font-medium">{{ warantyDetail.summary.scrapNo }}</p>
+                            </div>
+                            <div class="w-full">
+                                <span class="text-sm text-gray-500">Invoice Number</span>
+                                <p class="text-lg font-medium">{{ warantyDetail.summary.invoiceNo }}</p>
+                            </div>
+                        </div>
+
+                        <div class="font-semibold text-xl border-b pb-2 mt-8">👤Customer Information</div>
+                        <div class="flex flex-col md:flex-row gap-4">
+                            <div class="w-full">
+                                <span class="text-sm text-gray-500">Customer Name</span>
+                                <p class="text-lg font-medium">{{ warantyDetail.customerInfo.name }}</p>
+                            </div>
+                            <div class="w-full">
+                                <span class="text-sm text-gray-500">Vehicle</span>
+                                <p class="text-lg font-medium">{{ warantyDetail.customerInfo.vehicle }}</p>
                             </div>
                         </div>
 
                         <div class="flex flex-col md:flex-row gap-4">
                             <div class="w-full">
-                                <span class="text-sm text-gray-500">Email</span>
-                                <p class="text-lg font-medium">{{ memberDetail.emailAddress }}</p>
+                                <span class="text-sm text-gray-500">Registration Number</span>
+                                <p class="text-lg font-medium">{{ warantyDetail.customerInfo.regNo }}</p>
                             </div>
                             <div class="w-full">
-                                <span class="text-sm text-gray-500">Password</span>
-                                <div class="flex items-center">
-                                    <p class="text-lg font-medium mr-2 mb-0">
-                                        {{ showPassword ? memberDetail.password : '••••••••' }}
-                                    </p>
-                                    <!-- Toggle Button -->
-                                    <button type="button" @click="showPassword = !showPassword" class="text-gray-500 hover:text-gray-700">
-                                        <div class="text-lg font-medium mr-2 mb-0">
-                                            <i v-if="showPassword" class="pi pi-eye-slash"></i>
-                                            <i v-else class="pi pi-eye"></i>
-                                        </div>
-                                    </button>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="flex flex-col md:flex-row gap-4">
-                            <div class="w-full">
-                                <span class="text-sm text-gray-500">Mobile Number</span>
-                                <p class="text-lg font-medium">{{ memberDetail.countryCode }} {{ memberDetail.mobileNumber }}</p>
-                            </div>
-
-                            <div class="w-full">
-                                <span class="text-sm text-gray-500">Level</span>
-                                <p class="text-lg font-medium">{{ memberDetail.level }}</p>
-                            </div>
-                        </div>
-
-                        <div class="flex flex-col md:flex-row gap-4">
-                            <div class="w-full">
-                                <span class="text-sm text-gray-500">Race</span>
-                                <p class="text-lg font-medium">{{ memberDetail.race }}</p>
-                            </div>
-                            <div class="w-full">
-                                <span class="text-sm text-gray-500">State</span>
-                                <p class="text-lg font-medium">{{ memberDetail.state }}</p>
-                            </div>
-                        </div>
-
-                        <div class="flex flex-col md:flex-row gap-4">
-                            <div class="w-full">
-                                <span class="text-sm text-gray-500">Member Since</span>
-                                <p class="text-lg font-medium">{{ memberDetail.memberSince }}</p>
-                            </div>
-                            <div class="w-full">
-                                <span class="text-sm text-gray-500">Last Login</span>
-                                <p class="text-lg font-medium">{{ memberDetail.lastLogin }}</p>
+                                <span class="text-sm text-gray-500">Damage Code</span>
+                                <p class="text-lg font-medium">{{ warantyDetail.problem.damageCode }}</p>
                             </div>
                         </div>
                     </div>
@@ -94,8 +92,8 @@
                 <div class="card flex flex-col w-full">
                     <!-- Title -->
                     <div class="flex items-center justify-between border-b pb-2 mb-2">
-                        <div class="text-2xl font-bold text-gray-800">Account Info</div>
-                        <Tag :value="memberDetail.status === 1 ? 'Active' : 'Inactive'" :severity="memberDetail.status === 1 ? 'success' : 'danger'" />
+                        <div class="text-2xl font-bold text-gray-800">Tires Details</div>
+                        <!-- <Tag :value="memberDetail.status === 1 ? 'Active' : 'Inactive'" :severity="memberDetail.status === 1 ? 'success' : 'danger'" /> -->
                     </div>
 
                     <!-- Table -->
@@ -104,56 +102,39 @@
                             <tbody>
                                 <!-- Allow Waranty -->
                                 <tr class="border-b">
-                                    <td className="px-4 py-2 font-medium">Platform</td>
-                                    <td className="px-4 py-2 text-right">{{ memberDetail.platform }}</td>
+                                    <td className="px-4 py-2 font-medium">Size</td>
+                                    <td className="px-4 py-2 text-right">{{ warantyDetail.tires.size }}</td>
                                 </tr>
 
                                 <tr class="border-b">
-                                    <td className="px-4 py-2 font-medium">Allow Warranty</td>
-                                    <td className="px-4 py-2 text-right">{{ memberDetail.allow_warranty ? 'Yes' : 'No' }}</td>
+                                    <td className="px-4 py-2 font-medium">Pattern</td>
+                                    <td className="px-4 py-2 text-right">{{ warantyDetail.tires.pattern }}</td>
                                 </tr>
 
                                 <!-- Allow Order -->
                                 <tr class="border-b">
-                                    <td class="px-4 py-2 font-medium">Allow Order</td>
-                                    <td className="px-4 py-2 text-right">{{ memberDetail.allow_order ? 'Yes' : 'No' }}</td>
+                                    <td class="px-4 py-2 font-medium">Serial Number</td>
+                                    <td className="px-4 py-2 text-right">{{ warantyDetail.tires.serialNo }}</td>
                                 </tr>
                                 <!-- Allow Billing -->
                                 <tr class="border-b">
-                                    <td class="px-4 py-2 font-medium">Allow Billing</td>
-                                    <td className="px-4 py-2 text-right">{{ memberDetail.allow_billing ? 'Yes' : 'No' }}</td>
+                                    <td class="px-4 py-2 font-medium">Thread Depths Tire 1</td>
+                                    <td class="px-4 py-2 text-right">{{ warantyDetail.tires.treadDepths[0] }}</td>
                                 </tr>
 
-                                <!-- Allow Sale -->
                                 <tr class="border-b">
-                                    <td class="px-4 py-2 font-medium">Allow Sale</td>
-                                    <td className="px-4 py-2 text-right">{{ memberDetail.allow_sale ? 'Yes' : 'No' }}</td>
+                                    <td class="px-4 py-2 font-medium">Thread Depths Tire 2</td>
+                                    <td class="px-4 py-2 text-right">{{ warantyDetail.tires.treadDepths[1] }}</td>
                                 </tr>
 
-                                <!-- Allow User -->
                                 <tr class="border-b">
-                                    <td class="px-4 py-2 font-medium">Allow user</td>
-                                    <td className="px-4 py-2 text-right">{{ memberDetail.allow_user ? 'Yes' : 'No' }}</td>
+                                    <td class="px-4 py-2 font-medium">Thread Depths Tire 3</td>
+                                    <td class="px-4 py-2 text-right">{{ warantyDetail.tires.treadDepths[2] }}</td>
                                 </tr>
 
-                                <!-- Is Master -->
                                 <tr class="border-b">
-                                    <td class="px-4 py-2 font-medium">Is Master</td>
-                                    <td className="px-4 py-2 text-right">{{ memberDetail.isMaster ? 'Yes' : 'No' }}</td>
-                                </tr>
-
-                                <!-- Activation Code -->
-                                <tr class="border-b">
-                                    <td class="px-4 py-2 font-medium">Activation Code</td>
-                                    <td className="px-4 py-2 text-right">{{ memberDetail.activationCode }}</td>
-                                </tr>
-
-                                <!-- Suspend Button -->
-                                <tr>
-                                    <td class="px-4 py-2 font-medium"></td>
-                                    <td class="px-2 py-2 text-right">
-                                        <Button :label="isActivated ? 'Un-Activated' : 'Activated'" :severity="isActivated ? 'success' : 'danger'" size="small" @click="confirmSuspend" />
-                                    </td>
+                                    <td class="px-4 py-2 font-medium">Thread Depths Tire 4</td>
+                                    <td class="px-4 py-2 text-right">{{ warantyDetail.tires.treadDepths[3] }}</td>
                                 </tr>
                             </tbody>
                         </table>
@@ -196,53 +177,6 @@
 <script setup>
 import { ref } from 'vue';
 
-const form = ref({
-    memberCode: 'E346572',
-    custAccountNo: '6080100900',
-    companyName1: 'PS Tyres & Battery Auto Services Sdn. Bhd',
-    companyName2: '',
-    companyName3: '',
-    companyName4: '',
-    companyRegNo: 'MY123456789',
-    salesTaxNo: 'SST123456',
-    serviceTaxNo: 'STX120987',
-    tinNo: '1256734321',
-    vatNo: '0976213456',
-    addressLine1: '123 Toyo Road',
-    addressLine2: 'Toyo Industrial Park',
-    addressLine3: '',
-    addressLine4: '',
-    city: 'Kuala Lumpur',
-    postcode: '50000',
-    state: 'Kuala Lumpur',
-    country: 'Malaysia',
-    mapLatitude: '3.1390',
-    mapLongitude: '101.6869',
-    phoneNumber: '+60 3-1234 5678',
-    mobilreNumber: '+60 19-1234 567',
-    emailAddress: 'sales@toyotires.com.my',
-    accountType: 'Retailer',
-    priceGroup: 'A',
-    priceProcedure: 'Standard',
-    customerAccountGroup: 'Group1',
-    customerCondGrp: 'Cond1',
-    paymentTerms: 'NET 30',
-    riskCategory: 'Low',
-    creditLimit: 50000,
-    pricelist: '01',
-    signboardType: 'T10',
-    signboardBrand: 'Toyo',
-    salesOffice: 'Kuala Lumpur',
-    salesDistrict: 'Central',
-    shippingCond: 'RE',
-    accountCreation: '2023-01-15',
-    showOnList: 1,
-    ifFamilyChannel: 0,
-    allowLalamove: 1,
-    startingSalesAmt: 1000,
-    status: 0
-});
-
 const memberDetail = ref({
     id: 10,
     etenUserID: 'EU1010',
@@ -277,30 +211,62 @@ const memberDetail = ref({
 const showPassword = ref(false);
 
 const warantyDetail = ref({
-        id: 3,
-        refNo: "CLM-2025-003",
-        claimDate: "2025-04-10",
-        dealerName: "Toyo Tires Summit Dealer",
-        claimType: "Warranty",
-        audience: "ALL",
-        isSurvey: 0,
-        point1: 92,
-        point2: 86,
-        point3: 80,
-        title: "Toyo Tires Dealer Summit 2025",
-        image1URL: "https://example.com/images/dealer1.jpg",
-        image2URL: "https://example.com/images/dealer2.jpg",
-        image3URL: "https://example.com/images/dealer3.jpg",
-        desc: "Annual dealer summit to strengthen partnerships and explore new opportunities with Toyo Tires.",
-        location: "Shangri-La Hotel, Kuala Lumpur",
-        publishDate: "2025-04-05",
-        startDate: "2025-04-25",
-        endDate: "2025-04-26",
-        view: 340,
-        status: 0,
-        created: "2025-04-01",
-        deleted: null,
-      },);
+    id: 1,
+    refNo: 'CLM-2025-001',
+    claimDate: '2025-09-01',
+    dealerName: 'AutoWorld KL',
+    claimType: 'Tire Defect',
+    status: 0, // Pending
+    summary: {
+        ctcNo: 'CTC-2025-001',
+        scrapNo: 'SCR-8765',
+        invoiceNo: 'INV-4567'
+    },
+    dealerInfo: {
+        dealerCode: 'DLR-001',
+        contactPerson: 'Ahmad Zaki',
+        contactNo: '+6012-3456789'
+    },
+    customerInfo: {
+        name: 'Lee Wei Ming',
+        vehicle: 'Toyota Hilux 2.8G',
+        regNo: 'WXY 4567'
+    },
+    tires: {
+        size: '265/65R17',
+        pattern: 'Open Country A/T',
+        serialNo: 'TYR-99887766',
+        treadDepths: [6.5, 6.7, 6.6, 6.4]
+    },
+    problem: {
+        issue: 'Sidewall crack within 6 months of purchase',
+        photos: ['https://example.com/images/sidewall_damage.jpg'],
+        damageCode: 'D-102 (Sidewall Separation)'
+    },
+    ctcDetails: {
+        ctcNo: 'CTC-2025-001',
+        status: 'Pending Review'
+    },
+    scrapDetails: {
+        scrapNo: 'SCR-8765',
+        status: 'Pending Photo Upload'
+    },
+    claimVariable: {
+        amount: 'RM 450.00',
+        replacementType: 'Partial'
+    },
+    replacementOrder: {
+        orderNo: 'ORD-5566',
+        item: 'Open Country A/T (1 pc)'
+    },
+    reimbursement: {
+        approvedAmount: 'RM 300.00',
+        status: 'Pending'
+    },
+    report: {
+        file: 'CLM-2025-001-Report.pdf'
+    }
+});
 
 // 1. Suspend/Un-Activated
 const isActivated = ref(false);
