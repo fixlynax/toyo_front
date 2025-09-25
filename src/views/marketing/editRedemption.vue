@@ -225,7 +225,7 @@ const redemption = ref({
     courierName: 'DHL Express',
     trackingNumber: 'DHLMY10001',
     shippedDate: '2024-04-01',
-    status: 'Shipped',
+    status: 'Packing',
     created: '2024-03-25'
 });
 
