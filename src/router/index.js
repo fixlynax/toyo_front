@@ -291,9 +291,19 @@ const router = createRouter({
                     component: () => import('@/views/technical/listCTC.vue')
                 },
                   {
-                    path: '/technical/productList',
-                    name: 'Product-List',
-                    component: () => import('@/views/technical/productList.vue')
+                    path: '/technical/listProduct',
+                    name: 'List-Product',
+                    component: () => import('@/views/technical/listProduct.vue')
+                },
+                  {
+                    path: '/technical/bulkUpdate',
+                    name: 'List-Update',
+                    component: () => import('@/views/technical/BulkUpdate.vue')
+                },
+                  {
+                    path: '/technical/twpTireList',
+                    name: 'TWP-list',
+                    component: () => import('@/views/technical/twpTireList.vue')
                 },
                 //   {
                 //     path: '/technical/detailWarantyClaim',
