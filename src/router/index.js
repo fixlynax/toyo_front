@@ -285,6 +285,16 @@ const router = createRouter({
                     name: 'Detail-Waranty-Claim',
                     component: () => import('@/views/technical/detailWarantyClaim.vue')
                 },
+                //   {
+                //     path: '/technical/productList',
+                //     name: 'Product-List',
+                //     component: () => import('@/views/technical/productList.vue')
+                // },
+                //   {
+                //     path: '/technical/detailWarantyClaim',
+                //     name: 'Detail-Waranty-Claim',
+                //     component: () => import('@/views/technical/detailWarantyClaim.vue')
+                // },
             ]
         },
         {
