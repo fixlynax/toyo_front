@@ -26,6 +26,10 @@
                             <p class="mt-2 text-xl font-bold text-black-700">Redeemed Item</p>
                             <p class="text-lg text-black-500">{{ redemption.itemName }}</p>
                         </div>
+                        <div>
+                            <p class="mt-2 text-xl font-bold text-black-700">Approved By</p>
+                            <p class="text-lg text-black-500">{{ redemption.approvedBy }} ({{ redemption.adminID }})</p>
+                        </div>
                     </div>
                 </div>
 
@@ -194,7 +198,7 @@ const redemption = ref({
     shippedDate: '2024-04-01',
     status: 'Packing',
     adminID: 'admin01',
-    approvedBy: 'admin01',
+    approvedBy: 'EtenAdmin',
     verifiedDate: '2024-04-02',
     created: '2024-03-25',
     deleted: false
