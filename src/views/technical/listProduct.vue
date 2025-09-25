@@ -42,9 +42,9 @@
                 </template>
             </Column>
 
-            <Column field="rimDiameter" header="Size" style="min-width: 6rem">
+            <Column field="Size" header="Size" style="min-width: 6rem">
                 <template #body="{ data }">
-                    {{ data.rimDiameter }}
+                    {{ data.size }}
                 </template>
             </Column>
 
