@@ -4,7 +4,7 @@
             <!-- ======================= -->
             <!-- LEFT SECTION: Redemption & Shipping -->
             <!-- ======================= -->
-            <div class="md:w-2/3 flex flex-col gap-8">
+            <div class="md:w-2/3 flex flex-col">
                 <!-- Redemption Details -->
                 <div class="card flex flex-col gap-6 w-full">
                     <!-- Header Section -->
@@ -23,11 +23,11 @@
                             <p class="text-lg text-black-500">{{ redemption.contactNumber }}</p>
                         </div>
                         <div>
-                            <p class="mt-2 text-xl font-bold text-black-700">Redeemed Item</p>
+                            <p class="text-xl font-bold text-black-700">Redeemed Item</p>
                             <p class="text-lg text-black-500">{{ redemption.itemName }}</p>
                         </div>
                         <div>
-                            <p class="mt-2 text-xl font-bold text-black-700">Approved By</p>
+                            <p class="text-xl font-bold text-black-700">Approved By</p>
                             <p class="text-lg text-black-500">{{ redemption.approvedBy }} ({{ redemption.adminID }})</p>
                         </div>
                     </div>
@@ -48,7 +48,7 @@
                     </div>
 
                     <!-- Shipping Info -->
-                    <div class="grid grid-cols-4 gap-4 text-sm">
+                    <div class="grid grid-cols-4 gap-2 text-sm">
                         <div class="col-span-2">
                             <p class="text-xl font-bold text-gray-700">Recipient</p>
                             <p class="text-lg text-black-900">{{ redemption.recipientName }}</p>
