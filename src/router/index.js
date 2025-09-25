@@ -104,48 +104,8 @@ const router = createRouter({
                     name: 'documentation',
                     component: () => import('@/views/pages/Documentation.vue')
                 },
-                // Reward Catalogue 
-                {
-                    path: '/marketing/listCatalogue',
-                    name: 'List-Catalogue',
-                    component: () => import('@/views/marketing/listCatalogue.vue')
-                },
-                {
-                    path: '/marketing/detailCatalogue',
-                    name: 'Detail-Catalogue',
-                    component: () => import('@/views/marketing/detailCatalogue.vue')
-                },
-                {
-                    path: '/marketing/editCatalogue',
-                    name: 'Edit-Catalogue',
-                    component: () => import('@/views/marketing/editCatalogue.vue')
-                },
-                {
-                    path: '/marketing/createCatalogue',
-                    name: 'Create-Catalogue',
-                    component: () => import('@/views/marketing/createCatalogue.vue')
-                },
-                // Game Management
-                {
-                    path: '/marketing/listGame',
-                    name: 'List-Game',
-                    component: () => import('@/views/marketing/listGame.vue')
-                },
-                {
-                    path: '/marketing/detailGame',
-                    name: 'Detail-Game',
-                    component: () => import('@/views/marketing/detailGame.vue')
-                },
-                {
-                    path: '/marketing/createGame',
-                    name: 'Create-Game',
-                    component: () => import('@/views/marketing/createGame.vue')
-                },
-                {
-                    path: '/marketing/editGame',
-                    name: 'Edit-Game',
-                    component: () => import('@/views/marketing/editGame.vue')
-                },
+
+                // OM
                 // Eten Management
                 {
                     path: '/om/listEten',
@@ -172,6 +132,8 @@ const router = createRouter({
                     name: 'Edit-Eten',
                     component: () => import('@/views/om/editEten.vue')
                 },
+
+                //MARKETING
                 // News Managemnt
                 {
                     path: '/marketing/listNews',
@@ -264,11 +226,56 @@ const router = createRouter({
                     name: 'Detail-Redemption',
                     component: () => import('@/views/marketing/detailRedemption.vue')
                 },
+                // Reward Catalogue 
                 {
-                    path: '/marketing/editRedemption',
-                    name: 'Edit-Redemption',
-                    component: () => import('@/views/marketing/editRedemption.vue')
+                    path: '/marketing/listCatalogue',
+                    name: 'List-Catalogue',
+                    component: () => import('@/views/marketing/listCatalogue.vue')
                 },
+                {
+                    path: '/marketing/detailCatalogue',
+                    name: 'Detail-Catalogue',
+                    component: () => import('@/views/marketing/detailCatalogue.vue')
+                },
+                {
+                    path: '/marketing/editCatalogue',
+                    name: 'Edit-Catalogue',
+                    component: () => import('@/views/marketing/editCatalogue.vue')
+                },
+                {
+                    path: '/marketing/createCatalogue',
+                    name: 'Create-Catalogue',
+                    component: () => import('@/views/marketing/createCatalogue.vue')
+                },
+                // Game Management
+                {
+                    path: '/marketing/listGame',
+                    name: 'List-Game',
+                    component: () => import('@/views/marketing/listGame.vue')
+                },
+                {
+                    path: '/marketing/detailGame',
+                    name: 'Detail-Game',
+                    component: () => import('@/views/marketing/detailGame.vue')
+                },
+                {
+                    path: '/marketing/createGame',
+                    name: 'Create-Game',
+                    component: () => import('@/views/marketing/createGame.vue')
+                },
+                {
+                    path: '/marketing/editGame',
+                    name: 'Edit-Game',
+                    component: () => import('@/views/marketing/editGame.vue')
+                },
+
+                // TECHNICAL
+                // Claim List
+                // {
+                //     path: '/technical/listClaim',
+                //     name: 'List-Claim',
+                //     component: () => import('@/views/marketing/listClaim.vue')
+                // },
             ]
         },
         {
