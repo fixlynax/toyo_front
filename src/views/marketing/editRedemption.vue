@@ -140,16 +140,18 @@
                     </div>
 
                     <!-- Action Buttons -->
-                    <div class="flex justify-end mt-6 space-x-2">
+                    <div class="flex justify-end mt-6 gap-2">
                         <RouterLink to="/marketing/detailRedemption">
                             <Button label="Cancel" class="p-button-secondary" size="small" />
                         </RouterLink>
+                        <div>
                         <Button 
-                            label="Save Changes" 
+                            label="Update" 
                             class="p-button-success" 
                             size="small" 
                             @click="saveChanges"
                         />
+                        </div>
                     </div>
                 </div>
             </div>
