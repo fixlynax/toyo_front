@@ -295,6 +295,16 @@ const router = createRouter({
                     name: 'List-Product',
                     component: () => import('@/views/technical/listProduct.vue')
                 },
+                  {
+                    path: '/technical/bulkUpdate',
+                    name: 'List-Update',
+                    component: () => import('@/views/technical/BulkUpdate.vue')
+                },
+                  {
+                    path: '/technical/twpTireList',
+                    name: 'TWP-list',
+                    component: () => import('@/views/technical/twpTireList.vue')
+                },
                 //   {
                 //     path: '/technical/detailWarantyClaim',
                 //     name: 'Detail-Waranty-Claim',

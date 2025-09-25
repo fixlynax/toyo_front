@@ -124,12 +124,12 @@ const model = ref([
                     { 
                         label: 'Bulk Update', 
                         icon: 'pi pi-fw pi-refresh',
-                        to: '#' 
+                        to: '/technical/bulkUpdate' 
                     },
                     { 
                         label: 'TWP Tire List', 
                         icon: 'pi pi-fw pi-circle', 
-                        to: '#' 
+                        to: '/technical/twpTireList' 
                     }
                 ]
             }
