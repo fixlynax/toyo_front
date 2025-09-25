@@ -286,6 +286,11 @@ const router = createRouter({
                     name: 'Detail-Waranty-Claim',
                     component: () => import('@/views/technical/detailWarantyClaim.vue')
                 },
+                {
+                    path: '/technical/listCTC',
+                    name: 'List-CTC',
+                    component: () => import('@/views/technical/listCTC.vue')
+                },
             ]
         },
         {

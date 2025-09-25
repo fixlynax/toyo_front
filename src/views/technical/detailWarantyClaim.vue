@@ -5,13 +5,13 @@
                 <!-- Header -->
                 <div class="flex flex-col md:flex-row gap-8">
                     <div class="card flex flex-col gap-6 w-full">
-                        <div class="text-2xl font-bold text-gray-800 border-b pb-2">Member Infromation</div>
+                        <div class="text-2xl font-bold text-gray-800 border-b pb-2">Waranty Infromation</div>
 
                         <div class="flex items-center justify-between w-full">
                             <!-- Account No -->
                             <div>
-                                <span class="block text-sm text-gray-500">Member Code.</span>
-                                <span class="text-lg font-medium">{{ memberDetail.etenUserID }}</span>
+                                <span class="block text-sm text-gray-500">Refrence Number.</span>
+                                <span class="text-lg font-medium">{{ warantyDetail.refNo }}</span>
                             </div>
 
                             <!-- Create Button -->
@@ -23,8 +23,8 @@
                         <div class="font-semibold text-xl border-b pb-2 mt-8">👤 Account Details</div>
                         <div class="flex flex-col md:flex-row gap-4">
                             <div class="w-full">
-                                <span class="text-sm text-gray-500">Name</span>
-                                <p class="text-lg font-medium">{{ memberDetail.firstName }} {{ memberDetail.lastName }}</p>
+                                <span class="text-sm text-gray-500">Dealer Name</span>
+                                <p class="text-lg font-medium">{{ warantyDetail.dealerName }}</p>
                             </div>
                             <div class="w-full">
                                 <span class="text-sm text-gray-500">Gender</span>
@@ -275,6 +275,32 @@ const memberDetail = ref({
 });
 
 const showPassword = ref(false);
+
+const warantyDetail = ref({
+        id: 3,
+        refNo: "CLM-2025-003",
+        claimDate: "2025-04-10",
+        dealerName: "Toyo Tires Summit Dealer",
+        claimType: "Warranty",
+        audience: "ALL",
+        isSurvey: 0,
+        point1: 92,
+        point2: 86,
+        point3: 80,
+        title: "Toyo Tires Dealer Summit 2025",
+        image1URL: "https://example.com/images/dealer1.jpg",
+        image2URL: "https://example.com/images/dealer2.jpg",
+        image3URL: "https://example.com/images/dealer3.jpg",
+        desc: "Annual dealer summit to strengthen partnerships and explore new opportunities with Toyo Tires.",
+        location: "Shangri-La Hotel, Kuala Lumpur",
+        publishDate: "2025-04-05",
+        startDate: "2025-04-25",
+        endDate: "2025-04-26",
+        view: 340,
+        status: 0,
+        created: "2025-04-01",
+        deleted: null,
+      },);
 
 // 1. Suspend/Un-Activated
 const isActivated = ref(false);

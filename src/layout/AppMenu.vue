@@ -98,7 +98,7 @@ const model = ref([
                     { 
                         label: 'CTC List', 
                         icon: 'pi pi-fw pi-book', 
-                        to: '#' 
+                        to: '/technical/listCTC' 
                     },
                     { 
                         label: 'Scrap List', 
