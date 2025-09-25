@@ -298,7 +298,7 @@ const router = createRouter({
                   {
                     path: '/technical/bulkUpdate',
                     name: 'List-Update',
-                    component: () => import('@/views/technical/BulkUpdate.vue')
+                    component: () => import('@/views/technical/bulkUpdate.vue')
                 },
                   {
                     path: '/technical/twpTireList',
