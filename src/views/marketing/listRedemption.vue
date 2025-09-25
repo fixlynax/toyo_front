@@ -23,7 +23,6 @@ const getOverallStatusSeverity = (status) => {
     return 'secondary';
 };
 
-
 // Fetch data on component mount
 onBeforeMount(async () => {
     listData.value = await ListRedeemService.getListRedeemData();
@@ -48,10 +47,11 @@ onBeforeMount(async () => {
                         <Button type="button" icon="pi pi-cog" class="p-button" />
                     </div>
 
-                    <!-- Right: Add eTEN Button -->
-                    <RouterLink to="/marketing/createNews">
-                        <Button type="button" label="Create" />
-                    </RouterLink>
+                    <!-- Right: Export & Template Buttons -->
+                    <div class="flex items-center gap-2 ml-auto">
+                        <Button type="button" label="Export" icon="pi pi-file-export" class="p-button-sucess" />
+                        <Button type="button" label="Template" icon="pi pi-download" class="p-button-danger" />
+                    </div>
                 </div>
             </template>
 

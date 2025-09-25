@@ -1,7 +1,7 @@
 <template>
     <Fluid>
         <!-- Header -->
-        <div class="flex mt-8">
+        <div class="flex">
             <div class="card flex flex-col gap-4 w-full">
                 <div class="text-2xl font-bold text-gray-800 border-b pb-2">Confirm eTEN</div>
                  <p class="text-gray-600">Please review the information before submitting.</p>

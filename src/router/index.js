@@ -167,6 +167,11 @@ const router = createRouter({
                     name: 'Confirmation-Eten',
                     component: () => import('@/views/om/confirmationEten.vue')
                 },
+                {
+                    path: '/om/editEten',
+                    name: 'Edit-Eten',
+                    component: () => import('@/views/om/editEten.vue')
+                },
                 // News Managemnt
                 {
                     path: '/marketing/listNews',
