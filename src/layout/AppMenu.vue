@@ -93,7 +93,7 @@ const model = ref([
                     { 
                         label: 'Claim List', 
                         icon: 'pi pi-fw pi-list', 
-                        to: '#' 
+                        to: '/technical/listClaim' 
                     },
                     { 
                         label: 'CTC List', 

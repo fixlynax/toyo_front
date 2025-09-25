@@ -286,6 +286,16 @@ const router = createRouter({
                 //     name: 'List-Claim',
                 //     component: () => import('@/views/marketing/listClaim.vue')
                 // },
+                {
+                    path: '/technical/listClaim',
+                    name: 'List-Claim',
+                    component: () => import('@/views/technical/listClaim.vue')
+                },
+                  {
+                    path: '/technical/detailWarantyClaim',
+                    name: 'Detail-Waranty-Claim',
+                    component: () => import('@/views/technical/detailWarantyClaim.vue')
+                },
             ]
         },
         {
