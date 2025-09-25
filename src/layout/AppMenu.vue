@@ -119,7 +119,7 @@ const model = ref([
                     { 
                         label: 'Product List', 
                         icon: 'pi pi-fw pi-list', 
-                        to: '#' 
+                        to: '/technical/productList' 
                     },
                     { 
                         label: 'Bulk Update', 
