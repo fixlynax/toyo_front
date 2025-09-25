@@ -275,17 +275,6 @@ const router = createRouter({
                 },
 
                 // TECHNICAL
-                // Claim List
-                // {
-                //     path: '/technical/listClaim',
-                //     name: 'List-Claim',
-                //     component: () => import('@/views/marketing/listClaim.vue')
-                // },
-                // {
-                //     path: '/technical/listClaim',
-                //     name: 'List-Claim',
-                //     component: () => import('@/views/marketing/listClaim.vue')
-                // },
                 {
                     path: '/technical/listClaim',
                     name: 'List-Claim',
