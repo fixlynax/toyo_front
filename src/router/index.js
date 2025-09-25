@@ -226,6 +226,11 @@ const router = createRouter({
                     name: 'Detail-Redemption',
                     component: () => import('@/views/marketing/detailRedemption.vue')
                 },
+                {
+                    path: '/marketing/editRedemption',
+                    name: 'Edit-Redemption',
+                    component: () => import('@/views/marketing/editRedemption.vue')
+                },
                 // Reward Catalogue 
                 {
                     path: '/marketing/listCatalogue',
