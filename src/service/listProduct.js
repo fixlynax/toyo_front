@@ -3,6 +3,7 @@ export const ListTyreService = {
         return [
             {
                 id: 1,
+                warrantyRegisterID: 1001,
                 pattern: 'Proxes T1R',
                 rimDiameter: 17,
                 aspectRatio: '45',
@@ -13,10 +14,16 @@ export const ListTyreService = {
                 deleted: null,
                 status: 'Non-Waranty',
                 size: '215/45R17',
-                origin: 'Japan'
+                origin: 'Japan',
+                desc: 'High-performance tire for sports cars',
+                mfgcode: 'MFG-2025-001',
+                tyresize: 'Passenger Car',
+                tyrespec: '91W',
+                weekcode: '3524'
             },
             {
                 id: 2,
+                warrantyRegisterID: 1002,
                 pattern: 'Open Country A/T III',
                 rimDiameter: 18,
                 aspectRatio: '65',
@@ -27,10 +34,16 @@ export const ListTyreService = {
                 deleted: null,
                 status: 'Waranty',
                 size: '265/65R18',
-                origin: 'Thailand'
+                origin: 'Thailand',
+                desc: 'All-terrain tire designed for SUVs and light trucks',
+                mfgcode: 'MFG-2025-002',
+                tyresize: 'SUV',
+                tyrespec: '114S',
+                weekcode: '3324'
             },
             {
                 id: 3,
+                warrantyRegisterID: 1003,
                 pattern: 'Proxes Sport',
                 rimDiameter: 19,
                 aspectRatio: '40',
@@ -41,10 +54,16 @@ export const ListTyreService = {
                 deleted: null,
                 status: 'Waranty',
                 size: '245/40R19',
-                origin: 'Japan'
+                origin: 'Japan',
+                desc: 'Ultra high-performance tire for superior grip and handling',
+                mfgcode: 'MFG-2025-003',
+                tyresize: 'Passenger Car',
+                tyrespec: '98Y',
+                weekcode: '3224'
             },
             {
                 id: 4,
+                warrantyRegisterID: 1004,
                 pattern: 'Observe GSi-6',
                 rimDiameter: 16,
                 aspectRatio: '55',
@@ -55,10 +74,16 @@ export const ListTyreService = {
                 deleted: null,
                 status: 'Non-Waranty',
                 size: '205/55R16',
-                origin: 'Malaysia'
+                origin: 'Malaysia',
+                desc: 'Winter tire designed for enhanced performance on snow and ice',
+                mfgcode: 'MFG-2025-004',
+                tyresize: 'Passenger Car',
+                tyrespec: '91H',
+                weekcode: '3124'
             },
             {
                 id: 5,
+                warrantyRegisterID: 1005,
                 pattern: 'Open Country M/T',
                 rimDiameter: 17,
                 aspectRatio: '70',
@@ -69,10 +94,16 @@ export const ListTyreService = {
                 deleted: null,
                 status: 'Waranty',
                 size: '285/70R17',
-                origin: 'Thailand'
+                origin: 'Thailand',
+                desc: 'Mud-terrain tire built for rugged off-road performance',
+                mfgcode: 'MFG-2025-005',
+                tyresize: 'Truck',
+                tyrespec: '121Q',
+                weekcode: '2924'
             },
             {
                 id: 6,
+                warrantyRegisterID: 1006,
                 pattern: 'Proxes R1R',
                 rimDiameter: 15,
                 aspectRatio: '50',
@@ -83,10 +114,16 @@ export const ListTyreService = {
                 deleted: null,
                 status: 'Non-Waranty',
                 size: '195/50R15',
-                origin: 'Japan'
+                origin: 'Japan',
+                desc: 'Street sports tire for superior cornering and braking',
+                mfgcode: 'MFG-2025-006',
+                tyresize: 'Passenger Car',
+                tyrespec: '82V',
+                weekcode: '3024'
             },
             {
                 id: 7,
+                warrantyRegisterID: 1007,
                 pattern: 'Open Country H/T',
                 rimDiameter: 20,
                 aspectRatio: '55',
@@ -97,10 +134,16 @@ export const ListTyreService = {
                 deleted: null,
                 status: 'Waranty',
                 size: '275/55R20',
-                origin: 'Malaysia'
+                origin: 'Malaysia',
+                desc: 'Highway terrain tire optimized for smooth rides',
+                mfgcode: 'MFG-2025-007',
+                tyresize: 'Truck',
+                tyrespec: '113T',
+                weekcode: '3424'
             },
             {
                 id: 8,
+                warrantyRegisterID: 1008,
                 pattern: 'Proxes ST III',
                 rimDiameter: 19,
                 aspectRatio: '45',
@@ -111,10 +154,16 @@ export const ListTyreService = {
                 deleted: null,
                 status: 'Non-Waranty',
                 size: '255/45R19',
-                origin: 'Japan'
+                origin: 'Japan',
+                desc: 'High-performance SUV tire for stability and comfort',
+                mfgcode: 'MFG-2025-008',
+                tyresize: 'SUV',
+                tyrespec: '104W',
+                weekcode: '3724'
             },
             {
                 id: 9,
+                warrantyRegisterID: 1009,
                 pattern: 'Open Country R/T',
                 rimDiameter: 17,
                 aspectRatio: '65',
@@ -125,10 +174,16 @@ export const ListTyreService = {
                 deleted: null,
                 status: 'Non-Waranty',
                 size: '265/65R17',
-                origin: 'Thailand'
+                origin: 'Thailand',
+                desc: 'Rugged terrain tire built for mixed off-road and highway driving',
+                mfgcode: 'MFG-2025-009',
+                tyresize: 'Truck',
+                tyrespec: '120S',
+                weekcode: '3624'
             },
             {
                 id: 10,
+                warrantyRegisterID: 1010,
                 pattern: 'Proxes T1 Sport SUV',
                 rimDiameter: 21,
                 aspectRatio: '35',
@@ -139,14 +194,19 @@ export const ListTyreService = {
                 deleted: null,
                 status: 'Waranty',
                 size: '275/35R21',
-                origin: 'Japan'
+                origin: 'Japan',
+                desc: 'Premium performance SUV tire for ultimate grip and speed',
+                mfgcode: 'MFG-2025-010',
+                tyresize: 'SUV',
+                tyrespec: '103Y',
+                weekcode: '3824'
             }
         ];
     },
 
     getListTwpTyresData() {
         return [
-            { id: 1, tyreSize: '215/45R17', pattern: 'Proxes T1R',},
+            { id: 1, tyreSize: '215/45R17', pattern: 'Proxes T1R' },
             { id: 2, tyreSize: '265/65R18', pattern: 'Open Country A/T III' },
             { id: 3, tyreSize: '245/40R19', pattern: 'Proxes Sport' },
             { id: 4, tyreSize: '285/70R17', pattern: 'Open Country M/T' }
@@ -165,6 +225,6 @@ export const ListTyreService = {
         return Promise.resolve(this.getListTyreData());
     },
     getListTwpTyres() {
-    return Promise.resolve(this.getListTwpTyresData());
-  }
+        return Promise.resolve(this.getListTwpTyresData());
+    }
 };

@@ -1,7 +1,7 @@
 <template>
     <div class="card">
         <!-- Page Title -->
-        <div class="text-2xl font-bold text-gray-800 border-b pb-2 mb-4">TWP Tire List</div>
+        <div class="text-2xl font-bold text-gray-800 border-b pb-2">TWP Tire List</div>
 
         <DataTable :value="twpTires" dataKey="id" selectionMode="multiple" v-model:selection="selectedTires" :paginator="true" :rows="10" :loading="loading" class="w-full" :rowHover="true">
             <!-- Header Section inside DataTable -->
@@ -36,21 +36,17 @@
             <Column selectionMode="multiple" style="width: 3rem" />
 
             <Column field="pattern" header="Tyre Pattern" style="min-width: 8rem">
-                <template #body="{ data }">{{ data.pattern }}</template>
+                <template #body="{ data }">
+                    <!-- <RouterLink to="/technical/detailTWP" class="hover:underline font-bold">-->{{ data.pattern
+                    }}<!-- </RouterLink>  -->
+                </template>
             </Column>
 
             <Column field="tyreSize" header="Size" style="min-width: 8rem">
                 <template #body="{ data }">{{ data.tyreSize }}</template>
             </Column>
-
-            <Column field="origin" header="Origin" style="min-width: 8rem">
-                <template #body="{ data }">{{ data.origin }}</template>
-            </Column>
-
-            <Column header="Status" style="min-width: 6rem">
-                <template #body="{ data }">
-                    <span :class="{ 'font-bold': data.status === 'Waranty' }">{{ data.status }}</span>
-                </template>
+            <Column field="tyreSize" header="MFG Code" style="min-width: 8rem">
+                <template #body="{ data }">{{ data.mfgcode }}</template>
             </Column>
         </DataTable>
     </div>

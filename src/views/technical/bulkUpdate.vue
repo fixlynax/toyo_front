@@ -60,20 +60,9 @@
                     {{ data.tyreSize }}
                 </template>
             </Column>
-
-            <!-- Origin -->
-            <Column field="origin" header="Origin" style="min-width: 8rem">
+            <Column field="tyreSize" header="Size" style="min-width: 8rem">
                 <template #body="{ data }">
-                    {{ data.origin }}
-                </template>
-            </Column>
-
-            <!-- Warranty Status -->
-            <Column header="Status" style="min-width: 6rem">
-                <template #body="{ data }">
-                    <span :class="{ 'font-bold': data.status === 'Waranty' }">
-                        {{ data.status }}
-                    </span>
+                    {{ data.mfgcode }}
                 </template>
             </Column>
         </DataTable>

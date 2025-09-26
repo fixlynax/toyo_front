@@ -48,16 +48,10 @@
                 </template>
             </Column>
 
-            <Column field="aspectRatio" header="Origin" style="min-width: 6rem">
-                <template #body="{ data }">
-                    {{ data.origin }}
-                </template>
-            </Column>
-
             <Column header="Status" style="min-width: 6rem">
                 <template #body="{ data }">
-                    <span :class="{ 'font-bold': data.status === 'Waranty' }">
-                        {{ data.status }}
+                    <span>
+                        {{ data.mfgcode }}
                     </span>
                 </template>
             </Column>

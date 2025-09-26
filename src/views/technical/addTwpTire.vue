@@ -10,25 +10,25 @@
                     <!-- Tire Size -->
                     <div class="md:col-span-2">
                         <label class="block font-medium text-gray-700">Tire Size</label>
-                        <InputText v-model="form.tyreSize" placeholder="e.g., 215/60R16" class="w-full" />
+                        <Dropdown v-model="form.type" :options="tireSizeOptions" optionLabel="label" optionValue="value" placeholder="Select Type" class="w-full" />
                     </div>
 
                     <!-- Tire Pattern -->
                     <div class="md:col-span-2">
                         <label class="block font-medium text-gray-700">Tire Pattern</label>
-                        <InputText v-model="form.pattern" placeholder="e.g., All-Terrain" class="w-full" />
+                        <Dropdown v-model="form.type" :options="tirePatternOptions" optionLabel="label" optionValue="value" placeholder="Select Type" class="w-full" />
                     </div>
 
                     <!-- Tire Type -->
                     <div>
-                        <label class="block font-medium text-gray-700">Tire Type</label>
-                        <Dropdown v-model="form.type" :options="tireTypeOptions" optionLabel="label" optionValue="value" placeholder="Select Type" class="w-full" />
+                        <label class="block font-medium text-gray-700">Description</label>
+                        <InputText v-model="form.desc" class="w-full" placeholder="Enter Description Here..." />
                     </div>
 
                     <!-- Stock Quantity -->
                     <div>
-                        <label class="block font-medium text-gray-700">Stock Quantity</label>
-                        <InputNumber v-model="form.stock" class="w-full" placeholder="0" />
+                        <label class="block font-medium text-gray-700">MFG Code</label>
+                        <InputText v-model="form.mfgcode" class="w-full" placeholder="Enter MFGCode Here..." />
                     </div>
                 </div>
 
@@ -68,6 +68,42 @@ const tireTypeOptions = [
     { label: 'SUV', value: 'SUV' },
     { label: 'Truck', value: 'Truck' },
     { label: 'Bus', value: 'Bus' }
+];
+// =======================
+// Tire Size Options
+// =======================
+const tireSizeOptions = [
+    { label: '165/65R14', value: '165/65R14' },
+    { label: '175/70R14', value: '175/70R14' },
+    { label: '185/65R15', value: '185/65R15' },
+    { label: '195/60R15', value: '195/60R15' },
+    { label: '205/55R16', value: '205/55R16' },
+    { label: '215/60R16', value: '215/60R16' },
+    { label: '225/65R17', value: '225/65R17' },
+    { label: '235/55R18', value: '235/55R18' },
+    { label: '245/45R19', value: '245/45R19' },
+    { label: '265/70R17', value: '265/70R17' },
+    { label: '275/65R18', value: '275/65R18' },
+    { label: '295/80R22.5', value: '295/80R22.5' }, // Truck/Bus
+    { label: '315/80R22.5', value: '315/80R22.5' } // Truck/Bus
+];
+
+// =======================
+// Tire Pattern Options
+// =======================
+const tirePatternOptions = [
+    { label: 'All-Season', value: 'All-Season' },
+    { label: 'Highway Terrain (H/T)', value: 'Highway Terrain (H/T)' },
+    { label: 'Mud Terrain (M/T)', value: 'Mud Terrain (M/T)' },
+    { label: 'All Terrain (A/T)', value: 'All Terrain (A/T)' },
+    { label: 'Performance', value: 'Performance' },
+    { label: 'Touring', value: 'Touring' },
+    { label: 'Eco/Low Rolling Resistance', value: 'Eco/Low Rolling Resistance' },
+    { label: 'Directional', value: 'Directional' },
+    { label: 'Symmetric', value: 'Symmetric' },
+    { label: 'Asymmetric', value: 'Asymmetric' },
+    { label: 'Winter/Snow', value: 'Winter/Snow' },
+    { label: 'Commercial/Heavy Duty', value: 'Commercial/Heavy Duty' }
 ];
 
 // Cancel and go back
