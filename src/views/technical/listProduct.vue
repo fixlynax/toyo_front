@@ -38,7 +38,9 @@
             <!-- ========================= -->
             <Column field="pattern" header="Tyre Pattern" style="min-width: 6rem">
                 <template #body="{ data }">
+                     <RouterLink to="/technical/detailProduct" class="font-bold text-gray-800 hover:underline">
                     {{ data.pattern }}
+                    </RouterLink>
                 </template>
             </Column>
 
