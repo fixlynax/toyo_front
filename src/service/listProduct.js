@@ -146,7 +146,7 @@ export const ListTyreService = {
 
     getListTwpTyresData() {
         return [
-            { id: 1, tyreSize: '215/45R17', pattern: 'Proxes T1R' },
+            { id: 1, tyreSize: '215/45R17', pattern: 'Proxes T1R',},
             { id: 2, tyreSize: '265/65R18', pattern: 'Open Country A/T III' },
             { id: 3, tyreSize: '245/40R19', pattern: 'Proxes Sport' },
             { id: 4, tyreSize: '285/70R17', pattern: 'Open Country M/T' }

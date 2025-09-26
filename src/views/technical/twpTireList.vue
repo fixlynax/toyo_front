@@ -1,33 +1,55 @@
 <template>
     <div class="card">
-        <div class="flex justify-between items-center mb-4">
-            <h2 class="text-2xl font-bold text-gray-800">TWP Tire List</h2>
-            <div class="flex gap-2">
-                <RouterLink to="/technical/addTwpTire">
-                    <Button label="Add Tire" icon="pi pi-plus" class="p-button-success" @click="addTire" />
-                </RouterLink>
-                <Button label="Remove Selected" icon="pi pi-trash" class="p-button-danger" :disabled="!selectedTires.length" @click="removeSelectedTires" />
-            </div>
-        </div>
+        <!-- Page Title -->
+        <div class="text-2xl font-bold text-gray-800 border-b pb-2 mb-4">TWP Tire List</div>
 
-        <DataTable :value="twpTires" dataKey="id" selectionMode="multiple" v-model:selection="selectedTires" :paginator="true" :rows="10" :loading="loading">
+        <DataTable :value="twpTires" dataKey="id" selectionMode="multiple" v-model:selection="selectedTires" :paginator="true" :rows="10" :loading="loading" class="w-full" :rowHover="true">
+            <!-- Header Section inside DataTable -->
+            <template #header>
+                <div class="flex items-center justify-between flex-wrap gap-4 w-full">
+                    <!-- Left: Search + Cog -->
+                    <div class="flex items-center gap-2 w-full max-w-md flex-1">
+                        <IconField class="flex-1">
+                            <InputIcon>
+                                <i class="pi pi-search" />
+                            </InputIcon>
+                            <InputText placeholder="Quick Search" class="w-full" />
+                        </IconField>
+                        <Button type="button" icon="pi pi-cog" class="p-button" />
+                    </div>
+
+                    <!-- Right: Action Buttons -->
+                    <div class="flex gap-2 justify-end flex-shrink-0">
+                        <RouterLink to="/technical/addTwpTire">
+                            <Button label="Add Tire" icon="pi pi-plus" class="p-button-success" />
+                        </RouterLink>
+                        <Button label="Remove Selected" icon="pi pi-trash" class="p-button-danger" :disabled="!selectedTires.length" @click="removeSelectedTires" />
+                    </div>
+                </div>
+            </template>
+
+            <!-- Empty / Loading Messages -->
             <template #empty>No TWP Tire data found.</template>
             <template #loading>Loading TWP Tire data. Please wait...</template>
 
-            <!-- Checkbox Column -->
-            <Column selectionMode="multiple" style="width: 3rem"></Column>
+            <!-- Data Columns -->
+            <Column selectionMode="multiple" style="width: 3rem" />
 
-            <!-- Tire Size -->
-            <Column field="tyreSize" header="Tire Size" style="min-width: 10rem">
-                <template #body="{ data }">
-                    {{ data.tyreSize }}
-                </template>
+            <Column field="pattern" header="Tyre Pattern" style="min-width: 8rem">
+                <template #body="{ data }">{{ data.pattern }}</template>
             </Column>
 
-            <!-- Tire Pattern -->
-            <Column field="pattern" header="Tire Pattern" style="min-width: 10rem">
+            <Column field="tyreSize" header="Size" style="min-width: 8rem">
+                <template #body="{ data }">{{ data.tyreSize }}</template>
+            </Column>
+
+            <Column field="origin" header="Origin" style="min-width: 8rem">
+                <template #body="{ data }">{{ data.origin }}</template>
+            </Column>
+
+            <Column header="Status" style="min-width: 6rem">
                 <template #body="{ data }">
-                    {{ data.pattern }}
+                    <span :class="{ 'font-bold': data.status === 'Waranty' }">{{ data.status }}</span>
                 </template>
             </Column>
         </DataTable>
@@ -44,7 +66,7 @@ const loading = ref(true);
 
 onMounted(async () => {
     loading.value = true;
-    twpTires.value = await ListTyreService.getListTwpTyres();
+    twpTires.value = await ListTyreService.getListTyreData();
     loading.value = false;
 });
 // Remove selected tires
@@ -53,9 +75,3 @@ const removeSelectedTires = () => {
     selectedTires.value = [];
 };
 </script>
-
-<style scoped>
-.card {
-    padding: 1rem;
-}
-</style>
