@@ -3,7 +3,9 @@
         <div class="flex justify-between items-center mb-4">
             <h2 class="text-2xl font-bold text-gray-800">TWP Tire List</h2>
             <div class="flex gap-2">
-                <Button label="Add Tire" icon="pi pi-plus" class="p-button-success" @click="addTire" />
+                <RouterLink to="/technical/addTwpTire">
+                    <Button label="Add Tire" icon="pi pi-plus" class="p-button-success" @click="addTire" />
+                </RouterLink>
                 <Button label="Remove Selected" icon="pi pi-trash" class="p-button-danger" :disabled="!selectedTires.length" @click="removeSelectedTires" />
             </div>
         </div>
@@ -45,17 +47,6 @@ onMounted(async () => {
     twpTires.value = await ListTyreService.getListTwpTyres();
     loading.value = false;
 });
-
-// Add new tire
-const addTire = () => {
-    const newId = twpTires.value.length + 1;
-    twpTires.value.push({
-        id: newId,
-        tyreSize: 'NewSize-' + newId,
-        pattern: 'NewPattern-' + newId
-    });
-};
-
 // Remove selected tires
 const removeSelectedTires = () => {
     twpTires.value = twpTires.value.filter((tire) => !selectedTires.value.includes(tire));
