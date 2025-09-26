@@ -1,535 +1,581 @@
-export const listWarantyClaimService = { 
-  // Main function to return all events
-  getListWarantyData() {
-    return [
-      {
-        id: 1,
-        refNo: "CLM-2025-001",
-        claimDate: "2025-09-01",
-        dealerName: "AutoWorld KL",
-        claimType: "Tire Defect",
-        status: 0, // Pending
-        summary: {
-          ctcNo: "CTC-2025-001",
-          scrapNo: "SCR-8765",
-          invoiceNo: "INV-4567",
-        },
-        dealerInfo: {
-          dealerCode: "DLR-001",
-          contactPerson: "Ahmad Zaki",
-          contactNo: "+6012-3456789",
-        },
-        customerInfo: {
-          name: "Lee Wei Ming",
-          vehicle: "Toyota Hilux 2.8G",
-          regNo: "WXY 4567",
-        },
-        tires: {
-          size: "265/65R17",
-          pattern: "Open Country A/T",
-          serialNo: "TYR-99887766",
-          treadDepths: [6.5, 6.7, 6.6, 6.4],
-        },
-        problem: {
-          issue: "Sidewall crack within 6 months of purchase",
-          photos: ["https://example.com/images/sidewall_damage.jpg"],
-          damageCode: "D-102 (Sidewall Separation)",
-        },
-        ctcDetails: {
-          ctcNo: "CTC-2025-001",
-          status: "Pending Review",
-        },
-        scrapDetails: {
-          scrapNo: "SCR-8765",
-          status: "Pending Photo Upload",
-        },
-        claimVariable: {
-          amount: "RM 450.00",
-          replacementType: "Partial",
-        },
-        replacementOrder: {
-          orderNo: "ORD-5566",
-          item: "Open Country A/T (1 pc)",
-        },
-        reimbursement: {
-          approvedAmount: "RM 300.00",
-          status: "Pending",
-        },
-        report: {
-          file: "CLM-2025-001-Report.pdf",
-        },
-      },
-      {
-        id: 2,
-        refNo: "CLM-2025-002",
-        claimDate: "2025-09-03",
-        dealerName: "Speedy Motors",
-        claimType: "Manufacturing",
-        status: 1, // ETEN Approved
-        summary: {
-          ctcNo: "CTC-2025-002",
-          scrapNo: "SCR-1122",
-          invoiceNo: "INV-4588",
-        },
-        dealerInfo: {
-          dealerCode: "DLR-002",
-          contactPerson: "Siti Noraini",
-          contactNo: "+6017-9988776",
-        },
-        customerInfo: {
-          name: "Raj Kumar",
-          vehicle: "Toyota Vios 1.5G",
-          regNo: "VBD 3321",
-        },
-        tires: {
-          size: "195/55R15",
-          pattern: "Proxes R45",
-          serialNo: "TYR-22334455",
-          treadDepths: [7.0, 7.1, 7.0, 7.2],
-        },
-        problem: {
-          issue: "Uneven tread wear within 3 months",
-          photos: ["https://example.com/images/tread_wear.jpg"],
-          damageCode: "D-210 (Tread Separation)",
-        },
-        ctcDetails: {
-          ctcNo: "CTC-2025-002",
-          status: "Reviewed",
-        },
-        scrapDetails: {
-          scrapNo: "SCR-1122",
-          status: "Received",
-        },
-        claimVariable: {
-          amount: "RM 600.00",
-          replacementType: "Full",
-        },
-        replacementOrder: {
-          orderNo: "ORD-5570",
-          item: "Proxes R45 (4 pcs)",
-        },
-        reimbursement: {
-          approvedAmount: "RM 600.00",
-          status: "Approved",
-        },
-        report: {
-          file: "CLM-2025-002-Report.pdf",
-        },
-      },
-      {
-        id: 3,
-        refNo: "CLM-2025-003",
-        claimDate: "2025-09-04",
-        dealerName: "MegaTire Johor",
-        claimType: "Warranty Ext.",
-        status: 2, // ETEN Rejected
-        summary: {
-          ctcNo: "CTC-2025-003",
-          scrapNo: "SCR-3344",
-          invoiceNo: "INV-4601",
-        },
-        dealerInfo: {
-          dealerCode: "DLR-003",
-          contactPerson: "Tan Chee Hock",
-          contactNo: "+6019-5566778",
-        },
-        customerInfo: {
-          name: "Aminah Binti Yusof",
-          vehicle: "Perodua Myvi 1.3",
-          regNo: "JDK 7788",
-        },
-        tires: {
-          size: "175/65R14",
-          pattern: "NanoEnergy 3",
-          serialNo: "TYR-44556677",
-          treadDepths: [6.8, 6.9, 6.7, 6.9],
-        },
-        problem: {
-          issue: "Customer reported vibration noise",
-          photos: ["https://example.com/images/vibration_issue.jpg"],
-          damageCode: "D-305 (Noise/Vibration)",
-        },
-        ctcDetails: {
-          ctcNo: "CTC-2025-003",
-          status: "Rejected",
-        },
-        scrapDetails: {
-          scrapNo: "SCR-3344",
-          status: "Not Required",
-        },
-        claimVariable: {
-          amount: "RM 280.00",
-          replacementType: "Partial",
-        },
-        replacementOrder: {
-          orderNo: null,
-          item: "N/A",
-        },
-        reimbursement: {
-          approvedAmount: "RM 0.00",
-          status: "Rejected",
-        },
-        report: {
-          file: "CLM-2025-003-Report.pdf",
-        },
-      },
-      {
-        id: 4,
-        refNo: "CLM-2025-004",
-        claimDate: "2025-09-05",
-        dealerName: "CityTire Penang",
-        claimType: "Damage Claim",
-        status: 3, // Processing
-        summary: {
-          ctcNo: "CTC-2025-004",
-          scrapNo: "SCR-5566",
-          invoiceNo: "INV-4620",
-        },
-        dealerInfo: {
-          dealerCode: "DLR-004",
-          contactPerson: "Lim Wei Han",
-          contactNo: "+6011-2233445",
-        },
-        customerInfo: {
-          name: "Chan Kok Leong",
-          vehicle: "Honda Civic 1.8S",
-          regNo: "PNA 6621",
-        },
-        tires: {
-          size: "225/45R17",
-          pattern: "Proxes T1 Sport",
-          serialNo: "TYR-77889900",
-          treadDepths: [7.5, 7.5, 7.4, 7.6],
-        },
-        problem: {
-          issue: "Puncture not repairable (manufacturing fault claimed)",
-          photos: ["https://example.com/images/puncture_fault.jpg"],
-          damageCode: "D-405 (Impact Damage)",
-        },
-        ctcDetails: {
-          ctcNo: "CTC-2025-004",
-          status: "In Review",
-        },
-        scrapDetails: {
-          scrapNo: "SCR-5566",
-          status: "Pending Inspection",
-        },
-        claimVariable: {
-          amount: "RM 500.00",
-          replacementType: "Partial",
-        },
-        replacementOrder: {
-          orderNo: "ORD-5580",
-          item: "Proxes T1 Sport (2 pcs)",
-        },
-        reimbursement: {
-          approvedAmount: "RM 0.00",
-          status: "Processing",
-        },
-        report: {
-          file: "CLM-2025-004-Report.pdf",
-        },
-      },
-      {
-        id: 5,
-        refNo: "CLM-2025-005",
-        claimDate: "2025-09-07",
-        dealerName: "WheelHub Ipoh",
-        claimType: "Tire Defect",
-        status: 4, // Toyo Approved
-        summary: {
-          ctcNo: "CTC-2025-005",
-          scrapNo: "SCR-6677",
-          invoiceNo: "INV-4633",
-        },
-        dealerInfo: {
-          dealerCode: "DLR-005",
-          contactPerson: "Mohd Hafiz",
-          contactNo: "+6013-8899776",
-        },
-        customerInfo: {
-          name: "Suresh Kumar",
-          vehicle: "Mazda CX-5",
-          regNo: "ABC 9988",
-        },
-        tires: {
-          size: "225/55R19",
-          pattern: "Open Country U/T",
-          serialNo: "TYR-99112233",
-          treadDepths: [7.1, 7.2, 7.1, 7.0],
-        },
-        problem: {
-          issue: "Bulge developed on sidewall",
-          photos: ["https://example.com/images/sidewall_bulge.jpg"],
-          damageCode: "D-220 (Sidewall Bulge)",
-        },
-        ctcDetails: {
-          ctcNo: "CTC-2025-005",
-          status: "Approved",
-        },
-        scrapDetails: {
-          scrapNo: "SCR-6677",
-          status: "Scrapped",
-        },
-        claimVariable: {
-          amount: "RM 900.00",
-          replacementType: "Full",
-        },
-        replacementOrder: {
-          orderNo: "ORD-5590",
-          item: "Open Country U/T (4 pcs)",
-        },
-        reimbursement: {
-          approvedAmount: "RM 900.00",
-          status: "Paid",
-        },
-        report: {
-          file: "CLM-2025-005-Report.pdf",
-        },
-      },
-      {
-        id: 6,
-        refNo: "CLM-2025-006",
-        claimDate: "2025-09-08",
-        dealerName: "MegaTire JB",
-        claimType: "Manufacturing",
-        status: 0, // Pending
-        summary: {
-          ctcNo: "CTC-2025-006",
-          scrapNo: "SCR-7788",
-          invoiceNo: "INV-4644",
-        },
-        dealerInfo: {
-          dealerCode: "DLR-006",
-          contactPerson: "Farid Ismail",
-          contactNo: "+6010-2233445",
-        },
-        customerInfo: {
-          name: "Nurul Aisyah",
-          vehicle: "Toyota Camry 2.5V",
-          regNo: "JBN 2210",
-        },
-        tires: {
-          size: "215/55R17",
-          pattern: "Celsius",
-          serialNo: "TYR-55667788",
-          treadDepths: [7.3, 7.2, 7.4, 7.3],
-        },
-        problem: {
-          issue: "Cracks along tread grooves",
-          photos: ["https://example.com/images/tread_cracks.jpg"],
-          damageCode: "D-130 (Groove Cracking)",
-        },
-        ctcDetails: {
-          ctcNo: "CTC-2025-006",
-          status: "Pending Review",
-        },
-        scrapDetails: {
-          scrapNo: "SCR-7788",
-          status: "Pending Scrap",
-        },
-        claimVariable: {
-          amount: "RM 720.00",
-          replacementType: "Full",
-        },
-        replacementOrder: {
-          orderNo: null,
-          item: "N/A",
-        },
-        reimbursement: {
-          approvedAmount: "RM 0.00",
-          status: "Pending",
-        },
-        report: {
-          file: "CLM-2025-006-Report.pdf",
-        },
-      },
-      {
-        id: 7,
-        refNo: "CLM-2025-007",
-        claimDate: "2025-09-09",
-        dealerName: "TireZone Melaka",
-        claimType: "Damage Claim",
-        status: 5, // Toyo Rejected
-        summary: {
-          ctcNo: "CTC-2025-007",
-          scrapNo: "SCR-8899",
-          invoiceNo: "INV-4655",
-        },
-        dealerInfo: {
-          dealerCode: "DLR-007",
-          contactPerson: "Koh Mei Lin",
-          contactNo: "+6018-7788990",
-        },
-        customerInfo: {
-          name: "Ganesh Pillai",
-          vehicle: "Proton X70",
-          regNo: "MCU 4455",
-        },
-        tires: {
-          size: "225/60R18",
-          pattern: "Proxes CR1",
-          serialNo: "TYR-66778899",
-          treadDepths: [7.0, 7.0, 6.9, 7.1],
-        },
-        problem: {
-          issue: "Curb damage not covered under warranty",
-          photos: ["https://example.com/images/curb_damage.jpg"],
-          damageCode: "D-499 (External Damage)",
-        },
-        ctcDetails: {
-          ctcNo: "CTC-2025-007",
-          status: "Rejected",
-        },
-        scrapDetails: {
-          scrapNo: "SCR-8899",
-          status: "Not Accepted",
-        },
-        claimVariable: {
-          amount: "RM 850.00",
-          replacementType: "Full",
-        },
-        replacementOrder: {
-          orderNo: null,
-          item: "N/A",
-        },
-        reimbursement: {
-          approvedAmount: "RM 0.00",
-          status: "Rejected",
-        },
-        report: {
-          file: "CLM-2025-007-Report.pdf",
-        },
-      },
-      {
-        id: 8,
-        refNo: "CLM-2025-008",
-        claimDate: "2025-09-10",
-        dealerName: "CityTire KL",
-        claimType: "Tire Defect",
-        status: 9, // Deleted
-        summary: {
-          ctcNo: "CTC-2025-008",
-          scrapNo: "SCR-9900",
-          invoiceNo: "INV-4666",
-        },
-        dealerInfo: {
-          dealerCode: "DLR-008",
-          contactPerson: "Roslan Mahmud",
-          contactNo: "+6016-6677889",
-        },
-        customerInfo: {
-          name: "Lim Jia Yi",
-          vehicle: "Honda HR-V",
-          regNo: "WTT 9087",
-        },
-        tires: {
-          size: "215/60R16",
-          pattern: "NanoEnergy Van",
-          serialNo: "TYR-77889911",
-          treadDepths: [7.6, 7.5, 7.6, 7.6],
-        },
-        problem: {
-          issue: "Deleted by admin (duplicate claim)",
-          photos: [],
-          damageCode: "N/A",
-        },
-        ctcDetails: {
-          ctcNo: "CTC-2025-008",
-          status: "Deleted",
-        },
-        scrapDetails: {
-          scrapNo: "SCR-9900",
-          status: "N/A",
-        },
-        claimVariable: {
-          amount: "RM 0.00",
-          replacementType: "N/A",
-        },
-        replacementOrder: {
-          orderNo: null,
-          item: "N/A",
-        },
-        reimbursement: {
-          approvedAmount: "RM 0.00",
-          status: "N/A",
-        },
-        report: {
-          file: "CLM-2025-008-Report.pdf",
-        },
-      },
-      {
-        id: 9,
-        refNo: "CLM-2025-009",
-        claimDate: "2025-09-11",
-        dealerName: "TyreKing Sabah",
-        claimType: "Warranty Ext.",
-        status: 0, // Pending
-        summary: {
-          ctcNo: "CTC-2025-009",
-          scrapNo: "SCR-1123",
-          invoiceNo: "INV-4677",
-        },
-        dealerInfo: {
-          dealerCode: "DLR-009",
-          contactPerson: "Fiona Tan",
-          contactNo: "+6012-9988776",
-        },
-        customerInfo: {
-          name: "Raymond Wong",
-          vehicle: "Nissan X-Trail",
-          regNo: "SAB 7788",
-        },
-        tires: {
-          size: "225/65R17",
-          pattern: "Open Country A/T III",
-          serialNo: "TYR-88990011",
-          treadDepths: [6.9, 7.0, 6.8, 7.0],
-        },
-        problem: {
-          issue: "Noise at high speed",
-          photos: ["https://example.com/images/high_speed_noise.jpg"],
-          damageCode: "D-310 (Noise)",
-        },
-        ctcDetails: {
-          ctcNo: "CTC-2025-009",
-          status: "Pending",
-        },
-        scrapDetails: {
-          scrapNo: "SCR-1123",
-          status: "Pending Scrap",
-        },
-        claimVariable: {
-          amount: "RM 500.00",
-          replacementType: "Partial",
-        },
-        replacementOrder: {
-          orderNo: null,
-          item: "N/A",
-        },
-        reimbursement: {
-          approvedAmount: "RM 0.00",
-          status: "Pending",
-        },
-        report: {
-          file: "CLM-2025-009-Report.pdf",
-        },
-      },
-    ];
-  },
+export const listWarantyClaimService = {
+    // Main function to return all events
+    getListWarantyData() {
+        return [
+            {
+                id: 1,
+                refNo: 'CLM-2025-001',
+                claimDate: '2025-09-01',
+                dealerName: 'AutoWorld KL',
+                claimType: 'Tire Defect',
+                status: 0, // Pending
+                summary: {
+                    ctcNo: 'CTC-2025-001',
+                    scrapNo: 'SCR-8765',
+                    invoiceNo: 'INV-4567'
+                },
+                dealerInfo: {
+                    dealerCode: 'DLR-001',
+                    contactPerson: 'Ahmad Zaki',
+                    contactNo: '+6012-3456789'
+                },
+                customerInfo: {
+                    name: 'Lee Wei Ming',
+                    vehicle: 'Toyota Hilux 2.8G',
+                    regNo: 'WXY 4567'
+                },
+                tires: {
+                    size: '265/65R17',
+                    pattern: 'Open Country A/T',
+                    serialNo: 'TYR-99887766',
+                    treadDepths: [6.5, 6.7, 6.6, 6.4]
+                },
+                problem: {
+                    issue: 'Sidewall crack within 6 months of purchase',
+                    imageURL: ['/demo/images/sidewall-damage.jpg'], // relative to /public
+                    damageCode: 'D-102 (Sidewall Separation)'
+                },
 
-  // Return first 5 events
-  getListEventMini() {
-    return Promise.resolve(this.getListEventData().slice(0, 5));
-  },
+                ctcDetails: {
+                    ctcNo: 'CTC-2025-001',
+                    status: 'Pending Review'
+                },
+                scrapDetails: {
+                    scrapNo: 'SCR-8765',
+                    status: 'Pending Photo Upload'
+                },
+                claimVariable: {
+                    amount: 'RM 450.00',
+                    replacementType: 'Partial'
+                },
+                replacementOrder: {
+                    orderNo: 'ORD-5569',
+                    name: 'Proxes',
+                    item: 'Proxes R45',
+                    quantity: '4',
+                    total: '500.00',
+                    subTotal: '2000.00'
+                },
+                reimbursement: {
+                    refNo: 'TBD-1109',
+                    orderNo: 'TY-119',
+                    status: 'Return'
+                },
+                report: {
+                    file: 'CLM-2025-001-Report.pdf'
+                }
+            },
+            {
+                id: 2,
+                refNo: 'CLM-2025-002',
+                claimDate: '2025-09-03',
+                dealerName: 'Speedy Motors',
+                claimType: 'Manufacturing',
+                status: 1, // ETEN Approved
+                summary: {
+                    ctcNo: 'CTC-2025-002',
+                    scrapNo: 'SCR-1122',
+                    invoiceNo: 'INV-4588'
+                },
+                dealerInfo: {
+                    dealerCode: 'DLR-002',
+                    contactPerson: 'Siti Noraini',
+                    contactNo: '+6017-9988776'
+                },
+                customerInfo: {
+                    name: 'Raj Kumar',
+                    vehicle: 'Toyota Vios 1.5G',
+                    regNo: 'VBD 3321'
+                },
+                tires: {
+                    size: '195/55R15',
+                    pattern: 'Proxes R45',
+                    serialNo: 'TYR-22334455',
+                    treadDepths: [7.0, 7.1, 7.0, 7.2]
+                },
+                problem: {
+                    issue: 'Uneven tread wear within 3 months',
+                    photos: ['https://example.com/images/tread_wear.jpg'],
+                    damageCode: 'D-210 (Tread Separation)'
+                },
+                ctcDetails: {
+                    ctcNo: 'CTC-2025-002',
+                    status: 'Reviewed'
+                },
+                scrapDetails: {
+                    scrapNo: 'SCR-1122',
+                    status: 'Received'
+                },
+                claimVariable: {
+                    amount: 'RM 600.00',
+                    replacementType: 'Full'
+                },
+                replacementOrder: {
+                    orderNo: 'ORD-5570',
+                    name: 'Proxes',
+                    item: 'Proxes R45',
+                    quantity: '4',
+                    total: '500.00',
+                    subTotal: '2000.00'
+                },
+                reimbursement: {
+                    refNo: 'TBD-1109',
+                    orderNo: 'TY-120',
+                    status: 'Not Return'
+                },
+                report: {
+                    file: 'CLM-2025-002-Report.pdf'
+                }
+            },
+            {
+                id: 3,
+                refNo: 'CLM-2025-003',
+                claimDate: '2025-09-04',
+                dealerName: 'MegaTire Johor',
+                claimType: 'Warranty Ext.',
+                status: 2, // ETEN Rejected
+                summary: {
+                    ctcNo: 'CTC-2025-003',
+                    scrapNo: 'SCR-3344',
+                    invoiceNo: 'INV-4601'
+                },
+                dealerInfo: {
+                    dealerCode: 'DLR-003',
+                    contactPerson: 'Tan Chee Hock',
+                    contactNo: '+6019-5566778'
+                },
+                customerInfo: {
+                    name: 'Aminah Binti Yusof',
+                    vehicle: 'Perodua Myvi 1.3',
+                    regNo: 'JDK 7788'
+                },
+                tires: {
+                    size: '175/65R14',
+                    pattern: 'NanoEnergy 3',
+                    serialNo: 'TYR-44556677',
+                    treadDepths: [6.8, 6.9, 6.7, 6.9]
+                },
+                problem: {
+                    issue: 'Customer reported vibration noise',
+                    photos: ['https://example.com/images/vibration_issue.jpg'],
+                    damageCode: 'D-305 (Noise/Vibration)'
+                },
+                ctcDetails: {
+                    ctcNo: 'CTC-2025-003',
+                    status: 'Rejected'
+                },
+                scrapDetails: {
+                    scrapNo: 'SCR-3344',
+                    status: 'Not Required'
+                },
+                claimVariable: {
+                    amount: 'RM 280.00',
+                    replacementType: 'Partial'
+                },
+                replacementOrder: {
+                    orderNo: 'ORD-5570',
+                    name: 'Proxes',
+                    item: 'Proxes R45',
+                    quantity: '4',
+                    total: '500.00',
+                    subTotal: '2000.00'
+                },
+                reimbursement: {
+                    refNo: 'TBD-1109',
+                    orderNo: 'TY-120',
+                    status: 'Not Return'
+                },
+                report: {
+                    file: 'CLM-2025-003-Report.pdf'
+                }
+            },
+            {
+                id: 4,
+                refNo: 'CLM-2025-004',
+                claimDate: '2025-09-05',
+                dealerName: 'CityTire Penang',
+                claimType: 'Damage Claim',
+                status: 3, // Processing
+                summary: {
+                    ctcNo: 'CTC-2025-004',
+                    scrapNo: 'SCR-5566',
+                    invoiceNo: 'INV-4620'
+                },
+                dealerInfo: {
+                    dealerCode: 'DLR-004',
+                    contactPerson: 'Lim Wei Han',
+                    contactNo: '+6011-2233445'
+                },
+                customerInfo: {
+                    name: 'Chan Kok Leong',
+                    vehicle: 'Honda Civic 1.8S',
+                    regNo: 'PNA 6621'
+                },
+                tires: {
+                    size: '225/45R17',
+                    pattern: 'Proxes T1 Sport',
+                    serialNo: 'TYR-77889900',
+                    treadDepths: [7.5, 7.5, 7.4, 7.6]
+                },
+                problem: {
+                    issue: 'Puncture not repairable (manufacturing fault claimed)',
+                    photos: ['https://example.com/images/puncture_fault.jpg'],
+                    damageCode: 'D-405 (Impact Damage)'
+                },
+                ctcDetails: {
+                    ctcNo: 'CTC-2025-004',
+                    status: 'In Review'
+                },
+                scrapDetails: {
+                    scrapNo: 'SCR-5566',
+                    status: 'Pending Inspection'
+                },
+                claimVariable: {
+                    amount: 'RM 500.00',
+                    replacementType: 'Partial'
+                },
+                replacementOrder: {
+                    orderNo: 'ORD-5570',
+                    name: 'Proxes',
+                    item: 'Proxes R45',
+                    quantity: '4',
+                    total: '500.00',
+                    subTotal: '2000.00'
+                },
+                reimbursement: {
+                    refNo: 'TBD-1109',
+                    orderNo: 'TY-120',
+                    status: 'Not Return'
+                },
+                report: {
+                    file: 'CLM-2025-004-Report.pdf'
+                }
+            },
+            {
+                id: 5,
+                refNo: 'CLM-2025-005',
+                claimDate: '2025-09-07',
+                dealerName: 'WheelHub Ipoh',
+                claimType: 'Tire Defect',
+                status: 4, // Toyo Approved
+                summary: {
+                    ctcNo: 'CTC-2025-005',
+                    scrapNo: 'SCR-6677',
+                    invoiceNo: 'INV-4633'
+                },
+                dealerInfo: {
+                    dealerCode: 'DLR-005',
+                    contactPerson: 'Mohd Hafiz',
+                    contactNo: '+6013-8899776'
+                },
+                customerInfo: {
+                    name: 'Suresh Kumar',
+                    vehicle: 'Mazda CX-5',
+                    regNo: 'ABC 9988'
+                },
+                tires: {
+                    size: '225/55R19',
+                    pattern: 'Open Country U/T',
+                    serialNo: 'TYR-99112233',
+                    treadDepths: [7.1, 7.2, 7.1, 7.0]
+                },
+                problem: {
+                    issue: 'Bulge developed on sidewall',
+                    photos: ['https://example.com/images/sidewall_bulge.jpg'],
+                    damageCode: 'D-220 (Sidewall Bulge)'
+                },
+                ctcDetails: {
+                    ctcNo: 'CTC-2025-005',
+                    status: 'Approved'
+                },
+                scrapDetails: {
+                    scrapNo: 'SCR-6677',
+                    status: 'Scrapped'
+                },
+                claimVariable: {
+                    amount: 'RM 900.00',
+                    replacementType: 'Full'
+                },
+                replacementOrder: {
+                    orderNo: 'ORD-5570',
+                    name: 'Proxes',
+                    item: 'Proxes R45',
+                    quantity: '4',
+                    total: '500.00',
+                    subTotal: '2000.00'
+                },
+                reimbursement: {
+                    refNo: 'TBD-1109',
+                    orderNo: 'TY-120',
+                    status: 'Not Return'
+                },
+                report: {
+                    file: 'CLM-2025-005-Report.pdf'
+                }
+            },
+            {
+                id: 6,
+                refNo: 'CLM-2025-006',
+                claimDate: '2025-09-08',
+                dealerName: 'MegaTire JB',
+                claimType: 'Manufacturing',
+                status: 0, // Pending
+                summary: {
+                    ctcNo: 'CTC-2025-006',
+                    scrapNo: 'SCR-7788',
+                    invoiceNo: 'INV-4644'
+                },
+                dealerInfo: {
+                    dealerCode: 'DLR-006',
+                    contactPerson: 'Farid Ismail',
+                    contactNo: '+6010-2233445'
+                },
+                customerInfo: {
+                    name: 'Nurul Aisyah',
+                    vehicle: 'Toyota Camry 2.5V',
+                    regNo: 'JBN 2210'
+                },
+                tires: {
+                    size: '215/55R17',
+                    pattern: 'Celsius',
+                    serialNo: 'TYR-55667788',
+                    treadDepths: [7.3, 7.2, 7.4, 7.3]
+                },
+                problem: {
+                    issue: 'Cracks along tread grooves',
+                    photos: ['https://example.com/images/tread_cracks.jpg'],
+                    damageCode: 'D-130 (Groove Cracking)'
+                },
+                ctcDetails: {
+                    ctcNo: 'CTC-2025-006',
+                    status: 'Pending Review'
+                },
+                scrapDetails: {
+                    scrapNo: 'SCR-7788',
+                    status: 'Pending Scrap'
+                },
+                claimVariable: {
+                    amount: 'RM 720.00',
+                    replacementType: 'Full'
+                },
+                replacementOrder: {
+                    orderNo: 'ORD-5570',
+                    name: 'Proxes',
+                    item: 'Proxes R45',
+                    quantity: '4',
+                    total: '500.00',
+                    subTotal: '2000.00'
+                },
+                reimbursement: {
+                    refNo: 'TBD-1109',
+                    orderNo: 'TY-120',
+                    status: 'Not Return'
+                },
+                report: {
+                    file: 'CLM-2025-006-Report.pdf'
+                }
+            },
+            {
+                id: 7,
+                refNo: 'CLM-2025-007',
+                claimDate: '2025-09-09',
+                dealerName: 'TireZone Melaka',
+                claimType: 'Damage Claim',
+                status: 5, // Toyo Rejected
+                summary: {
+                    ctcNo: 'CTC-2025-007',
+                    scrapNo: 'SCR-8899',
+                    invoiceNo: 'INV-4655'
+                },
+                dealerInfo: {
+                    dealerCode: 'DLR-007',
+                    contactPerson: 'Koh Mei Lin',
+                    contactNo: '+6018-7788990'
+                },
+                customerInfo: {
+                    name: 'Ganesh Pillai',
+                    vehicle: 'Proton X70',
+                    regNo: 'MCU 4455'
+                },
+                tires: {
+                    size: '225/60R18',
+                    pattern: 'Proxes CR1',
+                    serialNo: 'TYR-66778899',
+                    treadDepths: [7.0, 7.0, 6.9, 7.1]
+                },
+                problem: {
+                    issue: 'Curb damage not covered under warranty',
+                    photos: ['https://example.com/images/curb_damage.jpg'],
+                    damageCode: 'D-499 (External Damage)'
+                },
+                ctcDetails: {
+                    ctcNo: 'CTC-2025-007',
+                    status: 'Rejected'
+                },
+                scrapDetails: {
+                    scrapNo: 'SCR-8899',
+                    status: 'Not Accepted'
+                },
+                claimVariable: {
+                    amount: 'RM 850.00',
+                    replacementType: 'Full'
+                },
+                replacementOrder: {
+                    orderNo: 'ORD-5570',
+                    name: 'Proxes',
+                    item: 'Proxes R45',
+                    quantity: '4',
+                    total: '500.00',
+                    subTotal: '2000.00'
+                },
+                reimbursement: {
+                    refNo: 'TBD-1109',
+                    orderNo: 'TY-120',
+                    status: 'Not Return'
+                },
+                report: {
+                    file: 'CLM-2025-007-Report.pdf'
+                }
+            },
+            {
+                id: 8,
+                refNo: 'CLM-2025-008',
+                claimDate: '2025-09-10',
+                dealerName: 'CityTire KL',
+                claimType: 'Tire Defect',
+                status: 9, // Deleted
+                summary: {
+                    ctcNo: 'CTC-2025-008',
+                    scrapNo: 'SCR-9900',
+                    invoiceNo: 'INV-4666'
+                },
+                dealerInfo: {
+                    dealerCode: 'DLR-008',
+                    contactPerson: 'Roslan Mahmud',
+                    contactNo: '+6016-6677889'
+                },
+                customerInfo: {
+                    name: 'Lim Jia Yi',
+                    vehicle: 'Honda HR-V',
+                    regNo: 'WTT 9087'
+                },
+                tires: {
+                    size: '215/60R16',
+                    pattern: 'NanoEnergy Van',
+                    serialNo: 'TYR-77889911',
+                    treadDepths: [7.6, 7.5, 7.6, 7.6]
+                },
+                problem: {
+                    issue: 'Deleted by admin (duplicate claim)',
+                    photos: [],
+                    damageCode: 'N/A'
+                },
+                ctcDetails: {
+                    ctcNo: 'CTC-2025-008',
+                    status: 'Deleted'
+                },
+                scrapDetails: {
+                    scrapNo: 'SCR-9900',
+                    status: 'N/A'
+                },
+                claimVariable: {
+                    amount: 'RM 0.00',
+                    replacementType: 'N/A'
+                },
+                replacementOrder: {
+                    orderNo: 'ORD-5570',
+                    name: 'Proxes',
+                    item: 'Proxes R45',
+                    quantity: '4',
+                    total: '500.00',
+                    subTotal: '2000.00'
+                },
+                reimbursement: {
+                    refNo: 'TBD-1109',
+                    orderNo: 'TY-120',
+                    status: 'Not Return'
+                },
+                report: {
+                    file: 'CLM-2025-008-Report.pdf'
+                }
+            },
+            {
+                id: 9,
+                refNo: 'CLM-2025-009',
+                claimDate: '2025-09-11',
+                dealerName: 'TyreKing Sabah',
+                claimType: 'Warranty Ext.',
+                status: 0, // Pending
+                summary: {
+                    ctcNo: 'CTC-2025-009',
+                    scrapNo: 'SCR-1123',
+                    invoiceNo: 'INV-4677'
+                },
+                dealerInfo: {
+                    dealerCode: 'DLR-009',
+                    contactPerson: 'Fiona Tan',
+                    contactNo: '+6012-9988776'
+                },
+                customerInfo: {
+                    name: 'Raymond Wong',
+                    vehicle: 'Nissan X-Trail',
+                    regNo: 'SAB 7788'
+                },
+                tires: {
+                    size: '225/65R17',
+                    pattern: 'Open Country A/T III',
+                    serialNo: 'TYR-88990011',
+                    treadDepths: [6.9, 7.0, 6.8, 7.0]
+                },
+                problem: {
+                    issue: 'Noise at high speed',
+                    photos: ['https://example.com/images/high_speed_noise.jpg'],
+                    damageCode: 'D-310 (Noise)'
+                },
+                ctcDetails: {
+                    ctcNo: 'CTC-2025-009',
+                    status: 'Pending'
+                },
+                scrapDetails: {
+                    scrapNo: 'SCR-1123',
+                    status: 'Pending Scrap'
+                },
+                claimVariable: {
+                    amount: 'RM 500.00',
+                    replacementType: 'Partial'
+                },
+                replacementOrder: {
+                    orderNo: 'ORD-5570',
+                    name: 'Proxes',
+                    item: 'Proxes R45',
+                    quantity: '4',
+                    total: '500.00',
+                    subTotal: '2000.00'
+                },
+                reimbursement: {
+                    refNo: 'TBD-1109',
+                    orderNo: 'TY-120',
+                    status: 'Not Return'
+                },
+                report: {
+                    file: 'CLM-2025-009-Report.pdf'
+                }
+            }
+        ];
+    },
 
-  // Return first 10 events
-  getListEventSmall() {
-    return Promise.resolve(this.getListEventData().slice(0, 10));
-  },
+    // Return first 5 events
+    getListEventMini() {
+        return Promise.resolve(this.getListWarantyData().slice(0, 5));
+    },
 
-  // Return all events
-  getListEvent() {
-    return Promise.resolve(this.getListEventData());
-  },
+    // Return first 10 events
+    getListEventSmall() {
+        return Promise.resolve(this.getListWarantyData().slice(0, 10));
+    },
+
+    // Return all events
+    getListEvent() {
+        return Promise.resolve(this.getListWarantyData());
+    }
 };

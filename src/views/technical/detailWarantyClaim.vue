@@ -1,178 +1,287 @@
 <template>
-    <Fluid>
-        <div class="flex flex-col md:flex-row gap-8">
-            <div class="md:w-2/3">
-                <!-- Header -->
-                <div class="flex flex-col md:flex-row gap-8">
-                    <div class="card flex flex-col gap-6 w-full">
-                        <div class="text-2xl font-bold text-gray-800 border-b pb-2">Waranty Infromation</div>
-
-                        <div class="flex items-center justify-between w-full">
-                            <!-- Account No -->
-                            <div>
-                                <span class="block text-sm text-gray-500">Refrence Number.</span>
-                                <span class="text-lg font-medium">{{ warantyDetail.refNo }}</span>
-                            </div>
-
-                            <!-- Create Button -->
-                            <RouterLink to="/marketing/editEtenUser">
-                                <Button type="button" label="Edit" />
+  <div class="p-6">
+    <div class="flex flex-col md:flex-row gap-8">
+      <!-- LEFT SIDE -->
+      <div class="md:w-2/3">
+        <!-- Warranty Info -->
+        <div class="card flex flex-col gap-6 w-full mb-6">
+          <div class="text-2xl font-bold text-gray-800 border-b pb-2 justify-between flex items-center">
+            Claim Details
+          <div class="inline-flex items-center gap-2">
+                            <!-- Edit Event -->
+                            <RouterLink to="/marketing/editEvent">
+                                <Button label="Report" class="p-button-info" size="small" />
                             </RouterLink>
-                        </div>
 
-                        <div class="font-semibold text-xl border-b pb-2 mt-8">👤Dealer Information</div>
-                        <div class="flex flex-col md:flex-row gap-4">
-                            <div class="w-full">
-                                <span class="text-sm text-gray-500">Dealer Name</span>
-                                <p class="text-lg font-medium">{{ warantyDetail.dealerName }}</p>
-                            </div>
-                            <div class="w-full">
-                                <span class="text-sm text-gray-500">Dealer Code</span>
-                                <p class="text-lg font-medium">{{ warantyDetail.dealerInfo.dealerCode }}</p>
-                            </div>
-                        </div>
-                        <div class="flex flex-col md:flex-row gap-4">
-                            <div class="w-full">
-                                <span class="text-sm text-gray-500">Contact Person</span>
-                                <p class="text-lg font-medium">{{ warantyDetail.dealerInfo.contactPerson }}</p>
-                            </div>
-                            <div class="w-full">
-                                <span class="text-sm text-gray-500">Contact Number</span>
-                                <p class="text-lg font-medium">{{ warantyDetail.dealerInfo.contactNo }}</p>
-                            </div>
-                        </div>
-                        <div class="flex flex-col md:flex-row gap-4">
-                            <div class="w-full">
-                                <span class="text-sm text-gray-500">Claim Type</span>
-                                <p class="text-lg font-medium">{{ warantyDetail.claimType }}</p>
-                            </div>
-                            <div class="w-full">
-                                <span class="text-sm text-gray-500">CTC Number</span>
-                                <p class="text-lg font-medium">{{ warantyDetail.summary.ctcNo }}</p>
-                            </div>
-                        </div>
-                        <div class="flex flex-col md:flex-row gap-4">
-                            <div class="w-full">
-                                <span class="text-sm text-gray-500">Scrap Number</span>
-                                <p class="text-lg font-medium">{{ warantyDetail.summary.scrapNo }}</p>
-                            </div>
-                            <div class="w-full">
-                                <span class="text-sm text-gray-500">Invoice Number</span>
-                                <p class="text-lg font-medium">{{ warantyDetail.summary.invoiceNo }}</p>
-                            </div>
-                        </div>
-
-                        <div class="font-semibold text-xl border-b pb-2 mt-8">👤Customer Information</div>
-                        <div class="flex flex-col md:flex-row gap-4">
-                            <div class="w-full">
-                                <span class="text-sm text-gray-500">Customer Name</span>
-                                <p class="text-lg font-medium">{{ warantyDetail.customerInfo.name }}</p>
-                            </div>
-                            <div class="w-full">
-                                <span class="text-sm text-gray-500">Vehicle</span>
-                                <p class="text-lg font-medium">{{ warantyDetail.customerInfo.vehicle }}</p>
-                            </div>
-                        </div>
-
-                        <div class="flex flex-col md:flex-row gap-4">
-                            <div class="w-full">
-                                <span class="text-sm text-gray-500">Registration Number</span>
-                                <p class="text-lg font-medium">{{ warantyDetail.customerInfo.regNo }}</p>
-                            </div>
-                            <div class="w-full">
-                                <span class="text-sm text-gray-500">Damage Code</span>
-                                <p class="text-lg font-medium">{{ warantyDetail.problem.damageCode }}</p>
-                            </div>
+                            <!-- Delete Event -->
+                            <Button label="Download" class="p-button-success" size="small" />
                         </div>
                     </div>
-                </div>
+
+          <!-- Reference -->
+          <div class="flex items-center justify-between w-full">
+            <div>
+              <span class="block text-sm text-gray-500">Reference Number</span>
+              <span class="text-lg font-medium">{{ warantyDetail.refNo }}</span>
             </div>
-            <div class="md:w-1/3">
-                <!-- Suspend Account -->
-                <div class="card flex flex-col w-full">
-                    <!-- Title -->
-                    <div class="flex items-center justify-between border-b pb-2 mb-2">
-                        <div class="text-2xl font-bold text-gray-800">Tires Details</div>
-                        <!-- <Tag :value="memberDetail.status === 1 ? 'Active' : 'Inactive'" :severity="memberDetail.status === 1 ? 'success' : 'danger'" /> -->
-                    </div>
-
-                    <!-- Table -->
-                    <div class="overflow-x-auto">
-                        <table class="w-full text-sm text-left text-gray-700">
-                            <tbody>
-                                <!-- Allow Waranty -->
-                                <tr class="border-b">
-                                    <td className="px-4 py-2 font-medium">Size</td>
-                                    <td className="px-4 py-2 text-right">{{ warantyDetail.tires.size }}</td>
-                                </tr>
-
-                                <tr class="border-b">
-                                    <td className="px-4 py-2 font-medium">Pattern</td>
-                                    <td className="px-4 py-2 text-right">{{ warantyDetail.tires.pattern }}</td>
-                                </tr>
-
-                                <!-- Allow Order -->
-                                <tr class="border-b">
-                                    <td class="px-4 py-2 font-medium">Serial Number</td>
-                                    <td className="px-4 py-2 text-right">{{ warantyDetail.tires.serialNo }}</td>
-                                </tr>
-                                <!-- Allow Billing -->
-                                <tr class="border-b">
-                                    <td class="px-4 py-2 font-medium">Thread Depths Tire 1</td>
-                                    <td class="px-4 py-2 text-right">{{ warantyDetail.tires.treadDepths[0] }}</td>
-                                </tr>
-
-                                <tr class="border-b">
-                                    <td class="px-4 py-2 font-medium">Thread Depths Tire 2</td>
-                                    <td class="px-4 py-2 text-right">{{ warantyDetail.tires.treadDepths[1] }}</td>
-                                </tr>
-
-                                <tr class="border-b">
-                                    <td class="px-4 py-2 font-medium">Thread Depths Tire 3</td>
-                                    <td class="px-4 py-2 text-right">{{ warantyDetail.tires.treadDepths[2] }}</td>
-                                </tr>
-
-                                <tr class="border-b">
-                                    <td class="px-4 py-2 font-medium">Thread Depths Tire 4</td>
-                                    <td class="px-4 py-2 text-right">{{ warantyDetail.tires.treadDepths[3] }}</td>
-                                </tr>
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-
-                <!-- Device List -->
-                <div class="card flex flex-col w-full">
-                    <div class="text-2xl font-bold text-gray-800 border-b pb-2 mb-3">Devices</div>
-                    <div class="overflow-x-auto">
-                        <table class="w-full text-sm text-left">
-                            <tbody>
-                                <tr v-for="device in devices" :key="device.id" class="border-b">
-                                    <!-- Device info -->
-                                    <td class="px-4 py-3">
-                                        <div class="flex items-center gap-2 text-gray-800 font-bold">
-                                            <i class="pi pi-tablet text-black-500"></i>
-                                            {{ device.name }}
-                                        </div>
-                                        <div class="ml-6 text-gray-500 text-xs mt-2">
-                                            <div>ID: {{ device.uniqueId }}</div>
-                                            <div>Active at: {{ device.lastActive }}</div>
-                                        </div>
-                                    </td>
-
-                                    <!-- Action -->
-                                    <td class="px-4 py-3 text-right align-top">
-                                        <Button :label="device.isBlocked ? 'Un-block' : 'Block'" :severity="device.isBlocked ? 'success' : 'danger'" size="small" @click="toggleBlock(device)" />
-                                    </td>
-                                </tr>
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-            </div>
+            <RouterLink to="/marketing/editEtenUser"></RouterLink>
+          </div>
         </div>
-    </Fluid>
+
+        <!-- Tires Details (2x2 layout) -->
+        <div class="card flex flex-col w-full">
+          <div class="flex items-center justify-between border-b pb-2 mb-4">
+            <div class="text-2xl font-bold text-gray-800">Tires Details</div>
+          </div>
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm text-gray-700">
+            <div>
+              <span class="block text-gray-500 text-sm">Size</span>
+              <p class="font-medium text-lg">{{ warantyDetail.tires.size }}</p>
+            </div>
+            <div>
+              <span class="block text-gray-500 text-sm">Pattern</span>
+              <p class="font-medium text-lg">{{ warantyDetail.tires.pattern }}</p>
+            </div>
+            <div>
+              <span class="block text-gray-500 text-sm">Serial Number</span>
+              <p class="font-medium text-lg">{{ warantyDetail.tires.serialNo }}</p>
+            </div>
+            <div>
+              <span class="block text-gray-500 text-sm">Tread Depth Tire 1</span>
+              <p class="font-medium text-lg">{{ warantyDetail.tires.treadDepths[0] }}</p>
+            </div>
+            <div>
+              <span class="block text-gray-500 text-sm">Tread Depth Tire 2</span>
+              <p class="font-medium text-lg">{{ warantyDetail.tires.treadDepths[1] }}</p>
+            </div>
+            <div>
+              <span class="block text-gray-500 text-sm">Tread Depth Tire 3</span>
+              <p class="font-medium text-lg">{{ warantyDetail.tires.treadDepths[2] }}</p>
+            </div>
+            <div>
+              <span class="block text-gray-500 text-sm">Tread Depth Tire 4</span>
+              <p class="font-medium text-lg">{{ warantyDetail.tires.treadDepths[3] }}</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Problem Issue -->
+        <div class="card flex flex-col w-full">
+          <div class="flex items-center justify-between border-b pb-2 mb-4">
+            <div class="text-2xl font-bold text-gray-800">Problem Issue</div>
+          </div>
+
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm text-gray-700">
+            <!-- Problem -->
+            <div>
+              <span class="block text-gray-500 text-sm">Problem</span>
+              <p class="font-medium text-lg">{{ warantyDetail.problem.issue }}</p>
+            </div>
+
+            <!-- Damage Code -->
+            <div>
+              <span class="block text-gray-500 text-sm">Damage Code</span>
+              <p class="font-medium text-lg">{{ warantyDetail.problem.damageCode }}</p>
+            </div>
+
+            <!-- Photos -->
+            <div class="md:col-span-2">
+              <span class="block text-gray-500 text-sm mb-2">Photos</span>
+              <div class="flex flex-wrap gap-3">
+                <img
+                  v-for="(photo, index) in warantyDetail.problem.imageURL"
+                  :key="index"
+                  :src="photo"
+                  alt="Problem photo"
+                  class="w-32 h-32 object-cover rounded-lg shadow"
+                />
+              </div>
+            </div>
+          </div>
+        </div> <!-- ✅ properly closed Problem Issue card -->
+
+        <!-- CTC Details -->
+        <div class="card flex flex-col w-full">
+          <div class="flex items-center justify-between border-b pb-2 mb-4">
+            <div class="text-2xl font-bold text-gray-800">CTC Details</div>
+          </div>
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm text-gray-700">
+            <div>
+              <span class="block text-gray-500 text-sm">Claim Date</span>
+              <p class="font-medium text-lg">{{ warantyDetail.claimDate }}</p>
+            </div>
+            <div>
+              <span class="block text-gray-500 text-sm">Claim Ref No</span>
+              <p class="font-medium text-lg">{{ warantyDetail.summary.ctcNo }}</p>
+            </div>
+            <div>
+              <span class="block text-gray-500 text-sm">Dealer Name</span>
+              <p class="font-medium text-lg">{{ warantyDetail.dealerName }}</p>
+            </div>
+            <div>
+              <span class="block text-gray-500 text-sm">Claim Type</span>
+              <p class="font-medium text-lg">{{ warantyDetail.claimType}}</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Scrap Details -->
+        <div class="card flex flex-col w-full">
+          <div class="flex items-center justify-between border-b pb-2 mb-4">
+            <div class="text-2xl font-bold text-gray-800">Scrap Details</div>
+          </div>
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm text-gray-700">
+            <div>
+              <span class="block text-gray-500 text-sm">Claim Date</span>
+              <p class="font-medium text-lg">{{ warantyDetail.claimDate }}</p>
+            </div>
+            <div>
+              <span class="block text-gray-500 text-sm">Claim Ref No</span>
+              <p class="font-medium text-lg">{{ warantyDetail.summary.scrapNo }}</p>
+            </div>
+            <div>
+              <span class="block text-gray-500 text-sm">Dealer Name</span>
+              <p class="font-medium text-lg">{{ warantyDetail.dealerName}}</p>
+            </div>
+            <div>
+              <span class="block text-gray-500 text-sm">Claim Type</span>
+              <p class="font-medium text-lg">{{ warantyDetail.claimType }}</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Claim Variable -->
+        <div class="card flex flex-col w-full">
+          <div class="flex items-center justify-between border-b pb-2 mb-4">
+            <div class="text-2xl font-bold text-gray-800">Claim Variable</div>
+          </div>
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm text-gray-700">
+            <div>
+              <span class="block text-gray-500 text-sm">Claim Type</span>
+              <p class="font-medium text-lg">{{ warantyDetail.claimType }}</p>
+            </div>
+            <div>
+              <span class="block text-gray-500 text-sm">Invoice Number</span>
+              <p class="font-medium text-lg">{{ warantyDetail.summary.invoiceNo }}</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Replacement Order -->
+        <div class="card flex flex-col w-full">
+          <div class="flex items-center justify-between border-b pb-2 mb-4">
+            <div class="text-2xl font-bold text-gray-800">Replacement Order</div>
+          </div>
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm text-gray-700">
+            <div>
+              <span class="block text-gray-500 text-sm">Order No</span>
+              <p class="font-medium text-lg">{{ warantyDetail.replacementOrder.orderNo }}</p>
+            </div>
+            <div>
+              <span class="block text-gray-500 text-sm">Name</span>
+              <p class="font-medium text-lg">{{ warantyDetail.replacementOrder.name }}</p>
+            </div>
+            <div>
+              <span class="block text-gray-500 text-sm">Item</span>
+              <p class="font-medium text-lg">{{ warantyDetail.replacementOrder.item }}</p>
+            </div>
+            <div>
+              <span class="block text-gray-500 text-sm">Quantity</span>
+              <p class="font-medium text-lg">{{ warantyDetail.replacementOrder.quantity }}</p>
+            </div>
+            <div>
+              <span class="block text-gray-500 text-sm">Total</span>
+              <p class="font-medium text-lg">{{ warantyDetail.replacementOrder.total }}</p>
+            </div>
+            <div>
+              <span class="block text-gray-500 text-sm">Sub Total</span>
+              <p class="font-medium text-lg">{{ warantyDetail.replacementOrder.subTotal }}</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Reimbursement Details -->
+        <div class="card flex flex-col w-full">
+          <div class="flex items-center justify-between border-b pb-2 mb-4">
+            <div class="text-2xl font-bold text-gray-800">Reimbursement Details</div>
+          </div>
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm text-gray-700">
+            <div>
+              <span class="block text-gray-500 text-sm">Ref No</span>
+              <p class="font-medium text-lg">{{ warantyDetail.reimbursement.refNo }}</p>
+            </div>
+            <div>
+              <span class="block text-gray-500 text-sm">Order No</span>
+              <p class="font-medium text-lg">{{ warantyDetail.reimbursement.orderNo }}</p>
+            </div>
+            <div>
+              <span class="block text-gray-500 text-sm">Order Status</span>
+              <p class="font-medium text-lg">{{ warantyDetail.reimbursement.status }}</p>
+            </div>
+          </div>
+        </div>
+      </div> <!-- ✅ close LEFT SIDE -->
+
+      <!-- RIGHT SIDE -->
+      <div class="md:w-1/3 flex flex-col gap-6">
+        <!-- Customer Information -->
+        <div class="card flex flex-col w-full">
+          <div class="font-semibold text-xl border-b pb-2">
+            👤 Customer Information
+          </div>
+          <div class="overflow-x-auto">
+            <table class="w-full text-sm text-left text-gray-700">
+              <tbody>
+                <tr class="border-b">
+                  <td class="px-4 py-2 font-medium">Customer Name</td>
+                  <td class="px-4 py-2">{{ warantyDetail.customerInfo.name }}</td>
+                </tr>
+                <tr class="border-b">
+                  <td class="px-4 py-2 font-medium">Vehicle</td>
+                  <td class="px-4 py-2">{{ warantyDetail.customerInfo.vehicle }}</td>
+                </tr>
+                <tr>
+                  <td class="px-4 py-2 font-medium">Registration Number</td>
+                  <td class="px-4 py-2">{{ warantyDetail.customerInfo.regNo }}</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Dealer Information -->
+        <div class="card flex flex-col w-full">
+          <div class="font-semibold text-xl border-b pb-2">
+            🏬 Dealer Information
+          </div>
+          <div class="overflow-x-auto">
+            <table class="w-full text-sm text-left text-gray-700">
+              <tbody>
+                <tr class="border-b">
+                  <td class="px-4 py-2 font-medium">Dealer Name</td>
+                  <td class="px-4 py-2">{{ warantyDetail.dealerName }}</td>
+                </tr>
+                <tr class="border-b">
+                  <td class="px-4 py-2 font-medium">Dealer Code</td>
+                  <td class="px-4 py-2">{{ warantyDetail.dealerInfo.dealerCode }}</td>
+                </tr>
+                <tr class="border-b">
+                  <td class="px-4 py-2 font-medium">Contact Person</td>
+                  <td class="px-4 py-2">{{ warantyDetail.dealerInfo.contactPerson }}</td>
+                </tr>
+                <tr>
+                  <td class="px-4 py-2 font-medium">Contact Number</td>
+                  <td class="px-4 py-2">{{ warantyDetail.dealerInfo.contactNo }}</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div> <!-- ✅ close RIGHT SIDE -->
+    </div>
+  </div>
 </template>
+
 
 <script setup>
 import { ref } from 'vue';
@@ -211,62 +320,67 @@ const memberDetail = ref({
 const showPassword = ref(false);
 
 const warantyDetail = ref({
-    id: 1,
-    refNo: 'CLM-2025-001',
-    claimDate: '2025-09-01',
-    dealerName: 'AutoWorld KL',
-    claimType: 'Tire Defect',
-    status: 0, // Pending
-    summary: {
-        ctcNo: 'CTC-2025-001',
-        scrapNo: 'SCR-8765',
-        invoiceNo: 'INV-4567'
-    },
-    dealerInfo: {
-        dealerCode: 'DLR-001',
-        contactPerson: 'Ahmad Zaki',
-        contactNo: '+6012-3456789'
-    },
-    customerInfo: {
-        name: 'Lee Wei Ming',
-        vehicle: 'Toyota Hilux 2.8G',
-        regNo: 'WXY 4567'
-    },
-    tires: {
-        size: '265/65R17',
-        pattern: 'Open Country A/T',
-        serialNo: 'TYR-99887766',
-        treadDepths: [6.5, 6.7, 6.6, 6.4]
-    },
-    problem: {
-        issue: 'Sidewall crack within 6 months of purchase',
-        photos: ['https://example.com/images/sidewall_damage.jpg'],
-        damageCode: 'D-102 (Sidewall Separation)'
-    },
-    ctcDetails: {
-        ctcNo: 'CTC-2025-001',
-        status: 'Pending Review'
-    },
-    scrapDetails: {
-        scrapNo: 'SCR-8765',
-        status: 'Pending Photo Upload'
-    },
-    claimVariable: {
-        amount: 'RM 450.00',
-        replacementType: 'Partial'
-    },
-    replacementOrder: {
-        orderNo: 'ORD-5566',
-        item: 'Open Country A/T (1 pc)'
-    },
-    reimbursement: {
-        approvedAmount: 'RM 300.00',
-        status: 'Pending'
-    },
-    report: {
-        file: 'CLM-2025-001-Report.pdf'
-    }
-});
+        id: 1,
+        refNo: "CLM-2025-001",
+        claimDate: "2025-09-01",
+        dealerName: "AutoWorld KL",
+        claimType: "Tire Defect",
+        status: 0, // Pending
+        summary: {
+          ctcNo: "CTC-2025-001",
+          scrapNo: "SCR-8765",
+          invoiceNo: "INV-4567",
+        },
+        dealerInfo: {
+          dealerCode: "DLR-001",
+          contactPerson: "Ahmad Zaki",
+          contactNo: "+6012-3456789",
+        },
+        customerInfo: {
+          name: "Lee Wei Ming",
+          vehicle: "Toyota Hilux 2.8G",
+          regNo: "WXY 4567",
+        },
+        tires: {
+          size: "265/65R17",
+          pattern: "Open Country A/T",
+          serialNo: "TYR-99887766",
+          treadDepths: [6.5, 6.7, 6.6, 6.4],
+        },
+        problem: {
+        issue: "Sidewall crack within 6 months of purchase",
+        imageURL: ["/demo/images/sidewall-damage.jpg"], // relative to /public
+        damageCode: "D-102 (Sidewall Separation)",
+        },
+        ctcDetails: {
+          ctcNo: "CTC-2025-001",
+          status: "Pending Review",
+        },
+        scrapDetails: {
+          scrapNo: "SCR-8765",
+          status: "Pending Photo Upload",
+        },
+        claimVariable: {
+          amount: "RM 450.00",
+          replacementType: "Partial",
+         },
+        replacementOrder: {
+          orderNo: "ORD-5569",
+          name: "Proxes",
+          item: "Proxes R45",
+          quantity: "4",
+          total: "500.00",
+          subTotal: "2000.00",
+        },
+        reimbursement: {
+          refNo: "TBD-1109",
+          orderNo: "TY-119",
+          status: "Return",
+        },
+        report: {
+          file: "CLM-2025-001-Report.pdf",
+        },
+      });
 
 // 1. Suspend/Un-Activated
 const isActivated = ref(false);
