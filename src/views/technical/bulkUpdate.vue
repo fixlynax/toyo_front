@@ -60,9 +60,12 @@
                     {{ data.tyreSize }}
                 </template>
             </Column>
-            <Column field="tyreSize" header="Size" style="min-width: 8rem">
+
+            <Column field="mfgcode" header="MFG Code" style="min-width: 8rem">
                 <template #body="{ data }">
-                    {{ data.mfgcode }}
+                    <span class="text-black-600 font-semibold">
+                        {{ data.mfgcode }}
+                    </span>
                 </template>
             </Column>
         </DataTable>
