@@ -32,18 +32,18 @@
 
                         <div class="flex flex-col md:flex-row gap-4 mt-3">
                             <div class="w-full">
-                                <span class="block text-sm text-gray-500">Term Condition</span>
+                                <span class="block text-xm font-bold text-black-700">Term Condition</span>
                                 <p class="text-lg font-medium">{{ campaign.termCondition }}</p>
                             </div>
                         </div>
 
                         <div class="flex flex-col md:flex-row gap-4 mt-3">
                             <div class="w-full">
-                                <span class="block text-sm text-gray-500">Start Date</span>
+                                <span class="block text-xm font-bold text-black-700">Start Date</span>
                                 <p class="text-lg font-medium">{{ campaign.startDate }}</p>
                             </div>
                             <div class="w-full">
-                                <span class="block text-sm text-gray-500">End Date</span>
+                                <span class="block text-xm font-bold text-black-700">End Date</span>
                                 <p class="text-lg font-medium">{{ campaign.endDate }}</p>
                             </div>
                         </div>

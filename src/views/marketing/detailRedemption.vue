@@ -13,21 +13,21 @@
                     </div>
 
                     <!-- Recipient Info -->
-                    <div class="mt-2 grid grid-cols-2 gap-4 text-sm">
+                    <div class="mt-2 grid grid-cols-2 gap-4">
                         <div>
-                            <p class="text-xl font-bold text-black-700">Recipient</p>
-                            <p class="text-lg text-black-900">{{ redemption.recipientName }}</p>
+                            <span class="block text-xm font-bold text-black-700">Recipient</span>
+                            <p class="text-lg font-medium">{{ redemption.recipientName }}</p>
                         </div>
                         <div>
-                            <p class="text-xl font-bold text-black-700">Contact</p>
+                            <span class="block text-xm font-bold text-black-700">Contact</span>
                             <p class="text-lg text-black-500">{{ redemption.contactNumber }}</p>
                         </div>
                         <div>
-                            <p class="text-xl font-bold text-black-700">Redeemed Item</p>
+                            <span class="block text-xm font-bold text-black-700">Redeemed Item</span>
                             <p class="text-lg text-black-500">{{ redemption.itemName }}</p>
                         </div>
                         <div>
-                            <p class="text-xl font-bold text-black-700">Approved By</p>
+                            <span class="block text-xm font-bold text-black-700">Approved By</span>
                             <p class="text-lg text-black-500">{{ redemption.approvedBy }} ({{ redemption.adminID }})</p>
                         </div>
                     </div>
@@ -50,24 +50,24 @@
                     <!-- Shipping Info -->
                     <div class="grid grid-cols-4 gap-2 text-sm">
                         <div class="col-span-2">
-                            <p class="text-xl font-bold text-gray-700">Recipient</p>
-                            <p class="text-lg text-black-900">{{ redemption.recipientName }}</p>
+                            <span class="text-xm font-bold text-black-700">Recipient</span>
+                            <p class="text-lg font-medium">{{ redemption.recipientName }}</p>
                         </div>
                         <div class="col-span-2">
-                            <p class="text-xl font-bold text-gray-700">Contact</p>
-                            <p class="text-lg text-black-900">{{ redemption.contactNumber }}</p>
+                            <span class="text-xm font-bold text-black-700">Contact</span>
+                            <p class="text-lg font-medium">{{ redemption.contactNumber }}</p>
                         </div>
                         <div class="col-span-2">
-                            <p class="text-xl font-bold text-gray-700">Courier</p>
-                            <p class="text-lg text-black-900">{{ redemption.courierName }}</p>
+                            <span class="text-xm font-bold text-black-700">Courier</span>
+                            <p class="text-lg font-medium">{{ redemption.courierName }}</p>
                         </div>
                         <div class="col-span-2">
-                            <p class="text-xl font-bold text-gray-700">Tracking No</p>
-                            <p class="text-lg text-black-900">{{ redemption.trackingNumber }}</p>
+                            <span class="text-xm font-bold text-black-700">Tracking No</span>
+                            <p class="text-lg font-medium">{{ redemption.trackingNumber }}</p>
                         </div>
                         <div class="col-span-4">
-                            <p class="mt-4 text-xl font-bold text-gray-700">Delivery Location</p>
-                            <p class="text-lg text-gray-900">{{ redemption.addLine1 }}, {{ redemption.addLine2 }}, {{ redemption.addCity }}, {{ redemption.addState }}, {{ redemption.addPostcode }}, {{ redemption.addCountry }}</p>
+                            <span class="text-xm font-bold text-gray-700">Delivery Location</span>
+                            <p class="text-lg font-medium">{{ redemption.addLine1 }}, {{ redemption.addLine2 }}, {{ redemption.addCity }}, {{ redemption.addState }}, {{ redemption.addPostcode }}, {{ redemption.addCountry }}</p>
                         </div>
                     </div>
 

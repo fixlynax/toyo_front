@@ -8,46 +8,46 @@
                 <!-- Game Form -->
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div class="md:col-span-2">
-                        <label class="block font-medium text-gray-700">Title</label>
+                        <label class="block font-bold text-gray-700">Title</label>
                         <InputText v-model="game.title" class="w-full" />
                     </div>
 
                     <div class="md:col-span-2">
-                        <label class="block font-medium text-gray-700">Description</label>
+                        <label class="block font-bold text-gray-700">Description</label>
                         <Textarea v-model="game.desc" rows="3" class="w-full" />
                     </div>
 
                     <div class="grid grid-cols-1 md:grid-cols-3 gap-4 md:col-span-2">
                         <div>
-                            <label class="block font-medium text-gray-700">Location</label>
+                            <label class="block font-bold text-gray-700">Location</label>
                             <InputText v-model="game.location" class="w-full" />
                         </div>
 
                         <div>
-                            <label class="block font-medium text-gray-700">Start Date</label>
+                            <label class="block font-bold text-gray-700">Start Date</label>
                             <Calendar v-model="game.startDate" dateFormat="yy-mm-dd" class="w-full" />
                         </div>
 
                         <div>
-                            <label class="block font-medium text-gray-700">End Date</label>
+                            <label class="block font-bold text-gray-700">End Date</label>
                             <Calendar v-model="game.endDate" dateFormat="yy-mm-dd" class="w-full" />
                         </div>
                     </div>
 
                     <div>
-                        <label class="block font-medium text-gray-700">Quota Player</label>
+                        <label class="block font-bold text-gray-700">Quota Player</label>
                         <InputNumber v-model="game.quota" class="w-full" />
                     </div>
 
                     <div>
-                        <label class="block font-medium text-gray-700">Type Game</label>
+                        <label class="block font-bold text-gray-700">Type Game</label>
                         <Dropdown v-model="game.type" :options="typeOptions" optionLabel="label" optionValue="value" class="w-full" />
                     </div>
                 </div>
 
                 <!-- Upload Images -->
                 <div>
-                    <label class="block font-medium text-gray-700 mb-2">Upload Game Images</label>
+                    <label class="block font-bold text-gray-700 mb-2">Upload Game Images</label>
                     <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
                         <div>
                             <FileUpload mode="basic" name="image1" accept="image/*" customUpload @select="onImageSelect($event, 'image1URL')" chooseLabel="Upload Image 1" class="w-full" />
@@ -80,13 +80,13 @@
 
                             <!-- Prize Type -->
                             <div class="mb-3">
-                                <label class="block font-medium text-gray-700">Prize Type</label>
+                                <label class="block font-bold text-gray-700">Prize Type</label>
                                 <Dropdown v-model="prize.type" :options="prizeTypes" optionLabel="label" optionValue="value" class="w-full" />
                             </div>
 
                             <!-- Prize Fields -->
                             <div v-if="prize.type === 'Point'">
-                                <label class="block font-medium text-gray-700">Prize Name</label>
+                                <label class="block font-bold text-gray-700">Prize Name</label>
                                 <InputText v-model="prize.name" class="w-full mb-2" />
                                 <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
                                     <div>
@@ -103,34 +103,34 @@
                                     </div>
                                 </div>
                                 <div class="mt-3">
-                                    <label class="block font-medium text-gray-700">Prize Quota</label>
+                                    <label class="block font-bold text-gray-700">Prize Quota</label>
                                     <InputNumber v-model="prize.quota" class="w-full" />
                                 </div>
                             </div>
 
                             <div v-if="prize.type === 'Item'">
-                                <label class="block font-medium text-gray-700">Prize Name</label>
+                                <label class="block font-bold text-gray-700">Prize Name</label>
                                 <InputText v-model="prize.name" class="w-full mb-2" />
 
-                                <label class="block font-medium text-gray-700">Prize Value</label>
+                                <label class="block font-bold text-gray-700">Prize Value</label>
                                 <InputText v-model="prize.value" class="w-full mb-2" />
 
-                                <label class="block font-medium text-gray-700">Prize Quota</label>
+                                <label class="block font-bold text-gray-700">Prize Quota</label>
                                 <InputNumber v-model="prize.quota" class="w-full" />
                             </div>
 
                             <div v-if="prize.type === 'E-Voucher'">
-                                <label class="block font-medium text-gray-700">Prize Name</label>
+                                <label class="block font-bold text-gray-700">Prize Name</label>
                                 <InputText v-model="prize.name" class="w-full mb-2" />
 
-                                <label class="block font-medium text-gray-700">Prize Value</label>
+                                <label class="block font-bold text-gray-700">Prize Value</label>
                                 <InputText v-model="prize.value" class="w-full mb-2" />
 
-                                <label class="block font-medium text-gray-700">Prize Quota</label>
+                                <label class="block font-bold text-gray-700">Prize Quota</label>
                                 <InputNumber v-model="prize.quota" class="w-full mb-3" />
 
                                 <div class="flex flex-col items-start gap-2 w-full">
-                                    <label class="font-medium text-gray-700">Upload E-Voucher Code</label>
+                                    <label class="font-bold text-gray-700">Upload E-Voucher Code</label>
                                     <div class="flex gap-4">
                                         <FileUpload mode="basic" name="excel" accept=".xlsx,.xls" chooseLabel="Upload Excel" class="p-button-sm" />
                                         <Button icon="pi pi-download" label="Download Excel" class="p-button-sm p-button-outlined" />
@@ -139,17 +139,17 @@
                             </div>
 
                             <div v-if="prize.type === 'E-Wallet'">
-                                <label class="block font-medium text-gray-700">Prize Name</label>
+                                <label class="block font-bold text-gray-700">Prize Name</label>
                                 <InputText v-model="prize.name" class="w-full mb-2" />
 
-                                <label class="block font-medium text-gray-700">Prize Value</label>
+                                <label class="block font-bold text-gray-700">Prize Value</label>
                                 <InputText v-model="prize.value" class="w-full mb-2" />
 
-                                <label class="block font-medium text-gray-700">Prize Quota</label>
+                                <label class="block font-bold text-gray-700">Prize Quota</label>
                                 <InputNumber v-model="prize.quota" class="w-full mb-3" />
 
                                 <div class="flex flex-col items-start gap-2 w-full">
-                                    <label class="font-medium text-gray-700">Upload E-Wallet Pin</label>
+                                    <label class="font-bold text-gray-700">Upload E-Wallet Pin</label>
                                     <div class="flex gap-4">
                                         <FileUpload mode="basic" name="excel" accept=".xlsx,.xls" chooseLabel="Upload Excel" class="p-button-sm" />
                                         <Button icon="pi pi-download" label="Download Excel" class="p-button-sm p-button-outlined" />

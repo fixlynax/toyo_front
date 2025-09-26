@@ -12,30 +12,30 @@
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <!-- Title -->
                     <div class="md:col-span-1">
-                        <label class="block font-medium text-gray-700 mb-1">Title</label>
+                        <label class="block font-bold text-gray-700 mb-1">Title</label>
                         <InputText disabled v-model="catalogue.title" class="w-full" />
                     </div>
 
                     <!-- SKU -->
                     <div>
-                        <label class="block font-medium text-gray-700 mb-1">SKU</label>
+                        <label class="block font-bold text-gray-700 mb-1">SKU</label>
                         <InputText v-model="catalogue.sku" class="w-full" />
                     </div>
 
                     <!-- Description -->
                     <div class="md:col-span-2">
-                        <label class="block font-medium text-gray-700">Description</label>
+                        <label class="block font-bold text-gray-700">Description</label>
                         <Textarea v-model="catalogue.description" class="w-full" />
                     </div>
 
                     <!-- Terms & Instructions -->
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4 md:col-span-2">
                         <div>
-                            <label class="block font-medium text-gray-700">Terms</label>
+                            <label class="block font-bold text-gray-700">Terms</label>
                             <Textarea v-model="catalogue.terms" class="w-full" />
                         </div>
                         <div>
-                            <label class="block font-medium text-gray-700">Instruction</label>
+                            <label class="block font-bold text-gray-700">Instruction</label>
                             <Textarea v-model="catalogue.instruction" class="w-full" />
                         </div>
                     </div>
@@ -43,11 +43,11 @@
                     <!-- Purpose To & Publish Date -->
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4 md:col-span-2">
                         <div>
-                            <label class="block font-medium text-gray-700 mb-1">Purpose To</label>
+                            <label class="block font-bold text-gray-700 mb-1">Purpose To</label>
                             <Dropdown disabled v-model="catalogue.purpose" :options="purposeOptions" optionLabel="label" optionValue="value" placeholder="Select an option" class="w-full" />
                         </div>
                         <div>
-                            <label class="block font-medium text-gray-700 mb-1">Expiry</label>
+                            <label class="block font-bold text-gray-700 mb-1">Expiry</label>
                             <Calendar v-model="catalogue.expiry" class="w-full" />
                         </div>
                     </div>
@@ -55,11 +55,11 @@
                     <!-- Type & Birthday -->
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4 md:col-span-2">
                         <div>
-                            <label class="block font-medium text-gray-700 mb-1">Type</label>
+                            <label class="block font-bold text-gray-700 mb-1">Type</label>
                             <Dropdown v-model="catalogue.type" :options="typeOptions" optionLabel="label" optionValue="value" placeholder="Select a type" class="w-full" />
                         </div>
                         <div>
-                            <label class="block font-medium text-gray-700 mb-1">Is Birthday?</label>
+                            <label class="block font-bold text-gray-700 mb-1">Is Birthday?</label>
                             <Dropdown v-model="catalogue.isBirthday" :options="isBirthday" optionLabel="label" optionValue="value" placeholder="Select an option" class="w-full" />
                         </div>
                     </div>
@@ -67,11 +67,11 @@
                     <!-- Value Type & Value Amount (only for E-Voucher) -->
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4 md:col-span-2" v-if="catalogue.type === 'E-Voucher'">
                         <div>
-                            <label class="block font-medium text-gray-700 mb-1">Value Type</label>
+                            <label class="block font-bold text-gray-700 mb-1">Value Type</label>
                             <Dropdown v-model="catalogue.valueType" :options="valueOptions" optionLabel="label" optionValue="value" placeholder="Select an option" class="w-full" />
                         </div>
                         <div>
-                            <label class="block font-medium text-gray-700 mb-1">Value Amount</label>
+                            <label class="block font-bold text-gray-700 mb-1">Value Amount</label>
                             <InputNumber v-model="catalogue.valueAmount" class="w-full" />
                         </div>
                     </div>
@@ -79,7 +79,7 @@
                     <!-- If Item -->
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4 md:col-span-2" v-else-if="catalogue.type === 'Item'">
                         <div>
-                            <label class="block font-medium text-gray-700 mb-1">Quantity</label>
+                            <label class="block font-bold text-gray-700 mb-1">Quantity</label>
                             <InputNumber v-model="catalogue.valueAmount" class="w-full" />
                         </div>
                     </div>
@@ -87,7 +87,7 @@
 
                 <!-- Upload Images -->
                 <div>
-                    <label class="block font-medium text-gray-700 mb-2">Catalogue Images</label>
+                    <label class="block font-bold text-gray-700 mb-2">Catalogue Images</label>
                     <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
                         <div class="relative">
                             <FileUpload mode="basic" name="image1" accept="image/*" customUpload @select="onImageSelect($event, 'image1URL')" chooseLabel="Change Image 1" class="w-full" />
@@ -115,11 +115,11 @@
                         <div class="flex flex-col md:flex-row items-center justify-between gap-4 w-full">
                             <div class="flex gap-4 w-full md:w-auto">
                                 <div class="w-32">
-                                    <label class="block font-medium text-gray-700 mb-1">Used</label>
+                                    <label class="block font-bold text-gray-700 mb-1">Used</label>
                                     <span class="text-gray-800 font-semibold">{{ catalogue.usedPins }}</span>
                                 </div>
                                 <div class="w-32">
-                                    <label class="block font-medium text-gray-700 mb-1">Total</label>
+                                    <label class="block font-bold text-gray-700 mb-1">Total</label>
                                     <span class="text-gray-800 font-semibold">{{ catalogue.totalqty }}</span>
                                 </div>
                             </div>
@@ -144,7 +144,7 @@
                     </Column>
                     <Column header="Status" style="min-width: 8rem">
                         <template #body="{ data }">
-                            <span :class="data.pinUsedStatus ? 'text-red-600 font-medium' : 'text-green-600 font-medium'">
+                            <span :class="data.pinUsedStatus ? 'text-red-600 font-bold' : 'text-green-600 font-bold'">
                                 {{ data.pinUsedStatus ? 'Used' : 'Available' }}
                             </span>
                         </template>
@@ -167,11 +167,11 @@
                         <div class="flex flex-col md:flex-row items-center justify-between gap-4 w-full">
                             <div class="flex gap-4 w-full md:w-auto">
                                 <div class="w-32">
-                                    <label class="block font-medium text-gray-700 mb-1">Used</label>
+                                    <label class="block font-bold text-gray-700 mb-1">Used</label>
                                     <span class="text-gray-800 font-semibold">{{ catalogue.usedVouchers }}</span>
                                 </div>
                                 <div class="w-32">
-                                    <label class="block font-medium text-gray-700 mb-1">Total</label>
+                                    <label class="block font-bold text-gray-700 mb-1">Total</label>
                                     <span class="text-gray-800 font-semibold">{{ catalogue.totalVouchers }}</span>
                                 </div>
                             </div>
@@ -217,29 +217,29 @@
 
                 <div class="p-4 text-gray-600">
                     <div class="mb-4">
-                        <label class="block font-medium text-gray-700 mb-1">Reward Type</label>
+                        <label class="block font-bold text-gray-700 mb-1">Reward Type</label>
                         <Dropdown v-model="catalogue.birthdayReward.type" :options="birthdayRewardTypeOptions" optionLabel="label" optionValue="value" placeholder="Select reward type" class="w-full" />
                     </div> -->
 
                     <!-- If Points -->
                     <!-- <div v-if="catalogue.birthdayReward.type === 'Points'" class="grid grid-cols-1 md:grid-cols-3 gap-4">
                         <div>
-                            <label class="block font-medium text-gray-700 mb-1">Silver Tier Points</label>
+                            <label class="block font-bold text-gray-700 mb-1">Silver Tier Points</label>
                             <InputNumber v-model="catalogue.birthdayReward.points.silver" class="w-full" />
                         </div>
                         <div>
-                            <label class="block font-medium text-gray-700 mb-1">Gold Tier Points</label>
+                            <label class="block font-bold text-gray-700 mb-1">Gold Tier Points</label>
                             <InputNumber v-model="catalogue.birthdayReward.points.gold" class="w-full" />
                         </div>
                         <div>
-                            <label class="block font-medium text-gray-700 mb-1">Platinum Tier Points</label>
+                            <label class="block font-bold text-gray-700 mb-1">Platinum Tier Points</label>
                             <InputNumber v-model="catalogue.birthdayReward.points.platinum" class="w-full" />
                         </div>
                     </div> -->
 
                     <!-- If Reward -->
                     <!-- <div v-else-if="catalogue.birthdayReward.type === 'Reward'" class="mt-4">
-                        <label class="block font-medium text-gray-700 mb-1">Select Reward Item</label>
+                        <label class="block font-bold text-gray-700 mb-1">Select Reward Item</label>
                         <Dropdown v-model="catalogue.birthdayReward.itemId" :options="rewardItems" optionLabel="title" optionValue="id" placeholder="Select a reward item" class="w-full" />
                     </div>
                 </div>
@@ -258,15 +258,15 @@
                 <div class="p-4 text-gray-600">
                     <div class="grid grid-cols-1 md:grid-cols-3 gap-4 md:col-span-2">
                         <div>
-                            <label class="block font-medium text-gray-700 mb-1">Silver Point</label>
+                            <label class="block font-bold text-gray-700 mb-1">Silver Point</label>
                             <InputNumber v-model="catalogue.point1" class="w-full" />
                         </div>
                         <div>
-                            <label class="block font-medium text-gray-700 mb-1">Gold Point</label>
+                            <label class="block font-bold text-gray-700 mb-1">Gold Point</label>
                             <InputNumber v-model="catalogue.point2" class="w-full" />
                         </div>
                         <div>
-                            <label class="block font-medium text-gray-700 mb-1">Platinum Point</label>
+                            <label class="block font-bold text-gray-700 mb-1">Platinum Point</label>
                             <InputNumber v-model="catalogue.point3" class="w-full" />
                         </div>
                     </div>

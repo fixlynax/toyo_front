@@ -11,7 +11,7 @@
                         <h2 class="text-2xl font-bold text-gray-800">🎁 Redemption Details</h2>
                     </div>
 
-                    <div class="mt-2 grid grid-cols-2 gap-4 text-sm">
+                    <div class="mt-2 grid grid-cols-2 gap-4">
                         <div>
                             <p class="text-xl font-bold text-black-700">Recipient</p>
                             <p class="text-lg text-black-900">{{ redemption.recipientName }}</p>

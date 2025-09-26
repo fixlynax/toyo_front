@@ -32,18 +32,18 @@
 
                         <div class="flex flex-col md:flex-row gap-4 mt-3">
                             <div class="w-full">
-                                <span class="block text-sm text-gray-500">Location</span>
+                                <span class="block text-xm font-bold text-black-700">Location</span>
                                 <p class="text-lg font-medium">{{ game.location }}</p>
                             </div>
                         </div>
 
                         <div class="flex flex-col md:flex-row gap-4 mt-3">
                             <div class="w-full">
-                                <span class="block text-sm text-gray-500">Start Date</span>
+                                <span class="block text-xm font-bold text-black-700">Start Date</span>
                                 <p class="text-lg font-medium">{{ game.startDate }}</p>
                             </div>
                             <div class="w-full">
-                                <span class="block text-sm text-gray-500">End Date</span>
+                                <span class="block text-xm font-bold text-black-700">End Date</span>
                                 <p class="text-lg font-medium">{{ game.endDate }}</p>
                             </div>
                         </div>

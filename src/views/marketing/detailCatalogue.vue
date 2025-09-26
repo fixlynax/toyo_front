@@ -29,31 +29,31 @@
                     </div>
                     <div class="flex flex-col md:flex-row gap-4 mt-2" v-if="catalogue.type === 'E-Voucher'">
                         <div class="w-full">
-                            <span class="block text-sm text-gray-500">Value Type</span>
+                            <span class="block text-xm font-bold text-black-700">Value Type</span>
                             <p class="text-lg font-medium">{{ catalogue.valueType }}</p>
                         </div>
                         <div class="w-full">
-                            <span class="block text-sm text-gray-500">Value Amount</span>
+                            <span class="block text-xm font-bold text-black-700">Value Amount</span>
                             <p class="text-lg font-medium">{{ catalogue.valueAmount }}</p>
                         </div>
                     </div>
                     <div class="flex flex-col md:flex-row gap-4 mt-2">
                         <div class="w-full">
-                            <span class="block text-sm text-gray-500">Expiry Date</span>
+                            <span class="block text-xm font-bold text-black-700">Expiry Date</span>
                             <p class="text-lg font-medium">{{ catalogue.expiry }}</p>
                         </div>
                         <div class="w-full">
-                            <span class="block text-sm text-gray-500">Quantity</span>
+                            <span class="block text-xm font-bold text-black-700">Quantity</span>
                             <p class="text-lg font-medium">{{ catalogue.availableqty }} of {{ catalogue.totalqty }}</p>
                         </div>
                     </div>
                     <div class="flex flex-col md:flex-row gap-4 mt-2">
                         <div class="w-full">
-                            <span class="block text-sm text-gray-500">Terms</span>
+                            <span class="block text-xm font-bold text-black-700">Terms</span>
                             <p class="text-lg font-medium">{{ catalogue.terms }}</p>
                         </div>
                         <div class="w-full">
-                            <span class="block text-sm text-gray-500">Instruction</span>
+                            <span class="block text-xm font-bold text-black-700">Instruction</span>
                             <p class="text-lg font-medium">{{ catalogue.instruction }}</p>
                         </div>
                     </div>

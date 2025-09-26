@@ -10,7 +10,7 @@
                         <div class="flex items-center justify-between w-full">
                             <!-- Account No -->
                             <div>
-                                <span class="block text-sm text-gray-500">Member Code.</span>
+                                <span class="block text-xm font-bold text-black-700">Member Code.</span>
                                 <span class="text-lg font-medium">{{ memberDetail.etenUserID }}</span>
                             </div>
 
@@ -23,22 +23,22 @@
                         <div class="font-semibold text-xl border-b pb-2 mt-8">👤 Account Details</div>
                         <div class="flex flex-col md:flex-row gap-4">
                             <div class="w-full">
-                                <span class="text-sm text-gray-500">Name</span>
+                                <span class="text-xm font-bold text-black-700">Name</span>
                                 <p class="text-lg font-medium">{{ memberDetail.firstName }} {{ memberDetail.lastName }}</p>
                             </div>
                             <div class="w-full">
-                                <span class="text-sm text-gray-500">Gender</span>
+                                <span class="text-xm font-bold text-black-700">Gender</span>
                                 <p class="text-lg font-medium">{{ memberDetail.gender }}</p>
                             </div>
                         </div>
 
                         <div class="flex flex-col md:flex-row gap-4">
                             <div class="w-full">
-                                <span class="text-sm text-gray-500">Email</span>
+                                <span class="text-xm font-bold text-black-700">Email</span>
                                 <p class="text-lg font-medium">{{ memberDetail.emailAddress }}</p>
                             </div>
                             <div class="w-full">
-                                <span class="text-sm text-gray-500">Password</span>
+                                <span class="text-xm font-bold text-black-700">Password</span>
                                 <div class="flex items-center">
                                     <p class="text-lg font-medium mr-2 mb-0">
                                         {{ showPassword ? memberDetail.password : '••••••••' }}
@@ -55,34 +55,34 @@
                         </div>
                         <div class="flex flex-col md:flex-row gap-4">
                             <div class="w-full">
-                                <span class="text-sm text-gray-500">Mobile Number</span>
+                                <span class="text-xm font-bold text-black-700">Mobile Number</span>
                                 <p class="text-lg font-medium">{{ memberDetail.countryCode }} {{ memberDetail.mobileNumber }}</p>
                             </div>
 
                             <div class="w-full">
-                                <span class="text-sm text-gray-500">Level</span>
+                                <span class="text-xm font-bold text-black-700">Level</span>
                                 <p class="text-lg font-medium">{{ memberDetail.level }}</p>
                             </div>
                         </div>
 
                         <div class="flex flex-col md:flex-row gap-4">
                             <div class="w-full">
-                                <span class="text-sm text-gray-500">Race</span>
+                                <span class="text-xm font-bold text-black-700">Race</span>
                                 <p class="text-lg font-medium">{{ memberDetail.race }}</p>
                             </div>
                             <div class="w-full">
-                                <span class="text-sm text-gray-500">State</span>
+                                <span class="text-xm font-bold text-black-700">State</span>
                                 <p class="text-lg font-medium">{{ memberDetail.state }}</p>
                             </div>
                         </div>
 
                         <div class="flex flex-col md:flex-row gap-4">
                             <div class="w-full">
-                                <span class="text-sm text-gray-500">Member Since</span>
+                                <span class="text-xm font-bold text-black-700">Member Since</span>
                                 <p class="text-lg font-medium">{{ memberDetail.memberSince }}</p>
                             </div>
                             <div class="w-full">
-                                <span class="text-sm text-gray-500">Last Login</span>
+                                <span class="text-xm font-bold text-black-700">Last Login</span>
                                 <p class="text-lg font-medium">{{ memberDetail.lastLogin }}</p>
                             </div>
                         </div>

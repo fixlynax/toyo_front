@@ -28,22 +28,22 @@
                     <!-- Event Info -->
                     <div class="mt-6">
                         <h1 class="text-2xl font-bold text-gray-800">{{ event.title }}</h1>
-                        <p class="text-lg font-medium">{{ event.desc }}</p>
+                        <p class="text-lg font-bold">{{ event.desc }}</p>
 
                         <div class="flex flex-col md:flex-row gap-4 mt-3">
                             <div class="w-full">
-                                <span class="block text-sm text-gray-500">Location</span>
+                                <span class="block text-xm font-bold text-black-700">Location</span>
                                 <p class="text-lg font-medium">{{ event.location }}</p>
                             </div>
                         </div>
 
                         <div class="flex flex-col md:flex-row gap-4 mt-3">
                             <div class="w-full">
-                                <span class="block text-sm text-gray-500">Start Date</span>
+                                <span class="block text-xm font-bold text-black-700">Start Date</span>
                                 <p class="text-lg font-medium">{{ event.startDate }}</p>
                             </div>
                             <div class="w-full">
-                                <span class="block text-sm text-gray-500">End Date</span>
+                                <span class="block text-xm font-bold text-black-700">End Date</span>
                                 <p class="text-lg font-medium">{{ event.endDate }}</p>
                             </div>
                         </div>
@@ -55,8 +55,7 @@
                     <div class="flex items-center justify-between border-b pb-2 mb-2">
                         <div class="text-2xl font-bold text-gray-800">📋 Survey Info</div>
                     </div>
-
-                    <
+                    
                     <div class="space-y-6">
                         <!-- Loop through each question -->
                         <div v-for="(q, qIndex) in questions" :key="qIndex" class="border-b pb-4">

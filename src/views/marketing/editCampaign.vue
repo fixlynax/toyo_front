@@ -9,38 +9,38 @@
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <!-- Title -->
                     <div class="md:col-span-2">
-                        <label class="block font-medium text-gray-700">Title</label>
+                        <label class="block font-bold text-gray-700">Title</label>
                         <InputText v-model="campaign.title" class="w-full" />
                     </div>
 
                     <!-- Description -->
                     <div class="md:col-span-2">
-                        <label class="block font-medium text-gray-700">Description</label>
+                        <label class="block font-bold text-gray-700">Description</label>
                         <Textarea v-model="campaign.description" rows="3" class="w-full" />
                     </div>
 
                     <!-- Term Condition -->
                     <div class="md:col-span-2">
-                        <label class="block font-medium text-gray-700">Term & Condition</label>
+                        <label class="block font-bold text-gray-700">Term & Condition</label>
                         <Textarea v-model="campaign.termCondition" rows="3" class="w-full" />
                     </div>
 
                     <div class="grid grid-cols-1 md:grid-cols-3 gap-4 md:col-span-2">
                         <!-- Quota -->
                         <div>
-                            <label class="block font-medium text-gray-700">Quota</label>
+                            <label class="block font-bold text-gray-700">Quota</label>
                             <InputNumber v-model="campaign.quota" class="w-full" />
                         </div>
 
                         <!-- Max per user -->
                         <div>
-                            <label class="block font-medium text-gray-700">Max Per User</label>
+                            <label class="block font-bold text-gray-700">Max Per User</label>
                             <InputNumber v-model="campaign.maxPerUser" class="w-full" />
                         </div>
 
                         <!-- Gamification -->
                         <div>
-                            <label class="block font-medium text-gray-700">Gamification</label>
+                            <label class="block font-bold text-gray-700">Gamification</label>
                             <Dropdown v-model="campaign.isGamification" :options="gamificationOnOff" optionLabel="label" optionValue="value" class="w-full" />
                         </div>
                     </div>
@@ -48,15 +48,15 @@
                     <!-- Dates -->
                     <div class="grid grid-cols-1 md:grid-cols-3 gap-4 md:col-span-2">
                         <div>
-                            <label class="block font-medium text-gray-700">Publish Date</label>
+                            <label class="block font-bold text-gray-700">Publish Date</label>
                             <Calendar v-model="campaign.publishDate" dateFormat="yy-mm-dd" class="w-full" />
                         </div>
                         <div>
-                            <label class="block font-medium text-gray-700">Start Date</label>
+                            <label class="block font-bold text-gray-700">Start Date</label>
                             <Calendar v-model="campaign.startDate" dateFormat="yy-mm-dd" class="w-full" />
                         </div>
                         <div>
-                            <label class="block font-medium text-gray-700">End Date</label>
+                            <label class="block font-bold text-gray-700">End Date</label>
                             <Calendar v-model="campaign.endDate" dateFormat="yy-mm-dd" class="w-full" />
                         </div>
                     </div>
@@ -64,15 +64,15 @@
                     <!-- Points -->
                     <div class="grid grid-cols-1 md:grid-cols-3 gap-4 md:col-span-2">
                         <div>
-                            <label class="block font-medium text-gray-700 mb-1">Point Silver</label>
+                            <label class="block font-bold text-gray-700 mb-1">Point Silver</label>
                             <InputNumber v-model="campaign.point1" class="w-full" />
                         </div>
                         <div>
-                            <label class="block font-medium text-gray-700 mb-1">Point Gold</label>
+                            <label class="block font-bold text-gray-700 mb-1">Point Gold</label>
                             <InputNumber v-model="campaign.point2" class="w-full" />
                         </div>
                         <div>
-                            <label class="block font-medium text-gray-700 mb-1">Point Platinum</label>
+                            <label class="block font-bold text-gray-700 mb-1">Point Platinum</label>
                             <InputNumber v-model="campaign.point3" class="w-full" />
                         </div>
                     </div>
@@ -80,7 +80,7 @@
 
                 <!-- Upload Images -->
                 <div>
-                    <label class="block font-medium text-gray-700 mb-2">Campaign Images</label>
+                    <label class="block font-bold text-gray-700 mb-2">Campaign Images</label>
                     <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
                         <div v-for="(field, idx) in ['image1Path', 'image2Path', 'image3Path']" :key="idx" class="relative">
                             <FileUpload mode="basic" :name="field" accept="image/*" customUpload @select="onImageSelect($event, field)" :chooseLabel="`Change Image ${idx + 1}`" class="w-full" />
@@ -103,17 +103,17 @@
                             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                                 <!-- Reward Name -->
                                 <div>
-                                    <label class="block font-medium text-gray-700">Reward Name</label>
+                                    <label class="block font-bold text-gray-700">Reward Name</label>
                                     <InputText v-model="reward.name" class="w-full" />
                                 </div>
                                 <!-- Reward Quantity -->
                                 <div>
-                                    <label class="block font-medium text-gray-700">Quantity</label>
+                                    <label class="block font-bold text-gray-700">Quantity</label>
                                     <InputNumber v-model="reward.quantity" class="w-full" />
                                 </div>
                                 <!-- Reward Type -->
                                 <div>
-                                    <label class="block font-medium text-gray-700">Type</label>
+                                    <label class="block font-bold text-gray-700">Type</label>
                                     <Dropdown v-model="reward.type" :options="rewardTypes" optionLabel="label" optionValue="value" class="w-full" />
                                 </div>
 
@@ -121,15 +121,15 @@
                                 <template v-if="reward.type === 'point'">
                                     <div class="md:col-span-2 grid grid-cols-1 md:grid-cols-3 gap-4">
                                         <div>
-                                            <label class="block font-medium text-gray-700">Silver Points</label>
+                                            <label class="block font-bold text-gray-700">Silver Points</label>
                                             <InputNumber v-model="reward.points.silver" class="w-full" />
                                         </div>
                                         <div>
-                                            <label class="block font-medium text-gray-700">Gold Points</label>
+                                            <label class="block font-bold text-gray-700">Gold Points</label>
                                             <InputNumber v-model="reward.points.gold" class="w-full" />
                                         </div>
                                         <div>
-                                            <label class="block font-medium text-gray-700">Platinum Points</label>
+                                            <label class="block font-bold text-gray-700">Platinum Points</label>
                                             <InputNumber v-model="reward.points.platinum" class="w-full" />
                                         </div>
                                     </div>
@@ -137,7 +137,7 @@
 
                                 <template v-else-if="reward.type === 'pin'">
                                     <div>
-                                        <label class="block font-medium text-gray-700">Expiry Date</label>
+                                        <label class="block font-bold text-gray-700">Expiry Date</label>
                                         <Calendar v-model="reward.expiry" dateFormat="yy-mm-dd" class="w-full" />
                                     </div>
                                 </template>
@@ -160,27 +160,27 @@
                             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                                 <!-- Title -->
                                 <div>
-                                    <label class="block font-medium text-gray-700">Title</label>
+                                    <label class="block font-bold text-gray-700">Title</label>
                                     <InputText v-model="criteria.title" class="w-full" />
                                 </div>
                                 <!-- Type -->
                                 <div>
-                                    <label class="block font-medium text-gray-700">Type</label>
+                                    <label class="block font-bold text-gray-700">Type</label>
                                     <Dropdown v-model="criteria.type" :options="criteriaTypes" optionLabel="label" optionValue="value" class="w-full" />
                                 </div>
                                 <!-- Pattern -->
                                 <div>
-                                    <label class="block font-medium text-gray-700">Pattern</label>
+                                    <label class="block font-bold text-gray-700">Pattern</label>
                                     <InputText v-model="criteria.pattern" class="w-full" />
                                 </div>
                                 <!-- Size -->
                                 <div>
-                                    <label class="block font-medium text-gray-700">Size</label>
+                                    <label class="block font-bold text-gray-700">Size</label>
                                     <InputText v-model="criteria.size" class="w-full" />
                                 </div>
                                 <!-- Min Qty -->
                                 <div>
-                                    <label class="block font-medium text-gray-700">Min Qty</label>
+                                    <label class="block font-bold text-gray-700">Min Qty</label>
                                     <InputNumber v-model="criteria.minQty" class="w-full" />
                                 </div>
                             </div>

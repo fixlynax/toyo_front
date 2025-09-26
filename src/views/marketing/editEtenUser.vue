@@ -9,57 +9,57 @@
                 <!-- User Form -->
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div class="md:col-span-2">
-                        <label class="block font-medium text-gray-700">Member Code</label>
+                        <label class="block font-bold text-gray-700">Member Code</label>
                         <InputText disabled v-model="memberDetail.etenUserID" class="w-full" />
                     </div>
 
                     <div>
-                        <label class="block font-medium text-gray-700">First Name</label>
+                        <label class="block font-bold text-gray-700">First Name</label>
                         <InputText v-model="memberDetail.firstName" class="w-full" />
                     </div>
 
                     <div>
-                        <label class="block font-medium text-gray-700">Last Name</label>
+                        <label class="block font-bold text-gray-700">Last Name</label>
                         <InputText v-model="memberDetail.lastName" class="w-full" />
                     </div>
 
                     <div>
-                        <label class="block font-medium text-gray-700">Country Code</label>
+                        <label class="block font-bold text-gray-700">Country Code</label>
                         <Dropdown v-model="memberDetail.countryCode" :options="codeOptions" optionLabel="label" optionValue="value" class="w-full" />
                     </div>
 
                     <div>
-                        <label class="block font-medium text-gray-700">Mobile Number</label>
+                        <label class="block font-bold text-gray-700">Mobile Number</label>
                         <InputText v-model="memberDetail.mobileNumber" class="w-full" />
                     </div>
 
                     <div>
-                        <label class="block font-medium text-gray-700">Gender</label>
+                        <label class="block font-bold text-gray-700">Gender</label>
                         <Dropdown v-model="memberDetail.gender" :options="genderOptions" optionLabel="label" optionValue="value" class="w-full" />
                     </div>
 
                     <div>
-                        <label class="block font-medium text-gray-700">Race</label>
+                        <label class="block font-bold text-gray-700">Race</label>
                         <Dropdown v-model="memberDetail.race" :options="raceOptions" optionLabel="label" optionValue="value" class="w-full" />
                     </div>
 
                     <div>
-                        <label class="block font-medium text-gray-700">State</label>
+                        <label class="block font-bold text-gray-700">State</label>
                         <Dropdown v-model="memberDetail.state" :options="stateOptions" optionLabel="label" optionValue="value" class="w-full" />
                     </div>
 
                     <div>
-                        <label class="block font-medium text-gray-700"> Member Level</label>
+                        <label class="block font-bold text-gray-700"> Member Level</label>
                         <Dropdown v-model="memberDetail.level" :options="levelOptions" optionLabel="label" optionValue="value" class="w-full" />
                     </div>
 
                     <div>
-                        <label class="block font-medium text-gray-700">Email</label>
+                        <label class="block font-bold text-gray-700">Email</label>
                         <InputText v-model="memberDetail.emailAddress" class="w-full" />
                     </div>
 
                     <div>
-                        <label class="block font-medium text-gray-700 mb-1">Password</label>
+                        <label class="block font-bold text-gray-700 mb-1">Password</label>
                         <div class="relative w-full">
                             <!-- Input -->
                             <InputText :type="showPassword ? 'text' : 'password'" v-model="memberDetail.password" class="w-full pr-10" />
@@ -73,12 +73,12 @@
                     </div>
 
                     <div>
-                        <label class="block font-medium text-gray-700">Member Since</label>
+                        <label class="block font-bold text-gray-700">Member Since</label>
                         <Calendar disabled v-model="memberDetail.memberSince" dateFormat="yy-mm-dd" class="w-full" />
                     </div>
 
                     <div>
-                        <label class="block font-medium text-gray-700">Last Login</label>
+                        <label class="block font-bold text-gray-700">Last Login</label>
                         <Calendar disabled v-model="memberDetail.lastLogin" dateFormat="yy-mm-dd" class="w-full" />
                     </div>
                 </div>
@@ -95,36 +95,36 @@
                 <!-- Account Info Form -->
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
-                        <label class="block font-medium text-gray-700">Platform</label>
+                        <label class="block font-bold text-gray-700">Platform</label>
                         <Dropdown v-model="memberDetail.platform" :options="platformOptions" optionLabel="label" optionValue="value" class="w-full" />
                     </div>
 
                     <div>
-                        <label class="block font-medium text-gray-700">Allow Waranty</label>
+                        <label class="block font-bold text-gray-700">Allow Waranty</label>
                         <Dropdown v-model="memberDetail.allow_warranty" :options="selectOptions" optionLabel="label" optionValue="value" class="w-full" />
                     </div>
                     <div>
-                        <label class="block font-medium text-gray-700">Allow Oder</label>
+                        <label class="block font-bold text-gray-700">Allow Oder</label>
                         <Dropdown v-model="memberDetail.allow_order" :options="selectOptions" optionLabel="label" optionValue="value" class="w-full" />
                     </div>
                     <div>
-                        <label class="block font-medium text-gray-700">Allow Billing</label>
+                        <label class="block font-bold text-gray-700">Allow Billing</label>
                         <Dropdown v-model="memberDetail.allow_billing" :options="selectOptions" optionLabel="label" optionValue="value" class="w-full" />
                     </div>
                     <div>
-                        <label class="block font-medium text-gray-700">Allow Sale</label>
+                        <label class="block font-bold text-gray-700">Allow Sale</label>
                         <Dropdown v-model="memberDetail.allow_sale" :options="selectOptions" optionLabel="label" optionValue="value" class="w-full" />
                     </div>
                     <div>
-                        <label class="block font-medium text-gray-700">Allow User</label>
+                        <label class="block font-bold text-gray-700">Allow User</label>
                         <Dropdown v-model="memberDetail.allow_user" :options="selectOptions" optionLabel="label" optionValue="value" class="w-full" />
                     </div>
                     <div>
-                        <label class="block font-medium text-gray-700">Is Master</label>
+                        <label class="block font-bold text-gray-700">Is Master</label>
                         <Dropdown v-model="memberDetail.isMaster" :options="selectOptions" optionLabel="label" optionValue="value" class="w-full" />
                     </div>
                     <div>
-                        <label class="block font-medium text-gray-700">Activation Code</label>
+                        <label class="block font-bold text-gray-700">Activation Code</label>
                         <InputText disabled v-model="memberDetail.activationCode" class="w-full" />
                     </div>
                 </div>

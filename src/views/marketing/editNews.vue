@@ -8,29 +8,29 @@
                 <!-- news Form -->
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div class="md:col-span-2">
-                        <label class="block font-medium text-gray-700">Title</label>
+                        <label class="block font-bold text-gray-700">Title</label>
                         <InputText v-model="news.title" class="w-full" />
                     </div>
 
                     <div class="md:col-span-2">
-                        <label class="block font-medium text-gray-700">Description</label>
+                        <label class="block font-bold text-gray-700">Description</label>
                         <Textarea v-model="news.desc" rows="3" class="w-full" />
                     </div>
 
                     <div>
-                        <label class="block font-medium text-gray-700">Publish Date</label>
+                        <label class="block font-bold text-gray-700">Publish Date</label>
                         <Calendar v-model="news.publishDate" dateFormat="yy-mm-dd" class="w-full" />
                     </div>
 
                     <div>
-                        <label class="block font-medium text-gray-700">Audience</label>
+                        <label class="block font-bold text-gray-700">Audience</label>
                         <Dropdown v-model="news.audience" :options="audienceOptions" optionLabel="label" optionValue="value" class="w-full" />
                     </div>
                 </div>
 
                 <!-- Upload Images -->
                 <div>
-                    <label class="block font-medium text-gray-700 mb-2">News Images</label>
+                    <label class="block font-bold text-gray-700 mb-2">News Images</label>
                     <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
                         <!-- Image 1 -->
                         <div class="relative">

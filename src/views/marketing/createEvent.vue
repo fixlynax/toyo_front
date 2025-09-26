@@ -8,60 +8,60 @@
                 <!-- Event Form -->
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div class="md:col-span-2">
-                        <label class="block font-medium text-gray-700">Title</label>
+                        <label class="block font-bold text-gray-700">Title</label>
                         <InputText v-model="event.title" class="w-full" />
                     </div>
 
                     <div class="md:col-span-2">
-                        <label class="block font-medium text-gray-700">Description</label>
+                        <label class="block font-bold text-gray-700">Description</label>
                         <Textarea v-model="event.desc" rows="3" class="w-full" />
                     </div>
 
                     <div>
-                        <label class="block font-medium text-gray-700">Location</label>
+                        <label class="block font-bold text-gray-700">Location</label>
                         <InputText v-model="event.location" class="w-full" />
                     </div>
 
                     <div>
-                        <label class="block font-medium text-gray-700">Publish Date</label>
+                        <label class="block font-bold text-gray-700">Publish Date</label>
                         <Calendar v-model="event.publishDate" dateFormat="yy-mm-dd" class="w-full" />
                     </div>
 
                     <div>
-                        <label class="block font-medium text-gray-700">Start Date</label>
+                        <label class="block font-bold text-gray-700">Start Date</label>
                         <Calendar v-model="event.startDate" dateFormat="yy-mm-dd" class="w-full" />
                     </div>
 
                     <div>
-                        <label class="block font-medium text-gray-700">End Date</label>
+                        <label class="block font-bold text-gray-700">End Date</label>
                         <Calendar v-model="event.endDate" dateFormat="yy-mm-dd" class="w-full" />
                     </div>
 
                     <div>
-                        <label class="block font-medium text-gray-700">Audience</label>
+                        <label class="block font-bold text-gray-700">Audience</label>
                         <Dropdown v-model="event.audience" :options="audienceOptions" optionLabel="label" optionValue="value" class="w-full" />
                     </div>
 
                     <div>
-                        <label class="block font-medium text-gray-700">Survey</label>
+                        <label class="block font-bold text-gray-700">Survey</label>
                         <Dropdown v-model="event.isSurvey" :options="surveyOptions" optionLabel="label" optionValue="value" class="w-full" />
                     </div>
 
                     <div class="grid grid-cols-1 md:grid-cols-4 gap-4 md:col-span-2">
                         <div>
-                            <label class="block font-medium text-gray-700 mb-1">Classic Point</label>
+                            <label class="block font-bold text-gray-700 mb-1">Classic Point</label>
                             <InputNumber v-model="event.point1" class="w-full" />
                         </div>
                         <div>
-                            <label class="block font-medium text-gray-700 mb-1">Silver Point</label>
+                            <label class="block font-bold text-gray-700 mb-1">Silver Point</label>
                             <InputNumber v-model="event.point2" class="w-full" />
                         </div>
                         <div>
-                            <label class="block font-medium text-gray-700 mb-1">Gold Point</label>
+                            <label class="block font-bold text-gray-700 mb-1">Gold Point</label>
                             <InputNumber v-model="event.point3" class="w-full" />
                         </div>
                         <div>
-                            <label class="block font-medium text-gray-700 mb-1">Platinum Point</label>
+                            <label class="block font-bold text-gray-700 mb-1">Platinum Point</label>
                             <InputNumber v-model="event.point4" class="w-full" />
                         </div>
                     </div>
@@ -69,7 +69,7 @@
 
                 <!-- Upload Images -->
                 <div>
-                    <label class="block font-medium text-gray-700 mb-2">Upload Event Image</label>
+                    <label class="block font-bold text-gray-700 mb-2">Upload Event Image</label>
                     <!-- <h2 class="text-lg font-bold text-gray-800 mt-6 mb-2">Upload Event Images</h2> -->
                     <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
                         <div>
