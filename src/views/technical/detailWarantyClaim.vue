@@ -557,7 +557,6 @@ const cancelReject = () => {
   rejectReason.value = "";
   showRejectReason.value = false;
 };
-
 // 1. Suspend/Un-Activated
 const isActivated = ref(false);
 const confirmSuspend = () => {
