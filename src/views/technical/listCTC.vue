@@ -67,7 +67,7 @@ onBeforeMount(async () => {
                     </div>
 
                     <!-- Right: Export & Template Buttons -->
-                    <RouterLink to="/marketing/createEvent">
+                    <RouterLink to="/technical/createCTC">
                         <Button type="button" label="Create" />
                     </RouterLink>
                 </div>
