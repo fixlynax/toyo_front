@@ -42,6 +42,7 @@ export const listWarantyClaimService = {
                 },
                 scrapDetails: {
                     scrapNo: 'SCR-8765',
+                    imageURL1: ['/demo/images/toyo.jpg'],
                     status: 'Pending Photo Upload'
                 },
                 claimVariable: {

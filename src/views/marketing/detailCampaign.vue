@@ -172,12 +172,16 @@
                 </div>
 
                 <div class="card flex flex-col w-full">
+                    <!-- Header with Invite Button -->
                     <div class="flex items-center justify-between border-b pb-2 mb-2">
                         <div class="text-2xl font-bold text-gray-800">🚩 Dealer list</div>
+                        <RouterLink to="/marketing/inviteDealer">
+                            <Button label="Invite Dealer" icon="pi pi-user-plus" style="width: fit-content" class="p-button-sm p-button-success" />
+                        </RouterLink>
                     </div>
 
                     <DataTable :value="dealerList" :paginator="true" :rows="3" dataKey="id" :rowHover="true" responsiveLayout="scroll" class="text-sm">
-                        <!-- Title + Type in one column -->
+                        <!-- Title + ID -->
                         <Column header="Name" style="min-width: 8rem">
                             <template #body="{ data }">
                                 <div class="flex flex-col">
@@ -185,21 +189,24 @@
                                     <span class="text-gray-600 text-xm mt-2">🔧 {{ data.id }}</span>
                                 </div>
                             </template>
-                        </Column>   
+                        </Column>
 
-                        <!-- Min Qty -->
+                        <!-- State -->
                         <Column header="State" style="min-width: 6rem">
                             <template #body="{ data }">
-                                <div class="flex flex-col">
-                                    <span class="text-gray-800">{{ data.state }}</span>
-                                </div>
+                                <span class="text-gray-800">{{ data.state }}</span>
                             </template>
                         </Column>
 
-                        <!-- Pattern -->
+                        <!-- Signboard Type -->
                         <Column field="signboardType" header="Signboard Type" style="min-width: 6rem"></Column>
 
-                        <!-- Size -->
+                        <!-- Actions -->
+                        <Column header="Actions" style="min-width: 4rem; text-align: center">
+                            <template #body="{ data }">
+                                <Button icon="pi pi-trash" class="p-button-text p-button-danger" @click="removeDealer(data)" />
+                            </template>
+                        </Column>
                     </DataTable>
                 </div>
 
@@ -217,12 +224,12 @@
                                     <span class="text-gray-600 text-xm mt-2">🔧 {{ data.type }}</span>
                                 </div>
                             </template>
-                        </Column>   
+                        </Column>
 
                         <!-- Pattern -->
                         <Column field="pattern" header="Pattern" style="min-width: 6rem"></Column>
 
-                         <Column field="size" header="Size" style="min-width: 6rem"></Column>
+                        <Column field="size" header="Size" style="min-width: 6rem"></Column>
                     </DataTable>
                 </div>
             </div>
@@ -341,50 +348,50 @@ const criteria = [
     }
 ];
 
-const dealerList = [
-  {
-    id: 'E010001',
-    name: 'Tau Lim Tires Service',
-    signboardType: 'T10',
-    state: 'Johor'
-  },
-  {
-    id: 'E010002',
-    name: 'Toyo Tires Center',
-    signboardType: 'TAC',
-    state: 'Kuala Lumpur'
-  },
-  {
-    id: 'E010003',
-    name: 'Auto Wheels Malaysia',
-    signboardType: 'TSS',
-    state: 'Selangor'
-  },
-  {
-    id: 'E010004',
-    name: 'Speedy Tire Shop',
-    signboardType: 'TST',
-    state: 'Penang'
-  },
-  {
-    id: 'E010005',
-    name: 'Premium Auto Tires',
-    signboardType: 'TPC',
-    state: 'Perak'
-  },
-  {
-    id: 'E010006',
-    name: 'Star Tires & Service',
-    signboardType: 'Non',
-    state: 'Sabah'
-  },
-  {
-    id: 'E010007',
-    name: 'AutoMax Tire Service',
-    signboardType: 'T10',
-    state: 'Johor'
-  }
-];
+const dealerList = ref([
+    {
+        id: 'E010001',
+        name: 'Tau Lim Tires Service',
+        signboardType: 'T10',
+        state: 'Johor'
+    },
+    {
+        id: 'E010002',
+        name: 'Toyo Tires Center',
+        signboardType: 'TAC',
+        state: 'Kuala Lumpur'
+    },
+    {
+        id: 'E010003',
+        name: 'Auto Wheels Malaysia',
+        signboardType: 'TSS',
+        state: 'Selangor'
+    },
+    {
+        id: 'E010004',
+        name: 'Speedy Tire Shop',
+        signboardType: 'TST',
+        state: 'Penang'
+    },
+    {
+        id: 'E010005',
+        name: 'Premium Auto Tires',
+        signboardType: 'TPC',
+        state: 'Perak'
+    },
+    {
+        id: 'E010006',
+        name: 'Star Tires & Service',
+        signboardType: 'Non',
+        state: 'Sabah'
+    },
+    {
+        id: 'E010007',
+        name: 'AutoMax Tire Service',
+        signboardType: 'T10',
+        state: 'Johor'
+    }
+]);
 
 const rewards = ref([
     // Example Reward: Points
@@ -419,15 +426,9 @@ const rewards = ref([
     }
 ]);
 
-function addReward() {
-    rewards.value.push({
-        type: null,
-        name: '',
-        image: null,
-        qty: 1,
-        tierPoints: { silver: 0, gold: 0, platinum: 0 }
-    });
-}
+const removeDealer = (dealer) => {
+    dealerList.value = dealerList.value.filter((d) => d.id !== dealer.id);
+};
 
 function removeReward(index) {
     rewards.value.splice(index, 1);
