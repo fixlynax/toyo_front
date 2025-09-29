@@ -67,25 +67,49 @@ onMounted(() => {
     setTimeout(() => {
         dealerList.value = [
             {
+                id: 'E010001',
+                name: 'Faster Tire Shop',
+                signboardType: 'TST',
+                state: 'Penang'
+            },
+            {
+                id: 'E010002',
+                name: 'Classic Auto Tires',
+                signboardType: 'TPC',
+                state: 'Kuala Lumpur'
+            },
+            {
+                id: 'E010003',
+                name: 'Twikle Tires & Service',
+                signboardType: 'Non',
+                state: 'Melaka'
+            },
+            {
                 id: 'E010004',
+                name: 'AutoPro Tire Service',
+                signboardType: 'T10',
+                state: 'Johor'
+            },
+            {
+                id: 'E010005',
                 name: 'Speedy Tire Shop',
                 signboardType: 'TST',
                 state: 'Penang'
             },
             {
-                id: 'E010005',
+                id: 'E010006',
                 name: 'Premium Auto Tires',
                 signboardType: 'TPC',
                 state: 'Perak'
             },
             {
-                id: 'E010006',
+                id: 'E010007',
                 name: 'Star Tires & Service',
                 signboardType: 'Non',
                 state: 'Sabah'
             },
             {
-                id: 'E010007',
+                id: 'E010008',
                 name: 'AutoMax Tire Service',
                 signboardType: 'T10',
                 state: 'Johor'
