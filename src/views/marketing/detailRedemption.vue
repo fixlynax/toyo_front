@@ -67,11 +67,7 @@
                         </div>
                         <div class="col-span-4">
                             <span class="text-sm font-bold text-gray-700">Delivery Location</span>
-                            <p class="text-lg font-medium">
-                                {{ redemption.addLine1 }}, {{ redemption.addLine2 }},
-                                {{ redemption.addCity }}, {{ redemption.addState }},
-                                {{ redemption.addPostcode }}, {{ redemption.addCountry }}
-                            </p>
+                            <p class="text-lg font-medium">{{ redemption.addLine1 }}, {{ redemption.addLine2 }}, {{ redemption.addCity }}, {{ redemption.addState }}, {{ redemption.addPostcode }}, {{ redemption.addCountry }}</p>
                         </div>
                     </div>
 
@@ -79,11 +75,11 @@
                     <div class="flex justify-end mt-4">
                         <div class="flex gap-2">
                             <!-- Reject Button -->
-                            <Button label="Reject" class="p-button-danger" size="small" @click="showRejectReason = true" />
+                            <Button label="Reject" class="p-button-danger" @click="showRejectReason = true" />
 
                             <!-- Approve Button -->
                             <RouterLink to="/marketing/detailEvent">
-                                <Button label="Approve" class="p-button-success" size="small" />
+                                <Button label="Approve" class="p-button-success" />
                             </RouterLink>
                         </div>
                     </div>
