@@ -7,69 +7,37 @@
 
                 <!-- Tire Form -->
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    
-                    <!-- Tire Size -->
-                    <div class="md:col-span-2">
-                        <label class="block text-xm font-bold text-gray-700 mb-2">Tire Size</label>
-                        <Dropdown 
-                            v-model="form.tyreSize" 
-                            :options="tireSizeOptions" 
-                            optionLabel="label" 
-                            optionValue="value" 
-                            placeholder="Select Tire Size" 
-                            class="w-full" 
-                        />
-                    </div>
-
                     <!-- Tire Pattern -->
                     <div class="md:col-span-2">
                         <label class="block text-xm font-bold text-gray-700 mb-2">Tire Pattern</label>
-                        <Dropdown 
-                            v-model="form.pattern" 
-                            :options="tirePatternOptions" 
-                            optionLabel="label" 
-                            optionValue="value" 
-                            placeholder="Select Tire Pattern" 
-                            class="w-full" 
-                        />
+                        <Dropdown v-model="form.pattern" :options="tirePatternOptions" optionLabel="label" optionValue="value" placeholder="Select Tire Pattern" class="w-full" />
+                    </div>
+                    <!-- Tire Size -->
+                    <div class="md:col-span-2">
+                        <label class="block text-xm font-bold text-gray-700 mb-2">Tire Size</label>
+                        <Dropdown v-model="form.tyreSize" :options="tireSizeOptions" optionLabel="label" optionValue="value" placeholder="Select Tire Size" class="w-full" />
                     </div>
 
                     <!-- Description -->
                     <div>
                         <label class="block text-xm font-bold text-gray-700 mb-2">Description</label>
-                        <InputText 
-                            v-model="form.desc" 
-                            class="w-full" 
-                            placeholder="Enter Description Here..." 
-                        />
+                        <InputText v-model="form.desc" class="w-full" placeholder="Enter Description Here..." />
                     </div>
 
                     <!-- MFG Code -->
                     <div>
                         <label class="block text-xm font-bold text-gray-700 mb-2">MFG Code</label>
-                        <InputText 
-                            v-model="form.mfgcode" 
-                            class="w-full" 
-                            placeholder="Enter MFG Code Here..." 
-                        />
+                        <InputText v-model="form.mfgcode" class="w-full" placeholder="Enter MFG Code Here..." />
                     </div>
                 </div>
 
                 <!-- Action Buttons -->
                 <div class="flex justify-end mt-8 gap-4">
                     <div class="w-32">
-                        <Button 
-                            label="Cancel" 
-                            class="w-full p-button-secondary" 
-                            @click="cancel" 
-                        />
+                        <Button label="Cancel" class="w-full p-button-secondary" @click="cancel" />
                     </div>
                     <div class="w-32">
-                        <Button 
-                            label="Save Tire" 
-                            class="w-full p-button-success" 
-                            @click="saveTire" 
-                        />
+                        <Button label="Save Tire" class="w-full p-button-success" @click="saveTire" />
                     </div>
                 </div>
             </div>
