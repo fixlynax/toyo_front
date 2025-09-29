@@ -35,7 +35,7 @@
             <!-- Data Columns -->
             <Column selectionMode="multiple" style="width: 3rem" />
 
-            <Column field="pattern" header="Tyre Pattern" style="min-width: 8rem">
+            <Column field="pattern" header="Tyre Pattern" style="min-width: 25rem">
                 <template #body="{ data }">
                     <!-- <RouterLink to="/technical/detailTWP" class="hover:underline font-bold">-->{{ data.pattern
                     }}<!-- </RouterLink>  -->
