@@ -280,6 +280,7 @@ const router = createRouter({
                 },
 
                 // TECHNICAL
+                // Claim Warranty
                 {
                     path: '/technical/listClaim',
                     name: 'List-Claim',
@@ -305,12 +306,27 @@ const router = createRouter({
                     name: 'List-CTC',
                     component: () => import('@/views/technical/listCTC.vue')
                 },
-                  {
+                {
+                    path: '/technical/createCTC',
+                    name: 'Create-CTC',
+                    component: () => import('@/views/technical/createCTC.vue')
+                },
+                {
                     path: '/technical/listProduct',
                     name: 'List-Product',
                     component: () => import('@/views/technical/listProduct.vue')
                 },
-                  {
+                {
+                    path: '/technical/listScrap',
+                    name: 'List-Scrap',
+                    component: () => import('@/views/technical/listScrap.vue')
+                },
+                {
+                    path: '/technical/listInvoice',
+                    name: 'List-Invoice',
+                    component: () => import('@/views/technical/listInvoice.vue')
+                },
+                {
                     path: '/technical/bulkUpdate',
                     name: 'List-Update',
                     component: () => import('@/views/technical/bulkUpdate.vue')
@@ -329,16 +345,6 @@ const router = createRouter({
                     path: '/technical/detailProduct',
                     name: 'Add-Twp-Tire',
                     component: () => import('@/views/technical/detailProduct.vue')
-                },
-                {
-                    path: '/technical/listScrap',
-                    name: 'List-Scrap',
-                    component: () => import('@/views/technical/listScrap.vue')
-                },
-                {
-                    path: '/technical/listInvoice',
-                    name: 'List-Invoice',
-                    component: () => import('@/views/technical/listInvoice.vue')
                 },
                 //   {
                 //     path: '/technical/detailWarantyClaim',
