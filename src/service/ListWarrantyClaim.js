@@ -47,6 +47,9 @@ export const listWarantyClaimService = {
                 claimVariable: {
                     amount: 'RM 450.00',
                     replacementType: 'Partial'
+                    Claim: '50%',
+                    Usable: '60%',
+                    Worn: '40%'
                 },
                 replacementOrder: {
                     orderNo: 'ORD-5569',
@@ -108,7 +111,10 @@ export const listWarantyClaimService = {
                 },
                 claimVariable: {
                     amount: 'RM 600.00',
-                    replacementType: 'Full'
+                    replacementType: 'Full',
+                    Claim: '90%',
+                    Usable: '40%',
+                    Worn: '40%'
                 },
                 replacementOrder: {
                     orderNo: 'ORD-5570',
@@ -170,7 +176,10 @@ export const listWarantyClaimService = {
                 },
                 claimVariable: {
                     amount: 'RM 280.00',
-                    replacementType: 'Partial'
+                    replacementType: 'Partial',
+                    Claim: '70%',
+                    Usable: '50%',
+                    Worn: '50%'
                 },
                 replacementOrder: {
                     orderNo: 'ORD-5570',
@@ -232,7 +241,10 @@ export const listWarantyClaimService = {
                 },
                 claimVariable: {
                     amount: 'RM 500.00',
-                    replacementType: 'Partial'
+                    replacementType: 'Partial',
+                    Claim: '60%',
+                    Usable: '70%',
+                    Worn: '30%'
                 },
                 replacementOrder: {
                     orderNo: 'ORD-5570',
@@ -294,7 +306,10 @@ export const listWarantyClaimService = {
                 },
                 claimVariable: {
                     amount: 'RM 900.00',
-                    replacementType: 'Full'
+                    replacementType: 'Full',
+                    Claim: '100%',
+                    Usable: '30%',
+                    Worn: '70%'
                 },
                 replacementOrder: {
                     orderNo: 'ORD-5570',
@@ -356,7 +371,10 @@ export const listWarantyClaimService = {
                 },
                 claimVariable: {
                     amount: 'RM 720.00',
-                    replacementType: 'Full'
+                    replacementType: 'Full',
+                    Claim: '80%',
+                    Usable: '50%',
+                    Worn: '50%'
                 },
                 replacementOrder: {
                     orderNo: 'ORD-5570',
@@ -418,7 +436,10 @@ export const listWarantyClaimService = {
                 },
                 claimVariable: {
                     amount: 'RM 850.00',
-                    replacementType: 'Full'
+                    replacementType: 'Full',
+                    Claim: '85%',
+                    Usable: '20%',
+                    Worn: '80%' 
                 },
                 replacementOrder: {
                     orderNo: 'ORD-5570',
@@ -480,7 +501,10 @@ export const listWarantyClaimService = {
                 },
                 claimVariable: {
                     amount: 'RM 0.00',
-                    replacementType: 'N/A'
+                    replacementType: 'N/A',
+                    Claim: '0%',
+                    Usable: '0%',
+                    Worn: '0%'  
                 },
                 replacementOrder: {
                     orderNo: 'ORD-5570',
@@ -542,7 +566,10 @@ export const listWarantyClaimService = {
                 },
                 claimVariable: {
                     amount: 'RM 500.00',
-                    replacementType: 'Partial'
+                    replacementType: 'Partial',
+                    Claim: '60%',
+                    Usable: '70%',
+                    Worn: '30%'
                 },
                 replacementOrder: {
                     orderNo: 'ORD-5570',
