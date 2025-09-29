@@ -28,7 +28,7 @@
                     <!-- Event Info -->
                     <div class="mt-6">
                         <h1 class="text-2xl font-bold text-gray-800">{{ event.title }}</h1>
-                        <p class="text-lg font-bold">{{ event.desc }}</p>
+                        <p class="text-lg font-medium">{{ event.desc }}</p>
 
                         <div class="flex flex-col md:flex-row gap-4 mt-3">
                             <div class="w-full">
