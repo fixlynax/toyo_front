@@ -3,17 +3,7 @@
         <!-- Page Title -->
         <div class="text-2xl font-bold text-gray-800 border-b pb-2">🚩 Dealer List</div>
 
-        <DataTable 
-            :value="dealerList" 
-            dataKey="id" 
-            selectionMode="multiple" 
-            v-model:selection="selectedDealers" 
-            :paginator="true" 
-            :rows="10" 
-            :loading="loading" 
-            class="w-full" 
-            :rowHover="true"
-        >
+        <DataTable :value="dealerList" dataKey="id" selectionMode="multiple" v-model:selection="selectedDealers" :paginator="true" :rows="10" :loading="loading" class="w-full" :rowHover="true">
             <!-- Header Section inside DataTable -->
             <template #header>
                 <div class="flex items-center justify-between flex-wrap gap-4 w-full">
@@ -30,8 +20,8 @@
 
                     <!-- Right: Action Buttons -->
                     <div class="flex gap-2 justify-end flex-shrink-0">
-                        <RouterLink to="/dealer/addDealer">
-                            <Button label="Invite Dealer" icon="pi pi-user-plus" class="p-button-success" />
+                        <RouterLink to="marketing/detailCampaign">
+                            <Button label="Invite" icon="pi pi-user-plus" class="p-button-success" />
                         </RouterLink>
                     </div>
                 </div>
@@ -76,10 +66,30 @@ onMounted(() => {
     loading.value = true;
     setTimeout(() => {
         dealerList.value = [
-            { id: 'DLR001', name: 'Tack Lim Service Tires', state: 'Kuala Lumpur', signboardType: 'T10' },
-            { id: 'DLR002', name: 'ProWheel Auto Sdn Bhd', state: 'Johor', signboardType: 'TAC' },
-            { id: 'DLR003', name: 'Speedy Tyres Centre', state: 'Penang', signboardType: 'T20' },
-            { id: 'DLR004', name: 'Hock Lee Tyres', state: 'Sabah', signboardType: 'T10' }
+            {
+                id: 'E010004',
+                name: 'Speedy Tire Shop',
+                signboardType: 'TST',
+                state: 'Penang'
+            },
+            {
+                id: 'E010005',
+                name: 'Premium Auto Tires',
+                signboardType: 'TPC',
+                state: 'Perak'
+            },
+            {
+                id: 'E010006',
+                name: 'Star Tires & Service',
+                signboardType: 'Non',
+                state: 'Sabah'
+            },
+            {
+                id: 'E010007',
+                name: 'AutoMax Tire Service',
+                signboardType: 'T10',
+                state: 'Johor'
+            }
         ];
         loading.value = false;
     }, 800);
