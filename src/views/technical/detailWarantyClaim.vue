@@ -190,9 +190,7 @@
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm text-gray-700">
                         <div>
                             <span class="block text-xm font-bold text-black-700">Claim %</span>
-                            <p class="font-medium text-lg">
-                                {{ warantyDetail.claimVariable.Claim }}
-                            </p>
+                            <p class="font-medium text-lg">{{ warantyDetail.claimVariable.Claim }}</p>
                         </div>
                         <div>
                             <span class="block text-xm font-bold text-black-700">Usable %</span>
@@ -207,77 +205,100 @@
                             <p class="font-medium text-lg">{{ warantyDetail.problem.damageCode }}</p>
                         </div>
                     </div>
-                    <!-- Action Buttons (only before decision) -->
-                    <div v-if="!showSubmit" class="flex justify-end mt-6">
-                        <div class="flex gap-2">
-                            <!-- Reject Button -->
-                            <Button label="Reject" class="p-button-danger" size="small" @click="handleReject" />
 
-                            <!-- Approve Button -->
+                    <!-- Action Buttons (Approve/Reject) -->
+                    <div v-if="!showDecision" class="flex justify-end mt-6">
+                        <div class="flex gap-2">
+                            <Button label="Reject" class="p-button-danger" size="small" @click="handleReject" />
                             <Button label="Approve" class="p-button-success" size="small" @click="handleApprove" />
                         </div>
                     </div>
-                </div>
 
-                <!-- ✅ Replacement Order -->
-                <div v-if="showReplacementOrder" class="card flex flex-col w-full mt-4">
-                    <div class="flex items-center justify-between border-b pb-2 mb-4">
-                        <div class="text-2xl font-bold text-gray-800">Replacement Order</div>
-                    </div>
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm text-gray-700">
-                        <div>
-                            <span class="block text-xm font-bold text-black-700">Order No</span>
-                            <p class="font-medium text-lg">{{ warantyDetail.replacementOrder.orderNo }}</p>
+                    <!-- Approve Options -->
+                    <div v-if="decision === 'approve'" class="mt-4 card p-4 border">
+                        <h3 class="text-lg font-bold mb-2">Select Approval Type</h3>
+                        <select v-model="selectedAction" class="border p-2 rounded w-full mb-4">
+                            <option disabled value="">-- Select Option --</option>
+                            <option value="replacement">Replacement Order</option>
+                            <option value="reimbursement">Reimbursement</option>
+                        </select>
+
+                        <!-- Replacement Order -->
+                        <div v-if="selectedAction === 'replacement'" class="mt-4">
+                            <h3 class="text-2xl font-bold text-gray-800 mb-2">Replacement Order</h3>
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm text-gray-700">
+                                <div>
+                                    <span class="block font-bold">Order No</span>
+                                    <p>{{ warantyDetail.replacementOrder.orderNo }}</p>
+                                </div>
+                                <div>
+                                    <span class="block font-bold">Name</span>
+                                    <p>{{ warantyDetail.replacementOrder.name }}</p>
+                                </div>
+                                <div>
+                                    <span class="block font-bold">Item</span>
+                                    <p>{{ warantyDetail.replacementOrder.item }}</p>
+                                </div>
+                                <div>
+                                    <span class="block font-bold">Quantity</span>
+                                    <p>{{ warantyDetail.replacementOrder.quantity }}</p>
+                                </div>
+                                <div>
+                                    <span class="block font-bold">Total</span>
+                                    <p>{{ warantyDetail.replacementOrder.total }}</p>
+                                </div>
+                                <div>
+                                    <span class="block font-bold">Sub Total</span>
+                                    <p>{{ warantyDetail.replacementOrder.subTotal }}</p>
+                                </div>
+                            </div>
                         </div>
-                        <div>
-                            <span class="block text-xm font-bold text-black-700">Name</span>
-                            <p class="font-medium text-lg">{{ warantyDetail.replacementOrder.name }}</p>
+
+                        <!-- Reimbursement -->
+                        <div v-if="selectedAction === 'reimbursement'" class="mt-4">
+                            <h3 class="text-2xl font-bold text-gray-800 mb-2">Reimbursement Details</h3>
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm text-gray-700">
+                                <div>
+                                    <span class="block font-bold">Ref No</span>
+                                    <p>{{ warantyDetail.reimbursement.refNo }}</p>
+                                </div>
+                                <div>
+                                    <span class="block font-bold">Order No</span>
+                                    <p>{{ warantyDetail.reimbursement.orderNo }}</p>
+                                </div>
+                                <div>
+                                    <span class="block font-bold">Status</span>
+                                    <p>{{ warantyDetail.reimbursement.status }}</p>
+                                </div>
+                            </div>
                         </div>
-                        <div>
-                            <span class="block text-xm font-bold text-black-700">Item</span>
-                            <p class="font-medium text-lg">{{ warantyDetail.replacementOrder.item }}</p>
-                        </div>
-                        <div>
-                            <span class="block text-xm font-bold text-black-700">Quantity</span>
-                            <p class="font-medium text-lg">{{ warantyDetail.replacementOrder.quantity }}</p>
-                        </div>
-                        <div>
-                            <span class="block text-xm font-bold text-black-700">Total</span>
-                            <p class="font-medium text-lg">{{ warantyDetail.replacementOrder.total }}</p>
-                        </div>
-                        <div>
-                            <span class="block text-xm font-bold text-black-700">Sub Total</span>
-                            <p class="font-medium text-lg">{{ warantyDetail.replacementOrder.subTotal }}</p>
+
+                        <!-- Buttons -->
+                        <div v-if="selectedAction" class="flex justify-end mt-4 space-x-2">
+                            <Button label="Cancel" class="p-button-info" size="small" @click="cancelDecision" />
+                            <Button label="Submit" class="p-button-danger" size="small" @click="submitDecision" />
                         </div>
                     </div>
 
-                    <!-- ✅ Submit Button -->
-                    <div v-if="showSubmit" class="flex justify-end mt-4">
-                        <Button label="Submit" class="p-button-primary" size="small" @click="submitDecision" />
-                    </div>
-                </div>
+                    <!-- Reject Options -->
+                    <div v-if="decision === 'reject'" class="mt-4 card p-4 border">
+                        <h3 class="text-lg font-bold mb-2">Reason for Rejection</h3>
+                        <select v-model="selectedAction" class="border p-2 rounded w-full mb-4">
+                            <option disabled value="">-- Select Reason --</option>
+                            <option value="expired">Warranty Expired</option>
+                            <option value="notCapable">Not Capable for Claim</option>
+                            <option value="terms">Not Following Terms & Conditions</option>
+                        </select>
 
-                <!-- ❌ Reimbursement Details -->
-                <div v-if="showReimbursement" class="card flex flex-col w-full mt-4">
-                    <div class="flex items-center justify-between border-b pb-2 mb-4">
-                        <div class="text-2xl font-bold text-gray-800">Reimbursement Details</div>
-                    </div>
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm text-gray-700">
-                        <div>
-                            <span class="block text-xm font-bold text-black-700">Ref No</span>
-                            <p class="font-medium text-lg">{{ warantyDetail.reimbursement.refNo }}</p>
-                        </div>
-                        <div>
-                            <span class="block text-xm font-bold text-black-700">Order No</span>
-                            <p class="font-medium text-lg">{{ warantyDetail.reimbursement.orderNo }}</p>
-                        </div>
-                        <div>
-                            <span class="block text-xm font-bold text-black-700">Order Status</span>
-                            <p class="font-medium text-lg">{{ warantyDetail.reimbursement.status }}</p>
+                        <!-- Buttons -->
+                        <div v-if="selectedAction" class="flex justify-end mt-4 space-x-2">
+                            <Button label="Cancel" class="p-button-info" size="small" @click="cancelDecision" />
+                            <Button label="Submit" class="p-button-danger" size="small" @click="submitDecision" />
                         </div>
                     </div>
                 </div>
             </div>
+            <!-- ✅ properly closed CTC Details card -->
             <!-- ✅ close LEFT SIDE -->
 
             <!-- RIGHT SIDE -->
@@ -417,8 +438,9 @@ const memberDetail = ref({
 
 const showPassword = ref(false);
 
-const showReplacementOrder = ref(false);
-const showReimbursement = ref(false);
+const showDecision = ref(false); // controls whether Approve/Reject are hidden
+const decision = ref(null); // "approve" | "reject"
+const selectedAction = ref(''); // chosen action (replacement/reimbursement/reason)
 const showSubmit = ref(false);
 
 const warantyDetail = ref({
@@ -474,27 +496,66 @@ const warantyDetail = ref({
     }
 });
 
-// ✅ Approve handler
 const handleApprove = () => {
-    showReimbursement.value = false;
-    if (Number(warantyDetail.value.claimVariable.Claim) >= 90) {
-        showReplacementOrder.value = true;
-    } else {
-        showReplacementOrder.value = false;
-    }
-    showSubmit.value = true;
+    decision.value = 'approve';
+    showDecision.value = true; // hide Approve/Reject, show approve options
+    selectedAction.value = '';
+    showSubmit.value = false;
 };
 
-// ❌ Reject handler
 const handleReject = () => {
-    showReplacementOrder.value = false;
-    showReimbursement.value = true;
-    showSubmit.value = true;
+    decision.value = 'reject';
+    showDecision.value = true; // hide Approve/Reject, show reject reasons
+    selectedAction.value = '';
+    showSubmit.value = false;
 };
 
-// ✅ Final submit action
 const submitDecision = () => {
-    alert('Decision submitted!'); // replace with API call later
+  if (decision.value === "approve") {
+    console.log("✅ Submitted Approval:", selectedAction.value);
+    alert(`Submitted Approval: ${selectedAction.value}`);
+  } else if (decision.value === "reject") {
+    console.log("❌ Submitted Rejection:", selectedAction.value);
+    alert(`Submitted Rejection: ${selectedAction.value}`);
+  }
+
+  // reset back to initial state after submit
+  cancelDecision();
+};
+
+
+const cancelDecision = () => {
+    // Reset everything
+    decision.value = null;
+    selectedAction.value = '';
+    showSubmit.value = false;
+    showDecision.value = false; // 👈 this brings back Approve/Reject buttons
+};
+
+const showRejectReason = ref(false);
+const rejectReason = ref("");
+
+// ✅ Approve logic
+const submitApprove = () => {
+  console.log("✅ Approved claim");
+  alert("Claim Approved ✅");
+  // 👉 You can add API call here
+};
+
+// ✅ Reject logic
+const submitReject = () => {
+  console.log("❌ Rejected with reason:", rejectReason.value);
+  alert(`Claim Rejected ❌\nReason: ${rejectReason.value}`);
+  
+  // Reset after submit
+  rejectReason.value = "";
+  showRejectReason.value = false;
+};
+
+// ✅ Cancel rejection
+const cancelReject = () => {
+  rejectReason.value = "";
+  showRejectReason.value = false;
 };
 
 // 1. Suspend/Un-Activated
