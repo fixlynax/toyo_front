@@ -173,34 +173,56 @@
 
                 <div class="card flex flex-col w-full">
                     <div class="flex items-center justify-between border-b pb-2 mb-2">
+                        <div class="text-2xl font-bold text-gray-800">🚩 Dealer list</div>
+                    </div>
+
+                    <DataTable :value="dealerList" :paginator="true" :rows="3" dataKey="id" :rowHover="true" responsiveLayout="scroll" class="text-sm">
+                        <!-- Title + Type in one column -->
+                        <Column header="Name" style="min-width: 8rem">
+                            <template #body="{ data }">
+                                <div class="flex flex-col">
+                                    <span class="font-bold text-gray-800">{{ data.name }}</span>
+                                    <span class="text-gray-600 text-xm mt-2">🔧 {{ data.id }}</span>
+                                </div>
+                            </template>
+                        </Column>   
+
+                        <!-- Min Qty -->
+                        <Column header="State" style="min-width: 6rem">
+                            <template #body="{ data }">
+                                <div class="flex flex-col">
+                                    <span class="text-gray-800">{{ data.state }}</span>
+                                </div>
+                            </template>
+                        </Column>
+
+                        <!-- Pattern -->
+                        <Column field="signboardType" header="Signboard Type" style="min-width: 6rem"></Column>
+
+                        <!-- Size -->
+                    </DataTable>
+                </div>
+
+                <div class="card flex flex-col w-full">
+                    <div class="flex items-center justify-between border-b pb-2 mb-2">
                         <div class="text-2xl font-bold text-gray-800">🚩 Criteria</div>
                     </div>
 
-                    <DataTable :value="criteria" :paginator="true" :rows="7" dataKey="id" :rowHover="true" responsiveLayout="scroll" class="text-sm">
+                    <DataTable :value="criteria" :paginator="true" :rows="3" dataKey="id" :rowHover="true" responsiveLayout="scroll" class="text-sm">
                         <!-- Title + Type in one column -->
-                        <Column header="Title" style="min-width: 8rem">
+                        <Column header="Name" style="min-width: 8rem">
                             <template #body="{ data }">
                                 <div class="flex flex-col">
                                     <span class="font-bold text-gray-800">{{ data.title }}</span>
                                     <span class="text-gray-600 text-xm mt-2">🔧 {{ data.type }}</span>
                                 </div>
                             </template>
-                        </Column>
-
-                        <!-- Min Qty -->
-                        <Column header="Min Qty" style="min-width: 6rem">
-                            <template #body="{ data }">
-                                <div class="flex flex-col">
-                                    <span class="text-gray-800">{{ data.minQty }} pcs</span>
-                                </div>
-                            </template>
-                        </Column>
+                        </Column>   
 
                         <!-- Pattern -->
                         <Column field="pattern" header="Pattern" style="min-width: 6rem"></Column>
 
-                        <!-- Size -->
-                        <Column field="size" header="Size" style="min-width: 6rem"></Column>
+                         <Column field="size" header="Size" style="min-width: 6rem"></Column>
                     </DataTable>
                 </div>
             </div>
@@ -319,9 +341,49 @@ const criteria = [
     }
 ];
 
-const rewardTypes = [
-    { label: 'Point', value: 'point' },
-    { label: 'Reload Pin', value: 'reload' }
+const dealerList = [
+  {
+    id: 'E010001',
+    name: 'Tau Lim Tires Service',
+    signboardType: 'T10',
+    state: 'Johor'
+  },
+  {
+    id: 'E010002',
+    name: 'Toyo Tires Center',
+    signboardType: 'TAC',
+    state: 'Kuala Lumpur'
+  },
+  {
+    id: 'E010003',
+    name: 'Auto Wheels Malaysia',
+    signboardType: 'TSS',
+    state: 'Selangor'
+  },
+  {
+    id: 'E010004',
+    name: 'Speedy Tire Shop',
+    signboardType: 'TST',
+    state: 'Penang'
+  },
+  {
+    id: 'E010005',
+    name: 'Premium Auto Tires',
+    signboardType: 'TPC',
+    state: 'Perak'
+  },
+  {
+    id: 'E010006',
+    name: 'Star Tires & Service',
+    signboardType: 'Non',
+    state: 'Sabah'
+  },
+  {
+    id: 'E010007',
+    name: 'AutoMax Tire Service',
+    signboardType: 'T10',
+    state: 'Johor'
+  }
 ];
 
 const rewards = ref([
