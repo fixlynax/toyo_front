@@ -10,11 +10,8 @@
                         <div class="inline-flex items-center gap-2">
                             <!-- Edit Event -->
                             <RouterLink to="/marketing/editEvent">
-                                <Button label="Report" class="p-button-info" size="small" />
+                                <Button label="Report Download" class="p-button-danger" size="small" />
                             </RouterLink>
-
-                            <!-- Delete Event -->
-                            <Button label="Download" class="p-button-success" size="small" />
                         </div>
                     </div>
 
@@ -52,7 +49,6 @@
                         </div>
                     </div>
                 </div>
-                <!-- ✅ properly closed Problem Issue card -->
 
                 <!-- CTC Details -->
                 <div class="card flex flex-col w-full">
@@ -98,16 +94,12 @@
                         </div>
                     </div>
 
-                    <!-- ======================= -->
-                    <!-- Rejection Reason Section -->
-                    <!-- ======================= -->
-                    <div v-if="showRejectReason" class="card flex flex-col gap-6 w-full border border-red-300 mt-4 p-4">
+                    <div v-if="showRejectReason" class="card flex flex-col gap-6 w-full border mt-4 p-4">
                         <!-- Header -->
                         <div class="flex items-center justify-between border-b pb-2">
-                            <h2 class="text-2xl font-bold text-red-600">❌ Reject CTC</h2>
+                            <h2 class="text-2xl font-bold text-black-600">❌ Reject CTC</h2>
                         </div>
 
-                        <!-- Reason Input -->
                         <div>
                             <p class="mb-2 text-gray-700 text-lg">Reason for rejection:</p>
                             <textarea v-model="rejectReason" class="w-full border p-2 rounded" placeholder="Enter reason here..." rows="3"></textarea>
@@ -151,21 +143,15 @@
                     <!-- Action Buttons -->
                     <div class="flex justify-end mt-6">
                         <div class="flex gap-2">
-                            <!-- Reject Button -->
-                            <Button label="Reject" class="p-button-danger" size="small" @click="showRejectReason = true" />
-
-                            <!-- Approve Button -->
+                            <Button label="Reject" class="p-button-danger" size="small" @click="showRejectReason2 = true" />
                             <Button label="Approve" class="p-button-success" size="small" @click="submitApprove" />
                         </div>
                     </div>
 
-                    <!-- ======================= -->
-                    <!-- Rejection Reason Section -->
-                    <!-- ======================= -->
-                    <div v-if="showRejectReason" class="card flex flex-col gap-6 w-full border border-red-300 mt-4 p-4">
+                    <div v-if="showRejectReason2" class="card flex flex-col gap-6 w-full border mt-4 p-4">
                         <!-- Header -->
                         <div class="flex items-center justify-between border-b pb-2">
-                            <h2 class="text-2xl font-bold text-red-600">❌ Reject CTC</h2>
+                            <h2 class="text-2xl font-bold text-black-600">❌ Reject Scrap</h2>
                         </div>
 
                         <!-- Reason Input -->
@@ -176,7 +162,7 @@
 
                         <!-- Action Buttons -->
                         <div class="flex justify-end mt-2 space-x-2">
-                            <Button label="Cancel" class="p-button-secondary" size="small" @click="showRejectReason = false" />
+                            <Button label="Cancel" class="p-button-secondary" size="small" @click="showRejectReason2 = false" />
                             <Button label="Submit" class="p-button-danger" size="small" @click="submitReject" :disabled="!rejectReason.trim()" />
                         </div>
                     </div>
@@ -298,8 +284,6 @@
                     </div>
                 </div>
             </div>
-            <!-- ✅ properly closed CTC Details card -->
-            <!-- ✅ close LEFT SIDE -->
 
             <!-- RIGHT SIDE -->
             <div class="md:w-1/3 flex flex-col">
@@ -405,42 +389,9 @@
 <script setup>
 import { ref } from 'vue';
 
-const memberDetail = ref({
-    id: 10,
-    etenUserID: 'EU1010',
-    countryCode: '60',
-    mobileNumber: '1890123456',
-    password: 'hashed_pw_10',
-    firstName: 'Faizal',
-    lastName: 'Rahman',
-    emailAddress: 'faizal.rahman@toyotires.com.my',
-    gender: 'Male',
-    race: 'Malay',
-    state: 'Sabah',
-    level: 'Silver',
-    memberSince: '2025-04-20',
-    lastLogin: '2025-08-01 12:05:00',
-    allow_warranty: 0,
-    allow_order: 1,
-    allow_billing: 0,
-    allow_sale: 1,
-    allow_user: 0,
-    activationCode: 'ACT01234',
-    isMaster: 0,
-    device: 'Windows Laptop',
-    platform: 'Web',
-    fcmToken: 'fcm_token_10',
-    status: 1,
-    activated: 1,
-    created: '2025-04-20',
-    deleted: 0
-});
-
-const showPassword = ref(false);
-
-const showDecision = ref(false); // controls whether Approve/Reject are hidden
-const decision = ref(null); // "approve" | "reject"
-const selectedAction = ref(''); // chosen action (replacement/reimbursement/reason)
+const showDecision = ref(false);
+const decision = ref(null);
+const selectedAction = ref('');
 const showSubmit = ref(false);
 
 const warantyDetail = ref({
@@ -449,7 +400,7 @@ const warantyDetail = ref({
     claimDate: '2025-09-01',
     dealerName: 'AutoWorld KL',
     claimType: 'Tire Defect',
-    status: 0, // Pending
+    status: 0,
     summary: {
         ctcNo: 'CTC-2025-001',
         scrapNo: 'SCR-8765',
@@ -477,7 +428,7 @@ const warantyDetail = ref({
         damageCode: 'D-102 (Sidewall Separation)'
     },
     claimVariable: {
-        Claim: 95, // 🔑 numeric
+        Claim: 95,
         Usable: 80,
         Worn: 20
     },
@@ -511,146 +462,44 @@ const handleReject = () => {
 };
 
 const submitDecision = () => {
-  if (decision.value === "approve") {
-    console.log("✅ Submitted Approval:", selectedAction.value);
-    alert(`Submitted Approval: ${selectedAction.value}`);
-  } else if (decision.value === "reject") {
-    console.log("❌ Submitted Rejection:", selectedAction.value);
-    alert(`Submitted Rejection: ${selectedAction.value}`);
-  }
+    if (decision.value === 'approve') {
+        console.log('✅ Submitted Approval:', selectedAction.value);
+        alert(`Submitted Approval: ${selectedAction.value}`);
+    } else if (decision.value === 'reject') {
+        console.log('❌ Submitted Rejection:', selectedAction.value);
+        alert(`Submitted Rejection: ${selectedAction.value}`);
+    }
 
-  // reset back to initial state after submit
-  cancelDecision();
+    cancelDecision();
 };
-
 
 const cancelDecision = () => {
     // Reset everything
     decision.value = null;
     selectedAction.value = '';
     showSubmit.value = false;
-    showDecision.value = false; // 👈 this brings back Approve/Reject buttons
+    showDecision.value = false; 
 };
 
 const showRejectReason = ref(false);
-const rejectReason = ref("");
+const showRejectReason2 = ref(false);
+const rejectReason = ref('');
 
 // ✅ Approve logic
 const submitApprove = () => {
-  console.log("✅ Approved claim");
-  alert("Claim Approved ✅");
-  // 👉 You can add API call here
+    console.log('✅ Approved claim');
+    alert('Claim Approved ✅');
+    // 👉 You can add API call here
 };
 
 // ✅ Reject logic
 const submitReject = () => {
-  console.log("❌ Rejected with reason:", rejectReason.value);
-  alert(`Claim Rejected ❌\nReason: ${rejectReason.value}`);
-  
-  // Reset after submit
-  rejectReason.value = "";
-  showRejectReason.value = false;
+    console.log('❌ Rejected with reason:', rejectReason.value);
+    alert(`Claim Rejected ❌\nReason: ${rejectReason.value}`);
+
+    // Reset after submit
+    rejectReason.value = '';
+    showRejectReason.value = false;
+    showRejectReason2.value = false;
 };
-
-// ✅ Cancel rejection
-const cancelReject = () => {
-  rejectReason.value = "";
-  showRejectReason.value = false;
-};
-// 1. Suspend/Un-Activated
-const isActivated = ref(false);
-const confirmSuspend = () => {
-    isActivated.value = !isActivated.value;
-};
-
-// 2. Block/Un-block Device List
-const devices = ref([
-    {
-        id: 1,
-        name: 'Windows Laptop',
-        uniqueId: '00008030-001E3D400043402E',
-        lastActive: '8/9/2025 10:54 pm',
-        isBlocked: true
-    }
-]);
-
-const toggleBlock = (device) => {
-    device.isBlocked = !device.isBlocked;
-};
-
-const users = ref([
-    { id: 'U001', name: 'John Doe', phone: '0123456789', account: '6080100900', lastLogin: '11/9/2025 8:00am', status: 1 },
-    { id: 'U002', name: 'Jane Smith', phone: '0198765432', account: '6080100901', lastLogin: '10/9/2025 8:00am', status: 1 },
-    { id: 'U003', name: 'Alex Tan', phone: '0172233445', account: '6080100902', lastLogin: '23/7/2025 8:00am', status: 0 },
-    { id: 'U004', name: 'Siti Aminah', phone: '0111122233', account: '6080100903', lastLogin: '09/9/2025 8:00am', status: 1 },
-    { id: 'U005', name: 'Michael Lee', phone: '0139988776', account: '6080100904', lastLogin: '07/8/2025 8:00am', status: 0 }
-]);
-
-const billingDocs = ref([
-    { id: 1, name: 'Invoice #001', type: 'Invoice' },
-    { id: 2, name: 'Credit Note #100', type: 'CN' },
-    { id: 3, name: 'Debit Note #200', type: 'DN' },
-    { id: 4, name: 'SOA Jan 2025', type: 'SOA Statement' },
-    { id: 5, name: 'Refund Note #10', type: 'Refund Note' }
-]);
-
-const viewDoc = (doc) => {
-    console.log('Viewing billing document:', doc);
-};
-
-// 4. Finance Documents
-const financeDocs = ref([
-    { id: 1, name: 'Payment Receipt' },
-    { id: 2, name: 'Tax Certificate' },
-    { id: 3, name: 'Bank Statement' },
-    { id: 4, name: 'Audit Report' },
-    { id: 5, name: 'Financial Summary' }
-]);
-
-const viewFinance = (doc) => {
-    console.log('Viewing finance document:', doc);
-};
-
-const manageUser = (user) => {
-    console.log('Managing user:', user);
-};
-
-const shiptoList = ref([
-    {
-        id: 1,
-        companyName1: 'Tan Know Car Tires',
-        companyName2: '',
-        companyName3: '',
-        companyName4: '',
-        addressLine1: 'Lot 123, Jalan Sungai',
-        addressLine2: 'Seksyen 15',
-        addressLine3: '',
-        addressLine4: '',
-        city: 'Shah Alam',
-        state: 'Selangor',
-        postcode: '40150',
-        country: 'Malaysia',
-        phoneNumber: '03-55123456',
-        mobileNumber: '012-3456789',
-        emailAddress: 'info@toyotires.my'
-    },
-    {
-        id: 2,
-        companyName1: 'Shiro Auto Parts',
-        companyName2: 'Warehouse Division',
-        companyName3: '',
-        companyName4: '',
-        addressLine1: 'No 45, Jalan Merdeka',
-        addressLine2: '',
-        addressLine3: '',
-        addressLine4: '',
-        city: 'Kuala Lumpur',
-        state: 'Wilayah Persekutuan',
-        postcode: '50450',
-        country: 'Malaysia',
-        phoneNumber: '03-98765432',
-        mobileNumber: '019-8765432',
-        emailAddress: 'contact@shiroauto.com'
-    }
-]);
 </script>
