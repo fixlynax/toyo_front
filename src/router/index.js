@@ -197,6 +197,11 @@ const router = createRouter({
                     name: 'Edit-Campaign',
                     component: () => import('@/views/marketing/editCampaign.vue')
                 },
+                {
+                    path: '/marketing/inviteDealer',
+                    name: 'Invite-Dealern',
+                    component: () => import('@/views/marketing/inviteDealer.vue')
+                },
 
                 // Member List
                 {
