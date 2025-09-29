@@ -61,7 +61,7 @@
                         <div class="text-2xl font-bold text-gray-800">CTC Details</div>
                         <div class="inline-flex items-center gap-2">
                             <!-- Create Event -->
-                            <RouterLink to="/marketing/editEvent">
+                            <RouterLink to="/technical/createOrder">
                                 <Button label="Create" class="p-button-info" size="small" />
                             </RouterLink>
                         </div>
@@ -126,6 +126,9 @@
                     <div class="flex items-center justify-between border-b pb-2 mb-4">
                         <div class="text-2xl font-bold text-gray-800">Scrap Details</div>
                     </div>
+                    <div class="grid grid-cols-1 md:grid-cols-1 gap-4 mb-4">
+                        <img v-for="(photo, index) in warantyDetail.problem.imageURL" :key="index" :src="photo" alt="catalogue Image 1" class="rounded-xl shadow-sm object-cover w-full h-80" />
+                    </div>
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm text-gray-700">
                         <div>
                             <span class="block text-xm font-bold text-black-700">Claim Date</span>
@@ -143,9 +146,6 @@
                             <span class="block text-xm font-bold text-black-700">Claim Type</span>
                             <p class="font-medium text-lg">{{ warantyDetail.claimType }}</p>
                         </div>
-                    </div>
-                    <div class="grid grid-cols-1 md:grid-cols-1 gap-4 mb-4">
-                        <img v-for="(photo, index) in warantyDetail.problem.imageURL" :key="index" :src="photo" alt="catalogue Image 1" class="rounded-xl shadow-sm object-cover w-full h-80" />
                     </div>
 
                     <!-- Action Buttons -->
@@ -182,118 +182,102 @@
                     </div>
                 </div>
 
-                 <!-- Claim Variable -->
-        <div class="card flex flex-col w-full">
-          <div class="flex items-center justify-between border-b pb-2 mb-4">
-            <div class="text-2xl font-bold text-gray-800">Claim Variable</div>
-          </div>
-          <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm text-gray-700">
-            <div>
-              <span class="block text-xm font-bold text-black-700">Claim %</span>
-              <p class="font-medium text-lg">
-                {{ warantyDetail.claimVariable.Claim }}
-              </p>
-            </div>
-            <div>
-              <span class="block text-xm font-bold text-black-700">Usable %</span>
-              <p class="font-medium text-lg">{{ warantyDetail.claimVariable.Usable }}</p>
-            </div>
-            <div>
-              <span class="block text-xm font-bold text-black-700">Worn %</span>
-              <p class="font-medium text-lg">{{ warantyDetail.claimVariable.Worn }}</p>
-            </div>
-            <div>
-              <span class="block text-xm font-bold text-black-700">Damage Code</span>
-              <p class="font-medium text-lg">{{ warantyDetail.problem.damageCode }}</p>
-            </div>
-          </div>
-        </div>
+                <!-- Claim Variable -->
+                <div class="card flex flex-col w-full">
+                    <div class="flex items-center justify-between border-b pb-2 mb-4">
+                        <div class="text-2xl font-bold text-gray-800">Claim Variable</div>
+                    </div>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm text-gray-700">
+                        <div>
+                            <span class="block text-xm font-bold text-black-700">Claim %</span>
+                            <p class="font-medium text-lg">
+                                {{ warantyDetail.claimVariable.Claim }}
+                            </p>
+                        </div>
+                        <div>
+                            <span class="block text-xm font-bold text-black-700">Usable %</span>
+                            <p class="font-medium text-lg">{{ warantyDetail.claimVariable.Usable }}</p>
+                        </div>
+                        <div>
+                            <span class="block text-xm font-bold text-black-700">Worn %</span>
+                            <p class="font-medium text-lg">{{ warantyDetail.claimVariable.Worn }}</p>
+                        </div>
+                        <div>
+                            <span class="block text-xm font-bold text-black-700">Damage Code</span>
+                            <p class="font-medium text-lg">{{ warantyDetail.problem.damageCode }}</p>
+                        </div>
+                    </div>
+                    <!-- Action Buttons (only before decision) -->
+                    <div v-if="!showSubmit" class="flex justify-end mt-6">
+                        <div class="flex gap-2">
+                            <!-- Reject Button -->
+                            <Button label="Reject" class="p-button-danger" size="small" @click="handleReject" />
 
-        <!-- ✅ Replacement Order -->
-        <div v-if="showReplacementOrder" class="card flex flex-col w-full mt-4">
-          <div class="flex items-center justify-between border-b pb-2 mb-4">
-            <div class="text-2xl font-bold text-gray-800">Replacement Order</div>
-          </div>
-          <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm text-gray-700">
-            <div>
-              <span class="block text-xm font-bold text-black-700">Order No</span>
-              <p class="font-medium text-lg">{{ warantyDetail.replacementOrder.orderNo }}</p>
-            </div>
-            <div>
-              <span class="block text-xm font-bold text-black-700">Name</span>
-              <p class="font-medium text-lg">{{ warantyDetail.replacementOrder.name }}</p>
-            </div>
-            <div>
-              <span class="block text-xm font-bold text-black-700">Item</span>
-              <p class="font-medium text-lg">{{ warantyDetail.replacementOrder.item }}</p>
-            </div>
-            <div>
-              <span class="block text-xm font-bold text-black-700">Quantity</span>
-              <p class="font-medium text-lg">{{ warantyDetail.replacementOrder.quantity }}</p>
-            </div>
-            <div>
-              <span class="block text-xm font-bold text-black-700">Total</span>
-              <p class="font-medium text-lg">{{ warantyDetail.replacementOrder.total }}</p>
-            </div>
-            <div>
-              <span class="block text-xm font-bold text-black-700">Sub Total</span>
-              <p class="font-medium text-lg">{{ warantyDetail.replacementOrder.subTotal }}</p>
-            </div>
-          </div>
-        </div>
+                            <!-- Approve Button -->
+                            <Button label="Approve" class="p-button-success" size="small" @click="handleApprove" />
+                        </div>
+                    </div>
+                </div>
 
-        <!-- ❌ Reimbursement Details -->
-        <div v-if="showReimbursement" class="card flex flex-col w-full mt-4">
-          <div class="flex items-center justify-between border-b pb-2 mb-4">
-            <div class="text-2xl font-bold text-gray-800">Reimbursement Details</div>
-          </div>
-          <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm text-gray-700">
-            <div>
-              <span class="block text-xm font-bold text-black-700">Ref No</span>
-              <p class="font-medium text-lg">{{ warantyDetail.reimbursement.refNo }}</p>
-            </div>
-            <div>
-              <span class="block text-xm font-bold text-black-700">Order No</span>
-              <p class="font-medium text-lg">{{ warantyDetail.reimbursement.orderNo }}</p>
-            </div>
-            <div>
-              <span class="block text-xm font-bold text-black-700">Order Status</span>
-              <p class="font-medium text-lg">{{ warantyDetail.reimbursement.status }}</p>
-            </div>
-          </div>
-        </div>
+                <!-- ✅ Replacement Order -->
+                <div v-if="showReplacementOrder" class="card flex flex-col w-full mt-4">
+                    <div class="flex items-center justify-between border-b pb-2 mb-4">
+                        <div class="text-2xl font-bold text-gray-800">Replacement Order</div>
+                    </div>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm text-gray-700">
+                        <div>
+                            <span class="block text-xm font-bold text-black-700">Order No</span>
+                            <p class="font-medium text-lg">{{ warantyDetail.replacementOrder.orderNo }}</p>
+                        </div>
+                        <div>
+                            <span class="block text-xm font-bold text-black-700">Name</span>
+                            <p class="font-medium text-lg">{{ warantyDetail.replacementOrder.name }}</p>
+                        </div>
+                        <div>
+                            <span class="block text-xm font-bold text-black-700">Item</span>
+                            <p class="font-medium text-lg">{{ warantyDetail.replacementOrder.item }}</p>
+                        </div>
+                        <div>
+                            <span class="block text-xm font-bold text-black-700">Quantity</span>
+                            <p class="font-medium text-lg">{{ warantyDetail.replacementOrder.quantity }}</p>
+                        </div>
+                        <div>
+                            <span class="block text-xm font-bold text-black-700">Total</span>
+                            <p class="font-medium text-lg">{{ warantyDetail.replacementOrder.total }}</p>
+                        </div>
+                        <div>
+                            <span class="block text-xm font-bold text-black-700">Sub Total</span>
+                            <p class="font-medium text-lg">{{ warantyDetail.replacementOrder.subTotal }}</p>
+                        </div>
+                    </div>
 
-        <!-- ✅ Submit Button -->
-        <div v-if="showSubmit" class="flex justify-end mt-4">
-          <Button
-            label="Submit"
-            class="p-button-primary"
-            size="small"
-            @click="submitDecision"
-          />
-        </div>
+                    <!-- ✅ Submit Button -->
+                    <div v-if="showSubmit" class="flex justify-end mt-4">
+                        <Button label="Submit" class="p-button-primary" size="small" @click="submitDecision" />
+                    </div>
+                </div>
 
-        <!-- Action Buttons (only before decision) -->
-        <div v-if="!showSubmit" class="flex justify-end mt-6">
-          <div class="flex gap-2">
-            <!-- Reject Button -->
-            <Button
-              label="Reject"
-              class="p-button-danger"
-              size="small"
-              @click="handleReject"
-            />
-
-            <!-- Approve Button -->
-            <Button
-              label="Approve"
-              class="p-button-success"
-              size="small"
-              @click="handleApprove"
-            />
-          </div>
-        </div>
-      </div>
+                <!-- ❌ Reimbursement Details -->
+                <div v-if="showReimbursement" class="card flex flex-col w-full mt-4">
+                    <div class="flex items-center justify-between border-b pb-2 mb-4">
+                        <div class="text-2xl font-bold text-gray-800">Reimbursement Details</div>
+                    </div>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm text-gray-700">
+                        <div>
+                            <span class="block text-xm font-bold text-black-700">Ref No</span>
+                            <p class="font-medium text-lg">{{ warantyDetail.reimbursement.refNo }}</p>
+                        </div>
+                        <div>
+                            <span class="block text-xm font-bold text-black-700">Order No</span>
+                            <p class="font-medium text-lg">{{ warantyDetail.reimbursement.orderNo }}</p>
+                        </div>
+                        <div>
+                            <span class="block text-xm font-bold text-black-700">Order Status</span>
+                            <p class="font-medium text-lg">{{ warantyDetail.reimbursement.status }}</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
             <!-- ✅ close LEFT SIDE -->
 
             <!-- RIGHT SIDE -->
@@ -371,19 +355,19 @@
                                     <td class="px-4 py-2 font-medium">Size</td>
                                     <td class="px-4 py-2 text-right">{{ warantyDetail.tires.size }}</td>
                                 </tr>
-                                <tr>
+                                <tr class="border-b">
                                     <td class="px-4 py-2 font-medium">Tread Depth Tire 1</td>
                                     <td class="px-4 py-2 text-right">{{ warantyDetail.tires.treadDepths[0] }}</td>
                                 </tr>
-                                <tr>
+                                <tr class="border-b">
                                     <td class="px-4 py-2 font-medium">Tread Depth Tire 2</td>
                                     <td class="px-4 py-2 text-right">{{ warantyDetail.tires.treadDepths[1] }}</td>
                                 </tr>
-                                <tr>
+                                <tr class="border-b">
                                     <td class="px-4 py-2 font-medium">Tread Depth Tire 3</td>
                                     <td class="px-4 py-2 text-right">{{ warantyDetail.tires.treadDepths[2] }}</td>
                                 </tr>
-                                <tr>
+                                <tr class="border-b">
                                     <td class="px-4 py-2 font-medium">Tread Depth Tire 4</td>
                                     <td class="px-4 py-2 text-right">{{ warantyDetail.tires.treadDepths[3] }}</td>
                                 </tr>
@@ -438,79 +422,79 @@ const showReimbursement = ref(false);
 const showSubmit = ref(false);
 
 const warantyDetail = ref({
-  id: 1,
-  refNo: 'CLM-2025-001',
-  claimDate: '2025-09-01',
-  dealerName: 'AutoWorld KL',
-  claimType: 'Tire Defect',
-  status: 0, // Pending
-  summary: {
-    ctcNo: 'CTC-2025-001',
-    scrapNo: 'SCR-8765',
-    invoiceNo: 'INV-4567'
-  },
-  dealerInfo: {
-    dealerCode: 'DLR-001',
-    contactPerson: 'Ahmad Zaki',
-    contactNo: '+6012-3456789'
-  },
-  customerInfo: {
-    name: 'Lee Wei Ming',
-    vehicle: 'Toyota Hilux 2.8G',
-    regNo: 'WXY 4567'
-  },
-  tires: {
-    size: '265/65R17',
-    pattern: 'Open Country A/T',
-    serialNo: 'TYR-99887766',
-    treadDepths: [6.5, 6.7, 6.6, 6.4]
-  },
-  problem: {
-    issue: 'Sidewall crack within 6 months of purchase',
-    imageURL: ['/demo/images/sidewall-damage.jpg'],
-    damageCode: 'D-102 (Sidewall Separation)'
-  },
-  claimVariable: {
-    Claim: 95, // 🔑 numeric
-    Usable: 80,
-    Worn: 20
-  },
-  replacementOrder: {
-    orderNo: 'ORD-5569',
-    name: 'Proxes',
-    item: 'Proxes R45',
-    quantity: '4',
-    total: '500.00',
-    subTotal: '2000.00'
-  },
-  reimbursement: {
-    refNo: 'TBD-1109',
-    orderNo: 'TY-119',
-    status: 'Return'
-  }
+    id: 1,
+    refNo: 'CLM-2025-001',
+    claimDate: '2025-09-01',
+    dealerName: 'AutoWorld KL',
+    claimType: 'Tire Defect',
+    status: 0, // Pending
+    summary: {
+        ctcNo: 'CTC-2025-001',
+        scrapNo: 'SCR-8765',
+        invoiceNo: 'INV-4567'
+    },
+    dealerInfo: {
+        dealerCode: 'DLR-001',
+        contactPerson: 'Ahmad Zaki',
+        contactNo: '+6012-3456789'
+    },
+    customerInfo: {
+        name: 'Lee Wei Ming',
+        vehicle: 'Toyota Hilux 2.8G',
+        regNo: 'WXY 4567'
+    },
+    tires: {
+        size: '265/65R17',
+        pattern: 'Open Country A/T',
+        serialNo: 'TYR-99887766',
+        treadDepths: [6.5, 6.7, 6.6, 6.4]
+    },
+    problem: {
+        issue: 'Sidewall crack within 6 months of purchase',
+        imageURL: ['/demo/images/sidewall-damage.jpg'],
+        damageCode: 'D-102 (Sidewall Separation)'
+    },
+    claimVariable: {
+        Claim: 95, // 🔑 numeric
+        Usable: 80,
+        Worn: 20
+    },
+    replacementOrder: {
+        orderNo: 'ORD-5569',
+        name: 'Proxes',
+        item: 'Proxes R45',
+        quantity: '4',
+        total: '500.00',
+        subTotal: '2000.00'
+    },
+    reimbursement: {
+        refNo: 'TBD-1109',
+        orderNo: 'TY-119',
+        status: 'Return'
+    }
 });
 
 // ✅ Approve handler
 const handleApprove = () => {
-  showReimbursement.value = false;
-  if (Number(warantyDetail.value.claimVariable.Claim) >= 90) {
-    showReplacementOrder.value = true;
-  } else {
-    showReplacementOrder.value = false;
-  }
-  showSubmit.value = true;
+    showReimbursement.value = false;
+    if (Number(warantyDetail.value.claimVariable.Claim) >= 90) {
+        showReplacementOrder.value = true;
+    } else {
+        showReplacementOrder.value = false;
+    }
+    showSubmit.value = true;
 };
 
 // ❌ Reject handler
 const handleReject = () => {
-  showReplacementOrder.value = false;
-  showReimbursement.value = true;
-  showSubmit.value = true;
+    showReplacementOrder.value = false;
+    showReimbursement.value = true;
+    showSubmit.value = true;
 };
 
 // ✅ Final submit action
 const submitDecision = () => {
-  alert('Decision submitted!'); // replace with API call later
+    alert('Decision submitted!'); // replace with API call later
 };
 
 // 1. Suspend/Un-Activated
@@ -609,5 +593,4 @@ const shiptoList = ref([
         emailAddress: 'contact@shiroauto.com'
     }
 ]);
-
 </script>
