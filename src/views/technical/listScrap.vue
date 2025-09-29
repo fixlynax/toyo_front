@@ -44,7 +44,7 @@ onBeforeMount(async () => {
 
 <template>
     <div class="card">
-        <div class="text-2xl font-bold text-gray-800 border-b pb-2">CTC List</div>
+        <div class="text-2xl font-bold text-gray-800 border-b pb-2">Scrap List</div>
         <DataTable 
             :value="listData" 
             :paginator="true" 
@@ -67,9 +67,10 @@ onBeforeMount(async () => {
                     </div>
 
                     <!-- Right: Export & Template Buttons -->
-                    <RouterLink to="/marketing/createEvent">
-                        <Button type="button" label="Create" />
-                    </RouterLink>
+                    <div class="flex items-center gap-2 ml-auto">
+                        <Button type="button" label="Export" icon="pi pi-file-export" class="p-button-sucess" />
+                        <Button type="button" label="Template" icon="pi pi-download" class="p-button-danger" />
+                    </div>
                 </div>
             </template>
 

@@ -67,7 +67,7 @@ onBeforeMount(async () => {
                             <InputIcon>
                                 <i class="pi pi-search" />
                             </InputIcon>
-                            <InputText v-model="filters1['global'].value" placeholder="Quick Search" class="w-full" />
+                            <InputText placeholder="Quick Search" class="w-full" />
                         </IconField>
                         <Button type="button" icon="pi pi-cog" class="p-button" />
                     </div>

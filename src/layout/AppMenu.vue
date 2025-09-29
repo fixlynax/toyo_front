@@ -103,12 +103,12 @@ const model = ref([
                     { 
                         label: 'Scrap List', 
                         icon: 'pi pi-fw pi-trash', 
-                        to: '#' 
+                        to: '/technical/listScrap' 
                     },
                     { 
                         label: 'Invoice List', 
                         icon: 'pi pi-fw pi-file-pdf', 
-                        to: '#' 
+                        to: '/technical/listInvoice' 
                     }
                 ]
             },

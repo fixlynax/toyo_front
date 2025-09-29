@@ -315,6 +315,16 @@ const router = createRouter({
                     name: 'Add-Twp-Tire',
                     component: () => import('@/views/technical/detailProduct.vue')
                 },
+                {
+                    path: '/technical/listScrap',
+                    name: 'List-Scrap',
+                    component: () => import('@/views/technical/listScrap.vue')
+                },
+                {
+                    path: '/technical/listInvoice',
+                    name: 'List-Invoice',
+                    component: () => import('@/views/technical/listInvoice.vue')
+                },
                 //   {
                 //     path: '/technical/detailWarantyClaim',
                 //     name: 'Detail-Waranty-Claim',
