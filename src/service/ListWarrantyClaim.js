@@ -46,7 +46,7 @@ export const listWarantyClaimService = {
                 },
                 claimVariable: {
                     amount: 'RM 450.00',
-                    replacementType: 'Partial'
+                    replacementType: 'Partial',
                     Claim: '50%',
                     Usable: '60%',
                     Worn: '40%'
