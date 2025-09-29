@@ -7,38 +7,69 @@
 
                 <!-- Tire Form -->
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    
                     <!-- Tire Size -->
                     <div class="md:col-span-2">
-                        <label class="block font-medium text-gray-700">Tire Size</label>
-                        <Dropdown v-model="form.type" :options="tireSizeOptions" optionLabel="label" optionValue="value" placeholder="Select Type" class="w-full" />
+                        <label class="block text-xm font-bold text-gray-700 mb-2">Tire Size</label>
+                        <Dropdown 
+                            v-model="form.tyreSize" 
+                            :options="tireSizeOptions" 
+                            optionLabel="label" 
+                            optionValue="value" 
+                            placeholder="Select Tire Size" 
+                            class="w-full" 
+                        />
                     </div>
 
                     <!-- Tire Pattern -->
                     <div class="md:col-span-2">
-                        <label class="block font-medium text-gray-700">Tire Pattern</label>
-                        <Dropdown v-model="form.type" :options="tirePatternOptions" optionLabel="label" optionValue="value" placeholder="Select Type" class="w-full" />
+                        <label class="block text-xm font-bold text-gray-700 mb-2">Tire Pattern</label>
+                        <Dropdown 
+                            v-model="form.pattern" 
+                            :options="tirePatternOptions" 
+                            optionLabel="label" 
+                            optionValue="value" 
+                            placeholder="Select Tire Pattern" 
+                            class="w-full" 
+                        />
                     </div>
 
-                    <!-- Tire Type -->
+                    <!-- Description -->
                     <div>
-                        <label class="block font-medium text-gray-700">Description</label>
-                        <InputText v-model="form.desc" class="w-full" placeholder="Enter Description Here..." />
+                        <label class="block text-xm font-bold text-gray-700 mb-2">Description</label>
+                        <InputText 
+                            v-model="form.desc" 
+                            class="w-full" 
+                            placeholder="Enter Description Here..." 
+                        />
                     </div>
 
-                    <!-- Stock Quantity -->
+                    <!-- MFG Code -->
                     <div>
-                        <label class="block font-medium text-gray-700">MFG Code</label>
-                        <InputText v-model="form.mfgcode" class="w-full" placeholder="Enter MFGCode Here..." />
+                        <label class="block text-xm font-bold text-gray-700 mb-2">MFG Code</label>
+                        <InputText 
+                            v-model="form.mfgcode" 
+                            class="w-full" 
+                            placeholder="Enter MFG Code Here..." 
+                        />
                     </div>
                 </div>
 
                 <!-- Action Buttons -->
                 <div class="flex justify-end mt-8 gap-4">
                     <div class="w-32">
-                        <Button label="Cancel" class="w-full p-button-secondary" @click="cancel" />
+                        <Button 
+                            label="Cancel" 
+                            class="w-full p-button-secondary" 
+                            @click="cancel" 
+                        />
                     </div>
                     <div class="w-32">
-                        <Button label="Save Tire" class="w-full p-button-success" @click="saveTire" />
+                        <Button 
+                            label="Save Tire" 
+                            class="w-full p-button-success" 
+                            @click="saveTire" 
+                        />
                     </div>
                 </div>
             </div>
@@ -47,28 +78,24 @@
 </template>
 
 <script setup>
-import { ref } from 'vue';
+import { ref, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
-import { ListTyreService } from '@/service/listProduct';
 
+// Router instance
 const router = useRouter();
 
+// Form state
 const form = ref({
     tyreSize: '',
     pattern: '',
-    type: '',
+    desc: '',
+    mfgcode: '',
     stock: 0,
     image1URL: '',
     image2URL: '',
     image3URL: ''
 });
 
-const tireTypeOptions = [
-    { label: 'Passenger Car', value: 'Passenger Car' },
-    { label: 'SUV', value: 'SUV' },
-    { label: 'Truck', value: 'Truck' },
-    { label: 'Bus', value: 'Bus' }
-];
 // =======================
 // Tire Size Options
 // =======================
@@ -84,8 +111,8 @@ const tireSizeOptions = [
     { label: '245/45R19', value: '245/45R19' },
     { label: '265/70R17', value: '265/70R17' },
     { label: '275/65R18', value: '275/65R18' },
-    { label: '295/80R22.5', value: '295/80R22.5' }, // Truck/Bus
-    { label: '315/80R22.5', value: '315/80R22.5' } // Truck/Bus
+    { label: '295/80R22.5', value: '295/80R22.5' },
+    { label: '315/80R22.5', value: '315/80R22.5' }
 ];
 
 // =======================
@@ -106,8 +133,18 @@ const tirePatternOptions = [
     { label: 'Commercial/Heavy Duty', value: 'Commercial/Heavy Duty' }
 ];
 
+// =======================
 // Cancel and go back
+// =======================
 const cancel = () => {
     router.push('/technical/twpTireList');
+};
+
+// =======================
+// Save Tire
+// =======================
+const saveTire = () => {
+    console.log('Tire saved:', form.value);
+    // TODO: Add API call to save tire data
 };
 </script>

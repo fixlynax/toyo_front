@@ -22,7 +22,7 @@
                     <!-- Right: Export & Template Buttons -->
                     <div class="flex items-center gap-2 ml-auto">
                         <Button type="button" label="Export" icon="pi pi-file-export" class="p-button" />
-                        <Button type="button" label="Template" icon="pi pi-download" class="p-button" />
+                        <Button type="button" label="Batch" icon="pi pi-file-edit" class="p-button" />
                     </div>
                 </div>
             </template>

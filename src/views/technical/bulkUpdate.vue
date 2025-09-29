@@ -21,11 +21,11 @@
 
                     <!-- Right: Export & Template Buttons -->
                     <div class="flex gap-2 justify-end">
-                        <Button label="Download Template" icon="pi pi-download" class="p-button-success" @click="downloadTemplate" />
+                        <Button label="Template" icon="pi pi-download" class="p-button" @click="downloadTemplate" />
 
                         <input type="file" ref="fileInput" class="hidden" accept=".xlsx,.xls" @change="handleFileUpload" />
 
-                        <Button label="Upload File" icon="pi pi-upload" class="p-button-info" @click="triggerFileInput" />
+                        <Button label="Upload File" icon="pi pi-upload" class="p-button" @click="triggerFileInput" />
 
                         <!-- <Button 
         label="Update" 
@@ -50,7 +50,9 @@
             <!-- Tyre Pattern -->
             <Column field="pattern" header="Tyre Pattern" style="min-width: 8rem">
                 <template #body="{ data }">
-                    {{ data.pattern }}
+                    <RouterLink to="/technical/detailProduct" class="font-bold hover:underline">
+                        {{ data.pattern }}
+                    </RouterLink>
                 </template>
             </Column>
 
