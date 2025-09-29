@@ -22,7 +22,7 @@
                     <!-- Right: Export & Template Buttons -->
                     <div class="flex items-center gap-2 ml-auto">
                         <Button type="button" label="Export" icon="pi pi-file-export" class="p-button" />
-                        <Button type="button" label="Template" icon="pi pi-download" class="p-button" />
+                        <Button type="button" label="Batch" icon="pi pi-file-edit" class="p-button" />
                     </div>
                 </div>
             </template>
@@ -36,9 +36,9 @@
             <!-- ========================= -->
             <!-- Data Columns -->
             <!-- ========================= -->
-            <Column field="pattern" header="Tyre Pattern" style="min-width: 6rem">
+            <Column field="pattern" header="Tyre Pattern" style="min-width: 25rem">
                 <template #body="{ data }">
-                     <RouterLink to="/technical/detailProduct" class="font-bold text-gray-800 hover:underline">
+                     <RouterLink to="/technical/detailProduct" class="font-semibold text-gray-800 hover:underline">
                     {{ data.pattern }}
                     </RouterLink>
                 </template>
@@ -50,7 +50,7 @@
                 </template>
             </Column>
 
-            <Column header="Status" style="min-width: 6rem">
+            <Column header="Mfg Code" style="min-width: 6rem">
                 <template #body="{ data }">
                     <span>
                         {{ data.mfgcode }}

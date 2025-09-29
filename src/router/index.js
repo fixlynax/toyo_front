@@ -317,7 +317,7 @@ const router = createRouter({
                 },
                   {
                     path: '/technical/addTwpTire',
-                    name: 'Add-Twp-Tire',
+                    name: 'add-twp',
                     component: () => import('@/views/technical/addTwpTire.vue')
                 },
                   {
