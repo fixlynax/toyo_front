@@ -280,10 +280,20 @@ const router = createRouter({
                     name: 'List-Claim',
                     component: () => import('@/views/technical/listClaim.vue')
                 },
-                  {
+                {
                     path: '/technical/detailWarantyClaim',
                     name: 'Detail-Waranty-Claim',
                     component: () => import('@/views/technical/detailWarantyClaim.vue')
+                },
+                {
+                    path: '/technical/createOrder',
+                    name: 'Create-Order',
+                    component: () => import('@/views/technical/createOrder.vue')
+                },
+                {
+                    path: '/technical/confirmationOrder',
+                    name: 'Confirmation-Order',
+                    component: () => import('@/views/technical/confirmationOrder.vue')
                 },
                 {
                     path: '/technical/listCTC',
