@@ -119,7 +119,7 @@
                         <div class="text-2xl font-bold text-gray-800">Scrap Details</div>
                     </div>
                     <div class="grid grid-cols-1 md:grid-cols-1 gap-4 mb-4">
-                        <img v-for="(photo, index) in warantyDetail.problem.imageURL" :key="index" :src="photo" alt="catalogue Image 1" class="rounded-xl shadow-sm object-cover w-full h-80" />
+                        <img v-for="(photo, index) in warantyDetail.scrapDetails.imageURL1" :key="index" :src="photo" alt="catalogue Image 1" class="rounded-xl shadow-sm object-cover w-full h-80" />
                     </div>
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm text-gray-700">
                         <div>
@@ -431,6 +431,10 @@ const warantyDetail = ref({
         Claim: 95,
         Usable: 80,
         Worn: 20
+    },
+    scrapDetails: {
+        scrapNo: 'SCR-8765',
+        imageURL1: ['/demo/images/toyo.jpg']
     },
     replacementOrder: {
         orderNo: 'ORD-5569',
