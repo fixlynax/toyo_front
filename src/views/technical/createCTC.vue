@@ -32,8 +32,8 @@
 
                     <div class="flex justify-start mt-8">
                         <div class="w-40">
-                            <RouterLink to="/technical/confirmationOrder">
-                                <Button label="Create Order" class="w-full p-button-success" />
+                            <RouterLink to="/technical/detailWarantyClaim">
+                                <Button label="Sumbit Order" class="w-full p-button-success" />
                             </RouterLink>
                         </div>
                     </div>
