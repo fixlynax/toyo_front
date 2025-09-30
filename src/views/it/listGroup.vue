@@ -1,14 +1,7 @@
 <template>
     <div class="card">
         <div class="text-2xl font-bold text-gray-800 border-b pb-2">List Group</div>
-        <DataTable 
-            :value="listData" 
-            :paginator="true" 
-            :rows="10" 
-            dataKey="id" 
-            :rowHover="true" 
-            :loading="loading"
-        >
+        <DataTable :value="listData" :paginator="true" :rows="10" dataKey="id" :rowHover="true" :loading="loading">
             <!-- Table Header -->
             <template #header>
                 <div class="flex items-center justify-between gap-4 w-full flex-wrap">
@@ -24,8 +17,8 @@
                     </div>
 
                     <!-- Right: Add Group Button -->
-                    <RouterLink to="/marketing/createNews">
-                        <Button type="button" label="Create" />
+                    <RouterLink to="/it/createGroup">
+                        <Button type="button" label="Create" icon="pi pi-plus" />
                     </RouterLink>
                 </div>
             </template>
@@ -34,8 +27,8 @@
             <template #empty> No User Group found. </template>
             <template #loading> Loading user group data. Please wait. </template>
 
-            <!-- Columns -->
-            <Column field="usergroup" header="User Group" style="min-width: 30rem">
+            <!-- User Group Name -->
+            <Column field="usergroup" header="User Group" style="min-width: 20rem">
                 <template #body="{ data }">
                     <RouterLink to="/marketing/detailNews" class="hover:underline font-bold">
                         {{ data.usergroup }}
@@ -43,17 +36,23 @@
                 </template>
             </Column>
 
+            <!-- Module / Function List -->
+            <Column field="modules" header="Module / Function List" style="min-width: 25rem">
+                <template #body="{ data }">
+                    <span>{{ data.modules.join(', ') }}</span>
+                </template>
+            </Column>
+
+            <!-- Status -->
             <Column header="Status" style="min-width: 6rem">
                 <template #body="{ data }">
-                    <Tag 
-                        :value="data.statusUser === 1 ? 'Active' : 'Suspend'" 
-                        :severity="data.statusUser === 1 ? 'success' : 'danger'" 
-                    />
+                    <Tag :value="data.statusUser === 1 ? 'Active' : 'Suspend'" :severity="data.statusUser === 1 ? 'success' : 'danger'" />
                 </template>
             </Column>
         </DataTable>
     </div>
 </template>
+
 <script>
 import { ListUserService } from '@/service/ITUser'; // adjust path
 
