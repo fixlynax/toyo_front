@@ -1,7 +1,7 @@
 <script setup>
 import { CustomerService } from '@/service/CustomerService';
 import { ProductService } from '@/service/ProductService';
-import { ListEtenService } from '@/service/ListEten';
+import { ListBackOrderService } from '@/service/ListBackOrder';
 import { FilterMatchMode, FilterOperator } from '@primevue/core/api';
 import { onBeforeMount, ref } from 'vue';
 
@@ -50,14 +50,14 @@ const loading = ref(true);
 
 // Fetch data on component mount
 onBeforeMount(async () => {
-    listData.value = await ListEtenService.getListEten();
+    listData.value = await ListBackOrderService.getListBackOrderData();
     loading.value = false;
 });
 </script>
 
 <template>
     <div class="card">
-        <div class="text-2xl font-bold text-gray-800 border-b pb-2">List Customer</div>
+        <div class="text-2xl font-bold text-gray-800 border-b pb-2">List Back Order</div>
         <DataTable :value="listData" :paginator="true" :rows="10" dataKey="id" :rowHover="true" :loading="loading">
             <template #header>
                 <div class="flex items-center justify-between gap-4 w-full flex-wrap">
@@ -82,28 +82,27 @@ onBeforeMount(async () => {
             <template #empty> No customers found. </template>
             <template #loading> Loading customers data. Please wait. </template>
             <!-- Columns -->
-            <Column field="memberCode" header="Mem Code" style="min-width: 6rem">
+            <Column field="dealeraccno" header="Dealer Acc No" style="min-width: 8rem">
                 <template #body="{ data }">
-                    <RouterLink to="/om/detailEten" class=" hover:underline font-bold">
-                        {{ data.memberCode }}
+                    <RouterLink to="/om/detailBackOrder" class=" hover:underline font-bold">
+                        {{ data.custAccountNo }}
                     </RouterLink>
                 </template>
             </Column>
-            <Column field="custAccountNo" header="Acc No" style="min-width: 6rem" >
+            <Column field="name" header="Name" style="min-width: 8rem" >
+                <template #body="{ data }"> {{ data.shipTo }}</template>
             </Column>
-            <Column field="companyName1" header="Company Name" style="min-width: 8rem" >
-              <template #rowtogglericon="slotProps"></template>
+            <Column field="orderdate" header="Order Date" style="min-width: 8rem" >
+              <template #body="{ data }"> {{ data.deliveryDate }}</template>
             </Column>
-            <Column header="Location" style="min-width: 8rem">
+            <Column header="Back Order Expiry" style="min-width: 8rem">
                 <template #body="{ data }">
-                    {{ data.city }}, {{ data.state }}
+                    {{ data.expiry }}
                 </template>
             </Column> 
-            <Column field="phoneNumber" header="Phone No" style="min-width: 8rem" />
-            <Column field="signboardType" header="Signboard" style="min-width: 8rem" />
-            <Column header="Status" style="min-width: 6rem">
+            <Column header="Status" style="min-width: 8rem">
                 <template #body="{ data }">
-                    <Tag :value="data.status === 1 ? 'Active' : 'Deactive'" :severity="getOverallStatusSeverity(data.status)" />
+                    <Tag :value="data.orderStatus === 1 ? 'Active' : 'Deactive'" :severity="getOverallStatusSeverity(data.orderStatus)" />
                 </template>
             </Column>
         </DataTable>

@@ -138,6 +138,11 @@ const router = createRouter({
                     name: 'List-Back-Order',
                     component: () => import('@/views/om/listBackOrder.vue')
                 },
+                 {
+                    path: '/om/detailBackOrder',
+                    name: 'Detail-Back-Order',
+                    component: () => import('@/views/om/detailBackOrder.vue')
+                },
                 //MARKETING
                 // News Managemnt
                 {
