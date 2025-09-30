@@ -236,7 +236,7 @@ const router = createRouter({
                     name: 'Edit-Redemption',
                     component: () => import('@/views/marketing/editRedemption.vue')
                 },
-                // Reward Catalogue 
+                // Reward Catalogue
                 {
                     path: '/marketing/listCatalogue',
                     name: 'List-Catalogue',
@@ -331,17 +331,17 @@ const router = createRouter({
                     name: 'List-Update',
                     component: () => import('@/views/technical/bulkUpdate.vue')
                 },
-                  {
+                {
                     path: '/technical/twpTireList',
                     name: 'TWP-list',
                     component: () => import('@/views/technical/twpTireList.vue')
                 },
-                  {
+                {
                     path: '/technical/addTwpTire',
                     name: 'add-twp',
                     component: () => import('@/views/technical/addTwpTire.vue')
                 },
-                  {
+                {
                     path: '/technical/detailProduct',
                     name: 'Add-Twp-Tire',
                     component: () => import('@/views/technical/detailProduct.vue')
@@ -351,6 +351,16 @@ const router = createRouter({
                 //     name: 'Detail-Waranty-Claim',
                 //     component: () => import('@/views/technical/detailWarantyClaim.vue')
                 // },
+                {
+                    path: '/it/ListGroup',
+                    name: 'it-List-Group',
+                    component: () => import('@/views/it/listGroup.vue')
+                },
+                {
+                    path: '/it/listUser',
+                    name: 'it-List-User',
+                    component: () => import('@/views/it/listUser.vue')
+                }
             ]
         },
         {

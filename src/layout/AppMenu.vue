@@ -297,12 +297,12 @@ const model = ref([
                     { 
                         label: 'User Group', 
                         icon: 'pi pi-fw pi-users', 
-                        to: '#' 
+                        to: '/it/ListGroup' 
                     },
                     { 
                         label: 'User Account', 
                         icon: 'pi pi-fw pi-user', 
-                        to: '#' 
+                        to: '/it/ListUser' 
                     }
                 ]
             },
