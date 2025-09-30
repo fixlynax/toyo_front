@@ -47,62 +47,6 @@
                 </div>
             </div>
 
-            <!-- CTC Details -->
-            <div class="card flex flex-col w-full">
-                <div class="flex items-center justify-between border-b pb-2 mb-4">
-                    <div class="text-2xl font-bold text-gray-800">CTC Details</div>
-                </div>
-
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm text-gray-700">
-                    <div>
-                        <span class="block text-sm font-bold text-black-700">Claim Date</span>
-                        <p class="font-medium text-lg">{{ warantyDetail.claimDate }}</p>
-                    </div>
-                    <div>
-                        <span class="block text-sm font-bold text-black-700">Claim Ref No</span>
-                        <p class="font-medium text-lg">{{ warantyDetail.summary.ctcNo }}</p>
-                    </div>
-                    <div>
-                        <span class="block text-sm font-bold text-black-700">Dealer Name</span>
-                        <p class="font-medium text-lg">{{ warantyDetail.dealerName }}</p>
-                    </div>
-                    <div>
-                        <span class="block text-sm font-bold text-black-700">Claim Type</span>
-                        <p class="font-medium text-lg">{{ warantyDetail.claimType }}</p>
-                    </div>
-                </div>
-
-                <div v-if="ctcFinalStatus" class="flex justify-end text-sm mt-4">
-                    <span
-                        class="px-4 py-2 rounded text-white"
-                        :class="{
-                            'bg-green-700': ctcFinalStatus === 'approved',
-                            'bg-red-700': ctcFinalStatus === 'rejected'
-                        }"
-                    >
-                        {{ ctcFinalStatusText }}
-                    </span>
-                </div>
-                <div v-else class="flex justify-end mt-6 gap-2">
-                    <Button label="Reject" class="p-button-danger" size="small" @click="onReject" />
-                    <Button label="Approve" class="p-button-success" size="small" @click="onApprove" />
-                </div>
-
-                <div v-if="ctcFinalStatus === 'rejected'" class="mt-4 p-4 border rounded bg-gray-50">
-                    <p class="font-bold text-xl mb-2">Rejection Reason</p>
-                    <p>{{ rejectReason }}</p>
-                </div>
-
-                <div v-if="showRejectInput" class="mt-4 p-4 border rounded bg-gray-50">
-                    <h3 class="font-bold text-xl mb-2">Reject Reason</h3>
-                    <textarea v-model="rejectReason" class="w-full border p-2 rounded" placeholder="Enter reason..." rows="3"></textarea>
-                    <div class="flex justify-end mt-2 space-x-2">
-                        <Button label="Cancel" class="p-button-secondary" size="small" @click="cancelReject" />
-                        <Button label="Submit" class="p-button-danger" size="small" @click="submitReject" :disabled="!rejectReason.trim()" />
-                    </div>
-                </div>
-            </div>
-
             <!-- Scrap Details -->
             <div class="card flex flex-col w-full">
                 <div class="flex items-center justify-between border-b pb-2 mb-4">
@@ -164,8 +108,61 @@
                 </div>
             </div>
 
+            <!-- CTC Details -->
+            <div v-if="scrapFinalStatus === 'approved'" class="card flex flex-col w-full">
+                <div class="flex items-center justify-between border-b pb-2 mb-4">
+                    <div class="text-2xl font-bold text-gray-800">CTC Details</div>
+                    <div class="inline-flex items-center gap-2">
+                        <RouterLink to="/technical/createCTC">
+                            <Button label="Create" class="p-button-info" size="small" />
+                        </RouterLink>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm text-gray-700">
+                    <div>
+                        <span class="block text-sm font-bold text-black-700">Claim Date</span>
+                        <p class="font-medium text-lg">{{ warantyDetail.collectDate }}</p>
+                    </div>
+                    <div>
+                        <span class="block text-sm font-bold text-black-700">Collect Time</span>
+                        <p class="font-medium text-lg">{{ warantyDetail.collectTime }}</p>
+                    </div>
+                </div>
+
+                <div v-if="ctcFinalStatus" class="flex justify-end text-sm mt-4">
+                    <span
+                        class="px-4 py-2 rounded text-white"
+                        :class="{
+                            'bg-green-700': ctcFinalStatus === 'approved',
+                            'bg-red-700': ctcFinalStatus === 'rejected'
+                        }"
+                    >
+                        {{ ctcFinalStatusText }}
+                    </span>
+                </div>
+                <div v-else class="flex justify-end mt-6 gap-2">
+                    <Button label="Reject" class="p-button-danger" size="small" @click="onReject" />
+                    <Button label="Approve" class="p-button-success" size="small" @click="onApprove" />
+                </div>
+
+                <div v-if="ctcFinalStatus === 'rejected'" class="mt-4 p-4 border rounded bg-gray-50">
+                    <p class="font-bold text-xl mb-2">Rejection Reason</p>
+                    <p>{{ rejectReason }}</p>
+                </div>
+
+                <div v-if="showRejectInput" class="mt-4 p-4 border rounded bg-gray-50">
+                    <h3 class="font-bold text-xl mb-2">Reject Reason</h3>
+                    <textarea v-model="rejectReason" class="w-full border p-2 rounded" placeholder="Enter reason..." rows="3"></textarea>
+                    <div class="flex justify-end mt-2 space-x-2">
+                        <Button label="Cancel" class="p-button-secondary" size="small" @click="cancelReject" />
+                        <Button label="Submit" class="p-button-danger" size="small" @click="submitReject" :disabled="!rejectReason.trim()" />
+                    </div>
+                </div>
+            </div>
+
             <!-- Claim Variable -->
-            <div class="card flex flex-col w-full">
+            <div v-if="ctcFinalStatus === 'approved'" class="card flex flex-col w-full">
                 <div class="flex items-center justify-between border-b pb-2 mb-4">
                     <div class="text-2xl font-bold text-gray-800">Claim Variable</div>
                     <div class="inline-flex items-center gap-2">
@@ -267,6 +264,10 @@
                                 <span class="block font-bold">Status</span>
                                 <p>{{ warantyDetail.reimbursement.status }}</p>
                             </div>
+                            <div>
+                                <span class="block font-bold">Invoice Ammount</span>
+                                <p>{{ warantyDetail.reimbursement.invoiceAmount }}</p>
+                            </div>
                         </div>
                     </div>
 
@@ -334,6 +335,10 @@
                             <div>
                                 <span class="block font-bold">Status</span>
                                 <p>{{ warantyDetail.reimbursement.status }}</p>
+                            </div>
+                            <div>
+                                <span class="block font-bold">Invoice Ammount</span>
+                                <p>{{ warantyDetail.reimbursement.invoiceAmount }}</p>
                             </div>
                         </div>
                     </div>
@@ -456,6 +461,8 @@ const warantyDetail = ref({
     id: 1,
     refNo: 'CLM-2025-001',
     claimDate: '2025-09-01',
+    collectDate: '2025-09-07',
+    collectTime: '3:00PM',
     dealerName: 'AutoWorld KL',
     claimType: 'Tire Defect',
     status: 0,
@@ -505,7 +512,8 @@ const warantyDetail = ref({
     reimbursement: {
         refNo: 'TBD-1109',
         orderNo: 'TY-119',
-        status: 'Return'
+        status: 'Approved',
+        invoiceAmount: '2000.00'
     }
 });
 
