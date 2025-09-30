@@ -46,7 +46,7 @@
             <Column header="Status" style="min-width: 6rem">
                 <template #body="{ data }">
                     <Tag 
-                        :value="data.statusUser === 1 ? 'Active' : 'Inactive'" 
+                        :value="data.statusUser === 1 ? 'Active' : 'Suspend'" 
                         :severity="data.statusUser === 1 ? 'success' : 'danger'" 
                     />
                 </template>
