@@ -375,6 +375,11 @@ const router = createRouter({
                     path: '/it/createGroup',
                     name: 'Create-Group',
                     component: () => import('@/views/it/createGroup.vue')
+                },
+                {
+                    path: '/it/createUser',
+                    name: 'Create-User',
+                    component: () => import('@/views/it/createUser.vue')
                 }
             ]
         },
