@@ -132,7 +132,12 @@ const router = createRouter({
                     name: 'Edit-Eten',
                     component: () => import('@/views/om/editEten.vue')
                 },
-
+                // Order Management
+                 {
+                    path: '/om/listBackOrder',
+                    name: 'List-Back-Order',
+                    component: () => import('@/views/om/listBackOrder.vue')
+                },
                 //MARKETING
                 // News Managemnt
                 {
