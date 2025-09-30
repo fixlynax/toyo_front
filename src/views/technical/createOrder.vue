@@ -97,13 +97,4 @@ const orderTypes = [
     { label: 'Special', value: 'Special' }
 ];
 
-const submitOrder = () => {
-    // if (!order.value.orderType) {
-    //     alert('⚠️ Please select an order type');
-    //     return;
-    // }
-    // alert('✅ Order Created:\n' + JSON.stringify(order.value, null, 2));
-
-    router.push('/technical/confirmationOrder');
-};
 </script>
