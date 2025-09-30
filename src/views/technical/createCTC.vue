@@ -11,22 +11,22 @@
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div>
                             <label class="block font-bold text-gray-700">Entry ID </label>
-                            <InputText v-model="order.companyName" class="w-full"  />
+                            <InputText class="w-full" />
                         </div>
 
                         <div>
                             <label class="block font-bold text-gray-700">Collect Date</label>
-                            <InputText v-model="order.address" class="w-full"  />
+                            <Calendar class="w-full" placeholder="Select Date " showIcon icon="pi pi-calendar" />
                         </div>
 
                         <div>
                             <label class="block font-bold text-gray-700">Collect Time</label>
-                            <InputText v-model="order.dealerAccno" class="w-full"  />
+                            <Calendar timeOnly hourFormat="12" class="w-full" placeholder="Select time " showIcon icon="pi pi-clock" />
                         </div>
 
                         <div>
                             <label class="block font-bold text-gray-700">Status</label>
-                            <InputText v-model="order.branchLocation" class="w-full"  />
+                            <InputText class="w-full" />
                         </div>
                     </div>
 
@@ -47,32 +47,4 @@
 
 <script setup>
 import { ref } from 'vue';
-
-const order = ref({
-    companyName: 'Tack Lim Service Tires',
-    address: '123 Jalan Ampang, Kuala Lumpur',
-    dealerAccno: 'TLST123438',
-    branchLocation: 'Kuala Lumpur',
-    itemName: 'Proxes TR1',
-    sku: 'PTR100123',
-    quantity: 4,
-    price: '0.00',
-    orderType: 'Normal'
-});
-
-const orderTypes = [
-    { label: 'Normal', value: 'Normal' },
-    { label: 'Urgent', value: 'Urgent' },
-    { label: 'Special', value: 'Special' }
-];
-
-const submitOrder = () => {
-    // if (!order.value.orderType) {
-    //     alert('⚠️ Please select an order type');
-    //     return;
-    // }
-    // alert('✅ Order Created:\n' + JSON.stringify(order.value, null, 2));
-
-    router.push('/technical/confirmationOrder');
-};
 </script>
