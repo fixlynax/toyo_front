@@ -131,6 +131,12 @@
                         <InputText id="boOrderNo" type="text" v-model="form.boOrderNo" />
                     </div>
                 </div>
+
+                <div class="flex justify-end mt-2">
+                    <div class="w-40">
+                        <Button label="Save Changes" class="w-full" @click="saveChanges" />
+                    </div>
+                </div>
             </div>
         </div>
 
@@ -156,14 +162,7 @@
             </div>
         </div>
 
-        <!-- ✅ Submit -->
-        <div class="flex mt-8">
-            <div class="card flex flex-col gap-4 w-full">
-                <div class="flex justify-end mt-4">
-                    <Button label="Save Changes" class="w-40" @click="saveChanges" />
-                </div>
-            </div>
-        </div>
+
     </Fluid>
 </template>
 

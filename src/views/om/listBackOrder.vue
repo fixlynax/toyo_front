@@ -90,7 +90,7 @@ onBeforeMount(async () => {
                 </template>
             </Column>
             <Column field="name" header="Name" style="min-width: 8rem" >
-                <template #body="{ data }"> {{ data.shipTo }}</template>
+                <template #body="{ data }"> {{ data.customerName }}</template>
             </Column>
             <Column field="orderdate" header="Order Date" style="min-width: 8rem" >
               <template #body="{ data }"> {{ data.deliveryDate }}</template>

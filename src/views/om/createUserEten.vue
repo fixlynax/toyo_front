@@ -18,6 +18,25 @@
                         <label class="block font-bold text-gray-700 mb-1">Mobile No</label>
                         <InputText v-model="form.mobile" class="w-full" placeholder="Enter mobile number" />
                     </div>
+                    <div>
+                        <label class="block font-bold text-gray-700">Gender</label>
+                        <Dropdown v-model="form.gender" :options="genderOptions" optionLabel="label" optionValue="value" class="w-full" />
+                    </div>
+
+                    <div>
+                        <label class="block font-bold text-gray-700">Race</label>
+                        <Dropdown v-model="form.race" :options="raceOptions" optionLabel="label" optionValue="value" class="w-full" />
+                    </div>
+
+                    <div>
+                        <label class="block font-bold text-gray-700">State</label>
+                        <Dropdown v-model="form.state" :options="stateOptions" optionLabel="label" optionValue="value" class="w-full" />
+                    </div>
+
+                    <div>
+                        <label class="block font-bold text-gray-700"> Member Level</label>
+                        <Dropdown v-model="form.level" :options="levelOptions" optionLabel="label" optionValue="value" class="w-full" />
+                    </div>
                 </div>
             </div>
 
@@ -119,6 +138,41 @@ const dealerList = [
     { code: '6080102302', name: 'Apex Tyre & Car Care' },
     { code: '6080114400', name: 'JS Motorsports Sdn Bhd' },
     { code: '6080125300', name: 'Weng Tat Tyre Service' }
+];
+
+const raceOptions = [
+    { label: 'Malay', value: 'Malay' },
+    { label: 'Chinese', value: 'Chinese' },
+    { label: 'Indian', value: 'Indian' },
+    { label: 'Other', value: 'Other' }
+];
+
+const stateOptions = [
+    { label: 'Johor', value: 'Johor' },
+    { label: 'Kelantan', value: 'Kelantan' },
+    { label: 'Kuala Lumpur', value: 'Lumpur' },
+    { label: 'Kedah', value: 'Kedah' },
+    { label: 'Melaka', value: 'Melaka' },
+    { label: 'Negeri Sembilan', value: 'Negeri Sembilan' },
+    { label: 'Pulau Pinang', value: 'Pulau Pinang' },
+    { label: 'Pahang', value: 'Pahang' },
+    { label: 'Perak', value: 'Perak' },
+    { label: 'Perlis', value: 'Perlis' },
+    { label: 'Selangor', value: 'Selangor' },
+    { label: 'Sabah', value: 'Sabah' },
+    { label: 'Sarawak', value: 'Sarawak' },
+    { label: 'Terengganu', value: 'Terengganu' }
+];
+
+const levelOptions = [
+    { label: 'Silver', value: 'Silver' },
+    { label: 'Gold', value: 'Gold' },
+    { label: 'Plantinum', value: 'Plantinum' }
+];
+
+const genderOptions = [
+    { label: 'Male', value: 'Male' },
+    { label: 'Female', value: 'Female' }
 ];
 
 const submitForm = () => {
