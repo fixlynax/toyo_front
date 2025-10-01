@@ -390,7 +390,33 @@ const router = createRouter({
                     path: '/it/createUser',
                     name: 'Create-User',
                     component: () => import('@/views/it/createUser.vue')
-                }
+                },
+                //SCM Part CTC
+                {
+                    path: '/scm/listCollection',
+                    name: 'Collection-List',
+                    component: () => import('@/views/scm/listCollection.vue')
+                },
+                {
+                    path: '/scm/detailCollection',
+                    name: 'Collection-Detail',
+                    component: () => import('@/views/scm/detailCollection.vue')
+                },
+                {
+                    path: '/scm/createCollection',
+                    name: 'Create-Collection',
+                    component: () => import('@/views/scm/createCollection.vue')
+                },
+                {
+                    path: '/scm/returnCollection',
+                    name: 'Return-Collection',
+                    component: () => import('@/views/scm/returnCollection.vue')
+                },
+                {
+                    path: '/scm/listCollection',
+                    name: 'Collection-List',
+                    component: () => import('@/views/scm/listCollection.vue')
+                },
             ]
         },
         {

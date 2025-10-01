@@ -5,6 +5,8 @@ export const ListBackOrderService = {
                 id: 1,
                 etenUserListID: 'U12345',
                 etenUserID: 'U67890',
+                custAccountNo: 'CUST001',
+                salesOnrg: 'SO001',
                 custAccountNo: '6080100900',
                 customerName: 'PS Tyres & Battery Auto Services Sdn. Bhd',
                 signboard: 'T10',

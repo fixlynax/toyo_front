@@ -12,7 +12,7 @@
                             <label for="custAccountNo" class="font-medium">Customer Account No.</label>
                             <i class="pi pi-lock cursor-pointer font-bold" v-tooltip="'Account No cannot be changed'"></i>
                         </div>
-                        <InputText v-model="form.custAccountNo" id="custAccountNo" type="text" class="w-full" disabled />
+                        <InputText v-model="backOrder.custAccountNo" id="custAccountNo" type="text" class="w-full" disabled />
                     </div>
                 </div>
             </div>
@@ -25,34 +25,56 @@
 
                 <div class="flex flex-col md:flex-row gap-4">
                     <div class="w-full">
-                        <label for="dealerName">Dealer Name</label>
-                        <InputText id="dealerName" type="text" v-model="warantyDetail.dealerName" />
+                        <label for="dealerName">Company Name</label>
+                        <InputText id="dealerName" type="text" v-model="backOrder.customerName" disabled />
                     </div>
                     <div class="w-full">
                         <label for="location">Location</label>
-                        <InputText id="location" type="text" v-model="warantyDetail.location" />
+                        <InputText id="location" type="text" v-model="backOrder.location" disabled/>
                     </div>
                 </div>
 
                 <div class="flex flex-col md:flex-row gap-4">
                     <div class="w-full">
-                        <label for="branch">Branch</label>
-                        <InputText id="branch" type="text" v-model="warantyDetail.branch" />
+                        <label for="branch">Signboard</label>
+                        <InputText id="branch" type="text" v-model="backOrder.signboard" disabled/>
                     </div>
                     <div class="w-full">
                         <label for="distributionChannel">Distribution Channel</label>
-                        <InputText id="distributionChannel" type="text" v-model="form.distributionChannel" />
+                        <InputText id="distributionChannel" type="text" v-model="backOrder.distributionChannel" disabled />
                     </div>
                 </div>
 
                 <div class="flex flex-col md:flex-row gap-4">
                     <div class="w-full">
                         <label for="contactPerson">Contact Person</label>
-                        <InputText id="contactPerson" type="text" v-model="warantyDetail.contactPerson" />
+                        <InputText id="contactPerson" type="text" v-model="warantyDetail.contactPerson" disabled/>
                     </div>
                     <div class="w-full">
                         <label for="contactNo">Contact Number</label>
-                        <InputText id="contactNo" type="text" v-model="warantyDetail.contactNo" />
+                        <InputText id="contactNo" type="text" v-model="warantyDetail.contactNo" disabled/>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 👤 Customer Info (ADDED) -->
+        <div class="flex mt-8">
+            <div class="card flex flex-col gap-4 w-full">
+                <div class="font-semibold text-xl border-b pb-2">👤 Customer Info</div>
+
+                <div class="flex flex-col md:flex-row gap-4">
+                    <div class="w-full">
+                        <label for="customerName">Customer Name</label>
+                        <InputText id="customerName" type="text" v-model="customerInfo.name" disabled/>
+                    </div>
+                    <div class="w-full">
+                        <label for="vehicle">Vehicle</label>
+                        <InputText id="vehicle" type="text" v-model="customerInfo.vehicle" disabled/>
+                    </div>
+                    <div class="w-full">
+                        <label for="regNo">Registration Number</label>
+                        <InputText id="regNo" type="text" v-model="customerInfo.regNo" disabled/>
                     </div>
                 </div>
             </div>
@@ -102,33 +124,33 @@
                 <div class="flex flex-col md:flex-row gap-4">
                     <div class="w-full">
                         <label for="shipTo">Ship To</label>
-                        <InputText id="shipTo" type="text" v-model="form.shipTo" />
+                        <InputText id="shipTo" type="text" v-model="backOrder.shipTo" />
                     </div>
                     <div class="w-full">
                         <label for="orderDesc">Description</label>
-                        <InputText id="orderDesc" type="text" v-model="form.orderDesc" />
+                        <InputText id="orderDesc" type="text" v-model="backOrder.orderDesc" />
                     </div>
                 </div>
 
                 <div class="flex flex-col md:flex-row gap-4">
                     <div class="w-full">
                         <label for="shippingCond">Shipping Condition</label>
-                        <Select id="shippingCond" v-model="dropdownShippingCondition" :options="dropdownShippingConditionValue" optionLabel="name" placeholder="Select One" class="w-full" />
+                        <InputText id="orderDesc" type="text" v-model="backOrder.shippingCond" />
                     </div>
                     <div class="w-full">
                         <label for="deliveryType">Delivery Type</label>
-                        <InputText id="deliveryType" type="text" v-model="form.deliveryType" />
+                        <InputText id="deliveryType" type="text" v-model="backOrder.deliveryType" />
                     </div>
                 </div>
 
                 <div class="flex flex-col md:flex-row gap-4">
                     <div class="w-full">
                         <label for="deliveryDate">Delivery Date</label>
-                        <InputText id="deliveryDate" type="date" v-model="form.deliveryDate" />
+                        <InputText id="deliveryDate" type="date" v-model="backOrder.deliveryDate" />
                     </div>
                     <div class="w-full">
                         <label for="boOrderNo">BO Order No</label>
-                        <InputText id="boOrderNo" type="text" v-model="form.boOrderNo" />
+                        <InputText id="boOrderNo" type="text" v-model="backOrder.boOrderNo" />
                     </div>
                 </div>
 
@@ -140,27 +162,7 @@
             </div>
         </div>
 
-        <!-- 👤 Customer Info (ADDED) -->
-        <div class="flex mt-8">
-            <div class="card flex flex-col gap-4 w-full">
-                <div class="font-semibold text-xl border-b pb-2">👤 Customer Info</div>
-
-                <div class="flex flex-col md:flex-row gap-4">
-                    <div class="w-full">
-                        <label for="customerName">Customer Name</label>
-                        <InputText id="customerName" type="text" v-model="customerInfo.name" />
-                    </div>
-                    <div class="w-full">
-                        <label for="vehicle">Vehicle</label>
-                        <InputText id="vehicle" type="text" v-model="customerInfo.vehicle" />
-                    </div>
-                    <div class="w-full">
-                        <label for="regNo">Registration Number</label>
-                        <InputText id="regNo" type="text" v-model="customerInfo.regNo" />
-                    </div>
-                </div>
-            </div>
-        </div>
+        
 
 
     </Fluid>
@@ -177,24 +179,40 @@ const dropdownShippingConditionValue = ref([
 
 const dropdownShippingCondition = ref(null);
 
-/* main editable objects */
-const form = ref({
-  custAccountNo: "6080100900",
-  distributionChannel: "ETEN",
-  shipTo: "Customer A",
-  orderDesc: "Order for tyres",
-  shippingCond: "RE",
-  deliveryType: "DELIVER",
-  deliveryDate: "2023-10-15",
-  boOrderNo: "BO1001",
-});
+
+const backOrder = ref({
+                id: 1,
+                etenUserListID: 'U12345',
+                etenUserID: 'U67890',
+                custAccountNo: '6080100900',
+                customerName: 'PS Tyres & Battery Auto Services Sdn. Bhd',
+                location: '123 Toyo Road, Toyo Industrial Park, 50000 Kuala Lumpur, Malaysia',
+                signboard: 'T10',
+                salesOrg: 'SO001',
+                distributionChannel: 'ETEN',
+                division: 'DIV01',
+                priceGroup: 'PG01',
+                sapOrderType: 'NORMAL',
+                customerCondGrp: 'CCG1',
+                shipTo: 'YESSIR TYRES SOLUTION SDN BHD',
+                shippingCond: 'Standard',
+                storageLocation: 'LOC01',
+                orderDesc: 'Order for electronics',
+                channel: 'ETEN',
+                deliveryType: 'DELIVER',
+                deliveryDate: '2023-10-15',
+                boOrderNo: 'BO1001',
+                backOrderArray: [],
+                fulfillArray: [],
+                orderStatus: 1,
+                expiry: '2023-11-15',
+                created: '2023-10-01',
+                modified: '2023-10-05'
+            },);
 
 const warantyDetail = ref({
-  dealerName: "AutoWorld KL",
-  location: "Kuala Lumpur",
-  branch: "Main Branch",
   contactPerson: "Ahmad Zaki",
-  contactNo: "+6012-3456789",
+  contactNo: "+6012-3456789"
 });
 
 const tyre = ref({
