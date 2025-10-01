@@ -233,12 +233,12 @@ const model = ref([
                     { 
                         label: 'Collection List', 
                         icon: 'pi pi-fw pi-archive', 
-                        to: '#' 
+                        to: '/scm/listCollection' 
                     },
                     { 
                         label: 'Return List', 
                         icon: 'pi pi-fw pi-reply', 
-                        to: '#' 
+                        to: '/scm/returnCollection'
                     }
                 ]
             },
