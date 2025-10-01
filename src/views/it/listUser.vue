@@ -43,7 +43,9 @@
             <Column header="Actions" style="min-width: 10rem">
                 <template #body="{ data }">
                     <div class="flex gap-2">
+                        <!-- Edit button navigates to /it/technical -->
                         <Button icon="pi pi-pencil" class="p-button-text p-button-info p-button-sm" @click="editUser(data)" />
+                        <!-- Delete button -->
                         <Button icon="pi pi-trash" class="p-button-text p-button-danger p-button-sm" @click="deleteUser(data)" />
                     </div>
                 </template>
@@ -55,7 +57,23 @@
 import { ListUserService } from '@/service/ITUser';
 import { FilterMatchMode } from '@primevue/core/api';
 import { onBeforeMount, ref } from 'vue';
+import { useRouter } from 'vue-router';
 
+// router
+const router = useRouter();
+
+// navigation + actions
+const editUser = (user) => {
+    // optional: do something with user first
+    router.push('/it/editUser'); // navigate to the new route
+};
+
+const deleteUser = (user) => {
+    // your delete logic
+    console.log('Deleting user:', user);
+};
+
+// state
 const listData = ref([]);
 const loading = ref(true);
 
@@ -89,6 +107,7 @@ const sortItems = ref([
     }
 ]);
 
+// sorting helper
 const sortBy = (field, order) => {
     listData.value.sort((a, b) => {
         if (a[field] < b[field]) return order === 'asc' ? -1 : 1;
@@ -97,10 +116,11 @@ const sortBy = (field, order) => {
     });
 };
 
-// Map status → label
+// status label + severity
 const getUserStatusLabel = (status) => (status === 1 ? 'Active' : 'Suspend');
 const getUserStatusSeverity = (status) => (status === 1 ? 'success' : 'danger');
 
+// fetch data
 onBeforeMount(async () => {
     listData.value = await ListUserService.getListUserData();
     loading.value = false;

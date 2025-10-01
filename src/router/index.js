@@ -397,6 +397,11 @@ const router = createRouter({
                     name: 'Create-User',
                     component: () => import('@/views/it/createUser.vue')
                 },
+                {
+                    path: '/it/editUser',
+                    name: 'Edit-User',
+                    component: () => import('@/views/it/editUser.vue')
+                },
                 //SCM
                 {
                     path: '/scm/listCollection',
