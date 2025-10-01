@@ -142,6 +142,11 @@ const router = createRouter({
                     name: 'Detail-User',
                     component: () => import('@/views/om/detailUser.vue')
                 },
+                {
+                    path: '/om/editUser',
+                    name: 'Edit-User',
+                    component: () => import('@/views/om/editUser.vue')
+                },
                 // Order Management
                  {
                     path: '/om/listBackOrder',

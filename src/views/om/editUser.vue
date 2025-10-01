@@ -1,18 +1,18 @@
 <template>
     <Fluid>
         <div class="card flex flex-col gap-8 w-full">
-            <div class="text-2xl font-bold text-gray-800 border-b pb-2">Create Eten User</div>
+            <div class="text-2xl font-bold text-gray-800 border-b pb-2">Edit Eten User</div>
 
             <!-- User Info -->
             <div>
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
                         <label class="block font-bold text-gray-700">First Name</label>
-                        <InputText v-model="form.firstName" class="w-full" placeholder="Enter full name" />
+                        <InputText v-model="form.firstName" class="w-full" placeholder="Enter first name" />
                     </div>
                     <div>
                         <label class="block font-bold text-gray-700">Last Name</label>
-                        <InputText v-model="form.lastName" class="w-full" placeholder="Enter full name" />
+                        <InputText v-model="form.lastName" class="w-full" placeholder="Enter last name" />
                     </div>
                     <div>
                         <label class="block font-bold text-gray-700">Gender</label>
@@ -30,8 +30,8 @@
                     </div>
 
                     <div>
-                        <label class="block font-bold text-gray-700"> Member Level</label>
-                        <Dropdown v-model="form.level" :options="levelOptions" optionLabel="label" optionValue="value" class="w-full" />
+                        <label class="block font-bold text-gray-700">Member Level</label>
+                        <Dropdown v-model="form.memberLevel" :options="levelOptions" optionLabel="label" optionValue="value" class="w-full" />
                     </div>
                     <div>
                         <label class="block font-bold text-gray-700">Email</label>
@@ -41,13 +41,14 @@
                         <label class="block font-bold text-gray-700">Mobile No</label>
                         <InputText v-model="form.mobile" class="w-full" placeholder="Enter mobile number" />
                     </div>
+                    <!-- Password fields optional for editing -->
                     <div>
-                        <label class="block font-bold text-gray-700">Password</label>
-                        <Password v-model="form.password" :feedback="false" toggleMask class="w-full" placeholder="Enter password" />
+                        <label class="block font-bold text-gray-700">New Password</label>
+                        <Password v-model="form.password" :feedback="false" toggleMask class="w-full" placeholder="Enter new password" />
                     </div>
                     <div>
                         <label class="block font-bold text-gray-700">Confirm Password</label>
-                        <Password v-model="form.confirmPassword" :feedback="false" toggleMask class="w-full" placeholder="Confirm password" />
+                        <Password v-model="form.confirmPassword" :feedback="false" toggleMask class="w-full" placeholder="Confirm new password" />
                     </div>
                 </div>
             </div>
@@ -112,33 +113,9 @@
             <div>
                 <h3 class="text-xl font-semibold text-gray-700 border-b p-2 mb-4">🧩 Modules Access</h3>
                 <div class="grid grid-cols-2 gap-4">
-                    <div>
-                        <Checkbox class="mr-2" v-model="form.modules" inputId="marketing" value="marketing" /> 
-                        <label for="marketing">Marketing</label>
-                    </div>
-                    <div>
-                        <Checkbox class="mr-2" v-model="form.modules" inputId="technical" value="technical" /> 
-                        <label for="technical">Technical</label>
-                    </div>
-                    <div>
-                        <Checkbox class="mr-2" v-model="form.modules" inputId="om" value="om" /> 
-                        <label for="om">OM</label>
-                    </div>
-                    <div>
-                        <Checkbox class="mr-2" v-model="form.modules" inputId="scm" value="scm" /> 
-                        <label for="scm">SCM</label>
-                    </div>
-                    <div>
-                        <Checkbox class="mr-2" v-model="form.modules" inputId="it" value="it" /> 
-                        <label for="it">IT</label>
-                    </div>
-                    <div>
-                        <Checkbox class="mr-2" v-model="form.modules" inputId="billing" value="billing" /> 
-                        <label for="billing">Billing</label>
-                    </div>
-                    <div>
-                        <Checkbox class="mr-2" v-model="form.modules" inputId="sales" value="sales" /> 
-                        <label for="sales">Sales</label>
+                    <div v-for="module in moduleOptions" :key="module.value">
+                        <Checkbox class="mr-2" v-model="form.modules" :inputId="module.value" :value="module.value" />
+                        <label :for="module.value">{{ module.label }}</label>
                     </div>
                 </div>
             </div>
@@ -146,7 +123,7 @@
             <!-- Submit Button -->
             <div class="flex justify-end mt-2">
                 <RouterLink to="/om/detailUser">
-                    <Button label="➕ Add User" class="p-button-success" @click="submitForm" />
+                    <Button label="💾 Update User" class="p-button-warning" @click="updateUser" />
                 </RouterLink>
             </div>
         </div>
@@ -154,7 +131,7 @@
 </template>
 
 <script setup>
-import { ref } from 'vue';
+import { ref, onMounted } from 'vue';
 
 const form = ref({
     firstName: '',
@@ -175,9 +152,33 @@ const form = ref({
     address4: '',
     city: '',
     postcode: '',
-    state: '',
     country: '',
     modules: []
+});
+
+// Example: Prefill when editing (simulate API response)
+onMounted(() => {
+    // fetch user data by id and set it to form
+    form.value = {
+        firstName: 'Ali',
+        lastName: 'Bin Abu',
+        email: 'ali@example.com',
+        mobile: '0123456789',
+        gender: 'Male',
+        state: 'Selangor',
+        race: 'Malay',
+        memberLevel: 'Gold',
+        dealerAcc: '6080100900',
+        shipToAcc: '6080102300',
+        address1: '123 Jalan Example',
+        address2: '',
+        address3: '',
+        address4: '',
+        city: 'Shah Alam',
+        postcode: '40100',
+        country: 'Malaysia',
+        modules: ['marketing', 'sales']
+    };
 });
 
 const dealerList = [
@@ -224,8 +225,19 @@ const genderOptions = [
     { label: 'Female', value: 'Female' }
 ];
 
-const submitForm = () => {
-    console.log('Form Submitted:', form.value);
+const moduleOptions = [
+    { label: 'Marketing', value: 'marketing' },
+    { label: 'Technical', value: 'technical' },
+    { label: 'OM', value: 'om' },
+    { label: 'SCM', value: 'scm' },
+    { label: 'IT', value: 'it' },
+    { label: 'Billing', value: 'billing' },
+    { label: 'Sales', value: 'sales' }
+];
+
+const updateUser = () => {
+    console.log('User Updated:', form.value);
+    // call API to update user
 };
 </script>
 
