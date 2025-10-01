@@ -6,7 +6,7 @@ export const ListBackOrderService = {
                 etenUserListID: 'U12345',
                 etenUserID: 'U67890',
                 custAccountNo: 'CUST001',
-                salesOrg: 'SO001',
+                salesOnrg: 'SO001',
                 distributionChannel: 'ETEN',
                 division: 'DIV01',
                 priceGroup: 'PG01',
