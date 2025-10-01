@@ -4,19 +4,15 @@
             <div class="text-2xl font-bold text-gray-800 border-b pb-2">Create Eten User</div>
 
             <!-- User Info -->
-            <div>  
+            <div>
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
-                        <label class="block font-bold text-gray-700 mb-1">Name</label>
-                        <InputText v-model="form.name" class="w-full" placeholder="Enter full name" />
+                        <label class="block font-bold text-gray-700">First Name</label>
+                        <InputText v-model="form.firstName" class="w-full" placeholder="Enter full name" />
                     </div>
                     <div>
-                        <label class="block font-bold text-gray-700 mb-1">Email</label>
-                        <InputText v-model="form.email" type="email" class="w-full" placeholder="Enter email" />
-                    </div>
-                    <div>
-                        <label class="block font-bold text-gray-700 mb-1">Mobile No</label>
-                        <InputText v-model="form.mobile" class="w-full" placeholder="Enter mobile number" />
+                        <label class="block font-bold text-gray-700">Last Name</label>
+                        <InputText v-model="form.lastName" class="w-full" placeholder="Enter full name" />
                     </div>
                     <div>
                         <label class="block font-bold text-gray-700">Gender</label>
@@ -37,19 +33,20 @@
                         <label class="block font-bold text-gray-700"> Member Level</label>
                         <Dropdown v-model="form.level" :options="levelOptions" optionLabel="label" optionValue="value" class="w-full" />
                     </div>
-                </div>
-            </div>
-
-            <!-- Security -->
-            <div>
-                <h3 class="text-xl font-semibold border-b p-2 text-gray-700 mb-4">🔑 Security</h3>
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
-                        <label class="block font-bold text-gray-700 mb-1">Password</label>
+                        <label class="block font-bold text-gray-700">Email</label>
+                        <InputText v-model="form.email" type="email" class="w-full" placeholder="Enter email" />
+                    </div>
+                    <div>
+                        <label class="block font-bold text-gray-700">Mobile No</label>
+                        <InputText v-model="form.mobile" class="w-full" placeholder="Enter mobile number" />
+                    </div>
+                    <div>
+                        <label class="block font-bold text-gray-700">Password</label>
                         <Password v-model="form.password" :feedback="false" toggleMask class="w-full" placeholder="Enter password" />
                     </div>
                     <div>
-                        <label class="block font-bold text-gray-700 mb-1">Confirm Password</label>
+                        <label class="block font-bold text-gray-700">Confirm Password</label>
                         <Password v-model="form.confirmPassword" :feedback="false" toggleMask class="w-full" placeholder="Confirm password" />
                     </div>
                 </div>
@@ -60,11 +57,11 @@
                 <h3 class="text-xl font-semibold text-gray-700 border-b p-2 mb-4">🏢 Dealer & Shipping</h3>
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
-                        <label class="block font-bold text-gray-700 mb-1">Dealer Acc No (Bill To)</label>
+                        <label class="block font-bold text-gray-700">Dealer Acc No (Bill To)</label>
                         <Dropdown v-model="form.dealerAcc" :options="dealerList" optionLabel="name" optionValue="code" placeholder="Select Dealer" class="w-full" />
                     </div>
                     <div>
-                        <label class="block font-bold text-gray-700 mb-1">Ship To Acc No</label>
+                        <label class="block font-bold text-gray-700">Ship To Acc No</label>
                         <Dropdown v-model="form.shipToAcc" :options="dealerList" optionLabel="name" optionValue="code" placeholder="Select Ship To" class="w-full" />
                     </div>
                 </div>
@@ -74,33 +71,80 @@
             <div>
                 <h3 class="text-xl font-semibold text-gray-700 border-b p-2 mb-4">📦 Shipping Address</h3>
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <InputText v-model="form.address1" class="w-full" placeholder="Address 1" />
-                    <InputText v-model="form.address2" class="w-full" placeholder="Address 2" />
-                    <InputText v-model="form.address3" class="w-full" placeholder="Address 3" />
-                    <InputText v-model="form.address4" class="w-full" placeholder="Address 4" />
-                    <InputText v-model="form.city" class="w-full" placeholder="City" />
-                    <InputText v-model="form.postcode" class="w-full" placeholder="Postcode" />
-                    <InputText v-model="form.state" class="w-full" placeholder="State" />
-                    <InputText v-model="form.country" class="w-full" placeholder="Country" />
+                    <div>
+                        <label class="block font-bold text-gray-700">Address 1</label>
+                        <InputText v-model="form.address1" class="w-full" />
+                    </div>
+                    <div>
+                        <label class="block font-bold text-gray-700">Address 2</label>
+                        <InputText v-model="form.address2" class="w-full" />
+                    </div>
+                    <div>
+                        <label class="block font-bold text-gray-700">Address 3</label>
+                        <InputText v-model="form.address3" class="w-full" />
+                    </div>
+                    <div>
+                        <label class="block font-bold text-gray-700">Address 4</label>
+                        <InputText v-model="form.address4" class="w-full" />
+                    </div>
+                    <div>
+                        <label class="block font-bold text-gray-700">State</label>
+                        <Dropdown v-model="form.state" :options="stateOptions" optionLabel="label" optionValue="value" class="w-full" />
+                    </div>
+                    <div>
+                        <label class="block font-bold text-gray-700">City</label>
+                        <InputText v-model="form.city" class="w-full" />
+                    </div>
+                    <div>
+                        <label class="block font-bold text-gray-700">Postcode</label>
+                        <InputText v-model="form.postcode" class="w-full" />
+                    </div>
+                    <div>
+                        <label class="block font-bold text-gray-700">Country</label>
+                        <InputText v-model="form.country" class="w-full" />
+                    </div>
                 </div>
             </div>
+        </div>
 
-            <!-- Modules -->
+        <!-- Modules -->
+        <div class="card flex flex-col gap-8 w-full">
             <div>
                 <h3 class="text-xl font-semibold text-gray-700 border-b p-2 mb-4">🧩 Modules Access</h3>
                 <div class="grid grid-cols-2 gap-4">
-                    <div><Checkbox v-model="form.modules" inputId="marketing" value="marketing" /> <label for="marketing">Marketing</label></div>
-                    <div><Checkbox v-model="form.modules" inputId="technical" value="technical" /> <label for="technical">Technical</label></div>
-                    <div><Checkbox v-model="form.modules" inputId="om" value="om" /> <label for="om">OM</label></div>
-                    <div><Checkbox v-model="form.modules" inputId="scm" value="scm" /> <label for="scm">SCM</label></div>
-                    <div><Checkbox v-model="form.modules" inputId="it" value="it" /> <label for="it">IT</label></div>
-                    <div><Checkbox v-model="form.modules" inputId="billing" value="billing" /> <label for="billing">Billing</label></div>
-                    <div><Checkbox v-model="form.modules" inputId="sales" value="sales" /> <label for="sales">Sales</label></div>
+                    <div>
+                        <Checkbox class="mr-2" v-model="form.modules" inputId="marketing" value="marketing" /> 
+                        <label for="marketing">Marketing</label>
+                    </div>
+                    <div>
+                        <Checkbox class="mr-2" v-model="form.modules" inputId="technical" value="technical" /> 
+                        <label for="technical">Technical</label>
+                    </div>
+                    <div>
+                        <Checkbox class="mr-2" v-model="form.modules" inputId="om" value="om" /> 
+                        <label for="om">OM</label>
+                    </div>
+                    <div>
+                        <Checkbox class="mr-2" v-model="form.modules" inputId="scm" value="scm" /> 
+                        <label for="scm">SCM</label>
+                    </div>
+                    <div>
+                        <Checkbox class="mr-2" v-model="form.modules" inputId="it" value="it" /> 
+                        <label for="it">IT</label>
+                    </div>
+                    <div>
+                        <Checkbox class="mr-2" v-model="form.modules" inputId="billing" value="billing" /> 
+                        <label for="billing">Billing</label>
+                    </div>
+                    <div>
+                        <Checkbox class="mr-2" v-model="form.modules" inputId="sales" value="sales" /> 
+                        <label for="sales">Sales</label>
+                    </div>
                 </div>
             </div>
 
             <!-- Submit Button -->
-            <div class="flex justify-end mt-6">
+            <div class="flex justify-end mt-2">
                 <RouterLink to="/marketing/detailEvent">
                     <Button label="➕ Add User" class="p-button-success" @click="submitForm" />
                 </RouterLink>
@@ -113,9 +157,14 @@
 import { ref } from 'vue';
 
 const form = ref({
-    name: '',
+    firstName: '',
+    lastName: '',
     email: '',
     mobile: '',
+    gender: '',
+    state: '',
+    race: '',
+    memberLevel: '',
     password: '',
     confirmPassword: '',
     dealerAcc: '',
