@@ -15,7 +15,7 @@
                             </div>
 
                             <!-- Create Button -->
-                            <RouterLink to="/om/editEten">
+                            <RouterLink to="/om/editBackOrder">
                                 <Button type="button" label="Edit" />
                             </RouterLink>
                         </div>
@@ -24,23 +24,34 @@
 
                         <div class="flex flex-col md:flex-row gap-4">
                             <div class="w-full">
-                                <span class="text-sm text-gray-500">Eten User</span>
-                                 <p class="text-lg font-medium"> {{ user.firstname }}  {{ user.lastname }}</p>
+                                <span class="text-sm text-gray-500">Dealer Name</span>
+                                 <p class="text-lg font-medium"> {{ warantyDetail.dealerName }} </p>
                             </div>
                             <div class="w-full">
-                                <span class="text-sm text-gray-500">Eten Id</span>
-                                <p class="text-lg font-medium">{{ order.etenUserID || '-' }}</p>
+                                <span class="text-sm text-gray-500">Location</span>
+                                <p class="text-lg font-medium">{{ warantyDetail.location || '-' }}</p>
                             </div>
                         </div>
 
                         <div class="flex flex-col md:flex-row gap-4">
                             <div class="w-full">
-                                <span class="text-sm text-gray-500">Name</span>
-                                <p class="text-lg font-medium">{{ customerInfo.name|| '-' }}</p>
+                                <span class="text-sm text-gray-500">Branch</span>
+                                <p class="text-lg font-medium">{{ warantyDetail.branch|| '-' }}</p>
                             </div>
                             <div class="w-full">
                                 <span class="text-sm text-gray-500">Distribution Channel</span>
                                 <p class="text-lg font-medium">{{ order.distributionChannel || '-' }}</p>
+                            </div>
+                        </div>
+
+                        <div class="flex flex-col md:flex-row gap-4">
+                            <div class="w-full">
+                                <span class="text-sm text-gray-500">Contact Person</span>
+                                <p class="text-lg font-medium">{{ warantyDetail.contactPerson|| '-' }}</p>
+                            </div>
+                            <div class="w-full">
+                                <span class="text-sm text-gray-500">Contact Number</span>
+                                <p class="text-lg font-medium">{{ warantyDetail.contactNo || '-' }}</p>
                             </div>
                         </div>
 
@@ -324,6 +335,16 @@ const customerInfo = ref({
         name: 'Lee Wei Ming',
         vehicle: 'Toyota Hilux 2.8G',
         regNo: 'WXY 4567'
+    },);
+
+const warantyDetail = ref(
+    {
+        dealerName: 'AutoWorld KL',
+        dealerCode: 'DLR-001',
+        contactPerson: 'Ahmad Zaki',
+        contactNo: '+6012-3456789',
+        location: 'Kuala Lumpur',
+        branch: 'Main Branch'
     },);
 
 // 1. Suspend/Un-suspend
