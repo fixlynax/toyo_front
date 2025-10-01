@@ -20,12 +20,12 @@
                             </RouterLink>
                         </div>
 
-                        <div class="font-semibold text-xl border-b pb-2 mt-8">Dealer Information</div>
+                        <div class="font-semibold text-xl border-b pb-2 mt-8">🏬 Dealer Information</div>
 
                         <div class="flex flex-col md:flex-row gap-4">
                             <div class="w-full">
-                                <span class="text-sm text-gray-500">Eten User LIst Id</span>
-                                <p class="text-lg font-medium">{{ order.etenUserListID }}</p>
+                                <span class="text-sm text-gray-500">Eten User</span>
+                                 <p class="text-lg font-medium"> {{ user.firstname }}  {{ user.lastname }}</p>
                             </div>
                             <div class="w-full">
                                 <span class="text-sm text-gray-500">Eten Id</span>
@@ -36,7 +36,7 @@
                         <div class="flex flex-col md:flex-row gap-4">
                             <div class="w-full">
                                 <span class="text-sm text-gray-500">Name</span>
-                                <p class="text-lg font-medium">{{ order.shipTo || '-' }}</p>
+                                <p class="text-lg font-medium">{{ customerInfo.name|| '-' }}</p>
                             </div>
                             <div class="w-full">
                                 <span class="text-sm text-gray-500">Distribution Channel</span>
@@ -55,7 +55,7 @@
                             </div>
                         </div>
 
-                        <div class="font-semibold text-xl border-b pb-2 mt-8">Tire Material & Description</div>
+                        <div class="font-semibold text-xl border-b pb-2 mt-8">🏬 Tire Material & Description</div>
 
                        <div class="flex flex-col md:flex-row gap-4">
                             <div class="w-full">
@@ -124,147 +124,94 @@
                 </div>
             </div>
             <div class="md:w-1/3">
-                <!-- Suspend Account -->
-                <div class="card flex flex-col w-full">
-                    <!-- Title -->
-                    <div class="text-2xl font-bold text-gray-800 border-b pb-3 mb-4">Account Status</div>
-
+    <!-- Suspend Account -->
+            <div class="card flex flex-col w-full">
+                <!-- Title + Status in one line -->
+                <div class="flex items-center justify-between border-b pb-3 mb-4">
+                    <div class="text-2xl font-bold text-gray-800">Account Status</div>
+                    <Tag 
+                        :value="form.status === 1 ? 'Active' : 'Inactive'" 
+                        :severity="form.status === 1 ? 'success' : 'danger'" 
+                    />
+                </div>
+          
                     <!-- Table -->
                     <div class="overflow-x-auto">
                         <table class="w-full text-sm text-left text-gray-700">
                             <tbody>
                                 <!-- Terms -->
                                 <tr class="border-b">
-                                    <td class="px-4 py-2 font-medium">Terms</td>
-                                    <td class="px-4 py-2 text-right">NET30</td>
+                                    <td class="px-4 py-2 font-medium">Division</td>
+                                    <td class="px-4 py-2 text-right">{{ order.division }}</td>
                                 </tr>
 
                                 <!-- Risk Category -->
                                 <tr class="border-b">
-                                    <td class="px-4 py-2 font-medium">Risk Category</td>
+                                    <td class="px-4 py-2 font-medium">Channel</td>
                                     <td class="px-4 py-2 text-right">
-                                        <span class="px-2 py-1 text-xs font-semibold text-green-700 bg-green-100 rounded"> Low </span>
+                                        <span class="px-2 py-1 text-xs text-black-700 bg-green- rounded"> {{ order.channel }} </span>
                                     </td>
                                 </tr>
 
                                 <!-- Credit Limit -->
                                 <tr class="border-b">
-                                    <td class="px-4 py-2 font-medium">Credit Limit</td>
-                                    <td class="px-4 py-2 text-right">50,000</td>
+                                    <td class="px-4 py-2 font-medium">SAP Order Type</td>
+                                    <td class="px-4 py-2 text-right">{{ order.sapOrderType }}</td>
                                 </tr>
-
-                                <!-- Status -->
+                                
+                                <!-- Credit Limit -->
                                 <tr class="border-b">
-                                    <td class="px-4 py-2 font-medium">Status</td>
-                                    <td class="px-4 py-2 text-right">
-                                        <span class="inline-flex items-center px-2 py-1 text-xs font-semibold text-green-700 bg-green-100 rounded"> <i class="pi pi-check-circle mr-1"></i> Active </span>
-                                    </td>
+                                    <td class="px-4 py-2 font-medium">Sales ORG</td>
+                                    <td class="px-4 py-2 text-right">{{ order.salesOrg }}</td>
                                 </tr>
 
                                 <!-- Suspend Button -->
                                 <tr>
                                     <td class="px-4 py-2 font-medium"></td>
                                     <td class="px-2 py-2 text-right">
-                                        <Button :label="isSuspended ? 'Un-suspend' : 'Suspend'" :severity="isSuspended ? 'success' : 'danger'" size="small" @click="confirmSuspend" />
-                                    </td>
-                                </tr>
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-
-                <!-- Device List -->
-                <div class="card flex flex-col w-full">
-                    <div class="text-2xl font-bold text-gray-800 border-b pb-2 mb-3">Devices</div>
-                    <div class="overflow-x-auto">
-                        <table class="w-full text-sm text-left">
-                            <tbody>
-                                <tr v-for="device in devices" :key="device.id" class="border-b">
-                                    <!-- Device info -->
-                                    <td class="px-4 py-3">
-                                        <div class="flex items-center gap-2 text-gray-800 font-bold">
-                                            <i class="pi pi-tablet text-black-500"></i>
-                                            {{ device.name }}
-                                        </div>
-                                        <div class="ml-6 text-gray-500 text-xs mt-2">
-                                            <div>ID: {{ device.uniqueId }}</div>
-                                            <div>Active at: {{ device.lastActive }}</div>
-                                        </div>
-                                    </td>
-
-                                    <!-- Action -->
-                                    <td class="px-4 py-3 text-right align-top">
-                                        <Button :label="device.isBlocked ? 'Un-block' : 'Block'" :severity="device.isBlocked ? 'success' : 'danger'" size="small" @click="toggleBlock(device)" />
-                                    </td>
-                                </tr>
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-
-                <!-- Finance Document -->
-                <div class="card flex flex-col w-full">
-                    <!-- Title -->
-                    <div class="text-2xl font-bold text-gray-800 border-b pb-2 mb-3">Documents</div>
-
-                    <!-- Document Items -->
-                    <div class="space-y-3">
-                        <!-- Billing -->
-                        <div class="flex items-center justify-between px-2">
-                            <div class="flex items-center gap-2 text-gray-700">
-                                <i class="pi pi-folder text-blue-500"></i>
-                                <span>Billing</span>
-                            </div>
                             <RouterLink to="/billing">
-                                <Button label="Go" size="small" />
+                                <Button label="Push Order" size="small" />
                             </RouterLink>
-                        </div>
-
-                        <!-- Account Details -->
-                        <div class="flex items-center justify-between px-2 mt-2">
-                            <div class="flex items-center gap-2 text-gray-700">
-                                <i class="pi pi-folder text-green-500"></i>
-                                <span>Account Details</span>
-                            </div>
-                            <RouterLink to="/account-details">
-                                <Button label="Go" size="small" />
-                            </RouterLink>
-                        </div>
-
-                        <!-- Staff Billing -->
-                        <div class="flex items-center justify-between px-2 mt-2">
-                            <div class="flex items-center gap-2 text-gray-700">
-                                <i class="pi pi-folder text-purple-500"></i>
-                                <span>Staff Billing</span>
-                            </div>
-                            <RouterLink to="/staff-billing">
-                                <Button label="Go" size="small" />
-                            </RouterLink>
-                        </div>
-
-                        <!-- Statement -->
-                        <div class="flex items-center justify-between px-2 mt-2">
-                            <div class="flex items-center gap-2 text-gray-700">
-                                <i class="pi pi-folder text-pink-500"></i>
-                                <span>Statement</span>
-                            </div>
-                            <RouterLink to="/statement">
-                                <Button label="Go" size="small" />
-                            </RouterLink>
-                        </div>
-
-                        <!-- Finance Document -->
-                        <div class="flex items-center justify-between px-2 mt-2">
-                            <div class="flex items-center gap-2 text-gray-700">
-                                <i class="pi pi-folder text-orange-500"></i>
-                                <span>Finance Document</span>
-                            </div>
-                            <RouterLink to="/finance-document">
-                                <Button label="Go" size="small" />
-                            </RouterLink>
-                        </div>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
                     </div>
                 </div>
+
+
+                <!-- Customer Information -->
+<div class="card flex flex-col w-full">
+    <!-- Title -->
+    <div class="text-2xl font-bold text-gray-800 border-b pb-2 mb-3">
+        👤 Customer Info
+    </div>
+
+    <!-- Table -->
+    <div class="overflow-x-auto">
+        <table class="w-full text-sm text-left text-gray-700">
+            <tbody>
+                <!-- Customer Name -->
+                <tr class="border-b">
+                    <td class="px-4 py-2 font-medium">Customer Name</td>
+                    <td class="px-4 py-2 text-right">{{ customerInfo.name }}</td>
+                </tr>
+
+                <!-- Vehicle -->
+                <tr class="border-b">
+                    <td class="px-4 py-2 font-medium">Vehicle</td>
+                    <td class="px-4 py-2 text-right">{{ customerInfo.vehicle }}</td>
+                </tr>
+
+                <!-- Registration Number -->
+                <tr>
+                    <td class="px-4 py-2 font-medium">Registration Number</td>
+                    <td class="px-4 py-2 text-right">{{ customerInfo.regNo }}</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</div>
             </div>
         </div>
     </Fluid>
@@ -367,6 +314,17 @@ const tyre = ref({
                 tyrespec: '91W',
                 weekcode: '3524'
             },);    
+
+const user = ref({
+    firstname: 'Hafiz',
+    lastname: 'Din'
+},);   
+
+const customerInfo = ref({
+        name: 'Lee Wei Ming',
+        vehicle: 'Toyota Hilux 2.8G',
+        regNo: 'WXY 4567'
+    },);
 
 // 1. Suspend/Un-suspend
 const isSuspended = ref(false);
