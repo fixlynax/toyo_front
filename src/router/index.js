@@ -132,6 +132,11 @@ const router = createRouter({
                     name: 'Edit-Eten',
                     component: () => import('@/views/om/editEten.vue')
                 },
+                {
+                    path: '/om/createUserEten',
+                    name: 'Create-User-Eten',
+                    component: () => import('@/views/om/createUserEten.vue')
+                },
                 // Order Management
                  {
                     path: '/om/listBackOrder',
@@ -142,6 +147,11 @@ const router = createRouter({
                     path: '/om/detailBackOrder',
                     name: 'Detail-Back-Order',
                     component: () => import('@/views/om/detailBackOrder.vue')
+                },
+                 {
+                    path: '/om/editBackOrder',
+                    name: 'edit-Back-Order',
+                    component: () => import('@/views/om/editBackOrder.vue')
                 },
                 //MARKETING
                 // News Managemnt

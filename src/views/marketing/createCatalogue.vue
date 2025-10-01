@@ -1,9 +1,6 @@
 <template>
     <Fluid>
         <div class="flex flex-col md:flex-row gap-8">
-            <!-- ======================== -->
-            <!-- Catalogue Edit Section   -->
-            <!-- ======================== -->
             <div class="card flex flex-col gap-6 w-full">
                 <!-- Header -->
                 <div class="text-2xl font-bold text-gray-800 border-b pb-2">Create Catalogue</div>
@@ -276,18 +273,6 @@ const purposeOptions = [
     { label: 'Campaign', value: 'Campaign' },
     { label: 'Game', value: 'Game' }
 ];
-
-const birthdayRewardTypeOptions = [
-    { label: 'Points', value: 'Points' },
-    { label: 'Reward', value: 'Reward' }
-];
-
-const rewardItems = [
-    { id: 1, title: 'Touch ’n Go Reload RM20' },
-    { id: 2, title: 'Starbucks Voucher RM10' },
-    { id: 3, title: 'Grab Food Credit RM15' }
-];
-
 /* Catalogue State */
 const catalogue = ref({
     title: '',
