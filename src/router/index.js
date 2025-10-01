@@ -137,6 +137,11 @@ const router = createRouter({
                     name: 'Create-User-Eten',
                     component: () => import('@/views/om/createUserEten.vue')
                 },
+                {
+                    path: '/om/detailUser',
+                    name: 'Detail-User',
+                    component: () => import('@/views/om/detailUser.vue')
+                },
                 // Order Management
                  {
                     path: '/om/listBackOrder',
@@ -366,11 +371,7 @@ const router = createRouter({
                     name: 'Add-Twp-Tire',
                     component: () => import('@/views/technical/detailProduct.vue')
                 },
-                //   {
-                //     path: '/technical/detailWarantyClaim',
-                //     name: 'Detail-Waranty-Claim',
-                //     component: () => import('@/views/technical/detailWarantyClaim.vue')
-                // },
+                // IT
                 {
                     path: '/it/ListGroup',
                     name: 'it-List-Group',
@@ -391,7 +392,7 @@ const router = createRouter({
                     name: 'Create-User',
                     component: () => import('@/views/it/createUser.vue')
                 },
-                //SCM Part CTC
+                //SCM
                 {
                     path: '/scm/listCollection',
                     name: 'Collection-List',
