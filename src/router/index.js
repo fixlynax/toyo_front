@@ -132,6 +132,11 @@ const router = createRouter({
                     name: 'Edit-Eten',
                     component: () => import('@/views/om/editEten.vue')
                 },
+                {
+                    path: '/om/createUserEten',
+                    name: 'Create-User-Eten',
+                    component: () => import('@/views/om/createUserEten.vue')
+                },
                 // Order Management
                  {
                     path: '/om/listBackOrder',

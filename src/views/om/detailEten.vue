@@ -378,22 +378,31 @@
 
                 <!-- Suspend Account -->
                 <div class="card flex flex-col w-full">
+                    <div class="flex items-center justify-between border-b pb-2 mb-4">
                     <!-- Title -->
-                    <div class="text-2xl font-bold text-gray-800 border-b pb-3 mb-4">User List</div>
+                    <div class="text-2xl font-bold text-gray-800">User List</div>
+                    <div class="inline-flex items-center gap-2">
+                        <RouterLink to="/om/createUserEten">
+                            <Button label="Create" class="p-button-info" size="small" />
+                        </RouterLink>
+                    </div>
+                    </div>
                     <!-- User Table -->
                     <DataTable :value="users" :rows="5" dataKey="id" :rowHover="true" responsiveLayout="scroll" class="text-sm">
                         <!-- Combined Column -->
                         <Column header="User Info" style="min-width: 1rem">
                             <template #body="{ data }">
                                 <div class="flex flex-col">
-                                    <span class="font-bold text-gray-800">{{ data.name }}</span>
+                                    <RouterLink to="/om/detailUser" class="hover:underline font-bold">
+                                        {{ data.name }}
+                                    </RouterLink>
                                     <span class="text-gray-600 text-xs mt-2">👨🏻‍💻 {{ data.account }}</span>
                                     <span class="text-gray-600 text-xs">📞 {{ data.phone }}</span>
                                 </div>
                             </template>
                         </Column>
 
-                        <Column field="lastLogin" header="Last Login" style="min-width: 8rem" ></Column>
+                        <Column field="lastLogin" header="Last Login" style="min-width: 8rem"></Column>
 
                         <!-- Status Column -->
                         <Column header="Status" style="min-width: 6rem">
@@ -512,8 +521,8 @@ const toggleBlock = (device) => {
 
 const users = ref([
     { id: 'U001', name: 'John Doe', phone: '0123456789', account: '6080100900', lastLogin: '11/9/2025 8:00am', status: 1 },
-    { id: 'U002', name: 'Jane Smith', phone: '0198765432', account: '6080100901', lastLogin:  '10/9/2025 8:00am', status: 1 },
-    { id: 'U003', name: 'Alex Tan', phone: '0172233445', account: '6080100902', lastLogin:  '23/7/2025 8:00am', status: 0 },
+    { id: 'U002', name: 'Jane Smith', phone: '0198765432', account: '6080100901', lastLogin: '10/9/2025 8:00am', status: 1 },
+    { id: 'U003', name: 'Alex Tan', phone: '0172233445', account: '6080100902', lastLogin: '23/7/2025 8:00am', status: 0 },
     { id: 'U004', name: 'Siti Aminah', phone: '0111122233', account: '6080100903', lastLogin: '09/9/2025 8:00am', status: 1 },
     { id: 'U005', name: 'Michael Lee', phone: '0139988776', account: '6080100904', lastLogin: '07/8/2025 8:00am', status: 0 }
 ]);
