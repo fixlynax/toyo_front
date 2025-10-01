@@ -5,13 +5,13 @@
                 <!-- Header -->
                 <div class="flex flex-col md:flex-row gap-8">
                     <div class="card flex flex-col gap-6 w-full">
-                        <div class="text-2xl font-bold text-gray-800 border-b pb-2">Customer Infromation</div>
+                        <div class="text-2xl font-bold text-gray-800 border-b pb-2">Back Order Detail</div>
 
                         <div class="flex items-center justify-between w-full">
                             <!-- Account No -->
                             <div>
-                                <span class="block text-sm text-gray-500">Account No.</span>
-                                <span class="text-lg font-medium">{{ form.custAccountNo }}</span>
+                                <span class="block text-sm text-gray-500">Customer Account No.</span>
+                                <span class="text-lg font-medium">{{ order.custAccountNo }}</span>
                             </div>
 
                             <!-- Create Button -->
@@ -20,214 +20,104 @@
                             </RouterLink>
                         </div>
 
-                        <div class="font-semibold text-xl border-b pb-2 mt-8">🏢 Company Details</div>
+                        <div class="font-semibold text-xl border-b pb-2 mt-8">Dealer Information</div>
 
                         <div class="flex flex-col md:flex-row gap-4">
                             <div class="w-full">
-                                <span class="text-sm text-gray-500">Company Registration No</span>
-                                <p class="text-lg font-medium">{{ form.companyRegNo }}</p>
+                                <span class="text-sm text-gray-500">Eten User LIst Id</span>
+                                <p class="text-lg font-medium">{{ order.etenUserListID }}</p>
+                            </div>
+                            <div class="w-full">
+                                <span class="text-sm text-gray-500">Eten Id</span>
+                                <p class="text-lg font-medium">{{ order.etenUserID || '-' }}</p>
                             </div>
                         </div>
 
                         <div class="flex flex-col md:flex-row gap-4">
                             <div class="w-full">
-                                <span class="text-sm text-gray-500">Company Name 1</span>
-                                <p class="text-lg font-medium">{{ form.companyName1 }}</p>
+                                <span class="text-sm text-gray-500">Name</span>
+                                <p class="text-lg font-medium">{{ order.shipTo || '-' }}</p>
                             </div>
                             <div class="w-full">
-                                <span class="text-sm text-gray-500">Company Name 2</span>
-                                <p class="text-lg font-medium">{{ form.companyName2 || '-' }}</p>
-                            </div>
-                        </div>
-
-                        <div class="flex flex-col md:flex-row gap-4">
-                            <div class="w-full">
-                                <span class="text-sm text-gray-500">Company Name 3</span>
-                                <p class="text-lg font-medium">{{ form.companyName3 || '-' }}</p>
-                            </div>
-                            <div class="w-full">
-                                <span class="text-sm text-gray-500">Company Name 4</span>
-                                <p class="text-lg font-medium">{{ form.companyName4 || '-' }}</p>
+                                <span class="text-sm text-gray-500">Distribution Channel</span>
+                                <p class="text-lg font-medium">{{ order.distributionChannel || '-' }}</p>
                             </div>
                         </div>
 
                         <div class="flex flex-col md:flex-row gap-4">
                             <div class="w-full">
-                                <span class="text-sm text-gray-500">Sales Tax No</span>
-                                <p class="text-lg font-medium">{{ form.salesTaxNo }}</p>
+                                <span class="text-sm text-gray-500">Order Date</span>
+                                <p class="text-lg font-medium">{{ order.deliveryDate }}</p>
                             </div>
                             <div class="w-full">
-                                <span class="text-sm text-gray-500">Service Tax No</span>
-                                <p class="text-lg font-medium">{{ form.serviceTaxNo }}</p>
+                                <span class="text-sm text-gray-500">Expiry</span>
+                                <p class="text-lg font-medium">{{ order.expiry }}</p>
+                            </div>
+                        </div>
+
+                        <div class="font-semibold text-xl border-b pb-2 mt-8">Tire Material & Description</div>
+
+                       <div class="flex flex-col md:flex-row gap-4">
+                            <div class="w-full">
+                                <span class="text-sm text-gray-500">Tyre Size</span>
+                                <p class="text-lg font-medium">{{ tyre.size }}</p>
+                            </div>
+                            <div class="w-full">
+                                <span class="text-sm text-gray-500">Tyre Spec</span>
+                                <p class="text-lg font-medium">{{ tyre.tyrespec || '-' }}</p>
                             </div>
                         </div>
 
                         <div class="flex flex-col md:flex-row gap-4">
                             <div class="w-full">
-                                <span class="text-sm text-gray-500">TIN No</span>
-                                <p class="text-lg font-medium">{{ form.tinNo }}</p>
+                                <span class="text-sm text-gray-500">Rim Diameter</span>
+                                <p class="text-lg font-medium">{{ tyre.rimDiameter || '-' }}</p>
                             </div>
                             <div class="w-full">
-                                <span class="text-sm text-gray-500">Vat No</span>
-                                <p class="text-lg font-medium">{{ form.vatNo }}</p>
-                            </div>
-                        </div>
-
-                        <div class="font-semibold text-xl border-b pb-2 mt-8">📍 Address & Contact Details</div>
-
-                        <div class="flex flex-col md:flex-row gap-4">
-                            <div class="w-full">
-                                <span class="text-sm text-gray-500">Address Line 1</span>
-                                <p class="text-lg font-medium">{{ form.addressLine1 }}</p>
-                            </div>
-                            <div class="w-full">
-                                <span class="text-sm text-gray-500">Address Line 2</span>
-                                <p class="text-lg font-medium">{{ form.addressLine2 }}</p>
+                                <span class="text-sm text-gray-500">Aspect Ratio</span>
+                                <p class="text-lg font-medium">{{ tyre.aspectRatio || '-' }}</p>
                             </div>
                         </div>
 
                         <div class="flex flex-col md:flex-row gap-4">
                             <div class="w-full">
-                                <span class="text-sm text-gray-500">Address Line 3</span>
-                                <p class="text-lg font-medium">{{ form.addressLine3 || '-' }}</p>
+                                <span class="text-sm text-gray-500">Section Width</span>
+                                <p class="text-lg font-medium">{{ tyre.sectionWidth }}</p>
+                            </div>
+                        </div>
+
+                       <div class="font-semibold text-xl border-b pb-2 mt-8">🚚 Shipping & Description</div>
+
+                        <div class="flex flex-col md:flex-row gap-4">
+                            <div class="w-full">
+                                <span class="text-sm text-gray-500">Ship To</span>
+                                <p class="text-lg font-medium">{{ order.shipTo }}</p>
                             </div>
                             <div class="w-full">
-                                <span class="text-sm text-gray-500">Address Line 4</span>
-                                <p class="text-lg font-medium">{{ form.addressLine4 || '-' }}</p>
+                                <span class="text-sm text-gray-500">Description</span>
+                                <p class="text-lg font-medium">{{ order.orderDesc }}</p>
                             </div>
                         </div>
 
                         <div class="flex flex-col md:flex-row gap-4">
                             <div class="w-full">
-                                <span class="text-sm text-gray-500">City</span>
-                                <p class="text-lg font-medium">{{ form.city }}</p>
+                                <span class="text-sm text-gray-500">Shipping Cond</span>
+                                <p class="text-lg font-medium">{{ order.shippingCond }}</p>
                             </div>
                             <div class="w-full">
-                                <span class="text-sm text-gray-500">Postcode</span>
-                                <p class="text-lg font-medium">{{ form.postcode }}</p>
-                            </div>
-                            <div class="w-full">
-                                <span class="text-sm text-gray-500">State</span>
-                                <p class="text-lg font-medium">{{ form.state }}</p>
-                            </div>
-                            <div class="w-full">
-                                <span class="text-sm text-gray-500">Country</span>
-                                <p class="text-lg font-medium">{{ form.country }}</p>
+                                <span class="text-sm text-gray-500">Delivery Type</span>
+                                <p class="text-lg font-medium">{{ order.deliveryType }}</p>
                             </div>
                         </div>
 
                         <div class="flex flex-col md:flex-row gap-4">
                             <div class="w-full">
-                                <span class="text-sm text-gray-500">Map Latitude</span>
-                                <p class="text-lg font-medium">{{ form.mapLatitude }}</p>
+                                <span class="text-sm text-gray-500">Delivery Date</span>
+                                <p class="text-lg font-medium">{{ order.deliveryDate }}</p>
                             </div>
                             <div class="w-full">
-                                <span class="text-sm text-gray-500">Map Longitude</span>
-                                <p class="text-lg font-medium">{{ form.mapLongitude }}</p>
-                            </div>
-                        </div>
-
-                        <div class="flex flex-col md:flex-row gap-4">
-                            <div class="w-full">
-                                <span class="text-sm text-gray-500">Phone No</span>
-                                <p class="text-lg font-medium">{{ form.phoneNumber }}</p>
-                            </div>
-                            <div class="w-full">
-                                <span class="text-sm text-gray-500">Email</span>
-                                <p class="text-lg font-medium">{{ form.emailAddress }}</p>
-                            </div>
-                        </div>
-
-                        <div class="font-semibold text-xl border-b pb-2 mt-8">👤 Account Details</div>
-
-                        <div class="flex flex-col md:flex-row gap-4">
-                            <div class="w-full">
-                                <span class="text-sm text-gray-500">Account Type</span>
-                                <p class="text-lg font-medium">{{ form.accountType }}</p>
-                            </div>
-                            <div class="w-full">
-                                <span class="text-sm text-gray-500">Payment Terms</span>
-                                <p class="text-lg font-medium">{{ form.paymentTerms }}</p>
-                            </div>
-                        </div>
-
-                        <div class="flex flex-col md:flex-row gap-4">
-                            <div class="w-full">
-                                <span class="text-sm text-gray-500">Risk Category</span>
-                                <p class="text-lg font-medium">{{ form.riskCategory }}</p>
-                            </div>
-                            <div class="w-full">
-                                <span class="text-sm text-gray-500">Credit Limit</span>
-                                <p class="text-lg font-medium">{{ form.creditLimit }}</p>
-                            </div>
-                        </div>
-
-                        <div class="flex flex-col md:flex-row gap-4">
-                            <div class="w-full">
-                                <span class="text-sm text-gray-500">Customer Account Group</span>
-                                <p class="text-lg font-medium">{{ form.customerAccountGroup }}</p>
-                            </div>
-                            <div class="w-full">
-                                <span class="text-sm text-gray-500">Customer Condition Group</span>
-                                <p class="text-lg font-medium">{{ form.customerCondGrp }}</p>
-                            </div>
-                        </div>
-
-                        <div class="font-semibold text-xl border-b pb-2 mt-8">💲 Pricing & Sales Info</div>
-
-                        <div class="flex flex-col md:flex-row gap-4">
-                            <div class="w-full">
-                                <span class="text-sm text-gray-500">Price List</span>
-                                <p class="text-lg font-medium">{{ form.pricelist }}</p>
-                            </div>
-                            <div class="w-full">
-                                <span class="text-sm text-gray-500">Price Group</span>
-                                <p class="text-lg font-medium">{{ form.priceGroup }}</p>
-                            </div>
-                            <div class="w-full">
-                                <span class="text-sm text-gray-500">Price Procedure</span>
-                                <p class="text-lg font-medium">{{ form.priceProcedure }}</p>
-                            </div>
-                        </div>
-
-                        <div class="flex flex-col md:flex-row gap-4">
-                            <div class="w-full">
-                                <span class="text-sm text-gray-500">Sales Office</span>
-                                <p class="text-lg font-medium">{{ form.salesOffice }}</p>
-                            </div>
-                            <div class="w-full">
-                                <span class="text-sm text-gray-500">Sales District</span>
-                                <p class="text-lg font-medium">{{ form.salesDistrict }}</p>
-                            </div>
-                            <div class="w-full">
-                                <span class="text-sm text-gray-500">Starting Sales Amount</span>
-                                <p class="text-lg font-medium">{{ form.startingSalesAmt }}</p>
-                            </div>
-                        </div>
-
-                        <div class="font-semibold text-xl border-b pb-2 mt-8">🚚 Shipping & Delivery</div>
-
-                        <div class="flex flex-col md:flex-row gap-4">
-                            <div class="w-full">
-                                <span class="text-sm text-gray-500">Shipping Condition</span>
-                                <p class="text-lg font-medium">{{ form.shippingCond }}</p>
-                            </div>
-                            <div class="w-full">
-                                <span class="text-sm text-gray-500">Allow Lalamove</span>
-                                <p class="text-lg font-medium">{{ form.allowLalamove ? 'Yes' : 'No' }}</p>
-                            </div>
-                        </div>
-
-                        <div class="font-semibold text-xl border-b pb-2 mt-8">🪧 Signboard / Branding</div>
-
-                        <div class="flex flex-col md:flex-row gap-4">
-                            <div class="w-full">
-                                <span class="text-sm text-gray-500">Signboard Type</span>
-                                <p class="text-lg font-medium">{{ form.signboardType }}</p>
-                            </div>
-                            <div class="w-full">
-                                <span class="text-sm text-gray-500">Signboard Brand</span>
-                                <p class="text-lg font-medium">{{ form.signboardBrand ? 'Yes' : 'No' }}</p>
+                                <span class="text-sm text-gray-500">BO Order No</span>
+                                <p class="text-lg font-medium">{{ order.boOrderNo }}</p>
                             </div>
                         </div>
                     </div>
@@ -375,58 +265,6 @@
                         </div>
                     </div>
                 </div>
-
-                <!-- Suspend Account -->
-                <div class="card flex flex-col w-full">
-                    <!-- Title -->
-                    <div class="text-2xl font-bold text-gray-800 border-b pb-3 mb-4">User List</div>
-                    <!-- User Table -->
-                    <DataTable :value="users" :rows="5" dataKey="id" :rowHover="true" responsiveLayout="scroll" class="text-sm">
-                        <!-- Combined Column -->
-                        <Column header="User Info" style="min-width: 1rem">
-                            <template #body="{ data }">
-                                <div class="flex flex-col">
-                                    <span class="font-bold text-gray-800">{{ data.name }}</span>
-                                    <span class="text-gray-600 text-xs mt-2">👨🏻‍💻 {{ data.account }}</span>
-                                    <span class="text-gray-600 text-xs">📞 {{ data.phone }}</span>
-                                </div>
-                            </template>
-                        </Column>
-
-                        <Column field="lastLogin" header="Last Login" style="min-width: 8rem" ></Column>
-
-                        <!-- Status Column -->
-                        <Column header="Status" style="min-width: 6rem">
-                            <template #body="{ data }">
-                                <Tag :value="data.status === 1 ? 'Active' : 'Inactive'" :severity="data.status === 1 ? 'success' : 'danger'" />
-                            </template>
-                        </Column>
-                    </DataTable>
-                </div>
-            </div>
-        </div>
-
-        <div class="flex flex-col md:flex-row gap-8 mt-8">
-            <div class="card flex flex-col gap-4 w-full">
-                <div class="text-2xl font-bold text-gray-800 border-b pb-2">Ship To</div>
-
-                <DataTable :value="shiptoList" :rows="5" dataKey="id" :rowHover="true" responsiveLayout="scroll" class="text-sm">
-                    <!-- Columns -->
-                    <Column field="companyName1" header="Company Name" style="min-width: 12rem" />
-                    <Column header="Address" style="min-width: 16rem">
-                        <template #body="{ data }">
-                            {{ data.addressLine1 }}<br />
-                            <span v-if="data.addressLine2">{{ data.addressLine2 }}<br /></span>
-                            <span v-if="data.addressLine3">{{ data.addressLine3 }}<br /></span>
-                            <span v-if="data.addressLine4">{{ data.addressLine4 }}</span>
-                            {{ data.city }}, {{ data.state }} {{ data.postcode }}<br />
-                            {{ data.country }}
-                        </template>
-                    </Column>
-
-                    <Column field="phoneNumber" header="Phone No" style="min-width: 10rem" />
-                    <Column field="emailAddress" header="Email" style="min-width: 14rem" />
-                </DataTable>
             </div>
         </div>
     </Fluid>
@@ -481,6 +319,54 @@ const form = ref({
     startingSalesAmt: 1000,
     status: 0
 });
+
+const order = ref({
+                id: 1,
+                etenUserListID: 'U12345',
+                etenUserID: 'U67890',
+                custAccountNo: 'CUST001',
+                salesOrg: 'SO001',
+                distributionChannel: 'ETEN',
+                division: 'DIV01',
+                priceGroup: 'PG01',
+                sapOrderType: 'NORMAL',
+                customerCondGrp: 'CCG1',
+                shipTo: 'Customer A',
+                shippingCond: 'Standard',
+                storageLocation: 'LOC01',
+                orderDesc: 'Order for electronics',
+                channel: 'ETEN',
+                deliveryType: 'DELIVER',
+                deliveryDate: '2023-10-15',
+                boOrderNo: 'BO1001',
+                backOrderArray: [],
+                fulfillArray: [],
+                orderStatus: 1,
+                expiry: '2023-11-15',
+                created: '2023-10-01',
+                modified: '2023-10-05'
+            },);
+
+const tyre = ref({
+                id: 1,
+                warrantyRegisterID: 1001,
+                pattern: 'Proxes T1R',
+                rimDiameter: 17,
+                aspectRatio: '45',
+                sectionWidth: '215',
+                tyreSize: '215/45R17',
+                loadIndex: '91',
+                plyRating: 'XL',
+                deleted: null,
+                status: 'Non-Waranty',
+                size: '215/45R17',
+                origin: 'Japan',
+                desc: 'High-performance tire for sports cars',
+                mfgcode: 'MFG-2025-001',
+                tyresize: 'Passenger Car',
+                tyrespec: '91W',
+                weekcode: '3524'
+            },);    
 
 // 1. Suspend/Un-suspend
 const isSuspended = ref(false);
