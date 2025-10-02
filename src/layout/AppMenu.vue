@@ -152,7 +152,7 @@ const model = ref([
             { 
                 label: 'Order', 
                 icon: 'pi pi-fw pi-shopping-cart', 
-                to: '#' 
+                to: '/om/listOrder' 
             },
             { 
                 label: 'Back Order', 
