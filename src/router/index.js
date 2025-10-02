@@ -147,7 +147,7 @@ const router = createRouter({
                     name: 'Edit-User',
                     component: () => import('@/views/om/editUser.vue')
                 },
-                // Back Order
+                // Order Management
                 {
                     path: '/om/listBackOrder',
                     name: 'List-Back-Order',
@@ -163,17 +163,11 @@ const router = createRouter({
                     name: 'edit-Back-Order',
                     component: () => import('@/views/om/editBackOrder.vue')
                 },
-                // Order
-                {
-                    path: '/om/listkOrder',
-                    name: 'List-Order',
-                    component: () => import('@/views/om/listOrder.vue')
-                },
-                {
-                    path: '/om/detailOrder',
-                    name: 'Detail-Order',
-                    component: () => import('@/views/om/detailOrder.vue')
-                },
+                //  {
+                //     path: '/om/listReturnOrder',
+                //     name: 'list-Return-Order',
+                //     component: () => import('@/views/om/listReturnOrder.vue')
+                // },
                 //MARKETING
                 // News Managemnt
                 {
@@ -413,6 +407,17 @@ const router = createRouter({
                     name: 'Edit-User',
                     component: () => import('@/views/it/editUser.vue')
                 },
+                {
+                    path: '/it/ListSalesAcc',
+                    name: 'List-Sales',
+                    component: () => import('@/views/it/listSalesAcc.vue')
+                },
+                {
+                    path: '/it/createSalesAcc',
+                    name: 'Create-Sales',
+                    component: () => import('@/views/it/createSalesAcc.vue')
+                },
+
                 //SCM
                 {
                     path: '/scm/listCollection',
