@@ -8,12 +8,6 @@ const router = createRouter({
             path: '/',
             component: AppLayout,
             children: [
-                {
-                    path: '/',
-                    name: 'dashboard',
-                    component: () => import('@/views/Dashboard.vue')
-                },
-
                 // ===============================
                 // OM (Order Management)
                 // ===============================
