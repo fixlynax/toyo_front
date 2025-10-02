@@ -58,7 +58,7 @@
 </template>
 
 <script setup>
-import { ref, onBeforeMount } from 'vue';
+import { onBeforeMount, ref } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 
 const route = useRoute();
@@ -105,13 +105,13 @@ onBeforeMount(async () => {
 
 // Cancel button
 const cancel = () => {
-    router.push('/it/listUser'); // adjust route to your list page
+    router.push('/it/listUserAccount'); // adjust route to your list page
 };
 
 // Save form
 const submitForm = () => {
     console.log('✅ User Updated:', form.value);
     // TODO: call API to update user
-    router.push('/it/listUser');
+    router.push('/it/listUserAccount');
 };
 </script>

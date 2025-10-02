@@ -19,7 +19,7 @@
                     </div>
 
                     <!-- Right: Create Button -->
-                    <RouterLink to="/it/createUser">
+                    <RouterLink to="/it/createUserAccount">
                         <Button type="button" label="Create" icon="pi pi-plus" />
                     </RouterLink>
                 </div>

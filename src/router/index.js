@@ -106,7 +106,7 @@ const router = createRouter({
                 },
 
                 // OM
-                // Eten Management
+                // Customer
                 {
                     path: '/om/listEten',
                     name: 'List-Eten',
@@ -147,7 +147,18 @@ const router = createRouter({
                     name: 'Edit-User',
                     component: () => import('@/views/om/editUser.vue')
                 },
-                // Order Management
+                // Order
+                {
+                    path: '/om/listOrder',
+                    name: 'List-Order',
+                    component: () => import('@/views/om/listOrder.vue')
+                },
+                {
+                    path: '/om/detailOrder',
+                    name: 'Detail-Order',
+                    component: () => import('@/views/om/detailOrder.vue')
+                },
+                // Back Order
                 {
                     path: '/om/listBackOrder',
                     name: 'List-Back-Order',
@@ -163,11 +174,13 @@ const router = createRouter({
                     name: 'edit-Back-Order',
                     component: () => import('@/views/om/editBackOrder.vue')
                 },
-                //  {
-                //     path: '/om/listReturnOrder',
-                //     name: 'list-Return-Order',
-                //     component: () => import('@/views/om/listReturnOrder.vue')
-                // },
+                // Return Order
+                 {
+                    path: '/om/listReturnOrder',
+                    name: 'list-Return-Order',
+                    component: () => import('@/views/om/listReturnOrder.vue')
+                },
+
                 //MARKETING
                 // News Managemnt
                 {
@@ -237,24 +250,27 @@ const router = createRouter({
                     name: 'Invite-Dealern',
                     component: () => import('@/views/marketing/inviteDealer.vue')
                 },
-
-                // Member List
+                // Game Management
                 {
-                    path: '/marketing/listEtenUser',
-                    name: 'List-Member',
-                    component: () => import('@/views/marketing/listEtenUser.vue')
+                    path: '/marketing/listGame',
+                    name: 'List-Game',
+                    component: () => import('@/views/marketing/listGame.vue')
                 },
                 {
-                    path: '/marketing/detailEtenUser',
-                    name: 'Detail-Member',
-                    component: () => import('@/views/marketing/detailEtenUser.vue')
+                    path: '/marketing/detailGame',
+                    name: 'Detail-Game',
+                    component: () => import('@/views/marketing/detailGame.vue')
                 },
                 {
-                    path: '/marketing/editEtenUser',
-                    name: 'Edit-Member',
-                    component: () => import('@/views/marketing/editEtenUser.vue')
+                    path: '/marketing/createGame',
+                    name: 'Create-Game',
+                    component: () => import('@/views/marketing/createGame.vue')
                 },
-
+                {
+                    path: '/marketing/editGame',
+                    name: 'Edit-Game',
+                    component: () => import('@/views/marketing/editGame.vue')
+                },
                 // Redemption Management
                 {
                     path: '/marketing/listRedemption',
@@ -270,6 +286,22 @@ const router = createRouter({
                     path: '/marketing/editRedemption',
                     name: 'Edit-Redemption',
                     component: () => import('@/views/marketing/editRedemption.vue')
+                },
+                // TC Members - Member List
+                {
+                    path: '/marketing/listEtenUser',
+                    name: 'List-Member',
+                    component: () => import('@/views/marketing/listEtenUser.vue')
+                },
+                {
+                    path: '/marketing/detailEtenUser',
+                    name: 'Detail-Member',
+                    component: () => import('@/views/marketing/detailEtenUser.vue')
+                },
+                {
+                    path: '/marketing/editEtenUser',
+                    name: 'Edit-Member',
+                    component: () => import('@/views/marketing/editEtenUser.vue')
                 },
                 // Reward Catalogue
                 {
@@ -292,30 +324,8 @@ const router = createRouter({
                     name: 'Create-Catalogue',
                     component: () => import('@/views/marketing/createCatalogue.vue')
                 },
-                // Game Management
-                {
-                    path: '/marketing/listGame',
-                    name: 'List-Game',
-                    component: () => import('@/views/marketing/listGame.vue')
-                },
-                {
-                    path: '/marketing/detailGame',
-                    name: 'Detail-Game',
-                    component: () => import('@/views/marketing/detailGame.vue')
-                },
-                {
-                    path: '/marketing/createGame',
-                    name: 'Create-Game',
-                    component: () => import('@/views/marketing/createGame.vue')
-                },
-                {
-                    path: '/marketing/editGame',
-                    name: 'Edit-Game',
-                    component: () => import('@/views/marketing/editGame.vue')
-                },
-
                 // TECHNICAL
-                // Claim Warranty
+                // Warranty Claim - Claim Warranty
                 {
                     path: '/technical/listClaim',
                     name: 'List-Claim',
@@ -336,6 +346,7 @@ const router = createRouter({
                     name: 'Confirmation-Order',
                     component: () => import('@/views/technical/confirmationOrder.vue')
                 },
+                // Warranty Claim - CTC List
                 {
                     path: '/technical/listCTC',
                     name: 'List-CTC',
@@ -346,26 +357,31 @@ const router = createRouter({
                     name: 'Create-CTC',
                     component: () => import('@/views/technical/createCTC.vue')
                 },
-                {
-                    path: '/technical/listProduct',
-                    name: 'List-Product',
-                    component: () => import('@/views/technical/listProduct.vue')
-                },
+                // Warranty Claim - List Scrap
                 {
                     path: '/technical/listScrap',
                     name: 'List-Scrap',
                     component: () => import('@/views/technical/listScrap.vue')
                 },
+                // Warranty Claim - List Invoice
                 {
                     path: '/technical/listInvoice',
                     name: 'List-Invoice',
                     component: () => import('@/views/technical/listInvoice.vue')
                 },
+                // Products - Product List
+                {
+                    path: '/technical/listProduct',
+                    name: 'List-Product',
+                    component: () => import('@/views/technical/listProduct.vue')
+                },
+                // Products - Bulk Update
                 {
                     path: '/technical/bulkUpdate',
                     name: 'List-Update',
                     component: () => import('@/views/technical/bulkUpdate.vue')
                 },
+                // Products - TWP Tire List 
                 {
                     path: '/technical/twpTireList',
                     name: 'TWP-list',
@@ -373,52 +389,56 @@ const router = createRouter({
                 },
                 {
                     path: '/technical/addTwpTire',
-                    name: 'add-twp',
+                    name: 'Add-TWP-Tire',
                     component: () => import('@/views/technical/addTwpTire.vue')
                 },
                 {
                     path: '/technical/detailProduct',
-                    name: 'Add-Twp-Tire',
+                    name: 'Detail-Twp-Tire',
                     component: () => import('@/views/technical/detailProduct.vue')
                 },
                 // IT
+                // Admin - List Group
                 {
                     path: '/it/ListGroup',
                     name: 'it-List-Group',
                     component: () => import('@/views/it/listGroup.vue')
                 },
                 {
-                    path: '/it/listUser',
-                    name: 'it-List-User',
-                    component: () => import('@/views/it/listUser.vue')
-                },
-                {
                     path: '/it/createGroup',
                     name: 'Create-Group',
                     component: () => import('@/views/it/createGroup.vue')
                 },
+                // Admin - List User Account
                 {
-                    path: '/it/createUser',
-                    name: 'Create-User',
-                    component: () => import('@/views/it/createUser.vue')
+                    path: '/it/listUserAccount',
+                    name: 'List-User-Account',
+                    component: () => import('@/views/it/listUserAccount.vue')
                 },
                 {
-                    path: '/it/editUser',
-                    name: 'Edit-User',
-                    component: () => import('@/views/it/editUser.vue')
+                    path: '/it/createUserAccount',
+                    name: 'Create-User-Account',
+                    component: () => import('@/views/it/createUserAccount.vue')
                 },
                 {
-                    path: '/it/ListSalesAcc',
+                    path: '/it/editUserAccount',
+                    name: 'Edit-User-Account',
+                    component: () => import('@/views/it/editUserAccount.vue')
+                },
+                //Salesman
+                {
+                    path: '/it/ListSalesAccount',
                     name: 'List-Sales',
-                    component: () => import('@/views/it/listSalesAcc.vue')
+                    component: () => import('@/views/it/listSalesAccount.vue')
                 },
                 {
-                    path: '/it/createSalesAcc',
+                    path: '/it/createSalesAccount',
                     name: 'Create-Sales',
-                    component: () => import('@/views/it/createSalesAcc.vue')
+                    component: () => import('@/views/it/createSalesAccount.vue')
                 },
 
-                //SCM
+                // SCM
+                // Warranty CTC - Collection List
                 {
                     path: '/scm/listCollection',
                     name: 'Collection-List',
@@ -434,16 +454,12 @@ const router = createRouter({
                     name: 'Create-Collection',
                     component: () => import('@/views/scm/createCollection.vue')
                 },
+                // Warranty CTC - Return List
                 {
                     path: '/scm/returnCollection',
                     name: 'Return-Collection',
                     component: () => import('@/views/scm/returnCollection.vue')
                 },
-                {
-                    path: '/scm/listCollection',
-                    name: 'Collection-List',
-                    component: () => import('@/views/scm/listCollection.vue')
-                }
             ]
         },
         {
