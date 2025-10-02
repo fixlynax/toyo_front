@@ -5,19 +5,13 @@
             <div class="md:w-2/3">
                 <div class="flex flex-col md:flex-row gap-8">
                     <div class="card flex flex-col gap-6 w-full">
-                        <div class="text-2xl font-bold text-gray-800 border-b pb-2">
-                            Back Order Detail
-                        </div>
+                        <div class="text-2xl font-bold text-gray-800 border-b pb-2">Return Order Detail</div>
 
                         <div class="flex items-center justify-between w-full">
                             <div>
                                 <span class="block text-sm text-gray-500">Return Request Number</span>
                                 <span class="text-lg font-medium">{{ returnOrder.returnRequestNo }}</span>
                             </div>
-
-                            <RouterLink to="/om/editreturnOrder">
-                                <Button type="button" label="Edit" />
-                            </RouterLink>
                         </div>
 
                         <!-- Dealer Info -->
@@ -57,27 +51,34 @@
 
                         <!-- Return Info -->
                         <div class="font-semibold text-xl border-b pb-2 mt-8">📦 Return Information</div>
-                        <div class="flex flex-col md:flex-row gap-8">
-                            <div>
-                                <span class="block text-sm font-bold text-black-700">Return Reason</span>
-                                <p class="font-medium text-lg">{{ returnOrder.returnReason }}</p>
-                            </div>
-                            <div>
-                                <span class="block text-sm font-bold text-black-700">Return Material</span>
-                                <p class="font-medium text-lg">{{ returnOrder.returnMaterial }}</p>
-                            </div>
-                            <div>
-                                <span class="block text-sm font-bold text-black-700">Quantity</span>
-                                <p class="font-medium text-lg">{{ returnOrder.quantity }}</p>
-                            </div>
-                            <div>
-                                <span class="block text-sm font-bold text-black-700">Total</span>
-                                <p class="font-medium text-lg">{{ returnOrder.total }}</p>
-                            </div>
-                        </div>
+                        <DataTable :value="[returnOrder]" :rows="1" dataKey="id" :rowHover="false" responsiveLayout="scroll" class="text-sm">
+                            <!-- Return Reason -->
+                            <Column header="Return Reason" style="min-width: 8rem">
+                                <template #body="{ data }">
+                                    <div class="flex flex-col">
+                                        <span class="font-bold text-xl">{{ data.returnMaterial }}</span>
+                                        <span class="font-semibold text-xm italic">{{ data.returnReason }}</span>
+                                    </div>
+                                </template>
+                            </Column>
+
+                            <!-- Quantity -->
+                            <Column header="Quantity" style="min-width: 6rem">
+                                <template #body="{ data }">
+                                    <span class="font-medium text-xl">{{ data.quantity }}</span>
+                                </template>
+                            </Column>
+
+                            <!-- Total -->
+                            <Column header="Total" style="min-width: 6rem">
+                                <template #body="{ data }">
+                                    <span class="font-medium text-xl">{{ data.total }}</span>
+                                </template>
+                            </Column>
+                        </DataTable>
 
                         <!-- Approval / Reject -->
-                        <div v-if="returnFinalStatus" class="flex justify-end text-sm mt-4">
+                        <div v-if="returnFinalStatus" class="flex justify-end text-sm mt-2">
                             <span
                                 class="px-4 py-2 rounded text-white"
                                 :class="{
@@ -88,30 +89,24 @@
                                 {{ returnFinalStatusText }}
                             </span>
                         </div>
-                        <div v-else class="flex justify-end mt-6 gap-2">
-                            <Button label="Reject" class="p-button-danger" size="small" @click="onRejectScrap" />
-                            <Button label="Approve" class="p-button-success" size="small" @click="onApproveScrap" />
+                        <div v-else class="flex justify-end mt-2 gap-2">
+                            <Button label="Reject" style="width: 8em" class="p-button-danger" size="small" @click="onRejectReturnOrder" />
+                            <Button label="Approve" style="width: 8em" class="p-button-success" size="small" @click="onApproveReturnOrder" />
                         </div>
 
                         <!-- Reject Reason Display -->
-                        <div v-if="returnFinalStatus === 'rejected'" class="mt-4 p-4 border rounded bg-gray-50">
+                        <div v-if="returnFinalStatus === 'rejected'" class="p-4 border rounded bg-gray-50">
                             <p class="font-bold text-xl mb-2">Reject Reason</p>
                             <p>{{ rejectReason }}</p>
                         </div>
 
-                        <!-- Reject Scrap Select -->
-                        <div v-if="showRejectReason" class="mt-4 p-4 border rounded bg-gray-50">
-                            <h3 class="font-bold text-xl mb-2">Reject Scrap</h3>
+                        <div v-if="showRejectReason" class="p-4 border rounded bg-gray-50">
+                            <h3 class="font-bold text-xl mb-2">Reject Return Order</h3>
                             <p class="mb-2 text-gray-700">Select a reason for rejection:</p>
-                            <select v-model="rejectReason" class="w-full border p-2 rounded">
-                                <option value="">-- Please Select --</option>
-                                <option v-for="reason in rejectReasonOptions" :key="reason" :value="reason">
-                                    {{ reason }}
-                                </option>
-                            </select>
+                            <Dropdown v-model="rejectReason" :options="rejectReasonOptions" placeholder="-- Please Select --" optionLabel="label" optionValue="value" class="w-full" />
                             <div class="flex justify-end mt-2 space-x-2">
-                                <Button label="Cancel" class="p-button-secondary" size="small" @click="cancelRejectReturn" />
-                                <Button label="Submit" class="p-button-danger" size="small" @click="submitRejectScrap" :disabled="!rejectReason" />
+                                <Button label="Cancel" style="width: 8em" class="p-button-secondary" size="small" @click="cancelRejectReturnOrder" />
+                                <Button label="Submit" style="width: 8em" class="p-button-danger" size="small" @click="submitRejectReturnOrder" :disabled="!rejectReason" />
                             </div>
                         </div>
                     </div>
@@ -124,10 +119,7 @@
                 <div class="card flex flex-col w-full">
                     <div class="flex items-center justify-between border-b pb-3 mb-4">
                         <div class="text-2xl font-bold text-gray-800">Advance Info</div>
-                        <Tag 
-                            :value="form.status === 1 ? 'Complete' : 'Pending'" 
-                            :severity="form.status === 1 ? 'success' : 'warn'" 
-                        />
+                        <Tag :value="form.status === 1 ? 'Complete' : 'Pending'" :severity="form.status === 1 ? 'success' : 'warn'" />
                     </div>
 
                     <!-- Table -->
@@ -154,14 +146,6 @@
                                     <td class="px-4 py-2 font-medium">Invoice Number</td>
                                     <td class="px-4 py-2 text-right">{{ returnOrder.invoiceNo }}</td>
                                 </tr>
-                                <tr>
-                                    <td class="px-4 py-2 font-medium"></td>
-                                    <td class="px-2 py-2 text-right">
-                                        <RouterLink to="/billing">
-                                            <Button label="Push Order" size="small" />
-                                        </RouterLink>
-                                    </td>
-                                </tr>
                             </tbody>
                         </table>
                     </div>
@@ -169,9 +153,7 @@
 
                 <!-- Customer Info -->
                 <div class="card flex flex-col w-full mt-6">
-                    <div class="text-2xl font-bold text-gray-800 border-b pb-2 mb-3">
-                        👤 Customer Info
-                    </div>
+                    <div class="text-2xl font-bold text-gray-800 border-b pb-2 mb-3">👤 Customer Info</div>
                     <div class="overflow-x-auto">
                         <table class="w-full text-sm text-left text-gray-700">
                             <tbody>
@@ -216,7 +198,7 @@ const returnOrder = ref({
     returnMaterial: 'TYRE-R15-001',
     returnReason: 'Defective tyre - air leakage',
     quantity: 4,
-    total: 1200.00,
+    total: 1200.0,
     custAccountNo: '6080100900',
     customerName: 'PS Tyres & Battery Auto Services Sdn. Bhd',
     location: '123 Toyo Road, Toyo Industrial Park, 50000 Kuala Lumpur, Malaysia',
@@ -243,40 +225,42 @@ const showRejectReason = ref(false);
 
 // Predefined reject reasons
 const rejectReasonOptions = ref([
-    "Incorrect material returned",
-    "Quantity mismatch",
-    "Expired return period",
-    "Damaged item not acceptable",
-    "Other (not eligible)"
+    { label: 'Incorrect material returned', value: 'Incorrect material returned' },
+    { label: 'Quantity mismatch', value: 'Quantity mismatch' },
+    { label: 'Expired return period', value: 'Expired return period' },
+    { label: 'Damaged item not acceptable', value: 'Damaged item not acceptable' },
+    { label: 'Other (not eligible)', value: 'Other (not eligible)' }
 ]);
 
+
+// Display text
 const returnFinalStatusText = computed(() => {
     if (returnFinalStatus.value === 'approved') return 'Approved';
     if (returnFinalStatus.value === 'rejected') return 'Rejected';
     return '';
 });
 
-// Approve function
-function onApproveScrap() {
+// ✅ Approve Return Order
+function onApproveReturnOrder() {
     returnFinalStatus.value = 'approved';
     showRejectReason.value = false;
     rejectReason.value = '';
 }
 
-// Open reject reason form
-function onRejectScrap() {
+// ✅ Open Reject Return Order form
+function onRejectReturnOrder() {
     showRejectReason.value = true;
-    rejectReason.value = ''; // reset selection
+    rejectReason.value = '';
 }
 
-// Cancel reject
-function cancelRejectReturn() {
+// ✅ Cancel Reject Return Order
+function cancelRejectReturnOrder() {
     showRejectReason.value = false;
     rejectReason.value = '';
 }
 
-// Submit reject
-function submitRejectScrap() {
+// ✅ Submit Reject Return Order
+function submitRejectReturnOrder() {
     if (!rejectReason.value) return;
     returnFinalStatus.value = 'rejected';
     showRejectReason.value = false;
