@@ -1,0 +1,150 @@
+export const ListReturnOrderService = {
+    getListReturnOrderData() {
+        return [
+            {
+                id: 1,
+                returnRequestNo: 'RR1001',
+                soNo: 'SO1001',
+                doNo: 'DO1001',
+                invoiceNo: 'INV1001',
+                returnMaterial: 'TYRE-R15-001',
+                etenUserListID: 'U12345',
+                etenUserID: 'U67890',
+                custAccountNo: '6080100900',
+                customerName: 'PS Tyres & Battery Auto Services Sdn. Bhd',
+                location: '123 Toyo Road, Toyo Industrial Park, 50000 Kuala Lumpur, Malaysia',
+                signboard: 'T10',
+                salesOrg: 'SO001',
+                distributionChannel: 'ETEN',
+                division: 'DIV01',
+                priceGroup: 'PG01',
+                sapOrderType: 'NORMAL',
+                customerCondGrp: 'CCG1',
+                shipTo: 'YESSIR TYRES SOLUTION SDN BHD',
+                shippingCond: 'Standard',
+                storageLocation: 'LOC01',
+                orderDesc: 'Order for electronics',
+                channel: 'ETEN',
+                deliveryType: 'DELIVER',
+                deliveryDate: '2023-10-15',
+                boOrderNo: 'BO1001',
+                backOrderArray: [],
+                fulfillArray: [],
+                orderStatus: 1, // Completed
+                expiry: '2023-11-15',
+                created: '2023-10-01',
+                modified: '2023-10-05'
+            },
+            {
+                id: 2,
+                returnRequestNo: 'RR1002',
+                soNo: 'SO1002',
+                doNo: 'DO1002',
+                invoiceNo: 'INV1002',
+                returnMaterial: 'TYRE-R17-002',
+                etenUserListID: 'U23456',
+                etenUserID: 'U78901',
+                custAccountNo: '6080102300',
+                customerName: 'Toyo Auto Centre UHP Tyres Sdn Bhd',
+                signboard: 'TTC',
+                salesOrg: 'SO002',
+                distributionChannel: 'ADMIN',
+                division: 'DIV02',
+                priceGroup: 'PG02',
+                sapOrderType: 'DIRECTSHIP',
+                customerCondGrp: 'CCG2',
+                shipTo: 'WING HING TYRE SERVICE SDN BHD',
+                shippingCond: 'Express',
+                storageLocation: 'LOC02',
+                orderDesc: 'Order for furniture',
+                channel: 'ADMIN',
+                deliveryType: 'SELFCOLLECT',
+                deliveryDate: '2023-10-20',
+                boOrderNo: 'BO1002',
+                backOrderArray: [],
+                fulfillArray: [],
+                orderStatus: 0, // Pending
+                expiry: '2023-11-20',
+                created: '2023-10-02',
+                modified: '2023-10-06'
+            },
+            {
+                id: 3,
+                returnRequestNo: 'RR1003',
+                soNo: 'SO1003',
+                doNo: 'DO1003',
+                invoiceNo: 'INV1003',
+                returnMaterial: 'TYRE-R18-003',
+                etenUserListID: 'U34567',
+                etenUserID: 'U89012',
+                custAccountNo: '6080102301',
+                customerName: 'Tek Ming Auto Service Sdn. Bhd.',
+                signboard: 'TPC',
+                salesOrg: 'SO003',
+                division: 'DIV03',
+                priceGroup: 'PG03',
+                sapOrderType: 'OWN',
+                customerCondGrp: 'CCG3',
+                shipTo: 'TYREPLUS - SHAH ALAM TYRES & AUTO ACCESSORIES',
+                shippingCond: 'Lalamove',
+                storageLocation: 'LOC03',
+                orderDesc: 'Order for books',
+                channel: 'CARES',
+                deliveryType: 'LALAMOVE',
+                deliveryDate: '2023-10-25',
+                boOrderNo: 'BO1003',
+                backOrderArray: [],
+                fulfillArray: [],
+                orderStatus: 66, // Processing
+                expiry: '2023-11-25',
+                created: '2023-10-03',
+                modified: '2023-10-07'
+            },
+            {
+                id: 4,
+                returnRequestNo: 'RR1004',
+                soNo: 'SO1004',
+                doNo: 'DO1004',
+                invoiceNo: 'INV1004',
+                returnMaterial: 'TYRE-R16-004',
+                etenUserListID: 'U45678',
+                etenUserID: 'U90123',
+                custAccountNo: '6080102302',
+                customerName: 'Apex Tyre & Car Care',
+                signboard: 'TST',
+                salesOrg: 'SO004',
+                division: 'DIV04',
+                priceGroup: 'PG04',
+                sapOrderType: 'NORMAL',
+                customerCondGrp: 'CCG4',
+                shipTo: 'WING HING TYRE SERVICE SDN BHD',
+                shippingCond: 'Standard',
+                storageLocation: 'LOC04',
+                orderDesc: 'Order for appliances',
+                channel: 'ETEN',
+                deliveryType: 'DELIVER',
+                deliveryDate: '2023-10-18',
+                boOrderNo: 'BO1004',
+                backOrderArray: [],
+                fulfillArray: [],
+                orderStatus: 77, // Delivery
+                expiry: '2023-11-18',
+                created: '2023-10-04',
+                modified: '2023-10-08'
+            }
+            // ... continue same structure for id 5-10
+        ];
+    },
+
+    getListReturnOrderMini() {
+        return Promise.resolve(this.getListReturnOrderData().slice(0, 5));
+    },
+
+    getListReturnOrderSmall() {
+        return Promise.resolve(this.getListReturnOrderData().slice(0, 10));
+    },
+
+    getListReturnOrder() {
+        return Promise.resolve(this.getListReturnOrderData());
+    }
+};
