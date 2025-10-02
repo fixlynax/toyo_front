@@ -34,7 +34,7 @@ onBeforeMount(async () => {
     <div class="card">
         <div class="text-2xl font-bold text-gray-800 border-b pb-2 mb-3">List Order</div>
 
-        <DataTable :value="listData" :paginator="true" :rows="10" dataKey="id" :rowHover="true" :loading="loading" :filters="filters1" filterDisplay="menu" class="text-sm">
+        <DataTable :value="listData" :paginator="true" :rows="10" dataKey="id" :rowHover="true" :loading="loading" :filters="filters1" filterDisplay="menu">
             <template #header>
                 <div class="flex items-center justify-between gap-4 w-full flex-wrap">
                     <!-- Left: Search -->
@@ -92,6 +92,7 @@ onBeforeMount(async () => {
 :deep(.p-datatable-frozen-tbody) {
     font-weight: bold;
 }
+
 :deep(.p-datatable-scrollable .p-frozen-column) {
     font-weight: bold;
 }

@@ -92,7 +92,6 @@ onBeforeMount(async () => {
             <Column field="custAccountNo" header="Acc No" style="min-width: 6rem" >
             </Column>
             <Column field="companyName1" header="Company Name" style="min-width: 8rem" >
-              <template #rowtogglericon="slotProps"></template>
             </Column>
             <Column header="Location" style="min-width: 8rem">
                 <template #body="{ data }">
