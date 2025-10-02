@@ -98,11 +98,22 @@ const statusOptions = [
 
 // District options
 const districtOptions = [
-    { label: 'North', value: 'North' },
-    { label: 'South', value: 'South' },
-    { label: 'East', value: 'East' },
-    { label: 'West', value: 'West' },
-    { label: 'Central', value: 'Central' }
+    { label: 'Johor', value: 'Johor' },
+    { label: 'Kedah', value: 'Kedah' },
+    { label: 'Kelantan', value: 'Kelantan' },
+    { label: 'Melaka', value: 'Melaka' },
+    { label: 'Negeri Sembilan', value: 'Negeri Sembilan' },
+    { label: 'Pahang', value: 'Pahang' },
+    { label: 'Perak', value: 'Perak' },
+    { label: 'Perlis', value: 'Perlis' },
+    { label: 'Pulau Pinang', value: 'Pulau Pinang' },
+    { label: 'Sabah', value: 'Sabah' },
+    { label: 'Sarawak', value: 'Sarawak' },
+    { label: 'Selangor', value: 'Selangor' },
+    { label: 'Terengganu', value: 'Terengganu' },
+    { label: 'Wilayah Persekutuan Kuala Lumpur', value: 'Wilayah Persekutuan Kuala Lumpur' },
+    { label: 'Wilayah Persekutuan Labuan', value: 'Wilayah Persekutuan Labuan' },
+    { label: 'Wilayah Persekutuan Putrajaya', value: 'Wilayah Persekutuan Putrajaya' }
 ];
 
 // Place order options
