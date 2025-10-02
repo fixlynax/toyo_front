@@ -180,6 +180,11 @@ const router = createRouter({
                     name: 'list-Return-Order',
                     component: () => import('@/views/om/listReturnOrder.vue')
                 },
+                 {
+                    path: '/om/detailReturnOrder',
+                    name: 'detail-Return-Order',
+                    component: () => import('@/views/om/detailReturnOrder.vue')
+                },
 
                 //MARKETING
                 // News Managemnt
