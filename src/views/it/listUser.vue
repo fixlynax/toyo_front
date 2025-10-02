@@ -29,16 +29,17 @@
             <template #loading> Loading user data. Please wait. </template>
 
             <!-- Columns -->
-            <Column field="username" header="Name" style="min-width: 10rem" />
+            <Column field="username" class="font-bold" header="Name" style="min-width: 10rem" />
             <Column field="department" header="Department" style="min-width: 8rem" />
             <Column field="mobileno" header="Mobile No" style="min-width: 8rem" />
             <Column field="email" header="Email" style="min-width: 12rem" />
             <Column field="usergroup" header="User Group" style="min-width: 8rem" />
             <Column header="Status" style="min-width: 6rem">
                 <template #body="{ data }">
-                    <Tag :value="getUserStatusLabel(data.statusUser)" :severity="getUserStatusSeverity(data.statusUser)" />
+                    <Tag :value="getUserStatusLabel(data.statusUser)" :severity="getUserStatusSeverity(data.statusUser)" class="font-bold" />
                 </template>
             </Column>
+
             <!-- Actions -->
             <Column header="Actions" style="min-width: 10rem">
                 <template #body="{ data }">
