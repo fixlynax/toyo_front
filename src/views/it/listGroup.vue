@@ -28,11 +28,9 @@
             <template #loading> Loading user group data. Please wait. </template>
 
             <!-- User Group Name -->
-            <Column field="usergroup" header="User Group" style="min-width: 20rem">
+            <Column class="font-bold" field="usergroup" header="User Group" style="min-width: 20rem">
                 <template #body="{ data }">
-                    <RouterLink to="/marketing/detailNews" class="hover:underline font-bold">
-                        {{ data.usergroup }}
-                    </RouterLink>
+                    {{ data.usergroup }}
                 </template>
             </Column>
 

@@ -1,11 +1,22 @@
 <template>
     <div class="card">
-        <div class="text-2xl font-bold text-gray-800 border-b pb-2">List User Account</div>
+        <div class="text-2xl font-bold text-gray-800 border-b pb-2">Sales Account</div>
 
-        <DataTable :value="listData" :paginator="true" :rows="10" dataKey="id" :rowHover="true" :loading="loading" :filters="filters" filterDisplay="menu" :globalFilterFields="['username', 'department', 'mobileno', 'email', 'usergroup']">
+        <DataTable 
+            :value="listData" 
+            :paginator="true" 
+            :rows="10" 
+            dataKey="id" 
+            :rowHover="true" 
+            :loading="loading" 
+            :filters="filters" 
+            filterDisplay="menu" 
+            :globalFilterFields="['Name', 'title', 'email', 'mobile', 'salesOffice', 'salesDistrict']"
+        >
+            <!-- Header -->
             <template #header>
                 <div class="flex items-center justify-between gap-4 w-full flex-wrap">
-                    <!-- Left: Quick Search + Sort Button -->
+                    <!-- Left: Quick Search + Sort -->
                     <div class="flex items-center gap-2 w-full max-w-md">
                         <IconField class="flex-1">
                             <InputIcon>
@@ -19,24 +30,30 @@
                     </div>
 
                     <!-- Right: Create Button -->
-                    <RouterLink to="/it/createUser">
+                    <RouterLink to="/sales/create">
                         <Button type="button" label="Create" icon="pi pi-plus" />
                     </RouterLink>
                 </div>
             </template>
 
-            <template #empty> No users found. </template>
-            <template #loading> Loading user data. Please wait. </template>
+            <template #empty> No sales accounts found. </template>
+            <template #loading> Loading sales accounts. Please wait. </template>
 
             <!-- Columns -->
-            <Column field="username" class="font-bold" header="Name" style="min-width: 10rem" />
-            <Column field="department" header="Department" style="min-width: 8rem" />
-            <Column field="mobileno" header="Mobile No" style="min-width: 8rem" />
+            <Column field="Name" class="font-bold" header="Name" style="min-width: 10rem" />
+            <Column field="title" header="Title" style="min-width: 8rem" />
+            <Column field="mobile" header="Mobile No" style="min-width: 10rem" />
             <Column field="email" header="Email" style="min-width: 12rem" />
-            <Column field="usergroup" header="User Group" style="min-width: 8rem" />
+            <Column field="salesOffice" header="Sales Office" style="min-width: 10rem" />
+            <Column field="salesDistrict" header="Sales District" style="min-width: 10rem" />
+            <Column field="placeorder" header="Place Order" style="min-width: 8rem">
+                <template #body="{ data }">
+                    <Tag :value="data.placeorder === 1 ? 'Yes' : 'No'" :severity="data.placeorder === 1 ? 'success' : 'warning'" />
+                </template>
+            </Column>
             <Column header="Status" style="min-width: 6rem">
                 <template #body="{ data }">
-                    <Tag :value="getUserStatusLabel(data.statusUser)" :severity="getUserStatusSeverity(data.statusUser)" class="font-bold" />
+                    <Tag :value="getUserStatusLabel(data.status)" :severity="getUserStatusSeverity(data.status)" class="font-bold" />
                 </template>
             </Column>
 
@@ -44,9 +61,7 @@
             <Column header="Actions" style="min-width: 10rem">
                 <template #body="{ data }">
                     <div class="flex gap-2">
-                        <!-- Edit button navigates to /it/technical -->
                         <Button icon="pi pi-pencil" class="p-button-text p-button-info p-button-sm" @click="editUser(data)" />
-                        <!-- Delete button -->
                         <Button icon="pi pi-trash" class="p-button-text p-button-danger p-button-sm" @click="deleteUser(data)" />
                     </div>
                 </template>
@@ -54,8 +69,9 @@
         </DataTable>
     </div>
 </template>
+
 <script setup>
-import { ListUserService } from '@/service/ITUser';
+import { ListSalesAccount } from '@/service/ListSalesAcc'; // <-- update to your sales service file
 import { FilterMatchMode } from '@primevue/core/api';
 import { onBeforeMount, ref } from 'vue';
 import { useRouter } from 'vue-router';
@@ -65,13 +81,11 @@ const router = useRouter();
 
 // navigation + actions
 const editUser = (user) => {
-    // optional: do something with user first
-    router.push('/it/editUser'); // navigate to the new route
+    router.push('/sales/edit/' + user.id); // navigate to edit route
 };
 
 const deleteUser = (user) => {
-    // your delete logic
-    console.log('Deleting user:', user);
+    console.log('Deleting sales account:', user);
 };
 
 // state
@@ -89,22 +103,22 @@ const sortItems = ref([
     {
         label: 'Sort by Name (A-Z)',
         icon: 'pi pi-sort-alpha-down',
-        command: () => sortBy('username', 'asc')
+        command: () => sortBy('Name', 'asc')
     },
     {
         label: 'Sort by Name (Z-A)',
         icon: 'pi pi-sort-alpha-up',
-        command: () => sortBy('username', 'desc')
+        command: () => sortBy('Name', 'desc')
     },
     {
-        label: 'Sort by Department',
+        label: 'Sort by Sales Office',
         icon: 'pi pi-briefcase',
-        command: () => sortBy('department', 'asc')
+        command: () => sortBy('salesOffice', 'asc')
     },
     {
         label: 'Sort by Status',
         icon: 'pi pi-check-circle',
-        command: () => sortBy('statusUser', 'desc')
+        command: () => sortBy('status', 'desc')
     }
 ]);
 
@@ -123,7 +137,7 @@ const getUserStatusSeverity = (status) => (status === 1 ? 'success' : 'danger');
 
 // fetch data
 onBeforeMount(async () => {
-    listData.value = await ListUserService.getListUserData();
+    listData.value = await ListSalesAccount.getListSalesAccount();
     loading.value = false;
 });
 </script>
