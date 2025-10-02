@@ -47,12 +47,23 @@
                     <Tag :value="data.statusUser === 1 ? 'Active' : 'Suspend'" :severity="data.statusUser === 1 ? 'success' : 'danger'" />
                 </template>
             </Column>
+            <!-- Actions -->
+            <Column header="Actions" style="min-width: 10rem">
+                <template #body="{ data }">
+                    <div class="flex gap-2">
+                        <!-- Edit button navigates to /it/technical -->
+                        <Button icon="pi pi-pencil" class="p-button-text p-button-info p-button-sm" @click="editUser(data)" />
+                        <!-- Delete button -->
+                        <Button icon="pi pi-trash" class="p-button-text p-button-danger p-button-sm" @click="deleteUser(data)" />
+                    </div>
+                </template>
+            </Column>
         </DataTable>
     </div>
 </template>
-
 <script>
-import { ListUserService } from '@/service/ITUser'; // adjust path
+import { ListUserService } from '@/service/ITUser';
+import { useRouter } from 'vue-router';
 
 export default {
     name: 'UserGroupList',
@@ -71,6 +82,12 @@ export default {
                 this.listData = data;
                 this.loading = false;
             });
+        },
+        editUser(user) {
+            this.$router.push('/it/editGroup'); // ✅ use this.$router
+        },
+        deleteUser(user) {
+            console.log('Deleting user:', user);
         }
     },
     mounted() {

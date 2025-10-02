@@ -66,7 +66,7 @@ const router = useRouter();
 // navigation + actions
 const editUser = (user) => {
     // optional: do something with user first
-    router.push('/it/editUser'); // navigate to the new route
+    router.push('/it/editUserAccount'); // navigate to the new route
 };
 
 const deleteUser = (user) => {
