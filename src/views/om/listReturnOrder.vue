@@ -103,7 +103,7 @@ onBeforeMount(async () => {
             <!-- Columns -->
             <Column field="returnRequestNo" header="Return Req No" style="min-width: 8rem">
                 <template #body="{ data }">
-                    <RouterLink to="/om/detailBackOrder" class="hover:underline font-bold">
+                    <RouterLink to="/om/detailReturnOrder" class="hover:underline font-bold">
                         {{ data.returnRequestNo }}
                     </RouterLink>
                 </template>
