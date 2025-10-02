@@ -436,6 +436,11 @@ const router = createRouter({
                     name: 'Create-Sales',
                     component: () => import('@/views/it/createSalesAccount.vue')
                 },
+                {
+                    path: '/it/editSalesAcc',
+                    name: 'Edit-Sales',
+                    component: () => import('@/views/it/editSalesAcc.vue')
+                },
 
                 // SCM
                 // Warranty CTC - Collection List

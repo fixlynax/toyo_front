@@ -71,7 +71,7 @@
 </template>
 
 <script setup>
-import { ListSalesAccount } from '@/service/ListSalesAcc'; // <-- update to your sales service file
+import { ListSalesAccount } from '@/service/listSalesAcc'; // <-- update to your sales service file
 import { FilterMatchMode } from '@primevue/core/api';
 import { onBeforeMount, ref } from 'vue';
 import { useRouter } from 'vue-router';
@@ -81,7 +81,7 @@ const router = useRouter();
 
 // navigation + actions
 const editUser = (user) => {
-    router.push('/sales/edit/' + user.id); // navigate to edit route
+    router.push('/it/editSalesAcc/'); // navigate to edit route
 };
 
 const deleteUser = (user) => {
