@@ -10,14 +10,7 @@
                     <!-- User Group -->
                     <div>
                         <label class="block text-sm font-bold text-gray-700 mb-2">User Group</label>
-                        <Dropdown
-                            v-model="form.usergroup"
-                            :options="userGroupOptions"
-                            optionLabel="label"
-                            optionValue="value"
-                            placeholder="Select User Group"
-                            class="w-full"
-                        />
+                        <Dropdown v-model="form.usergroup" :options="userGroupOptions" optionLabel="label" optionValue="value" placeholder="Select User Group" class="w-full" />
                     </div>
 
                     <!-- Username -->
@@ -35,7 +28,7 @@
                     <!-- Mobile No -->
                     <div>
                         <label class="block text-sm font-bold text-gray-700 mb-2">Mobile No</label>
-                        <InputText v-model="form.mobileno" placeholder="e.g. 01123456789" class="w-full" />
+                        <InputText v-model="form.mobileno" placeholder="e.g. 01123456789" class="w-full" @input="form.mobileno = form.mobileno.replace(/[^0-9]/g, '')" />
                     </div>
 
                     <!-- Email -->
@@ -47,14 +40,7 @@
                     <!-- Status -->
                     <div class="md:col-span-2">
                         <label class="block text-sm font-bold text-gray-700 mb-2">Status</label>
-                        <Dropdown
-                            v-model="form.statusUser"
-                            :options="statusOptions"
-                            optionLabel="label"
-                            optionValue="value"
-                            placeholder="Select status"
-                            class="w-full"
-                        />
+                        <Dropdown v-model="form.statusUser" :options="statusOptions" optionLabel="label" optionValue="value" placeholder="Select status" class="w-full" />
                     </div>
                 </div>
 
