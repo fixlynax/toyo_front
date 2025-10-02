@@ -309,7 +309,7 @@ const model = ref([
             { 
                 label: 'Salesman', 
                 icon: 'pi pi-fw pi-id-card', 
-                to: '#' 
+                to: '/it/listSalesAcc' 
             },
             {
                 label: 'Setting',

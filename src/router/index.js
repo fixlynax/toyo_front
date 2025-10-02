@@ -148,17 +148,17 @@ const router = createRouter({
                     component: () => import('@/views/om/editUser.vue')
                 },
                 // Order Management
-                 {
+                {
                     path: '/om/listBackOrder',
                     name: 'List-Back-Order',
                     component: () => import('@/views/om/listBackOrder.vue')
                 },
-                 {
+                {
                     path: '/om/detailBackOrder',
                     name: 'Detail-Back-Order',
                     component: () => import('@/views/om/detailBackOrder.vue')
                 },
-                 {
+                {
                     path: '/om/editBackOrder',
                     name: 'edit-Back-Order',
                     component: () => import('@/views/om/editBackOrder.vue')
@@ -402,6 +402,12 @@ const router = createRouter({
                     name: 'Edit-User',
                     component: () => import('@/views/it/editUser.vue')
                 },
+                {
+                    path: '/it/ListSalesAcc',
+                    name: 'List-Sales',
+                    component: () => import('@/views/it/listSalesAcc.vue')
+                },
+
                 //SCM
                 {
                     path: '/scm/listCollection',
@@ -427,7 +433,7 @@ const router = createRouter({
                     path: '/scm/listCollection',
                     name: 'Collection-List',
                     component: () => import('@/views/scm/listCollection.vue')
-                },
+                }
             ]
         },
         {
