@@ -302,14 +302,14 @@ const model = ref([
                     { 
                         label: 'User Account', 
                         icon: 'pi pi-fw pi-user', 
-                        to: '/it/ListUser' 
+                        to: '/it/listUserAccount' 
                     }
                 ]
             },
             { 
                 label: 'Salesman', 
                 icon: 'pi pi-fw pi-id-card', 
-                to: '/it/listSalesAcc' 
+                to: '/it/listSalesAccount' 
             },
             {
                 label: 'Setting',
