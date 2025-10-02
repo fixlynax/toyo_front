@@ -147,21 +147,32 @@ const router = createRouter({
                     name: 'Edit-User',
                     component: () => import('@/views/om/editUser.vue')
                 },
-                // Order Management
-                 {
+                // Back Order
+                {
                     path: '/om/listBackOrder',
                     name: 'List-Back-Order',
                     component: () => import('@/views/om/listBackOrder.vue')
                 },
-                 {
+                {
                     path: '/om/detailBackOrder',
                     name: 'Detail-Back-Order',
                     component: () => import('@/views/om/detailBackOrder.vue')
                 },
-                 {
+                {
                     path: '/om/editBackOrder',
                     name: 'edit-Back-Order',
                     component: () => import('@/views/om/editBackOrder.vue')
+                },
+                // Order
+                {
+                    path: '/om/listkOrder',
+                    name: 'List-Order',
+                    component: () => import('@/views/om/listOrder.vue')
+                },
+                {
+                    path: '/om/detailOrder',
+                    name: 'Detail-Order',
+                    component: () => import('@/views/om/detailOrder.vue')
                 },
                 //MARKETING
                 // News Managemnt
@@ -427,7 +438,7 @@ const router = createRouter({
                     path: '/scm/listCollection',
                     name: 'Collection-List',
                     component: () => import('@/views/scm/listCollection.vue')
-                },
+                }
             ]
         },
         {
