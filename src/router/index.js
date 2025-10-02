@@ -163,11 +163,11 @@ const router = createRouter({
                     name: 'edit-Back-Order',
                     component: () => import('@/views/om/editBackOrder.vue')
                 },
-                 {
-                    path: '/om/listReturnOrder',
-                    name: 'list-Return-Order',
-                    component: () => import('@/views/om/listReturnOrder.vue')
-                },
+                //  {
+                //     path: '/om/listReturnOrder',
+                //     name: 'list-Return-Order',
+                //     component: () => import('@/views/om/listReturnOrder.vue')
+                // },
                 //MARKETING
                 // News Managemnt
                 {
