@@ -30,7 +30,7 @@
                     </div>
 
                     <!-- Right: Create Button -->
-                    <RouterLink to="/it/createSalesAcc">
+                    <RouterLink to="/it/createSalesAccount">
                         <Button type="button" label="Create" icon="pi pi-plus" />
                     </RouterLink>
                 </div>
