@@ -16,33 +16,13 @@
                     <!-- Module / Function Selection -->
                     <div class="md:col-span-2">
                         <label class="block text-sm font-bold text-gray-700 mb-2">Module / Function List</label>
-                        <div class="grid grid-cols-2 gap-2">
-                            <div 
-                                v-for="module in moduleOptions" 
-                                :key="module.value" 
-                                class="flex items-center gap-2"
-                            >
-                                <Checkbox 
-                                    v-model="form.modules" 
-                                    :inputId="module.value" 
-                                    :value="module.value" 
-                                />
-                                <label :for="module.value">{{ module.label }}</label>
-                            </div>
-                        </div>
+                        <MultiSelect v-model="form.modules" :options="moduleOptions" optionLabel="label" optionValue="value" placeholder="Select modules" display="chip" class="w-full" />
                     </div>
 
                     <!-- Status -->
                     <div class="md:col-span-2">
                         <label class="block text-sm font-bold text-gray-700 mb-2">Status</label>
-                        <Dropdown
-                            v-model="form.statusUser"
-                            :options="statusOptions"
-                            optionLabel="label"
-                            optionValue="value"
-                            placeholder="Select status"
-                            class="w-full"
-                        />
+                        <Dropdown v-model="form.statusUser" :options="statusOptions" optionLabel="label" optionValue="value" placeholder="Select status" class="w-full" />
                     </div>
                 </div>
 
@@ -80,7 +60,7 @@ const moduleOptions = [
     { label: 'OM', value: 'OM' },
     { label: 'SCM', value: 'SCM' },
     { label: 'IT', value: 'IT' },
-    { label: 'Sale', value: 'Sale' }
+    { label: 'Sales', value: 'Sales' }
 ];
 
 // Status options
