@@ -417,6 +417,11 @@ const router = createRouter({
                     name: 'Create-Sales',
                     component: () => import('@/views/it/createSalesAcc.vue')
                 },
+                {
+                    path: '/it/editSalesAcc',
+                    name: 'Edit-Sales',
+                    component: () => import('@/views/it/editSalesAcc.vue')
+                },
 
                 //SCM
                 {
