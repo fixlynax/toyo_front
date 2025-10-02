@@ -162,7 +162,7 @@ const model = ref([
             { 
                 label: 'Return Order', 
                 icon: 'pi pi-fw pi-reply', 
-                to: '#' 
+                to: '/om/listReturnOrder' 
             },
             {
                 label: 'Report',
@@ -232,7 +232,7 @@ const model = ref([
                 items: [
                     { 
                         label: 'Collection List', 
-                        icon: 'pi pi-fw pi-archive', 
+                        icon: 'pi pi-fw pi-book', 
                         to: '/scm/listCollection' 
                     },
                     { 
