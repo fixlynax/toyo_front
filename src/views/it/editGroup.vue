@@ -3,14 +3,13 @@
         <div class="flex flex-col md:flex-row gap-8">
             <div class="card flex flex-col gap-6 w-full">
                 <!-- Header -->
-                <div class="text-2xl font-bold text-gray-800 border-b pb-2">Create User Group</div>
+                <div class="text-2xl font-bold text-gray-800 border-b pb-2">Edit Group</div>
 
-                <!-- User Group Form -->
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <!-- User Group Name -->
+                    <!-- User Group -->
                     <div class="md:col-span-2">
                         <label class="block text-sm font-bold text-gray-700 mb-2">User Group Name</label>
-                        <InputText v-model="form.usergroup" placeholder="Enter group name" class="w-full" />
+                        <InputText placeholder="Enter group name" class="w-full" />
                     </div>
 
                     <!-- Module / Function Selection -->
@@ -32,7 +31,7 @@
                         <Button label="Cancel" class="w-full p-button-secondary" @click="cancel" />
                     </div>
                     <div class="w-32">
-                        <Button label="Create" class="w-full p-button-success" @click="submitForm" />
+                        <Button label="Save" class="w-full p-button-success" @click="submitForm" />
                     </div>
                 </div>
             </div>
@@ -41,18 +40,29 @@
 </template>
 
 <script setup>
-import { ref } from 'vue';
-import { useRouter } from 'vue-router';
+import { onBeforeMount, ref } from 'vue';
+import { useRoute, useRouter } from 'vue-router';
 
+const route = useRoute();
 const router = useRouter();
 
-// Form state
+const loading = ref(true);
 const form = ref({
     usergroup: '',
-    modules: [],
+    username: '',
+    department: '',
+    mobileno: '',
+    email: '',
     statusUser: 1
 });
 
+// User group options
+const userGroupOptions = [
+    { label: 'Technical Consultant', value: 'Technical Consultant' },
+    { label: 'Human Resources', value: 'Human Resources' },
+    { label: 'Information Technology', value: 'Information Technology' }
+    // ...more
+];
 // Module options (checkbox list)
 const moduleOptions = [
     { label: 'Marketing', value: 'Marketing' },
@@ -62,26 +72,36 @@ const moduleOptions = [
     { label: 'IT', value: 'IT' },
     { label: 'Sales', value: 'Sales' }
 ];
-
 // Status options
 const statusOptions = [
     { label: 'Active', value: 1 },
     { label: 'Suspend', value: 0 }
 ];
 
-// Cancel action
+// load dummy user by id
+onBeforeMount(async () => {
+    const id = route.params.id; // e.g. 1
+    form.value = {
+        id,
+        usergroup: 'Information Technology',
+        username: 'John Doe',
+        department: 'IT',
+        mobileno: '555-1234',
+        email: 'john.doe@example.com',
+        statusUser: 1
+    };
+    loading.value = false;
+});
+
+// Cancel button
 const cancel = () => {
-    router.push('/it/listGroup');
+    router.push('/it/listGroup'); // adjust route to your list page
 };
 
-// Save action
+// Save form
 const submitForm = () => {
-    if (!form.value.usergroup) {
-        alert('User Group Name is required');
-        return;
-    }
-    console.log('✅ New User Group Created:', form.value);
-    // TODO: Replace with API call
+    console.log('✅ User Updated:', form.value);
+    // TODO: call API to update user
     router.push('/it/listGroup');
 };
 </script>

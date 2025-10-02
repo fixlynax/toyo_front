@@ -139,6 +139,6 @@ const submitForm = () => {
 
     console.log('✅ New User Created:', form.value);
     // TODO: replace with API call to save user
-    router.push('/marketing/userList');
+    router.push('/it/listUserAccount');
 };
 </script>

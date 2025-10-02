@@ -322,6 +322,11 @@ const router = createRouter({
                     component: () => import('@/views/it/createGroup.vue')
                 },
                 {
+                    path: '/it/editGroup',
+                    name: 'Edit-Group',
+                    component: () => import('@/views/it/editGroup.vue')
+                },
+                {
                     path: '/it/listUserAccount',
                     name: 'List-User-Account',
                     component: () => import('@/views/it/listUserAccount.vue')

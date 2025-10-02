@@ -124,6 +124,6 @@ const placeOrderOptions = [
 
 // Cancel button
 const cancel = () => {
-    router.push('/sales/userList'); // adjust route to your sales user list page
+    router.push('/it/listUserAccount'); // adjust route to your sales user list page
 };
 </script>
