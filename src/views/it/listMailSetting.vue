@@ -1,75 +1,117 @@
 <template>
-    <Fluid>
-        <div class="flex flex-col md:flex-row gap-8">
-            <div class="card flex flex-col gap-6 w-full">
-                <!-- Header -->
-                <div class="text-2xl font-bold text-gray-800 border-b pb-2">Email Setting</div>
-
-                <!-- Email Form -->
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <!-- Notification Email Name -->
-                    <div>
-                        <label class="block text-sm font-bold text-gray-700 mb-2">Notification Email Name</label>
-                        <Dropdown v-model="form.notificationName" :options="notificationOptions" optionLabel="label" optionValue="value" placeholder="Select Notification" class="w-full" />
+    <div class="card">
+        <div class="text-2xl font-bold text-gray-800 border-b pb-2">Email Settings</div>
+        <DataTable 
+            :value="listData" 
+            :paginator="true" 
+            :rows="10" 
+            dataKey="notification" 
+            :rowHover="true" 
+            :loading="loading"
+        >
+            <!-- Table Header -->
+            <template #header>
+                <div class="flex items-center justify-between gap-4 w-full flex-wrap">
+                    <!-- Left: Search Field + Cog Button -->
+                    <div class="flex items-center gap-2 w-full max-w-md">
+                        <IconField class="flex-1">
+                            <InputIcon>
+                                <i class="pi pi-search" />
+                            </InputIcon>
+                            <InputText 
+                                v-model="filters1['global'].value" 
+                                placeholder="Quick Search" 
+                                class="w-full" 
+                            />
+                        </IconField>
+                        <Button type="button" icon="pi pi-cog" class="p-button" />
                     </div>
 
-                    <!-- Email Address -->
-                    <div>
-                        <label class="block text-sm font-bold text-gray-700 mb-2">Email Address</label>
-                        <InputText v-model="form.email" placeholder="Enter email" class="w-full" />
-                    </div>
-
-                    <!-- Shipping Point -->
-                    <div class="md:col-span-2">
-                        <label class="block text-sm font-bold text-gray-700 mb-2">Shipping Point</label>
-                        <InputText v-model="form.shippingPoint" placeholder="Enter shipping point" class="w-full" />
-                    </div>
+                    <!-- Right: Add Email Setting Button -->
+                    <RouterLink to="/it/createMailSetting">
+                        <Button type="button" label="Create" icon="pi pi-plus" />
+                    </RouterLink>
                 </div>
+            </template>
 
-                <!-- Action Buttons -->
-                <div class="flex justify-end mt-8 gap-4">
-                    <div class="w-32">
-                        <Button label="Cancel" class="w-full p-button-secondary" @click="cancel" />
+            <!-- Empty / Loading Messages -->
+            <template #empty> No Email Settings found. </template>
+            <template #loading> Loading email setting data. Please wait. </template>
+
+            <!-- Notification Email Name -->
+            <Column class="font-bold" field="notification" header="Notification" style="min-width: 15rem">
+                <template #body="{ data }">
+                    {{ data.notification }}
+                </template>
+            </Column>
+
+            <!-- Email Address -->
+            <Column field="email" header="Email Address" style="min-width: 20rem">
+                <template #body="{ data }">
+                    {{ data.email }}
+                </template>
+            </Column>
+
+            <!-- Shipping Point -->
+            <Column field="shippoint" header="Shipping Point" style="min-width: 15rem">
+                <template #body="{ data }">
+                    {{ data.shippoint }}
+                </template>
+            </Column>
+
+            <!-- Actions -->
+            <Column header="Actions" style="min-width: 10rem">
+                <template #body="{ data }">
+                    <div class="flex gap-2">
+                        <!-- Edit button -->
+                        <Button 
+                            icon="pi pi-pencil" 
+                            class="p-button-text p-button-info p-button-sm" 
+                            @click="editMailSetting(data)" 
+                        />
+                        <!-- Delete button -->
+                        <Button 
+                            icon="pi pi-trash" 
+                            class="p-button-text p-button-danger p-button-sm" 
+                            @click="deleteMailSetting(data)" 
+                        />
                     </div>
-                    <div class="w-32">
-                        <Button label="Update" class="w-full p-button-success" @click="submitForm" />
-                    </div>
-                </div>
-            </div>
-        </div>
-    </Fluid>
+                </template>
+            </Column>
+        </DataTable>
+    </div>
 </template>
 
-<script setup>
-import { ref } from 'vue';
-import { useRouter } from 'vue-router';
+<script>
+import { listMailSetting } from '@/service/listMail';
 
-const router = useRouter();
-
-const form = ref({
-    notificationName: '',
-    email: '',
-    shippingPoint: ''
-});
-
-const notificationOptions = [
-    { label: 'System Alert', value: 'System Alert' },
-    { label: 'Password Reset', value: 'Password Reset' },
-    { label: 'Shipping Notification', value: 'Shipping Notification' }
-];
-
-const cancel = () => {
-    router.push('/it/dashboard'); // adjust route
-};
-
-const submitForm = () => {
-    if (!form.value.notificationName || !form.value.email) {
-        alert('⚠️ Notification name and Email are required');
-        return;
+export default {
+    name: 'MailSettingList',
+    data() {
+        return {
+            listData: [],
+            loading: true,
+            filters1: {
+                global: { value: null, matchMode: 'contains' }
+            }
+        };
+    },
+    methods: {
+        loadData() {
+            listMailSetting.getlistMailSetting().then((data) => {
+                this.listData = data;
+                this.loading = false;
+            });
+        },
+        editMailSetting(mail) {
+            this.$router.push('/it/editMailSetting'); 
+        },
+        deleteMailSetting(mail) {
+            console.log('Deleting mail setting:', mail);
+        }
+    },
+    mounted() {
+        this.loadData();
     }
-
-    console.log('✅ Email Setting Updated:', form.value);
-    // TODO: API call to save email settings
-    router.push('/it/dashboard');
 };
 </script>
