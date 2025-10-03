@@ -94,15 +94,15 @@
                     <div class="flex flex-col">
                         <RouterLink to="/technical/detailWarantyClaim" class="hover:underline font-bold">
                         <span class="font-bold text-gray-800">{{ data.refNo }}</span></RouterLink>
-                        <span class="text-gray-600 text-xs mt-2">🎖️ {{ data.warrantyType }}</span>
+                        <span class="text-gray-600 text-xs mt-2">🔴 {{ data.warrantyType }}</span>
                     </div>
                 </template>
             </Column>
             <Column field="Dealer" header="Dealer Acc No" style="min-width: 6rem">
                 <template #body="{ data }">
                     <div class="flex flex-col">
-                        <span class="font-bold text-gray-800">{{ data.dealerAccNo }}</span>
-                        <span class="text-gray-600 text-xs mt-2">🎖️ {{ data.dealerName }}</span>
+                        <span class="font-bold text-gray-800">{{ data.dealerName }}</span>
+                        <span class="text-gray-600 text-xs mt-2">👤 {{ data.dealerAccNo}}</span>
                     </div>
                 </template>
             </Column>
