@@ -122,6 +122,11 @@ const model = ref([
                         to: '/technical/listProduct' 
                     },
                     { 
+                        label: 'Pattern List', 
+                        icon: 'pi pi-fw pi-slack', 
+                        to: '/technical/listPattern'
+                    },
+                    { 
                         label: 'Bulk Update', 
                         icon: 'pi pi-fw pi-refresh',
                         to: '/technical/bulkUpdate' 
