@@ -323,7 +323,7 @@ const model = ref([
                     { 
                         label: 'Email Setting', 
                         icon: 'pi pi-fw pi-envelope', 
-                        to: '/it/mailSetting' 
+                        to: '/it/listMailSetting' 
                     },
                     { 
                         label: 'Terms & Conditions', 
