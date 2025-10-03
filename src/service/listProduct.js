@@ -4,6 +4,8 @@ export const ListTyreService = {
             {
                 id: 1,
                 warrantyRegisterID: 1001,
+                materialid: "81114NE0304175H",
+                itemdesc: "225/50R17 97V",
                 pattern: 'Proxes T1R',
                 rimDiameter: 17,
                 aspectRatio: '45',
@@ -24,6 +26,8 @@ export const ListTyreService = {
             {
                 id: 2,
                 warrantyRegisterID: 1002,
+                materialid: "81114NE0304176H",
+                itemdesc: "265/65R18 114S",
                 pattern: 'Open Country A/T III',
                 rimDiameter: 18,
                 aspectRatio: '65',
@@ -44,6 +48,8 @@ export const ListTyreService = {
             {
                 id: 3,
                 warrantyRegisterID: 1003,
+                materialid: "81114NE0304177H",
+                itemdesc: "245/40R19 98Y",
                 pattern: 'Proxes Sport',
                 rimDiameter: 19,
                 aspectRatio: '40',
@@ -64,6 +70,8 @@ export const ListTyreService = {
             {
                 id: 4,
                 warrantyRegisterID: 1004,
+                materialid: "81114NE0304178H",
+                itemdesc: "205/55R16 91H",
                 pattern: 'Observe GSi-6',
                 rimDiameter: 16,
                 aspectRatio: '55',
@@ -84,6 +92,8 @@ export const ListTyreService = {
             {
                 id: 5,
                 warrantyRegisterID: 1005,
+                materialid: "81114NE0304179H",
+                itemdesc: "285/70R17 121Q",
                 pattern: 'Open Country M/T',
                 rimDiameter: 17,
                 aspectRatio: '70',
@@ -104,6 +114,8 @@ export const ListTyreService = {
             {
                 id: 6,
                 warrantyRegisterID: 1006,
+                materialid: "81114NE0304180H",
+                itemdesc: "195/50R15 82V",
                 pattern: 'Proxes R1R',
                 rimDiameter: 15,
                 aspectRatio: '50',
@@ -124,6 +136,8 @@ export const ListTyreService = {
             {
                 id: 7,
                 warrantyRegisterID: 1007,
+                materialid: "81114NE0304181H",
+                itemdesc: "275/55R20 113T",
                 pattern: 'Open Country H/T',
                 rimDiameter: 20,
                 aspectRatio: '55',
@@ -144,6 +158,8 @@ export const ListTyreService = {
             {
                 id: 8,
                 warrantyRegisterID: 1008,
+                materialid: "81114NE0304182H",
+                itemdesc: "255/45R19 104W",
                 pattern: 'Proxes ST III',
                 rimDiameter: 19,
                 aspectRatio: '45',
@@ -164,6 +180,8 @@ export const ListTyreService = {
             {
                 id: 9,
                 warrantyRegisterID: 1009,
+                materialid: "81114NE0304183H",
+                itemdesc: "265/65R17 120S",
                 pattern: 'Open Country R/T',
                 rimDiameter: 17,
                 aspectRatio: '65',
@@ -184,6 +202,8 @@ export const ListTyreService = {
             {
                 id: 10,
                 warrantyRegisterID: 1010,
+                materialid: "81114NE0304184H",
+                itemdesc: "275/35R21 103Y",
                 pattern: 'Proxes T1 Sport SUV',
                 rimDiameter: 21,
                 aspectRatio: '35',
@@ -206,10 +226,10 @@ export const ListTyreService = {
 
     getListTwpTyresData() {
         return [
-            { id: 1, tyreSize: '215/45R17', pattern: 'Proxes T1R' },
-            { id: 2, tyreSize: '265/65R18', pattern: 'Open Country A/T III' },
-            { id: 3, tyreSize: '245/40R19', pattern: 'Proxes Sport' },
-            { id: 4, tyreSize: '285/70R17', pattern: 'Open Country M/T' }
+            { id: 1, materialid: "81114NE0304175H", tyreSize: '215/45R17', pattern: 'Proxes T1R' },
+            { id: 2, materialid: "81114NE0304176H", tyreSize: '265/65R18', pattern: 'Open Country A/T III' },
+            { id: 3, materialid: "81114NE0304177H", tyreSize: '245/40R19', pattern: 'Proxes Sport' },
+            { id: 4, materialid: "81114NE0304179H", tyreSize: '285/70R17', pattern: 'Open Country M/T' }
         ];
     },
 
