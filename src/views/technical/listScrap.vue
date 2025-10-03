@@ -1,5 +1,5 @@
 <script setup>
-import { listWarantyClaimService } from '@/service/ListWarrantyClaim';
+import { listWarantyClaimService } from '@/service/ListWarranty';
 import { onBeforeMount, ref } from 'vue';
 
 const listData = ref([]);
@@ -8,28 +8,44 @@ const loading = ref(true);
 // Map status → label
 const getOverallStatusLabel = (status) => {
     switch (status) {
-        case 0: return 'Pending';
-        case 1: return 'ETEN Approved';
-        case 2: return 'ETEN Rejected';
-        case 3: return 'Processing';
-        case 4: return 'Toyo Approved';
-        case 5: return 'Toyo Rejected';
-        case 9: return 'Deleted';
-        default: return 'Unknown';
+        case 0:
+            return 'Pending';
+        case 1:
+            return 'ETEN Approved';
+        case 2:
+            return 'ETEN Rejected';
+        case 3:
+            return 'Processing';
+        case 4:
+            return 'Toyo Approved';
+        case 5:
+            return 'Toyo Rejected';
+        case 9:
+            return 'Deleted';
+        default:
+            return 'Unknown';
     }
 };
 
 // Map status → severity (PrimeVue Tag colors)
 const getOverallStatusSeverity = (status) => {
     switch (status) {
-        case 0: return 'warn';     // Pending
-        case 1: return 'success';  // ETEN Approved
-        case 2: return 'danger';   // ETEN Rejected
-        case 3: return 'info';     // Processing
-        case 4: return 'success';  // Toyo Approved
-        case 5: return 'danger';   // Toyo Rejected
-        case 9: return 'secondary';// Deleted
-        default: return 'secondary';
+        case 0:
+            return 'warn'; // Pending
+        case 1:
+            return 'success'; // ETEN Approved
+        case 2:
+            return 'danger'; // ETEN Rejected
+        case 3:
+            return 'info'; // Processing
+        case 4:
+            return 'success'; // Toyo Approved
+        case 5:
+            return 'danger'; // Toyo Rejected
+        case 9:
+            return 'secondary'; // Deleted
+        default:
+            return 'secondary';
     }
 };
 
@@ -37,7 +53,7 @@ const getOverallStatusSeverity = (status) => {
 onBeforeMount(async () => {
     const allData = await listWarantyClaimService.getListWarantyData();
     // Only show Pending claims
-    listData.value = allData.filter(item => item.status === 0);
+    listData.value = allData.filter((item) => item.status === 0);
     loading.value = false;
 });
 </script>
@@ -45,14 +61,7 @@ onBeforeMount(async () => {
 <template>
     <div class="card">
         <div class="text-2xl font-bold text-gray-800 border-b pb-2">Scrap List</div>
-        <DataTable 
-            :value="listData" 
-            :paginator="true" 
-            :rows="10" 
-            dataKey="id" 
-            :rowHover="true" 
-            :loading="loading"
-        >
+        <DataTable :value="listData" :paginator="true" :rows="10" dataKey="id" :rowHover="true" :loading="loading">
             <template #header>
                 <div class="flex items-center justify-between gap-4 w-full flex-wrap">
                     <!-- Left: Search Field + Cog Button -->
@@ -76,7 +85,7 @@ onBeforeMount(async () => {
 
             <template #empty> No Pending Claims found. </template>
             <template #loading> Loading claims data. Please wait. </template>
-            
+
             <!-- Columns -->
             <Column field="refNo" header="Ref No" style="min-width: 8rem">
                 <template #body="{ data }">

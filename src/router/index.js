@@ -258,6 +258,11 @@ const router = createRouter({
                 // ===============================
                 // Warranty Claims
                 {
+                    path: '/technical/dashboardTechnical',
+                    name: 'Dashboard-Technical',
+                    component: () => import('@/views/technical/dashboardTechnical.vue')
+                },
+                {
                     path: '/technical/listClaim',
                     name: 'List-Claim',
                     component: () => import('@/views/technical/listClaim.vue')
