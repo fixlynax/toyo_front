@@ -318,17 +318,17 @@ const model = ref([
                     { 
                         label: 'Maintenance Mode', 
                         icon: 'pi pi-fw pi-power-off', 
-                        to: '#' 
+                        to: '/it/maintenanceMode' 
                     },
                     { 
                         label: 'Email Setting', 
                         icon: 'pi pi-fw pi-envelope', 
-                        to: '#' 
+                        to: '/it/mailSetting' 
                     },
                     { 
                         label: 'Terms & Conditions', 
                         icon: 'pi pi-fw pi-file', 
-                        to: '#' 
+                        to: '/it/terms&cond' 
                     }
                 ]
             }

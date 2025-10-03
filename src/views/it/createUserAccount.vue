@@ -10,68 +10,37 @@
                     <!-- User Group -->
                     <div>
                         <label class="block text-sm font-bold text-gray-700 mb-2">User Group</label>
-                        <Dropdown 
-                            v-model="form.usergroup" 
-                            :options="userGroupOptions" 
-                            optionLabel="label" 
-                            optionValue="value" 
-                            placeholder="Select User Group" 
-                            class="w-full" 
-                        />
+                        <Dropdown v-model="form.usergroup" :options="userGroupOptions" optionLabel="label" optionValue="value" placeholder="Select User Group" class="w-full" />
                     </div>
 
                     <!-- Username -->
                     <div>
                         <label class="block text-sm font-bold text-gray-700 mb-2">Username</label>
-                        <InputText 
-                            v-model="form.username" 
-                            placeholder="Enter username" 
-                            class="w-full" 
-                        />
+                        <InputText v-model="form.username" placeholder="Enter username" class="w-full" />
                     </div>
 
                     <!-- Department -->
                     <div>
                         <label class="block text-sm font-bold text-gray-700 mb-2">Department</label>
-                        <InputText 
-                            v-model="form.department" 
-                            placeholder="Enter department" 
-                            class="w-full" 
-                        />
+                        <InputText v-model="form.department" placeholder="Enter department" class="w-full" />
                     </div>
 
                     <!-- Mobile No -->
                     <div>
                         <label class="block text-sm font-bold text-gray-700 mb-2">Mobile No</label>
-                        <InputText 
-                            v-model="form.mobileno" 
-                            placeholder="e.g. 01123456789" 
-                            class="w-full" 
-                            @input="form.mobileno = form.mobileno.replace(/[^0-9]/g, '')" 
-                        />
+                        <InputText v-model="form.mobileno" placeholder="e.g. 01123456789" class="w-full" @keypress="onlyNumbers" />
                     </div>
 
                     <!-- Email -->
                     <div class="md:col-span-2">
                         <label class="block text-sm font-bold text-gray-700 mb-2">Email</label>
-                        <InputText 
-                            v-model="form.email" 
-                            placeholder="Enter email" 
-                            class="w-full" 
-                        />
+                        <InputText v-model="form.email" placeholder="Enter email" class="w-full" />
                     </div>
 
                     <!-- Status -->
                     <div class="md:col-span-2">
                         <label class="block text-sm font-bold text-gray-700 mb-2">Status</label>
-                        <Dropdown 
-                            v-model="form.statusUser" 
-                            :options="statusOptions" 
-                            optionLabel="label" 
-                            optionValue="value" 
-                            placeholder="Select status" 
-                            class="w-full" 
-                        />
+                        <Dropdown v-model="form.statusUser" :options="statusOptions" optionLabel="label" optionValue="value" placeholder="Select status" class="w-full" />
                     </div>
                 </div>
 
@@ -127,8 +96,15 @@ const statusOptions = [
 
 // Cancel button
 const cancel = () => {
-    router.push('/marketing/userList'); // adjust route
+    router.push('/it/listUserAccount'); // adjust route
 };
+//Prevent text on phone input
+function onlyNumbers(event) {
+    const char = String.fromCharCode(event.which);
+    if (!/[0-9]/.test(char)) {
+        event.preventDefault();
+    }
+}
 
 // Submit form
 const submitForm = () => {
