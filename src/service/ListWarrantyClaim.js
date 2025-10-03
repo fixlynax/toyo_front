@@ -8,7 +8,7 @@ export const listWarantyClaimService = {
                 claimDate: '2025-09-01',
                 submitDate: '2025-09-02',
                 dealerName: 'AutoWorld KL',
-                warrantyType: 0, // New
+                warrantyType: 'New', 
                 claimType: 'Tire Defect',
                 status: 0, // Pending
                 summary: {
@@ -64,7 +64,7 @@ export const listWarantyClaimService = {
                 claimDate: '2025-09-03',
                 submitDate: '2025-09-04',
                 dealerName: 'Speedy Motors',
-                warrantyType: 1, // Pending CTC
+                warrantyType: 'Pending CTC', // 
                 claimType: 'Manufacturing',
                 status: 1, // ETEN Approved
                 summary: {
@@ -120,7 +120,7 @@ export const listWarantyClaimService = {
                 claimDate: '2025-09-04',
                 submitDate: '2025-09-05',
                 dealerName: 'MegaTire Johor',
-                warrantyType: 2, // Pending Scrap
+                warrantyType: 'Pending Scrap', // 
                 claimType: 'Warranty Ext.',
                 status: 2, // ETEN Rejected
                 summary: {
@@ -176,7 +176,7 @@ export const listWarantyClaimService = {
                 claimDate: '2025-09-05',
                 submitDate: '2025-09-06',
                 dealerName: 'CityTire Penang',
-                warrantyType: 3, // Pending Invoice
+                warrantyType: 'Pending Invoice', // 
                 claimType: 'Damage Claim',
                 status: 3, // Processing
                 summary: {
@@ -232,9 +232,9 @@ export const listWarantyClaimService = {
                 claimDate: '2025-09-07',
                 submitDate: '2025-09-08',
                 dealerName: 'WheelHub Ipoh',
-                warrantyType: 4, // Waiting Approval
+                warrantyType: 'Waiting Approval', 
                 claimType: 'Tire Defect',
-                status: 4, // Toyo Approved
+                status: 4, 
                 summary: {
                     ctcNo: 'CTC-2025-005',
                     scrapNo: 'SCR-6677',
@@ -288,9 +288,9 @@ export const listWarantyClaimService = {
                 claimDate: '2025-09-08',
                 submitDate: '2025-09-09',
                 dealerName: 'MegaTire JB',
-                warrantyType: 5, // Processing
+                warrantyType: 'Processing',  
                 claimType: 'Manufacturing',
-                status: 0, // Pending
+                status: 5, // Pending
                 summary: {
                     ctcNo: 'CTC-2025-006',
                     scrapNo: 'SCR-7788',
@@ -344,9 +344,9 @@ export const listWarantyClaimService = {
                 claimDate: '2025-09-09',
                 submitDate: '2025-09-10',
                 dealerName: 'TireZone Melaka',
-                warrantyType: 6, // Completed
+                warrantyType: 'Completed', 
                 claimType: 'Damage Claim',
-                status: 5, // Toyo Rejected
+                status: 6, // Toyo Rejected
                 summary: {
                     ctcNo: 'CTC-2025-007',
                     scrapNo: 'SCR-8899',
