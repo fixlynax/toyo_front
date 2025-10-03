@@ -89,20 +89,25 @@
             <template #empty> No News found. </template>
             <template #loading> Loading News data. Please wait. </template>
             <!-- Columns -->
-            <Column field="refNo" header="Ref No" style="min-width: 8rem">
-                  <template #body="{ data }">
+            <Column field="refNo" header="Ref No" style="min-width: 10rem">
+                <template #body="{ data }">
                     <div class="flex flex-col">
-                        <RouterLink to="/technical/detailWarantyClaim" class="hover:underline font-bold">
-                        <span class="font-bold text-gray-800">{{ data.refNo }}</span></RouterLink>
-                        <span class="text-gray-600 text-xs mt-2">🔴 {{ data.warrantyType }}</span>
+                        <!-- Reference Number -->
+                        <RouterLink to="/technical/detailWarantyClaim" class="hover:underline">
+                            <span class="font-bold text-gray-800">{{ data.refNo }}</span>
+                        </RouterLink>
+
+                        <!-- Status -->
+                        <span class="text-gray-600 text-xs mt-2">👤 {{ data.warrantyType }}</span>
                     </div>
                 </template>
             </Column>
+
             <Column field="Dealer" header="Dealer Acc No" style="min-width: 6rem">
                 <template #body="{ data }">
                     <div class="flex flex-col">
                         <span class="font-bold text-gray-800">{{ data.dealerName }}</span>
-                        <span class="text-gray-600 text-xs mt-2">👤 {{ data.dealerAccNo}}</span>
+                        <span class="text-gray-600 text-xs mt-2">👤 {{ data.dealerInfo.custAccountNo }}</span>
                     </div>
                 </template>
             </Column>
@@ -133,8 +138,8 @@ const listData = ref([]);
 const loading = ref(true);
 
 // Map status → label
-const getOverallStatusLabel = (warrantyType) => {
-    switch (warrantyType) {
+const getOverallStatusLabel = (status) => {
+    switch (status) {
         case 0:
             return 'New';
         case 1:
@@ -155,8 +160,8 @@ const getOverallStatusLabel = (warrantyType) => {
 };
 
 // Map status → severity (PrimeVue Tag colors)
-const getOverallStatusSeverity = (warrantyType) => {
-    switch (warrantyType) {
+const getOverallStatusSeverity = (status) => {
+    switch (status) {
         case 0:
             return 'info';
         case 1:
