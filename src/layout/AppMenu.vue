@@ -193,7 +193,7 @@ const model = ref([
             { 
                 label: 'Sales Program',
                 icon: 'pi pi-fw pi-tags',
-                to: '#' },
+                to: '/om/listSalesProgram' },
             {
                 label: 'Maintenance',
                 icon: 'pi pi-fw pi-cog',

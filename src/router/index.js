@@ -90,6 +90,22 @@ const router = createRouter({
                     name: 'Detail-Return-Order',
                     component: () => import('@/views/om/detailReturnOrder.vue')
                 },
+                // Sales Program
+                {
+                    path: '/om/listSalesProgram',
+                    name: 'List-SalesProgram',
+                    component: () => import('@/views/om/listSalesProgram.vue')
+                },
+                // {
+                //     path: '/om/createSalesProgram',
+                //     name: 'Create-SalesProgram',
+                //     component: () => import('@/views/om/createSalesProgram.vue')
+                // },
+                // {
+                //     path: '/om/listSalesProgram',
+                //     name: 'Detail-SalesProgram',
+                //     component: () => import('@/views/om/detailSalesProgram.vue')
+                // },
 
                 // ===============================
                 // MARKETING
