@@ -84,7 +84,7 @@ const model = ref([
             { 
                 label: 'Dashboard', 
                 icon: 'pi pi-fw pi-home', 
-                to: '/' 
+                to: '/technical/dashboardTechnical' 
             },
             {
                 label: 'Warranty Claim',

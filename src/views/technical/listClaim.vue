@@ -72,6 +72,7 @@ onBeforeMount(async () => {
                 <template #body="{ data }">
                     <RouterLink to="/technical/detailWarantyClaim" class="hover:underline font-bold">
                         {{ data.refNo }}
+                        {{ data.dealerName }}
                     </RouterLink>
                 </template>
             </Column>

@@ -6,7 +6,9 @@ export const listWarantyClaimService = {
                 id: 1,
                 refNo: 'CLM-2025-001',
                 claimDate: '2025-09-01',
+                submitDate: '2025-09-02',
                 dealerName: 'AutoWorld KL',
+                warrantyType: 0, // New
                 claimType: 'Tire Defect',
                 status: 0, // Pending
                 summary: {
@@ -32,19 +34,11 @@ export const listWarantyClaimService = {
                 },
                 problem: {
                     issue: 'Sidewall crack within 6 months of purchase',
-                    imageURL: ['/demo/images/sidewall-damage.jpg'], // relative to /public
+                    imageURL: ['/demo/images/sidewall-damage.jpg'],
                     damageCode: 'D-102 (Sidewall Separation)'
                 },
-
-                ctcDetails: {
-                    ctcNo: 'CTC-2025-001',
-                    status: 'Pending Review'
-                },
-                scrapDetails: {
-                    scrapNo: 'SCR-8765',
-                    imageURL1: ['/demo/images/toyo.jpg'],
-                    status: 'Pending Photo Upload'
-                },
+                ctcDetails: { ctcNo: 'CTC-2025-001', status: 'Pending Review' },
+                scrapDetails: { scrapNo: 'SCR-8765', status: 'Pending Photo Upload' },
                 claimVariable: {
                     amount: 'RM 450.00',
                     replacementType: 'Partial',
@@ -60,20 +54,16 @@ export const listWarantyClaimService = {
                     total: '500.00',
                     subTotal: '2000.00'
                 },
-                reimbursement: {
-                    refNo: 'TBD-1109',
-                    orderNo: 'TY-119',
-                    status: 'Return'
-                },
-                report: {
-                    file: 'CLM-2025-001-Report.pdf'
-                }
+                reimbursement: { refNo: 'TBD-1109', orderNo: 'TY-119', status: 'Return' },
+                report: { file: 'CLM-2025-001-Report.pdf' }
             },
             {
                 id: 2,
                 refNo: 'CLM-2025-002',
                 claimDate: '2025-09-03',
+                submitDate: '2025-09-04',
                 dealerName: 'Speedy Motors',
+                warrantyType: 1, // Pending CTC
                 claimType: 'Manufacturing',
                 status: 1, // ETEN Approved
                 summary: {
@@ -102,14 +92,8 @@ export const listWarantyClaimService = {
                     photos: ['https://example.com/images/tread_wear.jpg'],
                     damageCode: 'D-210 (Tread Separation)'
                 },
-                ctcDetails: {
-                    ctcNo: 'CTC-2025-002',
-                    status: 'Reviewed'
-                },
-                scrapDetails: {
-                    scrapNo: 'SCR-1122',
-                    status: 'Received'
-                },
+                ctcDetails: { ctcNo: 'CTC-2025-002', status: 'Reviewed' },
+                scrapDetails: { scrapNo: 'SCR-1122', status: 'Received' },
                 claimVariable: {
                     amount: 'RM 600.00',
                     replacementType: 'Full',
@@ -125,20 +109,16 @@ export const listWarantyClaimService = {
                     total: '500.00',
                     subTotal: '2000.00'
                 },
-                reimbursement: {
-                    refNo: 'TBD-1109',
-                    orderNo: 'TY-120',
-                    status: 'Not Return'
-                },
-                report: {
-                    file: 'CLM-2025-002-Report.pdf'
-                }
+                reimbursement: { refNo: 'TBD-1109', orderNo: 'TY-120', status: 'Not Return' },
+                report: { file: 'CLM-2025-002-Report.pdf' }
             },
             {
                 id: 3,
                 refNo: 'CLM-2025-003',
                 claimDate: '2025-09-04',
+                submitDate: '2025-09-05',
                 dealerName: 'MegaTire Johor',
+                warrantyType: 2, // Pending Scrap
                 claimType: 'Warranty Ext.',
                 status: 2, // ETEN Rejected
                 summary: {
@@ -167,14 +147,8 @@ export const listWarantyClaimService = {
                     photos: ['https://example.com/images/vibration_issue.jpg'],
                     damageCode: 'D-305 (Noise/Vibration)'
                 },
-                ctcDetails: {
-                    ctcNo: 'CTC-2025-003',
-                    status: 'Rejected'
-                },
-                scrapDetails: {
-                    scrapNo: 'SCR-3344',
-                    status: 'Not Required'
-                },
+                ctcDetails: { ctcNo: 'CTC-2025-003', status: 'Rejected' },
+                scrapDetails: { scrapNo: 'SCR-3344', status: 'Not Required' },
                 claimVariable: {
                     amount: 'RM 280.00',
                     replacementType: 'Partial',
@@ -190,20 +164,16 @@ export const listWarantyClaimService = {
                     total: '500.00',
                     subTotal: '2000.00'
                 },
-                reimbursement: {
-                    refNo: 'TBD-1109',
-                    orderNo: 'TY-120',
-                    status: 'Not Return'
-                },
-                report: {
-                    file: 'CLM-2025-003-Report.pdf'
-                }
+                reimbursement: { refNo: 'TBD-1109', orderNo: 'TY-120', status: 'Not Return' },
+                report: { file: 'CLM-2025-003-Report.pdf' }
             },
             {
                 id: 4,
                 refNo: 'CLM-2025-004',
                 claimDate: '2025-09-05',
+                submitDate: '2025-09-06',
                 dealerName: 'CityTire Penang',
+                warrantyType: 3, // Pending Invoice
                 claimType: 'Damage Claim',
                 status: 3, // Processing
                 summary: {
@@ -232,14 +202,8 @@ export const listWarantyClaimService = {
                     photos: ['https://example.com/images/puncture_fault.jpg'],
                     damageCode: 'D-405 (Impact Damage)'
                 },
-                ctcDetails: {
-                    ctcNo: 'CTC-2025-004',
-                    status: 'In Review'
-                },
-                scrapDetails: {
-                    scrapNo: 'SCR-5566',
-                    status: 'Pending Inspection'
-                },
+                ctcDetails: { ctcNo: 'CTC-2025-004', status: 'In Review' },
+                scrapDetails: { scrapNo: 'SCR-5566', status: 'Pending Inspection' },
                 claimVariable: {
                     amount: 'RM 500.00',
                     replacementType: 'Partial',
@@ -255,20 +219,16 @@ export const listWarantyClaimService = {
                     total: '500.00',
                     subTotal: '2000.00'
                 },
-                reimbursement: {
-                    refNo: 'TBD-1109',
-                    orderNo: 'TY-120',
-                    status: 'Not Return'
-                },
-                report: {
-                    file: 'CLM-2025-004-Report.pdf'
-                }
+                reimbursement: { refNo: 'TBD-1109', orderNo: 'TY-120', status: 'Not Return' },
+                report: { file: 'CLM-2025-004-Report.pdf' }
             },
             {
                 id: 5,
                 refNo: 'CLM-2025-005',
                 claimDate: '2025-09-07',
+                submitDate: '2025-09-08',
                 dealerName: 'WheelHub Ipoh',
+                warrantyType: 4, // Waiting Approval
                 claimType: 'Tire Defect',
                 status: 4, // Toyo Approved
                 summary: {
@@ -297,14 +257,8 @@ export const listWarantyClaimService = {
                     photos: ['https://example.com/images/sidewall_bulge.jpg'],
                     damageCode: 'D-220 (Sidewall Bulge)'
                 },
-                ctcDetails: {
-                    ctcNo: 'CTC-2025-005',
-                    status: 'Approved'
-                },
-                scrapDetails: {
-                    scrapNo: 'SCR-6677',
-                    status: 'Scrapped'
-                },
+                ctcDetails: { ctcNo: 'CTC-2025-005', status: 'Approved' },
+                scrapDetails: { scrapNo: 'SCR-6677', status: 'Scrapped' },
                 claimVariable: {
                     amount: 'RM 900.00',
                     replacementType: 'Full',
@@ -320,20 +274,16 @@ export const listWarantyClaimService = {
                     total: '500.00',
                     subTotal: '2000.00'
                 },
-                reimbursement: {
-                    refNo: 'TBD-1109',
-                    orderNo: 'TY-120',
-                    status: 'Not Return'
-                },
-                report: {
-                    file: 'CLM-2025-005-Report.pdf'
-                }
+                reimbursement: { refNo: 'TBD-1109', orderNo: 'TY-120', status: 'Not Return' },
+                report: { file: 'CLM-2025-005-Report.pdf' }
             },
             {
                 id: 6,
                 refNo: 'CLM-2025-006',
                 claimDate: '2025-09-08',
+                submitDate: '2025-09-09',
                 dealerName: 'MegaTire JB',
+                warrantyType: 5, // Processing
                 claimType: 'Manufacturing',
                 status: 0, // Pending
                 summary: {
@@ -362,14 +312,8 @@ export const listWarantyClaimService = {
                     photos: ['https://example.com/images/tread_cracks.jpg'],
                     damageCode: 'D-130 (Groove Cracking)'
                 },
-                ctcDetails: {
-                    ctcNo: 'CTC-2025-006',
-                    status: 'Pending Review'
-                },
-                scrapDetails: {
-                    scrapNo: 'SCR-7788',
-                    status: 'Pending Scrap'
-                },
+                ctcDetails: { ctcNo: 'CTC-2025-006', status: 'Pending Review' },
+                scrapDetails: { scrapNo: 'SCR-7788', status: 'Pending Scrap' },
                 claimVariable: {
                     amount: 'RM 720.00',
                     replacementType: 'Full',
@@ -385,20 +329,16 @@ export const listWarantyClaimService = {
                     total: '500.00',
                     subTotal: '2000.00'
                 },
-                reimbursement: {
-                    refNo: 'TBD-1109',
-                    orderNo: 'TY-120',
-                    status: 'Not Return'
-                },
-                report: {
-                    file: 'CLM-2025-006-Report.pdf'
-                }
+                reimbursement: { refNo: 'TBD-1109', orderNo: 'TY-120', status: 'Not Return' },
+                report: { file: 'CLM-2025-006-Report.pdf' }
             },
             {
                 id: 7,
                 refNo: 'CLM-2025-007',
                 claimDate: '2025-09-09',
+                submitDate: '2025-09-10',
                 dealerName: 'TireZone Melaka',
+                warrantyType: 6, // Completed
                 claimType: 'Damage Claim',
                 status: 5, // Toyo Rejected
                 summary: {
@@ -427,14 +367,8 @@ export const listWarantyClaimService = {
                     photos: ['https://example.com/images/curb_damage.jpg'],
                     damageCode: 'D-499 (External Damage)'
                 },
-                ctcDetails: {
-                    ctcNo: 'CTC-2025-007',
-                    status: 'Rejected'
-                },
-                scrapDetails: {
-                    scrapNo: 'SCR-8899',
-                    status: 'Not Accepted'
-                },
+                ctcDetails: { ctcNo: 'CTC-2025-007', status: 'Rejected' },
+                scrapDetails: { scrapNo: 'SCR-8899', status: 'Not Accepted' },
                 claimVariable: {
                     amount: 'RM 850.00',
                     replacementType: 'Full',
@@ -450,160 +384,24 @@ export const listWarantyClaimService = {
                     total: '500.00',
                     subTotal: '2000.00'
                 },
-                reimbursement: {
-                    refNo: 'TBD-1109',
-                    orderNo: 'TY-120',
-                    status: 'Not Return'
-                },
-                report: {
-                    file: 'CLM-2025-007-Report.pdf'
-                }
-            },
-            {
-                id: 8,
-                refNo: 'CLM-2025-008',
-                claimDate: '2025-09-10',
-                dealerName: 'CityTire KL',
-                claimType: 'Tire Defect',
-                status: 9, // Deleted
-                summary: {
-                    ctcNo: 'CTC-2025-008',
-                    scrapNo: 'SCR-9900',
-                    invoiceNo: 'INV-4666'
-                },
-                dealerInfo: {
-                    dealerCode: 'DLR-008',
-                    contactPerson: 'Roslan Mahmud',
-                    contactNo: '+6016-6677889'
-                },
-                customerInfo: {
-                    name: 'Lim Jia Yi',
-                    vehicle: 'Honda HR-V',
-                    regNo: 'WTT 9087'
-                },
-                tires: {
-                    size: '215/60R16',
-                    pattern: 'NanoEnergy Van',
-                    serialNo: 'TYR-77889911',
-                    treadDepths: [7.6, 7.5, 7.6, 7.6]
-                },
-                problem: {
-                    issue: 'Deleted by admin (duplicate claim)',
-                    photos: [],
-                    damageCode: 'N/A'
-                },
-                ctcDetails: {
-                    ctcNo: 'CTC-2025-008',
-                    status: 'Deleted'
-                },
-                scrapDetails: {
-                    scrapNo: 'SCR-9900',
-                    status: 'N/A'
-                },
-                claimVariable: {
-                    amount: 'RM 0.00',
-                    replacementType: 'N/A',
-                    Claim: '0%',
-                    Usable: '0%',
-                    Worn: '0%'  
-                },
-                replacementOrder: {
-                    orderNo: 'ORD-5570',
-                    name: 'Proxes',
-                    item: 'Proxes R45',
-                    quantity: '4',
-                    total: '500.00',
-                    subTotal: '2000.00'
-                },
-                reimbursement: {
-                    refNo: 'TBD-1109',
-                    orderNo: 'TY-120',
-                    status: 'Not Return'
-                },
-                report: {
-                    file: 'CLM-2025-008-Report.pdf'
-                }
-            },
-            {
-                id: 9,
-                refNo: 'CLM-2025-009',
-                claimDate: '2025-09-11',
-                dealerName: 'TyreKing Sabah',
-                claimType: 'Warranty Ext.',
-                status: 0, // Pending
-                summary: {
-                    ctcNo: 'CTC-2025-009',
-                    scrapNo: 'SCR-1123',
-                    invoiceNo: 'INV-4677'
-                },
-                dealerInfo: {
-                    dealerCode: 'DLR-009',
-                    contactPerson: 'Fiona Tan',
-                    contactNo: '+6012-9988776'
-                },
-                customerInfo: {
-                    name: 'Raymond Wong',
-                    vehicle: 'Nissan X-Trail',
-                    regNo: 'SAB 7788'
-                },
-                tires: {
-                    size: '225/65R17',
-                    pattern: 'Open Country A/T III',
-                    serialNo: 'TYR-88990011',
-                    treadDepths: [6.9, 7.0, 6.8, 7.0]
-                },
-                problem: {
-                    issue: 'Noise at high speed',
-                    photos: ['https://example.com/images/high_speed_noise.jpg'],
-                    damageCode: 'D-310 (Noise)'
-                },
-                ctcDetails: {
-                    ctcNo: 'CTC-2025-009',
-                    status: 'Pending'
-                },
-                scrapDetails: {
-                    scrapNo: 'SCR-1123',
-                    status: 'Pending Scrap'
-                },
-                claimVariable: {
-                    amount: 'RM 500.00',
-                    replacementType: 'Partial',
-                    Claim: '60%',
-                    Usable: '70%',
-                    Worn: '30%'
-                },
-                replacementOrder: {
-                    orderNo: 'ORD-5570',
-                    name: 'Proxes',
-                    item: 'Proxes R45',
-                    quantity: '4',
-                    total: '500.00',
-                    subTotal: '2000.00'
-                },
-                reimbursement: {
-                    refNo: 'TBD-1109',
-                    orderNo: 'TY-120',
-                    status: 'Not Return'
-                },
-                report: {
-                    file: 'CLM-2025-009-Report.pdf'
-                }
+                reimbursement: { refNo: 'TBD-1109', orderNo: 'TY-120', status: 'Not Return' },
+                report: { file: 'CLM-2025-007-Report.pdf' }
             }
         ];
     },
 
     // Return first 5 events
-    getListEventMini() {
+    getListWarantyMini() {
         return Promise.resolve(this.getListWarantyData().slice(0, 5));
     },
 
     // Return first 10 events
-    getListEventSmall() {
+    getListWarantySmall() {
         return Promise.resolve(this.getListWarantyData().slice(0, 10));
     },
 
     // Return all events
-    getListEvent() {
+    getListWaranty() {
         return Promise.resolve(this.getListWarantyData());
     }
 };
