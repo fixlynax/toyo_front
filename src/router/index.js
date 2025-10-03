@@ -311,6 +311,8 @@ const router = createRouter({
                 // ===============================
                 // IT
                 // ===============================
+
+                //Admin
                 {
                     path: '/it/listGroup',
                     name: 'List-Group',
@@ -341,6 +343,7 @@ const router = createRouter({
                     name: 'Edit-User-Account',
                     component: () => import('@/views/it/editUserAccount.vue')
                 },
+                //Salesman
                 {
                     path: '/it/listSalesAccount',
                     name: 'List-Sales',
@@ -356,6 +359,8 @@ const router = createRouter({
                     name: 'Edit-Sales',
                     component: () => import('@/views/it/editSalesAcc.vue')
                 },
+
+                //Setting
                 {
                     path: '/it/maintenanceMode',
                     name: 'Maintenance-Mode',

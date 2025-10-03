@@ -3,54 +3,41 @@
         <div class="flex flex-col md:flex-row gap-8">
             <div class="card flex flex-col gap-6 w-full">
                 <!-- Header -->
-                <div class="text-2xl font-bold text-gray-800 border-b pb-2">Create User</div>
+                <div class="text-2xl font-bold text-gray-800 border-b pb-2">Maintenance Mode</div>
 
-                <!-- User Form -->
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <!-- User Group -->
-                    <div>
-                        <label class="block text-sm font-bold text-gray-700 mb-2">User Group</label>
-                        <Dropdown v-model="form.usergroup" :options="userGroupOptions" optionLabel="label" optionValue="value" placeholder="Select User Group" class="w-full" />
-                    </div>
+                <!-- Channel Toggles -->
+                <div class="flex flex-col gap-6">
+                    <div v-for="channel in channelOptions" :key="channel.value" class="border rounded-lg p-4 flex flex-col gap-4">
+                        <!-- Toggle Row -->
+                        <div class="flex items-center justify-between">
+                            <span class="font-medium text-gray-800">{{ channel.label }}</span>
+                            <InputSwitch 
+                                v-model="form.channels[channel.value].enabled" 
+                                @change="handleToggle(channel.value)" 
+                            />
+                        </div>
 
-                    <!-- Username -->
-                    <div>
-                        <label class="block text-sm font-bold text-gray-700 mb-2">Username</label>
-                        <InputText v-model="form.username" placeholder="Enter username" class="w-full" />
-                    </div>
+                        <!-- Show Period & Message only if ON -->
+                        <div v-if="form.channels[channel.value].enabled" class="grid grid-cols-1 gap-4">
+                            <!-- Period -->
+                            <div>
+                                <label class="block text-sm font-bold text-gray-700 mb-2">Period (Date/Time)</label>
+                                <DatePicker v-model="form.channels[channel.value].period" selectionMode="range" showIcon showTime hourFormat="24" :manualInput="true" class="w-full" />
+                            </div>
 
-                    <!-- Department -->
-                    <div>
-                        <label class="block text-sm font-bold text-gray-700 mb-2">Department</label>
-                        <InputText v-model="form.department" placeholder="Enter department" class="w-full" />
-                    </div>
-
-                    <!-- Mobile No -->
-                    <div>
-                        <label class="block text-sm font-bold text-gray-700 mb-2">Mobile No</label>
-                        <InputText v-model="form.mobileno" placeholder="e.g. 01123456789" class="w-full" @keypress="onlyNumbers" />
-                    </div>
-
-                    <!-- Email -->
-                    <div class="md:col-span-2">
-                        <label class="block text-sm font-bold text-gray-700 mb-2">Email</label>
-                        <InputText v-model="form.email" placeholder="Enter email" class="w-full" />
-                    </div>
-
-                    <!-- Status -->
-                    <div class="md:col-span-2">
-                        <label class="block text-sm font-bold text-gray-700 mb-2">Status</label>
-                        <Dropdown v-model="form.statusUser" :options="statusOptions" optionLabel="label" optionValue="value" placeholder="Select status" class="w-full" />
+                            <!-- Message -->
+                            <div>
+                                <label class="block text-sm font-bold text-gray-700 mb-2">Message</label>
+                                <Textarea v-model="form.channels[channel.value].message" placeholder="Enter maintenance message" rows="3" class="w-full" />
+                            </div>
+                        </div>
                     </div>
                 </div>
 
-                <!-- Action Buttons -->
+                <!-- Save Button -->
                 <div class="flex justify-end mt-8 gap-4">
                     <div class="w-32">
-                        <Button label="Cancel" class="w-full p-button-secondary" @click="cancel" />
-                    </div>
-                    <div class="w-32">
-                        <Button label="Create" class="w-full p-button-success" @click="submitForm" />
+                        <Button label="Save" class="w-full p-button-primary" @click="save" />
                     </div>
                 </div>
             </div>
@@ -61,60 +48,39 @@
 <script setup>
 import { ref } from 'vue';
 import { useRouter } from 'vue-router';
+import InputSwitch from 'primevue/inputswitch';
 
 const router = useRouter();
 
-// Form state (matches your data model)
 const form = ref({
-    usergroup: '',
-    username: '',
-    department: '',
-    mobileno: '',
-    email: '',
-    statusUser: 1
+    channels: {
+        TC: { enabled: false, period: null, message: '' },
+        ETEN: { enabled: false, period: null, message: '' },
+        BOTH: { enabled: false, period: null, message: '' }
+    }
 });
 
-// User group options
-const userGroupOptions = [
-    { label: 'Technical Consultant', value: 'Technical Consultant' },
-    { label: 'Human Resources', value: 'Human Resources' },
-    { label: 'Information Technology', value: 'Information Technology' },
-    { label: 'Finance', value: 'Finance' },
-    { label: 'Marketing', value: 'Marketing' },
-    { label: 'Sales', value: 'Sales' },
-    { label: 'Operations', value: 'Operations' },
-    { label: 'Engineering', value: 'Engineering' },
-    { label: 'Quality Assurance', value: 'Quality Assurance' },
-    { label: 'Administration', value: 'Administration' }
+const channelOptions = [
+    { label: 'Toyocares (TC)', value: 'TC' },
+    { label: 'ETEN', value: 'ETEN' },
+    { label: 'Both', value: 'BOTH' }
 ];
 
-// Status options
-const statusOptions = [
-    { label: 'Active', value: 1 },
-    { label: 'Suspend', value: 0 }
-];
-
-// Cancel button
-const cancel = () => {
-    router.push('/it/listUserAccount'); // adjust route
+// Handle toggle logic
+const handleToggle = (channel) => {
+    if (channel === 'BOTH' && form.value.channels.BOTH.enabled) {
+        // Disable TC & ETEN if BOTH is enabled
+        form.value.channels.TC.enabled = false;
+        form.value.channels.ETEN.enabled = false;
+    } else if ((channel === 'TC' || channel === 'ETEN') && form.value.channels[channel].enabled) {
+        // Disable BOTH if either TC or ETEN is enabled
+        form.value.channels.BOTH.enabled = false;
+    }
 };
-//Prevent text on phone input
-function onlyNumbers(event) {
-    const char = String.fromCharCode(event.which);
-    if (!/[0-9]/.test(char)) {
-        event.preventDefault();
-    }
-}
 
-// Submit form
-const submitForm = () => {
-    if (!form.value.username || !form.value.email || !form.value.usergroup) {
-        alert('⚠️ Username, Email, and User Group are required');
-        return;
-    }
-
-    console.log('✅ New User Created:', form.value);
-    // TODO: replace with API call to save user
-    router.push('/it/listUserAccount');
+const save = () => {
+    console.log('Saving maintenance mode config:', form.value);
+    // TODO: API call
+    router.push('/it/maintenanceMode');
 };
 </script>

@@ -3,44 +3,26 @@
         <div class="flex flex-col md:flex-row gap-8">
             <div class="card flex flex-col gap-6 w-full">
                 <!-- Header -->
-                <div class="text-2xl font-bold text-gray-800 border-b pb-2">Create User</div>
+                <div class="text-2xl font-bold text-gray-800 border-b pb-2">Email Setting</div>
 
-                <!-- User Form -->
+                <!-- Email Form -->
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <!-- User Group -->
+                    <!-- Notification Email Name -->
                     <div>
-                        <label class="block text-sm font-bold text-gray-700 mb-2">User Group</label>
-                        <Dropdown v-model="form.usergroup" :options="userGroupOptions" optionLabel="label" optionValue="value" placeholder="Select User Group" class="w-full" />
+                        <label class="block text-sm font-bold text-gray-700 mb-2">Notification Email Name</label>
+                        <Dropdown v-model="form.notificationName" :options="notificationOptions" optionLabel="label" optionValue="value" placeholder="Select Notification" class="w-full" />
                     </div>
 
-                    <!-- Username -->
+                    <!-- Email Address -->
                     <div>
-                        <label class="block text-sm font-bold text-gray-700 mb-2">Username</label>
-                        <InputText v-model="form.username" placeholder="Enter username" class="w-full" />
-                    </div>
-
-                    <!-- Department -->
-                    <div>
-                        <label class="block text-sm font-bold text-gray-700 mb-2">Department</label>
-                        <InputText v-model="form.department" placeholder="Enter department" class="w-full" />
-                    </div>
-
-                    <!-- Mobile No -->
-                    <div>
-                        <label class="block text-sm font-bold text-gray-700 mb-2">Mobile No</label>
-                        <InputText v-model="form.mobileno" placeholder="e.g. 01123456789" class="w-full" @keypress="onlyNumbers" />
-                    </div>
-
-                    <!-- Email -->
-                    <div class="md:col-span-2">
-                        <label class="block text-sm font-bold text-gray-700 mb-2">Email</label>
+                        <label class="block text-sm font-bold text-gray-700 mb-2">Email Address</label>
                         <InputText v-model="form.email" placeholder="Enter email" class="w-full" />
                     </div>
 
-                    <!-- Status -->
+                    <!-- Shipping Point -->
                     <div class="md:col-span-2">
-                        <label class="block text-sm font-bold text-gray-700 mb-2">Status</label>
-                        <Dropdown v-model="form.statusUser" :options="statusOptions" optionLabel="label" optionValue="value" placeholder="Select status" class="w-full" />
+                        <label class="block text-sm font-bold text-gray-700 mb-2">Shipping Point</label>
+                        <InputText v-model="form.shippingPoint" placeholder="Enter shipping point" class="w-full" />
                     </div>
                 </div>
 
@@ -50,7 +32,7 @@
                         <Button label="Cancel" class="w-full p-button-secondary" @click="cancel" />
                     </div>
                     <div class="w-32">
-                        <Button label="Create" class="w-full p-button-success" @click="submitForm" />
+                        <Button label="Update" class="w-full p-button-success" @click="submitForm" />
                     </div>
                 </div>
             </div>
@@ -64,57 +46,30 @@ import { useRouter } from 'vue-router';
 
 const router = useRouter();
 
-// Form state (matches your data model)
 const form = ref({
-    usergroup: '',
-    username: '',
-    department: '',
-    mobileno: '',
+    notificationName: '',
     email: '',
-    statusUser: 1
+    shippingPoint: ''
 });
 
-// User group options
-const userGroupOptions = [
-    { label: 'Technical Consultant', value: 'Technical Consultant' },
-    { label: 'Human Resources', value: 'Human Resources' },
-    { label: 'Information Technology', value: 'Information Technology' },
-    { label: 'Finance', value: 'Finance' },
-    { label: 'Marketing', value: 'Marketing' },
-    { label: 'Sales', value: 'Sales' },
-    { label: 'Operations', value: 'Operations' },
-    { label: 'Engineering', value: 'Engineering' },
-    { label: 'Quality Assurance', value: 'Quality Assurance' },
-    { label: 'Administration', value: 'Administration' }
+const notificationOptions = [
+    { label: 'System Alert', value: 'System Alert' },
+    { label: 'Password Reset', value: 'Password Reset' },
+    { label: 'Shipping Notification', value: 'Shipping Notification' }
 ];
 
-// Status options
-const statusOptions = [
-    { label: 'Active', value: 1 },
-    { label: 'Suspend', value: 0 }
-];
-
-// Cancel button
 const cancel = () => {
-    router.push('/it/listUserAccount'); // adjust route
+    router.push('/it/dashboard'); // adjust route
 };
-//Prevent text on phone input
-function onlyNumbers(event) {
-    const char = String.fromCharCode(event.which);
-    if (!/[0-9]/.test(char)) {
-        event.preventDefault();
-    }
-}
 
-// Submit form
 const submitForm = () => {
-    if (!form.value.username || !form.value.email || !form.value.usergroup) {
-        alert('⚠️ Username, Email, and User Group are required');
+    if (!form.value.notificationName || !form.value.email) {
+        alert('⚠️ Notification name and Email are required');
         return;
     }
 
-    console.log('✅ New User Created:', form.value);
-    // TODO: replace with API call to save user
-    router.push('/it/listUserAccount');
+    console.log('✅ Email Setting Updated:', form.value);
+    // TODO: API call to save email settings
+    router.push('/it/dashboard');
 };
 </script>
