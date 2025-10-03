@@ -367,8 +367,13 @@ const router = createRouter({
                     component: () => import('@/views/it/maintenanceMode.vue')
                 },
                 {
-                    path: '/it/mailSetting',
+                    path: '/it/listMailSetting',
                     name: 'Email-Setting',
+                    component: () => import('@/views/it/listMailSetting.vue')
+                },
+                {
+                    path: '/it/mailSetting',
+                    name: 'list-Setting',
                     component: () => import('@/views/it/mailSetting.vue')
                 },
                 {
