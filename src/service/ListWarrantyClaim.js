@@ -18,6 +18,7 @@ export const listWarantyClaimService = {
                 },
                 dealerInfo: {
                     dealerCode: 'DLR-001',
+                    custAccountNo: '6080100900',
                     contactPerson: 'Ahmad Zaki',
                     contactNo: '+6012-3456789'
                 },
@@ -73,6 +74,7 @@ export const listWarantyClaimService = {
                 },
                 dealerInfo: {
                     dealerCode: 'DLR-002',
+                    custAccountNo: '6080102300',
                     contactPerson: 'Siti Noraini',
                     contactNo: '+6017-9988776'
                 },
@@ -128,6 +130,7 @@ export const listWarantyClaimService = {
                 },
                 dealerInfo: {
                     dealerCode: 'DLR-003',
+                    custAccountNo: '6080102301',
                     contactPerson: 'Tan Chee Hock',
                     contactNo: '+6019-5566778'
                 },
@@ -183,6 +186,7 @@ export const listWarantyClaimService = {
                 },
                 dealerInfo: {
                     dealerCode: 'DLR-004',
+                    custAccountNo: '6080102302',
                     contactPerson: 'Lim Wei Han',
                     contactNo: '+6011-2233445'
                 },
@@ -238,6 +242,7 @@ export const listWarantyClaimService = {
                 },
                 dealerInfo: {
                     dealerCode: 'DLR-005',
+                    custAccountNo: '6080114400',
                     contactPerson: 'Mohd Hafiz',
                     contactNo: '+6013-8899776'
                 },
@@ -293,6 +298,7 @@ export const listWarantyClaimService = {
                 },
                 dealerInfo: {
                     dealerCode: 'DLR-006',
+                    custAccountNo: '6080125300',
                     contactPerson: 'Farid Ismail',
                     contactNo: '+6010-2233445'
                 },
@@ -348,6 +354,7 @@ export const listWarantyClaimService = {
                 },
                 dealerInfo: {
                     dealerCode: 'DLR-007',
+                    custAccountNo: '6080126701',
                     contactPerson: 'Koh Mei Lin',
                     contactNo: '+6018-7788990'
                 },
