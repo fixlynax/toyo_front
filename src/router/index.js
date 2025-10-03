@@ -356,6 +356,21 @@ const router = createRouter({
                     name: 'Edit-Sales',
                     component: () => import('@/views/it/editSalesAcc.vue')
                 },
+                {
+                    path: '/it/maintenanceMode',
+                    name: 'Maintenance-Mode',
+                    component: () => import('@/views/it/maintenanceMode.vue')
+                },
+                {
+                    path: '/it/mailSetting',
+                    name: 'Email-Setting',
+                    component: () => import('@/views/it/mailSetting.vue')
+                },
+                {
+                    path: '/it/terms&cond',
+                    name: 'Terms-Condition',
+                    component: () => import('@/views/it/terms&cond.vue')
+                },
 
                 // ===============================
                 // SCM

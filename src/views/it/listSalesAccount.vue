@@ -2,17 +2,7 @@
     <div class="card">
         <div class="text-2xl font-bold text-gray-800 border-b pb-2">Sales Account</div>
 
-        <DataTable 
-            :value="listData" 
-            :paginator="true" 
-            :rows="10" 
-            dataKey="id" 
-            :rowHover="true" 
-            :loading="loading" 
-            :filters="filters" 
-            filterDisplay="menu" 
-            :globalFilterFields="['Name', 'title', 'email', 'mobile', 'salesOffice', 'salesDistrict']"
-        >
+        <DataTable :value="listData" :paginator="true" :rows="10" dataKey="id" :rowHover="true" :loading="loading" :filters="filters" filterDisplay="menu" :globalFilterFields="['Name', 'title', 'email', 'mobile', 'salesOffice', 'salesDistrict']">
             <!-- Header -->
             <template #header>
                 <div class="flex items-center justify-between gap-4 w-full flex-wrap">
@@ -46,11 +36,14 @@
             <Column field="email" header="Email" style="min-width: 12rem" />
             <Column field="salesOffice" header="Sales Office" style="min-width: 10rem" />
             <Column field="salesDistrict" header="Sales District" style="min-width: 10rem" />
-            <Column field="placeorder" header="Place Order" style="min-width: 8rem">
+            <Column field="placeorder" header="Order" style="min-width: 8rem">
                 <template #body="{ data }">
-                    <Tag :value="data.placeorder === 1 ? 'Yes' : 'No'" :severity="data.placeorder === 1 ? 'success' : 'warning'" />
+                    <span :class="data.placeorder === 1 ? 'text-black-600 font-semibold' : 'text-black-600'">
+                        {{ data.placeorder === 1 ? 'Yes' : '-' }}
+                    </span>
                 </template>
             </Column>
+
             <Column header="Status" style="min-width: 6rem">
                 <template #body="{ data }">
                     <Tag :value="getUserStatusLabel(data.status)" :severity="getUserStatusSeverity(data.status)" class="font-bold" />
