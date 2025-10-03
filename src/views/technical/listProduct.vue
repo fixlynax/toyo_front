@@ -36,10 +36,17 @@
             <!-- ========================= -->
             <!-- Data Columns -->
             <!-- ========================= -->
+            <Column field="pattern" header="Material ID" style="min-width: 6rem">
+                <template #body="{ data }">
+                    <RouterLink to="/technical/detailProduct" class="font-semibold text-gray-800 hover:underline">
+                        {{ data.materialid }}
+                    </RouterLink>
+                </template>
+            </Column>
             <Column field="pattern" header="Tyre Pattern" style="min-width: 25rem">
                 <template #body="{ data }">
-                     <RouterLink to="/technical/detailProduct" class="font-semibold text-gray-800 hover:underline">
-                    {{ data.pattern }}
+                    <RouterLink to="/technical/detailProduct" class="text-gray-800">
+                        {{ data.pattern }}
                     </RouterLink>
                 </template>
             </Column>
@@ -47,14 +54,6 @@
             <Column field="Size" header="Size" style="min-width: 6rem">
                 <template #body="{ data }">
                     {{ data.size }}
-                </template>
-            </Column>
-
-            <Column header="Mfg Code" style="min-width: 6rem">
-                <template #body="{ data }">
-                    <span>
-                        {{ data.mfgcode }}
-                    </span>
                 </template>
             </Column>
         </DataTable>

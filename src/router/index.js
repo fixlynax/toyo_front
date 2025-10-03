@@ -379,7 +379,7 @@ const router = createRouter({
                 {
                     path: '/it/editMailSetting',
                     name: 'Edit-Mail',
-                    component: () => import('@/views/it/editMailSetting.vue')
+                    component: () => import('@/views/it/mailSetting.vue')
                 },
                 {
                     path: '/it/terms&cond',
