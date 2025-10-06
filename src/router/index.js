@@ -309,6 +309,11 @@ const router = createRouter({
                     component: () => import('@/views/technical/listProduct.vue')
                 },
                 {
+                    path: '/technical/listPattern',
+                    name: 'List-Pattern',
+                    component: () => import('@/views/technical/listPattern.vue')
+                },
+                {
                     path: '/technical/bulkUpdate',
                     name: 'Bulk-Update',
                     component: () => import('@/views/technical/bulkUpdate.vue')
