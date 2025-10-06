@@ -2,17 +2,7 @@
     <div class="card">
         <div class="text-2xl font-bold text-gray-800 border-b pb-2">List Product</div>
 
-        <DataTable
-            :value="tyres"
-            :paginator="true"
-            :rows="10"
-            dataKey="id"
-            :rowHover="true"
-            :loading="loading"
-            :filters="filters"
-            filterDisplay="menu"
-            :globalFilterFields="['materialid', 'itemdesc', 'pattern', 'origin', 'size', 'status']"
-        >
+        <DataTable :value="tyres" :paginator="true" :rows="10" dataKey="id" :rowHover="true" :loading="loading" :filters="filters" filterDisplay="menu" :globalFilterFields="['materialid', 'itemdesc', 'pattern', 'origin', 'size', 'status']">
             <!-- ========================= -->
             <!-- Header Section -->
             <!-- ========================= -->
@@ -24,11 +14,7 @@
                             <InputIcon>
                                 <i class="pi pi-search" />
                             </InputIcon>
-                            <InputText
-                                v-model="filters['global'].value"
-                                placeholder="Quick Search"
-                                class="w-full"
-                            />
+                            <InputText v-model="filters['global'].value" placeholder="Quick Search" class="w-full" />
                         </IconField>
 
                         <Button type="button" icon="pi pi-cog" @click="sortMenu.toggle($event)" />
@@ -38,7 +24,7 @@
                     <!-- Right: Export & Batch Buttons -->
                     <div class="flex items-center gap-2 ml-auto">
                         <Button type="button" label="Export" icon="pi pi-file-export" class="p-button" />
-                        <Button type="button" label="Batch" icon="pi pi-file-edit" class="p-button" />
+                        <Button type="button" label="Bulk" icon="pi pi-file-import" class="p-button" />
                     </div>
                 </div>
             </template>
@@ -60,34 +46,51 @@
                 </template>
             </Column>
 
-            <Column field="itemdesc" header="Tire Product" style="min-width: 25rem">
+            <Column field="itemdesc" header="Tire Product" style="min-width: 8rem">
                 <template #body="{ data }">
-                    <RouterLink to="/technical/detailProduct" class="text-gray-800">
-                        {{ data.itemdesc }}
-                        <span class="font-semibold">{{ data.pattern }}</span>
+                    <RouterLink to="/technical/detailProduct" class="block text-gray-800 hover:text-gray-600 transition-colors">
+                        <div class="font-semibold text-lg">{{ data.pattern }}</div>
+                        <div class="text-sm text-gray-500">{{ data.subpattern }}</div>
                     </RouterLink>
                 </template>
             </Column>
 
-            <Column field="origin" header="Origin" style="min-width: 6rem">
+            <Column field="origin" header="Origin" style="min-width: 8rem">
                 <template #body="{ data }">
                     {{ data.origin }}
                 </template>
             </Column>
 
-            <Column field="size" header="Size" style="min-width: 6rem">
+            <Column field="size" header="Size" style="min-width: 12rem">
                 <template #body="{ data }">
-                    {{ data.size }}
+                    <div class="flex flex-col leading-relaxed text-sm text-gray-700">
+                        <div class="flex">
+                            <span class="w-40 text-gray-800 font-semibold">Tyre Size Type:</span>
+                            <span>{{ data.tyresize }}</span>
+                        </div>
+                        <div class="flex">
+                            <span class="w-40 text-gray-800 font-semibold">Tyre Spec:</span>
+                            <span>{{ data.tyrespec }}</span>
+                        </div>
+                        <div class="flex">
+                            <span class="w-40 text-gray-800 font-semibold">Rim Diameter:</span>
+                            <span>{{ data.rimDiameter }}"</span>
+                        </div>
+                        <div class="flex">
+                            <span class="w-40 text-gray-800 font-semibold">Aspect Ratio:</span>
+                            <span>{{ data.aspectRatio }}</span>
+                        </div>
+                        <div class="flex">
+                            <span class="w-40 text-gray-800 font-semibold">Section Width:</span>
+                            <span>{{ data.sectionWidth }}</span>
+                        </div>
+                    </div>
                 </template>
             </Column>
 
-            <Column field="status" header="Status" style="min-width: 6rem">
+            <Column field="status" header="Status" style="min-width: 8rem">
                 <template #body="{ data }">
-                    <Tag
-                        :value="getOverallStatusLabel(data.deleted)"
-                        :severity="getOverallStatusSeverity(data.deleted)"
-                        class="font-bold"
-                    />
+                    {{ data.status }}
                 </template>
             </Column>
         </DataTable>
