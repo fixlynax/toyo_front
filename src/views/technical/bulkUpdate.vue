@@ -22,7 +22,6 @@
                     <!-- Right: Export & Template Buttons -->
                     <div class="flex items-center gap-2 ml-auto">
                         <Button type="button" label="Export" icon="pi pi-file-export" class="p-button" />
-                        <Button type="button" label="Upload" icon="pi pi-upload" class="p-button" />
                     </div>
                 </div>
             </template>
@@ -38,8 +37,8 @@
             <!-- ========================= -->
             <Column field="pattern" header="Tyre Pattern" style="min-width: 25rem">
                 <template #body="{ data }">
-                     <RouterLink to="/technical/detailProduct" class="font-semibold text-gray-800 hover:underline">
-                    {{ data.pattern }}
+                    <RouterLink to="/technical/detailProduct" class="font-semibold text-gray-800 hover:underline">
+                        {{ data.pattern }}
                     </RouterLink>
                 </template>
             </Column>
@@ -47,14 +46,6 @@
             <Column field="Size" header="Size" style="min-width: 6rem">
                 <template #body="{ data }">
                     {{ data.size }}
-                </template>
-            </Column>
-
-            <Column header="Mfg Code" style="min-width: 6rem">
-                <template #body="{ data }">
-                    <span>
-                        {{ data.mfgcode }}
-                    </span>
                 </template>
             </Column>
         </DataTable>
