@@ -31,16 +31,7 @@ onBeforeMount(async () => {
     <div class="card">
         <div class="text-2xl font-bold text-gray-800 border-b pb-2 mb-3">List Sales Program</div>
 
-        <DataTable 
-            :value="listData" 
-            :paginator="true" 
-            :rows="10" 
-            dataKey="programId" 
-            :rowHover="true" 
-            :loading="loading" 
-            :filters="filters1" 
-            filterDisplay="menu"
-        >
+        <DataTable :value="listData" :paginator="true" :rows="10" dataKey="programId" :rowHover="true" :loading="loading" :filters="filters1" filterDisplay="menu">
             <!-- Header -->
             <template #header>
                 <div class="flex items-center justify-between gap-4 w-full flex-wrap">
@@ -79,9 +70,7 @@ onBeforeMount(async () => {
 
             <!-- Period -->
             <Column header="Period" style="min-width: 12rem">
-                <template #body="{ data }">
-                    {{ data.startDate }} → {{ data.endDate }}
-                </template>
+                <template #body="{ data }"> {{ data.startDate }} → {{ data.endDate }} </template>
             </Column>
 
             <!-- Status -->

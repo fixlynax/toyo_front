@@ -1,129 +1,130 @@
 <template>
-    <div class="grid grid-cols-12 gap-8">
-        <div class="col-span-12 lg:col-span-6 xl:col-span-3">
-            <div class="card mb-0">
-                <div class="flex justify-between mb-4">
+    <!-- TOP STATS GRID -->
+    <div class="grid grid-cols-12 gap-6">
+        <div 
+            v-for="card in statsCards" 
+            :key="card.label"
+            class="col-span-12 sm:col-span-6 xl:col-span-3"
+        >
+            <div class="card hover:shadow-md transition-shadow duration-300">
+                <div class="flex justify-between items-center mb-4">
                     <div>
-                        <span class="block text-muted-color font-medium mb-4">Pending CTC</span>
-                        <div class="text-surface-900 dark:text-surface-0 font-medium text-xl">3560</div>
+                        <span class="block text-sm text-gray-500 mb-2">{{ card.label }}</span>
+                        <div class="text-2xl font-semibold text-gray-900 dark:text-white">
+                            {{ card.value }}
+                        </div>
                     </div>
-                    <div class="flex items-center justify-center bg-blue-100 dark:bg-blue-400/10 rounded-border" style="width: 2.5rem; height: 2.5rem">
-                        <i class="pi pi-shopping-cart text-blue-500 !text-xl"></i>
+                    <div 
+                        class="flex items-center justify-center rounded-lg"
+                        :class="card.iconBg"
+                        style="width: 2.75rem; height: 2.75rem"
+                    >
+                        <i :class="['!text-xl', card.icon, card.iconColor]"></i>
                     </div>
                 </div>
-                <span class="text-primary font-medium">+320 </span>
-                <span class="text-muted-color">CTC have been completed</span>
-            </div>
-        </div>
-        <div class="col-span-12 lg:col-span-6 xl:col-span-3">
-            <div class="card mb-0">
-                <div class="flex justify-between mb-4">
-                    <div>
-                        <span class="block text-muted-color font-medium mb-4">Pending Claim</span>
-                        <div class="text-surface-900 dark:text-surface-0 font-medium text-xl">RM 60, 500</div>
-                    </div>
-                    <div class="flex items-center justify-center bg-orange-100 dark:bg-orange-400/10 rounded-border" style="width: 2.5rem; height: 2.5rem">
-                        <i class="pi pi-dollar text-orange-500 !text-xl"></i>
-                    </div>
+                <div class="text-sm">
+                    <span class="text-primary font-semibold">{{ card.change }}</span>
+                    <span class="text-gray-500"> {{ card.footer }}</span>
                 </div>
-                <span class="text-primary font-medium">+312 </span>
-                <span class="text-muted-color">Claim have been completed</span>
-            </div>
-        </div>
-        <div class="col-span-12 lg:col-span-6 xl:col-span-3">
-            <div class="card mb-0">
-                <div class="flex justify-between mb-4">
-                    <div>
-                        <span class="block text-muted-color font-medium mb-4">Pending Scrap</span>
-                        <div class="text-surface-900 dark:text-surface-0 font-medium text-xl">65</div>
-                    </div>
-                    <div class="flex items-center justify-center bg-cyan-100 dark:bg-cyan-400/10 rounded-border" style="width: 2.5rem; height: 2.5rem">
-                        <i class="pi pi-users text-cyan-500 !text-xl"></i>
-                    </div>
-                </div>
-                <span class="text-primary font-medium">+122 </span>
-                <span class="text-muted-color">Scrap have been completed</span>
-            </div>
-        </div>
-        <div class="col-span-12 lg:col-span-6 xl:col-span-3">
-            <div class="card mb-0">
-                <div class="flex justify-between mb-4">
-                    <div>
-                        <span class="block text-muted-color font-medium mb-4">Pending Invoice</span>
-                        <div class="text-surface-900 dark:text-surface-0 font-medium text-xl">30</div>
-                    </div>
-                    <div class="flex items-center justify-center bg-purple-100 dark:bg-purple-400/10 rounded-border" style="width: 2.5rem; height: 2.5rem">
-                        <i class="pi pi-comment text-purple-500 !text-xl"></i>
-                    </div>
-                </div>
-                <span class="text-primary font-medium">+7 </span>
-                <span class="text-muted-color">Invoice have been completed</span>
             </div>
         </div>
     </div>
 
+    <!-- LIST WARRANTY -->
     <div class="card mt-8">
-        <div class="text-2xl font-bold text-gray-800 border-b pb-2">List Warranty</div>
-        <DataTable :value="listData" :paginator="true" :rows="10" dataKey="id" :rowHover="true" :loading="loading">
+        <div class="flex items-center justify-between border-b pb-3 mb-3">
+            <div class="text-xl font-bold text-gray-800">Warranty Claims</div>
+        </div>
+
+        <DataTable 
+            :value="listData" 
+            :paginator="true" 
+            :rows="10" 
+            dataKey="id" 
+            :rowHover="true" 
+            :loading="loading"
+            class="p-datatable-sm"
+        >
+            <!-- HEADER -->
             <template #header>
-                <div class="flex items-center justify-between gap-4 w-full flex-wrap">
-                    <!-- Left: Search Field + Cog Button -->
-                    <div class="flex items-center gap-2 w-full max-w-md">
+                <div class="flex flex-wrap gap-3 items-center justify-between w-full">
+                    <!-- Search -->
+                    <div class="flex items-center gap-2 w-full md:w-1/2">
                         <IconField class="flex-1">
                             <InputIcon>
                                 <i class="pi pi-search" />
                             </InputIcon>
-                            <InputText placeholder="Quick Search" class="w-full" />
+                            <InputText placeholder="Search warranty..." class="w-full" />
                         </IconField>
-                        <Button type="button" icon="pi pi-cog" class="p-button" />
+                        <Button type="button" icon="pi pi-cog" class="p-button-outlined p-button-sm" />
                     </div>
 
-                    <!-- Right: Export & Template Buttons -->
-                    <div class="flex items-center gap-2 ml-auto">
-                        <Button type="button" label="Export" icon="pi pi-file-export" class="p-button-sucess" />
-                        <Button type="button" label="Template" icon="pi pi-download" class="p-button-danger" />
+                    <!-- Actions -->
+                    <div class="flex items-center gap-2">
+                        <Button 
+                            type="button" 
+                            label="Export" 
+                            icon="pi pi-file-export" 
+                            class="p-button-success p-button-sm" 
+                        />
+                        <Button 
+                            type="button" 
+                            label="Template" 
+                            icon="pi pi-download" 
+                            class="p-button-danger p-button-sm" 
+                        />
                     </div>
                 </div>
             </template>
 
-            <template #empty> No News found. </template>
-            <template #loading> Loading News data. Please wait. </template>
-            <!-- Columns -->
+            <!-- States -->
+            <template #empty>
+                <div class="py-6 text-gray-500 text-center">No warranty claims found.</div>
+            </template>
+            <template #loading>
+                <div class="py-6 text-gray-500 text-center">Loading warranty claims...</div>
+            </template>
+
+            <!-- COLUMNS -->
             <Column field="refNo" header="Ref No" style="min-width: 10rem">
                 <template #body="{ data }">
                     <div class="flex flex-col">
-                        <!-- Reference Number -->
-                        <RouterLink to="/technical/detailWarantyClaim" class="hover:underline">
-                            <span class="font-bold text-gray-800">{{ data.refNo }}</span>
+                        <RouterLink to="/technical/detailWarantyClaim" class="hover:underline text-primary font-bold">
+                            {{ data.refNo }}
                         </RouterLink>
-
-                        <!-- Status -->
-                        <span class="text-gray-600 text-xs mt-2">👤 {{ data.warrantyType }}</span>
+                        <span class="text-gray-500 text-xs mt-1">🔧 {{ data.warrantyType }}</span>
                     </div>
                 </template>
             </Column>
 
-            <Column field="Dealer" header="Dealer Acc No" style="min-width: 6rem">
+            <Column field="dealerName" header="Dealer Acc No" style="min-width: 10rem">
                 <template #body="{ data }">
                     <div class="flex flex-col">
-                        <span class="font-bold text-gray-800">{{ data.dealerName }}</span>
-                        <span class="text-gray-600 text-xs mt-2">👤 {{ data.dealerInfo.custAccountNo }}</span>
+                        <span class="font-semibold text-gray-800">{{ data.dealerName }}</span>
+                        <span class="text-gray-500 text-xs mt-1">#{{ data.dealerInfo.custAccountNo }}</span>
                     </div>
                 </template>
             </Column>
-            <Column field="claimType" header="Claim Type" style="min-width: 6rem">
+
+            <Column field="claimType" header="Claim Type" style="min-width: 8rem">
                 <template #body="{ data }">
-                    {{ data.claimType }}
+                    <span class="text-gray-800">{{ data.claimType }}</span>
                 </template>
             </Column>
-            <Column field="SubmitDate" header="Submittion Date" style="min-width: 6rem">
+
+            <Column field="submitDate" header="Submission Date" style="min-width: 8rem">
                 <template #body="{ data }">
-                    {{ data.submitDate }}
+                    <span class="text-gray-800">{{ data.submitDate }}</span>
                 </template>
             </Column>
-            <Column header="Status" style="min-width: 6rem">
+
+            <Column header="Status" style="min-width: 8rem">
                 <template #body="{ data }">
-                    <Tag :value="getOverallStatusLabel(data.status)" :severity="getOverallStatusSeverity(data.status)" />
+                    <Tag 
+                        :value="getOverallStatusLabel(data.status)" 
+                        :severity="getOverallStatusSeverity(data.status)" 
+                        class="px-3 py-1 text-xs rounded-md"
+                    />
                 </template>
             </Column>
         </DataTable>
@@ -133,57 +134,59 @@
 <script setup>
 import { listWarantyClaimService } from '@/service/ListWarrantyClaim';
 import { onBeforeMount, ref } from 'vue';
+import { FilterMatchMode, FilterOperator } from '@primevue/core/api';
 
+// STATE
 const listData = ref([]);
 const loading = ref(true);
+const filters1 = ref(null);
 
-// Map status → label
+// TOP CARDS
+const statsCards = [
+    { label: 'Pending CTC', value: '3560', icon: 'pi pi-shopping-cart', iconBg: 'bg-blue-100 dark:bg-blue-400/10', iconColor: 'text-blue-500', change: '+320', footer: 'CTC completed' },
+    { label: 'Pending Claim', value: 'RM 60,500', icon: 'pi pi-dollar', iconBg: 'bg-orange-100 dark:bg-orange-400/10', iconColor: 'text-orange-500', change: '+312', footer: 'Claims completed' },
+    { label: 'Pending Scrap', value: '65', icon: 'pi pi-users', iconBg: 'bg-cyan-100 dark:bg-cyan-400/10', iconColor: 'text-cyan-500', change: '+122', footer: 'Scraps completed' },
+    { label: 'Pending Invoice', value: '30', icon: 'pi pi-comment', iconBg: 'bg-purple-100 dark:bg-purple-400/10', iconColor: 'text-purple-500', change: '+7', footer: 'Invoices completed' },
+];
+
+// STATUS LABELS
 const getOverallStatusLabel = (status) => {
     switch (status) {
-        case 0:
-            return 'New';
-        case 1:
-            return 'Pending CTC';
-        case 2:
-            return 'Pending Strap';
-        case 3:
-            return 'Pending Invoice';
-        case 4:
-            return 'Waiting Approval';
-        case 5:
-            return 'Processing';
-        case 6:
-            return 'Completed';
-        default:
-            return 'Unknown';
+        case 0: return 'New';
+        case 1: return 'Pending CTC';
+        case 2: return 'Pending Scrap';
+        case 3: return 'Pending Invoice';
+        case 4: return 'Waiting Approval';
+        case 5: return 'Processing';
+        case 6: return 'Completed';
+        default: return 'Unknown';
     }
 };
 
-// Map status → severity (PrimeVue Tag colors)
 const getOverallStatusSeverity = (status) => {
     switch (status) {
-        case 0:
-            return 'info';
-        case 1:
-            return 'warn';
-        case 2:
-            return 'warn';
-        case 3:
-            return 'warn';
-        case 4:
-            return 'warn';
-        case 5:
-            return 'secondary';
-        case 6:
-            return 'success';
-        default:
-            return 'danger';
+        case 0: return 'info';
+        case 1: 
+        case 2: 
+        case 3: 
+        case 4: return 'warn';
+        case 5: return 'secondary';
+        case 6: return 'success';
+        default: return 'danger';
     }
 };
 
-// Fetch data on component mount
+// FETCH DATA
 onBeforeMount(async () => {
     listData.value = await listWarantyClaimService.getListWarantyData();
     loading.value = false;
+    initFilters1();
 });
+
+function initFilters1() {
+    filters1.value = {
+        global: { value: null, matchMode: FilterMatchMode.CONTAINS },
+        title: { operator: FilterOperator.AND, constraints: [{ value: null, matchMode: FilterMatchMode.STARTS_WITH }] }
+    };
+}
 </script>
