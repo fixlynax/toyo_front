@@ -8,25 +8,20 @@
                 <!-- Dealer Details -->
                 <div>
                     <div class="text-xl font-bold text-gray-800 border-b pb-2 mb-4">🏢 Waranty Details</div>
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <div>
-                            <label class="block font-bold text-gray-700">Entry ID </label>
-                            <InputText class="w-full" />
-                        </div>
-
-                        <div>
-                            <label class="block font-bold text-gray-700">Collect Date</label>
-                            <Calendar class="w-full" placeholder="Select Date " showIcon icon="pi pi-calendar" />
-                        </div>
-
-                        <div>
-                            <label class="block font-bold text-gray-700">Collect Time</label>
-                            <Calendar timeOnly hourFormat="12" class="w-full" placeholder="Select time " showIcon icon="pi pi-clock" />
-                        </div>
-
-                        <div>
-                            <label class="block font-bold text-gray-700">Status</label>
-                            <InputText class="w-full" />
+                    <!-- ID and Date/Time side by side -->
+                    <div class="grid grid-cols-1 md:grid-cols-1 gap-4">
+                        <!-- Date and Time side by side -->
+                        <div class="flex flex-col md:flex-row gap-4 mt-4">
+                            <!-- Collect Date -->
+                            <div class="flex-1">
+                                <label class="block font-bold text-gray-700">Collect Date</label>
+                                <Calendar class="w-full" placeholder="Select Date" showIcon icon="pi pi-calendar" />
+                            </div>
+                            <!-- Collect Time -->
+                            <div class="flex-1">
+                                <label class="block font-bold text-gray-700">Collect Time</label>
+                                <Calendar timeOnly hourFormat="12" class="w-full" placeholder="Select time" showIcon icon="pi pi-clock" />
+                            </div>
                         </div>
                     </div>
 
@@ -38,8 +33,6 @@
                         </div>
                     </div>
                 </div>
-
-                <!-- Action Button -->
             </div>
         </div>
     </Fluid>

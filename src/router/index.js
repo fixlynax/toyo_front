@@ -302,6 +302,11 @@ const router = createRouter({
                     name: 'List-Scrap',
                     component: () => import('@/views/technical/listScrap.vue')
                 },
+                                {
+                    path: '/technical/createScrap',
+                    name: 'Create-Scrap',
+                    component: () => import('@/views/technical/createScrap.vue')
+                },
                 {
                     path: '/technical/listInvoice',
                     name: 'List-Invoice',
