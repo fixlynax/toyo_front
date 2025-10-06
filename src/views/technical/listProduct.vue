@@ -2,7 +2,7 @@
     <div class="card">
         <div class="text-2xl font-bold text-gray-800 border-b pb-2">List Product</div>
 
-        <DataTable :value="tyres" :paginator="true" :rows="10" dataKey="id" :rowHover="true" :loading="loading" :filters="filters" filterDisplay="menu" :globalFilterFields="['materialid', 'itemdesc', 'pattern', 'origin', 'size', 'status']">
+        <DataTable :value="tyres" :paginator="true" :rows="10" :rowsPerPageOptions="[5, 10, 20]" dataKey="id" :rowHover="true" :loading="loading" :filters="filters" filterDisplay="menu" :globalFilterFields="['materialid', 'itemdesc', 'pattern', 'origin', 'size', 'status']">
             <!-- ========================= -->
             <!-- Header Section -->
             <!-- ========================= -->
