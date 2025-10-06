@@ -25,7 +25,7 @@
                     <!-- Right: Export & Upload Buttons -->
                     <div class="flex items-center gap-2 ml-auto">
                         <Button type="button" label="Export" icon="pi pi-file-export" class="p-button" />
-                        <Button type="button" label="Upload" icon="pi pi-file-import" class="p-button" />
+                        <Button type="button" label="Create" icon="pi pi-file-import" class="p-button" />
                     </div>
                 </div>
             </template>
@@ -45,15 +45,7 @@
                 </template>
             </Column>
 
-            <Column field="materialid" header="Material ID" style="min-width: 8rem">
-                <template #body="{ data }">
-                    <RouterLink to="/technical/detailProduct" class="font-semibold text-gray-800 hover:underline">
-                        {{ data.materialid }}
-                    </RouterLink>
-                </template>
-            </Column>
-
-            <Column field="pattern" header="Tire Pattern" style="min-width: 8rem">
+            <Column field="pattern" header="Pattern" style="min-width: 8rem">
                 <template #body="{ data }">
                     <span class="font-semibold ml-1">{{ data.pattern }}</span>
                 </template>
