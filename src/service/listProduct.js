@@ -4,8 +4,8 @@ export const ListTyreService = {
             {
                 id: 1,
                 warrantyRegisterID: 1001,
-                materialid: "81114NE0304175H",
-                itemdesc: "225/50R17 97V",
+                materialid: '81114NE0304175H',
+                itemdesc: '225/50R17 97V',
                 pattern: 'Proxes T1R',
                 rimDiameter: 17,
                 aspectRatio: '45',
@@ -21,13 +21,14 @@ export const ListTyreService = {
                 mfgcode: 'MFG-2025-001',
                 tyresize: 'Passenger Car',
                 tyrespec: '91W',
-                weekcode: '3524'
+                weekcode: '3524',
+                imageURL: 'public/demo/images/toyor_tayar1.png'
             },
             {
                 id: 2,
                 warrantyRegisterID: 1002,
-                materialid: "81114NE0304176H",
-                itemdesc: "265/65R18 114S",
+                materialid: '81114NE0304176H',
+                itemdesc: '265/65R18 114S',
                 pattern: 'Open Country A/T III',
                 rimDiameter: 18,
                 aspectRatio: '65',
@@ -43,13 +44,14 @@ export const ListTyreService = {
                 mfgcode: 'MFG-2025-002',
                 tyresize: 'SUV',
                 tyrespec: '114S',
-                weekcode: '3324'
+                weekcode: '3324',
+                imageURL: 'public/demo/images/toyor_tayar2.png'
             },
             {
                 id: 3,
                 warrantyRegisterID: 1003,
-                materialid: "81114NE0304177H",
-                itemdesc: "245/40R19 98Y",
+                materialid: '81114NE0304177H',
+                itemdesc: '245/40R19 98Y',
                 pattern: 'Proxes Sport',
                 rimDiameter: 19,
                 aspectRatio: '40',
@@ -65,13 +67,14 @@ export const ListTyreService = {
                 mfgcode: 'MFG-2025-003',
                 tyresize: 'Passenger Car',
                 tyrespec: '98Y',
-                weekcode: '3224'
+                weekcode: '3224',
+                imageURL: 'public/demo/images/toyor_tayar3.png'
             },
             {
                 id: 4,
                 warrantyRegisterID: 1004,
-                materialid: "81114NE0304178H",
-                itemdesc: "205/55R16 91H",
+                materialid: '81114NE0304178H',
+                itemdesc: '205/55R16 91H',
                 pattern: 'Observe GSi-6',
                 rimDiameter: 16,
                 aspectRatio: '55',
@@ -87,13 +90,14 @@ export const ListTyreService = {
                 mfgcode: 'MFG-2025-004',
                 tyresize: 'Passenger Car',
                 tyrespec: '91H',
-                weekcode: '3124'
+                weekcode: '3124',
+                imageURL: 'public/demo/images/toyor_tayar4.png'
             },
             {
                 id: 5,
                 warrantyRegisterID: 1005,
-                materialid: "81114NE0304179H",
-                itemdesc: "285/70R17 121Q",
+                materialid: '81114NE0304179H',
+                itemdesc: '285/70R17 121Q',
                 pattern: 'Open Country M/T',
                 rimDiameter: 17,
                 aspectRatio: '70',
@@ -109,13 +113,14 @@ export const ListTyreService = {
                 mfgcode: 'MFG-2025-005',
                 tyresize: 'Truck',
                 tyrespec: '121Q',
-                weekcode: '2924'
+                weekcode: '2924',
+                imageURL: 'public/demo/images/toyor_tayar5.png'
             },
             {
                 id: 6,
                 warrantyRegisterID: 1006,
-                materialid: "81114NE0304180H",
-                itemdesc: "195/50R15 82V",
+                materialid: '81114NE0304180H',
+                itemdesc: '195/50R15 82V',
                 pattern: 'Proxes R1R',
                 rimDiameter: 15,
                 aspectRatio: '50',
@@ -131,105 +136,18 @@ export const ListTyreService = {
                 mfgcode: 'MFG-2025-006',
                 tyresize: 'Passenger Car',
                 tyrespec: '82V',
-                weekcode: '3024'
-            },
-            {
-                id: 7,
-                warrantyRegisterID: 1007,
-                materialid: "81114NE0304181H",
-                itemdesc: "275/55R20 113T",
-                pattern: 'Open Country H/T',
-                rimDiameter: 20,
-                aspectRatio: '55',
-                sectionWidth: '275',
-                tyreSize: '275/55R20',
-                loadIndex: '113',
-                plyRating: '8PR',
-                deleted: null,
-                status: 'Waranty',
-                size: '275/55R20',
-                origin: 'Malaysia',
-                desc: 'Highway terrain tire optimized for smooth rides',
-                mfgcode: 'MFG-2025-007',
-                tyresize: 'Truck',
-                tyrespec: '113T',
-                weekcode: '3424'
-            },
-            {
-                id: 8,
-                warrantyRegisterID: 1008,
-                materialid: "81114NE0304182H",
-                itemdesc: "255/45R19 104W",
-                pattern: 'Proxes ST III',
-                rimDiameter: 19,
-                aspectRatio: '45',
-                sectionWidth: '255',
-                tyreSize: '255/45R19',
-                loadIndex: '104',
-                plyRating: 'XL',
-                deleted: null,
-                status: 'Non-Waranty',
-                size: '255/45R19',
-                origin: 'Japan',
-                desc: 'High-performance SUV tire for stability and comfort',
-                mfgcode: 'MFG-2025-008',
-                tyresize: 'SUV',
-                tyrespec: '104W',
-                weekcode: '3724'
-            },
-            {
-                id: 9,
-                warrantyRegisterID: 1009,
-                materialid: "81114NE0304183H",
-                itemdesc: "265/65R17 120S",
-                pattern: 'Open Country R/T',
-                rimDiameter: 17,
-                aspectRatio: '65',
-                sectionWidth: '265',
-                tyreSize: '265/65R17',
-                loadIndex: '120',
-                plyRating: '10PR',
-                deleted: null,
-                status: 'Non-Waranty',
-                size: '265/65R17',
-                origin: 'Thailand',
-                desc: 'Rugged terrain tire built for mixed off-road and highway driving',
-                mfgcode: 'MFG-2025-009',
-                tyresize: 'Truck',
-                tyrespec: '120S',
-                weekcode: '3624'
-            },
-            {
-                id: 10,
-                warrantyRegisterID: 1010,
-                materialid: "81114NE0304184H",
-                itemdesc: "275/35R21 103Y",
-                pattern: 'Proxes T1 Sport SUV',
-                rimDiameter: 21,
-                aspectRatio: '35',
-                sectionWidth: '275',
-                tyreSize: '275/35R21',
-                loadIndex: '103',
-                plyRating: 'XL',
-                deleted: null,
-                status: 'Waranty',
-                size: '275/35R21',
-                origin: 'Japan',
-                desc: 'Premium performance SUV tire for ultimate grip and speed',
-                mfgcode: 'MFG-2025-010',
-                tyresize: 'SUV',
-                tyrespec: '103Y',
-                weekcode: '3824'
+                weekcode: '3024',
+                imageURL: 'public/demo/images/toyor_tayar6.png'
             }
         ];
     },
 
     getListTwpTyresData() {
         return [
-            { id: 1, materialid: "81114NE0304175H", tyreSize: '215/45R17', pattern: 'Proxes T1R' },
-            { id: 2, materialid: "81114NE0304176H", tyreSize: '265/65R18', pattern: 'Open Country A/T III' },
-            { id: 3, materialid: "81114NE0304177H", tyreSize: '245/40R19', pattern: 'Proxes Sport' },
-            { id: 4, materialid: "81114NE0304179H", tyreSize: '285/70R17', pattern: 'Open Country M/T' }
+            { id: 1, materialid: '81114NE0304175H', tyreSize: '215/45R17', pattern: 'Proxes T1R', imageURL: '/demo/images/toyor_tayar1.png' },
+            { id: 2, materialid: '81114NE0304176H', tyreSize: '265/65R18', pattern: 'Open Country A/T III', imageURL: 'demo/images/toyor_tayar1.png' },
+            { id: 3, materialid: '81114NE0304177H', tyreSize: '245/40R19', pattern: 'Proxes Sport', imageURL: '/demo/images/toyor_tayar1.png' },
+            { id: 4, materialid: '81114NE0304179H', tyreSize: '285/70R17', pattern: 'Open Country M/T', imageURL: '/demo/images/toyor_tayar1.png' }
         ];
     },
 
