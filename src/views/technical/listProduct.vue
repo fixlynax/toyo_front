@@ -24,7 +24,7 @@
                     <!-- Right: Export & Batch Buttons -->
                     <div class="flex items-center gap-2 ml-auto">
                         <Button type="button" label="Export" icon="pi pi-file-export" class="p-button" />
-                        <Button type="button" label="Batch" icon="pi pi-file-edit" class="p-button" />
+                        <Button type="button" label="Bulk" icon="pi pi-file-import" class="p-button" />
                     </div>
                 </div>
             </template>
@@ -61,7 +61,7 @@
                 </template>
             </Column>
 
-            <Column field="size" header="Size" style="min-width: 8rem">
+            <Column field="size" header="Size" style="min-width: 12rem">
                 <template #body="{ data }">
                     <div class="flex flex-col leading-relaxed text-sm text-gray-700">
                         <div class="flex">
@@ -88,9 +88,9 @@
                 </template>
             </Column>
 
-            <Column field="status" header="Status" style="min-width: 6rem">
+            <Column field="status" header="Status" style="min-width: 8rem">
                 <template #body="{ data }">
-                    <Tag :value="getOverallStatusLabel(data.deleted)" :severity="getOverallStatusSeverity(data.deleted)" class="font-bold" />
+                    {{ data.status }}
                 </template>
             </Column>
         </DataTable>
