@@ -8,7 +8,7 @@ export const listWarantyClaimService = {
                 claimDate: '2025-09-01',
                 submitDate: '2025-09-02',
                 dealerName: 'AutoWorld KL',
-                warrantyType: 'New', 
+                warrantyType: 'New Claim', 
                 claimType: 'Tire Defect',
                 status: 0, // Pending
                 summary: {
@@ -64,7 +64,7 @@ export const listWarantyClaimService = {
                 claimDate: '2025-09-03',
                 submitDate: '2025-09-04',
                 dealerName: 'Speedy Motors',
-                warrantyType: 'Pending CTC', // 
+                warrantyType: 'CTC', // 
                 claimType: 'Manufacturing',
                 status: 1, // ETEN Approved
                 summary: {
@@ -120,7 +120,7 @@ export const listWarantyClaimService = {
                 claimDate: '2025-09-04',
                 submitDate: '2025-09-05',
                 dealerName: 'MegaTire Johor',
-                warrantyType: 'Pending Scrap', // 
+                warrantyType: 'Scrap', // 
                 claimType: 'Warranty Ext.',
                 status: 2, // ETEN Rejected
                 summary: {
@@ -176,7 +176,7 @@ export const listWarantyClaimService = {
                 claimDate: '2025-09-05',
                 submitDate: '2025-09-06',
                 dealerName: 'CityTire Penang',
-                warrantyType: 'Pending Invoice', // 
+                warrantyType: 'Invoice', // 
                 claimType: 'Damage Claim',
                 status: 3, // Processing
                 summary: {
