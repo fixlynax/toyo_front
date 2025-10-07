@@ -326,7 +326,7 @@ const model = ref([
                     {
                         label: 'Terms & Conditions',
                         icon: 'pi pi-fw pi-file',
-                        to: '/it/terms&cond'
+                        to: '/it/termsCondition'
                     }
                 ]
             }

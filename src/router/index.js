@@ -459,7 +459,7 @@ const router = createRouter({
                     component: () => import('@/views/it/editMailSetting.vue')
                 },
                 {
-                    path: '/it/terms-condition',
+                    path: '/it/termsCondition',
                     name: 'Terms-Condition',
                     component: () => import('@/views/it/termsCondition.vue')
                 },
