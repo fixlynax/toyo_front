@@ -184,10 +184,18 @@
                     <div class="text-2xl font-bold text-gray-800">Scrap Detail</div>
                 </div>
 
-                <img :src="warantyDetail.scrapDetails.imageURL1[0]" alt="Scrap Image" class="rounded-xl shadow-sm object-cover w-full h-72 mb-4" />
+                <Galleria :value="scrapImages" :responsiveOptions="galleriaResponsiveOptions" :numVisible="3" containerStyle="max-width: 640px; margin: 0 auto" :circular="true" :showItemNavigators="true" :showThumbnails="false">
+                    >
+                    <template #item="slotProps">
+                        <img :src="slotProps.item.itemImageSrc" class="rounded-xl object-cover w-full h-60 shadow-sm" />
+                    </template>
+                    <template #thumbnail="slotProps">
+                        <img :src="slotProps.item.thumbnailImageSrc" class="rounded-md h-16 w-16 object-cover" />
+                    </template>
+                </Galleria>
 
                 <!-- Approve / Reject -->
-                <div v-if="scrapStatus === ''" class="flex justify-end gap-2">
+                <div v-if="scrapStatus === ''" class="flex justify-end gap-2 mt-4">
                     <Button label="Approve" class="p-button-success" size="small" @click="approveScrap" />
                     <Button label="Reject" class="p-button-danger" size="small" @click="rejectScrap" />
                 </div>
@@ -305,7 +313,7 @@
                         <span class="font-bold">Submitted Date</span>
                         <p>{{ invoice.submittedDate }}</p>
                     </div>
-                    <div class="flex gap-2">
+                    <div class="flex justify-end p-1 gap-2">
                         <Button icon="pi pi-eye" class="p-button-info" size="small" @click="viewInvoice" />
                         <Button icon="pi pi-download" class="p-button-danger" size="small" @click="viewInvoice" />
                     </div>
@@ -322,6 +330,8 @@
 
 <script setup>
 import { ref } from 'vue';
+import Galleria from 'primevue/galleria';
+import Button from 'primevue/button';
 
 const warantyDetail = ref({
     id: 'WARRANTY-TOYO-001',
@@ -337,7 +347,7 @@ const warantyDetail = ref({
     tires: { serialNo: 'TYO-99887766', pattern: 'Open Country A/T', sectionWidth: 255, tireSeries: 80, rimDiameter: 17, speedPlyRating: 'S', treadDepths: 6.5 },
     problem: { issue: 'Sidewall crack within 6 months of purchase', damageCode: 'D-102 (Sidewall Separation)' },
     claimVariable: { Claim: 90, Usable: 80, Worn: 10 },
-    scrapDetails: { imageURL1: ['/demo/images/toyo-scrap.jpg'] }
+    scrapDetails: { imageURL1: ['/demo/images/sidewall-damage.jpg'], imageURL2: ['/demo/images/sidewall-damage.jpg'], imageURL3: ['/demo/images/sidewall-damage.jpg'] }
 });
 
 // States
@@ -378,4 +388,16 @@ const submitReimbursement = () => {
 const viewInvoice = () => alert(`Viewing invoice: ${invoice.value.fileName}`);
 const approveInvoice = () => (invoiceStatus.value = 'approved');
 const rejectInvoice = () => (invoiceStatus.value = 'rejected');
+
+const scrapImages = ref([
+    { itemImageSrc: '/demo/images/sidewall-damage.jpg', thumbnailImageSrc: '/demo/images/sidewall-damage.jpg' },
+    { itemImageSrc: '/demo/images/toyo.jpg', thumbnailImageSrc: '/demo/images/sidewall-damage.jpg' },
+    { itemImageSrc: '/demo/images/event-toyo-1.jpg', thumbnailImageSrc: '/demo/images/sidewall-damage.jpg' }
+]);
+
+const galleriaResponsiveOptions = ref([
+    { breakpoint: '1024px', numVisible: 3 },
+    { breakpoint: '768px', numVisible: 2 },
+    { breakpoint: '560px', numVisible: 1 }
+]);
 </script>
