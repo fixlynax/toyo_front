@@ -16,7 +16,7 @@
                     <!-- Module / Function Selection -->
                     <div class="md:col-span-2">
                         <label class="block text-sm font-bold text-gray-700 mb-2">Module / Function List</label>
-                        <MultiSelect v-model="form.modules" :options="moduleOptions" optionLabel="label" optionValue="value" placeholder="Select modules" display="chip" class="w-full" />
+                        <MultiSelect v-model="form.modules" :options="moduleOptions" optionLabel="label" filter placeholder="Select modules" display="chip" class="w-full" />
                     </div>
 
                     <!-- Status -->
