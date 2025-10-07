@@ -50,8 +50,6 @@
             <!-- ========================= -->
             <!-- Data Columns -->
             <!-- ========================= -->
-            <Column expander style="width: 5rem" />
-
             <Column field="imageURL" header="Image" style="min-width: 8rem; text-align: center">
                 <template #body="{ data }">
                     <img :src="getImagePath(data.imageURL)" alt="Tyre Image" class="w-16 h-16 object-contain rounded-md shadow-sm border border-gray-200 cursor-pointer hover:scale-105 transition-transform" @click="openImage(data.imageURL)" />
@@ -64,22 +62,11 @@
                 </template>
             </Column>
 
-            <!-- ========================= -->
-            <!-- Row Expansion -->
-            <!-- ========================= -->
-            <template #expansion="slotProps">
-                <div class="p-4 bg-gray-50 rounded-lg shadow-inner">
-                    <h5 class="font-semibold mb-3 text-gray-700">Details for {{ slotProps.data.pattern }}</h5>
-
-                    <DataTable :value="slotProps.data.sizes" class="p-datatable-sm">
-                        <Column field="materialid" header="Material ID" style="min-width: 10rem"></Column>
-                        <Column field="productdesc" header="Product" style="min-width: 8rem"></Column>
-                        <Column field="size" header="Tyre Size" style="min-width: 8rem"></Column>
-                        <Column field="origin" header="Origin" style="min-width: 8rem"></Column>
-                        <Column field="status" header="Status" style="min-width: 6rem"></Column>
-                    </DataTable>
-                </div>
-            </template>
+            <Column field="pattern" header="Pattern Name" style="min-width: 8rem">
+                <template #body="{ data }">
+                    <span class="font-semibold ml-1">{{ data.patternName }}</span>
+                </template>
+            </Column>
         </DataTable>
 
         <!-- ✅ Image Preview Dialog -->

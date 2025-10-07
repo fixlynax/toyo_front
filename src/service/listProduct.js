@@ -7,6 +7,7 @@ export const ListTyreService = {
                 materialid: '81114NE0304175H',
                 itemdesc: '215/45R17 91W',
                 pattern: 'T1R',
+                patternName: 'Proxes T1R',
                 isTWP: 1,
                 sectionWidth: 215,
                 tireseries: 45,
@@ -32,6 +33,7 @@ export const ListTyreService = {
                 materialid: '81114NE0304176H',
                 itemdesc: '225/45R18 95W',
                 pattern: 'TSC',
+                patternName: 'Proxes TSC',
                 isTWP: 1,
                 sectionWidth: 225,
                 tireseries: 45,
@@ -57,6 +59,7 @@ export const ListTyreService = {
                 materialid: '81114NE0304177H',
                 itemdesc: '195/65R15 91H',
                 pattern: 'TR1',
+                patternName: 'Proxes TR1',
                 isTWP: 1,
                 sectionWidth: 195,
                 tireseries: 65,
@@ -82,6 +85,7 @@ export const ListTyreService = {
                 materialid: '81114NE0304178H',
                 itemdesc: '245/40R19 98Y',
                 pattern: 'TH7',
+                patternName: 'Proxes TH7',
                 isTWP: 0,
                 sectionWidth: 245,
                 tireseries: 40,
@@ -107,6 +111,7 @@ export const ListTyreService = {
                 materialid: '81114NE0304179H',
                 itemdesc: '185/60R14 82H',
                 pattern: 'TEO',
+                patternName: 'NanoEnergy TEO',
                 isTWP: 1,
                 sectionWidth: 185,
                 tireseries: 60,
@@ -132,6 +137,7 @@ export const ListTyreService = {
                 materialid: '81114NE0304180H',
                 itemdesc: '205/55R16 91V',
                 pattern: 'T35',
+                patternName: 'Proxes T35',
                 isTWP: 0,
                 sectionWidth: 205,
                 tireseries: 55,
@@ -157,6 +163,7 @@ export const ListTyreService = {
                 materialid: '81114NE0304181H',
                 itemdesc: '215/50R17 95W',
                 pattern: 'T1S',
+                patternName: 'Proxes T1S',
                 isTWP: 1,
                 sectionWidth: 215,
                 tireseries: 50,
@@ -174,7 +181,7 @@ export const ListTyreService = {
                 mfgcode: 'MFG-2025-007',
                 tyrespec: '95W',
                 weekcode: '3324',
-                imageURL: '/demo/images/toyor_tayar7.png'
+                imageURL: '/demo/images/toyor_tayar1.png'
             },
             {
                 id: 8,
@@ -182,6 +189,7 @@ export const ListTyreService = {
                 materialid: '81114NE0304182H',
                 itemdesc: '235/45R18 98Y',
                 pattern: 'C1S',
+                patternName: 'Proxes C1S',
                 isTWP: 0,
                 sectionWidth: 235,
                 tireseries: 45,
@@ -199,7 +207,7 @@ export const ListTyreService = {
                 mfgcode: 'MFG-2025-008',
                 tyrespec: '98Y',
                 weekcode: '3124',
-                imageURL: '/demo/images/toyor_tayar8.png'
+                imageURL: '/demo/images/toyor_tayar3.png'
             },
             {
                 id: 9,
@@ -207,6 +215,7 @@ export const ListTyreService = {
                 materialid: '81114NE0304183H',
                 itemdesc: '175/65R14 82T',
                 pattern: 'Yew',
+                patternName: 'Proxes Yew',
                 isTWP: 1,
                 sectionWidth: 175,
                 tireseries: 65,
@@ -224,7 +233,7 @@ export const ListTyreService = {
                 mfgcode: 'MFG-2025-009',
                 tyrespec: '82T',
                 weekcode: '2824',
-                imageURL: '/demo/images/toyor_tayar9.png'
+                imageURL: '/demo/images/toyor_tayar4.png'
             }
         ];
     },

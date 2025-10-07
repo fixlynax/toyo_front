@@ -62,10 +62,10 @@
                 </template>
             </Column>
 
-            <Column field="itemdesc" header="Tire Product" style="min-width: 8rem">
+            <Column field="itemdesc" header="Pattern" style="min-width: 8rem">
                 <template #body="{ data }">
                     <RouterLink to="/technical/detailProduct" class="block text-gray-800 hover:text-gray-600 transition-colors">
-                        <div class="font-semibold text-lg">{{ data.pattern }}</div>
+                        <div class="font-semibold">{{ data.pattern }}</div>
                     </RouterLink>
                 </template>
             </Column>
