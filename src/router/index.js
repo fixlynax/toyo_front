@@ -319,20 +319,11 @@ const router = createRouter({
                     component: () => import('@/views/technical/listPattern.vue')
                 },
                 {
-                    path: '/technical/bulkUpdate',
-                    name: 'Bulk-Update',
-                    component: () => import('@/views/technical/bulkUpdate.vue')
+                    path: '/technical/createPattern',
+                    name: 'Create-Pattern',
+                    component: () => import('@/views/technical/createPattern.vue')
                 },
-                {
-                    path: '/technical/addTwpTire',
-                    name: 'Add-TWP-Tire',
-                    component: () => import('@/views/technical/addTwpTire.vue')
-                },
-                {
-                    path: '/technical/detailProduct',
-                    name: 'Detail-Twp-Tire',
-                    component: () => import('@/views/technical/detailProduct.vue')
-                },
+
 
                 // ===============================
                 // IT

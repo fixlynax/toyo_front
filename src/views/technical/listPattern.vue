@@ -36,7 +36,9 @@
                     <!-- Right: Export & Create Buttons -->
                     <div class="flex items-center gap-2 ml-auto">
                         <Button type="button" label="Export" icon="pi pi-file-export" class="p-button" />
-                        <Button type="button" label="Create" icon="pi pi-file-import" class="p-button" />
+                        <RouterLink to="/technical/createPattern">
+                        <Button type="button" label="Create" icon="pi pi-plus" class="p-button" />
+                        </RouterLink>
                     </div>
                 </div>
             </template>
