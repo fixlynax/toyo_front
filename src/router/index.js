@@ -297,7 +297,7 @@ const router = createRouter({
                     name: 'List-Scrap',
                     component: () => import('@/views/technical/listScrap.vue')
                 },
-                                {
+                {
                     path: '/technical/createScrap',
                     name: 'Create-Scrap',
                     component: () => import('@/views/technical/createScrap.vue')
@@ -322,11 +322,6 @@ const router = createRouter({
                     path: '/technical/bulkUpdate',
                     name: 'Bulk-Update',
                     component: () => import('@/views/technical/bulkUpdate.vue')
-                },
-                {
-                    path: '/technical/twpTireList',
-                    name: 'TWP-List',
-                    component: () => import('@/views/technical/twpTireList.vue')
                 },
                 {
                     path: '/technical/addTwpTire',
@@ -543,7 +538,7 @@ const router = createRouter({
                     path: '/documentation',
                     name: 'documentation',
                     component: () => import('@/views/pages/Documentation.vue')
-                },
+                }
             ]
         },
 

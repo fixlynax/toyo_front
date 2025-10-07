@@ -127,11 +127,7 @@ const model = ref([
                         to: '/technical/listPattern'
                     },
 
-                    {
-                        label: 'TWP Tire List',
-                        icon: 'pi pi-fw pi-circle',
-                        to: '/technical/twpTireList'
-                    }
+
                 ]
             }
         ]
