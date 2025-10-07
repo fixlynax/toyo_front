@@ -2,7 +2,7 @@
     <div class="card">
         <div class="text-2xl font-bold text-gray-800 border-b pb-2">List Mail Setting</div>
 
-        <DataTable :value="listData" :paginator="true" :rows="10" dataKey="id" :rowHover="true" :loading="loading">
+        <DataTable v-model:expandedRows="expandedRows" :value="listData" :paginator="true" :rows="10" :rowsPerPageOptions="[5, 10, 20]" dataKey="id" :rowHover="true" :loading="loading">
             <!-- Header -->
             <template #header>
                 <div class="flex items-center justify-between gap-4 w-full flex-wrap">
@@ -19,29 +19,49 @@
             <template #empty> No Mail Setting found. </template>
             <template #loading> Loading Mail Setting data. Please wait. </template>
 
+            <!-- Expand Column -->
+            <Column expander style="width: 3rem" />
+
             <!-- Function Column -->
             <Column field="function" header="Function" style="min-width: 10rem">
                 <template #body="{ data }">{{ data.function }}</template>
             </Column>
 
-            <!-- Email List -->
+            <!-- Email List (show only first 2 emails) -->
             <Column field="emails" header="Email List" style="min-width: 25rem">
                 <template #body="{ data }">
-                    <div v-if="editingId === data.id">
-                        <MultiSelect v-model="form.emails" :options="emailOptions" optionLabel="label" optionValue="value" filter placeholder="Select email recipients" display="chip" class="w-full" />
+                    <div v-if="editingId === data.id" class="w-full">
+                        <MultiSelect
+                            v-model="form.emails"
+                            :options="emailOptions"
+                            optionLabel="label"
+                            optionValue="value"
+                            filter
+                            placeholder="Select email recipients"
+                            display="chip"
+                            class="min-w-[250px] max-w-[600px] w-full md:w-[350px]"
+                            style="max-width: 400px"
+                        />
                     </div>
+
                     <div v-else class="flex flex-col">
-                        <span v-for="(email, index) in data.emails" :key="index">{{ email }}</span>
+                        <span v-for="(email, index) in data.emails.slice(0, 2)" :key="index">{{ email }}</span>
+                        <span v-if="data.emails.length > 2" class="text-sm italic text-gray-500"> +{{ data.emails.length - 2 }} more </span>
                     </div>
                 </template>
             </Column>
 
-            <!-- Shipping Point - only visible if function === 'Order' -->
+            <!-- Shipping Point -->
             <Column field="shippingPoint" header="Shipping Point" style="min-width: 18rem">
                 <template #body="{ data }">
                     <span v-if="data.function === 'Order'">{{ data.shippingPoint }}</span>
                     <span v-else>-</span>
                 </template>
+            </Column>
+
+            <!-- Platform Column -->
+            <Column field="platform" header="Platform" style="min-width: 10rem">
+                <template #body="{ data }">{{ data.platform }}</template>
             </Column>
 
             <!-- Actions -->
@@ -58,6 +78,16 @@
                     </div>
                 </template>
             </Column>
+
+            <!-- Expanded Row Template -->
+            <template #expansion="slotProps">
+                <div class="p-4 border-t bg-gray-50">
+                    <div class="font-semibold mb-2 text-gray-700">Full Email List:</div>
+                    <ul class="list-disc list-inside text-gray-700">
+                        <li v-for="(email, index) in slotProps.data.emails" :key="index">{{ email }}</li>
+                    </ul>
+                </div>
+            </template>
         </DataTable>
     </div>
 </template>
@@ -70,6 +100,7 @@ export default {
             listData: [],
             loading: true,
             editingId: null,
+            expandedRows: [],
             filters1: {
                 global: { value: null, matchMode: 'contains' }
             },
@@ -81,40 +112,42 @@ export default {
                 { label: 'klang.ops@example.com', value: 'klang.ops@example.com' },
                 { label: 'klang.manager@example.com', value: 'klang.manager@example.com' },
                 { label: 'johor.ops@example.com', value: 'johor.ops@example.com' },
-                { label: 'johor.teamlead@example.com', value: 'johor.teamlead@example.com' },
                 { label: 'johor.manager@example.com', value: 'johor.manager@example.com' },
                 { label: 'penang.ops@example.com', value: 'penang.ops@example.com' },
                 { label: 'penang.supervisor@example.com', value: 'penang.supervisor@example.com' },
-                { label: 'om.hqlead@example.com', value: 'om.hqlead@example.com' },
-                { label: 'om.hqmanager@example.com', value: 'om.hqmanager@example.com' },
-                { label: 'tech.klang@example.com', value: 'tech.klang@example.com' },
-                { label: 'engineer.klang@example.com', value: 'engineer.klang@example.com' },
-                { label: 'ctc.warehouse@example.com', value: 'ctc.warehouse@example.com' },
-                { label: 'ctc.dispatch@example.com', value: 'ctc.dispatch@example.com' },
-                { label: 'om.penang@example.com', value: 'om.penang@example.com' },
-                { label: 'opslead.penang@example.com', value: 'opslead.penang@example.com' },
-                { label: 'ctc.klang@example.com', value: 'ctc.klang@example.com' },
-                { label: 'ctc.manager@example.com', value: 'ctc.manager@example.com' },
                 { label: 'tech.hq@example.com', value: 'tech.hq@example.com' },
                 { label: 'support.hq@example.com', value: 'support.hq@example.com' },
-                { label: 'om.johor@example.com', value: 'om.johor@example.com' },
-                { label: 'opsmanager.johor@example.com', value: 'opsmanager.johor@example.com' }
+                { label: 'ctc.klang@example.com', value: 'ctc.klang@example.com' },
+                { label: 'ctc.manager@example.com', value: 'ctc.manager@example.com' },
+                { label: 'om.penang@example.com', value: 'om.penang@example.com' },
+                { label: 'opslead.penang@example.com', value: 'opslead.penang@example.com' },
+                { label: 'extra1@example.com', value: 'extra1@example.com' },
+                { label: 'extra2@example.com', value: 'extra2@example.com' },
+                { label: 'extra3@example.com', value: 'extra3@example.com' },
+                { label: 'extra4@example.com', value: 'extra4@example.com' },
+                { label: 'extra.person@example.com', value: 'extra.person@example.com' },
+                { label: 'extra@example.com', value: 'extra@example.com' }
             ]
         };
     },
     methods: {
         loadData() {
             this.listData = [
-                { id: 1, function: 'OM', emails: ['klang.ops@example.com', 'klang.manager@example.com'] },
-                { id: 2, function: 'CTC', emails: ['johor.ops@example.com', 'johor.manager@example.com'] },
-                { id: 3, function: 'Tech', emails: ['penang.ops@example.com', 'penang.supervisor@example.com'] },
-                { id: 4, function: 'OM', emails: ['om.johor@example.com', 'opsmanager.johor@example.com'] },
-                { id: 5, function: 'CTC', emails: ['ctc.klang@example.com', 'ctc.manager@example.com'] },
-                { id: 6, function: 'Tech', emails: ['tech.hq@example.com', 'support.hq@example.com'] },
-                { id: 7, function: 'OM', emails: ['om.hqlead@example.com', 'om.hqmanager@example.com'] },
-                { id: 8, function: 'Order', shippingPoint: 'PS Penang', emails: ['om.penang@example.com', 'opslead.penang@example.com'] },
-                { id: 9, function: 'CTC', emails: ['ctc.warehouse@example.com', 'ctc.dispatch@example.com'] },
-                { id: 10, function: 'Tech', emails: ['tech.klang@example.com', 'engineer.klang@example.com'] }
+                {
+                    id: 1,
+                    function: 'News',
+                    platform: 'TC',
+                    emails: ['klang.ops@example.com', 'klang.manager@example.com', 'extra1@example.com', 'extra2@example.com', 'extra3@example.com', 'extra4@example.com']
+                },
+                { id: 2, function: 'Event', platform: 'eTEN', emails: ['johor.ops@example.com', 'johor.manager@example.com'] },
+                { id: 3, function: 'Tech', platform: 'TC', emails: ['penang.ops@example.com', 'penang.supervisor@example.com'] },
+                { id: 4, function: 'Campaign', platform: 'TC', emails: ['om.penang@example.com', 'opslead.penang@example.com'] },
+                { id: 5, function: 'Game', platform: 'eTEN', emails: ['ctc.klang@example.com', 'ctc.manager@example.com'] },
+                { id: 6, function: 'Reward', platform: 'TC', emails: ['tech.hq@example.com', 'support.hq@example.com'] },
+                { id: 7, function: 'Warranty', platform: 'TC', emails: ['om.penang@example.com', 'opslead.penang@example.com'] },
+                { id: 8, function: 'Order', shippingPoint: 'PS Penang', platform: 'eTEN', emails: ['ctc.klang@example.com', 'ctc.manager@example.com', 'support.hq@example.com', 'extra.person@example.com'] },
+                { id: 9, function: 'Return', platform: 'TC', emails: ['ctc.klang@example.com', 'tech.hq@example.com'] },
+                { id: 10, function: 'Tech', platform: 'eTEN', emails: ['tech.hq@example.com', 'support.hq@example.com', 'extra@example.com'] }
             ];
             this.loading = false;
         },
