@@ -39,8 +39,8 @@
                             filter
                             placeholder="Select email recipients"
                             display="chip"
-                            class="min-w-[250px] max-w-[600px] w-full md:w-[350px]"
-                            style="max-width: 400px"
+                            class="resizable-multiselect min-w-[250px] max-w-[800px] w-full"
+                            style="resize: horizontal; overflow: auto; min-height: 42px"
                         />
                     </div>
 
