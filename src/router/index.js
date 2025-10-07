@@ -9,9 +9,19 @@ const router = createRouter({
             component: AppLayout,
             children: [
                 // ===============================
+                // DASHBOARD
+                // ===============================
+                {
+                    path: '/',
+                    name: 'dashboard',
+                    component: () => import('@/views/Dashboard.vue')
+                },
+
+                // ===============================
                 // OM (Order Management)
                 // ===============================
-                // Customer
+                
+                // Customer eTEN
                 {
                     path: '/om/listEten',
                     name: 'List-Eten',
@@ -52,7 +62,8 @@ const router = createRouter({
                     name: 'Edit-User',
                     component: () => import('@/views/om/editUser.vue')
                 },
-                // Order
+
+                // Order Management
                 {
                     path: '/om/listOrder',
                     name: 'List-Order',
@@ -63,6 +74,7 @@ const router = createRouter({
                     name: 'Detail-Order',
                     component: () => import('@/views/om/detailOrder.vue')
                 },
+
                 // Back Order
                 {
                     path: '/om/listBackOrder',
@@ -79,6 +91,7 @@ const router = createRouter({
                     name: 'Edit-Back-Order',
                     component: () => import('@/views/om/editBackOrder.vue')
                 },
+
                 // Return Order
                 {
                     path: '/om/listReturnOrder',
@@ -90,6 +103,7 @@ const router = createRouter({
                     name: 'Detail-Return-Order',
                     component: () => import('@/views/om/detailReturnOrder.vue')
                 },
+
                 // Sales Program
                 {
                     path: '/om/listSalesProgram',
@@ -112,7 +126,7 @@ const router = createRouter({
                     component: () => import('@/views/om/editSalesProgram.vue')
                 },
 
-                //Messaging
+                // Messaging
                 {
                     path: '/om/listMessaging',
                     name: 'List-Messaging',
@@ -127,6 +141,7 @@ const router = createRouter({
                 // ===============================
                 // MARKETING
                 // ===============================
+                
                 // News
                 {
                     path: '/marketing/listNews',
@@ -148,6 +163,7 @@ const router = createRouter({
                     name: 'Edit-News',
                     component: () => import('@/views/marketing/editNews.vue')
                 },
+
                 // Events
                 {
                     path: '/marketing/listEvent',
@@ -169,6 +185,7 @@ const router = createRouter({
                     name: 'Edit-Event',
                     component: () => import('@/views/marketing/editEvent.vue')
                 },
+
                 // Campaigns
                 {
                     path: '/marketing/listCampaign',
@@ -195,6 +212,7 @@ const router = createRouter({
                     name: 'Invite-Dealer',
                     component: () => import('@/views/marketing/inviteDealer.vue')
                 },
+
                 // Games
                 {
                     path: '/marketing/listGame',
@@ -216,6 +234,7 @@ const router = createRouter({
                     name: 'Edit-Game',
                     component: () => import('@/views/marketing/editGame.vue')
                 },
+
                 // Redemptions
                 {
                     path: '/marketing/listRedemption',
@@ -232,6 +251,7 @@ const router = createRouter({
                     name: 'Edit-Redemption',
                     component: () => import('@/views/marketing/editRedemption.vue')
                 },
+
                 // Members
                 {
                     path: '/marketing/listEtenUser',
@@ -248,6 +268,7 @@ const router = createRouter({
                     name: 'Edit-Member',
                     component: () => import('@/views/marketing/editEtenUser.vue')
                 },
+
                 // Catalogue
                 {
                     path: '/marketing/listCatalogue',
@@ -273,12 +294,15 @@ const router = createRouter({
                 // ===============================
                 // TECHNICAL
                 // ===============================
-                // Warranty Claims
+                
+                // Dashboard
                 {
                     path: '/technical/dashboardTechnical',
                     name: 'Dashboard-Technical',
                     component: () => import('@/views/technical/dashboardTechnical.vue')
                 },
+
+                // Warranty Claims
                 {
                     path: '/technical/listClaim',
                     name: 'List-Claim',
@@ -299,6 +323,8 @@ const router = createRouter({
                     name: 'Confirmation-Order',
                     component: () => import('@/views/technical/confirmationOrder.vue')
                 },
+
+                // CTC (Customer Technical Complaint)
                 {
                     path: '/technical/listCTC',
                     name: 'List-CTC',
@@ -309,6 +335,8 @@ const router = createRouter({
                     name: 'Create-CTC',
                     component: () => import('@/views/technical/createCTC.vue')
                 },
+
+                // Scrap Management
                 {
                     path: '/technical/listScrap',
                     name: 'List-Scrap',
@@ -319,11 +347,14 @@ const router = createRouter({
                     name: 'Create-Scrap',
                     component: () => import('@/views/technical/createScrap.vue')
                 },
+
+                // Invoice
                 {
                     path: '/technical/listInvoice',
                     name: 'List-Invoice',
                     component: () => import('@/views/technical/listInvoice.vue')
                 },
+
                 // Products
                 {
                     path: '/technical/listProduct',
@@ -342,7 +373,7 @@ const router = createRouter({
                 },
                 {
                     path: '/technical/detailProduct',
-                    name: 'Detail-Twp-Tire',
+                    name: 'Detail-Product',
                     component: () => import('@/views/technical/detailProduct.vue')
                 },
                 {
@@ -354,8 +385,8 @@ const router = createRouter({
                 // ===============================
                 // IT
                 // ===============================
-
-                //Admin
+                
+                // Admin - Groups
                 {
                     path: '/it/listGroup',
                     name: 'List-Group',
@@ -371,6 +402,8 @@ const router = createRouter({
                     name: 'Edit-Group',
                     component: () => import('@/views/it/editGroup.vue')
                 },
+
+                // Admin - User Accounts
                 {
                     path: '/it/listUserAccount',
                     name: 'List-User-Account',
@@ -386,7 +419,8 @@ const router = createRouter({
                     name: 'Edit-User-Account',
                     component: () => import('@/views/it/editUserAccount.vue')
                 },
-                //Salesman
+
+                // Salesman Accounts
                 {
                     path: '/it/listSalesAccount',
                     name: 'List-Sales',
@@ -403,7 +437,7 @@ const router = createRouter({
                     component: () => import('@/views/it/editSalesAcc.vue')
                 },
 
-                //Setting
+                // Settings
                 {
                     path: '/it/maintenanceMode',
                     name: 'Maintenance-Mode',
@@ -422,16 +456,16 @@ const router = createRouter({
                 {
                     path: '/it/editMailSetting',
                     name: 'Edit-Mail',
-                    component: () => import('@/views/it/mailSetting.vue')
+                    component: () => import('@/views/it/editMailSetting.vue')
                 },
                 {
-                    path: '/it/terms&cond',
+                    path: '/it/terms-condition',
                     name: 'Terms-Condition',
-                    component: () => import('@/views/it/terms&cond.vue')
+                    component: () => import('@/views/it/termsCondition.vue')
                 },
 
                 // ===============================
-                // SCM
+                // SCM (Supply Chain Management)
                 // ===============================
                 {
                     path: '/scm/listCollection',
@@ -455,14 +489,8 @@ const router = createRouter({
                 },
 
                 // ===============================
-                // COMMENTED (for future use)
+                // UI KIT (Documentation/Components)
                 // ===============================
-                // UI Kit
-                {
-                    path: '/',
-                    name: 'dashboard',
-                    component: () => import('@/views/Dashboard.vue')
-                },
                 {
                     path: '/uikit/formlayout',
                     name: 'formlayout',
@@ -498,7 +526,6 @@ const router = createRouter({
                     name: 'panel',
                     component: () => import('@/views/uikit/PanelsDoc.vue')
                 },
-
                 {
                     path: '/uikit/overlay',
                     name: 'overlay',
@@ -540,7 +567,9 @@ const router = createRouter({
                     component: () => import('@/views/uikit/TimelineDoc.vue')
                 },
 
-                // UI Kit
+                // ===============================
+                // PAGES
+                // ===============================
                 {
                     path: '/pages/empty',
                     name: 'empty',
@@ -560,7 +589,7 @@ const router = createRouter({
         },
 
         // ===============================
-        // Public Pages
+        // PUBLIC PAGES (No Layout)
         // ===============================
         {
             path: '/landing',
@@ -586,6 +615,14 @@ const router = createRouter({
             path: '/auth/error',
             name: 'error',
             component: () => import('@/views/pages/auth/Error.vue')
+        },
+
+        // ===============================
+        // CATCH ALL ROUTE - 404
+        // ===============================
+        {
+            path: '/:pathMatch(.*)*',
+            redirect: '/pages/notfound'
         }
     ]
 });
