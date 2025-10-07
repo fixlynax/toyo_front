@@ -18,17 +18,9 @@
                         <Dropdown v-model="form.tyreSize" :options="tireSizeOptions" optionLabel="label" optionValue="value" placeholder="Select Tire Size" class="w-full" />
                     </div>
 
-                    <!-- Description -->
-                    <div>
-                        <label class="block text-xm font-bold text-gray-700 mb-2">Description</label>
-                        <InputText v-model="form.desc" class="w-full" placeholder="Enter Description Here..." />
-                    </div>
+      
 
-                    <!-- MFG Code -->
-                    <div>
-                        <label class="block text-xm font-bold text-gray-700 mb-2">MFG Code</label>
-                        <InputText v-model="form.mfgcode" class="w-full" placeholder="Enter MFG Code Here..." />
-                    </div>
+             
                 </div>
 
                 <!-- Action Buttons -->

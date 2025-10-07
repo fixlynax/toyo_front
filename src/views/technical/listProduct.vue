@@ -2,7 +2,18 @@
     <div class="card">
         <div class="text-2xl font-bold text-gray-800 border-b pb-2">List Product</div>
 
-        <DataTable :value="tyres" :paginator="true" :rows="10" :rowsPerPageOptions="[5, 10, 20]" dataKey="id" :rowHover="true" :loading="loading" :filters="filters" filterDisplay="menu" :globalFilterFields="['materialid', 'itemdesc', 'pattern', 'origin', 'size', 'status']">
+        <DataTable
+            :value="tyres"
+            :paginator="true"
+            :rows="10"
+            :rowsPerPageOptions="[5, 10, 20]"
+            dataKey="id"
+            :rowHover="true"
+            :loading="loading"
+            :filters="filters"
+            filterDisplay="menu"
+            :globalFilterFields="['materialid', 'itemdesc', 'pattern', 'origin', 'size', 'status']"
+        >
             <!-- ========================= -->
             <!-- Header Section -->
             <!-- ========================= -->
@@ -40,9 +51,14 @@
             <!-- ========================= -->
             <Column field="materialid" header="Material ID" style="min-width: 6rem">
                 <template #body="{ data }">
-                    <RouterLink to="/technical/detailProduct" class="font-semibold text-gray-800 hover:underline">
+                    <div class="flex flex-col items-start gap-1">
                         {{ data.materialid }}
-                    </RouterLink>
+
+                        <div class="flex flex-wrap gap-1">
+                            <span v-if="data.isTWP === 1" class="text-[10px] font-semibold text-white bg-[#0062B0] px-1.5 py-[1px] rounded"> TWP </span>
+                            <span v-if="data.status === 'Warranty'" class="text-[10px] font-semibold text-white bg-gray-500 px-1.5 py-[1px] rounded"> Warranty </span>
+                        </div>
+                    </div>
                 </template>
             </Column>
 
@@ -50,7 +66,6 @@
                 <template #body="{ data }">
                     <RouterLink to="/technical/detailProduct" class="block text-gray-800 hover:text-gray-600 transition-colors">
                         <div class="font-semibold text-lg">{{ data.pattern }}</div>
-                        <div class="text-sm text-gray-500">{{ data.subpattern }}</div>
                     </RouterLink>
                 </template>
             </Column>
@@ -65,32 +80,22 @@
                 <template #body="{ data }">
                     <div class="flex flex-col leading-relaxed text-sm text-gray-700">
                         <div class="flex">
-                            <span class="w-40 text-gray-800 font-semibold">Tyre Size Type:</span>
-                            <span>{{ data.tyresize }}</span>
+                            <span class="w-40 text-gray-800 font-semibold">Section Width:</span>
+                            <span>{{ data.sectionWidth }}</span>
                         </div>
                         <div class="flex">
-                            <span class="w-40 text-gray-800 font-semibold">Tyre Spec:</span>
-                            <span>{{ data.tyrespec }}</span>
+                            <span class="w-40 text-gray-800 font-semibold">Tire Series:</span>
+                            <span>{{ data.tireseries }}</span>
                         </div>
                         <div class="flex">
                             <span class="w-40 text-gray-800 font-semibold">Rim Diameter:</span>
                             <span>{{ data.rimDiameter }}"</span>
                         </div>
                         <div class="flex">
-                            <span class="w-40 text-gray-800 font-semibold">Aspect Ratio:</span>
-                            <span>{{ data.aspectRatio }}</span>
-                        </div>
-                        <div class="flex">
-                            <span class="w-40 text-gray-800 font-semibold">Section Width:</span>
-                            <span>{{ data.sectionWidth }}</span>
+                            <span class="w-40 text-gray-800 font-semibold">Speed Rating:</span>
+                            <span>{{ data.speedplyrating }}</span>
                         </div>
                     </div>
-                </template>
-            </Column>
-
-            <Column field="status" header="Status" style="min-width: 8rem">
-                <template #body="{ data }">
-                    {{ data.status }}
                 </template>
             </Column>
         </DataTable>
