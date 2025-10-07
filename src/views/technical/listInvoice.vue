@@ -1,5 +1,5 @@
 <script setup>
-import { listWarantyClaimService } from '@/service/ListWarranty';
+import { listWarantyClaimService } from '@/service/ListWarrantyClaim';
 import { onBeforeMount, ref } from 'vue';
 
 const listData = ref([]);

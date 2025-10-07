@@ -96,15 +96,15 @@ const router = createRouter({
                     name: 'List-SalesProgram',
                     component: () => import('@/views/om/listSalesProgram.vue')
                 },
+                {
+                    path: '/om/detailSalesProgram',
+                    name: 'Detail-Sales-Program',
+                    component: () => import('@/views/om/detailSalesProgram.vue')
+                },
                 // {
                 //     path: '/om/createSalesProgram',
-                //     name: 'Create-SalesProgram',
+                //     name: 'Create-Sales-Program',
                 //     component: () => import('@/views/om/createSalesProgram.vue')
-                // },
-                // {
-                //     path: '/om/listSalesProgram',
-                //     name: 'Detail-SalesProgram',
-                //     component: () => import('@/views/om/detailSalesProgram.vue')
                 // },
 
                 // ===============================
@@ -266,11 +266,6 @@ const router = createRouter({
                     path: '/technical/listClaim',
                     name: 'List-Claim',
                     component: () => import('@/views/technical/listClaim.vue')
-                },
-                {
-                    path: '/technical/detailWarantyClaimBackup',
-                    name: 'Detail-Waranty-Claim-Backup',
-                    component: () => import('@/views/technical/detailWarantyClaimBackup.vue')
                 },
                 {
                     path: '/technical/detailWarantyClaim',
