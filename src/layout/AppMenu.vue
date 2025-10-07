@@ -216,7 +216,7 @@ const model = ref([
             {
                 label: 'Messaging',
                 icon: 'pi pi-fw pi-envelope',
-                to: '#'
+                to: '/om/listMessaging'
             }
         ]
     },

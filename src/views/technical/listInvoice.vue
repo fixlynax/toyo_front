@@ -12,7 +12,7 @@ const getOverallStatusLabel = (status) => {
             return 'Pending';
         case 1:
             return 'ETEN Approved';
-        case 2:
+        case 2: 
             return 'ETEN Rejected';
         case 3:
             return 'Processing';

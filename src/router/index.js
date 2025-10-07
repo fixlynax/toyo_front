@@ -101,11 +101,28 @@ const router = createRouter({
                     name: 'Detail-Sales-Program',
                     component: () => import('@/views/om/detailSalesProgram.vue')
                 },
-                // {
-                //     path: '/om/createSalesProgram',
-                //     name: 'Create-Sales-Program',
-                //     component: () => import('@/views/om/createSalesProgram.vue')
-                // },
+                {
+                    path: '/om/createSalesProgram',
+                    name: 'Create-Sales-Program',
+                    component: () => import('@/views/om/createSalesProgram.vue')
+                },
+                {
+                    path: '/om/editSalesProgram',
+                    name: 'Edit-Sales-Program',
+                    component: () => import('@/views/om/editSalesProgram.vue')
+                },
+
+                //Messaging
+                {
+                    path: '/om/listMessaging',
+                    name: 'List-Messaging',
+                    component: () => import('@/views/om/listMessaging.vue')
+                },
+                {
+                    path: '/om/createMessaging',
+                    name: 'Create-Messaging',
+                    component: () => import('@/views/om/createMessaging.vue')
+                },
 
                 // ===============================
                 // MARKETING
@@ -322,11 +339,6 @@ const router = createRouter({
                     path: '/technical/bulkUpdate',
                     name: 'Bulk-Update',
                     component: () => import('@/views/technical/bulkUpdate.vue')
-                },
-                {
-                    path: '/technical/addTwpTire',
-                    name: 'Add-TWP-Tire',
-                    component: () => import('@/views/technical/addTwpTire.vue')
                 },
                 {
                     path: '/technical/detailProduct',
