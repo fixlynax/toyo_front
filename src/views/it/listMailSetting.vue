@@ -1,52 +1,60 @@
 <template>
     <div class="card">
-        <div class="text-2xl font-bold text-gray-800 border-b pb-2">List Mail Setting</div>
+        <div class="text-2xl font-bold text-gray-800 border-b pb-2 mb-3">List Mail Setting</div>
 
-        <DataTable v-model:expandedRows="expandedRows" :value="listData" :paginator="true" :rows="10" :rowsPerPageOptions="[5, 10, 20]" dataKey="id" :rowHover="true" :loading="loading">
+        <DataTable 
+            :value="listData" 
+            :paginator="true" 
+            :rows="10" 
+            dataKey="id" 
+            :rowHover="true" 
+            :loading="loading" 
+            :filters="filters1" 
+            filterDisplay="menu"
+            :expandedRows="expandedRows"
+            @row-toggle="onRowToggle"
+        >
             <!-- Header -->
             <template #header>
                 <div class="flex items-center justify-between gap-4 w-full flex-wrap">
+                    <!-- Search -->
                     <div class="flex items-center gap-2 w-full max-w-md">
                         <IconField class="flex-1">
-                            <InputIcon><i class="pi pi-search" /></InputIcon>
+                            <InputIcon>
+                                <i class="pi pi-search" />
+                            </InputIcon>
                             <InputText v-model="filters1['global'].value" placeholder="Quick Search" class="w-full" />
                         </IconField>
                         <Button type="button" icon="pi pi-cog" class="p-button" />
                     </div>
+
+                    <!-- Create Button -->
+                    <RouterLink to="/it/createMail">
+                        <Button type="button" label="Create Mail Setting" icon="pi pi-plus" class="p-button-success" />
+                    </RouterLink>
                 </div>
             </template>
 
             <template #empty> No Mail Setting found. </template>
             <template #loading> Loading Mail Setting data. Please wait. </template>
 
-            <!-- Expand Column -->
-            <Column expander style="width: 3rem" />
+            <!-- Expand Row -->
+            <Column :expander="true" headerStyle="width: 3rem" />
 
             <!-- Function Column -->
             <Column field="function" header="Function" style="min-width: 10rem">
-                <template #body="{ data }">{{ data.function }}</template>
+                <template #body="{ data }">
+                    <div class="font-semibold text-gray-800">
+                        {{ data.function }}
+                    </div>
+                </template>
             </Column>
 
-            <!-- Email List (show only first 2 emails) -->
-            <Column field="emails" header="Email List" style="min-width: 25rem">
+            <!-- Platform Column -->
+            <Column field="platform" header="Platform" style="min-width: 10rem">
                 <template #body="{ data }">
-                    <div v-if="editingId === data.id" class="w-full">
-                        <MultiSelect
-                            v-model="form.emails"
-                            :options="emailOptions"
-                            optionLabel="label"
-                            optionValue="value"
-                            filter
-                            placeholder="Select email recipients"
-                            display="chip"
-                            class="resizable-multiselect min-w-[250px] max-w-[800px] w-full"
-                            style="resize: horizontal; overflow: auto; min-height: 42px"
-                        />
-                    </div>
-
-                    <div v-else class="flex flex-col">
-                        <span v-for="(email, index) in data.emails.slice(0, 2)" :key="index">{{ email }}</span>
-                        <span v-if="data.emails.length > 2" class="text-sm italic text-gray-500"> +{{ data.emails.length - 2 }} more </span>
+                    <div class="text-gray-700">
+                        {{ data.platform }}
                     </div>
                 </template>
             </Column>
@@ -54,14 +62,11 @@
             <!-- Shipping Point -->
             <Column field="shippingPoint" header="Shipping Point" style="min-width: 18rem">
                 <template #body="{ data }">
-                    <span v-if="data.function === 'Order'">{{ data.shippingPoint }}</span>
-                    <span v-else>-</span>
+                    <div class="text-gray-700">
+                        <span v-if="data.function === 'Order'">{{ data.shippingPoint }}</span>
+                        <span v-else>-</span>
+                    </div>
                 </template>
-            </Column>
-
-            <!-- Platform Column -->
-            <Column field="platform" header="Platform" style="min-width: 10rem">
-                <template #body="{ data }">{{ data.platform }}</template>
             </Column>
 
             <!-- Actions -->
@@ -80,12 +85,66 @@
             </Column>
 
             <!-- Expanded Row Template -->
-            <template #expansion="slotProps">
-                <div class="p-4 border-t bg-gray-50">
-                    <div class="font-semibold mb-2 text-gray-700">Full Email List:</div>
-                    <ul class="list-disc list-inside text-gray-700">
-                        <li v-for="(email, index) in slotProps.data.emails" :key="index">{{ email }}</li>
-                    </ul>
+            <template #expansion="{ data }">
+                <div class="p-4 bg-gray-50 rounded-lg">
+                    <div class="text-lg font-bold text-gray-800 mb-4">Email List</div>
+                    
+                    <!-- Edit Mode -->
+                    <div v-if="editingId === data.id" class="mb-4">
+                        <div class="font-semibold text-gray-700 mb-2">Edit Email Recipients:</div>
+                        <MultiSelect
+                            v-model="form.emails"
+                            :options="emailOptions"
+                            optionLabel="label"
+                            optionValue="value"
+                            filter
+                            placeholder="Select email recipients"
+                            display="chip"
+                            class="resizable-multiselect min-w-[250px] max-w-[800px] w-full"
+                            style="resize: horizontal; overflow: auto; min-height: 42px"
+                        />
+                        <div class="flex justify-end gap-2 mt-4">
+                            <Button label="Save" icon="pi pi-check" class="p-button-success p-button-sm" @click="saveSetting(data)" />
+                            <Button label="Cancel" icon="pi pi-times" class="p-button-secondary p-button-sm" @click="cancelEdit()" />
+                        </div>
+                    </div>
+
+                    <!-- Read Mode -->
+                    <DataTable 
+                        v-else
+                        :value="getEmailData(data.emails)" 
+                        :paginator="true" 
+                        :rows="5" 
+                        :rowsPerPageOptions="[3, 5, 7, 15, 20, 25, 30, 50]"
+                        dataKey="email" 
+                        :rowHover="true"
+                        responsiveLayout="scroll"
+                    >
+                        <!-- Email Address -->
+                        <Column field="email" header="Email Address" style="min-width: 20rem">
+                            <template #body="{ data }">
+                                <div class="text-blue-600 hover:underline">
+                                    <a :href="`mailto:${data.email}`">{{ data.email }}</a>
+                                </div>
+                            </template>
+                        </Column>
+
+                        <!-- Status -->
+                        <Column field="status" header="Status" style="min-width: 8rem">
+                            <template #body="{ data }">
+                                <Tag 
+                                    value="Active" 
+                                    severity="success"
+                                />
+                            </template>
+                        </Column>
+
+                        <template #empty>
+                            <div class="text-center text-gray-500 py-4">
+                                No email recipients configured.
+                            </div>
+                        </template>
+                    </DataTable>
                 </div>
             </template>
         </DataTable>
@@ -152,10 +211,25 @@ export default {
             this.loading = false;
         },
 
+        getEmailData(emails) {
+            return emails.map(email => ({
+                email: email,
+                status: 1
+            }));
+        },
+
         editSetting(setting) {
+            // Cancel any existing edit first
+            if (this.editingId) {
+                this.cancelEdit();
+            }
+            
             this.editingId = setting.id;
             this.form.emails = [...setting.emails];
             this.form.function = setting.function;
+            
+            // Auto expand the row when editing
+            this.expandedRows = [setting];
         },
 
         saveSetting() {
@@ -171,6 +245,15 @@ export default {
             this.editingId = null;
             this.form.emails = [];
             this.form.function = '';
+            // Keep the row expanded if it was already expanded before editing
+            // Or collapse all: this.expandedRows = [];
+        },
+
+        onRowToggle(event) {
+            // If we're currently editing and user collapses the row, cancel edit
+            if (this.editingId && !event.data) {
+                this.cancelEdit();
+            }
         }
     },
     mounted() {
@@ -178,3 +261,21 @@ export default {
     }
 };
 </script>
+
+<style scoped lang="scss">
+:deep(.p-datatable-frozen-tbody) {
+    font-weight: bold;
+}
+
+:deep(.p-datatable-scrollable .p-frozen-column) {
+    font-weight: bold;
+}
+
+:deep(.p-row-expanded) {
+    background-color: #f9fafb !important;
+}
+
+:deep(.p-row-editing) {
+    background-color: #f0f9ff !important;
+}
+</style>
