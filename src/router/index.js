@@ -324,7 +324,6 @@ const router = createRouter({
                     component: () => import('@/views/technical/createPattern.vue')
                 },
 
-
                 // ===============================
                 // IT
                 // ===============================
@@ -389,9 +388,9 @@ const router = createRouter({
                     component: () => import('@/views/it/listMailSetting.vue')
                 },
                 {
-                    path: '/it/mailSetting',
-                    name: 'list-Setting',
-                    component: () => import('@/views/it/mailSetting.vue')
+                    path: '/it/createMail',
+                    name: 'Create-Mail',
+                    component: () => import('@/views/it/createMail.vue')
                 },
                 {
                     path: '/it/editMailSetting',
