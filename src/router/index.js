@@ -125,6 +125,23 @@ const router = createRouter({
                     component: () => import('@/views/om/editSalesProgram.vue')
                 },
 
+                // Maintenance
+                {
+                    path: '/om/listDisableOrder',
+                    name: 'Disable-Order',
+                    component: () => import('@/views/om/ListDisableOrder.vue')
+                },
+                {
+                    path: '/om/listMonthEndClosing',
+                    name: 'Month-End-Closing',
+                    component: () => import('@/views/om/listMonthEndClosing.vue')
+                },
+                {
+                    path: '/om/ListMaterialException',
+                    name: 'Material-Exception',
+                    component: () => import('@/views/om/listMaterialException.vue')
+                },
+
                 // Messaging
                 {
                     path: '/om/listMessaging',

@@ -197,17 +197,17 @@ const model = ref([
                     {
                         label: 'Disable Order',
                         icon: 'pi pi-fw pi-ban',
-                        to: '#'
+                        to: '/om/listDisableOrder'
                     },
                     {
                         label: 'Month End Closing',
                         icon: 'pi pi-fw pi-calendar-times',
-                        to: '#'
+                        to: '/om/listMonthEndClosing'
                     },
                     {
                         label: 'Material Exception',
                         icon: 'pi pi-fw pi-exclamation-triangle',
-                        to: '#'
+                        to: '/om/listMaterialException'
                     }
                 ]
             },
