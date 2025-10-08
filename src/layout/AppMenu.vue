@@ -337,17 +337,17 @@ const model = ref([
             {
                 label: 'Account Detail',
                 icon: 'pi pi-fw pi-tags',
-                to: '#'
+                to: '/billing/listBillingAccount'
             },
             {
                 label: 'Billing History',
                 icon: 'pi pi-fw pi-tags',
-                to: '#'
+                to: '/billing/listBilling'
             },
             {
                 label: 'Statement',
                 icon: 'pi pi-fw pi-tags',
-                to: '#'
+                to: '/billing/listStatement'
             }
         ]
     }

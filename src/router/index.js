@@ -20,7 +20,7 @@ const router = createRouter({
                 // ===============================
                 // OM (Order Management)
                 // ===============================
-                
+
                 // Customer eTEN
                 {
                     path: '/om/listEten',
@@ -141,7 +141,7 @@ const router = createRouter({
                 // ===============================
                 // MARKETING
                 // ===============================
-                
+
                 // News
                 {
                     path: '/marketing/listNews',
@@ -294,7 +294,7 @@ const router = createRouter({
                 // ===============================
                 // TECHNICAL
                 // ===============================
-                
+
                 // Dashboard
                 {
                     path: '/technical/dashboardTechnical',
@@ -385,7 +385,7 @@ const router = createRouter({
                 // ===============================
                 // IT
                 // ===============================
-                
+
                 // Admin - Groups
                 {
                     path: '/it/listGroup',
@@ -464,6 +464,24 @@ const router = createRouter({
                     component: () => import('@/views/it/termsCondition.vue')
                 },
 
+                // ===============================
+                // Billing 
+                // ===============================
+                {
+                    path: '/billing/listBillingAccount',
+                    name: 'Billing-Account',
+                    component: () => import('@/views/billing/listBillingAccount.vue')
+                },
+                {
+                    path: '/billing/listBilling',
+                    name: 'Billing',
+                    component: () => import('@/views/billing/listBilling.vue')
+                },
+                {
+                    path: '/billing/listStatement',
+                    name: 'Billing-Statement',
+                    component: () => import('@/views/billing/listStatement.vue')
+                },
                 // ===============================
                 // SCM (Supply Chain Management)
                 // ===============================
