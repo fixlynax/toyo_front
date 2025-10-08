@@ -4,13 +4,18 @@ import { BillingService } from '@/service/ListBilling';
 import { FilterMatchMode, FilterOperator } from '@primevue/core/api';
 
 const listData = ref([]);
-const filters = ref(null);
+const filters = ref({});
 const loading = ref(true);
 
 onBeforeMount(async () => {
-    listData.value = await BillingService.getBillingList();
-    initFilters();
-    loading.value = false;
+    try {
+        listData.value = await BillingService.getBillingList();
+        initFilters();
+    } catch (error) {
+        console.error('Error loading billing data:', error);
+    } finally {
+        loading.value = false;
+    }
 });
 
 function initFilters() {
@@ -28,7 +33,7 @@ function initFilters() {
         <div class="text-2xl font-bold text-gray-800 border-b pb-2 mb-4">Account Details</div>
 
         <!-- Data Table -->
-        <DataTable :value="listData" :loading="loading" :paginator="true" :rows="10" dataKey="id" :rowHover="true" :filters="filters" responsiveLayout="scroll">
+        <DataTable :value="listData" :loading="loading" :paginator="true" :rows="10" :rowsPerPageOptions="[3, 5, 7, 15, 20, 25, 30, 50]" dataKey="id" :rowHover="true" :filters="filters" responsiveLayout="scroll">
             <!-- Header -->
             <template #header>
                 <div class="flex flex-wrap items-center justify-between gap-4 w-full">
