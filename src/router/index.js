@@ -507,15 +507,26 @@ const router = createRouter({
                 // Return
                 {
                     path: '/scm/listReturnOrder',
-                    name: 'list-Return-Order',
+                    name: 'List-Return-Order',
                     component: () => import('@/views/scm/listReturnOrder.vue')
                 },
                 {
                     path: '/scm/detailReturnOrder',
-                    name: 'detail-Return-Order',
+                    name: 'Detail-Return-Order',
                     component: () => import('@/views/scm/detailReturnOrder.vue')
                 },
-                
+                // Logistic Account
+                {
+                    path: '/scm/listLogistic',
+                    name: 'List-Logistic',
+                    component: () => import('@/views/scm/listLogistic.vue')
+                },
+                {
+                    path: '/scm/detailLogistic',
+                    name: 'Detail-Logistic',
+                    component: () => import('@/views/scm/detailLogistic.vue')
+                },
+                // Back Order
 
                 // ===============================
                 // UI KIT (Documentation/Components)
