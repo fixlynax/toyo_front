@@ -566,7 +566,16 @@ const router = createRouter({
                     component: () => import('@/views/scm/editLogistic.vue')
                 },
                 // Back Order
-
+                 {
+                    path: '/scm/listBackOrdetr',
+                    name: 'List-BackOrder',
+                    component: () => import('@/views/scm/listBackOrdetr.vue')
+                },
+                {
+                    path: '/scm/detailBackOrder',
+                    name: 'Detail-BackOrder',
+                    component: () => import('@/views/scm/detailBackOrder.vue')
+                },
                 // ===============================
                 // UI KIT (Documentation/Components)
                 // ===============================
