@@ -487,6 +487,11 @@ const router = createRouter({
                     name: 'Return-Collection',
                     component: () => import('@/views/scm/returnCollection.vue')
                 },
+                {
+                    path: '/scm/listLogistic',
+                    name: 'List-Logistic',
+                    component: () => import('@/views/scm/listLogistic.vue')
+                },
 
                 // ===============================
                 // UI KIT (Documentation/Components)

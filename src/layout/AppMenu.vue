@@ -280,7 +280,7 @@ const model = ref([
             {
                 label: 'Back Order',
                 icon: 'pi pi-fw pi-history',
-                to: '#'
+                to: '/om/listBackOrder'
             }
         ]
     },
