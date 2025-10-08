@@ -9,7 +9,6 @@
         <DataTable :value="disabledOrders" :loading="loading" dataKey="id" :rows="10" paginator :rowsPerPageOptions="[5, 10, 20]" :filters="filters1" responsiveLayout="scroll" stripedRows rowHover>
             <template #header>
                 <div class="flex justify-between items-center">
-                    <span class="text-lg font-semibold">Disabled Orders</span>
                     <span class="text-sm text-gray-500">Total: {{ disabledOrders.length }}</span>
                     <div class="flex gap-2">
                         <RouterLink to="/it/createPage">
@@ -186,12 +185,3 @@ export default {
     }
 };
 </script>
-
-<style scoped>
-.line-clamp-2 {
-    overflow: hidden;
-    display: -webkit-box;
-    -webkit-line-clamp: 2;
-    -webkit-box-orient: vertical;
-}
-</style>
