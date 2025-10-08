@@ -275,7 +275,7 @@ const model = ref([
             {
                 label: 'Logistic Account',
                 icon: 'pi pi-fw pi-briefcase',
-                to: '#'
+                to: '/scm/listLogistic'
             },
             {
                 label: 'Back Order',
