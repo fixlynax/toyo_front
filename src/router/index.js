@@ -20,7 +20,6 @@ const router = createRouter({
                 // ===============================
                 // OM (Order Management)
                 // ===============================
-
                 // Customer eTEN
                 {
                     path: '/om/listEten',
@@ -141,7 +140,6 @@ const router = createRouter({
                 // ===============================
                 // MARKETING
                 // ===============================
-
                 // News
                 {
                     path: '/marketing/listNews',
@@ -294,7 +292,6 @@ const router = createRouter({
                 // ===============================
                 // TECHNICAL
                 // ===============================
-
                 // Dashboard
                 {
                     path: '/technical/dashboardTechnical',
@@ -385,7 +382,6 @@ const router = createRouter({
                 // ===============================
                 // IT
                 // ===============================
-
                 // Admin - Groups
                 {
                     path: '/it/listGroup',
@@ -467,11 +463,14 @@ const router = createRouter({
                 // ===============================
                 // Billing 
                 // ===============================
+                // Account Details
                 {
                     path: '/billing/listBillingAccount',
                     name: 'Billing-Account',
                     component: () => import('@/views/billing/listBillingAccount.vue')
                 },
+
+                // Billing
                 {
                     path: '/billing/listBilling',
                     name: 'Billing',
@@ -506,6 +505,7 @@ const router = createRouter({
                     name: 'Return-List',
                     component: () => import('@/views/scm/detailReturnList.vue')
                 },
+
                 // Order
                 {
                     path: '/scm/listOrderDelivery',
@@ -527,6 +527,7 @@ const router = createRouter({
                     name: 'Detail-Order-Pickup',
                     component: () => import('@/views/scm/detailOrderPickup.vue')
                 },
+
                 // Return
                 {
                     path: '/scm/listReturnOrder',
@@ -538,12 +539,14 @@ const router = createRouter({
                     name: 'Detail-Return-Order',
                     component: () => import('@/views/scm/detailReturnOrder.vue')
                 },
+
                 // Area ETA
                 {
                     path: '/scm/listAreaETA',
                     name: 'List-Area-ETA',
                     component: () => import('@/views/scm/listAreaETA.vue')
                 },
+
                 // Logistic Account
                 {
                     path: '/scm/listLogistic',
@@ -565,17 +568,19 @@ const router = createRouter({
                     name: 'Edit-Logistic',
                     component: () => import('@/views/scm/editLogistic.vue')
                 },
+
                 // Back Order
                  {
-                    path: '/scm/listBackOrdetr',
+                    path: '/scm/listBackOrder',
                     name: 'List-BackOrder',
-                    component: () => import('@/views/scm/listBackOrdetr.vue')
+                    component: () => import('@/views/scm/listBackOrder.vue')
                 },
                 {
                     path: '/scm/detailBackOrder',
                     name: 'Detail-BackOrder',
                     component: () => import('@/views/scm/detailBackOrder.vue')
                 },
+                
                 // ===============================
                 // UI KIT (Documentation/Components)
                 // ===============================

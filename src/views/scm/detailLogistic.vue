@@ -133,39 +133,6 @@
 <script setup>
 import { ref } from 'vue';
 
-const memberDetail = ref({
-    id: 10,
-    etenUserID: 'EU1010',
-    countryCode: '60',
-    mobileNumber: '1890123456',
-    password: 'hashed_pw_10',
-    firstName: 'Faizal',
-    lastName: 'Rahman',
-    emailAddress: 'faizal.rahman@toyotires.com.my',
-    gender: 'Male',
-    race: 'Malay',
-    state: 'Sabah',
-    level: 'Silver',
-    memberSince: '2025-04-20',
-    lastLogin: '2025-08-01 12:05:00',
-    allow_warranty: 0,
-    allow_order: 1,
-    allow_billing: 0,
-    allow_sale: 1,
-    allow_user: 0,
-    activationCode: 'ACT01234',
-    isMaster: 0,
-    device: 'Windows Laptop',
-    platform: 'Web',
-    fcmToken: 'fcm_token_10',
-    status: 1,
-    activated: 1,
-    created: '2025-04-20',
-    deleted: 0
-});
-
-const showPassword = ref(false);
-
 const logistic = ref({
     companyName: 'JNT',
     orderNo: 'ORD001',
