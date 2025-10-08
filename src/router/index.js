@@ -487,6 +487,11 @@ const router = createRouter({
                     name: 'List-Logistic',
                     component: () => import('@/views/scm/listLogistic.vue')
                 },
+                {
+                    path: '/scm/detailLogistic',
+                    name: 'Logistic-Detail',
+                    component: () => import('@/views/scm/detailLogistic.vue')
+                },
 
                 // ===============================
                 // UI KIT (Documentation/Components)
