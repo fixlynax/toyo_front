@@ -461,7 +461,7 @@ const router = createRouter({
                 },
 
                 // ===============================
-                // Billing 
+                // BILLING 
                 // ===============================
                 // Account Details
                 {
@@ -481,6 +481,7 @@ const router = createRouter({
                     name: 'Billing-Statement',
                     component: () => import('@/views/billing/listStatement.vue')
                 },
+
                 // ===============================
                 // SCM (Supply Chain Management)
                 // ===============================
@@ -531,12 +532,12 @@ const router = createRouter({
                 // Return
                 {
                     path: '/scm/listReturnOrder',
-                    name: 'List-Return-Order',
+                    name: 'List-Return-Order-SCM',
                     component: () => import('@/views/scm/listReturnOrder.vue')
                 },
                 {
                     path: '/scm/detailReturnOrder',
-                    name: 'Detail-Return-Order',
+                    name: 'Detail-Return-Order-SCM',
                     component: () => import('@/views/scm/detailReturnOrder.vue')
                 },
 
@@ -559,23 +560,28 @@ const router = createRouter({
                     component: () => import('@/views/scm/detailLogistic.vue')
                 },
                 {
+                    path: '/scm/createlogistic',
+                    name: 'Create-Logistic',
+                    component: () => import('@/views/scm/createlogistic.vue')
+                },
+                {
                     path: '/scm/editLogistic',
                     name: 'Edit-Logistic',
                     component: () => import('@/views/scm/editLogistic.vue')
                 },
 
                 // Back Order
-                 {
-                    path: '/scm/listBackOrder',
-                    name: 'List-BackOrder',
-                    component: () => import('@/views/scm/listBackOrder.vue')
+                {
+                    path: '/scm/listSCMBackOrder',
+                    name: 'List-SCM-BackOrder',
+                    component: () => import('@/views/scm/listSCMBackOrder.vue')
                 },
                 {
-                    path: '/scm/detailBackOrder',
-                    name: 'Detail-BackOrder',
-                    component: () => import('@/views/scm/detailBackOrder.vue')
+                    path: '/scm/detailSCMBackOrder',
+                    name: 'Detail-SCM-BackOrder',
+                    component: () => import('@/views/scm/detailSCMBackOrder.vue')
                 },
-                
+
                 // ===============================
                 // UI KIT (Documentation/Components)
                 // ===============================

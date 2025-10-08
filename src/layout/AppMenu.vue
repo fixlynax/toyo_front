@@ -283,7 +283,7 @@ const model = ref([
             {
                 label: 'Back Order',
                 icon: 'pi pi-fw pi-history',
-                to: '/scm/listBackOrder'
+                to: '/scm/listSCMBackOrder'
             }
         ]
     },
