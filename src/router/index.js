@@ -538,6 +538,12 @@ const router = createRouter({
                     name: 'Detail-Return-Order',
                     component: () => import('@/views/scm/detailReturnOrder.vue')
                 },
+                // Area ETA
+                {
+                    path: '/scm/listAreaETA',
+                    name: 'List-Area-ETA',
+                    component: () => import('@/views/scm/listAreaETA.vue')
+                },
                 // Logistic Account
                 {
                     path: '/scm/listLogistic',
