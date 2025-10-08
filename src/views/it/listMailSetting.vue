@@ -98,7 +98,7 @@
                         <!-- Email Address -->
                         <Column field="email" header="Email Address" style="min-width: 20rem">
                             <template #body="{ data }">
-                                <div class="text-blue-600 hover:underline">
+                                <div class="text-gray-800 hover:underline">
                                     <a :href="`mailto:${data.email}`">{{ data.email }}</a>
                                 </div>
                             </template>
