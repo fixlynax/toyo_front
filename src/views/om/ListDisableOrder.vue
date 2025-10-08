@@ -49,7 +49,7 @@
                     locations
                 </template>
             </Column>
-            <Column header="Period" style="min-width: 15rem">
+            <Column header="Period" style="min-width: 8rem">
                 <template #body="{ data }">
                     <div class="text-sm leading-tight">
                         <div class="font-semibold">{{ formatDate(data.startDateTime) }}</div>
