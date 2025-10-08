@@ -555,6 +555,11 @@ const router = createRouter({
                     name: 'Detail-Logistic',
                     component: () => import('@/views/scm/detailLogistic.vue')
                 },
+                {
+                    path: '/scm/createLogistic',
+                    name: 'Create-Logistic',
+                    component: () => import('@/views/scm/createLogistic.vue')
+                },
                 // Back Order
 
                 // ===============================

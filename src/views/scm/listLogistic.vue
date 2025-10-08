@@ -70,6 +70,10 @@ onBeforeMount(async () => {
                     </RouterLink>
                 </template>
             </Column>
+            <Column field="state" header="State" style="min-width: 6rem" >
+            </Column>
+            <Column field="createdSince" header="Created Since" style="min-width: 8rem" >
+            </Column>
 
             <!-- Status Column with Tag -->
             <Column header="Status" style="min-width: 6rem">
