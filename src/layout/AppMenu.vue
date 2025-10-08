@@ -250,7 +250,7 @@ const model = ref([
                     {
                         label: 'Order Pickup',
                         icon: 'pi pi-fw pi-download',
-                        to: '#'
+                        to: '/scm/listOrderPickup'
                     }
                 ]
             },
@@ -269,6 +269,11 @@ const model = ref([
                         to: '#'
                     }
                 ]
+            },
+            {
+                label: 'Area ETA',
+                icon: 'pi pi-fw pi-map',
+                to: '/scm/listAreaETA'
             },
             {
                 label: 'Logistic Account',
@@ -332,22 +337,17 @@ const model = ref([
     },
     {
         label: 'Billing',
-        icon: 'pi pi-fw pi-sitemap',
+        icon: 'pi pi-fw pi-credit-card',
         items: [
             {
                 label: 'Account Detail',
-                icon: 'pi pi-fw pi-tags',
+                icon: 'pi pi-fw pi-id-card',
                 to: '/billing/listBillingAccount'
             },
             {
                 label: 'Billing History',
-                icon: 'pi pi-fw pi-tags',
+                icon: 'pi pi-fw pi-history',
                 to: '/billing/listBilling'
-            },
-            {
-                label: 'Statement',
-                icon: 'pi pi-fw pi-tags',
-                to: '/billing/listStatement'
             }
         ]
     }
