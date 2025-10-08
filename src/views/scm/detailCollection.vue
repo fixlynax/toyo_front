@@ -1,16 +1,14 @@
 <template>
     <div class="flex flex-col md:flex-row gap-8">
-        <!-- LEFT SIDE -->
         <div class="md:w-2/3 flex flex-col">
             <div class="card flex flex-col w-full">
                 <div class="flex items-center justify-between border-b pb-2">
                     <div class="text-2xl font-bold text-gray-800">CTC Details</div>
                     <div class="inline-flex items-center gap-2">
-                        <Button label="Schedule Pick up" class="p-button-primary" size="small" @click="showCalendar = true" />
-                        <Button label="Update Status" class="p-button-secondary" size="small" @click="showStatusDialog = true" />
+                        <Button label="Pickup" class="p-button-warning" size="small" @click="showCalendar = true" />
+                        <Button label="Update Status" class="p-button-success" size="small" @click="showStatusDialog = true" />
                     </div>
                 </div>
-
                 <!-- CTC Reference Number -->
                 <div class="mt-6 mb-4">
                     <div>
@@ -20,21 +18,29 @@
                 </div>
 
                 <!-- Details Grid -->
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm text-gray-700">
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm text-gray-700 items-center">
                     <div>
-                        <span class="block text-sm font-bold text-black-700">Dealer Location</span>
+                        <span class="block text-sm font-bold text-gray-800">Dealer Location</span>
                         <p class="font-medium text-lg">{{ paramData.dealerInfo.dealerLoc }}</p>
                     </div>
 
                     <div>
-                        <span class="block text-sm font-bold text-black-700">Schedule Collection Date/Time</span>
+                        <span class="block text-sm font-bold text-gray-800">Schedule Collection Date/Time</span>
                         <p class="font-medium text-lg">{{ formattedSchedule }}</p>
                     </div>
 
                     <div>
-                        <span class="block text-sm font-bold text-black-700">No of Tires</span>
+                        <span class="block text-sm font-bold text-gray-800">No of Tires</span>
                         <p class="font-medium text-lg">{{ paramData.totalTire }}</p>
                     </div>
+                </div>
+                <div class="flex justify-end items-center gap-2">
+                    <RouterLink to="/scm/listCollection">
+                        <Button label="Cancel" size="small" class="p-button-secondary" />
+                    </RouterLink>
+                    <RouterLink to="/scm/listCollection">
+                        <Button label="Update" size="small" class="p-button-primary" />
+                    </RouterLink>
                 </div>
             </div>
         </div>
@@ -45,6 +51,12 @@
             <div class="card flex flex-col w-full">
                 <div class="flex items-center justify-between border-b pb-2 mb-2">
                     <div class="text-2xl font-bold text-gray-800">👤 Customer Information</div>
+                    <!-- Status Badge -->
+                    <div class="mt-4">
+                        <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium mb-2" :class="statusClass">
+                            {{ statusText }}
+                        </span>
+                    </div>
                 </div>
                 <div class="overflow-x-auto">
                     <table class="w-full text-sm text-left text-gray-700">
@@ -121,14 +133,7 @@
         <div class="p-4">
             <div class="mb-4">
                 <label class="block text-sm font-bold text-black-700 mb-2">Select Status</label>
-                <Dropdown 
-                    v-model="selectedStatus" 
-                    :options="statusOptions" 
-                    optionLabel="label" 
-                    optionValue="value" 
-                    placeholder="Select Status"
-                    class="w-full"
-                />
+                <Dropdown v-model="selectedStatus" :options="statusOptions" optionLabel="label" optionValue="value" placeholder="Select Status" class="w-full" />
             </div>
 
             <div class="mt-4 flex justify-end gap-2">
@@ -156,11 +161,27 @@ const today = new Date();
 
 // Status options for dropdown
 const statusOptions = ref([
-    { label: 'Scheduled', value: 0 },
-    { label: 'In Progress', value: 1 },
-    { label: 'Completed', value: 2 },
-    { label: 'Cancelled', value: 3 }
+    { label: 'Pending', value: 0 },
+    { label: 'Completed', value: 1 }
 ]);
+
+// Computed properties for status display
+const statusText = computed(() => {
+    const status = paramData.value.status;
+    return statusOptions.value.find((option) => option.value === status)?.label || 'Unknown';
+});
+
+const statusClass = computed(() => {
+    const status = paramData.value.status;
+    switch (status) {
+        case 0: // Pending
+            return 'bg-yellow-100 text-yellow-800';
+        case 1: // Completed
+            return 'bg-green-100 text-green-800';
+        default:
+            return 'bg-gray-100 text-gray-800';
+    }
+});
 
 // Format the schedule date for display
 const formattedSchedule = computed(() => {
