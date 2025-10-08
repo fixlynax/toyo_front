@@ -52,7 +52,7 @@ onBeforeMount(async () => {
                         <Button type="button" icon="pi pi-cog" class="p-button" />
                     </div>
                     <!-- Create Button -->
-                    <RouterLink to="/om/createEten">
+                    <RouterLink to="/scm/createlogistic">
                         <Button label="Create" type="button" />
                     </RouterLink>
                 </div>
@@ -69,6 +69,10 @@ onBeforeMount(async () => {
                         {{ data.companyName }}
                     </RouterLink>
                 </template>
+            </Column>
+            <Column field="state" header="State" style="min-width: 6rem" >
+            </Column>
+            <Column field="createdSince" header="Created Since" style="min-width: 8rem" >
             </Column>
 
             <!-- Status Column with Tag -->
