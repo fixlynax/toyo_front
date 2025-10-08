@@ -29,8 +29,8 @@
                     </div>
 
                     <!-- Create Button -->
-                    <RouterLink to="/messaging/createMessage">
-                        <Button type="button" label="Create Message" icon="pi pi-plus" class="p-button-success" />
+                    <RouterLink to="/om/createMessaging">
+                        <Button type="button" label="Create" icon="pi pi-plus" class="p-button-success" />
                     </RouterLink>
                 </div>
             </template>
