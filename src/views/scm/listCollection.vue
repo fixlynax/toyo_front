@@ -36,7 +36,7 @@ import { onBeforeMount, ref } from 'vue';
 
 // Function to get severity for overall status
 function getOverallStatusSeverity(status) {
-    return status === 1 ? 'success' : 'danger';
+    return status === 1 ? 'warn' : 'success';
 }
 
 const listData = ref([]);
@@ -76,25 +76,23 @@ onBeforeMount(async () => {
             <template #empty> No Collection found. </template>
             <template #loading> Loading News data. Please wait. </template>
             <!-- Columns -->
-            <Column field="ref" header="REF #" style="min-width: 8rem">
+            <Column field="ref" header="Ref No." style="min-width: 8rem">
                 <template #body="{ data }">
                     <RouterLink to="/scm/detailCollection" class="hover:underline font-bold">
                         {{ data.collectRef }}
                     </RouterLink>
                 </template>
             </Column>
-            <Column field="collectDate" header="COLLECTION DATE" style="min-width: 6rem">
-                <template #body="{ data }">
-                    {{ data.collectDate }} {{ data.collectTime }}
-                </template>
-            </Column>
-            <Column field="dealerName" header="DEALER" style="min-width: 8rem">
+            <Column field="dealerName" header="Dealer" style="min-width: 8rem">
                 <template #body="{ data }"> {{ data.dealerName }} </template>
             </Column>
-            <Column field="location" header="LOCATION" style="min-width: 6rem">
+            <Column field="location" header="Location" style="min-width: 6rem">
                 <template #body="{ data }">
                     {{ data.dealerLoc }}
                 </template>
+            </Column>
+            <Column field="collectDate" header="Collection Date" style="min-width: 6rem">
+                <template #body="{ data }"> {{ data.collectDate }} {{ data.collectTime }} </template>
             </Column>
             <Column field="totalTire" header="Total Tires" style="min-width: 6rem">
                 <template #body="{ data }">
@@ -103,7 +101,7 @@ onBeforeMount(async () => {
             </Column>
             <Column header="Status" style="min-width: 6rem">
                 <template #body="{ data }">
-                    <Tag :value="data.status === 1 ? 'Active' : 'Inactive'" :severity="getOverallStatusSeverity(data.status)" />
+                    <Tag :value="data.status === 1 ? 'Pending' : 'Completed'" :severity="getOverallStatusSeverity(data.status)" />
                 </template>
             </Column>
         </DataTable>
