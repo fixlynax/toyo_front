@@ -3,9 +3,7 @@
         <div class="flex flex-col md:flex-row gap-8">
             <div class="card flex flex-col gap-6 w-full">
                 <!-- Header -->
-                <div class="text-2xl font-bold text-gray-800 border-b pb-2 mb-4">
-                    Month End Closing Calendar
-                </div>
+                <div class="text-2xl font-bold text-gray-800 border-b pb-2 mb-4">Month End Closing Calendar</div>
 
                 <!-- Description -->
                 <div class="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
@@ -13,10 +11,7 @@
                         <i class="pi pi-info-circle text-blue-500 text-lg mt-1 mr-3"></i>
                         <div>
                             <div class="font-semibold text-blue-800 mb-1">About Month End Closing</div>
-                            <div class="text-blue-700 text-sm">
-                                Orders placed after the closing date/time will be processed as next month's orders when sent to SAP. 
-                                These dates apply nationwide to all regions and dealers.
-                            </div>
+                            <div class="text-blue-700 text-sm">Orders placed after the closing date/time will be processed as next month's orders when sent to SAP. These dates apply nationwide to all regions and dealers.</div>
                         </div>
                     </div>
                 </div>
@@ -24,39 +19,19 @@
                 <!-- Action Buttons -->
                 <div class="flex justify-between items-center mb-4">
                     <div class="flex gap-2">
-                        <Button 
-                            label="Add Closing Date" 
-                            icon="pi pi-plus" 
-                            class="p-button-primary"
-                            @click="showAddDialog = true"
-                        />
+                        <Button label="Add Closing Date" icon="pi pi-plus" class="p-button-primary" @click="showAddDialog = true" />
                     </div>
                     <div class="flex items-center gap-2">
-                        <span class="text-sm text-gray-500">
-                            {{ closingDates.length }} closing date(s) configured
-                        </span>
+                        <span class="text-sm text-gray-500"> {{ closingDates.length }} closing date(s) configured </span>
                     </div>
                 </div>
 
                 <!-- Closing Dates Table -->
-                <DataTable 
-                    :value="closingDates" 
-                    :paginator="true" 
-                    :rows="10"
-                    :rowsPerPageOptions="[5, 10, 20, 50]"
-                    dataKey="id" 
-                    :rowHover="true"
-                    :loading="loading"
-                    sortField="closingDateTime"
-                    :sortOrder="-1"
-                    responsiveLayout="scroll"
-                >
+                <DataTable :value="closingDates" :paginator="true" :rows="10" :rowsPerPageOptions="[5, 10, 20, 50]" dataKey="id" :rowHover="true" :loading="loading" sortField="closingDateTime" :sortOrder="-1" responsiveLayout="scroll">
                     <template #header>
                         <div class="flex justify-between items-center">
                             <span class="text-lg font-semibold">Monthly Closing Dates</span>
-                            <span class="text-sm text-gray-500">
-                                Showing {{ closingDates.length }} records
-                            </span>
+                            <span class="text-sm text-gray-500"> Showing {{ closingDates.length }} records </span>
                         </div>
                     </template>
 
@@ -65,12 +40,7 @@
                             <i class="pi pi-calendar-times text-4xl mb-2"></i>
                             <div>No closing dates configured.</div>
                             <div class="text-sm mt-1">Add your first month end closing date to get started.</div>
-                            <Button 
-                                label="Add First Closing Date" 
-                                icon="pi pi-plus" 
-                                class="p-button-outlined mt-4"
-                                @click="showAddDialog = true"
-                            />
+                            <Button label="Add First Closing Date" icon="pi pi-plus" class="p-button-outlined mt-4" @click="showAddDialog = true" />
                         </div>
                     </template>
 
@@ -104,21 +74,14 @@
 
                     <Column header="Status" style="min-width: 8rem">
                         <template #body="{ data }">
-                            <Tag 
-                                :value="getStatus(data)" 
-                                :severity="getStatusSeverity(data)" 
-                            />
+                            <Tag :value="getStatus(data)" :severity="getStatusSeverity(data)" />
                         </template>
                     </Column>
 
                     <Column header="Days Remaining" style="min-width: 8rem">
                         <template #body="{ data }">
                             <div class="text-center">
-                                <Badge 
-                                    :value="getDaysRemaining(data)" 
-                                    :severity="getDaysRemainingSeverity(data)"
-                                    class="min-w-12"
-                                />
+                                <Badge :value="getDaysRemaining(data)" :severity="getDaysRemainingSeverity(data)" class="min-w-12" />
                             </div>
                         </template>
                     </Column>
@@ -126,18 +89,8 @@
                     <Column header="Actions" style="min-width: 8rem">
                         <template #body="{ data }">
                             <div class="flex gap-1">
-                                <Button 
-                                    icon="pi pi-pencil" 
-                                    class="p-button-info p-button-text p-button-sm" 
-                                    v-tooltip="'Edit'"
-                                    @click="editDate(data)" 
-                                />
-                                <Button 
-                                    icon="pi pi-trash" 
-                                    class="p-button-danger p-button-text p-button-sm" 
-                                    v-tooltip="'Delete'"
-                                    @click="deleteDate(data.id)" 
-                                />
+                                <Button icon="pi pi-pencil" class="p-button-info p-button-text p-button-sm" v-tooltip="'Edit'" @click="editDate(data)" />
+                                <Button icon="pi pi-trash" class="p-button-danger p-button-text p-button-sm" v-tooltip="'Delete'" @click="deleteDate(data.id)" />
                             </div>
                         </template>
                     </Column>
@@ -146,45 +99,22 @@
         </div>
 
         <!-- Add/Edit Dialog -->
-        <Dialog 
-            v-model:visible="showAddDialog" 
-            :header="editMode ? 'Edit Closing Date' : 'Add Closing Date'" 
-            :modal="true"
-            class="p-fluid" 
-            :style="{ width: '40rem' }"
-        >
+        <Dialog v-model:visible="showAddDialog" :header="editMode ? 'Edit Closing Date' : 'Add Closing Date'" :modal="true" class="p-fluid" :style="{ width: '40rem' }">
             <div class="grid grid-cols-1 gap-4">
                 <!-- Month Selection -->
                 <div>
                     <label class="block font-bold text-gray-700 mb-2">Month & Year *</label>
-                    <Calendar 
-                        v-model="currentDate.monthYear" 
-                        view="month" 
-                        dateFormat="mm/yy"
-                        placeholder="Select Month and Year"
-                        class="w-full"
-                        :minDate="minMonth"
-                        :maxDate="maxMonth"
-                    />
+                    <Calendar v-model="currentDate.monthYear" view="month" dateFormat="mm/yy" placeholder="Select Month and Year" class="w-full" :minDate="minMonth" :maxDate="maxMonth" />
                 </div>
 
                 <!-- Closing Date & Time -->
                 <div>
                     <label class="block font-bold text-gray-700 mb-2">Closing Date & Time *</label>
-                    <Calendar 
-                        v-model="currentDate.closingDateTime" 
-                        showTime 
-                        hourFormat="24" 
-                        placeholder="Select Closing Date and Time"
-                        class="w-full"
-                        :minDate="minDate"
-                        :maxDate="maxDate"
-                    />
+                    <Calendar v-model="currentDate.closingDateTime" showTime hourFormat="24" placeholder="Select Closing Date and Time" class="w-full" :minDate="minDate" :maxDate="maxDate" />
                 </div>
 
                 <!-- Preview -->
-                <div v-if="currentDate.monthYear && currentDate.closingDateTime" 
-                     class="border rounded-lg p-4 bg-gray-50">
+                <div v-if="currentDate.monthYear && currentDate.closingDateTime" class="border rounded-lg p-4 bg-gray-50">
                     <label class="block font-bold text-gray-700 mb-2">Preview</label>
                     <div class="text-sm space-y-1">
                         <div class="flex justify-between">
@@ -201,30 +131,15 @@
                         </div>
                         <div class="flex justify-between">
                             <span class="text-gray-600">Status:</span>
-                            <Tag 
-                                :value="getPreviewStatus()" 
-                                :severity="getPreviewStatusSeverity()" 
-                                class="text-xs"
-                            />
+                            <Tag :value="getPreviewStatus()" :severity="getPreviewStatusSeverity()" class="text-xs" />
                         </div>
                     </div>
                 </div>
             </div>
 
             <template #footer>
-                <Button 
-                    label="Cancel" 
-                    icon="pi pi-times" 
-                    class="p-button-text" 
-                    @click="closeDialog" 
-                />
-                <Button 
-                    :label="editMode ? 'Update' : 'Add Closing Date'" 
-                    icon="pi pi-check" 
-                    class="p-button-primary"
-                    :disabled="!isDialogFormValid"
-                    @click="saveDate" 
-                />
+                <Button label="Cancel" icon="pi pi-times" class="p-button-text" @click="closeDialog" />
+                <Button :label="editMode ? 'Update' : 'Add Closing Date'" icon="pi pi-check" class="p-button-primary" :disabled="!isDialogFormValid" @click="saveDate" />
             </template>
         </Dialog>
     </Fluid>
@@ -303,8 +218,7 @@ const maxDate = computed(() => {
 
 // Computed properties
 const isDialogFormValid = computed(() => {
-    return currentDate.monthYear !== null && 
-           currentDate.closingDateTime !== null;
+    return currentDate.monthYear !== null && currentDate.closingDateTime !== null;
 });
 
 // Methods
@@ -351,7 +265,7 @@ const getMonthYearPreview = () => {
 const getStatus = (date) => {
     const now = new Date();
     const closingDate = new Date(date.closingDateTime);
-    
+
     if (now > closingDate) return 'Closed';
     if (now.getMonth() === closingDate.getMonth() && now.getFullYear() === closingDate.getFullYear()) {
         return 'Current';
@@ -362,10 +276,14 @@ const getStatus = (date) => {
 const getStatusSeverity = (date) => {
     const status = getStatus(date);
     switch (status) {
-        case 'Closed': return 'secondary';
-        case 'Current': return 'warning';
-        case 'Upcoming': return 'success';
-        default: return 'info';
+        case 'Closed':
+            return 'secondary';
+        case 'Current':
+            return 'warning';
+        case 'Upcoming':
+            return 'success';
+        default:
+            return 'info';
     }
 };
 
@@ -373,7 +291,7 @@ const getPreviewStatus = () => {
     if (!currentDate.closingDateTime) return '';
     const now = new Date();
     const closingDate = new Date(currentDate.closingDateTime);
-    
+
     if (now > closingDate) return 'Closed';
     if (now.getMonth() === closingDate.getMonth() && now.getFullYear() === closingDate.getFullYear()) {
         return 'Current';
@@ -384,19 +302,23 @@ const getPreviewStatus = () => {
 const getPreviewStatusSeverity = () => {
     const status = getPreviewStatus();
     switch (status) {
-        case 'Closed': return 'secondary';
-        case 'Current': return 'warning';
-        case 'Upcoming': return 'success';
-        default: return 'info';
+        case 'Closed':
+            return 'secondary';
+        case 'Current':
+            return 'warning';
+        case 'Upcoming':
+            return 'success';
+        default:
+            return 'info';
     }
 };
 
 const getDaysRemaining = (date) => {
     const now = new Date();
     const closingDate = new Date(date.closingDateTime);
-    
+
     if (now > closingDate) return '0';
-    
+
     const diffTime = closingDate - now;
     const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
     return diffDays.toString();
@@ -425,9 +347,9 @@ const editDate = (date) => {
 };
 
 const deleteDate = (id) => {
-    const date = closingDates.value.find(d => d.id === id);
+    const date = closingDates.value.find((d) => d.id === id);
     if (date && confirm(`Are you sure you want to delete the closing date for ${formatDate(date.monthYear)}?`)) {
-        closingDates.value = closingDates.value.filter(d => d.id !== id);
+        closingDates.value = closingDates.value.filter((d) => d.id !== id);
         console.log(`Closing date ${id} has been deleted`);
     }
 };
@@ -435,9 +357,7 @@ const deleteDate = (id) => {
 const saveDate = () => {
     if (editMode.value) {
         // Update existing date
-        const index = closingDates.value.findIndex(date => 
-            date.monthYear.getTime() === currentDate.monthYear.getTime()
-        );
+        const index = closingDates.value.findIndex((date) => date.monthYear.getTime() === currentDate.monthYear.getTime());
         if (index !== -1) {
             closingDates.value[index] = {
                 ...closingDates.value[index],
@@ -447,11 +367,8 @@ const saveDate = () => {
     } else {
         // Create new date
         // Check if month already exists
-        const existingDate = closingDates.value.find(date => 
-            date.monthYear.getMonth() === currentDate.monthYear.getMonth() &&
-            date.monthYear.getFullYear() === currentDate.monthYear.getFullYear()
-        );
-        
+        const existingDate = closingDates.value.find((date) => date.monthYear.getMonth() === currentDate.monthYear.getMonth() && date.monthYear.getFullYear() === currentDate.monthYear.getFullYear());
+
         if (existingDate) {
             alert('A closing date already exists for this month. Please edit the existing entry instead.');
             return;
@@ -466,7 +383,7 @@ const saveDate = () => {
         };
         closingDates.value.push(newDate);
     }
-    
+
     closeDialog();
     console.log('Closing date saved:', currentDate);
 };

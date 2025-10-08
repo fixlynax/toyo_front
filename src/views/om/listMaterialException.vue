@@ -3,9 +3,7 @@
         <div class="flex flex-col md:flex-row gap-8">
             <div class="card flex flex-col gap-6 w-full">
                 <!-- Header -->
-                <div class="text-2xl font-bold text-gray-800 border-b pb-2 mb-4">
-                    Material Exception List
-                </div>
+                <div class="text-2xl font-bold text-gray-800 border-b pb-2 mb-4">Material Exception List</div>
 
                 <!-- Description -->
                 <div class="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
@@ -13,10 +11,7 @@
                         <i class="pi pi-info-circle text-blue-500 text-lg mt-1 mr-3"></i>
                         <div>
                             <div class="font-semibold text-blue-800 mb-1">About Material Exceptions</div>
-                            <div class="text-blue-700 text-sm">
-                                Special material list to exclude or include from selected dealers. 
-                                Used for customer-specific products and special pricing (R8R Pattern).
-                            </div>
+                            <div class="text-blue-700 text-sm">Special material list to exclude or include from selected dealers. Used for customer-specific products and special pricing (R8R Pattern).</div>
                         </div>
                     </div>
                 </div>
@@ -24,45 +19,24 @@
                 <!-- Action Buttons -->
                 <div class="flex justify-between items-center mb-4">
                     <div class="flex gap-2">
-                        <Button 
-                            label="Add Exception" 
-                            icon="pi pi-plus" 
-                            class="p-button-primary"
-                            @click="showAddDialog = true"
-                        />
+                        <Button label="Add Exception" icon="pi pi-plus" class="p-button-primary" @click="showAddDialog = true" />
                     </div>
                     <div class="flex items-center gap-2">
                         <IconField>
                             <InputIcon>
                                 <i class="pi pi-search" />
                             </InputIcon>
-                            <InputText
-                                v-model="filters.global.value"
-                                placeholder="Search material exceptions..."
-                                class="w-64"
-                            />
+                            <InputText v-model="filters.global.value" placeholder="Search material exceptions..." class="w-64" />
                         </IconField>
                     </div>
                 </div>
 
                 <!-- Material Exceptions Table -->
-                <DataTable 
-                    :value="materialExceptions" 
-                    :paginator="true" 
-                    :rows="10"
-                    :rowsPerPageOptions="[5, 10, 20, 50]"
-                    dataKey="id" 
-                    :rowHover="true"
-                    :loading="loading"
-                    :filters="filters"
-                    responsiveLayout="scroll"
-                >
+                <DataTable :value="materialExceptions" :paginator="true" :rows="10" :rowsPerPageOptions="[5, 10, 20, 50]" dataKey="id" :rowHover="true" :loading="loading" :filters="filters" responsiveLayout="scroll">
                     <template #header>
                         <div class="flex justify-between items-center">
                             <span class="text-lg font-semibold">Material Exceptions</span>
-                            <span class="text-sm text-gray-500">
-                                {{ materialExceptions.length }} exception(s) found
-                            </span>
+                            <span class="text-sm text-gray-500"> {{ materialExceptions.length }} exception(s) found </span>
                         </div>
                     </template>
 
@@ -71,12 +45,7 @@
                             <i class="pi pi-inbox text-4xl mb-2"></i>
                             <div>No material exceptions found.</div>
                             <div class="text-sm mt-1">Add your first material exception to get started.</div>
-                            <Button 
-                                label="Add First Exception" 
-                                icon="pi pi-plus" 
-                                class="p-button-outlined mt-4"
-                                @click="showAddDialog = true"
-                            />
+                            <Button label="Add First Exception" icon="pi pi-plus" class="p-button-outlined mt-4" @click="showAddDialog = true" />
                         </div>
                     </template>
 
@@ -105,10 +74,7 @@
 
                     <Column header="Type" style="min-width: 8rem">
                         <template #body="{ data }">
-                            <Tag 
-                                :value="data.exceptionType" 
-                                :severity="getTypeSeverity(data.exceptionType)" 
-                            />
+                            <Tag :value="data.exceptionType" :severity="getTypeSeverity(data.exceptionType)" />
                         </template>
                     </Column>
 
@@ -131,39 +97,22 @@
 
                     <Column header="Special Price" style="min-width: 10rem">
                         <template #body="{ data }">
-                            <div v-if="data.specialPrice" class="text-green-600 font-semibold">
-                                RM {{ formatPrice(data.specialPrice) }}
-                            </div>
-                            <div v-else class="text-gray-400 text-sm">
-                                Standard Price
-                            </div>
+                            <div v-if="data.specialPrice" class="text-green-600 font-semibold">RM {{ formatPrice(data.specialPrice) }}</div>
+                            <div v-else class="text-gray-400 text-sm">Standard Price</div>
                         </template>
                     </Column>
 
                     <Column header="Status" style="min-width: 8rem">
                         <template #body="{ data }">
-                            <Tag 
-                                :value="data.status ? 'Active' : 'Inactive'" 
-                                :severity="data.status ? 'success' : 'danger'" 
-                            />
+                            <Tag :value="data.status ? 'Active' : 'Inactive'" :severity="data.status ? 'success' : 'danger'" />
                         </template>
                     </Column>
 
                     <Column header="Actions" style="min-width: 10rem">
                         <template #body="{ data }">
                             <div class="flex gap-1">
-                                <Button 
-                                    icon="pi pi-pencil" 
-                                    class="p-button-info p-button-text p-button-sm" 
-                                    v-tooltip="'Edit'"
-                                    @click="editException(data)" 
-                                />
-                                <Button 
-                                    icon="pi pi-trash" 
-                                    class="p-button-danger p-button-text p-button-sm" 
-                                    v-tooltip="'Delete'"
-                                    @click="deleteException(data.id)" 
-                                />
+                                <Button icon="pi pi-pencil" class="p-button-info p-button-text p-button-sm" v-tooltip="'Edit'" @click="editException(data)" />
+                                <Button icon="pi pi-trash" class="p-button-danger p-button-text p-button-sm" v-tooltip="'Delete'" @click="deleteException(data.id)" />
                             </div>
                         </template>
                     </Column>
@@ -172,38 +121,17 @@
         </div>
 
         <!-- Add/Edit Dialog -->
-        <Dialog 
-            v-model:visible="showAddDialog" 
-            :header="editMode ? 'Edit Material Exception' : 'Add Material Exception'" 
-            :modal="true"
-            class="p-fluid" 
-            :style="{ width: '60rem' }"
-        >
+        <Dialog v-model:visible="showAddDialog" :header="editMode ? 'Edit Material Exception' : 'Add Material Exception'" :modal="true" class="p-fluid" :style="{ width: '60rem' }">
             <div class="grid grid-cols-1 gap-4">
                 <!-- Material Selection -->
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
                         <label class="block font-bold text-gray-700 mb-2">Material Code *</label>
-                        <Dropdown 
-                            v-model="currentException.materialCode" 
-                            :options="materialOptions" 
-                            optionLabel="code"
-                            optionValue="code"
-                            placeholder="Select Material"
-                            class="w-full"
-                            filter
-                            @change="onMaterialChange"
-                        />
+                        <Dropdown v-model="currentException.materialCode" :options="materialOptions" optionLabel="code" optionValue="code" placeholder="Select Material" class="w-full" filter @change="onMaterialChange" />
                     </div>
                     <div>
                         <label class="block font-bold text-gray-700 mb-2">Material Description</label>
-                        <InputText 
-                            v-model="currentException.materialDescription" 
-                            type="text" 
-                            placeholder="Material description"
-                            class="w-full"
-                            disabled
-                        />
+                        <InputText v-model="currentException.materialDescription" type="text" placeholder="Material description" class="w-full" disabled />
                     </div>
                 </div>
 
@@ -211,23 +139,11 @@
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
                         <label class="block font-bold text-gray-700 mb-2">Exception Type *</label>
-                        <Dropdown 
-                            v-model="currentException.exceptionType" 
-                            :options="exceptionTypeOptions" 
-                            optionLabel="label"
-                            optionValue="value"
-                            placeholder="Select Type"
-                            class="w-full"
-                        />
+                        <Dropdown v-model="currentException.exceptionType" :options="exceptionTypeOptions" optionLabel="label" optionValue="value" placeholder="Select Type" class="w-full" />
                     </div>
                     <div>
                         <label class="block font-bold text-gray-700 mb-2">Pattern *</label>
-                        <InputText 
-                            v-model="currentException.pattern" 
-                            type="text" 
-                            placeholder="Enter R8R pattern"
-                            class="w-full"
-                        />
+                        <InputText v-model="currentException.pattern" type="text" placeholder="Enter R8R pattern" class="w-full" />
                     </div>
                 </div>
 
@@ -236,20 +152,9 @@
                     <label class="block font-bold text-gray-700 mb-2">Special Price</label>
                     <div class="flex items-center gap-2">
                         <span class="text-gray-600">RM</span>
-                        <InputNumber 
-                            v-model="currentException.specialPrice" 
-                            mode="currency" 
-                            currency="MYR" 
-                            locale="en-MY"
-                            placeholder="Enter special price"
-                            class="w-full"
-                            :min="0"
-                            :maxFractionDigits="2"
-                        />
+                        <InputNumber v-model="currentException.specialPrice" mode="currency" currency="MYR" locale="en-MY" placeholder="Enter special price" class="w-full" :min="0" :maxFractionDigits="2" />
                     </div>
-                    <div class="text-sm text-gray-500 mt-1">
-                        Leave empty to use standard pricing
-                    </div>
+                    <div class="text-sm text-gray-500 mt-1">Leave empty to use standard pricing</div>
                 </div>
 
                 <!-- Dealer Selection -->
@@ -258,38 +163,18 @@
                         <label class="block font-bold text-gray-700">Dealer List *</label>
                         <span class="text-sm text-gray-500">{{ currentException.dealers.length }} dealers selected</span>
                     </div>
-                    
+
                     <div class="flex gap-2 mb-3">
-                        <Button 
-                            label="Select All" 
-                            class="p-button-outlined p-button-secondary p-button-sm"
-                            @click="selectAllDealers"
-                        />
-                        <Button 
-                            label="Clear All" 
-                            class="p-button-outlined p-button-danger p-button-sm"
-                            @click="clearAllDealers"
-                        />
+                        <Button label="Select All" class="p-button-outlined p-button-secondary p-button-sm" @click="selectAllDealers" />
+                        <Button label="Clear All" class="p-button-outlined p-button-danger p-button-sm" @click="clearAllDealers" />
                     </div>
 
-                    <MultiSelect 
-                        v-model="currentException.dealers" 
-                        :options="dealerOptions" 
-                        optionLabel="label"
-                        optionValue="value"
-                        filter 
-                        display="chip" 
-                        placeholder="Select Dealers"
-                        class="w-full"
-                        :maxSelectedLabels="3"
-                    >
+                    <MultiSelect v-model="currentException.dealers" :options="dealerOptions" optionLabel="label" optionValue="value" filter display="chip" placeholder="Select Dealers" class="w-full" :maxSelectedLabels="3">
                         <template #optiongroup="slotProps">
                             <div class="flex items-center">
                                 <i class="pi pi-map-marker mr-2 text-blue-500" />
                                 <div class="font-semibold">{{ slotProps.option.label }}</div>
-                                <span class="ml-2 text-xs text-gray-500 bg-gray-100 px-2 py-1 rounded-full">
-                                    {{ slotProps.option.items.length }} dealers
-                                </span>
+                                <span class="ml-2 text-xs text-gray-500 bg-gray-100 px-2 py-1 rounded-full"> {{ slotProps.option.items.length }} dealers </span>
                             </div>
                         </template>
                     </MultiSelect>
@@ -307,8 +192,7 @@
                 </div>
 
                 <!-- Preview -->
-                <div v-if="currentException.materialCode && currentException.dealers.length > 0" 
-                     class="border rounded-lg p-4 bg-gray-50">
+                <div v-if="currentException.materialCode && currentException.dealers.length > 0" class="border rounded-lg p-4 bg-gray-50">
                     <label class="block font-bold text-gray-700 mb-2">Preview</label>
                     <div class="text-sm space-y-2">
                         <div class="flex justify-between">
@@ -317,11 +201,7 @@
                         </div>
                         <div class="flex justify-between">
                             <span class="text-gray-600">Type:</span>
-                            <Tag 
-                                :value="currentException.exceptionType" 
-                                :severity="getTypeSeverity(currentException.exceptionType)" 
-                                class="text-xs"
-                            />
+                            <Tag :value="currentException.exceptionType" :severity="getTypeSeverity(currentException.exceptionType)" class="text-xs" />
                         </div>
                         <div class="flex justify-between">
                             <span class="text-gray-600">Dealers:</span>
@@ -342,19 +222,8 @@
             </div>
 
             <template #footer>
-                <Button 
-                    label="Cancel" 
-                    icon="pi pi-times" 
-                    class="p-button-text" 
-                    @click="closeDialog" 
-                />
-                <Button 
-                    :label="editMode ? 'Update' : 'Add Exception'" 
-                    icon="pi pi-check" 
-                    class="p-button-primary"
-                    :disabled="!isDialogFormValid"
-                    @click="saveException" 
-                />
+                <Button label="Cancel" icon="pi pi-times" class="p-button-text" @click="closeDialog" />
+                <Button :label="editMode ? 'Update' : 'Add Exception'" icon="pi pi-check" class="p-button-primary" :disabled="!isDialogFormValid" @click="saveException" />
             </template>
         </Dialog>
     </Fluid>
@@ -362,7 +231,7 @@
 
 <script setup>
 import { ref, reactive, computed, onMounted } from 'vue';
-import { FilterMatchMode } from '@primevue/core/api'
+import { FilterMatchMode } from '@primevue/core/api';
 
 const loading = ref(false);
 const showAddDialog = ref(false);
@@ -392,7 +261,7 @@ const materialExceptions = ref([
         materialDescription: 'Premium Car Tyre 205/55R16',
         exceptionType: 'Include',
         pattern: 'R8R-SPECIAL-001',
-        specialPrice: 350.50,
+        specialPrice: 350.5,
         dealers: ['6080100900', '6080102300'],
         status: true,
         createdBy: 'Admin',
@@ -428,7 +297,7 @@ const materialExceptions = ref([
         materialDescription: 'Air Filter Premium',
         exceptionType: 'Include',
         pattern: 'R8R-SPECIAL-003',
-        specialPrice: 45.20,
+        specialPrice: 45.2,
         dealers: ['6080102300', '6080125300'],
         status: true,
         createdBy: 'Admin',
@@ -485,18 +354,13 @@ const dealerOptions = ref([
     },
     {
         label: 'Kedah',
-        items: [
-            { label: 'Weng Tat Tyre Service (6080125300)', value: '6080125300' }
-        ]
+        items: [{ label: 'Weng Tat Tyre Service (6080125300)', value: '6080125300' }]
     }
 ]);
 
 // Computed properties
 const isDialogFormValid = computed(() => {
-    return currentException.materialCode !== '' && 
-           currentException.exceptionType !== '' && 
-           currentException.pattern.trim() !== '' && 
-           currentException.dealers.length > 0;
+    return currentException.materialCode !== '' && currentException.exceptionType !== '' && currentException.pattern.trim() !== '' && currentException.dealers.length > 0;
 });
 
 // Methods
@@ -512,7 +376,7 @@ const getTypeSeverity = (type) => {
 };
 
 const onMaterialChange = () => {
-    const selectedMaterial = materialOptions.value.find(m => m.code === currentException.materialCode);
+    const selectedMaterial = materialOptions.value.find((m) => m.code === currentException.materialCode);
     if (selectedMaterial) {
         currentException.materialDescription = selectedMaterial.description;
     }
@@ -520,8 +384,8 @@ const onMaterialChange = () => {
 
 const selectAllDealers = () => {
     const allDealers = [];
-    dealerOptions.value.forEach(group => {
-        group.items.forEach(dealer => {
+    dealerOptions.value.forEach((group) => {
+        group.items.forEach((dealer) => {
             allDealers.push(dealer.value);
         });
     });
@@ -552,9 +416,9 @@ const editException = (exception) => {
 };
 
 const deleteException = (id) => {
-    const exception = materialExceptions.value.find(e => e.id === id);
+    const exception = materialExceptions.value.find((e) => e.id === id);
     if (exception && confirm(`Are you sure you want to delete the material exception for ${exception.materialCode}?`)) {
-        materialExceptions.value = materialExceptions.value.filter(e => e.id !== id);
+        materialExceptions.value = materialExceptions.value.filter((e) => e.id !== id);
         console.log(`Material exception ${id} has been deleted`);
     }
 };
@@ -562,7 +426,7 @@ const deleteException = (id) => {
 const saveException = () => {
     if (editMode.value) {
         // Update existing exception
-        const index = materialExceptions.value.findIndex(e => e.id === currentException.id);
+        const index = materialExceptions.value.findIndex((e) => e.id === currentException.id);
         if (index !== -1) {
             materialExceptions.value[index] = {
                 ...materialExceptions.value[index],
@@ -573,11 +437,8 @@ const saveException = () => {
     } else {
         // Create new exception
         // Check if material and pattern combination already exists
-        const existingException = materialExceptions.value.find(e => 
-            e.materialCode === currentException.materialCode && 
-            e.pattern === currentException.pattern
-        );
-        
+        const existingException = materialExceptions.value.find((e) => e.materialCode === currentException.materialCode && e.pattern === currentException.pattern);
+
         if (existingException) {
             alert('A material exception with this material and pattern already exists. Please edit the existing entry instead.');
             return;
@@ -597,7 +458,7 @@ const saveException = () => {
         };
         materialExceptions.value.unshift(newException);
     }
-    
+
     closeDialog();
     console.log('Material exception saved:', currentException);
 };
