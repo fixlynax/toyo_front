@@ -303,7 +303,7 @@ const paramData = ref({
     dealerName: 'AutoWorld KL',
     status: 0,
     collectSchedule: '2025-02-18T09:00:00',
-    totalTire: '6',
+    totalTire: '2',
     dealerInfo: {
         dealerCode: 'DLR-001',
         contactPerson: 'Ahmad Zaki',
