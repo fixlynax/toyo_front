@@ -2,18 +2,7 @@
     <div class="card">
         <div class="text-2xl font-bold text-gray-800 border-b pb-2 mb-3">List Mail Setting</div>
 
-        <DataTable 
-            :value="listData" 
-            :paginator="true" 
-            :rows="10" 
-            dataKey="id" 
-            :rowHover="true" 
-            :loading="loading" 
-            :filters="filters1" 
-            filterDisplay="menu"
-            :expandedRows="expandedRows"
-            @row-toggle="onRowToggle"
-        >
+        <DataTable :value="listData" :paginator="true" :rows="10" dataKey="id" :rowHover="true" :loading="loading" :filters="filters1" filterDisplay="menu" :expandedRows="expandedRows" @row-toggle="onRowToggle">
             <!-- Header -->
             <template #header>
                 <div class="flex items-center justify-between gap-4 w-full flex-wrap">
@@ -27,11 +16,6 @@
                         </IconField>
                         <Button type="button" icon="pi pi-cog" class="p-button" />
                     </div>
-
-                    <!-- Create Button -->
-                    <RouterLink to="/it/createMail">
-                        <Button type="button" label="Create Mail Setting" icon="pi pi-plus" class="p-button-success" />
-                    </RouterLink>
                 </div>
             </template>
 
@@ -88,7 +72,7 @@
             <template #expansion="{ data }">
                 <div class="p-4 bg-gray-50 rounded-lg">
                     <div class="text-lg font-bold text-gray-800 mb-4">Email List</div>
-                    
+
                     <!-- Edit Mode -->
                     <div v-if="editingId === data.id" class="mb-4">
                         <div class="font-semibold text-gray-700 mb-2">Edit Email Recipients:</div>
@@ -110,20 +94,11 @@
                     </div>
 
                     <!-- Read Mode -->
-                    <DataTable 
-                        v-else
-                        :value="getEmailData(data.emails)" 
-                        :paginator="true" 
-                        :rows="5" 
-                        :rowsPerPageOptions="[3, 5, 7, 15, 20, 25, 30, 50]"
-                        dataKey="email" 
-                        :rowHover="true"
-                        responsiveLayout="scroll"
-                    >
+                    <DataTable v-else :value="getEmailData(data.emails)" :paginator="true" :rows="5" :rowsPerPageOptions="[3, 5, 7, 15, 20, 25, 30, 50]" dataKey="email" :rowHover="true" responsiveLayout="scroll">
                         <!-- Email Address -->
                         <Column field="email" header="Email Address" style="min-width: 20rem">
                             <template #body="{ data }">
-                                <div class="text-blue-600 hover:underline">
+                                <div class="text-gray-800 hover:underline">
                                     <a :href="`mailto:${data.email}`">{{ data.email }}</a>
                                 </div>
                             </template>
@@ -132,17 +107,12 @@
                         <!-- Status -->
                         <Column field="status" header="Status" style="min-width: 8rem">
                             <template #body="{ data }">
-                                <Tag 
-                                    value="Active" 
-                                    severity="success"
-                                />
+                                <Tag value="Active" severity="success" />
                             </template>
                         </Column>
 
                         <template #empty>
-                            <div class="text-center text-gray-500 py-4">
-                                No email recipients configured.
-                            </div>
+                            <div class="text-center text-gray-500 py-4">No email recipients configured.</div>
                         </template>
                     </DataTable>
                 </div>
@@ -212,7 +182,7 @@ export default {
         },
 
         getEmailData(emails) {
-            return emails.map(email => ({
+            return emails.map((email) => ({
                 email: email,
                 status: 1
             }));
@@ -223,11 +193,11 @@ export default {
             if (this.editingId) {
                 this.cancelEdit();
             }
-            
+
             this.editingId = setting.id;
             this.form.emails = [...setting.emails];
             this.form.function = setting.function;
-            
+
             // Auto expand the row when editing
             this.expandedRows = [setting];
         },

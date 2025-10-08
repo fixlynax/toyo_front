@@ -478,11 +478,6 @@ const router = createRouter({
                     component: () => import('@/views/scm/detailCollection.vue')
                 },
                 {
-                    path: '/scm/createCollection',
-                    name: 'Create-Collection',
-                    component: () => import('@/views/scm/createCollection.vue')
-                },
-                {
                     path: '/scm/returnCollection',
                     name: 'Return-Collection',
                     component: () => import('@/views/scm/returnCollection.vue')
