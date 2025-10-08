@@ -560,6 +560,11 @@ const router = createRouter({
                     name: 'Create-Logistic',
                     component: () => import('@/views/scm/createLogistic.vue')
                 },
+                {
+                    path: '/scm/editLogistic',
+                    name: 'Edit-Logistic',
+                    component: () => import('@/views/scm/editLogistic.vue')
+                },
                 // Back Order
 
                 // ===============================

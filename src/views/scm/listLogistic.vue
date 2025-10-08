@@ -52,7 +52,7 @@ onBeforeMount(async () => {
                         <Button type="button" icon="pi pi-cog" class="p-button" />
                     </div>
                     <!-- Create Button -->
-                    <RouterLink to="/om/createEten">
+                    <RouterLink to="/scm/createlogistic">
                         <Button label="Create" type="button" />
                     </RouterLink>
                 </div>

@@ -14,7 +14,7 @@
               <span class="block text-xs font-bold text-black-700">Order No.</span>
               <span class="text-lg font-medium">{{ logistic.orderNo }}</span>
             </div>
-            <RouterLink to="/marketing/editEtenUser">
+            <RouterLink to="/scm/editLogistic">
               <Button type="button" label="Edit" />
             </RouterLink>
           </div>
