@@ -2,25 +2,18 @@
   <Fluid>
     <div class="flex flex-col md:flex-row gap-8">
       <!-- Left Column: Logistic Details and Ship To -->
-      <div class="md:w-2/3 flex flex-col space-y-8">
+      <div class="md:w-2/3 flex flex-col">
         <!-- Logistic Details Card -->
         <div class="card flex flex-col gap-6 w-full">
           <!-- Title -->
-          <div class="text-2xl font-bold text-gray-800 border-b pb-2">Logistic Information</div>
-          
-          <!-- Order No and Edit Button -->
           <div class="flex items-center justify-between w-full">
-            <div>
-              <span class="block text-xs font-bold text-black-700">Order No.</span>
-              <span class="text-lg font-medium">{{ logistic.orderNo }}</span>
-            </div>
-            <RouterLink to="/scm/editLogistic">
+            <div class="text-2xl font-bold text-gray-800 border-b pb-2">Logistic Information</div>
+
+          <RouterLink to="/scm/editLogistic">
               <Button type="button" label="Edit" />
             </RouterLink>
           </div>
           
-          <!-- Logistic Details Header -->
-          <div class="font-semibold text-xl border-b pb-2 mt-8">👤 Logistic Details</div>
           
           <!-- Company Name and Address -->
           <div class="w-full mb-4">
@@ -147,66 +140,9 @@ const logistic = ref({
     username: 'jnt_user01',
     status: '1',
     shippingPoints: ['JNT'],
-    createdSince: '2023-01-15T09:30:00',
-    lastLogin: '2023-10-01T14:45:00'
+    createdSince: '2023-01-15',
+    lastLogin: '2023-10-01'
 });
-// 1. Suspend/Un-Activated
-const isActivated = ref(false);
-const confirmSuspend = () => {
-    isActivated.value = !isActivated.value;
-};
-
-// 2. Block/Un-block Device List
-const devices = ref([
-    {
-        id: 1,
-        name: 'Windows Laptop',
-        uniqueId: '00008030-001E3D400043402E',
-        lastActive: '8/9/2025 10:54 pm',
-        isBlocked: true
-    }
-]);
-
-const toggleBlock = (device) => {
-    device.isBlocked = !device.isBlocked;
-};
-
-const users = ref([
-    { id: 'U001', name: 'John Doe', phone: '0123456789', account: '6080100900', lastLogin: '11/9/2025 8:00am', status: 1 },
-    { id: 'U002', name: 'Jane Smith', phone: '0198765432', account: '6080100901', lastLogin: '10/9/2025 8:00am', status: 1 },
-    { id: 'U003', name: 'Alex Tan', phone: '0172233445', account: '6080100902', lastLogin: '23/7/2025 8:00am', status: 0 },
-    { id: 'U004', name: 'Siti Aminah', phone: '0111122233', account: '6080100903', lastLogin: '09/9/2025 8:00am', status: 1 },
-    { id: 'U005', name: 'Michael Lee', phone: '0139988776', account: '6080100904', lastLogin: '07/8/2025 8:00am', status: 0 }
-]);
-
-const billingDocs = ref([
-    { id: 1, name: 'Invoice #001', type: 'Invoice' },
-    { id: 2, name: 'Credit Note #100', type: 'CN' },
-    { id: 3, name: 'Debit Note #200', type: 'DN' },
-    { id: 4, name: 'SOA Jan 2025', type: 'SOA Statement' },
-    { id: 5, name: 'Refund Note #10', type: 'Refund Note' }
-]);
-
-const viewDoc = (doc) => {
-    console.log('Viewing billing document:', doc);
-};
-
-// 4. Finance Documents
-const financeDocs = ref([
-    { id: 1, name: 'Payment Receipt' },
-    { id: 2, name: 'Tax Certificate' },
-    { id: 3, name: 'Bank Statement' },
-    { id: 4, name: 'Audit Report' },
-    { id: 5, name: 'Financial Summary' }
-]);
-
-const viewFinance = (doc) => {
-    console.log('Viewing finance document:', doc);
-};
-
-const manageUser = (user) => {
-    console.log('Managing user:', user);
-};
 
 const shiptoList = ref([
     {
