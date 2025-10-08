@@ -47,7 +47,7 @@
             <Column header="Locations" style="min-width: 10rem">
                 <template #body="{ data }">
                     <Badge :value="data.locations.length" />
-                    {{ data.locations.length }} locations
+                    locations
                 </template>
             </Column>
             <Column header="Period" style="min-width: 15rem">
