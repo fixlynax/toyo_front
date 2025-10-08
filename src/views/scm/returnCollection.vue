@@ -107,7 +107,7 @@ const clearFilters = () => {
 
             <Column field="collectRef" header="CTC Ref No" style="min-width: 8rem">
                 <template #body="{ data }">
-                    <RouterLink to="/scm/detailCollection" class="hover:underline font-bold text-primary">
+                    <RouterLink to="/scm/detailReturnList" class="hover:underline font-bold text-primary">
                         {{ data.collectRef }}
                     </RouterLink>
                 </template>

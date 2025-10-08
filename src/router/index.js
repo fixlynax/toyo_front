@@ -483,6 +483,11 @@ const router = createRouter({
                     name: 'Return-Collection',
                     component: () => import('@/views/scm/returnCollection.vue')
                 },
+                {
+                    path: '/scm/detailReturnList',
+                    name: 'Return-List',
+                    component: () => import('@/views/scm/detailReturnList.vue')
+                },
                 // Order
                 {
                     path: '/scm/listOrderDelivery',
