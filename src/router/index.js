@@ -467,6 +467,7 @@ const router = createRouter({
                 // ===============================
                 // SCM (Supply Chain Management)
                 // ===============================
+                // Warranty CTC
                 {
                     path: '/scm/listCollection',
                     name: 'Collection-List',
@@ -482,6 +483,39 @@ const router = createRouter({
                     name: 'Return-Collection',
                     component: () => import('@/views/scm/returnCollection.vue')
                 },
+                // Order
+                {
+                    path: '/scm/listOrderDelivery',
+                    name: 'List-Order-Delivery',
+                    component: () => import('@/views/scm/listOrderDelivery.vue')
+                },
+                {
+                    path: '/scm/detailOrderDelivery',
+                    name: 'Detail-Order-Delivery',
+                    component: () => import('@/views/scm/detailOrderDelivery.vue')
+                },
+                {
+                    path: '/scm/listOrderPickup',
+                    name: 'List-Order-Pickup',
+                    component: () => import('@/views/scm/listOrderPickup.vue')
+                },
+                {
+                    path: '/scm/detailOrderPickup',
+                    name: 'Detail-Order-Pickup',
+                    component: () => import('@/views/scm/detailOrderPickup.vue')
+                },
+                // Return
+                {
+                    path: '/scm/listReturnOrder',
+                    name: 'list-Return-Order',
+                    component: () => import('@/views/scm/listReturnOrder.vue')
+                },
+                {
+                    path: '/scm/detailReturnOrder',
+                    name: 'detail-Return-Order',
+                    component: () => import('@/views/scm/detailReturnOrder.vue')
+                },
+                
 
                 // ===============================
                 // UI KIT (Documentation/Components)

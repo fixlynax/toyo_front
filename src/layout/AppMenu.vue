@@ -125,9 +125,7 @@ const model = ref([
                         label: 'Pattern List',
                         icon: 'pi pi-fw pi-slack',
                         to: '/technical/listPattern'
-                    },
-
-
+                    }
                 ]
             }
         ]
@@ -247,7 +245,7 @@ const model = ref([
                     {
                         label: 'Order Delivery',
                         icon: 'pi pi-fw pi-send',
-                        to: '#'
+                        to: '/scm/listOrderDelivery'
                     },
                     {
                         label: 'Order Pickup',
@@ -263,7 +261,7 @@ const model = ref([
                     {
                         label: 'Return Order List',
                         icon: 'pi pi-fw pi-list',
-                        to: '#'
+                        to: '/scm/listReturnOrder'
                     },
                     {
                         label: 'Bulk Update',
@@ -329,6 +327,27 @@ const model = ref([
                         to: '/it/termsCondition'
                     }
                 ]
+            }
+        ]
+    },
+    {
+        label: 'Billing',
+        icon: 'pi pi-fw pi-sitemap',
+        items: [
+            {
+                label: 'Account Detail',
+                icon: 'pi pi-fw pi-tags',
+                to: '#'
+            },
+            {
+                label: 'Billing History',
+                icon: 'pi pi-fw pi-tags',
+                to: '#'
+            },
+            {
+                label: 'Statement',
+                icon: 'pi pi-fw pi-tags',
+                to: '#'
             }
         ]
     }
