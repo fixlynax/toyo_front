@@ -9,7 +9,6 @@
         <DataTable :value="disabledOrders" :loading="loading" dataKey="id" :rows="10" paginator :rowsPerPageOptions="[5, 10, 20]" :filters="filters1" responsiveLayout="scroll" stripedRows rowHover>
             <template #header>
                 <div class="flex justify-between items-center">
-                    <span class="text-lg font-semibold">Disabled Orders</span>
                     <span class="text-sm text-gray-500">Total: {{ disabledOrders.length }}</span>
                     <div class="flex gap-2">
                         <RouterLink to="/it/createPage">
@@ -50,7 +49,7 @@
                     locations
                 </template>
             </Column>
-            <Column header="Period" style="min-width: 15rem">
+            <Column header="Period" style="min-width: 8rem">
                 <template #body="{ data }">
                     <div class="text-sm leading-tight">
                         <div class="font-semibold">{{ formatDate(data.startDateTime) }}</div>
@@ -186,4 +185,3 @@ export default {
     }
 };
 </script>
-

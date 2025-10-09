@@ -6,7 +6,7 @@
                 <div class="text-2xl font-bold text-gray-800 border-b pb-2 mb-4">Material Exception List</div>
 
                 <!-- Description -->
-                <div class="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
+                <div class="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-2">
                     <div class="flex items-start">
                         <i class="pi pi-info-circle text-blue-500 text-lg mt-1 mr-3"></i>
                         <div>
@@ -16,27 +16,14 @@
                     </div>
                 </div>
 
-                <!-- Action Buttons -->
-                <div class="flex justify-between items-center mb-4">
-                    <div class="flex gap-2">
-                        <Button label="Add Exception" icon="pi pi-plus" class="p-button-primary" @click="showAddDialog = true" />
-                    </div>
-                    <div class="flex items-center gap-2">
-                        <IconField>
-                            <InputIcon>
-                                <i class="pi pi-search" />
-                            </InputIcon>
-                            <InputText v-model="filters.global.value" placeholder="Search material exceptions..." class="w-64" />
-                        </IconField>
-                    </div>
-                </div>
-
                 <!-- Material Exceptions Table -->
                 <DataTable :value="materialExceptions" :paginator="true" :rows="10" :rowsPerPageOptions="[5, 10, 20, 50]" dataKey="id" :rowHover="true" :loading="loading" :filters="filters" responsiveLayout="scroll">
                     <template #header>
                         <div class="flex justify-between items-center">
-                            <span class="text-lg font-semibold">Material Exceptions</span>
                             <span class="text-sm text-gray-500"> {{ materialExceptions.length }} exception(s) found </span>
+                            <div class="flex gap-2">
+                                <Button label="Add Exception" icon="pi pi-plus" class="p-button-primary" @click="showAddDialog = true" />
+                            </div>
                         </div>
                     </template>
 

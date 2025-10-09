@@ -6,7 +6,7 @@
                 <div class="text-2xl font-bold text-gray-800 border-b pb-2 mb-4">Month End Closing Calendar</div>
 
                 <!-- Description -->
-                <div class="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
+                <div class="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-2">
                     <div class="flex items-start">
                         <i class="pi pi-info-circle text-blue-500 text-lg mt-1 mr-3"></i>
                         <div>
@@ -16,22 +16,14 @@
                     </div>
                 </div>
 
-                <!-- Action Buttons -->
-                <div class="flex justify-between items-center mb-4">
-                    <div class="flex gap-2">
-                        <Button label="Add Closing Date" icon="pi pi-plus" class="p-button-primary" @click="showAddDialog = true" />
-                    </div>
-                    <div class="flex items-center gap-2">
-                        <span class="text-sm text-gray-500"> {{ closingDates.length }} closing date(s) configured </span>
-                    </div>
-                </div>
-
                 <!-- Closing Dates Table -->
                 <DataTable :value="closingDates" :paginator="true" :rows="10" :rowsPerPageOptions="[5, 10, 20, 50]" dataKey="id" :rowHover="true" :loading="loading" sortField="closingDateTime" :sortOrder="-1" responsiveLayout="scroll">
                     <template #header>
                         <div class="flex justify-between items-center">
-                            <span class="text-lg font-semibold">Monthly Closing Dates</span>
                             <span class="text-sm text-gray-500"> Showing {{ closingDates.length }} records </span>
+                            <div class="flex gap-2">
+                                <Button label="Add Closing Date" icon="pi pi-plus" class="p-button-primary" @click="showAddDialog = true" />
+                            </div>
                         </div>
                     </template>
 
@@ -407,13 +399,3 @@ onMounted(() => {
     }, 1000);
 });
 </script>
-
-<style scoped>
-:deep(.p-calendar) {
-    width: 100%;
-}
-
-.min-w-12 {
-    min-width: 3rem;
-}
-</style>
