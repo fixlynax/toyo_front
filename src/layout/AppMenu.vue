@@ -66,12 +66,12 @@ const model = ref([
                     {
                         label: 'Member',
                         icon: 'pi pi-fw pi-user',
-                        to: '#'
+                        to: '/marketing/reportMember'
                     },
                     {
                         label: 'Referral',
                         icon: 'pi pi-fw pi-users',
-                        to: '#'
+                        to: '/marketing/reportReferral'
                     }
                 ]
             }
@@ -166,22 +166,22 @@ const model = ref([
                     {
                         label: 'Sales Forecast',
                         icon: 'pi pi-fw pi-chart-line',
-                        to: '#'
+                        to: '/om/reportSalesForecast'
                     },
                     {
                         label: 'Direct Shipment',
                         icon: 'pi pi-fw pi-truck',
-                        to: '#'
+                        to: '/om/reportDirectShipment'
                     },
                     {
                         label: 'Back Order',
                         icon: 'pi pi-fw pi-history',
-                        to: '#'
+                        to: '/om/reportBackOrder'
                     },
                     {
                         label: 'Own Collection',
                         icon: 'pi pi-fw pi-box',
-                        to: '#'
+                        to: '/om/reportOwnCollection'
                     }
                 ]
             },

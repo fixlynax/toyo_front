@@ -103,6 +103,28 @@ const router = createRouter({
                     component: () => import('@/views/om/detailReturnOrder.vue')
                 },
 
+                // Report
+                {
+                    path: '/om/reportSalesForecast',
+                    name: 'Report-Sales-Forecast',
+                    component: () => import('@/views/om/reportSalesForecast.vue')
+                },
+                {
+                    path: '/om/reportBackOrder',
+                    name: 'Report-Back-Order',
+                    component: () => import('@/views/om/reportBackOrder.vue')
+                },
+                {
+                    path: '/om/reportDirectShipment',
+                    name: 'Report-Direct-Shipment',
+                    component: () => import('@/views/om/reportDirectShipment.vue')
+                },
+                {
+                    path: '/om/reportOwnCollection',
+                    name: 'Report-Own-Collection',
+                    component: () => import('@/views/om/reportOwnCollection.vue')
+                },
+
                 // Sales Program
                 {
                     path: '/om/listSalesProgram',
@@ -311,6 +333,18 @@ const router = createRouter({
                     component: () => import('@/views/marketing/createCatalogue.vue')
                 },
 
+                // Report
+                {
+                    path: '/marketing/reportMember',
+                    name: 'Report-Member',
+                    component: () => import('@/views/marketing/reportMember.vue')
+                },
+                {
+                    path: 'marketing/reportReferral',
+                    name: 'Report-Referral',
+                    component: () => import('@/views/marketing/reportReferral.vue')
+                },
+
                 // ===============================
                 // TECHNICAL
                 // ===============================
@@ -492,7 +526,7 @@ const router = createRouter({
                     component: () => import('@/views/billing/listBillingAccount.vue')
                 },
 
-                // Billing
+                // Billing History
                 {
                     path: '/billing/listBilling',
                     name: 'Billing',

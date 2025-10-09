@@ -49,12 +49,6 @@
 <script setup>
 import { ref, computed, onBeforeMount } from 'vue';
 import { FilterMatchMode } from '@primevue/core/api';
-import DataTable from 'primevue/datatable';
-import Column from 'primevue/column';
-import IconField from 'primevue/iconfield';
-import InputText from 'primevue/inputtext';
-import InputIcon from 'primevue/inputicon';
-import Tag from 'primevue/tag';
 
 // Import your pickup service (create this service if it doesn't exist)
 // import { ListPickupService } from '@/service/listPickup';
