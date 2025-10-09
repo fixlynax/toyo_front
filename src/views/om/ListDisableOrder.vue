@@ -187,11 +187,3 @@ export default {
 };
 </script>
 
-<style scoped>
-.line-clamp-2 {
-    overflow: hidden;
-    display: -webkit-box;
-    -webkit-line-clamp: 2;
-    -webkit-box-orient: vertical;
-}
-</style>

@@ -35,7 +35,7 @@
             </Column>
             <Column field="state" header="State" style="min-width: 8rem"/>
             <Column field="postcode" header="Postcode" style="min-width: 8rem"/>
-            <Column field="daerah" header="Daerah" style="min-width: 10rem"/>
+            <Column field="city" header="City" style="min-width: 10rem"/>
             <Column field="cutOffTime" header="Cut-off Time" style="min-width: 10rem"/>
             <Column field="leadTime" header="Lead Time" style="min-width: 8rem"/>
             <Column field="eta" header="ETA" style="min-width: 8rem"/>
@@ -74,7 +74,7 @@ onBeforeMount(async () => {
             },
             state: 'Selangor',
             postcode: '50000',
-            daerah: 'Kuala Lumpur',
+            city: 'Kuala Lumpur',
             cutOffTime: '5:00 PM',
             leadTime: '2 days',
             eta: '2-3 days'
@@ -89,7 +89,7 @@ onBeforeMount(async () => {
             },
             state: 'Penang',
             postcode: '10000',
-            daerah: 'Georgetown',
+            city: 'Georgetown',
             cutOffTime: '4:00 PM',
             leadTime: '1 day',
             eta: '1-2 days'
@@ -104,7 +104,7 @@ onBeforeMount(async () => {
             },
             state: 'Johor',
             postcode: '80000',
-            daerah: 'Johor Bahru',
+            city: 'Johor Bahru',
             cutOffTime: '6:00 PM',
             leadTime: '3 days',
             eta: '3-4 days'
@@ -119,7 +119,7 @@ onBeforeMount(async () => {
             },
             state: 'Perak',
             postcode: '30000',
-            daerah: 'Ipoh',
+            city: 'Ipoh',
             cutOffTime: '5:30 PM',
             leadTime: '2 days',
             eta: '2-3 days'
@@ -134,7 +134,7 @@ onBeforeMount(async () => {
             },
             state: 'Kedah',
             postcode: '05000',
-            daerah: 'Daerah',
+            city: 'Alor Setar',
             cutOffTime: '4:30 PM',
             leadTime: '1 day',
             eta: '1-2 days'
