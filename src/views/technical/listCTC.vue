@@ -74,11 +74,6 @@ onBeforeMount(async () => {
                         </IconField>
                         <Button type="button" icon="pi pi-cog" class="p-button" />
                     </div>
-
-                    <!-- Right: Export & Template Buttons -->
-                    <RouterLink to="/technical/createCTC">
-                        <Button type="button" label="Create" />
-                    </RouterLink>
                 </div>
             </template>
 
