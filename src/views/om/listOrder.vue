@@ -34,7 +34,7 @@ onBeforeMount(async () => {
     <div class="card">
         <div class="text-2xl font-bold text-gray-800 border-b pb-2 mb-3">List Order</div>
 
-        <DataTable :value="listData" :paginator="true" :rows="10" dataKey="id" :rowHover="true" :loading="loading" :filters="filters1" filterDisplay="menu"q>
+        <DataTable :value="listData" :paginator="true" :rows="10" dataKey="id" :rowHover="true" :loading="loading" :filters="filters1" filterDisplay="menu" q>
             <template #header>
                 <div class="flex items-center justify-between gap-4 w-full flex-wrap">
                     <!-- Left: Search -->
@@ -47,11 +47,6 @@ onBeforeMount(async () => {
                         </IconField>
                         <Button type="button" icon="pi pi-cog" class="p-button" />
                     </div>
-
-                    <!-- Right: Create Button -->
-                    <RouterLink to="/om/createEten">
-                        <Button type="button" label="Create" />
-                    </RouterLink>
                 </div>
             </template>
 
