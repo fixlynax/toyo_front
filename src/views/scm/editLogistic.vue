@@ -3,7 +3,7 @@
         <div class="flex flex-col md:flex-row gap-8">
             <div class="card flex flex-col gap-6 w-full">
                 <!-- Header -->
-                <div class="text-2xl font-bold text-gray-800 border-b pb-2">Create Logistic</div>
+                <div class="text-2xl font-bold text-gray-800 border-b pb-2">Edit Logistic</div>
 
                 <!-- Logistic Form -->
                 <div class="grid grid-cols-1 gap-6">
@@ -35,12 +35,7 @@
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div>
                             <label class="block font-bold text-gray-700 mb-2">State</label>
-                            <Dropdown 
-                                v-model="form.state" 
-                                :options="states" 
-                                placeholder="Select State" 
-                                class="w-full" 
-                            />
+                            <Dropdown v-model="form.state" :options="states" placeholder="Select State" class="w-full" />
                         </div>
                         <div>
                             <label class="block font-bold text-gray-700 mb-2">Postcode</label>
@@ -68,14 +63,7 @@
                         </div>
                         <div>
                             <label class="block font-bold text-gray-700 mb-2">Status</label>
-                            <Dropdown 
-                                v-model="form.status" 
-                                :options="statusOptions" 
-                                optionLabel="label"
-                                optionValue="value"
-                                placeholder="Select Status" 
-                                class="w-full" 
-                            />
+                            <Dropdown v-model="form.status" :options="statusOptions" optionLabel="label" optionValue="value" placeholder="Select Status" class="w-full" />
                         </div>
                     </div>
 
@@ -83,22 +71,22 @@
                     <div class="flex justify-between items-center border-b pb-2 mt-4">
                         <div class="text-xl font-bold text-gray-800">🚚 Shipping Point</div>
                     </div>
-                    
+
                     <div>
                         <div class="flex items-center justify-between mb-2">
                             <label class="block font-bold text-gray-700">Dealer List</label>
                             <span class="text-sm text-gray-500">{{ selectedDealers.length }} dealers selected</span>
                         </div>
-                        
-                        <MultiSelect 
-                            v-model="selectedDealers" 
-                            :options="groupedDealers" 
-                            optionLabel="label" 
-                            filter 
-                            optionGroupLabel="label" 
-                            optionGroupChildren="items" 
-                            display="chip" 
-                            placeholder="Select Dealers" 
+
+                        <MultiSelect
+                            v-model="selectedDealers"
+                            :options="groupedDealers"
+                            optionLabel="label"
+                            filter
+                            optionGroupLabel="label"
+                            optionGroupChildren="items"
+                            display="chip"
+                            placeholder="Select Dealers"
                             class="w-full"
                             :maxSelectedLabels="3"
                         >
@@ -106,9 +94,7 @@
                                 <div class="flex items-center">
                                     <i class="pi pi-map-marker mr-2 text-blue-500" />
                                     <div class="font-semibold">{{ slotProps.option.label }}</div>
-                                    <span class="ml-2 text-xs text-gray-500 bg-gray-100 px-2 py-1 rounded-full">
-                                        {{ slotProps.option.items.length }} dealers
-                                    </span>
+                                    <span class="ml-2 text-xs text-gray-500 bg-gray-100 px-2 py-1 rounded-full"> {{ slotProps.option.items.length }} dealers </span>
                                 </div>
                             </template>
                             <template #value="slotProps">
@@ -123,15 +109,7 @@
                     <!-- Selected Dealers Preview -->
                     <div v-if="selectedDealers.length > 0" class="border rounded-lg p-4 bg-gray-50">
                         <label class="block font-bold text-gray-700 mb-3">Selected Dealers Preview</label>
-                        <DataTable 
-                            :value="selectedDealers" 
-                            :paginator="true" 
-                            :rows="5" 
-                            :rowsPerPageOptions="[3, 5, 7, 10]"
-                            dataKey="custAccountNo" 
-                            :rowHover="true"
-                            responsiveLayout="scroll"
-                        >
+                        <DataTable :value="selectedDealers" :paginator="true" :rows="5" :rowsPerPageOptions="[3, 5, 7, 10]" dataKey="custAccountNo" :rowHover="true" responsiveLayout="scroll">
                             <Column header="Dealer Name" style="min-width: 12rem">
                                 <template #body="{ data }">
                                     <div class="font-semibold text-gray-800">
@@ -158,48 +136,29 @@
 
                             <Column header="Status" style="min-width: 6rem">
                                 <template #body="{ data }">
-                                    <Tag 
-                                        :value="data.status === 1 ? 'Active' : 'Inactive'" 
-                                        :severity="data.status === 1 ? 'success' : 'danger'" 
-                                    />
+                                    <Tag :value="data.status === 1 ? 'Active' : 'Inactive'" :severity="data.status === 1 ? 'success' : 'danger'" />
                                 </template>
                             </Column>
 
                             <Column header="Actions" style="min-width: 6rem">
                                 <template #body="{ data }">
-                                    <Button 
-                                        icon="pi pi-trash" 
-                                        class="p-button-danger p-button-text p-button-sm" 
-                                        @click="removeDealer(data)" 
-                                    />
+                                    <Button icon="pi pi-trash" class="p-button-danger p-button-text p-button-sm" @click="removeDealer(data)" />
                                 </template>
                             </Column>
 
                             <template #empty>
-                                <div class="text-center text-gray-500 py-4">
-                                    No dealers selected.
-                                </div>
+                                <div class="text-center text-gray-500 py-4">No dealers selected.</div>
                             </template>
                         </DataTable>
                     </div>
-                </div>
-
-                <!-- Action Buttons -->
-                <div class="flex justify-end gap-4 mt-8">
-                    <div class="w-32">
-                        <Button 
-                            label="Cancel" 
-                            class="w-full p-button-outlined p-button-secondary" 
-                            @click="handleCancel" 
-                        />
-                    </div>
-                    <div class="w-32">
-                        <Button 
-                            label="Create" 
-                            class="w-full" 
-                            :disabled="!isFormValid"
-                            @click="submitForm" 
-                        />
+                    <!-- Action Buttons -->
+                    <div class="flex justify-end gap-4">
+                        <div class="w-32">
+                            <Button label="Cancel" class="w-full p-button-outlined p-button-secondary" @click="handleCancel" />
+                        </div>
+                        <div class="w-32">
+                            <Button label="Save" class="w-full" :disabled="!isFormValid" @click="submitForm" />
+                        </div>
                     </div>
                 </div>
             </div>
@@ -299,8 +258,8 @@ const dealers = ref([
 // Group dealers by state for the MultiSelect
 const groupedDealers = computed(() => {
     const states = {};
-    
-    dealers.value.forEach(dealer => {
+
+    dealers.value.forEach((dealer) => {
         if (!states[dealer.state]) {
             states[dealer.state] = [];
         }
@@ -310,18 +269,14 @@ const groupedDealers = computed(() => {
         });
     });
 
-    return Object.keys(states).map(state => ({
+    return Object.keys(states).map((state) => ({
         label: state,
         items: states[state]
     }));
 });
 
 // list of states
-const states = [
-    'Johor', 'Kedah', 'Kelantan', 'Melaka', 'Negeri Sembilan',
-    'Pahang', 'Penang', 'Perak', 'Perlis', 'Sabah', 'Sarawak',
-    'Selangor', 'Terengganu', 'Kuala Lumpur', 'Putrajaya', 'Labuan'
-];
+const states = ['Johor', 'Kedah', 'Kelantan', 'Melaka', 'Negeri Sembilan', 'Pahang', 'Penang', 'Perak', 'Perlis', 'Sabah', 'Sarawak', 'Selangor', 'Terengganu', 'Kuala Lumpur', 'Putrajaya', 'Labuan'];
 
 // status options
 const statusOptions = ref([
@@ -331,20 +286,22 @@ const statusOptions = ref([
 
 // form validation
 const isFormValid = computed(() => {
-    return form.companyName.trim() !== '' && 
-           form.orderNo.trim() !== '' && 
-           form.address.trim() !== '' && 
-           form.city.trim() !== '' && 
-           form.state.trim() !== '' && 
-           form.postcode.trim() !== '' && 
-           form.contactPerson.trim() !== '' && 
-           form.contactNo.trim() !== '' && 
-           form.email.trim() !== '';
+    return (
+        form.companyName.trim() !== '' &&
+        form.orderNo.trim() !== '' &&
+        form.address.trim() !== '' &&
+        form.city.trim() !== '' &&
+        form.state.trim() !== '' &&
+        form.postcode.trim() !== '' &&
+        form.contactPerson.trim() !== '' &&
+        form.contactNo.trim() !== '' &&
+        form.email.trim() !== ''
+    );
 });
 
 // Initialize labels for dealers and pre-select some dealers
 onMounted(() => {
-    dealers.value.forEach(dealer => {
+    dealers.value.forEach((dealer) => {
         dealer.label = `${dealer.companyName1} (${dealer.custAccountNo})`;
     });
 
@@ -352,12 +309,12 @@ onMounted(() => {
     selectedDealers.value = [
         dealers.value[0], // PS Tyres & Battery Auto Services
         dealers.value[1], // Toyo Auto Centre UHP Tyres
-        dealers.value[4]  // JS Motorsports
+        dealers.value[4] // JS Motorsports
     ];
 });
 
 const removeDealer = (dealer) => {
-    const index = selectedDealers.value.findIndex(d => d.custAccountNo === dealer.custAccountNo);
+    const index = selectedDealers.value.findIndex((d) => d.custAccountNo === dealer.custAccountNo);
     if (index !== -1) {
         selectedDealers.value.splice(index, 1);
     }
@@ -383,10 +340,10 @@ const submitForm = () => {
         ...form,
         selectedDealers: selectedDealers.value
     };
-    
+
     console.log('Submitted data:', formData);
     alert('Logistic created successfully!');
-    
+
     // Reset form
     Object.assign(form, {
         companyName: '',
@@ -401,7 +358,7 @@ const submitForm = () => {
         status: '1'
     });
     selectedDealers.value = [];
-    
+
     // Navigate back to logistic list
     router.push('/scm/listLogistic');
 };
