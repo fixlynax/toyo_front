@@ -283,6 +283,11 @@ const router = createRouter({
                     name: 'Edit-Member',
                     component: () => import('@/views/marketing/editEtenUser.vue')
                 },
+                {
+                    path: '/marketing/referralRewardPoint',
+                    name: 'Referral-Reward-Point',
+                    component: () => import('@/views/marketing/referralRewardPoint.vue')
+                },
 
                 // Catalogue
                 {

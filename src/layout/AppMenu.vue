@@ -55,7 +55,7 @@ const model = ref([
                     {
                         label: 'Referral Reward Point',
                         icon: 'pi pi-fw pi-share-alt',
-                        to: '#'
+                        to: '/marketing/referralRewardPoint'
                     }
                 ]
             },
