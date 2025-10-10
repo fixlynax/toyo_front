@@ -1,7 +1,24 @@
 <template>
     <Fluid>
-        <div class="flex flex-col gap-8">
+        <!-- Main Content Area -->
+        <div class="card flex flex-col gap-6 w-full">
             <!-- Header -->
+            <div class="text-2xl font-bold text-gray-800">Direct Shipment Summary</div>
+
+            <!-- Summary Cards -->
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
+                <div class="card p-4 !bg-gray-50 border rounded-lg shadow-sm">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <div class="text-sm font-semibold text-gray-600">Total Shipments</div>
+                            <div class="text-2xl font-bold text-blue-600 mt-1">{{ summaryStats.totalShipments.toLocaleString() }}</div>
+                        </div>
+                        <div class="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center">
+                            <i class="pi pi-truck text-blue-600 text-xl"></i>
+                        </div>
+                    </div>
+                    <div class="text-xs text-green-600 mt-2"><i class="pi pi-arrow-up"></i> 15.2% from last period</div>
+                </div>
             <div class="card flex flex-col gap-6 w-full">
                 <div class="text-2xl font-bold text-gray-800 border-b pb-2 mb-4">
                     Direct Shipment Summary
@@ -25,78 +42,110 @@
                         </div>
                     </div>
 
-                    <div class="text-center p-4 border rounded-lg bg-purple-50">
-                        <div class="text-3xl font-bold text-purple-600">RM {{ (summaryStats.totalValue / 1000).toFixed(0) }}K</div>
-                        <div class="text-sm font-semibold text-gray-700 mt-2">Total Value</div>
-                        <div class="text-xs text-green-600 mt-1">
-                            <i class="pi pi-arrow-up"></i> 8.7% from last period
+                <div class="card p-4 bg-white border rounded-lg shadow-sm">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <div class="text-sm font-semibold text-gray-600">Completed</div>
+                            <div class="text-2xl font-bold text-green-600 mt-1">{{ summaryStats.completedShipments.toLocaleString() }}</div>
+                        </div>
+                        <div class="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center">
+                            <i class="pi pi-check-circle text-green-600 text-xl"></i>
                         </div>
                     </div>
-
-                    <div class="text-center p-4 border rounded-lg bg-orange-50">
-                        <div class="text-3xl font-bold text-orange-600">{{ summaryStats.avgDeliveryTime }}</div>
-                        <div class="text-sm font-semibold text-gray-700 mt-2">Avg Delivery Days</div>
-                        <div class="text-xs text-red-600 mt-1">
-                            <i class="pi pi-arrow-up"></i> 1.2 days longer
-                        </div>
+                    <div class="text-xs text-gray-500 mt-2">
+                        {{ summaryStats.completionRate }}% completion rate
                     </div>
                 </div>
 
-                <!-- Charts Row -->
-                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
-                    <!-- Status Distribution -->
-                    <div class="border rounded-lg p-4">
-                        <div class="text-lg font-bold text-gray-800 mb-4">Shipment Status</div>
-                        <Chart 
-                            type="doughnut" 
-                            :data="statusChartData" 
-                            :options="chartOptions"
-                            style="height: 250px"
-                        />
+                <div class="card p-4 bg-white border rounded-lg shadow-sm">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <div class="text-sm font-semibold text-gray-600">Total Value</div>
+                            <div class="text-2xl font-bold text-purple-600 mt-1">RM {{ summaryStats.totalValue.toLocaleString() }}</div>
+                        </div>
+                        <div class="w-12 h-12 bg-purple-100 rounded-full flex items-center justify-center">
+                            <i class="pi pi-dollar text-purple-600 text-xl"></i>
+                        </div>
                     </div>
-
-                    <!-- Monthly Trend -->
-                    <div class="border rounded-lg p-4">
-                        <div class="text-lg font-bold text-gray-800 mb-4">Monthly Trend</div>
-                        <Chart 
-                            type="bar" 
-                            :data="monthlyTrendChartData" 
-                            :options="chartOptions"
-                            style="height: 250px"
-                        />
+                    <div class="text-xs text-green-600 mt-2">
+                        <i class="pi pi-arrow-up"></i> 8.7% from last period
                     </div>
                 </div>
-            
+
+                <div class="card p-4 bg-white border rounded-lg shadow-sm">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <div class="text-sm font-semibold text-gray-600">Avg Delivery Time</div>
+                            <div class="text-2xl font-bold text-orange-600 mt-1">{{ summaryStats.avgDeliveryTime }} days</div>
+                        </div>
+                        <div class="w-12 h-12 bg-orange-100 rounded-full flex items-center justify-center">
+                            <i class="pi pi-clock text-orange-600 text-xl"></i>
+                        </div>
+                    </div>
+                    <div class="text-xs text-red-600 mt-2">
+                        <i class="pi pi-arrow-up"></i> 1.2 days longer
+                    </div>
+                </div>
+            </div>
+
+            <!-- Charts Section -->
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <!-- Shipment Status Distribution -->
+                <div class="card p-4 bg-white border rounded-lg">
+                    <div class="text-lg font-bold text-gray-800 mb-4">Shipment Status Distribution</div>
+                    <Chart 
+                        type="doughnut" 
+                        :data="statusChartData" 
+                        :options="chartOptions"
+                        style="height: 300px"
+                    />
+                </div>
+
+                <!-- Monthly Shipment Trend -->
+                <div class="card p-4 bg-white border rounded-lg">
+                    <div class="text-lg font-bold text-gray-800 mb-4">Monthly Shipment Trend</div>
+                    <Chart 
+                        type="bar" 
+                        :data="monthlyTrendChartData" 
+                        :options="chartOptions"
+                        style="height: 300px"
+                    />
+                </div>
+
+                <!-- Regional Distribution -->
+                <div class="card p-4 bg-white border rounded-lg">
+                    <div class="text-lg font-bold text-gray-800 mb-4">Regional Distribution</div>
+                    <Chart 
+                        type="pie" 
+                        :data="regionalChartData" 
+                        :options="chartOptions"
+                        style="height: 300px"
+                    />
+                </div>
+
+                <!-- Customer Type Distribution -->
+                <div class="card p-4 bg-white border rounded-lg">
+                    <div class="text-lg font-bold text-gray-800 mb-4">Customer Type Distribution</div>
+                    <Chart 
+                        type="polarArea" 
+                        :data="customerTypeChartData" 
+                        :options="chartOptions"
+                        style="height: 300px"
+                    />
+                </div>
+            </div>
+
+            <!-- Detailed Shipments Table -->
+            <div class="card flex flex-col gap-6 w-full">
                 <div class="flex justify-between items-center">
                     <div class="text-lg font-bold text-gray-800">Direct Shipment Details</div>
                     <div class="flex gap-2">
-                        <Button 
-                            label="Export CSV" 
-                            icon="pi pi-download" 
-                            class="p-button-outlined p-button-secondary"
-                            @click="exportToCSV" 
-                        />
-                        <Button 
-                            label="Print Report" 
-                            icon="pi pi-print" 
-                            class="p-button-outlined"
-                            @click="printReport" 
-                        />
+                        <Button label="Export CSV" icon="pi pi-download" class="p-button-outlined p-button-secondary" @click="exportToCSV" />
+                        <Button label="Print Report" icon="pi pi-print" class="p-button-outlined" @click="printReport" />
                     </div>
                 </div>
 
-                <DataTable 
-                    :value="shipmentData" 
-                    :paginator="true" 
-                    :rows="10"
-                    :rowsPerPageOptions="[5, 10, 20, 50]"
-                    dataKey="shipmentId" 
-                    :rowHover="true"
-                    :loading="loading"
-                    responsiveLayout="scroll"
-                    :scrollable="true"
-                    scrollHeight="400px"
-                >
+                <DataTable :value="shipmentData" :paginator="true" :rows="10" :rowsPerPageOptions="[5, 10, 20, 50]" dataKey="shipmentId" :rowHover="true" :loading="loading" responsiveLayout="scroll" :scrollable="true" scrollHeight="400px">
                     <Column field="shipmentId" header="Shipment ID" style="min-width: 120px" :sortable="true">
                         <template #body="{ data }">
                             <div class="font-mono text-sm font-semibold text-blue-600">
@@ -131,18 +180,13 @@
 
                     <Column field="totalValue" header="Order Value" style="min-width: 120px" :sortable="true">
                         <template #body="{ data }">
-                            <div class="font-bold text-purple-600">
-                                RM {{ data.totalValue.toLocaleString() }}
-                            </div>
+                            <div class="font-bold text-purple-600">RM {{ data.totalValue.toLocaleString() }}</div>
                         </template>
                     </Column>
 
                     <Column field="status" header="Status" style="min-width: 120px" :sortable="true">
                         <template #body="{ data }">
-                            <Tag 
-                                :value="data.status" 
-                                :severity="getStatusSeverity(data.status)" 
-                            />
+                            <Tag :value="data.status" :severity="getStatusSeverity(data.status)" />
                         </template>
                     </Column>
 
@@ -172,12 +216,7 @@
 
                     <Column header="Actions" style="min-width: 80px">
                         <template #body="{ data }">
-                            <Button 
-                                icon="pi pi-eye" 
-                                class="p-button-info p-button-text p-button-sm" 
-                                v-tooltip="'View Details'"
-                                @click="viewShipmentDetails(data)" 
-                            />
+                            <Button icon="pi pi-eye" class="p-button-info p-button-text p-button-sm" v-tooltip="'View Details'" @click="viewShipmentDetails(data)" />
                         </template>
                     </Column>
 
@@ -205,6 +244,38 @@ import { ref, reactive, onMounted } from 'vue';
 import Chart from 'primevue/chart';
 
 const loading = ref(false);
+
+// Filters
+const filters = reactive({
+    dateRange: null,
+    status: null,
+    customerType: null,
+    region: null
+});
+
+// Options for filters
+const statusOptions = ref([
+    { label: 'All Status', value: null },
+    { label: 'Pending', value: 'Pending' },
+    { label: 'Processing', value: 'Processing' },
+    { label: 'Shipped', value: 'Shipped' },
+    { label: 'Delivered', value: 'Delivered' },
+    { label: 'Cancelled', value: 'Cancelled' }
+]);
+
+const customerTypeOptions = ref([
+    { label: 'All Types', value: null },
+    { label: 'Dealer', value: 'Dealer' },
+    { label: 'Distributor', value: 'Distributor' },
+    { label: 'Corporate', value: 'Corporate' },
+    { label: 'Retail', value: 'Retail' }
+]);
+
+const regionOptions = ref([
+    'All Regions',
+    'Central Region', 'Northern Region', 'Southern Region', 
+    'East Coast', 'East Malaysia', 'Sabah', 'Sarawak'
+]);
 
 // Summary Statistics
 const summaryStats = reactive({
@@ -331,12 +402,18 @@ const formatDate = (date) => {
 
 const getStatusSeverity = (status) => {
     switch (status) {
-        case 'Delivered': return 'success';
-        case 'Shipped': return 'info';
-        case 'Processing': return 'warning';
-        case 'Pending': return 'secondary';
-        case 'Cancelled': return 'danger';
-        default: return 'info';
+        case 'Delivered':
+            return 'success';
+        case 'Shipped':
+            return 'info';
+        case 'Processing':
+            return 'warning';
+        case 'Pending':
+            return 'secondary';
+        case 'Cancelled':
+            return 'danger';
+        default:
+            return 'info';
     }
 };
 

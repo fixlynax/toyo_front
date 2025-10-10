@@ -163,7 +163,10 @@
                 </div>
 
                 <!-- Submit -->
-                <div class="flex justify-end mt-8">
+                <div class="flex justify-end mt-8 gap-2">
+                    <div class="w-40">
+                        <Button label="Cancel" class="p-button-secondary w-full mr-2" @click="$router.back()" />
+                    </div>
                     <div class="w-40">
                         <Button label="Submit" class="w-full" @click="submitForm" />
                     </div>

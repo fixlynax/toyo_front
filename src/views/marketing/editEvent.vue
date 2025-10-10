@@ -93,7 +93,8 @@
                                 <img :src="event.image3URL" alt="Preview 3" class="rounded-lg shadow-md object-cover w-full h-80" />
                                 <!-- Remove button -->
                                 <button @click="removeImage('image3URL')" class="absolute top-2 right-2 bg-red-500 text-white px-2 py-1 rounded-full hover:bg-red-600" title="Remove Image">&times;</button>
-                            </div>                        </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
 
@@ -121,7 +122,11 @@
                 </div>
 
                 <!-- Submit -->
-                <div class="flex justify-end mt-2">
+                <div class="flex justify-end mt-2 gap-2">
+                    <div class="w-40">
+                        <Button label="Cancel" class="p-button-secondary w-full mr-2" @click="$router.back()" />
+                    </div>
+
                     <div class="w-40">
                         <RouterLink to="/marketing/detailEvent">
                             <Button label="Update" class="w-full" />
