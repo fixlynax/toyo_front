@@ -48,7 +48,11 @@
                 </div>
 
                 <!-- Submit -->
+
                 <div class="flex justify-end mt-8 gap-2">
+                    <div class="w-40">
+                        <Button label="Cancel" class="p-button-secondary w-full mr-2" @click="$router.back()" />
+                    </div>
                     <div class="w-40">
                         <RouterLink to="/marketing/listnews">
                             <Button label="Save as Draft" class="w-full p-button-outlined p-button-info" @click="saveDraft" />

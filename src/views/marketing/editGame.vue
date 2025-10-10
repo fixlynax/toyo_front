@@ -113,7 +113,7 @@
                                         <InputNumber v-model="prize.value.platinum" class="w-full" />
                                     </div>
                                 </div>
-                                
+
                                 <div class="mt-3">
                                     <label class="block">Prize Quota</label>
                                     <InputNumber v-model="prize.quota" class="w-full" />
@@ -175,6 +175,10 @@
 
                 <!-- Submit -->
                 <div class="flex justify-end mt-8">
+                    <div class="w-40">
+                        <Button label="Cancel" class="p-button-secondary w-full mr-2" @click="$router.back()" />
+                    </div>
+
                     <div class="w-40">
                         <RouterLink to="/marketing/detailGame">
                             <Button label="Update" class="w-full" />

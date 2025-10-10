@@ -29,6 +29,12 @@
                         <h1 class="text-2xl font-bold text-gray-800">{{ news.title }}</h1>
                         <p class="text-lg font-medium">{{ news.desc }}</p>
                     </div>
+                    <!-- Cancel Button -->
+                    <div class="flex justify-end mt-2 gap-2">
+                        <div class="w-40">
+                            <Button label="Back" class="p-button-secondary w-full mr-2" @click="$router.back()" />
+                        </div>
+                    </div>
                 </div>
             </div>
 

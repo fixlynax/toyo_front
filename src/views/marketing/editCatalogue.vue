@@ -221,8 +221,8 @@
                         <Dropdown v-model="catalogue.birthdayReward.type" :options="birthdayRewardTypeOptions" optionLabel="label" optionValue="value" placeholder="Select reward type" class="w-full" />
                     </div> -->
 
-                    <!-- If Points -->
-                    <!-- <div v-if="catalogue.birthdayReward.type === 'Points'" class="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <!-- If Points -->
+        <!-- <div v-if="catalogue.birthdayReward.type === 'Points'" class="grid grid-cols-1 md:grid-cols-3 gap-4">
                         <div>
                             <label class="block font-bold text-gray-700 mb-1">Silver Tier Points</label>
                             <InputNumber v-model="catalogue.birthdayReward.points.silver" class="w-full" />
@@ -237,8 +237,8 @@
                         </div>
                     </div> -->
 
-                    <!-- If Reward -->
-                    <!-- <div v-else-if="catalogue.birthdayReward.type === 'Reward'" class="mt-4">
+        <!-- If Reward -->
+        <!-- <div v-else-if="catalogue.birthdayReward.type === 'Reward'" class="mt-4">
                         <label class="block font-bold text-gray-700 mb-1">Select Reward Item</label>
                         <Dropdown v-model="catalogue.birthdayReward.itemId" :options="rewardItems" optionLabel="title" optionValue="id" placeholder="Select a reward item" class="w-full" />
                     </div>
@@ -272,7 +272,11 @@
                     </div>
                 </div>
 
-                <div class="flex justify-end mt-2">
+                <div class="flex justify-end mt-2 gap-2">
+                    <div class="w-40">
+                        <Button label="Cancel" class="p-button-secondary w-full mr-2" @click="$router.back()" />
+                    </div>
+
                     <div class="w-40">
                         <RouterLink to="/marketing/detailcatalogue">
                             <Button v-if="catalogue.status === 0" label="Save" class="w-full" />
@@ -462,4 +466,3 @@ const removeImage = (property) => {
     catalogue.value[property] = ''; // or null, depending on your preference
 };
 </script>
-

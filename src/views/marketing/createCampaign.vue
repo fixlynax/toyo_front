@@ -183,10 +183,13 @@
                 </div>
 
                 <!-- Submit -->
-                <div class="flex justify-end mt-4">
+                <div class="flex justify-end mt-4 gap-2">
+                    <div class="w-40">
+                        <Button label="Cancel" class="p-button-secondary w-full mr-2" @click="$router.back()" />
+                    </div>
                     <div class="w-40">
                         <RouterLink to="/marketing/detailCampaign">
-                            <Button label="Create" class="w-full" />
+                            <Button label="Save" class="w-full" />
                         </RouterLink>
                     </div>
                 </div>
