@@ -5,48 +5,34 @@
             <!-- Header -->
             <div class="text-2xl font-bold text-gray-800">Direct Shipment Summary</div>
 
-            <!-- Summary Cards -->
-            <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
-                <div class="card p-4 !bg-gray-50 border rounded-lg shadow-sm">
+            <!-- Summary Stats Row -->
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+                <!-- Total Shipments -->
+                <div class="card p-4 bg-gray-50 border rounded-lg shadow-sm">
                     <div class="flex items-center justify-between">
                         <div>
                             <div class="text-sm font-semibold text-gray-600">Total Shipments</div>
-                            <div class="text-2xl font-bold text-blue-600 mt-1">{{ summaryStats.totalShipments.toLocaleString() }}</div>
+                            <div class="text-2xl font-bold text-blue-600 mt-1">
+                                {{ summaryStats.totalShipments.toLocaleString() }}
+                            </div>
                         </div>
                         <div class="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center">
                             <i class="pi pi-truck text-blue-600 text-xl"></i>
                         </div>
                     </div>
-                    <div class="text-xs text-green-600 mt-2"><i class="pi pi-arrow-up"></i> 15.2% from last period</div>
-                </div>
-            <div class="card flex flex-col gap-6 w-full">
-                <div class="text-2xl font-bold text-gray-800 border-b pb-2 mb-4">
-                    Direct Shipment Summary
-                </div>
-                
-                <!-- Summary Stats Row -->
-                <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
-                    <div class="text-center p-4 border rounded-lg bg-blue-50">
-                        <div class="text-3xl font-bold text-blue-600">{{ summaryStats.totalShipments.toLocaleString() }}</div>
-                        <div class="text-sm font-semibold text-gray-700 mt-2">Total Shipments</div>
-                        <div class="text-xs text-green-600 mt-1">
-                            <i class="pi pi-arrow-up"></i> 15.2% from last period
-                        </div>
+                    <div class="text-xs text-green-600 mt-2">
+                        <i class="pi pi-arrow-up"></i> 15.2% from last period
                     </div>
+                </div>
 
-                    <div class="text-center p-4 border rounded-lg bg-green-50">
-                        <div class="text-3xl font-bold text-green-600">{{ summaryStats.completedShipments.toLocaleString() }}</div>
-                        <div class="text-sm font-semibold text-gray-700 mt-2">Completed</div>
-                        <div class="text-xs text-gray-500 mt-1">
-                            {{ summaryStats.completionRate }}% completion rate
-                        </div>
-                    </div>
-
+                <!-- Completed -->
                 <div class="card p-4 bg-white border rounded-lg shadow-sm">
                     <div class="flex items-center justify-between">
                         <div>
                             <div class="text-sm font-semibold text-gray-600">Completed</div>
-                            <div class="text-2xl font-bold text-green-600 mt-1">{{ summaryStats.completedShipments.toLocaleString() }}</div>
+                            <div class="text-2xl font-bold text-green-600 mt-1">
+                                {{ summaryStats.completedShipments.toLocaleString() }}
+                            </div>
                         </div>
                         <div class="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center">
                             <i class="pi pi-check-circle text-green-600 text-xl"></i>
@@ -57,11 +43,14 @@
                     </div>
                 </div>
 
+                <!-- Total Value -->
                 <div class="card p-4 bg-white border rounded-lg shadow-sm">
                     <div class="flex items-center justify-between">
                         <div>
                             <div class="text-sm font-semibold text-gray-600">Total Value</div>
-                            <div class="text-2xl font-bold text-purple-600 mt-1">RM {{ summaryStats.totalValue.toLocaleString() }}</div>
+                            <div class="text-2xl font-bold text-purple-600 mt-1">
+                                RM {{ summaryStats.totalValue.toLocaleString() }}
+                            </div>
                         </div>
                         <div class="w-12 h-12 bg-purple-100 rounded-full flex items-center justify-center">
                             <i class="pi pi-dollar text-purple-600 text-xl"></i>
@@ -72,11 +61,14 @@
                     </div>
                 </div>
 
+                <!-- Avg Delivery Time -->
                 <div class="card p-4 bg-white border rounded-lg shadow-sm">
                     <div class="flex items-center justify-between">
                         <div>
                             <div class="text-sm font-semibold text-gray-600">Avg Delivery Time</div>
-                            <div class="text-2xl font-bold text-orange-600 mt-1">{{ summaryStats.avgDeliveryTime }} days</div>
+                            <div class="text-2xl font-bold text-orange-600 mt-1">
+                                {{ summaryStats.avgDeliveryTime }} days
+                            </div>
                         </div>
                         <div class="w-12 h-12 bg-orange-100 rounded-full flex items-center justify-center">
                             <i class="pi pi-clock text-orange-600 text-xl"></i>
@@ -93,9 +85,9 @@
                 <!-- Shipment Status Distribution -->
                 <div class="card p-4 bg-white border rounded-lg">
                     <div class="text-lg font-bold text-gray-800 mb-4">Shipment Status Distribution</div>
-                    <Chart 
-                        type="doughnut" 
-                        :data="statusChartData" 
+                    <Chart
+                        type="doughnut"
+                        :data="statusChartData"
                         :options="chartOptions"
                         style="height: 300px"
                     />
@@ -104,31 +96,9 @@
                 <!-- Monthly Shipment Trend -->
                 <div class="card p-4 bg-white border rounded-lg">
                     <div class="text-lg font-bold text-gray-800 mb-4">Monthly Shipment Trend</div>
-                    <Chart 
-                        type="bar" 
-                        :data="monthlyTrendChartData" 
-                        :options="chartOptions"
-                        style="height: 300px"
-                    />
-                </div>
-
-                <!-- Regional Distribution -->
-                <div class="card p-4 bg-white border rounded-lg">
-                    <div class="text-lg font-bold text-gray-800 mb-4">Regional Distribution</div>
-                    <Chart 
-                        type="pie" 
-                        :data="regionalChartData" 
-                        :options="chartOptions"
-                        style="height: 300px"
-                    />
-                </div>
-
-                <!-- Customer Type Distribution -->
-                <div class="card p-4 bg-white border rounded-lg">
-                    <div class="text-lg font-bold text-gray-800 mb-4">Customer Type Distribution</div>
-                    <Chart 
-                        type="polarArea" 
-                        :data="customerTypeChartData" 
+                    <Chart
+                        type="bar"
+                        :data="monthlyTrendChartData"
                         :options="chartOptions"
                         style="height: 300px"
                     />
@@ -145,7 +115,18 @@
                     </div>
                 </div>
 
-                <DataTable :value="shipmentData" :paginator="true" :rows="10" :rowsPerPageOptions="[5, 10, 20, 50]" dataKey="shipmentId" :rowHover="true" :loading="loading" responsiveLayout="scroll" :scrollable="true" scrollHeight="400px">
+                <DataTable
+                    :value="shipmentData"
+                    :paginator="true"
+                    :rows="10"
+                    :rowsPerPageOptions="[5, 10, 20, 50]"
+                    dataKey="shipmentId"
+                    :rowHover="true"
+                    :loading="loading"
+                    responsiveLayout="scroll"
+                    :scrollable="true"
+                    scrollHeight="400px"
+                >
                     <Column field="shipmentId" header="Shipment ID" style="min-width: 120px" :sortable="true">
                         <template #body="{ data }">
                             <div class="font-mono text-sm font-semibold text-blue-600">
@@ -156,9 +137,7 @@
 
                     <Column field="orderDate" header="Order Date" style="min-width: 100px" :sortable="true">
                         <template #body="{ data }">
-                            <div class="text-sm">
-                                {{ formatDate(data.orderDate) }}
-                            </div>
+                            <div class="text-sm">{{ formatDate(data.orderDate) }}</div>
                         </template>
                     </Column>
 
@@ -192,9 +171,7 @@
 
                     <Column field="shipmentDate" header="Shipment Date" style="min-width: 100px" :sortable="true">
                         <template #body="{ data }">
-                            <div class="text-sm">
-                                {{ formatDate(data.shipmentDate) }}
-                            </div>
+                            <div class="text-sm">{{ formatDate(data.shipmentDate) }}</div>
                         </template>
                     </Column>
 
@@ -245,39 +222,7 @@ import Chart from 'primevue/chart';
 
 const loading = ref(false);
 
-// Filters
-const filters = reactive({
-    dateRange: null,
-    status: null,
-    customerType: null,
-    region: null
-});
-
-// Options for filters
-const statusOptions = ref([
-    { label: 'All Status', value: null },
-    { label: 'Pending', value: 'Pending' },
-    { label: 'Processing', value: 'Processing' },
-    { label: 'Shipped', value: 'Shipped' },
-    { label: 'Delivered', value: 'Delivered' },
-    { label: 'Cancelled', value: 'Cancelled' }
-]);
-
-const customerTypeOptions = ref([
-    { label: 'All Types', value: null },
-    { label: 'Dealer', value: 'Dealer' },
-    { label: 'Distributor', value: 'Distributor' },
-    { label: 'Corporate', value: 'Corporate' },
-    { label: 'Retail', value: 'Retail' }
-]);
-
-const regionOptions = ref([
-    'All Regions',
-    'Central Region', 'Northern Region', 'Southern Region', 
-    'East Coast', 'East Malaysia', 'Sabah', 'Sarawak'
-]);
-
-// Summary Statistics
+// Summary Stats
 const summaryStats = reactive({
     totalShipments: 1247,
     completedShipments: 985,
@@ -286,7 +231,7 @@ const summaryStats = reactive({
     avgDeliveryTime: 3.2
 });
 
-// Sample data
+// Shipment Data
 const shipmentData = ref([
     {
         shipmentId: 'DS-2024-001234',
@@ -311,53 +256,16 @@ const shipmentData = ref([
         shipmentDate: new Date('2024-01-17'),
         deliveryDate: null,
         deliveryTime: null
-    },
-    {
-        shipmentId: 'DS-2024-001236',
-        orderDate: new Date('2024-01-14'),
-        customerName: 'ABC Motors Sdn Bhd',
-        customerType: 'Corporate',
-        region: 'Northern Region',
-        totalValue: 32500,
-        status: 'Processing',
-        shipmentDate: null,
-        deliveryDate: null,
-        deliveryTime: null
-    },
-    {
-        shipmentId: 'DS-2024-001237',
-        orderDate: new Date('2024-01-13'),
-        customerName: 'City Auto Retail',
-        customerType: 'Retail',
-        region: 'East Coast',
-        totalValue: 8900,
-        status: 'Delivered',
-        shipmentDate: new Date('2024-01-14'),
-        deliveryDate: new Date('2024-01-17'),
-        deliveryTime: 3
-    },
-    {
-        shipmentId: 'DS-2024-001238',
-        orderDate: new Date('2024-01-12'),
-        customerName: 'Borneo Tyre Services',
-        customerType: 'Dealer',
-        region: 'East Malaysia',
-        totalValue: 15600,
-        status: 'Cancelled',
-        shipmentDate: null,
-        deliveryDate: null,
-        deliveryTime: null
     }
 ]);
 
-// Chart Data
+// Charts
 const statusChartData = ref({
     labels: ['Delivered', 'Shipped', 'Processing', 'Pending', 'Cancelled'],
     datasets: [
         {
             data: [65, 15, 12, 6, 2],
-            backgroundColor: ['#10B981', '#3B82F6', '#F59E0B', '#6B7280', '#EF4444'],
-            hoverBackgroundColor: ['#059669', '#2563EB', '#D97706', '#4B5563', '#DC2626']
+            backgroundColor: ['#10B981', '#3B82F6', '#F59E0B', '#6B7280', '#EF4444']
         }
     ]
 });
@@ -368,9 +276,27 @@ const monthlyTrendChartData = ref({
         {
             label: 'Shipments',
             data: [120, 135, 98, 156, 145, 167, 189, 176, 154, 198, 210, 195],
-            backgroundColor: '#3B82F6',
-            borderColor: '#2563EB',
-            borderWidth: 1
+            backgroundColor: '#3B82F6'
+        }
+    ]
+});
+
+const regionalChartData = ref({
+    labels: ['Central', 'North', 'South', 'East Coast', 'East Malaysia'],
+    datasets: [
+        {
+            data: [30, 25, 20, 15, 10],
+            backgroundColor: ['#3B82F6', '#10B981', '#F59E0B', '#8B5CF6', '#EF4444']
+        }
+    ]
+});
+
+const customerTypeChartData = ref({
+    labels: ['Dealer', 'Distributor', 'Corporate', 'Retail'],
+    datasets: [
+        {
+            data: [40, 30, 20, 10],
+            backgroundColor: ['#3B82F6', '#10B981', '#F59E0B', '#EF4444']
         }
     ]
 });
@@ -379,41 +305,24 @@ const chartOptions = ref({
     plugins: {
         legend: {
             position: 'bottom',
-            labels: {
-                usePointStyle: true,
-                boxWidth: 8,
-                font: {
-                    size: 11
-                }
-            }
+            labels: { usePointStyle: true, boxWidth: 8, font: { size: 11 } }
         }
     },
     maintainAspectRatio: false
 });
 
 // Methods
-const formatDate = (date) => {
-    return new Date(date).toLocaleDateString('en-MY', {
-        year: 'numeric',
-        month: 'short',
-        day: 'numeric'
-    });
-};
+const formatDate = (date) =>
+    new Date(date).toLocaleDateString('en-MY', { year: 'numeric', month: 'short', day: 'numeric' });
 
 const getStatusSeverity = (status) => {
     switch (status) {
-        case 'Delivered':
-            return 'success';
-        case 'Shipped':
-            return 'info';
-        case 'Processing':
-            return 'warning';
-        case 'Pending':
-            return 'secondary';
-        case 'Cancelled':
-            return 'danger';
-        default:
-            return 'info';
+        case 'Delivered': return 'success';
+        case 'Shipped': return 'info';
+        case 'Processing': return 'warning';
+        case 'Pending': return 'secondary';
+        case 'Cancelled': return 'danger';
+        default: return 'info';
     }
 };
 
@@ -424,35 +333,20 @@ const getDeliveryTimeClass = (days) => {
     return 'text-red-600';
 };
 
-const exportToCSV = () => {
-    console.log('Exporting to CSV...');
-    alert('CSV export functionality would be implemented here');
-};
+const exportToCSV = () => alert('CSV export functionality would be implemented here');
+const printReport = () => window.print();
+const viewShipmentDetails = (shipment) => alert(`Viewing details for shipment: ${shipment.shipmentId}`);
 
-const printReport = () => {
-    window.print();
-};
-
-const viewShipmentDetails = (shipment) => {
-    console.log('Viewing shipment details:', shipment);
-    alert(`Viewing details for shipment: ${shipment.shipmentId}`);
-};
-
-// Initialize
-onMounted(() => {
-    console.log('Direct Shipment Summary component mounted');
-});
+onMounted(() => console.log('Direct Shipment Summary mounted'));
 </script>
 
 <style scoped>
 :deep(.p-datatable) {
     font-size: 0.875rem;
 }
-
 :deep(.p-chart) {
     font-size: 0.75rem;
 }
-
 @media print {
     .no-print {
         display: none !important;
