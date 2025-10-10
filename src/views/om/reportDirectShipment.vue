@@ -7,7 +7,7 @@
 
             <!-- Summary Cards -->
             <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
-                <div class="card p-4 !bg-gray-50 border rounded-lg shadow-sm ">
+                <div class="card p-4 !bg-gray-50 border rounded-lg shadow-sm">
                     <div class="flex items-center justify-between">
                         <div>
                             <div class="text-sm font-semibold text-gray-600">Total Shipments</div>
@@ -106,7 +106,7 @@
                         <div v-for="metric in performanceMetrics" :key="metric.label" class="flex justify-between items-center">
                             <span class="text-gray-700">{{ metric.label }}</span>
                             <div class="flex items-center gap-2">
-                                <span class="font-bold" :class="metric.color">{{ metric.value }}%</span>
+                                <span class="font-bold bg-white" :class="metric.color"> {{ metric.value }}% </span>
                                 <div class="w-24 bg-gray-200 rounded-full h-2">
                                     <div class="h-2 rounded-full" :class="metric.color" :style="{ width: metric.value + '%' }"></div>
                                 </div>
@@ -114,7 +114,7 @@
                         </div>
                     </div>
                 </div>
-                
+
                 <!-- Top Customers -->
                 <div class="card p-4 bg-white border rounded-lg">
                     <div class="text-lg font-bold text-gray-800 mb-4">Top Customers by Volume</div>
@@ -131,7 +131,7 @@
                         </div>
                     </div>
                 </div>
-                
+
                 <!-- Shipment Issues Summary -->
                 <div class="card p-4 bg-white border rounded-lg">
                     <div class="text-lg font-bold text-gray-800 mb-4">Shipment Issues Summary</div>
@@ -149,7 +149,6 @@
                     </div>
                 </div>
             </div>
-            
 
             <!-- Charts Section -->
             <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
@@ -177,8 +176,7 @@
                     <Chart type="polarArea" :data="customerTypeChartData" :options="chartOptions" style="height: 300px" />
                 </div>
             </div>
-            
-            
+
             <!-- Detailed Shipments Table -->
             <div class="card flex flex-col gap-6 w-full">
                 <div class="flex justify-between items-center">
@@ -188,7 +186,7 @@
                         <Button label="Print Report" icon="pi pi-print" class="p-button-outlined" @click="printReport" />
                     </div>
                 </div>
-        
+
                 <DataTable :value="shipmentData" :paginator="true" :rows="10" :rowsPerPageOptions="[5, 10, 20, 50]" dataKey="shipmentId" :rowHover="true" :loading="loading" responsiveLayout="scroll" :scrollable="true" scrollHeight="400px">
                     <Column field="shipmentId" header="Shipment ID" style="min-width: 120px" :sortable="true">
                         <template #body="{ data }">
@@ -197,7 +195,7 @@
                             </div>
                         </template>
                     </Column>
-        
+
                     <Column field="orderDate" header="Order Date" style="min-width: 100px" :sortable="true">
                         <template #body="{ data }">
                             <div class="text-sm">
@@ -205,14 +203,14 @@
                             </div>
                         </template>
                     </Column>
-        
+
                     <Column field="customerName" header="Customer" style="min-width: 150px" :sortable="true">
                         <template #body="{ data }">
                             <div class="font-semibold">{{ data.customerName }}</div>
                             <div class="text-xs text-gray-500">{{ data.customerType }}</div>
                         </template>
                     </Column>
-        
+
                     <Column field="region" header="Region" style="min-width: 100px" :sortable="true">
                         <template #body="{ data }">
                             <div class="flex items-center gap-1">
@@ -221,19 +219,19 @@
                             </div>
                         </template>
                     </Column>
-        
+
                     <Column field="totalValue" header="Order Value" style="min-width: 120px" :sortable="true">
                         <template #body="{ data }">
                             <div class="font-bold text-purple-600">RM {{ data.totalValue.toLocaleString() }}</div>
                         </template>
                     </Column>
-        
+
                     <Column field="status" header="Status" style="min-width: 120px" :sortable="true">
                         <template #body="{ data }">
                             <Tag :value="data.status" :severity="getStatusSeverity(data.status)" />
                         </template>
                     </Column>
-        
+
                     <Column field="shipmentDate" header="Shipment Date" style="min-width: 100px" :sortable="true">
                         <template #body="{ data }">
                             <div class="text-sm">
@@ -241,7 +239,7 @@
                             </div>
                         </template>
                     </Column>
-        
+
                     <Column field="deliveryDate" header="Delivery Date" style="min-width: 100px" :sortable="true">
                         <template #body="{ data }">
                             <div class="text-sm" :class="data.deliveryDate ? 'text-gray-800' : 'text-gray-400'">
@@ -249,7 +247,7 @@
                             </div>
                         </template>
                     </Column>
-        
+
                     <Column field="deliveryTime" header="Days" style="min-width: 80px" :sortable="true">
                         <template #body="{ data }">
                             <div class="text-center font-bold" :class="getDeliveryTimeClass(data.deliveryTime)">
@@ -257,13 +255,13 @@
                             </div>
                         </template>
                     </Column>
-        
+
                     <Column header="Actions" style="min-width: 100px">
                         <template #body="{ data }">
                             <Button icon="pi pi-eye" class="p-button-info p-button-text p-button-sm" v-tooltip="'View Details'" @click="viewShipmentDetails(data)" />
                         </template>
                     </Column>
-        
+
                     <template #empty>
                         <div class="text-center text-gray-500 py-8">
                             <i class="pi pi-inbox text-4xl mb-2"></i>
@@ -271,7 +269,7 @@
                             <div class="text-sm mt-1">Adjust your filters or generate a new report.</div>
                         </div>
                     </template>
-        
+
                     <template #loading>
                         <div class="text-center py-4">
                             <i class="pi pi-spinner pi-spin text-2xl mr-2"></i>
