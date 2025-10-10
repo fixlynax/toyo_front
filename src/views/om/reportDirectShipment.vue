@@ -1,91 +1,13 @@
 <template>
     <Fluid>
-        <div class="flex flex-col gap-8">
+        <!-- Main Content Area -->
+        <div class="card flex flex-col gap-6 w-full">
             <!-- Header -->
-            <div class="card flex flex-col gap-6 w-full">
-                <div class="text-2xl font-bold text-gray-800 border-b pb-2 mb-4">
-                    Direct Shipment Summary
-                </div>
-
-                <!-- Filters Section -->
-                <div class="border rounded-lg p-4 bg-gray-50">
-                    <div class="text-lg font-bold text-gray-800 mb-4">Report Filters</div>
-                    <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
-                        <!-- Date Range -->
-                        <div>
-                            <label class="block font-bold text-gray-700 mb-2">Date Range</label>
-                            <Calendar 
-                                v-model="filters.dateRange" 
-                                selectionMode="range" 
-                                :manualInput="false"
-                                placeholder="Select Date Range"
-                                class="w-full"
-                            />
-                        </div>
-
-                        <!-- Shipment Status -->
-                        <div>
-                            <label class="block font-bold text-gray-700 mb-2">Shipment Status</label>
-                            <Dropdown 
-                                v-model="filters.status" 
-                                :options="statusOptions" 
-                                optionLabel="label"
-                                optionValue="value"
-                                placeholder="All Status"
-                                class="w-full"
-                            />
-                        </div>
-
-                        <!-- Customer Type -->
-                        <div>
-                            <label class="block font-bold text-gray-700 mb-2">Customer Type</label>
-                            <Dropdown 
-                                v-model="filters.customerType" 
-                                :options="customerTypeOptions" 
-                                optionLabel="label"
-                                optionValue="value"
-                                placeholder="All Types"
-                                class="w-full"
-                            />
-                        </div>
-
-                        <!-- Region -->
-                        <div>
-                            <label class="block font-bold text-gray-700 mb-2">Region</label>
-                            <Dropdown 
-                                v-model="filters.region" 
-                                :options="regionOptions" 
-                                placeholder="All Regions"
-                                class="w-full"
-                            />
-                        </div>
-                    </div>
-
-                    <!-- Action Buttons -->
-                    <div class="flex justify-end gap-4 mt-4">
-                        <Button 
-                            label="Clear Filters" 
-                            class="p-button-outlined p-button-secondary"
-                            @click="clearFilters" 
-                        />
-                        <Button 
-                            label="Generate Report" 
-                            class="p-button-primary"
-                            @click="generateReport" 
-                        />
-                        <Button 
-                            label="Export Summary" 
-                            icon="pi pi-download" 
-                            class="p-button-success"
-                            @click="exportSummary" 
-                        />
-                    </div>
-                </div>
-            </div>
+            <div class="text-2xl font-bold text-gray-800">Direct Shipment Summary</div>
 
             <!-- Summary Cards -->
             <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
-                <div class="card p-4 bg-white border rounded-lg shadow-sm">
+                <div class="card p-4 !bg-gray-50 border rounded-lg shadow-sm ">
                     <div class="flex items-center justify-between">
                         <div>
                             <div class="text-sm font-semibold text-gray-600">Total Shipments</div>
@@ -95,12 +17,10 @@
                             <i class="pi pi-truck text-blue-600 text-xl"></i>
                         </div>
                     </div>
-                    <div class="text-xs text-green-600 mt-2">
-                        <i class="pi pi-arrow-up"></i> 15.2% from last period
-                    </div>
+                    <div class="text-xs text-green-600 mt-2"><i class="pi pi-arrow-up"></i> 15.2% from last period</div>
                 </div>
 
-                <div class="card p-4 bg-white border rounded-lg shadow-sm">
+                <div class="card p-4 !bg-gray-50 border rounded-lg shadow-sm">
                     <div class="flex items-center justify-between">
                         <div>
                             <div class="text-sm font-semibold text-gray-600">Completed</div>
@@ -110,12 +30,10 @@
                             <i class="pi pi-check-circle text-green-600 text-xl"></i>
                         </div>
                     </div>
-                    <div class="text-xs text-gray-500 mt-2">
-                        {{ summaryStats.completionRate }}% completion rate
-                    </div>
+                    <div class="text-xs text-gray-500 mt-2">{{ summaryStats.completionRate }}% completion rate</div>
                 </div>
 
-                <div class="card p-4 bg-white border rounded-lg shadow-sm">
+                <div class="card p-4 !bg-gray-50 border rounded-lg shadow-sm">
                     <div class="flex items-center justify-between">
                         <div>
                             <div class="text-sm font-semibold text-gray-600">Total Value</div>
@@ -125,12 +43,10 @@
                             <i class="pi pi-dollar text-purple-600 text-xl"></i>
                         </div>
                     </div>
-                    <div class="text-xs text-green-600 mt-2">
-                        <i class="pi pi-arrow-up"></i> 8.7% from last period
-                    </div>
+                    <div class="text-xs text-green-600 mt-2"><i class="pi pi-arrow-up"></i> 8.7% from last period</div>
                 </div>
 
-                <div class="card p-4 bg-white border rounded-lg shadow-sm">
+                <div class="card p-4 !bg-gray-50 border rounded-lg shadow-sm">
                     <div class="flex items-center justify-between">
                         <div>
                             <div class="text-sm font-semibold text-gray-600">Avg Delivery Time</div>
@@ -140,192 +56,47 @@
                             <i class="pi pi-clock text-orange-600 text-xl"></i>
                         </div>
                     </div>
-                    <div class="text-xs text-red-600 mt-2">
-                        <i class="pi pi-arrow-up"></i> 1.2 days longer
+                    <div class="text-xs text-red-600 mt-2"><i class="pi pi-arrow-up"></i> 1.2 days longer</div>
+                </div>
+            </div>
+        </div>
+        <div class="flex flex-col gap-8">
+            <!-- Filters Section - Moved to top -->
+            <div class="card border rounded-lg p-4 bg-gray-50">
+                <div class="text-lg font-bold text-gray-800 mb-4">Direct Shipment Report Filters</div>
+                <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+                    <!-- Date Range -->
+                    <div>
+                        <label class="block font-bold text-gray-700 mb-2">Date Range</label>
+                        <Calendar v-model="filters.dateRange" selectionMode="range" :manualInput="false" placeholder="Select Date Range" class="w-full" />
                     </div>
-                </div>
-            </div>
 
-            <!-- Charts Section -->
-            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                <!-- Shipment Status Distribution -->
-                <div class="card p-4 bg-white border rounded-lg">
-                    <div class="text-lg font-bold text-gray-800 mb-4">Shipment Status Distribution</div>
-                    <Chart 
-                        type="doughnut" 
-                        :data="statusChartData" 
-                        :options="chartOptions"
-                        style="height: 300px"
-                    />
-                </div>
+                    <!-- Shipment Status -->
+                    <div>
+                        <label class="block font-bold text-gray-700 mb-2">Shipment Status</label>
+                        <Dropdown v-model="filters.status" :options="statusOptions" optionLabel="label" optionValue="value" placeholder="All Status" class="w-full" />
+                    </div>
 
-                <!-- Monthly Shipment Trend -->
-                <div class="card p-4 bg-white border rounded-lg">
-                    <div class="text-lg font-bold text-gray-800 mb-4">Monthly Shipment Trend</div>
-                    <Chart 
-                        type="bar" 
-                        :data="monthlyTrendChartData" 
-                        :options="chartOptions"
-                        style="height: 300px"
-                    />
-                </div>
+                    <!-- Customer Type -->
+                    <div>
+                        <label class="block font-bold text-gray-700 mb-2">Customer Type</label>
+                        <Dropdown v-model="filters.customerType" :options="customerTypeOptions" optionLabel="label" optionValue="value" placeholder="All Types" class="w-full" />
+                    </div>
 
-                <!-- Regional Distribution -->
-                <div class="card p-4 bg-white border rounded-lg">
-                    <div class="text-lg font-bold text-gray-800 mb-4">Regional Distribution</div>
-                    <Chart 
-                        type="pie" 
-                        :data="regionalChartData" 
-                        :options="chartOptions"
-                        style="height: 300px"
-                    />
-                </div>
-
-                <!-- Customer Type Distribution -->
-                <div class="card p-4 bg-white border rounded-lg">
-                    <div class="text-lg font-bold text-gray-800 mb-4">Customer Type Distribution</div>
-                    <Chart 
-                        type="polarArea" 
-                        :data="customerTypeChartData" 
-                        :options="chartOptions"
-                        style="height: 300px"
-                    />
-                </div>
-            </div>
-
-            <!-- Detailed Shipments Table -->
-            <div class="card flex flex-col gap-6 w-full">
-                <div class="flex justify-between items-center">
-                    <div class="text-lg font-bold text-gray-800">Direct Shipment Details</div>
-                    <div class="flex gap-2">
-                        <Button 
-                            label="Export CSV" 
-                            icon="pi pi-download" 
-                            class="p-button-outlined p-button-secondary"
-                            @click="exportToCSV" 
-                        />
-                        <Button 
-                            label="Print Report" 
-                            icon="pi pi-print" 
-                            class="p-button-outlined"
-                            @click="printReport" 
-                        />
+                    <!-- Region -->
+                    <div>
+                        <label class="block font-bold text-gray-700 mb-2">Region</label>
+                        <Dropdown v-model="filters.region" :options="regionOptions" placeholder="All Regions" class="w-full" />
                     </div>
                 </div>
 
-                <DataTable 
-                    :value="shipmentData" 
-                    :paginator="true" 
-                    :rows="10"
-                    :rowsPerPageOptions="[5, 10, 20, 50]"
-                    dataKey="shipmentId" 
-                    :rowHover="true"
-                    :loading="loading"
-                    responsiveLayout="scroll"
-                    :scrollable="true"
-                    scrollHeight="400px"
-                >
-                    <Column field="shipmentId" header="Shipment ID" style="min-width: 120px" :sortable="true">
-                        <template #body="{ data }">
-                            <div class="font-mono text-sm font-semibold text-blue-600">
-                                {{ data.shipmentId }}
-                            </div>
-                        </template>
-                    </Column>
-
-                    <Column field="orderDate" header="Order Date" style="min-width: 100px" :sortable="true">
-                        <template #body="{ data }">
-                            <div class="text-sm">
-                                {{ formatDate(data.orderDate) }}
-                            </div>
-                        </template>
-                    </Column>
-
-                    <Column field="customerName" header="Customer" style="min-width: 150px" :sortable="true">
-                        <template #body="{ data }">
-                            <div class="font-semibold">{{ data.customerName }}</div>
-                            <div class="text-xs text-gray-500">{{ data.customerType }}</div>
-                        </template>
-                    </Column>
-
-                    <Column field="region" header="Region" style="min-width: 100px" :sortable="true">
-                        <template #body="{ data }">
-                            <div class="flex items-center gap-1">
-                                <i class="pi pi-map-marker text-gray-400 text-xs"></i>
-                                <span>{{ data.region }}</span>
-                            </div>
-                        </template>
-                    </Column>
-
-                    <Column field="totalValue" header="Order Value" style="min-width: 120px" :sortable="true">
-                        <template #body="{ data }">
-                            <div class="font-bold text-purple-600">
-                                RM {{ data.totalValue.toLocaleString() }}
-                            </div>
-                        </template>
-                    </Column>
-
-                    <Column field="status" header="Status" style="min-width: 120px" :sortable="true">
-                        <template #body="{ data }">
-                            <Tag 
-                                :value="data.status" 
-                                :severity="getStatusSeverity(data.status)" 
-                            />
-                        </template>
-                    </Column>
-
-                    <Column field="shipmentDate" header="Shipment Date" style="min-width: 100px" :sortable="true">
-                        <template #body="{ data }">
-                            <div class="text-sm">
-                                {{ formatDate(data.shipmentDate) }}
-                            </div>
-                        </template>
-                    </Column>
-
-                    <Column field="deliveryDate" header="Delivery Date" style="min-width: 100px" :sortable="true">
-                        <template #body="{ data }">
-                            <div class="text-sm" :class="data.deliveryDate ? 'text-gray-800' : 'text-gray-400'">
-                                {{ data.deliveryDate ? formatDate(data.deliveryDate) : 'Pending' }}
-                            </div>
-                        </template>
-                    </Column>
-
-                    <Column field="deliveryTime" header="Days" style="min-width: 80px" :sortable="true">
-                        <template #body="{ data }">
-                            <div class="text-center font-bold" :class="getDeliveryTimeClass(data.deliveryTime)">
-                                {{ data.deliveryTime || '-' }}
-                            </div>
-                        </template>
-                    </Column>
-
-                    <Column header="Actions" style="min-width: 100px">
-                        <template #body="{ data }">
-                            <Button 
-                                icon="pi pi-eye" 
-                                class="p-button-info p-button-text p-button-sm" 
-                                v-tooltip="'View Details'"
-                                @click="viewShipmentDetails(data)" 
-                            />
-                        </template>
-                    </Column>
-
-                    <template #empty>
-                        <div class="text-center text-gray-500 py-8">
-                            <i class="pi pi-inbox text-4xl mb-2"></i>
-                            <div>No shipment data found.</div>
-                            <div class="text-sm mt-1">Adjust your filters or generate a new report.</div>
-                        </div>
-                    </template>
-
-                    <template #loading>
-                        <div class="text-center py-4">
-                            <i class="pi pi-spinner pi-spin text-2xl mr-2"></i>
-                            Loading shipment data...
-                        </div>
-                    </template>
-                </DataTable>
+                <!-- Action Buttons -->
+                <div class="flex justify-end gap-4 mt-4">
+                    <Button label="Clear Filters" class="p-button-outlined p-button-secondary" @click="clearFilters" />
+                    <Button label="Generate Report" class="p-button-primary" @click="generateReport" />
+                    <Button label="Export Summary" icon="pi pi-download" class="p-button-success" @click="exportSummary" />
+                </div>
             </div>
-
             <!-- Performance Metrics -->
             <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
                 <!-- On-Time Delivery Performance -->
@@ -343,7 +114,7 @@
                         </div>
                     </div>
                 </div>
-
+                
                 <!-- Top Customers -->
                 <div class="card p-4 bg-white border rounded-lg">
                     <div class="text-lg font-bold text-gray-800 mb-4">Top Customers by Volume</div>
@@ -360,7 +131,7 @@
                         </div>
                     </div>
                 </div>
-
+                
                 <!-- Shipment Issues Summary -->
                 <div class="card p-4 bg-white border rounded-lg">
                     <div class="text-lg font-bold text-gray-800 mb-4">Shipment Issues Summary</div>
@@ -377,6 +148,137 @@
                         </div>
                     </div>
                 </div>
+            </div>
+            
+
+            <!-- Charts Section -->
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <!-- Shipment Status Distribution -->
+                <div class="card p-4 bg-white border rounded-lg">
+                    <div class="text-lg font-bold text-gray-800 mb-4">Shipment Status Distribution</div>
+                    <Chart type="doughnut" :data="statusChartData" :options="chartOptions" style="height: 300px" />
+                </div>
+
+                <!-- Monthly Shipment Trend -->
+                <div class="card p-4 bg-white border rounded-lg">
+                    <div class="text-lg font-bold text-gray-800 mb-4">Monthly Shipment Trend</div>
+                    <Chart type="bar" :data="monthlyTrendChartData" :options="chartOptions" style="height: 300px" />
+                </div>
+
+                <!-- Regional Distribution -->
+                <div class="card p-4 bg-white border rounded-lg">
+                    <div class="text-lg font-bold text-gray-800 mb-4">Regional Distribution</div>
+                    <Chart type="pie" :data="regionalChartData" :options="chartOptions" style="height: 300px" />
+                </div>
+
+                <!-- Customer Type Distribution -->
+                <div class="card p-4 bg-white border rounded-lg">
+                    <div class="text-lg font-bold text-gray-800 mb-4">Customer Type Distribution</div>
+                    <Chart type="polarArea" :data="customerTypeChartData" :options="chartOptions" style="height: 300px" />
+                </div>
+            </div>
+            
+            
+            <!-- Detailed Shipments Table -->
+            <div class="card flex flex-col gap-6 w-full">
+                <div class="flex justify-between items-center">
+                    <div class="text-lg font-bold text-gray-800">Direct Shipment Details</div>
+                    <div class="flex gap-2">
+                        <Button label="Export CSV" icon="pi pi-download" class="p-button-outlined p-button-secondary" @click="exportToCSV" />
+                        <Button label="Print Report" icon="pi pi-print" class="p-button-outlined" @click="printReport" />
+                    </div>
+                </div>
+        
+                <DataTable :value="shipmentData" :paginator="true" :rows="10" :rowsPerPageOptions="[5, 10, 20, 50]" dataKey="shipmentId" :rowHover="true" :loading="loading" responsiveLayout="scroll" :scrollable="true" scrollHeight="400px">
+                    <Column field="shipmentId" header="Shipment ID" style="min-width: 120px" :sortable="true">
+                        <template #body="{ data }">
+                            <div class="font-mono text-sm font-semibold text-blue-600">
+                                {{ data.shipmentId }}
+                            </div>
+                        </template>
+                    </Column>
+        
+                    <Column field="orderDate" header="Order Date" style="min-width: 100px" :sortable="true">
+                        <template #body="{ data }">
+                            <div class="text-sm">
+                                {{ formatDate(data.orderDate) }}
+                            </div>
+                        </template>
+                    </Column>
+        
+                    <Column field="customerName" header="Customer" style="min-width: 150px" :sortable="true">
+                        <template #body="{ data }">
+                            <div class="font-semibold">{{ data.customerName }}</div>
+                            <div class="text-xs text-gray-500">{{ data.customerType }}</div>
+                        </template>
+                    </Column>
+        
+                    <Column field="region" header="Region" style="min-width: 100px" :sortable="true">
+                        <template #body="{ data }">
+                            <div class="flex items-center gap-1">
+                                <i class="pi pi-map-marker text-gray-400 text-xs"></i>
+                                <span>{{ data.region }}</span>
+                            </div>
+                        </template>
+                    </Column>
+        
+                    <Column field="totalValue" header="Order Value" style="min-width: 120px" :sortable="true">
+                        <template #body="{ data }">
+                            <div class="font-bold text-purple-600">RM {{ data.totalValue.toLocaleString() }}</div>
+                        </template>
+                    </Column>
+        
+                    <Column field="status" header="Status" style="min-width: 120px" :sortable="true">
+                        <template #body="{ data }">
+                            <Tag :value="data.status" :severity="getStatusSeverity(data.status)" />
+                        </template>
+                    </Column>
+        
+                    <Column field="shipmentDate" header="Shipment Date" style="min-width: 100px" :sortable="true">
+                        <template #body="{ data }">
+                            <div class="text-sm">
+                                {{ formatDate(data.shipmentDate) }}
+                            </div>
+                        </template>
+                    </Column>
+        
+                    <Column field="deliveryDate" header="Delivery Date" style="min-width: 100px" :sortable="true">
+                        <template #body="{ data }">
+                            <div class="text-sm" :class="data.deliveryDate ? 'text-gray-800' : 'text-gray-400'">
+                                {{ data.deliveryDate ? formatDate(data.deliveryDate) : 'Pending' }}
+                            </div>
+                        </template>
+                    </Column>
+        
+                    <Column field="deliveryTime" header="Days" style="min-width: 80px" :sortable="true">
+                        <template #body="{ data }">
+                            <div class="text-center font-bold" :class="getDeliveryTimeClass(data.deliveryTime)">
+                                {{ data.deliveryTime || '-' }}
+                            </div>
+                        </template>
+                    </Column>
+        
+                    <Column header="Actions" style="min-width: 100px">
+                        <template #body="{ data }">
+                            <Button icon="pi pi-eye" class="p-button-info p-button-text p-button-sm" v-tooltip="'View Details'" @click="viewShipmentDetails(data)" />
+                        </template>
+                    </Column>
+        
+                    <template #empty>
+                        <div class="text-center text-gray-500 py-8">
+                            <i class="pi pi-inbox text-4xl mb-2"></i>
+                            <div>No shipment data found.</div>
+                            <div class="text-sm mt-1">Adjust your filters or generate a new report.</div>
+                        </div>
+                    </template>
+        
+                    <template #loading>
+                        <div class="text-center py-4">
+                            <i class="pi pi-spinner pi-spin text-2xl mr-2"></i>
+                            Loading shipment data...
+                        </div>
+                    </template>
+                </DataTable>
             </div>
         </div>
     </Fluid>
@@ -414,11 +316,7 @@ const customerTypeOptions = ref([
     { label: 'Retail', value: 'Retail' }
 ]);
 
-const regionOptions = ref([
-    'All Regions',
-    'Central Region', 'Northern Region', 'Southern Region', 
-    'East Coast', 'East Malaysia', 'Sabah', 'Sarawak'
-]);
+const regionOptions = ref(['All Regions', 'Central Region', 'Northern Region', 'Southern Region', 'East Coast', 'East Malaysia', 'Sabah', 'Sarawak']);
 
 // Summary Statistics
 const summaryStats = reactive({
@@ -586,12 +484,18 @@ const formatDate = (date) => {
 
 const getStatusSeverity = (status) => {
     switch (status) {
-        case 'Delivered': return 'success';
-        case 'Shipped': return 'info';
-        case 'Processing': return 'warning';
-        case 'Pending': return 'secondary';
-        case 'Cancelled': return 'danger';
-        default: return 'info';
+        case 'Delivered':
+            return 'success';
+        case 'Shipped':
+            return 'info';
+        case 'Processing':
+            return 'warning';
+        case 'Pending':
+            return 'secondary';
+        case 'Cancelled':
+            return 'danger';
+        default:
+            return 'info';
     }
 };
 
