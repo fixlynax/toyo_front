@@ -7,7 +7,7 @@
                 <!-- E-Wallet Section (PIN)   -->
                 <!-- ======================== -->
 
-                <div class="card flex flex-col w-full">
+                <div v-if="catalogue.type === 'E-Wallet'" class="card flex flex-col w-full">
                     <!-- Header -->
                     <div class="flex items-center justify-between border-b pb-3 mb-6">
                         <div class="flex items-center gap-2">
@@ -78,6 +78,148 @@
                         </Column>
                     </DataTable>
                 </div>
+                <div v-else-if="catalogue.type === 'E-Voucher'" class="card flex flex-col w-full">
+                    <!-- Header -->
+                    <div class="flex items-center justify-between border-b pb-3 mb-6">
+                        <div class="flex items-center gap-2">
+                            <RouterLink to="/marketing/listCatalogue">
+                                <Button icon="pi pi-arrow-left font-bold" class="p-button-text p-button-secondary text-xl" v-tooltip="'Back'" />
+                            </RouterLink>
+                            <div class="text-2xl font-bold text-gray-800">Details Catalogue</div>
+                        </div>
+
+                        <!-- Edit & Delete Buttons -->
+                        <div class="flex items-center gap-2">
+                            <RouterLink to="/marketing/editCatalogue">
+                                <Button label="Edit" class="p-button-info" size="small" />
+                            </RouterLink>
+                            <Button label="Delete" class="p-button-danger" size="small" />
+                        </div>
+                    </div>
+
+                    <!-- List PIN Section -->
+                    <div class="flex items-center justify-between mb-4">
+                        <div class="flex items-center gap-3">
+                            <div class="text-2xl font-bold text-gray-800">🔑 List PIN</div>
+                        </div>
+                    </div>
+
+                    <DataTable :value="encodedPins" :paginator="true" :rows="10" dataKey="id" :rowHover="true" :loading="loading">
+                        <template #header>
+                            <div class="flex flex-col md:flex-row items-center justify-between gap-4 w-full">
+                                <!-- Summary Info -->
+                                <div class="flex gap-4 w-full md:w-auto">
+                                    <div class="w-32">
+                                        <label class="block font-medium text-gray-700 mb-1">Used</label>
+                                        <span class="text-gray-800 font-semibold">{{ usedPins }}</span>
+                                    </div>
+                                    <div class="w-32">
+                                        <label class="block font-medium text-gray-700 mb-1">Total</label>
+                                        <span class="text-gray-800 font-semibold">{{ catalogue.totalqty }}</span>
+                                    </div>
+                                </div>
+
+                                <!-- Action Buttons -->
+                                <div class="flex gap-4 items-end w-full md:w-48">
+                                    <Button icon="pi pi-plus" class="p-button-text text-green-600 w-10 h-10 flex items-center justify-center" v-tooltip="'Add PIN'" @click="addPin" />
+                                    <Button icon="pi pi-minus" class="p-button-text text-yellow-600 w-10 h-10 flex items-center justify-center" v-tooltip="'Remove PIN'" @click="removePin" />
+                                    <Button icon="pi pi-file-export" label="Export" v-tooltip="'Export Redemption List'" @click="exportRedemptionList" />
+                                </div>
+                            </div>
+                        </template>
+
+                        <template #empty> No PINs found. </template>
+                        <template #loading> Loading PIN data. Please wait. </template>
+
+                        <Column header="Pin" style="min-width: 8rem">
+                            <template #body="{ data }">{{ data.pin }}</template>
+                        </Column>
+                        <Column header="Expiry" style="min-width: 8rem">
+                            <template #body="{ data }">{{ data.expiryDate }}</template>
+                        </Column>
+                        <Column header="Date Used" style="min-width: 8rem">
+                            <template #body="{ data }">{{ data.usedDate || '-' }}</template>
+                        </Column>
+                        <Column header="Status" style="min-width: 8rem">
+                            <template #body="{ data }">
+                                <span :class="data.pinUsedStatus ? 'text-red-600 font-medium' : 'text-green-600 font-medium'">
+                                    {{ data.pinUsedStatus ? 'Used' : 'Available' }}
+                                </span>
+                            </template>
+                        </Column>
+                    </DataTable>
+                </div>
+ <div v-else-if="catalogue.type === 'Item'" class="card flex flex-col w-full">
+    <!-- Header -->
+    <div class="flex items-center justify-between border-b pb-3 mb-6">
+        <div class="flex items-center gap-2">
+            <RouterLink to="/marketing/listCatalogue">
+                <Button icon="pi pi-arrow-left font-bold" class="p-button-text p-button-secondary text-xl" v-tooltip="'Back'" />
+            </RouterLink>
+            <div class="text-2xl font-bold text-gray-800">Details Catalogue</div>
+        </div>
+
+        <!-- Edit & Delete Buttons -->
+        <div class="flex items-center gap-2">
+            <RouterLink to="/marketing/editCatalogue">
+                <Button label="Edit" class="p-button-info" size="small" />
+            </RouterLink>
+            <Button label="Delete" class="p-button-danger" size="small" />
+        </div>
+    </div>
+
+    <!-- Item Stock Section -->
+    <div class="flex items-center justify-between mb-4">
+        <div class="flex items-center gap-3">
+            <div class="text-2xl font-bold text-gray-800">📦 Item Stock</div>
+        </div>
+    </div>
+
+    <!-- Quantity Overview -->
+    <div class="flex flex-col md:flex-row justify-between items-center bg-gray-50 border rounded-lg p-4 mb-6">
+        <div class="flex flex-col gap-2">
+            <div>
+                <span class="font-medium text-gray-700">Total Quantity:</span>
+                <span class="font-bold text-gray-900 ml-2">{{ catalogue.totalqty }}</span>
+            </div>
+            <div>
+                <span class="font-medium text-gray-700">Available Quantity:</span>
+                <span class="font-bold text-green-700 ml-2">{{ catalogue.availableqty }}</span>
+            </div>
+        </div>
+
+        <!-- Action Buttons -->
+        <div class="flex gap-4 mt-4 md:mt-0">
+            <Button icon="pi pi-plus" label="Add" class="p-button-success" @click="showAddDialog = true" />
+            <Button icon="pi pi-minus" label="Remove" class="p-button-warning" @click="showRemoveDialog = true" />
+        </div>
+    </div>
+
+    <!-- Add Stock Dialog -->
+    <Dialog v-model:visible="showAddDialog" header="Add Quantity" modal class="w-96">
+        <div class="flex flex-col gap-3">
+            <label for="addQty" class="font-medium">Quantity to Add</label>
+            <InputNumber v-model="addQty" id="addQty" showButtons min="1" />
+            <div class="flex justify-end gap-2 mt-3">
+                <Button label="Cancel" class="p-button-text" @click="showAddDialog = false" />
+                <Button label="Confirm" class="p-button-success" @click="addStock" />
+            </div>
+        </div>
+    </Dialog>
+
+    <!-- Remove Stock Dialog -->
+    <Dialog v-model:visible="showRemoveDialog" header="Remove Quantity" modal class="w-96">
+        <div class="flex flex-col gap-3">
+            <label for="removeQty" class="font-medium">Quantity to Remove</label>
+            <InputNumber v-model="removeQty" id="removeQty" showButtons min="1" />
+            <div class="flex justify-end gap-2 mt-3">
+                <Button label="Cancel" class="p-button-text" @click="showRemoveDialog = false" />
+                <Button label="Confirm" class="p-button-warning" @click="removeStock" />
+            </div>
+        </div>
+    </Dialog>
+</div>
+
 
                 <!-- ======================== -->
                 <!-- Redemption List Section  -->
@@ -232,7 +374,7 @@ import { ref, computed, onMounted } from 'vue';
 
 const catalogue = ref({
     id: 1,
-    type: 'E-Wallet', // or 'E-Voucher'
+    type: 'Item', // or 'E-Voucher'
     image1URL: 'https://assets.bharian.com.my/images/articles/tng13jan_BHfield_image_socialmedia.var_1610544082.jpg',
     title: 'Touch ’n Go Reload RM20',
     sku: 'TNG20',
@@ -323,5 +465,54 @@ const statusSeverity = (status) => {
     if (status === 1) return 'success';
     if (status === 2) return 'warn';
     return 'secondary';
+};
+
+/* ============================================================
+   ✅ ADDED: Item Stock Add / Remove Logic (non-destructive)
+   ============================================================ */
+const itemStocks = ref([
+    { id: 1, batch: 'Batch A', quantity: 2, addedDate: '2025-09-01' },
+    { id: 2, batch: 'Batch B', quantity: 2, addedDate: '2025-09-15' }
+]);
+
+const usedStock = ref(1); // example tracking
+
+const showAddDialog = ref(false);
+const showRemoveDialog = ref(false);
+const addQty = ref(0);
+const removeQty = ref(0);
+
+const addStock = () => {
+    if (addQty.value > 0) {
+        catalogue.value.totalqty += addQty.value;
+        itemStocks.value.push({
+            id: itemStocks.value.length + 1,
+            batch: `Batch ${String.fromCharCode(65 + itemStocks.value.length)}`,
+            quantity: addQty.value,
+            addedDate: new Date().toISOString().split('T')[0]
+        });
+        showAddDialog.value = false;
+        addQty.value = 0;
+    }
+};
+
+const removeStock = () => {
+    if (removeQty.value > 0 && catalogue.value.totalqty >= removeQty.value) {
+        catalogue.value.totalqty -= removeQty.value;
+        showRemoveDialog.value = false;
+        removeQty.value = 0;
+    }
+};
+
+const exportStockList = () => {
+    const dataStr = JSON.stringify(itemStocks.value, null, 2);
+    const blob = new Blob([dataStr], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'item_stock.json';
+    a.click();
+    URL.revokeObjectURL(url);
 };
 </script>
