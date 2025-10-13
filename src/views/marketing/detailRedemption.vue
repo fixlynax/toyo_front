@@ -1,23 +1,21 @@
 <template>
     <Fluid>
         <div class="flex flex-col md:flex-row gap-8">
-            <!-- ======================= -->
-            <!-- LEFT SECTION: Redemption & Shipping -->
-            <!-- ======================= -->
-            <div class="md:w-2/3 flex flex-col">
-                <!-- Redemption Details -->
+            <!-- Left Content -->
+            <div class="md:w-2/3">
                 <div class="card flex flex-col gap-6 w-full">
-                    <!-- Header Section -->
+                    <!-- Header -->
                     <div class="flex items-center justify-between border-b pb-2">
-                        <div class="flex items-center gap-2">
-                            <RouterLink to="/marketing/listRedemption">
-                                <Button icon="pi pi-arrow-left" class="p-button-text p-button-secondary text-xl font-bold" v-tooltip="'Back'" />
-                            </RouterLink>
-                            <h2 class="text-2xl font-bold text-gray-800">🎁 Details Redemption</h2>
+                        <!-- Left Section: Title + Back Button -->
+                        <div class="flex items-center gap-3">
+                            <RouterLink to="/marketing/listRedemption"> <Button icon="pi pi-arrow-left font-bold" class="p-button-text p-button-secondary text-xl" size="big" v-tooltip="'Back'" /> </RouterLink>
+                            <div class="text-2xl font-bold text-gray-800">🎁 Details Redemption</div>
                         </div>
+
+                        <!-- Right Section: Edit & Delete Buttons -->
                         <div class="inline-flex items-center gap-2">
-                            <RouterLink to="/marketing/editredemption">
-                                <Button label="Edit" class="p-button-info" size="small" icon="pi pi-pencil" />
+                            <RouterLink to="/marketing/editRedemption">
+                                <Button label="Edit" class="p-button-info" size="small" />
                             </RouterLink>
                         </div>
                     </div>
@@ -124,7 +122,7 @@
                     </div>
 
                     <!-- Action Buttons moved here -->
-                    <div class="flex justify-end mt-4 pt-4 border-t">
+                    <div class="flex justify-end mt-4 pt-4">
                         <div class="flex gap-2">
                             <!-- Reject Button -->
                             <Button label="Reject" class="p-button-danger" @click="showRejectDialog = true" />
@@ -140,51 +138,30 @@
         </div>
 
         <!-- Rejection Reason Dialog -->
-        <Dialog 
-            v-model:visible="showRejectDialog" 
-            modal 
-            header="Reject Redemption" 
-            :style="{ width: '500px' }"
-            :breakpoints="{ '960px': '75vw', '641px': '90vw' }"
-        >
-            <div class="flex flex-col gap-4">
+        <Dialog v-model:visible="showRejectDialog" modal header="Reject Redemption" :style="{ width: '500px' }" :breakpoints="{ '960px': '75vw', '641px': '90vw' }">
+            <div class="flex flex-col gap-1">
                 <div>
-                    <label for="rejectReason" class="block text-sm font-medium text-gray-700 mb-2">
-                        Reason for rejection <span class="text-red-500">*</span>
-                    </label>
-                    <textarea 
+                    <label for="rejectReason" class="block text-sm font-medium text-gray-700 mb-2"> Reason for rejection <span class="text-red-500">*</span> </label>
+                    <textarea
                         id="rejectReason"
-                        v-model="rejectReason" 
-                        class="w-full border border-gray-300 rounded-md p-3 focus:ring-2 focus:ring-blue-500 focus:border-blue-500" 
+                        v-model="rejectReason"
+                        class="w-full border border-gray-300 rounded-md p-1 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                         placeholder="Please provide the reason for rejecting this redemption..."
                         rows="4"
                         :class="{ 'border-red-500': showValidationError }"
                     ></textarea>
-                    <p v-if="showValidationError" class="text-red-500 text-sm mt-1">
-                        Please enter a reason for rejection
-                    </p>
+                    <p v-if="showValidationError" class="text-red-500 text-sm mt-1">Please enter a reason for rejection</p>
                 </div>
-                
+
                 <div class="mt-2">
-                    <p class="text-sm text-gray-600">
-                        This action cannot be undone. The user will be notified about the rejection.
-                    </p>
+                    <p class="text-sm text-gray-600">This action cannot be undone. The user will be notified about the rejection.</p>
                 </div>
             </div>
-            
+
             <template #footer>
-                <div class="flex justify-end gap-2">
-                    <Button 
-                        label="Cancel" 
-                        class="p-button-secondary" 
-                        @click="closeRejectDialog" 
-                    />
-                    <Button 
-                        label="Submit Rejection" 
-                        class="p-button-danger" 
-                        @click="submitReject" 
-                        :disabled="!rejectReason.trim()"
-                    />
+                <div class="flex justify-end gap-3">
+                    <Button label="Cancel" class="p-button-secondary p-button-sm" @click="closeRejectDialog" />
+                    <Button label="Submit Rejection" class="p-button-danger p-button-sm" @click="submitReject" :disabled="!rejectReason.trim()" />
                 </div>
             </template>
         </Dialog>
@@ -240,15 +217,15 @@ const submitReject = () => {
         showValidationError.value = true;
         return;
     }
-    
+
     console.log('Rejected with reason:', rejectReason.value);
     // Here you would typically make an API call to submit the rejection
-    
+
     // Show success message (you can use Toast from PrimeVue)
     // this.$toast.add({ severity: 'success', summary: 'Rejected', detail: 'Redemption has been rejected successfully', life: 3000 });
-    
+
     closeRejectDialog();
-    
+
     // Optionally, you can redirect or update the status
     // redemption.value.status = 'Rejected';
 };
