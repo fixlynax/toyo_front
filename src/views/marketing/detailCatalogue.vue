@@ -3,18 +3,22 @@
         <div class="flex flex-col md:flex-row gap-8">
             <!-- Left Content -->
             <div class="md:w-2/3">
-                <div class="card flex flex-col gap-3 w-full">
+                <!-- ======================== -->
+                <!-- E-Wallet Section (PIN)   -->
+                <!-- ======================== -->
+
+                <div class="card flex flex-col w-full">
                     <!-- Header -->
-                    <div class="flex items-center justify-between border-b pb-2">
-                        <div class="flex items-center gap-3">
+                    <div class="flex items-center justify-between border-b pb-3 mb-6">
+                        <div class="flex items-center gap-2">
                             <RouterLink to="/marketing/listCatalogue">
-                                <Button icon="pi pi-arrow-left font-bold" class="p-button-text p-button-secondary text-xl" size="big" v-tooltip="'Back'" />
+                                <Button icon="pi pi-arrow-left font-bold" class="p-button-text p-button-secondary text-xl" v-tooltip="'Back'" />
                             </RouterLink>
                             <div class="text-2xl font-bold text-gray-800">Details Catalogue</div>
                         </div>
 
-                        <!-- Buttons -->
-                        <div class="inline-flex items-center gap-2">
+                        <!-- Edit & Delete Buttons -->
+                        <div class="flex items-center gap-2">
                             <RouterLink to="/marketing/editCatalogue">
                                 <Button label="Edit" class="p-button-info" size="small" />
                             </RouterLink>
@@ -22,17 +26,113 @@
                         </div>
                     </div>
 
+                    <!-- List PIN Section -->
+                    <div class="flex items-center justify-between mb-4">
+                        <div class="flex items-center gap-3">
+                            <div class="text-2xl font-bold text-gray-800">🔑 List PIN</div>
+                        </div>
+                    </div>
+
+                    <DataTable :value="encodedPins" :paginator="true" :rows="10" dataKey="id" :rowHover="true" :loading="loading">
+                        <template #header>
+                            <div class="flex flex-col md:flex-row items-center justify-between gap-4 w-full">
+                                <!-- Summary Info -->
+                                <div class="flex gap-4 w-full md:w-auto">
+                                    <div class="w-32">
+                                        <label class="block font-medium text-gray-700 mb-1">Used</label>
+                                        <span class="text-gray-800 font-semibold">{{ usedPins }}</span>
+                                    </div>
+                                    <div class="w-32">
+                                        <label class="block font-medium text-gray-700 mb-1">Total</label>
+                                        <span class="text-gray-800 font-semibold">{{ catalogue.totalqty }}</span>
+                                    </div>
+                                </div>
+
+                                <!-- Action Buttons -->
+                                <div class="flex gap-4 items-end w-full md:w-48">
+                                    <Button icon="pi pi-plus" class="p-button-text text-green-600 w-10 h-10 flex items-center justify-center" v-tooltip="'Add PIN'" @click="addPin" />
+                                    <Button icon="pi pi-minus" class="p-button-text text-yellow-600 w-10 h-10 flex items-center justify-center" v-tooltip="'Remove PIN'" @click="removePin" />
+                                    <Button icon="pi pi-file-export" label="Export" v-tooltip="'Export Redemption List'" @click="exportRedemptionList" />
+                                </div>
+                            </div>
+                        </template>
+
+                        <template #empty> No PINs found. </template>
+                        <template #loading> Loading PIN data. Please wait. </template>
+
+                        <Column header="Pin" style="min-width: 8rem">
+                            <template #body="{ data }">{{ data.pin }}</template>
+                        </Column>
+                        <Column header="Expiry" style="min-width: 8rem">
+                            <template #body="{ data }">{{ data.expiryDate }}</template>
+                        </Column>
+                        <Column header="Date Used" style="min-width: 8rem">
+                            <template #body="{ data }">{{ data.usedDate || '-' }}</template>
+                        </Column>
+                        <Column header="Status" style="min-width: 8rem">
+                            <template #body="{ data }">
+                                <span :class="data.pinUsedStatus ? 'text-red-600 font-medium' : 'text-green-600 font-medium'">
+                                    {{ data.pinUsedStatus ? 'Used' : 'Available' }}
+                                </span>
+                            </template>
+                        </Column>
+                    </DataTable>
+                </div>
+
+                <!-- ======================== -->
+                <!-- Redemption List Section  -->
+                <!-- ======================== -->
+                <div class="card flex flex-col w-full mt-8">
+                    <!-- Header -->
+                    <div class="flex items-center justify-between border-b pb-3 mb-4">
+                        <div class="flex items-center gap-3">
+                            <div class="text-2xl font-bold text-gray-800">👨🏻‍💻 Redemption List</div>
+                        </div>
+
+                        <!-- Export Button -->
+                        <div class="flex items-center gap-2">
+                            <Button icon="pi pi-file-export" label="Export" class="p-button text-blue-600 p-2 flex items-center justify-center" v-tooltip="'Export Redemption List'" @click="exportRedemptionList" />
+                        </div>
+                    </div>
+
+                    <!-- DataTable -->
+                    <DataTable :value="participants" :paginator="true" :rows="10" dataKey="id" :rowHover="true" responsiveLayout="scroll" class="text-sm">
+                        <Column header="Member Code" style="min-width: 8rem">
+                            <template #body="{ data }">
+                                <span class="font-bold text-gray-800 hover:underline">
+                                    {{ data.memberCode }}
+                                </span>
+                            </template>
+                        </Column>
+
+                        <Column field="fullName" header="Member Name" style="min-width: 10rem" />
+                        <Column field="date" header="Date Redeemed" style="min-width: 10rem" />
+                        <Column field="point" header="Item" style="min-width: 8rem; text-align: start" />
+                    </DataTable>
+                </div>
+            </div>
+
+            <!-- Right Sidebar -->
+            <div class="md:w-1/3 flex flex-col">
+                <div class="card flex flex-col w-full">
+                    <!-- Header -->
+                    <div class="flex items-center justify-between border-b pb-2 mb-2">
+                        <div class="text-2xl font-bold text-gray-800">ℹ️ Details Info</div>
+                        <Tag :value="statusLabel(catalogue.status)" :severity="statusSeverity(catalogue.status)" />
+                    </div>
+
                     <!-- catalogue Images -->
                     <div class="grid grid-cols-1 md:grid-cols-1 gap-4 mt-4">
-                        <img :src="catalogue.image1URL" alt="catalogue Image 1" class="rounded-xl shadow-sm object-cover w-full h-80" />
+                        <img :src="catalogue.image1URL" alt="catalogue Image 1" class="rounded-xl shadow-sm object-cover w-full h-48" />
                     </div>
 
                     <!-- catalogue Info -->
-                    <div class="mt-6">
+                    <div class="mt-4">
                         <h1 class="text-2xl font-bold text-gray-800">{{ catalogue.title }}</h1>
                         <p class="text-lg font-medium">{{ catalogue.description }}</p>
                     </div>
-                    <div class="flex flex-col md:flex-row gap-4 mt-2" v-if="catalogue.type === 'E-Voucher'">
+
+                    <div class="flex flex-col md:flex-row mt-2" v-if="catalogue.type === 'E-Voucher'">
                         <div class="w-full">
                             <span class="block text-xm font-bold text-black-700">Value Type</span>
                             <p class="text-lg font-medium">{{ catalogue.valueType }}</p>
@@ -42,6 +142,7 @@
                             <p class="text-lg font-medium">{{ catalogue.valueAmount }}</p>
                         </div>
                     </div>
+
                     <div class="flex flex-col md:flex-row gap-4 mt-2">
                         <div class="w-full">
                             <span class="block text-xm font-bold text-black-700">Terms</span>
@@ -52,16 +153,24 @@
                             <p class="text-lg font-medium">{{ catalogue.instruction }}</p>
                         </div>
                     </div>
+                    <div class="flex justify-end mt-8">
+                        <div class="w-auto" v-if="catalogue.status === 1">
+                            <RouterLink to="/marketing/detailEvent">
+                                <Button label="Inactivate" class="p-button-danger" size="small" />
+                            </RouterLink>
+                        </div>
+                        <div class="w-auto" v-if="catalogue.status === 2">
+                            <RouterLink to="/marketing/detailEvent">
+                                <Button label="Activate" class="p-button-success" size="small" />
+                            </RouterLink>
+                        </div>
+                    </div>
                 </div>
-            </div>
 
-            <!-- Right Sidebar -->
-            <div class="md:w-1/3 flex flex-col gap-6">
                 <!-- Advance Info -->
                 <div class="card flex flex-col w-full">
                     <div class="flex items-center justify-between border-b pb-2 mb-2">
                         <div class="text-2xl font-bold text-gray-800">ℹ️ Advance Info</div>
-                        <Tag :value="statusLabel(catalogue.status)" :severity="statusSeverity(catalogue.status)" />
                     </div>
 
                     <div class="overflow-x-auto">
@@ -111,87 +220,8 @@
                                 </tr>
                             </tbody>
                         </table>
-
-                        <div class="flex justify-end mt-4">
-                            <div class="w-auto" v-if="catalogue.status === 1">
-                                <RouterLink to="/marketing/detailEvent">
-                                    <Button label="Inactivate" class="p-button-danger" size="small" />
-                                </RouterLink>
-                            </div>
-                            <div class="w-auto" v-if="catalogue.status === 2">
-                                <RouterLink to="/marketing/detailEvent">
-                                    <Button label="Activate" class="p-button-success" size="small" />
-                                </RouterLink>
-                            </div>
-                        </div>
                     </div>
                 </div>
-            </div>
-        </div>
-
-        <!-- Participant List (moved here) -->
-        <div class="card flex flex-col w-full mt-8">
-            <div class="text-2xl font-bold text-gray-800 border-b pb-3 mb-4">👨🏻‍💻 Redemption List</div>
-            <DataTable :value="participants" :paginator="true" :rows="10" dataKey="id" :rowHover="true" responsiveLayout="scroll" class="text-sm">
-                <Column header="Date Redeemed" style="min-width: 6rem">
-                    <template #body="{ data }">
-                        <span class="font-bold text-gray-800 hover:underline">{{ data.memberCode }}</span>
-                    </template>
-                </Column>
-
-                <Column field="fullName" header="Member Name" style="min-width: 6rem"></Column>
-                <Column field="date" header="Date Redeemed" style="min-width: 6rem"></Column>
-                <Column field="point" header="Item  " style="min-width: 6rem; text-align: start"></Column>
-            </DataTable>
-        </div>
-        <!-- ======================== -->
-        <!-- E-Wallet Section (PIN)   -->
-        <!-- ======================== -->
-        <div v-if="catalogue.type === 'E-Wallet'" class="mt-8">
-            <div class="card flex flex-col w-full">
-                <div class="flex items-center justify-between border-b pb-2 mb-2">
-                    <div class="text-2xl font-bold text-gray-800">🔑 List PIN</div>
-                </div>
-
-                <DataTable :value="encodedPins" :paginator="true" :rows="10" dataKey="id" :rowHover="true" :loading="loading">
-                    <template #header>
-                        <div class="flex flex-col md:flex-row items-center justify-between gap-4 w-full">
-                            <div class="flex gap-4 w-full md:w-auto">
-                                <div class="w-32">
-                                    <label class="block font-medium text-gray-700 mb-1">Used</label>
-                                    <span class="text-gray-800 font-semibold">{{ usedPins }}</span>
-                                </div>
-                                <div class="w-32">
-                                    <label class="block font-medium text-gray-700 mb-1">Total</label>
-                                    <span class="text-gray-800 font-semibold">{{ catalogue.totalqty }}</span>
-                                </div>
-                            </div>
-                            <div class="flex gap-2">
-                                <Button icon="pi pi-download" class="w-10 h-10" severity="primary" @click="downloadPins" />
-                            </div>
-                        </div>
-                    </template>
-
-                    <template #empty> No PINs found. </template>
-                    <template #loading> Loading PIN data. Please wait. </template>
-
-                    <Column header="Pin" style="min-width: 8rem">
-                        <template #body="{ data }">{{ data.pin }}</template>
-                    </Column>
-                    <Column header="Expiry" style="min-width: 8rem">
-                        <template #body="{ data }">{{ data.expiryDate }}</template>
-                    </Column>
-                    <Column header="Date Used" style="min-width: 8rem">
-                        <template #body="{ data }">{{ data.usedDate || '-' }}</template>
-                    </Column>
-                    <Column header="Status" style="min-width: 8rem">
-                        <template #body="{ data }">
-                            <span :class="data.pinUsedStatus ? 'text-red-600 font-medium' : 'text-green-600 font-medium'">
-                                {{ data.pinUsedStatus ? 'Used' : 'Available' }}
-                            </span>
-                        </template>
-                    </Column>
-                </DataTable>
             </div>
         </div>
     </Fluid>
