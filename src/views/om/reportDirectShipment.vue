@@ -1,13 +1,91 @@
 <template>
     <Fluid>
-        <!-- Main Content Area -->
-        <div class="card flex flex-col gap-6 w-full">
+        <div class="flex flex-col gap-8">
             <!-- Header -->
-            <div class="text-2xl font-bold text-gray-800">Direct Shipment Summary</div>
+            <div class="card flex flex-col gap-6 w-full">
+                <div class="text-2xl font-bold text-gray-800 border-b pb-2 mb-4">
+                    Direct Shipment Summary
+                </div>
+
+                <!-- Filters Section -->
+                <div class="border rounded-lg p-4 bg-gray-50">
+                    <div class="text-lg font-bold text-gray-800 mb-4">Report Filters</div>
+                    <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+                        <!-- Date Range -->
+                        <div>
+                            <label class="block font-bold text-gray-700 mb-2">Date Range</label>
+                            <Calendar 
+                                v-model="filters.dateRange" 
+                                selectionMode="range" 
+                                :manualInput="false"
+                                placeholder="Select Date Range"
+                                class="w-full"
+                            />
+                        </div>
+
+                        <!-- Shipment Status -->
+                        <div>
+                            <label class="block font-bold text-gray-700 mb-2">Shipment Status</label>
+                            <Dropdown 
+                                v-model="filters.status" 
+                                :options="statusOptions" 
+                                optionLabel="label"
+                                optionValue="value"
+                                placeholder="All Status"
+                                class="w-full"
+                            />
+                        </div>
+
+                        <!-- Customer Type -->
+                        <div>
+                            <label class="block font-bold text-gray-700 mb-2">Customer Type</label>
+                            <Dropdown 
+                                v-model="filters.customerType" 
+                                :options="customerTypeOptions" 
+                                optionLabel="label"
+                                optionValue="value"
+                                placeholder="All Types"
+                                class="w-full"
+                            />
+                        </div>
+
+                        <!-- Region -->
+                        <div>
+                            <label class="block font-bold text-gray-700 mb-2">Region</label>
+                            <Dropdown 
+                                v-model="filters.region" 
+                                :options="regionOptions" 
+                                placeholder="All Regions"
+                                class="w-full"
+                            />
+                        </div>
+                    </div>
+
+                    <!-- Action Buttons -->
+                    <div class="flex justify-end gap-4 mt-4">
+                        <Button 
+                            label="Clear Filters" 
+                            class="p-button-outlined p-button-secondary"
+                            @click="clearFilters" 
+                        />
+                        <Button 
+                            label="Generate Report" 
+                            class="p-button-primary"
+                            @click="generateReport" 
+                        />
+                        <Button 
+                            label="Export Summary" 
+                            icon="pi pi-download" 
+                            class="p-button-success"
+                            @click="exportSummary" 
+                        />
+                    </div>
+                </div>
+            </div>
 
             <!-- Summary Cards -->
             <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
-                <div class="card p-4 !bg-gray-50 border rounded-lg shadow-sm">
+                <div class="card p-4 bg-white border rounded-lg shadow-sm">
                     <div class="flex items-center justify-between">
                         <div>
                             <div class="text-sm font-semibold text-gray-600">Total Shipments</div>
@@ -17,30 +95,10 @@
                             <i class="pi pi-truck text-blue-600 text-xl"></i>
                         </div>
                     </div>
-                    <div class="text-xs text-green-600 mt-2"><i class="pi pi-arrow-up"></i> 15.2% from last period</div>
-                </div>
-            <div class="card flex flex-col gap-6 w-full">
-                <div class="text-2xl font-bold text-gray-800 border-b pb-2 mb-4">
-                    Direct Shipment Summary
-                </div>
-                
-                <!-- Summary Stats Row -->
-                <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
-                    <div class="text-center p-4 border rounded-lg bg-blue-50">
-                        <div class="text-3xl font-bold text-blue-600">{{ summaryStats.totalShipments.toLocaleString() }}</div>
-                        <div class="text-sm font-semibold text-gray-700 mt-2">Total Shipments</div>
-                        <div class="text-xs text-green-600 mt-1">
-                            <i class="pi pi-arrow-up"></i> 15.2% from last period
-                        </div>
+                    <div class="text-xs text-green-600 mt-2">
+                        <i class="pi pi-arrow-up"></i> 15.2% from last period
                     </div>
-
-                    <div class="text-center p-4 border rounded-lg bg-green-50">
-                        <div class="text-3xl font-bold text-green-600">{{ summaryStats.completedShipments.toLocaleString() }}</div>
-                        <div class="text-sm font-semibold text-gray-700 mt-2">Completed</div>
-                        <div class="text-xs text-gray-500 mt-1">
-                            {{ summaryStats.completionRate }}% completion rate
-                        </div>
-                    </div>
+                </div>
 
                 <div class="card p-4 bg-white border rounded-lg shadow-sm">
                     <div class="flex items-center justify-between">
@@ -140,12 +198,33 @@
                 <div class="flex justify-between items-center">
                     <div class="text-lg font-bold text-gray-800">Direct Shipment Details</div>
                     <div class="flex gap-2">
-                        <Button label="Export CSV" icon="pi pi-download" class="p-button-outlined p-button-secondary" @click="exportToCSV" />
-                        <Button label="Print Report" icon="pi pi-print" class="p-button-outlined" @click="printReport" />
+                        <Button 
+                            label="Export CSV" 
+                            icon="pi pi-download" 
+                            class="p-button-outlined p-button-secondary"
+                            @click="exportToCSV" 
+                        />
+                        <Button 
+                            label="Print Report" 
+                            icon="pi pi-print" 
+                            class="p-button-outlined"
+                            @click="printReport" 
+                        />
                     </div>
                 </div>
 
-                <DataTable :value="shipmentData" :paginator="true" :rows="10" :rowsPerPageOptions="[5, 10, 20, 50]" dataKey="shipmentId" :rowHover="true" :loading="loading" responsiveLayout="scroll" :scrollable="true" scrollHeight="400px">
+                <DataTable 
+                    :value="shipmentData" 
+                    :paginator="true" 
+                    :rows="10"
+                    :rowsPerPageOptions="[5, 10, 20, 50]"
+                    dataKey="shipmentId" 
+                    :rowHover="true"
+                    :loading="loading"
+                    responsiveLayout="scroll"
+                    :scrollable="true"
+                    scrollHeight="400px"
+                >
                     <Column field="shipmentId" header="Shipment ID" style="min-width: 120px" :sortable="true">
                         <template #body="{ data }">
                             <div class="font-mono text-sm font-semibold text-blue-600">
@@ -180,13 +259,18 @@
 
                     <Column field="totalValue" header="Order Value" style="min-width: 120px" :sortable="true">
                         <template #body="{ data }">
-                            <div class="font-bold text-purple-600">RM {{ data.totalValue.toLocaleString() }}</div>
+                            <div class="font-bold text-purple-600">
+                                RM {{ data.totalValue.toLocaleString() }}
+                            </div>
                         </template>
                     </Column>
 
                     <Column field="status" header="Status" style="min-width: 120px" :sortable="true">
                         <template #body="{ data }">
-                            <Tag :value="data.status" :severity="getStatusSeverity(data.status)" />
+                            <Tag 
+                                :value="data.status" 
+                                :severity="getStatusSeverity(data.status)" 
+                            />
                         </template>
                     </Column>
 
@@ -214,9 +298,14 @@
                         </template>
                     </Column>
 
-                    <Column header="Actions" style="min-width: 80px">
+                    <Column header="Actions" style="min-width: 100px">
                         <template #body="{ data }">
-                            <Button icon="pi pi-eye" class="p-button-info p-button-text p-button-sm" v-tooltip="'View Details'" @click="viewShipmentDetails(data)" />
+                            <Button 
+                                icon="pi pi-eye" 
+                                class="p-button-info p-button-text p-button-sm" 
+                                v-tooltip="'View Details'"
+                                @click="viewShipmentDetails(data)" 
+                            />
                         </template>
                     </Column>
 
@@ -224,6 +313,7 @@
                         <div class="text-center text-gray-500 py-8">
                             <i class="pi pi-inbox text-4xl mb-2"></i>
                             <div>No shipment data found.</div>
+                            <div class="text-sm mt-1">Adjust your filters or generate a new report.</div>
                         </div>
                     </template>
 
@@ -234,6 +324,59 @@
                         </div>
                     </template>
                 </DataTable>
+            </div>
+
+            <!-- Performance Metrics -->
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                <!-- On-Time Delivery Performance -->
+                <div class="card p-4 bg-white border rounded-lg">
+                    <div class="text-lg font-bold text-gray-800 mb-4">On-Time Delivery Performance</div>
+                    <div class="space-y-4">
+                        <div v-for="metric in performanceMetrics" :key="metric.label" class="flex justify-between items-center">
+                            <span class="text-gray-700">{{ metric.label }}</span>
+                            <div class="flex items-center gap-2">
+                                <span class="font-bold" :class="metric.color">{{ metric.value }}%</span>
+                                <div class="w-24 bg-gray-200 rounded-full h-2">
+                                    <div class="h-2 rounded-full" :class="metric.color" :style="{ width: metric.value + '%' }"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Top Customers -->
+                <div class="card p-4 bg-white border rounded-lg">
+                    <div class="text-lg font-bold text-gray-800 mb-4">Top Customers by Volume</div>
+                    <div class="space-y-3">
+                        <div v-for="customer in topCustomers" :key="customer.name" class="flex justify-between items-center p-2 hover:bg-gray-50 rounded">
+                            <div class="flex items-center gap-2">
+                                <i class="pi pi-building text-gray-400"></i>
+                                <span class="font-medium">{{ customer.name }}</span>
+                            </div>
+                            <div class="flex items-center gap-2">
+                                <span class="text-sm text-gray-500">{{ customer.shipments }} shipments</span>
+                                <span class="font-bold text-purple-600">RM {{ customer.value.toLocaleString() }}</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Shipment Issues Summary -->
+                <div class="card p-4 bg-white border rounded-lg">
+                    <div class="text-lg font-bold text-gray-800 mb-4">Shipment Issues Summary</div>
+                    <div class="space-y-3">
+                        <div v-for="issue in shipmentIssues" :key="issue.type" class="flex justify-between items-center p-2 border-b">
+                            <div class="flex items-center gap-2">
+                                <i class="pi pi-exclamation-triangle" :class="issue.color"></i>
+                                <span>{{ issue.type }}</span>
+                            </div>
+                            <div class="flex items-center gap-2">
+                                <span class="font-bold" :class="issue.color">{{ issue.count }}</span>
+                                <span class="text-sm text-gray-500">({{ issue.percentage }}%)</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
     </Fluid>
@@ -350,6 +493,31 @@ const shipmentData = ref([
     }
 ]);
 
+// Performance Metrics
+const performanceMetrics = ref([
+    { label: 'On-Time Delivery', value: 87, color: 'text-green-600 bg-green-500' },
+    { label: 'Within 2 Days', value: 65, color: 'text-blue-600 bg-blue-500' },
+    { label: 'Within 3 Days', value: 92, color: 'text-purple-600 bg-purple-500' },
+    { label: 'Delayed Shipments', value: 8, color: 'text-orange-600 bg-orange-500' }
+]);
+
+// Top Customers
+const topCustomers = ref([
+    { name: 'PS Tyres & Battery', shipments: 45, value: 1250000 },
+    { name: 'Toyo Auto Centre', shipments: 38, value: 980000 },
+    { name: 'ABC Motors', shipments: 32, value: 875000 },
+    { name: 'City Auto Retail', shipments: 28, value: 456000 },
+    { name: 'Borneo Tyre Services', shipments: 25, value: 389000 }
+]);
+
+// Shipment Issues
+const shipmentIssues = ref([
+    { type: 'Delivery Delays', count: 23, percentage: 1.8, color: 'text-orange-500' },
+    { type: 'Damaged Goods', count: 8, percentage: 0.6, color: 'text-red-500' },
+    { type: 'Wrong Items', count: 5, percentage: 0.4, color: 'text-yellow-500' },
+    { type: 'Missing Documentation', count: 12, percentage: 1.0, color: 'text-blue-500' }
+]);
+
 // Chart Data
 const statusChartData = ref({
     labels: ['Delivered', 'Shipped', 'Processing', 'Pending', 'Cancelled'],
@@ -375,16 +543,32 @@ const monthlyTrendChartData = ref({
     ]
 });
 
+const regionalChartData = ref({
+    labels: ['Central', 'Southern', 'Northern', 'East Coast', 'East Malaysia'],
+    datasets: [
+        {
+            data: [45, 20, 15, 12, 8],
+            backgroundColor: ['#3B82F6', '#EC4899', '#10B981', '#F59E0B', '#8B5CF6']
+        }
+    ]
+});
+
+const customerTypeChartData = ref({
+    labels: ['Dealer', 'Distributor', 'Corporate', 'Retail'],
+    datasets: [
+        {
+            data: [40, 30, 20, 10],
+            backgroundColor: ['#3B82F6', '#EC4899', '#10B981', '#F59E0B']
+        }
+    ]
+});
+
 const chartOptions = ref({
     plugins: {
         legend: {
             position: 'bottom',
             labels: {
-                usePointStyle: true,
-                boxWidth: 8,
-                font: {
-                    size: 11
-                }
+                usePointStyle: true
             }
         }
     },
@@ -402,18 +586,12 @@ const formatDate = (date) => {
 
 const getStatusSeverity = (status) => {
     switch (status) {
-        case 'Delivered':
-            return 'success';
-        case 'Shipped':
-            return 'info';
-        case 'Processing':
-            return 'warning';
-        case 'Pending':
-            return 'secondary';
-        case 'Cancelled':
-            return 'danger';
-        default:
-            return 'info';
+        case 'Delivered': return 'success';
+        case 'Shipped': return 'info';
+        case 'Processing': return 'warning';
+        case 'Pending': return 'secondary';
+        case 'Cancelled': return 'danger';
+        default: return 'info';
     }
 };
 
@@ -422,6 +600,27 @@ const getDeliveryTimeClass = (days) => {
     if (days <= 2) return 'text-green-600';
     if (days <= 4) return 'text-orange-600';
     return 'text-red-600';
+};
+
+const clearFilters = () => {
+    filters.dateRange = null;
+    filters.status = null;
+    filters.customerType = null;
+    filters.region = null;
+};
+
+const generateReport = () => {
+    loading.value = true;
+    // Simulate API call
+    setTimeout(() => {
+        loading.value = false;
+        console.log('Report generated with filters:', filters);
+    }, 1000);
+};
+
+const exportSummary = () => {
+    console.log('Exporting summary...');
+    alert('Summary export functionality would be implemented here');
 };
 
 const exportToCSV = () => {
@@ -445,12 +644,9 @@ onMounted(() => {
 </script>
 
 <style scoped>
-:deep(.p-datatable) {
-    font-size: 0.875rem;
-}
-
-:deep(.p-chart) {
-    font-size: 0.75rem;
+:deep(.p-calendar),
+:deep(.p-dropdown) {
+    width: 100%;
 }
 
 @media print {
