@@ -93,7 +93,7 @@ onBeforeMount(async () => {
             <template #empty> No News found. </template>
             <template #loading> Loading News data. Please wait. </template>
             <!-- Columns -->
-            <Column field="title" header="Title" style="min-width: 8rem">
+            <Column field="title" header="Title" sortable style="min-width: 8rem">
                 <template #body="{ data }">
                     <RouterLink to="/marketing/detailNews" class="hover:underline font-bold">
                         {{ data.title }}

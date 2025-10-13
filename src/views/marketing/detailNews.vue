@@ -6,9 +6,13 @@
                 <div class="card flex flex-col gap-6 w-full">
                     <!-- Header -->
                     <div class="flex items-center justify-between border-b pb-2">
-                        <div class="text-2xl font-bold text-gray-800">Details News</div>
+                        <!-- Left Section: Title + Back Button -->
+                        <div class="flex items-center gap-3">
+                            <RouterLink to="/marketing/listNews"> <Button icon="pi pi-arrow-left font-bold" class="p-button-text p-button-secondary text-xl" size="big" v-tooltip="'Back'" /> </RouterLink>
+                            <div class="text-2xl font-bold text-gray-800">Details News</div>
+                        </div>
 
-                        <!-- Buttons -->
+                        <!-- Right Section: Edit & Delete Buttons -->
                         <div class="inline-flex items-center gap-2">
                             <RouterLink to="/marketing/editNews">
                                 <Button label="Edit" class="p-button-info" size="small" />
@@ -28,12 +32,6 @@
                     <div class="mt-6">
                         <h1 class="text-2xl font-bold text-gray-800">{{ news.title }}</h1>
                         <p class="text-lg font-medium">{{ news.desc }}</p>
-                    </div>
-                    <!-- Cancel Button -->
-                    <div class="flex justify-end mt-2 gap-2">
-                        <div class="w-40">
-                            <Button label="Back" class="p-button-secondary w-full mr-2" @click="$router.back()" />
-                        </div>
                     </div>
                 </div>
             </div>
