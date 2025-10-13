@@ -81,10 +81,6 @@
                                     <td class="px-4 py-2 text-right">{{ catalogue.type }}</td>
                                 </tr>
                                 <tr class="border-b">
-                                    <td class="px-4 py-2 font-medium">Purpose ID</td>
-                                    <td class="px-4 py-2 text-right">{{ catalogue.purposelD }}</td>
-                                </tr>
-                                <tr class="border-b">
                                     <td class="px-4 py-2 font-medium">Purpose</td>
                                     <td class="px-4 py-2 text-right">{{ catalogue.purpose }}</td>
                                 </tr>
