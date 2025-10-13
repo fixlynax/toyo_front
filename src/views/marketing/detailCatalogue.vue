@@ -3,10 +3,15 @@
         <div class="flex flex-col md:flex-row gap-8">
             <!-- Left Content -->
             <div class="md:w-2/3">
-                <div class="card flex flex-col gap-6 w-full">
+                <div class="card flex flex-col gap-3 w-full">
                     <!-- Header -->
                     <div class="flex items-center justify-between border-b pb-2">
-                        <div class="text-2xl font-bold text-gray-800">Details Catalogue</div>
+                        <div class="flex items-center gap-3">
+                            <RouterLink to="/marketing/listCatalogue">
+                                <Button icon="pi pi-arrow-left font-bold" class="p-button-text p-button-secondary text-xl" size="big" v-tooltip="'Back'" />
+                            </RouterLink>
+                            <div class="text-2xl font-bold text-gray-800">Details Catalogue</div>
+                        </div>
 
                         <!-- Buttons -->
                         <div class="inline-flex items-center gap-2">
@@ -39,16 +44,6 @@
                     </div>
                     <div class="flex flex-col md:flex-row gap-4 mt-2">
                         <div class="w-full">
-                            <span class="block text-xm font-bold text-black-700">Expiry Date</span>
-                            <p class="text-lg font-medium">{{ catalogue.expiry }}</p>
-                        </div>
-                        <div class="w-full">
-                            <span class="block text-xm font-bold text-black-700">Quantity</span>
-                            <p class="text-lg font-medium">{{ catalogue.availableqty }} of {{ catalogue.totalqty }}</p>
-                        </div>
-                    </div>
-                    <div class="flex flex-col md:flex-row gap-4 mt-2">
-                        <div class="w-full">
                             <span class="block text-xm font-bold text-black-700">Terms</span>
                             <p class="text-lg font-medium">{{ catalogue.terms }}</p>
                         </div>
@@ -61,8 +56,8 @@
             </div>
 
             <!-- Right Sidebar -->
-            <div class="md:w-1/3 flex flex-col">
-                <!-- Quick Info -->
+            <div class="md:w-1/3 flex flex-col gap-6">
+                <!-- Advance Info -->
                 <div class="card flex flex-col w-full">
                     <div class="flex items-center justify-between border-b pb-2 mb-2">
                         <div class="text-2xl font-bold text-gray-800">ℹ️ Advance Info</div>
@@ -72,6 +67,10 @@
                     <div class="overflow-x-auto">
                         <table class="w-full text-sm text-left text-gray-700">
                             <tbody>
+                                <tr class="border-b">
+                                    <td class="px-4 py-2 font-medium">Created</td>
+                                    <td class="px-4 py-2 text-right">{{ catalogue.created }}</td>
+                                </tr>
                                 <tr class="border-b">
                                     <td class="px-4 py-2 font-medium">SKU</td>
                                     <td class="px-4 py-2 text-right">{{ catalogue.sku }}</td>
@@ -103,11 +102,16 @@
                                     <td class="px-4 py-2 text-right">{{ catalogue.point3 }}</td>
                                 </tr>
                                 <tr class="border-b">
-                                    <td class="px-4 py-2 font-medium">Created</td>
-                                    <td class="px-4 py-2 text-right">{{ catalogue.created }}</td>
+                                    <td class="px-4 py-2 font-medium">Quantity</td>
+                                    <td class="px-4 py-2 text-right">{{ catalogue.availableqty }} of {{ catalogue.totalqty }}</td>
+                                </tr>
+                                <tr class="border-b text-red-600">
+                                    <td class="px-4 py-2 font-medium">Expiry</td>
+                                    <td class="px-4 py-2 text-right">{{ catalogue.expiry }}</td>
                                 </tr>
                             </tbody>
                         </table>
+
                         <div class="flex justify-end mt-4">
                             <div class="w-auto" v-if="catalogue.status === 1">
                                 <RouterLink to="/marketing/detailEvent">
@@ -125,6 +129,21 @@
             </div>
         </div>
 
+        <!-- Participant List (moved here) -->
+        <div class="card flex flex-col w-full mt-8">
+            <div class="text-2xl font-bold text-gray-800 border-b pb-3 mb-4">👨🏻‍💻 Redemption List</div>
+            <DataTable :value="participants" :paginator="true" :rows="10" dataKey="id" :rowHover="true" responsiveLayout="scroll" class="text-sm">
+                <Column header="Date Redeemed" style="min-width: 6rem">
+                    <template #body="{ data }">
+                        <span class="font-bold text-gray-800 hover:underline">{{ data.memberCode }}</span>
+                    </template>
+                </Column>
+
+                <Column field="fullName" header="Member Name" style="min-width: 6rem"></Column>
+                <Column field="date" header="Date Redeemed" style="min-width: 6rem"></Column>
+                <Column field="point" header="Item  " style="min-width: 6rem; text-align: start"></Column>
+            </DataTable>
+        </div>
         <!-- ======================== -->
         <!-- E-Wallet Section (PIN)   -->
         <!-- ======================== -->
@@ -175,58 +194,6 @@
                 </DataTable>
             </div>
         </div>
-        <!-- ======================== -->
-        <!-- E-Voucher Section        -->
-        <!-- ======================== -->
-        <div v-if="catalogue.type === 'E-Voucher'" class="mt-8">
-            <div class="card flex flex-col w-full">
-                <div class="flex items-center justify-between border-b pb-2 mb-2">
-                    <div class="text-2xl font-bold text-gray-800">🎟️ E-Voucher Management</div>
-                </div>
-
-                <DataTable :value="catalogue.vouchers" :paginator="true" :rows="10" dataKey="id" :rowHover="true" :loading="loading.value">
-                    <template #header>
-                        <div class="flex flex-col md:flex-row items-center justify-between gap-4 w-full">
-                            <div class="flex gap-4 w-full md:w-auto">
-                                <div class="w-32">
-                                    <label class="block font-medium text-gray-700 mb-1">Used</label>
-                                    <span class="text-gray-800 font-semibold">{{ catalogue.usedVouchers }}</span>
-                                </div>
-                                <div class="w-32">
-                                    <label class="block font-medium text-gray-700 mb-1">Total</label>
-                                    <span class="text-gray-800 font-semibold">{{ catalogue.totalVouchers }}</span>
-                                </div>
-                            </div>
-
-                            <div class="flex gap-2">
-                                <Button icon="pi pi-download" class="w-10 h-10" severity="primary" @click="downloadVouchers" />
-                                <Button icon="pi pi-upload" class="w-10 h-10" severity="success" @click="importVouchers" />
-                            </div>
-                        </div>
-                    </template>
-
-                    <template #empty> No vouchers found. </template>
-                    <template #loading> Loading vouchers data. Please wait. </template>
-
-                    <Column header="Voucher Code" style="min-width: 10rem">
-                        <template #body="{ data }"> {{ data.code }} </template>
-                    </Column>
-                    <Column header="Expiry" style="min-width: 8rem">
-                        <template #body="{ data }"> {{ data.expiry }}</template>
-                    </Column>
-                    <Column header="Date Used" style="min-width: 8rem">
-                        <template #body="{ data }"> {{ data.used || '-' }}</template>
-                    </Column>
-                    <Column header="Status" style="min-width: 8rem">
-                        <template #body="{ data }">
-                            <span :class="data.status === 'Used' ? 'text-red-500 font-semibold' : 'text-green-500 font-semibold'">
-                                {{ data.status }}
-                            </span>
-                        </template>
-                    </Column>
-                </DataTable>
-            </div>
-        </div>
     </Fluid>
 </template>
 
@@ -257,16 +224,16 @@ const catalogue = ref({
     created: '2025-01-01',
     deleted: 0,
     pins: [],
-    vouchers: [
-        { id: 1, code: 'SBX-2025-0001', expiry: '2025-12-31', used: '2025-09-10', status: 'Used' },
-        { id: 2, code: 'SBX-2025-0002', expiry: '2025-12-31', used: null, status: 'Available' },
-        { id: 3, code: 'SBX-2025-0003', expiry: '2025-11-30', used: null, status: 'Available' },
-        { id: 4, code: 'SBX-2025-0004', expiry: '2025-10-31', used: '2025-09-20', status: 'Used' },
-        { id: 5, code: 'SBX-2025-0005', expiry: '2025-12-31', used: null, status: 'Available' }
-    ],
-    usedVouchers: 2, // Total vouchers marked as 'Used'
-    totalVouchers: 5 // Total vouchers in the list
+    vouchers: [],
+    usedVouchers: 0,
+    totalVouchers: 0
 });
+
+const participants = ref([
+    { id: 1, fullName: 'John Doe', memberCode: '66010345610299', date: '2025-10-05', point: 120 },
+    { id: 2, fullName: 'Jane Smith', memberCode: '040521250941', date: '2025-09-25', point: 90 },
+    { id: 3, fullName: 'Ali Ahmad', memberCode: '02010329454432', date: '2025-08-30', point: 150 }
+]);
 
 const loading = ref(false);
 
@@ -307,10 +274,6 @@ const downloadPins = () => {
     a.download = 'pins.json';
     a.click();
     URL.revokeObjectURL(url);
-};
-
-const importPins = () => {
-    alert('Import PIN logic goes here.');
 };
 
 onMounted(() => {
