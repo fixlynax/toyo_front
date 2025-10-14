@@ -54,6 +54,7 @@
                 <div class="card flex flex-col w-full" v-if="event.isSurvey === 1">
                     <div class="flex items-center justify-between border-b pb-2 mb-2">
                         <div class="text-2xl font-bold text-gray-800">📋 Survey Info</div>
+                        <Button icon="pi pi-download" label="report" style="width: fit-content" class="p-button-danger p-button-sm" />
                     </div>
 
                     <div class="space-y-6">
