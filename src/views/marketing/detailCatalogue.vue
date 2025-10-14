@@ -49,10 +49,11 @@
                                 </div>
 
                                 <!-- Action Buttons -->
-                                <div class="flex gap-4 items-end w-full md:w-48">
+                                <div class="flex gap-4 items-end w-full md:w-72">
                                     <Button icon="pi pi-plus" class="p-button-text text-green-600 w-10 h-10 flex items-center justify-center" v-tooltip="'Add PIN'" @click="addPin" />
                                     <Button icon="pi pi-minus" class="p-button-text text-yellow-600 w-10 h-10 flex items-center justify-center" v-tooltip="'Remove PIN'" @click="removePin" />
                                     <Button icon="pi pi-file-export" label="Export" v-tooltip="'Export Redemption List'" @click="exportRedemptionList" />
+                                    <Button icon="pi pi-file-import" label="Import" v-tooltip="'Export Redemption List'" @click="exportRedemptionList" />
                                 </div>
                             </div>
                         </template>
@@ -77,6 +78,26 @@
                             </template>
                         </Column>
                     </DataTable>
+                    <!-- Set Point & Delete Buttons -->
+                    <div class="flex flex-row items-center gap-2 mt-4">
+                        <Button label="Set Cost Redeem" class="p-button" size="small" style="width: auto" @click="showSetDialog = true" />
+                    </div>
+
+                    <!-- Set Point Dialog -->
+                    <Dialog v-model:visible="showSetDialog" header="Set Cost Redeem" modal class="w-96">
+                        <div class="flex flex-col gap-3">
+                            <label for="setPoint" class="font-medium">Silver Point</label>
+                            <InputNumber v-model="setPoint" id="setPoint" showButtons />
+                            <label for="setPoint" class="font-medium">Gold Point</label>
+                            <InputNumber v-model="setPoint" id="setPoint" showButtons />
+                            <label for="setPoint" class="font-medium">Plantinum Point</label>
+                            <InputNumber v-model="setPoint" id="setPoint" showButtons />
+                            <div class="flex justify-end gap-2 mt-3">
+                                <Button label="Cancel" class="p-button-text" @click="showSetDialog = false" />
+                                <Button label="Confirm" class="p-button-success" @click="confirmSetPoint" />
+                            </div>
+                        </div>
+                    </Dialog>
                 </div>
                 <div v-else-if="catalogue.type === 'E-Voucher'" class="card flex flex-col w-full">
                     <!-- Header -->
@@ -120,10 +141,11 @@
                                 </div>
 
                                 <!-- Action Buttons -->
-                                <div class="flex gap-4 items-end w-full md:w-48">
+                                <div class="flex gap-4 items-end w-full md:w-72">
                                     <Button icon="pi pi-plus" class="p-button-text text-green-600 w-10 h-10 flex items-center justify-center" v-tooltip="'Add PIN'" @click="addPin" />
                                     <Button icon="pi pi-minus" class="p-button-text text-yellow-600 w-10 h-10 flex items-center justify-center" v-tooltip="'Remove PIN'" @click="removePin" />
                                     <Button icon="pi pi-file-export" label="Export" v-tooltip="'Export Redemption List'" @click="exportRedemptionList" />
+                                    <Button icon="pi pi-file-import" label="Import" v-tooltip="'Export Redemption List'" @click="exportRedemptionList" />
                                 </div>
                             </div>
                         </template>
@@ -148,78 +170,121 @@
                             </template>
                         </Column>
                     </DataTable>
+                    <!-- Set Point & Delete Buttons -->
+                    <div class="flex flex-row items-center gap-2 mt-8">
+                        <Button label="Set Cost Redeem" class="p-button" size="small" style="width: auto" @click="showSetDialog = true" />
+                    </div>
+
+                    <!-- Set Point Dialog -->
+                    <Dialog v-model:visible="showSetDialog" header="Cost Redeem" modal class="w-96">
+                        <div class="flex flex-col gap-3">
+                            <label for="setPoint" class="font-medium">Silver Point</label>
+                            <InputNumber v-model="setPoint" id="setPoint" showButtons />
+                            <label for="setPoint" class="font-medium">Gold Point</label>
+                            <InputNumber v-model="setPoint" id="setPoint" showButtons />
+                            <label for="setPoint" class="font-medium">Plantinum Point</label>
+                            <InputNumber v-model="setPoint" id="setPoint" showButtons />
+                            <div class="flex justify-end gap-2 mt-3">
+                                <Button label="Cancel" class="p-button-text" @click="showSetDialog = false" />
+                                <Button label="Confirm" class="p-button-success" @click="confirmSetPoint" />
+                            </div>
+                        </div>
+                    </Dialog>
                 </div>
- <div v-else-if="catalogue.type === 'Item'" class="card flex flex-col w-full">
-    <!-- Header -->
-    <div class="flex items-center justify-between border-b pb-3 mb-6">
-        <div class="flex items-center gap-2">
-            <RouterLink to="/marketing/listCatalogue">
-                <Button icon="pi pi-arrow-left font-bold" class="p-button-text p-button-secondary text-xl" v-tooltip="'Back'" />
-            </RouterLink>
-            <div class="text-2xl font-bold text-gray-800">Details Catalogue</div>
-        </div>
+                <div v-else-if="catalogue.type === 'Item'" class="card flex flex-col w-full">
+                    <!-- Header -->
+                    <div class="flex items-center justify-between border-b pb-3 mb-6">
+                        <div class="flex items-center gap-2">
+                            <RouterLink to="/marketing/listCatalogue">
+                                <Button icon="pi pi-arrow-left font-bold" class="p-button-text p-button-secondary text-xl" v-tooltip="'Back'" />
+                            </RouterLink>
+                            <div class="text-2xl font-bold text-gray-800">Details Catalogue</div>
+                        </div>
 
-        <!-- Edit & Delete Buttons -->
-        <div class="flex items-center gap-2">
-            <RouterLink to="/marketing/editCatalogue">
-                <Button label="Edit" class="p-button-info" size="small" />
-            </RouterLink>
-            <Button label="Delete" class="p-button-danger" size="small" />
-        </div>
-    </div>
+                        <!-- Edit & Delete Buttons -->
+                        <div class="flex items-center gap-2">
+                            <RouterLink to="/marketing/editCatalogue">
+                                <Button label="Edit" class="p-button-info" size="small" />
+                            </RouterLink>
+                            <Button label="Delete" class="p-button-danger" size="small" />
+                        </div>
+                    </div>
 
-    <!-- Item Stock Section -->
-    <div class="flex items-center justify-between mb-4">
-        <div class="flex items-center gap-3">
-            <div class="text-2xl font-bold text-gray-800">📦 Item Stock</div>
-        </div>
-    </div>
+                    <!-- Item Stock Section -->
+                    <div class="flex items-center justify-between mb-4">
+                        <div class="flex items-center gap-3">
+                            <div class="text-2xl font-bold text-gray-800">📦 Item Stock</div>
+                        </div>
+                    </div>
 
-    <!-- Quantity Overview -->
-    <div class="flex flex-col md:flex-row justify-between items-center bg-gray-50 border rounded-lg p-4 mb-6">
-        <div class="flex flex-col gap-2">
-            <div>
-                <span class="font-medium text-gray-700">Total Quantity:</span>
-                <span class="font-bold text-gray-900 ml-2">{{ catalogue.totalqty }}</span>
-            </div>
-            <div>
-                <span class="font-medium text-gray-700">Available Quantity:</span>
-                <span class="font-bold text-green-700 ml-2">{{ catalogue.availableqty }}</span>
-            </div>
-        </div>
+                    <!-- Quantity Overview -->
+                    <div class="flex flex-col md:flex-row justify-between items-center bg-gray-50 border rounded-lg p-4 mb-6">
+                        <div class="flex flex-col gap-2">
+                            <div>
+                                <span class="font-medium text-gray-700">Total Quantity:</span>
+                                <span class="font-bold text-gray-900 ml-2">{{ catalogue.totalqty }}</span>
+                            </div>
+                            <div>
+                                <span class="font-medium text-gray-700">Available Quantity:</span>
+                                <span class="font-bold text-green-700 ml-2">{{ catalogue.availableqty }}</span>
+                            </div>
+                        </div>
 
-        <!-- Action Buttons -->
-        <div class="flex gap-4 mt-4 md:mt-0">
-            <Button icon="pi pi-plus" label="Add" class="p-button-success" @click="showAddDialog = true" />
-            <Button icon="pi pi-minus" label="Remove" class="p-button-warning" @click="showRemoveDialog = true" />
-        </div>
-    </div>
+                        <!-- Action Buttons -->
+                        <div class="flex gap-4 mt-4 md:mt-0">
+                            <Button icon="pi pi-plus" label="Add" class="p-button-success" @click="showAddDialog = true" />
+                            <Button icon="pi pi-minus" label="Remove" class="p-button-warning" @click="showRemoveDialog = true" />
+                        </div>
+                    </div>
 
-    <!-- Add Stock Dialog -->
-    <Dialog v-model:visible="showAddDialog" header="Add Quantity" modal class="w-96">
-        <div class="flex flex-col gap-3">
-            <label for="addQty" class="font-medium">Quantity to Add</label>
-            <InputNumber v-model="addQty" id="addQty" showButtons min="1" />
-            <div class="flex justify-end gap-2 mt-3">
-                <Button label="Cancel" class="p-button-text" @click="showAddDialog = false" />
-                <Button label="Confirm" class="p-button-success" @click="addStock" />
-            </div>
-        </div>
-    </Dialog>
+                    <!-- Add Stock Dialog -->
+                    <Dialog v-model:visible="showAddDialog" header="Add Quantity" modal class="w-96">
+                        <div class="flex flex-col gap-3">
+                            <label for="addQty" class="font-medium">Quantity to Add</label>
+                            <InputNumber v-model="addQty" id="addQty" showButtons min="1" />
+                            <div class="flex justify-end gap-2 mt-3">
+                                <Button label="Cancel" class="p-button-text" @click="showAddDialog = false" />
+                                <Button label="Confirm" class="p-button-success" @click="addStock" />
+                            </div>
+                        </div>
+                    </Dialog>
 
-    <!-- Remove Stock Dialog -->
-    <Dialog v-model:visible="showRemoveDialog" header="Remove Quantity" modal class="w-96">
-        <div class="flex flex-col gap-3">
-            <label for="removeQty" class="font-medium">Quantity to Remove</label>
-            <InputNumber v-model="removeQty" id="removeQty" showButtons min="1" />
-            <div class="flex justify-end gap-2 mt-3">
-                <Button label="Cancel" class="p-button-text" @click="showRemoveDialog = false" />
-                <Button label="Confirm" class="p-button-warning" @click="removeStock" />
-            </div>
-        </div>
-    </Dialog>
-</div>
+                    <!-- Remove Stock Dialog -->
+                    <Dialog v-model:visible="showRemoveDialog" header="Remove Quantity" modal class="w-96">
+                        <div class="flex flex-col gap-3">
+                            <label for="removeQty" class="font-medium">Quantity to Remove</label>
+                            <InputNumber v-model="removeQty" id="removeQty" showButtons min="1" />
+                            <div class="flex justify-end gap-2 mt-3">
+                                <Button label="Cancel" class="p-button-text" @click="showRemoveDialog = false" />
+                                <Button label="Confirm" class="p-button-warning" @click="removeStock" />
+                            </div>
+                        </div>
+                    </Dialog>
 
+                    <!-- Set Point & Delete Buttons -->
+                    <div class="flex flex-row items-center gap-2 mt-4">
+                        <Button label="Cost Redeem" class="p-button" size="small" style="width: auto" @click="showSetDialog = true" />
+                    </div>
+
+                    <!-- Set Point Dialog -->
+                    <Dialog v-model:visible="showSetDialog" header="Set Point" modal class="w-96">
+                        <div class="flex flex-col gap-3">
+                            <label for="silverPoint" class="font-medium">Silver Point</label>
+                            <InputNumber v-model="silverPoint" id="silverPoint" showButtons min="0" />
+
+                            <label for="goldPoint" class="font-medium">Gold Point</label>
+                            <InputNumber v-model="goldPoint" id="goldPoint" showButtons min="0" />
+
+                            <label for="platinumPoint" class="font-medium">Platinum Point</label>
+                            <InputNumber v-model="platinumPoint" id="platinumPoint" showButtons min="0" />
+
+                            <div class="flex justify-end gap-2 mt-3">
+                                <Button label="Cancel" class="p-button-text" @click="showSetDialog = false" />
+                                <Button label="Confirm" class="p-button-success" @click="confirmSetPoint" />
+                            </div>
+                        </div>
+                    </Dialog>
+                </div>
 
                 <!-- ======================== -->
                 <!-- Redemption List Section  -->
@@ -249,7 +314,6 @@
 
                         <Column field="fullName" header="Member Name" style="min-width: 10rem" />
                         <Column field="date" header="Date Redeemed" style="min-width: 10rem" />
-                        <Column field="point" header="Item" style="min-width: 8rem; text-align: start" />
                     </DataTable>
                 </div>
             </div>
@@ -272,17 +336,6 @@
                     <div class="mt-4">
                         <h1 class="text-2xl font-bold text-gray-800">{{ catalogue.title }}</h1>
                         <p class="text-lg font-medium">{{ catalogue.description }}</p>
-                    </div>
-
-                    <div class="flex flex-col md:flex-row mt-2" v-if="catalogue.type === 'E-Voucher'">
-                        <div class="w-full">
-                            <span class="block text-xm font-bold text-black-700">Value Type</span>
-                            <p class="text-lg font-medium">{{ catalogue.valueType }}</p>
-                        </div>
-                        <div class="w-full">
-                            <span class="block text-xm font-bold text-black-700">Value Amount</span>
-                            <p class="text-lg font-medium">{{ catalogue.valueAmount }}</p>
-                        </div>
                     </div>
 
                     <div class="flex flex-col md:flex-row gap-4 mt-2">
@@ -402,9 +455,9 @@ const catalogue = ref({
 });
 
 const participants = ref([
-    { id: 1, fullName: 'John Doe', memberCode: '66010345610299', date: '2025-10-05', point: 120 },
-    { id: 2, fullName: 'Jane Smith', memberCode: '040521250941', date: '2025-09-25', point: 90 },
-    { id: 3, fullName: 'Ali Ahmad', memberCode: '02010329454432', date: '2025-08-30', point: 150 }
+    { id: 1, fullName: 'John Doe', memberCode: '66010345610299', date: '2025-10-05' },
+    { id: 2, fullName: 'Jane Smith', memberCode: '040521250941', date: '2025-09-25' },
+    { id: 3, fullName: 'Ali Ahmad', memberCode: '02010329454432', date: '2025-08-30' }
 ]);
 
 const loading = ref(false);
@@ -504,15 +557,11 @@ const removeStock = () => {
     }
 };
 
-const exportStockList = () => {
-    const dataStr = JSON.stringify(itemStocks.value, null, 2);
-    const blob = new Blob([dataStr], { type: 'application/json' });
-    const url = URL.createObjectURL(blob);
+const showSetDialog = ref(false);
+const setPoint = ref(0);
 
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = 'item_stock.json';
-    a.click();
-    URL.revokeObjectURL(url);
+const confirmSetPoint = () => {
+    console.log('Point set to:', setPoint.value);
+    showSetDialog.value = false;
 };
 </script>
