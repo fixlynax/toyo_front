@@ -249,6 +249,11 @@ const router = createRouter({
                     name: 'Invite-Dealer',
                     component: () => import('@/views/marketing/inviteDealer.vue')
                 },
+                 {
+                    path: '/marketing/detailParticipant',
+                    name: 'Detail-Participant',
+                    component: () => import('@/views/marketing/detailParticipant.vue')
+                },
 
                 // Games
                 {
