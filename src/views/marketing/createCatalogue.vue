@@ -5,6 +5,25 @@
                 <!-- Header -->
                 <div class="text-2xl font-bold text-gray-800 border-b pb-2">Create Catalogue</div>
 
+                <!-- Type & Is Birthday -->
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 md:col-span-2">
+                    <div>
+                        <label class="block font-bold text-gray-700 mb-1">Type</label>
+                        <Dropdown v-model="catalogue.type" :options="typeOptions" optionLabel="label" optionValue="value" placeholder="Select a type" class="w-full" />
+                    </div>
+                    <div>
+                        <label class="block font-bold text-gray-700 mb-1">Is Birthday?</label>
+                        <Dropdown v-model="catalogue.isBirthday" :options="isBirthdayOptions" optionLabel="label" optionValue="value" placeholder="Select an option" class="w-full" />
+                    </div>
+                    <div v-if="catalogue.type === 'Item' || catalogue.type === 'E-Voucher'">
+                        <label class="block font-bold text-gray-700 mb-1">Quantity</label>
+                        <InputNumber v-model="catalogue.valueAmount" class="w-full" />
+                    </div>
+                    <div v-if="catalogue.type === 'E-Voucher'">
+                        <label class="block font-bold text-gray-700 mb-1">Provider</label>
+                        <InputNumber v-model="catalogue.valueAmount" class="w-full" />
+                    </div>
+                </div>
                 <!-- catalogue Form -->
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <!-- Title -->
@@ -48,22 +67,6 @@
                             <Calendar v-model="catalogue.expiry" class="w-full" />
                         </div>
                     </div>
-
-                    <!-- Type & Is Birthday -->
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 md:col-span-2">
-                        <div>
-                            <label class="block font-bold text-gray-700 mb-1">Type</label>
-                            <Dropdown v-model="catalogue.type" :options="typeOptions" optionLabel="label" optionValue="value" placeholder="Select a type" class="w-full" />
-                        </div>
-                        <div>
-                            <label class="block font-bold text-gray-700 mb-1">Is Birthday?</label>
-                            <Dropdown v-model="catalogue.isBirthday" :options="isBirthdayOptions" optionLabel="label" optionValue="value" placeholder="Select an option" class="w-full" />
-                        </div>
-                        <div v-if="catalogue.type === 'Item'">
-                            <label class="block font-bold text-gray-700 mb-1">Quantity</label>
-                            <InputNumber v-model="catalogue.valueAmount" class="w-full" />
-                        </div>
-                    </div>
                 </div>
 
                 <!-- Upload Images -->
@@ -85,7 +88,7 @@
         <!-- ======================== -->
         <!-- E-Wallet PIN Section     -->
         <!-- ======================== -->
-        <div v-if="catalogue.type === 'E-Wallet'" class="mt-8">
+        <div v-if="catalogue.type === 'E-Wallet' || catalogue.type === 'E-Voucher'" class="mt-8">
             <div class="card flex flex-col w-full">
                 <div class="flex items-center justify-between border-b pb-2 mb-2">
                     <div class="text-2xl font-bold text-gray-800">🔑 List PIN</div>
@@ -122,55 +125,6 @@
                     </Column>
                     <Column header="Status" style="min-width: 8rem">
                         <template #body="{ data }"> {{ data.status ? 'Used' : 'Available' }}</template>
-                    </Column>
-                </DataTable>
-            </div>
-        </div>
-
-        <!-- ======================== -->
-        <!-- E-Voucher Section        -->
-        <!-- ======================== -->
-        <div v-if="catalogue.type === 'E-Voucher'" class="mt-8">
-            <div class="card flex flex-col w-full">
-                <div class="flex items-center justify-between border-b pb-2 mb-2">
-                    <div class="text-2xl font-bold text-gray-800">🎟️ E-Voucher Management</div>
-                </div>
-
-                <DataTable :value="catalogue.vouchers" :paginator="true" :rows="10" dataKey="id" :rowHover="true" :loading="loading">
-                    <template #header>
-                        <div class="flex flex-col md:flex-row items-center justify-between gap-4 w-full">
-                            <div class="flex gap-4 w-full md:w-auto">
-                                <div class="w-32">
-                                    <label class="block font-bold text-gray-700 mb-1">Total</label>
-                                    <span class="text-gray-800 font-semibold">{{ catalogue.totalVouchers }}</span>
-                                </div>
-                            </div>
-
-                            <div class="flex gap-2">
-                                <Button icon="pi pi-download" class="w-10 h-10" severity="primary" @click="downloadVouchers" />
-                                <Button icon="pi pi-upload" class="w-10 h-10" severity="success" @click="importVouchers" />
-                            </div>
-                        </div>
-                    </template>
-
-                    <template #empty> No vouchers found. </template>
-                    <template #loading> Loading vouchers data. Please wait. </template>
-
-                    <Column header="Voucher Code" style="min-width: 10rem">
-                        <template #body="{ data }"> {{ data.code }} </template>
-                    </Column>
-                    <Column header="Expiry" style="min-width: 8rem">
-                        <template #body="{ data }"> {{ data.expiry }}</template>
-                    </Column>
-                    <Column header="Date Used" style="min-width: 8rem">
-                        <template #body="{ data }"> {{ data.usedDate || '-' }}</template>
-                    </Column>
-                    <Column header="Status" style="min-width: 8rem">
-                        <template #body="{ data }">
-                            <span :class="data.status === 'Used' ? 'text-red-500 font-semibold' : 'text-green-500 font-semibold'">
-                                {{ data.status }}
-                            </span>
-                        </template>
                     </Column>
                 </DataTable>
             </div>
@@ -216,44 +170,6 @@
                 </div>
             </div>
         </div> -->
-
-        <!-- ======================== -->
-        <!-- Cost Redeem Section      -->
-        <!-- ======================== -->
-        <div class="mt-8">
-            <div class="card flex flex-col w-full">
-                <div class="flex items-center justify-between border-b pb-2 mb-2">
-                    <div class="text-2xl font-bold text-gray-800">🎁 Cost Redeem</div>
-                </div>
-
-                <div class="p-4 text-gray-600">
-                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4 md:col-span-2">
-                        <div>
-                            <label class="block font-bold text-gray-700 mb-1">Silver Point</label>
-                            <InputNumber v-model="catalogue.point1" class="w-full" />
-                        </div>
-                        <div>
-                            <label class="block font-bold text-gray-700 mb-1">Gold Point</label>
-                            <InputNumber v-model="catalogue.point2" class="w-full" />
-                        </div>
-                        <div>
-                            <label class="block font-bold text-gray-700 mb-1">Platinum Point</label>
-                            <InputNumber v-model="catalogue.point3" class="w-full" />
-                        </div>
-                    </div>
-                </div>
-
-                <div class="flex justify-end mt-2 gap-2">
-                    <div class="w-40">
-                        <Button label="Cancel" class="p-button-secondary w-full mr-2" @click="$router.back()" />
-                    </div>
-
-                    <div class="w-40">
-                        <Button label="Save" class="w-full" />
-                    </div>
-                </div>
-            </div>
-        </div>
     </Fluid>
 </template>
 
