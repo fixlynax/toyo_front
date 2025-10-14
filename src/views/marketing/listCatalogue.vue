@@ -49,6 +49,10 @@
                         <div class="text-lg font-semibold text-gray-800 truncate">
                             {{ item.title }}
                         </div>
+                        <div class="text-ml font-semibold text-gray-500 truncate">
+                            Purpose:
+                            {{ item.purpose }}
+                        </div>
 
                         <!-- Row 1: SKU + Type -->
                         <div class="flex items-center justify-between text-sm text-gray-600">
@@ -66,13 +70,6 @@
                                 {{ item.expiry }}
                             </span>
                         </div>
-                    </div>
-
-                    <!-- Action Button -->
-                    <div class="mt-2 mx-4 mb-4">
-                        <RouterLink :to="`/marketing/editCatalogue/`">
-                            <button class="w-full px-4 py-2 bg-blue-600 text-white rounded-xl hover:bg-blue-700 transition-colors">Edit</button>
-                        </RouterLink>
                     </div>
                 </RouterLink>
             </div>

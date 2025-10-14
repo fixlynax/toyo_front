@@ -49,7 +49,7 @@ onBeforeMount(async () => {
 
                     <!-- Right: Export & Template Buttons -->
                     <div class="flex items-center gap-2 ml-auto">
-                        <Button type="button" label="Export" icon="pi pi-file-export" class="p-button-sucess" />
+                        <Button type="button" label="Update" icon="pi pi-sync" class="p-button-sucess" />
                         <Button type="button" label="Template" icon="pi pi-download" class="p-button-danger" />
                     </div>
                 </div>
@@ -58,7 +58,7 @@ onBeforeMount(async () => {
             <template #empty> No News found. </template>
             <template #loading> Loading News data. Please wait. </template>
             <!-- Columns -->
-            <Column field="refNo" header="Ref No" style="min-width: 8rem">
+            <Column field="refno" header="Ref No" sortable style="min-width: 8rem">
                 <template #body="{ data }">
                     <RouterLink to="/marketing/detailRedemption" class="hover:underline font-bold">
                         {{ data.refno }}
