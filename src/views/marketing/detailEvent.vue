@@ -55,7 +55,7 @@
                     <div class="flex items-center justify-between border-b pb-2 mb-2">
                         <div class="text-2xl font-bold text-gray-800">📋 Survey Info</div>
                     </div>
-                    
+
                     <div class="space-y-6">
                         <!-- Loop through each question -->
                         <div v-for="(q, qIndex) in questions" :key="qIndex" class="border-b pb-4">
@@ -107,10 +107,6 @@
                                     <td class="px-4 py-2 text-right">{{ event.isSurvey ? 'Yes' : 'No' }}</td>
                                 </tr>
                                 <tr v-if="event.isSurvey === 1" class="border-b">
-                                    <td class="px-4 py-2 font-medium">Point Classic</td>
-                                    <td class="px-4 py-2 text-right">{{ event.point1 }}</td>
-                                </tr>
-                                <tr v-if="event.isSurvey === 1" class="border-b">
                                     <td class="px-4 py-2 font-medium">Point Silver</td>
                                     <td class="px-4 py-2 text-right">{{ event.point2 }}</td>
                                 </tr>
@@ -133,12 +129,17 @@
 
                 <!-- Participant List (only if survey enabled) -->
                 <div class="card flex flex-col w-full" v-if="event.isSurvey === 1">
-                    <div class="text-2xl font-bold text-gray-800 border-b pb-3 mb-4">👨🏻‍💻 Participant List</div>
+                    <div class="flex items-center justify-between border-b pb-3 mb-4">
+                        <div class="text-2xl font-bold text-gray-800">👨🏻‍💻 Participant List</div>
+                        <Button icon="pi pi-file-import" label="Import" style="width: fit-content" class="p-button-danger p-button-sm" />
+                    </div>
+
                     <DataTable :value="participants" :paginator="true" :rows="10" dataKey="id" :rowHover="true" responsiveLayout="scroll" class="text-sm">
                         <Column header="User" style="min-width: 1rem">
                             <template #body="{ data }">
                                 <div class="flex flex-col">
                                     <span class="font-bold text-gray-800">{{ data.fullName }}</span>
+                                    <span class="text-gray-600 text-xs mt-2">👤 {{ data.memberCode }}</span>
                                     <span class="text-gray-600 text-xs mt-2">🎖️ {{ data.memberLevel }}</span>
                                 </div>
                             </template>
@@ -231,6 +232,7 @@ const participants = ref([
         id: 1,
         fullName: 'Ahmad Faiz',
         memberLevel: 'Gold',
+        memberCode: '6001200230',
         date: '2025-09-01',
         point: 90
     },
@@ -238,6 +240,7 @@ const participants = ref([
         id: 2,
         fullName: 'Nur Aisyah',
         memberLevel: 'Silver',
+        memberCode: '6001200456',
         date: '2025-09-02',
         point: 85
     },
@@ -245,6 +248,7 @@ const participants = ref([
         id: 3,
         fullName: 'Hafiz Din',
         memberLevel: 'Platinum',
+        memberCode: '6001200789',
         date: '2025-09-02',
         point: 95
     },
@@ -252,6 +256,7 @@ const participants = ref([
         id: 4,
         fullName: 'Lim Wei Jian',
         memberLevel: 'Gold',
+        memberCode: '6001200123',
         date: '2025-09-03',
         point: 90
     },
@@ -259,6 +264,7 @@ const participants = ref([
         id: 5,
         fullName: 'Siti Mariam',
         memberLevel: 'Silver',
+        memberCode: '6001200345',
         date: '2025-09-03',
         point: 85
     },
@@ -266,6 +272,7 @@ const participants = ref([
         id: 6,
         fullName: 'Arjun Kumar',
         memberLevel: 'Gold',
+        memberCode: '6001200678',
         date: '2025-09-04',
         point: 90
     },
@@ -273,6 +280,7 @@ const participants = ref([
         id: 7,
         fullName: 'Tan Li Ying',
         memberLevel: 'Platinum',
+        memberCode: '6001200912',
         date: '2025-09-04',
         point: 95
     },
@@ -280,6 +288,7 @@ const participants = ref([
         id: 8,
         fullName: 'Mohd Amir',
         memberLevel: 'Silver',
+        memberCode: '6001200111',
         date: '2025-09-05',
         point: 85
     },
@@ -287,6 +296,7 @@ const participants = ref([
         id: 9,
         fullName: 'Farah Nadiah',
         memberLevel: 'Gold',
+        memberCode: '6001200222',
         date: '2025-09-05',
         point: 90
     },
@@ -294,6 +304,7 @@ const participants = ref([
         id: 10,
         fullName: 'Jason Lee',
         memberLevel: 'Platinum',
+        memberCode: '6001200333',
         date: '2025-09-06',
         point: 95
     },
@@ -301,6 +312,7 @@ const participants = ref([
         id: 11,
         fullName: 'Hazrul Izhar',
         memberLevel: 'Classic',
+        memberCode: '6001200444',
         date: '2025-09-06',
         point: 95
     }

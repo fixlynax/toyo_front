@@ -47,7 +47,7 @@
 
                 <!-- Upload Images -->
                 <div>
-                    <label class="block font-bold text-gray-700 mb-2">Game Images</label>
+                    <label class="block font-bold text-gray-700 mb-2">Upload Game Images</label>
                     <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
                         <div class="relative">
                             <FileUpload mode="basic" name="image1" accept="image/*" customUpload @select="onImageSelect($event, 'image1URL')" chooseLabel="Change Image 1" class="w-full" />
@@ -56,6 +56,7 @@
                                 <button @click="removeImage('image1URL')" class="absolute top-2 right-2 bg-red-500 text-white px-2 py-1 rounded-full hover:bg-red-600">&times;</button>
                             </div>
                         </div>
+
                         <div class="relative">
                             <FileUpload mode="basic" name="image2" accept="image/*" customUpload @select="onImageSelect($event, 'image2URL')" chooseLabel="Change Image 2" class="w-full" />
                             <div v-if="game.image2URL" class="relative mt-2">
@@ -63,6 +64,7 @@
                                 <button @click="removeImage('image2URL')" class="absolute top-2 right-2 bg-red-500 text-white px-2 py-1 rounded-full hover:bg-red-600">&times;</button>
                             </div>
                         </div>
+
                         <div class="relative">
                             <FileUpload mode="basic" name="image3" accept="image/*" customUpload @select="onImageSelect($event, 'image3URL')" chooseLabel="Change Image 3" class="w-full" />
                             <div v-if="game.image3URL" class="relative mt-2">
@@ -72,118 +74,75 @@
                         </div>
                     </div>
                 </div>
+            </div>
+        </div>
 
-                <!-- Prize Section -->
-                <div>
-                    <div class="flex items-center justify-between border-b pb-2 mb-4 mt-6">
-                        <div class="text-xl font-bold text-gray-800">🏆 Prize Section</div>
-                        <Button icon="pi pi-plus" label="Add Prize" style="width: fit-content" class="p-button-success p-button-sm" :disabled="prizes.length >= 10" @click="addPrize" />
+        <!-- 🏆 Prize Section -->
+        <div class="card flex flex-col w-full mt-8">
+            <div class="flex items-center justify-between border-b pb-2 mb-4">
+                <div class="text-xl font-bold text-gray-800">🏆 Prize Section</div>
+            </div>
+
+            <div v-if="prizes.length > 0" class="space-y-4">
+                <div v-for="(prize, index) in prizes" :key="index" class="border rounded-lg p-4 shadow-sm bg-gray-50">
+                    <div class="flex items-center justify-between mb-3">
+                        <label class="font-semibold">Prize {{ index + 1 }}</label>
+                        <Button icon="pi pi-trash" class="p-button-danger p-button-text p-button-sm" @click="removePrize(index)" />
                     </div>
 
-                    <div v-if="prizes.length > 0" class="space-y-4">
-                        <div v-for="(prize, index) in prizes" :key="index" class="border rounded-lg p-4 shadow-sm bg-gray-50">
-                            <div class="flex items-center justify-between mb-3">
-                                <label class="font-semibold">Prize {{ index + 1 }}</label>
-                                <Button icon="pi pi-trash" class="p-button-danger p-button-text p-button-sm" @click="removePrize(index)" />
-                            </div>
-
-                            <!-- Prize Type -->
-                            <div class="mb-3">
-                                <label class="block font-bold text-gray-700">Prize Type</label>
-                                <Dropdown v-model="prize.type" :options="prizeTypes" optionLabel="label" optionValue="value" class="w-full" />
-                            </div>
-
-                            <!-- Prize Inputs -->
-                            <div v-if="prize.type === 'Point'">
-                                <label class="block font-bold text-gray-700">Prize Name</label>
-                                <InputText v-model="prize.name" class="w-full mb-2" />
-                                <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
-                                    <div>
-                                        <label class="text-sm">Silver</label>
-                                        <InputNumber v-model="prize.value.silver" class="w-full" />
+                    <!-- Prize & Quantity Side by Side -->
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4 items-end">
+                        <!-- Select Prize (2/3) -->
+                        <div class="md:col-span-2">
+                            <label class="block font-bold text-gray-700 mb-1">Select Prize</label>
+                            <Dropdown v-model="prize.selected" :options="listPrize" optionLabel="prizeName" placeholder="Select a prize" class="w-full">
+                                <template #option="slotProps">
+                                    <div class="flex items-center gap-3">
+                                        <img :src="slotProps.option.imageURL" class="w-28 h-16 object-cover rounded" />
+                                        <div class="flex flex-col">
+                                            <span class="font-semibold text-gray-800">{{ slotProps.option.prizeName }}</span>
+                                            <small class="text-gray-500">{{ slotProps.option.prizeType }}</small>
+                                        </div>
                                     </div>
-
-                                    <div>
-                                        <label class="text-sm">Gold</label>
-                                        <InputNumber v-model="prize.value.gold" class="w-full" />
+                                </template>
+                                <template #value="slotProps">
+                                    <div v-if="slotProps.value" class="flex items-center gap-3">
+                                        <img :src="slotProps.value.imageURL" class="w-8 h-8 object-cover rounded" />
+                                        <div>
+                                            <span class="font-semibold text-gray-800">{{ slotProps.value.prizeName }}</span>
+                                            <small class="block text-gray-500">{{ slotProps.value.prizeType }}</small>
+                                        </div>
                                     </div>
+                                    <span v-else class="text-gray-400">Select Prize</span>
+                                </template>
+                            </Dropdown>
+                        </div>
 
-                                    <div>
-                                        <label class="text-sm">Platinum</label>
-                                        <InputNumber v-model="prize.value.platinum" class="w-full" />
-                                    </div>
-                                </div>
-
-                                <div class="mt-3">
-                                    <label class="block">Prize Quota</label>
-                                    <InputNumber v-model="prize.quota" class="w-full" />
-                                </div>
-                            </div>
-
-                            <div v-if="prize.type === 'Item'">
-                                <label class="block font-bold text-gray-700">Prize Name</label>
-                                <InputText v-model="prize.name" class="w-full mb-2" />
-
-                                <label class="block font-bold text-gray-700">Prize Value</label>
-                                <InputText v-model="prize.value" class="w-full mb-2" />
-
-                                <label class="block font-bold text-gray-700">Prize Quota</label>
-                                <InputNumber v-model="prize.quota" class="w-full" />
-                            </div>
-
-                            <div v-if="prize.type === 'E-Voucher'">
-                                <label class="block">Prize Name</label>
-                                <InputText v-model="prize.name" class="w-full mb-2" />
-
-                                <label class="block">Prize Value</label>
-                                <InputText v-model="prize.value" class="w-full mb-2" />
-
-                                <label class="block">Prize Quota</label>
-                                <InputNumber v-model="prize.quota" class="w-full mb-3" />
-
-                                <div class="flex flex-col gap-2 w-full">
-                                    <label>Upload E-Voucher Code</label>
-                                    <div class="flex gap-4">
-                                        <FileUpload mode="basic" name="excel" accept=".xlsx,.xls" chooseLabel="Upload Excel" class="p-button-sm" />
-                                        <Button icon="pi pi-download" label="Download Excel" class="p-button-sm p-button-outlined" />
-                                    </div>
-                                </div>
-                            </div>
-
-                            <div v-if="prize.type === 'E-Wallet'">
-                                <label class="block">Prize Name</label>
-                                <InputText v-model="prize.name" class="w-full mb-2" />
-
-                                <label class="block">Prize Value</label>
-                                <InputText v-model="prize.value" class="w-full mb-2" />
-
-                                <label class="block">Prize Quota</label>
-                                <InputNumber v-model="prize.quota" class="w-full mb-3" />
-
-                                <div class="flex flex-col gap-2 w-full">
-                                    <label>Upload E-Wallet Pin</label>
-                                    <div class="flex gap-4">
-                                        <FileUpload mode="basic" name="excel" accept=".xlsx,.xls" chooseLabel="Upload Excel" class="p-button-sm" />
-                                        <Button icon="pi pi-download" label="Download Excel" class="p-button-sm p-button-outlined" />
-                                    </div>
-                                </div>
-                            </div>
+                        <!-- Quantity (1/3 with FloatLabel) -->
+                        <div class="w-full">
+                            <FloatLabel>
+                                <InputNumber id="qty" v-model="prize.qty" :min="1" class="w-full" />
+                                <label for="qty">Quantity</label>
+                            </FloatLabel>
                         </div>
                     </div>
-                    <div v-else class="text-gray-500 italic">No prizes added yet.</div>
                 </div>
+            </div>
 
-                <!-- Submit -->
-                <div class="flex justify-end mt-8">
-                    <div class="w-40">
-                        <Button label="Cancel" class="p-button-secondary w-full mr-2" @click="$router.back()" />
-                    </div>
+            <div v-else class="text-gray-500 italic">No prizes added yet.</div>
 
-                    <div class="w-40">
-                        <RouterLink to="/marketing/detailGame">
-                            <Button label="Update" class="w-full" />
-                        </RouterLink>
-                    </div>
+            <!-- Add Prize Button -->
+            <div class="flex justify-start mt-4">
+                <Button icon="pi pi-plus" label="Add Prize" style="width: fit-content" class="p-button-success p-button-sm" :disabled="prizes.length >= 10" @click="addPrize" />
+            </div>
+
+            <!-- Submit -->
+            <div class="flex justify-end mt-8 gap-2">
+                <div class="w-40">
+                    <Button label="Cancel" class="p-button-secondary w-full mr-2" @click="$router.back()" />
+                </div>
+                <div class="w-40">
+                    <Button label="Update" class="w-full" @click="updateForm" />
                 </div>
             </div>
         </div>
@@ -192,18 +151,6 @@
 
 <script setup>
 import { ref } from 'vue';
-
-const typeOptions = [
-    { label: 'Spin', value: 'Spin' },
-    { label: 'Random', value: 'Random' }
-];
-
-const prizeTypes = [
-    { label: 'Point', value: 'Point' },
-    { label: 'Item', value: 'Item' },
-    { label: 'E-Wallet', value: 'E-Wallet' },
-    { label: 'E-Voucher', value: 'E-Voucher' }
-];
 
 const game = ref({
     id: 1,
@@ -219,16 +166,31 @@ const game = ref({
     image3URL: '/demo/images/event-toyo-3.jpg'
 });
 
+const typeOptions = [
+    { label: 'Spin', value: 'Spin' },
+    { label: 'Random', value: 'Random' }
+];
+
+// 🎁 Prize List Dropdown Data
+const listPrize = ref([
+    { id: 1, imageURL: '/demo/images/bonus-point.png', prizeName: 'Bonus Point Toyo', prizeType: 'Point', prizeQuota: 50, prizeRemain: 20 },
+    { id: 2, imageURL: 'https://assets.bharian.com.my/images/articles/tng13jan_BHfield_image_socialmedia.var_1610544082.jpg', prizeName: 'MYR 50 E-Wallet', prizeType: 'E-Wallet', prizeQuota: 100, prizeRemain: 40 },
+    { id: 3, imageURL: 'https://assets.offgamers.com/img/offer/kr_fdf75033-56ee-4ce6-929c-1f9c93a4c642_1b1c60fc-e950-4c62-8ee7-471d42484619.webp', prizeName: 'Shopee E-Voucher', prizeType: 'E-Voucher', prizeQuota: 30, prizeRemain: 10 },
+    { id: 4, imageURL: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRdSHDEYMxmOB1Z63V0UB1ohMHGZ5cs5DG4zg&s', prizeName: 'Toyo Tumbler', prizeType: 'Item', prizeQuota: 15, prizeRemain: 5 }
+]);
+
 const prizes = ref([
-    { type: 'Point', name: 'Bonus Points', value: { silver: 50, gold: 100, platinum: 200 }, quota: 100 },
-    { type: 'Item', name: 'Toyo Cap', value: 'Cap', quota: 50 },
-    { type: 'E-Wallet', name: 'GrabPay Credit', value: 'RM10', quota: 30 },
-    { type: 'E-Voucher', name: 'Lazada Voucher', value: 'RM20', quota: 20 }
+    { selected: { prizeName: 'Bonus Point Toyo', prizeType: 'Point', imageURL: '/demo/images/bonus-point.png' }, qty: 5 },
+    { selected: { prizeName: 'Toyo Tumbler', prizeType: 'Item', imageURL: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRdSHDEYMxmOB1Z63V0UB1ohMHGZ5cs5DG4zg&s' }, qty: 2 }
 ]);
 
 const addPrize = () => {
-    prizes.value.push({ type: '', name: '', value: '', quota: '' });
+    prizes.value.push({
+        selected: null,
+        qty: 1
+    });
 };
+
 const removePrize = (index) => {
     prizes.value.splice(index, 1);
 };
@@ -243,7 +205,13 @@ const onImageSelect = (eventFile, field) => {
         reader.readAsDataURL(file);
     }
 };
-const removeImage = (property) => {
-    game.value[property] = null;
+
+const removeImage = (field) => {
+    game.value[field] = '';
+};
+
+const updateForm = () => {
+    console.log('Updated Game Data:', game.value);
+    console.log('Updated Prizes:', prizes.value);
 };
 </script>

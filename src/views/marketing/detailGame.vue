@@ -50,25 +50,49 @@
                     </div>
                 </div>
 
-                <!-- Survey Info (only if enabled) -->
-                <div class="card flex flex-col w-full">
+                <!-- Prize Info -->
+                <div class="card flex flex-col w-full relative">
                     <div class="flex items-center justify-between border-b pb-2 mb-2">
-                        <div class="text-2xl font-bold text-gray-800">📋 Prize Info</div>
+                        <div class="text-2xl font-bold text-gray-800">🎁 Prize Info</div>
                     </div>
 
                     <DataTable :value="listPrize" :paginator="true" :rows="7" dataKey="id" :rowHover="true" responsiveLayout="scroll" class="text-sm">
-                        <!-- User Column -->
-                        <Column field="prizeName" header="Prize Name" style="min-width: 8rem"></Column>
+                        <!-- Prize Column -->
+                        <Column header="Prize" style="min-width: 10rem">
+                            <template #body="{ data }">
+                                <div class="flex items-center gap-3 relative group" @mouseenter="hoverPrize = data.id" @mouseleave="hoverPrize = null">
+                                    <img :src="data.imageURL" alt="Prize" class="w-36 h-24 rounded-lg object-cover border" />
+                                    <div class="flex flex-col">
+                                        <span class="font-bold text-gray-800">{{ data.prizeName }}</span>
+                                        <span class="text-gray-600 text-xs">{{ data.prizeType }}</span>
+                                    </div>
 
-                        <!-- Prize Type -->
-                        <Column field="prizeType" header="Prize Type" style="min-width: 8rem"></Column>
+                                    <!-- Tooltip for Point Type -->
+                                    <div v-if="data.prizeType === 'Point' && hoverPrize === data.id" class="absolute top-0 left-20 bg-white border rounded-lg shadow-lg p-3 text-xm w-60 z-10">
+                                        <div class="font-semibold text-xl text-gray-700 mb-2">🏅 Point Reward</div>
+                                        <ul class="list-disc list-inside text-gray-700 space-y-1 ml-5">
+                                            <li><b>Silver:</b> 80 pts</li>
+                                            <li><b>Gold:</b> 90 pts</li>
+                                            <li><b>Platinum:</b> 100 pts</li>
+                                        </ul>
+                                    </div>
+                                </div>
+                            </template>
+                        </Column>
 
-                        <!-- Prize -->
-                        <Column field="prizeValue" header="Prize Value" style="min-width: 8rem"></Column>
+                        <!-- Win / Qty Column -->
+                        <Column header="Win / Qty" style="min-width: 8rem">
+                            <template #body="{ data }">
+                                <div>{{ data.prizeRemain }} / {{ data.prizeQuota }}</div>
+                            </template>
+                        </Column>
 
-                        <Column field="prizeQuota" header="Prize Quota" style="min-width: 8rem"></Column>
-
-                        <Column field="prizeRemain" header="Prize Remain" style="min-width: 8rem"></Column>
+                        <!-- Action Column -->
+                        <Column header="Action" style="min-width: 6rem">
+                            <template #body="{ data }">
+                                <Button icon="pi pi-pencil" class="p-button-text p-button-info" @click="openEditDialog(data)" />
+                            </template>
+                        </Column>
                     </DataTable>
                 </div>
             </div>
@@ -98,7 +122,7 @@
                                     <td class="px-4 py-2 text-right">{{ game.type }}</td>
                                 </tr>
                                 <tr class="border-b">
-                                    <td class="px-4 py-2 font-medium">Quota</td>
+                                    <td class="px-4 py-2 font-medium">Quota Player</td>
                                     <td class="px-4 py-2 text-right">{{ game.quota }}</td>
                                 </tr>
                                 <tr class="border-b">
@@ -122,7 +146,10 @@
                 </div>
 
                 <div class="card flex flex-col w-full">
-                    <div class="text-2xl font-bold text-gray-800 border-b pb-3 mb-4">👨🏻‍💻 Participant List</div>
+                    <div class="flex items-center justify-between border-b pb-3 mb-4">
+                        <div class="text-2xl font-bold text-gray-800">👨🏻‍💻 Participant List</div>
+                        <Button icon="pi pi-file-import" label="Import" style="width: fit-content" class="p-button-danger p-button-sm" />
+                    </div>
                     <DataTable :value="participants" :paginator="true" :rows="7" dataKey="id" :rowHover="true" responsiveLayout="scroll" class="text-sm">
                         <!-- User Column -->
                         <Column header="User" style="min-width: 6rem">
@@ -144,11 +171,28 @@
                 </div>
             </div>
         </div>
+        <!-- Edit Prize Dialog -->
+        <Dialog v-model:visible="editDialogVisible" modal header="Edit Prize Quantity" :style="{ width: '400px' }">
+            <div class="flex flex-col gap-3">
+                <div class="font-semibold text-gray-800">{{ selectedPrize?.prizeName }}</div>
+                <div class="flex items-center gap-3">
+                    <label class="text-gray-700 font-medium w-20">Quota:</label>
+                    <InputNumber v-model="selectedPrize.prizeQuota" :min="1" class="w-full" />
+                </div>
+                <div class="flex justify-end mt-4">
+                    <Button label="Save" icon="pi pi-check" class="p-button-success p-button-sm" @click="savePrizeEdit" />
+                </div>
+            </div>
+        </Dialog>
     </Fluid>
 </template>
 
 <script setup>
 import { ref } from 'vue';
+
+const hoverPrize = ref(null);
+const editDialogVisible = ref(false);
+const selectedPrize = ref(null);
 
 const game = ref({
     id: 1,
@@ -176,62 +220,10 @@ const game = ref({
 });
 
 const listPrize = ref([
-    {
-        id: 1,
-        prizeName: 'Amazon $20 Gift Card',
-        prizeType: 'Point',
-        prizeValue: 100,
-        prizeQuota: 50,
-        prizeRemain: 20
-    },
-    {
-        id: 2,
-        prizeName: 'MYR 50 E-Wallet',
-        prizeType: 'E-Wallet',
-        prizeValue: 'MYR 50',
-        prizeQuota: 100,
-        prizeRemain: 40
-    },
-    {
-        id: 3,
-        prizeName: 'Amazon $50 E-Voucher',
-        prizeType: 'E-Voucher',
-        prizeValue: 'Amazon $50',
-        prizeQuota: 30,
-        prizeRemain: 10
-    },
-    {
-        id: 4,
-        prizeName: 'Smartwatch',
-        prizeType: 'Item',
-        prizeValue: 'Smartwatch',
-        prizeQuota: 15,
-        prizeRemain: 5
-    },
-    {
-        id: 5,
-        prizeName: 'Amazon $10 Gift Card',
-        prizeType: 'Point',
-        prizeValue: 75,
-        prizeQuota: 40,
-        prizeRemain: 25
-    },
-    {
-        id: 6,
-        prizeName: 'MYR 100 E-Wallet',
-        prizeType: 'E-Wallet',
-        prizeValue: 'MYR 100',
-        prizeQuota: 80,
-        prizeRemain: 30
-    },
-    {
-        id: 7,
-        prizeName: 'Amazon $25 E-Voucher',
-        prizeType: 'E-Voucher',
-        prizeValue: 'Amazon $25',
-        prizeQuota: 25,
-        prizeRemain: 8
-    }
+    { id: 1, prizeType: 'Point', imageURL: '/demo/images/bonus-point.png', prizeName: 'Bonus Point Toyo', prizeQuota: 50, prizeRemain: 20 },
+    { id: 2, prizeType: 'E-Wallet', imageURL: 'https://assets.bharian.com.my/images/articles/tng13jan_BHfield_image_socialmedia.var_1610544082.jpg', prizeName: 'MYR 50 E-Wallet', prizeQuota: 100, prizeRemain: 40 },
+    { id: 3, prizeType: 'E-Voucher', imageURL: 'https://assets.offgamers.com/img/offer/kr_fdf75033-56ee-4ce6-929c-1f9c93a4c642_1b1c60fc-e950-4c62-8ee7-471d42484619.webp', prizeName: 'Shopee E-Voucher', prizeQuota: 30, prizeRemain: 10 },
+    { id: 4, prizeType: 'Item', imageURL: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRdSHDEYMxmOB1Z63V0UB1ohMHGZ5cs5DG4zg&s', prizeName: 'Toyo Tumbler', prizeQuota: 15, prizeRemain: 5 }
 ]);
 
 const participants = ref([
@@ -335,4 +327,17 @@ const participants = ref([
         prize: 'Smartphone'
     }
 ]);
+
+function openEditDialog(prize) {
+    selectedPrize.value = { ...prize };
+    editDialogVisible.value = true;
+}
+
+function savePrizeEdit() {
+    const index = listPrize.value.findIndex(p => p.id === selectedPrize.value.id);
+    if (index !== -1) {
+        listPrize.value[index].prizeQuota = selectedPrize.value.prizeQuota;
+    }
+    editDialogVisible.value = false;
+}
 </script>
