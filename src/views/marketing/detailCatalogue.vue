@@ -335,17 +335,6 @@
                         <p class="text-lg font-medium">{{ catalogue.description }}</p>
                     </div>
 
-                    <div class="flex flex-col md:flex-row mt-2" v-if="catalogue.type === 'E-Voucher'">
-                        <div class="w-full">
-                            <span class="block text-xm font-bold text-black-700">Value Type</span>
-                            <p class="text-lg font-medium">{{ catalogue.valueType }}</p>
-                        </div>
-                        <div class="w-full">
-                            <span class="block text-xm font-bold text-black-700">Value Amount</span>
-                            <p class="text-lg font-medium">{{ catalogue.valueAmount }}</p>
-                        </div>
-                    </div>
-
                     <div class="flex flex-col md:flex-row gap-4 mt-2">
                         <div class="w-full">
                             <span class="block text-xm font-bold text-black-700">Terms</span>
