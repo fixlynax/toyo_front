@@ -4,7 +4,7 @@
             <!-- ======================= -->
             <!-- LEFT SECTION: Redemption & Shipping Edit -->
             <!-- ======================= -->
-            <div class="md:w-2/3 flex flex-col gap-8">
+            <div class="md:w-2/3 flex flex-col gap-2">
                 <!-- Redemption Details (Read-only) -->
                 <div class="card flex flex-col gap-6 w-full">
                     <div class="flex items-center justify-between border-b pb-2">
@@ -13,16 +13,20 @@
 
                     <div class="mt-2 grid grid-cols-2 gap-4">
                         <div>
-                            <p class="text-xl font-bold text-black-700">Recipient</p>
-                            <p class="text-lg text-black-900">{{ redemption.recipientName }}</p>
+                            <span class="block text-sm font-bold text-gray-700">Recipient</span>
+                            <p class="text-lg font-medium">{{ redemption.recipientName }}</p>
                         </div>
                         <div>
-                            <p class="text-xl font-bold text-black-700">Contact</p>
-                            <p class="text-lg text-black-500">{{ redemption.contactNumber }}</p>
+                            <span class="block text-sm font-bold text-gray-700">Contact</span>
+                            <p class="text-lg text-gray-500">{{ redemption.contactNumber }}</p>
                         </div>
                         <div>
-                            <p class="mt-2 text-xl font-bold text-black-700">Redeemed Item</p>
-                            <p class="text-lg text-black-500">{{ redemption.itemName }}</p>
+                            <span class="block text-sm font-bold text-gray-700">Redeemed Item</span>
+                            <p class="text-lg text-gray-500">{{ redemption.itemName }}</p>
+                        </div>
+                        <div>
+                            <span class="block text-sm font-bold text-gray-700">Approved By</span>
+                            <p class="text-lg text-gray-500">{{ redemption.approvedBy }} ({{ redemption.adminID }})</p>
                         </div>
                     </div>
                 </div>
@@ -37,105 +41,55 @@
                         <!-- Recipient Name -->
                         <div class="col-span-2">
                             <label class="block text-gray-700 font-semibold">Recipient</label>
-                            <InputText 
-                                v-model="form.recipientName" 
-                                type="text" 
-                                class="w-full border p-2 rounded"
-                                placeholder="Recipient Name"
-                            />
+                            <InputText v-model="form.recipientName" type="text" class="w-full border p-2 rounded" placeholder="Recipient Name" />
                         </div>
 
                         <!-- Contact Number -->
                         <div class="col-span-2">
                             <label class="block text-gray-700 font-semibold">Contact</label>
-                            <InputText 
-                                v-model="form.contactNumber" 
-                                type="text" 
-                                class="w-full border p-2 rounded"
-                                placeholder="Contact Number"
-                            />
+                            <InputText v-model="form.contactNumber" type="text" class="w-full border p-2 rounded" placeholder="Contact Number" />
                         </div>
 
                         <!-- Courier Name -->
                         <div class="col-span-2">
                             <label class="block text-gray-700 font-semibold">Courier</label>
-                            <InputText 
-                                v-model="form.courierName" 
-                                type="text" 
-                                class="w-full border p-2 rounded"
-                                placeholder="Courier Name"
-                            />
+                            <InputText v-model="form.courierName" type="text" class="w-full border p-2 rounded" placeholder="Courier Name" />
                         </div>
 
                         <!-- Tracking Number -->
                         <div class="col-span-2">
                             <label class="block text-gray-700 font-semibold">Tracking No</label>
-                            <InputText 
-                                v-model="form.trackingNumber" 
-                                type="text" 
-                                class="w-full border p-2 rounded"
-                                placeholder="Tracking Number"
-                            />
+                            <InputText v-model="form.trackingNumber" type="text" class="w-full border p-2 rounded" placeholder="Tracking Number" />
                         </div>
 
                         <!-- Address Lines -->
                         <div class="col-span-4">
                             <label class="block text-gray-700 font-semibold">Address Line 1</label>
-                            <InputText 
-                                v-model="form.addLine1" 
-                                type="text" 
-                                class="w-full border p-2 rounded"
-                                placeholder="Street Address"
-                            />
+                            <InputText v-model="form.addLine1" type="text" class="w-full border p-2 rounded" placeholder="Street Address" />
                         </div>
                         <div class="col-span-4">
                             <label class="block text-gray-700 font-semibold">Address Line 2</label>
-                            <InputText 
-                                v-model="form.addLine2" 
-                                type="text" 
-                                class="w-full border p-2 rounded"
-                                placeholder="Apartment, Suite, etc. (optional)"
-                            />
+                            <InputText v-model="form.addLine2" type="text" class="w-full border p-2 rounded" placeholder="Apartment, Suite, etc. (optional)" />
                         </div>
 
                         <!-- City & State -->
                         <div class="col-span-2">
                             <label class="block text-gray-700 font-semibold">City</label>
-                            <InputText 
-                                v-model="form.addCity" 
-                                type="text" 
-                                class="w-full border p-2 rounded"
-                                placeholder="City"
-                            />
+                            <InputText v-model="form.addCity" type="text" class="w-full border p-2 rounded" placeholder="City" />
                         </div>
                         <div class="col-span-2">
                             <label class="block text-gray-700 font-semibold">State</label>
-                            <InputText 
-                                v-model="form.addState" 
-                                type="text" 
-                                class="w-full border p-2 rounded"
-                                placeholder="State"
-                            />
+                            <InputText v-model="form.addState" type="text" class="w-full border p-2 rounded" placeholder="State" />
                         </div>
 
                         <!-- Postcode & Country -->
                         <div class="col-span-2">
                             <label class="block text-gray-700 font-semibold">Postcode</label>
-                            <InputText 
-                                v-model="form.addPostcode" 
-                                type="text" 
-                                class="w-full border p-2 rounded"
-                                placeholder="Postcode"
-                            />
+                            <InputText v-model="form.addPostcode" type="text" class="w-full border p-2 rounded" placeholder="Postcode" />
                         </div>
                         <div class="col-span-2">
                             <label class="block text-gray-700 font-semibold">Country</label>
-                            <InputText 
-                                v-model="form.addCountry" 
-                                type="text" 
-                                class="w-full border p-2 rounded"
-                                placeholder="Country"
-                            />
+                            <InputText v-model="form.addCountry" type="text" class="w-full border p-2 rounded" placeholder="Country" />
                         </div>
                     </div>
 
@@ -145,11 +99,7 @@
                             <Button label="Cancel" class="p-button-secondary" />
                         </RouterLink>
                         <div>
-                        <Button 
-                            label="Update" 
-                            class="p-button-success"  
-                            @click="saveChanges"
-                        />
+                            <Button label="Update" class="p-button-success" @click="saveChanges" />
                         </div>
                     </div>
                 </div>
@@ -162,10 +112,7 @@
                 <div class="card flex flex-col w-full">
                     <div class="flex items-center justify-between border-b pb-2 mb-2">
                         <h2 class="text-2xl font-bold text-gray-800">ℹ️ Advance Info</h2>
-                        <Tag 
-                            :value="statusLabel(redemption.status)" 
-                            :severity="statusSeverity(redemption.status)" 
-                        />
+                        <Tag :value="statusLabel(redemption.status)" :severity="statusSeverity(redemption.status)" />
                     </div>
 
                     <div class="overflow-x-auto">
@@ -224,6 +171,8 @@ const redemption = ref({
     courierName: 'DHL Express',
     trackingNumber: 'DHLMY10001',
     shippedDate: '2024-04-01',
+    adminID: 'admin01',
+    approvedBy: 'EtenAdmin',
     status: 'Packing',
     created: '2024-03-25'
 });

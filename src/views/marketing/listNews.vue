@@ -105,6 +105,14 @@ onBeforeMount(async () => {
                     {{ data.publishDate }}
                 </template>
             </Column>
+            <Column field="Period" header="Period" style="min-width: 6rem">
+                <template #body="{ data }">
+                    {{ data.startDate }}
+                    <span class="font-bold"> - </span>
+                    {{ data.endDate }}
+                </template>
+            </Column>
+
             <Column field="audience" header="Audience" style="min-width: 6rem">
                 <template #body="{ data }">
                     {{ data.audience }}
