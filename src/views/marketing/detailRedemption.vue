@@ -72,6 +72,41 @@
                         </div>
                     </div>
                 </div>
+
+                <!-- NEW RESULT CARD BELOW -->
+                <div v-if="redemption.status === 'Approved'" class="card mt-6 border-l-4 border-green-500 bg-green-50 shadow-sm">
+                    <div class="flex items-center gap-2 mb-3">
+                        <i class="pi pi-check-circle text-green-600 text-xl"></i>
+                        <h3 class="font-bold text-green-700 text-lg">Redemption Approved</h3>
+                    </div>
+                    <div class="grid grid-cols-2 gap-3 text-xm">
+                        <div>
+                            <span class="font-semibold text-gray-700">Approved By:</span>
+                            <p class="text-gray-600">{{ redemption.approvedBy }}</p>
+                        </div>
+                        <div>
+                            <span class="font-semibold text-gray-700">Approved Date:</span>
+                            <p class="text-gray-600">{{ formatDate(redemption.approvedDate) }}</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div v-if="redemption.status === 'Rejected'" class="card mt-6 border-l-4 border-red-500 bg-red-50 shadow-sm">
+                    <div class="flex items-center gap-2 mb-3">
+                        <i class="pi pi-times-circle text-red-600 text-xl"></i>
+                        <h3 class="font-bold text-red-700 text-lg">Redemption Rejected</h3>
+                    </div>
+                    <div class="grid grid-cols-2 gap-3 text-xm">
+                        <div>
+                            <span class="font-semibold text-gray-700">Reason:</span>
+                            <p class="text-gray-600">{{ redemption.rejectReason }}</p>
+                        </div>
+                        <div>
+                            <span class="font-semibold text-gray-700">Rejected Date:</span>
+                            <p class="text-gray-600">{{ formatDate(redemption.rejectedDate) }}</p>
+                        </div>
+                    </div>
+                </div>
             </div>
 
             <!-- ======================= -->
@@ -117,20 +152,26 @@
                                     <td class="px-4 py-2 font-medium">Verified Date</td>
                                     <td class="px-4 py-2 text-right">{{ redemption.verifiedDate }}</td>
                                 </tr>
+                                <tr class="border-b" v-if="redemption.approvedDate">
+                                    <td class="px-4 py-2 font-medium">Approved Date</td>
+                                    <td class="px-4 py-2 text-right">{{ redemption.approvedDate }}</td>
+                                </tr>
+                                <tr class="border-b" v-if="redemption.rejectedDate">
+                                    <td class="px-4 py-2 font-medium">Rejected Date</td>
+                                    <td class="px-4 py-2 text-right">{{ redemption.rejectedDate }}</td>
+                                </tr>
                             </tbody>
                         </table>
                     </div>
 
-                    <!-- Action Buttons moved here -->
-                    <div class="flex justify-end mt-4 pt-4">
+                    <!-- Action Buttons - Only show for pending status -->
+                    <div v-if="redemption.status === 'Pending'" class="flex justify-end mt-4 pt-4">
                         <div class="flex gap-2">
                             <!-- Reject Button -->
                             <Button label="Reject" class="p-button-danger" @click="showRejectDialog = true" />
 
                             <!-- Approve Button -->
-                            <RouterLink to="/marketing/detailEvent">
-                                <Button label="Approve" class="p-button-success" />
-                            </RouterLink>
+                            <Button label="Approve" class="p-button-success" @click="showApproveDialog = true" />
                         </div>
                     </div>
                 </div>
@@ -165,6 +206,30 @@
                 </div>
             </template>
         </Dialog>
+
+        <!-- Approval Confirmation Dialog -->
+        <Dialog v-model:visible="showApproveDialog" modal header="Approve Redemption" :style="{ width: '400px' }" :breakpoints="{ '960px': '75vw', '641px': '90vw' }">
+            <div class="flex flex-col gap-3">
+                <div class="flex items-center gap-3">
+                    <i class="pi pi-exclamation-triangle text-yellow-500 text-xl"></i>
+                    <p class="text-gray-700">Are you sure you want to approve this redemption?</p>
+                </div>
+                <div class="bg-blue-50 p-3 rounded-md">
+                    <p class="text-sm text-blue-700">
+                        <strong>Item:</strong> {{ redemption.itemName }}<br>
+                        <strong>Recipient:</strong> {{ redemption.recipientName }}<br>
+                        <strong>Points:</strong> {{ redemption.totalPoint }}
+                    </p>
+                </div>
+            </div>
+
+            <template #footer>
+                <div class="flex justify-end gap-3">
+                    <Button label="Cancel" class="p-button-secondary p-button-sm" @click="showApproveDialog = false" />
+                    <Button label="Confirm Approval" class="p-button-success p-button-sm" @click="submitApprove" />
+                </div>
+            </template>
+        </Dialog>
     </Fluid>
 </template>
 
@@ -173,6 +238,7 @@ import { ref } from 'vue';
 import Dialog from 'primevue/dialog';
 
 const showRejectDialog = ref(false);
+const showApproveDialog = ref(false);
 const rejectReason = ref('');
 const showValidationError = ref(false);
 
@@ -196,12 +262,15 @@ const redemption = ref({
     courierName: 'DHL Express',
     trackingNumber: 'DHLMY10001',
     shippedDate: '2024-04-01',
-    status: 'Packing',
+    status: 'Pending', // Changed to Pending to show action buttons
     adminID: 'admin01',
     approvedBy: 'EtenAdmin',
     verifiedDate: '2024-04-02',
     created: '2024-03-25',
-    deleted: false
+    deleted: false,
+    approvedDate: null,
+    rejectedDate: null,
+    rejectReason: null
 });
 
 // Close dialog and reset form
@@ -218,6 +287,11 @@ const submitReject = () => {
         return;
     }
 
+    // Update redemption status
+    redemption.value.status = 'Rejected';
+    redemption.value.rejectedDate = new Date().toISOString().split('T')[0];
+    redemption.value.rejectReason = rejectReason.value;
+
     console.log('Rejected with reason:', rejectReason.value);
     // Here you would typically make an API call to submit the rejection
 
@@ -225,23 +299,56 @@ const submitReject = () => {
     // this.$toast.add({ severity: 'success', summary: 'Rejected', detail: 'Redemption has been rejected successfully', life: 3000 });
 
     closeRejectDialog();
+};
 
-    // Optionally, you can redirect or update the status
-    // redemption.value.status = 'Rejected';
+// Approve submission handler
+const submitApprove = () => {
+    // Update redemption status
+    redemption.value.status = 'Approved';
+    redemption.value.approvedDate = new Date().toISOString().split('T')[0];
+
+    console.log('Redemption approved');
+    // Here you would typically make an API call to submit the approval
+
+    // Show success message
+    // this.$toast.add({ severity: 'success', summary: 'Approved', detail: 'Redemption has been approved successfully', life: 3000 });
+
+    showApproveDialog.value = false;
 };
 
 // Helper functions for status label
 const statusLabel = (status) => {
-    if (status === 'Packing') return 'Packing';
-    if (status === 'Shipped') return 'Shipped';
-    if (status === 'Delivered') return 'Delivered';
-    return 'Unknown';
+    const statusMap = {
+        'Pending': 'Pending',
+        'Approved': 'Approved',
+        'Rejected': 'Rejected',
+        'Packing': 'Packing',
+        'Shipped': 'Shipped',
+        'Delivered': 'Delivered'
+    };
+    return statusMap[status] || 'Unknown';
 };
 
 const statusSeverity = (status) => {
-    if (status === 'Packing') return 'info';
-    if (status === 'Shipped') return 'warn';
-    if (status === 'Delivered') return 'success';
-    return 'secondary';
+    const severityMap = {
+        'Pending': 'warning',
+        'Approved': 'success',
+        'Rejected': 'danger',
+        'Packing': 'info',
+        'Shipped': 'warn',
+        'Delivered': 'success'
+    };
+    return severityMap[status] || 'secondary';
+};
+
+// Date formatting function
+const formatDate = (dateString) => {
+    if (!dateString) return 'N/A';
+    const date = new Date(dateString);
+    return date.toLocaleDateString('en-US', {
+        year: 'numeric',
+        month: 'short',
+        day: 'numeric'
+    });
 };
 </script>
