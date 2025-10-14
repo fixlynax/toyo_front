@@ -3,14 +3,16 @@
         <div class="flex flex-col md:flex-row gap-8">
             <!-- LEFT CONTENT -->
             <div class="md:w-2/3">
-                <div class="card flex flex-col gap-6 w-full">
+                <div class="card flex flex-col gap-6 w-full relative pb-20">
+                    <!-- Added pb-20 for button space -->
+
                     <!-- HEADER -->
                     <div class="flex items-center justify-between border-b pb-2">
                         <div class="flex items-center gap-3">
                             <RouterLink to="/marketing/listRedemption">
                                 <Button icon="pi pi-arrow-left font-bold" class="p-button-text p-button-secondary text-xl" size="big" v-tooltip="'Back'" />
                             </RouterLink>
-                            <div class="text-2xl font-bold text-gray-800">Warranty</div>
+                            <div class="text-2xl font-bold text-gray-800">Warranty Detail</div>
                         </div>
                     </div>
 
@@ -50,64 +52,56 @@
                         </div>
                     </div>
 
-                    <!-- ACTION BUTTONS -->
-                    <div v-if="redemption.status === 'Pending'" class="flex justify-end gap-3 mt-6">
-                        <Button 
-                            label="Reject" 
-                            class="p-button-danger w-36" 
-                            @click="showRejectDialog = true" 
-                        />
-                        <Button 
-                            label="Approve" 
-                            class="p-button-success w-36" 
-                            @click="showApproveDialog = true" 
-                        />
-                    </div>
-
-                    <!-- STATUS RESULT CARD -->
-                    <div v-if="redemption.status === 'Approved'" class="mt-4">
-                        <div class="card border border-green-200 bg-green-50">
-                            <div class="flex items-center gap-2 mb-3">
-                                <i class="pi pi-check-circle text-green-500 text-xl"></i>
-                                <h3 class="font-bold text-green-700 text-lg">Approved</h3>
-                            </div>
-                            <div class="grid grid-cols-2 gap-3 text-sm">
-                                <div>
-                                    <span class="font-semibold text-gray-700">Approved By:</span>
-                                    <p class="text-gray-600">{{ redemption.approvedBy }}</p>
-                                </div>
-                                <div>
-                                    <span class="font-semibold text-gray-700">Approved Date:</span>
-                                    <p class="text-gray-600">{{ formatDate(redemption.approvedDate) }}</p>
-                                </div>
-                            </div>
+                    <!-- ACTION BUTTONS (fixed to bottom-right inside card) -->
+                    <div v-if="redemption.status === 'Pending'" class="flex justify-end gap-2">
+                        <div class="w-30">
+                            <Button label="Reject" class="p-button-danger w-32" @click="showRejectDialog = true" />
+                        </div>
+                        <div class="w-30">
+                            <Button label="Approve" class="p-button-success w-32" @click="showApproveDialog = true" />
                         </div>
                     </div>
+                </div>
 
-                    <div v-if="redemption.status === 'Rejected'" class="mt-4">
-                        <div class="card border border-red-200 bg-red-50">
-                            <div class="flex items-center gap-2 mb-3">
-                                <i class="pi pi-times-circle text-red-500 text-xl"></i>
-                                <h3 class="font-bold text-red-700 text-lg">Rejected</h3>
-                            </div>
-                            <div class="grid grid-cols-2 gap-3 text-sm">
-                                <div>
-                                    <span class="font-semibold text-gray-700">Rejected Date:</span>
-                                    <p class="text-gray-600">{{ formatDate(redemption.rejectedDate) }}</p>
-                                </div>
-                                <div class="col-span-2">
-                                    <span class="font-semibold text-gray-700">Reason:</span>
-                                    <p class="text-gray-600">{{ redemption.rejectReason }}</p>
-                                </div>
-                            </div>
+                <!-- NEW RESULT CARD BELOW -->
+                <div v-if="redemption.status === 'Approved'" class="card mt-6 border-l-4 border-green-500 bg-green-50 shadow-sm">
+                    <div class="flex items-center gap-2 mb-3">
+                        <i class="pi pi-check-circle text-green-600 text-xl"></i>
+                        <h3 class="font-bold text-green-700 text-lg">Redemption Approved</h3>
+                    </div>
+                    <div class="grid grid-cols-2 gap-3 text-xm">
+                        <div>
+                            <span class="font-semibold text-gray-700">Approved By:</span>
+                            <p class="text-gray-600">{{ redemption.approvedBy }}</p>
+                        </div>
+                        <div>
+                            <span class="font-semibold text-gray-700">Approved Date:</span>
+                            <p class="text-gray-600">{{ formatDate(redemption.approvedDate) }}</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div v-if="redemption.status === 'Rejected'" class="card mt-6 border-l-4 border-red-500 bg-red-50 shadow-sm">
+                    <div class="flex items-center gap-2 mb-3">
+                        <i class="pi pi-times-circle text-red-600 text-xl"></i>
+                        <h3 class="font-bold text-red-700 text-lg">Redemption Rejected</h3>
+                    </div>
+                    <div class="grid grid-cols-2 gap-3 text-xm">
+                        <div>
+                            <span class="font-semibold text-gray-700">Reason:</span>
+                            <p class="text-gray-600">{{ redemption.rejectReason }}</p>
+                        </div>
+                        <div>
+                            <span class="font-semibold text-gray-700">Rejected Date:</span>
+                            <p class="text-gray-600">{{ formatDate(redemption.rejectedDate) }}</p>
                         </div>
                     </div>
                 </div>
             </div>
 
             <!-- RIGHT CONTENT (Customer + Dealer Info) -->
-            <div class="md:w-1/3 flex flex-col gap-6">
-                <!-- CUSTOMER INFO CARD -->
+            <div class="md:w-1/3 flex flex-col">
+                <!-- CUSTOMER INFO -->
                 <div class="card flex flex-col w-full">
                     <div class="flex items-center justify-between border-b pb-2 mb-2">
                         <h2 class="text-2xl font-bold text-gray-800">Customer Info</h2>
@@ -126,7 +120,7 @@
                     </table>
                 </div>
 
-                <!-- DEALER INFO CARD -->
+                <!-- DEALER INFO -->
                 <div class="card flex flex-col w-full">
                     <div class="flex items-center justify-between border-b pb-2 mb-2">
                         <h2 class="text-2xl font-bold text-gray-800">Dealer Info</h2>
@@ -162,16 +156,8 @@
         <!-- DIALOGS -->
         <Dialog v-model:visible="showRejectDialog" modal header="Reject Redemption" :style="{ width: '500px' }">
             <div>
-                <label for="rejectReason" class="block text-sm font-medium text-gray-700 mb-2">
-                    Reason for rejection <span class="text-red-500">*</span>
-                </label>
-                <textarea
-                    id="rejectReason"
-                    v-model="rejectReason"
-                    class="w-full border border-gray-300 rounded-md p-2 focus:ring-2 focus:ring-red-400"
-                    placeholder="Provide rejection reason..."
-                    rows="4"
-                ></textarea>
+                <label for="rejectReason" class="block text-sm font-medium text-gray-700 mb-2"> Reason for rejection <span class="text-red-500">*</span> </label>
+                <textarea id="rejectReason" v-model="rejectReason" class="w-full border border-gray-300 rounded-md p-2 focus:ring-2 focus:ring-red-400" placeholder="Provide rejection reason..." rows="4"></textarea>
             </div>
             <template #footer>
                 <div class="flex justify-end gap-3">
@@ -183,9 +169,7 @@
 
         <Dialog v-model:visible="showApproveDialog" modal header="Approve Redemption" :style="{ width: '500px' }">
             <div>
-                <label for="approvedBy" class="block text-sm font-medium text-gray-700 mb-2">
-                    Approved By <span class="text-red-500">*</span>
-                </label>
+                <label for="approvedBy" class="block text-xl font-medium text-gray-700 mb-2"> Approved By <span class="text-red-500">*</span> </label>
                 <InputText id="approvedBy" v-model="approvedBy" class="w-full" placeholder="Enter your name" />
             </div>
             <template #footer>
@@ -198,10 +182,8 @@
     </Fluid>
 </template>
 
-
 <script setup>
 import { ref } from 'vue';
-
 
 const showRejectDialog = ref(false);
 const showApproveDialog = ref(false);
