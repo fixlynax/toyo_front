@@ -63,11 +63,11 @@
                                 </tr>
 
                                 <tr class="border-b">
-                                    <td class="px-4 py-2 font-medium">Start</td>
+                                    <td class="px-4 py-2 font-medium">Start Date</td>
                                     <td class="px-4 py-2 text-right">{{ news.startDate }}</td>
                                 </tr>
                                 <tr class="border-b">
-                                    <td class="px-4 py-2 font-medium">End</td>
+                                    <td class="px-4 py-2 font-medium">End Date</td>
                                     <td class="px-4 py-2 text-right">{{ news.endDate }}</td>
                                 </tr>
                                 <tr class="border-b">
@@ -111,7 +111,7 @@ const news = ref({
     startDate: '2025-01-15',
     endDate: '2025-02-15',
     view: 145,
-    status: 2, // 0=Draft, 1=Published, 2=Unpublished
+    status: 0, // 0=Draft, 1=Published, 2=Unpublished
     created: '2025-01-10',
     deleted: null
 });
