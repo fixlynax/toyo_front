@@ -86,12 +86,12 @@
                     <!-- Set Point Dialog -->
                     <Dialog v-model:visible="showSetDialog" header="Set Cost Redeem" modal class="w-96">
                         <div class="flex flex-col gap-3">
-                            <label for="setPoint" class="font-medium">Silver Point</label>
-                            <InputNumber v-model="setPoint" id="setPoint" showButtons />
-                            <label for="setPoint" class="font-medium">Gold Point</label>
-                            <InputNumber v-model="setPoint" id="setPoint" showButtons />
-                            <label for="setPoint" class="font-medium">Plantinum Point</label>
-                            <InputNumber v-model="setPoint" id="setPoint" showButtons />
+                            <label for="silverpoint" class="font-medium">Silver Point</label>
+                            <InputNumber v-model="silverpoint" id="silverpoint" showButtons />
+                            <label for="goldpoint" class="font-medium">Gold Point</label>
+                            <InputNumber v-model="goldpoint" id="goldpoint" showButtons />
+                            <label for="plantinumpoint" class="font-medium">Plantinum Point</label>
+                            <InputNumber v-model="plantinumpoint" id="plantinumpoint" showButtons />
                             <div class="flex justify-end gap-2 mt-3">
                                 <Button label="Cancel" class="p-button-text" @click="showSetDialog = false" />
                                 <Button label="Confirm" class="p-button-success" @click="confirmSetPoint" />
@@ -176,14 +176,14 @@
                     </div>
 
                     <!-- Set Point Dialog -->
-                    <Dialog v-model:visible="showSetDialog" header="Cost Redeem" modal class="w-96">
+                    <Dialog v-model:visible="showSetDialog" header="Set Cost Redeem" modal class="w-96">
                         <div class="flex flex-col gap-3">
-                            <label for="setPoint" class="font-medium">Silver Point</label>
-                            <InputNumber v-model="setPoint" id="setPoint" showButtons />
-                            <label for="setPoint" class="font-medium">Gold Point</label>
-                            <InputNumber v-model="setPoint" id="setPoint" showButtons />
-                            <label for="setPoint" class="font-medium">Plantinum Point</label>
-                            <InputNumber v-model="setPoint" id="setPoint" showButtons />
+                            <label for="silverpoint" class="font-medium">Silver Point</label>
+                            <InputNumber v-model="silverpoint" id="silverpoint" showButtons />
+                            <label for="goldpoint" class="font-medium">Gold Point</label>
+                            <InputNumber v-model="goldpoint" id="goldpoint" showButtons />
+                            <label for="plantinumpoint" class="font-medium">Plantinum Point</label>
+                            <InputNumber v-model="plantinumpoint" id="plantinumpoint" showButtons />
                             <div class="flex justify-end gap-2 mt-3">
                                 <Button label="Cancel" class="p-button-text" @click="showSetDialog = false" />
                                 <Button label="Confirm" class="p-button-success" @click="confirmSetPoint" />
@@ -267,17 +267,14 @@
                     </div>
 
                     <!-- Set Point Dialog -->
-                    <Dialog v-model:visible="showSetDialog" header="Set Point" modal class="w-96">
+                    <Dialog v-model:visible="showSetDialog" header="Set Cost Redeem" modal class="w-96">
                         <div class="flex flex-col gap-3">
-                            <label for="silverPoint" class="font-medium">Silver Point</label>
-                            <InputNumber v-model="silverPoint" id="silverPoint" showButtons min="0" />
-
-                            <label for="goldPoint" class="font-medium">Gold Point</label>
-                            <InputNumber v-model="goldPoint" id="goldPoint" showButtons min="0" />
-
-                            <label for="platinumPoint" class="font-medium">Platinum Point</label>
-                            <InputNumber v-model="platinumPoint" id="platinumPoint" showButtons min="0" />
-
+                            <label for="silverpoint" class="font-medium">Silver Point</label>
+                            <InputNumber v-model="silverpoint" id="silverpoint" showButtons />
+                            <label for="goldpoint" class="font-medium">Gold Point</label>
+                            <InputNumber v-model="goldpoint" id="goldpoint" showButtons />
+                            <label for="plantinumpoint" class="font-medium">Plantinum Point</label>
+                            <InputNumber v-model="plantinumpoint" id="plantinumpoint" showButtons />
                             <div class="flex justify-end gap-2 mt-3">
                                 <Button label="Cancel" class="p-button-text" @click="showSetDialog = false" />
                                 <Button label="Confirm" class="p-button-success" @click="confirmSetPoint" />
@@ -427,7 +424,7 @@ import { ref, computed, onMounted } from 'vue';
 
 const catalogue = ref({
     id: 1,
-    type: 'E-Wallet', // or 'E-Voucher'
+    type: 'E-Voucher', // or 'E-Voucher'
     image1URL: 'https://assets.bharian.com.my/images/articles/tng13jan_BHfield_image_socialmedia.var_1610544082.jpg',
     title: 'Touch ’n Go Reload RM20',
     sku: 'TNG20',
@@ -570,4 +567,8 @@ const confirmSetPoint = () => {
     console.log('Point set to:', setPoint.value);
     showSetDialog.value = false;
 };
+
+const silverPoint = ref(0);
+const goldPoint = ref(0);
+const platinumPoint = ref(0);
 </script>
