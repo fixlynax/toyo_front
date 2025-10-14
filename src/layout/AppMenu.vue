@@ -336,7 +336,7 @@ const model = ref([
         ]
     },
     {
-        label: 'Billing',
+        label: 'Credit Control',
         icon: 'pi pi-fw pi-credit-card',
         items: [
             {
