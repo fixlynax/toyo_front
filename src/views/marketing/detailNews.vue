@@ -102,7 +102,7 @@ const news = ref({
     startDate: '2025-01-15',
     endDate: '2025-02-15',
     view: 145,
-    status: 0, // 0=Draft, 1=Published, 2=Unpublished
+    status: 2, // 0=Draft, 1=Published, 2=Unpublished
     created: '2025-01-10',
     deleted: null
 });

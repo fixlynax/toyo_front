@@ -1,32 +1,20 @@
 <template>
     <Fluid>
         <div class="flex flex-col md:flex-row gap-8">
-            <!-- Left Content -->
+            <!-- LEFT CONTENT -->
             <div class="md:w-2/3">
                 <div class="card flex flex-col gap-6 w-full">
-                    <!-- Header -->
+                    <!-- HEADER -->
                     <div class="flex items-center justify-between border-b pb-2">
-                        <!-- Left Section: Title + Back Button -->
                         <div class="flex items-center gap-3">
-                            <RouterLink to="/marketing/listRedemption"> 
-                                <Button icon="pi pi-arrow-left font-bold" class="p-button-text p-button-secondary text-xl" size="big" v-tooltip="'Back'" /> 
+                            <RouterLink to="/marketing/listRedemption">
+                                <Button icon="pi pi-arrow-left font-bold" class="p-button-text p-button-secondary text-xl" size="big" v-tooltip="'Back'" />
                             </RouterLink>
                             <div class="text-2xl font-bold text-gray-800">Warranty</div>
                         </div>
-
-                        <!-- Right Section: Edit Button -->
-                        <div class="inline-flex items-center gap-2">
-                            <Button 
-                                label="Edit" 
-                                class="p-button-info" 
-                                size="small" 
-                                @click="$router.push('')"
-                                :disabled="redemption.status === 'Approved' || redemption.status === 'Rejected'"
-                            />
-                        </div>
                     </div>
 
-                    <!-- Recipient Info -->
+                    <!-- RECIPIENT INFO -->
                     <div class="mt-2 grid grid-cols-2 gap-4">
                         <div>
                             <span class="block text-sm font-bold text-gray-700">Registration Number</span>
@@ -41,12 +29,12 @@
                             <p class="text-lg text-gray-500">{{ item.size }}</p>
                         </div>
                         <div>
-                            <span class="block text-sm font-bold text-gray-700"> Serial No</span>
+                            <span class="block text-sm font-bold text-gray-700">Serial No</span>
                             <p class="text-lg text-gray-500">{{ item.serialNo }}</p>
                         </div>
                     </div>
 
-                    <!-- Invoice File Section -->
+                    <!-- INVOICE FILE -->
                     <div class="mt-4 border-t pt-4">
                         <span class="block text-sm font-bold text-gray-700 mb-2">Invoice File</span>
                         <div class="flex items-center gap-3 p-3 bg-gray-50 rounded-lg border">
@@ -56,167 +44,135 @@
                                 <p class="text-sm text-gray-500">{{ formatFileSize(invoiceFileSize) }}</p>
                             </div>
                             <div class="flex gap-2">
-                                <Button 
-                                    icon="pi pi-eye" 
-                                    class="p-button-secondary p-button-sm" 
-                                    @click="viewInvoice"
-                                    v-tooltip="'View Invoice'"
-                                />
-                                <Button 
-                                    icon="pi pi-download" 
-                                    class="p-button-primary p-button-sm" 
-                                    @click="downloadInvoice"
-                                    v-tooltip="'Download Invoice'"
-                                />
+                                <Button icon="pi pi-eye" class="p-button-secondary p-button-sm" @click="viewInvoice" v-tooltip="'View Invoice'" />
+                                <Button icon="pi pi-download" class="p-button-primary p-button-sm" @click="downloadInvoice" v-tooltip="'Download Invoice'" />
                             </div>
                         </div>
                     </div>
 
-                    <!-- Status Display Section -->
-                    <div v-if="redemption.status === 'Approved'" class="mt-4 p-4 bg-green-50 border border-green-200 rounded-lg">
-                        <div class="flex items-center gap-2 mb-2">
-                            <i class="pi pi-check-circle text-green-500"></i>
-                            <span class="font-bold text-green-800">Approved</span>
-                        </div>
-                        <div class="grid grid-cols-2 gap-2 text-sm">
-                            <div>
-                                <span class="font-medium text-gray-700">Approved By:</span>
-                                <p class="text-gray-600">{{ redemption.approvedBy }}</p>
-                            </div>
-                            <div>
-                                <span class="font-medium text-gray-700">Approved Date:</span>
-                                <p class="text-gray-600">{{ formatDate(redemption.approvedDate) }}</p>
-                            </div>
-                        </div>
+                    <!-- ACTION BUTTONS -->
+                    <div v-if="redemption.status === 'Pending'" class="flex justify-end gap-3 mt-6">
+                        <Button 
+                            label="Reject" 
+                            class="p-button-danger w-36" 
+                            @click="showRejectDialog = true" 
+                        />
+                        <Button 
+                            label="Approve" 
+                            class="p-button-success w-36" 
+                            @click="showApproveDialog = true" 
+                        />
                     </div>
 
-                    <div v-if="redemption.status === 'Rejected'" class="mt-4 p-4 bg-red-50 border border-red-200 rounded-lg">
-                        <div class="flex items-center gap-2 mb-2">
-                            <i class="pi pi-times-circle text-red-500"></i>
-                            <span class="font-bold text-red-800">Rejected</span>
-                        </div>
-                        <div class="space-y-2 text-sm">
-                            <div class="grid grid-cols-2 gap-2">
+                    <!-- STATUS RESULT CARD -->
+                    <div v-if="redemption.status === 'Approved'" class="mt-4">
+                        <div class="card border border-green-200 bg-green-50">
+                            <div class="flex items-center gap-2 mb-3">
+                                <i class="pi pi-check-circle text-green-500 text-xl"></i>
+                                <h3 class="font-bold text-green-700 text-lg">Approved</h3>
+                            </div>
+                            <div class="grid grid-cols-2 gap-3 text-sm">
                                 <div>
-                                    <span class="font-medium text-gray-700">Rejected Date:</span>
+                                    <span class="font-semibold text-gray-700">Approved By:</span>
+                                    <p class="text-gray-600">{{ redemption.approvedBy }}</p>
+                                </div>
+                                <div>
+                                    <span class="font-semibold text-gray-700">Approved Date:</span>
+                                    <p class="text-gray-600">{{ formatDate(redemption.approvedDate) }}</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div v-if="redemption.status === 'Rejected'" class="mt-4">
+                        <div class="card border border-red-200 bg-red-50">
+                            <div class="flex items-center gap-2 mb-3">
+                                <i class="pi pi-times-circle text-red-500 text-xl"></i>
+                                <h3 class="font-bold text-red-700 text-lg">Rejected</h3>
+                            </div>
+                            <div class="grid grid-cols-2 gap-3 text-sm">
+                                <div>
+                                    <span class="font-semibold text-gray-700">Rejected Date:</span>
                                     <p class="text-gray-600">{{ formatDate(redemption.rejectedDate) }}</p>
                                 </div>
                                 <div class="col-span-2">
-                                    <span class="font-medium text-gray-700">Reason:</span>
-                                    <p class="text-gray-600 mt-1">{{ redemption.rejectReason }}</p>
+                                    <span class="font-semibold text-gray-700">Reason:</span>
+                                    <p class="text-gray-600">{{ redemption.rejectReason }}</p>
                                 </div>
                             </div>
                         </div>
-                    </div>
-
-                    <!-- Action Buttons -->
-                    <div class="flex justify-end gap-2 mt-4 pt-4 border-t">
-                        <!-- Reject Button -->
-                        <Button 
-                            label="Reject" 
-                            class="p-button-danger" 
-                            @click="showRejectDialog = true"
-                            :disabled="redemption.status === 'Rejected' || redemption.status === 'Approved'"
-                        />
-
-                        <!-- Approve Button -->
-                        <Button 
-                            label="Approve" 
-                            class="p-button-success" 
-                            @click="showApproveDialog = true"
-                            :disabled="redemption.status === 'Rejected' || redemption.status === 'Approved'"
-                        />
                     </div>
                 </div>
             </div>
 
-            <!-- ======================= -->
-            <!-- RIGHT SECTION: Customer Info -->
-            <!-- ======================= -->
+            <!-- RIGHT CONTENT (Customer + Dealer Info) -->
             <div class="md:w-1/3 flex flex-col gap-6">
-                <!-- Original Customer Info Card -->
+                <!-- CUSTOMER INFO CARD -->
                 <div class="card flex flex-col w-full">
-                    <!-- Header -->
                     <div class="flex items-center justify-between border-b pb-2 mb-2">
                         <h2 class="text-2xl font-bold text-gray-800">Customer Info</h2>
                     </div>
-
-                    <!-- Info Table -->
-                    <div class="overflow-x-auto">
-                        <table class="w-full text-sm text-left text-gray-700">
-                            <tbody>
-                                <tr class="border-b">
-                                    <td class="px-4 py-2 font-medium">Customer Name</td>
-                                    <td class="px-4 py-2 text-right">{{ customerInfo.name }}</td>
-                                </tr>
-                                <tr class="border-b">
-                                    <td class="px-4 py-2 font-medium">Vehicle</td>
-                                    <td class="px-4 py-2 text-right">{{ customerInfo.vehicle }}</td>
-                                </tr>
-                            </tbody>
-                        </table>
-                    </div>
+                    <table class="w-full text-sm text-left text-gray-700">
+                        <tbody>
+                            <tr class="border-b">
+                                <td class="px-4 py-2 font-medium">Customer Name</td>
+                                <td class="px-4 py-2 text-right">{{ customerInfo.name }}</td>
+                            </tr>
+                            <tr class="border-b">
+                                <td class="px-4 py-2 font-medium">Vehicle</td>
+                                <td class="px-4 py-2 text-right">{{ customerInfo.vehicle }}</td>
+                            </tr>
+                        </tbody>
+                    </table>
                 </div>
 
-                <!-- Duplicate Customer Info Card -->
+                <!-- DEALER INFO CARD -->
                 <div class="card flex flex-col w-full">
-                    <!-- Header -->
                     <div class="flex items-center justify-between border-b pb-2 mb-2">
                         <h2 class="text-2xl font-bold text-gray-800">Dealer Info</h2>
                     </div>
-
-                    <!-- Info Table -->
-                    <div class="overflow-x-auto">
-                        <table class="w-full text-sm text-left text-gray-700">
-                            <tbody>
-                                <tr class="border-b">
-                                    <td class="px-4 py-2 font-medium">Dealer Name</td>
-                                    <td class="px-4 py-2 text-right">{{ backOrder.customerName }}</td>
-                                </tr>
-                                <tr class="border-b">
-                                    <td class="px-4 py-2 font-medium">Location</td>
-                                    <td class="px-4 py-2 text-right">{{ backOrder.location }}</td>
-                                </tr>
-                                <tr class="border-b">
-                                    <td class="px-4 py-2 font-medium">Account No</td>
-                                    <td class="px-4 py-2 text-right">{{ backOrder.custAccountNo }}</td>
-                                </tr>
-                                 <tr class="border-b">
-                                    <td class="px-4 py-2 font-medium">Contact Person</td>
-                                    <td class="px-4 py-2 text-right">{{ warantyDetail.contactPerson }}</td>
-                                </tr>
-                                <tr class="border-b">
-                                    <td class="px-4 py-2 font-medium">Contact Number</td>
-                                    <td class="px-4 py-2 text-right">{{ warantyDetail.contactNo }}</td>
-                                </tr>
-                            </tbody>
-                        </table>
-                    </div>
+                    <table class="w-full text-sm text-left text-gray-700">
+                        <tbody>
+                            <tr class="border-b">
+                                <td class="px-4 py-2 font-medium">Dealer Name</td>
+                                <td class="px-4 py-2 text-right">{{ backOrder.customerName }}</td>
+                            </tr>
+                            <tr class="border-b">
+                                <td class="px-4 py-2 font-medium">Location</td>
+                                <td class="px-4 py-2 text-right">{{ backOrder.location }}</td>
+                            </tr>
+                            <tr class="border-b">
+                                <td class="px-4 py-2 font-medium">Account No</td>
+                                <td class="px-4 py-2 text-right">{{ backOrder.custAccountNo }}</td>
+                            </tr>
+                            <tr class="border-b">
+                                <td class="px-4 py-2 font-medium">Contact Person</td>
+                                <td class="px-4 py-2 text-right">{{ warantyDetail.contactPerson }}</td>
+                            </tr>
+                            <tr class="border-b">
+                                <td class="px-4 py-2 font-medium">Contact Number</td>
+                                <td class="px-4 py-2 text-right">{{ warantyDetail.contactNo }}</td>
+                            </tr>
+                        </tbody>
+                    </table>
                 </div>
             </div>
         </div>
 
-        <!-- Rejection Reason Dialog -->
-        <Dialog v-model:visible="showRejectDialog" modal header="Reject Redemption" :style="{ width: '500px' }" :breakpoints="{ '960px': '75vw', '641px': '90vw' }">
-            <div class="flex flex-col gap-1">
-                <div>
-                    <label for="rejectReason" class="block text-sm font-medium text-gray-700 mb-2"> Reason for rejection <span class="text-red-500">*</span> </label>
-                    <textarea
-                        id="rejectReason"
-                        v-model="rejectReason"
-                        class="w-full border border-gray-300 rounded-md p-1 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                        placeholder="Please provide the reason for rejecting this redemption..."
-                        rows="4"
-                        :class="{ 'border-red-500': showValidationError }"
-                    ></textarea>
-                    <p v-if="showValidationError" class="text-red-500 text-sm mt-1">Please enter a reason for rejection</p>
-                </div>
-
-                <div class="mt-2">
-                    <p class="text-sm text-gray-600">This action cannot be undone. The user will be notified about the rejection.</p>
-                </div>
+        <!-- DIALOGS -->
+        <Dialog v-model:visible="showRejectDialog" modal header="Reject Redemption" :style="{ width: '500px' }">
+            <div>
+                <label for="rejectReason" class="block text-sm font-medium text-gray-700 mb-2">
+                    Reason for rejection <span class="text-red-500">*</span>
+                </label>
+                <textarea
+                    id="rejectReason"
+                    v-model="rejectReason"
+                    class="w-full border border-gray-300 rounded-md p-2 focus:ring-2 focus:ring-red-400"
+                    placeholder="Provide rejection reason..."
+                    rows="4"
+                ></textarea>
             </div>
-
             <template #footer>
                 <div class="flex justify-end gap-3">
                     <Button label="Cancel" class="p-button-secondary p-button-sm p-button-outlined" @click="closeRejectDialog" />
@@ -225,30 +181,13 @@
             </template>
         </Dialog>
 
-        <!-- Approval Dialog -->
-        <Dialog v-model:visible="showApproveDialog" modal header="Approve Redemption" :style="{ width: '500px' }" :breakpoints="{ '960px': '75vw', '641px': '90vw' }">
-            <div class="flex flex-col gap-1">
-                <div class="mb-4">
-                    <p class="text-sm text-gray-700">Are you sure you want to approve this redemption?</p>
-                </div>
-
-                <div>
-                    <label for="approvedBy" class="block text-sm font-medium text-gray-700 mb-2"> Approved By <span class="text-red-500">*</span> </label>
-                    <InputText
-                        id="approvedBy"
-                        v-model="approvedBy"
-                        class="w-full"
-                        placeholder="Enter your name"
-                        :class="{ 'border-red-500': showApproveValidationError }"
-                    />
-                    <p v-if="showApproveValidationError" class="text-red-500 text-sm mt-1">Please enter your name</p>
-                </div>
-
-                <div class="mt-2">
-                    <p class="text-sm text-gray-600">This action will approve the redemption and update the status.</p>
-                </div>
+        <Dialog v-model:visible="showApproveDialog" modal header="Approve Redemption" :style="{ width: '500px' }">
+            <div>
+                <label for="approvedBy" class="block text-sm font-medium text-gray-700 mb-2">
+                    Approved By <span class="text-red-500">*</span>
+                </label>
+                <InputText id="approvedBy" v-model="approvedBy" class="w-full" placeholder="Enter your name" />
             </div>
-
             <template #footer>
                 <div class="flex justify-end gap-3">
                     <Button label="Cancel" class="p-button-secondary p-button-sm p-button-outlined" @click="closeApproveDialog" />
@@ -259,11 +198,10 @@
     </Fluid>
 </template>
 
+
 <script setup>
 import { ref } from 'vue';
-import Dialog from 'primevue/dialog';
-import InputText from 'primevue/inputtext';
-import Tag from 'primevue/tag';
+
 
 const showRejectDialog = ref(false);
 const showApproveDialog = ref(false);
@@ -274,7 +212,6 @@ const showApproveValidationError = ref(false);
 
 // Invoice file data
 const invoiceFileName = ref('warranty_invoice_2024_001.pdf');
-const invoiceFileSize = ref(2048576); // 2MB in bytes
 
 const redemption = ref({
     id: 1,
@@ -338,8 +275,8 @@ const backOrder = ref({
 });
 
 const warantyDetail = ref({
-  contactPerson: "Ahmad Zaki",
-  contactNo: "+6012-3456789"
+    contactPerson: 'Ahmad Zaki',
+    contactNo: '+6012-3456789'
 });
 
 const item = ref({
@@ -371,27 +308,18 @@ const item = ref({
 });
 
 const customerInfo = ref({
-  name: "Lee Wei Ming",
-  vehicle: "Toyota Hilux 2.8G",
-  regNo: "WXY 4567",
+    name: 'Lee Wei Ming',
+    vehicle: 'Toyota Hilux 2.8G',
+    regNo: 'WXY 4567'
 });
 
 // Invoice file functions
 const viewInvoice = () => {
-    // Simulate viewing the invoice
     console.log('Viewing invoice:', invoiceFileName.value);
-    // In real implementation, this would open the file in a viewer or new tab
-    // window.open(`/api/invoices/${invoiceFileName.value}`, '_blank');
 };
 
 const downloadInvoice = () => {
-    // Simulate downloading the invoice
     console.log('Downloading invoice:', invoiceFileName.value);
-    // In real implementation, this would trigger a file download
-    // const link = document.createElement('a');
-    // link.href = `/api/invoices/download/${invoiceFileName.value}`;
-    // link.download = invoiceFileName.value;
-    // link.click();
 };
 
 // Format file size
@@ -428,68 +356,45 @@ const closeApproveDialog = () => {
     showApproveValidationError.value = false;
 };
 
-// Reject submission handler
-const submitReject = () => {
-    if (!rejectReason.value.trim()) {
-        showValidationError.value = true;
-        return;
-    }
-
-    console.log('Rejected with reason:', rejectReason.value);
-    
-    // Update redemption status and add rejection details
-    redemption.value.status = 'Rejected';
-    redemption.value.rejectedDate = new Date().toISOString().split('T')[0];
-    redemption.value.rejectReason = rejectReason.value;
-    
-    // Show success message
-    // this.$toast.add({ severity: 'success', summary: 'Rejected', detail: 'Redemption has been rejected successfully', life: 3000 });
-
-    closeRejectDialog();
-};
-
-// Approve submission handler
-const submitApprove = () => {
-    if (!approvedBy.value.trim()) {
-        showApproveValidationError.value = true;
-        return;
-    }
-
-    console.log('Approved by:', approvedBy.value);
-    
-    // Update redemption status and add approval details
-    redemption.value.status = 'Approved';
-    redemption.value.approvedBy = approvedBy.value;
-    redemption.value.approvedDate = new Date().toISOString().split('T')[0];
-    
-    // Show success message
-    // this.$toast.add({ severity: 'success', summary: 'Approved', detail: 'Redemption has been approved successfully', life: 3000 });
-
-    closeApproveDialog();
-};
-
-// Helper functions for status label
 const statusLabel = (status) => {
     const statusMap = {
-        'Pending': 'Pending',
-        'Packing': 'Packing',
-        'Shipped': 'Shipped',
-        'Delivered': 'Delivered',
-        'Approved': 'Approved',
-        'Rejected': 'Rejected'
+        Pending: 'Pending',
+        Packing: 'Packing',
+        Shipped: 'Shipped',
+        Delivered: 'Delivered',
+        Approved: 'Approved',
+        Rejected: 'Rejected'
     };
     return statusMap[status] || 'Unknown';
 };
 
 const statusSeverity = (status) => {
     const severityMap = {
-        'Pending': 'warning',
-        'Packing': 'info',
-        'Shipped': 'warn',
-        'Delivered': 'success',
-        'Approved': 'success',
-        'Rejected': 'danger'
+        Pending: 'warning',
+        Packing: 'info',
+        Shipped: 'warn',
+        Delivered: 'success',
+        Approved: 'success',
+        Rejected: 'danger'
     };
     return severityMap[status] || 'secondary';
+};
+
+const submitReject = () => {
+    if (!rejectReason.value.trim()) return;
+
+    redemption.value.status = 'Rejected';
+    redemption.value.rejectedDate = new Date().toISOString();
+    redemption.value.rejectReason = rejectReason.value;
+    closeRejectDialog();
+};
+
+const submitApprove = () => {
+    if (!approvedBy.value.trim()) return;
+
+    redemption.value.status = 'Approved';
+    redemption.value.approvedBy = approvedBy.value;
+    redemption.value.approvedDate = new Date().toISOString();
+    closeApproveDialog();
 };
 </script>

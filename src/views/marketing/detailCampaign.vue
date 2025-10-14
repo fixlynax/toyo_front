@@ -157,7 +157,7 @@
                         <Column header="User" style="min-width: 6rem">
                             <template #body="{ data }">
                                 <div class="flex flex-col">
-                                    <RouterLink to="marketing/detailParticipant" class="hover:underline">
+                                    <RouterLink to="/marketing/detailParticipant" class="hover:underline">
                                         <span class="font-bold text-gray-800">{{ data.fullName }}</span>
                                     </RouterLink>
                                     <span class="text-gray-600 text-xs mt-2">🎖️ {{ data.memberLevel }}</span>
