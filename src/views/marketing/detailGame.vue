@@ -71,9 +71,9 @@
                                     <div v-if="data.prizeType === 'Point' && hoverPrize === data.id" class="absolute top-0 left-20 bg-white border rounded-lg shadow-lg p-3 text-xm w-60 z-10">
                                         <div class="font-semibold text-xl text-gray-700 mb-2">🏅 Point Reward</div>
                                         <ul class="list-disc list-inside text-gray-700 space-y-1 ml-5">
-                                            <li><b>Silver:</b> 80 pts</li>
-                                            <li><b>Gold:</b> 90 pts</li>
-                                            <li><b>Platinum:</b> 100 pts</li>
+                                            <li><b>Silver :</b> 80 pts</li>
+                                            <li><b>Gold :</b> 90 pts</li>
+                                            <li><b>Platinum :</b> 100 pts</li>
                                         </ul>
                                     </div>
                                 </div>
@@ -148,7 +148,7 @@
                 <div class="card flex flex-col w-full">
                     <div class="flex items-center justify-between border-b pb-3 mb-4">
                         <div class="text-2xl font-bold text-gray-800">👨🏻‍💻 Participant List</div>
-                        <Button icon="pi pi-file-import" label="Import" style="width: fit-content" class="p-button-danger p-button-sm" />
+                        <Button icon="pi pi-file-export" label="Export" style="width: fit-content" class="p-button-danger p-button-sm" />
                     </div>
                     <DataTable :value="participants" :paginator="true" :rows="7" dataKey="id" :rowHover="true" responsiveLayout="scroll" class="text-sm">
                         <!-- User Column -->
@@ -171,6 +171,7 @@
                 </div>
             </div>
         </div>
+        
         <!-- Edit Prize Dialog -->
         <Dialog v-model:visible="editDialogVisible" modal header="Edit Prize Quantity" :style="{ width: '400px' }">
             <div class="flex flex-col gap-3">

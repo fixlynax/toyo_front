@@ -50,73 +50,49 @@
                     </div>
                 </div>
 
-                <div class="card flex flex-col w-full">
-                    <!-- Header -->
-                    <div class="flex items-center justify-between border-b pb-2 mb-4">
-                        <div class="text-2xl font-bold text-gray-800">🎁 Reward Options</div>
+                <div class="card flex flex-col w-full relative">
+                    <div class="flex items-center justify-between border-b pb-2 mb-2">
+                        <div class="text-2xl font-bold text-gray-800">🎁 Prize Info</div>
                     </div>
 
-                    <div class="space-y-8">
-                        <!-- Each Reward -->
-                        <div v-for="(reward, rIndex) in rewards" :key="rIndex" class="pb-6 border-b last:border-0">
-                            <!-- Top Row -->
-                            <div class="flex justify-between items-center mb-4">
-                                <div class="text-2xl font-bold text-gray-800">{{ reward.name }}</div>
-                                <Button icon="pi pi-trash" class="p-button-text p-button-danger" @click="removeReward(rIndex)" />
-                            </div>
-
-                            <!-- Reward Image + Details -->
-                            <div class="flex flex-col md:flex-row gap-6 items-start">
-                                <!-- Image -->
-                                <img :src="reward.image" alt="Reward Image" class="rounded-xl shadow-sm object-cover w-full md:w-1/3 max-h-48" />
-
-                                <!-- Info -->
-                                <div class="flex-1 space-y-3">
-                                    <!-- Type & Quantity -->
-                                    <div class="flex justify-between items-center">
-                                        <span class="text-gray-600 text-lg">Type</span>
-                                        <span class="font-semibold text-lg">{{ reward.type }}</span>
-                                    </div>
-                                    <div class="flex justify-between items-center">
-                                        <span class="text-gray-600 text-lg">Quantity</span>
-                                        <span class="font-semibold text-lg">{{ reward.balQty }}/{{ reward.totalQty }}</span>
+                    <DataTable :value="listPrize" :paginator="true" :rows="7" dataKey="id" :rowHover="true" responsiveLayout="scroll" class="text-sm">
+                        <!-- Prize Column -->
+                        <Column header="Prize" style="min-width: 10rem">
+                            <template #body="{ data }">
+                                <div class="flex items-center gap-3 relative group" @mouseenter="hoverPrize = data.id" @mouseleave="hoverPrize = null">
+                                    <img :src="data.imageURL" alt="Prize" class="w-36 h-24 rounded-lg object-cover border" />
+                                    <div class="flex flex-col">
+                                        <span class="font-bold text-gray-800">{{ data.prizeName }}</span>
+                                        <span class="text-gray-600 text-xs">{{ data.prizeType }}</span>
                                     </div>
 
-                                    <!-- Reward Pin -->
-                                    <template v-if="reward.type === 'Reward Pin'">
-                                        <div class="pt-4">
-                                            <div class="text-xl font-bold text-gray-800 mb-2">Reward Pin Details</div>
-                                            <div class="flex justify-between items-center">
-                                                <span class="text-gray-600 text-lg">Expiry</span>
-                                                <span class="font-semibold text-lg">{{ reward.expiry }}</span>
-                                            </div>
-                                        </div>
-                                    </template>
-
-                                    <!-- Points -->
-                                    <template v-else-if="reward.type === 'Point'">
-                                        <div class="pt-4">
-                                            <div class="text-xl font-bold text-gray-800 mb-3">Tier Points</div>
-                                            <div class="grid grid-cols-3 text-center gap-4">
-                                                <div>
-                                                    <div class="text-gray-500">Silver</div>
-                                                    <div class="font-semibold">{{ reward.tierPoints.silver }}</div>
-                                                </div>
-                                                <div>
-                                                    <div class="text-gray-500">Gold</div>
-                                                    <div class="font-semibold">{{ reward.tierPoints.gold }}</div>
-                                                </div>
-                                                <div>
-                                                    <div class="text-gray-500">Platinum</div>
-                                                    <div class="font-semibold">{{ reward.tierPoints.platinum }}</div>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </template>
+                                    <!-- Tooltip for Point Type -->
+                                    <div v-if="data.prizeType === 'Point' && hoverPrize === data.id" class="absolute top-0 left-20 bg-white border rounded-lg shadow-lg p-3 text-xm w-60 z-10">
+                                        <div class="font-semibold text-xl text-gray-700 mb-2">🏅 Point Reward</div>
+                                        <ul class="list-disc list-inside text-gray-700 space-y-1 ml-5">
+                                            <li><b>Silver :</b> 80 pts</li>
+                                            <li><b>Gold :</b> 90 pts</li>
+                                            <li><b>Platinum :</b> 100 pts</li>
+                                        </ul>
+                                    </div>
                                 </div>
-                            </div>
-                        </div>
-                    </div>
+                            </template>
+                        </Column>
+
+                        <!-- Win / Qty Column -->
+                        <Column header="Win / Qty" style="min-width: 8rem">
+                            <template #body="{ data }">
+                                <div>{{ data.prizeRemain }} / {{ data.prizeQuota }}</div>
+                            </template>
+                        </Column>
+
+                        <!-- Action Column -->
+                        <Column header="Action" style="min-width: 6rem">
+                            <template #body="{ data }">
+                                <Button icon="pi pi-pencil" class="p-button-text p-button-info" @click="openEditDialog(data)" />
+                            </template>
+                        </Column>
+                    </DataTable>
                 </div>
             </div>
 
@@ -169,6 +145,47 @@
                             </tbody>
                         </table>
                     </div>
+                </div>
+
+                <div class="card flex flex-col w-full">
+                    <div class="flex items-center justify-between border-b pb-3 mb-4">
+                        <div class="text-2xl font-bold text-gray-800">👨🏻‍💻 Participant List</div>
+                        <Button icon="pi pi-file-export" label="Export" style="width: fit-content" class="p-button-danger p-button-sm" />
+                    </div>
+                    <DataTable :value="participants" :paginator="true" :rows="7" dataKey="id" :rowHover="true" responsiveLayout="scroll" class="text-sm">
+                        <!-- User Column -->
+                        <Column header="User" style="min-width: 6rem">
+                            <template #body="{ data }">
+                                <div class="flex flex-col">
+                                    <RouterLink to="marketing/detailParticipant" class="hover:underline">
+                                        <span class="font-bold text-gray-800">{{ data.fullName }}</span>
+                                    </RouterLink>
+                                    <span class="text-gray-600 text-xs mt-2">🎖️ {{ data.memberLevel }}</span>
+                                    <span class="text-gray-600 text-xs mt-2">📅 {{ data.date }}</span>
+                                </div>
+                            </template>
+                        </Column>
+
+                        <!-- Prize Type -->
+                        <Column field="prizeName" header="Prize" style="min-width: 8rem"></Column>
+
+                        <!-- Action Approve & Reject -->
+                        <!-- Action Approve & Reject -->
+                        <Column header="Action" style="min-width: 8rem">
+                            <template #body="{ data }">
+                                <div class="flex gap-2 items-center">
+                                    <!-- Approve Button -->
+                                    <Button v-if="!data.status" icon="pi pi-check" size="small" class="p-button-success p-button-sm" @click="approveParticipant(data)" />
+
+                                    <!-- Reject Button -->
+                                    <Button v-if="!data.status" icon="pi pi-times" size="small" class="p-button-danger p-button-sm" @click="rejectParticipant(data)" />
+
+                                    <!-- Status Tag -->
+                                    <Tag v-if="data.status" :value="data.status" :severity="data.status === 'Approved' ? 'success' : data.status === 'Rejected' ? 'danger' : 'info'" class="ml-2" />
+                                </div>
+                            </template>
+                        </Column>
+                    </DataTable>
                 </div>
 
                 <div class="card flex flex-col w-full">
@@ -234,11 +251,29 @@
                 </div>
             </div>
         </div>
+
+        <!-- Edit Prize Dialog -->
+        <Dialog v-model:visible="editDialogVisible" modal header="Edit Prize Quantity" :style="{ width: '400px' }">
+            <div class="flex flex-col gap-3">
+                <div class="font-semibold text-gray-800">{{ selectedPrize?.prizeName }}</div>
+                <div class="flex items-center gap-3">
+                    <label class="text-gray-700 font-medium w-20">Quota:</label>
+                    <InputNumber v-model="selectedPrize.prizeQuota" :min="1" class="w-full" />
+                </div>
+                <div class="flex justify-end mt-4">
+                    <Button label="Save" icon="pi pi-check" class="p-button-success p-button-sm" @click="savePrizeEdit" />
+                </div>
+            </div>
+        </Dialog>
     </Fluid>
 </template>
 
 <script setup>
 import { ref } from 'vue';
+
+const hoverPrize = ref(null);
+const editDialogVisible = ref(false);
+const selectedPrize = ref(null);
 
 const campaign = ref({
     id: 1,
@@ -264,6 +299,130 @@ const campaign = ref({
     deleted: null,
     totalSub: 650 // Current total submissions
 });
+
+const participants = ref([
+    {
+        id: 1,
+        fullName: 'Ahmad Faiz',
+        memberLevel: 'Gold',
+        date: '2025-09-01',
+        point: 90,
+        prizeName: 'Bonus Point Toyo',
+        prizeType: 'Point',
+        prize: 100,
+        status: 'Approved'
+    },
+    {
+        id: 2,
+        fullName: 'Nur Aisyah',
+        memberLevel: 'Silver',
+        date: '2025-09-02',
+        point: 85,
+        prizeName: 'E-Wallet RM 50',
+        prizeType: 'E-Wallet',
+        prize: 'MYR 50',
+        status: 'Approved'
+    },
+    {
+        id: 3,
+        fullName: 'Hafiz Din',
+        memberLevel: 'Platinum',
+        date: '2025-09-02',
+        point: 95,
+        prizeName: 'Shoppe RM 20',
+        prizeType: 'E-Voucher',
+        prize: 'Amazon $20',
+        status: 'Rejected'
+    },
+    {
+        id: 4,
+        fullName: 'Lim Wei Jian',
+        memberLevel: 'Gold',
+        date: '2025-09-03',
+        point: 90,
+        prizeName: 'Smartwatch',
+        prizeType: 'Item',
+        prize: 'Smartwatch',
+        status: ''
+    },
+    {
+        id: 5,
+        fullName: 'Siti Mariam',
+        memberLevel: 'Silver',
+        date: '2025-09-03',
+        point: 85,
+        prizeName: 'Bonus Point Toyo',
+        prizeType: 'Point',
+        prize: 50,
+        status: ''
+    },
+    {
+        id: 6,
+        fullName: 'Arjun Kumar',
+        memberLevel: 'Gold',
+        date: '2025-09-04',
+        point: 90,
+        prizeName: 'E-Wallet RM 100',
+        prizeType: 'E-Wallet',
+        prize: 'MYR 100',
+        status: ''
+    },
+    {
+        id: 7,
+        fullName: 'Tan Li Ying',
+        memberLevel: 'Platinum',
+        date: '2025-09-04',
+        point: 95,
+        prizeName: 'E-Voucher Shoppe RM 50',
+        prizeType: 'E-Voucher',
+        prize: 'Amazon $50',
+        status: ''
+    },
+    {
+        id: 8,
+        fullName: 'Mohd Amir',
+        memberLevel: 'Silver',
+        date: '2025-09-05',
+        point: 85,
+        prizeName: 'Bluetooth Headphones',
+        prizeType: 'Item',
+        prize: 'Bluetooth Headphones',
+        status: ''
+    },
+    {
+        id: 9,
+        fullName: 'Farah Nadiah',
+        memberLevel: 'Gold',
+        date: '2025-09-05',
+        point: 90,
+        prizeName: 'Bonus Point Toyo',
+        prizeType: 'Point',
+        prize: 75,
+        status: ''
+    },
+    {
+        id: 10,
+        fullName: 'Jason Lee',
+        memberLevel: 'Platinum',
+        date: '2025-09-06',
+        point: 95,
+        prizeName: 'E-Wallet RM 200',
+        prizeType: 'E-Wallet',
+        prize: 'MYR 200',
+        status: ''
+    },
+    {
+        id: 11,
+        fullName: 'Hazrul Izhar',
+        memberLevel: 'Classic',
+        date: '2025-09-06',
+        point: 95,
+        prizeName: 'Umbrella',
+        prizeType: 'Item',
+        prize: 'Smartphone',
+        status: ''
+    }
+]);
 
 const criteria = [
     {
@@ -393,44 +552,41 @@ const dealerList = ref([
     }
 ]);
 
-const rewards = ref([
-    // Example Reward: Points
-    {
-        type: 'Point',
-        name: '500 Bonus Points',
-        image: '/demo/images/bonus-point.png',
-        totalQty: 30,
-        balQty: 17,
-        tierPoints: {
-            silver: 100,
-            gold: 200,
-            platinum: 300
-        },
-        // Not applicable for Points
-        expiry: null
-    },
-
-    // Example Reward: Reward Pin
-    {
-        type: 'Reward Pin',
-        name: 'RM10 E-Wallet Voucher',
-        image: 'https://assets.bharian.com.my/images/articles/tng13jan_BHfield_image_socialmedia.var_1610544082.jpg',
-        totalQty: 20,
-        balQty: 12,
-        expiry: '2025-12-31',
-        tierPoints: {
-            silver: null,
-            gold: null,
-            platinum: null
-        }
-    }
+const listPrize = ref([
+    { id: 1, prizeType: 'Point', imageURL: '/demo/images/bonus-point.png', prizeName: 'Bonus Point Toyo', prizeQuota: 50, prizeRemain: 20 },
+    { id: 2, prizeType: 'E-Wallet', imageURL: 'https://assets.bharian.com.my/images/articles/tng13jan_BHfield_image_socialmedia.var_1610544082.jpg', prizeName: 'MYR 50 E-Wallet', prizeQuota: 100, prizeRemain: 40 },
+    { id: 3, prizeType: 'E-Voucher', imageURL: 'https://assets.offgamers.com/img/offer/kr_fdf75033-56ee-4ce6-929c-1f9c93a4c642_1b1c60fc-e950-4c62-8ee7-471d42484619.webp', prizeName: 'Shopee E-Voucher', prizeQuota: 30, prizeRemain: 10 },
+    { id: 4, prizeType: 'Item', imageURL: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRdSHDEYMxmOB1Z63V0UB1ohMHGZ5cs5DG4zg&s', prizeName: 'Toyo Tumbler', prizeQuota: 15, prizeRemain: 5 }
 ]);
 
 const removeDealer = (dealer) => {
     dealerList.value = dealerList.value.filter((d) => d.id !== dealer.id);
 };
 
-function removeReward(index) {
-    rewards.value.splice(index, 1);
+function openEditDialog(prize) {
+    selectedPrize.value = { ...prize };
+    editDialogVisible.value = true;
+}
+
+function savePrizeEdit() {
+    const index = listPrize.value.findIndex((p) => p.id === selectedPrize.value.id);
+    if (index !== -1) {
+        listPrize.value[index].prizeQuota = selectedPrize.value.prizeQuota;
+    }
+    editDialogVisible.value = false;
+}
+
+function approveParticipant(participant) {
+    const target = participants.value.find(p => p.id === participant.id);
+    if (target) {
+        target.status = 'Approved';
+    }
+}
+
+function rejectParticipant(participant) {
+    const target = participants.value.find(p => p.id === participant.id);
+    if (target) {
+        target.status = 'Rejected';
+    }
 }
 </script>

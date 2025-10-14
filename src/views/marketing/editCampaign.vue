@@ -1,5 +1,6 @@
 <template>
     <Fluid>
+        <!-- 🎯 Edit Campaign -->
         <div class="flex flex-col md:flex-row gap-8">
             <div class="card flex flex-col gap-6 w-full">
                 <!-- Header -->
@@ -19,26 +20,22 @@
                         <Textarea v-model="campaign.description" rows="3" class="w-full" />
                     </div>
 
-                    <!-- Term Condition -->
+                    <!-- Term & Condition -->
                     <div class="md:col-span-2">
                         <label class="block font-bold text-gray-700">Term & Condition</label>
                         <Textarea v-model="campaign.termCondition" rows="3" class="w-full" />
                     </div>
 
+                    <!-- Quota & Max -->
                     <div class="grid grid-cols-1 md:grid-cols-3 gap-4 md:col-span-2">
-                        <!-- Quota -->
                         <div>
                             <label class="block font-bold text-gray-700">Quota</label>
                             <InputNumber v-model="campaign.quota" class="w-full" />
                         </div>
-
-                        <!-- Max per user -->
                         <div>
                             <label class="block font-bold text-gray-700">Max Per User</label>
                             <InputNumber v-model="campaign.maxPerUser" class="w-full" />
                         </div>
-
-                        <!-- Gamification -->
                         <div>
                             <label class="block font-bold text-gray-700">Gamification</label>
                             <Dropdown v-model="campaign.isGamification" :options="gamificationOnOff" optionLabel="label" optionValue="value" class="w-full" />
@@ -60,22 +57,6 @@
                             <Calendar v-model="campaign.endDate" dateFormat="yy-mm-dd" class="w-full" />
                         </div>
                     </div>
-
-                    <!-- Points -->
-                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4 md:col-span-2">
-                        <div>
-                            <label class="block font-bold text-gray-700 mb-1">Point Silver</label>
-                            <InputNumber v-model="campaign.point1" class="w-full" />
-                        </div>
-                        <div>
-                            <label class="block font-bold text-gray-700 mb-1">Point Gold</label>
-                            <InputNumber v-model="campaign.point2" class="w-full" />
-                        </div>
-                        <div>
-                            <label class="block font-bold text-gray-700 mb-1">Point Platinum</label>
-                            <InputNumber v-model="campaign.point3" class="w-full" />
-                        </div>
-                    </div>
                 </div>
 
                 <!-- Upload Images -->
@@ -85,124 +66,166 @@
                         <div v-for="(field, idx) in ['image1Path', 'image2Path', 'image3Path']" :key="idx" class="relative">
                             <FileUpload mode="basic" :name="field" accept="image/*" customUpload @select="onImageSelect($event, field)" :chooseLabel="`Change Image ${idx + 1}`" class="w-full" />
                             <div v-if="campaign[field]" class="relative mt-2">
-                                <img :src="campaign[field]" :alt="`Preview ${idx + 1}`" class="rounded-lg shadow-md object-cover w-full h-80" />
+                                <img :src="campaign[field]" :alt="`Preview ${idx + 1}`" class="rounded-lg shadow-md object-cover w-full h-60" />
                                 <button @click="removeImage(field)" class="absolute top-2 right-2 bg-red-500 text-white px-2 py-1 rounded-full">&times;</button>
                             </div>
                         </div>
                     </div>
                 </div>
+            </div>
+        </div>
 
-                <!-- Reward Options (only if gamification ON) -->
-                <div v-if="campaign.isGamification == 1">
-                    <div class="flex justify-between items-center border-b pb-2 mb-2">
-                        <div class="text-xl font-bold text-gray-800">🎁 Reward Options</div>
-                        <Button label="Add Reward" style="width: fit-content" icon="pi pi-plus" class="p-button-sm" @click="addReward" />
+        <!-- 💎 Point Section -->
+        <div class="card flex flex-col w-full mt-8">
+            <div class="flex items-center justify-between border-b pb-2 mb-4">
+                <div class="text-xl font-bold text-gray-800">💎 Point Configuration</div>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div>
+                    <label class="block font-bold text-gray-700">Silver Points</label>
+                    <InputNumber v-model="campaign.point1" class="w-full" />
+                </div>
+                <div>
+                    <label class="block font-bold text-gray-700">Gold Points</label>
+                    <InputNumber v-model="campaign.point2" class="w-full" />
+                </div>
+                <div>
+                    <label class="block font-bold text-gray-700">Platinum Points</label>
+                    <InputNumber v-model="campaign.point3" class="w-full" />
+                </div>
+            </div>
+        </div>
+
+        <!-- 🏆 Reward Section -->
+        <div v-if="campaign.isGamification == 1" class="card flex flex-col w-full mt-8">
+            <div class="flex items-center justify-between border-b pb-2 mb-4">
+                <div class="text-xl font-bold text-gray-800">🏆 Reward Section</div>
+            </div>
+
+            <div v-if="rewards.length > 0" class="space-y-4">
+                <div v-for="(reward, index) in rewards" :key="index" class="border rounded-lg p-4 shadow-sm bg-gray-50">
+                    <div class="flex items-center justify-between mb-3">
+                        <label class="font-semibold">Reward {{ index + 1 }}</label>
+                        <Button icon="pi pi-trash" class="p-button-danger p-button-text p-button-sm" @click="removeReward(index)" />
                     </div>
-                    <div class="space-y-6">
-                        <div v-for="(reward, rIndex) in rewards" :key="rIndex" class="border p-4 rounded-lg shadow-sm bg-gray-50">
-                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                <!-- Reward Name -->
-                                <div>
-                                    <label class="block font-bold text-gray-700">Reward Name</label>
-                                    <InputText v-model="reward.name" class="w-full" />
-                                </div>
-                                <!-- Reward Quantity -->
-                                <div>
-                                    <label class="block font-bold text-gray-700">Quantity</label>
-                                    <InputNumber v-model="reward.quantity" class="w-full" />
-                                </div>
-                                <!-- Reward Type -->
-                                <div>
-                                    <label class="block font-bold text-gray-700">Type</label>
-                                    <Dropdown v-model="reward.type" :options="rewardTypes" optionLabel="label" optionValue="value" class="w-full" />
-                                </div>
 
-                                <!-- Conditional Fields -->
-                                <template v-if="reward.type === 'point'">
-                                    <div class="md:col-span-2 grid grid-cols-1 md:grid-cols-3 gap-4">
-                                        <div>
-                                            <label class="block font-bold text-gray-700">Silver Points</label>
-                                            <InputNumber v-model="reward.points.silver" class="w-full" />
-                                        </div>
-                                        <div>
-                                            <label class="block font-bold text-gray-700">Gold Points</label>
-                                            <InputNumber v-model="reward.points.gold" class="w-full" />
-                                        </div>
-                                        <div>
-                                            <label class="block font-bold text-gray-700">Platinum Points</label>
-                                            <InputNumber v-model="reward.points.platinum" class="w-full" />
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4 items-end">
+                        <!-- Select Prize -->
+                        <div class="md:col-span-2">
+                            <label class="block font-bold text-gray-700 mb-1">Select Prize</label>
+                            <Dropdown v-model="reward.selected" :options="listPrize" optionLabel="prizeName" placeholder="Select a prize" class="w-full">
+                                <template #option="slotProps">
+                                    <div class="flex items-center gap-3">
+                                        <img :src="slotProps.option.imageURL" class="w-28 h-16 object-cover rounded" />
+                                        <div class="flex flex-col">
+                                            <span class="font-semibold text-gray-800">{{ slotProps.option.prizeName }}</span>
+                                            <small class="text-gray-500">{{ slotProps.option.prizeType }}</small>
                                         </div>
                                     </div>
                                 </template>
+                                <template #value="slotProps">
+                                    <div v-if="slotProps.value" class="flex items-center gap-3">
+                                        <img :src="slotProps.value.imageURL" class="w-14 h-14 object-cover rounded" />
+                                        <div>
+                                            <span class="font-semibold text-gray-800">{{ slotProps.value.prizeName }}</span>
+                                            <small class="block text-gray-500">{{ slotProps.value.prizeType }}</small>
+                                        </div>
+                                    </div>
+                                    <span v-else class="text-gray-400">Select Prize</span>
+                                </template>
+                            </Dropdown>
+                        </div>
 
-                                <template v-else-if="reward.type === 'pin'">
-                                    <div>
-                                        <label class="block font-bold text-gray-700">Expiry Date</label>
-                                        <Calendar v-model="reward.expiry" dateFormat="yy-mm-dd" class="w-full" />
+                        <!-- Quantity -->
+                        <div>
+                            <FloatLabel>
+                                <InputNumber id="qty" v-model="reward.qty" :min="1" class="w-full" />
+                                <label for="qty">Quantity</label>
+                            </FloatLabel>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div v-else class="text-gray-500 italic">No rewards added yet.</div>
+
+            <div class="flex justify-start mt-4">
+                <div class="w-30">
+                    <Button icon="pi pi-plus" label="Add Reward" class="p-button-success p-button-sm" @click="addReward" />
+                </div>
+            </div>
+        </div>
+
+        <!-- 📋 Criteria Section -->
+        <div v-if="campaign.isGamification == 1" class="card flex flex-col w-full mt-8">
+            <div class="flex items-center justify-between border-b pb-2 mb-4">
+                <div class="text-xl font-bold text-gray-800">📋 Criteria</div>
+            </div>
+
+            <div v-if="criterias.length > 0" class="space-y-4">
+                <div v-for="(criteria, index) in criterias" :key="index" class="border rounded-lg p-4 shadow-sm bg-gray-50">
+                    <div class="flex items-center justify-between mb-3">
+                        <label class="font-semibold">Criteria {{ index + 1 }}</label>
+                        <Button icon="pi pi-trash" class="p-button-danger p-button-text p-button-sm" @click="removeCriteria(index)" />
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-1 gap-4 items-end">
+                        <!-- Dropdown -->
+                        <div class="md:col-span-2">
+                            <label class="block font-bold text-gray-700 mb-1">Select Tyre Pattern</label>
+                            <Dropdown v-model="criteria.selected" :options="listCriteria" optionLabel="name" placeholder="Select pattern" class="w-full">
+                                <template #option="slotProps">
+                                    <div class="flex items-center gap-3">
+                                        <img :src="slotProps.option.image" class="w-20 h-20 object-cover rounded" />
+                                        <div>
+                                            <div class="font-semibold">{{ slotProps.option.name }}</div>
+                                            <small class="text-gray-500">{{ slotProps.option.pattern }} • {{ slotProps.option.size }} • {{ slotProps.option.minQty }}</small>
+                                        </div>
                                     </div>
                                 </template>
-                            </div>
-                            <div class="flex justify-end mt-2">
-                                <Button icon="pi pi-trash" class="p-button-danger p-button-sm" @click="removeReward(rIndex)" />
-                            </div>
+                                <template #value="slotProps">
+                                    <div v-if="slotProps.value" class="flex items-center gap-3">
+                                        <!-- Image -->
+                                        <img :src="slotProps.value.image" class="w-20 h-20 object-cover rounded-md border border-gray-200 shadow-sm" />
+
+                                        <!-- Details -->
+                                        <div class="flex flex-col leading-tight">
+                                            <span class="font-semibold text-gray-800">
+                                                {{ slotProps.value.name }}
+                                            </span>
+                                            <div class="text-xs text-gray-600 space-y-0.5">
+                                                <div>🧶 <span class="font-medium">Pattern:</span> {{ slotProps.value.pattern }}</div>
+                                                <div>📏 <span class="font-medium">Size:</span> {{ slotProps.value.size }}</div>
+                                                <div>📦 <span class="font-medium">Min Qty:</span> {{ slotProps.value.minQty }}</div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <span v-else class="text-gray-400 italic">Select pattern</span>
+                                </template>
+                            </Dropdown>
                         </div>
                     </div>
                 </div>
+            </div>
 
-                <!-- Criteria (only if gamification ON) -->
-                <div v-if="campaign.isGamification == 1">
-                    <div class="flex justify-between items-center border-b pb-2 mb-2">
-                        <div class="text-xl font-bold text-gray-800">📋 Criteria</div>
-                        <Button label="Add Criteria" style="width: fit-content" icon="pi pi-plus" class="p-button-sm" @click="addCriteria" />
-                    </div>
-                    <div class="space-y-6">
-                        <div v-for="(criteria, cIndex) in criterias" :key="cIndex" class="border p-4 rounded-lg shadow-sm bg-gray-50">
-                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                <!-- Title -->
-                                <div>
-                                    <label class="block font-bold text-gray-700">Title</label>
-                                    <InputText v-model="criteria.title" class="w-full" />
-                                </div>
-                                <!-- Type -->
-                                <div>
-                                    <label class="block font-bold text-gray-700">Type</label>
-                                    <Dropdown v-model="criteria.type" :options="criteriaTypes" optionLabel="label" optionValue="value" class="w-full" />
-                                </div>
-                                <!-- Pattern -->
-                                <div>
-                                    <label class="block font-bold text-gray-700">Pattern</label>
-                                    <InputText v-model="criteria.pattern" class="w-full" />
-                                </div>
-                                <!-- Size -->
-                                <div>
-                                    <label class="block font-bold text-gray-700">Size</label>
-                                    <InputText v-model="criteria.size" class="w-full" />
-                                </div>
-                                <!-- Min Qty -->
-                                <div>
-                                    <label class="block font-bold text-gray-700">Min Qty</label>
-                                    <InputNumber v-model="criteria.minQty" class="w-full" />
-                                </div>
-                            </div>
-                            <div class="flex justify-end mt-2">
-                                <Button icon="pi pi-trash" class="p-button-danger p-button-sm" @click="removeCriteria(cIndex)" />
-                            </div>
-                        </div>
-                    </div>
+            <div v-else class="text-gray-500 italic">No criteria added yet.</div>
+
+            <div class="flex justify-start mt-4">
+                <div class="w-30">
+                    <Button icon="pi pi-plus" label="Add Criteria" class="p-button-info p-button-sm" @click="addCriteria" />
                 </div>
+            </div>
+        </div>
 
-                <!-- Submit -->
-                <div class="flex justify-end mt-4 gap-2">
-                    <div class="w-40">
-                        <Button label="Cancel" class="p-button-secondary w-full mr-2" @click="$router.back()" />
-                    </div>
-
-                    <div class="w-40">
-                        <RouterLink to="/marketing/detailCampaign">
-                            <Button label="Update" class="w-full" />
-                        </RouterLink>
-                    </div>
-                </div>
+        <!-- ✅ Submit Buttons -->
+        <div class="flex justify-end mt-8 gap-2">
+            <div class="w-40">
+                <Button label="Cancel" class="p-button-secondary w-full" @click="$router.back()" />
+            </div>
+            <div class="w-40">
+                <Button label="Update" class="w-full" @click="submitForm" />
             </div>
         </div>
     </Fluid>
@@ -232,43 +255,59 @@ const campaign = ref({
     status: 1
 });
 
-// Rewards
-const rewardTypes = [
-    { label: 'Point', value: 'point' },
-    { label: 'Reward Pin', value: 'pin' }
-];
-
 const gamificationOnOff = [
     { label: 'ON', value: 1 },
     { label: 'OFF', value: 0 }
 ];
 
-const rewards = ref([
-    {
-        name: 'RM50 Voucher',
-        quantity: 10,
-        type: 'point',
-        points: { silver: 100, gold: 200, platinum: 300 },
-        expiry: null
-    }
+// 🎁 Prize List
+const listPrize = ref([
+    { id: 1, imageURL: '/demo/images/bonus-point.png', prizeName: 'Bonus Point Toyo', prizeType: 'Point', prizeQuota: 50, prizeRemain: 20 },
+    { id: 2, imageURL: 'https://assets.bharian.com.my/images/articles/tng13jan_BHfield_image_socialmedia.var_1610544082.jpg', prizeName: 'MYR 50 E-Wallet', prizeType: 'E-Wallet', prizeQuota: 100, prizeRemain: 40 },
+    { id: 3, imageURL: 'https://assets.offgamers.com/img/offer/kr_fdf75033-56ee-4ce6-929c-1f9c93a4c642_1b1c60fc-e950-4c62-8ee7-471d42484619.webp', prizeName: 'Shopee E-Voucher', prizeType: 'E-Voucher', prizeQuota: 30, prizeRemain: 10 },
+    { id: 4, imageURL: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRdSHDEYMxmOB1Z63V0UB1ohMHGZ5cs5DG4zg&s', prizeName: 'Toyo Tumbler', prizeType: 'Item', prizeQuota: 15, prizeRemain: 5 }
 ]);
 
-const addReward = () =>
-    rewards.value.push({
-        name: '',
-        quantity: 0,
-        type: '',
-        points: { silver: 0, gold: 0, platinum: 0 },
-        expiry: null
-    });
+// 🎯 Reward State
+const rewards = ref([]);
+const addReward = () => rewards.value.push({ selected: null, qty: 1 });
 const removeReward = (index) => rewards.value.splice(index, 1);
 
-// Criteria
-const criteriaTypes = [
-    { label: 'Tyre', value: 'tyre' },
-    { label: 'Rim', value: 'rim' }
-];
-const criterias = ref([{ title: 'Buy Tyre A', type: 'tyre', pattern: 'AT202', size: '195/55R15', minQty: 2 }]);
-const addCriteria = () => criterias.value.push({ title: '', type: '', pattern: '', size: '', minQty: 1 });
+// 📋 Criteria
+const listCriteria = ref([
+    { image: '/demo/images/toyor_tayar6.png', pattern: 'T1R', name: 'Proxes T1R', size: '15 inch', minQty: 2 },
+    { image: '/demo/images/toyor_tayar5.png', pattern: 'TSC', name: 'Proxes TSC', size: '17 inch', minQty: 1 },
+    { image: '/demo/images/toyor_tayar4.png', pattern: 'TR', name: 'Proxes TR1', size: '14 inch', minQty: 2 },
+    { image: '/demo/images/toyor_tayar3.png', pattern: 'TH7', name: 'Proxes TH7', size: '15 inch', minQty: 1 },
+    { image: '/demo/images/toyor_tayar2.png', pattern: 'T1S', name: 'Proxes T1S', size: '14 inch', minQty: 2 },
+    { image: '/demo/images/toyor_tayar1.png', pattern: 'T35', name: 'Proxes T35', size: '16 inch', minQty: 1 },
+    { image: '/demo/images/toyor_tayar2.png', pattern: 'TEO', name: 'NanoEnergy TEO', size: '24 inch', minQty: 2 },
+    { image: '/demo/images/toyor_tayar1.png', pattern: 'T35', name: 'Proxes T35', size: '16 inch', minQty: 1 },
+    { image: '/demo/images/toyor_tayar3.png', pattern: 'T1S', name: 'Proxes T1S', size: '14 inch', minQty: 4 },
+    { image: '/demo/images/toyor_tayar4.png', pattern: 'TH7', name: 'Proxes TH7', size: '15 inch', minQty: 2 },
+    { image: '/demo/images/toyor_tayar5.png', pattern: 'C1S', name: 'Proxes C1S', size: '15 inch', minQty: 1 },
+    { image: '/demo/images/toyor_tayar6.png', pattern: 'Yew', name: 'Proxes Yew', size: '15 inch', minQty: 4 }
+]);
+
+const criterias = ref([]);
+const addCriteria = () => criterias.value.push({ selected: null, minQty: 1 });
 const removeCriteria = (index) => criterias.value.splice(index, 1);
+
+// 📸 Upload
+const onImageSelect = (event, field) => {
+    const file = event.files[0];
+    if (file) {
+        const reader = new FileReader();
+        reader.onload = (e) => (campaign.value[field] = e.target.result);
+        reader.readAsDataURL(file);
+    }
+};
+const removeImage = (field) => (campaign.value[field] = '');
+
+// 🚀 Submit
+const submitForm = () => {
+    console.log('Updated Campaign:', campaign.value);
+    console.log('Rewards:', rewards.value);
+    console.log('Criterias:', criterias.value);
+};
 </script>
