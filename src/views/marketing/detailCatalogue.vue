@@ -427,7 +427,7 @@ import { ref, computed, onMounted } from 'vue';
 
 const catalogue = ref({
     id: 1,
-    type: 'Item', // or 'E-Voucher'
+    type: 'E-Wallet', // or 'E-Voucher'
     image1URL: 'https://assets.bharian.com.my/images/articles/tng13jan_BHfield_image_socialmedia.var_1610544082.jpg',
     title: 'Touch ’n Go Reload RM20',
     sku: 'TNG20',
@@ -471,9 +471,15 @@ const usedPins = computed(() => {
 const encodedPins = computed(() => {
     return catalogue.value.pins.map((pin) => ({
         ...pin,
-        pin: btoa(pin.pin).replace(/=+$/, '') // Base64 encode without trailing '='
+        pin: maskPin(pin.pin)
     }));
 });
+const maskPin = (pin) => {
+    if (!pin) return '';
+    const str = pin.toString().replace(/-/g, ''); // remove dashes for clean masking
+    if (str.length <= 2) return str;
+    return str[0] + '*'.repeat(str.length - 2) + str[str.length - 1];
+};
 
 // Load sample pins
 const loadPins = () => {
