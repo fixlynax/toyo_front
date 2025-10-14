@@ -15,18 +15,31 @@
                         <label class="block font-bold text-gray-700 mb-1">Is Birthday?</label>
                         <Dropdown v-model="catalogue.isBirthday" :options="isBirthdayOptions" optionLabel="label" optionValue="value" placeholder="Select an option" class="w-full" />
                     </div>
+
                     <div v-if="catalogue.type === 'Item' || catalogue.type === 'E-Voucher'">
                         <label class="block font-bold text-gray-700 mb-1">Quantity</label>
-                        <InputNumber v-model="catalogue.valueAmount" class="w-full" />
+                        <InputNumber placeholder="Enter quantity" class="w-full" />
                     </div>
+
                     <div v-if="catalogue.type === 'E-Voucher'">
                         <label class="block font-bold text-gray-700 mb-1">Provider</label>
-                        <InputNumber v-model="catalogue.valueAmount" class="w-full" />
+                        <InputText placeholder="Enter provider name" class="w-full" />
                     </div>
                 </div>
                 <!-- catalogue Form -->
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <!-- Title -->
+                    <!-- Purpose To & Expiry -->
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 md:col-span-2">
+                        <div>
+                            <label class="block font-bold text-gray-700 mb-1">Purpose To</label>
+                            <Dropdown v-model="catalogue.purpose" :options="purposeOptions" optionLabel="label" optionValue="value" placeholder="Select an option" class="w-full" />
+                        </div>
+                        <div>
+                            <label class="block font-bold text-gray-700 mb-1">Expiry</label>
+                            <Calendar v-model="catalogue.expiry" class="w-full" />
+                        </div>
+                    </div>
                     <div>
                         <label class="block font-bold text-gray-700 mb-1">Title</label>
                         <InputText v-model="catalogue.title" class="w-full" />
@@ -53,18 +66,6 @@
                         <div>
                             <label class="block font-bold text-gray-700">Instruction</label>
                             <Textarea v-model="catalogue.instruction" class="w-full" />
-                        </div>
-                    </div>
-
-                    <!-- Purpose To & Expiry -->
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 md:col-span-2">
-                        <div>
-                            <label class="block font-bold text-gray-700 mb-1">Purpose To</label>
-                            <Dropdown v-model="catalogue.purpose" :options="purposeOptions" optionLabel="label" optionValue="value" placeholder="Select an option" class="w-full" />
-                        </div>
-                        <div>
-                            <label class="block font-bold text-gray-700 mb-1">Expiry</label>
-                            <Calendar v-model="catalogue.expiry" class="w-full" />
                         </div>
                     </div>
                 </div>
@@ -94,22 +95,22 @@
                 <div class="mt-6">
                     <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
                         <div>
-                            <label for="minSpend" class="block font-bold text-gray-700 mb-1">Silver Point</label>
-                            <InputNumber id="minSpend" v-model="catalogue.birthdayReward.minSpend" showButtons min="0" class="w-full" />
+                            <label for="silverpoint" class="block font-bold text-gray-700 mb-1">Silver Point</label>
+                            <InputNumber id="silverpoint" showButtons min="0" class="w-full" />
                         </div>
 
                         <div>
-                            <label for="bonusPoints" class="block font-bold text-gray-700 mb-1">Gold Point</label>
-                            <InputNumber id="bonusPoints" v-model="catalogue.birthdayReward.bonusPoints" showButtons min="0" class="w-full" />
+                            <label for="goldpoint" class="block font-bold text-gray-700 mb-1">Gold Point</label>
+                            <InputNumber id="goldpoint" showButtons min="0" class="w-full" />
                         </div>
 
                         <div>
-                            <label for="discountPercent" class="block font-bold text-gray-700 mb-1">Plantinum Point</label>
-                            <InputNumber id="discountPercent" v-model="catalogue.birthdayReward.discountPercent" showButtons min="0" max="100" suffix="%" class="w-full" />
+                            <label for="plantinumpoint" class="block font-bold text-gray-700 mb-1">Plantinum Point</label>
+                            <InputNumber id="plantinumpoint" showButtons min="0" class="w-full" />
                         </div>
                     </div>
-                    <!-- Submit -->
-                    <div class="flex justify-end mt-8 gap-2">
+                    <!-- Submit Buttons (Default position) -->
+                    <div v-if="catalogue.type !== 'E-Wallet' && catalogue.type !== 'E-Voucher'" class="flex justify-end mt-8 gap-2">
                         <div class="w-40">
                             <Button label="Cancel" class="p-button-secondary w-full mr-2" @click="$router.back()" />
                         </div>
@@ -162,6 +163,15 @@
                         <template #body="{ data }"> {{ data.status ? 'Used' : 'Available' }}</template>
                     </Column>
                 </DataTable>
+                <!-- Submit Buttons (For E-Wallet & E-Voucher) -->
+                <div class="flex justify-end mt-8 gap-2">
+                    <div class="w-40">
+                        <Button label="Cancel" class="p-button-secondary w-full mr-2" @click="$router.back()" />
+                    </div>
+                    <div class="w-40">
+                        <Button label="Submit" class="w-full" @click="$router.back()" />
+                    </div>
+                </div>
             </div>
         </div>
     </Fluid>
@@ -211,7 +221,7 @@ const catalogue = ref({
     totalVouchers: 0,
 
     // Item Data
-    valueAmount: 0,
+    valueAmount: 20,
 
     // Birthday Reward
     birthdayReward: {

@@ -84,7 +84,7 @@
                     </div>
 
                     <!-- Set Point Dialog -->
-                    <Dialog v-model:visible="showSetDialog" header="Set Point" modal class="w-96">
+                    <Dialog v-model:visible="showSetDialog" header="Set Cost Redeem" modal class="w-96">
                         <div class="flex flex-col gap-3">
                             <label for="setPoint" class="font-medium">Silver Point</label>
                             <InputNumber v-model="setPoint" id="setPoint" showButtons />
@@ -176,7 +176,7 @@
                     </div>
 
                     <!-- Set Point Dialog -->
-                    <Dialog v-model:visible="showSetDialog" header="Set Point" modal class="w-96">
+                    <Dialog v-model:visible="showSetDialog" header="Cost Redeem" modal class="w-96">
                         <div class="flex flex-col gap-3">
                             <label for="setPoint" class="font-medium">Silver Point</label>
                             <InputNumber v-model="setPoint" id="setPoint" showButtons />
@@ -263,18 +263,21 @@
 
                     <!-- Set Point & Delete Buttons -->
                     <div class="flex flex-row items-center gap-2 mt-4">
-                        <Button label="Set Point" class="p-button" size="small" style="width: auto" @click="showSetDialog = true" />
+                        <Button label="Cost Redeem" class="p-button" size="small" style="width: auto" @click="showSetDialog = true" />
                     </div>
 
                     <!-- Set Point Dialog -->
                     <Dialog v-model:visible="showSetDialog" header="Set Point" modal class="w-96">
                         <div class="flex flex-col gap-3">
-                            <label for="setPoint" class="font-medium">Silver Point</label>
-                            <InputNumber v-model="setPoint" id="setPoint" showButtons />
-                            <label for="setPoint" class="font-medium">Gold Point</label>
-                            <InputNumber v-model="setPoint" id="setPoint" showButtons />
-                            <label for="setPoint" class="font-medium">Plantinum Point</label>
-                            <InputNumber v-model="setPoint" id="setPoint" showButtons />
+                            <label for="silverPoint" class="font-medium">Silver Point</label>
+                            <InputNumber v-model="silverPoint" id="silverPoint" showButtons min="0" />
+
+                            <label for="goldPoint" class="font-medium">Gold Point</label>
+                            <InputNumber v-model="goldPoint" id="goldPoint" showButtons min="0" />
+
+                            <label for="platinumPoint" class="font-medium">Platinum Point</label>
+                            <InputNumber v-model="platinumPoint" id="platinumPoint" showButtons min="0" />
+
                             <div class="flex justify-end gap-2 mt-3">
                                 <Button label="Cancel" class="p-button-text" @click="showSetDialog = false" />
                                 <Button label="Confirm" class="p-button-success" @click="confirmSetPoint" />
@@ -424,7 +427,7 @@ import { ref, computed, onMounted } from 'vue';
 
 const catalogue = ref({
     id: 1,
-    type: 'E-Voucher', // or 'E-Voucher'
+    type: 'Item', // or 'E-Voucher'
     image1URL: 'https://assets.bharian.com.my/images/articles/tng13jan_BHfield_image_socialmedia.var_1610544082.jpg',
     title: 'Touch ’n Go Reload RM20',
     sku: 'TNG20',
@@ -552,18 +555,6 @@ const removeStock = () => {
         showRemoveDialog.value = false;
         removeQty.value = 0;
     }
-};
-
-const exportStockList = () => {
-    const dataStr = JSON.stringify(itemStocks.value, null, 2);
-    const blob = new Blob([dataStr], { type: 'application/json' });
-    const url = URL.createObjectURL(blob);
-
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = 'item_stock.json';
-    a.click();
-    URL.revokeObjectURL(url);
 };
 
 const showSetDialog = ref(false);
