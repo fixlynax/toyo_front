@@ -61,6 +61,15 @@
                                     <td class="px-4 py-2 font-medium">Total View</td>
                                     <td class="px-4 py-2 text-right">{{ news.view }}</td>
                                 </tr>
+
+                                <tr class="border-b">
+                                    <td class="px-4 py-2 font-medium">Start</td>
+                                    <td class="px-4 py-2 text-right">{{ news.startDate }}</td>
+                                </tr>
+                                <tr class="border-b">
+                                    <td class="px-4 py-2 font-medium">End</td>
+                                    <td class="px-4 py-2 text-right">{{ news.endDate }}</td>
+                                </tr>
                                 <tr class="border-b">
                                     <td class="px-4 py-2 font-medium">Created</td>
                                     <td class="px-4 py-2 text-right">{{ news.created }}</td>
