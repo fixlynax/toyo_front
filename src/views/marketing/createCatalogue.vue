@@ -84,7 +84,42 @@
                 </div>
             </div>
         </div>
+        <div class="mt-8">
+            <div class="card flex flex-col w-full">
+                <div class="flex items-center justify-between border-b pb-2 mb-2">
+                    <div class="text-2xl font-bold text-gray-800">🪙 Cost Redeem</div>
+                </div>
 
+                <!-- 3-Column Input Section -->
+                <div class="mt-6">
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <div>
+                            <label for="minSpend" class="block font-bold text-gray-700 mb-1">Silver Point</label>
+                            <InputNumber id="minSpend" v-model="catalogue.birthdayReward.minSpend" showButtons min="0" class="w-full" />
+                        </div>
+
+                        <div>
+                            <label for="bonusPoints" class="block font-bold text-gray-700 mb-1">Gold Point</label>
+                            <InputNumber id="bonusPoints" v-model="catalogue.birthdayReward.bonusPoints" showButtons min="0" class="w-full" />
+                        </div>
+
+                        <div>
+                            <label for="discountPercent" class="block font-bold text-gray-700 mb-1">Plantinum Point</label>
+                            <InputNumber id="discountPercent" v-model="catalogue.birthdayReward.discountPercent" showButtons min="0" max="100" suffix="%" class="w-full" />
+                        </div>
+                    </div>
+                    <!-- Submit -->
+                    <div class="flex justify-end mt-8 gap-2">
+                        <div class="w-40">
+                            <Button label="Cancel" class="p-button-secondary w-full mr-2" @click="$router.back()" />
+                        </div>
+                        <div class="w-40">
+                            <Button label="Submit" class="w-full" @click="$router.back()" />
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
         <!-- ======================== -->
         <!-- E-Wallet PIN Section     -->
         <!-- ======================== -->
@@ -129,47 +164,6 @@
                 </DataTable>
             </div>
         </div>
-
-        <!-- ======================== -->
-        <!-- Birthday Reward Section  -->
-        <!-- ======================== -->
-        <!-- <div v-if="catalogue.isBirthday === 1" class="mt-8">
-            <div class="card flex flex-col w-full">
-                <div class="flex items-center justify-between border-b pb-2 mb-2">
-                    <div class="text-2xl font-bold text-gray-800">🎂 Birthday Reward</div>
-                </div>
-
-                <div class="p-4 text-gray-600"> -->
-        <!-- Reward Type Selection -->
-        <!-- <div class="mb-4">
-                        <label class="block font-bold text-gray-700 mb-1">Reward Type</label>
-                        <Dropdown v-model="catalogue.birthdayReward.type" :options="birthdayRewardTypeOptions" optionLabel="label" optionValue="value" placeholder="Select reward type" class="w-full" />
-                    </div> -->
-
-        <!-- Points Option -->
-        <!-- <div v-if="catalogue.birthdayReward.type === 'Points'" class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                        <div>
-                            <label class="block font-bold text-gray-700 mb-1">Silver Tier Points</label>
-                            <InputNumber v-model="catalogue.birthdayReward.points.silver" class="w-full" />
-                        </div>
-                        <div>
-                            <label class="block font-bold text-gray-700 mb-1">Gold Tier Points</label>
-                            <InputNumber v-model="catalogue.birthdayReward.points.gold" class="w-full" />
-                        </div>
-                        <div>
-                            <label class="block font-bold text-gray-700 mb-1">Platinum Tier Points</label>
-                            <InputNumber v-model="catalogue.birthdayReward.points.platinum" class="w-full" />
-                        </div>
-                    </div> -->
-
-        <!-- Reward Item Option -->
-        <!-- <div v-else-if="catalogue.birthdayReward.type === 'Reward'" class="mt-4">
-                        <label class="block font-bold text-gray-700 mb-1">Select Reward Item</label>
-                        <Dropdown v-model="catalogue.birthdayReward.itemId" :options="rewardItems" optionLabel="title" optionValue="id" placeholder="Select a reward item" class="w-full" />
-                    </div>
-                </div>
-            </div>
-        </div> -->
     </Fluid>
 </template>
 

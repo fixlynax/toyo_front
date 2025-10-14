@@ -49,10 +49,11 @@
                                 </div>
 
                                 <!-- Action Buttons -->
-                                <div class="flex gap-4 items-end w-full md:w-48">
+                                <div class="flex gap-4 items-end w-full md:w-72">
                                     <Button icon="pi pi-plus" class="p-button-text text-green-600 w-10 h-10 flex items-center justify-center" v-tooltip="'Add PIN'" @click="addPin" />
                                     <Button icon="pi pi-minus" class="p-button-text text-yellow-600 w-10 h-10 flex items-center justify-center" v-tooltip="'Remove PIN'" @click="removePin" />
                                     <Button icon="pi pi-file-export" label="Export" v-tooltip="'Export Redemption List'" @click="exportRedemptionList" />
+                                    <Button icon="pi pi-file-import" label="Import" v-tooltip="'Export Redemption List'" @click="exportRedemptionList" />
                                 </div>
                             </div>
                         </template>
