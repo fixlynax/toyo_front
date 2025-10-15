@@ -342,7 +342,7 @@ const model = ref([
             {
                 label: 'Account Detail',
                 icon: 'pi pi-fw pi-id-card',
-                to: '/billing/listBillingAccount'
+                to: '/billing/listAccountDetail'
             },
             {
                 label: 'Billing History',

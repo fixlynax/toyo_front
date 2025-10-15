@@ -526,9 +526,9 @@ const router = createRouter({
                 // ===============================
                 // Account Details
                 {
-                    path: '/billing/listBillingAccount',
+                    path: '/billing/listAccountDetail',
                     name: 'Billing-Account',
-                    component: () => import('@/views/billing/listBillingAccount.vue')
+                    component: () => import('@/views/billing/listAccountDetail.vue')
                 },
 
                 // Billing History
