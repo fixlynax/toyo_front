@@ -538,6 +538,16 @@ const router = createRouter({
                     component: () => import('@/views/billing/listBilling.vue')
                 },
                 {
+                    path: '/billing/listEbilling',
+                    name: 'E-Billing',
+                    component: () => import('@/views/billing/listEbilling.vue')
+                },
+                {
+                    path: '/billing/listOther',
+                    name: 'List-Other',
+                    component: () => import('@/views/billing/listOther.vue')
+                },
+                {
                     path: '/billing/listStatement',
                     name: 'Billing-Statement',
                     component: () => import('@/views/billing/listStatement.vue')
