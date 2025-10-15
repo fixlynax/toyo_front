@@ -80,6 +80,11 @@ const router = createRouter({
                     name: 'List-Back-Order',
                     component: () => import('@/views/om/listBackOrder.vue')
                 },
+                 {
+                    path: '/om/createBackOrder',
+                    name: 'Create-Back-Order',
+                    component: () => import('@/views/om/createBackOrder.vue')
+                },
                 {
                     path: '/om/detailBackOrder',
                     name: 'Detail-Back-Order',
