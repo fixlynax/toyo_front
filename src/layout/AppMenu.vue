@@ -346,8 +346,18 @@ const model = ref([
             },
             {
                 label: 'Billing History',
-                icon: 'pi pi-fw pi-history',
+                icon: 'pi pi-fw pi-list',
                 to: '/billing/listBilling'
+            },
+            {
+                label: 'E-Billing',
+                icon: 'pi pi-fw pi-envelope',
+                to: ''
+            },
+            {
+                label: 'Others',
+                icon: 'pi pi-fw pi-briefcase',
+                to: '/billing/listStatement'
             }
         ]
     }
