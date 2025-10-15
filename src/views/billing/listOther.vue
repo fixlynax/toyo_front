@@ -1,6 +1,6 @@
 <template>
     <div class="card">
-        <div class="text-2xl font-bold text-gray-800 border-b pb-2">List Statement</div>
+        <div class="text-2xl font-bold text-gray-800 border-b pb-2">List Other</div>
 
         <DataTable :value="listData" :paginator="true" :rows="10" dataKey="id" :rowHover="true" :loading="loading" :filters="filters" filterDisplay="menu" :globalFilterFields="['username', 'department', 'mobileno', 'email', 'usergroup']">
             <template #header>

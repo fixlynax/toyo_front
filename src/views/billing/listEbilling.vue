@@ -24,7 +24,7 @@ function initFilters1() {
 
 <template>
     <div class="card">
-        <div class="text-2xl font-bold text-gray-800 border-b pb-2">List Billing</div>
+        <div class="text-2xl font-bold text-gray-800 border-b pb-2">List E-Billing</div>
 
         <DataTable :value="listData" :paginator="true" :rows="10" dataKey="id" :rowHover="true" :loading="loading" :filters="filters1">
             <template #header>
