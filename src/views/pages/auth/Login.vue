@@ -31,8 +31,8 @@ const checked = ref(false);
                                 />
                             </g>
                         </svg>
-                        <div class="text-surface-900 dark:text-surface-0 text-3xl font-medium mb-4">Welcome to PrimeLand!</div>
-                        <span class="text-muted-color font-medium">Sign in to continue</span>
+                        <div class="text-surface-900 dark:text-surface-0 text-3xl font-medium mb-4">Welcome TOYO Admin!</div>
+                        <span class="text-muted-color font-medium">Log in to continue</span>
                     </div>
 
                     <div>
@@ -49,7 +49,7 @@ const checked = ref(false);
                             </div>
                             <span class="font-medium no-underline ml-2 text-right cursor-pointer text-primary">Forgot password?</span>
                         </div>
-                        <Button label="Sign In" class="w-full" as="router-link" to="/"></Button>
+                        <Button label="" class="w-full" as="router-link" to="/"></Button>
                     </div>
                 </div>
             </div>
