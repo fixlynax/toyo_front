@@ -1,22 +1,55 @@
 import AppLayout from '@/layout/AppLayout.vue';
 import { createRouter, createWebHistory } from 'vue-router';
+import { tokenService } from '@/service/api';
 
 const router = createRouter({
     history: createWebHistory(),
     routes: [
+        // ===============================
+        // PUBLIC PAGES (No Layout)
+        // ===============================
+        {
+            path: '/landing',
+            name: 'landing',
+            component: () => import('@/views/pages/Landing.vue')
+        },
+        {
+            path: '/pages/notfound',
+            name: 'notfound',
+            component: () => import('@/views/pages/NotFound.vue')
+        },
+        {
+            path: '/auth/login',
+            name: 'login',
+            component: () => import('@/views/pages/auth/Login.vue')
+        },
+        {
+            path: '/auth/access',
+            name: 'accessDenied',
+            component: () => import('@/views/pages/auth/Access.vue')
+        },
+        {
+            path: '/auth/error',
+            name: 'error',
+            component: () => import('@/views/pages/auth/Error.vue')
+        },
+
+        // ===============================
+        // PROTECTED ROUTES (With Layout)
+        // ===============================
         {
             path: '/',
             component: AppLayout,
             children: [
                 // ===============================
-                // TEST API INTERGADE
+                // TEST API CONNECTION
                 // ===============================
                 {
                     path: '/test-api',
                     name: 'Test-API',
                     component: () => import('@/views/TestAPI.vue')
                 },
-                
+
                 // ===============================
                 // DASHBOARD
                 // ===============================
@@ -89,7 +122,7 @@ const router = createRouter({
                     name: 'List-Back-Order',
                     component: () => import('@/views/om/listBackOrder.vue')
                 },
-                 {
+                {
                     path: '/om/createBackOrder',
                     name: 'Create-Back-Order',
                     component: () => import('@/views/om/createBackOrder.vue')
@@ -263,7 +296,7 @@ const router = createRouter({
                     name: 'Invite-Dealer',
                     component: () => import('@/views/marketing/inviteDealer.vue')
                 },
-                 {
+                {
                     path: '/marketing/detailParticipant',
                     name: 'Detail-Participant',
                     component: () => import('@/views/marketing/detailParticipant.vue')
@@ -536,7 +569,7 @@ const router = createRouter({
                 },
 
                 // ===============================
-                // BILLING 
+                // BILLING
                 // ===============================
                 // Account Details
                 {
@@ -579,7 +612,8 @@ const router = createRouter({
                 {
                     path: '/scm/detailCollection',
                     name: 'Collection-Detail',
-                    component: () => import('@/views/scm/detailCollection.vue')
+                    component: () => import('@/views/scm/detailCollection.vue'),
+                    props: true
                 },
                 {
                     path: '/scm/returnCollection',
@@ -768,35 +802,6 @@ const router = createRouter({
         },
 
         // ===============================
-        // PUBLIC PAGES (No Layout)
-        // ===============================
-        {
-            path: '/landing',
-            name: 'landing',
-            component: () => import('@/views/pages/Landing.vue')
-        },
-        {
-            path: '/pages/notfound',
-            name: 'notfound',
-            component: () => import('@/views/pages/NotFound.vue')
-        },
-        {
-            path: '/auth/login',
-            name: 'login',
-            component: () => import('@/views/pages/auth/Login.vue')
-        },
-        {
-            path: '/auth/access',
-            name: 'accessDenied',
-            component: () => import('@/views/pages/auth/Access.vue')
-        },
-        {
-            path: '/auth/error',
-            name: 'error',
-            component: () => import('@/views/pages/auth/Error.vue')
-        },
-
-        // ===============================
         // CATCH ALL ROUTE - 404
         // ===============================
         {
@@ -804,6 +809,25 @@ const router = createRouter({
             redirect: '/pages/notfound'
         }
     ]
+});
+
+// Route guard
+router.beforeEach((to, from, next) => {
+    const publicPages = ['/auth/login', '/auth/access', '/auth/error', '/landing', '/pages/notfound'];
+    const authRequired = !publicPages.includes(to.path);
+    const loggedIn = tokenService.getToken() && !tokenService.isTokenExpired();
+
+    // If auth required and not logged in, redirect to login
+    if (authRequired && !loggedIn) {
+        return next('/auth/login');
+    }
+
+    // If already logged in and trying to access login page, redirect to dashboard
+    if (to.path === '/auth/login' && loggedIn) {
+        return next('/');
+    }
+
+    next();
 });
 
 export default router;

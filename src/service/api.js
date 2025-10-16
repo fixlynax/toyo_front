@@ -9,11 +9,40 @@ const apiClient = axios.create({
   }
 });
 
+// Token management functions
+export const tokenService = {
+  getToken() {
+    return localStorage.getItem('auth_token');
+  },
+  
+  setToken(token) {
+    localStorage.setItem('auth_token', token);
+  },
+  
+  removeToken() {
+    localStorage.removeItem('auth_token');
+    localStorage.removeItem('token_expires_at');
+    localStorage.removeItem('token_type');
+  },
+  
+  isTokenExpired() {
+    const expiresAt = localStorage.getItem('token_expires_at');
+    if (!expiresAt) return true;
+    
+    return Date.now() >= parseInt(expiresAt) * 1000; // Convert to milliseconds
+  },
+  
+  logout() {
+    this.removeToken();
+    // Redirect to login page if needed
+    window.location.href = '/login';
+  }
+};
+
 // Request interceptor
 apiClient.interceptors.request.use(
   (config) => {
-    // You can add auth token here if needed
-    const token = localStorage.getItem('auth_token');
+    const token = tokenService.getToken();
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
     }
@@ -32,8 +61,9 @@ apiClient.interceptors.response.use(
   (error) => {
     // Handle common errors
     if (error.response?.status === 401) {
-      // Handle unauthorized
-      console.error('Unauthorized access');
+      // Handle unauthorized - token expired or invalid
+      console.error('Unauthorized access - token may be expired');
+      tokenService.logout();
     }
     return Promise.reject(error);
   }
@@ -64,5 +94,8 @@ export default {
   // Custom request
   customRequest(config) {
     return apiClient(config);
-  }
+  },
+
+  // Token service
+  tokenService
 };
