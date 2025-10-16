@@ -53,9 +53,9 @@ function initFilters1() {
                 </template>
             </Column>
 
-            <Column field="docsType" header="Type" style="min-width: 8rem">
+            <!-- <Column field="docsType" header="Type" style="min-width: 8rem">
                 <template #body="{ data }">{{ data.docsType }}</template>
-            </Column>
+            </Column> -->
 
             <Column field="referenceDocsNo" header="Reference Doc" style="min-width: 8rem">
                 <template #body="{ data }">{{ data.referenceDocsNo }}</template>
