@@ -1,64 +1,22 @@
-<script setup>
-import { CustomerService } from '@/service/CustomerService';
-import { ProductService } from '@/service/ProductService';
-import { ListGameService } from '@/service/ListGame';
-import { FilterMatchMode, FilterOperator } from '@primevue/core/api';
-import { onBeforeMount, ref } from 'vue';
-
-const customers1 = ref(null);
-const customers2 = ref(null);
-const customers3 = ref(null);
-const filters1 = ref(null);
-const loading1 = ref(null);
-const products = ref(null);
-const expandedRows = ref([]);
-
-onBeforeMount(() => {
-    ProductService.getProductsWithOrdersSmall().then((data) => (products.value = data));
-    CustomerService.getCustomersLarge().then((data) => {
-        customers1.value = data;
-        loading1.value = false;
-        customers1.value.forEach((customer) => (customer.date = new Date(customer.date)));
-    });
-    CustomerService.getCustomersLarge().then((data) => (customers2.value = data));
-    CustomerService.getCustomersMedium().then((data) => (customers3.value = data));
-
-    initFilters1();
-});
-
-function initFilters1() {
-    filters1.value = {
-        global: { value: null, matchMode: FilterMatchMode.CONTAINS },
-        name: { operator: FilterOperator.AND, constraints: [{ value: null, matchMode: FilterMatchMode.STARTS_WITH }] },
-        'country.name': { operator: FilterOperator.AND, constraints: [{ value: null, matchMode: FilterMatchMode.STARTS_WITH }] },
-        representative: { value: null, matchMode: FilterMatchMode.IN },
-        date: { operator: FilterOperator.AND, constraints: [{ value: null, matchMode: FilterMatchMode.DATE_IS }] },
-        balance: { operator: FilterOperator.AND, constraints: [{ value: null, matchMode: FilterMatchMode.EQUALS }] },
-        status: { operator: FilterOperator.OR, constraints: [{ value: null, matchMode: FilterMatchMode.EQUALS }] },
-        activity: { value: [0, 100], matchMode: FilterMatchMode.BETWEEN },
-        verified: { value: null, matchMode: FilterMatchMode.EQUALS }
-    };
-}
-
-// Function to get severity for overall status
-function getOverallStatusSeverity(status) {
-    return status === 1 ? 'success' : 'danger';
-}
-
-const listData = ref([]);
-const loading = ref(true);
-
-// Fetch data on component mount
-onBeforeMount(async () => {
-    listData.value = await ListGameService.getListGame();
-    loading.value = false;
-});
-</script>
-
 <template>
     <div class="card">
         <div class="text-2xl font-bold text-gray-800 border-b pb-2">List Game</div>
-        <DataTable :value="listData" :paginator="true" :rows="10" dataKey="id" :rowHover="true" :loading="loading">
+
+        <DataTable
+            :value="listData"
+            :paginator="true"
+            :rows="10"
+            :rowsPerPageOptions="[5, 10, 20]"
+            dataKey="id"
+            :rowHover="true"
+            :loading="loading"
+            :filters="filters"
+            filterDisplay="menu"
+            :globalFilterFields="['gameNo', 'gameName', 'title', 'type', 'publishDate', 'status']"
+        >
+            <!-- ========================= -->
+            <!-- Header Section -->
+            <!-- ========================= -->
             <template #header>
                 <div class="flex items-center justify-between gap-4 w-full flex-wrap">
                     <!-- Left: Search Field + Cog Button -->
@@ -67,51 +25,95 @@ onBeforeMount(async () => {
                             <InputIcon>
                                 <i class="pi pi-search" />
                             </InputIcon>
-                            <InputText v-model="filters1['global'].value" placeholder="Quick Search" class="w-full" />
+                            <InputText v-model="filters['global'].value" placeholder="Quick Search" class="w-full" />
                         </IconField>
                         <Button type="button" icon="pi pi-cog" class="p-button" />
                     </div>
 
-                    <!-- Right: Add eTEN Button -->
+                    <!-- Right: Create Game Button -->
                     <RouterLink to="/marketing/CreateGame">
-                        <Button type="button" label="Create"></Button>
+                        <Button type="button" label="Create" />
                     </RouterLink>
                 </div>
             </template>
 
+            <!-- ========================= -->
+            <!-- Empty / Loading Messages -->
+            <!-- ========================= -->
             <template #empty> No Games found. </template>
             <template #loading> Loading Games data. Please wait. </template>
-            <!-- Columns -->
+
+            <!-- ========================= -->
+            <!-- Data Columns -->
+            <!-- ========================= -->
             <Column field="gameNo" header="Game No" style="min-width: 6rem">
                 <template #body="{ data }">
-                    <RouterLink to="/marketing/detailGame" class=" hover:underline font-bold">
+                    <RouterLink to="/marketing/detailGame" class="hover:underline font-bold">
                         {{ data.gameNo }}
                     </RouterLink>
                 </template>
             </Column>
+            
             <Column field="gameName" header="Game Name" style="min-width: 6rem">
                 <template #body="{ data }">
-                        {{ data.title }}
+                    {{ data.title }}
                 </template>
             </Column>
+            
             <Column field="type" header="Type" style="min-width: 6rem">
                 <template #body="{ data }">
-                        {{ data.type }}
+                    {{ data.type }}
                 </template>
-            </Column> 
+            </Column>
+            
             <Column field="publishDate" header="Publish Date" style="min-width: 6rem">
                 <template #body="{ data }">
-                        {{ data.publishDate }}
+                    {{ data.publishDate }}
                 </template>
-            </Column> 
-            <Column header="Status" style="min-width: 6rem">
+            </Column>
+            
+            <Column field="status" header="Status" style="min-width: 6rem">
                 <template #body="{ data }">
-                    <Tag :value="data.status === 1 ? 'Active' : 'Inactive'" :severity="getOverallStatusSeverity(data.status)" />
+                    <Tag 
+                        :value="data.status === 1 ? 'Active' : 'Inactive'" 
+                        :severity="getOverallStatusSeverity(data.status)" 
+                    />
                 </template>
             </Column>
         </DataTable>
     </div>
 </template>
+
+<script setup>
+import { onMounted, ref } from 'vue';
+import { FilterMatchMode } from '@primevue/core/api';
+import { ListGameService } from '@/service/ListGame';
+
+// Data variables
+const listData = ref([]);
+const loading = ref(true);
+
+// Filters for quick search
+const filters = ref({
+    global: { value: null, matchMode: FilterMatchMode.CONTAINS }
+});
+
+// =========================
+// Fetch data on mount
+// =========================
+onMounted(async () => {
+    loading.value = true;
+    listData.value = await ListGameService.getListGame();
+    loading.value = false;
+});
+
+// =========================
+// Helper functions for status display
+// =========================
+const getOverallStatusSeverity = (status) => {
+    return status === 1 ? 'success' : 'danger';
+};
+</script>
 
 <style scoped lang="scss">
 :deep(.p-datatable-frozen-tbody) {

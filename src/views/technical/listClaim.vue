@@ -1,4 +1,5 @@
 <script setup>
+import { FilterMatchMode } from '@primevue/core/api';
 import { listWarantyClaimService } from '@/service/ListWarrantyClaim';
 import { onBeforeMount, ref } from 'vue';
 
@@ -33,6 +34,11 @@ const getOverallStatusSeverity = (status) => {
     }
 };
 
+// Filters for quick search
+const filters = ref({
+    global: { value: null, matchMode: FilterMatchMode.CONTAINS }
+});
+
 // Fetch data on component mount
 onBeforeMount(async () => {
     listData.value = await listWarantyClaimService.getListWarantyData();
@@ -43,7 +49,9 @@ onBeforeMount(async () => {
 <template>
     <div class="card">
         <div class="text-2xl font-bold text-gray-800 border-b pb-2">List Claim</div>
-        <DataTable :value="listData" :paginator="true" :rows="10" dataKey="id" :rowHover="true" :loading="loading">
+        <DataTable :value="listData" :paginator="true" :rows="10" dataKey="id" :rowHover="true" :loading="loading":filters="filters"
+            filterDisplay="menu"
+            :globalFilterFields="['refNo', 'dealerName', 'claimType', 'claimDate', 'Status']">
             <template #header>
                 <div class="flex items-center justify-between gap-4 w-full flex-wrap">
                     <!-- Left: Search Field + Cog Button -->
@@ -52,7 +60,7 @@ onBeforeMount(async () => {
                             <InputIcon>
                                 <i class="pi pi-search" />
                             </InputIcon>
-                            <InputText placeholder="Quick Search" class="w-full" />
+                            <InputText v-model="filters['global'].value" placeholder="Quick Search" class="w-full" />
                         </IconField>
                         <Button type="button" icon="pi pi-cog" class="p-button" />
                     </div>
