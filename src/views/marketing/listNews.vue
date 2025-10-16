@@ -14,9 +14,6 @@
             filterDisplay="menu"
             :globalFilterFields="['title', 'publishDate', 'period', 'audience', 'viewer', 'status']"
         >
-            <!-- ========================= -->
-            <!-- Header Section -->
-            <!-- ========================= -->
             <template #header>
                 <div class="flex items-center justify-between gap-4 w-full flex-wrap">
                     <!-- Left: Search Field + Cog Button -->
@@ -37,55 +34,46 @@
                 </div>
             </template>
 
-            <!-- ========================= -->
-            <!-- Empty / Loading Messages -->
-            <!-- ========================= -->
             <template #empty> No News found. </template>
             <template #loading> Loading News data. Please wait. </template>
-
-            <!-- ========================= -->
-            <!-- Data Columns -->
-            <!-- ========================= -->
+            
             <Column field="title" header="Title" sortable style="min-width: 8rem">
                 <template #body="{ data }">
-                    <RouterLink to="/marketing/detailNews" class="hover:underline font-bold">
+                    <RouterLink :to="`/marketing/detailNews/${data.id}`" class="hover:underline font-bold">
                         {{ data.title }}
                     </RouterLink>
                 </template>
             </Column>
-            
-            <Column field="publishDate" header="Publish Date" style="min-width: 6rem">
+
+            <Column field="publishDate" header="Publish Date" sortable style="min-width: 6rem">
                 <template #body="{ data }">
-                    {{ data.publishDate }}
-                </template>
-            </Column>
-            
-            <Column field="period" header="Period" style="min-width: 6rem">
-                <template #body="{ data }">
-                    {{ data.startDate }}
-                    <span class="font-bold"> - </span>
-                    {{ data.endDate }}
+                    {{ formatDate(data.publishDate) }}
                 </template>
             </Column>
 
-            <Column field="audience" header="Audience" style="min-width: 6rem">
+            <Column field="period" header="Period" style="min-width: 8rem">
                 <template #body="{ data }">
-                    {{ data.audience }}
+                    {{ formatDate(data.startDate) }}
+                    <span class="font-bold"> - </span>
+                    {{ formatDate(data.endDate) }}
                 </template>
             </Column>
-            
-            <Column field="viewer" header="Viewer" style="min-width: 6rem">
+
+            <Column field="audience" header="Audience" sortable style="min-width: 6rem">
                 <template #body="{ data }">
-                    {{ data.view }}
+                    <Tag :value="data.audience" :severity="getAudienceSeverity(data.audience)" />
                 </template>
             </Column>
-            
-            <Column field="status" header="Status" style="min-width: 6rem">
+
+            <Column field="viewer" header="Viewer" sortable style="min-width: 6rem">
                 <template #body="{ data }">
-                    <Tag 
-                        :value="getOverallStatusLabel(data.status)" 
-                        :severity="getOverallStatusSeverity(data.status)" 
-                    />
+                    {{ data.view || 0 }}
+                </template>
+            </Column>
+
+            <Column field="status" header="Status" sortable style="min-width: 6rem">
+                <template #body="{ data }">
+                    <Tag :value="getStatusLabel(data.status)" :severity="getStatusSeverity(data.status)" />
                 </template>
             </Column>
         </DataTable>
@@ -94,8 +82,8 @@
 
 <script setup>
 import { onMounted, ref } from 'vue';
+import api from '@/service/api';
 import { FilterMatchMode } from '@primevue/core/api';
-import { ListNewsService } from '@/service/ListNews';
 
 // Data variables
 const listData = ref([]);
@@ -110,25 +98,74 @@ const filters = ref({
 // Fetch data on mount
 // =========================
 onMounted(async () => {
-    loading.value = true;
-    listData.value = await ListNewsService.getListNewsData();
-    loading.value = false;
+    try {
+        loading.value = true;
+        const response = await api.get('news/newsList');
+
+        console.log('API Response:', response.data);
+
+        if (response.data.status === 1 && Array.isArray(response.data.admin_data)) {
+            listData.value = response.data.admin_data.map((news) => ({
+                id: news.id,
+                title: news.title || 'Untitled',
+                publishDate: news.publishDate,
+                startDate: news.startDate,
+                endDate: news.endDate, // Fixed typo: was 'endtDate'
+                audience: news.audience || 'N/A',
+                view: news.view || 0, // Fixed: was 'viewer' in API but 'view' in data
+                status: news.status
+            }));
+        } else {
+            console.error('API returned error or invalid data:', response.data);
+            listData.value = [];
+        }
+    } catch (error) {
+        console.error('Error fetching news list:', error);
+        listData.value = [];
+    } finally {
+        loading.value = false;
+    }
 });
 
 // =========================
-// Helper functions for status display
+// Helper functions
 // =========================
-const getOverallStatusLabel = (status) => {
-    if (status === 0) return 'Draft';
-    if (status === 1) return 'Published';
-    if (status === 2) return 'Unpublished';
-    return 'Unknown';
+const getStatusLabel = (status) => {
+    const statusMap = {
+        0: 'Draft',
+        1: 'Published', 
+        2: 'Unpublished'
+    };
+    return statusMap[status] || 'Unknown';
 };
 
-const getOverallStatusSeverity = (status) => {
-    if (status === 0) return 'info';
-    if (status === 1) return 'success';
-    if (status === 2) return 'warn';
-    return 'secondary';
+const getStatusSeverity = (status) => {
+    const severityMap = {
+        0: 'info',
+        1: 'success',
+        2: 'warning' // Fixed: was 'warn', should be 'warning'
+    };
+    return severityMap[status] || 'secondary';
+};
+
+const getAudienceSeverity = (audience) => {
+    const audienceMap = {
+        'ALL': 'info',
+        'TC': 'success',
+        'ETEN': 'warning'
+    };
+    return audienceMap[audience] || 'secondary';
+};
+
+const formatDate = (dateString) => {
+    if (!dateString || dateString === 'N/A') return 'N/A';
+    
+    try {
+        // Parse DD-MM-YYYY format and return as is, or format if needed
+        return dateString;
+    } catch (error) {
+        console.error('Error formatting date:', error);
+        return dateString;
+    }
 };
 </script>
