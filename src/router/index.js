@@ -9,6 +9,15 @@ const router = createRouter({
             component: AppLayout,
             children: [
                 // ===============================
+                // TEST API INTERGADE
+                // ===============================
+                {
+                    path: '/test-api',
+                    name: 'Test-API',
+                    component: () => import('@/views/TestAPI.vue')
+                },
+                
+                // ===============================
                 // DASHBOARD
                 // ===============================
                 {
