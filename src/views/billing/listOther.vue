@@ -44,16 +44,13 @@ function initFilters1() {
             <template #empty> No Billing found. </template>
             <template #loading> Loading billing data. Please wait. </template>
 
-            <Column field="docsNo" header="Document No" style="min-width: 10rem">
-                <template #body="{ data }">
-                    <RouterLink to="/billing/detailBilling" class="hover:underline font-bold">
-                        {{ data.docsNo }}
-                    </RouterLink>
-                </template>
-            </Column>
-
             <Column field="docsDate" header="Document Date" style="min-width: 8rem">
                 <template #body="{ data }">{{ data.docsDate }}</template>
+            </Column>
+            <Column field="docsNo" header="Document No" style="min-width: 10rem">
+                <template #body="{ data }">
+                    {{ data.docsNo }}
+                </template>
             </Column>
 
             <Column field="docsType" header="Type" style="min-width: 8rem">
@@ -66,10 +63,6 @@ function initFilters1() {
 
             <Column field="dealerName" header="Dealer Name" style="min-width: 10rem">
                 <template #body="{ data }">{{ data.dealerName }}</template>
-            </Column>
-
-            <Column field="company" header="Company" style="min-width: 10rem">
-                <template #body="{ data }">{{ data.company }}</template>
             </Column>
 
             <Column header="Download" style="min-width: 6rem; text-align: center">

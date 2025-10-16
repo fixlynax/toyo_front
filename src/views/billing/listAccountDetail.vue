@@ -1,59 +1,60 @@
 <script setup>
-import { ref, onBeforeMount } from 'vue';
+import { onBeforeMount, ref } from 'vue';
 import { BillingService } from '@/service/ListBilling';
 import { FilterMatchMode, FilterOperator } from '@primevue/core/api';
 
+const filters1 = ref(null);
 const listData = ref([]);
-const filters = ref({});
 const loading = ref(true);
 
 onBeforeMount(async () => {
-    try {
-        listData.value = await BillingService.getBillingList();
-        initFilters();
-    } catch (error) {
-        console.error('Error loading billing data:', error);
-    } finally {
-        loading.value = false;
-    }
+    listData.value = await BillingService.getBillingList();
+    loading.value = false;
+    initFilters1();
 });
 
-function initFilters() {
-    filters.value = {
+function initFilters1() {
+    filters1.value = {
         global: { value: null, matchMode: FilterMatchMode.CONTAINS },
         dealerName: { operator: FilterOperator.AND, constraints: [{ value: null, matchMode: FilterMatchMode.STARTS_WITH }] },
-        dealerId: { operator: FilterOperator.AND, constraints: [{ value: null, matchMode: FilterMatchMode.STARTS_WITH }] }
+        docsNo: { operator: FilterOperator.AND, constraints: [{ value: null, matchMode: FilterMatchMode.STARTS_WITH }] }
     };
 }
 </script>
 
 <template>
     <div class="card">
-        <!-- Header -->
-        <div class="text-2xl font-bold text-gray-800 border-b pb-2 mb-4">Account Details</div>
+        <div class="text-2xl font-bold text-gray-800 border-b pb-2">Account Detail</div>
 
-        <!-- Data Table -->
-        <DataTable :value="listData" :loading="loading" :paginator="true" :rows="10" :rowsPerPageOptions="[3, 5, 7, 15, 20, 25, 30, 50]" dataKey="id" :rowHover="true" :filters="filters" responsiveLayout="scroll">
-            <!-- Header -->
+        <DataTable :value="listData" :paginator="true" :rows="10" dataKey="id" :rowHover="true" :loading="loading" :filters="filters1">
             <template #header>
-                <div class="flex flex-wrap items-center justify-between gap-4 w-full">
-                    <IconField class="flex-1 max-w-md">
-                        <InputIcon><i class="pi pi-search" /></InputIcon>
-                        <InputText v-model="filters['global'].value" placeholder="Quick Search" class="w-full" />
-                    </IconField>
-                    <Button icon="pi pi-cog" class="p-button" />
+                <div class="flex items-center justify-between gap-4 w-full flex-wrap">
+                    <div class="flex items-center gap-2 w-full max-w-md">
+                        <IconField class="flex-1">
+                            <InputIcon>
+                                <i class="pi pi-search" />
+                            </InputIcon>
+                            <InputText v-model="filters1['global'].value" placeholder="Quick Search" class="w-full" />
+                        </IconField>
+                        <Button type="button" icon="pi pi-cog" class="p-button" />
+                    </div>
                 </div>
             </template>
 
-            <!-- States -->
-            <template #empty>No billing records found.</template>
-            <template #loading>Loading billing data, please wait...</template>
+            <template #empty> No Billing found. </template>
+            <template #loading> Loading billing data. Please wait. </template>
 
-            <!-- Columns -->
-            <Column field="docsDate" header="Document DateTime" style="min-width: 12rem" />
-            <Column field="company" header="Company" style="min-width: 8rem" />
-            <Column field="dealerId" header="Dealer ID" class="font-semibold" style="min-width: 8rem" />
-            <Column field="dealerName" header="Dealer Name" style="min-width: 14rem" />
+            <Column field="docsDate" header="Document Date" style="min-width: 8rem">
+                <template #body="{ data }">{{ data.docsDate }}</template>
+            </Column>
+
+            <Column field="dealerId" header="Dealer ID" style="min-width: 8rem">
+                <template #body="{ data }">{{ data.referenceDocsNo }}</template>
+            </Column>
+
+            <Column field="dealerName" header="Dealer Name" style="min-width: 10rem">
+                <template #body="{ data }">{{ data.dealerName }}</template>
+            </Column>
 
             <!-- Amount Due -->
             <Column field="amtdue" header="Amount Due (RM)" style="min-width: 10rem; text-align: right">
@@ -67,7 +68,6 @@ function initFilters() {
                 </template>
             </Column>
 
-            <!-- Download -->
             <Column header="Download" style="min-width: 6rem; text-align: center">
                 <template #body="{ data }">
                     <Button icon="pi pi-download" class="p-button-sm" :severity="data.download ? 'success' : 'secondary'" :disabled="!data.download" v-tooltip.top="data.download ? 'Download Available' : 'Not Ready'" />

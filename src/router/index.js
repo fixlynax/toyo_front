@@ -563,7 +563,7 @@ const router = createRouter({
                 },
                 {
                     path: '/billing/listStatement',
-                    name: 'Billing-Statement',
+                    name: 'List-Statement',
                     component: () => import('@/views/billing/listStatement.vue')
                 },
 
