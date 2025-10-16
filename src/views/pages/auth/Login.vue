@@ -91,7 +91,7 @@ const handleLogin = async () => {
                             <span class="font-medium no-underline ml-2 text-right cursor-pointer text-primary">Forgot password?</span>
                         </div>
                         <Button 
-                            label="Sign In" 
+                            label="Log In" 
                             class="w-full" 
                             @click="handleLogin"
                             :loading="loading"
