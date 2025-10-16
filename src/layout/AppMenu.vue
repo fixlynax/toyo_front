@@ -336,18 +336,33 @@ const model = ref([
         ]
     },
     {
-        label: 'Billing',
+        label: 'Credit Control',
         icon: 'pi pi-fw pi-credit-card',
         items: [
             {
                 label: 'Account Detail',
                 icon: 'pi pi-fw pi-id-card',
-                to: '/billing/listBillingAccount'
+                to: '/billing/listAccountDetail'
             },
             {
                 label: 'Billing History',
-                icon: 'pi pi-fw pi-history',
+                icon: 'pi pi-fw pi-list',
                 to: '/billing/listBilling'
+            },
+            {
+                label: 'E-Billing',
+                icon: 'pi pi-fw pi-envelope',
+                to: '/billing/listEbilling'
+            },
+            {
+                label: 'Statement',
+                icon: 'pi pi-fw pi-receipt',
+                to: '/billing/listStatement'
+            },
+            {
+                label: 'Others',
+                icon: 'pi pi-fw pi-briefcase',
+                to: '/billing/listOther'
             }
         ]
     }

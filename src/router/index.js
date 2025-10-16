@@ -89,6 +89,11 @@ const router = createRouter({
                     name: 'List-Back-Order',
                     component: () => import('@/views/om/listBackOrder.vue')
                 },
+                 {
+                    path: '/om/createBackOrder',
+                    name: 'Create-Back-Order',
+                    component: () => import('@/views/om/createBackOrder.vue')
+                },
                 {
                     path: '/om/detailBackOrder',
                     name: 'Detail-Back-Order',
@@ -535,9 +540,9 @@ const router = createRouter({
                 // ===============================
                 // Account Details
                 {
-                    path: '/billing/listBillingAccount',
+                    path: '/billing/listAccountDetail',
                     name: 'Billing-Account',
-                    component: () => import('@/views/billing/listBillingAccount.vue')
+                    component: () => import('@/views/billing/listAccountDetail.vue')
                 },
 
                 // Billing History
@@ -545,6 +550,16 @@ const router = createRouter({
                     path: '/billing/listBilling',
                     name: 'Billing',
                     component: () => import('@/views/billing/listBilling.vue')
+                },
+                {
+                    path: '/billing/listEbilling',
+                    name: 'E-Billing',
+                    component: () => import('@/views/billing/listEbilling.vue')
+                },
+                {
+                    path: '/billing/listOther',
+                    name: 'List-Other',
+                    component: () => import('@/views/billing/listOther.vue')
                 },
                 {
                     path: '/billing/listStatement',

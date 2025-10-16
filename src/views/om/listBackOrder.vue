@@ -73,7 +73,7 @@ onBeforeMount(async () => {
                     </div>
 
                     <!-- Right: Add eTEN Button -->
-                    <RouterLink to="/om/createEten">
+                    <RouterLink to="/om/createBackOrder">
                         <Button type="button" label="Create" />
                     </RouterLink>
                 </div>
