@@ -1,8 +1,17 @@
 <script setup>
 import { ref, onBeforeMount } from 'vue';
-import api from '@/service/api'; // Import your api client
+import api from '@/service/api';
+import { FilterMatchMode } from '@primevue/core/api';
 
-// Function to get severity for status
+// Data variables
+const listData = ref([]);
+const loading = ref(true);
+
+// Filters for quick search
+const filters = ref({
+    global: { value: null, matchMode: FilterMatchMode.CONTAINS }
+});
+
 function getStatusSeverity(status) {
     const severityMap = {
         0: 'secondary', // pending
@@ -32,9 +41,6 @@ function getStatusText(status) {
     return statusMap[status] || 'Unknown';
 }
 
-const listData = ref([]);
-const loading = ref(true);
-
 // Fetch data on component mount
 onBeforeMount(async () => {
     try {
@@ -43,7 +49,7 @@ onBeforeMount(async () => {
 
         console.log('Admin data:', response.data.admin_data);
 
-        if (response.data.status === 'success') {
+        if (response.data.status === 1) {
             listData.value = response.data.admin_data.map((item) => ({
                 id: item.id,
                 claimRefNo: item.claimRefNo,
@@ -80,11 +86,9 @@ onBeforeMount(async () => {
             :loading="loading"
             :filters="filters"
             filterDisplay="menu"
-            :globalFilterFields="['collectRef', 'dealerName', 'dealerLoc', 'collectDate', 'collectTime', 'totalTire', 'status']"
+            :globalFilterFields="['claimRefNo', 'companyName1', 'city', 'collectDate', 'collectTime', 'status']"
         >
-            <!-- ========================= -->
-            <!-- Header Section -->
-            <!-- ========================= -->
+
             <template #header>
                 <div class="flex items-center justify-between gap-4 w-full flex-wrap">
                     <!-- Left: Search Field + Cog Button -->
@@ -100,24 +104,24 @@ onBeforeMount(async () => {
                 </div>
             </template>
 
-            <!-- ========================= -->
-            <!-- Empty / Loading Messages -->
-            <!-- ========================= -->
             <template #empty> No Collection found. </template>
-            <template #loading> Loading News data. Please wait. </template>
-            <!-- Columns -->
-            <Column field="ref" header="Ref No." style="min-width: 8rem">
+            <template #loading> Loading Collection data. Please wait. </template>
+
+            <Column field="claimRefNo" header="Ref No." style="min-width: 8rem">
                 <template #body="{ data }">
-                    <!-- Pass the id as parameter -->
                     <RouterLink :to="`/scm/detailCollection/${data.id}`" class="hover:underline font-bold text-primary">
                         {{ data.claimRefNo }}
                     </RouterLink>
                 </template>
             </Column>
-            <Column field="dealerName" header="Dealer" style="min-width: 8rem">
-                <template #body="{ data }"> {{ data.dealerName }} </template>
+            
+            <Column field="companyName1" header="Dealer" style="min-width: 8rem">
+                <template #body="{ data }"> 
+                    {{ data.companyName1 }} 
+                </template>
             </Column>
-            <Column field="location" header="Location" style="min-width: 6rem">
+            
+            <Column field="city" header="Location" style="min-width: 6rem">
                 <template #body="{ data }">
                     {{ data.city }}
                 </template>
@@ -128,47 +132,12 @@ onBeforeMount(async () => {
                     {{ data.collectDate }} {{ data.collectTime }}
                 </template>
             </Column>
-            <Column field="totalTire" header="Total Tires" style="min-width: 6rem">
-                <template #body="{ data }">
-                    {{ data.totalTire }}
-                </template>
-            </Column>
+            
             <Column header="Status" style="min-width: 6rem">
                 <template #body="{ data }">
-                    <Tag :value="data.status === 1 ? 'Pending' : 'Completed'" :severity="getOverallStatusSeverity(data.status)" />
+                    <Tag :value="getStatusText(data.status)" :severity="getStatusSeverity(data.status)" />
                 </template>
             </Column>
         </DataTable>
     </div>
 </template>
-
-<script setup>
-import { onMounted, ref } from 'vue';
-import { FilterMatchMode } from '@primevue/core/api';
-import { ListCollectionService } from '@/service/ListCollection';
-
-// Data variables
-const listData = ref([]);
-const loading = ref(true);
-
-// Filters for quick search
-const filters = ref({
-    global: { value: null, matchMode: FilterMatchMode.CONTAINS }
-});
-
-// =========================
-// Helper functions for status display
-// =========================
-const getOverallStatusSeverity = (status) => {
-    return status === 1 ? 'warn' : 'success';
-};
-
-// =========================
-// Fetch data on mount
-// =========================
-onMounted(async () => {
-    loading.value = true;
-    listData.value = await ListCollectionService.getListCollectionData();
-    loading.value = false;
-});
-</script>
