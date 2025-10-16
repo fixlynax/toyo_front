@@ -4,7 +4,9 @@
             <!-- Page Title -->
             <div class="text-2xl font-bold text-gray-800 border-b pb-2 mb-4">List Catalogue</div>
 
-            <!-- Header: Search and Actions -->
+            <!-- ========================= -->
+            <!-- Header Section -->
+            <!-- ========================= -->
             <div class="flex items-center justify-between gap-4 w-full flex-wrap mb-6">
                 <!-- Left: Search Field + Cog Button -->
                 <div class="flex items-center gap-2 w-full max-w-md">
@@ -12,7 +14,11 @@
                         <InputIcon>
                             <i class="pi pi-search" />
                         </InputIcon>
-                        <InputText placeholder="Quick Search" class="w-full" />
+                        <InputText 
+                            v-model="searchQuery" 
+                            placeholder="Quick Search" 
+                            class="w-full" 
+                        />
                     </IconField>
                     <Button type="button" icon="pi pi-cog" class="p-button" />
                 </div>
@@ -23,11 +29,13 @@
                 </RouterLink>
             </div>
 
+            <!-- ========================= -->
             <!-- Catalogue Grid -->
+            <!-- ========================= -->
             <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-6">
                 <!-- Catalogue Card -->
                 <RouterLink
-                    v-for="(item, index) in catalogueItems"
+                    v-for="(item, index) in filteredItems"
                     :key="index"
                     to="/marketing/detailCatalogue"
                     class="flex flex-col rounded-2xl overflow-hidden shadow-md hover:shadow-xl transition-shadow duration-300 bg-white cursor-pointer transition-all duration-300 hover:shadow-2xl hover:scale-105"
@@ -73,34 +81,24 @@
                     </div>
                 </RouterLink>
             </div>
+
+            <!-- ========================= -->
+            <!-- Empty State -->
+            <!-- ========================= -->
+            <div v-if="filteredItems.length === 0" class="text-center py-8 text-gray-500">
+                No catalogue items found matching your search.
+            </div>
         </div>
     </Fluid>
 </template>
 
 <script setup>
-import { ref } from 'vue';
+import { ref, computed } from 'vue';
 
-// --- Helper to determine expiry color ---
-const getExpiryClass = (expiryDate) => {
-    const today = new Date();
-    const expiry = new Date(expiryDate);
+// Search query
+const searchQuery = ref('');
 
-    // Calculate difference in days
-    const diffTime = expiry - today;
-    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-
-    if (diffDays < 0) {
-        // Expired
-        return 'text-red-500';
-    } else if (diffDays <= 3) {
-        // Expiring within 3 days
-        return 'text-yellow-500';
-    } else {
-        // Safe
-        return 'text-black';
-    }
-};
-
+// Catalogue data
 const catalogueItems = ref([
     {
         id: 1,
@@ -247,4 +245,45 @@ const catalogueItems = ref([
         deleted: 0
     }
 ]);
+
+// =========================
+// Computed Properties
+// =========================
+const filteredItems = computed(() => {
+    if (!searchQuery.value) {
+        return catalogueItems.value;
+    }
+
+    const query = searchQuery.value.toLowerCase();
+    return catalogueItems.value.filter(item =>
+        item.title.toLowerCase().includes(query) ||
+        item.sku.toLowerCase().includes(query) ||
+        item.type.toLowerCase().includes(query) ||
+        item.purpose.toLowerCase().includes(query) ||
+        item.description.toLowerCase().includes(query)
+    );
+});
+
+// =========================
+// Helper Functions
+// =========================
+const getExpiryClass = (expiryDate) => {
+    const today = new Date();
+    const expiry = new Date(expiryDate);
+
+    // Calculate difference in days
+    const diffTime = expiry - today;
+    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+
+    if (diffDays < 0) {
+        // Expired
+        return 'text-red-500';
+    } else if (diffDays <= 3) {
+        // Expiring within 3 days
+        return 'text-yellow-500';
+    } else {
+        // Safe
+        return 'text-black';
+    }
+};
 </script>

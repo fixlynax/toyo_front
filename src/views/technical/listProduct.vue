@@ -111,6 +111,7 @@ import { ListTyreService } from '@/service/listProduct';
 const tyres = ref([]);
 const loading = ref(true);
 
+
 // Filters for quick search
 const filters = ref({
     global: { value: null, matchMode: FilterMatchMode.CONTAINS }
