@@ -48,7 +48,7 @@
             <!-- ========================= -->
             <Column field="gameNo" header="Game No" style="min-width: 6rem">
                 <template #body="{ data }">
-                    <RouterLink to="/marketing/detailGame" class="hover:underline font-bold">
+                    <RouterLink :to="`/marketing/detailGame/${data.id}`" class="hover:underline font-bold">
                         {{ data.gameNo }}
                     </RouterLink>
                 </template>
@@ -86,8 +86,8 @@
 
 <script setup>
 import { onMounted, ref } from 'vue';
+import api from '@/service/api';
 import { FilterMatchMode } from '@primevue/core/api';
-import { ListGameService } from '@/service/ListGame';
 
 // Data variables
 const listData = ref([]);
@@ -102,9 +102,31 @@ const filters = ref({
 // Fetch data on mount
 // =========================
 onMounted(async () => {
-    loading.value = true;
-    listData.value = await ListGameService.getListGame();
-    loading.value = false;
+    try {
+        loading.value = true;
+        const response = await api.get('game/gameList');
+
+        console.log('API Response:', response.data);
+
+        if (response.data.status === 1 && Array.isArray(response.data.admin_data)) {
+            listData.value = response.data.admin_data.map((game) => ({
+                id: game.id,
+                gameNo: game.gameNo || 'Untitled',
+                title: game.title,
+                type: game.type,
+                publishDate: game.publishDate, 
+                status: game.status
+            }));
+        } else {
+            console.error('API returned error or invalid data:', response.data);
+            listData.value = [];
+        }
+    } catch (error) {
+        console.error('Error fetching game list:', error);
+        listData.value = [];
+    } finally {
+        loading.value = false;
+    }
 });
 
 // =========================
