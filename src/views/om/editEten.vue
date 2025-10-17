@@ -132,288 +132,293 @@ onMounted(() => {
                 <div class="flex flex-col md:flex-row gap-4">
                     <div class="w-full">
                         <label for="companyRegNo">Company Registration No</label>
-                        <InputText id="companyRegNo" type="text" v-model="form.companyRegNo" />
+                        <InputText id="companyRegNo" type="text" v-model="form.companyRegNo" disabled />
                     </div>
                 </div>
 
                 <div class="flex flex-col md:flex-row gap-4">
                     <div class="w-full">
                         <label for="companyName1">Company Name 1</label>
-                        <InputText id="companyName1" type="text" v-model="form.companyName1" />
+                        <InputText id="companyName1" type="text" v-model="form.companyName1" disabled />
                     </div>
                     <div class="w-full">
                         <label for="companyName2">Company Name 2</label>
-                        <InputText id="companyName2" type="text" v-model="form.companyName2" />
+                        <InputText id="companyName2" type="text" v-model="form.companyName2" disabled />
                     </div>
                 </div>
 
                 <div class="flex flex-col md:flex-row gap-4">
                     <div class="w-full">
                         <label for="companyName3">Company Name 3</label>
-                        <InputText id="companyName3" type="text" v-model="form.companyName3" />
+                        <InputText id="companyName3" type="text" v-model="form.companyName3" disabled />
                     </div>
                     <div class="w-full">
                         <label for="companyName4">Company Name 4</label>
-                        <InputText id="companyName4" type="text" v-model="form.companyName4" />
+                        <InputText id="companyName4" type="text" v-model="form.companyName4" disabled />
                     </div>
                 </div>
 
                 <div class="flex flex-col md:flex-row gap-4">
                     <div class="w-full">
                         <label for="salesTaxNo">Sales Tax No</label>
-                        <InputText id="salesTaxNo" type="text" v-model="form.salesTaxNo" />
+                        <InputText id="salesTaxNo" type="text" v-model="form.salesTaxNo" disabled />
                     </div>
                     <div class="w-full">
                         <label for="serviceTaxNo">Service Tax No</label>
-                        <InputText id="serviceTaxNo" type="text" v-model="form.serviceTaxNo" />
+                        <InputText id="serviceTaxNo" type="text" v-model="form.serviceTaxNo" disabled />
                     </div>
                 </div>
 
                 <div class="flex flex-col md:flex-row gap-4">
                     <div class="w-full">
                         <label for="tinNo">TIN No</label>
-                        <InputText id="tinNo" type="text" v-model="form.tinNo" />
+                        <InputText id="tinNo" type="text" v-model="form.tinNo" disabled />
                     </div>
                     <div class="w-full">
                         <label for="vatNo">VAT No</label>
-                        <InputText id="vatNo" type="text" v-model="form.vatNo" />
+                        <InputText id="vatNo" type="text" v-model="form.vatNo" disabled />
                     </div>
                 </div>
             </div>
         </div>
 
         <!-- 📍 Address & Contact Details -->
-            <div class="flex mt-8">
-                <div class="card flex flex-col gap-4 w-full">
-                    <div class="font-semibold text-xl border-b pb-2">📍 Address & Contact Details</div>
+        <div class="flex mt-8">
+            <div class="card flex flex-col gap-4 w-full">
+                <div class="font-semibold text-xl border-b pb-2">📍 Address & Contact Details</div>
 
-                    <div class="flex flex-col md:flex-row gap-4">
-                        <div class="w-full">
-                            <label for="addressLine1">Address Line 1</label>
-                            <InputText id="addressLine1" type="text" v-model="form.addressLine1" />
-                        </div>
-                        <div class="w-full">
-                            <label for="addressLine2">Address Line 2</label>
-                            <InputText id="addressLine2" type="text" v-model="form.addressLine2" />
-                        </div>
+                <div class="flex flex-col md:flex-row gap-4">
+                    <div class="w-full">
+                        <label for="addressLine1">Address Line 1</label>
+                        <InputText disabled id="addressLine1" type="text" v-model="form.addressLine1" />
                     </div>
-
-                    <div class="flex flex-col md:flex-row gap-4">
-                        <div class="w-full">
-                            <label for="addressLine3">Address Line 3</label>
-                            <InputText id="addressLine3" type="text" v-model="form.addressLine3" />
-                        </div>
-                        <div class="w-full">
-                            <label for="addressLine4">Address Line 4</label>
-                            <InputText id="addressLine4" type="text" v-model="form.addressLine4" />
-                        </div>
+                    <div class="w-full">
+                        <label for="addressLine2">Address Line 2</label>
+                        <InputText disabled id="addressLine2" type="text" v-model="form.addressLine2" />
                     </div>
+                </div>
 
-                    <div class="flex flex-col md:flex-row gap-4">
-                        <div class="w-full">
-                            <label for="city">City</label>
-                            <InputText id="city" type="text" v-model="form.city" />
-                        </div>
-                        <div class="w-full">
-                            <label for="postcode">Postcode</label>
-                            <InputText id="postcode" type="text" v-model="form.postcode" />
-                        </div>
-                        <div class="w-full">
-                            <label for="state">State</label>
-                            <InputText id="state" type="text" v-model="form.state" />
-                        </div>
-                        <div class="w-full">
-                            <label for="country">Country</label>
-                            <InputText id="country" type="text" v-model="form.country" />
-                        </div>
+                <div class="flex flex-col md:flex-row gap-4">
+                    <div class="w-full">
+                        <label for="addressLine3">Address Line 3</label>
+                        <InputText id="addressLine3" disabled type="text" v-model="form.addressLine3" />
                     </div>
-
-                    <div class="flex flex-col md:flex-row gap-4">
-                        <div class="w-full">
-                            <label for="mapLatitude">Map Latitude</label>
-                            <InputText id="mapLatitude" type="text" v-model="form.mapLatitude" />
-                        </div>
-                        <div class="w-full">
-                            <label for="mapLongitude">Map Longitude</label>
-                            <InputText id="mapLongitude" type="text" v-model="form.mapLongitude" />
-                        </div>
+                    <div class="w-full">
+                        <label for="addressLine4">Address Line 4</label>
+                        <InputText id="addressLine4" disabled type="text" v-model="form.addressLine4" />
                     </div>
+                </div>
 
-                    <div class="flex flex-col md:flex-row gap-4">
-                        <div class="w-full">
-                            <label for="phoneN">Phone No</label>
-                            <InputText id="phoneN" type="text" v-model="form.phoneNumber" />
-                        </div>
-                        <div class="w-full">
-                            <label for="emailAddress">Email</label>
-                            <InputText id="emailAddress" type="text" v-model="form.emailAddress" />
-                        </div>
+                <div class="flex flex-col md:flex-row gap-4">
+                    <div class="w-full">
+                        <label for="city">City</label>
+                        <InputText id="city" disabled type="text" v-model="form.city" />
+                    </div>
+                    <div class="w-full">
+                        <label for="postcode">Postcode</label>
+                        <InputText id="postcode" disabled type="text" v-model="form.postcode" />
+                    </div>
+                    <div class="w-full">
+                        <label for="state">State</label>
+                        <InputText id="state" disabled type="text" v-model="form.state" />
+                    </div>
+                    <div class="w-full">
+                        <label for="country">Country</label>
+                        <InputText id="country" disabled type="text" v-model="form.country" />
+                    </div>
+                </div>
+
+                <div class="flex flex-col md:flex-row gap-4">
+                    <div class="w-full">
+                        <label for="mapLatitude">Map Latitude</label>
+                        <InputText id="mapLatitude" disabled type="text" v-model="form.mapLatitude" />
+                    </div>
+                    <div class="w-full">
+                        <label for="mapLongitude">Map Longitude</label>
+                        <InputText id="mapLongitude" disabled type="text" v-model="form.mapLongitude" />
+                    </div>
+                </div>
+
+                <div class="flex flex-col md:flex-row gap-4">
+                    <div class="w-full">
+                        <label for="phoneN">Phone No</label>
+                        <InputText id="phoneN" disabled type="text" v-model="form.phoneNumber" />
+                    </div>
+                    <div class="w-full">
+                        <label for="emailAddress">Email</label>
+                        <InputText id="emailAddress" disabled type="text" v-model="form.emailAddress" />
                     </div>
                 </div>
             </div>
+        </div>
 
-            <!-- 👤 Account Details -->
-            <div class="flex mt-8">
-                <div class="card flex flex-col gap-4 w-full">
-                    <div class="font-semibold text-xl border-b pb-2">👤 Account Details</div>
+        <!-- 👤 Account Details -->
+        <div class="flex mt-8">
+            <div class="card flex flex-col gap-4 w-full">
+                <div class="font-semibold text-xl border-b pb-2">👤 Account Details</div>
 
-                    <div class="flex flex-col md:flex-row gap-4">
-                        <div class="w-full">
-                            <label for="accountType">Account Type</label>
-                            <Select v-model="dropdownAccountType" :options="dropdownAccountTypeValue" optionLabel="name" placeholder="Select One" class="w-full" />
-                        </div>
-                        <div class="w-full">
-                            <label for="paymentTerms">Payment Terms</label>
-                            <InputText id="paymentTerms" type="text" v-model="form.paymentTerms" />
-                        </div>
+                <div class="flex flex-col md:flex-row gap-4">
+                    <div class="w-full">
+                        <label for="accountType">Account Type</label>
+                        <Select disabled v-model="dropdownAccountType" :options="dropdownAccountTypeValue" optionLabel="name" placeholder="Select One" class="w-full" />
                     </div>
-
-                    <div class="flex flex-col md:flex-row gap-4">
-                        <div class="w-full">
-                            <label for="riskCategory">Risk Category</label>
-                            <InputText id="riskCategory" type="text" v-model="form.riskCategory" />
-                        </div>
-                        <div class="w-full">
-                            <label for="creditLimit">Credit Limit</label>
-                            <InputText id="creditLimit" type="text" v-model="form.creditLimit" />
-                        </div>
+                    <div class="w-full">
+                        <label for="paymentTerms">Payment Terms</label>
+                        <InputText disabled id="paymentTerms" type="text" v-model="form.paymentTerms" />
                     </div>
+                </div>
 
-                    <div class="flex flex-col md:flex-row gap-4">
-                        <div class="w-full">
-                            <label for="customerAccountGroup">Customer Account Group</label>
-                            <InputText id="customerAccountGroup" type="text" v-model="form.customerAccountGroup" />
-                        </div>
-                        <div class="w-full">
-                            <label for="customerCondGrp">Customer Condition Group</label>
-                            <InputText id="customerCondGrp" type="text" v-model="form.customerCondGrp" />
-                        </div>
+                <div class="flex flex-col md:flex-row gap-4">
+                    <div class="w-full">
+                        <label for="riskCategory">Risk Category</label>
+                        <InputText disabled id="riskCategory" type="text" v-model="form.riskCategory" />
+                    </div>
+                    <div class="w-full">
+                        <label for="creditLimit">Credit Limit</label>
+                        <InputText disabled id="creditLimit" type="text" v-model="form.creditLimit" />
+                    </div>
+                </div>
+
+                <div class="flex flex-col md:flex-row gap-4">
+                    <div class="w-full">
+                        <label for="customerAccountGroup">Customer Account Group</label>
+                        <InputText disabled id="customerAccountGroup" type="text" v-model="form.customerAccountGroup" />
+                    </div>
+                    <div class="w-full">
+                        <label for="customerCondGrp">Customer Condition Group</label>
+                        <InputText disabled id="customerCondGrp" type="text" v-model="form.customerCondGrp" />
                     </div>
                 </div>
             </div>
+        </div>
 
-            <!-- 💲 Pricing & Sales Info -->
-            <div class="flex mt-8">
-                <div class="card flex flex-col gap-4 w-full">
-                    <div class="font-semibold text-xl border-b pb-2">💲 Pricing & Sales Info</div>
+        <!-- 💲 Pricing & Sales Info -->
+        <div class="flex mt-8">
+            <div class="card flex flex-col gap-4 w-full">
+                <div class="font-semibold text-xl border-b pb-2">💲 Pricing & Sales Info</div>
 
-                    <div class="flex flex-col md:flex-row gap-4">
-                        <div class="w-full">
-                            <label for="pricelist">Price List</label>
-                            <Select id="pricelist" v-model="dropdownPriceList" :options="dropdownPriceListValue" optionLabel="name" placeholder="Select One" class="w-full" />
-                        </div>
-                        <div class="w-full">
-                            <label for="priceGroup">Price Group</label>
-                            <InputText id="priceGroup" type="text" v-model="form.priceGroup" />
-                        </div>
-                        <div class="w-full">
-                            <label for="priceProcedure">Price Procedure</label>
-                            <InputText id="priceProcedure" type="text" v-model="form.priceProcedure" />
-                        </div>
+                <div class="flex flex-col md:flex-row gap-4">
+                    <div class="w-full">
+                        <label for="pricelist">Price List</label>
+                        <Select disabled id="pricelist" v-model="dropdownPriceList" :options="dropdownPriceListValue" optionLabel="name" placeholder="Select One" class="w-full" />
                     </div>
+                    <div class="w-full">
+                        <label for="priceGroup">Price Group</label>
+                        <InputText disabled="true" id="priceGroup" type="text" v-model="form.priceGroup" />
+                    </div>
+                    <div class="w-full">
+                        <label for="priceProcedure">Price Procedure</label>
+                        <InputText disabled="true" id="priceProcedure" type="text" v-model="form.priceProcedure" />
+                    </div>
+                </div>
 
-                    <div class="flex flex-col md:flex-row gap-4">
-                        <div class="w-full">
-                            <label for="salesOffice">Sales Office</label>
-                            <InputText id="salesOffice" type="text" v-model="form.salesOffice" />
-                        </div>
-                        <div class="w-full">
-                            <label for="salesDistrict">Sales District</label>
-                            <InputText id="salesDistrict" type="text" v-model="form.salesDistrict" />
-                        </div>
-                        <div class="w-full">
-                            <label for="startingSalesAmt">Starting Sales Amount</label>
-                            <InputText id="startingSalesAmt" type="text" v-model="form.startingSalesAmt" />
-                        </div>
+                <div class="flex flex-col md:flex-row gap-4">
+                    <div class="w-full">
+                        <label for="salesOffice">Sales Office</label>
+                        <InputText id="salesOffice" disabled type="text" v-model="form.salesOffice" />
+                    </div>
+                    <div class="w-full">
+                        <label for="salesDistrict">Sales District</label>
+                        <InputText id="salesDistrict" disabled type="text" v-model="form.salesDistrict" />
+                    </div>
+                    <div class="w-full">
+                        <label for="startingSalesAmt">Starting Sales Amount</label>
+                        <InputText id="startingSalesAmt" disabled type="text" v-model="form.startingSalesAmt" />
                     </div>
                 </div>
             </div>
+        </div>
 
-            <!-- 🪧 Signboard / Branding -->
-            <div class="flex mt-8">
-                <div class="card flex flex-col gap-4 w-full">
-                    <div class="font-semibold text-xl border-b pb-2">🪧 Signboard / Branding</div>
+        <!-- 🪧 Signboard / Branding -->
+        <div class="flex mt-8">
+            <div class="card flex flex-col gap-4 w-full">
+                <div class="font-semibold text-xl border-b pb-2">🪧 Signboard / Branding</div>
 
-                    <div class="flex flex-col md:flex-row gap-4">
-                        <div class="w-full">
-                            <label for="signboardType">Signboard Type</label>
-                            <Select id="signboardType" v-model="dropdownSignboardType" :options="dropdownSignboardTypeValue" optionLabel="name" placeholder="Select One" class="w-full" />
-                        </div>
-                        <div class="w-full">
-                            <label for="signboardBrand">Signboard Brand</label>
-                            <InputText id="signboardBrand" type="text" v-model="form.signboardBrand" />
-                        </div>
+                <div class="flex flex-col md:flex-row gap-4">
+                    <div class="w-full">
+                        <label for="signboardType">Signboard Type</label>
+                        <Select id="signboardType" disabled v-model="dropdownSignboardType" :options="dropdownSignboardTypeValue" optionLabel="name" placeholder="Select One" class="w-full" />
+                    </div>
+                    <div class="w-full">
+                        <label for="signboardBrand">Signboard Brand</label>
+                        <InputText id="signboardBrand" disabled type="text" v-model="form.signboardBrand" />
                     </div>
                 </div>
             </div>
+        </div>
 
-            <!-- 🚚 Shipping & Delivery -->
-            <div class="flex mt-8">
-                <div class="card flex flex-col gap-4 w-full">
-                    <div class="font-semibold text-xl border-b pb-2">🚚 Shipping & Delivery</div>
+        <!-- 🚚 Shipping & Delivery -->
+        <div class="flex mt-8">
+            <div class="card flex flex-col gap-4 w-full">
+                <div class="font-semibold text-xl border-b pb-2">🚚 Shipping & Delivery</div>
 
-                    <div class="flex flex-col md:flex-row gap-4">
-                        <div class="w-full">
-                            <label for="shippingCond">Shipping Condition</label>
-                            <Select id="shippingCond" v-model="dropdownShippingCondition" :options="dropdownShippingConditionValue" optionLabel="name" placeholder="Select One" class="w-full" />
-                        </div>
-                        <div class="w-full">
-                            <label for="allowLalamove">Allow Lalamove</label>
-                            <Select id="allowLalamove" v-model="dropdownYesNo" :options="dropdownYesNoValue" optionLabel="name" placeholder="Select One" class="w-full" />
-                        </div>
+                <div class="flex flex-col md:flex-row gap-4">
+                    <div class="w-full">
+                        <label for="shippingCond">Shipping Condition</label>
+                        <Select id="shippingCond" disabled v-model="dropdownShippingCondition" :options="dropdownShippingConditionValue" optionLabel="name" placeholder="Select One" class="w-full" />
+                    </div>
+                    <div class="w-full">
+                        <label for="allowLalamove">Allow Lalamove</label>
+                        <Select id="allowLalamove" v-model="dropdownYesNo" :options="dropdownYesNoValue" optionLabel="name" placeholder="Select One" class="w-full" />
                     </div>
                 </div>
             </div>
+        </div>
 
-            <!-- ⚙️ Other Settings -->
-            <div class="flex mt-8">
-                <div class="card flex flex-col gap-4 w-full">
-                    <div class="font-semibold text-xl border-b pb-2">⚙️ Other Settings</div>
+        <!-- ⚙️ Other Settings -->
+        <div class="flex mt-8">
+            <div class="card flex flex-col gap-4 w-full">
+                <div class="font-semibold text-xl border-b pb-2">⚙️ Other Settings</div>
 
-                    <div class="flex flex-col md:flex-row gap-4">
-                        <div class="w-full">
-                            <label for="showOnList">Show On List</label>
-                            <Select id="showOnList" v-model="dropdownYesNo" :options="dropdownYesNoValue" optionLabel="name" placeholder="Select One" class="w-full" />
-                        </div>
-                        <div class="w-full">
-                            <label for="ifFamilyChannel">If Family Channel</label>
-                            <Select id="ifFamilyChannel" v-model="dropdownYesNo" :options="dropdownYesNoValue" optionLabel="name" placeholder="Select One" class="w-full" />
-                        </div>
+                <div class="flex flex-col md:flex-row gap-4">
+                    <div class="w-full">
+                        <label for="showOnList">Show On List</label>
+                        <Select id="showOnList" v-model="dropdownYesNo" :options="dropdownYesNoValue" optionLabel="name" placeholder="Select One" class="w-full" />
+                    </div>
+                    <div class="w-full">
+                        <label for="ifFamilyChannel">If Family Channel</label>
+                        <Select id="ifFamilyChannel" v-model="dropdownYesNo" :options="dropdownYesNoValue" optionLabel="name" placeholder="Select One" class="w-full" />
                     </div>
                 </div>
             </div>
+        </div>
 
-            <!-- Master User -->
-            <div class="flex mt-8">
-                <div class="card flex flex-col gap-4 w-full">
-                    <div class="font-semibold text-xl border-b pb-2">👤 Master User</div>
-                    <div class="flex flex-col md:flex-row gap-4">
-                        <div class="w-full">
-                            <label for="firstname">First Name</label>
-                            <InputText id="firstname" type="text" />
-                        </div>
-                        <div class="w-full">
-                            <label for="lastname">Last Name</label>
-                            <InputText id="lastname" type="text" />
-                        </div>
-                        <div class="w-full">
-                            <label for="email">Email</label>
-                            <InputText id="email" type="text" />
-                        </div>
-                        <div class="w-full">
-                            <label for="phoneno">Phone No</label>
-                            <InputText id="phoneno" type="text" />
-                        </div>
+        <!-- Master User -->
+        <div class="flex mt-8">
+            <div class="card flex flex-col gap-4 w-full">
+                <div class="font-semibold text-xl border-b pb-2">👤 Master User</div>
+                <div class="flex flex-col md:flex-row gap-4">
+                    <div class="w-full">
+                        <label for="firstname">First Name</label>
+                        <InputText id="firstname" type="text" />
                     </div>
+                    <div class="w-full">
+                        <label for="lastname">Last Name</label>
+                        <InputText id="lastname" type="text" />
+                    </div>
+                    <div class="w-full">
+                        <label for="email">Email</label>
+                        <InputText id="email" type="text" />
+                    </div>
+                    <div class="w-full">
+                        <label for="phoneno">Phone No</label>
+                        <InputText id="phoneno" type="text" />
+                    </div>
+                </div>
 
-                    <div class="flex flex-col md:flex-row justify-start mt-4">
-                        <div class="w-40">
-                            <RouterLink to="/om/confirmationEten">
-                                <Button label="Submit" class="w-full" />
-                            </RouterLink>
-                        </div>
+                <div class="flex flex-col md:flex-row justify-end gap-2 mt-4">
+                    <div class="w-40">
+                        <RouterLink to="/om/confirmationEten">
+                            <Button label="Cancel" class="p-button-secondary w-full" />
+                        </RouterLink>
+                    </div>
+                    <div class="w-40">
+                        <RouterLink to="/om/confirmationEten">
+                            <Button label="Submit" class="w-full" />
+                        </RouterLink>
                     </div>
                 </div>
             </div>
+        </div>
     </Fluid>
 </template>

@@ -516,7 +516,7 @@ const users = ref([
     { id: 'U002', name: 'Jane Smith', phone: '0198765432', modules: ['OM', 'Technical'], account: '6080100901', lastLogin: '10/9/2025 8:00am', status: 1 },
     { id: 'U003', name: 'Alex Tan', phone: '0172233445', modules: ['ITBilling'], account: '6080100902', lastLogin: '23/7/2025 8:00am', status: 0 },
     { id: 'U004', name: 'Siti Aminah', phone: '0111122233', modules: ['SCM', 'Sales', 'Marketing'], account: '6080100903', lastLogin: '09/9/2025 8:00am', status: 1 },
-    { id: 'U005', name: 'Michael Lee', phone: '0139988776', modules: ['Technical', 'ITBilling'], account: '6080100904', lastLogin: '07/8/2025 8:00am', status: 0 }
+    { id: 'U005', name: 'Michael Lee', phone: '0139988776', modules: ['Technical', 'IT'], account: '6080100904', lastLogin: '07/8/2025 8:00am', status: 0 }
 ]);
 
 const billingDocs = ref([
