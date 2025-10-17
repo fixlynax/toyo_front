@@ -5,15 +5,9 @@
                 <!-- Header -->
                 <div class="flex flex-col md:flex-row gap-8">
                     <div class="card flex flex-col gap-6 w-full">
-                        <div class="text-2xl font-bold text-gray-800 border-b pb-2">Member Infromation</div>
+                        <div class="text-2xl font-bold text-gray-800 border-b pb-2">Member Information</div>
 
                         <div class="flex items-center justify-between w-full">
-                            <!-- Account No -->
-                            <div>
-                                <span class="block text-xm font-bold text-black-700">Member Code.</span>
-                                <span class="text-lg font-medium">{{ memberDetail.etenUserID }}</span>
-                            </div>
-
                             <!-- Create Button -->
                             <RouterLink to="/marketing/editEtenUser">
                                 <Button type="button" label="Edit" />
@@ -86,117 +80,10 @@
                                 <p class="text-lg font-medium">{{ memberDetail.lastLogin }}</p>
                             </div>
                         </div>
-                        <div class="font-semibold text-xl border-b pb-2 mt-8">📦 Shipping Address</div>
-                        <div class="flex flex-col md:flex-row gap-4 mb-4">
-                            <div class="w-full">
-                                <span class="text-xm font-bold text-black-700">Address 1</span>
-                                <p class="text-lg font-medium">{{ form.addressLine1 }}</p>
-                            </div>
-                            <div class="w-full">
-                                <span class="text-xm font-bold text-black-700">Address 2</span>
-                                <p class="text-lg font-medium">{{ form.addressLine2 }}</p>
-                            </div>
-                        </div>
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-                            <div>
-                                <label class="block font-bold text-gray-700">Address 3</label>
-                                <p class="text-lg font-medium">{{ form.addressLine3 || '-' }}</p>
-                            </div>
-                            <div>
-                                <label class="block font-bold text-gray-700">Address 4</label>
-                                <p class="text-lg font-medium">{{ form.addressLine4 || '-' }}</p>
-                            </div>
-                            <div>
-                                <label class="block font-bold text-gray-700">State</label>
-                                <p class="text-lg font-medium">{{ form.state }}</p>
-                            </div>
-                            <div>
-                                <label class="block font-bold text-gray-700">City</label>
-                                <p class="text-lg font-medium">{{ form.city }}</p>
-                            </div>
-                            <div>
-                                <label class="block font-bold text-gray-700">Postcode</label>
-                                <p class="text-lg font-medium">{{ form.postcode }}</p>
-                            </div>
-                            <div>
-                                <label class="block font-bold text-gray-700">Country</label>
-                                <p class="text-lg font-medium">{{ form.country }}</p>
-                            </div>
-                        </div>
                     </div>
                 </div>
             </div>
             <div class="md:w-1/3">
-                <!-- Suspend Account -->
-                <div class="card flex flex-col w-full">
-                    <!-- Title -->
-                    <div class="flex items-center justify-between border-b pb-2 mb-2">
-                        <div class="text-2xl font-bold text-gray-800">Account Info</div>
-                        <Tag :value="memberDetail.status === 1 ? 'Active' : 'Inactive'" :severity="memberDetail.status === 1 ? 'success' : 'danger'" />
-                    </div>
-
-                    <!-- Table -->
-                    <div class="overflow-x-auto">
-                        <table class="w-full text-sm text-left text-gray-700">
-                            <tbody>
-                                <!-- Allow Waranty -->
-                                <tr class="border-b">
-                                    <td className="px-4 py-2 font-medium">Platform</td>
-                                    <td className="px-4 py-2 text-right">{{ memberDetail.platform }}</td>
-                                </tr>
-
-                                <tr class="border-b">
-                                    <td className="px-4 py-2 font-medium">Allow Warranty</td>
-                                    <td className="px-4 py-2 text-right">{{ memberDetail.allow_warranty ? 'Yes' : 'No' }}</td>
-                                </tr>
-
-                                <!-- Allow Order -->
-                                <tr class="border-b">
-                                    <td class="px-4 py-2 font-medium">Allow Order</td>
-                                    <td className="px-4 py-2 text-right">{{ memberDetail.allow_order ? 'Yes' : 'No' }}</td>
-                                </tr>
-                                <!-- Allow Billing -->
-                                <tr class="border-b">
-                                    <td class="px-4 py-2 font-medium">Allow Billing</td>
-                                    <td className="px-4 py-2 text-right">{{ memberDetail.allow_billing ? 'Yes' : 'No' }}</td>
-                                </tr>
-
-                                <!-- Allow Sale -->
-                                <tr class="border-b">
-                                    <td class="px-4 py-2 font-medium">Allow Sale</td>
-                                    <td className="px-4 py-2 text-right">{{ memberDetail.allow_sale ? 'Yes' : 'No' }}</td>
-                                </tr>
-
-                                <!-- Allow User -->
-                                <tr class="border-b">
-                                    <td class="px-4 py-2 font-medium">Allow user</td>
-                                    <td className="px-4 py-2 text-right">{{ memberDetail.allow_user ? 'Yes' : 'No' }}</td>
-                                </tr>
-
-                                <!-- Is Master -->
-                                <tr class="border-b">
-                                    <td class="px-4 py-2 font-medium">Is Master</td>
-                                    <td className="px-4 py-2 text-right">{{ memberDetail.isMaster ? 'Yes' : 'No' }}</td>
-                                </tr>
-
-                                <!-- Activation Code -->
-                                <tr class="border-b">
-                                    <td class="px-4 py-2 font-medium">Activation Code</td>
-                                    <td className="px-4 py-2 text-right">{{ memberDetail.activationCode }}</td>
-                                </tr>
-
-                                <!-- Suspend Button -->
-                                <tr>
-                                    <td class="px-4 py-2 font-medium"></td>
-                                    <td class="px-2 py-2 text-right">
-                                        <Button :label="isActivated ? 'Un-Activated' : 'Activated'" :severity="isActivated ? 'success' : 'danger'" size="small" @click="confirmSuspend" />
-                                    </td>
-                                </tr>
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-
                 <div class="card flex flex-col w-full p-4">
                     <!-- Title -->
                     <div class="flex items-center justify-between border-b pb-2 mb-4">
@@ -206,31 +93,31 @@
                     <div class="space-y-4">
                         <div class="flex items-center justify-between">
                             <span class="font-medium text-gray-700">Marketing</span>
-                            <ToggleSwitch v-model="modules.marketing" />
+                            <ToggleSwitch v-model="modules.marketing" class="custom-toggle" />
                         </div>
                         <div class="flex items-center justify-between">
                             <span class="font-medium text-gray-700">OM</span>
-                            <ToggleSwitch v-model="modules.om" />
+                            <ToggleSwitch v-model="modules.om" class="custom-toggle" />
                         </div>
                         <div class="flex items-center justify-between">
                             <span class="font-medium text-gray-700">Technical</span>
-                            <ToggleSwitch v-model="modules.technical" />
+                            <ToggleSwitch v-model="modules.technical" class="custom-toggle" />
                         </div>
                         <div class="flex items-center justify-between">
                             <span class="font-medium text-gray-700">SCM</span>
-                            <ToggleSwitch v-model="modules.scm" />
+                            <ToggleSwitch v-model="modules.scm" class="custom-toggle" />
                         </div>
                         <div class="flex items-center justify-between">
                             <span class="font-medium text-gray-700">IT</span>
-                            <ToggleSwitch v-model="modules.it" />
+                            <ToggleSwitch v-model="modules.it" class="custom-toggle" />
                         </div>
                         <div class="flex items-center justify-between">
                             <span class="font-medium text-gray-700">Billing</span>
-                            <ToggleSwitch v-model="modules.billing" />
+                            <ToggleSwitch v-model="modules.billing" class="custom-toggle" />
                         </div>
                         <div class="flex items-center justify-between">
                             <span class="font-medium text-gray-700">Sales</span>
-                            <ToggleSwitch v-model="modules.sales" />
+                            <ToggleSwitch v-model="modules.sales" class="custom-toggle" />
                         </div>
                     </div>
                 </div>
@@ -382,3 +269,21 @@ const toggleBlock = (device) => {
     device.isBlocked = !device.isBlocked;
 };
 </script>
+<style scoped>
+:deep(.custom-toggle .p-toggleswitch-slider) {
+    background-color: #ef4444;
+    transition: background-color 0.3s ease;
+}
+
+:deep(.custom-toggle.p-toggleswitch-checked .p-toggleswitch-slider) {
+    background-color: #22c55e;
+}
+
+:deep(.custom-toggle .p-toggleswitch-slider:before) {
+    background-color: white;
+}
+
+:deep(.custom-toggle .p-toggleswitch-slider:hover) {
+    filter: brightness(1.1);
+}
+</style>

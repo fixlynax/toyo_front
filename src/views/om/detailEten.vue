@@ -3,229 +3,205 @@
         <div class="flex flex-col md:flex-row gap-8">
             <div class="md:w-2/3">
                 <!-- Header -->
-                <div class="flex flex-col md:flex-row gap-8">
-                    <div class="card flex flex-col gap-6 w-full">
-                        <div class="text-2xl font-bold text-gray-800 border-b pb-2">Customer Infromation</div>
-
-                        <div class="flex items-center justify-between w-full">
-                            <!-- Account No -->
-                            <div>
-                                <span class="block text-sm text-gray-500">Account No.</span>
-                                <span class="text-lg font-medium">{{ form.custAccountNo }}</span>
-                            </div>
-
-                            <!-- Create Button -->
+                <div class="flex flex-col gap-8">
+                    <div class="card flex flex-col gap-4 w-full">
+                        <div class="flex items-center justify-between border-b pb-2 mb-4">
+                            <div class="text-2xl font-bold text-gray-800">Customer Information</div>
                             <RouterLink to="/om/editEten">
                                 <Button type="button" label="Edit" />
                             </RouterLink>
                         </div>
 
-                        <div class="font-semibold text-xl border-b pb-2 mt-8">🏢 Company Details</div>
+                        <div>
+                            <span class="block text-sm text-gray-500">Account No.</span>
+                            <span class="text-lg font-medium">{{ form.custAccountNo }}</span>
+                        </div>
+                    </div>
 
-                        <div class="flex flex-col md:flex-row gap-4">
-                            <div class="w-full">
+                    <div class="card flex flex-col gap-4 w-full">
+                        <div class="text-xl font-semibold border-b pb-2">🏢 Company Details</div>
+
+                        <div class="grid md:grid-cols-2 gap-4">
+                            <div>
                                 <span class="text-sm text-gray-500">Company Registration No</span>
                                 <p class="text-lg font-medium">{{ form.companyRegNo }}</p>
                             </div>
-                        </div>
-
-                        <div class="flex flex-col md:flex-row gap-4">
-                            <div class="w-full">
+                            <div>
                                 <span class="text-sm text-gray-500">Company Name 1</span>
                                 <p class="text-lg font-medium">{{ form.companyName1 }}</p>
                             </div>
-                            <div class="w-full">
+                            <div>
                                 <span class="text-sm text-gray-500">Company Name 2</span>
                                 <p class="text-lg font-medium">{{ form.companyName2 || '-' }}</p>
                             </div>
-                        </div>
-
-                        <div class="flex flex-col md:flex-row gap-4">
-                            <div class="w-full">
+                            <div>
                                 <span class="text-sm text-gray-500">Company Name 3</span>
                                 <p class="text-lg font-medium">{{ form.companyName3 || '-' }}</p>
                             </div>
-                            <div class="w-full">
+                            <div>
                                 <span class="text-sm text-gray-500">Company Name 4</span>
                                 <p class="text-lg font-medium">{{ form.companyName4 || '-' }}</p>
                             </div>
-                        </div>
-
-                        <div class="flex flex-col md:flex-row gap-4">
-                            <div class="w-full">
+                            <div>
                                 <span class="text-sm text-gray-500">Sales Tax No</span>
                                 <p class="text-lg font-medium">{{ form.salesTaxNo }}</p>
                             </div>
-                            <div class="w-full">
+                            <div>
                                 <span class="text-sm text-gray-500">Service Tax No</span>
                                 <p class="text-lg font-medium">{{ form.serviceTaxNo }}</p>
                             </div>
-                        </div>
-
-                        <div class="flex flex-col md:flex-row gap-4">
-                            <div class="w-full">
+                            <div>
                                 <span class="text-sm text-gray-500">TIN No</span>
                                 <p class="text-lg font-medium">{{ form.tinNo }}</p>
                             </div>
-                            <div class="w-full">
-                                <span class="text-sm text-gray-500">Vat No</span>
+                            <div>
+                                <span class="text-sm text-gray-500">VAT No</span>
                                 <p class="text-lg font-medium">{{ form.vatNo }}</p>
                             </div>
                         </div>
+                    </div>
 
-                        <div class="font-semibold text-xl border-b pb-2 mt-8">📍 Address & Contact Details</div>
+                    <div class="card flex flex-col gap-4 w-full">
+                        <div class="text-xl font-semibold border-b pb-2">📍 Address & Contact Details</div>
 
-                        <div class="flex flex-col md:flex-row gap-4">
-                            <div class="w-full">
+                        <div class="grid md:grid-cols-2 gap-4">
+                            <div>
                                 <span class="text-sm text-gray-500">Address Line 1</span>
                                 <p class="text-lg font-medium">{{ form.addressLine1 }}</p>
                             </div>
-                            <div class="w-full">
+                            <div>
                                 <span class="text-sm text-gray-500">Address Line 2</span>
                                 <p class="text-lg font-medium">{{ form.addressLine2 }}</p>
                             </div>
-                        </div>
-
-                        <div class="flex flex-col md:flex-row gap-4">
-                            <div class="w-full">
+                            <div>
                                 <span class="text-sm text-gray-500">Address Line 3</span>
                                 <p class="text-lg font-medium">{{ form.addressLine3 || '-' }}</p>
                             </div>
-                            <div class="w-full">
+                            <div>
                                 <span class="text-sm text-gray-500">Address Line 4</span>
                                 <p class="text-lg font-medium">{{ form.addressLine4 || '-' }}</p>
                             </div>
-                        </div>
-
-                        <div class="flex flex-col md:flex-row gap-4">
-                            <div class="w-full">
+                            <div>
                                 <span class="text-sm text-gray-500">City</span>
                                 <p class="text-lg font-medium">{{ form.city }}</p>
                             </div>
-                            <div class="w-full">
+                            <div>
                                 <span class="text-sm text-gray-500">Postcode</span>
                                 <p class="text-lg font-medium">{{ form.postcode }}</p>
                             </div>
-                            <div class="w-full">
+                            <div>
                                 <span class="text-sm text-gray-500">State</span>
                                 <p class="text-lg font-medium">{{ form.state }}</p>
                             </div>
-                            <div class="w-full">
+                            <div>
                                 <span class="text-sm text-gray-500">Country</span>
                                 <p class="text-lg font-medium">{{ form.country }}</p>
                             </div>
-                        </div>
-
-                        <div class="flex flex-col md:flex-row gap-4">
-                            <div class="w-full">
+                            <div>
                                 <span class="text-sm text-gray-500">Map Latitude</span>
                                 <p class="text-lg font-medium">{{ form.mapLatitude }}</p>
                             </div>
-                            <div class="w-full">
+                            <div>
                                 <span class="text-sm text-gray-500">Map Longitude</span>
                                 <p class="text-lg font-medium">{{ form.mapLongitude }}</p>
                             </div>
-                        </div>
-
-                        <div class="flex flex-col md:flex-row gap-4">
-                            <div class="w-full">
+                            <div>
                                 <span class="text-sm text-gray-500">Phone No</span>
                                 <p class="text-lg font-medium">{{ form.phoneNumber }}</p>
                             </div>
-                            <div class="w-full">
+                            <div>
                                 <span class="text-sm text-gray-500">Email</span>
                                 <p class="text-lg font-medium">{{ form.emailAddress }}</p>
                             </div>
                         </div>
+                    </div>
 
-                        <div class="font-semibold text-xl border-b pb-2 mt-8">👤 Account Details</div>
+                    <div class="card flex flex-col gap-4 w-full">
+                        <div class="text-xl font-semibold border-b pb-2">👤 Account Details</div>
 
-                        <div class="flex flex-col md:flex-row gap-4">
-                            <div class="w-full">
+                        <div class="grid md:grid-cols-2 gap-4">
+                            <div>
                                 <span class="text-sm text-gray-500">Account Type</span>
                                 <p class="text-lg font-medium">{{ form.accountType }}</p>
                             </div>
-                            <div class="w-full">
+                            <div>
                                 <span class="text-sm text-gray-500">Payment Terms</span>
                                 <p class="text-lg font-medium">{{ form.paymentTerms }}</p>
                             </div>
-                        </div>
-
-                        <div class="flex flex-col md:flex-row gap-4">
-                            <div class="w-full">
+                            <div>
                                 <span class="text-sm text-gray-500">Risk Category</span>
                                 <p class="text-lg font-medium">{{ form.riskCategory }}</p>
                             </div>
-                            <div class="w-full">
+                            <div>
                                 <span class="text-sm text-gray-500">Credit Limit</span>
                                 <p class="text-lg font-medium">{{ form.creditLimit }}</p>
                             </div>
-                        </div>
-
-                        <div class="flex flex-col md:flex-row gap-4">
-                            <div class="w-full">
+                            <div>
                                 <span class="text-sm text-gray-500">Customer Account Group</span>
                                 <p class="text-lg font-medium">{{ form.customerAccountGroup }}</p>
                             </div>
-                            <div class="w-full">
+                            <div>
                                 <span class="text-sm text-gray-500">Customer Condition Group</span>
                                 <p class="text-lg font-medium">{{ form.customerCondGrp }}</p>
                             </div>
                         </div>
+                    </div>
 
-                        <div class="font-semibold text-xl border-b pb-2 mt-8">💲 Pricing & Sales Info</div>
+                    <div class="card flex flex-col gap-4 w-full">
+                        <div class="text-xl font-semibold border-b pb-2">💲 Pricing & Sales Info</div>
 
-                        <div class="flex flex-col md:flex-row gap-4">
-                            <div class="w-full">
+                        <div class="grid md:grid-cols-3 gap-4">
+                            <div>
                                 <span class="text-sm text-gray-500">Price List</span>
                                 <p class="text-lg font-medium">{{ form.pricelist }}</p>
                             </div>
-                            <div class="w-full">
+                            <div>
                                 <span class="text-sm text-gray-500">Price Group</span>
                                 <p class="text-lg font-medium">{{ form.priceGroup }}</p>
                             </div>
-                            <div class="w-full">
+                            <div>
                                 <span class="text-sm text-gray-500">Price Procedure</span>
                                 <p class="text-lg font-medium">{{ form.priceProcedure }}</p>
                             </div>
-                        </div>
-
-                        <div class="flex flex-col md:flex-row gap-4">
-                            <div class="w-full">
+                            <div>
                                 <span class="text-sm text-gray-500">Sales Office</span>
                                 <p class="text-lg font-medium">{{ form.salesOffice }}</p>
                             </div>
-                            <div class="w-full">
+                            <div>
                                 <span class="text-sm text-gray-500">Sales District</span>
                                 <p class="text-lg font-medium">{{ form.salesDistrict }}</p>
                             </div>
-                            <div class="w-full">
+                            <div>
                                 <span class="text-sm text-gray-500">Starting Sales Amount</span>
                                 <p class="text-lg font-medium">{{ form.startingSalesAmt }}</p>
                             </div>
                         </div>
+                    </div>
 
-                        <div class="font-semibold text-xl border-b pb-2 mt-8">🚚 Shipping & Delivery</div>
+                    <div class="card flex flex-col gap-4 w-full">
+                        <div class="text-xl font-semibold border-b pb-2">🚚 Shipping & Delivery</div>
 
-                        <div class="flex flex-col md:flex-row gap-4">
-                            <div class="w-full">
+                        <div class="grid md:grid-cols-2 gap-4">
+                            <div>
                                 <span class="text-sm text-gray-500">Shipping Condition</span>
                                 <p class="text-lg font-medium">{{ form.shippingCond }}</p>
                             </div>
-                            <div class="w-full">
+                            <div>
                                 <span class="text-sm text-gray-500">Allow Lalamove</span>
                                 <p class="text-lg font-medium">{{ form.allowLalamove ? 'Yes' : 'No' }}</p>
                             </div>
                         </div>
+                    </div>
 
-                        <div class="font-semibold text-xl border-b pb-2 mt-8">🪧 Signboard / Branding</div>
+                    <div class="card flex flex-col gap-4 w-full">
+                        <div class="text-xl font-semibold border-b pb-2">🪧 Signboard / Branding</div>
 
-                        <div class="flex flex-col md:flex-row gap-4">
-                            <div class="w-full">
+                        <div class="grid md:grid-cols-2 gap-4">
+                            <div>
                                 <span class="text-sm text-gray-500">Signboard Type</span>
                                 <p class="text-lg font-medium">{{ form.signboardType }}</p>
                             </div>
-                            <div class="w-full">
+                            <div>
                                 <span class="text-sm text-gray-500">Signboard Brand</span>
                                 <p class="text-lg font-medium">{{ form.signboardBrand ? 'Yes' : 'No' }}</p>
                             </div>
@@ -237,7 +213,12 @@
                 <!-- Suspend Account -->
                 <div class="card flex flex-col w-full">
                     <!-- Title -->
-                    <div class="text-2xl font-bold text-gray-800 border-b pb-3 mb-4">Account Status</div>
+                    <div class="flex items-center justify-between border-b pb-3 mb-4">
+                        <div class="text-2xl font-bold text-gray-800">Account Status</div>
+                        <div>
+                            <Button label="Manage Device" icon="pi pi-tablet" size="small" class="!py-1 !px-3 text-sm" @click="onManageDevice" />
+                        </div>
+                    </div>
 
                     <!-- Table -->
                     <div class="overflow-x-auto">
@@ -284,13 +265,12 @@
                 </div>
 
                 <!-- Device List -->
-                <div class="card flex flex-col w-full">
+                <!-- <div class="card flex flex-col w-full">
                     <div class="text-2xl font-bold text-gray-800 border-b pb-2 mb-3">Devices</div>
                     <div class="overflow-x-auto">
                         <table class="w-full text-sm text-left">
                             <tbody>
                                 <tr v-for="device in devices" :key="device.id" class="border-b">
-                                    <!-- Device info -->
                                     <td class="px-4 py-3">
                                         <div class="flex items-center gap-2 text-gray-800 font-bold">
                                             <i class="pi pi-tablet text-black-500"></i>
@@ -302,7 +282,6 @@
                                         </div>
                                     </td>
 
-                                    <!-- Action -->
                                     <td class="px-4 py-3 text-right align-top">
                                         <Button :label="device.isBlocked ? 'Un-block' : 'Block'" :severity="device.isBlocked ? 'success' : 'danger'" size="small" @click="toggleBlock(device)" />
                                     </td>
@@ -310,7 +289,7 @@
                             </tbody>
                         </table>
                     </div>
-                </div>
+                </div> -->
 
                 <!-- Finance Document -->
                 <div class="card flex flex-col w-full">
@@ -375,52 +354,20 @@
                         </div>
                     </div>
                 </div>
-
-                <!-- Suspend Account -->
-                <div class="card flex flex-col w-full">
-                    <div class="flex items-center justify-between border-b pb-2 mb-4">
-                    <!-- Title -->
-                    <div class="text-2xl font-bold text-gray-800">User List</div>
-                    <div class="inline-flex items-center gap-2">
-                        <RouterLink to="/om/createUserEten">
-                            <Button label="Create" class="p-button-info" size="small" />
-                        </RouterLink>
-                    </div>
-                    </div>
-                    <!-- User Table -->
-                    <DataTable :value="users" :rows="5" dataKey="id" :rowHover="true" responsiveLayout="scroll" class="text-sm">
-                        <!-- Combined Column -->
-                        <Column header="User Info" style="min-width: 1rem">
-                            <template #body="{ data }">
-                                <div class="flex flex-col">
-                                    <RouterLink to="/om/detailUser" class="hover:underline font-bold">
-                                        {{ data.name }}
-                                    </RouterLink>
-                                    <span class="text-gray-600 text-xs mt-2">👨🏻‍💻 {{ data.account }}</span>
-                                    <span class="text-gray-600 text-xs">📞 {{ data.phone }}</span>
-                                </div>
-                            </template>
-                        </Column>
-
-                        <Column field="lastLogin" header="Last Login" style="min-width: 8rem"></Column>
-
-                        <!-- Status Column -->
-                        <Column header="Status" style="min-width: 6rem">
-                            <template #body="{ data }">
-                                <Tag :value="data.status === 1 ? 'Active' : 'Inactive'" :severity="data.status === 1 ? 'success' : 'danger'" />
-                            </template>
-                        </Column>
-                    </DataTable>
-                </div>
             </div>
         </div>
 
         <div class="flex flex-col md:flex-row gap-8 mt-8">
             <div class="card flex flex-col gap-4 w-full">
-                <div class="text-2xl font-bold text-gray-800 border-b pb-2">Ship To</div>
+                <!-- Header -->
+                <div class="flex items-center justify-between border-b pb-2 mb-4">
+                    <div class="text-2xl font-bold text-gray-800">Ship To</div>
+                    <!-- Optional button area (keep empty for consistency) -->
+                    <div></div>
+                </div>
 
+                <!-- Ship To Table -->
                 <DataTable :value="shiptoList" :rows="5" dataKey="id" :rowHover="true" responsiveLayout="scroll" class="text-sm">
-                    <!-- Columns -->
                     <Column field="companyName1" header="Company Name" style="min-width: 12rem" />
                     <Column header="Address" style="min-width: 16rem">
                         <template #body="{ data }">
@@ -435,6 +382,51 @@
 
                     <Column field="phoneNumber" header="Phone No" style="min-width: 10rem" />
                     <Column field="emailAddress" header="Email" style="min-width: 14rem" />
+                </DataTable>
+            </div>
+        </div>
+
+        <div class="flex flex-col md:flex-row gap-8 mt-8">
+            <div class="card flex flex-col gap-4 w-full">
+                <!-- Header -->
+                <div class="flex items-center justify-between border-b pb-2 mb-4">
+                    <div class="text-2xl font-bold text-gray-800">User List</div>
+                    <div class="inline-flex items-center gap-2">
+                        <RouterLink to="/om/createUserEten">
+                            <Button label="Create" class="p-button-info" size="small" />
+                        </RouterLink>
+                    </div>
+                </div>
+
+                <!-- User Table -->
+                <DataTable :value="users" :rows="5" dataKey="id" :rowHover="true" responsiveLayout="scroll" class="text-sm">
+                    <Column header="User Info" style="min-width: 1rem">
+                        <template #body="{ data }">
+                            <div class="flex flex-col">
+                                <RouterLink to="/om/detailUser" class="hover:underline font-bold">
+                                    {{ data.name }}
+                                </RouterLink>
+                            </div>
+                        </template>
+                    </Column>
+
+                    <Column field="lastLogin" header="Last Login" style="min-width: 8rem" />
+                    <Column header="Module" style="min-width: 8rem">
+                        <template #body="{ data }">
+                            {{ data.modules.join(', ') }}
+                        </template>
+                    </Column>
+
+                    <Column header="Status" style="min-width: 8rem">
+                        <template #body="{ data }">
+                            <Tag :value="data.status === 1 ? 'Active' : 'Inactive'" :severity="data.status === 1 ? 'success' : 'danger'" />
+                        </template>
+                    </Column>
+                    <Column field="activationCode" header="Activation Code" style="min-width: 8rem">
+                        <template #body="{ data }">
+                            <Button icon="pi pi-send" label="Send" class="p-button-info p-button-sm" @click="sendSetting(data)" />
+                        </template>
+                    </Column>
                 </DataTable>
             </div>
         </div>
@@ -520,11 +512,11 @@ const toggleBlock = (device) => {
 };
 
 const users = ref([
-    { id: 'U001', name: 'John Doe', phone: '0123456789', account: '6080100900', lastLogin: '11/9/2025 8:00am', status: 1 },
-    { id: 'U002', name: 'Jane Smith', phone: '0198765432', account: '6080100901', lastLogin: '10/9/2025 8:00am', status: 1 },
-    { id: 'U003', name: 'Alex Tan', phone: '0172233445', account: '6080100902', lastLogin: '23/7/2025 8:00am', status: 0 },
-    { id: 'U004', name: 'Siti Aminah', phone: '0111122233', account: '6080100903', lastLogin: '09/9/2025 8:00am', status: 1 },
-    { id: 'U005', name: 'Michael Lee', phone: '0139988776', account: '6080100904', lastLogin: '07/8/2025 8:00am', status: 0 }
+    { id: 'U001', name: 'John Doe', phone: '0123456789', modules: ['Marketing', 'Sales'], account: '6080100900', lastLogin: '11/9/2025 8:00am', status: 1 },
+    { id: 'U002', name: 'Jane Smith', phone: '0198765432', modules: ['OM', 'Technical'], account: '6080100901', lastLogin: '10/9/2025 8:00am', status: 1 },
+    { id: 'U003', name: 'Alex Tan', phone: '0172233445', modules: ['ITBilling'], account: '6080100902', lastLogin: '23/7/2025 8:00am', status: 0 },
+    { id: 'U004', name: 'Siti Aminah', phone: '0111122233', modules: ['SCM', 'Sales', 'Marketing'], account: '6080100903', lastLogin: '09/9/2025 8:00am', status: 1 },
+    { id: 'U005', name: 'Michael Lee', phone: '0139988776', modules: ['Technical', 'ITBilling'], account: '6080100904', lastLogin: '07/8/2025 8:00am', status: 0 }
 ]);
 
 const billingDocs = ref([
