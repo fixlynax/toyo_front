@@ -61,7 +61,7 @@
 
             <Column field="audience" header="Audience" sortable style="min-width: 6rem">
                 <template #body="{ data }">
-                    <Tag :value="data.audience" :severity="getAudienceSeverity(data.audience)" />
+                    {{ data.audience }}
                 </template>
             </Column>
 
