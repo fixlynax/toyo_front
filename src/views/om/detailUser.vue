@@ -5,16 +5,15 @@
                 <!-- Header -->
                 <div class="flex flex-col md:flex-row gap-8">
                     <div class="card flex flex-col gap-6 w-full">
-                        <div class="text-2xl font-bold text-gray-800 border-b pb-2">Member Information</div>
+                        <div class="flex items-center justify-between border-b pb-2">
+                            <div class="text-2xl font-bold text-gray-800">Member Information</div>
 
-                        <div class="flex items-center justify-between w-full">
-                            <!-- Create Button -->
                             <RouterLink to="/marketing/editEtenUser">
                                 <Button type="button" label="Edit" />
                             </RouterLink>
                         </div>
 
-                        <div class="font-semibold text-xl border-b pb-2 mt-8">👤 Account Details</div>
+                        <div class="font-semibold text-xl border-b pb-2">👤 Account Details</div>
                         <div class="flex flex-col md:flex-row gap-4">
                             <div class="w-full">
                                 <span class="text-xm font-bold text-black-700">Name</span>
