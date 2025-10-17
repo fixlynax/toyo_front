@@ -36,7 +36,7 @@
 
             <template #empty> No News found. </template>
             <template #loading> Loading News data. Please wait. </template>
-            
+
             <Column field="title" header="Title" sortable style="min-width: 8rem">
                 <template #body="{ data }">
                     <RouterLink :to="`/marketing/detailNews/${data.id}`" class="hover:underline font-bold">
@@ -102,8 +102,6 @@ onMounted(async () => {
         loading.value = true;
         const response = await api.get('news/newsList');
 
-        console.log('API Response:', response.data);
-
         if (response.data.status === 1 && Array.isArray(response.data.admin_data)) {
             listData.value = response.data.admin_data.map((news) => ({
                 id: news.id,
@@ -133,7 +131,7 @@ onMounted(async () => {
 const getStatusLabel = (status) => {
     const statusMap = {
         0: 'Draft',
-        1: 'Published', 
+        1: 'Published',
         2: 'Unpublished'
     };
     return statusMap[status] || 'Unknown';
@@ -148,18 +146,9 @@ const getStatusSeverity = (status) => {
     return severityMap[status] || 'secondary';
 };
 
-const getAudienceSeverity = (audience) => {
-    const audienceMap = {
-        'ALL': 'info',
-        'TC': 'success',
-        'ETEN': 'warning'
-    };
-    return audienceMap[audience] || 'secondary';
-};
-
 const formatDate = (dateString) => {
     if (!dateString || dateString === 'N/A') return 'N/A';
-    
+
     try {
         // Parse DD-MM-YYYY format and return as is, or format if needed
         return dateString;
