@@ -48,7 +48,7 @@
             <!-- ========================= -->
             <Column field="title" header="Title" style="min-width: 8rem">
                 <template #body="{ data }">
-                    <RouterLink to="/marketing/detailEvent" class="hover:underline font-bold">
+                    <RouterLink :to="`/marketing/detailEvent/${data.id}`" class="hover:underline font-bold">
                         {{ data.title }}
                     </RouterLink>
                 </template>
@@ -92,8 +92,8 @@
 
 <script setup>
 import { onMounted, ref } from 'vue';
+import api from '@/service/api';
 import { FilterMatchMode } from '@primevue/core/api';
-import { ListEventService } from '@/service/ListEvent';
 
 // Data variables
 const listData = ref([]);
@@ -108,9 +108,33 @@ const filters = ref({
 // Fetch data on mount
 // =========================
 onMounted(async () => {
-    loading.value = true;
-    listData.value = await ListEventService.getListEventData();
-    loading.value = false;
+    try {
+        loading.value = true;
+        const response = await api.get('event/eventList');
+
+        console.log('API Response:', response.data);
+
+        if (response.data.status === 1 && Array.isArray(response.data.admin_data)) {
+            listData.value = response.data.admin_data.map((event) => ({
+                id: event.id,
+                title: event.title || 'Untitled',
+                location: event.publishDate,
+                publishDate: event.startDate,
+                startDate: event.startDate, 
+                endDate: event.endDate, 
+                isSurvey: event.isSurvey || 'N/A',
+                status: event.status
+            }));
+        } else {
+            console.error('API returned error or invalid data:', response.data);
+            listData.value = [];
+        }
+    } catch (error) {
+        console.error('Error fetching event list:', error);
+        listData.value = [];
+    } finally {
+        loading.value = false;
+    }
 });
 
 // =========================
