@@ -4,7 +4,7 @@
             <div class="card flex flex-col gap-6 w-full">
                 <!-- Header -->
                 <div class="text-2xl font-bold text-gray-800 border-b pb-2">
-                    {{ isEditMode ? 'Edit Sales Program' : 'Create Sales Program' }}
+                    {{ isEditMode ? 'Edit Sales Program' : 'Edit Sales Program' }}
                 </div>
 
                 <!-- Sales Program Form -->
