@@ -8,30 +8,27 @@
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
                         <label class="block font-bold text-gray-700">First Name</label>
-                        <InputText v-model="form.firstName" class="w-full" placeholder="Enter full name" />
+                        <InputText v-model="form.firstName" class="w-full" placeholder="Enter first name" />
                     </div>
                     <div>
                         <label class="block font-bold text-gray-700">Last Name</label>
-                        <InputText v-model="form.lastName" class="w-full" placeholder="Enter full name" />
+                        <InputText v-model="form.lastName" class="w-full" placeholder="Enter last name" />
                     </div>
                     <div>
                         <label class="block font-bold text-gray-700">Gender</label>
-                        <Dropdown v-model="form.gender" :options="genderOptions" optionLabel="label" optionValue="value" class="w-full" />
+                        <Dropdown v-model="form.gender" :options="genderOptions" optionLabel="label" optionValue="value" class="w-full" placeholder="Select gender" />
                     </div>
-
                     <div>
                         <label class="block font-bold text-gray-700">Race</label>
-                        <Dropdown v-model="form.race" :options="raceOptions" optionLabel="label" optionValue="value" class="w-full" />
+                        <Dropdown v-model="form.race" :options="raceOptions" optionLabel="label" optionValue="value" class="w-full" placeholder="Select race" />
                     </div>
-
                     <div>
                         <label class="block font-bold text-gray-700">State</label>
-                        <Dropdown v-model="form.state" :options="stateOptions" optionLabel="label" optionValue="value" class="w-full" />
+                        <Dropdown v-model="form.state" :options="stateOptions" optionLabel="label" optionValue="value" class="w-full" placeholder="Select state" />
                     </div>
-
                     <div>
-                        <label class="block font-bold text-gray-700"> Member Level</label>
-                        <Dropdown v-model="form.level" :options="levelOptions" optionLabel="label" optionValue="value" class="w-full" />
+                        <label class="block font-bold text-gray-700">Member Level</label>
+                        <Dropdown v-model="form.memberLevel" :options="levelOptions" optionLabel="label" optionValue="value" class="w-full" placeholder="Select level" />
                     </div>
                     <div>
                         <label class="block font-bold text-gray-700">Email</label>
@@ -89,7 +86,7 @@
                     </div>
                     <div>
                         <label class="block font-bold text-gray-700">State</label>
-                        <Dropdown v-model="form.state" :options="stateOptions" optionLabel="label" optionValue="value" class="w-full" />
+                        <Dropdown v-model="form.shippingState" :options="stateOptions" optionLabel="label" optionValue="value" class="w-full" placeholder="Select state" />
                     </div>
                     <div>
                         <label class="block font-bold text-gray-700">City</label>
@@ -112,42 +109,24 @@
             <div>
                 <h3 class="text-xl font-semibold text-gray-700 border-b p-2 mb-4">🧩 Modules Access</h3>
                 <div class="grid grid-cols-2 gap-4">
-                    <div>
-                        <Checkbox class="mr-2" v-model="form.modules" inputId="marketing" value="marketing" /> 
-                        <label for="marketing">Marketing</label>
-                    </div>
-                    <div>
-                        <Checkbox class="mr-2" v-model="form.modules" inputId="technical" value="technical" /> 
-                        <label for="technical">Technical</label>
-                    </div>
-                    <div>
-                        <Checkbox class="mr-2" v-model="form.modules" inputId="om" value="om" /> 
-                        <label for="om">OM</label>
-                    </div>
-                    <div>
-                        <Checkbox class="mr-2" v-model="form.modules" inputId="scm" value="scm" /> 
-                        <label for="scm">SCM</label>
-                    </div>
-                    <div>
-                        <Checkbox class="mr-2" v-model="form.modules" inputId="it" value="it" /> 
-                        <label for="it">IT</label>
-                    </div>
-                    <div>
-                        <Checkbox class="mr-2" v-model="form.modules" inputId="billing" value="billing" /> 
-                        <label for="billing">Billing</label>
-                    </div>
-                    <div>
-                        <Checkbox class="mr-2" v-model="form.modules" inputId="sales" value="sales" /> 
-                        <label for="sales">Sales</label>
+                    <div v-for="module in moduleOptions" :key="module.value">
+                        <Checkbox class="mr-2" v-model="form.modules" :inputId="module.value" :value="module.value" />
+                        <label :for="module.value">{{ module.label }}</label>
                     </div>
                 </div>
             </div>
 
-            <!-- Submit Button -->
-            <div class="flex justify-end mt-2">
-                <RouterLink to="/om/detailUser">
-                    <Button label="➕ Add User" class="p-button-success" @click="submitForm" />
-                </RouterLink>
+            <div class="flex flex-col md:flex-row justify-end gap-2 mt-4">
+                <div class="w-40">
+                    <RouterLink to="/om/confirmationEten">
+                        <Button label="Cancel" class="w-full p-button-secondary" />
+                    </RouterLink>
+                </div>
+                <div class="w-40">
+                    <RouterLink to="/om/confirmationEten">
+                        <Button label="Submit" class="w-full" />
+                    </RouterLink>
+                </div>
             </div>
         </div>
     </Fluid>
@@ -155,6 +134,9 @@
 
 <script setup>
 import { ref } from 'vue';
+import { useRouter } from 'vue-router';
+
+const router = useRouter();
 
 const form = ref({
     firstName: '',
@@ -175,7 +157,7 @@ const form = ref({
     address4: '',
     city: '',
     postcode: '',
-    state: '',
+    shippingState: '',
     country: '',
     modules: []
 });
@@ -199,7 +181,7 @@ const raceOptions = [
 const stateOptions = [
     { label: 'Johor', value: 'Johor' },
     { label: 'Kelantan', value: 'Kelantan' },
-    { label: 'Kuala Lumpur', value: 'Lumpur' },
+    { label: 'Kuala Lumpur', value: 'Kuala Lumpur' },
     { label: 'Kedah', value: 'Kedah' },
     { label: 'Melaka', value: 'Melaka' },
     { label: 'Negeri Sembilan', value: 'Negeri Sembilan' },
@@ -216,7 +198,7 @@ const stateOptions = [
 const levelOptions = [
     { label: 'Silver', value: 'Silver' },
     { label: 'Gold', value: 'Gold' },
-    { label: 'Plantinum', value: 'Plantinum' }
+    { label: 'Platinum', value: 'Platinum' }
 ];
 
 const genderOptions = [
@@ -224,13 +206,19 @@ const genderOptions = [
     { label: 'Female', value: 'Female' }
 ];
 
+const moduleOptions = [
+    { label: 'Marketing', value: 'marketing' },
+    { label: 'Technical', value: 'technical' },
+    { label: 'OM', value: 'om' },
+    { label: 'SCM', value: 'scm' },
+    { label: 'IT', value: 'it' },
+    { label: 'Billing', value: 'billing' },
+    { label: 'Sales', value: 'sales' }
+];
+
 const submitForm = () => {
     console.log('Form Submitted:', form.value);
+    // Add form validation or API submission here
+    router.push('/om/detailUser');
 };
 </script>
-
-<style scoped>
-.card {
-    @apply bg-white shadow-md rounded-xl p-6;
-}
-</style>

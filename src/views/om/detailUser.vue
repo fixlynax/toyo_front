@@ -6,14 +6,29 @@
                 <div class="flex flex-col md:flex-row gap-8">
                     <div class="card flex flex-col gap-6 w-full">
                         <div class="flex items-center justify-between border-b pb-2">
-                            <div class="text-2xl font-bold text-gray-800">Member Information</div>
+                            <div class="flex items-center space-x-3">
+                                <RouterLink to="/om/listEten">
+                                    <Button icon="pi pi-arrow-left font-bold" class="p-button-text p-button-secondary text-xl" size="big" v-tooltip="'Back'" />
+                                </RouterLink>
+
+                                <div class="text-2xl font-bold text-gray-800">Member Information</div>
+                            </div>
 
                             <RouterLink to="/marketing/editEtenUser">
                                 <Button type="button" label="Edit" />
                             </RouterLink>
                         </div>
 
-                        <div class="font-semibold text-xl border-b pb-2">👤 Account Details</div>
+                        <div class="font-semibold text-xl pb-2">👤 Account Details</div>
+                        <div class="flex flex-col md:flex-row gap-4">
+                            <div class="w-full">
+                                <span class="text-xm font-bold text-black-700">Member Code</span>
+                                <p class="text-lg font-medium">
+                                    {{ memberDetail.etenUserID }}
+                                    <span v-if="memberDetail.isMaster === 1" class="font-bold">(Master)</span>
+                                </p>
+                            </div>
+                        </div>
                         <div class="flex flex-col md:flex-row gap-4">
                             <div class="w-full">
                                 <span class="text-xm font-bold text-black-700">Name</span>
@@ -51,36 +66,20 @@
                                 <span class="text-xm font-bold text-black-700">Mobile Number</span>
                                 <p class="text-lg font-medium">{{ memberDetail.countryCode }} {{ memberDetail.mobileNumber }}</p>
                             </div>
-
-                            <div class="w-full">
-                                <span class="text-xm font-bold text-black-700">Level</span>
-                                <p class="text-lg font-medium">{{ memberDetail.level }}</p>
-                            </div>
-                        </div>
-
-                        <div class="flex flex-col md:flex-row gap-4">
-                            <div class="w-full">
-                                <span class="text-xm font-bold text-black-700">Race</span>
-                                <p class="text-lg font-medium">{{ memberDetail.race }}</p>
-                            </div>
-                            <div class="w-full">
-                                <span class="text-xm font-bold text-black-700">State</span>
-                                <p class="text-lg font-medium">{{ memberDetail.state }}</p>
-                            </div>
-                        </div>
-
-                        <div class="flex flex-col md:flex-row gap-4">
-                            <div class="w-full">
-                                <span class="text-xm font-bold text-black-700">Member Since</span>
-                                <p class="text-lg font-medium">{{ memberDetail.memberSince }}</p>
-                            </div>
-                            <div class="w-full">
-                                <span class="text-xm font-bold text-black-700">Last Login</span>
-                                <p class="text-lg font-medium">{{ memberDetail.lastLogin }}</p>
-                            </div>
                         </div>
                     </div>
                 </div>
+                <!-- <div class="card mt-6">
+                    <div class="flex items-center justify-between border-b pb-4 mb-4">
+                        <div class="text-2xl font-bold text-gray-800">Shipping Details</div>
+                    </div>
+                    <div class="mt-8 flex flex-col md:flex-row gap-4">
+                        <div class="w-full">
+                            <span class="text-xm font-bold text-black-700">Member Code</span>
+                            <p class="text-lg font-medium">{{ memberDetail.shi }}</p>
+                        </div>
+                    </div>
+                </div> -->
             </div>
             <div class="md:w-1/3">
                 <div class="card flex flex-col w-full p-4">
@@ -92,31 +91,31 @@
                     <div class="space-y-4">
                         <div class="flex items-center justify-between">
                             <span class="font-medium text-gray-700">Marketing</span>
-                            <ToggleSwitch v-model="modules.marketing" class="custom-toggle" />
+                            <ToggleSwitch disabled v-model="modules.marketing" class="custom-toggle" />
                         </div>
                         <div class="flex items-center justify-between">
                             <span class="font-medium text-gray-700">OM</span>
-                            <ToggleSwitch v-model="modules.om" class="custom-toggle" />
+                            <ToggleSwitch disabled v-model="modules.om" class="custom-toggle" />
                         </div>
                         <div class="flex items-center justify-between">
                             <span class="font-medium text-gray-700">Technical</span>
-                            <ToggleSwitch v-model="modules.technical" class="custom-toggle" />
+                            <ToggleSwitch disabled v-model="modules.technical" class="custom-toggle" />
                         </div>
                         <div class="flex items-center justify-between">
                             <span class="font-medium text-gray-700">SCM</span>
-                            <ToggleSwitch v-model="modules.scm" class="custom-toggle" />
+                            <ToggleSwitch disabled v-model="modules.scm" class="custom-toggle" />
                         </div>
                         <div class="flex items-center justify-between">
                             <span class="font-medium text-gray-700">IT</span>
-                            <ToggleSwitch v-model="modules.it" class="custom-toggle" />
+                            <ToggleSwitch disabled v-model="modules.it" class="custom-toggle" />
                         </div>
                         <div class="flex items-center justify-between">
                             <span class="font-medium text-gray-700">Billing</span>
-                            <ToggleSwitch v-model="modules.billing" class="custom-toggle" />
+                            <ToggleSwitch disabled v-model="modules.billing" class="custom-toggle" />
                         </div>
                         <div class="flex items-center justify-between">
                             <span class="font-medium text-gray-700">Sales</span>
-                            <ToggleSwitch v-model="modules.sales" class="custom-toggle" />
+                            <ToggleSwitch disabled v-model="modules.sales" class="custom-toggle" />
                         </div>
                     </div>
                 </div>
@@ -167,59 +166,12 @@ const modules = ref({
     sales: true
 });
 
-const form = ref({
-    memberCode: 'E346572',
-    custAccountNo: '6080100900',
-    companyName1: 'PS Tyres & Battery Auto Services Sdn. Bhd',
-    companyName2: '',
-    companyName3: '',
-    companyName4: '',
-    companyRegNo: 'MY123456789',
-    salesTaxNo: 'SST123456',
-    serviceTaxNo: 'STX120987',
-    tinNo: '1256734321',
-    vatNo: '0976213456',
-    addressLine1: '123 Toyo Road',
-    addressLine2: 'Toyo Industrial Park',
-    addressLine3: '',
-    addressLine4: '',
-    city: 'Kuala Lumpur',
-    postcode: '50000',
-    state: 'Kuala Lumpur',
-    country: 'Malaysia',
-    mapLatitude: '3.1390',
-    mapLongitude: '101.6869',
-    phoneNumber: '+60 3-1234 5678',
-    mobilreNumber: '+60 19-1234 567',
-    emailAddress: 'sales@toyotires.com.my',
-    accountType: 'Retailer',
-    priceGroup: 'A',
-    priceProcedure: 'Standard',
-    customerAccountGroup: 'Group1',
-    customerCondGrp: 'Cond1',
-    paymentTerms: 'NET 30',
-    riskCategory: 'Low',
-    creditLimit: 50000,
-    pricelist: '01',
-    signboardType: 'T10',
-    signboardBrand: 'Toyo',
-    salesOffice: 'Kuala Lumpur',
-    salesDistrict: 'Central',
-    shippingCond: 'RE',
-    accountCreation: '2023-01-15',
-    showOnList: 1,
-    ifFamilyChannel: 0,
-    allowLalamove: 1,
-    startingSalesAmt: 1000,
-    status: 0
-});
-
 const memberDetail = ref({
     id: 10,
     etenUserID: 'EU1010',
     countryCode: '60',
     mobileNumber: '1890123456',
-    password: 'hashed_pw_10',
+    password: 'passowrd 123',
     firstName: 'Faizal',
     lastName: 'Rahman',
     emailAddress: 'faizal.rahman@toyotires.com.my',
@@ -235,12 +187,13 @@ const memberDetail = ref({
     allow_sale: 1,
     allow_user: 0,
     activationCode: 'ACT01234',
-    isMaster: 0,
+    isMaster: 1,
     device: 'Windows Laptop',
     platform: 'Web',
     fcmToken: 'fcm_token_10',
     status: 1,
     activated: 1,
+    custaccountno: '6020201500',
     created: '2025-04-20',
     deleted: 0
 });
@@ -269,20 +222,28 @@ const toggleBlock = (device) => {
 };
 </script>
 <style scoped>
-:deep(.custom-toggle .p-toggleswitch-slider) {
-    background-color: #ef4444;
-    transition: background-color 0.3s ease;
+/* --- Disabled OFF --- */
+:deep(.custom-toggle.p-disabled:not(.p-toggleswitch-checked) .p-toggleswitch-slider) {
+    background-color: #f87171; /* lighter red */
+    opacity: 0.8;
+    cursor: not-allowed;
 }
 
-:deep(.custom-toggle.p-toggleswitch-checked .p-toggleswitch-slider) {
-    background-color: #22c55e;
+/* --- Disabled ON --- */
+:deep(.custom-toggle.p-disabled.p-toggleswitch-checked .p-toggleswitch-slider) {
+    background-color: #22c55e; /* lighter green */
+    opacity: 0.8;
+    cursor: not-allowed;
 }
 
-:deep(.custom-toggle .p-toggleswitch-slider:before) {
-    background-color: white;
+/* Disabled knob */
+:deep(.custom-toggle.p-disabled .p-toggleswitch-slider:before) {
+    background-color: #f9fafb;
+    opacity: 0.9;
 }
 
-:deep(.custom-toggle .p-toggleswitch-slider:hover) {
-    filter: brightness(1.1);
+/* Disable hover for disabled */
+:deep(.custom-toggle.p-disabled .p-toggleswitch-slider:hover) {
+    filter: none;
 }
 </style>

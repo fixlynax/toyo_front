@@ -241,8 +241,4 @@ const updateUser = () => {
 };
 </script>
 
-<style scoped>
-.card {
-    @apply bg-white shadow-md rounded-xl p-6;
-}
-</style>
+

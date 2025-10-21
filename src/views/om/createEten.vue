@@ -398,7 +398,12 @@ function goNext() {
                         </div>
                     </div>
 
-                    <div class="flex flex-col md:flex-row justify-start mt-4">
+                    <div class="flex flex-col md:flex-row justify-end gap-2 mt-4">
+                        <div class="w-40">
+                            <RouterLink to="/om/confirmationEten">
+                                <Button  label="Cancel" class="w-full p-button-secondary" />
+                            </RouterLink>
+                        </div>
                         <div class="w-40">
                             <RouterLink to="/om/confirmationEten">
                                 <Button label="Submit" class="w-full" />

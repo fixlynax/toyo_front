@@ -3,10 +3,16 @@
         <div class="flex flex-col md:flex-row gap-8">
             <div class="md:w-2/3">
                 <!-- Header -->
-                <div class="flex flex-col gap-8">
+                <div class="flex flex-col">
                     <div class="card flex flex-col gap-4 w-full">
                         <div class="flex items-center justify-between border-b pb-2 mb-4">
-                            <div class="text-2xl font-bold text-gray-800">Customer Information</div>
+                            <div class="flex items-center gap-2">
+                                <RouterLink to="/om/listEten">
+                                    <Button icon="pi pi-arrow-left font-bold" class="p-button-text p-button-secondary text-xl" size="big" v-tooltip="'Back'" />
+                                </RouterLink>
+                                <div class="text-2xl font-bold text-gray-800">Customer Information</div>
+                            </div>
+
                             <RouterLink to="/om/editEten">
                                 <Button type="button" label="Edit" />
                             </RouterLink>
@@ -405,17 +411,18 @@
                             <div class="flex flex-col">
                                 <RouterLink to="/om/detailUser" class="hover:underline font-bold">
                                     {{ data.name }}
+                                    <span v-if="data.isMaster === 1" class="text-blue-400">(Admin)</span>
                                 </RouterLink>
                             </div>
                         </template>
                     </Column>
 
-                    <Column field="lastLogin" header="Last Login" style="min-width: 8rem" />
                     <Column header="Module" style="min-width: 8rem">
                         <template #body="{ data }">
                             {{ data.modules.join(', ') }}
                         </template>
                     </Column>
+                    <Column field="lastLogin" header="Last Login" style="min-width: 8rem" />
 
                     <Column header="Status" style="min-width: 8rem">
                         <template #body="{ data }">
@@ -424,7 +431,7 @@
                     </Column>
                     <Column field="activationCode" header="Activation Code" style="min-width: 8rem">
                         <template #body="{ data }">
-                            <Button icon="pi pi-send" label="Send" class="p-button-info p-button-sm" @click="sendSetting(data)" />
+                            <Button icon="pi pi-send" label="Send" style="width: fit-content" class="p-button-info p-button-sm" @click="sendSetting(data)" />
                         </template>
                     </Column>
                 </DataTable>
@@ -512,11 +519,11 @@ const toggleBlock = (device) => {
 };
 
 const users = ref([
-    { id: 'U001', name: 'John Doe', phone: '0123456789', modules: ['Marketing', 'Sales'], account: '6080100900', lastLogin: '11/9/2025 8:00am', status: 1 },
-    { id: 'U002', name: 'Jane Smith', phone: '0198765432', modules: ['OM', 'Technical'], account: '6080100901', lastLogin: '10/9/2025 8:00am', status: 1 },
-    { id: 'U003', name: 'Alex Tan', phone: '0172233445', modules: ['ITBilling'], account: '6080100902', lastLogin: '23/7/2025 8:00am', status: 0 },
-    { id: 'U004', name: 'Siti Aminah', phone: '0111122233', modules: ['SCM', 'Sales', 'Marketing'], account: '6080100903', lastLogin: '09/9/2025 8:00am', status: 1 },
-    { id: 'U005', name: 'Michael Lee', phone: '0139988776', modules: ['Technical', 'IT'], account: '6080100904', lastLogin: '07/8/2025 8:00am', status: 0 }
+    { id: 'U001', name: 'John Doe', phone: '0123456789', modules: ['Marketing', 'Sales'], account: '6080100900', lastLogin: '11/9/2025 8:00am', status: 1, isMaster: 1 },
+    { id: 'U002', name: 'Jane Smith', phone: '0198765432', modules: ['OM', 'Technical'], account: '6080100901', lastLogin: '10/9/2025 8:00am', status: 1, isMaster: 0 },
+    { id: 'U003', name: 'Alex Tan', phone: '0172233445', modules: ['ITBilling'], account: '6080100902', lastLogin: '23/7/2025 8:00am', status: 0, isMaster: 0 },
+    { id: 'U004', name: 'Siti Aminah', phone: '0111122233', modules: ['SCM', 'Sales', 'Marketing'], account: '6080100903', lastLogin: '09/9/2025 8:00am', status: 1, isMaster: 0 },
+    { id: 'U005', name: 'Michael Lee', phone: '0139988776', modules: ['Technical', 'IT'], account: '6080100904', lastLogin: '07/8/2025 8:00am', status: 0, isMaster: 0 }
 ]);
 
 const billingDocs = ref([

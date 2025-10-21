@@ -129,18 +129,52 @@
                     </div>
                 </div>
                 <!-- ✅ closes Account Info grid -->
-
-                <!-- Submit -->
-                <div class="flex justify-end mt-2 gap-2">
-                    <div class="w-40">
-                        <Button label="Cancel" class="p-button-secondary w-full mr-2" @click="$router.back()" />
+            </div>
+        </div>
+        <div class="mt-8 card flex flex-col gap-8 w-full">
+            <div>
+                <h3 class="text-2xl font-bold text-gray-800 border-b pb-2">🧩 Modules Access</h3>
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <Checkbox class="mr-2" value="marketing" />
+                        <label for="marketing">Marketing</label>
                     </div>
-
-                    <div class="w-40">
-                        <RouterLink to="/marketing/detailEtenUser">
-                            <Button label="Update" class="w-full" />
-                        </RouterLink>
+                    <div>
+                        <Checkbox class="mr-2" value="technical" />
+                        <label for="technical">Technical</label>
                     </div>
+                    <div>
+                        <Checkbox class="mr-2" value="om" />
+                        <label for="om">OM</label>
+                    </div>
+                    <div>
+                        <Checkbox class="mr-2" value="scm" />
+                        <label for="scm">SCM</label>
+                    </div>
+                    <div>
+                        <Checkbox class="mr-2" value="it" />
+                        <label for="it">IT</label>
+                    </div>
+                    <div>
+                        <Checkbox class="mr-2" value="billing" />
+                        <label for="billing">Billing</label>
+                    </div>
+                    <div>
+                        <Checkbox class="mr-2" value="sales" />
+                        <label for="sales">Sales</label>
+                    </div>
+                </div>
+            </div>
+
+            <div class="flex justify-end mt-2 gap-2">
+                <div class="w-40">
+                    <Button label="Cancel" class="p-button-secondary w-full mr-2" @click="$router.back()" />
+                </div>
+
+                <div class="w-40">
+                    <RouterLink to="/marketing/detailEtenUser">
+                        <Button label="Update" class="w-full" />
+                    </RouterLink>
                 </div>
             </div>
         </div>
