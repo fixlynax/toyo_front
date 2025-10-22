@@ -47,7 +47,7 @@
                 <DataTable :value="message.dealers" class="p-datatable-sm" :rowHover="true">
                     <Column field="custAccountNo" header="Account No" style="min-width: 250px">
                         <template #body="{ data }">
-                            <div class="font-mono text-sm">{{ data.custAccountNo }}</div>
+                            <div class="font-mono text-md">{{ data.custAccountNo }}</div>
                         </template>
                     </Column>
                     
