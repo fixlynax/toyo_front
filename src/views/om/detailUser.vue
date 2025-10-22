@@ -14,7 +14,7 @@
                                 <div class="text-2xl font-bold text-gray-800">Member Information</div>
                             </div>
 
-                            <RouterLink to="/marketing/editEtenUser">
+                            <RouterLink to="/om/editEtenUser">
                                 <Button type="button" label="Edit" />
                             </RouterLink>
                         </div>
@@ -35,8 +35,8 @@
                                 <p class="text-lg font-medium">{{ memberDetail.firstName }} {{ memberDetail.lastName }}</p>
                             </div>
                             <div class="w-full">
-                                <span class="text-xm font-bold text-black-700">Gender</span>
-                                <p class="text-lg font-medium">{{ memberDetail.gender }}</p>
+                                <span class="text-xm font-bold text-black-700">Mobile Number</span>
+                                <p class="text-lg font-medium">(+{{ memberDetail.countryCode }} ) {{ memberDetail.mobileNumber }}</p>
                             </div>
                         </div>
 
@@ -59,12 +59,6 @@
                                         </div>
                                     </button>
                                 </div>
-                            </div>
-                        </div>
-                        <div class="flex flex-col md:flex-row gap-4">
-                            <div class="w-full">
-                                <span class="text-xm font-bold text-black-700">Mobile Number</span>
-                                <p class="text-lg font-medium">{{ memberDetail.countryCode }} {{ memberDetail.mobileNumber }}</p>
                             </div>
                         </div>
                     </div>
@@ -125,7 +119,9 @@
                     <div class="flex items-center justify-between border-b pb-2 mb-3">
                         <div class="text-2xl font-bold text-gray-800">Devices</div>
                         <div class="flex justify-end">
-                            <Button label="Manage Device" icon="pi pi-tablet" size="small" class="!py-1 !px-3 text-sm" />
+                            <RouterLink to="/om/manageDevices">
+                                <Button label="Manage All Devices" icon="pi pi-tablet" size="small" class="!py-1 !px-3 text-sm" />
+                            </RouterLink>
                         </div>
                     </div>
 
@@ -134,7 +130,7 @@
                         <div class="overflow-x-auto">
                             <table class="w-full text-sm text-left">
                                 <tbody>
-                                    <tr v-for="device in devices" :key="device.id" class="border-b">
+                                    <tr v-for="device in [...devices].sort((a, b) => new Date(b.lastActive) - new Date(a.lastActive)).slice(0, 5)" :key="device.id" class="border-b">
                                         <!-- Device info -->
                                         <td class="px-4 py-3">
                                             <div class="flex items-center gap-2 text-gray-800 font-bold">
@@ -149,7 +145,7 @@
 
                                         <!-- Action -->
                                         <td class="px-4 py-3 text-right align-top">
-                                            <Button :label="device.isBlocked ? 'Un-block' : 'Block'" :severity="device.isBlocked ? 'success' : 'danger'" size="small" class="!py-1 !px-2 text-xs w-fit" @click="toggleBlock(device)" />
+                                            <Button disabled :label="device.isBlocked ? 'Un-block' : 'Block'" :severity="device.isBlocked ? 'success' : 'danger'" size="small" class="!py-1 !px-2 text-xs w-fit" @click="toggleBlock(device)" />
                                         </td>
                                     </tr>
                                 </tbody>
@@ -223,6 +219,69 @@ const devices = ref([
         uniqueId: '00008030-001E3D400043402E',
         lastActive: '8/9/2025 10:54 pm',
         isBlocked: true
+    },
+    {
+        id: 2,
+        name: 'MacBook Pro',
+        uniqueId: '00008120-00A2BC1234567890',
+        lastActive: '10/21/2025 11:22 am',
+        isBlocked: false
+    },
+    {
+        id: 3,
+        name: 'iPhone 15 Pro',
+        uniqueId: '00008030-00F1C2D3E4B5A6',
+        lastActive: '10/18/2025 9:47 pm',
+        isBlocked: false
+    },
+    {
+        id: 4,
+        name: 'Android Tablet',
+        uniqueId: 'TAB-4C3D2B1A900',
+        lastActive: '10/15/2025 4:20 pm',
+        isBlocked: true
+    },
+    {
+        id: 5,
+        name: 'Office PC',
+        uniqueId: 'PC-5B6C7D8E9F00',
+        lastActive: '9/28/2025 3:14 pm',
+        isBlocked: false
+    },
+    {
+        id: 6,
+        name: 'Windows Desktop',
+        uniqueId: '00008020-001E3D400043402E',
+        lastActive: '10/22/2025 8:05 am',
+        isBlocked: false
+    },
+    {
+        id: 7,
+        name: 'iPad Air',
+        uniqueId: '00008040-00B1E2C3D4A5F6',
+        lastActive: '10/21/2025 9:10 pm',
+        isBlocked: true
+    },
+    {
+        id: 8,
+        name: 'Samsung Galaxy S24',
+        uniqueId: 'AND-9X8Y7Z6W5V4U',
+        lastActive: '10/22/2025 12:15 am',
+        isBlocked: false
+    },
+    {
+        id: 9,
+        name: 'Workstation PC',
+        uniqueId: 'PC-9F8E7D6C5B4A',
+        lastActive: '10/20/2025 2:30 pm',
+        isBlocked: false
+    },
+    {
+        id: 10,
+        name: 'Surface Pro 9',
+        uniqueId: '00008030-001E3D4000AA11',
+        lastActive: '10/19/2025 6:35 pm',
+        isBlocked: false
     }
 ]);
 

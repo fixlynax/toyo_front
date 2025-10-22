@@ -221,9 +221,6 @@
                     <!-- Title -->
                     <div class="flex items-center justify-between border-b pb-3 mb-4">
                         <div class="text-2xl font-bold text-gray-800">Account Status</div>
-                        <div>
-                            <Button label="Manage Device" icon="pi pi-tablet" size="small" class="!py-1 !px-3 text-sm" />
-                        </div>
                     </div>
 
                     <!-- Table -->
