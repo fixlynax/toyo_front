@@ -222,7 +222,7 @@
                     <div class="flex items-center justify-between border-b pb-3 mb-4">
                         <div class="text-2xl font-bold text-gray-800">Account Status</div>
                         <div>
-                            <Button label="Manage Device" icon="pi pi-tablet" size="small" class="!py-1 !px-3 text-sm" @click="onManageDevice" />
+                            <Button label="Manage Device" icon="pi pi-tablet" size="small" class="!py-1 !px-3 text-sm" />
                         </div>
                     </div>
 
@@ -271,31 +271,11 @@
                 </div>
 
                 <!-- Device List -->
-                <!-- <div class="card flex flex-col w-full">
-                    <div class="text-2xl font-bold text-gray-800 border-b pb-2 mb-3">Devices</div>
-                    <div class="overflow-x-auto">
-                        <table class="w-full text-sm text-left">
-                            <tbody>
-                                <tr v-for="device in devices" :key="device.id" class="border-b">
-                                    <td class="px-4 py-3">
-                                        <div class="flex items-center gap-2 text-gray-800 font-bold">
-                                            <i class="pi pi-tablet text-black-500"></i>
-                                            {{ device.name }}
-                                        </div>
-                                        <div class="ml-6 text-gray-500 text-xs mt-2">
-                                            <div>ID: {{ device.uniqueId }}</div>
-                                            <div>Active at: {{ device.lastActive }}</div>
-                                        </div>
-                                    </td>
-
-                                    <td class="px-4 py-3 text-right align-top">
-                                        <Button :label="device.isBlocked ? 'Un-block' : 'Block'" :severity="device.isBlocked ? 'success' : 'danger'" size="small" @click="toggleBlock(device)" />
-                                    </td>
-                                </tr>
-                            </tbody>
-                        </table>
-                    </div>
-                </div> -->
+                <div class="card flex flex-col w-full">
+                    <div class="text-2xl font-bold text-gray-800 border-b pb-2 mb-3">Forecast vs Actual Comparison</div>
+                    <Chart type="bar" :data="chartData" :options="chartOptions" class="h-[30rem]" />
+                    <div class="overflow-x-auto"></div>
+                </div>
 
                 <!-- Finance Document -->
                 <div class="card flex flex-col w-full">
@@ -441,7 +421,119 @@
 </template>
 
 <script setup>
-import { ref } from 'vue';
+import { ref, onMounted } from 'vue';
+
+onMounted(() => {
+    chartData.value = setChartData();
+    chartOptions.value = setChartOptions();
+});
+
+const chartData = ref();
+const chartOptions = ref();
+
+const setChartData = () => {
+    const documentStyle = getComputedStyle(document.documentElement);
+
+    return {
+        labels: ['January', 'February', 'March', 'April', 'May', 'June', 'July'],
+        datasets: [
+            {
+                label: 'Forecast',
+                backgroundColor: '#0062B0',
+                borderColor: documentStyle.getPropertyValue('--p-cyan-500'),
+                borderWidth: 0,
+                borderRadius: 16, // More rounded corners
+                borderSkipped: false,
+                data: [65, 59, 80, 81, 56, 55, 40]
+            },
+            {
+                label: 'Actual',
+                backgroundColor: '#B1DEFF',
+                borderColor: documentStyle.getPropertyValue('--p-gray-500'),
+                borderWidth: 0,
+                borderRadius: 16, // More rounded corners
+                borderSkipped: false,
+                data: [28, 48, 40, 19, 86, 27, 90]
+            }
+        ]
+    };
+};
+
+const setChartOptions = () => {
+    const documentStyle = getComputedStyle(document.documentElement);
+    const textColor = documentStyle.getPropertyValue('--p-text-color');
+    const textColorSecondary = documentStyle.getPropertyValue('--p-text-muted-color');
+    const surfaceBorder = documentStyle.getPropertyValue('--p-content-border-color');
+
+    return {
+        indexAxis: 'y',
+        maintainAspectRatio: false,
+        aspectRatio: 0.8,
+        plugins: {
+            legend: {
+                position: 'top',
+                align: 'center',
+                labels: {
+                    color: textColor,
+                    usePointStyle: true,
+                    padding: 20,
+                    boxWidth: 8,
+                    boxHeight: 8
+                }
+            },
+            tooltip: {
+                mode: 'index',
+                intersect: false,
+                callbacks: {
+                    label: function (context) {
+                        return `${context.dataset.label}: ${context.parsed.x}`;
+                    }
+                }
+            }
+        },
+        scales: {
+            x: {
+                position: 'top',
+                ticks: {
+                    color: textColorSecondary,
+                    font: {
+                        weight: 500
+                    },
+                    callback: function (value) {
+                        return value;
+                    }
+                },
+                grid: {
+                    display: false,
+                    drawBorder: false
+                }
+            },
+            y: {
+                ticks: {
+                    color: textColorSecondary,
+                    font: {
+                        size: 12,
+                        weight: '500'
+                    },
+                    padding: 10
+                },
+                grid: {
+                    color: surfaceBorder,
+                    drawBorder: false
+                }
+            }
+        },
+        // Enhanced bar styling
+        elements: {
+            bar: {
+                borderRadius: 16, // Even more rounded
+                borderSkipped: false
+            }
+        },
+        barPercentage: 0.7,
+        categoryPercentage: 0.8
+    };
+};
 
 const form = ref({
     memberCode: 'E346572',
@@ -593,4 +685,12 @@ const shiptoList = ref([
         emailAddress: 'contact@shiroauto.com'
     }
 ]);
+
+const onManageDevice = () => {
+    console.log('Manage device clicked');
+};
+
+const sendSetting = (data) => {
+    console.log('Sending activation code to:', data.name);
+};
 </script>

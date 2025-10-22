@@ -120,32 +120,41 @@
                     </div>
                 </div>
 
-                <!-- Device List -->
-                <div class="card flex flex-col w-full">
-                    <div class="text-2xl font-bold text-gray-800 border-b pb-2 mb-3">Devices</div>
-                    <div class="overflow-x-auto">
-                        <table class="w-full text-sm text-left">
-                            <tbody>
-                                <tr v-for="device in devices" :key="device.id" class="border-b">
-                                    <!-- Device info -->
-                                    <td class="px-4 py-3">
-                                        <div class="flex items-center gap-2 text-gray-800 font-bold">
-                                            <i class="pi pi-tablet text-black-500"></i>
-                                            {{ device.name }}
-                                        </div>
-                                        <div class="ml-6 text-gray-500 text-xs mt-2">
-                                            <div>ID: {{ device.uniqueId }}</div>
-                                            <div>Active at: {{ device.lastActive }}</div>
-                                        </div>
-                                    </td>
+                <div class="card flex flex-col border-b w-full">
+                    <!-- Header -->
+                    <div class="flex items-center justify-between border-b pb-2 mb-3">
+                        <div class="text-2xl font-bold text-gray-800">Devices</div>
+                        <div class="flex justify-end">
+                            <Button label="Manage Device" icon="pi pi-tablet" size="small" class="!py-1 !px-3 text-sm" />
+                        </div>
+                    </div>
 
-                                    <!-- Action -->
-                                    <td class="px-4 py-3 text-right align-top">
-                                        <Button :label="device.isBlocked ? 'Un-block' : 'Block'" :severity="device.isBlocked ? 'success' : 'danger'" size="small" @click="toggleBlock(device)" />
-                                    </td>
-                                </tr>
-                            </tbody>
-                        </table>
+                    <!-- Table -->
+                    <div>
+                        <div class="overflow-x-auto">
+                            <table class="w-full text-sm text-left">
+                                <tbody>
+                                    <tr v-for="device in devices" :key="device.id" class="border-b">
+                                        <!-- Device info -->
+                                        <td class="px-4 py-3">
+                                            <div class="flex items-center gap-2 text-gray-800 font-bold">
+                                                <i class="pi pi-tablet text-black-500"></i>
+                                                {{ device.name }}
+                                            </div>
+                                            <div class="ml-6 text-gray-500 text-xs mt-2">
+                                                <div>ID: {{ device.uniqueId }}</div>
+                                                <div>Active at: {{ device.lastActive }}</div>
+                                            </div>
+                                        </td>
+
+                                        <!-- Action -->
+                                        <td class="px-4 py-3 text-right align-top">
+                                            <Button :label="device.isBlocked ? 'Un-block' : 'Block'" :severity="device.isBlocked ? 'success' : 'danger'" size="small" class="!py-1 !px-2 text-xs w-fit" @click="toggleBlock(device)" />
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
                     </div>
                 </div>
             </div>
