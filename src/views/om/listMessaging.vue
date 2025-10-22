@@ -11,8 +11,6 @@
             :loading="loading" 
             :filters="filters1" 
             filterDisplay="menu"
-            :expandedRows="expandedRows"
-            @row-toggle="onRowToggle"
         >
             <!-- Header -->
             <template #header>
@@ -38,13 +36,11 @@
             <template #empty> No messages found. </template>
             <template #loading> Loading messages data. Please wait. </template>
 
-            <!-- Expand Row -->
-            <Column :expander="true" headerStyle="width: 3rem" />
-
-            <!-- Message Date -->
+            <!-- Message Date (Clickable) -->
             <Column field="messageDate" header="Message Date" style="min-width: 10rem">
                 <template #body="{ data }">
-                    <div class="font-semibold text-gray-800">
+                    <div class="font-semibold text-gray-800 cursor-pointer hover:text-blue-600 transition-colors" 
+                         @click="goToDetail(data.messageId, data.messageDate)">
                         {{ formatDate(data.messageDate) }}
                     </div>
                 </template>
@@ -68,85 +64,27 @@
                 </template>
             </Column>
 
-            <!-- Expanded Row Template -->
-            <template #expansion="{ data }">
-                <div class="p-4 bg-gray-50 rounded-lg">
-                    <div class="text-lg font-bold text-gray-800 mb-4">Dealers List</div>
-                    <DataTable 
-                        :value="data.dealers" 
-                        :paginator="true" 
-                        :rows="5" 
-                        :rowsPerPageOptions="[3, 5, 7, 15, 20, 25, 30, 50]"
-                        dataKey="custAccountNo" 
-                        :rowHover="true"
-                        responsiveLayout="scroll"
-                    >
-                        <!-- Dealer Account No -->
-                        <Column field="custAccountNo" header="Account No" style="min-width: 8rem">
-                            <template #body="{ data }">
-                                <div class="font-mono text-gray-700">
-                                    {{ data.custAccountNo }}
-                                </div>
-                            </template>
-                        </Column>
-
-                        <!-- Dealer Name -->
-                        <Column field="companyName1" header="Dealer Name" style="min-width: 12rem">
-                            <template #body="{ data }">
-                                <div class="font-semibold text-gray-800">
-                                    {{ data.companyName1 }}
-                                </div>
-                            </template>
-                        </Column>
-
-                        <!-- Dealer Email -->
-                        <Column field="emailAddress" header="Email" style="min-width: 12rem">
-                            <template #body="{ data }">
-                                <div class="text-blue-600 hover:underline">
-                                    <a :href="`mailto:${data.emailAddress}`">{{ data.emailAddress }}</a>
-                                </div>
-                            </template>
-                        </Column>
-
-                        <!-- Dealer Phone -->
-                        <Column field="phoneNumber" header="Phone" style="min-width: 10rem">
-                            <template #body="{ data }">
-                                <div class="text-gray-700">
-                                    {{ data.phoneNumber }}
-                                </div>
-                            </template>
-                        </Column>
-
-                        <!-- Status -->
-                        <Column field="status" header="Status" style="min-width: 8rem">
-                            <template #body="{ data }">
-                                <Tag 
-                                    :value="data.status === 1 ? 'Active' : 'Inactive'" 
-                                    :severity="data.status === 1 ? 'success' : 'danger'" 
-                                />
-                            </template>
-                        </Column>
-
-                        <template #empty>
-                            <div class="text-center text-gray-500 py-4">
-                                No dealers found for this message.
-                            </div>
-                        </template>
-                    </DataTable>
-                </div>
-            </template>
+            <!-- Dealers Count -->
+            <Column field="dealersCount" header="Dealers" style="min-width: 8rem">
+                <template #body="{ data }">
+                    <div class="text-center">
+                        <Tag :value="data.dealers.length.toString()" class="bg-blue-100 text-blue-800" />
+                    </div>
+                </template>
+            </Column>
         </DataTable>
     </div>
 </template>
 
 <script setup>
 import { ref, onBeforeMount } from 'vue';
+import { useRouter } from 'vue-router';
 import { FilterMatchMode, FilterOperator } from '@primevue/core/api';
 
+const router = useRouter();
 const filters1 = ref(null);
 const listData = ref([]);
 const loading = ref(true);
-const expandedRows = ref([]);
 
 // Sample data - replace with your actual service
 const mockMessages = [
@@ -263,9 +201,8 @@ const formatDate = (dateString) => {
     });
 };
 
-const onRowToggle = (event) => {
-    // You can add custom logic here when rows are expanded/collapsed
-    console.log('Row toggle:', event);
+const goToDetail = (messageId, messageDate) => {
+    router.push(`/om/detailMessaging/${messageId}`);
 };
 
 onBeforeMount(async () => {
@@ -286,9 +223,5 @@ onBeforeMount(async () => {
 
 :deep(.p-datatable-scrollable .p-frozen-column) {
     font-weight: bold;
-}
-
-:deep(.p-row-expanded) {
-    background-color: #f9fafb !important;
 }
 </style>
