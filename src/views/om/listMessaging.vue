@@ -37,38 +37,22 @@
             <template #loading> Loading messages data. Please wait. </template>
 
             <!-- Message Date (Clickable) -->
-            <Column field="messageDate" header="Message Date" style="min-width: 10rem">
+            <Column field="messageDate" header="Message DateTime" style="min-width: 25rem">
                 <template #body="{ data }">
                     <div class="font-semibold text-gray-800 cursor-pointer hover:text-blue-600 transition-colors" 
-                         @click="goToDetail(data.messageId, data.messageDate)">
-                        {{ formatDate(data.messageDate) }}
+                         @click="goToDetail(data.messageId)">
+                        {{ formatDate(data.messageDate) }} , {{ data.messageTime }}
                     </div>
                 </template>
             </Column>
 
-            <!-- Message Time -->
-            <Column field="messageTime" header="Message Time" style="min-width: 8rem">
-                <template #body="{ data }">
-                    <div class="text-gray-700">
-                        {{ data.messageTime }}
-                    </div>
-                </template>
-            </Column>
+           
 
             <!-- Message Subject -->
-            <Column field="subject" header="Message Subject" style="min-width: 15rem">
+            <Column field="subject" header="Message Subject" style="min-width: 20rem">
                 <template #body="{ data }">
                     <div class="font-medium text-gray-900">
                         {{ data.subject }}
-                    </div>
-                </template>
-            </Column>
-
-            <!-- Dealers Count -->
-            <Column field="dealersCount" header="Dealers" style="min-width: 8rem">
-                <template #body="{ data }">
-                    <div class="text-center">
-                        <Tag :value="data.dealers.length.toString()" class="bg-blue-100 text-blue-800" />
                     </div>
                 </template>
             </Column>
@@ -201,8 +185,11 @@ const formatDate = (dateString) => {
     });
 };
 
-const goToDetail = (messageId, messageDate) => {
-    router.push(`/om/detailMessaging/${messageId}`);
+const goToDetail = (messageId) => {
+    router.push({
+        path: '/om/detailMessaging',
+        query: { id: messageId }
+    });
 };
 
 onBeforeMount(async () => {

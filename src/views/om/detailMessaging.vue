@@ -1,156 +1,88 @@
 <template>
     <div class="card">
         <div class="flex items-center justify-between mb-6">
-            <div>
-                <Button 
-                    icon="pi pi-arrow-left" 
-                    class="p-button-text p-button-secondary mb-2" 
-                    @click="goBack"
-                    label="Back to List"
-                />
-                <div class="text-2xl font-bold text-gray-800">
-                    Dealers for {{ currentMessage?.subject }}
+            <div class="text-2xl font-bold text-gray-800">Message Details</div>
+            <Button 
+                label="Back to List" 
+                icon="pi pi-arrow-left" 
+                class="p-button-secondary" 
+                @click="goBack" 
+            />
+        </div>
+
+        <div v-if="loading" class="text-center py-8">
+            <ProgressSpinner style="width: 50px; height: 50px" />
+            <div class="mt-2 text-gray-600">Loading message details...</div>
+        </div>
+
+        <div v-else-if="message" class="bg-white rounded-lg shadow-sm border p-6">
+            <!-- Message Header -->
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
+                <div>
+                    <label class="block text-sm font-medium text-gray-500 mb-1">Message ID</label>
+                    <div class="text-lg font-semibold text-gray-800">{{ message.messageId }}</div>
                 </div>
-                <div class="text-gray-600 mt-1">
-                    Message Date: {{ formatDate(currentMessage?.messageDate) }} at {{ currentMessage?.messageTime }}
+                <div>
+                    <label class="block text-sm font-medium text-gray-500 mb-1">Date</label>
+                    <div class="text-lg font-semibold text-gray-800">{{ formatDate(message.messageDate) }}</div>
                 </div>
-                <div class="text-gray-600">
-                    Total {{ dealers.length }} dealer(s) found
+                <div>
+                    <label class="block text-sm font-medium text-gray-500 mb-1">Time</label>
+                    <div class="text-lg font-semibold text-gray-800">{{ message.messageTime }}</div>
                 </div>
             </div>
-            
-            <div class="text-right">
-                <div class="text-lg font-semibold text-gray-700">
-                    {{ formatDate(currentMessage?.messageDate) }}
+
+            <!-- Subject -->
+            <div class="mb-6">
+                <label class="block text-sm font-medium text-gray-500 mb-1">Subject</label>
+                <div class="text-xl font-bold text-gray-900">{{ message.subject }}</div>
+            </div>
+
+            <!-- Dealers Section -->
+            <div class="border-t pt-6">
+                <div class="flex items-center justify-between mb-4">
+                    <h3 class="text-lg font-semibold text-gray-800">Dealers List </h3>
                 </div>
-                <div class="text-gray-500">
-                    Message Date
-                </div>
+
+                <DataTable :value="message.dealers" class="p-datatable-sm" :rowHover="true">
+                    <Column field="custAccountNo" header="Account No" style="min-width: 250px">
+                        <template #body="{ data }">
+                            <div class="font-mono text-sm">{{ data.custAccountNo }}</div>
+                        </template>
+                    </Column>
+                    
+                    <Column field="companyName1" header="Company Name" style="min-width: 200px">
+                        <template #body="{ data }">
+                            <div class="font-medium">{{ data.companyName1 }}</div>
+                        </template>
+                    </Column>
+                </DataTable>
             </div>
         </div>
 
-        <DataTable 
-            :value="dealers" 
-            :paginator="true" 
-            :rows="10" 
-            :rowsPerPageOptions="[5, 10, 15, 20, 25, 30, 50]"
-            dataKey="custAccountNo" 
-            :rowHover="true"
-            :loading="loading"
-            responsiveLayout="scroll"
-        >
-            <template #header>
-                <div class="flex items-center justify-between gap-4 w-full flex-wrap">
-                    <!-- Search -->
-                    <div class="flex items-center gap-2 w-full max-w-md">
-                        <IconField class="flex-1">
-                            <InputIcon>
-                                <i class="pi pi-search" />
-                            </InputIcon>
-                            <InputText v-model="filters1['global'].value" placeholder="Search dealers..." class="w-full" />
-                        </IconField>
-                    </div>
-
-                    <!-- Export Button -->
-                    <Button 
-                        type="button" 
-                        label="Export" 
-                        icon="pi pi-download" 
-                        class="p-button-outlined" 
-                    />
-                </div>
-            </template>
-
-            <template #empty> 
-                <div class="text-center text-gray-500 py-8">
-                    <i class="pi pi-inbox text-4xl mb-2"></i>
-                    <div>No dealers found for this message.</div>
-                </div>
-            </template>
-            <template #loading> Loading dealers data. Please wait. </template>
-
-            <!-- Dealer Account No -->
-            <Column field="custAccountNo" header="Account No" style="min-width: 8rem" sortable>
-                <template #body="{ data }">
-                    <div class="font-mono text-gray-700">
-                        {{ data.custAccountNo }}
-                    </div>
-                </template>
-            </Column>
-
-            <!-- Dealer Name -->
-            <Column field="companyName1" header="Dealer Name" style="min-width: 15rem" sortable>
-                <template #body="{ data }">
-                    <div class="font-semibold text-gray-800">
-                        {{ data.companyName1 }}
-                    </div>
-                </template>
-            </Column>
-
-            <!-- Dealer Email -->
-            <Column field="emailAddress" header="Email" style="min-width: 12rem" sortable>
-                <template #body="{ data }">
-                    <div class="text-blue-600 hover:underline">
-                        <a :href="`mailto:${data.emailAddress}`">{{ data.emailAddress }}</a>
-                    </div>
-                </template>
-            </Column>
-
-            <!-- Dealer Phone -->
-            <Column field="phoneNumber" header="Phone" style="min-width: 10rem">
-                <template #body="{ data }">
-                    <div class="text-gray-700">
-                        {{ data.phoneNumber }}
-                    </div>
-                </template>
-            </Column>
-
-            <!-- Status -->
-            <Column field="status" header="Status" style="min-width: 8rem" sortable>
-                <template #body="{ data }">
-                    <Tag 
-                        :value="data.status === 1 ? 'Active' : 'Inactive'" 
-                        :severity="data.status === 1 ? 'success' : 'danger'" 
-                    />
-                </template>
-            </Column>
-
-            <!-- Actions -->
-            <Column header="Actions" style="min-width: 10rem">
-                <template #body="{ data }">
-                    <div class="flex gap-2">
-                        <Button 
-                            icon="pi pi-eye" 
-                            class="p-button-rounded p-button-text p-button-primary" 
-                            v-tooltip="'View Details'"
-                        />
-                        <Button 
-                            icon="pi pi-envelope" 
-                            class="p-button-rounded p-button-text p-button-info" 
-                            v-tooltip="'Send Email'"
-                        />
-                    </div>
-                </template>
-            </Column>
-        </DataTable>
+        <div v-else class="text-center py-8">
+            <i class="pi pi-exclamation-triangle text-4xl text-yellow-500 mb-4"></i>
+            <div class="text-xl font-semibold text-gray-700 mb-2">Message Not Found</div>
+            <div class="text-gray-600 mb-4">The requested message could not be found.</div>
+            <Button label="Back to List" icon="pi pi-arrow-left" @click="goBack" />
+        </div>
     </div>
 </template>
 
 <script setup>
-import { ref, onBeforeMount, computed } from 'vue';
-import { useRouter, useRoute } from 'vue-router';
+import { ref, onMounted, watch } from 'vue';
+import { useRoute, useRouter } from 'vue-router';
 import { FilterMatchMode, FilterOperator } from '@primevue/core/api';
 
-const router = useRouter();
 const route = useRoute();
-const dealers = ref([]);
-const loading = ref(true);
-const filters1 = ref(null);
-const currentMessage = ref(null);
+const router = useRouter();
 
-// Sample data - replace with your actual service
-const mockMessages = [
-    {
+const message = ref(null);
+const loading = ref(true);
+
+// Mock data service - replace with your actual API call
+const mockMessages = {
+    'MSG001': {
         messageId: 'MSG001',
         messageDate: '2024-01-15',
         messageTime: '14:30:00',
@@ -193,7 +125,7 @@ const mockMessages = [
             }
         ]
     },
-    {
+    'MSG002': {
         messageId: 'MSG002',
         messageDate: '2024-01-10',
         messageTime: '09:15:00',
@@ -215,7 +147,7 @@ const mockMessages = [
             }
         ]
     },
-    {
+    'MSG003': {
         messageId: 'MSG003',
         messageDate: '2024-01-05',
         messageTime: '16:45:00',
@@ -244,18 +176,9 @@ const mockMessages = [
             }
         ]
     }
-];
-
-function initFilters1() {
-    filters1.value = {
-        global: { value: null, matchMode: FilterMatchMode.CONTAINS },
-        companyName1: { operator: FilterOperator.AND, constraints: [{ value: null, matchMode: FilterMatchMode.STARTS_WITH }] },
-        status: { operator: FilterOperator.AND, constraints: [{ value: null, matchMode: FilterMatchMode.EQUALS }] }
-    };
-}
+};
 
 const formatDate = (dateString) => {
-    if (!dateString) return '';
     const date = new Date(dateString);
     return date.toLocaleDateString('en-US', {
         year: 'numeric',
@@ -265,26 +188,42 @@ const formatDate = (dateString) => {
 };
 
 const goBack = () => {
-    router.push('/om/listMessaging');
+    router.push('/om/listMessaging'); // Adjust this path to your list page route
 };
 
-const loadDealers = () => {
-    const messageId = route.params.messageId;
-    const message = mockMessages.find(msg => msg.messageId === messageId);
+const fetchMessageDetails = async (messageId) => {
+    loading.value = true;
     
-    if (message) {
-        currentMessage.value = message;
-        dealers.value = message.dealers;
-    } else {
-        currentMessage.value = null;
-        dealers.value = [];
-    }
+    // Simulate API call delay
+    await new Promise(resolve => setTimeout(resolve, 500));
+    
+    // Replace this with your actual API call
+    // const response = await messagingService.getMessageById(messageId);
+    // message.value = response.data;
+    
+    // Using mock data for demonstration
+    message.value = mockMessages[messageId] || null;
+    
     loading.value = false;
 };
 
-onBeforeMount(async () => {
-    initFilters1();
-    loadDealers();
+// Watch for route changes (in case user navigates between different messages)
+watch(
+    () => route.query.id,
+    (newMessageId) => {
+        if (newMessageId) {
+            fetchMessageDetails(newMessageId);
+        }
+    }
+);
+
+onMounted(() => {
+    const messageId = route.query.id;
+    if (messageId) {
+        fetchMessageDetails(messageId);
+    } else {
+        loading.value = false;
+    }
 });
 </script>
 
@@ -292,6 +231,7 @@ onBeforeMount(async () => {
 :deep(.p-datatable) {
     .p-datatable-thead > tr > th {
         background-color: #f8fafc;
+        color: #374151;
         font-weight: 600;
     }
 }
