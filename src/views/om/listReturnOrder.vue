@@ -29,11 +29,6 @@
                         </IconField>
                         <Button type="button" icon="pi pi-cog" class="p-button" />
                     </div>
-
-                    <!-- Right: Create Return Order Button -->
-                    <RouterLink to="/om/createEten">
-                        <Button type="button" label="Create" />
-                    </RouterLink>
                 </div>
             </template>
 
@@ -46,38 +41,45 @@
             <!-- ========================= -->
             <!-- Data Columns -->
             <!-- ========================= -->
-            <Column field="returnRequestNo" header="Return Req No" style="min-width: 8rem">
+            <Column field="returnRequestNo" header="Return Req No." style="min-width: 8rem">
                 <template #body="{ data }">
                     <RouterLink to="/om/detailReturnOrder" class="hover:underline font-bold">
                         {{ data.returnRequestNo }}
                     </RouterLink>
                 </template>
             </Column>
-            
-            <Column field="custAccountNo" header="Dealer Acc No" style="min-width: 8rem">
+
+            <Column field="custAccountNo" header="Acc No." style="min-width: 8rem">
                 <template #body="{ data }">
                     {{ data.custAccountNo }}
                 </template>
             </Column>
-            
-            <Column field="customerName" header="Dealer Name" style="min-width: 8rem">
+
+            <Column field="customerName" header="Requester Name" style="min-width: 8rem">
                 <template #body="{ data }">
                     {{ data.customerName }}
                 </template>
             </Column>
-            
+            <Column field="customerName" header="Reason Code" style="min-width: 8rem">
+                <template #body="{ data }">
+                    {{ data.reasonCode }}
+                </template>
+            </Column>
+            <Column field="customerName" header="Reason Message" style="min-width: 8rem">
+                <template #body="{ data }">
+                    {{ data.reasonMessage }}
+                </template>
+            </Column>
+
             <Column field="deliveryDate" header="Date" style="min-width: 8rem">
                 <template #body="{ data }">
                     {{ formatDate(data.deliveryDate) }}
                 </template>
             </Column>
-            
+
             <Column field="orderStatus" header="Status" style="min-width: 8rem">
                 <template #body="{ data }">
-                    <Tag
-                        :value="getOverallStatusLabel(data.orderStatus)"
-                        :severity="getOverallStatusSeverity(data.orderStatus)"
-                    />
+                    <Tag :value="getOverallStatusLabel(data.orderStatus)" :severity="getOverallStatusSeverity(data.orderStatus)" />
                 </template>
             </Column>
         </DataTable>
@@ -100,10 +102,10 @@ const filters = ref({
 
 // Status map for cleaner handling
 const STATUS_MAP = {
-    0: { label: 'Pending', severity: 'warn' },
-    66: { label: 'Processing', severity: 'info' },
-    77: { label: 'Delivery', severity: 'success' },
-    1: { label: 'Completed', severity: 'primary' }
+    0: { label: 'Pending Approval', severity: 'warn' },
+    1: { label: 'Approved', severity: 'info' },
+    2: { label: 'Processing', severity: 'success' },
+    3: { label: 'Completed', severity: 'primary' }
 };
 
 // =========================

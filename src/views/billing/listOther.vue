@@ -38,6 +38,9 @@ function initFilters1() {
                         </IconField>
                         <Button type="button" icon="pi pi-cog" class="p-button" />
                     </div>
+                    <div class="flex justify-end gap-2 w-full max-w-md">
+                        <Button type="button" icon="pi pi-upload" label="Upload" class="p-button " />
+                    </div>
                 </div>
             </template>
 
