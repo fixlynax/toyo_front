@@ -2,13 +2,7 @@
     <div class="card rounded-2xl shadow-sm">
         <!-- Header -->
         <div class="flex justify-between items-center mb-4">
-            <h5 class="m-0 text-2xl font-bold text-gray-800">Disable Order List</h5>
-            <Button 
-                label="Add New" 
-                icon="pi pi-plus" 
-                class="p-button-sm p-button-primary" 
-                @click="showCreatePopup"
-            />
+            <h5 class="m-0 text-2xl font-bold text-gray-800">Disable Ordering</h5>
         </div>
 
         <!-- DataTable -->
@@ -17,8 +11,6 @@
             :loading="loading"
             dataKey="id"
             :rows="10"
-            paginator
-            :rowsPerPageOptions="[5, 10, 20]"
             :filters="filters1"
             responsiveLayout="scroll"
             stripedRows
@@ -27,9 +19,7 @@
         >
             <template #header>
                 <div class="flex justify-between items-center">
-                    <span class="text-sm text-gray-500">
-                        Total: {{ disabledOrders.length }}
-                    </span>
+                    <span class="text-sm text-gray-500">Total: {{ disabledOrders.length }}</span>
                 </div>
             </template>
 
@@ -37,12 +27,7 @@
                 <div class="text-center p-6">
                     <i class="pi pi-inbox text-3xl text-gray-400 mb-2"></i>
                     <div>No disabled orders found.</div>
-                    <Button
-                        label="Create One"
-                        icon="pi pi-plus"
-                        class="p-button-text mt-3"
-                        @click="showCreatePopup"
-                    />
+                    <Button label="Create One" icon="pi pi-plus" class="p-button-text mt-3" @click="showCreatePopup" />
                 </div>
             </template>
 
@@ -53,7 +38,7 @@
                         <Tag
                             v-for="type in data.orderTypes"
                             :key="type"
-                            :value="type"
+                            :value="getOrderTypeLabel(type)"
                             :severity="getOrderTypeSeverity(type)"
                         />
                     </div>
@@ -71,8 +56,7 @@
 
             <Column header="Locations" style="min-width: 10rem">
                 <template #body="{ data }">
-                    <Badge :value="data.locations.length" />
-                    locations
+                    <Badge :value="data.locations.length" /> locations
                 </template>
             </Column>
 
@@ -88,10 +72,7 @@
 
             <Column header="Status" style="min-width: 8rem">
                 <template #body="{ data }">
-                    <Tag
-                        :value="getStatus(data)"
-                        :severity="getStatusSeverity(data)"
-                    />
+                    <Tag :value="getStatus(data)" :severity="getStatusSeverity(data)" />
                 </template>
             </Column>
 
@@ -106,25 +87,8 @@
             <Column header="Actions" style="min-width: 10rem" bodyClass="text-center">
                 <template #body="{ data }">
                     <div class="flex justify-center gap-2">
-                        <Button
-                            icon="pi pi-power-off"
-                            class="p-button-text p-button-success p-button-sm"
-                            v-tooltip="'Enable Order'"
-                            :disabled="getStatus(data) === 'Expired'"
-                            @click="enableOrder(data.id)"
-                        />
-                        <Button
-                            icon="pi pi-pencil"
-                            class="p-button-text p-button-info p-button-sm"
-                            v-tooltip="'Edit'"
-                            @click="editItem(data)"
-                        />
-                        <Button
-                            icon="pi pi-trash"
-                            class="p-button-text p-button-danger p-button-sm"
-                            v-tooltip="'Delete'"
-                            @click="deleteItem(data.id)"
-                        />
+                        <Button icon="pi pi-pencil" class="p-button-text p-button-info p-button-sm" v-tooltip="'Edit'" @click="editItem(data)" />
+                        <Button icon="pi pi-trash" class="p-button-text p-button-danger p-button-sm" v-tooltip="'Delete'" @click="deleteItem(data.id)" />
                     </div>
                 </template>
             </Column>
@@ -157,12 +121,7 @@
                         class="w-full"
                         :class="{ 'p-invalid': submitted && !newOrder.orderTypes.length }"
                     />
-                    <small
-                        v-if="submitted && !newOrder.orderTypes.length"
-                        class="p-error block mt-1"
-                    >
-                        Order Types is required
-                    </small>
+                    <small v-if="submitted && !newOrder.orderTypes.length" class="p-error block mt-1">Order Types is required</small>
                 </div>
 
                 <!-- Maintenance Type -->
@@ -180,12 +139,7 @@
                         class="w-full"
                         :class="{ 'p-invalid': submitted && !newOrder.maintenanceType }"
                     />
-                    <small
-                        v-if="submitted && !newOrder.maintenanceType"
-                        class="p-error block mt-1"
-                    >
-                        Maintenance Type is required
-                    </small>
+                    <small v-if="submitted && !newOrder.maintenanceType" class="p-error block mt-1">Maintenance Type is required</small>
                 </div>
 
                 <!-- Locations -->
@@ -204,12 +158,7 @@
                         class="w-full"
                         :class="{ 'p-invalid': submitted && !newOrder.locations.length }"
                     />
-                    <small
-                        v-if="submitted && !newOrder.locations.length"
-                        class="p-error block mt-1"
-                    >
-                        At least one location is required
-                    </small>
+                    <small v-if="submitted && !newOrder.locations.length" class="p-error block mt-1">At least one location is required</small>
                 </div>
 
                 <!-- Period -->
@@ -237,10 +186,7 @@
                             :class="{ 'p-invalid': submitted && !newOrder.endDateTime }"
                         />
                     </div>
-                    <small
-                        v-if="submitted && (!newOrder.startDateTime || !newOrder.endDateTime)"
-                        class="p-error block mt-1"
-                    >
+                    <small v-if="submitted && (!newOrder.startDateTime || !newOrder.endDateTime)" class="p-error block mt-1">
                         Both start and end date are required
                     </small>
                 </div>
@@ -248,37 +194,19 @@
                 <!-- Message -->
                 <div class="field col-12">
                     <label for="message" class="font-semibold text-gray-700">Message</label>
-                    <Textarea
-                        id="message"
-                        v-model="newOrder.message"
-                        rows="3"
-                        autoResize
-                        placeholder="Enter message (optional)"
-                        class="w-full"
-                    />
+                    <Textarea id="message" v-model="newOrder.message" rows="3" autoResize placeholder="Enter message (optional)" class="w-full" />
                 </div>
             </div>
 
             <template #footer>
                 <div class="flex justify-end gap-3">
-                    <Button
-                        label="Cancel"
-                        icon="pi pi-times"
-                        class="p-button-text text-gray-600 hover:text-gray-800"
-                        @click="hideCreatePopup"
-                    />
-                    <Button
-                        label="Create"
-                        icon="pi pi-check"
-                        class="p-button-primary"
-                        @click="createNewOrder"
-                    />
+                    <Button label="Cancel" icon="pi pi-times" class="p-button-text text-gray-600 hover:text-gray-800" @click="hideCreatePopup" />
+                    <Button label="Create" icon="pi pi-check" class="p-button-primary" @click="createNewOrder" />
                 </div>
             </template>
         </Dialog>
     </div>
 </template>
-
 
 <script>
 export default {
@@ -301,10 +229,9 @@ export default {
                 message: ''
             },
             orderTypeOptions: [
-                { label: 'Normal', value: 'Normal' },
-                { label: 'Clearance', value: 'Clearance' },
-                { label: 'Direct Shipment', value: 'Direct Shipment' },
-                { label: 'Both', value: 'Both' }
+                { label: 'Normal', value: 1 },
+                { label: 'All', value: 2 },
+                { label: 'Own Use', value: 0 }
             ],
             maintenanceTypeOptions: [
                 { label: 'Shipping Point', value: 'shipping_point' },
@@ -339,7 +266,7 @@ export default {
             const now = new Date();
             if (now < new Date(order.startDateTime)) return 'Scheduled';
             if (now <= new Date(order.endDateTime)) return 'Active';
-            return 'Expired';
+            return 'Inactive';
         },
 
         getStatusSeverity(order) {
@@ -348,23 +275,26 @@ export default {
                     return 'warning';
                 case 'Active':
                     return 'danger';
-                case 'Expired':
+                case 'Inactive':
                     return 'secondary';
                 default:
                     return 'info';
             }
         },
 
-        getOrderTypeSeverity(type) {
-            switch (type) {
-                case 'Clearance':
-                    return 'warning';
-                case 'Direct Shipment':
-                    return 'info';
-                case 'Normal':
-                    return 'success';
-                case 'Both':
-                    return 'danger';
+        getOrderTypeLabel(value) {
+            const map = { 0: 'Own Use', 1: 'Normal', 2: 'All' };
+            return map[value] || 'Unknown';
+        },
+
+        getOrderTypeSeverity(value) {
+            switch (value) {
+                case 1:
+                    return 'info'; // Normal
+                case 2:
+                    return 'warning'; // All
+                case 0:
+                    return 'success'; // Own Use
                 default:
                     return 'secondary';
             }
@@ -395,24 +325,22 @@ export default {
         createNewOrder() {
             this.submitted = true;
 
-            // Validate required fields
-            if (!this.newOrder.orderTypes.length || 
-                !this.newOrder.maintenanceType || 
-                !this.newOrder.locations.length || 
-                !this.newOrder.startDateTime || 
-                !this.newOrder.endDateTime) {
+            if (
+                !this.newOrder.orderTypes.length ||
+                !this.newOrder.maintenanceType ||
+                !this.newOrder.locations.length ||
+                !this.newOrder.startDateTime ||
+                !this.newOrder.endDateTime
+            )
                 return;
-            }
 
-            // Validate date logic
             if (this.newOrder.endDateTime <= this.newOrder.startDateTime) {
                 alert('End date must be after start date');
                 return;
             }
 
-            // Create new order object
             const newOrder = {
-                id: Math.max(...this.disabledOrders.map(o => o.id), 0) + 1,
+                id: Math.max(...this.disabledOrders.map((o) => o.id), 0) + 1,
                 orderTypes: [...this.newOrder.orderTypes],
                 maintenanceType: this.newOrder.maintenanceType,
                 locations: [...this.newOrder.locations],
@@ -421,10 +349,8 @@ export default {
                 message: this.newOrder.message || 'No message provided'
             };
 
-            // Add to the list
             this.disabledOrders.unshift(newOrder);
 
-            // Show success message
             this.$toast.add({
                 severity: 'success',
                 summary: 'Success',
@@ -432,25 +358,11 @@ export default {
                 life: 3000
             });
 
-            // Close popup and reset form
             this.hideCreatePopup();
-        },
-
-        enableOrder(id) {
-            if (confirm('Enable this order?')) {
-                this.disabledOrders = this.disabledOrders.filter((o) => o.id !== id);
-                this.$toast.add({
-                    severity: 'success',
-                    summary: 'Enabled',
-                    detail: 'Order has been enabled',
-                    life: 3000
-                });
-            }
         },
 
         editItem(item) {
             console.log('Editing:', item);
-            // You can implement edit functionality similarly
         },
 
         deleteItem(id) {
@@ -466,24 +378,23 @@ export default {
         }
     },
     mounted() {
-        // Sample data for disabled orders
         this.disabledOrders = [
             {
                 id: 1,
-                orderTypes: ['Normal', 'Clearance'],
+                orderTypes: [1, 2],
                 maintenanceType: 'shipping_point',
                 locations: ['SP001', 'SP002'],
-                startDateTime: new Date('2024-01-20T08:00:00'),
-                endDateTime: new Date('2024-01-20T12:00:00'),
+                startDateTime: new Date('2025-01-20T08:00:00'),
+                endDateTime: new Date('2025-01-20T12:00:00'),
                 message: 'System maintenance for SP001 and SP002'
             },
             {
                 id: 2,
-                orderTypes: ['Direct Shipment'],
+                orderTypes: [0],
                 maintenanceType: 'storage_location',
                 locations: ['SL001'],
-                startDateTime: new Date('2024-01-21T14:00:00'),
-                endDateTime: new Date('2024-01-21T16:00:00'),
+                startDateTime: new Date('2025-01-21T14:00:00'),
+                endDateTime: new Date('2025-01-21T16:00:00'),
                 message: 'Inventory counting for SL001'
             }
         ];

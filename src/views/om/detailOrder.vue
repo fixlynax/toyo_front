@@ -155,7 +155,7 @@
                                     <td></td>
                                     <td class="px-2 py-2 text-right">
                                         <RouterLink to="/billing">
-                                            <Button label="Pull Order" size="small" />
+                                            <Button label="Process Back-Order" size="small" />
                                         </RouterLink>
                                     </td>
                                 </tr>
