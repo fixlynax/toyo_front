@@ -442,7 +442,7 @@ const setChartData = () => {
                 backgroundColor: '#0062B0',
                 borderColor: documentStyle.getPropertyValue('--p-cyan-500'),
                 borderWidth: 0,
-                borderRadius: 16, // More rounded corners
+                borderRadius: 16,
                 borderSkipped: false,
                 data: [65, 59, 80, 81, 56, 55, 40]
             },
@@ -451,7 +451,7 @@ const setChartData = () => {
                 backgroundColor: '#B1DEFF',
                 borderColor: documentStyle.getPropertyValue('--p-gray-500'),
                 borderWidth: 0,
-                borderRadius: 16, // More rounded corners
+                borderRadius: 16,
                 borderSkipped: false,
                 data: [28, 48, 40, 19, 86, 27, 90]
             }
@@ -482,11 +482,46 @@ const setChartOptions = () => {
                 }
             },
             tooltip: {
-                mode: 'index',
-                intersect: false,
+                mode: 'nearest', // Changed from 'index' to 'nearest'
+                intersect: true, // Changed to true to only show tooltip when directly hovering
+                backgroundColor: 'rgba(255, 255, 255, 0.95)',
+                titleColor: '#1f2937',
+                bodyColor: '#374151',
+                borderColor: '#d1d5db',
+                borderWidth: 1,
+                cornerRadius: 8,
+                padding: 12,
+                displayColors: true,
+                boxPadding: 6,
+                usePointStyle: true,
                 callbacks: {
+                    title: function (context) {
+                        // Show month name as title
+                        return context[0].label;
+                    },
                     label: function (context) {
-                        return `${context.dataset.label}: ${context.parsed.x}`;
+                        const label = context.dataset.label || '';
+                        const value = context.parsed.x;
+                        return `${label}: ${value}`;
+                    },
+                    afterBody: function (context) {
+                        if (context.length === 2) {
+                            const forecast = context[0].parsed.x;
+                            const actual = context[1].parsed.x;
+                            const difference = actual - forecast;
+                            const percentage = forecast > 0 ? ((difference / forecast) * 100).toFixed(1) : 0;
+
+                            return [`Variance: ${difference >= 0 ? '+' : ''}${difference}`, `Percentage: ${difference >= 0 ? '+' : ''}${percentage}%`];
+                        }
+                        return [];
+                    },
+                    labelColor: function (context) {
+                        return {
+                            borderColor: context.dataset.borderColor,
+                            backgroundColor: context.dataset.backgroundColor,
+                            borderWidth: 2,
+                            borderRadius: 2
+                        };
                     }
                 }
             }
@@ -523,18 +558,27 @@ const setChartOptions = () => {
                 }
             }
         },
-        // Enhanced bar styling
+        interaction: {
+            mode: 'nearest', // Changed from 'index' to 'nearest'
+            intersect: true // Changed to true
+        },
         elements: {
             bar: {
-                borderRadius: 16, // Even more rounded
-                borderSkipped: false
+                borderRadius: 16,
+                borderSkipped: false,
+                hoverBackgroundColor: function (context) {
+                    if (context.datasetIndex === 0) {
+                        return '#004a80';
+                    } else {
+                        return '#8ecaff';
+                    }
+                }
             }
         },
         barPercentage: 0.7,
         categoryPercentage: 0.8
     };
 };
-
 const form = ref({
     memberCode: 'E346572',
     custAccountNo: '6080100900',
