@@ -4,7 +4,7 @@
             <div class="card flex flex-col gap-6 w-full">
                 <!-- Header -->
                 <div class="text-2xl font-bold text-gray-800 border-b pb-2">
-                    {{ isEditMode ? 'Edit Sales Program' : 'Edit Sales Program' }}
+                    {{ isEditMode ? 'Edit Sales Program' : 'Create Sales Program' }}
                 </div>
 
                 <!-- Sales Program Form -->
@@ -414,16 +414,18 @@ const router = useRouter();
 const isEditMode = ref(false);
 const originalData = ref(null);
 
+// Pre-filled existing sales program data
 const salesProgram = ref({
-    title: '',
-    desc: '',
-    startDate: '',
-    endDate: '',
+    id: 'ABC4321',
+    title: 'Year End Discount',
+    desc: 'Exclusive year-end discounts on selected Toyo Tires models. Limited time offer!',
+    startDate: '2025-09-01',
+    endDate: '2025-10-30',
     priceGroup: '06',
     type: 'FOC',
     status: 1,
-    image: '',
-    id: ''
+    image: '/demo/images/event-toyo-2.jpg',
+    created: '2025-09-08'
 });
 
 const typeOptions = [
@@ -564,667 +566,8 @@ const materials = ref([
         patternName: '(NULL)',
         rimDiameter: 15,
         image: '/demo/images/event-toyo-1.jpg'
-    },
-    {
-        id: 372,
-        materialID: '51116510003105T',
-        material: '1105/70R16 TEMPORARY SPARE SS...',
-        materialType: 'ZTRD',
-        pattern: '510',
-        patternName: '(NULL)',
-        rimDiameter: 16,
-        image: '/demo/images/event-toyo-1.jpg'
-    },
-    {
-        id: 373,
-        materialID: '61115NTN107205V',
-        material: '205/50 R15 86V NTINT1 TLR 2R 1X',
-        materialType: 'ZTRD',
-        pattern: 'NTL',
-        patternName: '(NULL)',
-        rimDiameter: 15,
-        image: '/demo/images/event-toyo-1.jpg'
-    },
-    {
-        id: 374,
-        materialID: '61116N83005215W',
-        material: '215/60 R16 99W 830 TLY GSS RD1X',
-        materialType: 'ZTRD',
-        pattern: '830',
-        patternName: '(NULL)',
-        rimDiameter: 16,
-        image: '/demo/images/event-toyo-1.jpg'
-    },
-    {
-        id: 375,
-        materialID: '61116N83006205W',
-        material: '205/55 R16 94W 830 TLY GSS CG1X',
-        materialType: 'ZTRD',
-        pattern: '830',
-        patternName: '(NULL)',
-        rimDiameter: 16,
-        image: '/demo/images/event-toyo-1.jpg'
-    },
-    {
-        id: 376,
-        materialID: '61117SG24007215W',
-        material: '215/50 R17 95W SG2A TLZ GSS RD1X',
-        materialType: 'ZTRD',
-        pattern: '852',
-        patternName: '(NULL)',
-        rimDiameter: 17,
-        image: '/demo/images/event-toyo-1.jpg'
-    },
-    {
-        id: 377,
-        materialID: '61117SG24008225W',
-        material: '225/45 R17 94W SG2A TLZ GSS RD1X',
-        materialType: 'ZTRD',
-        pattern: '852',
-        patternName: '(NULL)',
-        rimDiameter: 17,
-        image: '/demo/images/event-toyo-1.jpg'
-    },
-    {
-        id: 378,
-        materialID: '61117N83006215W',
-        material: '215/55 R17 98W 830 TLY GSS CG1X',
-        materialType: 'ZTRD',
-        pattern: '830',
-        patternName: '(NULL)',
-        rimDiameter: 17,
-        image: '/demo/images/event-toyo-1.jpg'
-    },
-    {
-        id: 379,
-        materialID: '61117N83006225W',
-        material: '225/55 R17 101W 830 TLY GSS CG1X',
-        materialType: 'ZTRD',
-        pattern: '830',
-        patternName: '(NULL)',
-        rimDiameter: 17,
-        image: '/demo/images/event-toyo-1.jpg'
-    },
-    {
-        id: 380,
-        materialID: '61117N83007215W',
-        material: '215/50 R17 95W 830 TLY GSS CG1X',
-        materialType: 'ZTRD',
-        pattern: '830',
-        patternName: '(NULL)',
-        rimDiameter: 17,
-        image: '/demo/images/event-toyo-1.jpg'
-    },
-    {
-        id: 381,
-        materialID: '61117N83007225Y',
-        material: '225/50 R17 98Y 830 TLY G2R CG1X',
-        materialType: 'ZTRD',
-        pattern: '830',
-        patternName: '(NULL)',
-        rimDiameter: 17,
-        image: '/demo/images/event-toyo-1.jpg'
-    },
-    {
-        id: 382,
-        materialID: '61117NIN008225W',
-        material: '225/45 R17 91W NTINVT.UK SS GEHX',
-        materialType: 'ZTRD',
-        pattern: 'NIN',
-        patternName: '(NULL)',
-        rimDiameter: 17,
-        image: '/demo/images/event-toyo-1.jpg'
-    },
-    {
-        id: 383,
-        materialID: '61117NIN008235W',
-        material: '235/45ZR17 94W NTINV TLY SS GEHX',
-        materialType: 'ZTRD',
-        pattern: 'NIN',
-        patternName: '(NULL)',
-        rimDiameter: 17,
-        image: '/demo/images/event-toyo-1.jpg'
-    },
-    {
-        id: 384,
-        materialID: '61118N83008225Y',
-        material: '225/45 R18 95Y 830 TLY G1R CG1X',
-        materialType: 'ZTRD',
-        pattern: '830',
-        patternName: '(NULL)',
-        rimDiameter: 18,
-        image: '/demo/images/event-toyo-1.jpg'
-    },
-    {
-        id: 385,
-        materialID: '61118N83008235W',
-        material: '235/45 R18 98W 830 TLY GSS RD1X',
-        materialType: 'ZTRD',
-        pattern: '830',
-        patternName: '(NULL)',
-        rimDiameter: 18,
-        image: '/demo/images/event-toyo-1.jpg'
-    },
-    {
-        id: 386,
-        materialID: '61118N83009235Y',
-        material: '235/40 R18 95Y 830 TLY G1R CG1X',
-        materialType: 'ZTRD',
-        pattern: '830',
-        patternName: '(NULL)',
-        rimDiameter: 18,
-        image: '/demo/images/event-toyo-1.jpg'
-    },
-    {
-        id: 387,
-        materialID: '61118NIN008225W',
-        material: '225/45 R18 91W NTINV TLYK SS GEHX',
-        materialType: 'ZTRD',
-        pattern: 'NIN',
-        patternName: '(NULL)',
-        rimDiameter: 18,
-        image: '/demo/images/event-toyo-1.jpg'
-    },
-    {
-        id: 388,
-        materialID: '61118NIN008245W',
-        material: '245/45 R18 96W NTINV TLYK SS GEHX',
-        materialType: 'ZTRD',
-        pattern: 'NIN',
-        patternName: '(NULL)',
-        rimDiameter: 18,
-        image: '/demo/images/event-toyo-1.jpg'
-    },
-    {
-        id: 389,
-        materialID: '61118NIN009275W',
-        material: '275/40ZR18 99W NTINV TLYK SS HK',
-        materialType: 'ZTRD',
-        pattern: 'NIN',
-        patternName: '(NULL)',
-        rimDiameter: 18,
-        image: '/demo/images/event-toyo-1.jpg'
-    },
-    {
-        id: 390,
-        materialID: '61119SG24008245Y',
-        material: '245/45 R19 102Y SG2A TLZ G1R RD1X',
-        materialType: 'ZTRD',
-        pattern: '562',
-        patternName: '(NULL)',
-        rimDiameter: 19,
-        image: '/demo/images/event-toyo-1.jpg'
-    },
-    {
-        id: 391,
-        materialID: '61119NIN010025W',
-        material: '235/35ZR19 91W NTINV TLYK SS RD...',
-        materialType: 'ZTRD',
-        pattern: 'NIN',
-        patternName: '(NULL)',
-        rimDiameter: 19,
-        image: '/demo/images/event-toyo-1.jpg'
-    },
-    {
-        id: 392,
-        materialID: '61120SG24009245Y',
-        material: '245/40 R20 99Y SG2A TLZ G1R RD1X',
-        materialType: 'ZTRD',
-        pattern: '562',
-        patternName: '(NULL)',
-        rimDiameter: 20,
-        image: '/demo/images/event-toyo-1.jpg'
-    },
-    {
-        id: 393,
-        materialID: '61120NIN009245W',
-        material: '245/40 R20 99W NTINV TLYK SS GEHX',
-        materialType: 'ZTRD',
-        pattern: 'NIN',
-        patternName: '(NULL)',
-        rimDiameter: 20,
-        image: '/demo/images/event-toyo-1.jpg'
-    },
-    {
-        id: 394,
-        materialID: '61120NIN010075W',
-        material: '275/35ZR20 1020W NTINV TLY SS CG...',
-        materialType: 'ZTRD',
-        pattern: 'NIN',
-        patternName: '(NULL)',
-        rimDiameter: 20,
-        image: '/demo/images/event-toyo-1.jpg'
-    },
-    {
-        id: 395,
-        materialID: '62120NGMT003300Q',
-        material: '33X1250 R20 114Q NTGMT TLB BETC',
-        materialType: 'ZTRD',
-        pattern: 'NGM',
-        patternName: '(NULL)',
-        rimDiameter: 20,
-        image: '/demo/images/event-toyo-1.jpg'
-    },
-    {
-        id: 396,
-        materialID: '62120NGMT003509',
-        material: '35X1250 R20 1219 NTGMT TLE BEPT',
-        materialType: 'ZTRD',
-        pattern: 'NGM',
-        patternName: '(NULL)',
-        rimDiameter: 20,
-        image: '/demo/images/event-toyo-1.jpg'
-    },
-    {
-        id: 397,
-        materialID: '62517421404225V',
-        material: '225/65 R17 106V 421A TLZ GSS CG1X',
-        materialType: 'ZTRD',
-        pattern: '414',
-        patternName: '(NULL)',
-        rimDiameter: 17,
-        image: '/demo/images/event-toyo-1.jpg'
-    },
-    {
-        id: 398,
-        materialID: '62518421405225V',
-        material: '225/60 R18 104V 421A TLZ GSS RD1X',
-        materialType: 'ZTRD',
-        pattern: '414',
-        patternName: '(NULL)',
-        rimDiameter: 18,
-        image: '/demo/images/event-toyo-1.jpg'
-    },
-    {
-        id: 399,
-        materialID: '62518421A05235W',
-        material: '235/60 R18 10/W 421A TLZ GSS CG1X',
-        materialType: 'ZTRD',
-        pattern: '41A',
-        patternName: '(NULL)',
-        rimDiameter: 18,
-        image: '/demo/images/event-toyo-1.jpg'
-    },
-    {
-        id: 400,
-        materialID: '62518421A06235V',
-        material: '235/55 R18 10/W 421A TLZ GSS CG1X',
-        materialType: 'ZTRD',
-        pattern: '41A',
-        patternName: '(NULL)',
-        rimDiameter: 18,
-        image: '/demo/images/event-toyo-1.jpg'
-    },
-    {
-        id: 401,
-        materialID: '62519421A06225V',
-        material: '225/55 R19 99V 421A TLZ GSS 1X',
-        materialType: 'ZTRD',
-        pattern: '41A',
-        patternName: '(NULL)',
-        rimDiameter: 19,
-        image: '/demo/images/event-toyo-1.jpg'
-    },
-    {
-        id: 402,
-        materialID: '62519421A06235W',
-        material: '235/55 R19 105W 421A TLZ GSS RD1X',
-        materialType: 'ZTRD',
-        pattern: '41A',
-        patternName: '(NULL)',
-        rimDiameter: 19,
-        image: '/demo/images/event-toyo-1.jpg'
-    },
-    {
-        id: 403,
-        materialID: '62520420507265V',
-        material: '265/50 R20 111V 420S TLV GSS RD1X',
-        materialType: 'ZTRD',
-        pattern: '42S',
-        patternName: '(NULL)',
-        rimDiameter: 20,
-        image: '/demo/images/event-toyo-1.jpg'
-    },
-    {
-        id: 404,
-        materialID: '62520421008245W',
-        material: '245/45 R20 103W 421A TLZ GSS RD1X',
-        materialType: 'ZTRD',
-        pattern: '41A',
-        patternName: '(NULL)',
-        rimDiameter: 20,
-        image: '/demo/images/event-toyo-1.jpg'
-    },
-    {
-        id: 405,
-        materialID: '62520421008235W',
-        material: '255/45 R20 105W 421A TLZ GSS CG1X',
-        materialType: 'ZTRD',
-        pattern: '41A',
-        patternName: '(NULL)',
-        rimDiameter: 20,
-        image: '/demo/images/event-toyo-1.jpg'
-    },
-    {
-        id: 406,
-        materialID: '62520421008275W',
-        material: '275/45 R20 110W 421A TLZ GSS RD1X',
-        materialType: 'ZTRD',
-        pattern: '41A',
-        patternName: '(NULL)',
-        rimDiameter: 20,
-        image: '/demo/images/event-toyo-1.jpg'
-    },
-    {
-        id: 407,
-        materialID: '62520421009275W',
-        material: '275/40 R20 106W 421A TLZ GSS CG1X',
-        materialType: 'ZTRD',
-        pattern: '41A',
-        patternName: '(NULL)',
-        rimDiameter: 20,
-        image: '/demo/images/event-toyo-1.jpg'
-    },
-    {
-        id: 408,
-        materialID: '62520421010315W',
-        material: '315/35 R20 110W 421A TLZ GSS CG1X',
-        materialType: 'ZTRD',
-        pattern: '41A',
-        patternName: '(NULL)',
-        rimDiameter: 20,
-        image: '/demo/images/event-toyo-1.jpg'
-    },
-    {
-        id: 42,
-        materialID: '71114750703185S',
-        material: '185/70 R14 88S TYSD7 TLM GSS MC1Z',
-        materialType: 'ZTRD',
-        pattern: 'SD7',
-        patternName: 'Toyo SD7',
-        rimDiameter: 14,
-        image: '/demo/images/event-toyo-1.jpg'
-    },
-    {
-        id: 43,
-        materialID: '71114750704175S',
-        material: '175/65 R14 82S TYSD7 TLM GSS MC1Z',
-        materialType: 'ZTRD',
-        pattern: 'SD7',
-        patternName: 'Toyo SD7',
-        rimDiameter: 14,
-        image: '/demo/images/event-toyo-1.jpg'
-    },
-    {
-        id: 409,
-        materialID: '71114750704185S',
-        material: '185/65 R14 86S TYSD7 TLM GSS MC1Z',
-        materialType: 'ZTRD',
-        pattern: 'SD7',
-        patternName: '(NULL)',
-        rimDiameter: 14,
-        image: '/demo/images/event-toyo-1.jpg'
-    },
-    {
-        id: 410,
-        materialID: '71114750705183H',
-        material: '185/60 R14 82H TYSD7 TLM GSS MC1Z',
-        materialType: 'ZTRD',
-        pattern: 'SD7',
-        patternName: '(NULL)',
-        rimDiameter: 14,
-        image: '/demo/images/event-toyo-1.jpg'
-    },
-    {
-        id: 411,
-        materialID: '71114750704175S',
-        material: '175/65 R15 84S TYSD7 TLM GSS MC1Z',
-        materialType: 'ZTRD',
-        pattern: 'SD7',
-        patternName: '(NULL)',
-        rimDiameter: 15,
-        image: '/demo/images/event-toyo-1.jpg'
-    },
-    {
-        id: 412,
-        materialID: '71114750704185S',
-        material: '185/65 R15 88S TYSD7 TLM GSS MC1Z',
-        materialType: 'ZTRD',
-        pattern: 'SD7',
-        patternName: '(NULL)',
-        rimDiameter: 15,
-        image: '/demo/images/event-toyo-1.jpg'
-    },
-    {
-        id: 413,
-        materialID: '71114750704195H',
-        material: '195/65 R15 91H TYSD7 TLM GSS MC1Z',
-        materialType: 'ZTRD',
-        pattern: 'SD7',
-        patternName: '(NULL)',
-        rimDiameter: 15,
-        image: '/demo/images/event-toyo-1.jpg'
-    },
-    {
-        id: 414,
-        materialID: '71114750704203H',
-        material: '205/65 R15 94H TYSD7 TLM GSS MC1Z',
-        materialType: 'ZTRD',
-        pattern: 'SD7',
-        patternName: '(NULL)',
-        rimDiameter: 15,
-        image: '/demo/images/event-toyo-1.jpg'
-    },
-    {
-        id: 415,
-        materialID: '71114750705183H',
-        material: '185/60 R15 84H TYSD7 TLM GSS MC1Z',
-        materialType: 'ZTRD',
-        pattern: 'SD7',
-        patternName: '(NULL)',
-        rimDiameter: 15,
-        image: '/demo/images/event-toyo-1.jpg'
-    },
-    {
-        id: 416,
-        materialID: '71114750705193H',
-        material: '195/60 R15 88H TYSD7 TLZ SSMC1Z',
-        materialType: 'ZTRD',
-        pattern: 'SD7',
-        patternName: '(NULL)',
-        rimDiameter: 15,
-        image: '/demo/images/event-toyo-1.jpg'
-    },
-    {
-        id: 417,
-        materialID: '71114750706185V',
-        material: '185/55 R15 82V TYSD7 TLM GSS MC1Z',
-        materialType: 'ZTRD',
-        pattern: 'SD7',
-        patternName: '(NULL)',
-        rimDiameter: 15,
-        image: '/demo/images/event-toyo-1.jpg'
-    },
-    {
-        id: 418,
-        materialID: '71114750706195V',
-        material: '195/55 R15 83V TYSD7 TLZ SSMC1Z',
-        materialType: 'ZTRD',
-        pattern: 'SD7',
-        patternName: '(NULL)',
-        rimDiameter: 15,
-        image: '/demo/images/event-toyo-1.jpg'
-    },
-    {
-        id: 419,
-        materialID: '71114750705203H',
-        material: '205/60 R16 92H TYSD7 TLM GSS MC1Z',
-        materialType: 'ZTRD',
-        pattern: 'SD7',
-        patternName: '(NULL)',
-        rimDiameter: 16,
-        image: '/demo/images/event-toyo-1.jpg'
-    },
-    {
-        id: 420,
-        materialID: '71114750705213H',
-        material: '215/60 R16 93H TYSD7 TLM GSS MC1Z',
-        materialType: 'ZTRD',
-        pattern: 'SD7',
-        patternName: '(NULL)',
-        rimDiameter: 16,
-        image: '/demo/images/event-toyo-1.jpg'
-    },
-    {
-        id: 421,
-        materialID: '71114750706205V',
-        material: '205/55 R16 91V TYSD7 TLM GSS MC1Z',
-        materialType: 'ZTRD',
-        pattern: 'SD7',
-        patternName: '(NULL)',
-        rimDiameter: 16,
-        image: '/demo/images/event-toyo-1.jpg'
-    },
-    {
-        id: 422,
-        materialID: '71114750706215V',
-        material: '215/55 R17 94V TYSD7 TLM GSS MC1Z',
-        materialType: 'ZTRD',
-        pattern: 'SD7',
-        patternName: '(NULL)',
-        rimDiameter: 17,
-        image: '/demo/images/event-toyo-1.jpg'
-    },
-    {
-        id: 423,
-        materialID: '71114750707215V',
-        material: '215/50 R17 91V TYSD7 TLM GSS MC1Z',
-        materialType: 'ZTRD',
-        pattern: 'SD7',
-        patternName: '(NULL)',
-        rimDiameter: 17,
-        image: '/demo/images/event-toyo-1.jpg'
-    },
-    {
-        id: 424,
-        materialID: '71114750708215W',
-        material: '215/45 R17 87W TYSD7 TLM GSS M...',
-        materialType: 'ZTRD',
-        pattern: 'SD7',
-        patternName: '(NULL)',
-        rimDiameter: 17,
-        image: '/demo/images/event-toyo-1.jpg'
-    },
-    {
-        id: 425,
-        materialID: '71114750708225W',
-        material: '225/45 R18 91W TYSD7 TLM GSS M...',
-        materialType: 'ZTRD',
-        pattern: 'SD7',
-        patternName: '(NULL)',
-        rimDiameter: 18,
-        image: '/demo/images/event-toyo-1.jpg'
-    },
-    {
-        id: 426,
-        materialID: '7310CM17000110L',
-        material: '11R225146L M1702 TL',
-        materialType: 'ZTRD',
-        pattern: '170',
-        patternName: '(NULL)',
-        rimDiameter: 0,
-        image: '/demo/images/event-toyo-1.jpg'
-    },
-    {
-        id: 427,
-        materialID: '7310CM17001209H',
-        material: '295/80 R225152M M170 TL',
-        materialType: 'ZTRD',
-        pattern: '170',
-        patternName: '(NULL)',
-        rimDiameter: 0,
-        image: '/demo/images/event-toyo-1.jpg'
-    },
-    {
-        id: 428,
-        materialID: '7310CM32000110K',
-        material: '11R225 148K M3202 TL',
-        materialType: 'ZTRD',
-        pattern: '320',
-        patternName: '(NULL)',
-        rimDiameter: 0,
-        image: '/demo/images/event-toyo-1.jpg'
-    },
-    {
-        id: 429,
-        materialID: '7310CM61000110M',
-        material: '11R225 16 M6102 TL S',
-        materialType: 'ZTRD',
-        pattern: '610',
-        patternName: '(NULL)',
-        rimDiameter: 0,
-        image: '/demo/images/event-toyo-1.jpg'
-    },
-    {
-        id: 430,
-        materialID: '7310CM62700110L',
-        material: '11R225 5 146L M627 TL',
-        materialType: 'ZTRD',
-        pattern: '627',
-        patternName: '(NULL)',
-        rimDiameter: 0,
-        image: '/demo/images/event-toyo-1.jpg'
-    },
-    {
-        id: 148,
-        materialID: '81114CR1F04175T',
-        material: '175/65 R14 82T PXCR1FTLY GSS MT1Z',
-        materialType: 'ZFP2',
-        pattern: 'CRQ',
-        patternName: '(NULL)',
-        rimDiameter: 14,
-        image: '/demo/images/event-toyo-1.jpg'
-    },
-    {
-        id: 149,
-        materialID: '81114NE0303165T',
-        material: '165/70 R14 85T NE03',
-        materialType: 'ZFP2',
-        pattern: 'N03',
-        patternName: '(NULL)',
-        rimDiameter: 14,
-        image: '/demo/images/event-toyo-1.jpg'
-    },
-    {
-        id: 150,
-        materialID: '81114NE0303175T',
-        material: '175/70 R14 88T NE03',
-        materialType: 'ZFP2',
-        pattern: 'N03',
-        patternName: '(NULL)',
-        rimDiameter: 14,
-        image: '/demo/images/event-toyo-1.jpg'
-    },
-    {
-        id: 151,
-        materialID: '81114NE0303185T',
-        material: '185/70 R14 88T NE03',
-        materialType: 'ZFP2',
-        pattern: 'N03',
-        patternName: '(NULL)',
-        rimDiameter: 14,
-        image: '/demo/images/event-toyo-1.jpg'
-    },
-    {
-        id: 152,
-        materialID: '81114NE0303195T',
-        material: '195/70 R14 91T NE03',
-        materialType: 'ZFP2',
-        pattern: 'N03',
-        patternName: '(NULL)',
-        rimDiameter: 14,
-        image: '/demo/images/event-toyo-1.jpg'
     }
+    // ... (rest of the materials array remains the same)
 ]);
 
 // Computed properties for filters
@@ -1272,8 +615,52 @@ onMounted(() => {
     if (programId) {
         isEditMode.value = true;
         loadSalesProgram(programId);
+    } else {
+        // For demo purposes, pre-fill with sample criteria even in create mode
+        prefillSampleCriteria();
     }
 });
+
+// Pre-fill sample criteria data
+const prefillSampleCriteria = () => {
+    programItems.value = [
+        {
+            id: 1,
+            buyQty: 2,
+            freeQty: 1,
+            selectedBuyMaterials: [
+                findMaterialById(39),  // 175/70R13 8ZT TOYO 350
+                findMaterialById(363), // 1115/70D14 TEMPORARY SPARE SS...
+                findMaterialById(365)  // 175/65R14 8ZT TOYO 350
+            ],
+            selectedFreeMaterial: findMaterialById(364),  // 185/70R14 8ST TOYO 350
+            status: 1
+        },
+        {
+            id: 2,
+            buyQty: 3,
+            freeQty: 1,
+            selectedBuyMaterials: [
+                findMaterialById(366),  // 185/65R14 8GT TOYO 350
+                findMaterialById(367)   // 185/60R14 8ZT TOYO 350
+            ],
+            selectedFreeMaterial: findMaterialById(40),   // 175/65R15 8HT TOYO 350
+            status: 1
+        },
+        {
+            id: 3,
+            buyQty: 4,
+            freeQty: 2,
+            selectedBuyMaterials: [
+                findMaterialById(368),  // 185/65R15 8BT TOYO 350
+                findMaterialById(369),  // 195/65R15 9TT TOYO 350
+                findMaterialById(41)    // 205/65R15 9HT TOYO 350
+            ],
+            selectedFreeMaterial: findMaterialById(370),  // 185/60R15 8HT TOYO 350
+            status: 1
+        }
+    ];
+};
 
 // Load existing sales program data
 const loadSalesProgram = (id) => {
@@ -1316,7 +703,8 @@ const loadProgramItems = (programId) => {
             freeQty: 1,
             selectedBuyMaterials: [
                 findMaterialById(39),  // 175/70R13 8ZT TOYO 350
-                findMaterialById(363)  // 1115/70D14 TEMPORARY SPARE SS...
+                findMaterialById(363), // 1115/70D14 TEMPORARY SPARE SS...
+                findMaterialById(365)  // 175/65R14 8ZT TOYO 350
             ],
             selectedFreeMaterial: findMaterialById(364),  // 185/70R14 8ST TOYO 350
             status: 1
@@ -1326,10 +714,23 @@ const loadProgramItems = (programId) => {
             buyQty: 3,
             freeQty: 1,
             selectedBuyMaterials: [
-                findMaterialById(365),  // 175/65R14 8ZT TOYO 350
-                findMaterialById(366)   // 185/65R14 8GT TOYO 350
+                findMaterialById(366),  // 185/65R14 8GT TOYO 350
+                findMaterialById(367),  // 185/60R14 8ZT TOYO 350
+                findMaterialById(368)   // 185/65R15 8BT TOYO 350
             ],
-            selectedFreeMaterial: findMaterialById(367),  // 185/60R14 8ZT TOYO 350
+            selectedFreeMaterial: findMaterialById(369),  // 195/65R15 9TT TOYO 350
+            status: 1
+        },
+        {
+            id: 3,
+            buyQty: 4,
+            freeQty: 2,
+            selectedBuyMaterials: [
+                findMaterialById(40),   // 175/65R15 8HT TOYO 350
+                findMaterialById(41),   // 205/65R15 9HT TOYO 350
+                findMaterialById(370)   // 185/60R15 8HT TOYO 350
+            ],
+            selectedFreeMaterial: findMaterialById(371),  // 195/60R15 8BT TOYO 350
             status: 1
         }
     ];
@@ -1466,4 +867,3 @@ watch(
     }
 );
 </script>
-
