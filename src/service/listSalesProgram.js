@@ -11,7 +11,7 @@ export const ListSalesProgramService = {
                 image: null,
                 startDate: '2025-09-01',
                 endDate: '2025-10-30',
-                status: 1,
+                status: 0,
                 created: '2025-09-08 00:00:00'
             },
             {
@@ -37,7 +37,7 @@ export const ListSalesProgramService = {
                 image: null,
                 startDate: '2025-09-15',
                 endDate: '2025-11-30',
-                status: 1,
+                status: 2,
                 created: null
             },
             {
@@ -50,7 +50,7 @@ export const ListSalesProgramService = {
                 image: null,
                 startDate: '2025-12-01',
                 endDate: '2025-12-31',
-                status: 1,
+                status: 3,
                 created: '2025-09-20 00:00:00'
             },
             {
@@ -63,7 +63,7 @@ export const ListSalesProgramService = {
                 image: null,
                 startDate: '2025-06-01',
                 endDate: '2025-06-30',
-                status: 1,
+                status: 4,
                 created: '2025-05-20 00:00:00'
             },
             {
@@ -89,7 +89,7 @@ export const ListSalesProgramService = {
                 image: null,
                 startDate: '2025-11-01',
                 endDate: '2025-11-15',
-                status: 1,
+                status: 3,
                 created: '2025-10-01 00:00:00'
             }
         ];

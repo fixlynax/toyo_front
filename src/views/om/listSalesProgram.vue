@@ -7,10 +7,13 @@ const filters1 = ref(null);
 const listData = ref([]);
 const loading = ref(true);
 
-// Status Map
+
 const statusMap = {
-    0: { label: 'Inactive', severity: 'danger' },
-    1: { label: 'Active', severity: 'success' }
+    0: { label: 'Upcoming', severity: 'info' },
+    1: { label: 'On-going', severity: 'success' },
+    2: { label: 'Expired', severity: 'warn' },
+    3: { label: 'Disabled', severity: 'secondary' },
+    4: { label: 'Cancelled', severity: 'danger' }
 };
 
 function initFilters1() {
