@@ -1,18 +1,41 @@
 <template>
     <div class="card">
-        <div class="text-2xl font-bold text-gray-800 border-b pb-2 mb-3">List Messaging</div>
+        <div class="flex items-center justify-between mb-6">
+            <div>
+                <Button 
+                    icon="pi pi-arrow-left" 
+                    class="p-button-text p-button-secondary mb-2" 
+                    @click="goBack"
+                    label="Back to List"
+                />
+                <div class="text-2xl font-bold text-gray-800">
+                    Dealers for {{ formatDate(route.params.messageDate) }}
+                </div>
+                <div class="text-gray-600 mt-1">
+                    Total {{ dealers.length }} dealer(s) found
+                </div>
+            </div>
+            
+            <div class="text-right">
+                <div class="text-lg font-semibold text-gray-700">
+                    {{ formatDate(route.params.messageDate) }}
+                </div>
+                <div class="text-gray-500">
+                    Message Date
+                </div>
+            </div>
+        </div>
 
         <DataTable 
-            :value="listData" 
+            :value="dealers" 
             :paginator="true" 
             :rows="10" 
-            dataKey="messageId" 
-            :rowHover="true" 
-            :loading="loading" 
-            :filters="filters1" 
-            filterDisplay="menu"
+            :rowsPerPageOptions="[5, 10, 15, 20, 25, 30, 50]"
+            dataKey="custAccountNo" 
+            :rowHover="true"
+            :loading="loading"
+            responsiveLayout="scroll"
         >
-            <!-- Header -->
             <template #header>
                 <div class="flex items-center justify-between gap-4 w-full flex-wrap">
                     <!-- Search -->
@@ -21,54 +44,88 @@
                             <InputIcon>
                                 <i class="pi pi-search" />
                             </InputIcon>
-                            <InputText v-model="filters1['global'].value" placeholder="Quick Search" class="w-full" />
+                            <InputText v-model="filters1['global'].value" placeholder="Search dealers..." class="w-full" />
                         </IconField>
-                        <Button type="button" icon="pi pi-cog" class="p-button" />
                     </div>
 
-                    <!-- Create Button -->
-                    <RouterLink to="/om/createMessaging">
-                        <Button type="button" label="Create" icon="pi pi-plus" class="p-button-success" />
-                    </RouterLink>
+                    <!-- Export Button -->
+                    <Button 
+                        type="button" 
+                        label="Export" 
+                        icon="pi pi-download" 
+                        class="p-button-outlined" 
+                    />
                 </div>
             </template>
 
-            <template #empty> No messages found. </template>
-            <template #loading> Loading messages data. Please wait. </template>
+            <template #empty> 
+                <div class="text-center text-gray-500 py-8">
+                    <i class="pi pi-inbox text-4xl mb-2"></i>
+                    <div>No dealers found for this message date.</div>
+                </div>
+            </template>
+            <template #loading> Loading dealers data. Please wait. </template>
 
-            <!-- Message Date (Clickable) -->
-            <Column field="messageDate" header="Message Date" style="min-width: 10rem">
+            <!-- Dealer Account No -->
+            <Column field="custAccountNo" header="Account No" style="min-width: 8rem" sortable>
                 <template #body="{ data }">
-                    <div class="font-semibold text-gray-800 cursor-pointer hover:text-blue-600 transition-colors" 
-                         @click="goToDetail(data.messageDate)">
-                        {{ formatDate(data.messageDate) }}
+                    <div class="font-mono text-gray-700">
+                        {{ data.custAccountNo }}
                     </div>
                 </template>
             </Column>
 
-            <!-- Message Time -->
-            <Column field="messageTime" header="Message Time" style="min-width: 8rem">
+            <!-- Dealer Name -->
+            <Column field="companyName1" header="Dealer Name" style="min-width: 15rem" sortable>
+                <template #body="{ data }">
+                    <div class="font-semibold text-gray-800">
+                        {{ data.companyName1 }}
+                    </div>
+                </template>
+            </Column>
+
+            <!-- Dealer Email -->
+            <Column field="emailAddress" header="Email" style="min-width: 12rem" sortable>
+                <template #body="{ data }">
+                    <div class="text-blue-600 hover:underline">
+                        <a :href="`mailto:${data.emailAddress}`">{{ data.emailAddress }}</a>
+                    </div>
+                </template>
+            </Column>
+
+            <!-- Dealer Phone -->
+            <Column field="phoneNumber" header="Phone" style="min-width: 10rem">
                 <template #body="{ data }">
                     <div class="text-gray-700">
-                        {{ data.messageTime }}
+                        {{ data.phoneNumber }}
                     </div>
                 </template>
             </Column>
 
-            <!-- Message Subject -->
-            <Column field="subject" header="Message Subject" style="min-width: 15rem">
+            <!-- Status -->
+            <Column field="status" header="Status" style="min-width: 8rem" sortable>
                 <template #body="{ data }">
-                    <div class="font-medium text-gray-900">
-                        {{ data.subject }}
-                    </div>
+                    <Tag 
+                        :value="data.status === 1 ? 'Active' : 'Inactive'" 
+                        :severity="data.status === 1 ? 'success' : 'danger'" 
+                    />
                 </template>
             </Column>
 
-            <!-- Dealers Count -->
-            <Column field="dealersCount" header="Dealers" style="min-width: 8rem">
+            <!-- Actions -->
+            <Column header="Actions" style="min-width: 10rem">
                 <template #body="{ data }">
-                    <div class="text-center">
-                        <Tag :value="data.dealers.length.toString()" class="bg-blue-100 text-blue-800" />
+                    <div class="flex gap-2">
+                        <Button 
+                            icon="pi pi-eye" 
+                            class="p-button-rounded p-button-text p-button-primary" 
+                            v-tooltip="'View Details'"
+                        />
+                        <Button 
+                            icon="pi pi-envelope" 
+                            class="p-button-rounded p-button-text p-button-info" 
+                            v-tooltip="'Send Email'"
+                        />
                     </div>
                 </template>
             </Column>
@@ -77,14 +134,15 @@
 </template>
 
 <script setup>
-import { ref, onBeforeMount } from 'vue';
-import { useRouter } from 'vue-router';
+import { ref, onBeforeMount, computed } from 'vue';
+import { useRouter, useRoute } from 'vue-router';
 import { FilterMatchMode, FilterOperator } from '@primevue/core/api';
 
 const router = useRouter();
-const filters1 = ref(null);
-const listData = ref([]);
+const route = useRoute();
+const dealers = ref([]);
 const loading = ref(true);
+const filters1 = ref(null);
 
 // Sample data - replace with your actual service
 const mockMessages = [
@@ -187,8 +245,8 @@ const mockMessages = [
 function initFilters1() {
     filters1.value = {
         global: { value: null, matchMode: FilterMatchMode.CONTAINS },
-        subject: { operator: FilterOperator.AND, constraints: [{ value: null, matchMode: FilterMatchMode.STARTS_WITH }] },
-        messageDate: { operator: FilterOperator.AND, constraints: [{ value: null, matchMode: FilterMatchMode.DATE_IS }] }
+        companyName1: { operator: FilterOperator.AND, constraints: [{ value: null, matchMode: FilterMatchMode.STARTS_WITH }] },
+        status: { operator: FilterOperator.AND, constraints: [{ value: null, matchMode: FilterMatchMode.EQUALS }] }
     };
 }
 
@@ -201,27 +259,33 @@ const formatDate = (dateString) => {
     });
 };
 
-const goToDetail = (messageDate) => {
-    router.push(`/om/detailMessaging/${messageDate}`);
+const goBack = () => {
+    router.push('/om/listMessaging');
+};
+
+const loadDealers = () => {
+    const messageDate = route.params.messageDate;
+    const message = mockMessages.find(msg => msg.messageDate === messageDate);
+    
+    if (message) {
+        dealers.value = message.dealers;
+    } else {
+        dealers.value = [];
+    }
+    loading.value = false;
 };
 
 onBeforeMount(async () => {
     initFilters1();
-    // Replace with your actual service call
-    // listData.value = await MessagingService.getListMessages();
-    
-    // Using mock data for demonstration
-    listData.value = mockMessages;
-    loading.value = false;
+    loadDealers();
 });
 </script>
 
 <style scoped lang="scss">
-:deep(.p-datatable-frozen-tbody) {
-    font-weight: bold;
-}
-
-:deep(.p-datatable-scrollable .p-frozen-column) {
-    font-weight: bold;
+:deep(.p-datatable) {
+    .p-datatable-thead > tr > th {
+        background-color: #f8fafc;
+        font-weight: 600;
+    }
 }
 </style>
