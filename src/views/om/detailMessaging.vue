@@ -51,7 +51,7 @@
                         </template>
                     </Column>
                     
-                    <Column field="companyName1" header="Company Name" style="min-width: 200px">
+                    <Column field="companyName1" header="Dealer Name" style="min-width: 200px">
                         <template #body="{ data }">
                             <div class="font-medium">{{ data.companyName1 }}</div>
                         </template>
