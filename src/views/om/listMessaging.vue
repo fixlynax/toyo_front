@@ -40,7 +40,7 @@
             <Column field="messageDate" header="Message Date" style="min-width: 10rem">
                 <template #body="{ data }">
                     <div class="font-semibold text-gray-800 cursor-pointer hover:text-blue-600 transition-colors" 
-                         @click="goToDetail(data.messageDate)">
+                         @click="goToDetail(data.messageId, data.messageDate)">
                         {{ formatDate(data.messageDate) }}
                     </div>
                 </template>
@@ -201,8 +201,8 @@ const formatDate = (dateString) => {
     });
 };
 
-const goToDetail = (messageDate) => {
-    router.push(`/om/detailMessaging/${messageDate}`);
+const goToDetail = (messageId, messageDate) => {
+    router.push(`/om/detailMessaging/${messageId}`);
 };
 
 onBeforeMount(async () => {

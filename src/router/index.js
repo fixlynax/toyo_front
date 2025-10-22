@@ -223,9 +223,10 @@ const router = createRouter({
                     component: () => import('@/views/om/listMessaging.vue')
                 },
                 {
-                    path: '/om/detailMessaging',
-                    name: 'Detail-Messaging',
-                    component: () => import('@/views/om/detailMessaging.vue')
+                    path: '/om/detailMessaging/:messageId',
+                    name: 'detailMessaging',
+                    component: () => import('@/views/detailMessaging.vue'),
+                    props: true
                 },
                 {
                     path: '/om/createMessaging',

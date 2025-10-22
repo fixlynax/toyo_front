@@ -9,16 +9,19 @@
                     label="Back to List"
                 />
                 <div class="text-2xl font-bold text-gray-800">
-                    Dealers for {{ formatDate(route.params.messageDate) }}
+                    Dealers for {{ currentMessage?.subject }}
                 </div>
                 <div class="text-gray-600 mt-1">
+                    Message Date: {{ formatDate(currentMessage?.messageDate) }} at {{ currentMessage?.messageTime }}
+                </div>
+                <div class="text-gray-600">
                     Total {{ dealers.length }} dealer(s) found
                 </div>
             </div>
             
             <div class="text-right">
                 <div class="text-lg font-semibold text-gray-700">
-                    {{ formatDate(route.params.messageDate) }}
+                    {{ formatDate(currentMessage?.messageDate) }}
                 </div>
                 <div class="text-gray-500">
                     Message Date
@@ -61,7 +64,7 @@
             <template #empty> 
                 <div class="text-center text-gray-500 py-8">
                     <i class="pi pi-inbox text-4xl mb-2"></i>
-                    <div>No dealers found for this message date.</div>
+                    <div>No dealers found for this message.</div>
                 </div>
             </template>
             <template #loading> Loading dealers data. Please wait. </template>
@@ -143,6 +146,7 @@ const route = useRoute();
 const dealers = ref([]);
 const loading = ref(true);
 const filters1 = ref(null);
+const currentMessage = ref(null);
 
 // Sample data - replace with your actual service
 const mockMessages = [
@@ -251,6 +255,7 @@ function initFilters1() {
 }
 
 const formatDate = (dateString) => {
+    if (!dateString) return '';
     const date = new Date(dateString);
     return date.toLocaleDateString('en-US', {
         year: 'numeric',
@@ -264,12 +269,14 @@ const goBack = () => {
 };
 
 const loadDealers = () => {
-    const messageDate = route.params.messageDate;
-    const message = mockMessages.find(msg => msg.messageDate === messageDate);
+    const messageId = route.params.messageId;
+    const message = mockMessages.find(msg => msg.messageId === messageId);
     
     if (message) {
+        currentMessage.value = message;
         dealers.value = message.dealers;
     } else {
+        currentMessage.value = null;
         dealers.value = [];
     }
     loading.value = false;
