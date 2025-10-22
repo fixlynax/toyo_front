@@ -104,6 +104,11 @@ const router = createRouter({
                     component: () => import('@/views/om/detailUser.vue')
                 },
                 {
+                    path: '/om/manageDevices',
+                    name: 'Manage-Devices',
+                    component: () => import('@/views/om/manageDevices.vue')
+                },
+                {
                     path: '/om/editUser',
                     name: 'Edit-User',
                     component: () => import('@/views/om/editUser.vue')
