@@ -15,22 +15,6 @@
                         <InputText v-model="form.lastName" class="w-full" placeholder="Enter last name" />
                     </div>
                     <div>
-                        <label class="block font-bold text-gray-700">Gender</label>
-                        <Dropdown v-model="form.gender" :options="genderOptions" optionLabel="label" optionValue="value" class="w-full" placeholder="Select gender" />
-                    </div>
-                    <div>
-                        <label class="block font-bold text-gray-700">Race</label>
-                        <Dropdown v-model="form.race" :options="raceOptions" optionLabel="label" optionValue="value" class="w-full" placeholder="Select race" />
-                    </div>
-                    <div>
-                        <label class="block font-bold text-gray-700">State</label>
-                        <Dropdown v-model="form.state" :options="stateOptions" optionLabel="label" optionValue="value" class="w-full" placeholder="Select state" />
-                    </div>
-                    <div>
-                        <label class="block font-bold text-gray-700">Member Level</label>
-                        <Dropdown v-model="form.memberLevel" :options="levelOptions" optionLabel="label" optionValue="value" class="w-full" placeholder="Select level" />
-                    </div>
-                    <div>
                         <label class="block font-bold text-gray-700">Email</label>
                         <InputText v-model="form.email" type="email" class="w-full" placeholder="Enter email" />
                     </div>
@@ -45,60 +29,6 @@
                     <div>
                         <label class="block font-bold text-gray-700">Confirm Password</label>
                         <Password v-model="form.confirmPassword" :feedback="false" toggleMask class="w-full" placeholder="Confirm password" />
-                    </div>
-                </div>
-            </div>
-
-            <!-- Dealer & Shipping -->
-            <div>
-                <h3 class="text-xl font-semibold text-gray-700 border-b p-2 mb-4">🏢 Dealer & Shipping</h3>
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div>
-                        <label class="block font-bold text-gray-700">Dealer Acc No (Bill To)</label>
-                        <Dropdown v-model="form.dealerAcc" :options="dealerList" optionLabel="name" optionValue="code" placeholder="Select Dealer" class="w-full" />
-                    </div>
-                    <div>
-                        <label class="block font-bold text-gray-700">Ship To Acc No</label>
-                        <Dropdown v-model="form.shipToAcc" :options="dealerList" optionLabel="name" optionValue="code" placeholder="Select Ship To" class="w-full" />
-                    </div>
-                </div>
-            </div>
-
-            <!-- Shipping Address -->
-            <div>
-                <h3 class="text-xl font-semibold text-gray-700 border-b p-2 mb-4">📦 Shipping Address</h3>
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div>
-                        <label class="block font-bold text-gray-700">Address 1</label>
-                        <InputText v-model="form.address1" class="w-full" />
-                    </div>
-                    <div>
-                        <label class="block font-bold text-gray-700">Address 2</label>
-                        <InputText v-model="form.address2" class="w-full" />
-                    </div>
-                    <div>
-                        <label class="block font-bold text-gray-700">Address 3</label>
-                        <InputText v-model="form.address3" class="w-full" />
-                    </div>
-                    <div>
-                        <label class="block font-bold text-gray-700">Address 4</label>
-                        <InputText v-model="form.address4" class="w-full" />
-                    </div>
-                    <div>
-                        <label class="block font-bold text-gray-700">State</label>
-                        <Dropdown v-model="form.shippingState" :options="stateOptions" optionLabel="label" optionValue="value" class="w-full" placeholder="Select state" />
-                    </div>
-                    <div>
-                        <label class="block font-bold text-gray-700">City</label>
-                        <InputText v-model="form.city" class="w-full" />
-                    </div>
-                    <div>
-                        <label class="block font-bold text-gray-700">Postcode</label>
-                        <InputText v-model="form.postcode" class="w-full" />
-                    </div>
-                    <div>
-                        <label class="block font-bold text-gray-700">Country</label>
-                        <InputText v-model="form.country" class="w-full" />
                     </div>
                 </div>
             </div>
@@ -118,12 +48,12 @@
 
             <div class="flex flex-col md:flex-row justify-end gap-2 mt-4">
                 <div class="w-40">
-                    <RouterLink to="/om/confirmationEten">
+                    <RouterLink to="/om/detailEten">
                         <Button label="Cancel" class="w-full p-button-secondary" />
                     </RouterLink>
                 </div>
                 <div class="w-40">
-                    <RouterLink to="/om/confirmationEten">
+                    <RouterLink to="/om/detailEten">
                         <Button label="Submit" class="w-full" />
                     </RouterLink>
                 </div>
@@ -215,10 +145,4 @@ const moduleOptions = [
     { label: 'Billing', value: 'billing' },
     { label: 'Sales', value: 'sales' }
 ];
-
-const submitForm = () => {
-    console.log('Form Submitted:', form.value);
-    // Add form validation or API submission here
-    router.push('/om/detailUser');
-};
 </script>
