@@ -141,7 +141,7 @@
                 </div>
 
                 <div class="w-40">
-                    <RouterLink to="/marketing/detailEtenUser">
+                    <RouterLink to="/om/detailUser">
                         <Button label="Update" class="w-full" />
                     </RouterLink>
                 </div>
