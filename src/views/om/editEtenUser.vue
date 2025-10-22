@@ -55,82 +55,37 @@
             </div>
         </div>
 
-        <!-- Account Info Section -->
-        <div class="flex flex-col md:flex-row gap-8 mt-6">
-            <div class="card flex flex-col gap-6 w-full">
-                <!-- Header -->
-                <div class="text-2xl font-bold text-gray-800 border-b pb-2">Account Info</div>
-
-                <!-- Account Info Form -->
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div>
-                        <label class="block font-bold text-gray-700">Platform</label>
-                        <Dropdown v-model="memberDetail.platform" :options="platformOptions" optionLabel="label" optionValue="value" class="w-full" />
-                    </div>
-
-                    <div>
-                        <label class="block font-bold text-gray-700">Allow Waranty</label>
-                        <Dropdown v-model="memberDetail.allow_warranty" :options="selectOptions" optionLabel="label" optionValue="value" class="w-full" />
-                    </div>
-                    <div>
-                        <label class="block font-bold text-gray-700">Allow Oder</label>
-                        <Dropdown v-model="memberDetail.allow_order" :options="selectOptions" optionLabel="label" optionValue="value" class="w-full" />
-                    </div>
-                    <div>
-                        <label class="block font-bold text-gray-700">Allow Billing</label>
-                        <Dropdown v-model="memberDetail.allow_billing" :options="selectOptions" optionLabel="label" optionValue="value" class="w-full" />
-                    </div>
-                    <div>
-                        <label class="block font-bold text-gray-700">Allow Sale</label>
-                        <Dropdown v-model="memberDetail.allow_sale" :options="selectOptions" optionLabel="label" optionValue="value" class="w-full" />
-                    </div>
-                    <div>
-                        <label class="block font-bold text-gray-700">Allow User</label>
-                        <Dropdown v-model="memberDetail.allow_user" :options="selectOptions" optionLabel="label" optionValue="value" class="w-full" />
-                    </div>
-                    <div>
-                        <label class="block font-bold text-gray-700">Is Master</label>
-                        <Dropdown v-model="memberDetail.isMaster" :options="selectOptions" optionLabel="label" optionValue="value" class="w-full" />
-                    </div>
-                    <div>
-                        <label class="block font-bold text-gray-700">Activation Code</label>
-                        <InputText disabled v-model="memberDetail.activationCode" class="w-full" />
-                    </div>
-                </div>
-                <!-- ✅ closes Account Info grid -->
-            </div>
-        </div>
         <div class="mt-8 card flex flex-col gap-8 w-full">
             <div>
                 <h3 class="text-2xl font-bold text-gray-800 border-b pb-2">🧩 Modules Access</h3>
                 <div class="grid grid-cols-2 gap-4">
                     <div>
-                        <Checkbox class="mr-2" value="marketing" />
-                        <label for="marketing">Marketing</label>
+                        <Checkbox v-model="moduleAccess.marketing" :binary="true" class="mr-2" />
+                        <label>Marketing</label>
                     </div>
                     <div>
-                        <Checkbox class="mr-2" value="technical" />
-                        <label for="technical">Technical</label>
+                        <Checkbox v-model="moduleAccess.technical" :binary="true" class="mr-2" />
+                        <label>Technical</label>
                     </div>
                     <div>
-                        <Checkbox class="mr-2" value="om" />
-                        <label for="om">OM</label>
+                        <Checkbox v-model="moduleAccess.om" :binary="true" class="mr-2" />
+                        <label>OM</label>
                     </div>
                     <div>
-                        <Checkbox class="mr-2" value="scm" />
-                        <label for="scm">SCM</label>
+                        <Checkbox v-model="moduleAccess.scm" :binary="true" class="mr-2" />
+                        <label>SCM</label>
                     </div>
                     <div>
-                        <Checkbox class="mr-2" value="it" />
-                        <label for="it">IT</label>
+                        <Checkbox v-model="moduleAccess.it" :binary="true" class="mr-2" />
+                        <label>IT</label>
                     </div>
                     <div>
-                        <Checkbox class="mr-2" value="billing" />
-                        <label for="billing">Billing</label>
+                        <Checkbox v-model="moduleAccess.billing" :binary="true" class="mr-2" />
+                        <label>Billing</label>
                     </div>
                     <div>
-                        <Checkbox class="mr-2" value="sales" />
-                        <label for="sales">Sales</label>
+                        <Checkbox v-model="moduleAccess.sales" :binary="true" class="mr-2" />
+                        <label>Sales</label>
                     </div>
                 </div>
             </div>
@@ -151,59 +106,7 @@
 </template>
 
 <script setup>
-import { ref } from 'vue';
-
-const raceOptions = [
-    { label: 'Malay', value: 'Malay' },
-    { label: 'Chinese', value: 'Chinese' },
-    { label: 'Indian', value: 'Indian' },
-    { label: 'Other', value: 'Other' }
-];
-
-const stateOptions = [
-    { label: 'Johor', value: 'Johor' },
-    { label: 'Kelantan', value: 'Kelantan' },
-    { label: 'Kuala Lumpur', value: 'Lumpur' },
-    { label: 'Kedah', value: 'Kedah' },
-    { label: 'Melaka', value: 'Melaka' },
-    { label: 'Negeri Sembilan', value: 'Negeri Sembilan' },
-    { label: 'Pulau Pinang', value: 'Pulau Pinang' },
-    { label: 'Pahang', value: 'Pahang' },
-    { label: 'Perak', value: 'Perak' },
-    { label: 'Perlis', value: 'Perlis' },
-    { label: 'Selangor', value: 'Selangor' },
-    { label: 'Sabah', value: 'Sabah' },
-    { label: 'Sarawak', value: 'Sarawak' },
-    { label: 'Terengganu', value: 'Terengganu' }
-];
-
-const platformOptions = [
-    { label: 'Web', value: 'Web' },
-    { label: 'Android', value: 'Android' },
-    { label: 'Huawei', value: 'Huawei' },
-    { label: 'Iphone', value: 'Iphone' }
-];
-
-const levelOptions = [
-    { label: 'Silver', value: 'Silver' },
-    { label: 'Gold', value: 'Gold' },
-    { label: 'Plantinum', value: 'Plantinum' }
-];
-
-const genderOptions = [
-    { label: 'Male', value: 'Male' },
-    { label: 'Female', value: 'Female' }
-];
-
-const codeOptions = [
-    { label: '+60', value: '+60' },
-    { label: '+65', value: '+65' }
-];
-
-const selectOptions = [
-    { label: 'Yes', value: 1 },
-    { label: 'No', value: 0 }
-];
+import { ref, computed } from 'vue';
 
 const memberDetail = ref({
     id: 10,
@@ -236,5 +139,34 @@ const memberDetail = ref({
     deleted: 0
 });
 
+// Fixed computed property with proper mapping
+const moduleAccess = computed({
+    get() {
+        return {
+            marketing: memberDetail.value.allow_warranty === 1,
+            technical: memberDetail.value.allow_user === 1,
+            om: memberDetail.value.allow_order === 1,
+            scm: memberDetail.value.allow_billing === 1,
+            it: memberDetail.value.allow_sale === 1,
+            billing: memberDetail.value.allow_billing === 1,
+            sales: memberDetail.value.allow_sale === 1
+        };
+    },
+    set(newValue) {
+        // Update the memberDetail values when checkboxes change
+        memberDetail.value.allow_warranty = newValue.marketing ? 1 : 0;
+        memberDetail.value.allow_user = newValue.technical ? 1 : 0;
+        memberDetail.value.allow_order = newValue.om ? 1 : 0;
+        memberDetail.value.allow_billing = newValue.scm || newValue.billing ? 1 : 0;
+        memberDetail.value.allow_sale = newValue.it || newValue.sales ? 1 : 0;
+    }
+});
+
 const showPassword = ref(false);
+const codeOptions = ref([
+    { label: '+60', value: '60' },
+    { label: '+65', value: '65' },
+    { label: '+66', value: '66' }
+    // Add more country codes as needed
+]);
 </script>
