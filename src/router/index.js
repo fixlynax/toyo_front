@@ -227,6 +227,7 @@ const router = createRouter({
                     name: 'List-Messaging',
                     component: () => import('@/views/om/listMessaging.vue')
                 },
+                // In your router/index.js file
                 {
                     path: '/om/detailMessaging',
                     name: 'Detail-Messaging',
