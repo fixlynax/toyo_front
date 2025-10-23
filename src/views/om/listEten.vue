@@ -71,7 +71,7 @@
             <Column field="status" header="Status" style="min-width: 6rem">
                 <template #body="{ data }">
                     <Tag 
-                        :value="data.status === 1 ? 'Active' : 'Deactive'" 
+                        :value="data.status === 1 ? 'Active' : 'Inactive'" 
                         :severity="getOverallStatusSeverity(data.status)" 
                     />
                 </template>
