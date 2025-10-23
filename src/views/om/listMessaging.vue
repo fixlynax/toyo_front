@@ -37,7 +37,7 @@
             <template #loading> Loading messages data. Please wait. </template>
 
             <!-- Message Date (Clickable) -->
-            <Column field="messageDate" header="Message DateTime" style="min-width: 25rem">
+            <Column field="messageDate" header="Message DateTime" style="min-width: 10rem">
                 <template #body="{ data }">
                     <div class="font-semibold text-gray-800 cursor-pointer hover:text-blue-600 transition-colors" 
                          @click="goToDetail(data.messageId)">
@@ -49,10 +49,19 @@
            
 
             <!-- Message Subject -->
-            <Column field="subject" header="Message Subject" style="min-width: 20rem">
+            <Column field="subject" header="Message Subject" style="min-width: 15rem">
                 <template #body="{ data }">
                     <div class="font-medium text-gray-900">
                         {{ data.subject }}
+                    </div>
+                </template>
+            </Column>
+
+            <!-- Dealers Count -->
+            <Column field="dealersCount" header="Number Of Customer" style="min-width: 8rem">
+                <template #body="{ data }">
+                    <div class="text-center">
+                        <Tag :value="data.dealers.length.toString()" class="bg-blue-100 text-blue-800" />
                     </div>
                 </template>
             </Column>
