@@ -254,14 +254,16 @@ const router = createRouter({
                     component: () => import('@/views/marketing/createNews.vue')
                 },
                 {
-                    path: '/marketing/detailNews',
+                    path: '/marketing/detailNews/:id',
                     name: 'Detail-News',
-                    component: () => import('@/views/marketing/detailNews.vue')
+                    component: () => import('@/views/marketing/detailNews.vue'),
+                    props: true
                 },
                 {
-                    path: '/marketing/editNews',
+                    path: '/marketing/editNews/:id',
                     name: 'Edit-News',
-                    component: () => import('@/views/marketing/editNews.vue')
+                    component: () => import('@/views/marketing/editNews.vue'),
+                    props: true
                 },
 
                 // Events
