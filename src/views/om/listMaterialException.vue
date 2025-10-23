@@ -17,7 +17,17 @@
                 </div>
 
                 <!-- Material Exceptions Table -->
-                <DataTable :value="materialExceptions" :paginator="true" :rows="10" :rowsPerPageOptions="[5, 10, 20, 50]" dataKey="id" :rowHover="true" :loading="loading" :filters="filters" responsiveLayout="scroll">
+                <DataTable
+                    :value="materialExceptions"
+                    :paginator="true"
+                    :rows="10"
+                    :rowsPerPageOptions="[5, 10, 20, 50]"
+                    dataKey="id"
+                    :rowHover="true"
+                    :loading="loading"
+                    :filters="filters"
+                    responsiveLayout="scroll"
+                >
                     <template #header>
                         <div class="flex justify-between items-center">
                             <span class="text-sm text-gray-500"> {{ materialExceptions.length }} exception(s) found </span>
@@ -59,7 +69,7 @@
                         </template>
                     </Column>
 
-                    <Column header="Type" style="min-width: 8rem">
+                    <Column header="Type" style="min-width: 10rem">
                         <template #body="{ data }">
                             <Tag :value="data.exceptionType" :severity="getTypeSeverity(data.exceptionType)" />
                         </template>
@@ -74,22 +84,7 @@
                         </template>
                     </Column>
 
-                    <Column header="Pattern" style="min-width: 8rem">
-                        <template #body="{ data }">
-                            <div class="font-mono text-sm bg-gray-100 px-2 py-1 rounded">
-                                {{ data.pattern }}
-                            </div>
-                        </template>
-                    </Column>
-
-                    <Column header="Special Price" style="min-width: 10rem">
-                        <template #body="{ data }">
-                            <div v-if="data.specialPrice" class="text-green-600 font-semibold">RM {{ formatPrice(data.specialPrice) }}</div>
-                            <div v-else class="text-gray-400 text-sm">Standard Price</div>
-                        </template>
-                    </Column>
-
-                    <Column header="Status" style="min-width: 8rem">
+                    <Column header="Status" style="min-width: 10rem">
                         <template #body="{ data }">
                             <Tag :value="data.status ? 'Active' : 'Inactive'" :severity="data.status ? 'success' : 'danger'" />
                         </template>
@@ -108,13 +103,28 @@
         </div>
 
         <!-- Add/Edit Dialog -->
-        <Dialog v-model:visible="showAddDialog" :header="editMode ? 'Edit Material Exception' : 'Add Material Exception'" :modal="true" class="p-fluid" :style="{ width: '60rem' }">
+        <Dialog
+            v-model:visible="showAddDialog"
+            :header="editMode ? 'Edit Material Exception' : 'Add Material Exception'"
+            :modal="true"
+            class="p-fluid"
+            :style="{ width: '60rem' }"
+        >
             <div class="grid grid-cols-1 gap-4">
                 <!-- Material Selection -->
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
                         <label class="block font-bold text-gray-700 mb-2">Material Code *</label>
-                        <Dropdown v-model="currentException.materialCode" :options="materialOptions" optionLabel="code" optionValue="code" placeholder="Select Material" class="w-full" filter @change="onMaterialChange" />
+                        <Dropdown
+                            v-model="currentException.materialCode"
+                            :options="materialOptions"
+                            optionLabel="code"
+                            optionValue="code"
+                            placeholder="Select Material"
+                            class="w-full"
+                            filter
+                            @change="onMaterialChange"
+                        />
                     </div>
                     <div>
                         <label class="block font-bold text-gray-700 mb-2">Material Description</label>
@@ -122,26 +132,12 @@
                     </div>
                 </div>
 
-                <!-- Exception Type and Pattern -->
+                <!-- Exception Type -->
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
                         <label class="block font-bold text-gray-700 mb-2">Exception Type *</label>
                         <Dropdown v-model="currentException.exceptionType" :options="exceptionTypeOptions" optionLabel="label" optionValue="value" placeholder="Select Type" class="w-full" />
                     </div>
-                    <div>
-                        <label class="block font-bold text-gray-700 mb-2">Pattern *</label>
-                        <InputText v-model="currentException.pattern" type="text" placeholder="Enter R8R pattern" class="w-full" />
-                    </div>
-                </div>
-
-                <!-- Special Price -->
-                <div>
-                    <label class="block font-bold text-gray-700 mb-2">Special Price</label>
-                    <div class="flex items-center gap-2">
-                        <span class="text-gray-600">RM</span>
-                        <InputNumber v-model="currentException.specialPrice" mode="currency" currency="MYR" locale="en-MY" placeholder="Enter special price" class="w-full" :min="0" :maxFractionDigits="2" />
-                    </div>
-                    <div class="text-sm text-gray-500 mt-1">Leave empty to use standard pricing</div>
                 </div>
 
                 <!-- Dealer Selection -->
@@ -156,12 +152,22 @@
                         <Button label="Clear All" class="p-button-outlined p-button-danger p-button-sm" @click="clearAllDealers" />
                     </div>
 
-                    <MultiSelect v-model="currentException.dealers" :options="dealerOptions" optionLabel="label" optionValue="value" filter display="chip" placeholder="Select Dealers" class="w-full" :maxSelectedLabels="3">
-                        <template #optiongroup="slotProps">
-                            <div class="flex items-center">
-                                <i class="pi pi-map-marker mr-2 text-blue-500" />
-                                <div class="font-semibold">{{ slotProps.option.label }}</div>
-                                <span class="ml-2 text-xs text-gray-500 bg-gray-100 px-2 py-1 rounded-full"> {{ slotProps.option.items.length }} dealers </span>
+                    <!-- ✅ FIXED SEARCHABLE DEALER LIST -->
+                    <MultiSelect
+                        v-model="currentException.dealers"
+                        :options="allDealers"
+                        optionLabel="label"
+                        optionValue="value"
+                        filter
+                        display="chip"
+                        placeholder="Search or Select Dealers"
+                        class="w-full"
+                        :maxSelectedLabels="3"
+                    >
+                        <template #option="slotProps">
+                            <div class="flex flex-col">
+                                <div class="font-medium text-gray-800">{{ slotProps.option.label }}</div>
+                                <small class="text-gray-500">{{ slotProps.option.group }}</small>
                             </div>
                         </template>
                     </MultiSelect>
@@ -217,19 +223,17 @@
 </template>
 
 <script setup>
-import { ref, reactive, computed, onMounted } from 'vue';
-import { FilterMatchMode } from '@primevue/core/api';
+import { ref, reactive, computed, onMounted } from 'vue'
+import { FilterMatchMode } from '@primevue/core/api'
 
-const loading = ref(false);
-const showAddDialog = ref(false);
-const editMode = ref(false);
+const loading = ref(false)
+const showAddDialog = ref(false)
+const editMode = ref(false)
 
-// Filters for search
 const filters = reactive({
     global: { value: null, matchMode: FilterMatchMode.CONTAINS }
-});
+})
 
-// Current exception for add/edit
 const currentException = reactive({
     materialCode: '',
     materialDescription: '',
@@ -238,9 +242,8 @@ const currentException = reactive({
     specialPrice: null,
     dealers: [],
     status: true
-});
+})
 
-// Sample data
 const materialExceptions = ref([
     {
         id: 1,
@@ -250,9 +253,7 @@ const materialExceptions = ref([
         pattern: 'R8R-SPECIAL-001',
         specialPrice: 350.5,
         dealers: ['6080100900', '6080102300'],
-        status: true,
-        createdBy: 'Admin',
-        createdAt: new Date('2024-01-15')
+        status: true
     },
     {
         id: 2,
@@ -262,198 +263,124 @@ const materialExceptions = ref([
         pattern: 'R8R-EXCLUDE-001',
         specialPrice: null,
         dealers: ['6080102301', '6080102302', '6080114400'],
-        status: true,
-        createdBy: 'Admin',
-        createdAt: new Date('2024-01-10')
-    },
-    {
-        id: 3,
-        materialCode: 'MAT-003',
-        materialDescription: 'Brake Pad Set Front',
-        exceptionType: 'Include',
-        pattern: 'R8R-SPECIAL-002',
-        specialPrice: 120.75,
-        dealers: ['6080100900'],
-        status: false,
-        createdBy: 'Admin',
-        createdAt: new Date('2024-01-05')
-    },
-    {
-        id: 4,
-        materialCode: 'MAT-004',
-        materialDescription: 'Air Filter Premium',
-        exceptionType: 'Include',
-        pattern: 'R8R-SPECIAL-003',
-        specialPrice: 45.2,
-        dealers: ['6080102300', '6080125300'],
-        status: true,
-        createdBy: 'Admin',
-        createdAt: new Date('2024-01-20')
+        status: true
     }
-]);
+])
 
-// Options
 const materialOptions = ref([
-    { code: 'MAT-001', description: 'Premium Car Tyre 205/55R16', category: 'Tyres' },
-    { code: 'MAT-002', description: 'Engine Oil Synthetic 5W-30', category: 'Lubricants' },
-    { code: 'MAT-003', description: 'Brake Pad Set Front', category: 'Brakes' },
-    { code: 'MAT-004', description: 'Air Filter Premium', category: 'Filters' },
-    { code: 'MAT-005', description: 'Battery 12V 60Ah', category: 'Electrical' },
-    { code: 'MAT-006', description: 'Spark Plug Iridium', category: 'Ignition' },
-    { code: 'MAT-007', description: 'Shock Absorber Set', category: 'Suspension' },
-    { code: 'MAT-008', description: 'Wheel Bearing Kit', category: 'Steering' }
-]);
+    { code: 'MAT-001', description: 'Premium Car Tyre 205/55R16' },
+    { code: 'MAT-002', description: 'Engine Oil Synthetic 5W-30' },
+    { code: 'MAT-003', description: 'Brake Pad Set Front' },
+    { code: 'MAT-004', description: 'Air Filter Premium' }
+])
 
 const exceptionTypeOptions = ref([
     { label: 'Include', value: 'Include' },
     { label: 'Exclude', value: 'Exclude' }
-]);
+])
 
 const dealerOptions = ref([
     {
         label: 'Kuala Lumpur',
         items: [
-            { label: 'PS Tyres & Battery Auto Services (6080100900)', value: '6080100900' },
-            { label: 'KL City Center (6080102500)', value: '6080102500' }
+            { label: 'PS Tyres & Battery Auto Services', value: '6080100900' },
+            { label: 'KL City Center', value: '6080102500' }
         ]
     },
     {
         label: 'Johor',
         items: [
-            { label: 'Toyo Auto Centre UHP Tyres (6080102300)', value: '6080102300' },
-            { label: 'Johor Bahru Motors (6080102400)', value: '6080102400' }
+            { label: 'Toyo Auto Centre UHP Tyres', value: '6080102300' },
+            { label: 'Johor Bahru Motors', value: '6080102400' }
         ]
     },
     {
         label: 'Penang',
         items: [
-            { label: 'Tek Ming Auto Service (6080102301)', value: '6080102301' },
-            { label: 'Georgetown Auto (6080102600)', value: '6080102600' }
+            { label: 'Tek Ming Auto Service', value: '6080102301' },
+            { label: 'Georgetown Auto', value: '6080102600' }
         ]
     },
     {
         label: 'Selangor',
         items: [
-            { label: 'Apex Tyre & Car Care (6080102302)', value: '6080102302' },
-            { label: 'JS Motorsports (6080114400)', value: '6080114400' },
-            { label: 'Petaling Jaya Auto (6080102700)', value: '6080102700' }
+            { label: 'Apex Tyre & Car Care', value: '6080102302' },
+            { label: 'JS Motorsports', value: '6080114400' },
+            { label: 'Petaling Jaya Auto', value: '6080102700' }
         ]
     },
     {
         label: 'Kedah',
-        items: [{ label: 'Weng Tat Tyre Service (6080125300)', value: '6080125300' }]
+        items: [{ label: 'Weng Tat Tyre Service', value: '6080125300' }]
     }
-]);
+])
 
-// Computed properties
+// ✅ Flattened dealer list for global search & combined display
+const allDealers = computed(() =>
+    dealerOptions.value.flatMap(group =>
+        group.items.map(d => ({
+            label: `${d.label} (${d.value})`,
+            value: d.value,
+            group: group.label
+        }))
+    )
+)
+
 const isDialogFormValid = computed(() => {
-    return currentException.materialCode !== '' && currentException.exceptionType !== '' && currentException.pattern.trim() !== '' && currentException.dealers.length > 0;
-});
+    return (
+        currentException.materialCode &&
+        currentException.exceptionType &&
+        currentException.dealers.length > 0
+    )
+})
 
-// Methods
-const formatPrice = (price) => {
-    return new Intl.NumberFormat('en-MY', {
+const formatPrice = price =>
+    new Intl.NumberFormat('en-MY', {
         minimumFractionDigits: 2,
         maximumFractionDigits: 2
-    }).format(price);
-};
+    }).format(price)
 
-const getTypeSeverity = (type) => {
-    return type === 'Include' ? 'success' : 'warning';
-};
+const getTypeSeverity = type => (type === 'Include' ? 'success' : 'warning')
 
 const onMaterialChange = () => {
-    const selectedMaterial = materialOptions.value.find((m) => m.code === currentException.materialCode);
-    if (selectedMaterial) {
-        currentException.materialDescription = selectedMaterial.description;
-    }
-};
+    const selected = materialOptions.value.find(m => m.code === currentException.materialCode)
+    if (selected) currentException.materialDescription = selected.description
+}
 
 const selectAllDealers = () => {
-    const allDealers = [];
-    dealerOptions.value.forEach((group) => {
-        group.items.forEach((dealer) => {
-            allDealers.push(dealer.value);
-        });
-    });
-    currentException.dealers = allDealers;
-};
+    currentException.dealers = allDealers.value.map(d => d.value)
+}
 
-const clearAllDealers = () => {
-    currentException.dealers = [];
-};
+const clearAllDealers = () => (currentException.dealers = [])
 
-const addException = () => {
-    showAddDialog.value = true;
-    editMode.value = false;
-};
+const editException = data => {
+    editMode.value = true
+    Object.assign(currentException, { ...data })
+    showAddDialog.value = true
+}
 
-const editException = (exception) => {
-    editMode.value = true;
-    Object.assign(currentException, {
-        materialCode: exception.materialCode,
-        materialDescription: exception.materialDescription,
-        exceptionType: exception.exceptionType,
-        pattern: exception.pattern,
-        specialPrice: exception.specialPrice,
-        dealers: [...exception.dealers],
-        status: exception.status
-    });
-    showAddDialog.value = true;
-};
-
-const deleteException = (id) => {
-    const exception = materialExceptions.value.find((e) => e.id === id);
-    if (exception && confirm(`Are you sure you want to delete the material exception for ${exception.materialCode}?`)) {
-        materialExceptions.value = materialExceptions.value.filter((e) => e.id !== id);
-        console.log(`Material exception ${id} has been deleted`);
+const deleteException = id => {
+    if (confirm('Are you sure you want to delete this exception?')) {
+        materialExceptions.value = materialExceptions.value.filter(e => e.id !== id)
     }
-};
+}
 
 const saveException = () => {
     if (editMode.value) {
-        // Update existing exception
-        const index = materialExceptions.value.findIndex((e) => e.id === currentException.id);
-        if (index !== -1) {
-            materialExceptions.value[index] = {
-                ...materialExceptions.value[index],
-                ...currentException,
-                dealers: [...currentException.dealers]
-            };
-        }
+        const idx = materialExceptions.value.findIndex(e => e.id === currentException.id)
+        if (idx !== -1) materialExceptions.value[idx] = { ...currentException }
     } else {
-        // Create new exception
-        // Check if material and pattern combination already exists
-        const existingException = materialExceptions.value.find((e) => e.materialCode === currentException.materialCode && e.pattern === currentException.pattern);
-
-        if (existingException) {
-            alert('A material exception with this material and pattern already exists. Please edit the existing entry instead.');
-            return;
-        }
-
-        const newException = {
-            id: Date.now(),
-            materialCode: currentException.materialCode,
-            materialDescription: currentException.materialDescription,
-            exceptionType: currentException.exceptionType,
-            pattern: currentException.pattern,
-            specialPrice: currentException.specialPrice,
-            dealers: [...currentException.dealers],
-            status: currentException.status,
-            createdBy: 'Admin',
-            createdAt: new Date()
-        };
-        materialExceptions.value.unshift(newException);
+        materialExceptions.value.unshift({
+            ...currentException,
+            id: Date.now()
+        })
     }
-
-    closeDialog();
-    console.log('Material exception saved:', currentException);
-};
+    closeDialog()
+}
 
 const closeDialog = () => {
-    showAddDialog.value = false;
-    editMode.value = false;
-    // Reset form
+    showAddDialog.value = false
+    editMode.value = false
     Object.assign(currentException, {
         materialCode: '',
         materialDescription: '',
@@ -462,17 +389,13 @@ const closeDialog = () => {
         specialPrice: null,
         dealers: [],
         status: true
-    });
-};
+    })
+}
 
-// Initialize
 onMounted(() => {
-    // Simulate loading
-    loading.value = true;
-    setTimeout(() => {
-        loading.value = false;
-    }, 1000);
-});
+    loading.value = true
+    setTimeout(() => (loading.value = false), 800)
+})
 </script>
 
 <style scoped>
