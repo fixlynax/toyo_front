@@ -143,28 +143,28 @@ const closingDates = ref([
     {
         id: 1,
         monthYear: new Date('2024-01-01'),
-        closingDateTime: new Date('2024-01-31T23:59:59'),
+        closingDateTime: new Date('2025-01-26T15:00:59'),
         createdBy: 'Admin',
         createdAt: new Date('2024-01-01T09:00:00')
     },
     {
         id: 2,
         monthYear: new Date('2024-02-01'),
-        closingDateTime: new Date('2024-02-29T23:59:59'),
+        closingDateTime: new Date('2025-02-26T15:00:59'),
         createdBy: 'Admin',
         createdAt: new Date('2024-02-01T09:00:00')
     },
     {
         id: 3,
         monthYear: new Date('2024-03-01'),
-        closingDateTime: new Date('2024-03-31T23:59:59'),
+        closingDateTime: new Date('2025-03-26T15:00:59'),
         createdBy: 'Admin',
-        createdAt: new Date('2024-03-01T09:00:00')
+        createdAt: new Date('2025-03-01T09:00:00')
     },
     {
         id: 4,
         monthYear: new Date('2024-04-01'),
-        closingDateTime: new Date('2024-04-30T23:59:59'),
+        closingDateTime: new Date('2025-04-26T15:00:59'),
         createdBy: 'Admin',
         createdAt: new Date('2024-04-01T09:00:00')
     }
