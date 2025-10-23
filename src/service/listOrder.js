@@ -1,9 +1,11 @@
-export const ListOrderService = { 
-    getListOrderData() { 
+export const ListOrderService = {
+    getListOrderData() {
         return [
             {
                 id: 1,
                 etenUserListID: 'E346572',
+                orderType: 2,
+                deliveryMethod: 0,
                 etenUserID: 'EU1001',
                 custAccountNo: '6080100900',
                 companyName: 'PS Tyres & Battery Auto Services Sdn. Bhd',
@@ -26,20 +28,25 @@ export const ListOrderService = {
                 soNo: 'SO001',
                 doNo: 'DO001',
                 invNo: 'INV001',
-                order_array: ['item1','item2'],
+                order_array: ['item1', 'item2'],
                 fullfill_order_array: ['fulfilled1'],
-                subtotal: 1000.00,
-                tax: 60.00,
-                total: 1060.00,
+                subtotal: 1000.0,
+                tax: 60.0,
+                total: 1060.0,
                 orderReceiveRating: 5,
                 orderReceiveRemarks: 'Good delivery',
-                orderStatus: 1, // completed
+                orderStatus: 1,
+                salesOrderNo: 'SO-1001',
+                deliveryOrderNo: 'DO-1001',
+                invoiceNo: 'INV-1001',
                 sap_timestamp: '2025-10-02T10:00:00Z',
                 created: '2025-10-02T09:00:00Z'
             },
             {
                 id: 2,
                 etenUserListID: 'E234176',
+                orderType: 1,
+                deliveryMethod: 1,
                 etenUserID: 'EU1002',
                 custAccountNo: '6080102300',
                 companyName: 'Toyo Auto Centre UHP Tyres Sdn Bhd',
@@ -64,18 +71,23 @@ export const ListOrderService = {
                 invNo: 'INV002',
                 order_array: ['item3'],
                 fullfill_order_array: ['fulfilled3'],
-                subtotal: 2000.00,
-                tax: 120.00,
-                total: 2120.00,
+                subtotal: 2000.0,
+                tax: 120.0,
+                total: 2120.0,
                 orderReceiveRating: 4,
                 orderReceiveRemarks: 'Self collect',
-                orderStatus: 66, // processing
+                orderStatus: 66,
+                salesOrderNo: 'SO-2002',
+                deliveryOrderNo: 'DO-2002',
+                invoiceNo: 'INV-2002',
                 sap_timestamp: '2025-10-02T11:00:00Z',
                 created: '2025-10-02T09:30:00Z'
             },
             {
                 id: 3,
                 etenUserListID: 'E127568',
+                orderType: 2,
+                deliveryMethod: 0,
                 etenUserID: 'EU1003',
                 custAccountNo: '6080102301',
                 companyName: 'Tek Ming Auto Service Sdn. Bhd.',
@@ -98,20 +110,25 @@ export const ListOrderService = {
                 soNo: 'SO003',
                 doNo: 'DO003',
                 invNo: 'INV003',
-                order_array: ['item4','item5','item6'],
-                fullfill_order_array: ['fulfilled4','fulfilled5'],
-                subtotal: 1500.00,
-                tax: 90.00,
-                total: 1590.00,
+                order_array: ['item4', 'item5', 'item6'],
+                fullfill_order_array: ['fulfilled4', 'fulfilled5'],
+                subtotal: 1500.0,
+                tax: 90.0,
+                total: 1590.0,
                 orderReceiveRating: 3,
                 orderReceiveRemarks: 'Delay',
-                orderStatus: 77, // delivery
+                orderStatus: 77,
+                salesOrderNo: 'SO-3003',
+                deliveryOrderNo: 'DO-3003',
+                invoiceNo: 'INV-3003',
                 sap_timestamp: '2025-10-02T12:00:00Z',
                 created: '2025-10-02T09:45:00Z'
             },
             {
                 id: 4,
                 etenUserListID: 'E127823',
+                orderType: 0,
+                deliveryMethod: 0,
                 etenUserID: 'EU1004',
                 custAccountNo: '6080102302',
                 companyName: 'Apex Tyre & Car Care',
@@ -136,18 +153,23 @@ export const ListOrderService = {
                 invNo: 'INV004',
                 order_array: ['item7'],
                 fullfill_order_array: ['fulfilled7'],
-                subtotal: 3000.00,
-                tax: 180.00,
-                total: 3180.00,
+                subtotal: 3000.0,
+                tax: 180.0,
+                total: 3180.0,
                 orderReceiveRating: 5,
                 orderReceiveRemarks: 'Fast delivery',
                 orderStatus: 1,
+                salesOrderNo: 'SO-4004',
+                deliveryOrderNo: 'DO-4004',
+                invoiceNo: 'INV-4004',
                 sap_timestamp: '2025-10-02T12:30:00Z',
                 created: '2025-10-02T10:15:00Z'
             },
             {
                 id: 5,
                 etenUserListID: 'E74B23S5',
+                orderType: 0,
+                deliveryMethod: 0,
                 etenUserID: 'EU1005',
                 custAccountNo: '6080114400',
                 companyName: 'JS Motorsports Sdn Bhd',
@@ -170,20 +192,25 @@ export const ListOrderService = {
                 soNo: 'SO005',
                 doNo: 'DO005',
                 invNo: 'INV005',
-                order_array: ['item8','item9'],
+                order_array: ['item8', 'item9'],
                 fullfill_order_array: ['fulfilled8'],
-                subtotal: 2500.00,
-                tax: 150.00,
-                total: 2650.00,
+                subtotal: 2500.0,
+                tax: 150.0,
+                total: 2650.0,
                 orderReceiveRating: 4,
                 orderReceiveRemarks: 'Okay',
                 orderStatus: 66,
+                salesOrderNo: 'SO-5005',
+                deliveryOrderNo: 'DO-5005',
+                invoiceNo: 'INV-5005',
                 sap_timestamp: '2025-10-02T13:00:00Z',
                 created: '2025-10-02T10:30:00Z'
             },
             {
                 id: 6,
                 etenUserListID: 'E325632',
+                orderType: 1,
+                deliveryMethod: 1,
                 etenUserID: 'EU1006',
                 custAccountNo: '6080125300',
                 companyName: 'Weng Tat Tyre Service',
@@ -208,18 +235,23 @@ export const ListOrderService = {
                 invNo: 'INV006',
                 order_array: ['item10'],
                 fullfill_order_array: ['fulfilled10'],
-                subtotal: 1800.00,
-                tax: 108.00,
-                total: 1908.00,
+                subtotal: 1800.0,
+                tax: 108.0,
+                total: 1908.0,
                 orderReceiveRating: 2,
                 orderReceiveRemarks: 'Need improvement',
-                orderStatus: 0, // pending
+                orderStatus: 0,
+                salesOrderNo: 'SO-6006',
+                deliveryOrderNo: 'DO-6006',
+                invoiceNo: 'INV-6006',
                 sap_timestamp: '2025-10-02T14:00:00Z',
                 created: '2025-10-02T11:00:00Z'
             },
             {
                 id: 7,
                 etenUserListID: 'E346572',
+                orderType: 2,
+                deliveryMethod: 0,
                 etenUserID: 'EU1007',
                 custAccountNo: '6080100900',
                 companyName: 'Sport Tire Chong Lim',
@@ -242,29 +274,32 @@ export const ListOrderService = {
                 soNo: 'SO007',
                 doNo: 'DO007',
                 invNo: 'INV007',
-                order_array: ['item11','item12'],
+                order_array: ['item11', 'item12'],
                 fullfill_order_array: ['fulfilled11'],
-                subtotal: 4000.00,
-                tax: 240.00,
-                total: 4240.00,
+                subtotal: 4000.0,
+                tax: 240.0,
+                total: 4240.0,
                 orderReceiveRating: 5,
                 orderReceiveRemarks: 'Excellent',
-                orderStatus: 77,
+                orderStatus: 99,
+                salesOrderNo: 'SO-7007',
+                deliveryOrderNo: 'DO-7007',
+                invoiceNo: 'INV-7007',
                 sap_timestamp: '2025-10-02T15:00:00Z',
                 created: '2025-10-02T11:30:00Z'
             }
         ];
     },
 
-    getListOrderMini() { 
+    getListOrderMini() {
         return Promise.resolve(this.getListOrderData().slice(0, 5));
     },
 
-    getListOrderSmall() { 
+    getListOrderSmall() {
         return Promise.resolve(this.getListOrderData().slice(0, 10));
     },
 
-    getListOrder() { 
+    getListOrder() {
         return Promise.resolve(this.getListOrderData());
-    },
+    }
 };

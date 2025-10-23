@@ -8,7 +8,7 @@
                         <div class="text-2xl font-bold text-gray-800 border-b pb-2">Return Order Detail</div>
 
                         <!-- Return Info -->
-                        <div class="font-semibold text-xl border-b pb-2 mt-2">🏬 Dealer Information</div>
+                        <div class="font-semibold text-xl border-b pb-2 mt-2">🏬 Customer Details</div>
                         <div class="flex flex-col md:flex-row gap-4">
                             <div class="w-full">
                                 <span class="text-sm text-gray-500">Dealer Name</span>
