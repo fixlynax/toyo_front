@@ -46,13 +46,20 @@
                 </template>
             </Column>
 
-           
-
             <!-- Message Subject -->
             <Column field="subject" header="Message Subject" style="min-width: 15rem">
                 <template #body="{ data }">
                     <div class="font-medium text-gray-900">
                         {{ data.subject }}
+                    </div>
+                </template>
+            </Column>
+
+            <!-- Message Subject -->
+            <Column field="subject" header="Admin" style="min-width: 8rem">
+                <template #body="{ data }">
+                    <div class="font-medium text-gray-900">
+                        {{ data.admin }}
                     </div>
                 </template>
             </Column>
@@ -86,6 +93,7 @@ const mockMessages = [
         messageDate: '2024-01-15',
         messageTime: '14:30:00',
         subject: 'Year End Promotion Announcement',
+        admin: 'shukei',
         dealers: [
             {
                 custAccountNo: '6080100900',
@@ -129,6 +137,7 @@ const mockMessages = [
         messageDate: '2024-01-10',
         messageTime: '09:15:00',
         subject: 'New Product Launch - Toyo Proxes Sport',
+        admin: 'shahira',
         dealers: [
             {
                 custAccountNo: '6080100900',
@@ -151,6 +160,7 @@ const mockMessages = [
         messageDate: '2024-01-05',
         messageTime: '16:45:00',
         subject: 'Inventory Check Request',
+        admin: 'Hafiz',
         dealers: [
             {
                 custAccountNo: '6080102300',
