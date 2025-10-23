@@ -3,7 +3,12 @@
         <div class="flex flex-col md:flex-row gap-8">
             <div class="md:w-2/3 flex flex-col">
                 <div class="card flex flex-col gap-6 w-full">
-                    <div class="text-2xl font-bold text-gray-800 border-b pb-2">Order Details</div>
+                    <div class="flex items-center gap-2 border-b">
+                        <RouterLink to="/om/listOrder">
+                            <Button icon="pi pi-arrow-left font-bold" class="p-button-text p-button-secondary text-xl" size="big" v-tooltip="'Back'" />
+                        </RouterLink>
+                        <div class="text-2xl font-bold text-gray-800">Customer Information</div>
+                    </div>
 
                     <div class="flex items-center justify-between w-full">
                         <div>
@@ -12,7 +17,7 @@
                         </div>
                     </div>
 
-                    <div class="font-semibold text-xl border-b pb-2 mt-8">🏬 Customer Details</div>
+                    <div class="font-semibold text-xl border-b pb-2 mt-2">🏬 Customer Details</div>
 
                     <div class="flex flex-col md:flex-row gap-4">
                         <div class="w-full">
@@ -133,8 +138,6 @@
                         <span class="text-lg font-semibold text-gray-800">Grand Total: RM {{ totalAmount.toFixed(2) }}</span>
                     </div>
                 </div>
-
-         
             </div>
 
             <div class="md:w-1/3 flex flex-col">
@@ -148,23 +151,23 @@
                             <tbody>
                                 <tr class="border-b">
                                     <td class="px-4 py-2 font-medium">Price Group</td>
-                                    <td class="px-4 py-2 text-right">{{ backOrder.division }}</td>
+                                    <td class="px-4 py-2 text-right font-semibold">{{ backOrder.division }}</td>
                                 </tr>
                                 <tr class="border-b">
                                     <td class="px-4 py-2 font-medium">Customer Group</td>
-                                    <td class="px-4 py-2 text-right">{{ backOrder.sapOrderType }}</td>
+                                    <td class="px-4 py-2 text-right font-semibold">{{ backOrder.sapOrderType }}</td>
                                 </tr>
                                 <tr class="border-b">
                                     <td class="px-4 py-2 font-medium">Storage Location</td>
-                                    <td class="px-4 py-2 text-right">{{ backOrder.salesOrg }}</td>
+                                    <td class="px-4 py-2 text-right font-semibold">{{ backOrder.salesOrg }}</td>
                                 </tr>
                                 <tr class="border-b">
                                     <td class="px-4 py-2 font-medium">User Approved</td>
-                                    <td class="px-4 py-2 text-right">{{ backOrder.deliveryDate }}</td>
+                                    <td class="px-4 py-2 text-right font-semibold">{{ backOrder.deliveryDate }}</td>
                                 </tr>
                                 <tr class="border-b">
                                     <td class="px-4 py-2 font-medium">Date Approved</td>
-                                    <td class="px-4 py-2 text-right">{{ backOrder.deliveryDate }}</td>
+                                    <td class="px-4 py-2 text-right font-semibold">{{ backOrder.deliveryDate }}</td>
                                 </tr>
                                 <tr>
                                     <td></td>
@@ -183,25 +186,25 @@
                 </div>
 
                 <div class="card flex flex-col w-full">
-                    <div class="text-2xl font-bold text-gray-800 border-b pb-2 mb-3">Document Info</div>
+                    <div class="text-2xl font-bold text-gray-800 border-b pb-2 mb-2">Document Info</div>
                     <div class="overflow-x-auto">
                         <table class="w-full text-sm text-left text-gray-700">
                             <tbody>
                                 <tr class="border-b">
                                     <td class="px-4 py-2 font-medium">SO No.</td>
-                                    <td class="px-4 py-2 text-right font-bold">{{ billing.soNo }}</td>
+                                    <td class="px-4 py-2 text-right font-semibold">{{ billing.soNo }}</td>
                                 </tr>
                                 <tr class="border-b">
                                     <td class="px-4 py-2 font-medium">DO No.</td>
-                                    <td class="px-4 py-2 text-right font-bold">{{ billing.doNo }}</td>
+                                    <td class="px-4 py-2 text-right font-semibold">{{ billing.doNo }}</td>
                                 </tr>
                                 <tr class="border-b">
                                     <td class="px-4 py-2 font-medium">Invoice No</td>
-                                    <td class="px-4 py-2 text-right font-bold">{{ billing.invoiceNo }}</td>
+                                    <td class="px-4 py-2 text-right font-semibold">{{ billing.invoiceNo }}</td>
                                 </tr>
                                 <tr class="border-b">
                                     <td class="px-4 py-2 font-medium">Last Updated</td>
-                                    <td class="px-4 py-2 text-right font-bold">{{ billing.lastUpdated }}</td>
+                                    <td class="px-4 py-2 text-right font-semibold">{{ billing.lastUpdated }}</td>
                                 </tr>
                             </tbody>
                         </table>
@@ -228,7 +231,6 @@
                                 <span>{{ data.description }}</span>
                             </template>
                         </Column>
-
                     </DataTable>
 
                     <div class="flex justify-end items-center border-t px-4 py-2">
@@ -337,7 +339,7 @@ const backOrdering = ref({
     deliveryDate: '2025-10-22',
     boOrderNo: 'BO1001',
     deliveryETA: '2025-10-24',
-    deliveryStatus: 'Processing',
+    deliveryStatus: 'Delivered',
     lastUpdated: '2025-10-23 09:45 AM'
 });
 
