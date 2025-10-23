@@ -5,7 +5,7 @@
                 <!-- Header -->
                 <div class="text-2xl font-bold text-gray-800 border-b pb-2 mb-4">Month End Closing Calendar</div>
 
-                <!-- Description -->
+                <!-- Description
                 <div class="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-2">
                     <div class="flex items-start">
                         <i class="pi pi-info-circle text-blue-500 text-lg mt-1 mr-3"></i>
@@ -14,7 +14,7 @@
                             <div class="text-blue-700 text-sm">Orders placed after the closing date/time will be processed as next month's orders when sent to SAP. These dates apply nationwide to all regions and dealers.</div>
                         </div>
                     </div>
-                </div>
+                </div> -->
 
                 <!-- Closing Dates Table -->
                 <DataTable :value="closingDates" :paginator="true" :rows="10" :rowsPerPageOptions="[5, 10, 20, 50]" dataKey="id" :rowHover="true" :loading="loading" sortField="closingDateTime" :sortOrder="-1" responsiveLayout="scroll">
@@ -22,7 +22,6 @@
                         <div class="flex justify-between items-center">
                             <span class="text-sm text-gray-500"> Showing {{ closingDates.length }} records </span>
                             <div class="flex gap-2">
-                                <Button label="Add Closing Date" icon="pi pi-plus" class="p-button-primary" @click="showAddDialog = true" />
                             </div>
                         </div>
                     </template>
@@ -46,43 +45,36 @@
                     <Column field="monthYear" header="Month" style="min-width: 10rem" :sortable="true">
                         <template #body="{ data }">
                             <div class="font-semibold text-gray-800">
-                                {{ data.monthYear }}
+                                {{ formatMonth(data.monthYear) }}
                             </div>
                         </template>
                     </Column>
 
-                    <Column field="closingDateTime" header="Closing Date & Time" style="min-width: 15rem" :sortable="true">
+                    <Column field="closingDateTime" header="Closing Date" style="min-width: 15rem" :sortable="true">
                         <template #body="{ data }">
                             <div class="text-sm">
                                 <div class="font-semibold text-gray-800">
                                     {{ formatDate(data.closingDateTime) }}
                                 </div>
-                                <div class="text-gray-500 text-xs">
+                            </div>
+                        </template>
+                    </Column>
+
+                    <Column field="closingDateTime" header="Closing Time" style="min-width: 15rem" :sortable="true">
+                        <template #body="{ data }">
+                            <div class="text-sm">
+                                <div class="font-semibold text-gray-800">
                                     {{ formatTime(data.closingDateTime) }}
                                 </div>
                             </div>
                         </template>
                     </Column>
 
-                    <Column header="Status" style="min-width: 8rem">
-                        <template #body="{ data }">
-                            <Tag :value="getStatus(data)" :severity="getStatusSeverity(data)" />
-                        </template>
-                    </Column>
-
-                    <Column header="Days Remaining" style="min-width: 8rem">
-                        <template #body="{ data }">
-                            <div class="text-center">
-                                <Badge :value="getDaysRemaining(data)" :severity="getDaysRemainingSeverity(data)" class="min-w-12" />
-                            </div>
-                        </template>
-                    </Column>
 
                     <Column header="Actions" style="min-width: 8rem">
                         <template #body="{ data }">
                             <div class="flex gap-1">
                                 <Button icon="pi pi-pencil" class="p-button-info p-button-text p-button-sm" v-tooltip="'Edit'" @click="editDate(data)" />
-                                <Button icon="pi pi-trash" class="p-button-danger p-button-text p-button-sm" v-tooltip="'Delete'" @click="deleteDate(data.id)" />
                             </div>
                         </template>
                     </Column>
@@ -93,11 +85,7 @@
         <!-- Add/Edit Dialog -->
         <Dialog v-model:visible="showAddDialog" :header="editMode ? 'Edit Closing Date' : 'Add Closing Date'" :modal="true" class="p-fluid" :style="{ width: '40rem' }">
             <div class="grid grid-cols-1 gap-4">
-                <!-- Month Selection -->
-                <div>
-                    <label class="block font-bold text-gray-700 mb-2">Month & Year *</label>
-                    <Calendar v-model="currentDate.monthYear" view="month" dateFormat="mm/yy" placeholder="Select Month and Year" class="w-full" :minDate="minMonth" :maxDate="maxMonth" />
-                </div>
+                
 
                 <!-- Closing Date & Time -->
                 <div>
@@ -219,6 +207,13 @@ const formatDate = (date) => {
         year: 'numeric',
         month: 'long',
         day: 'numeric'
+    });
+};
+
+const formatMonth = (date) => {
+    return new Date(date).toLocaleDateString('en-MY', {
+        year: 'numeric',
+        month: 'long'
     });
 };
 
