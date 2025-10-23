@@ -18,6 +18,16 @@
                     </div>
 
                     <div>
+                        <label class="block font-bold text-gray-700">Start Date</label>
+                        <Calendar v-model="news.startDate" dateFormat="yy-mm-dd" class="w-full" />
+                    </div>
+
+                    <div>
+                        <label class="block font-bold text-gray-700">End Date</label>
+                        <Calendar v-model="news.endDate" dateFormat="yy-mm-dd" class="w-full" />
+                    </div>
+
+                    <div>
                         <label class="block font-bold text-gray-700">Publish Date</label>
                         <Calendar v-model="news.publishDate" dateFormat="yy-mm-dd" class="w-full" />
                     </div>
