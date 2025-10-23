@@ -43,66 +43,112 @@
 
                 <!-- FOC Info (only if enabled) -->
                 <div v-if="salesProgram.type=='FOC'" class="card flex flex-col w-full">
-                    <div class="flex items-center justify-between border-b pb-2 mb-2">
-                        <div class="text-2xl font-bold text-gray-800">📋 FOC Detail</div>
+                    <div class="flex items-center justify-between border-b pb-2 mb-4">
+                        <div class="text-2xl font-bold text-gray-800">📋 FOC Criteria</div>
+                        <div class="text-sm text-gray-600">
+                            Total {{ criteriaList.length }} criteria
+                        </div>
                     </div>
 
-                    <DataTable :value="FOClistPrize" :paginator="true" :rows="7" dataKey="id" :rowHover="true" responsiveLayout="scroll" class="text-sm">
-                        <Column header="Buy Material" style="min-width: 8rem">
-                            <template #body="{ data }">
-                                <div class="flex flex-col">
-                                    <span class="font-bold text-gray-800">{{ data.buy_materialName }}</span>
-                                    <span class="text-gray-600 text-xs mt-2">🔑 {{ data.buy_materialid }}</span>
+                    <!-- Criteria Cards -->
+                    <div class="space-y-6">
+                        <div v-for="(criteria, criteriaIndex) in criteriaList" :key="criteria.material" 
+                             class="border border-gray-200 rounded-xl p-6 bg-white shadow-sm hover:shadow-md transition-shadow">
+                            <!-- Criteria Header -->
+                            <div class="flex items-center justify-between mb-4 pb-3 border-b border-gray-100">
+                                <div class="flex items-center gap-3">
+                                    <div class="w-8 h-8 bg-blue-500 rounded-full flex items-center justify-center shadow-sm">
+                                        <span class="text-white font-bold text-sm">{{ criteriaIndex + 1 }}</span>
+                                    </div>
+                                    <h3 class="font-semibold text-lg text-gray-800">Criteria {{ criteriaIndex + 1 }}</h3>
                                 </div>
-                            </template>
-                        </Column>
-
-                        <!-- Prize Type -->
-                        <Column field="buyQty" header="Buy Qty" style="min-width: 6rem; text-align: center"></Column>
-
-                        
-                        <Column field="freeQty" header="Free Qty" style="min-width: 6rem; text-align: center"></Column>
-                        
-                        <Column header="Free Material" style="min-width: 8rem">
-                            <template #body="{ data }">
-                                <div class="flex flex-col">
-                                    <span class="font-bold text-gray-800">{{ data.free_materialName }}</span>
-                                    <span class="text-gray-600 text-xs mt-2">🔑 {{ data.free_materialid }}</span>
+                                <div class="flex items-center gap-2">
+                                    <span class="text-sm font-medium text-gray-600">Buy {{ criteria.buyQty }}, Get {{ criteria.freeQty }} Free</span>
+                                    <Tag :value="criteria.status === 1 ? 'Active' : 'Inactive'" 
+                                         :severity="criteria.status === 1 ? 'success' : 'danger'" />
                                 </div>
-                            </template>
-                        </Column>
-                        <column header="Status" style="min-width: 8rem">
-                            <template #body="{ data }">
-                                <Tag :value="data.status === 1 ? 'Active' : 'Inactive'" :severity="data.status === 1 ? 'success' : 'danger'" />
-                            </template>
-                        </column>
-                    </DataTable>
-                </div>
+                            </div>
 
-                 <!-- FOC Info (only if enabled) -->
-                <div v-if="salesProgram.type=='MARKDOWN'" class="card flex flex-col w-full">
-                    <div class="flex items-center justify-between border-b pb-2 mb-2">
-                        <div class="text-2xl font-bold text-gray-800">📋 MARKDOWN Detail</div>
+                            <!-- Criteria Content -->
+                            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                                <!-- Buy Materials Section -->
+                                <div>
+                                    <h4 class="font-semibold text-gray-700 mb-3 flex items-center gap-2">
+                                        <i class="pi pi-shopping-cart text-blue-600"></i>
+                                        Buy Materials ({{ criteria.buyMaterials.length }})
+                                    </h4>
+                                    <div class="space-y-3">
+                                        <div v-for="material in criteria.buyMaterials" :key="material.material" 
+                                             class="flex items-center gap-3 p-3 bg-blue-50 border border-blue-200 rounded-lg">
+                                            <img :src="material.image || '/demo/images/event-toyo-1.jpg'" 
+                                                 :alt="material.material" class="w-12 h-12 object-cover rounded-md shadow-sm" />
+                                            <div class="flex-1 min-w-0">
+                                                <div class="font-medium text-sm text-blue-800">{{ material.material }}</div>
+                                                <div class="text-xs text-blue-600 truncate">{{ material.material }}</div>
+                                                <div class="flex flex-wrap items-center gap-2 mt-1">
+                                                    <span class="text-xs bg-white px-2 py-0.5 rounded text-blue-700 border border-blue-200">
+                                                        Pattern: {{ material.pattern }}
+                                                    </span>
+                                                    <span class="text-xs bg-white px-2 py-0.5 rounded text-blue-700 border border-blue-200">
+                                                        Rim: {{ material.rimDiameter }}"
+                                                    </span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Free Material Section -->
+                                <div>
+                                    <h4 class="font-semibold text-gray-700 mb-3 flex items-center gap-2">
+                                        <i class="pi pi-gift text-green-600"></i>
+                                        Free Material
+                                    </h4>
+                                    <div v-if="criteria.freeMaterial" class="flex items-center gap-4 p-4 bg-green-50 border border-green-200 rounded-lg">
+                                        <img :src="criteria.freeMaterial.image || '/demo/images/event-toyo-1.jpg'" 
+                                             :alt="criteria.freeMaterial.material" class="w-16 h-16 object-cover rounded-lg shadow-sm" />
+                                        <div class="flex-1">
+                                            <div class="font-semibold text-green-800 text-sm mb-1">{{ criteria.freeMaterial.material }}</div>
+                                            <div class="text-xs text-green-600 mb-2">{{ criteria.freeMaterial.material }}</div>
+                                            <div class="flex flex-wrap items-center gap-2">
+                                                <span class="text-xs bg-white px-2 py-0.5 rounded text-green-700 border border-green-200">
+                                                    Pattern: {{ criteria.freeMaterial.pattern }}
+                                                </span>
+                                                <span class="text-xs bg-white px-2 py-0.5 rounded text-green-700 border border-green-200">
+                                                    Rim: {{ criteria.freeMaterial.rimDiameter }}"
+                                                </span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div v-else class="text-center py-6 border-2 border-dashed border-gray-300 rounded-lg">
+                                        <i class="pi pi-gift text-3xl text-gray-300 mb-2"></i>
+                                        <p class="text-gray-500 text-sm">No free material selected</p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Quantities Summary -->
+                            <div class="mt-4 pt-4 border-t border-gray-100">
+                                <div class="grid grid-cols-2 gap-4 text-center">
+                                    <div class="bg-blue-50 rounded-lg p-3">
+                                        <div class="text-2xl font-bold text-blue-600">{{ criteria.buyQty }}</div>
+                                        <div class="text-sm text-blue-700 font-medium">Buy Quantity</div>
+                                    </div>
+                                    <div class="bg-green-50 rounded-lg p-3">
+                                        <div class="text-2xl font-bold text-green-600">{{ criteria.freeQty }}</div>
+                                        <div class="text-sm text-green-700 font-medium">Free Quantity</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
                     </div>
 
-                    <DataTable :value="MARKDOWNlistPrize" :paginator="true" :rows="7" dataKey="id" :rowHover="true" responsiveLayout="scroll" class="text-sm">
-
-                        <Column header="Material" style="min-width: 20rem">
-                            <template #body="{ data }">
-                                <div class="flex flex-col">
-                                    <span class="font-bold text-gray-800">{{ data.materialName }}</span>
-                                    <span class="text-gray-600 text-xs mt-2">🔑 {{ data.materialid }}</span>
-                                </div>
-                            </template>
-                        </Column>
-
-                        <!-- Prize Type -->
-                        <column header="Status" style="min-width: 6rem">
-                            <template #body="{ data }">
-                                <Tag :value="data.status === 1 ? 'Active' : 'Inactive'" :severity="data.status === 1 ? 'success' : 'danger'" />
-                            </template>
-                        </column>
-                    </DataTable>
+                    <!-- Empty State -->
+                    <div v-if="criteriaList.length === 0" class="text-center py-8 text-gray-500">
+                        <i class="pi pi-inbox text-4xl text-gray-300 mb-3"></i>
+                        <p class="text-lg">No criteria defined</p>
+                        <p class="text-sm">Add criteria to define promotion rules</p>
+                    </div>
                 </div>
             </div>
 
@@ -134,34 +180,13 @@
                                     <td class="px-4 py-2 font-medium">Price Group</td>
                                     <td class="px-4 py-2 text-right">{{ salesProgram.priceGroup }}</td>
                                 </tr>
+                                <tr class="border-b">
+                                    <td class="px-4 py-2 font-medium">Total Criteria</td>
+                                    <td class="px-4 py-2 text-right">{{ criteriaList.length }}</td>
+                                </tr>
                             </tbody>
                         </table>
                     </div>
-                </div>
-
-                <div class="card flex flex-col w-full">
-                    <div class="text-2xl font-bold text-gray-800 border-b pb-3 mb-4">👨🏻‍💻 eTEN List</div>
-                    <DataTable :value="etenList" :paginator="true" :rows="7" dataKey="id" :rowHover="true" responsiveLayout="scroll" class="text-sm">
-                        <!-- User Column -->
-                        <Column header="Dealer" style="min-width: 10rem">
-                            <template #body="{ data }">
-                                <div class="flex flex-col">
-                                    <span class="font-bold text-gray-800">{{ data.companyName1 }}</span>
-                                    <span class="text-gray-600 text-xs mt-2">🔑 {{ data.custAccountNo }}</span>
-                                    <span class="text-gray-600 text-xs mt-2">📍 {{ data.state }}</span>
-                                </div>
-                            </template>
-                        </Column>
-
-                        <Column header="Contact" style="min-width: 8rem">
-                            <template #body="{ data }">
-                                <div class="flex flex-col">
-                                    <span class=" text-gray-800">{{ data.emailAddress }}</span>
-                                    <span class=" text-gray-800">{{ data.mobilreNumber }}</span>
-                                </div>
-                            </template>
-                        </Column>
-                    </DataTable>
                 </div>
             </div>
         </div>
@@ -169,7 +194,7 @@
 </template>
 
 <script setup>
-import { ref } from 'vue';
+import { ref, computed } from 'vue';
 
 const salesProgram = ref({
     programId: 'ABC4321',
@@ -185,152 +210,189 @@ const salesProgram = ref({
     created: '2025-09-08'
 });
 
-const etenList = [
-  {
-    memberCode: 'E346572',
-    custAccountNo: '6080100900',
-    companyName1: 'PS Tyres & Battery Auto Services Sdn. Bhd',
-    phoneNumber: '+60 3-1234 5678',
-    mobilreNumber: '+60 19-1234 567',
-    state: 'Kuala Lumpur',
-    emailAddress: 'sales@toyotires.com.my',
-    status: 0
-  },
-  {
-    memberCode: 'E234176',
-    custAccountNo: '6080102300',
-    companyName1: 'Toyo Auto Centre UHP Tyres Sdn Bhd',
-    phoneNumber: '+60 7-2345 678',
-    mobilreNumber: '+60 16-2345 678',
-    state: 'Johor',
-    emailAddress: 'johor@toyotires.com.my',
-    status: 1
-  },
-  {
-    memberCode: 'E127568',
-    custAccountNo: '6080102301',
-    companyName1: 'Tek Ming Auto Service Sdn. Bhd.',
-    phoneNumber: '+60 4-3456 789',
-    mobilreNumber: '+60 12-3456 789',
-    state: 'Penang',
-    emailAddress: 'penang@toyotires.com.my',
-    status: 1
-  },
-  {
-    memberCode: 'E127823',
-    custAccountNo: '6080102302',
-    companyName1: 'Apex Tyre & Car Care',
-    phoneNumber: '+60 82-4567 890',
-    mobilreNumber: '+60 18-4567 890',
-    state: 'Selangor',
-    emailAddress: 'selangor@toyotires.com.my',
-    status: 1
-  },
-  {
-    memberCode: 'E748235',
-    custAccountNo: '6080114400',
-    companyName1: 'JS Motorsports Sdn Bhd',
-    phoneNumber: '+60 4-5678 901',
-    mobilreNumber: '+60 17-5678 901',
-    state: 'Selangor',
-    emailAddress: 'petaling@toyotires.com.my',
-    status: 1
-  },
-  {
-    memberCode: 'E325632',
-    custAccountNo: '6080125300',
-    companyName1: 'Weng Tat Tyre Service',
-    phoneNumber: '+60 8-7654 321',
-    mobilreNumber: '+60 19-8765 432',
-    state: 'Kedah',
-    emailAddress: 'labuan@toyotires.com.my',
-    status: 0
-  }
-];
+// Sample materials data
+const materialsData = ref([
+    {
+        id: 39,
+        materialID: '51113735003175T',
+        material: '175/70R13 8ZT TOYO 350',
+        materialType: 'ZTRD',
+        pattern: '735',
+        patternName: 'Toyo 350',
+        rimDiameter: 13,
+        image: '/demo/images/event-toyo-1.jpg'
+    },
+    {
+        id: 363,
+        materialID: '51114510003115T',
+        material: '1115/70D14 TEMPORARY SPARE SS...',
+        materialType: 'ZTRD',
+        pattern: '510',
+        patternName: '(NULL)',
+        rimDiameter: 14,
+        image: '/demo/images/event-toyo-1.jpg'
+    },
+    {
+        id: 364,
+        materialID: '51114735003185T',
+        material: '185/70R14 8ST TOYO 350',
+        materialType: 'ZTRD',
+        pattern: '735',
+        patternName: '(NULL)',
+        rimDiameter: 14,
+        image: '/demo/images/event-toyo-1.jpg'
+    },
+    {
+        id: 365,
+        materialID: '51114735004175T',
+        material: '175/65R14 8ZT TOYO 350',
+        materialType: 'ZTRD',
+        pattern: '735',
+        patternName: '(NULL)',
+        rimDiameter: 14,
+        image: '/demo/images/event-toyo-1.jpg'
+    },
+    {
+        id: 366,
+        materialID: '51114735004185T',
+        material: '185/65R14 8GT TOYO 350',
+        materialType: 'ZTRD',
+        pattern: '735',
+        patternName: '(NULL)',
+        rimDiameter: 14,
+        image: '/demo/images/event-toyo-1.jpg'
+    },
+    {
+        id: 367,
+        materialID: '51114735005185T',
+        material: '185/60R14 8ZT TOYO 350',
+        materialType: 'ZTRD',
+        pattern: '735',
+        patternName: '(NULL)',
+        rimDiameter: 14,
+        image: '/demo/images/event-toyo-1.jpg'
+    },
+    {
+        id: 40,
+        materialID: '51115735004175T',
+        material: '175/65R15 8HT TOYO 350',
+        materialType: 'ZTRD',
+        pattern: '735',
+        patternName: 'Toyo 350',
+        rimDiameter: 15,
+        image: '/demo/images/event-toyo-1.jpg'
+    },
+    {
+        id: 368,
+        materialID: '51115735004185T',
+        material: '185/65R15 8BT TOYO 350',
+        materialType: 'ZTRD',
+        pattern: '735',
+        patternName: '(NULL)',
+        rimDiameter: 15,
+        image: '/demo/images/event-toyo-1.jpg'
+    },
+    {
+        id: 369,
+        materialID: '51115735004195T',
+        material: '195/65R15 9TT TOYO 350',
+        materialType: 'ZTRD',
+        pattern: '735',
+        patternName: '(NULL)',
+        rimDiameter: 15,
+        image: '/demo/images/event-toyo-1.jpg'
+    },
+    {
+        id: 41,
+        materialID: '51115735004205T',
+        material: '205/65R15 9HT TOYO 350',
+        materialType: 'ZTRD',
+        pattern: '735',
+        patternName: 'Toyo 350',
+        rimDiameter: 15,
+        image: '/demo/images/event-toyo-1.jpg'
+    },
+    {
+        id: 370,
+        materialID: '51115735005185T',
+        material: '185/60R15 8HT TOYO 350',
+        materialType: 'ZTRD',
+        pattern: '735',
+        patternName: '(NULL)',
+        rimDiameter: 15,
+        image: '/demo/images/event-toyo-1.jpg'
+    },
+    {
+        id: 371,
+        materialID: '51115735005195T',
+        material: '195/60R15 8BT TOYO 350',
+        materialType: 'ZTRD',
+        pattern: '735',
+        patternName: '(NULL)',
+        rimDiameter: 15,
+        image: '/demo/images/event-toyo-1.jpg'
+    }
+    // ... (rest of the materials array remains the same)
+]);
 
-const FOClistPrize = ref([
+// Criteria list with grouped materials
+const criteriaList = ref([
     {
-        id: 1,
-        salesPragramlD: 'PRG20251001',
-        buy_materialid: '81114NE0304175H',
-        buy_materialName: 'Toyo Proxes Sport 225/45R17',
+        material: 1,
         buyQty: 4,
-        free_materialid: '81114NE0304176H',
-        free_materialName: 'Toyo Proxes Sport 225/45R17',
         freeQty: 1,
+        buyMaterials: [
+            materialsData[1], // Toyo Proxes Sport 225/45R17
+            materialsData[3], // Toyo Open Country A/T III 265/70R17
+            materialsData[5]  // Toyo NanoEnergy 3 195/65R15
+        ],
+        freeMaterial: materialsData[2], // Toyo Proxes Sport 225/45R17
         status: 1,
-        created: '2025-10-01',
+        created: '2025-10-01'
     },
     {
-        id: 2,
-        salesPragramlD: 'PRG20251002',
-        buy_materialid: '81114NE0304180H',
-        buy_materialName: 'Toyo Open Country A/T III 265/70R17',
+        material: 2,
         buyQty: 4,
-        free_materialid: '81114NE0304181H',
-        free_materialName: 'Toyo Open Country A/T III 265/70R17',
         freeQty: 1,
+        buyMaterials: [
+            materialsData[7], // Toyo Proxes R888R 255/40R18
+            materialsData[4], // Toyo Open Country A/T III 265/70R17
+            materialsData[6]  // Toyo NanoEnergy 3 195/65R15
+        ],
+        freeMaterial: materialsData[8], // Toyo Proxes R888R 255/40R18
         status: 1,
-        created: '2025-10-05',
+        created: '2025-10-05'
     },
     {
-        id: 3,
-        salesPragramlD: 'PRG20251003',
-        buy_materialid: '81114NE0304190H',
-        buy_materialName: 'Toyo NanoEnergy 3 195/65R15',
-        buyQty: 4,
-        free_materialid: '81114NE0304191H',
-        free_materialName: 'Toyo NanoEnergy 3 195/65R15',
-        freeQty: 1,
-        status: 1,
-        created: '2025-10-10',
-    },
-    {
-        id: 4,
-        salesPragramlD: 'PRG20251004',
-        buy_materialid: '81114NE0304200H',
-        buy_materialName: 'Toyo Proxes R888R 255/40R18',
+        material: 3,
         buyQty: 2,
-        free_materialid: '81114NE0304201H',
-        free_materialName: 'Toyo Proxes R888R 255/40R18',
         freeQty: 1,
+        buyMaterials: [
+            materialsData[1], // Toyo Proxes Sport 225/45R17
+            materialsData[5]  // Toyo NanoEnergy 3 195/65R15
+        ],
+        freeMaterial: materialsData[3], // Toyo Open Country A/T III 265/70R17
         status: 1,
-        created: '2025-10-15',
+        created: '2025-10-10'
     }
 ]);
 
-const MARKDOWNlistPrize = ref([
-    {
-        id: 1,
-        salesPragramlD: 'PRG20251001',
-        materialid: '81114NE0304176H',
-        materialName: 'Toyo Proxes Sport 225/45R17',
-        status: 1,
-        created: '2025-10-01',
-    },
-    {
-        id: 2,
-        salesPragramlD: 'PRG20251002',
-        materialid: '81114NE0304250H',
-        materialName: 'Toyo Extensa HP II 205/55R16',
-        status: 1,
-        created: '2025-10-08',
-    },
-    {
-        id: 3,
-        salesPragramlD: 'PRG20251003',
-        materialid: '81114NE0304260H',
-        materialName: 'Toyo Celsius 235/65R17',
-        status: 1,
-        created: '2025-10-12',
-    },
-    {
-        id: 4,
-        salesPragramlD: 'PRG20251004',
-        materialid: '81114NE0304270H',
-        materialName: 'Toyo Observe GSi-6 215/60R16',
-        status: 1,
-        created: '2025-10-18',
-    }
-]);
+// Computed property to match the structure you might need for other components
+const FOClistPrize = computed(() => {
+    return criteriaList.value.flatMap(criteria => 
+        criteria.buyMaterials.map(buyMaterial => ({
+            material: `${criteria.material}-${buyMaterial.material}`,
+            salesPragramlD: salesProgram.value.programId,
+            buy_material: buyMaterial.material,
+            buy_materialmaterial: buyMaterial.material,
+            buyQty: criteria.buyQty,
+            free_material: criteria.freeMaterial.material,
+            free_materialmaterial: criteria.freeMaterial.material,
+            freeQty: criteria.freeQty,
+            status: criteria.status,
+            created: criteria.created,
+            criteriaId: criteria.material
+        }))
+    );
+});
 </script>
