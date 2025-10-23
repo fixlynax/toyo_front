@@ -31,9 +31,9 @@
 
           <!-- IMAGES -->
           <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mt-4">
-            <img v-if="news.image1URL" :src="news.image1URL" alt="News Image 1" class="rounded-xl shadow-sm object-cover w-full h-40" />
-            <img v-if="news.image2URL" :src="news.image2URL" alt="News Image 2" class="rounded-xl shadow-sm object-cover w-full h-40" />
-            <img v-if="news.image3URL" :src="news.image3URL" alt="News Image 3" class="rounded-xl shadow-sm object-cover w-full h-40" />
+            <img v-if="imageSrcs.image1" :src="imageSrcs.image1" alt="News Image 1" class="rounded-xl shadow-sm object-cover w-full h-40" />
+            <img v-if="imageSrcs.image2" :src="imageSrcs.image2" alt="News Image 2" class="rounded-xl shadow-sm object-cover w-full h-40" />
+            <img v-if="imageSrcs.image3" :src="imageSrcs.image3" alt="News Image 3" class="rounded-xl shadow-sm object-cover w-full h-40" />
           </div>
 
           <!-- INFO -->
@@ -97,6 +97,11 @@ const route = useRoute();
 const news = ref(null);
 const loading = ref(true);
 const error = ref(null);
+const imageSrcs = ref({
+  image1: null,
+  image2: null,
+  image3: null,
+});
 
 const fetchNewsDetails = async () => {
   try {
@@ -104,6 +109,11 @@ const fetchNewsDetails = async () => {
     const response = await api.get(`news/details/${id}`);
     if (response.data.status === 1) {
       news.value = response.data.admin_data;
+
+      // Fetch images that require authentication
+      imageSrcs.value.image1 = await fetchPrivateImage(news.value.image1URL);
+      imageSrcs.value.image2 = await fetchPrivateImage(news.value.image2URL);
+      imageSrcs.value.image3 = await fetchPrivateImage(news.value.image3URL);
     } else {
       error.value = 'News not found.';
     }
@@ -130,6 +140,17 @@ const statusSeverity = (status) => {
   if (status === 1) return 'success';
   if (status === 2) return 'warn';
   return 'secondary';
+};
+
+const fetchPrivateImage = async (url) => {
+  if (!url) return null;
+
+  try {
+    return await api.getPrivateFile(url);
+  } catch (error) {
+    console.error('Error loading image:', error);
+    return null;
+  }
 };
 </script>
 
