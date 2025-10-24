@@ -1,26 +1,23 @@
 <script setup>
-import { onBeforeMount, ref } from 'vue';
-import { BillingService } from '@/service/ListBilling';
-import { FilterMatchMode, FilterOperator } from '@primevue/core/api';
+import { onBeforeMount, ref } from 'vue'
+import { BillingService } from '@/service/ListBilling'
+import { FilterMatchMode, FilterOperator } from '@primevue/core/api'
 
-const filters1 = ref(null);
-const listData = ref([]);
-const loading = ref(true);
+const filters1 = ref({
+  global: { value: null, matchMode: FilterMatchMode.CONTAINS },
+  dealerName: { operator: FilterOperator.AND, constraints: [{ value: null, matchMode: FilterMatchMode.STARTS_WITH }] },
+  docsNo: { operator: FilterOperator.AND, constraints: [{ value: null, matchMode: FilterMatchMode.STARTS_WITH }] }
+})
+
+const listData = ref([])
+const loading = ref(true)
 
 onBeforeMount(async () => {
-    listData.value = await BillingService.getBillingList();
-    loading.value = false;
-    initFilters1();
-});
-
-function initFilters1() {
-    filters1.value = {
-        global: { value: null, matchMode: FilterMatchMode.CONTAINS },
-        dealerName: { operator: FilterOperator.AND, constraints: [{ value: null, matchMode: FilterMatchMode.STARTS_WITH }] },
-        docsNo: { operator: FilterOperator.AND, constraints: [{ value: null, matchMode: FilterMatchMode.STARTS_WITH }] }
-    };
-}
+  listData.value = await BillingService.getBillingList()
+  loading.value = false
+})
 </script>
+
 
 <template>
     <div class="card">

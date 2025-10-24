@@ -360,6 +360,11 @@ const model = ref([
                 to: '/billing/listOther'
             },
             {
+                label: 'Business Contingency Plan',
+                icon: 'pi pi-fw pi-briefcase',
+                to: '/billing/BCP'
+            },
+            {
                 label: 'Messaging',
                 icon: 'pi pi-fw pi-envelope',
                 to: '/billing/listMessaging'
