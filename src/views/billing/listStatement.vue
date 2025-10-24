@@ -44,20 +44,13 @@ onBeforeMount(async () => {
                 <template #body="{ data }">{{ data.docsDate }}</template>
             </Column>
 
-            <Column field="docsNo" header="Document No" style="min-width: 10rem">
-                <template #body="{ data }">
-                    {{ data.docsNo }}
-                </template>
-            </Column>
 
 
             <Column field="docsType" header="Type" style="min-width: 8rem">
                 <template #body="{ data }">{{ data.docsType }}</template>
             </Column>
 
-            <Column field="referenceDocsNo" header="Reference Doc" style="min-width: 8rem">
-                <template #body="{ data }">{{ data.referenceDocsNo }}</template>
-            </Column>
+
             <Column field="dealerId" header="Dealer ID" style="min-width: 10rem">
                 <template #body="{ data }">{{ data.dealerId }}</template>
             </Column>
