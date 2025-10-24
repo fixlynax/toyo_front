@@ -44,12 +44,16 @@ onBeforeMount(async () => {
                 <template #body="{ data }">{{ data.docsDate }}</template>
             </Column>
 
-            <Column field="dealerId" header="Dealer ID" style="min-width: 8rem">
-                <template #body="{ data }">{{ data.referenceDocsNo }}</template>
+            <Column field="dealerId" header="Customer Acc No." style="min-width: 8rem">
+                <template #body="{ data }">{{ data.dealerId }}</template>
             </Column>
 
             <Column field="dealerName" header="Dealer Name" style="min-width: 10rem">
                 <template #body="{ data }">{{ data.dealerName }}</template>
+            </Column>
+
+            <Column field="dealerName" header="Date Range" style="min-width: 10rem">
+                <template #body="{ data }">{{ data.dateRange }}</template>
             </Column>
 
             <!-- Amount Due -->
