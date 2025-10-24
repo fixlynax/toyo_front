@@ -96,6 +96,22 @@ export default {
     return apiClient(config);
   },
 
+  async getPrivateFile(url) {
+    const token = tokenService.getToken();
+
+    const response = await fetch(url, {
+      method: 'GET',
+      headers: {
+        Authorization: `Bearer ${token}`,
+        'X-Api-Key': import.meta.env.VITE_API_KEY,
+      },
+    });
+
+    if (!response.ok) throw new Error('Failed to load private file');
+    const blob = await response.blob();
+    return URL.createObjectURL(blob);
+  },
+
   // Token service
   tokenService
 };
