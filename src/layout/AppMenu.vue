@@ -210,11 +210,6 @@ const model = ref([
                         to: '/om/listMaterialException'
                     }
                 ]
-            },
-            {
-                label: 'Messaging',
-                icon: 'pi pi-fw pi-envelope',
-                to: '/om/listMessaging'
             }
         ]
     },
@@ -363,6 +358,11 @@ const model = ref([
                 label: 'Others',
                 icon: 'pi pi-fw pi-briefcase',
                 to: '/billing/listOther'
+            },
+            {
+                label: 'Messaging',
+                icon: 'pi pi-fw pi-envelope',
+                to: '/billing/listMessaging'
             }
         ]
     }
