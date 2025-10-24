@@ -3,30 +3,30 @@ import { ref, onBeforeMount } from 'vue';
 import api from '@/service/api';
 import { FilterMatchMode } from '@primevue/core/api';
 
-// Data variables
 const listData = ref([]);
 const loading = ref(true);
-
-// Filters for quick search
 const filters = ref({
     global: { value: null, matchMode: FilterMatchMode.CONTAINS }
 });
 
+const selectedRows = ref([]);
+const filterStatus = ref(null);
+const showFilterMenu = ref(false);
+
 function getStatusSeverity(status) {
     const severityMap = {
-        0: 'secondary', // pending
-        1: 'info', // eten approved
-        2: 'danger', // eten rejected
-        3: 'warning', // processing
-        4: 'warning', // in progress
-        5: 'success', // toyo approved
-        6: 'danger', // toyo rejected
-        9: 'secondary' // deleted
+        0: 'secondary',
+        1: 'info',
+        2: 'danger',
+        3: 'warning',
+        4: 'warning',
+        5: 'success',
+        6: 'danger',
+        9: 'secondary'
     };
     return severityMap[status] || 'secondary';
 }
 
-// Function to get status text
 function getStatusText(status) {
     const statusMap = {
         0: 'Pending',
@@ -41,14 +41,10 @@ function getStatusText(status) {
     return statusMap[status] || 'Unknown';
 }
 
-// Fetch data on component mount
 onBeforeMount(async () => {
     try {
         loading.value = true;
         const response = await api.get('collection/list');
-
-        console.log('Admin data:', response.data.admin_data);
-
         if (response.data.status === 1) {
             listData.value = response.data.admin_data.map((item) => ({
                 id: item.id,
@@ -57,12 +53,9 @@ onBeforeMount(async () => {
                 city: item.eten_data?.city || 'N/A',
                 collectDate: item.ctc_data?.collectDate || 'N/A',
                 collectTime: item.ctc_data?.collectTime || '',
-                status: item.status // Using the main status from warranty entry
+                status: item.status
             }));
-        } else {
-            console.error('API returned error:', response.data);
-            listData.value = [];
-        }
+        } else listData.value = [];
     } catch (error) {
         console.error('Error fetching collection list:', error);
         listData.value = [];
@@ -70,6 +63,11 @@ onBeforeMount(async () => {
         loading.value = false;
     }
 });
+
+function filteredList() {
+    if (filterStatus.value === null) return listData.value;
+    return listData.value.filter((x) => x.status === filterStatus.value);
+}
 </script>
 
 <template>
@@ -77,7 +75,9 @@ onBeforeMount(async () => {
         <div class="text-2xl font-bold text-gray-800 border-b pb-2">List Collection</div>
 
         <DataTable
-            :value="listData"
+            v-model:selection="selectedRows"
+            selectionMode="checkbox"
+            :value="filteredList()"
             :paginator="true"
             :rows="10"
             :rowsPerPageOptions="[5, 10, 20]"
@@ -88,10 +88,8 @@ onBeforeMount(async () => {
             filterDisplay="menu"
             :globalFilterFields="['claimRefNo', 'companyName1', 'city', 'collectDate', 'collectTime', 'status']"
         >
-
             <template #header>
                 <div class="flex items-center justify-between gap-4 w-full flex-wrap">
-                    <!-- Left: Search Field + Cog Button -->
                     <div class="flex items-center gap-2 w-full max-w-md">
                         <IconField class="flex-1">
                             <InputIcon>
@@ -99,13 +97,59 @@ onBeforeMount(async () => {
                             </InputIcon>
                             <InputText v-model="filters['global'].value" placeholder="Quick Search" class="w-full" />
                         </IconField>
-                        <Button type="button" icon="pi pi-cog" class="p-button" />
+
+                        <div class="relative">
+                            <Button type="button" icon="pi pi-cog" class="p-button" @click="showFilterMenu = !showFilterMenu" />
+                            <div v-if="showFilterMenu" class="absolute right-0 mt-2 w-48 bg-white border rounded-lg shadow-lg p-2 z-10">
+                                <div
+                                    class="flex items-center gap-2 px-3 py-2 hover:bg-gray-100 cursor-pointer rounded-md"
+                                    :class="{ 'bg-gray-200': filterStatus === null }"
+                                    @click="
+                                        filterStatus = null;
+                                        showFilterMenu = false;
+                                    "
+                                >
+                                    <i class="pi pi-list text-gray-600"></i>
+                                    <span>All</span>
+                                </div>
+
+                                <div
+                                    class="flex items-center gap-2 px-3 py-2 hover:bg-gray-100 cursor-pointer rounded-md"
+                                    :class="{ 'bg-gray-200': filterStatus === 0 }"
+                                    @click="
+                                        filterStatus = 0;
+                                        showFilterMenu = false;
+                                    "
+                                >
+                                    <i class="pi pi-clock text-yellow-500"></i>
+                                    <span>Pending</span>
+                                </div>
+
+                                <div
+                                    class="flex items-center gap-2 px-3 py-2 hover:bg-gray-100 cursor-pointer rounded-md"
+                                    :class="{ 'bg-gray-200': filterStatus === 3 }"
+                                    @click="
+                                        filterStatus = 3;
+                                        showFilterMenu = false;
+                                    "
+                                >
+                                    <i class="pi pi-calendar text-blue-500"></i>
+                                    <span>Schedule</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="flex justify-end gap-2">
+                        <Button type="button" label="Bulk Update " icon="pi pi-upload" class="p-button-success" />
                     </div>
                 </div>
             </template>
 
             <template #empty> No Collection found. </template>
             <template #loading> Loading Collection data. Please wait. </template>
+
+            <Column selectionMode="multiple" headerStyle="width: 3rem"></Column>
 
             <Column field="claimRefNo" header="Ref No." style="min-width: 8rem">
                 <template #body="{ data }">
@@ -114,25 +158,19 @@ onBeforeMount(async () => {
                     </RouterLink>
                 </template>
             </Column>
-            
+
             <Column field="companyName1" header="Dealer" style="min-width: 8rem">
-                <template #body="{ data }"> 
-                    {{ data.companyName1 }} 
-                </template>
+                <template #body="{ data }">{{ data.companyName1 }}</template>
             </Column>
-            
+
             <Column field="city" header="Location" style="min-width: 6rem">
-                <template #body="{ data }">
-                    {{ data.city }}
-                </template>
+                <template #body="{ data }">{{ data.city }}</template>
             </Column>
-            
+
             <Column field="collectDate" header="Collection Date" style="min-width: 6rem">
-                <template #body="{ data }">
-                    {{ data.collectDate }} {{ data.collectTime }}
-                </template>
+                <template #body="{ data }"> {{ data.collectDate }} {{ data.collectTime }} </template>
             </Column>
-            
+
             <Column header="Status" style="min-width: 6rem">
                 <template #body="{ data }">
                     <Tag :value="getStatusText(data.status)" :severity="getStatusSeverity(data.status)" />
