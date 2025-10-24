@@ -2,108 +2,90 @@
     <div class="flex flex-col md:flex-row gap-8">
         <div class="md:w-2/3 flex flex-col">
             <div class="card flex flex-col w-full">
-                <div class="flex items-center gap-2 border-b">
-                    <RouterLink to="/om/listReturnOrder">
-                        <Button icon="pi pi-arrow-left font-bold" class="p-button-text p-button-secondary text-xl" size="big" v-tooltip="'Back'" />
+                <div class="flex items-center gap-2 border-b pb-2 mb-4">
+                    <RouterLink to="/scm/listCollection">
+                        <Button icon="pi pi-arrow-left" class="p-button-text p-button-secondary text-xl" v-tooltip="'Back'" />
                     </RouterLink>
                     <div class="text-2xl font-bold text-gray-800">CTC Details</div>
                 </div>
-                <!-- CTC Reference Number -->
+
+                <!-- Collection Info -->
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6 text-sm text-gray-700">
+                    <div class="md:col-span-2">
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+                            <div>
+                                <span class="block text-sm font-bold text-gray-800">Customer Acc No</span>
+                                <p class="font-medium text-lg">{{ paramData.customerInfoaccNo }}</p>
+                            </div>
+                            <div>
+                                <span class="block text-sm font-bold text-gray-800">Customer Company Name</span>
+                                <p class="font-medium text-lg">{{ paramData.companyName }}</p>
+                            </div>
+                            <div>
+                                <span class="block text-sm font-bold text-gray-800">Customer Address</span>
+                                <p class="font-medium text-lg">{{ paramData.address }}</p>
+                            </div>
+                            <div>
+                                <span class="block text-sm font-bold text-gray-800">Customer Contact No</span>
+                                <p class="font-medium text-lg">{{ paramData.contactNo }}</p>
+                            </div>
+                            <div>
+                                <span class="block text-sm font-bold text-gray-800">Customer Name</span>
+                                <p class="font-medium text-lg">{{ paramData.name }}</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div>
+                        <span class="block text-sm font-bold text-gray-800">Request Date</span>
+                        <p class="font-medium text-lg">{{ paramData.requestDate }}</p>
+                    </div>
+
+                    <div>
+                        <span class="block text-sm font-bold text-gray-800">3PL Company Name</span>
+                        <p class="font-medium text-lg">{{ paramData.company3PL }}</p>
+                    </div>
+
+                    <div>
+                        <span class="block text-sm font-bold text-gray-800">ETA Date/Time</span>
+                        <p class="font-medium text-lg">{{ paramData.etaDateTime }}</p>
+                    </div>
+                </div>
+
+                <!-- Action Buttons -->
+                <div class="flex justify-end items-center gap-2 mt-6 border-t pt-4">
+                    <Button label="Update Collection Schedule" size="small" class="p-button-primary" />
+                    <Button label="Update Collection Complete" size="small" class="p-button-success" />
+                </div>
+            </div>
+            <div class="card">
+                <div class="text-2xl font-bold text-gray-800">Collection Items:</div>
                 <div class="mt-6 mb-4">
                     <div>
-                        <span class="block text-sm font-bold text-black-700">CTC Ref No</span>
+                        <span class="block text-sm font-bold text-black-700">LIST OF MATERIAL TO COLLECT</span>
                         <span class="text-lg font-medium">{{ paramData.refNo }}</span>
                     </div>
-                </div>
-
-                <!-- Details Grid -->
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm text-gray-700 items-center">
-                    <div>
-                        <span class="block text-sm font-bold text-gray-800">Dealer Location</span>
-                        <p class="font-medium text-lg">{{ paramData.dealerInfo.dealerLoc }}</p>
-                    </div>
-
-                    <div>
-                        <span class="block text-sm font-bold text-gray-800">Schedule Collection Date/Time</span>
-                        <p class="font-medium text-lg">{{ formattedSchedule }}</p>
-                    </div>
-
-                    <div>
-                        <span class="block text-sm font-bold text-gray-800">No of Tires</span>
-                        <p class="font-medium text-lg">{{ paramData.totalTire }}</p>
-                    </div>
-                </div>
-                <div class="flex justify-end items-center gap-2">
-                    <RouterLink to="/scm/listCollection">
-                        <Button label="Cancel" size="small" class="p-button-secondary" />
-                    </RouterLink>
-                    <RouterLink to="/scm/listCollection">
-                        <Button label="Update" size="small" class="p-button-primary" />
-                    </RouterLink>
                 </div>
             </div>
         </div>
 
         <!-- RIGHT SIDE -->
         <div class="md:w-1/3 flex flex-col">
-            <!-- Customer Information -->
-            <div class="card flex flex-col w-full">
-                <div class="flex items-center justify-between border-b pb-2 mb-2">
-                    <div class="text-2xl font-bold text-gray-800">👤 Customer Information</div>
-                    <!-- Status Badge -->
-                    <div class="mt-4">
-                        <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium mb-2" :class="statusClass">
-                            {{ statusText }}
-                        </span>
-                    </div>
-                </div>
-                <div class="overflow-x-auto">
-                    <table class="w-full text-sm text-left text-gray-700">
-                        <tbody>
-                            <tr class="border-b">
-                                <td class="px-4 py-2 font-medium">Customer Name</td>
-                                <td class="px-4 py-2 text-right">{{ paramData.customerInfo.name }}</td>
-                            </tr>
-                            <tr class="border-b">
-                                <td class="px-4 py-2 font-medium">Vehicle</td>
-                                <td class="px-4 py-2 text-right">{{ paramData.customerInfo.vehicle }}</td>
-                            </tr>
-                            <tr class="border-b">
-                                <td class="px-4 py-2 font-medium">Registration Number</td>
-                                <td class="px-4 py-2 text-right">{{ paramData.customerInfo.regNo }}</td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-
             <!-- Dealer Information -->
             <div class="card flex flex-col w-full">
                 <div class="flex items-center justify-between border-b pb-2 mb-2">
-                    <div class="text-2xl font-bold text-gray-800">🏬 Dealer Information</div>
+                    <div class="text-2xl font-bold text-gray-800">🏬 CTC Info</div>
                 </div>
                 <div class="overflow-x-auto">
                     <table class="w-full text-sm text-left text-gray-700">
                         <tbody>
                             <tr class="border-b">
-                                <td class="px-4 py-2 font-medium">Dealer Name</td>
-                                <td class="px-4 py-2 text-right">{{ paramData.dealerName }}</td>
+                                <td class="px-4 py-2 font-medium">Collection Type</td>
+                                <td class="px-4 py-2 text-right">CTC</td>
                             </tr>
                             <tr class="border-b">
-                                <td class="px-4 py-2 font-medium">Dealer Code</td>
-                                <td class="px-4 py-2 text-right">{{ paramData.dealerInfo.dealerCode }}</td>
-                            </tr>
-                            <tr class="border-b">
-                                <td class="px-4 py-2 font-medium">Contact Person</td>
-                                <td class="px-4 py-2 text-right">{{ paramData.dealerInfo.contactPerson }}</td>
-                            </tr>
-                            <tr>
-                                <td class="px-4 py-2 font-medium">Contact Number</td>
-                                <td class="px-4 py-2 text-right">{{ paramData.dealerInfo.contactNo }}</td>
-                            </tr>
-                            <tr>
-                                <td class="px-4 py-2 font-medium">Address</td>
-                                <td class="px-4 py-2 text-right">{{ paramData.dealerInfo.dealerLoc }}</td>
+                                <td class="px-4 py-2 font-medium">Collection Ref No</td>
+                                <td class="px-4 py-2 text-right">{{ paramData.refNo }}</td>
                             </tr>
                         </tbody>
                     </table>
@@ -111,44 +93,11 @@
             </div>
         </div>
     </div>
-
-    <!-- Schedule Pickup Dialog -->
-    <Dialog v-model:visible="showCalendar" header="Schedule Pick Up" :modal="true" :closable="true">
-        <div class="p-4">
-            <div class="mb-4">
-                <label class="block text-sm font-bold text-black-700 mb-2">Select Date & Time</label>
-                <Calendar v-model="selectedDate" showIcon showTime hourFormat="24" dateFormat="yy-mm-dd" :minDate="today" />
-            </div>
-
-            <div class="mt-4 flex justify-end gap-2">
-                <Button label="Cancel" class="p-button-text" @click="showCalendar = false" />
-                <Button label="Confirm Schedule" class="p-button-primary" @click="reschedule" />
-            </div>
-        </div>
-    </Dialog>
-
-    <!-- Update Status Dialog -->
-    <Dialog v-model:visible="showStatusDialog" header="Update Status" :modal="true" :closable="true">
-        <div class="p-4">
-            <div class="mb-4">
-                <label class="block text-sm font-bold text-black-700 mb-2">Select Status</label>
-                <Dropdown v-model="selectedStatus" :options="statusOptions" optionLabel="label" optionValue="value" placeholder="Select Status" class="w-full" />
-            </div>
-
-            <div class="mt-4 flex justify-end gap-2">
-                <Button label="Cancel" class="p-button-text" @click="showStatusDialog = false" />
-                <Button label="Update" class="p-button-primary" @click="updateStatus" />
-            </div>
-        </div>
-    </Dialog>
 </template>
 
 <script setup>
 import { ref, computed } from 'vue';
 import Button from 'primevue/button';
-import Dialog from 'primevue/dialog';
-import Calendar from 'primevue/calendar';
-import Dropdown from 'primevue/dropdown';
 
 const showCalendar = ref(false);
 const showStatusDialog = ref(false);
@@ -198,10 +147,9 @@ const formattedSchedule = computed(() => {
 const reschedule = () => {
     if (selectedDate.value && selectedDate.value > new Date()) {
         console.log('New schedule selected:', selectedDate.value);
-        // Update the schedule in paramData
+
         paramData.value.collectSchedule = selectedDate.value.toISOString();
         showCalendar.value = false;
-        // Here you would typically make an API call to update the schedule
     } else {
         alert('Please select a future date & time!');
     }
@@ -212,7 +160,6 @@ const updateStatus = () => {
         console.log('Status updated to:', selectedStatus.value);
         paramData.value.status = selectedStatus.value;
         showStatusDialog.value = false;
-        // Here you would typically make an API call to update the status
     } else {
         alert('Please select a status!');
     }
@@ -224,10 +171,20 @@ const paramData = ref({
     claimDate: '2025-09-01',
     collectDate: '2025-09-07',
     collectTime: '3:00PM',
+    requestDate: '3:00PM',
+    etaDateTime: '3:00PM',
+    customerContactNo: '3:00PM',
+    CompanyName: 'HUH DUH NU UH',
     dealerName: 'AutoWorld KL',
+    name: 'AutoWorld KL',
+    contactNo: 'AutoWorld KL',
+    address: 'AutoWorld KL',
+    companyName: 'AutoWorld KL',
+    customerInfoaccNo: 'AutoWorld KL',
     status: 0,
     collectSchedule: '2025-02-18T09:00:00',
     totalTire: '6',
+    company3PL: 'Miaw Miaw SDN BHD',
     dealerInfo: {
         dealerCode: 'DLR-001',
         contactPerson: 'Ahmad Zaki',
