@@ -5,7 +5,7 @@
                 <!-- Header -->
                 <div class="text-2xl font-bold text-gray-800 border-b pb-2">Create News</div>
 
-                <!-- news Form -->
+                <!-- News Form -->
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div class="md:col-span-2">
                         <label class="block font-bold text-gray-700">Title</label>
@@ -19,17 +19,17 @@
 
                     <div>
                         <label class="block font-bold text-gray-700">Start Date</label>
-                        <Calendar v-model="news.startDate" dateFormat="yy-mm-dd" class="w-full" />
+                        <Calendar v-model="news.startDate" dateFormat="yy-mm-dd" showIcon class="w-full" :minDate="today" @date-select="onStartDateSelect" />
                     </div>
 
                     <div>
                         <label class="block font-bold text-gray-700">End Date</label>
-                        <Calendar v-model="news.endDate" dateFormat="yy-mm-dd" class="w-full" />
+                        <Calendar v-model="news.endDate" dateFormat="yy-mm-dd" showIcon class="w-full" :minDate="minEndDate" />
                     </div>
 
                     <div>
                         <label class="block font-bold text-gray-700">Publish Date</label>
-                        <Calendar v-model="news.publishDate" dateFormat="yy-mm-dd" class="w-full" />
+                        <Calendar v-model="news.publishDate" dateFormat="yy-mm-dd" showIcon class="w-full" :minDate="today" />
                     </div>
 
                     <div>
@@ -67,7 +67,7 @@
 </template>
 
 <script setup>
-import { ref } from 'vue';
+import { ref, computed } from 'vue';
 import api from '@/service/api';
 import { useRouter } from 'vue-router';
 import { useToast } from 'primevue/usetoast';
@@ -75,12 +75,15 @@ import { useToast } from 'primevue/usetoast';
 const router = useRouter();
 const toast = useToast();
 
+// Audience options
 const audienceOptions = [
     { label: 'TC', value: 'TC' },
     { label: 'ETEN', value: 'ETEN' },
     { label: 'ALL', value: 'ALL' }
 ];
 
+// Reactive data
+const today = new Date();
 const news = ref({
     title: '',
     desc: '',
@@ -94,18 +97,36 @@ const news = ref({
     isPublish: 0
 });
 
+// Preview images
 const preview = ref({
     image1: '',
     image2: '',
     image3: ''
 });
 
-// handle file selection + preview
+// Computed: End date must be after start date
+const minEndDate = computed(() => {
+    return news.value.startDate ? new Date(news.value.startDate) : today;
+});
+
+// When start date changes, reset end date if invalid
+const onStartDateSelect = () => {
+    if (news.value.endDate && news.value.endDate <= news.value.startDate) {
+        news.value.endDate = '';
+        toast.add({
+            severity: 'warn',
+            summary: 'Invalid Date',
+            detail: 'End date must be after start date.',
+            life: 3000
+        });
+    }
+};
+
+// Handle file selection and preview
 const onImageSelect = (event, field) => {
     const file = event.files[0];
     if (file) {
         news.value[field] = file;
-
         const reader = new FileReader();
         reader.onload = (e) => {
             preview.value[field] = e.target.result;
@@ -114,8 +135,29 @@ const onImageSelect = (event, field) => {
     }
 };
 
-// handle save (draft or publish)
+// Handle save (draft or publish)
 const handleSave = async (isPublish) => {
+    // Validate required fields
+    if (!news.value.title || !news.value.desc || !news.value.startDate || !news.value.endDate) {
+        toast.add({
+            severity: 'warn',
+            summary: 'Missing Fields',
+            detail: 'Please fill in all required fields.',
+            life: 3000
+        });
+        return;
+    }
+
+    if (news.value.endDate <= news.value.startDate) {
+        toast.add({
+            severity: 'error',
+            summary: 'Invalid Date Range',
+            detail: 'End date must be after start date.',
+            life: 3000
+        });
+        return;
+    }
+
     try {
         const formData = new FormData();
         formData.append('title', news.value.title);
@@ -137,9 +179,7 @@ const handleSave = async (isPublish) => {
             method: 'post',
             url: '/api/news/create',
             data: formData,
-            headers: {
-                'Content-Type': 'multipart/form-data'
-            }
+            headers: { 'Content-Type': 'multipart/form-data' }
         });
 
         if (response.data.status === 1) {
@@ -169,7 +209,7 @@ const handleSave = async (isPublish) => {
     }
 };
 
-// format date for backend (d-m-Y)
+// Format date (d-m-Y)
 const formatDate = (date) => {
     if (!date) return '';
     const d = new Date(date);
