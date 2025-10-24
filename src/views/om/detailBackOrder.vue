@@ -4,7 +4,12 @@
             <!-- LEFT SIDE -->
             <div class="md:w-2/3 flex flex-col gap-2">
                 <div class="card flex flex-col gap-6 w-full">
-                    <div class="text-2xl font-bold text-gray-800 border-b pb-2">Back Order Detail</div>
+                    <div class="flex items-center gap-2 border-b">
+                        <RouterLink to="/om/listBackOrder">
+                            <Button icon="pi pi-arrow-left font-bold" class="p-button-text p-button-secondary text-xl" size="big" v-tooltip="'Back'" />
+                        </RouterLink>
+                        <div class="text-2xl font-bold text-gray-800">Back Order Detail</div>
+                    </div>
 
                     <div class="font-semibold text-xl border-b pb-2 mt-2">🏬 Customer Information</div>
                     <div class="grid grid-cols-2 gap-4">
@@ -36,7 +41,7 @@
                 </div>
 
                 <div class="card">
-                    <div class="font-semibold text-xl border-b pb-2 mt-2">🚚 Shipping & Order Info</div>
+                    <div class="font-semibold text-xl border-b pb-2 mt-2 mb-4">🚚 Shipping Information</div>
                     <div class="grid grid-cols-2 gap-4">
                         <div>
                             <span class="text-sm text-gray-500">Ship To</span>
@@ -66,37 +71,70 @@
                             <span class="text-sm text-gray-500">Expiry</span>
                             <p class="text-lg font-medium">{{ order.expiry }}</p>
                         </div>
+                        <div>
+                            <span class="text-sm text-gray-700">Delivery Status</span>
+                            <p class="text-lg font-medium">
+                                <Tag :value="backOrdering.deliveryStatus" :severity="backOrdering.deliveryStatus === 'Delivered' ? 'success' : backOrdering.deliveryStatus === 'Scheduled' ? 'info' : 'warn'" />
+                            </p>
+                            <p class="text-xs text-gray-500 mt-1">Last updated: {{ backOrdering.lastUpdated }}</p>
+                        </div>
                     </div>
                 </div>
 
-                <!-- BACK ORDER ARRAY -->
-                <div class="card flex flex-col gap-4">
-                    <div class="font-semibold text-xl border-b pb-2">📦 Back Order Items</div>
-                    <DataTable :value="order.backorder_array" class="text-sm" stripedRows>
-                        <Column field="materialid" header="Material ID" style="min-width: 8rem">
+              
+                <div class="card flex flex-col w-full">
+                    <div class="font-semibold text-xl border-b pb-2">📦 Order Items</div>
+
+                    <DataTable :value="orderItems" dataKey="id" responsiveLayout="scroll" class="text-sm" stripedRows>
+                        <Column field="itemLineNo" header="Item Line No." style="min-width: 6rem; text-align: center">
                             <template #body="{ data }">
-                                <span class="font-bold text-lg">{{ data.materialid }}</span>
+                                <span class="font-bold text-lg">{{ data.itemLineNo }}</span>
                             </template>
                         </Column>
-                        <Column field="qty" header="Qty" style="min-width: 6rem">
+
+                        <Column field="materialId" header="Material ID" style="min-width: 8rem; text-align: center">
                             <template #body="{ data }">
-                                <span class="text-lg">{{ data.qty }}</span>
+                                <span class="font-medium text-lg">{{ data.materialId }}</span>
                             </template>
                         </Column>
-                        <Column field="price" header="Price (RM)" style="min-width: 6rem">
+
+                        <Column field="salesProgramId" header="Sales Program ID" style="min-width: 8rem; text-align: center">
                             <template #body="{ data }">
-                                <span class="text-lg">{{ data.price }}</span>
+                                <span class="text-lg">{{ data.salesProgramId }}</span>
                             </template>
                         </Column>
-                        <Column field="salesprogramid" header="Sales Program ID" style="min-width: 6rem">
+
+                        <Column field="priceGroup" header="Price Group" style="min-width: 6rem; text-align: center">
                             <template #body="{ data }">
-                                <span class="text-lg">{{ data.salesprogramid }}</span>
+                                <span class="text-lg">{{ data.priceGroup }}</span>
+                            </template>
+                        </Column>
+
+                        <Column field="quantity" header="Qty" style="text-align: center">
+                            <template #body="{ data }">
+                                <span class="text-lg">{{ data.quantity }}</span>
+                            </template>
+                        </Column>
+
+                        <Column field="unitPrice" header="Unit Price (RM)" style="min-width: 8rem; text-align: right">
+                            <template #body="{ data }">
+                                <span class="text-lg font-semibold text-green-600">{{ data.unitPrice.toFixed(2) }}</span>
+                            </template>
+                        </Column>
+
+                        <Column field="totalPrice" header="Total (RM)" style="min-width: 8rem; text-align: right">
+                            <template #body="{ data }">
+                                <span class="text-lg font-bold text-green-700">{{ (data.quantity * data.unitPrice).toFixed(2) }}</span>
                             </template>
                         </Column>
                     </DataTable>
+
+                    <div class="flex justify-end items-center border-t px-4 py-2">
+                        <span class="text-lg font-semibold text-gray-800">Grand Total: RM {{ totalAmount.toFixed(2) }}</span>
+                    </div>
                 </div>
 
-                <!-- FULFILMENT ARRAY -->
+           
                 <div class="card flex flex-col gap-4">
                     <div class="font-semibold text-xl border-b pb-2">📦 Fulfilment Details</div>
                     <DataTable :value="order.fulfil_array" class="text-sm" stripedRows>
@@ -125,7 +163,8 @@
             </div>
 
             <!-- RIGHT SIDE -->
-            <div class="md:w-1/3 flex flex-col">
+            <div class="md:w-1/3 flex flex-col gap-6">
+                <!-- ADVANCE INFO -->
                 <div class="card flex flex-col w-full">
                     <div class="flex items-center justify-between border-b pb-3 mb-4">
                         <div class="text-2xl font-bold text-gray-800">Advance Info</div>
@@ -164,13 +203,42 @@
                         <Button label="Process Back-Order" severity="success" size="small" class="!w-fit" />
                     </div>
                 </div>
+
+            
+                <div class="card flex flex-col w-full">
+                    <div class="text-2xl font-bold text-gray-800 border-b pb-2 mb-3">📦 Order Logs</div>
+
+                    <DataTable :value="orderLogs.slice(0, 10)" dataKey="id" responsiveLayout="scroll" class="text-sm" stripedRows>
+                        <Column field="timestamp" header="Date & Time" style="min-width: 10rem">
+                            <template #body="{ data }">
+                                <span class="font-medium text-gray-800">{{ data.timestamp }}</span>
+                            </template>
+                        </Column>
+
+                        <Column field="stage" header="Stage" style="min-width: 8rem">
+                            <template #body="{ data }">
+                                <span class="font-semibold">{{ data.stage }}</span>
+                            </template>
+                        </Column>
+
+                        <Column field="description" header="Activity Description" style="width: 16rem">
+                            <template #body="{ data }">
+                                <span>{{ data.description }}</span>
+                            </template>
+                        </Column>
+                    </DataTable>
+
+                    <div class="flex justify-end items-center border-t px-4 py-2">
+                        <span class="text-sm text-gray-500">Showing latest 10 activities</span>
+                    </div>
+                </div>
             </div>
         </div>
     </Fluid>
 </template>
 
 <script setup>
-import { ref } from 'vue';
+import { ref, computed } from 'vue';
 import Fluid from 'primevue/fluid';
 import Tag from 'primevue/tag';
 import Button from 'primevue/button';
@@ -203,4 +271,36 @@ const order = ref({
     created: '2025-09-08 00:00:00',
     modified: '2025-09-09 00:00:00'
 });
+
+const orderLogs = ref([
+    { id: 1, timestamp: '2025-10-20 09:45', stage: 'Customer Created', description: 'Order submitted by customer', status: 'Completed' },
+    { id: 2, timestamp: '2025-10-20 10:02', stage: 'Order Validated', description: 'Order verified in system', status: 'Completed' },
+    { id: 3, timestamp: '2025-10-20 10:10', stage: 'Awaiting Approval', description: 'Pending admin approval', status: 'Pending' },
+    { id: 4, timestamp: '2025-10-20 11:15', stage: 'Approved', description: 'Admin approved the order', status: 'Completed' },
+    { id: 5, timestamp: '2025-10-20 12:30', stage: 'Dispatched to SAP', description: 'Order sent to SAP for processing', status: 'Completed' },
+    { id: 6, timestamp: '2025-10-20 13:00', stage: 'SAP Validation', description: 'SAP validating order details', status: 'Completed' },
+    { id: 7, timestamp: '2025-10-20 14:20', stage: 'Processing in SAP', description: 'Order being processed in SAP', status: 'Completed' },
+    { id: 8, timestamp: '2025-10-20 15:45', stage: 'Delivery Created', description: 'SAP created delivery order', status: 'Completed' },
+    { id: 9, timestamp: '2025-10-20 17:00', stage: 'Invoice Generated', description: 'SAP invoice successfully generated', status: 'Completed' },
+    { id: 10, timestamp: '2025-10-20 18:10', stage: 'Order Completed', description: 'Order marked completed in SAP', status: 'Completed' }
+]);
+
+const backOrdering = ref({
+    shipTo: 'YESSIR TYRES SOLUTION SDN BHD',
+    orderDesc: 'Order for electronics',
+    shippingCond: 'Standard',
+    deliveryType: 'DELIVER',
+    deliveryDate: '2025-10-22',
+    boOrderNo: 'BO1001',
+    deliveryETA: '2025-10-24',
+    deliveryStatus: 'Delivered',
+    lastUpdated: '2025-10-23 09:45 AM'
+});
+
+const orderItems = ref([
+    { id: 1, itemLineNo: '0010', materialId: '81114NE0304175H', salesProgramId: 'SP1001', priceGroup: '06', quantity: 2, unitPrice: 100 },
+    { id: 2, itemLineNo: '0020', materialId: '81114NE0304120K', salesProgramId: 'SP1002', priceGroup: '06', quantity: 1, unitPrice: 150 }
+]);
+
+const totalAmount = computed(() => orderItems.value.reduce((sum, item) => sum + item.quantity * item.unitPrice, 0));
 </script>

@@ -3,23 +3,19 @@ import { onBeforeMount, ref } from 'vue';
 import { BillingService } from '@/service/ListBilling';
 import { FilterMatchMode, FilterOperator } from '@primevue/core/api';
 
-const filters1 = ref(null);
+const filters1 = ref({
+    global: { value: null, matchMode: FilterMatchMode.CONTAINS },
+    dealerName: { operator: FilterOperator.AND, constraints: [{ value: null, matchMode: FilterMatchMode.STARTS_WITH }] },
+    docsNo: { operator: FilterOperator.AND, constraints: [{ value: null, matchMode: FilterMatchMode.STARTS_WITH }] }
+});
+
 const listData = ref([]);
 const loading = ref(true);
 
 onBeforeMount(async () => {
     listData.value = await BillingService.getBillingList();
     loading.value = false;
-    initFilters1();
 });
-
-function initFilters1() {
-    filters1.value = {
-        global: { value: null, matchMode: FilterMatchMode.CONTAINS },
-        dealerName: { operator: FilterOperator.AND, constraints: [{ value: null, matchMode: FilterMatchMode.STARTS_WITH }] },
-        docsNo: { operator: FilterOperator.AND, constraints: [{ value: null, matchMode: FilterMatchMode.STARTS_WITH }] }
-    };
-}
 </script>
 
 <template>
@@ -39,7 +35,7 @@ function initFilters1() {
                         <Button type="button" icon="pi pi-cog" class="p-button" />
                     </div>
                     <div class="flex justify-end gap-2 w-full max-w-md">
-                        <Button type="button" icon="pi pi-upload" label="Upload" class="p-button " />
+                        <Button type="button" icon="pi pi-upload" label="Upload" class="p-button" />
                     </div>
                 </div>
             </template>

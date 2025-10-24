@@ -2,12 +2,11 @@
     <div class="flex flex-col md:flex-row gap-8">
         <div class="md:w-2/3 flex flex-col">
             <div class="card flex flex-col w-full">
-                <div class="flex items-center justify-between border-b pb-2">
+                <div class="flex items-center gap-2 border-b">
+                    <RouterLink to="/om/listReturnOrder">
+                        <Button icon="pi pi-arrow-left font-bold" class="p-button-text p-button-secondary text-xl" size="big" v-tooltip="'Back'" />
+                    </RouterLink>
                     <div class="text-2xl font-bold text-gray-800">CTC Details</div>
-                    <div class="inline-flex items-center gap-2">
-                        <Button label="Pickup" class="p-button-warning" size="small" @click="showCalendar = true" />
-                        <Button label="Update Status" class="p-button-success" size="small" @click="showStatusDialog = true" />
-                    </div>
                 </div>
                 <!-- CTC Reference Number -->
                 <div class="mt-6 mb-4">

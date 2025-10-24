@@ -133,19 +133,9 @@ const router = createRouter({
                     component: () => import('@/views/om/listBackOrder.vue')
                 },
                 {
-                    path: '/om/createBackOrder',
-                    name: 'Create-Back-Order',
-                    component: () => import('@/views/om/createBackOrder.vue')
-                },
-                {
                     path: '/om/detailBackOrder',
                     name: 'Detail-Back-Order',
                     component: () => import('@/views/om/detailBackOrder.vue')
-                },
-                {
-                    path: '/om/editBackOrder',
-                    name: 'Edit-Back-Order',
-                    component: () => import('@/views/om/editBackOrder.vue')
                 },
 
                 // Return Order
@@ -219,24 +209,6 @@ const router = createRouter({
                     path: '/om/ListMaterialException',
                     name: 'Material-Exception',
                     component: () => import('@/views/om/listMaterialException.vue')
-                },
-
-                // Messaging
-                {
-                    path: '/om/listMessaging',
-                    name: 'List-Messaging',
-                    component: () => import('@/views/om/listMessaging.vue')
-                },
-                // In your router/index.js file
-                {
-                    path: '/om/detailMessaging',
-                    name: 'Detail-Messaging',
-                    component: () => import('@/views/om/detailMessaging.vue')
-                },
-                {
-                    path: '/om/createMessaging',
-                    name: 'Create-Messaging',
-                    component: () => import('@/views/om/createMessaging.vue')
                 },
 
                 // ===============================
@@ -616,6 +588,22 @@ const router = createRouter({
                     path: '/billing/listStatement',
                     name: 'List-Statement',
                     component: () => import('@/views/billing/listStatement.vue')
+                },
+                {
+                    path: '/billing/listMessaging',
+                    name: 'List-Messaging',
+                    component: () => import('@/views/billing/listMessaging.vue')
+                },
+                // In your router/index.js file
+                {
+                    path: '/billing/detailMessaging',
+                    name: 'Detail-Messaging',
+                    component: () => import('@/views/billing/detailMessaging.vue')
+                },
+                {
+                    path: '/billing/createMessaging',
+                    name: 'Create-Messaging',
+                    component: () => import('@/views/billing/createMessaging.vue')
                 },
 
                 // ===============================
