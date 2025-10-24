@@ -51,11 +51,11 @@
                     {{ data.customerName }}
                 </template>
             </Column>
-            <Column field="customerName" header="Order Type" style="min-width: 10rem">
+            <!-- <Column field="customerName" header="Order Type" style="min-width: 10rem">
                 <template #body="{ data }">
                     {{ data.orderType }}
                 </template>
-            </Column>
+            </Column> -->
             <Column field="customerName" header="Delivery" style="min-width: 10rem">
                 <template #body="{ data }">
                     {{ data.deliveryType }}

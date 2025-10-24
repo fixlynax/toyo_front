@@ -133,19 +133,9 @@ const router = createRouter({
                     component: () => import('@/views/om/listBackOrder.vue')
                 },
                 {
-                    path: '/om/createBackOrder',
-                    name: 'Create-Back-Order',
-                    component: () => import('@/views/om/createBackOrder.vue')
-                },
-                {
                     path: '/om/detailBackOrder',
                     name: 'Detail-Back-Order',
                     component: () => import('@/views/om/detailBackOrder.vue')
-                },
-                {
-                    path: '/om/editBackOrder',
-                    name: 'Edit-Back-Order',
-                    component: () => import('@/views/om/editBackOrder.vue')
                 },
 
                 // Return Order

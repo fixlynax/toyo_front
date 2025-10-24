@@ -115,9 +115,9 @@
                             </template>
                         </Column>
 
-                        <Column field="quantity" header="Quantity" style="min-width: 6rem; text-align: right">
+                        <Column field="quantity" header="Qty" style="text-align: center">
                             <template #body="{ data }">
-                                <span class="text-lg font-semibold">{{ data.quantity }}</span>
+                                <span class="text-lg">{{ data.quantity }}</span>
                             </template>
                         </Column>
 

@@ -3,9 +3,14 @@
         <div class="flex flex-col md:flex-row gap-8">
             <div class="md:w-2/3 flex flex-col gap-8">
                 <div class="card flex flex-col gap-6 w-full">
-                    <div class="text-2xl font-bold text-gray-800 border-b pb-2">Return Order Detail</div>
+                    <div class="flex items-center gap-2 border-b">
+                        <RouterLink to="/om/listReturnOrder">
+                            <Button icon="pi pi-arrow-left font-bold" class="p-button-text p-button-secondary text-xl" size="big" v-tooltip="'Back'" />
+                        </RouterLink>
+                        <div class="text-2xl font-bold text-gray-800">Return Order Detail</div>
+                    </div>
 
-                    <div class="font-semibold text-xl border-b pb-2 mt-2">🏬 Dealer Details</div>
+                    <div class="font-semibold text-xl border-b pb-2 mt-2">🏬 Customer Details</div>
                     <div class="grid grid-cols-2 gap-4">
                         <div>
                             <span class="text-sm text-gray-500">Dealer Name</span>
@@ -24,12 +29,52 @@
                             <p class="text-lg font-medium">{{ dealerShop.city }} {{ dealerShop.state }}</p>
                         </div>
                         <div>
-                            <span class="text-sm text-gray-500">Channel</span>
-                            <p class="text-lg font-medium">{{ order.channel }}</p>
+                            <span class="text-sm text-gray-500">Return Code</span>
+                            <p class="text-lg font-semibold">{{ order.reason_code }}</p>
                         </div>
                         <div>
                             <span class="text-sm text-gray-500">Return Reason</span>
                             <p class="text-lg font-medium">{{ order.reason_message }}</p>
+                        </div>
+
+                        <div>
+                            <span class="text-sm text-gray-500">Channel</span>
+                            <p class="text-lg font-medium">{{ order.channel }}</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card flex flex-col gap-4 w-full">
+                    <div class="font-semibold text-xl border-b pb-2">🚚 Shipping Information</div>
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <span class="text-sm font-bold text-gray-700">Ship To</span>
+                            <p class="text-lg font-medium">
+                                {{ order.deliveryType === 'DELIVER' ? dealerShop.companyName1 : 'Customer Self Pickup' }}
+                            </p>
+                        </div>
+                        <div>
+                            <span class="text-sm font-bold text-gray-700">Description</span>
+                            <p class="text-lg font-medium">{{ order.orderDesc }}</p>
+                        </div>
+                        <div>
+                            <span class="text-sm font-bold text-gray-700">Shipping Cond</span>
+                            <p class="text-lg font-medium">{{ order.shippingcond }}</p>
+                        </div>
+                        <div>
+                            <span class="text-sm font-bold text-gray-700">Delivery Type</span>
+                            <p class="text-lg font-medium">{{ order.deliveryType }}</p>
+                        </div>
+                        <div>
+                            <span class="text-sm font-bold text-gray-700">Delivery ETA</span>
+                            <p class="text-lg font-medium">{{ order.deliveryDate }}</p>
+                        </div>
+                        <div>
+                            <span class="text-sm font-bold text-gray-700">Delivery Status</span>
+                            <p class="text-lg font-medium">
+                                <Tag value="Delivered" severity="success" />
+                            </p>
+                            <p class="text-xs text-gray-500 mt-1">Last updated: {{ order.created }}</p>
                         </div>
                     </div>
                 </div>
@@ -37,6 +82,11 @@
                 <div class="card">
                     <div class="font-semibold text-xl border-b pb-2 mt-2">📦 Return Materials</div>
                     <DataTable :value="returnOrderArray" class="text-sm" stripedRows>
+                        <Column field="salesdoclineitem" header="Line Item No." style="min-width: 6rem">
+                            <template #body="{ data }">
+                                <span class="text-lg">{{ data.salesdoclineitem }}</span>
+                            </template>
+                        </Column>
                         <Column field="materialid" header="Material ID" style="min-width: 8rem">
                             <template #body="{ data }">
                                 <span class="font-bold text-lg">{{ data.materialid }}</span>
@@ -57,34 +107,18 @@
                                 <span class="text-lg">{{ data.qty }}</span>
                             </template>
                         </Column>
-                        <Column field="salesdoclineitem" header="Line Item" style="min-width: 6rem">
+                        <Column field="total" header="Total" style="min-width: 6rem">
                             <template #body="{ data }">
-                                <span class="text-lg">{{ data.salesdoclineitem }}</span>
+                                <span class="text-lg">RM {{ order.total }}</span>
+                            </template>
+                        </Column>
+                        <Column field="tax" header="Tax" style="min-width: 6rem">
+                            <template #body="{ data }">
+                                <span class="text-lg text-red-600">RM {{ order.tax }}</span>
                             </template>
                         </Column>
                     </DataTable>
-                </div>
-
-                <div class="card">
-                    <div class="font-semibold text-xl border-b pb-2 mt-2">💰 Order Summary</div>
-                    <div class="grid grid-cols-2 gap-4 text-lg">
-                        <div>
-                            <span class="text-sm text-gray-500">Subtotal</span>
-                            <p class="font-medium">RM {{ order.subtotal }}</p>
-                        </div>
-                        <div>
-                            <span class="text-sm text-gray-500">Tax</span>
-                            <p class="font-medium">RM {{ order.tax }}</p>
-                        </div>
-                        <div>
-                            <span class="text-sm text-gray-500">Total</span>
-                            <p class="font-medium text-green-700">RM {{ order.total }}</p>
-                        </div>
-                        <div>
-                            <span class="text-sm text-gray-500">Created</span>
-                            <p class="font-medium">{{ order.created }}</p>
-                        </div>
-                    </div>
+                    <div class="mt-2 flex justify-end text-lg font-semibold">Subtotal: RM {{ order.subtotal }}</div>
                 </div>
             </div>
 
@@ -127,10 +161,6 @@
                                     <td class="px-4 py-2 text-right">{{ order.division }}</td>
                                 </tr>
                                 <tr class="border-b">
-                                    <td class="px-4 py-2 font-medium">Shipping Cond</td>
-                                    <td class="px-4 py-2 text-right">{{ order.shippingcond }}</td>
-                                </tr>
-                                <tr class="border-b">
                                     <td class="px-4 py-2 font-medium">Delivery Date</td>
                                     <td class="px-4 py-2 text-right">{{ order.deliveryDate }}</td>
                                 </tr>
@@ -164,14 +194,14 @@
 </template>
 
 <script setup>
-import { ref, computed } from 'vue'
-import Fluid from 'primevue/fluid'
-import Tag from 'primevue/tag'
-import Button from 'primevue/button'
-import Dialog from 'primevue/dialog'
-import Dropdown from 'primevue/dropdown'
-import DataTable from 'primevue/datatable'
-import Column from 'primevue/column'
+import { ref } from 'vue';
+import Fluid from 'primevue/fluid';
+import Tag from 'primevue/tag';
+import Button from 'primevue/button';
+import Dialog from 'primevue/dialog';
+import Dropdown from 'primevue/dropdown';
+import DataTable from 'primevue/datatable';
+import Column from 'primevue/column';
 
 const apiResponse = {
     status: 1,
@@ -180,6 +210,8 @@ const apiResponse = {
             returnID: 24,
             id: 61,
             orderID: 61,
+            etenUserListID: 1,
+            etenUserID: 1,
             return_orderNo_ref: 'RTNORD-000000020',
             return_order_array: '[{"materialid":"81114NE0304175H","itemcategory":"ZR02","plant":"TSM","qty":"3","salesdoclineitem":"10"}]',
             reason_code: 'Y01',
@@ -199,8 +231,10 @@ const apiResponse = {
             storagelocation: 'TMSA',
             orderDesc: 'NORMAL',
             channel: 'ETEN',
+            containerSize: null,
             deliveryType: 'DELIVER',
             deliveryDate: '2025-10-11',
+            eten_user_shiptoID: 1,
             order_no: 'ORD-000000044',
             so_no: '0910002078',
             do_no: '0920001446',
@@ -215,32 +249,32 @@ const apiResponse = {
                     companyName1: 'YIP BROTHERS TYRE & AUTO CAR WORKS',
                     companyName2: 'SDN. BHD.',
                     city: 'SHAH ALAM,',
-                    state: 'SEL'
+                    state: 'SELANGOR'
                 }
             }
         }
     ]
-}
+};
 
-const order = ref(apiResponse.admin_data[0])
-const dealerShop = ref(order.value.dealer.dealer_shop)
-const returnOrderArray = ref(JSON.parse(order.value.return_order_array))
+const order = ref(apiResponse.admin_data[0]);
+const dealerShop = ref(order.value.dealer.dealer_shop);
+const returnOrderArray = ref(JSON.parse(order.value.return_order_array));
 
-const showRejectPopup = ref(false)
-const rejectReason = ref(null)
+const showRejectPopup = ref(false);
+const rejectReason = ref(null);
 const rejectReasonOptions = ref([
     { label: 'Incorrect Details', value: 'Incorrect Details' },
     { label: 'Invalid Return Reason', value: 'Invalid Return Reason' },
     { label: 'Duplicate Request', value: 'Duplicate Request' },
     { label: 'Other', value: 'Other' }
-])
+]);
 
 const onApproveReturnOrder = () => {
-    alert('Return order approved')
-}
+    alert('Return order approved');
+};
 
 const submitRejectReturnOrder = () => {
-    alert(`Return order rejected: ${rejectReason.value}`)
-    showRejectPopup.value = false
-}
+    alert(`Return order rejected: ${rejectReason.value}`);
+    showRejectPopup.value = false;
+};
 </script>
