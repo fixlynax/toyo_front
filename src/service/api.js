@@ -97,8 +97,8 @@ export default {
   },
 
   async getPrivateFile(url) {
+  try {
     const token = tokenService.getToken();
-
     const response = await fetch(url, {
       method: 'GET',
       headers: {
@@ -107,10 +107,19 @@ export default {
       },
     });
 
+    if (response.status === 401) {
+      console.warn('Unauthorized image access, skipping logout.');
+      return null;
+    }
+
     if (!response.ok) throw new Error('Failed to load private file');
     const blob = await response.blob();
     return URL.createObjectURL(blob);
-  },
+  } catch (error) {
+    console.error('Private file fetch error:', error);
+    return null;
+  }
+},
 
   // Token service
   tokenService
