@@ -86,7 +86,7 @@
                                 </tr>
                             </tbody>
                         </table>
-                        <div v-if="news.status==='draft'" class="flex justify-end mt-4 gap-2">
+                        <div v-if="news.status===0" class="flex justify-end mt-4 gap-2">
                             <div class="w-30">
                                 <Button label="Publish" @click="publishNews" :loading="saving" />
                             </div>
