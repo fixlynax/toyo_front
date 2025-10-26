@@ -3,23 +3,19 @@ import { onBeforeMount, ref } from 'vue';
 import { BillingService } from '@/service/ListBilling';
 import { FilterMatchMode, FilterOperator } from '@primevue/core/api';
 
-const filters1 = ref(null);
+const filters1 = ref({
+    global: { value: null, matchMode: FilterMatchMode.CONTAINS },
+    dealerName: { operator: FilterOperator.AND, constraints: [{ value: null, matchMode: FilterMatchMode.STARTS_WITH }] },
+    docsNo: { operator: FilterOperator.AND, constraints: [{ value: null, matchMode: FilterMatchMode.STARTS_WITH }] }
+});
+
 const listData = ref([]);
 const loading = ref(true);
 
 onBeforeMount(async () => {
     listData.value = await BillingService.getBillingList();
     loading.value = false;
-    initFilters1();
 });
-
-function initFilters1() {
-    filters1.value = {
-        global: { value: null, matchMode: FilterMatchMode.CONTAINS },
-        dealerName: { operator: FilterOperator.AND, constraints: [{ value: null, matchMode: FilterMatchMode.STARTS_WITH }] },
-        docsNo: { operator: FilterOperator.AND, constraints: [{ value: null, matchMode: FilterMatchMode.STARTS_WITH }] }
-    };
-}
 </script>
 
 <template>
@@ -48,12 +44,16 @@ function initFilters1() {
                 <template #body="{ data }">{{ data.docsDate }}</template>
             </Column>
 
-            <Column field="dealerId" header="Dealer ID" style="min-width: 8rem">
-                <template #body="{ data }">{{ data.referenceDocsNo }}</template>
+            <Column field="dealerId" header="Customer Acc No." style="min-width: 8rem">
+                <template #body="{ data }">{{ data.dealerId }}</template>
             </Column>
 
             <Column field="dealerName" header="Dealer Name" style="min-width: 10rem">
                 <template #body="{ data }">{{ data.dealerName }}</template>
+            </Column>
+
+            <Column field="dealerName" header="Date Range" style="min-width: 10rem">
+                <template #body="{ data }">{{ data.dateRange }}</template>
             </Column>
 
             <!-- Amount Due -->

@@ -48,7 +48,7 @@ onBeforeMount(async () => {
         <template #body="{ data }">{{ data.docsNo }}</template>
       </Column>
 
-      <Column field="docsType" header="Type" style="min-width: 8rem">
+      <Column sortable field="docsType" header="Type" style="min-width: 8rem">
         <template #body="{ data }">{{ data.docsType }}</template>
       </Column>
 
@@ -62,6 +62,9 @@ onBeforeMount(async () => {
 
       <Column field="dealerName" header="Dealer Name" style="min-width: 10rem">
         <template #body="{ data }">{{ data.dealerName }}</template>
+      </Column>
+      <Column field="dealerName" header="Date Range" style="min-width: 10rem">
+        <template #body="{ data }">{{ data.dateRange }}</template>
       </Column>
 
       <Column field="company" header="Company" style="min-width: 10rem">
