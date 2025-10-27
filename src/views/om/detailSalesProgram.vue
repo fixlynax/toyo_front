@@ -123,23 +123,15 @@
                                     <div
                                         v-for="material in criteria.buyMaterials"
                                         :key="material.id"
-                                        class="flex items-center gap-3 p-3 bg-blue-50 border border-blue-200 rounded-lg"
+                                        class="p-3 bg-blue-50 border border-blue-200 rounded-lg"
                                     >
-                                        <img
-                                            :src="material.image || '/demo/images/event-toyo-1.jpg'"
-                                            :alt="material.material"
-                                            class="w-12 h-12 object-cover rounded-md shadow-sm"
-                                        />
-                                        <div class="flex-1 min-w-0">
-                                            <div class="font-medium text-sm text-blue-800 truncate">{{ material.material }}</div>
-                                            <div class="flex flex-wrap items-center gap-2 mt-1">
-                                                <span class="text-xs bg-white px-2 py-0.5 rounded text-blue-700 border border-blue-200">
-                                                    Pattern: {{ material.pattern }}
-                                                </span>
-                                                <span class="text-xs bg-white px-2 py-0.5 rounded text-blue-700 border border-blue-200">
-                                                    Rim: {{ material.rimDiameter }}"
-                                                </span>
-                                            </div>
+                                        <div class="flex flex-wrap items-center gap-2">
+                                            <span class="text-xs bg-white px-2 py-1 rounded text-blue-700 border border-blue-200 font-medium">
+                                                Pattern: {{ material.pattern }}
+                                            </span>
+                                            <span class="text-xs bg-white px-2 py-1 rounded text-blue-700 border border-blue-200 font-medium">
+                                                Rim: {{ material.rimDiameter }}"
+                                            </span>
                                         </div>
                                     </div>
                                 </div>
@@ -153,25 +145,15 @@
                                 </h4>
                                 <div
                                     v-if="criteria.freeMaterial"
-                                    class="flex items-center gap-4 p-4 bg-green-50 border border-green-200 rounded-lg"
+                                    class="p-4 bg-green-50 border border-green-200 rounded-lg"
                                 >
-                                    <img
-                                        :src="criteria.freeMaterial.image || '/demo/images/event-toyo-1.jpg'"
-                                        :alt="criteria.freeMaterial.material"
-                                        class="w-16 h-16 object-cover rounded-lg shadow-sm"
-                                    />
-                                    <div class="flex-1">
-                                        <div class="font-semibold text-green-800 text-sm mb-1 truncate">
-                                            {{ criteria.freeMaterial.material }}
-                                        </div>
-                                        <div class="flex flex-wrap items-center gap-2">
-                                            <span class="text-xs bg-white px-2 py-0.5 rounded text-green-700 border border-green-200">
-                                                Pattern: {{ criteria.freeMaterial.pattern }}
-                                            </span>
-                                            <span class="text-xs bg-white px-2 py-0.5 rounded text-green-700 border border-green-200">
-                                                Rim: {{ criteria.freeMaterial.rimDiameter }}"
-                                            </span>
-                                        </div>
+                                    <div class="flex flex-wrap items-center gap-2">
+                                        <span class="text-xs bg-white px-2 py-1 rounded text-green-700 border border-green-200 font-medium">
+                                            Pattern: {{ criteria.freeMaterial.pattern }}
+                                        </span>
+                                        <span class="text-xs bg-white px-2 py-1 rounded text-green-700 border border-green-200 font-medium">
+                                            Rim: {{ criteria.freeMaterial.rimDiameter }}"
+                                        </span>
                                     </div>
                                 </div>
                                 <div
@@ -196,7 +178,6 @@
         </div>
     </Fluid>
 </template>
-
 
 <script setup>
 import { ref, computed } from 'vue'
