@@ -48,7 +48,7 @@
             <!-- ========================= -->
             <Column field="etenUserID" header="Mem Code" style="min-width: 8rem">
                 <template #body="{ data }">
-                    <RouterLink to="/marketing/detailEtenUser" class="hover:underline font-bold">
+                    <RouterLink :to="`/marketing/detailEtenUser/${data.id}`" class="hover:underline font-bold">
                         {{ data.etenUserID }}
                     </RouterLink>
                 </template>
@@ -91,7 +91,7 @@
 <script setup>
 import { onMounted, ref } from 'vue';
 import { FilterMatchMode } from '@primevue/core/api';
-import { ListEtenUserService } from '@/service/ListEtenUser';
+import api from '@/service/api';
 
 // Data variables
 const listData = ref([]);
@@ -106,9 +106,42 @@ const filters = ref({
 // Fetch data on mount
 // =========================
 onMounted(async () => {
-    loading.value = true;
-    listData.value = await ListEtenUserService.getListEtenUserData();
-    loading.value = false;
+    try {
+        loading.value = true;
+        const response = await api.get('cares/userList');
+
+        console.log('API Response:', response.data);
+
+        if (response.data.status === 1 && response.data.admin_data) {
+            // Combine active and inactive users
+            const allUsers = [
+                ...(response.data.admin_data.active_user || []),
+                ...(response.data.admin_data.inactive_user || [])
+            ];
+
+            listData.value = allUsers.map((user) => ({
+                id: user.id,
+                etenUserID: user.member_code || 'N/A',
+                firstName: user.full_name || 'N/A',
+                lastName: '', // Not available in API
+                gender: 'N/A', // Not available in API
+                race: 'N/A', // Not available in API
+                state: 'N/A', // Not available in API
+                level: user.member_level || 'N/A',
+                memberSince: 'N/A', // Not available in API
+                lastLogin: 'N/A', // Not available in API
+                status: user.status
+            }));
+        } else {
+            console.error('API returned error or invalid data:', response.data);
+            listData.value = [];
+        }
+    } catch (error) {
+        console.error('Error fetching user list:', error);
+        listData.value = [];
+    } finally {
+        loading.value = false;
+    }
 });
 
 // =========================
