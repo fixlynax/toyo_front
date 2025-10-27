@@ -54,7 +54,7 @@
                 </template>
             </Column>
             
-            <Column field="accountNo" header="User ID" style="min-width: 6rem" />
+            <Column field="userId" header="User ID" style="min-width: 6rem" />
             
             <Column field="storageLocation" header="Storage Location" style="min-width: 6rem" />
 
