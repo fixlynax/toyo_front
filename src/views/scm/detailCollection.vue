@@ -1,5 +1,6 @@
 <template>
     <div class="flex flex-col md:flex-row gap-8">
+        <!-- LEFT SIDE -->
         <div class="md:w-2/3 flex flex-col">
             <!-- HEADER -->
             <div class="card flex flex-col w-full">
@@ -43,31 +44,52 @@
             <div class="card">
                 <div class="text-2xl font-bold text-gray-800 border-b pb-2 mb-4">Collection Items</div>
                 <div class="overflow-x-auto">
-                    <table class="w-full text-sm text-left text-gray-700">
-                        <thead class="bg-gray-50">
-                            <tr>
-                                <th class="px-4 py-2 font-bold">Tire Type</th>
-                                <th class="px-4 py-2 font-bold text-right">Quantity</th>
-                                <th class="px-4 py-2 font-bold text-right">Condition</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr class="border-b">
-                                <td class="px-4 py-2">Passenger Car Tires</td>
-                                <td class="px-4 py-2 text-right">4</td>
-                                <td class="px-4 py-2 text-right">
-                                    <Tag value="Good" severity="success" />
-                                </td>
-                            </tr>
-                            <tr class="border-b">
-                                <td class="px-4 py-2">Light Truck Tires</td>
-                                <td class="px-4 py-2 text-right">2</td>
-                                <td class="px-4 py-2 text-right">
-                                    <Tag value="Worn" severity="warning" />
-                                </td>
-                            </tr>
-                        </tbody>
-                    </table>
+                    <DataTable :value="orderItems" dataKey="itemLineNo" responsiveLayout="scroll" class="text-sm" stripedRows>
+                        <Column field="itemLineNo" header="Item Line No." style="min-width: 6rem; text-align: center">
+                            <template #body="{ data }">
+                                <span class="font-bold text-lg">{{ data.itemLineNo }}</span>
+                            </template>
+                        </Column>
+
+                        <Column field="materialId" header="Material ID" style="min-width: 8rem; text-align: center">
+                            <template #body="{ data }">
+                                <span class="font-medium text-lg">{{ data.materialId }}</span>
+                            </template>
+                        </Column>
+
+                        <Column field="salesProgramId" header="Sales Program ID" style="min-width: 8rem; text-align: center">
+                            <template #body="{ data }">
+                                <span class="text-lg">{{ data.salesProgramId }}</span>
+                            </template>
+                        </Column>
+
+                        <Column field="priceGroup" header="Price Group" style="min-width: 6rem; text-align: center">
+                            <template #body="{ data }">
+                                <span class="text-lg">{{ data.priceGroup }}</span>
+                            </template>
+                        </Column>
+
+                        <Column field="quantity" header="Qty" style="text-align: center">
+                            <template #body="{ data }">
+                                <span class="text-lg">{{ data.quantity }}</span>
+                            </template>
+                        </Column>
+
+                        <Column field="unitPrice" header="Unit Price (RM)" style="min-width: 8rem; text-align: right">
+                            <template #body="{ data }">
+                                <span class="text-lg font-semibold text-green-600">{{ data.unitPrice.toFixed(2) }}</span>
+                            </template>
+                        </Column>
+
+                        <Column field="totalPrice" header="Total (RM)" style="min-width: 8rem; text-align: right">
+                            <template #body="{ data }">
+                                <span class="text-lg font-bold text-green-700">{{ (data.quantity * data.unitPrice).toFixed(2) }}</span>
+                            </template>
+                        </Column>
+                    </DataTable>
+                    <div class="flex justify-end items-center border-t px-4 py-2">
+                        <span class="text-lg font-semibold text-gray-800">Grand Total: RM {{ grandTotal.toFixed(2) }}</span>
+                    </div>
                 </div>
             </div>
         </div>
@@ -95,9 +117,19 @@
                             </tr>
                         </tbody>
                     </table>
-                    <div class="mt-4 flex justify-end items-center gap-2">
-                        <Button label="Update Collection Schedule" size="small" class="p-button-primary w-40" />
-                        <Button label="Update Collection Complete" size="small" class="p-button-success w-40" />
+
+                    <div class="mt-4 flex justify-end items-center gap-2 relative">
+                        <Button label="Update" size="small" class="p-button-primary w-40" @click="toggleDropdown" />
+
+                        <transition name="fade">
+                            <div
+                                v-if="showDropdown"
+                                class="absolute right-0 top-full mt-2 bg-white border border-gray-300 rounded-lg shadow-lg w-56 z-50 p-2 flex flex-col gap-2"
+                            >
+                                <Button label="Update Collection Schedule" size="small" class="p-button-primary w-full" @click="handleSelect('schedule')" />
+                                <Button label="Update Collection Complete" size="small" class="p-button-success w-full" @click="handleSelect('status')" />
+                            </div>
+                        </transition>
                     </div>
                 </div>
             </div>
@@ -106,107 +138,67 @@
 </template>
 
 <script setup>
-import { ref, computed } from 'vue';
+import { ref, computed, onMounted, onBeforeUnmount } from 'vue';
 import Button from 'primevue/button';
+import DataTable from 'primevue/datatable';
+import Column from 'primevue/column';
 
+const showDropdown = ref(false);
 const showCalendar = ref(false);
 const showStatusDialog = ref(false);
-const selectedDate = ref(null);
-const selectedStatus = ref(null);
 
-// today + current time → ensures only future date/time is valid
-const today = new Date();
+const toggleDropdown = () => {
+    showDropdown.value = !showDropdown.value;
+};
 
-// Status options for dropdown
-const statusOptions = ref([
-    { label: 'Pending', value: 0 },
-    { label: 'Completed', value: 1 }
+const handleSelect = (option) => {
+    showDropdown.value = false;
+    if (option === 'schedule') {
+        showCalendar.value = true;
+    } else if (option === 'status') {
+        showStatusDialog.value = true;
+    }
+};
+
+const handleClickOutside = (event) => {
+    const dropdown = document.querySelector('.relative');
+    if (dropdown && !dropdown.contains(event.target)) {
+        showDropdown.value = false;
+    }
+};
+
+onMounted(() => document.addEventListener('click', handleClickOutside));
+onBeforeUnmount(() => document.removeEventListener('click', handleClickOutside));
+
+const orderItems = ref([
+    { itemLineNo: 1, materialId: 'MAT001', salesProgramId: 'SP001', priceGroup: 'A1', quantity: 10, unitPrice: 25.5 },
+    { itemLineNo: 2, materialId: 'MAT002', salesProgramId: 'SP002', priceGroup: 'B2', quantity: 5, unitPrice: 30.0 },
+    { itemLineNo: 3, materialId: 'MAT003', salesProgramId: 'SP003', priceGroup: 'C3', quantity: 8, unitPrice: 22.75 }
 ]);
-
-// Computed properties for status display
-const statusText = computed(() => {
-    const status = paramData.value.status;
-    return statusOptions.value.find((option) => option.value === status)?.label || 'Unknown';
-});
-
-const statusClass = computed(() => {
-    const status = paramData.value.status;
-    switch (status) {
-        case 0: // Pending
-            return 'bg-yellow-100 text-yellow-800';
-        case 1: // Completed
-            return 'bg-green-100 text-green-800';
-        default:
-            return 'bg-gray-100 text-gray-800';
-    }
-});
-
-// Format the schedule date for display
-const formattedSchedule = computed(() => {
-    const date = new Date(paramData.value.collectSchedule);
-    return date.toLocaleString('en-MY', {
-        year: 'numeric',
-        month: '2-digit',
-        day: '2-digit',
-        hour: '2-digit',
-        minute: '2-digit',
-        hour12: true
-    });
-});
-
-const reschedule = () => {
-    if (selectedDate.value && selectedDate.value > new Date()) {
-        console.log('New schedule selected:', selectedDate.value);
-
-        paramData.value.collectSchedule = selectedDate.value.toISOString();
-        showCalendar.value = false;
-    } else {
-        alert('Please select a future date & time!');
-    }
-};
-
-const updateStatus = () => {
-    if (selectedStatus.value !== null) {
-        console.log('Status updated to:', selectedStatus.value);
-        paramData.value.status = selectedStatus.value;
-        showStatusDialog.value = false;
-    } else {
-        alert('Please select a status!');
-    }
-};
 
 const paramData = ref({
     id: 1,
     refNo: 'CLM-2025-001',
-    claimDate: '2025-09-01',
     accno: '66010341222',
-    collectDate: '2025-09-07',
-    collectTime: '3:00PM',
-    requestDate: '3:00PM',
-    etaDateTime: '3:00PM',
     customerContactNo: '0123456789',
     CompanyName: 'HUH DUH NU UH',
     customerName: 'Zakir Turun',
-    dealerName: 'AutoWorld KL',
-    name: 'AutoWorld KL',
-    contactNo: 'AutoWorld KL',
-    address: 'AutoWorld KL',
     companyName: 'AutoWorld KL',
-    customerInfoaccNo: 'AutoWorld KL',
-    status: 0,
-    collectSchedule: '2025-02-18T09:00:00',
-    totalTire: '6',
-    company3PL: 'Miaw Miaw SDN BHD',
     dealerInfo: {
-        dealerCode: 'DLR-001',
-        contactPerson: 'Ahmad Zaki',
-        contactNo: '+6012-3456789',
         dealerLoc: 'Petaling Jaya'
-    },
-    customerInfo: {
-        name: 'Lee Wei Ming',
-        vehicle: 'Toyota Hilux 2.8G',
-        regNo: 'WXY 4567'
     }
 });
+
+const grandTotal = computed(() => orderItems.value.reduce((sum, item) => sum + item.quantity * item.unitPrice, 0));
 </script>
+
+<style scoped>
+.fade-enter-active,
+.fade-leave-active {
+    transition: opacity 0.2s;
+}
+.fade-enter-from,
+.fade-leave-to {
+    opacity: 0;
+}
+</style>

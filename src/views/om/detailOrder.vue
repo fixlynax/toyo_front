@@ -81,7 +81,9 @@
                         <div>
                             <span class="text-sm font-bold text-gray-700">Delivery Status</span>
                             <p class="text-lg font-medium">
-                                <Tag :value="backOrdering.deliveryStatus" :severity="backOrdering.deliveryStatus === 'Delivered' ? 'success' : backOrdering.deliveryStatus === 'Scheduled' ? 'info' : 'warn'" />
+                                <span class="text-green-600 font-bold">
+                                    {{ backOrdering.deliveryStatus }}
+                                </span>
                             </p>
                             <p class="text-xs text-gray-500 mt-1">Last updated: {{ backOrdering.lastUpdated }}</p>
                         </div>
