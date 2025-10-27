@@ -3,18 +3,16 @@
         <!-- LEFT SIDE -->
         <div class="md:w-2/3 flex flex-col">
             <div class="card flex flex-col w-full">
-                <div class="flex items-center justify-between border-b pb-2">
+                <div class="flex items-center gap-2 border-b pb-2 mb-4">
+                    <RouterLink to="/scm/returnCollection">
+                        <Button icon="pi pi-arrow-left" class="p-button-text p-button-secondary text-xl" v-tooltip="'Back'" />
+                    </RouterLink>
                     <div class="text-2xl font-bold text-gray-800">Return Details</div>
-                    <div class="inline-flex items-center gap-2">
-                        <Button label="Schedule Return" class="p-button-warning" size="small" @click="showCalendar = true" />
-                        <Button label="Update Status" class="p-button-success" size="small" @click="showStatusDialog = true" />
-                    </div>
                 </div>
 
                 <!-- Status Badge -->
                 <div class="mt-4">
-                    <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium"
-                          :class="statusClass">
+                    <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium" :class="statusClass">
                         {{ statusText }}
                     </span>
                 </div>
