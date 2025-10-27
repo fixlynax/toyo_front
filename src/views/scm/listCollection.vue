@@ -149,31 +149,66 @@ function filteredList() {
             <template #empty> No Collection found. </template>
             <template #loading> Loading Collection data. Please wait. </template>
 
-            <Column field="claimRefNo" header="Ref No." style="min-width: 8rem">
-                <template #body="{ data }">
-                    <RouterLink :to="`/scm/detailCollection/${data.id}`" class="hover:underline font-bold text-primary">
-                        {{ data.claimRefNo }}
-                    </RouterLink>
-                </template>
-            </Column>
+            <Column field="createDate" header="Create Date" style="min-width: 8rem">
+    <template #body="{ data }">
+        {{ data.createDate }}
+    </template>
+</Column>
 
-            <Column field="companyName1" header="Dealer" style="min-width: 8rem">
-                <template #body="{ data }">{{ data.companyName1 }}</template>
-            </Column>
+<Column field="customerAccNo" header="Customer Acc No." style="min-width: 8rem">
+    <template #body="{ data }">
+        {{ data.customerAccNo }}
+    </template>
+</Column>
 
-            <Column field="city" header="Location" style="min-width: 6rem">
-                <template #body="{ data }">{{ data.city }}</template>
-            </Column>
+<Column field="customerName" header="Customer Name" style="min-width: 10rem">
+    <template #body="{ data }">
+        {{ data.customerName }}
+    </template>
+</Column>
 
-            <Column field="collectDate" header="Collection Date" style="min-width: 6rem">
-                <template #body="{ data }"> {{ data.collectDate }} {{ data.collectTime }} </template>
-            </Column>
+<Column field="collectionAddress" header="Collection Address" style="min-width: 12rem">
+    <template #body="{ data }">
+        {{ data.collectionAddress }}
+    </template>
+</Column>
 
-            <Column header="Status" style="min-width: 6rem">
-                <template #body="{ data }">
-                    <Tag :value="getStatusText(data.status)" :severity="getStatusSeverity(data.status)" />
-                </template>
-            </Column>
+<Column field="contactNo" header="Contact No." style="min-width: 8rem">
+    <template #body="{ data }">
+        {{ data.contactNo }}
+    </template>
+</Column>
+
+<Column field="totalPcs" header="Total Pcs" style="min-width: 6rem; text-align: center;">
+    <template #body="{ data }">
+        {{ data.totalPcs }}
+    </template>
+</Column>
+
+<Column field="thirdPartyLogistics" header="3PL" style="min-width: 6rem">
+    <template #body="{ data }">
+        {{ data.thirdPartyLogistics }}
+    </template>
+</Column>
+
+<Column field="pickupDatetime" header="Pickup Datetime" style="min-width: 10rem">
+    <template #body="{ data }">
+        {{ data.pickupDatetime }}
+    </template>
+</Column>
+
+<Column field="collectedDatetime" header="Collected Datetime" style="min-width: 10rem">
+    <template #body="{ data }">
+        {{ data.collectedDatetime }}
+    </template>
+</Column>
+
+<Column field="status" header="Status" style="min-width: 8rem">
+    <template #body="{ data }">
+        <Tag :value="getStatusText(data.status)" :severity="getStatusSeverity(data.status)" />
+    </template>
+</Column>
+
         </DataTable>
     </div>
 </template>
