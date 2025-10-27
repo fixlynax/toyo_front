@@ -14,6 +14,7 @@
                             </RouterLink>
 
                             <!-- Delete Event -->
+                            <!-- const response = await api.put(`game/delete/${gameId}`); -->
                             <Button label="Delete" class="p-button-danger" size="small" />
                         </div>
                     </div>
@@ -140,6 +141,15 @@
                                         </div>
                                     </td>
                                 </tr>
+                                <tr>
+                                    <td class="px-4 py-2 font-medium"></td>
+                                    <td class="px-4 py-2 text-right">
+                                        <div class="flex justify-end">
+                                            <!--  const response = await api.put(`game/toggleInactive/${gameId}`); -->
+                                            <ToggleButton v-model="checked" onLabel="Inactive" offLabel="Active" onIcon="pi pi-lock" offIcon="pi pi-lock-open" class="w-36" aria-label="Do you confirm ?" />
+                                        </div>
+                                    </td>
+                                </tr>
                             </tbody>
                         </table>
                     </div>
@@ -171,7 +181,7 @@
                 </div>
             </div>
         </div>
-        
+
         <!-- Edit Prize Dialog -->
         <Dialog v-model:visible="editDialogVisible" modal header="Edit Prize Quantity" :style="{ width: '400px' }">
             <div class="flex flex-col gap-3">
@@ -335,7 +345,7 @@ function openEditDialog(prize) {
 }
 
 function savePrizeEdit() {
-    const index = listPrize.value.findIndex(p => p.id === selectedPrize.value.id);
+    const index = listPrize.value.findIndex((p) => p.id === selectedPrize.value.id);
     if (index !== -1) {
         listPrize.value[index].prizeQuota = selectedPrize.value.prizeQuota;
     }
