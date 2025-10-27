@@ -26,17 +26,17 @@
 
                         <div>
                             <label class="block font-bold text-gray-700">Publish Date</label>
-                            <Calendar v-model="event.publishDate" dateFormat="yy-mm-dd" class="w-full" />
+                            <Calendar v-model="event.publishDate" dateFormat="dd-mm-yy" showIcon class="w-full" />
                         </div>
 
                         <div>
                             <label class="block font-bold text-gray-700">Start Date</label>
-                            <Calendar v-model="event.startDate" dateFormat="yy-mm-dd" class="w-full" />
+                            <Calendar v-model="event.startDate" :minDate="today" dateFormat="dd-mm-yy" showIcon class="w-full" @date-select="onStartDateSelect" />
                         </div>
 
                         <div>
                             <label class="block font-bold text-gray-700">End Date</label>
-                            <Calendar v-model="event.endDate" dateFormat="yy-mm-dd" class="w-full" />
+                            <Calendar v-model="event.endDate" :minDate="minEndDate" dateFormat="dd-mm-yy" showIcon class="w-full" />
                         </div>
 
                         <div>
@@ -54,96 +54,80 @@
                     <div>
                         <label class="block font-bold text-gray-700 mb-2">Upload Event Image</label>
                         <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                            <div>
-                                <FileUpload mode="basic" name="image1" accept="image/*" customUpload @select="onImageSelect($event, 'image1URL')" chooseLabel="Upload Image 1" class="w-full" />
-                                <img v-if="event.image1URL" :src="event.image1URL" alt="Preview 1" class="mt-2 rounded-lg shadow-md object-cover w-full h-80" />
-                            </div>
-                            <div>
-                                <FileUpload mode="basic" name="image2" accept="image/*" customUpload @select="onImageSelect($event, 'image2URL')" chooseLabel="Upload Image 2" class="w-full" />
-                                <img v-if="event.image2URL" :src="event.image2URL" alt="Preview 2" class="mt-2 rounded-lg shadow-md object-cover w-full h-80" />
-                            </div>
-                            <div>
-                                <FileUpload mode="basic" name="image3" accept="image/*" customUpload @select="onImageSelect($event, 'image3URL')" chooseLabel="Upload Image 3" class="w-full" />
-                                <img v-if="event.image3URL" :src="event.image3URL" alt="Preview 3" class="mt-2 rounded-lg shadow-md object-cover w-full h-80" />
+                            <div v-for="n in 3" :key="n">
+                                <FileUpload mode="basic" :name="`image${n}`" accept="image/*" customUpload @select="(e) => onImageSelect(e, `image${n}`)" :chooseLabel="`Upload Image ${n}`" class="w-full" />
+                                <img v-if="event[`image${n}URL`]" :src="event[`image${n}URL`]" :alt="`Preview ${n}`" class="mt-2 rounded-lg shadow-md object-cover w-full h-80" />
                             </div>
                         </div>
                     </div>
 
-                    <div v-if="event.isSurvey === 0" class="flex justify-end mt-8 gap-2">
+                    <div v-if="event.isSurvey === 'no'" class="flex justify-end mt-8 gap-2">
                         <div class="w-40">
                             <Button label="Cancel" class="p-button-secondary w-full mr-2" @click="$router.back()" />
                         </div>
                         <div class="w-40">
-                            <RouterLink to="/marketing/detailEvent">
-                                <Button label="Submit" class="w-full" />
-                            </RouterLink>
+                            <Button label="Submit" class="w-full" @click="submitEvent" />
                         </div>
                     </div>
                 </div>
 
-                <!-- Point Configuration Card -->
-                <div v-if="event.isSurvey === 1" class="card flex flex-col gap-6 w-full">
+                <!-- Point Configuration -->
+                <div v-if="event.isSurvey === 'yes'" class="card flex flex-col gap-6 w-full">
                     <div class="text-xl font-bold text-gray-800 border-b pb-2">🏆 Point Configuration</div>
                     <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
                         <div>
                             <label class="block font-bold text-gray-700 mb-1">Silver</label>
-                            <InputNumber v-model="event.point2" class="w-full" />
+                            <InputNumber v-model="event.point1" class="w-full" />
                         </div>
                         <div>
                             <label class="block font-bold text-gray-700 mb-1">Gold</label>
-                            <InputNumber v-model="event.point3" class="w-full" />
+                            <InputNumber v-model="event.point2" class="w-full" />
                         </div>
                         <div>
                             <label class="block font-bold text-gray-700 mb-1">Platinum</label>
-                            <InputNumber v-model="event.point4" class="w-full" />
+                            <InputNumber v-model="event.point3" showIcon class="w-full" />
                         </div>
                     </div>
                 </div>
 
-                <!-- Survey Questions Card -->
-                <div v-if="event.isSurvey === 1" class="card flex flex-col gap-6 w-full">
-                    <!-- Header -->
+                <!-- Survey Questions -->
+                <div v-if="event.isSurvey === 'yes'" class="card flex flex-col gap-6 w-full">
                     <div class="text-xl font-bold text-gray-800 border-b pb-2">📝 Survey Questions</div>
-
-                    <!-- Questions List -->
                     <div v-if="questions.length > 0" class="space-y-4">
                         <div v-for="(q, index) in questions" :key="index" class="border rounded-lg p-4 shadow-sm bg-gray-50">
-                            <!-- Question Header -->
                             <div class="flex items-center justify-between mb-2">
                                 <label class="font-semibold text-gray-800">Question {{ index + 1 }}</label>
                                 <Button icon="pi pi-trash" class="p-button-danger p-button-text p-button-sm" @click="removeQuestion(index)" />
                             </div>
 
-                            <!-- Question Input -->
-                            <InputText v-model="q.text" placeholder="Enter your question" class="w-full mb-4" />
+                            <InputText v-model="q.question" placeholder="Enter your question" class="w-full mb-4" />
 
-                            <!-- Answer Inputs -->
                             <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                                <FloatLabel v-for="(ans, i) in q.options" :key="i" variant="on" class="w-full">
-                                    <InputText :id="`answer-${index}-${i}`" v-model="q.options[i]" class="w-full" />
+                                <FloatLabel v-for="(ans, i) in q.answers" :key="i" variant="on" class="w-full">
+                                    <InputText :id="`answer-${index}-${i}`" v-model="q.answers[i]" class="w-full" />
                                     <label :for="`answer-${index}-${i}`">Answer {{ i + 1 }}</label>
                                 </FloatLabel>
+                            </div>
+
+                            <div class="mt-4">
+                                <label class="block font-semibold text-gray-700 mb-2">Correct Answer</label>
+                                <Dropdown v-model="q.correctAnswer" :options="correctAnswerOptions" optionLabel="label" optionValue="value" placeholder="Select correct answer" class="w-full" />
                             </div>
                         </div>
                     </div>
 
-                    <!-- No Questions Placeholder -->
                     <div v-else class="text-gray-500 italic">No questions added yet.</div>
 
-                    <!-- Add Question Button -->
                     <div class="flex justify-start">
                         <Button icon="pi pi-plus" label="Add Question" style="width: fit-content" class="p-button-success p-button-sm" :disabled="questions.length >= 10" @click="addQuestion" />
                     </div>
 
-                    <!-- Submit Buttons -->
                     <div class="flex justify-end mt-8 gap-2">
                         <div class="w-40">
                             <Button label="Cancel" class="p-button-secondary w-full mr-2" @click="$router.back()" />
                         </div>
                         <div class="w-40">
-                            <RouterLink to="/marketing/detailEvent">
-                                <Button label="Submit" class="w-full" />
-                            </RouterLink>
+                            <Button label="Submit" class="w-full" @click="submitEvent" />
                         </div>
                     </div>
                 </div>
@@ -153,8 +137,15 @@
 </template>
 
 <script setup>
-import { ref } from 'vue';
+import { ref, computed } from 'vue';
+import api from '@/service/api';
+import { useRouter } from 'vue-router';
+import { useToast } from 'primevue/usetoast';
 
+const toast = useToast();
+const router = useRouter();
+
+// dropdown options
 const audienceOptions = [
     { label: 'TC', value: 'TC' },
     { label: 'ETEN', value: 'ETEN' },
@@ -162,51 +153,206 @@ const audienceOptions = [
 ];
 
 const surveyOptions = [
-    { label: 'Yes', value: 1 },
-    { label: 'No', value: 0 }
+    { label: 'Yes', value: 'yes' },
+    { label: 'No', value: 'no' }
 ];
 
+const correctAnswerOptions = [
+    { label: 'Answer 1', value: '1' },
+    { label: 'Answer 2', value: '2' },
+    { label: 'Answer 3', value: '3' }
+];
+
+// event object
 const event = ref({
     audience: 'ALL',
-    isSurvey: 0,
+    isSurvey: 'no',
     point1: '',
     point2: '',
     point3: '',
-    point4: '',
     title: '',
-    image1URL: '',
-    image2URL: '',
-    image3URL: '',
     desc: '',
     location: '',
     publishDate: '',
     startDate: '',
-    endDate: ''
+    endDate: '',
+    image1URL: '',
+    image2URL: '',
+    image3URL: ''
 });
 
-const questions = ref([]);
+const today = new Date();
+const minEndDate = ref(today);
 
-const addQuestion = () => {
-    if (questions.value.length < 10) {
-        questions.value.push({
-            text: '',
-            options: ['Low', 'Average', 'High']
-        });
+const onStartDateSelect = (date) => {
+    minEndDate.value = date;
+    if (event.value.endDate && new Date(event.value.endDate) < new Date(date)) {
+        event.value.endDate = '';
     }
 };
 
+// survey questions
+const questions = ref([]);
+const addQuestion = () => {
+    if (questions.value.length < 10) {
+        questions.value.push({
+            question: '',
+            answers: ['', '', ''],
+            correctAnswer: ''
+        });
+    }
+};
 const removeQuestion = (index) => {
     questions.value.splice(index, 1);
 };
 
-const onImageSelect = (eventFile, field) => {
+// handle image preview and file storage
+const imageFiles = ref({});
+const onImageSelect = (eventFile, fieldName) => {
     const file = eventFile.files[0];
     if (file) {
         const reader = new FileReader();
-        reader.onload = (e) => {
-            event.value[field] = e.target.result;
-        };
+        reader.onload = (e) => (event.value[`${fieldName}URL`] = e.target.result);
         reader.readAsDataURL(file);
+        imageFiles.value[fieldName] = file;
+    }
+};
+
+// Format date from Date object to dd-mm-yyyy string
+const formatDate = (date) => {
+    if (!date) return '';
+    const d = new Date(date);
+    const day = String(d.getDate()).padStart(2, '0');
+    const month = String(d.getMonth() + 1).padStart(2, '0');
+    const year = d.getFullYear();
+    return `${day}-${month}-${year}`;
+};
+
+const validateFields = () => {
+    // Basic validation
+    if (!event.value.title || !event.value.desc || !event.value.location || !event.value.publishDate || !event.value.startDate || !event.value.endDate || !event.value.audience) {
+        toast.add({ severity: 'warn', summary: 'Validation', detail: 'Please fill all required fields.', life: 3000 });
+        return false;
+    }
+
+    // Survey-specific validation
+    if (event.value.isSurvey === 'yes') {
+        if (!event.value.point1 || !event.value.point2 || !event.value.point3) {
+            toast.add({ severity: 'warn', summary: 'Validation', detail: 'Please fill all point fields.', life: 3000 });
+            return false;
+        }
+        if (questions.value.length === 0) {
+            toast.add({ severity: 'warn', summary: 'Validation', detail: 'Add at least one survey question.', life: 3000 });
+            return false;
+        }
+        for (let q of questions.value) {
+            if (!q.question || !q.answers[0] || !q.answers[1] || !q.answers[2] || !q.correctAnswer) {
+                toast.add({
+                    severity: 'warn',
+                    summary: 'Validation',
+                    detail: 'All questions, answers, and correct answers are required.',
+                    life: 3000
+                });
+                return false;
+            }
+        }
+    }
+    return true;
+};
+
+// submit form
+const submitEvent = async () => {
+    if (!validateFields()) return;
+
+    try {
+        const formData = new FormData();
+
+        // Append basic fields
+        formData.append('title', event.value.title);
+        formData.append('description', event.value.desc);
+        formData.append('publishDate', formatDate(event.value.publishDate));
+        formData.append('startDate', formatDate(event.value.startDate));
+        formData.append('endDate', formatDate(event.value.endDate));
+        formData.append('audience', event.value.audience);
+        formData.append('location', event.value.location);
+        formData.append('isSurvey', event.value.isSurvey);
+
+        // Append points only if survey is yes
+        if (event.value.isSurvey === 'yes') {
+            formData.append('point1', event.value.point1.toString());
+            formData.append('point2', event.value.point2.toString());
+            formData.append('point3', event.value.point3.toString());
+
+            // Append survey questions
+            const surveyQuestions = questions.value.map((q) => ({
+                question: q.question,
+                answer1: q.answers[0],
+                answer2: q.answers[1],
+                answer3: q.answers[2],
+                correctAnswer: q.correctAnswer
+            }));
+            formData.append('survey_questions', JSON.stringify(surveyQuestions));
+        } else {
+            // For non-survey events, still send empty points or default values
+            formData.append('point1', '0');
+            formData.append('point2', '0');
+            formData.append('point3', '0');
+            formData.append('survey_questions', JSON.stringify([]));
+        }
+
+        // Append image files
+        for (let i = 1; i <= 3; i++) {
+            const fieldName = `image${i}`;
+            if (imageFiles.value[fieldName]) {
+                formData.append(fieldName, imageFiles.value[fieldName]);
+            }
+        }
+
+        // Use customRequest to send FormData with proper headers
+        const response = await api.customRequest({
+            method: 'POST',
+            url: '/api/event/create',
+            data: formData,
+            headers: {
+                'Content-Type': 'multipart/form-data'
+            }
+        });
+
+        if (response.data.status === 1) {
+            toast.add({
+                severity: 'success',
+                summary: 'Success',
+                detail: 'Event created successfully!',
+                life: 3000
+            });
+            router.push('/marketing/listEvent');
+        } else {
+            console.error('Backend error:', response.data);
+            toast.add({
+                severity: 'error',
+                summary: 'Error',
+                detail: response.data.messages ? Object.values(response.data.messages).flat().join(', ') : 'Failed to create event',
+                life: 5000
+            });
+        }
+    } catch (error) {
+        console.error('API Error:', error);
+        if (error.response?.data) {
+            console.error('Error response:', error.response.data);
+            toast.add({
+                severity: 'error',
+                summary: 'Error',
+                detail: error.response.data.messages ? Object.values(error.response.data.messages).flat().join(', ') : 'Something went wrong',
+                life: 5000
+            });
+        } else {
+            toast.add({
+                severity: 'error',
+                summary: 'Error',
+                detail: 'Network error or server unavailable',
+                life: 3000
+            });
+        }
     }
 };
 </script>

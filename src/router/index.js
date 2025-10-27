@@ -250,9 +250,10 @@ const router = createRouter({
                     component: () => import('@/views/marketing/createEvent.vue')
                 },
                 {
-                    path: '/marketing/detailEvent',
+                    path: '/marketing/detailEvent/:id',
                     name: 'Detail-Event',
-                    component: () => import('@/views/marketing/detailEvent.vue')
+                    component: () => import('@/views/marketing/detailEvent.vue'),
+                    props: true
                 },
                 {
                     path: '/marketing/editEvent',

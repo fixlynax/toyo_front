@@ -9,73 +9,90 @@
                         <div class="text-2xl font-bold text-gray-800">Event Details</div>
                         <div class="inline-flex items-center gap-2">
                             <!-- Edit Event -->
-                            <RouterLink to="/marketing/editEvent">
+                            <RouterLink :to="`/marketing/editEvent/${eventId}`">
                                 <Button label="Edit" class="p-button-info" size="small" />
                             </RouterLink>
 
                             <!-- Delete Event -->
-                            <Button label="Delete" class="p-button-danger" size="small" />
+                            <Button label="Delete" class="p-button-danger" size="small" @click="confirmDelete" />
                         </div>
                     </div>
 
-                    <!-- Event Images -->
-                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mt-4">
-                        <img :src="event.image1URL" alt="Event Image 1" class="rounded-xl shadow-sm object-cover w-full h-80" />
-                        <img :src="event.image2URL" alt="Event Image 2" class="rounded-xl shadow-sm object-cover w-full h-80" />
-                        <img :src="event.image3URL" alt="Event Image 3" class="rounded-xl shadow-sm object-cover w-full h-80" />
+                    <!-- Loading State -->
+                    <div v-if="loading" class="flex justify-center items-center py-8">
+                        <ProgressSpinner />
                     </div>
 
-                    <!-- Event Info -->
-                    <div class="mt-6">
-                        <h1 class="text-2xl font-bold text-gray-800">{{ event.title }}</h1>
-                        <p class="text-lg font-medium">{{ event.desc }}</p>
-
-                        <div class="flex flex-col md:flex-row gap-4 mt-3">
-                            <div class="w-full">
-                                <span class="block text-xm font-bold text-black-700">Location</span>
-                                <p class="text-lg font-medium">{{ event.location }}</p>
-                            </div>
+                    <!-- Event Content -->
+                    <div v-else>
+                        <!-- Event Images -->
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mt-4">
+                            <img v-if="event.image1URL" :src="event.image1URL" alt="Event Image 1" class="rounded-xl shadow-sm object-cover w-full h-80" />
+                            <img v-if="event.image2URL" :src="event.image2URL" alt="Event Image 2" class="rounded-xl shadow-sm object-cover w-full h-80" />
+                            <img v-if="event.image3URL" :src="event.image3URL" alt="Event Image 3" class="rounded-xl shadow-sm object-cover w-full h-80" />
                         </div>
 
-                        <div class="flex flex-col md:flex-row gap-4 mt-3">
-                            <div class="w-full">
-                                <span class="block text-xm font-bold text-black-700">Start Date</span>
-                                <p class="text-lg font-medium">{{ event.startDate }}</p>
+                        <!-- Event Info -->
+                        <div class="mt-6">
+                            <h1 class="text-2xl font-bold text-gray-800">{{ event.title }}</h1>
+                            <p class="text-lg font-medium">{{ event.desc }}</p>
+
+                            <div class="flex flex-col md:flex-row gap-4 mt-3">
+                                <div class="w-full">
+                                    <span class="block text-xm font-bold text-black-700">Location</span>
+                                    <p class="text-lg font-medium">{{ event.location }}</p>
+                                </div>
                             </div>
-                            <div class="w-full">
-                                <span class="block text-xm font-bold text-black-700">End Date</span>
-                                <p class="text-lg font-medium">{{ event.endDate }}</p>
+
+                            <div class="flex flex-col md:flex-row gap-4 mt-3">
+                                <div class="w-full">
+                                    <span class="block text-xm font-bold text-black-700">Start Date</span>
+                                    <p class="text-lg font-medium">{{ event.startDate }}</p>
+                                </div>
+                                <div class="w-full">
+                                    <span class="block text-xm font-bold text-black-700">End Date</span>
+                                    <p class="text-lg font-medium">{{ event.endDate }}</p>
+                                </div>
                             </div>
                         </div>
                     </div>
                 </div>
 
                 <!-- Survey Info (only if enabled) -->
-                <div class="card flex flex-col w-full" v-if="event.isSurvey === 1">
+                <div class="card flex flex-col w-full" v-if="event.isSurvey === 'Yes' && surveyQuestions.length > 0">
                     <div class="flex items-center justify-between border-b pb-2 mb-2">
                         <div class="text-2xl font-bold text-gray-800">📋 Survey Info</div>
-                        <Button icon="pi pi-download" label="report" style="width: fit-content" class="p-button-danger p-button-sm" />
+                        <Button icon="pi pi-download" label="Report" style="width: fit-content" class="p-button-danger p-button-sm" />
                     </div>
 
                     <div class="space-y-6">
                         <!-- Loop through each question -->
-                        <div v-for="(q, qIndex) in questions" :key="qIndex" class="border-b pb-4">
+                        <div v-for="(q, qIndex) in surveyQuestions" :key="qIndex" class="border-b pb-4">
                             <!-- Question Title and "Statistic" on the same line -->
                             <div class="flex justify-between items-center mb-2">
-                                <div class="font-bold text-lg">Q{{ qIndex + 1 }}. {{ q.text }}</div>
+                                <div class="font-bold text-lg">Q{{ qIndex + 1 }}. {{ q.question }}</div>
                                 <div class="font-bold text-lg text-gray-700">Respondent</div>
                             </div>
 
                             <!-- Answers & Statistics -->
                             <div class="space-y-1">
-                                <div v-for="(ans, aIndex) in q.options" :key="aIndex" class="flex justify-between px-2">
-                                    <!-- Left Side: Answer -->
+                                <div class="flex justify-between px-2">
                                     <ul class="list-disc list-inside mt-1 text-gray-600">
-                                        <li>{{ ans }}</li>
+                                        <li>{{ q.answer1 }}</li>
                                     </ul>
-
-                                    <!-- Right Side: Statistic -->
-                                    <span class="">{{ q.statistics[aIndex] }}</span>
+                                    <span>{{ q.answer1_count }}</span>
+                                </div>
+                                <div class="flex justify-between px-2">
+                                    <ul class="list-disc list-inside mt-1 text-gray-600">
+                                        <li>{{ q.answer2 }}</li>
+                                    </ul>
+                                    <span>{{ q.answer2_count }}</span>
+                                </div>
+                                <div class="flex justify-between px-2">
+                                    <ul class="list-disc list-inside mt-1 text-gray-600">
+                                        <li>{{ q.answer3 }}</li>
+                                    </ul>
+                                    <span>{{ q.answer3_count }}</span>
                                 </div>
                             </div>
                         </div>
@@ -104,24 +121,28 @@
                                     <td class="px-4 py-2 text-right">{{ event.audience }}</td>
                                 </tr>
                                 <tr class="border-b">
-                                    <td class="px-4 py-2 font-medium">Survey</td>
-                                    <td class="px-4 py-2 text-right">{{ event.isSurvey ? 'Yes' : 'No' }}</td>
+                                    <td class="px-4 py-2 font-medium">View</td>
+                                    <td class="px-4 py-2 text-right">{{ event.view }}</td>
                                 </tr>
-                                <tr v-if="event.isSurvey === 1" class="border-b">
+                                <tr class="border-b">
+                                    <td class="px-4 py-2 font-medium">Survey</td>
+                                    <td class="px-4 py-2 text-right">{{ event.isSurvey }}</td>
+                                </tr>
+                                <tr v-if="event.isSurvey === 'Yes'" class="border-b">
                                     <td class="px-4 py-2 font-medium">Point Silver</td>
+                                    <td class="px-4 py-2 text-right">{{ event.point1 }}</td>
+                                </tr>
+                                <tr v-if="event.isSurvey === 'Yes'" class="border-b">
+                                    <td class="px-4 py-2 font-medium">Point Gold</td>
                                     <td class="px-4 py-2 text-right">{{ event.point2 }}</td>
                                 </tr>
-                                <tr v-if="event.isSurvey === 1" class="border-b">
-                                    <td class="px-4 py-2 font-medium">Point Gold</td>
-                                    <td class="px-4 py-2 text-right">{{ event.point3 }}</td>
-                                </tr>
-                                <tr v-if="event.isSurvey === 1" class="border-b">
+                                <tr v-if="event.isSurvey === 'Yes'" class="border-b">
                                     <td class="px-4 py-2 font-medium">Point Platinum</td>
-                                    <td class="px-4 py-2 text-right">{{ event.point4 }}</td>
+                                    <td class="px-4 py-2 text-right">{{ event.point3 }}</td>
                                 </tr>
                                 <tr class="border-b">
                                     <td class="px-4 py-2 font-medium">Total Participants</td>
-                                    <td class="px-4 py-2 text-right">{{ event.view }}</td>
+                                    <td class="px-4 py-2 text-right">{{ participants.length }}</td>
                                 </tr>
                             </tbody>
                         </table>
@@ -129,7 +150,7 @@
                 </div>
 
                 <!-- Participant List (only if survey enabled) -->
-                <div class="card flex flex-col w-full" v-if="event.isSurvey === 1">
+                <div class="card flex flex-col w-full" v-if="event.isSurvey === 'Yes' && participants.length > 0">
                     <div class="flex items-center justify-between border-b pb-3 mb-4">
                         <div class="text-2xl font-bold text-gray-800">👨🏻‍💻 Participant List</div>
                         <Button icon="pi pi-file-import" label="Import" style="width: fit-content" class="p-button-danger p-button-sm" />
@@ -139,183 +160,179 @@
                         <Column header="User" style="min-width: 1rem">
                             <template #body="{ data }">
                                 <div class="flex flex-col">
-                                    <span class="font-bold text-gray-800">{{ data.fullName }}</span>
+                                    <span class="font-bold text-gray-800">{{ data.name }}</span>
                                     <span class="text-gray-600 text-xs mt-2">👤 {{ data.memberCode }}</span>
-                                    <span class="text-gray-600 text-xs mt-2">🎖️ {{ data.memberLevel }}</span>
+                                    <span class="text-gray-600 text-xs mt-2">🎖️ {{ data.membership }}</span>
                                 </div>
                             </template>
                         </Column>
 
-                        <Column field="date" header="Date Taken" style="min-width: 6rem"></Column>
-                        <Column field="point" header="Point Earned" style="min-width: 6rem; text-align: center"></Column>
+                        <Column field="dateTaken" header="Date Taken" style="min-width: 6rem"></Column>
+                        <Column field="pointEarn" header="Point Earned" style="min-width: 6rem; text-align: center"></Column>
                     </DataTable>
                 </div>
             </div>
         </div>
 
-        <!-- <div class="flex flex-col md:flex-row gap-8 mt-8">
-            <div class="w-full" v-if="event.isSurvey === 1">
-                <div class="card flex flex-col w-full">
-                    <div class="flex items-center justify-between border-b pb-2 mb-2">
-                        <div class="text-2xl font-bold text-gray-800">📊 Survey Statistic</div>
-                    </div>
-
-                    <div class="grid grid-cols-12">
-                        <div class="col-span-12 xl:col-span-12">
-                            <SurveyStatistic />
-                        </div>
-                    </div>
-                </div>
+        <!-- Delete Confirmation Dialog -->
+        <Dialog v-model:visible="deleteDialog" :style="{width: '450px'}" header="Confirm" :modal="true">
+            <div class="flex align-items-center justify-content-center">
+                <i class="pi pi-exclamation-triangle mr-3" style="font-size: 2rem" />
+                <span>Are you sure you want to delete this event?</span>
             </div>
-        </div> -->
+            <template #footer>
+                <Button label="No" icon="pi pi-times" class="p-button-text" @click="deleteDialog = false"/>
+                <Button label="Yes" icon="pi pi-check" class="p-button-danger" @click="deleteEvent" />
+            </template>
+        </Dialog>
     </Fluid>
 </template>
 
 <script setup>
-import { ref } from 'vue';
+import { ref, onMounted, computed } from 'vue';
+import { useRoute, useRouter } from 'vue-router';
+import { useToast } from 'primevue/usetoast';
+import api from '@/service/api';
 
+const route = useRoute();
+const router = useRouter();
+const toast = useToast();
+
+const eventId = route.params.id;
+const loading = ref(true);
+const deleteDialog = ref(false);
+
+// Event data structure matching backend response
 const event = ref({
-    id: 1,
-    audience: 'TC',
-    isSurvey: 1, // change to 0 to test "no survey"
-    point1: 85,
-    point2: 90,
-    point3: 95,
-    point4: 100,
-    title: 'Toyo Tires Drift Challenge 2025',
-    image1URL: '/demo/images/event-toyo-1.jpg',
-    image2URL: '/demo/images/event-toyo-2.jpg',
-    image3URL: '/demo/images/event-toyo-3.jpg',
-    desc: 'Experience the thrill of high-speed drifting powered by Toyo Tires. Join us for a weekend of motorsport excitement!',
-    location: 'Sepang International Circuit, Malaysia',
-    publishDate: '2025-01-10',
-    startDate: '2025-02-15',
-    endDate: '2025-02-16',
-    view: 542,
-    status: 1
+    id: null,
+    audience: '',
+    isSurvey: 'No',
+    point1: 0,
+    point2: 0,
+    point3: 0,
+    title: '',
+    image1URL: '',
+    image2URL: '',
+    image3URL: '',
+    desc: '',
+    location: '',
+    publishDate: '',
+    startDate: '',
+    endDate: '',
+    view: 0,
+    status: 0
 });
 
-const questions = ref([
-    {
-        text: 'How do you rate the durability of the tires?',
-        options: ['Low', 'Average', 'High'],
-        statistics: [10, 20, 2]
-    },
-    {
-        text: 'How do you rate the comfort while driving?',
-        options: ['Low', 'Average', 'High'],
-        statistics: [5, 15, 8]
-    },
-    {
-        text: 'How do you rate the performance in wet conditions?',
-        options: ['Low', 'Average', 'High'],
-        statistics: [7, 12, 6]
-    },
-    {
-        text: 'How do you rate the performance in dry conditions?',
-        options: ['Low', 'Average', 'High'],
-        statistics: [3, 17, 9]
-    },
-    {
-        text: 'How do you rate the value for money?',
-        options: ['Low', 'Average', 'High'],
-        statistics: [4, 14, 11]
-    },
-    {
-        text: 'How satisfied are you overall with Toyo Tires?',
-        options: ['Low', 'Average', 'High'],
-        statistics: [2, 18, 9]
-    }
-]);
+const surveyQuestions = ref([]);
+const participants = ref([]);
 
-const participants = ref([
-    {
-        id: 1,
-        fullName: 'Ahmad Faiz',
-        memberLevel: 'Gold',
-        memberCode: '6001200230',
-        date: '2025-09-01',
-        point: 90
-    },
-    {
-        id: 2,
-        fullName: 'Nur Aisyah',
-        memberLevel: 'Silver',
-        memberCode: '6001200456',
-        date: '2025-09-02',
-        point: 85
-    },
-    {
-        id: 3,
-        fullName: 'Hafiz Din',
-        memberLevel: 'Platinum',
-        memberCode: '6001200789',
-        date: '2025-09-02',
-        point: 95
-    },
-    {
-        id: 4,
-        fullName: 'Lim Wei Jian',
-        memberLevel: 'Gold',
-        memberCode: '6001200123',
-        date: '2025-09-03',
-        point: 90
-    },
-    {
-        id: 5,
-        fullName: 'Siti Mariam',
-        memberLevel: 'Silver',
-        memberCode: '6001200345',
-        date: '2025-09-03',
-        point: 85
-    },
-    {
-        id: 6,
-        fullName: 'Arjun Kumar',
-        memberLevel: 'Gold',
-        memberCode: '6001200678',
-        date: '2025-09-04',
-        point: 90
-    },
-    {
-        id: 7,
-        fullName: 'Tan Li Ying',
-        memberLevel: 'Platinum',
-        memberCode: '6001200912',
-        date: '2025-09-04',
-        point: 95
-    },
-    {
-        id: 8,
-        fullName: 'Mohd Amir',
-        memberLevel: 'Silver',
-        memberCode: '6001200111',
-        date: '2025-09-05',
-        point: 85
-    },
-    {
-        id: 9,
-        fullName: 'Farah Nadiah',
-        memberLevel: 'Gold',
-        memberCode: '6001200222',
-        date: '2025-09-05',
-        point: 90
-    },
-    {
-        id: 10,
-        fullName: 'Jason Lee',
-        memberLevel: 'Platinum',
-        memberCode: '6001200333',
-        date: '2025-09-06',
-        point: 95
-    },
-    {
-        id: 11,
-        fullName: 'Hazrul Izhar',
-        memberLevel: 'Classic',
-        memberCode: '6001200444',
-        date: '2025-09-06',
-        point: 95
+// Fetch event details
+const fetchEventDetails = async () => {
+    try {
+        loading.value = true;
+        const response = await api.get(`event/details/${eventId}`);
+        
+        if (response.data.status === 1) {
+            const eventData = response.data.admin_data;
+            
+            // Update event data
+            event.value = {
+                ...event.value,
+                ...eventData
+            };
+
+            // Handle survey questions
+            if (eventData.survey_questions && eventData.survey_questions.length > 0) {
+                surveyQuestions.value = eventData.survey_questions[0] || [];
+            }
+
+            // Handle participants
+            if (eventData.participants) {
+                participants.value = eventData.participants;
+            }
+
+            // Process private images
+            await processPrivateImages();
+        } else {
+            toast.add({
+                severity: 'error',
+                summary: 'Error',
+                detail: 'Failed to load event details',
+                life: 3000
+            });
+        }
+    } catch (error) {
+        console.error('Error fetching event details:', error);
+        toast.add({
+            severity: 'error',
+            summary: 'Error',
+            detail: 'Failed to load event details',
+            life: 3000
+        });
+    } finally {
+        loading.value = false;
     }
-]);
+};
+
+// Process private images using the API method
+const processPrivateImages = async () => {
+    const imageFields = ['image1URL', 'image2URL', 'image3URL'];
+    
+    for (const field of imageFields) {
+        if (event.value[field] && typeof event.value[field] === 'string') {
+            try {
+                const blobUrl = await api.getPrivateFile(event.value[field]);
+                if (blobUrl) {
+                    event.value[field] = blobUrl;
+                }
+            } catch (error) {
+                console.error(`Error loading image ${field}:`, error);
+                // Keep the original URL if private file loading fails
+            }
+        }
+    }
+};
+
+// Delete event
+const confirmDelete = () => {
+    deleteDialog.value = true;
+};
+
+const deleteEvent = async () => {
+    try {
+        // You'll need to implement the delete API endpoint
+        const response = await api.delete(`event/delete/${eventId}`);
+        
+        if (response.data.status === 1) {
+            toast.add({
+                severity: 'success',
+                summary: 'Success',
+                detail: 'Event deleted successfully',
+                life: 3000
+            });
+            router.push('/marketing/listEvent');
+        } else {
+            toast.add({
+                severity: 'error',
+                summary: 'Error',
+                detail: 'Failed to delete event',
+                life: 3000
+            });
+        }
+    } catch (error) {
+        console.error('Error deleting event:', error);
+        toast.add({
+            severity: 'error',
+            summary: 'Error',
+            detail: 'Failed to delete event',
+            life: 3000
+        });
+    } finally {
+        deleteDialog.value = false;
+    }
+};
+
+onMounted(() => {
+    fetchEventDetails();
+});
 </script>

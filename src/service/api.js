@@ -69,6 +69,8 @@ apiClient.interceptors.response.use(
   }
 );
 
+apiClient.defaults.headers.post['Content-Type'] = 'multipart/form-data';
+
 // API methods
 export default {
   // GET request
