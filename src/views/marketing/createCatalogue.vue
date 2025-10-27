@@ -85,7 +85,7 @@
                 </div>
             </div>
         </div>
-        <div class="mt-8">
+        <div v-if="catalogue.purpose === 'Catalogue' || catalogue.type === 'Point'" class="mt-8">
             <div class="card flex flex-col w-full">
                 <div class="flex items-center justify-between border-b pb-2 mb-2">
                     <div class="text-2xl font-bold text-gray-800">🪙 Cost Redeem</div>
@@ -184,7 +184,8 @@ import { ref } from 'vue';
 const typeOptions = [
     { label: 'E-Wallet', value: 'E-Wallet' },
     { label: 'E-Voucher', value: 'E-Voucher' },
-    { label: 'Item', value: 'Item' }
+    { label: 'Item', value: 'Item' },
+    { label: 'Point', value: 'Point' }
 ];
 
 const isBirthdayOptions = [
