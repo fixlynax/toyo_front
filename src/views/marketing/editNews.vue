@@ -259,23 +259,21 @@ const updateNews = async () => {
         formData.append('endDate', news.value.endDate);
         formData.append('isPublish', news.value.status ?? 0);
 
-        // ✅ Improved image handling logic
+        // ✅ Smart image handling
         ['image1URL', 'image2URL', 'image3URL'].forEach((field, index) => {
-            const currentImage = currentImages.value[field];
-            const originalImage = originalImages.value[field];
+            const fileField = `image${index + 1}`;
+            const current = currentImages.value[field];
+            const original = originalImages.value[field];
 
-            if (currentImage instanceof File) {
-                // 🟢 New image uploaded — send file
-                formData.append(`image${index + 1}`, currentImage);
-            } else if (currentImage === null && originalImage) {
-                // 🔴 Image was removed by user
-                formData.append(`removeImage${index + 1}`, '1');
-            } else if (originalImage && typeof currentImage === 'string') {
-                // 🟢 Keep the original image if unchanged
-                formData.append(`keepImage${index + 1}`, originalImage);
-            } else {
-                // ⚪ No image at all (never existed)
-                formData.append(`keepImage${index + 1}`, '');
+            if (current instanceof File) {
+                // 🟢 Upload new image
+                formData.append(fileField, current);
+            } else if (current === null && original) {
+                // 🔴 Image removed — keep null to clear it
+                formData.append(fileField, '');
+            } else if (original && typeof current === 'string') {
+                // 🟢 Keep existing image (unchanged)
+                formData.append(fileField + 'URL', original);
             }
         });
 
