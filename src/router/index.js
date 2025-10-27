@@ -300,9 +300,10 @@ const router = createRouter({
                     component: () => import('@/views/marketing/listGame.vue')
                 },
                 {
-                    path: '/marketing/detailGame',
+                    path: '/marketing/detailGame/:id',
                     name: 'Detail-Game',
-                    component: () => import('@/views/marketing/detailGame.vue')
+                    component: () => import('@/views/marketing/detailGame.vue'),
+                    props: true
                 },
                 {
                     path: '/marketing/createGame',
