@@ -272,7 +272,7 @@ const router = createRouter({
                     path: '/marketing/detailCampaign/:id',
                     name: 'Detail-Campaign',
                     component: () => import('@/views/marketing/detailCampaign.vue'),
-                    props: sassTrue
+                    props: true
                 },
                 {
                     path: '/marketing/createCampaign',
