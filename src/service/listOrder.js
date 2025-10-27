@@ -4,6 +4,8 @@ export const ListOrderService = {
             {
                 id: 1,
                 etenUserListID: 'E346572',
+                contactNo: '0123456789',
+                totalPcs: '2',
                 orderType: 2,
                 deliveryMethod: 0,
                 etenUserID: 'EU1001',
@@ -40,11 +42,16 @@ export const ListOrderService = {
                 deliveryOrderNo: 'DO-1001',
                 invoiceNo: 'INV-1001',
                 sap_timestamp: '2025-10-02T10:00:00Z',
-                created: '2025-10-02T09:00:00Z'
+                created: '2025-10-02T09:00:00Z',
+                company3PL: 'ABX Logistics',
+                pickupDatetime: '2025-10-04T10:30:00Z',
+                collectedDatetime: '2025-10-04T12:00:00Z'
             },
             {
                 id: 2,
                 etenUserListID: 'E234176',
+                contactNo: '0112456789',
+                totalPcs: '3',
                 orderType: 1,
                 deliveryMethod: 1,
                 etenUserID: 'EU1002',
@@ -81,11 +88,16 @@ export const ListOrderService = {
                 deliveryOrderNo: 'DO-2002',
                 invoiceNo: 'INV-2002',
                 sap_timestamp: '2025-10-02T11:00:00Z',
-                created: '2025-10-02T09:30:00Z'
+                created: '2025-10-02T09:30:00Z',
+                company3PL: 'J&T Express',
+                pickupDatetime: '2025-10-06T09:00:00Z',
+                collectedDatetime: '2025-10-06T11:00:00Z'
             },
             {
                 id: 3,
                 etenUserListID: 'E127568',
+                contactNo: '0137765432',
+                totalPcs: '5',
                 orderType: 2,
                 deliveryMethod: 0,
                 etenUserID: 'EU1003',
@@ -122,11 +134,16 @@ export const ListOrderService = {
                 deliveryOrderNo: 'DO-3003',
                 invoiceNo: 'INV-3003',
                 sap_timestamp: '2025-10-02T12:00:00Z',
-                created: '2025-10-02T09:45:00Z'
+                created: '2025-10-02T09:45:00Z',
+                company3PL: 'Lalamove',
+                pickupDatetime: '2025-10-09T14:00:00Z',
+                collectedDatetime: '2025-10-09T16:00:00Z'
             },
             {
                 id: 4,
                 etenUserListID: 'E127823',
+                contactNo: '0199833221',
+                totalPcs: '1',
                 orderType: 0,
                 deliveryMethod: 0,
                 etenUserID: 'EU1004',
@@ -163,11 +180,16 @@ export const ListOrderService = {
                 deliveryOrderNo: 'DO-4004',
                 invoiceNo: 'INV-4004',
                 sap_timestamp: '2025-10-02T12:30:00Z',
-                created: '2025-10-02T10:15:00Z'
+                created: '2025-10-02T10:15:00Z',
+                company3PL: 'DHL Express',
+                pickupDatetime: '2025-10-11T10:00:00Z',
+                collectedDatetime: '2025-10-11T13:30:00Z'
             },
             {
                 id: 5,
                 etenUserListID: 'E74B23S5',
+                contactNo: '0182234499',
+                totalPcs: '4',
                 orderType: 0,
                 deliveryMethod: 0,
                 etenUserID: 'EU1005',
@@ -204,11 +226,16 @@ export const ListOrderService = {
                 deliveryOrderNo: 'DO-5005',
                 invoiceNo: 'INV-5005',
                 sap_timestamp: '2025-10-02T13:00:00Z',
-                created: '2025-10-02T10:30:00Z'
+                created: '2025-10-02T10:30:00Z',
+                company3PL: 'FedEx',
+                pickupDatetime: '2025-10-14T11:00:00Z',
+                collectedDatetime: '2025-10-14T14:00:00Z'
             },
             {
                 id: 6,
                 etenUserListID: 'E325632',
+                contactNo: '0104455678',
+                totalPcs: '3',
                 orderType: 1,
                 deliveryMethod: 1,
                 etenUserID: 'EU1006',
@@ -245,11 +272,16 @@ export const ListOrderService = {
                 deliveryOrderNo: 'DO-6006',
                 invoiceNo: 'INV-6006',
                 sap_timestamp: '2025-10-02T14:00:00Z',
-                created: '2025-10-02T11:00:00Z'
+                created: '2025-10-02T11:00:00Z',
+                company3PL: 'Pos Malaysia',
+                pickupDatetime: '2025-10-17T10:00:00Z',
+                collectedDatetime: '2025-10-17T12:00:00Z'
             },
             {
                 id: 7,
                 etenUserListID: 'E346572',
+                contactNo: '0179988776',
+                totalPcs: '6',
                 orderType: 2,
                 deliveryMethod: 0,
                 etenUserID: 'EU1007',
@@ -286,7 +318,10 @@ export const ListOrderService = {
                 deliveryOrderNo: 'DO-7007',
                 invoiceNo: 'INV-7007',
                 sap_timestamp: '2025-10-02T15:00:00Z',
-                created: '2025-10-02T11:30:00Z'
+                created: '2025-10-02T11:30:00Z',
+                company3PL: 'GD Express',
+                pickupDatetime: '2025-10-19T09:30:00Z',
+                collectedDatetime: '2025-10-19T11:45:00Z'
             }
         ];
     },
