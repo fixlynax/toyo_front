@@ -54,9 +54,11 @@
                 </template>
             </Column>
             
-            <Column field="state" header="State" style="min-width: 6rem" />
+            <Column field="userId" header="User ID" style="min-width: 6rem" />
             
-            <Column field="createdSince" header="Created Since" style="min-width: 8rem" />
+            <Column field="storageLocation" header="Storage Location" style="min-width: 6rem" />
+
+            <Column field="lastLogin" header="Last Login" style="min-width: 6rem" />
             
             <Column field="status" header="Status" style="min-width: 6rem">
                 <template #body="{ data }">

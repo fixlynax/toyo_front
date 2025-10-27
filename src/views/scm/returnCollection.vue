@@ -1,6 +1,9 @@
 <template>
     <div class="card">
-        <div class="text-2xl font-bold text-gray-800 pb-2">Return List</div>
+        <div class="flex items-center justify-between mb-4">
+            <div class="text-2xl font-bold text-gray-800">Return List</div>
+            <Button icon="pi pi-upload" label="Bulk Update" class="p-button" />
+        </div>
 
         <DataTable
             :value="listData"
@@ -61,13 +64,13 @@
             <!-- ========================= -->
             <!-- Data Columns -->
             <!-- ========================= -->
-            <Column field="requestDate" header="Request Date" style="min-width: 8rem">
+            <Column field="requestDate" header="Create Date" style="min-width: 8rem">
                 <template #body="{ data }">
                     {{ data.requestDate }}
                 </template>
             </Column>
 
-            <Column field="collectRef" header="CTC Ref No" style="min-width: 8rem">
+            <Column field="collectRef" header="Ref No" style="min-width: 8rem">
                 <template #body="{ data }">
                     <RouterLink to="/scm/detailReturnList" class="hover:underline font-bold text-primary">
                         {{ data.collectRef }}
@@ -75,7 +78,17 @@
                 </template>
             </Column>
 
-            <Column field="dealerName" header="Dealer Name" style="min-width: 8rem">
+            <Column field="dealerName" header="Customer Acc No." style="min-width: 8rem">
+                <template #body="{ data }">
+                    {{ data.customerID }}
+                </template>
+            </Column>
+            <Column field="dealerName" header="Customer Name" style="min-width: 8rem">
+                <template #body="{ data }">
+                    {{ data.dealerName }}
+                </template>
+            </Column>
+            <Column field="ctcAddr" header="Collection Address" style="min-width: 8rem">
                 <template #body="{ data }">
                     {{ data.dealerName }}
                 </template>
@@ -87,11 +100,19 @@
                     <small class="text-gray-600">{{ data.contactNo }}</small>
                 </template>
             </Column>
-
-            <Column field="location" header="Location" style="min-width: 8rem">
+            <Column field="contact" header="3PL" style="min-width: 8rem">
                 <template #body="{ data }">
-                    {{ data.dealerLoc }}<br />
-                    <small class="text-gray-600">{{ data.state }}</small>
+                    {{ data.PL }}
+                </template>
+            </Column>
+            <Column field="contact" header="Pickup DateTime" style="min-width: 8rem">
+                <template #body="{ data }">
+                    {{ data.PL }}
+                </template>
+            </Column>
+            <Column field="contact" header="Collected DateTime" style="min-width: 8rem">
+                <template #body="{ data }">
+                    {{ data.PL }}
                 </template>
             </Column>
 
@@ -103,10 +124,7 @@
 
             <Column field="status" header="Status" style="min-width: 6rem">
                 <template #body="{ data }">
-                    <Tag 
-                        :value="data.status === 1 ? 'Pending' : data.status === 2 ? 'Completed' : 'In Progress'" 
-                        :severity="getStatusSeverity(data.status)" 
-                    />
+                    <Tag :value="data.status === 1 ? 'Pending' : data.status === 2 ? 'Completed' : 'In Progress'" :severity="getStatusSeverity(data.status)" />
                 </template>
             </Column>
         </DataTable>

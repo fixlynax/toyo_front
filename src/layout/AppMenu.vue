@@ -271,7 +271,7 @@ const model = ref([
                 to: '/scm/listAreaETA'
             },
             {
-                label: 'Logistic Account',
+                label: '3PL Account',
                 icon: 'pi pi-fw pi-briefcase',
                 to: '/scm/listLogistic'
             },
