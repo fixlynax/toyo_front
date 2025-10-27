@@ -43,7 +43,7 @@
                 </div>
             </div>
 
-            <div class="card flex flex-col w-full mt-6">
+            <div class="card flex flex-col w-full">
                 <div class="text-xl font-bold text-gray-800 border-b pb-2 mb-4">Pickup Information</div>
 
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-6 text-sm text-gray-700">
@@ -65,11 +65,34 @@
             </div>
 
             <!-- COLLECTION ITEMS -->
-            <div class="card mt-6">
+            <div class="card">
                 <div class="text-2xl font-bold text-gray-800 border-b pb-2 mb-4">Collection Items</div>
-                <div class="mt-2">
-                    <span class="block text-sm font-bold text-gray-800">List of Material to Collect</span>
-                    <p class="font-medium text-lg">{{ paramData.refNo }}</p>
+                <div class="overflow-x-auto">
+                    <table class="w-full text-sm text-left text-gray-700">
+                        <thead class="bg-gray-50">
+                            <tr>
+                                <th class="px-4 py-2 font-bold">Tire Type</th>
+                                <th class="px-4 py-2 font-bold text-right">Quantity</th>
+                                <th class="px-4 py-2 font-bold text-right">Condition</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr class="border-b">
+                                <td class="px-4 py-2">Passenger Car Tires</td>
+                                <td class="px-4 py-2 text-right">4</td>
+                                <td class="px-4 py-2 text-right">
+                                    <Tag value="Good" severity="success" />
+                                </td>
+                            </tr>
+                            <tr class="border-b">
+                                <td class="px-4 py-2">Light Truck Tires</td>
+                                <td class="px-4 py-2 text-right">2</td>
+                                <td class="px-4 py-2 text-right">
+                                    <Tag value="Worn" severity="warning" />
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
                 </div>
             </div>
         </div>
@@ -173,14 +196,14 @@ const paramData = ref({
     id: 1,
     refNo: 'CLM-2025-001',
     claimDate: '2025-09-01',
-    accno:'66010341222',
+    accno: '66010341222',
     collectDate: '2025-09-07',
     collectTime: '3:00PM',
     requestDate: '3:00PM',
     etaDateTime: '3:00PM',
     customerContactNo: '0123456789',
     CompanyName: 'HUH DUH NU UH',
-    customerName:'Zakir Turun',
+    customerName: 'Zakir Turun',
     dealerName: 'AutoWorld KL',
     name: 'AutoWorld KL',
     contactNo: 'AutoWorld KL',

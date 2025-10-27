@@ -10,15 +10,14 @@
                     <div class="text-2xl font-bold text-gray-800">Return Details</div>
                 </div>
 
-                <!-- Status Badge -->
-                <div class="mt-4">
+                <!-- <div class="mt-4">
                     <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium" :class="statusClass">
                         {{ statusText }}
                     </span>
-                </div>
+                </div> -->
 
                 <!-- CTC Reference Number -->
-                <div class="mt-6 mb-4">
+                <div class="mb-4">
                     <div>
                         <span class="block text-sm font-bold text-black-700">CTC Ref No</span>
                         <span class="text-lg font-medium">{{ paramData.refNo }}</span>
@@ -46,9 +45,30 @@
                 <!-- Action Buttons -->
                 <div class="flex justify-end items-center gap-2 mt-6">
                     <RouterLink to="/scm/listCollection">
-                        <Button label="Cancel" size="small" class="p-button-secondary" />
+                        <Button label="Update Return Schedule" size="small" class="p-button-" />
                     </RouterLink>
-                    <Button label="Update" size="small" class="p-button-primary" @click="handleUpdate" />
+                    <Button label="Updat Return Complete" size="small" class="p-button-success" @click="handleUpdate" />
+                </div>
+            </div>
+
+            <div class="card flex flex-col w-full">
+                <div class="text-xl font-bold text-gray-800 border-b pb-2 mb-4">Pickup Information</div>
+
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6 text-sm text-gray-700">
+                    <div>
+                        <span class="block text-sm font-bold text-gray-800">Request Date</span>
+                        <p class="font-medium text-lg">{{ paramData.claimDate }}</p>
+                    </div>
+
+                    <div>
+                        <span class="block text-sm font-bold text-gray-800">3PL Company Name</span>
+                        <p class="font-medium text-lg">{{ paramData.pl }}</p>
+                    </div>
+
+                    <div>
+                        <span class="block text-sm font-bold text-gray-800">ETA Date/Time</span>
+                        <p class="font-medium text-lg">{{ paramData.etaDateTime }}</p>
+                    </div>
                 </div>
             </div>
 
@@ -90,7 +110,7 @@
         <!-- RIGHT SIDE -->
         <div class="md:w-1/3 flex flex-col">
             <!-- Customer Information -->
-            <div class="card flex flex-col w-full">
+            <!-- <div class="card flex flex-col w-full">
                 <div class="flex items-center justify-between border-b pb-2 mb-2">
                     <div class="text-2xl font-bold text-gray-800">👤 Customer Information</div>
                 </div>
@@ -112,12 +132,12 @@
                         </tbody>
                     </table>
                 </div>
-            </div>
+            </div> -->
 
             <!-- Dealer Information -->
             <div class="card flex flex-col w-full">
                 <div class="flex items-center justify-between border-b pb-2 mb-2">
-                    <div class="text-2xl font-bold text-gray-800">🏬 Dealer Information</div>
+                    <div class="text-2xl font-bold text-gray-800">🏬 Customer Information</div>
                 </div>
                 <div class="overflow-x-auto">
                     <table class="w-full text-sm text-left text-gray-700">
@@ -134,7 +154,7 @@
                                 <td class="px-4 py-2 font-medium">Contact Person</td>
                                 <td class="px-4 py-2 text-right">{{ paramData.dealerInfo.contactPerson }}</td>
                             </tr>
-                            <tr>
+                            <tr class="border-b">
                                 <td class="px-4 py-2 font-medium">Contact Number</td>
                                 <td class="px-4 py-2 text-right">{{ paramData.dealerInfo.contactNo }}</td>
                             </tr>
@@ -148,7 +168,7 @@
             </div>
 
             <!-- Shipment Information -->
-            <div class="card flex flex-col w-full">
+            <!-- <div class="card flex flex-col w-full">
                 <div class="flex items-center justify-between border-b pb-2 mb-2">
                     <div class="text-xl font-bold text-gray-800">🚚 Shipment Arrangement</div>
                 </div>
@@ -170,7 +190,7 @@
                         </tbody>
                     </table>
                 </div>
-            </div>
+            </div> -->
         </div>
     </div>
 
@@ -183,7 +203,7 @@
             </div>
 
             <div class="mt-4 flex justify-end gap-2">
-                <Button label="Cancel" class="p-button-text" @click="showCalendar = false" />
+                <Button label="Update Return Schedule" class="p-button-text" @click="showCalendar = false" />
                 <Button label="Confirm Return Schedule" class="p-button-primary" @click="reschedule" />
             </div>
         </div>
@@ -298,7 +318,9 @@ const paramData = ref({
     claimDate: '2025-09-01',
     collectDate: '2025-09-07',
     collectTime: '3:00PM',
+    etaDateTime:'2025-09-07',
     dealerName: 'AutoWorld KL',
+    pl: 'LALAMOVE',
     status: 0,
     collectSchedule: '2025-02-18T09:00:00',
     totalTire: '2',
