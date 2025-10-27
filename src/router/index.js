@@ -1,6 +1,7 @@
 import AppLayout from '@/layout/AppLayout.vue';
 import { createRouter, createWebHistory } from 'vue-router';
 import { tokenService } from '@/service/api';
+import { sassTrue } from 'sass';
 
 const router = createRouter({
     history: createWebHistory(),
@@ -268,9 +269,10 @@ const router = createRouter({
                     component: () => import('@/views/marketing/listCampaign.vue')
                 },
                 {
-                    path: '/marketing/detailCampaign',
+                    path: '/marketing/detailCampaign/:id',
                     name: 'Detail-Campaign',
-                    component: () => import('@/views/marketing/detailCampaign.vue')
+                    component: () => import('@/views/marketing/detailCampaign.vue'),
+                    props: sassTrue
                 },
                 {
                     path: '/marketing/createCampaign',
