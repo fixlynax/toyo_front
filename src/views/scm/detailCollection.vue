@@ -13,10 +13,10 @@
                 <!-- CUSTOMER INFO -->
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6 text-sm text-gray-700">
                     <div class="md:col-span-2">
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
-                            <div>
+                        <div class="grid grid-cols-2 md:grid-cols-2 gap-3">
+                            <div class="md:col-span-2 mb-4">
                                 <span class="block text-sm font-bold text-gray-800">Customer Acc No</span>
-                                <p class="font-medium text-lg">{{ paramData.accno }}</p>
+                                <p class="font-medium font-semibold text-lg">{{ paramData.accno }}</p>
                             </div>
                             <div>
                                 <span class="block text-sm font-bold text-gray-800">Customer Company Name</span>
@@ -35,31 +35,6 @@
                                 <p class="font-medium text-lg">{{ paramData.customerName }}</p>
                             </div>
                         </div>
-                        <div class="flex justify-end items-center gap-2">
-                            <Button label="Update Collection Schedule" size="small" class="p-button-primary" />
-                            <Button label="Update Collection Complete" size="small" class="p-button-success" />
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <div class="card flex flex-col w-full">
-                <div class="text-xl font-bold text-gray-800 border-b pb-2 mb-4">Pickup Information</div>
-
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-6 text-sm text-gray-700">
-                    <div>
-                        <span class="block text-sm font-bold text-gray-800">Request Date</span>
-                        <p class="font-medium text-lg">{{ paramData.requestDate }}</p>
-                    </div>
-
-                    <div>
-                        <span class="block text-sm font-bold text-gray-800">3PL Company Name</span>
-                        <p class="font-medium text-lg">{{ paramData.company3PL }}</p>
-                    </div>
-
-                    <div>
-                        <span class="block text-sm font-bold text-gray-800">ETA Date/Time</span>
-                        <p class="font-medium text-lg">{{ paramData.etaDateTime }}</p>
                     </div>
                 </div>
             </div>
@@ -101,21 +76,29 @@
         <div class="md:w-1/3 flex flex-col">
             <div class="card flex flex-col w-full">
                 <div class="flex items-center justify-between border-b pb-2 mb-2">
-                    <div class="text-2xl font-bold text-gray-800">🏬 CTC Info</div>
+                    <div class="text-2xl font-bold text-gray-800">🚚 Pickup Information</div>
                 </div>
                 <div class="overflow-x-auto">
                     <table class="w-full text-sm text-left text-gray-700">
                         <tbody>
                             <tr class="border-b">
-                                <td class="px-4 py-2 font-medium">Collection Type</td>
+                                <td class="px-4 py-2 font-medium">Request Date</td>
                                 <td class="px-4 py-2 text-right">CTC</td>
                             </tr>
                             <tr class="border-b">
-                                <td class="px-4 py-2 font-medium">Collection Ref No</td>
-                                <td class="px-4 py-2 text-right">{{ paramData.refNo }}</td>
+                                <td class="px-4 py-2 font-medium">3PL Name</td>
+                                <td class="px-4 py-2 text-right">{{ paramData.accno }}</td>
+                            </tr>
+                            <tr class="border-b">
+                                <td class="px-4 py-2 font-medium">ETA Date/Time</td>
+                                <td class="px-4 py-2 text-right">{{ paramData.companyName }}</td>
                             </tr>
                         </tbody>
                     </table>
+                    <div class="mt-4 flex justify-end items-center gap-2">
+                        <Button label="Update Collection Schedule" size="small" class="p-button-primary w-40" />
+                        <Button label="Update Collection Complete" size="small" class="p-button-success w-40" />
+                    </div>
                 </div>
             </div>
         </div>
