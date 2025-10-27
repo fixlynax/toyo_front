@@ -29,8 +29,8 @@
               <p class="text-lg font-medium">{{ logistic.username }}</p>
             </div>
             <div class="w-full md:w-1/2">
-              <span class="text-xs font-bold text-black-700">Email</span>
-              <p class="text-lg font-medium">{{ logistic.email }}</p>
+              <span class="text-xs font-bold text-black-700">Password</span>
+              <p class="text-lg font-medium">{{ logistic.password }}</p>
             </div>
           </div>
           
@@ -68,19 +68,9 @@
           <div class="text-2xl font-bold text-gray-800 border-b pb-2 mb-2">🚚 Ship To</div>
           <DataTable :value="shiptoList" :rows="5" dataKey="id" :rowHover="true" responsiveLayout="scroll" class="text-sm">
             <!-- Columns -->
-            <Column field="companyName1" header="Company Name" style="min-width: 15rem" />
-            <Column header="Address" style="min-width: 20rem">
-              <template #body="{ data }">
-                {{ data.addressLine1 }}<br />
-                <span v-if="data.addressLine2">{{ data.addressLine2 }}<br /></span>
-                <span v-if="data.addressLine3">{{ data.addressLine3 }}<br /></span>
-                <span v-if="data.addressLine4">{{ data.addressLine4 }}</span>
-                {{ data.city }}, {{ data.state }} {{ data.postcode }}<br />
-                {{ data.country }}
-              </template>
-            </Column>
-            <Column field="phoneNumber" header="Phone No" style="min-width: 10rem" />
-            <Column field="emailAddress" header="Email" style="min-width: 14rem" />
+            <Column field="code" header="Storage Location" style="min-width: 15rem" />
+            <Column field="name" header="Name" style="min-width: 20rem"></Column>
+            <Column field="description" header="Description" style="min-width: 10rem" />
           </DataTable>
         </div>
       </div>
@@ -127,59 +117,35 @@
 import { ref } from 'vue';
 
 const logistic = ref({
-    companyName: 'JNT',
-    orderNo: 'ORD001',
-    accountNo: '6080100900',
-    contactPerson: 'John Doe',
-    contactNo: '123-456-7890',
-    address: 'Toyo Tires Malaysia, Jalan Toyo, Off Jalan Klang Lama',
-    city: 'Shah Alam',
-    postcode: '47301',
-    state: 'Selangor',
-    email: 'contact@jntlogistics.com',
-    username: 'jnt_user01',
-    status: '1',
-    shippingPoints: ['JNT'],
-    createdSince: '2023-01-15',
-    lastLogin: '2023-10-01'
+        companyName: "JNT",
+        orderNo: 'ORD001',
+        accountNo: '6080100900',
+        contactPerson: "John Doe",
+        contactNo: "123-456-7890",
+        address: "Toyo Tires Malaysia, Jalan Toyo, Off Jalan Klang Lama",
+        city: "Shah Alam",
+        postcode: "47301",
+        state: "Selangor",
+        email: "contact@jntlogistics.com",
+        username: "jnt_user01",
+        password: "password123",
+        status: "1",
+        shippingPoints: ["JNT"],
+        storageLocation: "TMJB",
+        createdSince: "2023-01-15T09:30:00",
+        lastLogin: "2023-10-01T14:45:00"
 });
 
 const shiptoList = ref([
-    {
-        id: 1,
-        companyName1: 'Tan Know Car Tires',
-        companyName2: '',
-        companyName3: '',
-        companyName4: '',
-        addressLine1: 'Lot 123, Jalan Sungai',
-        addressLine2: 'Seksyen 15',
-        addressLine3: '',
-        addressLine4: '',
-        city: 'Shah Alam',
-        state: 'Selangor',
-        postcode: '40150',
-        country: 'Malaysia',
-        phoneNumber: '03-55123456',
-        mobileNumber: '012-3456789',
-        emailAddress: 'info@toyotires.my'
+        {
+        code: 'TMJB',
+        name: 'Toyo Malaysia Johor Bahru',
+        description: 'Main storage facility in Johor Bahru'
     },
     {
-        id: 2,
-        companyName1: 'Shiro Auto Parts',
-        companyName2: 'Warehouse Division',
-        companyName3: '',
-        companyName4: '',
-        addressLine1: 'No 45, Jalan Merdeka',
-        addressLine2: '',
-        addressLine3: '',
-        addressLine4: '',
-        city: 'Kuala Lumpur',
-        state: 'Wilayah Persekutuan',
-        postcode: '50450',
-        country: 'Malaysia',
-        phoneNumber: '03-98765432',
-        mobileNumber: '019-8765432',
-        emailAddress: 'contact@shiroauto.com'
+        code: 'TMSA',
+        name: 'Toyo Malaysia Shah Alam',
+        description: 'Central warehouse in Shah Alam'
     }
 ]);
 </script>
