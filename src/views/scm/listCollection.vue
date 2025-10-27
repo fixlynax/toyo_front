@@ -13,6 +13,8 @@ const selectedRows = ref([]);
 const filterStatus = ref(null);
 const showFilterMenu = ref(false);
 
+
+
 function getStatusSeverity(status) {
     const severityMap = {
         0: 'secondary',
@@ -33,8 +35,8 @@ function getStatusText(status) {
         1: 'ETEN Approved',
         2: 'ETEN Rejected',
         3: 'Processing',
-        4: 'In Progress',
-        5: 'Toyo Approved',
+        4: 'Schedule',
+        5: 'Collected',
         6: 'Toyo Rejected',
         9: 'Deleted'
     };
@@ -141,7 +143,7 @@ function filteredList() {
                     </div>
 
                     <div class="flex justify-end gap-2">
-                        <Button type="button" label="Bulk Update " icon="pi pi-upload" class="p-button-success" />
+                        <Button type="button" label="Bulk Update " icon="pi pi-upload" />
                     </div>
                 </div>
             </template>
@@ -150,65 +152,71 @@ function filteredList() {
             <template #loading> Loading Collection data. Please wait. </template>
 
             <Column field="createDate" header="Create Date" style="min-width: 8rem">
-    <template #body="{ data }">
-        {{ data.createDate }}
-    </template>
-</Column>
+                <template #body="{ data }">
+                    {{ data.createDate }}
+                </template>
+            </Column>
+            <Column field="collectRef" header="Ref No" style="min-width: 8rem">
+                <template #body="{ data }">
+                    <RouterLink to="/scm/detailCollection" class="hover:underline font-bold text-primary">
+                        {{ data.claimRefNo }}
+                    </RouterLink>
+                </template>
+            </Column>
 
-<Column field="customerAccNo" header="Customer Acc No." style="min-width: 8rem">
-    <template #body="{ data }">
-        {{ data.customerAccNo }}
-    </template>
-</Column>
+            <Column field="customerAccNo" header="Customer Acc No." style="min-width: 8rem">
+                <template #body="{ data }">
+                    {{ data.customerAccNo }}
+                </template>
+            </Column>
 
-<Column field="customerName" header="Customer Name" style="min-width: 10rem">
-    <template #body="{ data }">
-        {{ data.customerName }}
-    </template>
-</Column>
+            <Column field="customerName" header="Customer Name" style="min-width: 10rem">
+                <template #body="{ data }">
+                    {{ data.companyName1 }}
+                </template>
+            </Column>
 
-<Column field="collectionAddress" header="Collection Address" style="min-width: 12rem">
-    <template #body="{ data }">
-        {{ data.collectionAddress }}
-    </template>
-</Column>
+            <Column field="collectionAddress" header="Collection Address" style="min-width: 12rem">
+                <template #body="{ data }">
+                    {{ data.collectionAddress }}
+                </template>
+            </Column>
 
-<Column field="contactNo" header="Contact No." style="min-width: 8rem">
-    <template #body="{ data }">
-        {{ data.contactNo }}
-    </template>
-</Column>
+            <Column field="contactNo" header="Contact" style="min-width: 8rem">
+                <template #body="{ data }">
+                    {{ data.contactNo }}
+                </template>
+            </Column>
 
-<Column field="totalPcs" header="Total Pcs" style="min-width: 6rem; text-align: center;">
-    <template #body="{ data }">
-        {{ data.totalPcs }}
-    </template>
-</Column>
+            <Column field="thirdPartyLogistics" header="3PL" style="min-width: 6rem">
+                <template #body="{ data }">
+                    {{ data.thirdPartyLogistics }}
+                </template>
+            </Column>
 
-<Column field="thirdPartyLogistics" header="3PL" style="min-width: 6rem">
-    <template #body="{ data }">
-        {{ data.thirdPartyLogistics }}
-    </template>
-</Column>
+            <Column field="pickupDatetime" header="Pickup Datetime" style="min-width: 10rem">
+                <template #body="{ data }">
+                    {{ data.collectDate }}
+                </template>
+            </Column>
 
-<Column field="pickupDatetime" header="Pickup Datetime" style="min-width: 10rem">
-    <template #body="{ data }">
-        {{ data.pickupDatetime }}
-    </template>
-</Column>
+            <Column field="collectedDatetime" header="Collected Datetime" style="min-width: 10rem">
+                <template #body="{ data }">
+                    {{ data.collectedDatetime }}
+                </template>
+            </Column>
 
-<Column field="collectedDatetime" header="Collected Datetime" style="min-width: 10rem">
-    <template #body="{ data }">
-        {{ data.collectedDatetime }}
-    </template>
-</Column>
+            <Column field="totalPcs" header="Piece of Tires" style="min-width: 6rem; text-align: center">
+                <template #body="{ data }">
+                    {{ data.totalPcs }}
+                </template>
+            </Column>
 
-<Column field="status" header="Status" style="min-width: 8rem">
-    <template #body="{ data }">
-        <Tag :value="getStatusText(data.status)" :severity="getStatusSeverity(data.status)" />
-    </template>
-</Column>
-
+            <Column field="status" header="Status" style="min-width: 8rem">
+                <template #body="{ data }">
+                    <Tag :value="getStatusText(data.status)" :severity="getStatusSeverity(data.status)" />
+                </template>
+            </Column>
         </DataTable>
     </div>
 </template>
