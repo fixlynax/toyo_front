@@ -48,7 +48,7 @@
             <!-- ========================= -->
             <Column field="campaignNo" header="Campaign No" style="min-width: 8rem">
                 <template #body="{ data }">
-                    <RouterLink to="/marketing/detailCampaign" class="hover:underline font-bold">
+                    <RouterLink :to="`/marketing/detailCampaign//${data.id}`" class="hover:underline font-bold">
                         {{ data.campaignNo }}
                     </RouterLink>
                 </template>
@@ -93,7 +93,7 @@
 <script setup>
 import { onMounted, ref } from 'vue';
 import { FilterMatchMode } from '@primevue/core/api';
-import { ListCampaignService } from '@/service/ListCampaign';
+import api from '@/service/api';
 
 // Data variables
 const listData = ref([]);
@@ -108,9 +108,33 @@ const filters = ref({
 // Fetch data on mount
 // =========================
 onMounted(async () => {
-    loading.value = true;
-    listData.value = await ListCampaignService.getListCampaignData();
-    loading.value = false;
+    try {
+        loading.value = true;
+        const response = await api.get('campaign/campaignList');
+
+        console.log('API Response:', response.data);
+
+        if (response.data.status === 1 && Array.isArray(response.data.admin_data)) {
+            listData.value = response.data.admin_data.map((campaign) => ({
+                id: campaign.id,
+                campaignNo: campaign.campaignNo || 'N/A',
+                title: campaign.title || 'Untitled',
+                publishDate: campaign.publishDate,
+                startDate: campaign.startDate, 
+                endDate: campaign.endDate, 
+                totalSub: campaign.total_participant || 'N/A',
+                status: campaign.status
+            }));
+        } else {
+            console.error('API returned error or invalid data:', response.data);
+            listData.value = [];
+        }
+    } catch (error) {
+        console.error('Error fetching campaign list:', error);
+        listData.value = [];
+    } finally {
+        loading.value = false;
+    }
 });
 
 // =========================
