@@ -15,6 +15,7 @@ export const ListLogisticService = {
         username: "jnt_user01",
         status: "1",
         shippingPoints: ["JNT"],
+        storageLocation: "TMJB",
         createdSince: "2023-01-15T09:30:00",
         lastLogin: "2023-10-01T14:45:00"
       },
@@ -32,6 +33,7 @@ export const ListLogisticService = {
         username: "ninjavan_user01",
         status: "1",
         shippingPoints: ["Ninja Van"],
+        storageLocation: "TMSA",
         createdSince: "2022-11-20T11:00:00",
         lastLogin: "2023-09-25T10:15:00"
       },
@@ -49,6 +51,7 @@ export const ListLogisticService = {
         username: "lalamove_user01",
         status: "0",
         shippingPoints: ["Lalamove"],
+        storageLocation: "RETP",
         createdSince: "2023-03-10T08:45:00",
         lastLogin: "2023-08-30T16:20:00"
       },
@@ -66,6 +69,7 @@ export const ListLogisticService = {
         username: "flash_user01",
         status: "1",
         shippingPoints: ["JNT", "Lalamove"],
+        storageLocation: "TMSB",
         createdSince: "2022-06-05T14:00:00",
         lastLogin: "2023-09-20T09:30:00"
       },
@@ -83,6 +87,7 @@ export const ListLogisticService = {
         username: "expressway_user",
         status: "1",
         shippingPoints: ["DHL"],
+        storageLocation: "TMSK",
         createdSince: "2021-12-01T10:15:00",
         lastLogin: "2023-09-28T17:10:00"
       },
@@ -100,6 +105,7 @@ export const ListLogisticService = {
         username: "speedy_user",
         status: "0",
         shippingPoints: ["JNT"],
+        storageLocation: "TMJB",
         createdSince: "2020-08-10T13:45:00",
         lastLogin: "2022-12-15T12:00:00"
       },
@@ -117,6 +123,7 @@ export const ListLogisticService = {
         username: "globalship_user",
         status: "1",
         shippingPoints: ["Lalamove"],
+        storageLocation: "RER",
         createdSince: "2022-03-22T09:00:00",
         lastLogin: "2023-10-02T11:45:00"
       },
@@ -134,6 +141,7 @@ export const ListLogisticService = {
         username: "nextday_user",
         status: "1",
         shippingPoints: ["DHL", "Lalamove"],
+        storageLocation: "TMSB",
         createdSince: "2021-05-15T16:30:00",
         lastLogin: "2023-09-30T15:20:00"
       },
@@ -151,6 +159,7 @@ export const ListLogisticService = {
         username: "expressfast_user",
         status: "0",
         shippingPoints: ["JNT"],
+        storageLocation: "TMSA",
         createdSince: "2020-05-01T08:00:00",
         lastLogin: "2022-10-10T09:00:00"
       }
