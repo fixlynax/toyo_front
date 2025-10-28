@@ -46,15 +46,15 @@
                     <div class="grid grid-cols-1 md:grid-cols-3 gap-4 md:col-span-2">
                         <div>
                             <label class="block font-bold text-gray-700">Publish Date</label>
-                            <Calendar v-model="campaign.publishDate" dateFormat="yy-mm-dd" class="w-full" />
+                            <Calendar v-model="campaign.publishDate" showIcon dateFormat="yy-mm-dd" class="w-full" />
                         </div>
                         <div>
                             <label class="block font-bold text-gray-700">Start Date</label>
-                            <Calendar v-model="campaign.startDate" dateFormat="yy-mm-dd" class="w-full" />
+                            <Calendar v-model="campaign.startDate" showIcon dateFormat="yy-mm-dd" class="w-full" />
                         </div>
                         <div>
                             <label class="block font-bold text-gray-700">End Date</label>
-                            <Calendar v-model="campaign.endDate" dateFormat="yy-mm-dd" class="w-full" />
+                            <Calendar v-model="campaign.endDate" showIcon dateFormat="yy-mm-dd" class="w-full" />
                         </div>
                     </div>
                 </div>

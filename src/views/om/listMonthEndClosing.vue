@@ -17,7 +17,7 @@
                 </div> -->
 
                 <!-- Closing Dates Table -->
-                <DataTable :value="closingDates" :paginator="true" :rows="10" :rowsPerPageOptions="[5, 10, 20, 50]" dataKey="id" :rowHover="true" :loading="loading" sortField="closingDateTime" :sortOrder="-1" responsiveLayout="scroll">
+                <DataTable :value="closingDates" :paginator="true" :rows="10" :rowsPerPageOptions="[12, 24, 36, 48, 60]" dataKey="id" :rowHover="true" :loading="loading" sortField="closingDateTime" :sortOrder="-1" responsiveLayout="scroll">
                     <template #header>
                         <div class="flex justify-between items-center">
                             <span class="text-sm text-gray-500"> Showing {{ closingDates.length }} records </span>

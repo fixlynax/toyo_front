@@ -197,9 +197,14 @@ const router = createRouter({
 
                 // Maintenance
                 {
-                    path: '/om/listDisableOrder',
-                    name: 'Disable-Order',
-                    component: () => import('@/views/om/ListDisableOrder.vue')
+                    path: '/om/listDisableOrderNS',
+                    name: 'Disable-Order-NS',
+                    component: () => import('@/views/om/ListDisableOrderNS.vue')
+                },
+                {
+                    path: '/om/listDisableOrderDS',
+                    name: 'Disable-Order-DS',
+                    component: () => import('@/views/om/ListDisableOrderDS.vue')
                 },
                 {
                     path: '/om/listMonthEndClosing',

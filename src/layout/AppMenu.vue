@@ -197,7 +197,18 @@ const model = ref([
                     {
                         label: 'Disable Order',
                         icon: 'pi pi-fw pi-ban',
-                        to: '/om/listDisableOrder'
+                        items: [
+                            {
+                                label: 'Normal Shipment',
+                                icon: 'pi pi-fw pi-box',
+                                to: '/om/listDisableOrderNS'
+                            },
+                            {
+                                label: 'Direct Shipment',
+                                icon: 'pi pi-fw pi-truck',
+                                to: '/om/listDisableOrderDS'
+                            }
+                        ]
                     },
                     {
                         label: 'Month End Closing',
