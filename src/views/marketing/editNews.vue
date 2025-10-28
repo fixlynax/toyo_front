@@ -54,6 +54,7 @@
                                 <img :src="previewImages[field]" alt="Preview" class="rounded-lg shadow-md object-cover w-full h-80" />
                                 <button @click="removeImage(field)" class="absolute top-2 right-2 bg-red-500 text-white px-2 py-1 rounded-full hover:bg-red-600" title="Remove Image">&times;</button>
                             </div>
+                            <div v-else class="mt-2 p-4 border-2 border-dashed border-gray-300 rounded-lg text-center text-gray-500">No Image</div>
                         </div>
                     </div>
                 </div>
@@ -117,6 +118,12 @@ const currentImages = ref({
     image1URL: null,
     image2URL: null,
     image3URL: null
+});
+
+const imageChanges = ref({
+    image1URL: false,
+    image2URL: false,
+    image3URL: false
 });
 
 const previewImages = ref({
@@ -224,6 +231,7 @@ const onImageSelect = (event, property) => {
     if (!file) return;
     news.value[property] = file;
     currentImages.value[property] = file; // Store the new file
+    imageChanges.value[property] = true; // Mark as changed
     previewImages.value[property] = URL.createObjectURL(file);
 };
 
@@ -231,6 +239,7 @@ const onImageSelect = (event, property) => {
 const removeImage = (property) => {
     news.value[property] = null;
     currentImages.value[property] = null; // Mark as removed
+    imageChanges.value[property] = true; // Mark as changed
     previewImages.value[property] = null;
 };
 
@@ -259,20 +268,23 @@ const updateNews = async () => {
         formData.append('endDate', news.value.endDate);
         formData.append('isPublish', news.value.status ?? 0);
 
-        // ✅ Smart image handling
+        // ✅ Smart image handling - only send changed images
         ['image1URL', 'image2URL', 'image3URL'].forEach((field, index) => {
             const fileField = `image${index + 1}`;
             const current = currentImages.value[field];
             const original = originalImages.value[field];
+            const hasChanged = imageChanges.value[field];
 
-            if (current instanceof File) {
-                // 🟢 Upload new image
-                formData.append(fileField, current);
-            } else if (current === null && original) {
-                // 🔴 Image removed — keep null to clear it
-                formData.append(fileField, '');
-            } else if (original && typeof current === 'string') {
-                // 🟢 Keep existing image (unchanged)
+            if (hasChanged) {
+                if (current instanceof File) {
+                    // 🟢 Upload new image
+                    formData.append(fileField, current);
+                } else if (current === null) {
+                    // 🔴 Image removed - send empty string to clear it
+                    formData.append(fileField, '');
+                }
+            } else if (original) {
+                // 🟢 Keep existing image - send the URL to maintain it
                 formData.append(fileField + 'URL', original);
             }
         });
