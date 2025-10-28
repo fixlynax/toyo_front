@@ -1,5 +1,5 @@
 <script setup>
-import { ListSalesProgramService } from '@/service/listSalesProgram';
+import api from '@/service/api';
 import { FilterMatchMode, FilterOperator } from '@primevue/core/api';
 import { onBeforeMount, ref } from 'vue';
 
@@ -9,11 +9,8 @@ const loading = ref(true);
 
 
 const statusMap = {
-    0: { label: 'Upcoming', severity: 'info' },
-    1: { label: 'On-going', severity: 'success' },
-    2: { label: 'Expired', severity: 'warn' },
-    3: { label: 'Disabled', severity: 'secondary' },
-    4: { label: 'Cancelled', severity: 'danger' }
+    0: { label: 'Inactive', severity: 'danger' },
+    1: { label: 'Active', severity: 'success' }
 };
 
 function initFilters1() {
@@ -24,9 +21,35 @@ function initFilters1() {
 }
 
 onBeforeMount(async () => {
-    initFilters1();
-    listData.value = await ListSalesProgramService.getListSalesProgram();
-    loading.value = false;
+    try {
+        initFilters1();
+        loading.value = true;
+        const response = await api.get('sales-program/list-sales-program');
+
+        console.log('API Response:', response.data);
+
+       
+        if (response.data.status === 1 && Array.isArray(response.data.admin_data)) {
+            listData.value = response.data.admin_data.map(sales => ({
+                id: sales.id,
+                programId: sales.programid,
+                title: sales.title,
+                startDate: sales.startDate ,
+                endDate: sales.endDate ,
+                status: sales.status
+            }));
+            
+            console.log('Transformed data:', listData.value);
+        } else {
+            console.error('API returned error or invalid data:', response.data);
+            listData.value = [];
+        }
+    } catch (error) {
+        console.error('Error fetching sales list:', error);
+        listData.value = [];
+    } finally {
+        loading.value = false;
+    }
 });
 </script>
 
@@ -62,7 +85,7 @@ onBeforeMount(async () => {
             <!-- Program ID -->
             <Column field="programId" header="Program ID" style="min-width: 8rem">
                 <template #body="{ data }">
-                    <RouterLink to="/om/detailSalesProgram" class="hover:underline font-bold">
+                    <RouterLink :to="`/om/detailSalesProgram/${data.id}`" class="hover:underline font-bold">
                         {{ data.programId }}
                     </RouterLink>
                 </template>

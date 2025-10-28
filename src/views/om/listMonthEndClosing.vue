@@ -5,24 +5,11 @@
                 <!-- Header -->
                 <div class="text-2xl font-bold text-gray-800 border-b pb-2 mb-4">Month End Closing Calendar</div>
 
-                <!-- Description
-                <div class="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-2">
-                    <div class="flex items-start">
-                        <i class="pi pi-info-circle text-blue-500 text-lg mt-1 mr-3"></i>
-                        <div>
-                            <div class="font-semibold text-blue-800 mb-1">About Month End Closing</div>
-                            <div class="text-blue-700 text-sm">Orders placed after the closing date/time will be processed as next month's orders when sent to SAP. These dates apply nationwide to all regions and dealers.</div>
-                        </div>
-                    </div>
-                </div> -->
-
                 <!-- Closing Dates Table -->
                 <DataTable :value="closingDates" :paginator="true" :rows="10" :rowsPerPageOptions="[12, 24, 36, 48, 60]" dataKey="id" :rowHover="true" :loading="loading" sortField="closingDateTime" :sortOrder="-1" responsiveLayout="scroll">
                     <template #header>
                         <div class="flex justify-between items-center">
                             <span class="text-sm text-gray-500"> Showing {{ closingDates.length }} records </span>
-                            <div class="flex gap-2">
-                            </div>
                         </div>
                     </template>
 
@@ -30,8 +17,6 @@
                         <div class="text-center text-gray-500 py-8">
                             <i class="pi pi-calendar-times text-4xl mb-2"></i>
                             <div>No closing dates configured.</div>
-                            <div class="text-sm mt-1">Add your first month end closing date to get started.</div>
-                            <Button label="Add First Closing Date" icon="pi pi-plus" class="p-button-outlined mt-4" @click="showAddDialog = true" />
                         </div>
                     </template>
 
@@ -70,6 +55,11 @@
                         </template>
                     </Column>
 
+                    <Column field="status" header="Status" style="min-width: 8rem">
+                        <template #body="{ data }">
+                            <Tag :value="getApiStatus(data.status)" :severity="getApiStatusSeverity(data.status)" />
+                        </template>
+                    </Column>
 
                     <Column header="Actions" style="min-width: 8rem">
                         <template #body="{ data }">
@@ -82,15 +72,36 @@
             </div>
         </div>
 
-        <!-- Add/Edit Dialog -->
-        <Dialog v-model:visible="showAddDialog" :header="editMode ? 'Edit Closing Date' : 'Add Closing Date'" :modal="true" class="p-fluid" :style="{ width: '40rem' }">
+        <!-- Edit Dialog -->
+        <Dialog v-model:visible="showEditDialog" header="Edit Closing Date" :modal="true" class="p-fluid" :style="{ width: '40rem' }">
             <div class="grid grid-cols-1 gap-4">
-                
+                <!-- Month Display -->
+                <div>
+                    <label class="block font-bold text-gray-700 mb-2">Month</label>
+                    <div class="p-inputtext p-component w-full bg-gray-100">
+                        {{ formatMonth(currentDate.monthYear) }}
+                    </div>
+                </div>
 
                 <!-- Closing Date & Time -->
                 <div>
                     <label class="block font-bold text-gray-700 mb-2">Closing Date & Time *</label>
                     <Calendar v-model="currentDate.closingDateTime" showTime hourFormat="24" placeholder="Select Closing Date and Time" class="w-full" :minDate="minDate" :maxDate="maxDate" />
+                </div>
+
+                <!-- Status -->
+                <div>
+                    <label class="block font-bold text-gray-700 mb-2">Status</label>
+                    <div class="flex gap-4">
+                        <div class="flex items-center">
+                            <RadioButton v-model="currentDate.status" inputId="status_active" name="status" :value="1" />
+                            <label for="status_active" class="ml-2">Active (Closing)</label>
+                        </div>
+                        <div class="flex items-center">
+                            <RadioButton v-model="currentDate.status" inputId="status_inactive" name="status" :value="0" />
+                            <label for="status_inactive" class="ml-2">Inactive (Not Closing)</label>
+                        </div>
+                    </div>
                 </div>
 
                 <!-- Preview -->
@@ -99,7 +110,7 @@
                     <div class="text-sm space-y-1">
                         <div class="flex justify-between">
                             <span class="text-gray-600">Month:</span>
-                            <span class="font-semibold">{{ getMonthYearPreview() }}</span>
+                            <span class="font-semibold">{{ formatMonth(currentDate.monthYear) }}</span>
                         </div>
                         <div class="flex justify-between">
                             <span class="text-gray-600">Closing Date:</span>
@@ -111,7 +122,7 @@
                         </div>
                         <div class="flex justify-between">
                             <span class="text-gray-600">Status:</span>
-                            <Tag :value="getPreviewStatus()" :severity="getPreviewStatusSeverity()" class="text-xs" />
+                            <Tag :value="getApiStatus(currentDate.status)" :severity="getApiStatusSeverity(currentDate.status)" class="text-xs" />
                         </div>
                     </div>
                 </div>
@@ -119,7 +130,7 @@
 
             <template #footer>
                 <Button label="Cancel" icon="pi pi-times" class="p-button-text" @click="closeDialog" />
-                <Button :label="editMode ? 'Update' : 'Add Closing Date'" icon="pi pi-check" class="p-button-primary" :disabled="!isDialogFormValid" @click="saveDate" />
+                <Button label="Update" icon="pi pi-check" class="p-button-primary" :disabled="!isDialogFormValid" @click="saveDate" />
             </template>
         </Dialog>
     </Fluid>
@@ -127,60 +138,23 @@
 
 <script setup>
 import { ref, reactive, computed, onMounted } from 'vue';
+import api from '@/service/api';
 
 const loading = ref(false);
-const showAddDialog = ref(false);
+const showEditDialog = ref(false);
 const editMode = ref(false);
 
-// Current date for add/edit
+// Current date for edit
 const currentDate = reactive({
+    id: null,
     monthYear: null,
-    closingDateTime: null
+    closingDateTime: null,
+    status: 1
 });
 
-// Sample data
-const closingDates = ref([
-    {
-        id: 1,
-        monthYear: new Date('2024-01-01'),
-        closingDateTime: new Date('2025-01-26T15:00:59'),
-        createdBy: 'Admin',
-        createdAt: new Date('2024-01-01T09:00:00')
-    },
-    {
-        id: 2,
-        monthYear: new Date('2024-02-01'),
-        closingDateTime: new Date('2025-02-26T15:00:59'),
-        createdBy: 'Admin',
-        createdAt: new Date('2024-02-01T09:00:00')
-    },
-    {
-        id: 3,
-        monthYear: new Date('2024-03-01'),
-        closingDateTime: new Date('2025-03-26T15:00:59'),
-        createdBy: 'Admin',
-        createdAt: new Date('2025-03-01T09:00:00')
-    },
-    {
-        id: 4,
-        monthYear: new Date('2024-04-01'),
-        closingDateTime: new Date('2025-04-26T15:00:59'),
-        createdBy: 'Admin',
-        createdAt: new Date('2024-04-01T09:00:00')
-    }
-]);
+const closingDates = ref([]);
 
 // Date constraints
-const minMonth = computed(() => {
-    return new Date();
-});
-
-const maxMonth = computed(() => {
-    const date = new Date();
-    date.setFullYear(date.getFullYear() + 2);
-    return date;
-});
-
 const minDate = computed(() => {
     if (!currentDate.monthYear) return new Date();
     const month = new Date(currentDate.monthYear);
@@ -198,7 +172,7 @@ const maxDate = computed(() => {
 
 // Computed properties
 const isDialogFormValid = computed(() => {
-    return currentDate.monthYear !== null && currentDate.closingDateTime !== null;
+    return currentDate.closingDateTime !== null && currentDate.status !== null;
 });
 
 // Methods
@@ -241,156 +215,135 @@ const formatTimePreview = (date) => {
     });
 };
 
-const getMonthYearPreview = () => {
-    if (!currentDate.monthYear) return '';
-    return new Date(currentDate.monthYear).toLocaleDateString('en-MY', {
-        year: 'numeric',
-        month: 'long'
-    });
+// API Status handling
+const getApiStatus = (status) => {
+    return status === 1 ? 'Close' : 'Incoming';
 };
 
-const getStatus = (date) => {
-    const now = new Date();
-    const closingDate = new Date(date.closingDateTime);
-
-    if (now > closingDate) return 'Closed';
-    if (now.getMonth() === closingDate.getMonth() && now.getFullYear() === closingDate.getFullYear()) {
-        return 'Current';
-    }
-    return 'Upcoming';
-};
-
-const getStatusSeverity = (date) => {
-    const status = getStatus(date);
-    switch (status) {
-        case 'Closed':
-            return 'secondary';
-        case 'Current':
-            return 'warning';
-        case 'Upcoming':
-            return 'success';
-        default:
-            return 'info';
-    }
-};
-
-const getPreviewStatus = () => {
-    if (!currentDate.closingDateTime) return '';
-    const now = new Date();
-    const closingDate = new Date(currentDate.closingDateTime);
-
-    if (now > closingDate) return 'Closed';
-    if (now.getMonth() === closingDate.getMonth() && now.getFullYear() === closingDate.getFullYear()) {
-        return 'Current';
-    }
-    return 'Upcoming';
-};
-
-const getPreviewStatusSeverity = () => {
-    const status = getPreviewStatus();
-    switch (status) {
-        case 'Closed':
-            return 'secondary';
-        case 'Current':
-            return 'warning';
-        case 'Upcoming':
-            return 'success';
-        default:
-            return 'info';
-    }
-};
-
-const getDaysRemaining = (date) => {
-    const now = new Date();
-    const closingDate = new Date(date.closingDateTime);
-
-    if (now > closingDate) return '0';
-
-    const diffTime = closingDate - now;
-    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-    return diffDays.toString();
-};
-
-const getDaysRemainingSeverity = (date) => {
-    const days = parseInt(getDaysRemaining(date));
-    if (days === 0) return 'danger';
-    if (days <= 3) return 'warning';
-    if (days <= 7) return 'info';
-    return 'success';
-};
-
-const addDate = () => {
-    showAddDialog.value = true;
-    editMode.value = false;
+const getApiStatusSeverity = (status) => {
+    return status === 1 ? 'success' : 'secondary';
 };
 
 const editDate = (date) => {
     editMode.value = true;
     Object.assign(currentDate, {
+        id: date.id,
         monthYear: new Date(date.monthYear),
-        closingDateTime: new Date(date.closingDateTime)
+        closingDateTime: new Date(date.closingDateTime),
+        status: date.status
     });
-    showAddDialog.value = true;
+    showEditDialog.value = true;
 };
 
-const deleteDate = (id) => {
-    const date = closingDates.value.find((d) => d.id === id);
-    if (date && confirm(`Are you sure you want to delete the closing date for ${formatDate(date.monthYear)}?`)) {
-        closingDates.value = closingDates.value.filter((d) => d.id !== id);
-        console.log(`Closing date ${id} has been deleted`);
-    }
-};
-
-const saveDate = () => {
-    if (editMode.value) {
-        // Update existing date
-        const index = closingDates.value.findIndex((date) => date.monthYear.getTime() === currentDate.monthYear.getTime());
-        if (index !== -1) {
-            closingDates.value[index] = {
-                ...closingDates.value[index],
-                closingDateTime: new Date(currentDate.closingDateTime)
-            };
-        }
-    } else {
-        // Create new date
-        // Check if month already exists
-        const existingDate = closingDates.value.find((date) => date.monthYear.getMonth() === currentDate.monthYear.getMonth() && date.monthYear.getFullYear() === currentDate.monthYear.getFullYear());
-
-        if (existingDate) {
-            alert('A closing date already exists for this month. Please edit the existing entry instead.');
-            return;
-        }
-
-        const newDate = {
-            id: Date.now(),
-            monthYear: new Date(currentDate.monthYear),
-            closingDateTime: new Date(currentDate.closingDateTime),
-            createdBy: 'Admin',
-            createdAt: new Date()
+const saveDate = async () => {
+    try {
+        loading.value = true;
+        
+        // Prepare data for API update
+        const updateData = {
+            id: currentDate.id,
+            closingDate: new Date(currentDate.closingDateTime).getDate(),
+            closingMonth: new Date(currentDate.monthYear).toLocaleDateString('en-MY', { month: 'long' }),
+            closingYear: new Date(currentDate.monthYear).getFullYear().toString(),
+            closingTime: new Date(currentDate.closingDateTime).toLocaleTimeString('en-MY', { 
+                hour: '2-digit', 
+                minute: '2-digit',
+                second: '2-digit',
+                hour12: false 
+            }),
+            status: currentDate.status
         };
-        closingDates.value.push(newDate);
-    }
 
-    closeDialog();
-    console.log('Closing date saved:', currentDate);
+        // Call API to update the closing date
+        const response = await api.put('maintenance/update-monthly-end', updateData);
+        
+        if (response.data.status === 1) {
+            // Update local data
+            const index = closingDates.value.findIndex((date) => date.id === currentDate.id);
+            if (index !== -1) {
+                closingDates.value[index] = {
+                    ...closingDates.value[index],
+                    closingDateTime: new Date(currentDate.closingDateTime),
+                    status: currentDate.status
+                };
+            }
+            closeDialog();
+            console.log('Closing date updated successfully');
+        } else {
+            console.error('Failed to update closing date:', response.data);
+            alert('Failed to update closing date. Please try again.');
+        }
+    } catch (error) {
+        console.error('Error updating closing date:', error);
+        alert('Error updating closing date. Please try again.');
+    } finally {
+        loading.value = false;
+    }
 };
 
 const closeDialog = () => {
-    showAddDialog.value = false;
+    showEditDialog.value = false;
     editMode.value = false;
     // Reset form
     Object.assign(currentDate, {
+        id: null,
         monthYear: null,
-        closingDateTime: null
+        closingDateTime: null,
+        status: 1
     });
 };
 
+// Helper function to convert API data to component format
+const transformApiData = (apiData) => {
+    return apiData.map(item => {
+        // Create a date string from the API data
+        const dateString = `${item.closingDate} ${item.closingMonth} ${item.closingYear} ${item.closingTime}`;
+        const closingDateTime = new Date(dateString);
+        
+        // Create monthYear from closing date (first day of the month)
+        const monthYear = new Date(item.closingYear, getMonthNumber(item.closingMonth), 1);
+        
+        return {
+            id: item.id,
+            monthYear: monthYear,
+            closingDateTime: closingDateTime,
+            status: item.status,
+            updated: item.updated,
+            closingDateFormatted: item.closingDateFormatted
+        };
+    });
+};
+
+// Helper function to convert month name to number
+const getMonthNumber = (monthName) => {
+    const months = {
+        'January': 0, 'February': 1, 'March': 2, 'April': 3, 'May': 4, 'June': 5,
+        'July': 6, 'August': 7, 'September': 8, 'October': 9, 'November': 10, 'December': 11
+    };
+    return months[monthName] || 0;
+};
+
 // Initialize
-onMounted(() => {
-    // Simulate loading
-    loading.value = true;
-    setTimeout(() => {
+onMounted(async () => {
+    try {
+        loading.value = true;
+        const response = await api.get('maintenance/list-monthly-end');
+
+        console.log('API Response:', response.data);
+
+        if (response.data.status === 1 && response.data.admin_data) {
+            // Transform API data to match component structure
+            closingDates.value = transformApiData(response.data.admin_data);
+            console.log('Transformed closing dates:', closingDates.value);
+        } else {
+            console.error('API returned error or invalid data:', response.data);
+            closingDates.value = [];
+        }
+    } catch (error) {
+        console.error('Error fetching month end closing dates:', error);
+        closingDates.value = [];
+    } finally {
         loading.value = false;
-    }, 1000);
+    }
 });
 </script>

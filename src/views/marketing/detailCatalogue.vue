@@ -118,60 +118,31 @@
                         </div>
                     </div>
 
-                    <!-- List PIN Section -->
-                    <div class="flex items-center justify-between mb-4">
-                        <div class="flex items-center gap-3">
-                            <div class="text-2xl font-bold text-gray-800">🔑 List PIN</div>
+                    <!-- E-Voucher Details -->
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 text-gray-800 mb-8">
+                        <div>
+                            <span class="block text-sm font-semibold text-gray-500">Quantity</span>
+                            <p class="text-lg font-medium">{{ catalogue.totalVouchers }}</p>
+                        </div>
+                        <div>
+                            <span class="block text-sm font-semibold text-gray-500">Provider</span>
+                            <p class="text-lg font-medium">{{ catalogue.provider || '-' }}</p>
+                        </div>
+                        <div>
+                            <span class="block text-sm font-semibold text-gray-500">Value Type</span>
+                            <p class="text-lg font-medium">{{ catalogue.valueType || '-' }}</p>
+                        </div>
+                        <div>
+                            <span class="block text-sm font-semibold text-gray-500">Value Amount</span>
+                            <p class="text-lg font-medium">
+                                <template v-if="catalogue.valueType === 'Percentage'"> {{ catalogue.valueAmount }}% </template>
+                                <template v-else> RM {{ catalogue.valueAmount?.toLocaleString('en-MY', { minimumFractionDigits: 2 }) }} </template>
+                            </p>
                         </div>
                     </div>
 
-                    <DataTable :value="encodedPins" :paginator="true" :rows="10" dataKey="id" :rowHover="true" :loading="loading">
-                        <template #header>
-                            <div class="flex flex-col md:flex-row items-center justify-between gap-4 w-full">
-                                <!-- Summary Info -->
-                                <div class="flex gap-4 w-full md:w-auto">
-                                    <div class="w-32">
-                                        <label class="block font-medium text-gray-700 mb-1">Used</label>
-                                        <span class="text-gray-800 font-semibold">{{ usedPins }}</span>
-                                    </div>
-                                    <div class="w-32">
-                                        <label class="block font-medium text-gray-700 mb-1">Total</label>
-                                        <span class="text-gray-800 font-semibold">{{ catalogue.totalqty }}</span>
-                                    </div>
-                                </div>
-
-                                <!-- Action Buttons -->
-                                <div class="flex gap-4 items-end w-full md:w-72">
-                                    <Button icon="pi pi-plus" class="p-button-text text-green-600 w-10 h-10 flex items-center justify-center" v-tooltip="'Add PIN'" @click="addPin" />
-                                    <Button icon="pi pi-minus" class="p-button-text text-yellow-600 w-10 h-10 flex items-center justify-center" v-tooltip="'Remove PIN'" @click="removePin" />
-                                    <Button icon="pi pi-file-export" label="Export" v-tooltip="'Export Redemption List'" @click="exportRedemptionList" />
-                                    <Button icon="pi pi-file-import" label="Import" v-tooltip="'Export Redemption List'" @click="exportRedemptionList" />
-                                </div>
-                            </div>
-                        </template>
-
-                        <template #empty> No PINs found. </template>
-                        <template #loading> Loading PIN data. Please wait. </template>
-
-                        <Column header="Pin" style="min-width: 8rem">
-                            <template #body="{ data }">{{ data.pin }}</template>
-                        </Column>
-                        <Column header="Expiry" style="min-width: 8rem">
-                            <template #body="{ data }">{{ data.expiryDate }}</template>
-                        </Column>
-                        <Column header="Date Used" style="min-width: 8rem">
-                            <template #body="{ data }">{{ data.usedDate || '-' }}</template>
-                        </Column>
-                        <Column header="Status" style="min-width: 8rem">
-                            <template #body="{ data }">
-                                <span :class="data.pinUsedStatus ? 'text-red-600 font-medium' : 'text-green-600 font-medium'">
-                                    {{ data.pinUsedStatus ? 'Used' : 'Available' }}
-                                </span>
-                            </template>
-                        </Column>
-                    </DataTable>
-                    <!-- Set Point & Delete Buttons -->
-                    <div class="flex flex-row items-center gap-2 mt-8">
+                    <!-- Set Point Button -->
+                    <div class="flex flex-row items-center gap-2 mt-4">
                         <Button label="Set Cost Redeem" class="p-button" size="small" style="width: auto" @click="showSetDialog = true" />
                     </div>
 
@@ -191,6 +162,7 @@
                         </div>
                     </Dialog>
                 </div>
+
                 <div v-else-if="catalogue.type === 'Item'" class="card flex flex-col w-full">
                     <!-- Header -->
                     <div class="flex items-center justify-between border-b pb-3 mb-6">
@@ -281,6 +253,46 @@
                             </div>
                         </div>
                     </Dialog>
+                </div>
+                <div v-else-if="catalogue.type === 'Point'" class="card flex flex-col w-full">
+                    <div class="flex items-center justify-between border-b pb-3 mb-6">
+                        <div class="flex items-center gap-2">
+                            <RouterLink to="/marketing/listCatalogue">
+                                <Button icon="pi pi-arrow-left font-bold" class="p-button-text p-button-secondary text-xl" v-tooltip="'Back'" />
+                            </RouterLink>
+                            <div class="text-2xl font-bold text-gray-800">Details Catalogue</div>
+                        </div>
+
+                        <div class="flex items-center gap-2">
+                            <RouterLink to="/marketing/editCatalogue">
+                                <Button label="Edit" class="p-button-info" size="small" />
+                            </RouterLink>
+                            <Button label="Delete" class="p-button-danger" size="small" />
+                        </div>
+                    </div>
+
+                    <div class="flex items-center justify-between mb-4">
+                        <div class="flex items-center gap-3">
+                            <div class="text-2xl font-bold text-gray-800">📦 Point</div>
+                        </div>
+                    </div>
+                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-6 text-center">
+                        <div class="p-4 bg-gray-50 rounded-xl shadow-sm">
+                            <span class="block text-sm font-semibold text-gray-500 uppercase">Silver</span>
+                            <p class="text-2xl font-bold text-gray-800 mt-1">{{ catalogue.silverPoint }}</p>
+                        </div>
+                        <div class="p-4 bg-gray-50 rounded-xl shadow-sm">
+                            <span class="block text-sm font-semibold text-gray-500 uppercase">Gold</span>
+                            <p class="text-2xl font-bold text-yellow-600 mt-1">{{ catalogue.goldPoint }}</p>
+                        </div>
+                        <div class="p-4 bg-gray-50 rounded-xl shadow-sm">
+                            <span class="block text-sm font-semibold text-gray-500 uppercase">Platinum</span>
+                            <p class="text-2xl font-bold text-purple-600 mt-1">{{ catalogue.plantinumpoint }}</p>
+                        </div>
+                    </div>
+                    <!-- <div class="flex items-end w-full md:w-72">
+                        <Button label="Edit Point" class="p-button" />
+                    </div> -->
                 </div>
 
                 <!-- ======================== -->
@@ -448,7 +460,13 @@ const catalogue = ref({
     pins: [],
     vouchers: [],
     usedVouchers: 0,
-    totalVouchers: 0
+    totalVouchers: 0,
+    silverPoint: 21,
+    goldPoint: 40,
+    plantinumpoint: 60,
+    valueType: 'Percentage',
+    provider: 'Shopee',
+    totalVouchers: '256',
 });
 
 const participants = ref([

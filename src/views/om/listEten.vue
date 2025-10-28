@@ -14,9 +14,7 @@
             filterDisplay="menu"
             :globalFilterFields="['memberCode', 'custAccountNo', 'companyName1', 'city', 'state', 'phoneNumber', 'signboardType', 'status']"
         >
-            <!-- ========================= -->
-            <!-- Header Section -->
-            <!-- ========================= -->
+           
             <template #header>
                 <div class="flex items-center justify-between gap-4 w-full flex-wrap">
                     <!-- Left: Search Field + Cog Button -->
@@ -37,18 +35,14 @@
                 </div>
             </template>
 
-            <!-- ========================= -->
-            <!-- Empty / Loading Messages -->
-            <!-- ========================= -->
+            
             <template #empty> No customers found. </template>
             <template #loading> Loading customers data. Please wait. </template>
 
-            <!-- ========================= -->
-            <!-- Data Columns -->
-            <!-- ========================= -->
+            
             <Column field="memberCode" header="Mem Code" style="min-width: 6rem">
                 <template #body="{ data }">
-                    <RouterLink to="/om/detailEten" class="hover:underline font-bold">
+                    <RouterLink :to="`/om/detailEten/${data.id}`" class="hover:underline font-bold">
                         {{ data.memberCode }}
                     </RouterLink>
                 </template>
@@ -83,29 +77,58 @@
 <script setup>
 import { onMounted, ref } from 'vue';
 import { FilterMatchMode } from '@primevue/core/api';
-import { ListEtenService } from '@/service/ListEten';
+import api from '@/service/api';
 
-// Data variables
+
 const listData = ref([]);
 const loading = ref(true);
 
-// Filters for quick search
+
 const filters = ref({
     global: { value: null, matchMode: FilterMatchMode.CONTAINS }
 });
 
-// =========================
-// Fetch data on mount
-// =========================
+
 onMounted(async () => {
-    loading.value = true;
-    listData.value = await ListEtenService.getListEten();
-    loading.value = false;
+    try {
+        loading.value = true;
+        const response = await api.get('list_dealer');
+
+        console.log('API Response:', response.data);
+
+        if (response.data.status === 1 && response.data.admin_data) {
+           
+            const adminData = response.data.admin_data;
+            
+            listData.value = Object.keys(adminData).map(key => {
+                const customer = adminData[key];
+                const shop = customer.shop;
+                
+                return {
+                    id: shop.id,
+                    memberCode: shop.memberCode || 'Untitled',
+                    custAccountNo: shop.custAccountNo,
+                    companyName1: shop.companyName1,
+                    city: shop.city, 
+                    state: shop.state, 
+                    phoneNumber: shop.phoneNumber || 'N/A',
+                    signboardType: shop.signboardType || 'N/A',
+                    status: shop.status,
+                    user_list: customer.user_list 
+                };
+            });
+        } else {
+            console.error('API returned error or invalid data:', response.data);
+            listData.value = [];
+        }
+    } catch (error) {
+        console.error('Error fetching customer list:', error);
+        listData.value = [];
+    } finally {
+        loading.value = false;
+    }
 });
 
-// =========================
-// Helper functions for status display
-// =========================
 const getOverallStatusSeverity = (status) => {
     return status === 1 ? 'success' : 'danger';
 };

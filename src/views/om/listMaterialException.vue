@@ -5,17 +5,6 @@
                 <!-- Header -->
                 <div class="text-2xl font-bold text-gray-800 border-b pb-2 mb-4">Material Exception List</div>
 
-                <!-- Description -->
-                <div class="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-2">
-                    <div class="flex items-start">
-                        <i class="pi pi-info-circle text-blue-500 text-lg mt-1 mr-3"></i>
-                        <div>
-                            <div class="font-semibold text-blue-800 mb-1">About Material Exceptions</div>
-                            <div class="text-blue-700 text-sm">Special material list to exclude or include from selected dealers. Used for customer-specific products and special pricing (R8R Pattern).</div>
-                        </div>
-                    </div>
-                </div>
-
                 <!-- Material Exceptions Table -->
                 <DataTable
                     :value="materialExceptions"
@@ -78,8 +67,8 @@
                     <Column header="Dealers" style="min-width: 10rem">
                         <template #body="{ data }">
                             <div class="text-sm">
-                                <Badge :value="data.dealers.length" class="mr-2" />
-                                {{ data.dealers.length }} dealer(s)
+                                <Badge :value="data.dealerCount" class="mr-2" />
+                                {{ data.dealerCount }} dealer(s)
                             </div>
                         </template>
                     </Column>
@@ -152,7 +141,7 @@
                         <Button label="Clear All" class="p-button-outlined p-button-danger p-button-sm" @click="clearAllDealers" />
                     </div>
 
-                    <!-- ✅ FIXED SEARCHABLE DEALER LIST -->
+                    <!-- Searchable Dealer List -->
                     <MultiSelect
                         v-model="currentException.dealers"
                         :options="allDealers"
@@ -201,14 +190,8 @@
                             <span class="font-semibold">{{ currentException.dealers.length }} selected</span>
                         </div>
                         <div class="flex justify-between">
-                            <span class="text-gray-600">Pattern:</span>
-                            <span class="font-mono font-semibold">{{ currentException.pattern }}</span>
-                        </div>
-                        <div class="flex justify-between">
-                            <span class="text-gray-600">Price:</span>
-                            <span class="font-semibold" :class="currentException.specialPrice ? 'text-green-600' : 'text-gray-600'">
-                                {{ currentException.specialPrice ? `RM ${formatPrice(currentException.specialPrice)}` : 'Standard Price' }}
-                            </span>
+                            <span class="text-gray-600">Status:</span>
+                            <Tag :value="currentException.status ? 'Active' : 'Inactive'" :severity="currentException.status ? 'success' : 'danger'" class="text-xs" />
                         </div>
                     </div>
                 </div>
@@ -219,13 +202,24 @@
                 <Button :label="editMode ? 'Update' : 'Add Exception'" icon="pi pi-check" class="p-button-primary" :disabled="!isDialogFormValid" @click="saveException" />
             </template>
         </Dialog>
+
+        <!-- Loading Overlay -->
+        <Dialog v-model:visible="loading" :modal="true" :closable="false" :style="{ width: '20rem' }">
+            <div class="flex items-center gap-4">
+                <i class="pi pi-spinner pi-spin text-2xl"></i>
+                <span>Processing...</span>
+            </div>
+        </Dialog>
     </Fluid>
 </template>
 
 <script setup>
 import { ref, reactive, computed, onMounted } from 'vue'
 import { FilterMatchMode } from '@primevue/core/api'
+import { useToast } from 'primevue/usetoast'
+import api from '@/service/api';
 
+const toast = useToast()
 const loading = ref(false)
 const showAddDialog = ref(false)
 const editMode = ref(false)
@@ -235,41 +229,19 @@ const filters = reactive({
 })
 
 const currentException = reactive({
+    id: null,
     materialCode: '',
     materialDescription: '',
     exceptionType: '',
-    pattern: '',
-    specialPrice: null,
     dealers: [],
     status: true
 })
 
-const materialExceptions = ref([
-    {
-        id: 1,
-        materialCode: 'MAT-001',
-        materialDescription: 'Premium Car Tyre 205/55R16',
-        exceptionType: 'Include',
-        pattern: 'R8R-SPECIAL-001',
-        specialPrice: 350.5,
-        dealers: ['6080100900', '6080102300'],
-        status: true
-    },
-    {
-        id: 2,
-        materialCode: 'MAT-002',
-        materialDescription: 'Engine Oil Synthetic 5W-30',
-        exceptionType: 'Exclude',
-        pattern: 'R8R-EXCLUDE-001',
-        specialPrice: null,
-        dealers: ['6080102301', '6080102302', '6080114400'],
-        status: true
-    }
-])
+const materialExceptions = ref([])
 
 const materialOptions = ref([
-    { code: 'MAT-001', description: 'Premium Car Tyre 205/55R16' },
-    { code: 'MAT-002', description: 'Engine Oil Synthetic 5W-30' },
+    { code: '81114NE0305185H', description: 'Premium Car Tyre 205/55R16' },
+    { code: '81115NE0306195V', description: 'Engine Oil Synthetic 5W-30' },
     { code: 'MAT-003', description: 'Brake Pad Set Front' },
     { code: 'MAT-004', description: 'Air Filter Premium' }
 ])
@@ -283,39 +255,39 @@ const dealerOptions = ref([
     {
         label: 'Kuala Lumpur',
         items: [
-            { label: 'PS Tyres & Battery Auto Services', value: '6080100900' },
-            { label: 'KL City Center', value: '6080102500' }
+            { label: 'PS Tyres & Battery Auto Services', value: '1' },
+            { label: 'KL City Center', value: '2' }
         ]
     },
     {
         label: 'Johor',
         items: [
-            { label: 'Toyo Auto Centre UHP Tyres', value: '6080102300' },
-            { label: 'Johor Bahru Motors', value: '6080102400' }
+            { label: 'Toyo Auto Centre UHP Tyres', value: '3' },
+            { label: 'Johor Bahru Motors', value: '4' }
         ]
     },
     {
         label: 'Penang',
         items: [
-            { label: 'Tek Ming Auto Service', value: '6080102301' },
-            { label: 'Georgetown Auto', value: '6080102600' }
+            { label: 'Tek Ming Auto Service', value: '5' },
+            { label: 'Georgetown Auto', value: '6' }
         ]
     },
     {
         label: 'Selangor',
         items: [
-            { label: 'Apex Tyre & Car Care', value: '6080102302' },
-            { label: 'JS Motorsports', value: '6080114400' },
-            { label: 'Petaling Jaya Auto', value: '6080102700' }
+            { label: 'Apex Tyre & Car Care', value: '7' },
+            { label: 'JS Motorsports', value: '8' },
+            { label: 'Petaling Jaya Auto', value: '9' }
         ]
     },
     {
         label: 'Kedah',
-        items: [{ label: 'Weng Tat Tyre Service', value: '6080125300' }]
+        items: [{ label: 'Weng Tat Tyre Service', value: '10' }]
     }
 ])
 
-// ✅ Flattened dealer list for global search & combined display
+// Flattened dealer list for global search & combined display
 const allDealers = computed(() =>
     dealerOptions.value.flatMap(group =>
         group.items.map(d => ({
@@ -334,67 +306,181 @@ const isDialogFormValid = computed(() => {
     )
 })
 
-const formatPrice = price =>
-    new Intl.NumberFormat('en-MY', {
-        minimumFractionDigits: 2,
-        maximumFractionDigits: 2
-    }).format(price)
-
-const getTypeSeverity = type => (type === 'Include' ? 'success' : 'warning')
+const getTypeSeverity = (type) => (type === 'Include' ? 'success' : 'warning')
 
 const onMaterialChange = () => {
     const selected = materialOptions.value.find(m => m.code === currentException.materialCode)
-    if (selected) currentException.materialDescription = selected.description
+    if (selected) {
+        currentException.materialDescription = selected.description
+    }
 }
 
 const selectAllDealers = () => {
     currentException.dealers = allDealers.value.map(d => d.value)
 }
 
-const clearAllDealers = () => (currentException.dealers = [])
+const clearAllDealers = () => {
+    currentException.dealers = []
+}
 
-const editException = data => {
+const editException = (data) => {
     editMode.value = true
-    Object.assign(currentException, { ...data })
+    Object.assign(currentException, { 
+        ...data,
+        // Convert dealer IDs back to array format for multiselect
+        dealers: Array.isArray(data.dealers) ? data.dealers : []
+    })
     showAddDialog.value = true
 }
 
-const deleteException = id => {
+const deleteException = async (id) => {
     if (confirm('Are you sure you want to delete this exception?')) {
-        materialExceptions.value = materialExceptions.value.filter(e => e.id !== id)
+        try {
+            loading.value = true
+            const response = await api.delete(`maintenance/delete-material-exception/${id}`)
+            
+            if (response.data.status === 1) {
+                // Remove from local list
+                materialExceptions.value = materialExceptions.value.filter(e => e.id !== id)
+                toast.add({ severity: 'success', summary: 'Success', detail: 'Material exception deleted successfully', life: 3000 })
+            } else {
+                console.error('API returned error:', response.data)
+                toast.add({ severity: 'error', summary: 'Error', detail: 'Failed to delete material exception', life: 3000 })
+            }
+        } catch (error) {
+            console.error('Error deleting material exception:', error)
+            toast.add({ severity: 'error', summary: 'Error', detail: 'Error deleting material exception', life: 3000 })
+        } finally {
+            loading.value = false
+        }
     }
 }
 
-const saveException = () => {
-    if (editMode.value) {
-        const idx = materialExceptions.value.findIndex(e => e.id === currentException.id)
-        if (idx !== -1) materialExceptions.value[idx] = { ...currentException }
-    } else {
-        materialExceptions.value.unshift({
-            ...currentException,
-            id: Date.now()
-        })
+const saveException = async () => {
+    try {
+        loading.value = true
+
+        // Prepare data for API
+        const apiData = {
+            materialid: currentException.materialCode,
+            status: currentException.status ? 1 : 0
+        }
+
+        // Split dealers into include and exclude based on exception type
+        if (currentException.exceptionType === 'Include') {
+            apiData.i_eten_userID = currentException.dealers.join(',')
+            apiData.e_eten_userID = '0'
+        } else if (currentException.exceptionType === 'Exclude') {
+            apiData.i_eten_userID = '0'
+            apiData.e_eten_userID = currentException.dealers.join(',')
+        }
+
+        let response
+        if (editMode.value) {
+            // Update existing
+            apiData.id = currentException.id
+            response = await api.put('maintenance/update-material-exception', apiData)
+        } else {
+            // Create new
+            response = await api.post('maintenance/create-material-exception', apiData)
+        }
+
+        if (response.data.status === 1) {
+            // Refresh the list
+            await fetchMaterialExceptions()
+            closeDialog()
+            toast.add({ 
+                severity: 'success', 
+                summary: 'Success', 
+                detail: `Material exception ${editMode.value ? 'updated' : 'created'} successfully`, 
+                life: 3000 
+            })
+        } else {
+            console.error('API returned error:', response.data)
+            toast.add({ severity: 'error', summary: 'Error', detail: `Failed to ${editMode.value ? 'update' : 'create'} material exception`, life: 3000 })
+        }
+    } catch (error) {
+        console.error('Error saving material exception:', error)
+        toast.add({ severity: 'error', summary: 'Error', detail: `Error ${editMode.value ? 'updating' : 'creating'} material exception`, life: 3000 })
+    } finally {
+        loading.value = false
     }
-    closeDialog()
 }
 
 const closeDialog = () => {
     showAddDialog.value = false
     editMode.value = false
     Object.assign(currentException, {
+        id: null,
         materialCode: '',
         materialDescription: '',
         exceptionType: '',
-        pattern: '',
-        specialPrice: null,
         dealers: [],
         status: true
     })
 }
 
+const fetchMaterialExceptions = async () => {
+    try {
+        loading.value = true
+        const response = await api.get('maintenance/list-material-exception')
+
+        console.log('API Response:', response.data)
+
+        if (response.data.status === 1 && response.data.admin_data) {
+            const adminData = response.data.admin_data
+            
+            materialExceptions.value = adminData.map(item => {
+                // Calculate dealer counts
+                const includeDealers = item.i_eten_userID && item.i_eten_userID !== '0' 
+                    ? item.i_eten_userID.split(',') 
+                    : []
+                const excludeDealers = item.e_eten_userID && item.e_eten_userID !== '0' 
+                    ? item.e_eten_userID.split(',') 
+                    : []
+                
+                const totalDealers = includeDealers.length + excludeDealers.length
+
+                // Determine exception type
+                let exceptionType = 'Include'
+                if (item.i_eten_userID === '0' && item.e_eten_userID && item.e_eten_userID !== '0') {
+                    exceptionType = 'Exclude'
+                } else if (item.i_eten_userID && item.i_eten_userID !== '0' && item.e_eten_userID && item.e_eten_userID !== '0') {
+                    exceptionType = 'Mixed'
+                }
+
+                // Combine all dealer IDs
+                const allDealerIds = [...includeDealers, ...excludeDealers]
+
+                // Find material description
+                const materialInfo = materialOptions.value.find(m => m.code === item.materialid)
+
+                return {
+                    id: item.id,
+                    materialCode: item.materialid,
+                    materialDescription: materialInfo ? materialInfo.description : `Material ${item.materialid}`,
+                    exceptionType: exceptionType,
+                    dealers: allDealerIds,
+                    dealerCount: totalDealers,
+                    status: item.status === 1,
+                    created: item.created
+                }
+            })
+        } else {
+            console.error('API returned error or invalid data:', response.data)
+            materialExceptions.value = []
+        }
+    } catch (error) {
+        console.error('Error fetching material exceptions:', error)
+        materialExceptions.value = []
+        toast.add({ severity: 'error', summary: 'Error', detail: 'Failed to load material exceptions', life: 3000 })
+    } finally {
+        loading.value = false
+    }
+}
+
 onMounted(() => {
-    loading.value = true
-    setTimeout(() => (loading.value = false), 800)
+    fetchMaterialExceptions()
 })
 </script>
 

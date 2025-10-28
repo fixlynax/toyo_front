@@ -74,14 +74,15 @@
                         <div>
                             <span class="text-sm text-gray-700">Delivery Status</span>
                             <p class="text-lg font-medium">
-                                <Tag :value="backOrdering.deliveryStatus" :severity="backOrdering.deliveryStatus === 'Delivered' ? 'success' : backOrdering.deliveryStatus === 'Scheduled' ? 'info' : 'warn'" />
+                                <span class="text-green-600 font-bold">
+                                    {{ backOrdering.deliveryStatus }}
+                                </span>
                             </p>
                             <p class="text-xs text-gray-500 mt-1">Last updated: {{ backOrdering.lastUpdated }}</p>
                         </div>
                     </div>
                 </div>
 
-              
                 <div class="card flex flex-col w-full">
                     <div class="font-semibold text-xl border-b pb-2">📦 Order Items</div>
 
@@ -134,7 +135,6 @@
                     </div>
                 </div>
 
-           
                 <div class="card flex flex-col gap-4">
                     <div class="font-semibold text-xl border-b pb-2">📦 Fulfilment Details</div>
                     <DataTable :value="order.fulfil_array" class="text-sm" stripedRows>
@@ -204,7 +204,6 @@
                     </div>
                 </div>
 
-            
                 <div class="card flex flex-col w-full">
                     <div class="text-2xl font-bold text-gray-800 border-b pb-2 mb-3">📦 Order Logs</div>
 

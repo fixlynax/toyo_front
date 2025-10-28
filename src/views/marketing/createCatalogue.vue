@@ -25,6 +25,20 @@
                         <label class="block font-bold text-gray-700 mb-1">Provider</label>
                         <InputText placeholder="Enter provider name" class="w-full" />
                     </div>
+                    <div v-if="catalogue.type === 'E-Voucher'">
+                        <label class="block font-bold text-gray-700 mb-1">Value Type</label>
+                        <Dropdown v-model="catalogue.valueType" :options="valueType" optionLabel="label" optionValue="value" placeholder="Select an option" class="w-full" />
+                    </div>
+
+                    <div v-if="catalogue.type === 'E-Voucher'">
+                        <label class="block font-bold text-gray-700 mb-1">Value Amount</label>
+                        <div>
+                            <InputNumber v-if="catalogue.valueType !== 'Percentage'" placeholder="Enter Amount" class="w-full" />
+                            <div v-else class="flex items-center gap-2">
+                                <InputNumber placeholder="Enter Percentage" suffix="%" :max="100" class="w-full" />
+                            </div>
+                        </div>
+                    </div>
                 </div>
                 <!-- catalogue Form -->
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -33,7 +47,7 @@
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4 md:col-span-2">
                         <div>
                             <label class="block font-bold text-gray-700 mb-1">Purpose To</label>
-                            <Dropdown v-model="catalogue.purpose" :options="purposeOptions" optionLabel="label" optionValue="value" placeholder="Select an option" class="w-full" />
+                            <Dropdown v-model="catalogue.purpose" :options="filteredPurposeOptions" optionLabel="label" optionValue="value" placeholder="Select an option" class="w-full" />
                         </div>
                         <div>
                             <label class="block font-bold text-gray-700 mb-1">Expiry</label>
@@ -82,13 +96,21 @@
                             </div>
                         </div>
                     </div>
+                    <div v-if="!catalogue.type || catalogue.type === 'Item'" class="flex justify-end mt-8 gap-2">
+                        <div class="w-40">
+                            <Button label="Cancel" class="p-button-secondary w-full mr-2" @click="$router.back()" />
+                        </div>
+                        <div class="w-40">
+                            <Button label="Submit" class="w-full" @click="$router.back()" />
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
         <div v-if="catalogue.type === 'Point'" class="mt-8">
             <div class="card flex flex-col w-full">
                 <div class="flex items-center justify-between border-b pb-2 mb-2">
-                    <div class="text-2xl font-bold text-gray-800">🪙 Point Add</div>
+                    <div class="text-2xl font-bold text-gray-800">🪙 Point Reward</div>
                 </div>
 
                 <!-- 3-Column Input Section -->
@@ -160,7 +182,7 @@
         <!-- ======================== -->
         <!-- E-Wallet PIN Section     -->
         <!-- ======================== -->
-        <div v-if="catalogue.type === 'E-Wallet' || catalogue.type === 'E-Voucher'" class="mt-8">
+        <div v-if="catalogue.type === 'E-Wallet'" class="mt-8">
             <div class="card flex flex-col w-full">
                 <div class="flex items-center justify-between border-b pb-2 mb-2">
                     <div class="text-2xl font-bold text-gray-800">🔑 List PIN</div>
@@ -214,7 +236,7 @@
 </template>
 
 <script setup>
-import { ref } from 'vue';
+import { ref, computed } from 'vue';
 
 /* Dropdown Options */
 const typeOptions = [
@@ -229,11 +251,17 @@ const isBirthdayOptions = [
     { label: 'No', value: 0 }
 ];
 
+const valueType = [
+    { label: 'Percentage', value: 'Percentage' },
+    { label: 'Amount', value: 'Amount' }
+];
+
 const purposeOptions = [
     { label: 'Catalogue', value: 'Catalogue' },
     { label: 'Campaign', value: 'Campaign' },
     { label: 'Game', value: 'Game' }
 ];
+
 /* Catalogue State */
 const catalogue = ref({
     title: '',
@@ -277,6 +305,14 @@ const catalogue = ref({
     point3: 0
 });
 
+/* Filtered Purpose Options */
+const filteredPurposeOptions = computed(() => {
+    if (catalogue.value.type === 'Point') {
+        return purposeOptions.filter((opt) => opt.value !== 'Catalogue');
+    }
+    return purposeOptions;
+});
+
 const loading = ref(false);
 
 /* Image Handlers */
@@ -300,7 +336,6 @@ const downloadPins = () => {
 
 const importPins = () => {
     console.log('Importing PINs for', catalogue.value.title);
-    // Example mock PIN
     catalogue.value.pins.push({
         id: catalogue.value.pins.length + 1,
         pin: '1234-5678-ABCD',
@@ -318,7 +353,6 @@ const downloadVouchers = () => {
 
 const importVouchers = () => {
     console.log('Importing vouchers for', catalogue.value.title);
-    // Example mock voucher
     catalogue.value.vouchers.push({
         id: catalogue.value.vouchers.length + 1,
         code: 'VOUCHER-' + (catalogue.value.vouchers.length + 1),
