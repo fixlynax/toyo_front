@@ -85,7 +85,43 @@
                 </div>
             </div>
         </div>
-        <div class="mt-8">
+        <div v-if="catalogue.type === 'Point'" class="mt-8">
+            <div class="card flex flex-col w-full">
+                <div class="flex items-center justify-between border-b pb-2 mb-2">
+                    <div class="text-2xl font-bold text-gray-800">🪙 Point Add</div>
+                </div>
+
+                <!-- 3-Column Input Section -->
+                <div class="mt-6">
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <div>
+                            <label for="silverpoint" class="block font-bold text-gray-700 mb-1">Silver Point</label>
+                            <InputNumber id="silverpoint" showButtons min="0" class="w-full" />
+                        </div>
+
+                        <div>
+                            <label for="goldpoint" class="block font-bold text-gray-700 mb-1">Gold Point</label>
+                            <InputNumber id="goldpoint" showButtons min="0" class="w-full" />
+                        </div>
+
+                        <div>
+                            <label for="plantinumpoint" class="block font-bold text-gray-700 mb-1">Plantinum Point</label>
+                            <InputNumber id="plantinumpoint" showButtons min="0" class="w-full" />
+                        </div>
+                    </div>
+                    <!-- Submit Buttons (Default position) -->
+                    <div v-if="catalogue.type !== 'E-Wallet' && catalogue.type !== 'E-Voucher'" class="flex justify-end mt-8 gap-2">
+                        <div class="w-40">
+                            <Button label="Cancel" class="p-button-secondary w-full mr-2" @click="$router.back()" />
+                        </div>
+                        <div class="w-40">
+                            <Button label="Submit" class="w-full" @click="$router.back()" />
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div v-if="catalogue.purpose === 'Catalogue' && catalogue.type !== 'Point'" class="mt-8">
             <div class="card flex flex-col w-full">
                 <div class="flex items-center justify-between border-b pb-2 mb-2">
                     <div class="text-2xl font-bold text-gray-800">🪙 Cost Redeem</div>
@@ -184,7 +220,8 @@ import { ref } from 'vue';
 const typeOptions = [
     { label: 'E-Wallet', value: 'E-Wallet' },
     { label: 'E-Voucher', value: 'E-Voucher' },
-    { label: 'Item', value: 'Item' }
+    { label: 'Item', value: 'Item' },
+    { label: 'Point', value: 'Point' }
 ];
 
 const isBirthdayOptions = [
