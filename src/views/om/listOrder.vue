@@ -44,7 +44,7 @@ const statusTabs = [
     { label: 'Delivery', status: 77 },
     { label: 'Completed', status: 1 }
 ];
-const activeTabIndex = ref(0);
+const activeTabIndex = ref(66);
 
 // 🟢 Fetch data
 onBeforeMount(async () => {

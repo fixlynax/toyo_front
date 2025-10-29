@@ -132,7 +132,7 @@ onMounted(async () => {
 
         console.log('API Response:', response.data);
 
-        if (response.data.status === 1 && Array.isArray(response.data.admin_data)) {
+        if (response.data.status === 'PENDING' && Array.isArray(response.data.admin_data)) {
             // Map the API data to our frontend structure
             listData.value = response.data.admin_data.map(returnOrder => {
                 return {

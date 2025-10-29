@@ -49,7 +49,7 @@
             <!-- ========================= -->
             <Column field="refno" header="Ref No" sortable style="min-width: 8rem">
                 <template #body="{ data }">
-                    <RouterLink to="/marketing/detailRedemption" class="hover:underline font-bold">
+                    <RouterLink :to="`/marketing/detailRedemption/${data.id}`" class="hover:underline font-bold">
                         {{ data.refno }}
                     </RouterLink>
                 </template>
@@ -94,7 +94,7 @@
 <script setup>
 import { onMounted, ref } from 'vue';
 import { FilterMatchMode } from '@primevue/core/api';
-import { ListRedeemService } from '@/service/ListRedeem';
+import api from '@/service/api';
 
 // Data variables
 const listData = ref([]);
@@ -109,27 +109,48 @@ const filters = ref({
 // Fetch data on mount
 // =========================
 onMounted(async () => {
-    loading.value = true;
-    listData.value = await ListRedeemService.getListRedeemData();
-    loading.value = false;
+    try {
+        loading.value = true;
+        const response = await api.get('redeem/list');
+
+        console.log('API Response:', response.data);
+
+        if (response.data.status === 1 && Array.isArray(response.data.admin_data)) {
+            listData.value = response.data.admin_data.map((redeem) => ({
+                id: redeem.id,
+                refno: redeem.ref_no || 'Untitled',
+                recipientName: redeem.member_name,
+                itemName: redeem.redeem_item,
+                quantity: redeem.quantity, 
+                redemptionDate: redeem.redeem_date, 
+                status: redeem.status
+            }));
+        } else {
+            console.error('API returned error or invalid data:', response.data);
+            listData.value = [];
+        }
+    } catch (error) {
+        console.error('Error fetching redeem list:', error);
+        listData.value = [];
+    } finally {
+        loading.value = false;
+    }
 });
 
 // =========================
 // Helper functions for status display
 // =========================
 const getOverallStatusLabel = (status) => {
-    if (status === '0') return 'Pending';
-    if (status === '1') return 'Approved';
-    if (status === '2') return 'Rejected';
-    if (status === 'Shipped') return 'Shipped';
+    if (status === 0) return 'Pending';
+    if (status === 1) return 'Approved';
+    if (status === 2) return 'Rejected';
     return 'Unknown';
 };
 
 const getOverallStatusSeverity = (status) => {
-    if (status === '0') return 'warn';
-    if (status === '1') return 'success';
-    if (status === '2') return 'danger';
-    if (status === 'Shipped') return 'success';
+    if (status === 0) return 'warn';
+    if (status === 1) return 'success';
+    if (status === 2) return 'danger';
     return 'secondary';
 };
 </script>
