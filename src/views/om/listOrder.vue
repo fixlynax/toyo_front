@@ -1,7 +1,7 @@
 <script setup>
 import api from '@/service/api';
 import { FilterMatchMode, FilterOperator } from '@primevue/core/api';
-import { onBeforeMount, ref, computed } from 'vue';
+import { onBeforeMount, ref, computed, watch } from 'vue';
 import { RouterLink } from 'vue-router';
 
 // PrimeVue Components
@@ -36,9 +36,8 @@ const statusMap = {
     99: { label: 'Return Order', severity: 'danger' }
 };
 
-// 🟢 Tab setup
+// 🟢 Tab setup - Added "All" tab and fixed status mapping
 const statusTabs = [
-    { label: 'All', status: null },
     { label: 'Pending', status: 0 },
     { label: 'Processing', status: 66 },
     { label: 'Delivery', status: 77 },
@@ -46,28 +45,36 @@ const statusTabs = [
 ];
 const activeTabIndex = ref(0);
 
-// 🟢 Fetch data
-onBeforeMount(async () => {
+// 🟢 Fetch data function
+const fetchOrders = async (status = null) => {
     try {
-        initFilters1();
         loading.value = true;
-        const response = await api.get('order/list-order');
+
+        // Map frontend status to backend status labels
+        const statusMapping = {
+            0: 'PENDING',
+            66: 'PROCESSING',
+            77: 'DELIVERY',
+            1: 'COMPLETE',
+        };
+
+        const tabs = statusMapping[status] || 'PENDING';
+
+        const response = await api.post('order/list-order', { tabs });
 
         console.log('API Response:', response.data);
 
-        // FIX: Check for status === 1 (success) instead of 0
         if (response.data.status === 1 && Array.isArray(response.data.admin_data)) {
             // Transform the API data to match frontend expectations
-            listData.value = response.data.admin_data.map(order => ({
+            listData.value = response.data.admin_data.map((order) => ({
                 id: order.id,
                 orderNo: order.order_no,
                 custAccountNo: order.custaccountno,
-                // FIX: Use dealerName from API response
-                companyName: order.dealerName ,
+                companyName: order.dealerName || `${order.companyName1 || ''} ${order.companyName2 || ''}`.trim(),
                 sapOrderType: order.sapordertype,
                 orderType: order.orderDesc,
                 deliveryType: order.deliveryType,
-                shipToAccountNo: order.shiptoCustAccNo ,
+                shipToAccountNo: order.shiptoCustAccNo,
                 deliveryDate: order.deliveryDate,
                 soNo: order.so_no,
                 doNo: order.do_no,
@@ -77,7 +84,7 @@ onBeforeMount(async () => {
                 total: order.total,
                 orderArray: order.order_array
             }));
-            
+
             console.log('Transformed data:', listData.value);
         } else {
             console.error('API returned error or invalid data:', response.data);
@@ -89,14 +96,27 @@ onBeforeMount(async () => {
     } finally {
         loading.value = false;
     }
+};
+
+// 🟢 Watch for tab changes and fetch data
+watch(activeTabIndex, (newIndex) => {
+    const selectedStatus = statusTabs[newIndex]?.status;
+    fetchOrders(selectedStatus);
+});
+
+// 🟢 Initial data fetch
+onBeforeMount(async () => {
+    initFilters1();
+    const selectedStatus = statusTabs[activeTabIndex.value]?.status;
+    await fetchOrders(selectedStatus);
 });
 
 // 🟢 Helper functions for data mapping
 function mapOrderType(sapOrderType) {
     const typeMap = {
-        'ZRP1': 0, // Normal
-        'ZDS1': 1, // DS
-        'ZOU1': 2  // Own-use
+        ZRP1: 0, // Normal
+        ZDS1: 1, // DS
+        ZOU1: 2 // Own-use
     };
     return typeMap[sapOrderType] ?? 0; // Default to Normal
 }
@@ -109,10 +129,8 @@ function mapDeliveryMethod(deliveryType) {
 // 🟢 Filtered Data (based on selected tab)
 const filteredOrders = computed(() => {
     const selectedStatus = statusTabs[activeTabIndex.value]?.status;
-    // FIX: Handle null/undefined properly for "All" tab
-    if (selectedStatus === null || selectedStatus === undefined) {
-        return listData.value;
-    }
+
+    // For specific status tabs, filter the data
     return listData.value.filter((order) => order.orderStatus === selectedStatus);
 });
 
@@ -139,17 +157,7 @@ const formatDate = (dateString) => {
         <TabMenu :model="statusTabs" v-model:activeIndex="activeTabIndex" class="mb-4" />
 
         <!-- 🟢 DataTable -->
-        <DataTable 
-            :value="filteredOrders" 
-            :paginator="true" 
-            :rows="10" 
-            dataKey="id" 
-            :rowHover="true" 
-            :loading="loading" 
-            :filters="filters1" 
-            filterDisplay="menu"
-            :globalFilterFields="['orderNo', 'custAccountNo', 'companyName', 'shipToAccountNo']"
-        >
+        <DataTable :value="filteredOrders" :paginator="true" :rows="10" dataKey="id" :rowHover="true" :loading="loading" :filters="filters1" filterDisplay="menu" :globalFilterFields="['orderNo', 'custAccountNo', 'companyName', 'shipToAccountNo']">
             <!-- 🟢 Header -->
             <template #header>
                 <div class="flex items-center justify-between gap-4 w-full flex-wrap">
@@ -159,35 +167,24 @@ const formatDate = (dateString) => {
                             <InputIcon>
                                 <i class="pi pi-search" />
                             </InputIcon>
-                            <InputText 
-                                v-model="filters1['global'].value" 
-                                placeholder="Quick Search" 
-                                class="w-full" 
-                            />
+                            <InputText v-model="filters1['global'].value" placeholder="Quick Search" class="w-full" />
                         </IconField>
                         <Button type="button" icon="pi pi-cog" class="p-button" />
                     </div>
                 </div>
             </template>
 
-            <template #empty> 
-                <div class="text-center py-4 text-gray-500">
-                    No orders found.
-                </div>
+            <template #empty>
+                <div class="text-center py-4 text-gray-500">No orders found.</div>
             </template>
-            <template #loading> 
-                <div class="text-center py-4">
-                    Loading orders data. Please wait.
-                </div>
+            <template #loading>
+                <div class="text-center py-4">Loading orders data. Please wait.</div>
             </template>
 
             <!-- 🟢 Order Info -->
             <Column header="Order No" style="min-width: 6rem">
                 <template #body="{ data }">
-                    <RouterLink 
-                        :to="`/om/detailOrder/${data.id}`" 
-                        class="hover:underline font-bold text-blue-600"
-                    >
+                    <RouterLink :to="`/om/detailOrder/${data.id}`" class="hover:underline font-bold text-blue-600">
                         {{ data.orderNo || '-' }}
                     </RouterLink>
                 </template>
@@ -201,25 +198,25 @@ const formatDate = (dateString) => {
             </Column>
             <Column field="companyName" header="Dealer Name" style="min-width: 10rem">
                 <template #body="{ data }">
-                    {{ data.companyName || '-' }}
+                    {{ data.companyName1 || '-' }}
                 </template>
             </Column>
 
             <!-- 🟢 Order Type -->
             <Column field="orderType" header="Order Type" style="min-width: 7rem">
                 <template #body="{ data }">
-                    <span v-if="data.orderType === 0">Normal</span>
-                    <span v-else-if="data.orderType === 1">DS</span>
-                    <span v-else-if="data.orderType === 2">Own-use</span>
-                    <span v-else>{{ data.orderDesc || data.sapOrderType || '-' }}</span>
+                    <span v-if="data.orderType === 'NORMAL'">Normal</span>
+                    <span v-else-if="data.orderType === 'DS'">DS</span>
+                    <span v-else-if="data.orderType === 'OWN-USE'">Own-use</span>
+                    <span v-else>{{ data.orderType || data.sapOrderType || '-' }}</span>
                 </template>
             </Column>
 
             <!-- 🟢 Delivery Method -->
-            <Column field="deliveryMethod" header="Delivery" style="min-width: 7rem">
+            <Column field="deliveryType" header="Delivery" style="min-width: 7rem">
                 <template #body="{ data }">
-                    <span v-if="data.deliveryMethod === 0">Deliver</span>
-                    <span v-else-if="data.deliveryMethod === 1">Pickup</span>
+                    <span v-if="data.deliveryType === 'DELIVER'">Deliver</span>
+                    <span v-else-if="data.deliveryType === 'PICKUP'">Pickup</span>
                     <span v-else>{{ data.deliveryType || '-' }}</span>
                 </template>
             </Column>
@@ -248,7 +245,7 @@ const formatDate = (dateString) => {
                         <span v-else-if="data.orderStatus === 1">
                             Invoice: <strong>{{ data.invoiceNo || '-' }}</strong>
                         </span>
-                        <span v-else-if="data.orderStatus === 99"> 
+                        <span v-else-if="data.orderStatus === 99">
                             <strong>Return Order</strong>
                         </span>
                         <span v-else>-</span>
@@ -259,10 +256,7 @@ const formatDate = (dateString) => {
             <!-- 🟢 Status -->
             <Column header="Status" style="min-width: 6rem">
                 <template #body="{ data }">
-                    <Tag 
-                        :value="statusMap[data.orderStatus]?.label || 'Unknown'" 
-                        :severity="statusMap[data.orderStatus]?.severity || 'danger'" 
-                    />
+                    <Tag :value="statusMap[data.orderStatus]?.label || 'Unknown'" :severity="statusMap[data.orderStatus]?.severity || 'danger'" />
                 </template>
             </Column>
 
@@ -287,7 +281,7 @@ const formatDate = (dateString) => {
 }
 
 :deep(.p-tabmenu .p-tabmenu-nav .p-tabmenuitem.p-highlight .p-menuitem-link) {
-    border-color: #3B82F6;
+    border-color: #3b82f6;
 }
 
 :deep(.p-datatable .p-datatable-thead > tr > th) {

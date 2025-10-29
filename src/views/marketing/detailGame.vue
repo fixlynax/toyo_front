@@ -6,12 +6,7 @@
                 <!-- Detail Event -->
                 <div class="card flex flex-col w-full">
                     <div class="flex items-center justify-between border-b pb-2">
-                        <div class="flex items-center gap-3">
-                            <RouterLink to="/marketing/listGame">
-                                <Button icon="pi pi-arrow-left" class="p-button-text p-button-secondary text-xl" size="big" v-tooltip="'Back'" />
-                            </RouterLink>
-                            <div class="text-2xl font-bold text-gray-800">Game Details</div>
-                        </div>
+                        <div class="text-2xl font-bold text-gray-800">Game Details</div>
                         <div class="inline-flex items-center gap-2">
                             <!-- Edit Event -->
                             <RouterLink :to="`/marketing/editGame/${gameId}`">
@@ -139,11 +134,7 @@
                                     <td class="px-4 py-2 text-right">
                                         <div class="flex justify-end">
                                             <div class="flex flex-col items-center">
-                                                <VueQrcode 
-                                                    :value="qrCodeData" 
-                                                    :options="qrOptions"
-                                                    class="rounded-xl shadow-sm object-cover w-30 h-30 mb-2" 
-                                                />
+                                                <img :src="`/demo/images/qr-toyo.png`" alt="QR Game Image" class="rounded-xl shadow-sm object-cover w-30 h-20 mb-2" />
                                                 <button class="bg-red-600 text-white px-3 py-1 rounded" @click="downloadQRCode">Download</button>
                                             </div>
                                         </div>
@@ -223,7 +214,6 @@
 import { ref, onMounted, computed } from 'vue';
 import { useRoute } from 'vue-router';
 import { useToast } from 'primevue/usetoast';
-import VueQrcode from '@chenfengyuan/vue-qrcode';
 import api from '@/service/api';
 
 const route = useRoute();
@@ -257,21 +247,6 @@ const game = ref({
 
 const listPrize = ref([]);
 const participants = ref([]);
-
-// QR Code configuration
-const qrOptions = ref({
-    width: 120,
-    height: 120,
-    color: {
-        dark: '#000000',
-        light: '#FFFFFF'
-    }
-});
-
-// Computed property for QR code data
-const qrCodeData = computed(() => {
-    return `TOYO:GAME:${game.value.gameNo}`;
-});
 
 const gameStatus = computed({
     get: () => game.value.status === 1,
@@ -494,81 +469,14 @@ async function exportParticipants() {
 }
 
 // Download QR code
-async function downloadQRCode() {
-    try {
-        // Create a canvas element to draw the QR code
-        const canvas = document.createElement('canvas');
-        const ctx = canvas.getContext('2d');
-        
-        // Set canvas size
-        canvas.width = 300;
-        canvas.height = 300;
-        
-        // Create a temporary QR code for download with higher resolution
-        const tempQrOptions = {
-            ...qrOptions.value,
-            width: 300,
-            height: 300
-        };
-        
-        // Create QR code image
-        const qrCode = await generateQRCodeImage(qrCodeData.value, tempQrOptions);
-        
-        // Draw white background
-        ctx.fillStyle = '#FFFFFF';
-        ctx.fillRect(0, 0, canvas.width, canvas.height);
-        
-        // Draw QR code
-        const img = new Image();
-        img.onload = () => {
-            ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
-            
-            // Create download link
-            const link = document.createElement('a');
-            link.download = `TOYO_GAME_${game.value.gameNo}_QR.png`;
-            link.href = canvas.toDataURL('image/png');
-            link.click();
-            
-            toast.add({
-                severity: 'success',
-                summary: 'Success',
-                detail: 'QR Code downloaded successfully',
-                life: 3000
-            });
-        };
-        img.src = qrCode;
-        
-    } catch (error) {
-        console.error('Error downloading QR code:', error);
-        toast.add({
-            severity: 'error',
-            summary: 'Error',
-            detail: 'Failed to download QR code',
-            life: 3000
-        });
-    }
-}
-
-// Helper function to generate QR code as image data URL
-function generateQRCodeImage(data, options) {
-    return new Promise((resolve) => {
-        // Create a temporary VueQrcode component to generate the QR code
-        const tempQr = new VueQrcode({
-            propsData: {
-                value: data,
-                options: options
-            }
-        });
-        
-        // Mount temporarily to get the QR code
-        tempQr.$mount();
-        const qrSvg = tempQr.$el.outerHTML;
-        
-        // Convert SVG to data URL
-        const svgBlob = new Blob([qrSvg], { type: 'image/svg+xml;charset=utf-8' });
-        const url = URL.createObjectURL(svgBlob);
-        
-        resolve(url);
+function downloadQRCode() {
+    // Implement QR code download functionality
+    console.log('Downloading QR code...');
+    toast.add({
+        severity: 'info',
+        summary: 'Info',
+        detail: 'QR download functionality to be implemented',
+        life: 3000
     });
 }
 
