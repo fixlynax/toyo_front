@@ -86,7 +86,7 @@ const toast = useToast();
 const loading = ref(true);
 const saving = ref(false);
 const error = ref(null);
-const minDate = ref(new Date()); // ✅ Disable past dates
+const minDate = ref(new Date());
 
 const audienceOptions = [
     { label: 'TC', value: 'TC' },
@@ -107,7 +107,6 @@ const news = ref({
     status: 0
 });
 
-// Track original image URLs and current state
 const originalImages = ref({
     image1URL: null,
     image2URL: null,
@@ -145,7 +144,6 @@ const fetchNewsDetails = async () => {
                 endDate: data.endDate
             };
 
-            // ✅ Load private images and set both original and current images
             if (data.image1URL) {
                 const imageUrl = await fetchPrivateImage(data.image1URL);
                 previewImages.value.image1URL = imageUrl;
@@ -184,14 +182,12 @@ const fetchPrivateImage = async (url) => {
     }
 };
 
-// ✅ Date validation logic
 const validateDates = () => {
     const start = new Date(news.value.startDate);
     const end = new Date(news.value.endDate);
     const today = new Date();
     today.setHours(0, 0, 0, 0);
 
-    // Prevent selecting past dates
     if (start < today) {
         toast.add({
             severity: 'warn',
@@ -225,7 +221,6 @@ const validateDates = () => {
     }
 };
 
-// ✅ Image selection
 const onImageSelect = (event, property) => {
     const file = event.files[0];
     if (!file) return;
@@ -235,15 +230,13 @@ const onImageSelect = (event, property) => {
     previewImages.value[property] = URL.createObjectURL(file);
 };
 
-// ✅ Remove image
 const removeImage = (property) => {
     news.value[property] = null;
-    currentImages.value[property] = null; // Mark as removed
-    imageChanges.value[property] = true; // Mark as changed
+    currentImages.value[property] = 'REMOVED'; 
+    imageChanges.value[property] = true; 
     previewImages.value[property] = null;
 };
 
-// ✅ Update news
 const updateNews = async () => {
     try {
         if (news.value.startDate && news.value.endDate && new Date(news.value.endDate) < new Date(news.value.startDate)) {
@@ -267,25 +260,18 @@ const updateNews = async () => {
         formData.append('startDate', news.value.startDate);
         formData.append('endDate', news.value.endDate);
         formData.append('isPublish', news.value.status ?? 0);
-
-        // ✅ Smart image handling - only send changed images
+                                                                                                                                                                                                        
         ['image1URL', 'image2URL', 'image3URL'].forEach((field, index) => {
-            const fileField = `image${index + 1}`;
+            const imageField = `image${index + 1}`;
             const current = currentImages.value[field];
-            const original = originalImages.value[field];
             const hasChanged = imageChanges.value[field];
 
             if (hasChanged) {
                 if (current instanceof File) {
-                    // 🟢 Upload new image
-                    formData.append(fileField, current);
-                } else if (current === null) {
-                    // 🔴 Image removed - send empty string to clear it
-                    formData.append(fileField, '');
+                    formData.append(imageField, current);
+                } else if (current === 'REMOVED') {
+                    formData.append(imageField, '');
                 }
-            } else if (original) {
-                // 🟢 Keep existing image - send the URL to maintain it
-                formData.append(fileField + 'URL', original);
             }
         });
 
