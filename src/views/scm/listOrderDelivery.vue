@@ -109,11 +109,6 @@
                 </template>
             </Column>
 
-            <Column field="orderType" header="Order Item" style="min-width: 10rem">
-                <template #body="{ data }">
-                    {{ getOrderTypeLabel(data.orderType, data.deliveryMethod, data.containerSize) }}
-                </template>
-            </Column>
             <Column field="orderType" header="Order Type" style="min-width: 10rem">
                 <template #body="{ data }">
                     {{ getOrderTypeLabel(data.orderType, data.deliveryMethod, data.containerSize) }}

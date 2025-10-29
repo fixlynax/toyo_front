@@ -33,56 +33,37 @@
             <template #empty> No back orders found. </template>
             <template #loading> Loading back orders data. Please wait. </template>
 
-            <Column field="OrderNo" header="Order No." style="min-width: 10rem">
+            <Column field="orderNo" header="Order No." style="min-width: 10rem">
                 <template #body="{ data }">
-                    <RouterLink to="/om/detailBackOrder" class="hover:underline font-bold text-black-600">
-                        {{ data.custAccountNo }}
+                    <RouterLink :to="`/om/detailBackOrder/${data.id}`" class="hover:underline font-bold text-black-600">
+                        {{ data.orderNo }}
                     </RouterLink>
                 </template>
             </Column>
-            <Column field="custAccountNo" header="Dealer Acc No" style="min-width: 10rem">
+            
+            <Column field="custAccountNo" header="Dealer Acc No" style="min-width: 10rem" />
+
+            <Column field="customerName" header="Dealer Name" style="min-width: 10rem" />
+            
+            <Column field="deliveryType" header="Delivery" style="min-width: 10rem" />
+
+            <Column field="orderDate" header="Order Date" style="min-width: 8rem">
                 <template #body="{ data }">
-                        {{ data.custAccountNo }}
+                    {{ formatDate(data.orderDate) }}
                 </template>
             </Column>
 
-            <Column field="customerName" header="Dealer Name" style="min-width: 10rem">
-                <template #body="{ data }">
-                    {{ data.customerName }}
-                </template>
-            </Column>
-            <!-- <Column field="customerName" header="Order Type" style="min-width: 10rem">
-                <template #body="{ data }">
-                    {{ data.orderType }}
-                </template>
-            </Column> -->
-            <Column field="customerName" header="Delivery" style="min-width: 10rem">
-                <template #body="{ data }">
-                    {{ data.deliveryType }}
-                </template>
-            </Column>
-
-            <Column field="deliveryDate" header="Order Date" style="min-width: 8rem">
-                <template #body="{ data }">
-                    {{ data.deliveryDate }}
-                </template>
-            </Column>
-
-            <Column field="deliveryDate" header="Ship To Acc No." style="min-width: 8rem">
-                <template #body="{ data }">
-                    {{ data.shipTo }}
-                </template>
-            </Column>
+            <Column field="shipTo" header="Ship To Acc No." style="min-width: 8rem" />
 
             <Column field="deliveryDate" header="Delivery Date" style="min-width: 8rem">
                 <template #body="{ data }">
-                    {{ data.deliveryDate }}
+                    {{ formatDate(data.deliveryDate) }}
                 </template>
             </Column>
 
             <Column field="expiry" header="Back Order Expiry" style="min-width: 10rem">
                 <template #body="{ data }">
-                    {{ data.expiry }}
+                    {{ formatDate(data.expiry) }}
                 </template>
             </Column>
 
@@ -107,7 +88,7 @@
 <script setup>
 import { onMounted, ref } from 'vue';
 import { FilterMatchMode } from '@primevue/core/api';
-import { ListBackOrderService } from '@/service/ListBackOrder';
+import api from '@/service/api';
 import ProgressBar from 'primevue/progressbar';
 import Tag from 'primevue/tag';
 import { RouterLink } from 'vue-router';
@@ -123,15 +104,102 @@ const filters = ref({
 });
 
 onMounted(async () => {
-    loading.value = true;
-    listData.value = await ListBackOrderService.getListBackOrderData();
-    loading.value = false;
+    try {
+        loading.value = true;
+        const response = await api.get('order/list-back-order');
+
+        console.log('API Response:', response.data);
+
+        if (response.data.status === 1 && response.data.admin_data) {
+            // admin_data is an array, not an object
+            const adminData = response.data.admin_data;
+            
+            listData.value = adminData.map(order => {
+                // Calculate progress percentage
+                const progress = calculateProgress(order);
+                
+                return {
+                    id: order.id,
+                    orderNo: order.bo_orderno || 'N/A',
+                    custAccountNo: order.custaccountno,
+                    customerName: order.dealerName ,
+                    deliveryType: order.deliveryType,
+                    orderDate: order.created,
+                    shipTo: order.shipto || order.custaccountno,
+                    deliveryDate: order.deliveryDate,
+                    expiry: order.expiry,
+                    orderStatus: order.orderstatus,
+                    progress: progress,
+                    status: order.status
+                };
+            });
+        } else {
+            console.error('API returned error or invalid data:', response.data);
+            listData.value = [];
+        }
+    } catch (error) {
+        console.error('Error fetching back order list:', error);
+        listData.value = [];
+    } finally {
+        loading.value = false;
+    }
 });
+
+const calculateProgress = (order) => {
+    try {
+        if (order.fullfill_percentage !== null && order.fullfill_percentage !== undefined) {
+            return parseInt(order.fullfill_percentage);
+        }
+
+        // Calculate from backorder_array and remaining_array
+        if (order.backorder_array && order.remaining_array) {
+            const backorderItems = Array.isArray(order.backorder_array) 
+                ? order.backorder_array 
+                : JSON.parse(order.backorder_array);
+                
+            const remainingItems = typeof order.remaining_array === 'string' 
+                ? JSON.parse(order.remaining_array) 
+                : order.remaining_array;
+
+            if (Array.isArray(backorderItems) && Array.isArray(remainingItems)) {
+                const totalOrdered = backorderItems.reduce((sum, item) => sum + parseInt(item.qty || 0), 0);
+                const totalRemaining = remainingItems.reduce((sum, item) => sum + parseInt(item.qty || 0), 0);
+                
+                if (totalOrdered > 0) {
+                    const fulfilled = totalOrdered - totalRemaining;
+                    return Math.round((fulfilled / totalOrdered) * 100);
+                }
+            }
+        }
+        
+        return 0;
+    } catch (error) {
+        console.error('Error calculating progress:', error);
+        return 0;
+    }
+};
+
+const formatDate = (dateString) => {
+    if (!dateString) return 'N/A';
+    
+    try {
+        const date = new Date(dateString);
+        return date.toLocaleDateString('en-US', {
+            year: 'numeric',
+            month: 'short',
+            day: 'numeric'
+        });
+    } catch (error) {
+        return dateString;
+    }
+};
 
 const getStatusLabel = (status) => {
     switch (status) {
-        case 1:
+        case 0:
             return 'Pending';
+        case 1:
+            return 'Active';
         case 2:
             return 'Expired';
         case 3:
@@ -145,12 +213,14 @@ const getStatusLabel = (status) => {
 
 const getStatusSeverity = (status) => {
     switch (status) {
-        case 1:
-            return 'warn';
-        case 2:
-            return 'danger';
-        case 3:
+        case 0:
             return 'secondary';
+        case 1:
+            return 'info';
+        case 2:
+            return 'warning';
+        case 3:
+            return 'danger';
         case 4:
             return 'success';
         default:

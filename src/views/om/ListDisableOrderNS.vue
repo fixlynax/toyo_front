@@ -20,6 +20,13 @@
             <template #header>
                 <div class="flex justify-between items-center">
                     <span class="text-sm text-gray-500">Total: {{ disabledOrders.length }}</span>
+                    <Button 
+                        label="Refresh" 
+                        icon="pi pi-refresh" 
+                        class="p-button-outlined p-button-sm" 
+                        @click="fetchDisabledOrders" 
+                        :loading="loading"
+                    />
                 </div>
             </template>
 
@@ -35,7 +42,7 @@
             <Column header="Storage Location" style="min-width: 12rem">
                 <template #body="{ data }">
                     <div class="text-sm text-gray-700">
-                        {{ data.storageLocations.join(', ') }}
+                        {{ data.storageLocation }}
                     </div>
                 </template>
             </Column>
@@ -44,10 +51,8 @@
                 <template #body="{ data }">
                     <div class="flex flex-wrap gap-1">
                         <Tag
-                            v-for="type in data.orderTypes"
-                            :key="type"
-                            :value="getOrderTypeLabel(type)"
-                            :severity="getOrderTypeSeverity(type)"
+                            :value="getOrderTypeLabel(data.orderType)"
+                            :severity="getOrderTypeSeverity(data.orderType)"
                         />
                     </div>
                 </template>
@@ -56,9 +61,9 @@
             <Column header="Period" style="min-width: 8rem">
                 <template #body="{ data }">
                     <div class="text-sm leading-tight">
-                        <div class="font-semibold">{{ formatDate(data.startDateTime) }}</div>
+                        <div class="font-semibold">{{ formatDate(data.startPeriod) }}</div>
                         <div class="text-gray-500 text-xs">to</div>
-                        <div class="font-semibold">{{ formatDate(data.endDateTime) }}</div>
+                        <div class="font-semibold">{{ formatDate(data.endPeriod) }}</div>
                     </div>
                 </template>
             </Column>
@@ -102,19 +107,17 @@
                     <label for="storageLocations" class="font-semibold text-gray-700">
                         Storage Locations <span class="text-red-500">*</span>
                     </label>
-                    <MultiSelect
+                    <Dropdown
                         id="storageLocations"
-                        v-model="newOrder.storageLocations"
+                        v-model="newOrder.storageLocation"
                         :options="storageLocationOptions"
                         optionLabel="label"
                         optionValue="value"
-                        display="chip"
-                        filter
-                        placeholder="Select Storage Locations"
+                        placeholder="Select Storage Location"
                         class="w-full"
-                        :class="{ 'p-invalid': submitted && !newOrder.storageLocations.length }"
+                        :class="{ 'p-invalid': submitted && !newOrder.storageLocation }"
                     />
-                    <small v-if="submitted && !newOrder.storageLocations.length" class="p-error block mt-1">Storage Locations is required</small>
+                    <small v-if="submitted && !newOrder.storageLocation" class="p-error block mt-1">Storage Location is required</small>
                 </div>
 
                 <!-- Order Types -->
@@ -122,19 +125,17 @@
                     <label for="orderTypes" class="font-semibold text-gray-700">
                         Order Types <span class="text-red-500">*</span>
                     </label>
-                    <MultiSelect
+                    <Dropdown
                         id="orderTypes"
-                        v-model="newOrder.orderTypes"
+                        v-model="newOrder.orderType"
                         :options="orderTypeOptions"
                         optionLabel="label"
                         optionValue="value"
-                        display="chip"
-                        filter
-                        placeholder="Select Order Types"
+                        placeholder="Select Order Type"
                         class="w-full"
-                        :class="{ 'p-invalid': submitted && !newOrder.orderTypes.length }"
+                        :class="{ 'p-invalid': submitted && !newOrder.orderType }"
                     />
-                    <small v-if="submitted && !newOrder.orderTypes.length" class="p-error block mt-1">Order Types is required</small>
+                    <small v-if="submitted && !newOrder.orderType" class="p-error block mt-1">Order Type is required</small>
                 </div>
 
                 <!-- Period -->
@@ -144,28 +145,28 @@
                     </label>
                     <div class="flex gap-2 flex-col md:flex-row">
                         <Calendar
-                            v-model="newOrder.startDateTime"
+                            v-model="newOrder.startPeriod"
                             showTime
                             hourFormat="24"
                             :minDate="minDate"
                             placeholder="Start Date/Time"
                             class="flex-1"
-                            :class="{ 'p-invalid': submitted && !newOrder.startDateTime }"
+                            :class="{ 'p-invalid': submitted && !newOrder.startPeriod }"
                         />
                         <Calendar
-                            v-model="newOrder.endDateTime"
+                            v-model="newOrder.endPeriod"
                             showTime
                             hourFormat="24"
-                            :minDate="newOrder.startDateTime || minDate"
+                            :minDate="newOrder.startPeriod || minDate"
                             placeholder="End Date/Time"
                             class="flex-1"
-                            :class="{ 'p-invalid': submitted && !newOrder.endDateTime }"
+                            :class="{ 'p-invalid': submitted && !newOrder.endPeriod }"
                         />
                     </div>
-                    <small v-if="submitted && (!newOrder.startDateTime || !newOrder.endDateTime)" class="p-error block mt-1">
+                    <small v-if="submitted && (!newOrder.startPeriod || !newOrder.endPeriod)" class="p-error block mt-1">
                         Both start and end date are required
                     </small>
-                    <small v-if="newOrder.endDateTime && newOrder.startDateTime && newOrder.endDateTime <= newOrder.startDateTime" class="p-error block mt-1">
+                    <small v-if="newOrder.endPeriod && newOrder.startPeriod && newOrder.endPeriod <= newOrder.startPeriod" class="p-error block mt-1">
                         End date must be after start date
                     </small>
                 </div>
@@ -180,7 +181,7 @@
             <template #footer>
                 <div class="flex justify-end gap-3">
                     <Button label="Cancel" icon="pi pi-times" class="p-button-text text-gray-600 hover:text-gray-800" @click="hideCreatePopup" />
-                    <Button label="Create" icon="pi pi-check" class="p-button-primary" @click="createNewOrder" />
+                    <Button label="Create" icon="pi pi-check" class="p-button-primary" @click="createNewOrder" :loading="creating" />
                 </div>
             </template>
         </Dialog>
@@ -195,24 +196,40 @@
             :closable="false"
         >
             <div class="p-fluid formgrid grid gap-4 mt-2" v-if="editingOrder">
+                <!-- Storage Locations -->
+                <div class="field col-12">
+                    <label for="editStorageLocations" class="font-semibold text-gray-700">
+                        Storage Locations <span class="text-red-500">*</span>
+                    </label>
+                    <Dropdown
+                        id="editStorageLocations"
+                        v-model="editingOrder.storageLocation"
+                        :options="storageLocationOptions"
+                        optionLabel="label"
+                        optionValue="value"
+                        placeholder="Select Storage Location"
+                        class="w-full"
+                        :class="{ 'p-invalid': submitted && !editingOrder.storageLocation }"
+                    />
+                    <small v-if="submitted && !editingOrder.storageLocation" class="p-error block mt-1">Storage Location is required</small>
+                </div>
+
                 <!-- Order Types -->
                 <div class="field col-12">
                     <label for="editOrderTypes" class="font-semibold text-gray-700">
                         Order Types <span class="text-red-500">*</span>
                     </label>
-                    <MultiSelect
+                    <Dropdown
                         id="editOrderTypes"
-                        v-model="editingOrder.orderTypes"
+                        v-model="editingOrder.orderType"
                         :options="orderTypeOptions"
                         optionLabel="label"
                         optionValue="value"
-                        display="chip"
-                        filter
-                        placeholder="Select Order Types"
+                        placeholder="Select Order Type"
                         class="w-full"
-                        :class="{ 'p-invalid': submitted && !editingOrder.orderTypes.length }"
+                        :class="{ 'p-invalid': submitted && !editingOrder.orderType }"
                     />
-                    <small v-if="submitted && !editingOrder.orderTypes.length" class="p-error block mt-1">Order Types is required</small>
+                    <small v-if="submitted && !editingOrder.orderType" class="p-error block mt-1">Order Type is required</small>
                 </div>
 
                 <!-- Period -->
@@ -222,28 +239,28 @@
                     </label>
                     <div class="flex gap-2 flex-col md:flex-row">
                         <Calendar
-                            v-model="editingOrder.startDateTime"
+                            v-model="editingOrder.startPeriod"
                             showTime
                             hourFormat="24"
                             :minDate="minDate"
                             placeholder="Start Date/Time"
                             class="flex-1"
-                            :class="{ 'p-invalid': submitted && !editingOrder.startDateTime }"
+                            :class="{ 'p-invalid': submitted && !editingOrder.startPeriod }"
                         />
                         <Calendar
-                            v-model="editingOrder.endDateTime"
+                            v-model="editingOrder.endPeriod"
                             showTime
                             hourFormat="24"
-                            :minDate="editingOrder.startDateTime || minDate"
+                            :minDate="editingOrder.startPeriod || minDate"
                             placeholder="End Date/Time"
                             class="flex-1"
-                            :class="{ 'p-invalid': submitted && !editingOrder.endDateTime }"
+                            :class="{ 'p-invalid': submitted && !editingOrder.endPeriod }"
                         />
                     </div>
-                    <small v-if="submitted && (!editingOrder.startDateTime || !editingOrder.endDateTime)" class="p-error block mt-1">
+                    <small v-if="submitted && (!editingOrder.startPeriod || !editingOrder.endPeriod)" class="p-error block mt-1">
                         Both start and end date are required
                     </small>
-                    <small v-if="editingOrder.endDateTime && editingOrder.startDateTime && editingOrder.endDateTime <= editingOrder.startDateTime" class="p-error block mt-1">
+                    <small v-if="editingOrder.endPeriod && editingOrder.startPeriod && editingOrder.endPeriod <= editingOrder.startPeriod" class="p-error block mt-1">
                         End date must be after start date
                     </small>
                 </div>
@@ -258,7 +275,7 @@
             <template #footer>
                 <div class="flex justify-end gap-3">
                     <Button label="Cancel" icon="pi pi-times" class="p-button-text text-gray-600 hover:text-gray-800" @click="hideEditPopup" />
-                    <Button label="Update" icon="pi pi-check" class="p-button-primary" @click="updateOrder" />
+                    <Button label="Update" icon="pi pi-check" class="p-button-primary" @click="updateOrder" :loading="updating" />
                 </div>
             </template>
         </Dialog>
@@ -266,12 +283,16 @@
 </template>
 
 <script>
+import api from '@/service/api';
+
 export default {
     name: 'ListPageLayout',
     data() {
         return {
             disabledOrders: [],
             loading: true,
+            creating: false,
+            updating: false,
             filters1: {
                 global: { value: null, matchMode: 'contains' }
             },
@@ -279,10 +300,10 @@ export default {
             editPopupVisible: false,
             submitted: false,
             newOrder: {
-                storageLocations: [],
-                orderTypes: [],
-                startDateTime: null,
-                endDateTime: null,
+                storageLocation: null,
+                orderType: null,
+                startPeriod: null,
+                endPeriod: null,
                 message: ''
             },
             editingOrder: null,
@@ -306,6 +327,50 @@ export default {
         }
     },
     methods: {
+        async fetchDisabledOrders() {
+            this.loading = true;
+            try {
+                const response = await api.get('maintenance/list-disable-order');
+                
+                if (response.data.status === 1) {
+                    this.disabledOrders = response.data.admin_data.map(item => ({
+                        ...item,
+                        startPeriod: this.parseApiDate(item.startPeriod),
+                        endPeriod: this.parseApiDate(item.endPeriod)
+                    }));
+                } else {
+                    this.$toast.add({
+                        severity: 'error',
+                        summary: 'Error',
+                        detail: 'Failed to fetch disabled orders',
+                        life: 3000
+                    });
+                }
+            } catch (error) {
+                console.error('Error fetching disabled orders:', error);
+                this.$toast.add({
+                    severity: 'error',
+                    summary: 'Error',
+                    detail: 'Failed to fetch disabled orders',
+                    life: 3000
+                });
+            } finally {
+                this.loading = false;
+            }
+        },
+
+        parseApiDate(dateString) {
+            if (!dateString) return null;
+            // Convert from "2025-10-01 00:00:00" to Date object
+            return new Date(dateString.replace(' ', 'T'));
+        },
+
+        formatDateForApi(date) {
+            if (!date) return null;
+            // Convert Date object to "2025-10-01 00:00:00" format
+            return date.toISOString().replace('T', ' ').substring(0, 19);
+        },
+
         formatDate(date) {
             if (!date) return 'N/A';
             return new Date(date).toLocaleString('en-MY', {
@@ -318,11 +383,11 @@ export default {
         },
 
         getStatus(order) {
-            if (!order.startDateTime || !order.endDateTime) return 'Unknown';
+            if (!order.startPeriod || !order.endPeriod) return 'Unknown';
             
             const now = new Date();
-            const start = new Date(order.startDateTime);
-            const end = new Date(order.endDateTime);
+            const start = new Date(order.startPeriod);
+            const end = new Date(order.endPeriod);
             
             if (now < start) return 'Scheduled';
             if (now <= end) return 'Active';
@@ -376,29 +441,29 @@ export default {
 
         resetForm() {
             this.newOrder = {
-                storageLocations: [],
-                orderTypes: [],
-                startDateTime: null,
-                endDateTime: null,
+                storageLocation: null,
+                orderType: null,
+                startPeriod: null,
+                endPeriod: null,
                 message: ''
             };
             this.submitted = false;
         },
 
-        createNewOrder() {
+        async createNewOrder() {
             this.submitted = true;
 
             // Validation
             if (
-                !this.newOrder.storageLocations.length ||
-                !this.newOrder.orderTypes.length ||
-                !this.newOrder.startDateTime ||
-                !this.newOrder.endDateTime
+                !this.newOrder.storageLocation ||
+                !this.newOrder.orderType ||
+                !this.newOrder.startPeriod ||
+                !this.newOrder.endPeriod
             ) {
                 return;
             }
 
-            if (this.newOrder.endDateTime <= this.newOrder.startDateTime) {
+            if (this.newOrder.endPeriod <= this.newOrder.startPeriod) {
                 this.$toast.add({
                     severity: 'error',
                     summary: 'Error',
@@ -408,56 +473,74 @@ export default {
                 return;
             }
 
-            // Create new order
-            const newOrder = {
-                id: this.disabledOrders.length > 0 ? Math.max(...this.disabledOrders.map((o) => o.id)) + 1 : 1,
-                storageLocations: [...this.newOrder.storageLocations],
-                orderTypes: [...this.newOrder.orderTypes],
-                startDateTime: new Date(this.newOrder.startDateTime),
-                endDateTime: new Date(this.newOrder.endDateTime),
-                message: this.newOrder.message || 'No message provided'
-            };
+            this.creating = true;
+            try {
+                const payload = {
+                    storageLocation: this.newOrder.storageLocation,
+                    orderType: this.newOrder.orderType,
+                    startPeriod: this.formatDateForApi(this.newOrder.startPeriod),
+                    endPeriod: this.formatDateForApi(this.newOrder.endPeriod),
+                    message: this.newOrder.message || 'No message provided'
+                };
 
-            this.disabledOrders.unshift(newOrder);
-
-            this.$toast.add({
-                severity: 'success',
-                summary: 'Success',
-                detail: 'Disable order created successfully',
-                life: 3000
-            });
-
-            this.hideCreatePopup();
+                // Note: You'll need to adjust the endpoint based on your actual API
+                const response = await api.post('maintenance/create-disable-order', payload);
+                
+                if (response.data.status === 1) {
+                    this.$toast.add({
+                        severity: 'success',
+                        summary: 'Success',
+                        detail: 'Disable order created successfully',
+                        life: 3000
+                    });
+                    
+                    this.hideCreatePopup();
+                    this.fetchDisabledOrders(); // Refresh the list
+                } else {
+                    this.$toast.add({
+                        severity: 'error',
+                        summary: 'Error',
+                        detail: response.data.message || 'Failed to create order',
+                        life: 3000
+                    });
+                }
+            } catch (error) {
+                console.error('Error creating order:', error);
+                this.$toast.add({
+                    severity: 'error',
+                    summary: 'Error',
+                    detail: 'Failed to create disable order',
+                    life: 3000
+                });
+            } finally {
+                this.creating = false;
+            }
         },
 
         editItem(item) {
             this.editingOrder = { 
                 ...item,
-                // Ensure we create new arrays to avoid reference issues
-                storageLocations: [...item.storageLocations],
-                orderTypes: [...item.orderTypes],
-                // Ensure dates are Date objects
-                startDateTime: new Date(item.startDateTime),
-                endDateTime: new Date(item.endDateTime)
+                startPeriod: new Date(item.startPeriod),
+                endPeriod: new Date(item.endPeriod)
             };
             this.editPopupVisible = true;
             this.submitted = false;
         },
 
-        updateOrder() {
+        async updateOrder() {
             this.submitted = true;
 
             // Validation
             if (
-                !this.editingOrder.storageLocations.length ||
-                !this.editingOrder.orderTypes.length ||
-                !this.editingOrder.startDateTime ||
-                !this.editingOrder.endDateTime
+                !this.editingOrder.storageLocation ||
+                !this.editingOrder.orderType ||
+                !this.editingOrder.startPeriod ||
+                !this.editingOrder.endPeriod
             ) {
                 return;
             }
 
-            if (this.editingOrder.endDateTime <= this.editingOrder.startDateTime) {
+            if (this.editingOrder.endPeriod <= this.editingOrder.startPeriod) {
                 this.$toast.add({
                     severity: 'error',
                     summary: 'Error',
@@ -467,25 +550,49 @@ export default {
                 return;
             }
 
-            // Find and update the order
-            const index = this.disabledOrders.findIndex(order => order.id === this.editingOrder.id);
-            if (index !== -1) {
-                // Use splice to ensure reactivity
-                this.disabledOrders.splice(index, 1, { 
-                    ...this.editingOrder,
-                    startDateTime: new Date(this.editingOrder.startDateTime),
-                    endDateTime: new Date(this.editingOrder.endDateTime)
+            this.updating = true;
+            try {
+                const payload = {
+                    id: this.editingOrder.id,
+                    storageLocation: this.editingOrder.storageLocation,
+                    orderType: this.editingOrder.orderType,
+                    startPeriod: this.formatDateForApi(this.editingOrder.startPeriod),
+                    endPeriod: this.formatDateForApi(this.editingOrder.endPeriod),
+                    message: this.editingOrder.message || 'No message provided'
+                };
+
+                // Note: You'll need to adjust the endpoint based on your actual API
+                const response = await api.put('maintenance/update-disable-order', payload);
+                
+                if (response.data.status === 1) {
+                    this.$toast.add({
+                        severity: 'success',
+                        summary: 'Success',
+                        detail: 'Disable order updated successfully',
+                        life: 3000
+                    });
+                    
+                    this.hideEditPopup();
+                    this.fetchDisabledOrders(); // Refresh the list
+                } else {
+                    this.$toast.add({
+                        severity: 'error',
+                        summary: 'Error',
+                        detail: response.data.message || 'Failed to update order',
+                        life: 3000
+                    });
+                }
+            } catch (error) {
+                console.error('Error updating order:', error);
+                this.$toast.add({
+                    severity: 'error',
+                    summary: 'Error',
+                    detail: 'Failed to update disable order',
+                    life: 3000
                 });
+            } finally {
+                this.updating = false;
             }
-
-            this.$toast.add({
-                severity: 'success',
-                summary: 'Success',
-                detail: 'Disable order updated successfully',
-                life: 3000
-            });
-
-            this.hideEditPopup();
         },
 
         hideEditPopup() {
@@ -494,56 +601,42 @@ export default {
             this.submitted = false;
         },
 
-        deleteItem(id) {
+        async deleteItem(id) {
             if (confirm('Are you sure you want to delete this order?')) {
-                this.disabledOrders = this.disabledOrders.filter((o) => o.id !== id);
-                this.$toast.add({
-                    severity: 'info',
-                    summary: 'Deleted',
-                    detail: 'Order has been deleted',
-                    life: 3000
-                });
+                try {
+                    // Note: You'll need to adjust the endpoint based on your actual API
+                    const response = await api.delete(`maintenance/delete-disable-order/${id}`);
+                    
+                    if (response.data.status === 1) {
+                        this.$toast.add({
+                            severity: 'info',
+                            summary: 'Deleted',
+                            detail: 'Order has been deleted',
+                            life: 3000
+                        });
+                        this.fetchDisabledOrders(); // Refresh the list
+                    } else {
+                        this.$toast.add({
+                            severity: 'error',
+                            summary: 'Error',
+                            detail: response.data.message || 'Failed to delete order',
+                            life: 3000
+                        });
+                    }
+                } catch (error) {
+                    console.error('Error deleting order:', error);
+                    this.$toast.add({
+                        severity: 'error',
+                        summary: 'Error',
+                        detail: 'Failed to delete order',
+                        life: 3000
+                    });
+                }
             }
         }
     },
     mounted() {
-        // Sample data based on your image structure
-        this.disabledOrders = [
-            {
-                id: 1,
-                storageLocations: ['TMJB'],
-                orderTypes: ['NORMAL', 'OWN'],
-                startDateTime: new Date('2025-01-20T08:00:00'),
-                endDateTime: new Date('2025-01-20T12:00:00'),
-                message: 'Maintenance for TMJB location'
-            },
-            {
-                id: 2,
-                storageLocations: ['TMSA'],
-                orderTypes: ['NORMAL', 'OWN'],
-                startDateTime: new Date('2025-01-21T14:00:00'),
-                endDateTime: new Date('2025-01-21T16:00:00'),
-                message: 'Inventory counting for TMSA'
-            },
-            {
-                id: 3,
-                storageLocations: ['RETP'],
-                orderTypes: ['ALL'],
-                startDateTime: new Date('2025-01-22T09:00:00'),
-                endDateTime: new Date('2025-01-22T17:00:00'),
-                message: 'System upgrade for RETP'
-            },
-            {
-                id: 4,
-                storageLocations: ['TMSB', 'TMSK'],
-                orderTypes: ['NORMAL'],
-                startDateTime: new Date('2025-01-24T08:00:00'),
-                endDateTime: new Date('2025-01-24T12:00:00'),
-                message: 'Multiple location maintenance'
-            }
-        ];
-
-        this.loading = false;
+        this.fetchDisabledOrders();
     }
 };
 </script>

@@ -14,9 +14,7 @@
             filterDisplay="menu"
             :globalFilterFields="['returnRequestNo', 'custAccountNo', 'customerName', 'deliveryDate', 'orderStatus']"
         >
-            <!-- ========================= -->
-            <!-- Header Section -->
-            <!-- ========================= -->
+            
             <template #header>
                 <div class="flex items-center justify-between gap-4 w-full flex-wrap">
                     <!-- Left: Search Field + Cog Button -->
@@ -32,18 +30,13 @@
                 </div>
             </template>
 
-            <!-- ========================= -->
-            <!-- Empty / Loading Messages -->
-            <!-- ========================= -->
             <template #empty> No return orders found. </template>
             <template #loading> Loading return orders. Please wait... </template>
 
-            <!-- ========================= -->
-            <!-- Data Columns -->
-            <!-- ========================= -->
+            
             <Column field="returnRequestNo" header="Return Req No." style="min-width: 8rem">
                 <template #body="{ data }">
-                    <RouterLink to="/om/detailReturnOrder" class="hover:underline font-bold">
+                    <RouterLink :to="`/om/detailReturnOrder/${data.id}`" class="hover:underline font-bold">
                         {{ data.returnRequestNo }}
                     </RouterLink>
                 </template>
@@ -60,20 +53,22 @@
                     {{ data.customerName }}
                 </template>
             </Column>
-            <Column field="customerName" header="Reason Code" style="min-width: 8rem">
+            
+            <Column field="reasonCode" header="Reason Code" style="min-width: 8rem">
                 <template #body="{ data }">
-                    {{ data.reasonCode }}
+                    {{ data.reasonCode || 'N/A' }}
                 </template>
             </Column>
-            <Column field="customerName" header="Reason Message" style="min-width: 8rem">
+            
+            <Column field="reasonMessage" header="Reason Message" style="min-width: 8rem">
                 <template #body="{ data }">
-                    {{ data.reasonMessage }}
+                    {{ data.reasonMessage || 'N/A' }}
                 </template>
             </Column>
 
-            <Column field="deliveryDate" header="Date" style="min-width: 8rem">
+            <Column field="createdDate" header="Date" style="min-width: 8rem">
                 <template #body="{ data }">
-                    {{ formatDate(data.deliveryDate) }}
+                    {{ formatDate(data.createdDate) }}
                 </template>
             </Column>
 
@@ -89,7 +84,7 @@
 <script setup>
 import { onMounted, ref } from 'vue';
 import { FilterMatchMode } from '@primevue/core/api';
-import { ListReturnOrderService } from '@/service/listReturnOrder';
+import api from '@/service/api';
 
 // Data variables
 const listData = ref([]);
@@ -102,15 +97,13 @@ const filters = ref({
 
 // Status map for cleaner handling
 const STATUS_MAP = {
-    0: { label: 'Pending Approval', severity: 'warn' },
+    0: { label: 'Pending Approval', severity: 'warning' },
     1: { label: 'Approved', severity: 'info' },
     2: { label: 'Processing', severity: 'success' },
     3: { label: 'Completed', severity: 'primary' }
 };
 
-// =========================
-// Helper functions
-// =========================
+
 const getOverallStatusSeverity = (status) => {
     return STATUS_MAP[Number(status)]?.severity || 'danger';
 };
@@ -122,17 +115,49 @@ const getOverallStatusLabel = (status) => {
 // Format date as ISO string (YYYY-MM-DD)
 const formatDate = (dateStr) => {
     if (!dateStr) return '-';
-    const date = new Date(dateStr);
-    return date.toISOString().split('T')[0]; // keeps only YYYY-MM-DD
+    try {
+        const date = new Date(dateStr);
+        return date.toISOString().split('T')[0]; // keeps only YYYY-MM-DD
+    } catch (error) {
+        console.error('Error formatting date:', dateStr, error);
+        return '-';
+    }
 };
 
-// =========================
-// Fetch data on mount
-// =========================
+
 onMounted(async () => {
-    loading.value = true;
-    listData.value = await ListReturnOrderService.getListReturnOrderData();
-    loading.value = false;
+    try {
+        loading.value = true;
+        const response = await api.get('order/list-return-order');
+
+        console.log('API Response:', response.data);
+
+        if (response.data.status === 1 && Array.isArray(response.data.admin_data)) {
+            // Map the API data to our frontend structure
+            listData.value = response.data.admin_data.map(returnOrder => {
+                return {
+                    id: returnOrder.id,
+                    returnRequestNo: returnOrder.return_orderNo_ref || 'N/A',
+                    custAccountNo: returnOrder.custaccountno || 'N/A',
+                    customerName: returnOrder.dealerName || 'N/A',
+                    reasonCode: returnOrder.reason_code,
+                    reasonMessage: returnOrder.reason_message,
+                    createdDate: returnOrder.created,
+                    orderStatus: returnOrder.orderstatus
+                };
+            });
+            
+            console.log('Mapped data:', listData.value);
+        } else {
+            console.error('API returned error or invalid data:', response.data);
+            listData.value = [];
+        }
+    } catch (error) {
+        console.error('Error fetching return order list:', error);
+        listData.value = [];
+    } finally {
+        loading.value = false;
+    }
 });
 </script>
 

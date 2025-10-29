@@ -5,11 +5,18 @@
             <div class="md:w-2/3 flex flex-col">
                 <div class="card flex flex-col w-full">
                     <div class="flex items-center justify-between border-b pb-2">
-                        <div class="text-2xl font-bold text-gray-800">Order Delivery Details</div>
+                        <div class="flex items-center gap-3">
+                            <RouterLink to="/scm/listOrderDelivery">
+                                <Button icon="pi pi-arrow-left" class="p-button-text p-button-secondary text-xl" v-tooltip="'Back'" />
+                            </RouterLink>
+                            <div class="text-2xl font-bold text-gray-800">Order Delivery Details</div>
+                        </div>
+
                         <div class="inline-flex items-center gap-2">
                             <Button label="Edit" class="p-button-primary" size="small" />
                         </div>
                     </div>
+
                     <div class="mt-6 mb-4">
                         <div>
                             <span class="block text-sm font-bold text-black-700">Order Number</span>
@@ -79,31 +86,6 @@
                         </table>
                     </div>
                 </div>
-
-                <!-- Customer Information -->
-                <div class="card flex flex-col w-full">
-                    <div class="flex items-center justify-between border-b pb-2 mb-2">
-                        <div class="text-2xl font-bold text-gray-800">👤 Customer Information</div>
-                    </div>
-                    <div class="overflow-x-auto">
-                        <table class="w-full text-sm text-left text-gray-700">
-                            <tbody>
-                                <tr class="border-b">
-                                    <td class="px-4 py-2 font-medium">Customer Name</td>
-                                    <td class="px-4 py-2 text-right">{{ customerInfo.name }}</td>
-                                </tr>
-                                <tr class="border-b">
-                                    <td class="px-4 py-2 font-medium">Vehicle</td>
-                                    <td class="px-4 py-2 text-right">{{ customerInfo.vehicle }}</td>
-                                </tr>
-                                <tr>
-                                    <td class="px-4 py-2 font-medium">Registration Number</td>
-                                    <td class="px-4 py-2 text-right">{{ customerInfo.regNo }}</td>
-                                </tr>
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
             </div>
         </div>
     </Fluid>
@@ -111,7 +93,7 @@
 
 <script setup>
 import { ref } from 'vue';
-import Button from "primevue/button";
+import Button from 'primevue/button';
 
 const orderData = ref({
     orderNo: 'OD-2025-001',

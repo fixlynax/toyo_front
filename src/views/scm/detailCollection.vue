@@ -118,19 +118,19 @@
                         </tbody>
                     </table>
 
-                    <div class="mt-4 flex justify-end items-center gap-2 relative">
-                        <Button label="Update" size="small" class="p-button-primary w-40" @click="toggleDropdown" />
+                </div>
+                <div class="mt-4 flex justify-end items-center gap-2 relative">
+                    <Button label="Update" size="small" class="p-button-primary w-40" @click="toggleDropdown" />
 
-                        <transition name="fade">
-                            <div
-                                v-if="showDropdown"
-                                class="absolute right-0 top-full mt-2 bg-white border border-gray-300 rounded-lg shadow-lg w-56 z-50 p-2 flex flex-col gap-2"
-                            >
-                                <Button label="Update Collection Schedule" size="small" class="p-button-primary w-full" @click="handleSelect('schedule')" />
-                                <Button label="Update Collection Complete" size="small" class="p-button-success w-full" @click="handleSelect('status')" />
-                            </div>
-                        </transition>
-                    </div>
+                    <transition name="fade">
+                        <div
+                            v-if="showDropdown"
+                            class="absolute right-0 top-full mt-2 bg-white border border-gray-300 rounded-lg shadow-lg w-56 z-50 p-2 flex flex-col gap-2"
+                        >
+                            <Button label="Update Collection Schedule" size="small" class="p-button-secondary w-full" @click="handleSelect('schedule')" />
+                            <Button label="Update Collection Complete" size="small" class="p-button-success w-full" @click="handleSelect('status')" />
+                        </div>
+                    </transition>
                 </div>
             </div>
         </div>
