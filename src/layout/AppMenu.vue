@@ -261,20 +261,9 @@ const model = ref([
                 ]
             },
             {
-                label: 'Return',
-                icon: 'pi pi-fw pi-refresh',
-                items: [
-                    {
-                        label: 'Return Order List',
-                        icon: 'pi pi-fw pi-list',
-                        to: '/scm/listReturnOrder'
-                    },
-                    {
-                        label: 'Bulk Update',
-                        icon: 'pi pi-fw pi-refresh',
-                        to: '#'
-                    }
-                ]
+                label: 'Return Order List',
+                icon: 'pi pi-fw pi-list',
+                to: '/scm/listReturnOrder'
             },
             {
                 label: 'Area ETA',

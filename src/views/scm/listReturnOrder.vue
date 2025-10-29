@@ -15,6 +15,9 @@
                                 <InputText v-model="filters['global'].value" placeholder="Quick Search" class="w-full" />
                             </IconField>
                         </div>
+                        <div class="flex justify-end gap-2">
+                            <Button type="button" label="Bulk Update" icon="pi pi-upload" />
+                        </div>
                     </div>
                 </div>
             </template>
@@ -80,12 +83,13 @@ const filteredReturns = computed(() => {
     // Global search
     if (filters.value.global.value) {
         const search = filters.value.global.value.toLowerCase();
-        filtered = filtered.filter(order =>
-            order.returnRequestNo.toLowerCase().includes(search) ||
-            (order.orderNo && order.orderNo.toLowerCase().includes(search)) ||
-            order.customerName.toLowerCase().includes(search) ||
-            order.shipTo.toLowerCase().includes(search) ||
-            getStatusLabel(order.orderStatus).toLowerCase().includes(search)
+        filtered = filtered.filter(
+            (order) =>
+                order.returnRequestNo.toLowerCase().includes(search) ||
+                (order.orderNo && order.orderNo.toLowerCase().includes(search)) ||
+                order.customerName.toLowerCase().includes(search) ||
+                order.shipTo.toLowerCase().includes(search) ||
+                getStatusLabel(order.orderStatus).toLowerCase().includes(search)
         );
     }
 
@@ -110,21 +114,31 @@ function formatDate(dateString) {
 
 function getStatusLabel(status) {
     switch (status) {
-        case 0: return 'Pending';
-        case 1: return 'Completed';
-        case 66: return 'Processing';
-        case 77: return 'Delivery';
-        default: return 'Unknown';
+        case 0:
+            return 'Pending';
+        case 1:
+            return 'Completed';
+        case 66:
+            return 'Processing';
+        case 77:
+            return 'Delivery';
+        default:
+            return 'Unknown';
     }
 }
 
 function getStatusSeverity(status) {
     switch (status) {
-        case 0: return 'warn';
-        case 1: return 'success';
-        case 66: return 'info';
-        case 77: return 'primary';
-        default: return 'secondary';
+        case 0:
+            return 'warn';
+        case 1:
+            return 'success';
+        case 66:
+            return 'info';
+        case 77:
+            return 'primary';
+        default:
+            return 'secondary';
     }
 }
 
