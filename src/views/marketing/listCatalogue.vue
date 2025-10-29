@@ -30,25 +30,47 @@
             </div>
 
             <!-- ========================= -->
+            <!-- Loading State -->
+            <!-- ========================= -->
+            <div v-if="loading" class="text-center py-8">
+                <ProgressSpinner style="width: 50px; height: 50px" />
+                <p class="mt-2 text-gray-600">Loading catalogue items...</p>
+            </div>
+
+            <!-- ========================= -->
+            <!-- Error State -->
+            <!-- ========================= -->
+            <div v-else-if="error" class="text-center py-8 text-red-500">
+                <i class="pi pi-exclamation-triangle text-2xl mb-2"></i>
+                <p>{{ error }}</p>
+                <Button @click="fetchCatalogueItems" label="Retry" class="p-button-outlined mt-4" />
+            </div>
+
+            <!-- ========================= -->
             <!-- Catalogue Grid -->
             <!-- ========================= -->
-            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-6">
+            <div v-else class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-6">
                 <!-- Catalogue Card -->
                 <RouterLink
                     v-for="(item, index) in filteredItems"
-                    :key="index"
-                    to="/marketing/detailCatalogue"
+                    :key="item.id || index"
+                    :to="`/marketing/detailCatalogue/${item.id}`"
                     class="flex flex-col rounded-2xl overflow-hidden shadow-md hover:shadow-xl transition-shadow duration-300 bg-white cursor-pointer transition-all duration-300 hover:shadow-2xl hover:scale-105"
                 >
                     <!-- Top: Image Section -->
                     <div class="w-full h-32 bg-gray-100 relative overflow-hidden rounded-t-2xl">
                         <!-- Status Badge -->
-                        <div :class="['absolute top-2 right-2 whitespace-nowrap text-xs font-bold px-2 py-1 rounded-full shadow-md', item.status === 1 ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700']">
-                            {{ item.status === 1 ? 'In Stock' : 'Out of Stock' }}
+                        <div :class="['absolute top-2 right-2 whitespace-nowrap text-xs font-bold px-2 py-1 rounded-full shadow-md', item.available_qty > 0 ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700']">
+                            {{ item.available_qty > 0 ? 'In Stock' : 'Out of Stock' }}
                         </div>
 
                         <!-- Image -->
-                        <img :src="item.imageURL" :alt="item.title" class="w-full h-full object-cover" />
+                        <img 
+                            :src="item.imageURL || 'https://via.placeholder.com/150x100?text=No+Image'" 
+                            :alt="item.title" 
+                            class="w-full h-full object-cover"
+                            @error="handleImageError"
+                        />
                     </div>
 
                     <!-- Bottom: Info Section -->
@@ -62,20 +84,19 @@
                             {{ item.purpose }}
                         </div>
 
-                        <!-- Row 1: SKU + Type -->
+                        <!-- Row 1: Type -->
                         <div class="flex items-center justify-between text-sm text-gray-600">
-                            <span class="truncate">{{ item.sku }}</span>
-                            <span class="truncate">{{ item.type }}</span>
+                            <span class="truncate">{{ formatType(item.type) }}</span>
                         </div>
 
-                        <!-- Row 2: Expiry + Balance -->
+                        <!-- Row 2: Available + Expiry -->
                         <div class="flex items-center justify-between text-sm font-medium">
-                            <!-- Balance -->
-                            <span class="text-gray-600">{{ item.availableqty }} / {{ item.totalqty }}</span>
+                            <!-- Available Quantity -->
+                            <span class="text-gray-600">{{ item.available_qty }} / {{ item.total_qty }}</span>
 
                             <!-- Expiry with dynamic color -->
                             <span class="font-bold italic" :class="getExpiryClass(item.expiry)">
-                                {{ item.expiry }}
+                                {{ formatExpiryDate(item.expiry) }}
                             </span>
                         </div>
                     </div>
@@ -85,7 +106,7 @@
             <!-- ========================= -->
             <!-- Empty State -->
             <!-- ========================= -->
-            <div v-if="filteredItems.length === 0" class="text-center py-8 text-gray-500">
+            <div v-if="!loading && !error && filteredItems.length === 0" class="text-center py-8 text-gray-500">
                 No catalogue items found matching your search.
             </div>
         </div>
@@ -93,159 +114,61 @@
 </template>
 
 <script setup>
-import { ref, computed } from 'vue';
+import { ref, computed, onMounted } from 'vue';
+import api from '@/service/api';
 
-
-// Search query
+// Reactive data
 const searchQuery = ref('');
+const catalogueItems = ref([]);
+const loading = ref(false);
+const error = ref('');
 
-// Catalogue data
-const catalogueItems = ref([
-    {
-        id: 1,
-        type: 'E-Wallet',
-        imageURL: 'https://assets.bharian.com.my/images/articles/tng13jan_BHfield_image_socialmedia.var_1610544082.jpg',
-        title: 'Touch ’n Go Reload RM20',
-        sku: 'TNG20',
-        valueType: 'Amount/',
-        valueAmount: 20,
-        description: 'Reload your Touch ’n Go eWallet instantly with RM20 credit.',
-        terms: 'Valid for registered TNG accounts only.',
-        instruction: 'Provide TNG eWallet number during redemption.',
-        point1: 200,
-        point2: 180,
-        point3: 150,
-        purpose: 'Reward',
-        purposelD: 'PR001',
-        totalqty: 500,
-        availableqty: 420,
-        expiry: '2025-12-31',
-        isBirthday: 0,
-        status: 0,
-        created: '2025-01-01',
-        deleted: 0
-    },
-    {
-        id: 2,
-        type: 'Voucher',
-        imageURL: 'https://assets.offgamers.com/img/offer/kr_fdf75033-56ee-4ce6-929c-1f9c93a4c642_1b1c60fc-e950-4c62-8ee7-471d42484619.webp',
-        title: 'RM50 Toyo Service Voucher',
-        sku: 'TSV50',
-        valueType: 'RM',
-        valueAmount: 50,
-        description: 'Redeemable at participating Toyo Tyre service centres nationwide.',
-        terms: 'Valid for tyre service only. Not exchangeable for cash.',
-        instruction: 'Present voucher code at counter.',
-        point1: 500,
-        point2: 480,
-        point3: 450,
-        purpose: 'Reward',
-        purposelD: 'PR002',
-        totalqty: 200,
-        availableqty: 160,
-        expiry: '2025-09-30',
-        isBirthday: 0,
-        status: 1,
-        created: '2025-02-10',
-        deleted: 0
-    },
-    {
-        id: 3,
-        type: 'Item',
-        imageURL: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRdSHDEYMxmOB1Z63V0UB1ohMHGZ5cs5DG4zg&s',
-        title: 'Toyo Tyres Cap',
-        sku: 'TT-CAP01',
-        valueType: 'Points',
-        valueAmount: 300,
-        description: 'Exclusive Toyo Tyres branded cap for loyal members.',
-        terms: 'Limited to 1 per member.',
-        instruction: 'Redeem online and collect at service centre.',
-        point1: 300,
-        point2: 280,
-        point3: 250,
-        purpose: 'Merchandise',
-        purposelD: 'PR003',
-        totalqty: 150,
-        availableqty: 90,
-        expiry: '2026-01-15',
-        isBirthday: 0,
-        status: 1,
-        created: '2025-02-20',
-        deleted: 0
-    },
-    {
-        id: 4,
-        type: 'E-Wallet',
-        imageURL: 'https://assets.bharian.com.my/images/articles/tng13jan_BHfield_image_socialmedia.var_1610544082.jpg',
-        title: 'Touch ’n Go Reload RM50',
-        sku: 'TNG50',
-        valueType: 'RM',
-        valueAmount: 50,
-        description: 'Get RM50 credit directly into your TNG eWallet.',
-        terms: 'Limited to one redemption per week.',
-        instruction: 'Provide TNG account number at redemption.',
-        point1: 500,
-        point2: 480,
-        point3: 450,
-        purpose: 'Reward',
-        purposelD: 'PR004',
-        totalqty: 300,
-        availableqty: 250,
-        expiry: '2025-11-30',
-        isBirthday: 1,
-        status: 1,
-        created: '2025-03-01',
-        deleted: 0
-    },
-    {
-        id: 5,
-        type: 'Voucher',
-        imageURL: 'https://assets.offgamers.com/img/offer/kr_fdf75033-56ee-4ce6-929c-1f9c93a4c642_1b1c60fc-e950-4c62-8ee7-471d42484619.webp',
-        title: 'RM100 Toyo Voucher',
-        sku: 'TV100',
-        valueType: 'RM',
-        valueAmount: 100,
-        description: 'Redeem for Toyo Tyres or merchandise at official outlets.',
-        terms: 'Valid for one-time use.',
-        instruction: 'Show e-voucher QR code at redemption.',
-        point1: 1000,
-        point2: 950,
-        point3: 900,
-        purpose: 'Reward',
-        purposelD: 'PR005',
-        totalqty: 100,
-        availableqty: 85,
-        expiry: '2025-08-15',
-        isBirthday: 0,
-        status: 1,
-        created: '2025-03-15',
-        deleted: 0
-    },
-    {
-        id: 6,
-        type: 'Item',
-        imageURL: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRdSHDEYMxmOB1Z63V0UB1ohMHGZ5cs5DG4zg&s',
-        title: 'Toyo Sports Bottle',
-        sku: 'TT-BOT01',
-        valueType: 'Points',
-        valueAmount: 200,
-        description: 'Durable sports bottle with Toyo branding.',
-        terms: 'Available while stocks last.',
-        instruction: 'Collect at Toyo service centre after redemption.',
-        point1: 200,
-        point2: 180,
-        point3: 150,
-        purpose: 'Merchandise',
-        purposelD: 'PR006',
-        totalqty: 300,
-        availableqty: 240,
-        expiry: '2025-09-23',
-        isBirthday: 0,
-        status: 1,
-        created: '2025-09-20',
-        deleted: 0
+// =========================
+// Lifecycle Hooks
+// =========================
+onMounted(() => {
+    fetchCatalogueItems();
+});
+
+// =========================
+// API Functions
+// =========================
+const fetchCatalogueItems = async () => {
+    loading.value = true;
+    error.value = '';
+    
+    try {
+        const response = await api.get('catalog/catalogList');
+        console.log('API Response:', response.data);
+
+        if (response.data.status === 1 && Array.isArray(response.data.admin_data)) {
+            catalogueItems.value = response.data.admin_data.map(item => ({
+                ...item,
+                // Ensure imageURL is properly formatted
+                imageURL: item.imageURL || null
+            }));
+        } else {
+            error.value = 'Failed to load catalogue items: Invalid response format';
+            catalogueItems.value = [];
+        }
+    } catch (err) {
+        console.error('Error fetching catalogue items:', err);
+        if (err.response?.status === 401) {
+            error.value = 'Unauthorized access. Please login again.';
+        } else if (err.response?.status === 403) {
+            error.value = 'Access denied. You do not have permission to view catalogue items.';
+        } else if (err.response?.status >= 500) {
+            error.value = 'Server error. Please try again later.';
+        } else if (err.code === 'NETWORK_ERROR') {
+            error.value = 'Network error. Please check your connection.';
+        } else {
+            error.value = 'Failed to load catalogue items. Please try again.';
+        }
+        catalogueItems.value = [];
+    } finally {
+        loading.value = false;
     }
-]);
+};
 
 // =========================
 // Computed Properties
@@ -257,11 +180,10 @@ const filteredItems = computed(() => {
 
     const query = searchQuery.value.toLowerCase();
     return catalogueItems.value.filter(item =>
-        item.title.toLowerCase().includes(query) ||
-        item.sku.toLowerCase().includes(query) ||
-        item.type.toLowerCase().includes(query) ||
-        item.purpose.toLowerCase().includes(query) ||
-        item.description.toLowerCase().includes(query)
+        item.title?.toLowerCase().includes(query) ||
+        item.type?.toLowerCase().includes(query) ||
+        item.purpose?.toLowerCase().includes(query) ||
+        item.description?.toLowerCase().includes(query)
     );
 });
 
@@ -269,22 +191,63 @@ const filteredItems = computed(() => {
 // Helper Functions
 // =========================
 const getExpiryClass = (expiryDate) => {
-    const today = new Date();
-    const expiry = new Date(expiryDate);
+    if (!expiryDate) return 'text-gray-500';
+    
+    try {
+        const today = new Date();
+        // Convert DD-MM-YYYY to YYYY-MM-DD for proper Date parsing
+        const [day, month, year] = expiryDate.split('-');
+        const expiry = new Date(`${year}-${month}-${day}`);
+        
+        // Handle invalid dates
+        if (isNaN(expiry.getTime())) {
+            return 'text-gray-500';
+        }
 
-    // Calculate difference in days
-    const diffTime = expiry - today;
-    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+        // Calculate difference in days
+        const diffTime = expiry - today;
+        const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
 
-    if (diffDays < 0) {
-        // Expired
-        return 'text-red-500';
-    } else if (diffDays <= 3) {
-        // Expiring within 3 days
-        return 'text-yellow-500';
-    } else {
-        // Safe
-        return 'text-black';
+        if (diffDays < 0) {
+            // Expired
+            return 'text-red-500';
+        } else if (diffDays <= 3) {
+            // Expiring within 3 days
+            return 'text-yellow-500';
+        } else {
+            // Safe
+            return 'text-green-600';
+        }
+    } catch (error) {
+        console.error('Error parsing expiry date:', error);
+        return 'text-gray-500';
     }
+};
+
+const formatExpiryDate = (expiryDate) => {
+    if (!expiryDate) return 'No expiry';
+    
+    try {
+        // Convert from DD-MM-YYYY to DD/MM/YYYY format
+        const [day, month, year] = expiryDate.split('-');
+        return `${day}/${month}/${year}`;
+    } catch (error) {
+        console.error('Error formatting expiry date:', error);
+        return 'Invalid date';
+    }
+};
+
+const formatType = (type) => {
+    const typeMap = {
+        'ITEM': 'Item',
+        'EWALLET': 'E-Wallet',
+        'EVOUCHER': 'E-Voucher'
+    };
+    return typeMap[type] || type;
+};
+
+const handleImageError = (event) => {
+    // Set a placeholder image when the image fails to load
+    event.target.src = 'https://via.placeholder.com/150x100?text=No+Image';
 };
 </script>
