@@ -6,7 +6,12 @@
                 <!-- Detail Event -->
                 <div class="card flex flex-col w-full">
                     <div class="flex items-center justify-between border-b pb-2">
-                        <div class="text-2xl font-bold text-gray-800">Event Details</div>
+                        <div class="flex items-center gap-3">
+                            <RouterLink to="/marketing/listEvent">
+                                <Button icon="pi pi-arrow-left" class="p-button-text p-button-secondary text-xl" size="big" v-tooltip="'Back'" />
+                            </RouterLink>
+                            <div class="text-2xl font-bold text-gray-800">Detail Event</div>
+                        </div>
                         <div class="inline-flex items-center gap-2">
                             <!-- Edit Event -->
                             <RouterLink :to="`/marketing/editEvent/${eventId}`">
@@ -175,13 +180,13 @@
         </div>
 
         <!-- Delete Confirmation Dialog -->
-        <Dialog v-model:visible="deleteDialog" :style="{width: '450px'}" header="Confirm" :modal="true">
+        <Dialog v-model:visible="deleteDialog" :style="{ width: '450px' }" header="Confirm" :modal="true">
             <div class="flex align-items-center justify-content-center">
                 <i class="pi pi-exclamation-triangle mr-3" style="font-size: 2rem" />
                 <span>Are you sure you want to delete this event?</span>
             </div>
             <template #footer>
-                <Button label="No" icon="pi pi-times" class="p-button-text" @click="deleteDialog = false"/>
+                <Button label="No" icon="pi pi-times" class="p-button-text" @click="deleteDialog = false" />
                 <Button label="Yes" icon="pi pi-check" class="p-button-danger" @click="deleteEvent" />
             </template>
         </Dialog>
@@ -231,10 +236,10 @@ const fetchEventDetails = async () => {
     try {
         loading.value = true;
         const response = await api.get(`event/details/${eventId}`);
-        
+
         if (response.data.status === 1) {
             const eventData = response.data.admin_data;
-            
+
             // Update event data
             event.value = {
                 ...event.value,
@@ -277,7 +282,7 @@ const fetchEventDetails = async () => {
 // Process private images using the API method
 const processPrivateImages = async () => {
     const imageFields = ['image1URL', 'image2URL', 'image3URL'];
-    
+
     for (const field of imageFields) {
         if (event.value[field] && typeof event.value[field] === 'string') {
             try {
@@ -302,7 +307,7 @@ const deleteEvent = async () => {
     try {
         // You'll need to implement the delete API endpoint
         const response = await api.delete(`event/delete/${eventId}`);
-        
+
         if (response.data.status === 1) {
             toast.add({
                 severity: 'success',

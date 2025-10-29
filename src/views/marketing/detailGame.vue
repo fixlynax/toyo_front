@@ -6,7 +6,12 @@
                 <!-- Detail Event -->
                 <div class="card flex flex-col w-full">
                     <div class="flex items-center justify-between border-b pb-2">
-                        <div class="text-2xl font-bold text-gray-800">Game Details</div>
+                        <div class="flex items-center gap-3">
+                            <RouterLink to="/marketing/listGame">
+                                <Button icon="pi pi-arrow-left" class="p-button-text p-button-secondary text-xl" size="big" v-tooltip="'Back'" />
+                            </RouterLink>
+                            <div class="text-2xl font-bold text-gray-800">Game Details</div>
+                        </div>
                         <div class="inline-flex items-center gap-2">
                             <!-- Edit Event -->
                             <RouterLink :to="`/marketing/editGame/${gameId}`">
