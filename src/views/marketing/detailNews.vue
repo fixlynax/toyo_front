@@ -35,15 +35,25 @@
 
                     <!-- IMAGES -->
                     <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mt-4">
-                        <img v-if="imageSrcs.image1" :src="imageSrcs.image1" alt="News Image 1" class="rounded-xl shadow-sm object-cover w-full h-40" />
-                        <img v-if="imageSrcs.image2" :src="imageSrcs.image2" alt="News Image 2" class="rounded-xl shadow-sm object-cover w-full h-40" />
-                        <img v-if="imageSrcs.image3" :src="imageSrcs.image3" alt="News Image 3" class="rounded-xl shadow-sm object-cover w-full h-40" />
+                        <img v-if="imageSrcs.image1" :src="imageSrcs.image1" alt="News Image 1" class="rounded-xl shadow-sm object-cover w-full h-80" />
+                        <img v-if="imageSrcs.image2" :src="imageSrcs.image2" alt="News Image 2" class="rounded-xl shadow-sm object-cover w-full h-80" />
+                        <img v-if="imageSrcs.image3" :src="imageSrcs.image3" alt="News Image 3" class="rounded-xl shadow-sm object-cover w-full h-80" />
                     </div>
 
                     <!-- News Info -->
                     <div class="mt-6">
                         <h1 class="text-2xl font-bold text-gray-800">{{ news.title }}</h1>
                         <p class="text-lg font-medium">{{ news.description }}</p>
+                    </div>
+                    <div class="flex flex-col md:flex-row gap-4">
+                        <div class="w-full">
+                            <span class="block text-xm font-bold text-black-700">Start Date</span>
+                            <p class="text-lg font-medium">{{ news.startDate }}</p>
+                        </div>
+                        <div class="w-full">
+                            <span class="block text-xm font-bold text-black-700">End Date</span>
+                            <p class="text-lg font-medium">{{ news.endDate }}</p>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -73,20 +83,30 @@
                                     <td class="px-4 py-2 text-right">{{ news.view }}</td>
                                 </tr>
                                 <tr class="border-b">
-                                    <td class="px-4 py-2 font-medium">Start Date</td>
-                                    <td class="px-4 py-2 text-right">{{ news.startDate }}</td>
-                                </tr>
-                                <tr class="border-b">
-                                    <td class="px-4 py-2 font-medium">End Date</td>
-                                    <td class="px-4 py-2 text-right">{{ news.endDate }}</td>
-                                </tr>
-                                <tr class="border-b">
                                     <td class="px-4 py-2 font-medium">Created</td>
                                     <td class="px-4 py-2 text-right">{{ news.created_at }}</td>
                                 </tr>
+                                <tr>
+                                    <td class="px-4 py-2 font-medium"></td>
+                                    <td class="py-4 text-right">
+                                        <div class="flex justify-end">
+                                            <ToggleButton
+                                                v-model="newsStatus"
+                                                :modelValue="news.status === 1"
+                                                @change="toggleNewsStatus"
+                                                onLabel="Inactive"
+                                                offLabel="Active"
+                                                onIcon="pi pi-eye"
+                                                offIcon="pi pi-eye-slash"
+                                                class="w-30"
+                                                aria-label="Do you confirm ?"
+                                            />
+                                        </div>
+                                    </td>
+                                </tr>
                             </tbody>
                         </table>
-                        <div v-if="news.status===0" class="flex justify-end mt-4 gap-2">
+                        <div v-if="news.status === 0" class="flex justify-end mt-4 gap-2">
                             <div class="w-30">
                                 <Button label="Publish" @click="publishNews" :loading="saving" />
                             </div>
@@ -99,7 +119,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue';
+import { ref, onMounted, computed } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { useConfirm } from 'primevue/useconfirm';
 import { useToast } from 'primevue/usetoast';
@@ -110,14 +130,37 @@ const router = useRouter();
 const confirm = useConfirm();
 const toast = useToast();
 
-const news = ref(null);
+const news = ref({
+    id: null,
+    title: '',
+    description: '',
+    image1URL: '',
+    image2URL: '',
+    image3URL: '',
+    startDate: '',
+    endDate: '',
+    publishDate: '',
+    audience: '',
+    view: 0,
+    status: 0,
+    created_at: ''
+});
 const loading = ref(true);
 const error = ref(null);
+const saving = ref(false);
 
 const imageSrcs = ref({
     image1: null,
     image2: null,
     image3: null
+});
+
+// Computed property for toggle button
+const newsStatus = computed({
+    get: () => news.value.status === 1,
+    set: (newValue) => {
+        // This will be handled by the API call
+    }
 });
 
 // Fetch news details
@@ -143,7 +186,39 @@ const fetchNewsDetails = async () => {
     }
 };
 
-onMounted(fetchNewsDetails);
+// Toggle news status
+const toggleNewsStatus = async () => {
+    try {
+        const response = await api.put(`news/togglePublish/${news.value.id}`);
+
+        if (response.data.status === 1) {
+            // Update local news status
+            news.value.status = news.value.status === 1 ? 2 : 1;
+
+            toast.add({
+                severity: 'success',
+                summary: 'Success',
+                detail: `News ${news.value.status === 1 ? 'published' : 'unpublished'} successfully`,
+                life: 3000
+            });
+        } else {
+            toast.add({
+                severity: 'error',
+                summary: 'Error',
+                detail: 'Failed to update news status',
+                life: 3000
+            });
+        }
+    } catch (error) {
+        console.error('Error updating news status:', error);
+        toast.add({
+            severity: 'error',
+            summary: 'Error',
+            detail: 'Failed to update news status',
+            life: 3000
+        });
+    }
+};
 
 // Helper functions for status label and severity
 const statusLabel = (status) => {
@@ -211,43 +286,40 @@ const confirmDelete = () => {
     });
 };
 
-//Publish News
-const publishNews = () => {
-    confirm.require({
-        message: 'Are you sure you want to publish this news?',
-        header: 'Confirm Publish',
-        icon: 'pi pi-exclamation-triangle',
-        acceptLabel: 'Yes, Publish',
-        rejectLabel: 'Cancel',
-        acceptClass: 'p-button-success',
-        accept: async () => {
-            try {
-                await api.put(`news/togglePublish/${news.value.id}`);
-                toast.add({
-                    severity: 'success',
-                    summary: 'Published',
-                    detail: 'News published successfully.',
-                    life: 3000
-                });
-                fetchNewsDetails(); // Refresh details
-            } catch (error) {
-                console.error('Publish failed:', error);
-                toast.add({
-                    severity: 'error',
-                    summary: 'Error',
-                    detail: 'Failed to publish news.',
-                    life: 3000
-                });
-            }
-        },
-        reject: () => {
+// Publish News
+const publishNews = async () => {
+    try {
+        const response = await api.put(`news/togglePublish/${news.value.id}`);
+
+        if (response.data.status === 1) {
+            // Update local news status
+            news.value.status = news.value.status === 1 ? 0 : 1;
+
             toast.add({
-                severity: 'info',
-                summary: 'Cancelled',
-                detail: 'Publish cancelled.',
-                life: 2000
+                severity: 'success',
+                summary: 'Published',
+                detail: `News ${news.value.status === 1 ? 'activated' : 'deactivated'} successfully`,
+                life: 3000
+            });
+        } else {
+            toast.add({
+                severity: 'error',
+                summary: 'Error',
+                detail: 'Failed to publish news.',
+                life: 3000
             });
         }
-    });
-}
+    } catch (error) {
+        console.error('Publish failed:', error);
+        toast.add({
+            severity: 'error',
+            summary: 'Error',
+            detail: 'Failed to publish news.',
+            life: 3000
+        });
+    }
+};
+onMounted(() => {
+    fetchNewsDetails();
+});
 </script>

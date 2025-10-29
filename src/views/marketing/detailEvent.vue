@@ -144,6 +144,14 @@
                                     <td class="px-4 py-2 font-medium">Total Participants</td>
                                     <td class="px-4 py-2 text-right">{{ participants.length }}</td>
                                 </tr>
+                                <tr>
+                                    <td class="px-4 py-2 font-medium"></td>
+                                    <td class="py-4 text-right">
+                                        <div class="flex justify-end">
+                                            <ToggleButton v-model="eventStatus" @change="toggleEventStatus" onLabel="Inactive" offLabel="Active" onIcon="pi pi-times" offIcon="pi pi-check" class="w-30" />
+                                        </div>
+                                    </td>
+                                </tr>
                             </tbody>
                         </table>
                     </div>
@@ -175,13 +183,13 @@
         </div>
 
         <!-- Delete Confirmation Dialog -->
-        <Dialog v-model:visible="deleteDialog" :style="{width: '450px'}" header="Confirm" :modal="true">
+        <Dialog v-model:visible="deleteDialog" :style="{ width: '450px' }" header="Confirm" :modal="true">
             <div class="flex align-items-center justify-content-center">
                 <i class="pi pi-exclamation-triangle mr-3" style="font-size: 2rem" />
                 <span>Are you sure you want to delete this event?</span>
             </div>
             <template #footer>
-                <Button label="No" icon="pi pi-times" class="p-button-text" @click="deleteDialog = false"/>
+                <Button label="No" icon="pi pi-times" class="p-button-text" @click="deleteDialog = false" />
                 <Button label="Yes" icon="pi pi-check" class="p-button-danger" @click="deleteEvent" />
             </template>
         </Dialog>
@@ -202,7 +210,7 @@ const eventId = route.params.id;
 const loading = ref(true);
 const deleteDialog = ref(false);
 
-// Event data structure matching backend response
+// Event data
 const event = ref({
     id: null,
     audience: '',
@@ -226,15 +234,57 @@ const event = ref({
 const surveyQuestions = ref([]);
 const participants = ref([]);
 
+// Computed property for toggle button
+const eventStatus = computed({
+    get: () => event.value.status === 1,
+    set: (newValue) => {
+        // This will be handled by the API call
+    }
+});
+
+// Toggle event status
+const toggleEventStatus = async () => {
+    try {
+        const response = await api.put(`event/togglePublish/${eventId}`);
+
+        if (response.data.status === 1) {
+            // Update local event status
+            event.value.status = event.value.status === 1 ? 0 : 1;
+
+            toast.add({
+                severity: 'success',
+                summary: 'Success',
+                detail: `Event ${event.value.status === 1 ? 'activated' : 'deactivated'} successfully`,
+                life: 3000
+            });
+        } else {
+            toast.add({
+                severity: 'error',
+                summary: 'Error',
+                detail: 'Failed to update event status',
+                life: 3000
+            });
+        }
+    } catch (error) {
+        console.error('Error updating event status:', error);
+        toast.add({
+            severity: 'error',
+            summary: 'Error',
+            detail: 'Failed to update event status',
+            life: 3000
+        });
+    }
+};
+
 // Fetch event details
 const fetchEventDetails = async () => {
     try {
         loading.value = true;
         const response = await api.get(`event/details/${eventId}`);
-        
+
         if (response.data.status === 1) {
             const eventData = response.data.admin_data;
-            
+
             // Update event data
             event.value = {
                 ...event.value,
@@ -277,7 +327,7 @@ const fetchEventDetails = async () => {
 // Process private images using the API method
 const processPrivateImages = async () => {
     const imageFields = ['image1URL', 'image2URL', 'image3URL'];
-    
+
     for (const field of imageFields) {
         if (event.value[field] && typeof event.value[field] === 'string') {
             try {
@@ -293,16 +343,15 @@ const processPrivateImages = async () => {
     }
 };
 
-// Delete event
+// Delete event functions
 const confirmDelete = () => {
     deleteDialog.value = true;
 };
 
 const deleteEvent = async () => {
     try {
-        // You'll need to implement the delete API endpoint
         const response = await api.delete(`event/delete/${eventId}`);
-        
+
         if (response.data.status === 1) {
             toast.add({
                 severity: 'success',

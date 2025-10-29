@@ -20,9 +20,9 @@
 
                     <!-- Event Images -->
                     <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mt-4">
-                        <img :src="game.image1URL || '/demo/images/event-placeholder.jpg'" alt="Game Image 1" class="rounded-xl shadow-sm object-cover w-full h-80" />
-                        <img :src="game.image2URL || '/demo/images/event-placeholder.jpg'" alt="Game Image 2" class="rounded-xl shadow-sm object-cover w-full h-80" />
-                        <img :src="game.image3URL || '/demo/images/event-placeholder.jpg'" alt="Game Image 3" class="rounded-xl shadow-sm object-cover w-full h-80" />
+                        <img v-if="game.image1URL" :src="game.image1URL" alt="Event Image 1" class="rounded-xl shadow-sm object-cover w-full h-80" />
+                        <img v-if="game.image2URL" :src="game.image2URL" alt="Event Image 2" class="rounded-xl shadow-sm object-cover w-full h-80" />
+                        <img v-if="game.image3URL" :src="game.image3URL" alt="Event Image 3" class="rounded-xl shadow-sm object-cover w-full h-80" />
                     </div>
 
                     <!-- Event Info -->
@@ -40,11 +40,11 @@
                         <div class="flex flex-col md:flex-row gap-4 mt-3">
                             <div class="w-full">
                                 <span class="block text-xm font-bold text-black-700">Start Date</span>
-                                <p class="text-lg font-medium">{{ game.startDate }}</p>
+                                <p class="text-lg font-medium">{{ formatDisplayDate(game.startDate) }}</p>
                             </div>
                             <div class="w-full">
                                 <span class="block text-xm font-bold text-black-700">End Date</span>
-                                <p class="text-lg font-medium">{{ game.endDate }}</p>
+                                <p class="text-lg font-medium">{{ formatDisplayDate(game.endDate) }}</p>
                             </div>
                         </div>
                     </div>
@@ -115,7 +115,7 @@
                                 </tr>
                                 <tr class="border-b">
                                     <td class="px-4 py-2 font-medium">Published</td>
-                                    <td class="px-4 py-2 text-right">{{ game.publishDate }}</td>
+                                    <td class="px-4 py-2 text-right">{{ formatDisplayDate(game.publishDate) }}</td>
                                 </tr>
                                 <tr class="border-b">
                                     <td class="px-4 py-2 font-medium">Type</td>
@@ -134,7 +134,11 @@
                                     <td class="px-4 py-2 text-right">
                                         <div class="flex justify-end">
                                             <div class="flex flex-col items-center">
-                                                <img :src="`/demo/images/qr-toyo.png`" alt="QR Game Image" class="rounded-xl shadow-sm object-cover w-30 h-20 mb-2" />
+                                                <VueQrcode 
+                                                    :value="qrCodeData" 
+                                                    :options="qrOptions"
+                                                    class="rounded-xl shadow-sm object-cover w-30 h-30 mb-2" 
+                                                />
                                                 <button class="bg-red-600 text-white px-3 py-1 rounded" @click="downloadQRCode">Download</button>
                                             </div>
                                         </div>
@@ -142,7 +146,7 @@
                                 </tr>
                                 <tr>
                                     <td class="px-4 py-2 font-medium"></td>
-                                    <td class="px-4 py-2 text-right">
+                                    <td class="py-4 text-right">
                                         <div class="flex justify-end">
                                             <ToggleButton
                                                 v-model="gameStatus"
@@ -150,9 +154,9 @@
                                                 @change="toggleGameStatus"
                                                 onLabel="Inactive"
                                                 offLabel="Active"
-                                                onIcon="pi pi-lock"
-                                                offIcon="pi pi-lock-open"
-                                                class="w-36"
+                                                onIcon="pi pi-times"
+                                                offIcon="pi pi-check"
+                                                class="w-30"
                                                 aria-label="Do you confirm ?"
                                             />
                                         </div>
@@ -213,14 +217,17 @@
 <script setup>
 import { ref, onMounted, computed } from 'vue';
 import { useRoute } from 'vue-router';
+import { useToast } from 'primevue/usetoast';
+import VueQrcode from '@chenfengyuan/vue-qrcode';
 import api from '@/service/api';
 
 const route = useRoute();
+const toast = useToast();
 const gameId = route.params.id;
 
 const hoverPrize = ref(null);
 const editDialogVisible = ref(false);
-const selectedPrize = ref(null);
+const selectedPrize = ref({ quantity: 0 });
 const loading = ref(false);
 
 const game = ref({
@@ -246,12 +253,46 @@ const game = ref({
 const listPrize = ref([]);
 const participants = ref([]);
 
+// QR Code configuration
+const qrOptions = ref({
+    width: 120,
+    height: 120,
+    color: {
+        dark: '#000000',
+        light: '#FFFFFF'
+    }
+});
+
+// Computed property for QR code data
+const qrCodeData = computed(() => {
+    return `TOYO:GAME:${game.value.gameNo}`;
+});
+
 const gameStatus = computed({
     get: () => game.value.status === 1,
     set: (value) => {
         game.value.status = value ? 1 : 0;
     }
 });
+
+// Format date from YYYY-MM-DD to DD-MM-YYYY
+function formatDisplayDate(dateString) {
+    if (!dateString) return '';
+
+    try {
+        // If already in correct format, return as is
+        if (dateString.includes('-') && dateString.split('-')[0].length === 2) {
+            return dateString;
+        }
+
+        // Convert from YYYY-MM-DD to DD-MM-YYYY
+        const [year, month, day] = dateString.split('-');
+        return `${day}-${month}-${year}`;
+    } catch (error) {
+        console.error('Error formatting date:', error);
+        return dateString;
+    }
+}
 
 // Format prize type for display
 function formatPrizeType(type) {
@@ -263,6 +304,42 @@ function formatPrizeType(type) {
     };
     return typeMap[type] || type;
 }
+
+// Process private images using the API method
+const processPrivateImages = async () => {
+    const imageFields = ['image1URL', 'image2URL', 'image3URL'];
+
+    for (const field of imageFields) {
+        if (game.value[field] && typeof game.value[field] === 'string') {
+            try {
+                const blobUrl = await api.getPrivateFile(game.value[field]);
+                if (blobUrl) {
+                    game.value[field] = blobUrl;
+                }
+            } catch (error) {
+                console.error(`Error loading image ${field}:`, error);
+                // Keep the original URL if private file loading fails
+            }
+        }
+    }
+};
+
+// Process prize catalog images
+const processPrizeImages = async () => {
+    for (const prize of listPrize.value) {
+        if (prize.imageURL && typeof prize.imageURL === 'string') {
+            try {
+                const blobUrl = await api.getPrivateFile(prize.imageURL);
+                if (blobUrl) {
+                    prize.imageURL = blobUrl;
+                }
+            } catch (error) {
+                console.error(`Error loading prize image for ${prize.prizeName}:`, error);
+                // Keep the original URL if private file loading fails
+            }
+        }
+    }
+};
 
 // Fetch game details from API
 async function fetchGameDetails() {
@@ -276,6 +353,9 @@ async function fetchGameDetails() {
             // Set game details
             game.value = adminData.game_details;
 
+            // Process game images
+            await processPrivateImages();
+
             // Transform prizes data to match frontend structure
             listPrize.value = adminData.prizes.map((prize) => ({
                 id: prize.id,
@@ -288,36 +368,66 @@ async function fetchGameDetails() {
                 rawData: prize
             }));
 
+            // Process prize images
+            await processPrizeImages();
+
             // Set participants
             participants.value = adminData.participants;
         } else {
             console.error('Failed to fetch game details');
+            toast.add({
+                severity: 'error',
+                summary: 'Error',
+                detail: 'Failed to fetch game details',
+                life: 3000
+            });
         }
     } catch (error) {
         console.error('Error fetching game details:', error);
+        toast.add({
+            severity: 'error',
+            summary: 'Error',
+            detail: 'Error fetching game details',
+            life: 3000
+        });
     } finally {
         loading.value = false;
     }
 }
 
 // Toggle game status
-async function toggleGameStatus() {
+const toggleGameStatus = async () => {
     try {
         const response = await api.put(`game/toggleInactive/${gameId}`);
+
         if (response.data.status === 1) {
-            // Success - status updated
-            console.log('Game status updated successfully');
+            // Update local game status
+            game.value.status = game.value.status === 1 ? 0 : 1;
+
+            toast.add({
+                severity: 'success',
+                summary: 'Success',
+                detail: `Game ${game.value.status === 1 ? 'activated' : 'deactivated'} successfully`,
+                life: 3000
+            });
         } else {
-            console.error('Failed to update game status');
-            // Revert the toggle if failed
-            gameStatus.value = !gameStatus.value;
+            toast.add({
+                severity: 'error',
+                summary: 'Error',
+                detail: 'Failed to update game status',
+                life: 3000
+            });
         }
     } catch (error) {
         console.error('Error updating game status:', error);
-        // Revert the toggle if error
-        gameStatus.value = !gameStatus.value;
+        toast.add({
+            severity: 'error',
+            summary: 'Error',
+            detail: 'Failed to update game status',
+            life: 3000
+        });
     }
-}
+};
 
 // Delete game
 async function deleteGame() {
@@ -325,13 +435,33 @@ async function deleteGame() {
         try {
             const response = await api.put(`game/delete/${gameId}`);
             if (response.data.status === 1) {
-                // Redirect to games list or show success message
-                window.location.href = '/marketing/games';
+                toast.add({
+                    severity: 'success',
+                    summary: 'Success',
+                    detail: 'Game deleted successfully',
+                    life: 3000
+                });
+                // Redirect to games list after short delay
+                setTimeout(() => {
+                    window.location.href = '/marketing/games';
+                }, 1000);
             } else {
                 console.error('Failed to delete game');
+                toast.add({
+                    severity: 'error',
+                    summary: 'Error',
+                    detail: 'Failed to delete game',
+                    life: 3000
+                });
             }
         } catch (error) {
             console.error('Error deleting game:', error);
+            toast.add({
+                severity: 'error',
+                summary: 'Error',
+                detail: 'Error deleting game',
+                life: 3000
+            });
         }
     }
 }
@@ -341,16 +471,100 @@ async function exportParticipants() {
     try {
         // Implement export functionality
         console.log('Exporting participants...');
-        // You can implement CSV export or call backend export endpoint
+        toast.add({
+            severity: 'info',
+            summary: 'Info',
+            detail: 'Export functionality to be implemented',
+            life: 3000
+        });
     } catch (error) {
         console.error('Error exporting participants:', error);
+        toast.add({
+            severity: 'error',
+            summary: 'Error',
+            detail: 'Error exporting participants',
+            life: 3000
+        });
     }
 }
 
 // Download QR code
-function downloadQRCode() {
-    // Implement QR code download functionality
-    console.log('Downloading QR code...');
+async function downloadQRCode() {
+    try {
+        // Create a canvas element to draw the QR code
+        const canvas = document.createElement('canvas');
+        const ctx = canvas.getContext('2d');
+        
+        // Set canvas size
+        canvas.width = 300;
+        canvas.height = 300;
+        
+        // Create a temporary QR code for download with higher resolution
+        const tempQrOptions = {
+            ...qrOptions.value,
+            width: 300,
+            height: 300
+        };
+        
+        // Create QR code image
+        const qrCode = await generateQRCodeImage(qrCodeData.value, tempQrOptions);
+        
+        // Draw white background
+        ctx.fillStyle = '#FFFFFF';
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+        
+        // Draw QR code
+        const img = new Image();
+        img.onload = () => {
+            ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+            
+            // Create download link
+            const link = document.createElement('a');
+            link.download = `TOYO_GAME_${game.value.gameNo}_QR.png`;
+            link.href = canvas.toDataURL('image/png');
+            link.click();
+            
+            toast.add({
+                severity: 'success',
+                summary: 'Success',
+                detail: 'QR Code downloaded successfully',
+                life: 3000
+            });
+        };
+        img.src = qrCode;
+        
+    } catch (error) {
+        console.error('Error downloading QR code:', error);
+        toast.add({
+            severity: 'error',
+            summary: 'Error',
+            detail: 'Failed to download QR code',
+            life: 3000
+        });
+    }
+}
+
+// Helper function to generate QR code as image data URL
+function generateQRCodeImage(data, options) {
+    return new Promise((resolve) => {
+        // Create a temporary VueQrcode component to generate the QR code
+        const tempQr = new VueQrcode({
+            propsData: {
+                value: data,
+                options: options
+            }
+        });
+        
+        // Mount temporarily to get the QR code
+        tempQr.$mount();
+        const qrSvg = tempQr.$el.outerHTML;
+        
+        // Convert SVG to data URL
+        const svgBlob = new Blob([qrSvg], { type: 'image/svg+xml;charset=utf-8' });
+        const url = URL.createObjectURL(svgBlob);
+        
+        resolve(url);
+    });
 }
 
 // Prize edit functions
@@ -373,11 +587,30 @@ async function savePrizeEdit() {
                 listPrize.value[index].rawData.quantity = selectedPrize.value.quantity;
             }
             editDialogVisible.value = false;
+
+            toast.add({
+                severity: 'success',
+                summary: 'Success',
+                detail: 'Prize quantity updated successfully',
+                life: 3000
+            });
         } else {
             console.error('Failed to update prize quantity');
+            toast.add({
+                severity: 'error',
+                summary: 'Error',
+                detail: 'Failed to update prize quantity',
+                life: 3000
+            });
         }
     } catch (error) {
         console.error('Error updating prize quantity:', error);
+        toast.add({
+            severity: 'error',
+            summary: 'Error',
+            detail: 'Error updating prize quantity',
+            life: 3000
+        });
     }
 }
 
