@@ -22,6 +22,9 @@
                 </RouterLink>
             </div>
 
+            <!-- Tab Menu for filtering by purpose -->
+            <TabMenu :model="purposeTabs" v-model:activeIndex="activeTabIndex" class="mb-4" />
+
             <!-- Use your custom LoadingPage component -->
         <LoadingPage v-if="loading" :sub-message="'Loading Catalogue Item'" class="min-h-[800px]"/>
 
@@ -79,13 +82,15 @@
                 </RouterLink>
             </div>
 
-            <div v-if="!loading && !error && filteredItems.length === 0" class="text-center py-8 text-gray-500">No catalogue items found matching your search.</div>
+            <div v-if="!loading && !error && filteredItems.length === 0" class="text-center py-8 text-gray-500">
+                No catalogue items found {{ activeTabIndex > 0 ? `for ${purposeTabs[activeTabIndex].label}` : '' }}.
+            </div>
         </div>
     </Fluid>
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from 'vue';
+import { ref, computed, onMounted, watch } from 'vue';
 import api from '@/service/api';
 import LoadingPage from '@/components/LoadingPage.vue';
 
@@ -94,6 +99,15 @@ const searchQuery = ref('');
 const catalogueItems = ref([]);
 const loading = ref(false);
 const error = ref('');
+
+// Tab Menu Configuration
+const purposeTabs = [
+    { label: 'All', purpose: '' },
+    { label: 'Catalog', purpose: 'CATALOG' },
+    { label: 'Campaign', purpose: 'CAMPAIGN' },
+    { label: 'Game', purpose: 'GAME' }
+];
+const activeTabIndex = ref(0);
 
 onMounted(() => {
     fetchCatalogueItems();
@@ -165,13 +179,28 @@ const processCatalogueImages = async () => {
     }
 };
 
+// Filter items based on active tab and search query
 const filteredItems = computed(() => {
-    if (!searchQuery.value) {
-        return catalogueItems.value;
+    let filtered = catalogueItems.value;
+
+    // Filter by active tab (purpose)
+    const activeTab = purposeTabs[activeTabIndex.value];
+    if (activeTab.purpose) {
+        filtered = filtered.filter(item => item.purpose === activeTab.purpose);
     }
 
-    const query = searchQuery.value.toLowerCase();
-    return catalogueItems.value.filter((item) => item.title?.toLowerCase().includes(query) || item.type?.toLowerCase().includes(query) || item.purpose?.toLowerCase().includes(query) || item.description?.toLowerCase().includes(query));
+    // Filter by search query
+    if (searchQuery.value) {
+        const query = searchQuery.value.toLowerCase();
+        filtered = filtered.filter((item) => 
+            item.title?.toLowerCase().includes(query) || 
+            item.type?.toLowerCase().includes(query) || 
+            item.purpose?.toLowerCase().includes(query) || 
+            item.description?.toLowerCase().includes(query)
+        );
+    }
+
+    return filtered;
 });
 
 const getExpiryClass = (expiryDate) => {
@@ -234,4 +263,10 @@ const handleImageError = (event) => {
     // Set a placeholder image when the image fails to load
     event.target.src = 'https://via.placeholder.com/150x100?text=No+Image';
 };
+
+// Watch for tab changes to update the filtered items
+watch(activeTabIndex, () => {
+    // The computed property filteredItems will automatically update
+    console.log(`Tab changed to: ${purposeTabs[activeTabIndex.value].label}`);
+});
 </script>
