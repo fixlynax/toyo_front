@@ -2,10 +2,6 @@
     <div class="card flex flex-col w-full">
         <div class="text-2xl font-bold text-gray-800 border-b pb-2">📦 List Back Order</div>
 
-        <LoadingPage v-if="loading" :sub-message="'Loading Catalogue Item'" class="min-h-[720px]" />
-
-        <LoadingPage v-if="loading" :sub-message="'Loading Catalogue Item'" class="min-h-[720px]" />
-
         <!-- 🟢 Only show LoadingPage during initial load, hide DataTable completely -->
         <LoadingPage v-if="loading" :message="'Loading Back Orders...'" :sub-message="'Fetching your Back Order list'" />
 
@@ -186,14 +182,13 @@ const calculateProgress = (order) => {
 };
 
 const getProgressBarClass = (progress) => {
-    if (progress < 25) {
-        return 'progress-low'; // Red for <25%
-    } else if (progress < 75) {
-        return 'progress-medium'; // Yellow/Orange for <75%
-    } else {
-        return 'progress-high'; // Green for >=75%
-    }
+  if (progress <= 40) return 'progress-low';       // Red
+  if (progress <= 60) return 'progress-fair';      // Orange
+  if (progress < 100) return 'progress-good';      // Yellow
+  return 'progress-excellent';                     // Green (100%)
 };
+
+
 
 const formatDate = (dateString) => {
     if (!dateString) return '-';
@@ -235,24 +230,49 @@ const getStatusSeverity = (status) => {
 
 <style scoped lang="scss">
 :deep(.p-progressbar) {
-    height: 0.75rem;
+  height: 0.8rem;
+  border-radius: 9999px;
+  background-color: #f3f4f6; // Neutral background
+  box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.08);
+  overflow: hidden;
 
-    &.progress-low {
-        .p-progressbar-value {
-            background: linear-gradient(90deg, #ef4444, #dc2626) !important; // Red gradient
-        }
-    }
+  .p-progressbar-value {
+    border-radius: 9999px;
+    transition: width 0.4s ease, background 0.4s ease;
+  }
 
-    &.progress-medium {
-        .p-progressbar-value {
-            background: linear-gradient(90deg, #f59e0b, #d97706) !important; // Amber/Orange gradient
-        }
+  // 🔴 Low: 0–40%
+  &.progress-low {
+    .p-progressbar-value {
+      background: linear-gradient(90deg, #f87171, #b91c1c);
+      box-shadow: 0 0 6px rgba(239, 68, 68, 0.3);
     }
+  }
 
-    &.progress-high {
-        .p-progressbar-value {
-            background: linear-gradient(90deg, #10b981, #059669) !important; // Green gradient
-        }
+  // 🟠 Fair: 41–60%
+  &.progress-fair {
+    .p-progressbar-value {
+      background: linear-gradient(90deg, #fb923c, #ea580c);
+      box-shadow: 0 0 6px rgba(251, 146, 60, 0.3);
     }
+  }
+
+  // 🟡 Good: 61–99%
+  &.progress-good {
+    .p-progressbar-value {
+      background: linear-gradient(90deg, #fde047, #eab308);
+      box-shadow: 0 0 6px rgba(250, 204, 21, 0.3);
+    }
+  }
+
+  // 🟢 Excellent: 100%
+  &.progress-excellent {
+    .p-progressbar-value {
+      background: linear-gradient(90deg, #34d399, #059669);
+      box-shadow: 0 0 6px rgba(52, 211, 153, 0.4);
+    }
+  }
 }
 </style>
+
+
