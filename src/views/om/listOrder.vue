@@ -3,6 +3,7 @@ import api from '@/service/api';
 import { FilterMatchMode, FilterOperator } from '@primevue/core/api';
 import { onBeforeMount, ref, computed, watch } from 'vue';
 import { RouterLink } from 'vue-router';
+import LoadingPage from '@/components/LoadingPage.vue';
 
 // PrimeVue Components
 import TabMenu from 'primevue/tabmenu';
@@ -43,7 +44,7 @@ const statusTabs = [
     { label: 'Delivery', status: 77 },
     { label: 'Completed', status: 1 }
 ];
-const activeTabIndex = ref(66);
+const activeTabIndex = ref(0); // Fixed: Start with first tab (Pending)
 
 // 🟢 Fetch data function
 const fetchOrders = async (status = null) => {
@@ -153,121 +154,133 @@ const formatDate = (dateString) => {
     <div class="card">
         <div class="text-2xl font-bold text-gray-800 border-b pb-2">List Order</div>
 
-        <!-- 🟢 Status Tab Menu -->
-        <TabMenu :model="statusTabs" v-model:activeIndex="activeTabIndex" class="mb-4" />
+        <!-- 🟢 Use LoadingPage for initial load, hide everything else -->
+        <LoadingPage v-if="loading" :message="'Loading Orders...'" :sub-message="'Fetching your order list'" />
 
-        <!-- 🟢 DataTable -->
-        <DataTable :value="filteredOrders" :paginator="true" :rows="10" dataKey="id" :rowHover="true" :loading="loading" :filters="filters1" filterDisplay="menu" :globalFilterFields="['orderNo', 'custAccountNo', 'companyName', 'shipToAccountNo']">
-            <!-- 🟢 Header -->
-            <template #header>
-                <div class="flex items-center justify-between gap-4 w-full flex-wrap">
-                    <!-- Search -->
-                    <div class="flex items-center gap-2 w-full max-w-md">
-                        <IconField class="flex-1">
-                            <InputIcon>
-                                <i class="pi pi-search" />
-                            </InputIcon>
-                            <InputText v-model="filters1['global'].value" placeholder="Quick Search" class="w-full" />
-                        </IconField>
-                        <Button type="button" icon="pi pi-cog" class="p-button" />
+        <!-- 🟢 Content only shows when not loading -->
+        <div v-else>
+            <!-- 🟢 Status Tab Menu -->
+            <TabMenu :model="statusTabs" v-model:activeIndex="activeTabIndex" class="mb-4" />
+
+            <!-- 🟢 DataTable without loading prop -->
+            <DataTable 
+                :value="filteredOrders" 
+                :paginator="true" 
+                :rows="10" 
+                dataKey="id" 
+                :rowHover="true" 
+                :filters="filters1" 
+                filterDisplay="menu" 
+                :globalFilterFields="['orderNo', 'custAccountNo', 'companyName', 'shipToAccountNo']"
+            >
+                <!-- 🟢 Header -->
+                <template #header>
+                    <div class="flex items-center justify-between gap-4 w-full flex-wrap">
+                        <!-- Search -->
+                        <div class="flex items-center gap-2 w-full max-w-md">
+                            <IconField class="flex-1">
+                                <InputIcon>
+                                    <i class="pi pi-search" />
+                                </InputIcon>
+                                <InputText v-model="filters1['global'].value" placeholder="Quick Search" class="w-full" />
+                            </IconField>
+                            <Button type="button" icon="pi pi-cog" class="p-button" />
+                        </div>
                     </div>
-                </div>
-            </template>
-
-            <template #empty>
-                <div class="text-center py-4 text-gray-500">No orders found.</div>
-            </template>
-            <template #loading>
-                <div class="text-center py-4">Loading orders data. Please wait.</div>
-            </template>
-
-            <!-- 🟢 Order Info -->
-            <Column header="Order No" style="min-width: 6rem">
-                <template #body="{ data }">
-                    <RouterLink :to="`/om/detailOrder/${data.id}`" class="hover:underline font-bold text-blue-600">
-                        {{ data.orderNo || '-' }}
-                    </RouterLink>
                 </template>
-            </Column>
 
-            <!-- Dealer Info -->
-            <Column field="custAccountNo" header="Dealer Acc No" style="min-width: 6rem">
-                <template #body="{ data }">
-                    {{ data.custAccountNo || '-' }}
+                <template #empty>
+                    <div class="text-center py-4 text-gray-500">No orders found.</div>
                 </template>
-            </Column>
-            <Column field="companyName" header="Dealer Name" style="min-width: 10rem">
-                <template #body="{ data }">
-                    {{ data.companyName1 || '-' }}
-                </template>
-            </Column>
 
-            <!-- 🟢 Order Type -->
-            <Column field="orderType" header="Order Type" style="min-width: 7rem">
-                <template #body="{ data }">
-                    <span v-if="data.orderType === 'NORMAL'">Normal</span>
-                    <span v-else-if="data.orderType === 'DS'">DS</span>
-                    <span v-else-if="data.orderType === 'OWN-USE'">Own-use</span>
-                    <span v-else>{{ data.orderType || data.sapOrderType || '-' }}</span>
-                </template>
-            </Column>
+                <!-- 🟢 Order Info -->
+                <Column header="Order No" style="min-width: 6rem">
+                    <template #body="{ data }">
+                        <RouterLink :to="`/om/detailOrder/${data.id}`" class="hover:underline font-bold text-blue-600">
+                            {{ data.orderNo || '-' }}
+                        </RouterLink>
+                    </template>
+                </Column>
 
-            <!-- 🟢 Delivery Method -->
-            <Column field="deliveryType" header="Delivery" style="min-width: 7rem">
-                <template #body="{ data }">
-                    <span v-if="data.deliveryType === 'DELIVER'">Deliver</span>
-                    <span v-else-if="data.deliveryType === 'PICKUP'">Pickup</span>
-                    <span v-else>{{ data.deliveryType || '-' }}</span>
-                </template>
-            </Column>
+                <!-- Dealer Info -->
+                <Column field="custAccountNo" header="Dealer Acc No" style="min-width: 6rem">
+                    <template #body="{ data }">
+                        {{ data.custAccountNo || '-' }}
+                    </template>
+                </Column>
+                <Column field="companyName" header="Dealer Name" style="min-width: 10rem">
+                    <template #body="{ data }">
+                        {{ data.companyName1 || '-' }}
+                    </template>
+                </Column>
 
-            <!-- 🟢 Ship To Account -->
-            <Column field="shipToAccountNo" header="Ship To Acc No" style="min-width: 8rem">
-                <template #body="{ data }">
-                    {{ data.shipToAccountNo || data.custAccountNo || '-' }}
-                </template>
-            </Column>
+                <!-- 🟢 Order Type -->
+                <Column field="orderType" header="Order Type" style="min-width: 7rem">
+                    <template #body="{ data }">
+                        <span v-if="data.orderType === 'NORMAL'">Normal</span>
+                        <span v-else-if="data.orderType === 'DS'">DS</span>
+                        <span v-else-if="data.orderType === 'OWN-USE'">Own-use</span>
+                        <span v-else>{{ data.orderType || data.sapOrderType || '-' }}</span>
+                    </template>
+                </Column>
 
-            <!-- 🟢 Delivery Date -->
-            <Column header="Delivery Date" style="min-width: 8rem">
-                <template #body="{ data }">
-                    {{ formatDate(data.deliveryDate) }}
-                </template>
-            </Column>
+                <!-- 🟢 Delivery Method -->
+                <Column field="deliveryType" header="Delivery" style="min-width: 7rem">
+                    <template #body="{ data }">
+                        <span v-if="data.deliveryType === 'DELIVER'">Deliver</span>
+                        <span v-else-if="data.deliveryType === 'PICKUP'">Pickup</span>
+                        <span v-else>{{ data.deliveryType || '-' }}</span>
+                    </template>
+                </Column>
 
-            <!-- 🟢 SO / DO / Invoice -->
-            <Column header="SAP Ref" style="min-width: 10rem">
-                <template #body="{ data }">
-                    <div class="flex flex-col text-sm">
-                        <span v-if="data.orderStatus === 66 || data.orderStatus === 77 || data.orderStatus === 0">
-                            SO: <strong>{{ data.soNo || '-' }}</strong> | DO: <strong>{{ data.doNo || '-' }}</strong>
-                        </span>
-                        <span v-else-if="data.orderStatus === 1">
-                            Invoice: <strong>{{ data.invoiceNo || '-' }}</strong>
-                        </span>
-                        <span v-else-if="data.orderStatus === 99">
-                            <strong>Return Order</strong>
-                        </span>
+                <!-- 🟢 Ship To Account -->
+                <Column field="shipToAccountNo" header="Ship To Acc No" style="min-width: 8rem">
+                    <template #body="{ data }">
+                        {{ data.shipToAccountNo || data.custAccountNo || '-' }}
+                    </template>
+                </Column>
+
+                <!-- 🟢 Delivery Date -->
+                <Column header="Delivery Date" style="min-width: 8rem">
+                    <template #body="{ data }">
+                        {{ formatDate(data.deliveryDate) }}
+                    </template>
+                </Column>
+
+                <!-- 🟢 SO / DO / Invoice -->
+                <Column header="SAP Ref" style="min-width: 10rem">
+                    <template #body="{ data }">
+                        <div class="flex flex-col text-sm">
+                            <span v-if="data.orderStatus === 66 || data.orderStatus === 77 || data.orderStatus === 0">
+                                SO: <strong>{{ data.soNo || '-' }}</strong> | DO: <strong>{{ data.doNo || '-' }}</strong>
+                            </span>
+                            <span v-else-if="data.orderStatus === 1">
+                                Invoice: <strong>{{ data.invoiceNo || '-' }}</strong>
+                            </span>
+                            <span v-else-if="data.orderStatus === 99">
+                                <strong>Return Order</strong>
+                            </span>
+                            <span v-else>-</span>
+                        </div>
+                    </template>
+                </Column>
+
+                <!-- 🟢 Status -->
+                <Column header="Status" style="min-width: 6rem">
+                    <template #body="{ data }">
+                        <Tag :value="statusMap[data.orderStatus]?.label || 'Unknown'" :severity="statusMap[data.orderStatus]?.severity || 'danger'" />
+                    </template>
+                </Column>
+
+                <!-- 🟢 Total Amount -->
+                <Column header="Total" style="min-width: 8rem">
+                    <template #body="{ data }">
+                        <span v-if="data.total">${{ parseFloat(data.total).toFixed(2) }}</span>
                         <span v-else>-</span>
-                    </div>
-                </template>
-            </Column>
-
-            <!-- 🟢 Status -->
-            <Column header="Status" style="min-width: 6rem">
-                <template #body="{ data }">
-                    <Tag :value="statusMap[data.orderStatus]?.label || 'Unknown'" :severity="statusMap[data.orderStatus]?.severity || 'danger'" />
-                </template>
-            </Column>
-
-            <!-- 🟢 Total Amount -->
-            <Column header="Total" style="min-width: 8rem">
-                <template #body="{ data }">
-                    <span v-if="data.total">${{ parseFloat(data.total).toFixed(2) }}</span>
-                    <span v-else>-</span>
-                </template>
-            </Column>
-        </DataTable>
+                    </template>
+                </Column>
+            </DataTable>
+        </div>
     </div>
 </template>
 

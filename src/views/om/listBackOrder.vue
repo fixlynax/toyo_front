@@ -120,16 +120,16 @@ onMounted(async () => {
                 
                 return {
                     id: order.id,
-                    orderNo: order.bo_orderno || 'N/A',
+                    orderNo: order.bo_orderno || '-',
                     custAccountNo: order.custaccountno,
                     customerName: order.dealerName ,
-                    deliveryType: order.deliveryType,
+                    deliveryType: order.deliveryType || '-',
                     orderDate: order.created,
                     shipTo: order.shipto || order.custaccountno,
                     deliveryDate: order.deliveryDate,
                     expiry: order.expiry,
                     orderStatus: order.orderstatus,
-                    progress: progress,
+                    progress: order.fullfill_percentage ,
                     status: order.status
                 };
             });
@@ -180,7 +180,7 @@ const calculateProgress = (order) => {
 };
 
 const formatDate = (dateString) => {
-    if (!dateString) return 'N/A';
+    if (!dateString) return '-';
     
     try {
         const date = new Date(dateString);
@@ -199,12 +199,6 @@ const getStatusLabel = (status) => {
         case 0:
             return 'Pending';
         case 1:
-            return 'Active';
-        case 2:
-            return 'Expired';
-        case 3:
-            return 'Cancelled';
-        case 4:
             return 'Completed';
         default:
             return 'Unknown';
@@ -214,14 +208,8 @@ const getStatusLabel = (status) => {
 const getStatusSeverity = (status) => {
     switch (status) {
         case 0:
-            return 'secondary';
+            return 'warn';
         case 1:
-            return 'info';
-        case 2:
-            return 'warning';
-        case 3:
-            return 'danger';
-        case 4:
             return 'success';
         default:
             return 'info';
