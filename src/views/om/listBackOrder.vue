@@ -1,15 +1,17 @@
 <template>
-    <div class="card flex flex-col w-full">
+    <div class="card flex flex-col w-full ">
         <div class="text-2xl font-bold text-gray-800 border-b pb-2">📦 List Back Order</div>
 
+        <LoadingPage v-if="loading" :sub-message="'Loading Catalogue Item'" class="min-h-[720px]"/>
+
         <DataTable
+            v-if="!loading"
             :value="listData"
             :paginator="true"
             :rows="10"
             :rowsPerPageOptions="[5, 10, 20]"
             dataKey="id"
             :rowHover="true"
-            :loading="loading"
             :filters="filters"
             filterDisplay="menu"
             :globalFilterFields="['custAccountNo', 'customerName', 'deliveryDate', 'expiry', 'orderStatus']"
@@ -40,11 +42,9 @@
                     </RouterLink>
                 </template>
             </Column>
-            
-            <Column field="custAccountNo" header="Dealer Acc No" style="min-width: 10rem" />
 
+            <Column field="custAccountNo" header="Dealer Acc No" style="min-width: 10rem" />
             <Column field="customerName" header="Dealer Name" style="min-width: 10rem" />
-            
             <Column field="deliveryType" header="Delivery" style="min-width: 10rem" />
 
             <Column field="orderDate" header="Order Date" style="min-width: 8rem">
@@ -85,6 +85,7 @@
     </div>
 </template>
 
+
 <script setup>
 import { onMounted, ref } from 'vue';
 import { FilterMatchMode } from '@primevue/core/api';
@@ -96,6 +97,7 @@ import InputText from 'primevue/inputtext';
 import Button from 'primevue/button';
 import IconField from 'primevue/iconfield';
 import InputIcon from 'primevue/inputicon';
+import LoadingPage from '@/components/LoadingPage.vue';
 
 const listData = ref([]);
 const loading = ref(true);
@@ -113,23 +115,23 @@ onMounted(async () => {
         if (response.data.status === 1 && response.data.admin_data) {
             // admin_data is an array, not an object
             const adminData = response.data.admin_data;
-            
-            listData.value = adminData.map(order => {
+
+            listData.value = adminData.map((order) => {
                 // Calculate progress percentage
                 const progress = calculateProgress(order);
-                
+
                 return {
                     id: order.id,
                     orderNo: order.bo_orderno || '-',
                     custAccountNo: order.custaccountno,
-                    customerName: order.dealerName ,
+                    customerName: order.dealerName,
                     deliveryType: order.deliveryType || '-',
                     orderDate: order.created,
                     shipTo: order.shipto || order.custaccountno,
                     deliveryDate: order.deliveryDate,
                     expiry: order.expiry,
                     orderStatus: order.orderstatus,
-                    progress: order.fullfill_percentage ,
+                    progress: order.fullfill_percentage,
                     status: order.status
                 };
             });
@@ -153,25 +155,21 @@ const calculateProgress = (order) => {
 
         // Calculate from backorder_array and remaining_array
         if (order.backorder_array && order.remaining_array) {
-            const backorderItems = Array.isArray(order.backorder_array) 
-                ? order.backorder_array 
-                : JSON.parse(order.backorder_array);
-                
-            const remainingItems = typeof order.remaining_array === 'string' 
-                ? JSON.parse(order.remaining_array) 
-                : order.remaining_array;
+            const backorderItems = Array.isArray(order.backorder_array) ? order.backorder_array : JSON.parse(order.backorder_array);
+
+            const remainingItems = typeof order.remaining_array === 'string' ? JSON.parse(order.remaining_array) : order.remaining_array;
 
             if (Array.isArray(backorderItems) && Array.isArray(remainingItems)) {
                 const totalOrdered = backorderItems.reduce((sum, item) => sum + parseInt(item.qty || 0), 0);
                 const totalRemaining = remainingItems.reduce((sum, item) => sum + parseInt(item.qty || 0), 0);
-                
+
                 if (totalOrdered > 0) {
                     const fulfilled = totalOrdered - totalRemaining;
                     return Math.round((fulfilled / totalOrdered) * 100);
                 }
             }
         }
-        
+
         return 0;
     } catch (error) {
         console.error('Error calculating progress:', error);
@@ -181,7 +179,7 @@ const calculateProgress = (order) => {
 
 const formatDate = (dateString) => {
     if (!dateString) return '-';
-    
+
     try {
         const date = new Date(dateString);
         return date.toLocaleDateString('en-US', {
@@ -212,7 +210,7 @@ const getStatusSeverity = (status) => {
         case 1:
             return 'success';
         default:
-            return 'info';
+            return 'secondary';
     }
 };
 </script>
