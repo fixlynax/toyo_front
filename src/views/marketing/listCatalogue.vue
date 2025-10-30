@@ -4,9 +4,6 @@
             <!-- Page Title -->
             <div class="text-2xl font-bold text-gray-800 border-b pb-2 mb-4">List Catalogue</div>
 
-            <!-- ========================= -->
-            <!-- Header Section -->
-            <!-- ========================= -->
             <div class="flex items-center justify-between gap-4 w-full flex-wrap mb-6">
                 <!-- Left: Search Field + Cog Button -->
                 <div class="flex items-center gap-2 w-full max-w-md">
@@ -14,11 +11,7 @@
                         <InputIcon>
                             <i class="pi pi-search" />
                         </InputIcon>
-                        <InputText 
-                            v-model="searchQuery" 
-                            placeholder="Quick Search" 
-                            class="w-full" 
-                        />
+                        <InputText v-model="searchQuery" placeholder="Quick Search" class="w-full" />
                     </IconField>
                     <Button type="button" icon="pi pi-cog" class="p-button" />
                 </div>
@@ -29,26 +22,15 @@
                 </RouterLink>
             </div>
 
-            <!-- ========================= -->
-            <!-- Loading State -->
-            <!-- ========================= -->
-            <div v-if="loading" class="text-center py-8">
-                <ProgressSpinner style="width: 50px; height: 50px" />
-                <p class="mt-2 text-gray-600">Loading catalogue items...</p>
-            </div>
+            <!-- Use your custom LoadingPage component -->
+            <LoadingPage v-if="loading" :message="'Loading Catalogue Items...'" :sub-message="'Fetching your marketing materials'" />
 
-            <!-- ========================= -->
-            <!-- Error State -->
-            <!-- ========================= -->
             <div v-else-if="error" class="text-center py-8 text-red-500">
                 <i class="pi pi-exclamation-triangle text-2xl mb-2"></i>
                 <p>{{ error }}</p>
                 <Button @click="fetchCatalogueItems" label="Retry" class="p-button-outlined mt-4" />
             </div>
 
-            <!-- ========================= -->
-            <!-- Catalogue Grid -->
-            <!-- ========================= -->
             <div v-else class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-6">
                 <!-- Catalogue Card -->
                 <RouterLink
@@ -65,12 +47,7 @@
                         </div>
 
                         <!-- Image -->
-                        <img 
-                            :src="item.imageURL || 'https://via.placeholder.com/150x100?text=No+Image'" 
-                            :alt="item.title" 
-                            class="w-full h-full object-cover"
-                            @error="handleImageError"
-                        />
+                        <img :src="item.processedImageURL || 'https://via.placeholder.com/150x100?text=No+Image'" :alt="item.title" class="w-full h-full object-cover" @error="handleImageError" />
                     </div>
 
                     <!-- Bottom: Info Section -->
@@ -79,8 +56,7 @@
                         <div class="text-lg font-semibold text-gray-800 truncate">
                             {{ item.title }}
                         </div>
-                        <div class="text-ml font-semibold text-gray-500 truncate">
-                            Purpose:
+                        <div class="text-ml font-bold text-gray-600 truncate">
                             {{ item.purpose }}
                         </div>
 
@@ -103,12 +79,7 @@
                 </RouterLink>
             </div>
 
-            <!-- ========================= -->
-            <!-- Empty State -->
-            <!-- ========================= -->
-            <div v-if="!loading && !error && filteredItems.length === 0" class="text-center py-8 text-gray-500">
-                No catalogue items found matching your search.
-            </div>
+            <div v-if="!loading && !error && filteredItems.length === 0" class="text-center py-8 text-gray-500">No catalogue items found matching your search.</div>
         </div>
     </Fluid>
 </template>
@@ -116,6 +87,7 @@
 <script setup>
 import { ref, computed, onMounted } from 'vue';
 import api from '@/service/api';
+import LoadingPage from '@/components/LoadingPage.vue';
 
 // Reactive data
 const searchQuery = ref('');
@@ -123,30 +95,29 @@ const catalogueItems = ref([]);
 const loading = ref(false);
 const error = ref('');
 
-// =========================
-// Lifecycle Hooks
-// =========================
 onMounted(() => {
     fetchCatalogueItems();
 });
 
-// =========================
-// API Functions
-// =========================
 const fetchCatalogueItems = async () => {
     loading.value = true;
     error.value = '';
-    
+
     try {
         const response = await api.get('catalog/catalogList');
         console.log('API Response:', response.data);
 
         if (response.data.status === 1 && Array.isArray(response.data.admin_data)) {
-            catalogueItems.value = response.data.admin_data.map(item => ({
+            catalogueItems.value = response.data.admin_data.map((item) => ({
                 ...item,
                 // Ensure imageURL is properly formatted
-                imageURL: item.imageURL || null
+                imageURL: item.imageURL || null,
+                // Initialize processedImageURL for private images
+                processedImageURL: null
             }));
+
+            // Process private images after fetching data
+            await processCatalogueImages();
         } else {
             error.value = 'Failed to load catalogue items: Invalid response format';
             catalogueItems.value = [];
@@ -170,35 +141,48 @@ const fetchCatalogueItems = async () => {
     }
 };
 
-// =========================
-// Computed Properties
-// =========================
+const processCatalogueImages = async () => {
+    for (const item of catalogueItems.value) {
+        if (item.imageURL && typeof item.imageURL === 'string') {
+            try {
+                const blobUrl = await api.getPrivateFile(item.imageURL);
+                if (blobUrl) {
+                    // Use a different property to avoid conflicts
+                    item.processedImageURL = blobUrl;
+                } else {
+                    // Fallback to original URL if private file loading fails
+                    item.processedImageURL = item.imageURL;
+                }
+            } catch (error) {
+                console.error(`Error loading catalogue image for ${item.title}:`, error);
+                // Fallback to original URL or placeholder
+                item.processedImageURL = item.imageURL;
+            }
+        } else {
+            // No image URL, use placeholder
+            item.processedImageURL = 'https://via.placeholder.com/150x100?text=No+Image';
+        }
+    }
+};
+
 const filteredItems = computed(() => {
     if (!searchQuery.value) {
         return catalogueItems.value;
     }
 
     const query = searchQuery.value.toLowerCase();
-    return catalogueItems.value.filter(item =>
-        item.title?.toLowerCase().includes(query) ||
-        item.type?.toLowerCase().includes(query) ||
-        item.purpose?.toLowerCase().includes(query) ||
-        item.description?.toLowerCase().includes(query)
-    );
+    return catalogueItems.value.filter((item) => item.title?.toLowerCase().includes(query) || item.type?.toLowerCase().includes(query) || item.purpose?.toLowerCase().includes(query) || item.description?.toLowerCase().includes(query));
 });
 
-// =========================
-// Helper Functions
-// =========================
 const getExpiryClass = (expiryDate) => {
     if (!expiryDate) return 'text-gray-500';
-    
+
     try {
         const today = new Date();
         // Convert DD-MM-YYYY to YYYY-MM-DD for proper Date parsing
         const [day, month, year] = expiryDate.split('-');
         const expiry = new Date(`${year}-${month}-${day}`);
-        
+
         // Handle invalid dates
         if (isNaN(expiry.getTime())) {
             return 'text-gray-500';
@@ -226,7 +210,7 @@ const getExpiryClass = (expiryDate) => {
 
 const formatExpiryDate = (expiryDate) => {
     if (!expiryDate) return 'No expiry';
-    
+
     try {
         // Convert from DD-MM-YYYY to DD/MM/YYYY format
         const [day, month, year] = expiryDate.split('-');
@@ -239,9 +223,9 @@ const formatExpiryDate = (expiryDate) => {
 
 const formatType = (type) => {
     const typeMap = {
-        'ITEM': 'Item',
-        'EWALLET': 'E-Wallet',
-        'EVOUCHER': 'E-Voucher'
+        ITEM: 'Item',
+        EWALLET: 'E-Wallet',
+        EVOUCHER: 'E-Voucher'
     };
     return typeMap[type] || type;
 };
