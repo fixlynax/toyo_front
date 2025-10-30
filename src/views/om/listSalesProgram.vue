@@ -2,6 +2,7 @@
 import api from '@/service/api';
 import { FilterMatchMode, FilterOperator } from '@primevue/core/api';
 import { onBeforeMount, ref } from 'vue';
+import LoadingPage from '@/components/LoadingPage.vue';
 
 const filters1 = ref(null);
 const listData = ref([]);
@@ -56,8 +57,11 @@ onBeforeMount(async () => {
 <template>
     <div class="card">
         <div class="text-2xl font-bold text-gray-800 border-b pb-2 mb-3">List Sales Program</div>
+          <!-- 🟢 Use LoadingPage for initial load, hide everything else -->
+        <LoadingPage v-if="loading" :message="'Loading your Sales Progtame...'" :sub-message="'Fetching your Sales Progtame'" />
 
-        <DataTable :value="listData" :paginator="true" :rows="10" dataKey="programId" :rowHover="true" :loading="loading" :filters="filters1" filterDisplay="menu">
+
+        <DataTable v-else :value="listData" :paginator="true" :rows="10" dataKey="programId" :rowHover="true"  :filters="filters1" filterDisplay="menu">
             <!-- Header -->
             <template #header>
                 <div class="flex items-center justify-between gap-4 w-full flex-wrap">
@@ -80,7 +84,7 @@ onBeforeMount(async () => {
             </template>
 
             <template #empty> No sales programs found. </template>
-            <template #loading> Loading sales programs data. Please wait. </template>
+            
 
             <!-- Program ID -->
             <Column field="programId" header="Program ID" style="min-width: 8rem">

@@ -5,10 +5,17 @@
             <h5 class="m-0 text-2xl font-bold text-gray-800">DO - Direct Shipment</h5>
         </div>
 
+         <!-- 🟢 Only show LoadingPage during initial load, hide DataTable completely -->
+        <LoadingPage 
+            v-if="loading" 
+            :message="'Loading Disable Orders DS...'" 
+            :sub-message="'Fetching your Disable Orders DS list'" 
+        />
+
         <!-- DataTable -->
         <DataTable
+        v-else
             :value="disabledOrders"
-            :loading="loading"
             dataKey="id"
             :rows="10"
             :filters="filters1"
@@ -25,7 +32,6 @@
                         icon="pi pi-refresh" 
                         class="p-button-outlined p-button-sm" 
                         @click="fetchDisabledOrders" 
-                        :loading="loading"
                     />
                 </div>
             </template>
@@ -284,6 +290,7 @@
 
 <script>
 import api from '@/service/api';
+import LoadingPage from '@/components/LoadingPage.vue';
 
 export default {
     name: 'ListPageLayout',

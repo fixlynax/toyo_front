@@ -5,15 +5,22 @@
                 <!-- Header -->
                 <div class="text-2xl font-bold text-gray-800 border-b pb-2 mb-4">Material Exception List</div>
 
+                <!-- 🟢 Only show LoadingPage during initial load, hide DataTable completely -->
+        <LoadingPage 
+            v-if="loading" 
+            :message="'Loading Material Exception...'" 
+            :sub-message="'Fetching your Material Exception list'" 
+        />
+
                 <!-- Material Exceptions Table -->
                 <DataTable
+                v-else 
                     :value="materialExceptions"
                     :paginator="true"
                     :rows="10"
                     :rowsPerPageOptions="[5, 10, 20, 50]"
                     dataKey="id"
                     :rowHover="true"
-                    :loading="loading"
                     :filters="filters"
                     responsiveLayout="scroll"
                 >
@@ -202,14 +209,6 @@
                 <Button :label="editMode ? 'Update' : 'Add Exception'" icon="pi pi-check" class="p-button-primary" :disabled="!isDialogFormValid" @click="saveException" />
             </template>
         </Dialog>
-
-        <!-- Loading Overlay -->
-        <Dialog v-model:visible="loading" :modal="true" :closable="false" :style="{ width: '20rem' }">
-            <div class="flex items-center gap-4">
-                <i class="pi pi-spinner pi-spin text-2xl"></i>
-                <span>Processing...</span>
-            </div>
-        </Dialog>
     </Fluid>
 </template>
 
@@ -218,6 +217,7 @@ import { ref, reactive, computed, onMounted } from 'vue'
 import { FilterMatchMode } from '@primevue/core/api'
 import { useToast } from 'primevue/usetoast'
 import api from '@/service/api';
+import LoadingPage from '@/components/LoadingPage.vue';
 
 const toast = useToast()
 const loading = ref(false)

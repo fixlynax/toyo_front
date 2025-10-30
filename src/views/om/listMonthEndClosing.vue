@@ -5,8 +5,15 @@
                 <!-- Header -->
                 <div class="text-2xl font-bold text-gray-800 border-b pb-2 mb-4">Month End Closing Calendar</div>
 
+                <!-- 🟢 Only show LoadingPage during initial load, hide DataTable completely -->
+        <LoadingPage 
+            v-if="loading" 
+            :message="'Loading Month End Closing...'" 
+            :sub-message="'Fetching your Month End Closing list'" 
+        />
+
                 <!-- Closing Dates Table -->
-                <DataTable :value="closingDates" :paginator="true" :rows="10" :rowsPerPageOptions="[12, 24, 36, 48, 60]" dataKey="id" :rowHover="true" :loading="loading" sortField="closingDateTime" :sortOrder="-1" responsiveLayout="scroll">
+                <DataTable v-else :value="closingDates" :paginator="true" :rows="10" :rowsPerPageOptions="[12, 24, 36, 48, 60]" dataKey="id" :rowHover="true"  sortField="closingDateTime" :sortOrder="-1" responsiveLayout="scroll">
                     <template #header>
                         <div class="flex justify-between items-center">
                             <span class="text-sm text-gray-500"> Showing {{ closingDates.length }} records </span>
@@ -139,6 +146,7 @@
 <script setup>
 import { ref, reactive, computed, onMounted } from 'vue';
 import api from '@/service/api';
+import LoadingPage from '@/components/LoadingPage.vue';
 
 const loading = ref(false);
 const showEditDialog = ref(false);
