@@ -4,7 +4,7 @@
         <div class="flex">
             <div class="card flex flex-col gap-4 w-full">
                 <div class="text-2xl font-bold text-gray-800 border-b pb-2">Confirm eTEN</div>
-                 <p class="text-gray-600">Please review the information before submitting.</p>
+                <p class="text-gray-600">Please review the information before submitting.</p>
 
                 <!-- Account No -->
                 <div class="flex items-end gap-3">
@@ -35,18 +35,18 @@
                     </div>
                     <div class="w-full">
                         <span class="text-sm text-gray-500">Company Name 2</span>
-                        <p class="text-lg font-medium">{{ form.companyName2 || "-"  }}</p>
+                        <p class="text-lg font-medium">{{ form.companyName2 || '-' }}</p>
                     </div>
                 </div>
 
                 <div class="flex flex-col md:flex-row gap-4">
                     <div class="w-full">
                         <span class="text-sm text-gray-500">Company Name 3</span>
-                        <p class="text-lg font-medium">{{ form.companyName3 || "-" }}</p>
+                        <p class="text-lg font-medium">{{ form.companyName3 || '-' }}</p>
                     </div>
                     <div class="w-full">
                         <span class="text-sm text-gray-500">Company Name 4</span>
-                        <p class="text-lg font-medium">{{ form.companyName4 || "-"  }}</p>
+                        <p class="text-lg font-medium">{{ form.companyName4 || '-' }}</p>
                     </div>
                 </div>
 
@@ -62,15 +62,19 @@
                 </div>
 
                 <div class="flex flex-col md:flex-row gap-4">
-                        <div class="w-full">
-                            <span class="text-sm text-gray-500">TIN No</span>
-                            <p class="text-lg font-medium">{{ form.tinNo }}</p>
-                        </div>
-                        <div class="w-full">
-                            <span class="text-sm text-gray-500">Vat No</span>
-                            <p class="text-lg font-medium">{{ form.vatNo }}</p>
-                        </div>
+                    <div class="w-full">
+                        <span class="text-sm text-gray-500">TIN No</span>
+                        <p class="text-lg font-medium">{{ form.tinNo }}</p>
                     </div>
+                    <div class="w-full">
+                        <span class="text-sm text-gray-500">Vat No</span>
+                        <p class="text-lg font-medium">{{ form.vatNo }}</p>
+                    </div>
+                </div>
+                <div class="w-full">
+                    <span class="text-sm text-gray-500">Main Branch</span>
+                    <p class="text-lg font-medium">{{ form.mainBranch }}</p>
+                </div>
             </div>
         </div>
 
@@ -93,11 +97,11 @@
                 <div class="flex flex-col md:flex-row gap-4">
                     <div class="w-full">
                         <span class="text-sm text-gray-500">Address Line 3</span>
-                        <p class="text-lg font-medium">{{ form.addressLine3 || "-" }}</p>
+                        <p class="text-lg font-medium">{{ form.addressLine3 || '-' }}</p>
                     </div>
                     <div class="w-full">
                         <span class="text-sm text-gray-500">Address Line 4</span>
-                        <p class="text-lg font-medium">{{ form.addressLine4 || "-" }}</p>
+                        <p class="text-lg font-medium">{{ form.addressLine4 || '-' }}</p>
                     </div>
                 </div>
 
@@ -254,18 +258,18 @@
                         <p class="text-lg font-medium">{{ form.signboardBrand ? 'Yes' : 'No' }}</p>
                     </div>
                 </div>
-                
-                <div class="flex flex-col md:flex-row justify-end mt-4"> 
-                    <div class="w-40"> 
+
+                <div class="flex flex-col md:flex-row justify-end mt-4">
+                    <div class="w-40">
                         <RouterLink to="/om/addEten">
                             <Button label="Edit" class="w-full" />
                         </RouterLink>
-                    </div> 
-                    <div class="w-40 ml-4"> 
+                    </div>
+                    <div class="w-40 ml-4">
                         <RouterLink to="/om/detailEten">
                             <Button label="Submit" class="w-full" />
                         </RouterLink>
-                    </div> 
+                    </div>
                 </div>
             </div>
         </div>
@@ -273,52 +277,53 @@
 </template>
 
 <script setup>
-import { ref } from 'vue'
+import { ref } from 'vue';
 
 const form = ref({
-        memberCode: 'E346572',
-        custAccountNo: '6080100900',
-        companyName1: 'PS Tyres & Battery Auto Services Sdn. Bhd',
-        companyName2: '',
-        companyName3: '',
-        companyName4: '',
-        companyRegNo: 'MY123456789',
-        salesTaxNo: 'SST123456',
-        serviceTaxNo: 'STX120987',
-        tinNo: '1256734321',
-        vatNo: '0976213456',
-        addressLine1: '123 Toyo Road',
-        addressLine2: 'Toyo Industrial Park',
-        addressLine3: '',
-        addressLine4: '',
-        city: 'Kuala Lumpur',
-        postcode: '50000',
-        state: 'Kuala Lumpur',
-        country: 'Malaysia',
-        mapLatitude: '3.1390',
-        mapLongitude: '101.6869',
-        phoneNumber: '+60 3-1234 5678',
-        mobilreNumber: '+60 19-1234 567',
-        emailAddress: 'sales@toyotires.com.my',
-        accountType: 'Retailer',
-        priceGroup: 'A',
-        priceProcedure: 'Standard',
-        customerAccountGroup: 'Group1',
-        customerCondGrp: 'Cond1',
-        paymentTerms: 'NET 30',
-        riskCategory: 'Low',
-        creditLimit: 50000,
-        pricelist: '01',
-        signboardType: 'T10',
-        signboardBrand: 'Toyo',
-        salesOffice: 'Kuala Lumpur',
-        salesDistrict: 'Central',
-        shippingCond: 'RE',
-        accountCreation: '2023-01-15',
-        showOnList: 1,
-        ifFamilyChannel: 0,
-        allowLalamove: 1,
-        startingSalesAmt: 1000,
-        status: 0
-})
+    memberCode: 'E346572',
+    custAccountNo: '6080100900',
+    companyName1: 'PS Tyres & Battery Auto Services Sdn. Bhd',
+    companyName2: '',
+    companyName3: '',
+    companyName4: '',
+    companyRegNo: 'MY123456789',
+    salesTaxNo: 'SST123456',
+    serviceTaxNo: 'STX120987',
+    tinNo: '1256734321',
+    vatNo: '0976213456',
+    mainBranch: 'TOYO TAYAR SUBANG',
+    addressLine1: '123 Toyo Road',
+    addressLine2: 'Toyo Industrial Park',
+    addressLine3: '',
+    addressLine4: '',
+    city: 'Kuala Lumpur',
+    postcode: '50000',
+    state: 'Kuala Lumpur',
+    country: 'Malaysia',
+    mapLatitude: '3.1390',
+    mapLongitude: '101.6869',
+    phoneNumber: '+60 3-1234 5678',
+    mobilreNumber: '+60 19-1234 567',
+    emailAddress: 'sales@toyotires.com.my',
+    accountType: 'Retailer',
+    priceGroup: 'A',
+    priceProcedure: 'Standard',
+    customerAccountGroup: 'Group1',
+    customerCondGrp: 'Cond1',
+    paymentTerms: 'NET 30',
+    riskCategory: 'Low',
+    creditLimit: 50000,
+    pricelist: '01',
+    signboardType: 'T10',
+    signboardBrand: 'Toyo',
+    salesOffice: 'Kuala Lumpur',
+    salesDistrict: 'Central',
+    shippingCond: 'RE',
+    accountCreation: '2023-01-15',
+    showOnList: 1,
+    ifFamilyChannel: 0,
+    allowLalamove: 1,
+    startingSalesAmt: 1000,
+    status: 0
+});
 </script>

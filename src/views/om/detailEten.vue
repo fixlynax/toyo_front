@@ -64,6 +64,10 @@
                                 <span class="text-sm text-gray-500">VAT No</span>
                                 <p class="text-lg font-medium">{{ form.vatNo }}</p>
                             </div>
+                            <div>
+                                <span class="text-sm text-gray-500">Main  Branch</span>
+                                <p class="text-lg font-medium">{{ form.mainBranch }}</p>
+                            </div>
                         </div>
                     </div>
 
@@ -588,6 +592,7 @@ const form = ref({
     serviceTaxNo: 'STX120987',
     tinNo: '1256734321',
     vatNo: '0976213456',
+    mainBranch: 'Toyo Tire Seri Petaling',
     addressLine1: '123 Toyo Road',
     addressLine2: 'Toyo Industrial Park',
     addressLine3: '',
