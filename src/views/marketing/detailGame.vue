@@ -130,16 +130,17 @@
                                     <td class="px-4 py-2 text-right">{{ participants.length }}</td>
                                 </tr>
                                 <tr class="border-b">
-                                    <td class="px-4 py-2 font-medium">QR Game</td>
-                                    <td class="px-4 py-2 text-right">
-                                        <div class="flex justify-end">
-                                            <div class="flex flex-col items-center">
-                                                <img :src="`/demo/images/qr-toyo.png`" alt="QR Game Image" class="rounded-xl shadow-sm object-cover w-30 h-20 mb-2" />
-                                                <button class="bg-red-600 text-white px-3 py-1 rounded" @click="downloadQRCode">Download</button>
+                                    <td class="px-4 py-2 font-medium align-top">QR Game</td>
+                                    <td class=" py-2">
+                                        <div class="flex flex-col items-end gap-3">
+                                            <div ref="qrWrapper" class="bg-white p-2 rounded-xl shadow-sm">
+                                                <qrcode-vue :value="qrCodeData" :size="70" level="H" render-as="canvas" />
                                             </div>
+                                            <Button label="Download" class="p-button-danger p-button-sm" style="width: fit-content; margin-right: 4px" @click="downloadQRCode" />
                                         </div>
                                     </td>
                                 </tr>
+
                                 <tr>
                                     <td class="px-4 py-2 font-medium"></td>
                                     <td class="py-4 text-right">
@@ -214,11 +215,17 @@
 import { ref, onMounted, computed } from 'vue';
 import { useRoute } from 'vue-router';
 import { useToast } from 'primevue/usetoast';
+import QrcodeVue from 'qrcode.vue';
 import api from '@/service/api';
 
 const route = useRoute();
 const toast = useToast();
 const gameId = route.params.id;
+
+const qrWrapper = ref(null);
+const qrCodeData = computed(() => {
+    return game.value.gameNo ? `TOYO:GAME:${game.value.gameNo}` : '';
+});
 
 const hoverPrize = ref(null);
 const editDialogVisible = ref(false);
@@ -470,13 +477,27 @@ async function exportParticipants() {
 
 // Download QR code
 function downloadQRCode() {
-    // Implement QR code download functionality
-    console.log('Downloading QR code...');
+    const canvas = qrWrapper.value?.querySelector('canvas');
+    if (!canvas) {
+        toast.add({
+            severity: 'warn',
+            summary: 'Warning',
+            detail: 'QR code not ready yet',
+            life: 2000
+        });
+        return;
+    }
+
+    const link = document.createElement('a');
+    link.download = `${game.value.gameNo || 'game_qr'}.png`;
+    link.href = canvas.toDataURL('image/png');
+    link.click();
+
     toast.add({
-        severity: 'info',
-        summary: 'Info',
-        detail: 'QR download functionality to be implemented',
-        life: 3000
+        severity: 'success',
+        summary: 'Downloaded',
+        detail: 'QR code saved successfully!',
+        life: 2000
     });
 }
 
