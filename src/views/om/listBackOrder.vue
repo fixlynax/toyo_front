@@ -2,14 +2,22 @@
     <div class="card flex flex-col w-full">
         <div class="text-2xl font-bold text-gray-800 border-b pb-2">📦 List Back Order</div>
 
+        <!-- 🟢 Only show LoadingPage during initial load, hide DataTable completely -->
+        <LoadingPage 
+            v-if="loading" 
+            :message="'Loading Back Orders...'" 
+            :sub-message="'Fetching your Back Order list'" 
+        />
+
+        <!-- 🟢 Only show DataTable when NOT loading -->
         <DataTable
+            v-else
             :value="listData"
             :paginator="true"
             :rows="10"
             :rowsPerPageOptions="[5, 10, 20]"
             dataKey="id"
             :rowHover="true"
-            :loading="loading"
             :filters="filters"
             filterDisplay="menu"
             :globalFilterFields="['custAccountNo', 'customerName', 'deliveryDate', 'expiry', 'orderStatus']"
@@ -31,7 +39,7 @@
             </template>
 
             <template #empty> No back orders found. </template>
-            <template #loading> Loading back orders data. Please wait. </template>
+            <!-- Removed #loading template since we're using external LoadingPage -->
 
             <Column field="orderNo" header="Order No." style="min-width: 10rem">
                 <template #body="{ data }">
@@ -76,7 +84,12 @@
             <Column field="progress" header="Progress" style="min-width: 10rem">
                 <template #body="{ data }">
                     <div class="flex items-center gap-2">
-                        <ProgressBar :value="data.progress" class="w-full" :showValue="false" />
+                        <ProgressBar 
+                            :value="data.progress" 
+                            class="w-full" 
+                            :showValue="false"
+                            :class="getProgressBarClass(data.progress)"
+                        />
                         <span class="text-sm font-semibold">{{ data.progress }}%</span>
                     </div>
                 </template>
@@ -96,6 +109,7 @@ import InputText from 'primevue/inputtext';
 import Button from 'primevue/button';
 import IconField from 'primevue/iconfield';
 import InputIcon from 'primevue/inputicon';
+import LoadingPage from '@/components/LoadingPage.vue';
 
 const listData = ref([]);
 const loading = ref(true);
@@ -111,7 +125,6 @@ onMounted(async () => {
         console.log('API Response:', response.data);
 
         if (response.data.status === 1 && response.data.admin_data) {
-            // admin_data is an array, not an object
             const adminData = response.data.admin_data;
             
             listData.value = adminData.map(order => {
@@ -122,14 +135,14 @@ onMounted(async () => {
                     id: order.id,
                     orderNo: order.bo_orderno || '-',
                     custAccountNo: order.custaccountno,
-                    customerName: order.dealerName ,
+                    customerName: order.dealerName,
                     deliveryType: order.deliveryType || '-',
                     orderDate: order.created,
                     shipTo: order.shipto || order.custaccountno,
                     deliveryDate: order.deliveryDate,
                     expiry: order.expiry,
                     orderStatus: order.orderstatus,
-                    progress: order.fullfill_percentage ,
+                    progress: progress, // Use calculated progress
                     status: order.status
                 };
             });
@@ -147,8 +160,10 @@ onMounted(async () => {
 
 const calculateProgress = (order) => {
     try {
+        // Use fullfill_percentage if available
         if (order.fullfill_percentage !== null && order.fullfill_percentage !== undefined) {
-            return parseInt(order.fullfill_percentage);
+            const progress = parseInt(order.fullfill_percentage);
+            return isNaN(progress) ? 0 : Math.min(100, Math.max(0, progress)); // Ensure between 0-100
         }
 
         // Calculate from backorder_array and remaining_array
@@ -157,9 +172,9 @@ const calculateProgress = (order) => {
                 ? order.backorder_array 
                 : JSON.parse(order.backorder_array);
                 
-            const remainingItems = typeof order.remaining_array === 'string' 
-                ? JSON.parse(order.remaining_array) 
-                : order.remaining_array;
+            const remainingItems = Array.isArray(order.remaining_array)
+                ? order.remaining_array
+                : JSON.parse(order.remaining_array);
 
             if (Array.isArray(backorderItems) && Array.isArray(remainingItems)) {
                 const totalOrdered = backorderItems.reduce((sum, item) => sum + parseInt(item.qty || 0), 0);
@@ -167,7 +182,8 @@ const calculateProgress = (order) => {
                 
                 if (totalOrdered > 0) {
                     const fulfilled = totalOrdered - totalRemaining;
-                    return Math.round((fulfilled / totalOrdered) * 100);
+                    const progress = Math.round((fulfilled / totalOrdered) * 100);
+                    return Math.min(100, Math.max(0, progress)); // Ensure between 0-100
                 }
             }
         }
@@ -176,6 +192,16 @@ const calculateProgress = (order) => {
     } catch (error) {
         console.error('Error calculating progress:', error);
         return 0;
+    }
+};
+
+const getProgressBarClass = (progress) => {
+    if (progress < 25) {
+        return 'progress-low'; // Red for <25%
+    } else if (progress < 75) {
+        return 'progress-medium'; // Yellow/Orange for <75%
+    } else {
+        return 'progress-high'; // Green for >=75%
     }
 };
 
@@ -220,5 +246,23 @@ const getStatusSeverity = (status) => {
 <style scoped lang="scss">
 :deep(.p-progressbar) {
     height: 0.75rem;
+    
+    &.progress-low {
+        .p-progressbar-value {
+            background: linear-gradient(90deg, #ef4444, #dc2626) !important; // Red gradient
+        }
+    }
+    
+    &.progress-medium {
+        .p-progressbar-value {
+            background: linear-gradient(90deg, #f59e0b, #d97706) !important; // Amber/Orange gradient
+        }
+    }
+    
+    &.progress-high {
+        .p-progressbar-value {
+            background: linear-gradient(90deg, #10b981, #059669) !important; // Green gradient
+        }
+    }
 }
 </style>
