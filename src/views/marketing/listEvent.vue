@@ -2,91 +2,93 @@
     <div class="card">
         <div class="text-2xl font-bold text-gray-800 border-b pb-2">List Event</div>
 
-        <DataTable
-            :value="listData"
-            :paginator="true"
-            :rows="10"
-            :rowsPerPageOptions="[5, 10, 20]"
-            dataKey="id"
-            :rowHover="true"
-            :loading="loading"
-            :filters="filters"
-            filterDisplay="menu"
-            :globalFilterFields="['title', 'location', 'publishDate', 'period', 'isSurvey', 'status']"
-        >
-            <!-- ========================= -->
-            <!-- Header Section -->
-            <!-- ========================= -->
-            <template #header>
-                <div class="flex items-center justify-between gap-4 w-full flex-wrap">
-                    <!-- Left: Search Field + Cog Button -->
-                    <div class="flex items-center gap-2 w-full max-w-md">
-                        <IconField class="flex-1">
-                            <InputIcon>
-                                <i class="pi pi-search" />
-                            </InputIcon>
-                            <InputText v-model="filters['global'].value" placeholder="Quick Search" class="w-full" />
-                        </IconField>
-                        <Button type="button" icon="pi pi-cog" class="p-button" />
+        <!-- Show LoadingPage only during initial page load -->
+        <LoadingPage v-if="initialLoading" :message="'Loading Events...'" :sub-message="'Fetching event data'" />
+
+        <!-- Show content area when not in initial loading -->
+        <div v-else>
+            <DataTable
+                :value="listData"
+                :paginator="true"
+                :rows="10"
+                :rowsPerPageOptions="[5, 10, 20]"
+                dataKey="id"
+                :rowHover="true"
+                :loading="tableLoading"
+                :filters="filters"
+                filterDisplay="menu"
+                :globalFilterFields="['title', 'location', 'publishDate', 'period', 'isSurvey', 'status']"
+            >
+            
+                <template #header>
+                    <div class="flex items-center justify-between gap-4 w-full flex-wrap">
+                        <!-- Left: Search Field + Cog Button -->
+                        <div class="flex items-center gap-2 w-full max-w-md">
+                            <IconField class="flex-1">
+                                <InputIcon>
+                                    <i class="pi pi-search" />
+                                </InputIcon>
+                                <InputText v-model="filters['global'].value" placeholder="Quick Search" class="w-full" />
+                            </IconField>
+                            <Button type="button" icon="pi pi-cog" class="p-button" />
+                        </div>
+
+                        <!-- Right: Create Event Button -->
+                        <RouterLink to="/marketing/createEvent">
+                            <Button type="button" label="Create" />
+                        </RouterLink>
                     </div>
+                </template>
 
-                    <!-- Right: Create Event Button -->
-                    <RouterLink to="/marketing/createEvent">
-                        <Button type="button" label="Create" />
-                    </RouterLink>
-                </div>
-            </template>
+                <template #empty>
+                    <div class="text-center py-8 text-gray-500">No Event found.</div>
+                </template>
 
-            <!-- ========================= -->
-            <!-- Empty / Loading Messages -->
-            <!-- ========================= -->
-            <template #empty> No Event found. </template>
-            <template #loading> Loading Event data. Please wait. </template>
+                <template #loading>
+                    <div class="text-center py-4">
+                        <ProgressSpinner style="width: 30px; height: 30px" />
+                        <p class="mt-2 text-gray-600">Loading event data...</p>
+                    </div>
+                </template>
 
-            <!-- ========================= -->
-            <!-- Data Columns -->
-            <!-- ========================= -->
-            <Column field="title" header="Title" style="min-width: 8rem">
-                <template #body="{ data }">
-                    <RouterLink :to="`/marketing/detailEvent/${data.id}`" class="hover:underline font-bold">
-                        {{ data.title }}
-                    </RouterLink>
-                </template>
-            </Column>
-            
-            <Column field="location" header="Location" style="min-width: 6rem">
-                <template #body="{ data }">
-                    {{ data.location }}
-                </template>
-            </Column>
-            
-            <Column field="publishDate" header="Publish Date" style="min-width: 6rem">
-                <template #body="{ data }">
-                    {{ data.publishDate }}
-                </template>
-            </Column>
-            
-            <Column field="period" header="Period" style="min-width: 8rem">
-                <template #body="{ data }">
-                    {{ data.startDate }} - {{ data.endDate }}
-                </template>
-            </Column>
+                <Column field="title" header="Title" style="min-width: 8rem">
+                    <template #body="{ data }">
+                        <RouterLink :to="`/marketing/detailEvent/${data.id}`" class="hover:underline font-bold">
+                            {{ data.title }}
+                        </RouterLink>
+                    </template>
+                </Column>
 
-            <Column field="isSurvey" header="Survey" style="min-width: 6rem">
-                <template #body="{ data }">
-                    <span v-if="data.isSurvey" class="font-bold">Yes</span>
-                </template>
-            </Column>
-            
-            <Column field="status" header="Status" style="min-width: 6rem">
-                <template #body="{ data }">
-                    <Tag 
-                        :value="data.status === 1 ? 'Active' : 'Inactive'" 
-                        :severity="getOverallStatusSeverity(data.status)" 
-                    />
-                </template>
-            </Column>
-        </DataTable>
+                <Column field="location" header="Location" style="min-width: 6rem">
+                    <template #body="{ data }">
+                        {{ data.location }}
+                    </template>
+                </Column>
+
+                <Column field="publishDate" header="Publish Date" style="min-width: 6rem">
+                    <template #body="{ data }">
+                        {{ data.publishDate }}
+                    </template>
+                </Column>
+
+                <Column field="period" header="Period" style="min-width: 8rem">
+                    <template #body="{ data }"> {{ data.startDate }} - {{ data.endDate }} </template>
+                </Column>
+
+                <Column field="isSurvey" header="Survey" style="min-width: 6rem">
+                    <template #body="{ data }">
+                        <span v-if="data.isSurvey" class="font-bold">Yes</span>
+                        <span v-else class="text-gray-500">No</span>
+                    </template>
+                </Column>
+
+                <Column field="status" header="Status" style="min-width: 6rem">
+                    <template #body="{ data }">
+                        <Tag :value="data.status === 1 ? 'Active' : 'Inactive'" :severity="getOverallStatusSeverity(data.status)" />
+                    </template>
+                </Column>
+            </DataTable>
+        </div>
     </div>
 </template>
 
@@ -94,22 +96,23 @@
 import { onMounted, ref } from 'vue';
 import api from '@/service/api';
 import { FilterMatchMode } from '@primevue/core/api';
+import LoadingPage from '@/components/LoadingPage.vue';
 
 // Data variables
 const listData = ref([]);
-const loading = ref(true);
+const initialLoading = ref(true); // For initial page load
+const tableLoading = ref(false); // For table operations
 
 // Filters for quick search
 const filters = ref({
     global: { value: null, matchMode: FilterMatchMode.CONTAINS }
 });
 
-// =========================
-// Fetch data on mount
-// =========================
 onMounted(async () => {
     try {
-        loading.value = true;
+        initialLoading.value = true;
+        tableLoading.value = true;
+
         const response = await api.get('event/eventList');
 
         console.log('API Response:', response.data);
@@ -118,11 +121,11 @@ onMounted(async () => {
             listData.value = response.data.admin_data.map((event) => ({
                 id: event.id,
                 title: event.title || 'Untitled',
-                location: event.publishDate,
-                publishDate: event.startDate,
-                startDate: event.startDate, 
-                endDate: event.endDate, 
-                isSurvey: event.isSurvey || 'N/A',
+                location: event.location || 'N/A', // Fixed: was using publishDate for location
+                publishDate: event.publishDate || 'N/A', // Fixed: was using startDate for publishDate
+                startDate: event.startDate || 'N/A',
+                endDate: event.endDate || 'N/A',
+                isSurvey: event.isSurvey || false,
                 status: event.status
             }));
         } else {
@@ -133,13 +136,11 @@ onMounted(async () => {
         console.error('Error fetching event list:', error);
         listData.value = [];
     } finally {
-        loading.value = false;
+        initialLoading.value = false;
+        tableLoading.value = false;
     }
 });
 
-// =========================
-// Helper functions for status display
-// =========================
 const getOverallStatusSeverity = (status) => {
     return status === 1 ? 'success' : 'danger';
 };

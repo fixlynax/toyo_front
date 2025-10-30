@@ -2,85 +2,87 @@
     <div class="card">
         <div class="text-2xl font-bold text-gray-800 border-b pb-2">List Game</div>
 
-        <DataTable
-            :value="listData"
-            :paginator="true"
-            :rows="10"
-            :rowsPerPageOptions="[5, 10, 20]"
-            dataKey="id"
-            :rowHover="true"
-            :loading="loading"
-            :filters="filters"
-            filterDisplay="menu"
-            :globalFilterFields="['gameNo', 'gameName', 'title', 'type', 'publishDate', 'status']"
-        >
-            <!-- ========================= -->
-            <!-- Header Section -->
-            <!-- ========================= -->
-            <template #header>
-                <div class="flex items-center justify-between gap-4 w-full flex-wrap">
-                    <!-- Left: Search Field + Cog Button -->
-                    <div class="flex items-center gap-2 w-full max-w-md">
-                        <IconField class="flex-1">
-                            <InputIcon>
-                                <i class="pi pi-search" />
-                            </InputIcon>
-                            <InputText v-model="filters['global'].value" placeholder="Quick Search" class="w-full" />
-                        </IconField>
-                        <Button type="button" icon="pi pi-cog" class="p-button" />
+        <!-- Show LoadingPage only during initial page load -->
+        <LoadingPage v-if="initialLoading" :message="'Loading Games...'" :sub-message="'Fetching game data'" />
+
+        <!-- Show content area when not in initial loading -->
+        <div v-else>
+            <DataTable
+                :value="listData"
+                :paginator="true"
+                :rows="10"
+                :rowsPerPageOptions="[5, 10, 20]"
+                dataKey="id"
+                :rowHover="true"
+                :loading="tableLoading"
+                :filters="filters"
+                filterDisplay="menu"
+                :globalFilterFields="['gameNo', 'gameName', 'title', 'type', 'publishDate', 'status']"
+            >
+                <template #header>
+                    <div class="flex items-center justify-between gap-4 w-full flex-wrap">
+                        <!-- Left: Search Field + Cog Button -->
+                        <div class="flex items-center gap-2 w-full max-w-md">
+                            <IconField class="flex-1">
+                                <InputIcon>
+                                    <i class="pi pi-search" />
+                                </InputIcon>
+                                <InputText v-model="filters['global'].value" placeholder="Quick Search" class="w-full" />
+                            </IconField>
+                            <Button type="button" icon="pi pi-cog" class="p-button" />
+                        </div>
+
+                        <!-- Right: Create Game Button -->
+                        <RouterLink to="/marketing/CreateGame">
+                            <Button type="button" label="Create" />
+                        </RouterLink>
                     </div>
+                </template>
 
-                    <!-- Right: Create Game Button -->
-                    <RouterLink to="/marketing/CreateGame">
-                        <Button type="button" label="Create" />
-                    </RouterLink>
-                </div>
-            </template>
+                <template #empty>
+                    <div class="text-center py-8 text-gray-500">No Games found.</div>
+                </template>
 
-            <!-- ========================= -->
-            <!-- Empty / Loading Messages -->
-            <!-- ========================= -->
-            <template #empty> No Games found. </template>
-            <template #loading> Loading Games data. Please wait. </template>
+                <template #loading>
+                    <div class="text-center py-4">
+                        <ProgressSpinner style="width: 30px; height: 30px" />
+                        <p class="mt-2 text-gray-600">Loading game data...</p>
+                    </div>
+                </template>
 
-            <!-- ========================= -->
-            <!-- Data Columns -->
-            <!-- ========================= -->
-            <Column field="gameNo" header="Game No" style="min-width: 6rem">
-                <template #body="{ data }">
-                    <RouterLink :to="`/marketing/detailGame/${data.id}`" class="hover:underline font-bold">
-                        {{ data.gameNo }}
-                    </RouterLink>
-                </template>
-            </Column>
-            
-            <Column field="gameName" header="Game Name" style="min-width: 6rem">
-                <template #body="{ data }">
-                    {{ data.title }}
-                </template>
-            </Column>
-            
-            <Column field="type" header="Type" style="min-width: 6rem">
-                <template #body="{ data }">
-                    {{ data.type }}
-                </template>
-            </Column>
-            
-            <Column field="publishDate" header="Publish Date" style="min-width: 6rem">
-                <template #body="{ data }">
-                    {{ data.publishDate }}
-                </template>
-            </Column>
-            
-            <Column field="status" header="Status" style="min-width: 6rem">
-                <template #body="{ data }">
-                    <Tag 
-                        :value="data.status === 1 ? 'Active' : 'Inactive'" 
-                        :severity="getOverallStatusSeverity(data.status)" 
-                    />
-                </template>
-            </Column>
-        </DataTable>
+                <Column field="gameNo" header="Game No" style="min-width: 6rem">
+                    <template #body="{ data }">
+                        <RouterLink :to="`/marketing/detailGame/${data.id}`" class="hover:underline font-bold">
+                            {{ data.gameNo }}
+                        </RouterLink>
+                    </template>
+                </Column>
+
+                <Column field="gameName" header="Game Name" style="min-width: 6rem">
+                    <template #body="{ data }">
+                        {{ data.title }}
+                    </template>
+                </Column>
+
+                <Column field="type" header="Type" style="min-width: 6rem">
+                    <template #body="{ data }">
+                        {{ data.type }}
+                    </template>
+                </Column>
+
+                <Column field="publishDate" header="Publish Date" style="min-width: 6rem">
+                    <template #body="{ data }">
+                        {{ data.publishDate }}
+                    </template>
+                </Column>
+
+                <Column field="status" header="Status" style="min-width: 6rem">
+                    <template #body="{ data }">
+                        <Tag :value="data.status === 1 ? 'Active' : 'Inactive'" :severity="getOverallStatusSeverity(data.status)" />
+                    </template>
+                </Column>
+            </DataTable>
+        </div>
     </div>
 </template>
 
@@ -88,22 +90,23 @@
 import { onMounted, ref } from 'vue';
 import api from '@/service/api';
 import { FilterMatchMode } from '@primevue/core/api';
+import LoadingPage from '@/components/LoadingPage.vue';
 
 // Data variables
 const listData = ref([]);
-const loading = ref(true);
+const initialLoading = ref(true); // For initial page load
+const tableLoading = ref(false); // For table operations
 
 // Filters for quick search
 const filters = ref({
     global: { value: null, matchMode: FilterMatchMode.CONTAINS }
 });
 
-// =========================
-// Fetch data on mount
-// =========================
 onMounted(async () => {
     try {
-        loading.value = true;
+        initialLoading.value = true;
+        tableLoading.value = true;
+
         const response = await api.get('game/gameList');
 
         console.log('API Response:', response.data);
@@ -111,10 +114,10 @@ onMounted(async () => {
         if (response.data.status === 1 && Array.isArray(response.data.admin_data)) {
             listData.value = response.data.admin_data.map((game) => ({
                 id: game.id,
-                gameNo: game.gameNo || 'Untitled',
-                title: game.title,
-                type: game.type,
-                publishDate: game.publishDate, 
+                gameNo: game.gameNo || 'N/A',
+                title: game.title || 'Untitled',
+                type: game.type || 'N/A',
+                publishDate: game.publishDate || 'N/A',
                 status: game.status
             }));
         } else {
@@ -125,13 +128,11 @@ onMounted(async () => {
         console.error('Error fetching game list:', error);
         listData.value = [];
     } finally {
-        loading.value = false;
+        initialLoading.value = false;
+        tableLoading.value = false;
     }
 });
 
-// =========================
-// Helper functions for status display
-// =========================
 const getOverallStatusSeverity = (status) => {
     return status === 1 ? 'success' : 'danger';
 };

@@ -2,81 +2,95 @@
     <div class="card">
         <div class="text-2xl font-bold text-gray-800 border-b pb-2">List News</div>
 
-        <DataTable
-            :value="listData"
-            :paginator="true"
-            :rows="10"
-            :rowsPerPageOptions="[5, 10, 20]"
-            dataKey="id"
-            :rowHover="true"
-            :loading="loading"
-            :filters="filters"
-            filterDisplay="menu"
-            :globalFilterFields="['title', 'publishDate', 'period', 'audience', 'viewer', 'status']"
-        >
-            <template #header>
-                <div class="flex items-center justify-between gap-4 w-full flex-wrap">
-                    <!-- Left: Search Field + Cog Button -->
-                    <div class="flex items-center gap-2 w-full max-w-md">
-                        <IconField class="flex-1">
-                            <InputIcon>
-                                <i class="pi pi-search" />
-                            </InputIcon>
-                            <InputText v-model="filters['global'].value" placeholder="Quick Search" class="w-full" />
-                        </IconField>
-                        <Button type="button" icon="pi pi-cog" class="p-button" />
+        <!-- Show LoadingPage only during initial page load -->
+        <LoadingPage v-if="initialLoading" :message="'Loading News...'" :sub-message="'Fetching list announcements'" />
+
+        <!-- Show content area when not in initial loading -->
+        <div v-else>
+            <DataTable
+                :value="listData"
+                :paginator="true"
+                :rows="10"
+                :rowsPerPageOptions="[5, 10, 20]"
+                dataKey="id"
+                :rowHover="true"
+                :loading="tableLoading"
+                :filters="filters"
+                filterDisplay="menu"
+                :globalFilterFields="['title', 'publishDate', 'period', 'audience', 'viewer', 'status']"
+            >
+                <template #header>
+                    <div class="flex items-center justify-between gap-4 w-full flex-wrap">
+                        <!-- Left: Search Field + Cog Button -->
+                        <div class="flex items-center gap-2 w-full max-w-md">
+                            <IconField class="flex-1">
+                                <InputIcon>
+                                    <i class="pi pi-search" />
+                                </InputIcon>
+                                <InputText v-model="filters['global'].value" placeholder="Quick Search" class="w-full" />
+                            </IconField>
+                            <Button type="button" icon="pi pi-cog" class="p-button" />
+                        </div>
+
+                        <!-- Right: Create News Button -->
+                        <RouterLink to="/marketing/createNews">
+                            <Button type="button" label="Create" />
+                        </RouterLink>
                     </div>
-
-                    <!-- Right: Create News Button -->
-                    <RouterLink to="/marketing/createNews">
-                        <Button type="button" label="Create" />
-                    </RouterLink>
-                </div>
-            </template>
-
-            <template #empty> No News found. </template>
-            <template #loading> Loading News data. Please wait. </template>
-
-            <Column field="title" header="Title" sortable style="min-width: 8rem">
-                <template #body="{ data }">
-                    <RouterLink :to="`/marketing/detailNews/${data.id}`" class="hover:underline font-bold">
-                        {{ data.title }}
-                    </RouterLink>
                 </template>
-            </Column>
 
-            <Column field="publishDate" header="Publish Date" sortable style="min-width: 6rem">
-                <template #body="{ data }">
-                    {{ formatDate(data.publishDate) }}
+                <template #empty>
+                    <div class="text-center py-8 text-gray-500">No News found.</div>
                 </template>
-            </Column>
 
-            <Column field="period" header="Period" style="min-width: 8rem">
-                <template #body="{ data }">
-                    {{ formatDate(data.startDate) }}
-                    <span class="font-bold"> - </span>
-                    {{ formatDate(data.endDate) }}
+                <template #loading>
+                    <div class="text-center py-4">
+                        <ProgressSpinner style="width: 30px; height: 30px" />
+                        <p class="mt-2 text-gray-600">Loading news data...</p>
+                    </div>
                 </template>
-            </Column>
 
-            <Column field="audience" header="Audience" sortable style="min-width: 6rem">
-                <template #body="{ data }">
-                    {{ data.audience }}
-                </template>
-            </Column>
+                <Column field="title" header="Title" sortable style="min-width: 8rem">
+                    <template #body="{ data }">
+                        <RouterLink :to="`/marketing/detailNews/${data.id}`" class="hover:underline font-bold">
+                            {{ data.title }}
+                        </RouterLink>
+                    </template>
+                </Column>
 
-            <Column field="viewer" header="Viewer" sortable style="min-width: 6rem">
-                <template #body="{ data }">
-                    {{ data.view || 0 }}
-                </template>
-            </Column>
+                <Column field="publishDate" header="Publish Date" sortable style="min-width: 6rem">
+                    <template #body="{ data }">
+                        {{ formatDate(data.publishDate) }}
+                    </template>
+                </Column>
 
-            <Column field="status" header="Status" sortable style="min-width: 6rem">
-                <template #body="{ data }">
-                    <Tag :value="getStatusLabel(data.status)" :severity="getStatusSeverity(data.status)" />
-                </template>
-            </Column>
-        </DataTable>
+                <Column field="period" header="Period" style="min-width: 8rem">
+                    <template #body="{ data }">
+                        {{ formatDate(data.startDate) }}
+                        <span class="font-bold"> - </span>
+                        {{ formatDate(data.endDate) }}
+                    </template>
+                </Column>
+
+                <Column field="audience" header="Audience" sortable style="min-width: 6rem">
+                    <template #body="{ data }">
+                        {{ data.audience }}
+                    </template>
+                </Column>
+
+                <Column field="viewer" header="Viewer" sortable style="min-width: 6rem">
+                    <template #body="{ data }">
+                        {{ data.view || 0 }}
+                    </template>
+                </Column>
+
+                <Column field="status" header="Status" sortable style="min-width: 6rem">
+                    <template #body="{ data }">
+                        <Tag :value="getStatusLabel(data.status)" :severity="getStatusSeverity(data.status)" />
+                    </template>
+                </Column>
+            </DataTable>
+        </div>
     </div>
 </template>
 
@@ -84,22 +98,23 @@
 import { onMounted, ref } from 'vue';
 import api from '@/service/api';
 import { FilterMatchMode } from '@primevue/core/api';
+import LoadingPage from '@/components/LoadingPage.vue';
 
 // Data variables
 const listData = ref([]);
-const loading = ref(true);
+const initialLoading = ref(true); // For initial page load
+const tableLoading = ref(false); // For table operations
 
 // Filters for quick search
 const filters = ref({
     global: { value: null, matchMode: FilterMatchMode.CONTAINS }
 });
 
-// =========================
-// Fetch data on mount
-// =========================
 onMounted(async () => {
     try {
-        loading.value = true;
+        initialLoading.value = true;
+        tableLoading.value = true;
+
         const response = await api.get('news/newsList');
 
         if (response.data.status === 1 && Array.isArray(response.data.admin_data)) {
@@ -108,9 +123,9 @@ onMounted(async () => {
                 title: news.title || 'Untitled',
                 publishDate: news.publishDate,
                 startDate: news.startDate,
-                endDate: news.endDate, // Fixed typo: was 'endtDate'
+                endDate: news.endDate,
                 audience: news.audience || 'N/A',
-                view: news.view || 0, // Fixed: was 'viewer' in API but 'view' in data
+                view: news.view || 0,
                 status: news.status
             }));
         } else {
@@ -121,13 +136,12 @@ onMounted(async () => {
         console.error('Error fetching news list:', error);
         listData.value = [];
     } finally {
-        loading.value = false;
+        initialLoading.value = false;
+        tableLoading.value = false;
     }
 });
 
-// =========================
-// Helper functions
-// =========================
+// ... rest of your methods remain the same
 const getStatusLabel = (status) => {
     const statusMap = {
         0: 'Draft',
@@ -141,20 +155,13 @@ const getStatusSeverity = (status) => {
     const severityMap = {
         0: 'info',
         1: 'success',
-        2: 'warning' // Fixed: was 'warn', should be 'warning'
+        2: 'warning'
     };
     return severityMap[status] || 'secondary';
 };
 
 const formatDate = (dateString) => {
     if (!dateString || dateString === 'N/A') return 'N/A';
-
-    try {
-        // Parse DD-MM-YYYY format and return as is, or format if needed
-        return dateString;
-    } catch (error) {
-        console.error('Error formatting date:', error);
-        return dateString;
-    }
+    return dateString;
 };
 </script>
