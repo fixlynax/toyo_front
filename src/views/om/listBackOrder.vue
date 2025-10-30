@@ -3,15 +3,11 @@
         <div class="text-2xl font-bold text-gray-800 border-b pb-2">📦 List Back Order</div>
 
         <!-- 🟢 Only show LoadingPage during initial load, hide DataTable completely -->
-        <LoadingPage 
-            v-if="loading" 
-            :message="'Loading Back Orders...'" 
-            :sub-message="'Fetching your Back Order list'" 
-        />
+        <LoadingPage v-if="loading" :message="'Loading Back Orders...'" :sub-message="'Fetching your Back Order list'" />
 
         <!-- 🟢 Only show DataTable when NOT loading -->
         <DataTable
-            v-else
+            v-if="!loading"
             :value="listData"
             :paginator="true"
             :rows="10"
@@ -48,11 +44,9 @@
                     </RouterLink>
                 </template>
             </Column>
-            
-            <Column field="custAccountNo" header="Dealer Acc No" style="min-width: 10rem" />
 
+            <Column field="custAccountNo" header="Dealer Acc No" style="min-width: 10rem" />
             <Column field="customerName" header="Dealer Name" style="min-width: 10rem" />
-            
             <Column field="deliveryType" header="Delivery" style="min-width: 10rem" />
 
             <Column field="orderDate" header="Order Date" style="min-width: 8rem">
@@ -84,12 +78,7 @@
             <Column field="progress" header="Progress" style="min-width: 10rem">
                 <template #body="{ data }">
                     <div class="flex items-center gap-2">
-                        <ProgressBar 
-                            :value="data.progress" 
-                            class="w-full" 
-                            :showValue="false"
-                            :class="getProgressBarClass(data.progress)"
-                        />
+                        <ProgressBar :value="data.progress" class="w-full" :showValue="false" :class="getProgressBarClass(data.progress)" />
                         <span class="text-sm font-semibold">{{ data.progress }}%</span>
                     </div>
                 </template>
@@ -126,15 +115,16 @@ onMounted(async () => {
 
         if (response.data.status === 1 && response.data.admin_data) {
             const adminData = response.data.admin_data;
-            
-            listData.value = adminData.map(order => {
+
+            listData.value = adminData.map((order) => {
                 // Calculate progress percentage
                 const progress = calculateProgress(order);
-                
+
                 return {
                     id: order.id,
                     orderNo: order.bo_orderno || '-',
                     custAccountNo: order.custaccountno,
+                    customerName: order.dealerName,
                     customerName: order.dealerName,
                     deliveryType: order.deliveryType || '-',
                     orderDate: order.created,
@@ -142,7 +132,7 @@ onMounted(async () => {
                     deliveryDate: order.deliveryDate,
                     expiry: order.expiry,
                     orderStatus: order.orderstatus,
-                    progress: progress, // Use calculated progress
+                    progress: order.fullfill_percentage,
                     status: order.status
                 };
             });
@@ -168,18 +158,14 @@ const calculateProgress = (order) => {
 
         // Calculate from backorder_array and remaining_array
         if (order.backorder_array && order.remaining_array) {
-            const backorderItems = Array.isArray(order.backorder_array) 
-                ? order.backorder_array 
-                : JSON.parse(order.backorder_array);
-                
-            const remainingItems = Array.isArray(order.remaining_array)
-                ? order.remaining_array
-                : JSON.parse(order.remaining_array);
+            const backorderItems = Array.isArray(order.backorder_array) ? order.backorder_array : JSON.parse(order.backorder_array);
+
+            const remainingItems = Array.isArray(order.remaining_array) ? order.remaining_array : JSON.parse(order.remaining_array);
 
             if (Array.isArray(backorderItems) && Array.isArray(remainingItems)) {
                 const totalOrdered = backorderItems.reduce((sum, item) => sum + parseInt(item.qty || 0), 0);
                 const totalRemaining = remainingItems.reduce((sum, item) => sum + parseInt(item.qty || 0), 0);
-                
+
                 if (totalOrdered > 0) {
                     const fulfilled = totalOrdered - totalRemaining;
                     const progress = Math.round((fulfilled / totalOrdered) * 100);
@@ -187,7 +173,7 @@ const calculateProgress = (order) => {
                 }
             }
         }
-        
+
         return 0;
     } catch (error) {
         console.error('Error calculating progress:', error);
@@ -196,18 +182,17 @@ const calculateProgress = (order) => {
 };
 
 const getProgressBarClass = (progress) => {
-    if (progress < 25) {
-        return 'progress-low'; // Red for <25%
-    } else if (progress < 75) {
-        return 'progress-medium'; // Yellow/Orange for <75%
-    } else {
-        return 'progress-high'; // Green for >=75%
-    }
+  if (progress <= 40) return 'progress-low';       // Red
+  if (progress <= 60) return 'progress-fair';      // Orange
+  if (progress < 100) return 'progress-good';      // Yellow
+  return 'progress-excellent';                     // Green (100%)
 };
+
+
 
 const formatDate = (dateString) => {
     if (!dateString) return '-';
-    
+
     try {
         const date = new Date(dateString);
         return date.toLocaleDateString('en-US', {
@@ -238,31 +223,56 @@ const getStatusSeverity = (status) => {
         case 1:
             return 'success';
         default:
-            return 'info';
+            return 'secondary';
     }
 };
 </script>
 
 <style scoped lang="scss">
 :deep(.p-progressbar) {
-    height: 0.75rem;
-    
-    &.progress-low {
-        .p-progressbar-value {
-            background: linear-gradient(90deg, #ef4444, #dc2626) !important; // Red gradient
-        }
+  height: 0.8rem;
+  border-radius: 9999px;
+  background-color: #f3f4f6; // Neutral background
+  box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.08);
+  overflow: hidden;
+
+  .p-progressbar-value {
+    border-radius: 9999px;
+    transition: width 0.4s ease, background 0.4s ease;
+  }
+
+  // 🔴 Low: 0–40%
+  &.progress-low {
+    .p-progressbar-value {
+      background: linear-gradient(90deg, #f87171, #b91c1c);
+      box-shadow: 0 0 6px rgba(239, 68, 68, 0.3);
     }
-    
-    &.progress-medium {
-        .p-progressbar-value {
-            background: linear-gradient(90deg, #f59e0b, #d97706) !important; // Amber/Orange gradient
-        }
+  }
+
+  // 🟠 Fair: 41–60%
+  &.progress-fair {
+    .p-progressbar-value {
+      background: linear-gradient(90deg, #fb923c, #ea580c);
+      box-shadow: 0 0 6px rgba(251, 146, 60, 0.3);
     }
-    
-    &.progress-high {
-        .p-progressbar-value {
-            background: linear-gradient(90deg, #10b981, #059669) !important; // Green gradient
-        }
+  }
+
+  // 🟡 Good: 61–99%
+  &.progress-good {
+    .p-progressbar-value {
+      background: linear-gradient(90deg, #fde047, #eab308);
+      box-shadow: 0 0 6px rgba(250, 204, 21, 0.3);
     }
+  }
+
+  // 🟢 Excellent: 100%
+  &.progress-excellent {
+    .p-progressbar-value {
+      background: linear-gradient(90deg, #34d399, #059669);
+      box-shadow: 0 0 6px rgba(52, 211, 153, 0.4);
+    }
+  }
 }
 </style>
+
+

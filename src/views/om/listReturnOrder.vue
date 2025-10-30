@@ -1,15 +1,17 @@
 <template>
     <div class="card">
         <div class="text-2xl font-bold text-gray-800 border-b pb-2">List Return Order</div>
+        <!-- 🟢 Only show LoadingPage during initial load, hide DataTable completely -->
+        <LoadingPage v-if="loading" :message="'Loading Return Orders...'" :sub-message="'Fetching your Return Order list'" />
 
         <DataTable
+        v-else
             :value="listData"
             :paginator="true"
             :rows="10"
             :rowsPerPageOptions="[5, 10, 20]"
             dataKey="id"
             :rowHover="true"
-            :loading="loading"
             :filters="filters"
             filterDisplay="menu"
             :globalFilterFields="['returnRequestNo', 'custAccountNo', 'customerName', 'deliveryDate', 'orderStatus']"
@@ -85,6 +87,7 @@
 import { onMounted, ref } from 'vue';
 import { FilterMatchMode } from '@primevue/core/api';
 import api from '@/service/api';
+import LoadingPage from '@/components/LoadingPage.vue';
 
 // Data variables
 const listData = ref([]);

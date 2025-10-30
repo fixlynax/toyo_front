@@ -1,5 +1,5 @@
 <template>
-    <div class="flex flex-col items-center justify-center gap-6 w-full h-full bg-white/50 dark:bg-gray-900 rounded-2xl">
+    <div class="flex flex-col items-center justify-center gap-6 w-full h-full bg-white/50 dark:bg-gray-900 rounded-2xl mt-8">
         <img src="/public/demo/images/toyo_logo.png" alt="Toyo Tires" class="h-10 md:h-10 animate-pulse" style="object-fit: contain" />
 
         <img src="/public/demo/images/tire.gif" alt="Toyo Tires" class="h-20 md:h-28 animate-pulse" style="object-fit: contain" />
@@ -73,3 +73,4 @@ const randomMessage = computed(() => {
     animation: spin 1s linear infinite;
 }
 </style>
+
