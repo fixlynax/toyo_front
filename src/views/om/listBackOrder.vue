@@ -3,7 +3,7 @@
         <div class="text-2xl font-bold text-gray-800 border-b pb-2">📦 List Back Order</div>
 
         <!-- 🟢 Only show LoadingPage during initial load, hide DataTable completely -->
-        <LoadingPage v-if="loading" :message="'Loading Back Orders...'" :sub-message="'Fetching your Back Order list'" />
+        <LoadingPage v-if="loading" :sub-message="'Fetching your Back Order list'" class="min-h-[720px]" />
 
         <!-- 🟢 Only show DataTable when NOT loading -->
         <DataTable
@@ -244,7 +244,7 @@ const getStatusSeverity = (status) => {
   // 🔴 Low: 0–40%
   &.progress-low {
     .p-progressbar-value {
-      background: linear-gradient(90deg, #f87171, #b91c1c);
+      background: linear-gradient(90deg, #f87171,);
       box-shadow: 0 0 6px rgba(239, 68, 68, 0.3);
     }
   }
@@ -252,7 +252,7 @@ const getStatusSeverity = (status) => {
   // 🟠 Fair: 41–60%
   &.progress-fair {
     .p-progressbar-value {
-      background: linear-gradient(90deg, #fb923c, #ea580c);
+      background: linear-gradient(90deg, #fb923c, );
       box-shadow: 0 0 6px rgba(251, 146, 60, 0.3);
     }
   }
@@ -260,7 +260,7 @@ const getStatusSeverity = (status) => {
   // 🟡 Good: 61–99%
   &.progress-good {
     .p-progressbar-value {
-      background: linear-gradient(90deg, #fde047, #eab308);
+      background: linear-gradient(90deg, #fde047, );
       box-shadow: 0 0 6px rgba(250, 204, 21, 0.3);
     }
   }
@@ -268,7 +268,7 @@ const getStatusSeverity = (status) => {
   // 🟢 Excellent: 100%
   &.progress-excellent {
     .p-progressbar-value {
-      background: linear-gradient(90deg, #34d399, #059669);
+      background: linear-gradient(90deg, #34d399,);
       box-shadow: 0 0 6px rgba(52, 211, 153, 0.4);
     }
   }
