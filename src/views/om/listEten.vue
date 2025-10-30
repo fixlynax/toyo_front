@@ -2,14 +2,18 @@
     <div class="card">
         <div class="text-2xl font-bold text-gray-800 border-b pb-2">List Customer</div>
 
+        <!-- Use your custom LoadingPage component for initial load -->
+        <LoadingPage v-if="loading" :message="'Loading Customer List...'" :sub-message="'Fetching your Customer list'" />
+
+        <!-- DataTable only shows when not loading -->
         <DataTable
+            v-else
             :value="listData"
             :paginator="true"
             :rows="10"
             :rowsPerPageOptions="[5, 10, 20]"
             dataKey="id"
             :rowHover="true"
-            :loading="loading"
             :filters="filters"
             filterDisplay="menu"
             :globalFilterFields="['memberCode', 'custAccountNo', 'companyName1', 'city', 'state', 'phoneNumber', 'signboardType', 'status']"
@@ -37,7 +41,6 @@
 
             
             <template #empty> No customers found. </template>
-            <template #loading> Loading customers data. Please wait. </template>
 
             
             <Column field="memberCode" header="Mem Code" style="min-width: 6rem">
@@ -78,16 +81,14 @@
 import { onMounted, ref } from 'vue';
 import { FilterMatchMode } from '@primevue/core/api';
 import api from '@/service/api';
-
+import LoadingPage from '@/components/LoadingPage.vue';
 
 const listData = ref([]);
 const loading = ref(true);
 
-
 const filters = ref({
     global: { value: null, matchMode: FilterMatchMode.CONTAINS }
 });
-
 
 onMounted(async () => {
     try {
