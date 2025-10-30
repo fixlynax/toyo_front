@@ -23,7 +23,7 @@
             </div>
 
             <!-- Tab Menu for filtering by purpose -->
-            <TabMenu :model="purposeTabs" v-model:activeIndex="activeTabIndex" class="mb-4" />
+            <TabMenu :model="purposeTabs" v-model:activeIndex="activeTabIndex" class="mb-4 border-b" />
 
             <!-- Use your custom LoadingPage component -->
         <LoadingPage v-if="loading" :sub-message="'Loading Catalogue Item'" class="min-h-[800px]"/>
@@ -270,3 +270,29 @@ watch(activeTabIndex, () => {
     console.log(`Tab changed to: ${purposeTabs[activeTabIndex.value].label}`);
 });
 </script>
+<style scoped>
+/* Remove the default top highlight and apply bottom border instead */
+.p-tabmenu .p-tabmenu-nav .p-tabmenuitem.p-highlight .p-menuitem-link {
+    border-top: none !important;
+    border-bottom: 3px solid var(--primary-color) !important;
+    color: var(--primary-color);
+}
+
+/* Ensure non-active tabs have no bottom border */
+.p-tabmenu .p-tabmenu-nav .p-menuitem-link {
+    border: none;
+    border-radius: 0;
+    background: transparent;
+    transition: all 0.2s ease;
+}
+
+/* Optional: subtle hover effect */
+.p-tabmenu .p-tabmenu-nav .p-menuitem-link:hover {
+    color: var(--primary-color);
+    background-color: rgba(var(--primary-color-rgb), 0.05);
+}
+</style>
+
+
+
+
