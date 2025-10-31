@@ -275,7 +275,7 @@ const formatDate = (dateString) => {
                 <!-- 🟢 Total Amount -->
                 <Column header="Total" style="min-width: 8rem">
                     <template #body="{ data }">
-                        <span v-if="data.total">${{ parseFloat(data.total).toFixed(2) }}</span>
+                        <span v-if="data.total">RM {{ parseFloat(data.total).toFixed(2) }}</span>
                         <span v-else>-</span>
                     </template>
                 </Column>
