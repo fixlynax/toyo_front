@@ -25,16 +25,20 @@
             class="rounded-xl overflow-hidden"
         >
             <template #header>
-                <div class="flex justify-between items-center">
-                    <span class="text-sm text-gray-500">Total: {{ disabledOrders.length }}</span>
-                    <Button 
-                        label="Refresh" 
-                        icon="pi pi-refresh" 
-                        class="p-button-outlined p-button-sm" 
-                        @click="fetchDisabledOrders" 
-                    />
-                </div>
+                <div class="flex items-center justify-between gap-4 w-full flex-wrap">
+                    <!-- Search -->
+                    <div class="flex items-center gap-2 w-full max-w-md">
+                        <IconField class="flex-1">
+                            <InputIcon>
+                                <i class="pi pi-search" />
+                            </InputIcon>
+                            <InputText v-model="filters1['global'].value" placeholder="Quick Search" class="w-full" />
+                        </IconField>
+                        <Button type="button" icon="pi pi-cog" class="p-button" />
+                    </div>
+                    </div>
             </template>
+
 
             <template #empty>
                 <div class="text-center p-6">

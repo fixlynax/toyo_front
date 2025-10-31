@@ -6,17 +6,45 @@
                 <div class="text-2xl font-bold text-gray-800 border-b pb-2 mb-4">Month End Closing Calendar</div>
 
                 <!-- 🟢 Only show LoadingPage during initial load, hide DataTable completely -->
-        <LoadingPage 
-            v-if="loading" 
-            :message="'Loading Month End Closing...'" 
-            :sub-message="'Fetching your Month End Closing list'" 
-        />
+                <LoadingPage 
+                    v-if="loading" 
+                    :message="'Loading Month End Closing...'" 
+                    :sub-message="'Fetching your Month End Closing list'" 
+                />
 
                 <!-- Closing Dates Table -->
-                <DataTable v-else :value="closingDates" :paginator="true" :rows="10" :rowsPerPageOptions="[12, 24, 36, 48, 60]" dataKey="id" :rowHover="true"  sortField="closingDateTime" :sortOrder="-1" responsiveLayout="scroll">
+                <DataTable 
+                    v-else 
+                    :value="closingDates" 
+                    :paginator="true" 
+                    :rows="10" 
+                    :rowsPerPageOptions="[12, 24, 36, 48, 60]" 
+                    dataKey="id" 
+                    :rowHover="true"  
+                    sortField="closingDateTime" 
+                    :sortOrder="-1" 
+                    responsiveLayout="scroll" 
+                    :filters="filters"
+                    filterDisplay="menu"
+                    :globalFilterFields="['monthYear', 'closingDateTime', 'status']"
+                    class="rounded-table"
+                >
                     <template #header>
-                        <div class="flex justify-between items-center">
-                            <span class="text-sm text-gray-500"> Showing {{ closingDates.length }} records </span>
+                        <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 w-full">
+                            <!-- Search Field -->
+                            <div class="flex items-center gap-2 w-full sm:max-w-md">
+                                <IconField class="flex-1">
+                                    <InputIcon>
+                                        <i class="pi pi-search" />
+                                    </InputIcon>
+                                    <InputText 
+                                        v-model="filters['global'].value" 
+                                        placeholder="Quick Search (Month, Date, Status)" 
+                                        class="w-full" 
+                                    />
+                                </IconField>
+                                 <Button type="button" icon="pi pi-cog" class="p-button" />
+                            </div>
                         </div>
                     </template>
 
@@ -42,7 +70,7 @@
                         </template>
                     </Column>
 
-                    <Column field="closingDateTime" header="Closing Date" style="min-width: 15rem" :sortable="true">
+                    <Column field="closingDateTime" header="Closing Date" style="min-width: 15rem" >
                         <template #body="{ data }">
                             <div class="text-sm">
                                 <div class="font-semibold text-gray-800">
@@ -52,7 +80,7 @@
                         </template>
                     </Column>
 
-                    <Column field="closingDateTime" header="Closing Time" style="min-width: 15rem" :sortable="true">
+                    <Column field="closingDateTime" header="Closing Time" style="min-width: 15rem" >
                         <template #body="{ data }">
                             <div class="text-sm">
                                 <div class="font-semibold text-gray-800">
@@ -147,10 +175,16 @@
 import { ref, reactive, computed, onMounted } from 'vue';
 import api from '@/service/api';
 import LoadingPage from '@/components/LoadingPage.vue';
+import { FilterMatchMode } from '@primevue/core/api';
 
 const loading = ref(false);
 const showEditDialog = ref(false);
 const editMode = ref(false);
+
+// Quick Search Filters
+const filters = ref({
+    global: { value: null, matchMode: FilterMatchMode.CONTAINS }
+});
 
 // Current date for edit
 const currentDate = reactive({
@@ -161,6 +195,23 @@ const currentDate = reactive({
 });
 
 const closingDates = ref([]);
+
+// Computed property to count filtered records
+const filteredRecordsCount = computed(() => {
+    if (filters.value.global.value) {
+        const searchTerm = filters.value.global.value.toLowerCase();
+        return closingDates.value.filter(date => {
+            const monthYear = formatMonth(date.monthYear).toLowerCase();
+            const closingDate = formatDate(date.closingDateTime).toLowerCase();
+            const status = getApiStatus(date.status).toLowerCase();
+            
+            return monthYear.includes(searchTerm) || 
+                   closingDate.includes(searchTerm) || 
+                   status.includes(searchTerm);
+        }).length;
+    }
+    return closingDates.value.length;
+});
 
 // Date constraints
 const minDate = computed(() => {
@@ -355,3 +406,44 @@ onMounted(async () => {
     }
 });
 </script>
+
+<style scoped>
+:deep(.rounded-table) {
+    border-radius: 12px;
+    overflow: hidden;
+    border: 1px solid #e5e7eb;
+    
+    .p-datatable-header {
+        border-top-left-radius: 12px;
+        border-top-right-radius: 12px;
+    }
+    
+    .p-paginator-bottom {
+        border-bottom-left-radius: 12px;
+        border-bottom-right-radius: 12px;
+    }
+    
+    .p-datatable-thead > tr > th {
+        &:first-child {
+            border-top-left-radius: 12px;
+        }
+        &:last-child {
+            border-top-right-radius: 12px;
+        }
+    }
+    
+    .p-datatable-tbody > tr:last-child > td {
+        &:first-child {
+            border-bottom-left-radius: 0;
+        }
+        &:last-child {
+            border-bottom-right-radius: 0;
+        }
+    }
+    
+    .p-datatable-tbody > tr.p-datatable-emptymessage > td {
+        border-bottom-left-radius: 12px;
+        border-bottom-right-radius: 12px;
+    }
+}
+</style>
