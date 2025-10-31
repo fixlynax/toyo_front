@@ -1,6 +1,6 @@
 <template>
     <div class="card">
-        <div class="text-2xl font-bold text-gray-800 border-b pb-2">List User</div>
+        <div class="text-2xl font-bold text-gray-800 border-b pb-2 mb-6">List User</div>
 
         <!-- Show LoadingPage only during initial page load -->
         <LoadingPage v-if="initialLoading" :message="'Loading Users...'" :sub-message="'Fetching user data'" />
@@ -18,6 +18,8 @@
                 :filters="filters"
                 filterDisplay="menu"
                 :globalFilterFields="['etenUserID', 'firstName', 'lastName', 'gender', 'race', 'state', 'level', 'memberSince', 'lastLogin', 'status']"
+                class="rounded-table"
+
             >
 
                 <template #header>
@@ -151,3 +153,47 @@ const getOverallStatusSeverity = (status) => {
     return status === 1 ? 'success' : 'danger';
 };
 </script>
+
+<style scoped>
+
+:deep(.rounded-table) {
+    border-radius: 12px;
+    overflow: hidden;
+    border: 1px solid #e5e7eb;
+    
+    .p-datatable-header {
+        border-top-left-radius: 12px;
+        border-top-right-radius: 12px;
+    }
+    
+    .p-paginator-bottom {
+        border-bottom-left-radius: 12px;
+        border-bottom-right-radius: 12px;
+    }
+    
+    .p-datatable-thead > tr > th {
+        &:first-child {
+            border-top-left-radius: 12px;
+        }
+        &:last-child {
+            border-top-right-radius: 12px;
+        }
+    }
+    
+    
+    .p-datatable-tbody > tr:last-child > td {
+        &:first-child {
+            border-bottom-left-radius: 0;
+        }
+        &:last-child {
+            border-bottom-right-radius: 0;
+        }
+    }
+    
+    
+    .p-datatable-tbody > tr.p-datatable-emptymessage > td {
+        border-bottom-left-radius: 12px;
+        border-bottom-right-radius: 12px;
+    }
+}
+</style>

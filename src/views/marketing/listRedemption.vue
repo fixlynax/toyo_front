@@ -1,6 +1,6 @@
 <template>
     <div class="card">
-        <div class="text-2xl font-bold text-gray-800 border-b pb-2">Details Redemption</div>
+        <div class="text-2xl font-bold text-gray-800 border-b pb-2 mb-6">Details Redemption</div>
 
         <!-- Show LoadingPage only during initial page load -->
         <LoadingPage v-if="initialLoading" :message="'Loading Redemptions...'" :sub-message="'Fetching redemption data'" />
@@ -18,6 +18,7 @@
                 :filters="filters"
                 filterDisplay="menu"
                 :globalFilterFields="['refno', 'memberName', 'recipientName', 'itemName', 'quantity', 'redemptionDate', 'status']"
+                class="rounded-table"
             >
 
                 <template #header>
@@ -156,3 +157,45 @@ const getOverallStatusSeverity = (status) => {
     return 'secondary';
 };
 </script>
+
+<style scoped>
+
+:deep(.rounded-table) {
+    border-radius: 12px;
+    overflow: hidden;
+    border: 1px solid #e5e7eb;
+    
+    .p-datatable-header {
+        border-top-left-radius: 12px;
+        border-top-right-radius: 12px;
+    }
+    
+    .p-paginator-bottom {
+        border-bottom-left-radius: 12px;
+        border-bottom-right-radius: 12px;
+    }
+    
+    .p-datatable-thead > tr > th {
+        &:first-child {
+            border-top-left-radius: 12px;
+        }
+        &:last-child {
+            border-top-right-radius: 12px;
+        }
+    }
+    
+    .p-datatable-tbody > tr:last-child > td {
+        &:first-child {
+            border-bottom-left-radius: 0;
+        }
+        &:last-child {
+            border-bottom-right-radius: 0;
+        }
+    }
+    
+    .p-datatable-tbody > tr.p-datatable-emptymessage > td {
+        border-bottom-left-radius: 12px;
+        border-bottom-right-radius: 12px;
+    }
+}
+</style>
