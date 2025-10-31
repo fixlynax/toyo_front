@@ -1,6 +1,6 @@
 <template>
     <div class="card">
-        <div class="text-2xl font-bold text-gray-800 border-b pb-2">List Event</div>
+        <div class="text-2xl font-bold text-gray-800 border-b pb-2 mb-6">List Event</div>
 
         <!-- Show LoadingPage only during initial page load -->
         <LoadingPage v-if="initialLoading" :message="'Loading Events...'" :sub-message="'Fetching event data'" />
@@ -184,10 +184,10 @@ const getOverallStatusSeverity = (status) => {
     // For the last row in the table body
     .p-datatable-tbody > tr:last-child > td {
         &:first-child {
-            border-bottom-left-radius: 12px;
+            border-bottom-left-radius: 0;
         }
         &:last-child {
-            border-bottom-right-radius: 12px;
+            border-bottom-right-radius: 0;
         }
     }
     
