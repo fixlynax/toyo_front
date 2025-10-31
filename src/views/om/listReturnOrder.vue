@@ -116,7 +116,7 @@ onBeforeMount(() => {
 <template>
     <div class="card">
         <!-- Header -->
-        <div class="text-2xl font-bold text-gray-800 border-b pb-2 mb-4">List Return Order</div>
+        <div class="text-2xl font-bold text-gray-800 border-b pb-2 mb-6">List Return Order</div>
 
         <!-- 🟢 Loading Page -->
         <LoadingPage v-if="loading" :message="'Loading Return Orders...'" :sub-message="'Fetching Return Order list...'" />
@@ -137,6 +137,7 @@ onBeforeMount(() => {
                 :filters="filters"
                 filterDisplay="menu"
                 :globalFilterFields="['returnRequestNo', 'custAccountNo', 'customerName', 'reasonCode', 'orderStatus']"
+                class="rounded-table"
             >
                 <!-- Header -->
                 <template #header>
@@ -222,5 +223,54 @@ onBeforeMount(() => {
 :deep(.p-datatable .p-datatable-thead > tr > th) {
     background-color: #f8fafc;
     font-weight: 600;
+}
+
+:deep(.p-datatable-frozen-tbody) {
+    font-weight: bold;
+}
+
+:deep(.p-datatable-scrollable .p-frozen-column) {
+    font-weight: bold;
+}
+
+:deep(.rounded-table) {
+    border-radius: 12px;
+    overflow: hidden;
+    border: 1px solid #e5e7eb;
+    
+    .p-datatable-header {
+        border-top-left-radius: 12px;
+        border-top-right-radius: 12px;
+    }
+    
+    .p-paginator-bottom {
+        border-bottom-left-radius: 12px;
+        border-bottom-right-radius: 12px;
+    }
+    
+    .p-datatable-thead > tr > th {
+        &:first-child {
+            border-top-left-radius: 12px;
+        }
+        &:last-child {
+            border-top-right-radius: 12px;
+        }
+    }
+    
+    
+    .p-datatable-tbody > tr:last-child > td {
+        &:first-child {
+            border-bottom-left-radius: 0;
+        }
+        &:last-child {
+            border-bottom-right-radius: 0;
+        }
+    }
+    
+    
+    .p-datatable-tbody > tr.p-datatable-emptymessage > td {
+        border-bottom-left-radius: 12px;
+        border-bottom-right-radius: 12px;
+    }
 }
 </style>
