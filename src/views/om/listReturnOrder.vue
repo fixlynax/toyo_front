@@ -1,112 +1,55 @@
-<template>
-    <div class="card">
-        <div class="text-2xl font-bold text-gray-800 border-b pb-2">List Return Order</div>
-        <!-- 🟢 Only show LoadingPage during initial load, hide DataTable completely -->
-        <LoadingPage v-if="loading" :message="'Loading Return Orders...'" :sub-message="'Fetching your Return Order list'" />
-
-        <DataTable
-        v-else
-            :value="listData"
-            :paginator="true"
-            :rows="10"
-            :rowsPerPageOptions="[5, 10, 20]"
-            dataKey="id"
-            :rowHover="true"
-            :filters="filters"
-            filterDisplay="menu"
-            :globalFilterFields="['returnRequestNo', 'custAccountNo', 'customerName', 'deliveryDate', 'orderStatus']"
-        >
-            
-            <template #header>
-                <div class="flex items-center justify-between gap-4 w-full flex-wrap">
-                    <!-- Left: Search Field + Cog Button -->
-                    <div class="flex items-center gap-2 w-full max-w-md">
-                        <IconField class="flex-1">
-                            <InputIcon>
-                                <i class="pi pi-search" />
-                            </InputIcon>
-                            <InputText v-model="filters['global'].value" placeholder="Quick Search" class="w-full" />
-                        </IconField>
-                        <Button type="button" icon="pi pi-cog" class="p-button" />
-                    </div>
-                </div>
-            </template>
-
-            <template #empty> No return orders found. </template>
-            <template #loading> Loading return orders. Please wait... </template>
-
-            
-            <Column field="returnRequestNo" header="Return Req No." style="min-width: 8rem">
-                <template #body="{ data }">
-                    <RouterLink :to="`/om/detailReturnOrder/${data.id}`" class="hover:underline font-bold">
-                        {{ data.returnRequestNo }}
-                    </RouterLink>
-                </template>
-            </Column>
-
-            <Column field="custAccountNo" header="Acc No." style="min-width: 8rem">
-                <template #body="{ data }">
-                    {{ data.custAccountNo }}
-                </template>
-            </Column>
-
-            <Column field="customerName" header="Requester Name" style="min-width: 8rem">
-                <template #body="{ data }">
-                    {{ data.customerName }}
-                </template>
-            </Column>
-            
-            <Column field="reasonCode" header="Reason Code" style="min-width: 8rem">
-                <template #body="{ data }">
-                    {{ data.reasonCode || 'N/A' }}
-                </template>
-            </Column>
-            
-            <Column field="reasonMessage" header="Reason Message" style="min-width: 8rem">
-                <template #body="{ data }">
-                    {{ data.reasonMessage || 'N/A' }}
-                </template>
-            </Column>
-
-            <Column field="createdDate" header="Date" style="min-width: 8rem">
-                <template #body="{ data }">
-                    {{ formatDate(data.createdDate) }}
-                </template>
-            </Column>
-
-            <Column field="orderStatus" header="Status" style="min-width: 8rem">
-                <template #body="{ data }">
-                    <Tag :value="getOverallStatusLabel(data.orderStatus)" :severity="getOverallStatusSeverity(data.orderStatus)" />
-                </template>
-            </Column>
-        </DataTable>
-    </div>
-</template>
-
 <script setup>
-import { onMounted, ref } from 'vue';
-import { FilterMatchMode } from '@primevue/core/api';
 import api from '@/service/api';
+import { FilterMatchMode, FilterOperator } from '@primevue/core/api';
+import { onBeforeMount, ref, computed, watch } from 'vue';
+import { RouterLink } from 'vue-router';
 import LoadingPage from '@/components/LoadingPage.vue';
 
-// Data variables
+// 🟢 PrimeVue Components
+import TabMenu from 'primevue/tabmenu';
+import DataTable from 'primevue/datatable';
+import Column from 'primevue/column';
+import Tag from 'primevue/tag';
+import Button from 'primevue/button';
+import InputText from 'primevue/inputtext';
+import IconField from 'primevue/iconfield';
+import InputIcon from 'primevue/inputicon';
+
+// 🟢 State variables
+const filters = ref({});
 const listData = ref([]);
 const loading = ref(true);
 
-// Filters for quick search
-const filters = ref({
-    global: { value: null, matchMode: FilterMatchMode.CONTAINS }
-});
+// 🟢 Initialize filters
+function initFilters() {
+    filters.value = {
+        global: { value: null, matchMode: FilterMatchMode.CONTAINS },
+        name: { operator: FilterOperator.AND, constraints: [{ value: null, matchMode: FilterMatchMode.STARTS_WITH }] }
+    };
+}
 
-// Status map for cleaner handling
+// 🟢 Tab setup (same concept as listOrder)
+const statusTabs = [
+    { label: 'Pending', status: 'PENDING' },
+    { label: 'Approved', status: 'APPROVED' },
+    { label: 'Rejected', status: 'REJECTED' },
+    { label: 'Processing', status: 'PROCESSING' },
+    { label: 'Pending Collection', status: 'PENDING_COLLECTION' },
+    { label: 'Completed', status: 'COMPLETE' }
+];
+const activeTabIndex = ref(0);
+
+// 🧩 Status Map (frontend view)
 const STATUS_MAP = {
     0: { label: 'Pending Approval', severity: 'warning' },
     1: { label: 'Approved', severity: 'info' },
-    2: { label: 'Processing', severity: 'success' },
-    3: { label: 'Completed', severity: 'primary' }
+    2: { label: 'Rejected', severity: 'danger' },
+    66: { label: 'Processing', severity: 'success' },
+    77: { label: 'Pending Collection', severity: 'secondary' },
+    9: { label: 'Completed', severity: 'primary' }
 };
 
-
+// 🧩 Helpers
 const getOverallStatusSeverity = (status) => {
     return STATUS_MAP[Number(status)]?.severity || 'danger';
 };
@@ -115,44 +58,37 @@ const getOverallStatusLabel = (status) => {
     return STATUS_MAP[Number(status)]?.label || 'Unknown';
 };
 
-// Format date as ISO string (YYYY-MM-DD)
+// 🧩 Date Formatter
 const formatDate = (dateStr) => {
     if (!dateStr) return '-';
     try {
         const date = new Date(dateStr);
-        return date.toISOString().split('T')[0]; // keeps only YYYY-MM-DD
+        return date.toISOString().split('T')[0];
     } catch (error) {
         console.error('Error formatting date:', dateStr, error);
         return '-';
     }
 };
 
-
-onMounted(async () => {
+// 🟢 Fetch return orders based on tab
+const fetchReturnOrders = async (tabStatus = 'PENDING') => {
+    loading.value = true;
     try {
-        loading.value = true;
-        const response = await api.get('order/list-return-order');
+        const response = await api.post(`order/list-return-order?tabs=${tabStatus}`);
 
-        console.log('API Response:', response.data);
-
-        if (response.data.status === 'PENDING' && Array.isArray(response.data.admin_data)) {
-            // Map the API data to our frontend structure
-            listData.value = response.data.admin_data.map(returnOrder => {
-                return {
-                    id: returnOrder.id,
-                    returnRequestNo: returnOrder.return_orderNo_ref || 'N/A',
-                    custAccountNo: returnOrder.custaccountno || 'N/A',
-                    customerName: returnOrder.dealerName || 'N/A',
-                    reasonCode: returnOrder.reason_code,
-                    reasonMessage: returnOrder.reason_message,
-                    createdDate: returnOrder.created,
-                    orderStatus: returnOrder.orderstatus
-                };
-            });
-            
-            console.log('Mapped data:', listData.value);
+        if (response.data.status === 1 && Array.isArray(response.data.admin_data)) {
+            listData.value = response.data.admin_data.map((returnOrder) => ({
+                id: returnOrder.id,
+                returnRequestNo: returnOrder.return_orderNo_ref || '-',
+                custAccountNo: returnOrder.custaccountno || '-',
+                customerName: returnOrder.dealerName || '-',
+                reasonCode: returnOrder.reason_code || '-',
+                reasonMessage: returnOrder.reason_message || '-',
+                createdDate: returnOrder.created || '-',
+                orderStatus: returnOrder.orderstatus || '-'
+            }));
         } else {
-            console.error('API returned error or invalid data:', response.data);
+            console.warn('Unexpected API response:', response.data);
             listData.value = [];
         }
     } catch (error) {
@@ -161,8 +97,114 @@ onMounted(async () => {
     } finally {
         loading.value = false;
     }
+};
+
+// 🟢 Watch for tab change
+watch(activeTabIndex, (newIndex) => {
+    const selectedStatus = statusTabs[newIndex]?.status;
+    fetchReturnOrders(selectedStatus);
+});
+
+// 🟢 Initial data load
+onBeforeMount(() => {
+    initFilters();
+    const firstTab = statusTabs[activeTabIndex.value]?.status;
+    fetchReturnOrders(firstTab);
 });
 </script>
+
+<template>
+    <div class="card">
+        <!-- Header -->
+        <div class="text-2xl font-bold text-gray-800 border-b pb-2 mb-4">List Return Order</div>
+
+        <!-- 🟢 Loading Page -->
+        <LoadingPage v-if="loading" :message="'Loading Return Orders...'" :sub-message="'Fetching Return Order list...'" />
+
+        <!-- 🟢 Tab Menu and Table -->
+        <div v-else>
+            <!-- 🟣 Status Tabs -->
+            <TabMenu :model="statusTabs" v-model:activeIndex="activeTabIndex" class="mb-4" />
+
+            <!-- 🟢 DataTable -->
+            <DataTable
+                :value="listData"
+                :paginator="true"
+                :rows="10"
+                :rowsPerPageOptions="[5, 10, 20]"
+                dataKey="id"
+                :rowHover="true"
+                :filters="filters"
+                filterDisplay="menu"
+                :globalFilterFields="['returnRequestNo', 'custAccountNo', 'customerName', 'reasonCode', 'orderStatus']"
+            >
+                <!-- Header -->
+                <template #header>
+                    <div class="flex items-center justify-between gap-4 w-full flex-wrap">
+                        <div class="flex items-center gap-2 w-full max-w-md">
+                            <IconField class="flex-1">
+                                <InputIcon>
+                                    <i class="pi pi-search" />
+                                </InputIcon>
+                                <InputText v-model="filters['global'].value" placeholder="Quick Search" class="w-full" />
+                            </IconField>
+                            <Button type="button" icon="pi pi-cog" class="p-button" />
+                        </div>
+                    </div>
+                </template>
+
+                <template #empty>
+                    <div class="text-center py-4 text-gray-500">No return orders found for this status.</div>
+                </template>
+
+                <!-- Columns -->
+                <Column field="returnRequestNo" header="Return Req No." style="min-width: 8rem">
+                    <template #body="{ data }">
+                        <RouterLink :to="`/om/detailReturnOrder/${data.id}`" class="hover:underline font-bold text-blue-600">
+                            {{ data.returnRequestNo }}
+                        </RouterLink>
+                    </template>
+                </Column>
+
+                <Column field="custAccountNo" header="Acc No." style="min-width: 8rem">
+                    <template #body="{ data }">
+                        {{ data.custAccountNo }}
+                    </template>
+                </Column>
+
+                <Column field="customerName" header="Requester Name" style="min-width: 8rem">
+                    <template #body="{ data }">
+                        {{ data.customerName }}
+                    </template>
+                </Column>
+
+                <Column field="reasonCode" header="Reason Code" style="min-width: 8rem">
+                    <template #body="{ data }">
+                        {{ data.reasonCode || 'N/A' }}
+                    </template>
+                </Column>
+
+                <Column field="reasonMessage" header="Reason Message" style="min-width: 10rem">
+                    <template #body="{ data }">
+                        {{ data.reasonMessage || 'N/A' }}
+                    </template>
+                </Column>
+
+                <Column field="createdDate" header="Date" style="min-width: 8rem">
+                    <template #body="{ data }">
+                        {{ formatDate(data.createdDate) }}
+                    </template>
+                </Column>
+
+                <Column field="orderStatus" header="Status" style="min-width: 8rem">
+                    <template #body="{ data }">
+                        <Tag :value="getOverallStatusLabel(data.orderStatus)" :severity="getOverallStatusSeverity(data.orderStatus)" />
+                    </template>
+                </Column>
+            </DataTable>
+        </div>
+    </div>
+</template>
 
 <style scoped lang="scss">
 :deep(.p-datatable-frozen-tbody) {
@@ -171,5 +213,14 @@ onMounted(async () => {
 
 :deep(.p-datatable-scrollable .p-frozen-column) {
     font-weight: bold;
+}
+
+:deep(.p-tabmenu .p-tabmenu-nav .p-tabmenuitem.p-highlight .p-menuitem-link) {
+    border-color: #3b82f6;
+}
+
+:deep(.p-datatable .p-datatable-thead > tr > th) {
+    background-color: #f8fafc;
+    font-weight: 600;
 }
 </style>

@@ -6,30 +6,25 @@
                 <div class="text-2xl font-bold text-gray-800 border-b pb-2 mb-4">Material Exception List</div>
 
                 <!-- 🟢 Only show LoadingPage during initial load, hide DataTable completely -->
-        <LoadingPage 
-            v-if="loading" 
-            :message="'Loading Material Exception...'" 
-            :sub-message="'Fetching your Material Exception list'" 
-        />
+                <LoadingPage v-if="loading" :message="'Loading Material Exception...'" :sub-message="'Fetching your Material Exception list'" />
 
                 <!-- Material Exceptions Table -->
-                <DataTable
-                v-else 
-                    :value="materialExceptions"
-                    :paginator="true"
-                    :rows="10"
-                    :rowsPerPageOptions="[5, 10, 20, 50]"
-                    dataKey="id"
-                    :rowHover="true"
-                    :filters="filters"
-                    responsiveLayout="scroll"
-                >
+                <DataTable v-else :value="materialExceptions" :paginator="true" :rows="10" :rowsPerPageOptions="[10, 25, 50, 100]" dataKey="id" :rowHover="true" :filters="filters" responsiveLayout="scroll" class="rounded-table">
                     <template #header>
-                        <div class="flex justify-between items-center">
-                            <span class="text-sm text-gray-500"> {{ materialExceptions.length }} exception(s) found </span>
-                            <div class="flex gap-2">
-                                <Button label="Add Exception" icon="pi pi-plus" class="p-button-primary" @click="showAddDialog = true" />
+                        <div class="flex items-center justify-between gap-4 w-full flex-wrap">
+                            <!-- Left: Search Field + Cog Button -->
+                            <div class="flex items-center gap-2 w-full max-w-md">
+                                <IconField class="flex-1">
+                                    <InputIcon>
+                                        <i class="pi pi-search" />
+                                    </InputIcon>
+                                    <InputText v-model="filters['global'].value" placeholder="Quick Search" class="w-full" />
+                                </IconField>
+                                <Button type="button" icon="pi pi-cog" class="p-button" />
                             </div>
+
+                            <!-- Right: Create Event Button -->
+                            <Button label="Create" icon="pi pi-plus" style="width: fit-content" class="p-button-primary" @click="showAddDialog = true" />
                         </div>
                     </template>
 
@@ -99,28 +94,13 @@
         </div>
 
         <!-- Add/Edit Dialog -->
-        <Dialog
-            v-model:visible="showAddDialog"
-            :header="editMode ? 'Edit Material Exception' : 'Add Material Exception'"
-            :modal="true"
-            class="p-fluid"
-            :style="{ width: '60rem' }"
-        >
+        <Dialog v-model:visible="showAddDialog" :header="editMode ? 'Edit Material Exception' : 'Add Material Exception'" :modal="true" class="p-fluid" :style="{ width: '60rem' }">
             <div class="grid grid-cols-1 gap-4">
                 <!-- Material Selection -->
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
                         <label class="block font-bold text-gray-700 mb-2">Material Code *</label>
-                        <Dropdown
-                            v-model="currentException.materialCode"
-                            :options="materialOptions"
-                            optionLabel="code"
-                            optionValue="code"
-                            placeholder="Select Material"
-                            class="w-full"
-                            filter
-                            @change="onMaterialChange"
-                        />
+                        <Dropdown v-model="currentException.materialCode" :options="materialOptions" optionLabel="code" optionValue="code" placeholder="Select Material" class="w-full" filter @change="onMaterialChange" />
                     </div>
                     <div>
                         <label class="block font-bold text-gray-700 mb-2">Material Description</label>
@@ -149,17 +129,7 @@
                     </div>
 
                     <!-- Searchable Dealer List -->
-                    <MultiSelect
-                        v-model="currentException.dealers"
-                        :options="allDealers"
-                        optionLabel="label"
-                        optionValue="value"
-                        filter
-                        display="chip"
-                        placeholder="Search or Select Dealers"
-                        class="w-full"
-                        :maxSelectedLabels="3"
-                    >
+                    <MultiSelect v-model="currentException.dealers" :options="allDealers" optionLabel="label" optionValue="value" filter display="chip" placeholder="Search or Select Dealers" class="w-full" :maxSelectedLabels="3">
                         <template #option="slotProps">
                             <div class="flex flex-col">
                                 <div class="font-medium text-gray-800">{{ slotProps.option.label }}</div>
@@ -213,20 +183,20 @@
 </template>
 
 <script setup>
-import { ref, reactive, computed, onMounted } from 'vue'
-import { FilterMatchMode } from '@primevue/core/api'
-import { useToast } from 'primevue/usetoast'
+import { ref, reactive, computed, onMounted } from 'vue';
+import { FilterMatchMode } from '@primevue/core/api';
+import { useToast } from 'primevue/usetoast';
 import api from '@/service/api';
 import LoadingPage from '@/components/LoadingPage.vue';
 
-const toast = useToast()
-const loading = ref(false)
-const showAddDialog = ref(false)
-const editMode = ref(false)
+const toast = useToast();
+const loading = ref(false);
+const showAddDialog = ref(false);
+const editMode = ref(false);
 
 const filters = reactive({
     global: { value: null, matchMode: FilterMatchMode.CONTAINS }
-})
+});
 
 const currentException = reactive({
     id: null,
@@ -235,21 +205,21 @@ const currentException = reactive({
     exceptionType: '',
     dealers: [],
     status: true
-})
+});
 
-const materialExceptions = ref([])
+const materialExceptions = ref([]);
 
 const materialOptions = ref([
     { code: '81114NE0305185H', description: 'Premium Car Tyre 205/55R16' },
     { code: '81115NE0306195V', description: 'Engine Oil Synthetic 5W-30' },
     { code: 'MAT-003', description: 'Brake Pad Set Front' },
     { code: 'MAT-004', description: 'Air Filter Premium' }
-])
+]);
 
 const exceptionTypeOptions = ref([
     { label: 'Include', value: 'Include' },
     { label: 'Exclude', value: 'Exclude' }
-])
+]);
 
 const dealerOptions = ref([
     {
@@ -285,131 +255,127 @@ const dealerOptions = ref([
         label: 'Kedah',
         items: [{ label: 'Weng Tat Tyre Service', value: '10' }]
     }
-])
+]);
 
 // Flattened dealer list for global search & combined display
 const allDealers = computed(() =>
-    dealerOptions.value.flatMap(group =>
-        group.items.map(d => ({
+    dealerOptions.value.flatMap((group) =>
+        group.items.map((d) => ({
             label: `${d.label} (${d.value})`,
             value: d.value,
             group: group.label
         }))
     )
-)
+);
 
 const isDialogFormValid = computed(() => {
-    return (
-        currentException.materialCode &&
-        currentException.exceptionType &&
-        currentException.dealers.length > 0
-    )
-})
+    return currentException.materialCode && currentException.exceptionType && currentException.dealers.length > 0;
+});
 
-const getTypeSeverity = (type) => (type === 'Include' ? 'success' : 'warning')
+const getTypeSeverity = (type) => (type === 'Include' ? 'success' : 'warning');
 
 const onMaterialChange = () => {
-    const selected = materialOptions.value.find(m => m.code === currentException.materialCode)
+    const selected = materialOptions.value.find((m) => m.code === currentException.materialCode);
     if (selected) {
-        currentException.materialDescription = selected.description
+        currentException.materialDescription = selected.description;
     }
-}
+};
 
 const selectAllDealers = () => {
-    currentException.dealers = allDealers.value.map(d => d.value)
-}
+    currentException.dealers = allDealers.value.map((d) => d.value);
+};
 
 const clearAllDealers = () => {
-    currentException.dealers = []
-}
+    currentException.dealers = [];
+};
 
 const editException = (data) => {
-    editMode.value = true
-    Object.assign(currentException, { 
+    editMode.value = true;
+    Object.assign(currentException, {
         ...data,
         // Convert dealer IDs back to array format for multiselect
         dealers: Array.isArray(data.dealers) ? data.dealers : []
-    })
-    showAddDialog.value = true
-}
+    });
+    showAddDialog.value = true;
+};
 
 const deleteException = async (id) => {
     if (confirm('Are you sure you want to delete this exception?')) {
         try {
-            loading.value = true
-            const response = await api.delete(`maintenance/delete-material-exception/${id}`)
-            
+            loading.value = true;
+            const response = await api.delete(`maintenance/delete-material-exception/${id}`);
+
             if (response.data.status === 1) {
                 // Remove from local list
-                materialExceptions.value = materialExceptions.value.filter(e => e.id !== id)
-                toast.add({ severity: 'success', summary: 'Success', detail: 'Material exception deleted successfully', life: 3000 })
+                materialExceptions.value = materialExceptions.value.filter((e) => e.id !== id);
+                toast.add({ severity: 'success', summary: 'Success', detail: 'Material exception deleted successfully', life: 3000 });
             } else {
-                console.error('API returned error:', response.data)
-                toast.add({ severity: 'error', summary: 'Error', detail: 'Failed to delete material exception', life: 3000 })
+                console.error('API returned error:', response.data);
+                toast.add({ severity: 'error', summary: 'Error', detail: 'Failed to delete material exception', life: 3000 });
             }
         } catch (error) {
-            console.error('Error deleting material exception:', error)
-            toast.add({ severity: 'error', summary: 'Error', detail: 'Error deleting material exception', life: 3000 })
+            console.error('Error deleting material exception:', error);
+            toast.add({ severity: 'error', summary: 'Error', detail: 'Error deleting material exception', life: 3000 });
         } finally {
-            loading.value = false
+            loading.value = false;
         }
     }
-}
+};
 
 const saveException = async () => {
     try {
-        loading.value = true
+        loading.value = true;
 
         // Prepare data for API
         const apiData = {
             materialid: currentException.materialCode,
             status: currentException.status ? 1 : 0
-        }
+        };
 
         // Split dealers into include and exclude based on exception type
         if (currentException.exceptionType === 'Include') {
-            apiData.i_eten_userID = currentException.dealers.join(',')
-            apiData.e_eten_userID = '0'
+            apiData.i_eten_userID = currentException.dealers.join(',');
+            apiData.e_eten_userID = '0';
         } else if (currentException.exceptionType === 'Exclude') {
-            apiData.i_eten_userID = '0'
-            apiData.e_eten_userID = currentException.dealers.join(',')
+            apiData.i_eten_userID = '0';
+            apiData.e_eten_userID = currentException.dealers.join(',');
         }
 
-        let response
+        let response;
         if (editMode.value) {
             // Update existing
-            apiData.id = currentException.id
-            response = await api.put('maintenance/update-material-exception', apiData)
+            apiData.id = currentException.id;
+            response = await api.put('maintenance/update-material-exception', apiData);
         } else {
             // Create new
-            response = await api.post('maintenance/create-material-exception', apiData)
+            response = await api.post('maintenance/create-material-exception', apiData);
         }
 
         if (response.data.status === 1) {
             // Refresh the list
-            await fetchMaterialExceptions()
-            closeDialog()
-            toast.add({ 
-                severity: 'success', 
-                summary: 'Success', 
-                detail: `Material exception ${editMode.value ? 'updated' : 'created'} successfully`, 
-                life: 3000 
-            })
+            await fetchMaterialExceptions();
+            closeDialog();
+            toast.add({
+                severity: 'success',
+                summary: 'Success',
+                detail: `Material exception ${editMode.value ? 'updated' : 'created'} successfully`,
+                life: 3000
+            });
         } else {
-            console.error('API returned error:', response.data)
-            toast.add({ severity: 'error', summary: 'Error', detail: `Failed to ${editMode.value ? 'update' : 'create'} material exception`, life: 3000 })
+            console.error('API returned error:', response.data);
+            toast.add({ severity: 'error', summary: 'Error', detail: `Failed to ${editMode.value ? 'update' : 'create'} material exception`, life: 3000 });
         }
     } catch (error) {
-        console.error('Error saving material exception:', error)
-        toast.add({ severity: 'error', summary: 'Error', detail: `Error ${editMode.value ? 'updating' : 'creating'} material exception`, life: 3000 })
+        console.error('Error saving material exception:', error);
+        toast.add({ severity: 'error', summary: 'Error', detail: `Error ${editMode.value ? 'updating' : 'creating'} material exception`, life: 3000 });
     } finally {
-        loading.value = false
+        loading.value = false;
     }
-}
+};
 
 const closeDialog = () => {
-    showAddDialog.value = false
-    editMode.value = false
+    showAddDialog.value = false;
+    editMode.value = false;
     Object.assign(currentException, {
         id: null,
         materialCode: '',
@@ -417,43 +383,39 @@ const closeDialog = () => {
         exceptionType: '',
         dealers: [],
         status: true
-    })
-}
+    });
+};
 
 const fetchMaterialExceptions = async () => {
     try {
-        loading.value = true
-        const response = await api.get('maintenance/list-material-exception')
+        loading.value = true;
+        const response = await api.get('maintenance/list-material-exception');
 
-        console.log('API Response:', response.data)
+        console.log('API Response:', response.data);
 
         if (response.data.status === 1 && response.data.admin_data) {
-            const adminData = response.data.admin_data
-            
-            materialExceptions.value = adminData.map(item => {
+            const adminData = response.data.admin_data;
+
+            materialExceptions.value = adminData.map((item) => {
                 // Calculate dealer counts
-                const includeDealers = item.i_eten_userID && item.i_eten_userID !== '0' 
-                    ? item.i_eten_userID.split(',') 
-                    : []
-                const excludeDealers = item.e_eten_userID && item.e_eten_userID !== '0' 
-                    ? item.e_eten_userID.split(',') 
-                    : []
-                
-                const totalDealers = includeDealers.length + excludeDealers.length
+                const includeDealers = item.i_eten_userID && item.i_eten_userID !== '0' ? item.i_eten_userID.split(',') : [];
+                const excludeDealers = item.e_eten_userID && item.e_eten_userID !== '0' ? item.e_eten_userID.split(',') : [];
+
+                const totalDealers = includeDealers.length + excludeDealers.length;
 
                 // Determine exception type
-                let exceptionType = 'Include'
+                let exceptionType = 'Include';
                 if (item.i_eten_userID === '0' && item.e_eten_userID && item.e_eten_userID !== '0') {
-                    exceptionType = 'Exclude'
+                    exceptionType = 'Exclude';
                 } else if (item.i_eten_userID && item.i_eten_userID !== '0' && item.e_eten_userID && item.e_eten_userID !== '0') {
-                    exceptionType = 'Mixed'
+                    exceptionType = 'Mixed';
                 }
 
                 // Combine all dealer IDs
-                const allDealerIds = [...includeDealers, ...excludeDealers]
+                const allDealerIds = [...includeDealers, ...excludeDealers];
 
                 // Find material description
-                const materialInfo = materialOptions.value.find(m => m.code === item.materialid)
+                const materialInfo = materialOptions.value.find((m) => m.code === item.materialid);
 
                 return {
                     id: item.id,
@@ -464,24 +426,24 @@ const fetchMaterialExceptions = async () => {
                     dealerCount: totalDealers,
                     status: item.status === 1,
                     created: item.created
-                }
-            })
+                };
+            });
         } else {
-            console.error('API returned error or invalid data:', response.data)
-            materialExceptions.value = []
+            console.error('API returned error or invalid data:', response.data);
+            materialExceptions.value = [];
         }
     } catch (error) {
-        console.error('Error fetching material exceptions:', error)
-        materialExceptions.value = []
-        toast.add({ severity: 'error', summary: 'Error', detail: 'Failed to load material exceptions', life: 3000 })
+        console.error('Error fetching material exceptions:', error);
+        materialExceptions.value = [];
+        toast.add({ severity: 'error', summary: 'Error', detail: 'Failed to load material exceptions', life: 3000 });
     } finally {
-        loading.value = false
+        loading.value = false;
     }
-}
+};
 
 onMounted(() => {
-    fetchMaterialExceptions()
-})
+    fetchMaterialExceptions();
+});
 </script>
 
 <style scoped>
@@ -492,5 +454,44 @@ onMounted(() => {
 
 :deep(.p-inputnumber) {
     width: 100%;
+}
+
+:deep(.rounded-table) {
+    border-radius: 12px;
+    overflow: hidden;
+    border: 1px solid #e5e7eb;
+
+    .p-datatable-header {
+        border-top-left-radius: 12px;
+        border-top-right-radius: 12px;
+    }
+
+    .p-paginator-bottom {
+        border-bottom-left-radius: 12px;
+        border-bottom-right-radius: 12px;
+    }
+
+    .p-datatable-thead > tr > th {
+        &:first-child {
+            border-top-left-radius: 12px;
+        }
+        &:last-child {
+            border-top-right-radius: 12px;
+        }
+    }
+
+    .p-datatable-tbody > tr:last-child > td {
+        &:first-child {
+            border-bottom-left-radius: 12px;
+        }
+        &:last-child {
+            border-bottom-right-radius: 12px;
+        }
+    }
+
+    .p-datatable-tbody > tr.p-datatable-emptymessage > td {
+        border-bottom-left-radius: 12px;
+        border-bottom-right-radius: 12px;
+    }
 }
 </style>

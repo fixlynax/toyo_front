@@ -11,7 +11,7 @@
                 :value="listData"
                 :paginator="true"
                 :rows="10"
-                :rowsPerPageOptions="[5, 10, 20]"
+                :rowsPerPageOptions="[10, 25, 50, 100]"
                 dataKey="id"
                 :rowHover="true"
                 :loading="tableLoading"
