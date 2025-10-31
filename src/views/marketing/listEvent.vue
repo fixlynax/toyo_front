@@ -11,13 +11,14 @@
                 :value="listData"
                 :paginator="true"
                 :rows="10"
-                :rowsPerPageOptions="[5, 10, 20]"
+                :rowsPerPageOptions="[10, 25, 50, 100]"
                 dataKey="id"
                 :rowHover="true"
                 :loading="tableLoading"
                 :filters="filters"
                 filterDisplay="menu"
                 :globalFilterFields="['title', 'location', 'publishDate', 'period', 'isSurvey', 'status']"
+                class="rounded-table"
             >
             
                 <template #header>
@@ -153,5 +154,47 @@ const getOverallStatusSeverity = (status) => {
 
 :deep(.p-datatable-scrollable .p-frozen-column) {
     font-weight: bold;
+}
+
+// Rounded table styles
+:deep(.rounded-table) {
+    border-radius: 12px;
+    overflow: hidden;
+    border: 1px solid #e5e7eb;
+    
+    .p-datatable-header {
+        border-top-left-radius: 12px;
+        border-top-right-radius: 12px;
+    }
+    
+    .p-paginator-bottom {
+        border-bottom-left-radius: 12px;
+        border-bottom-right-radius: 12px;
+    }
+    
+    .p-datatable-thead > tr > th {
+        &:first-child {
+            border-top-left-radius: 12px;
+        }
+        &:last-child {
+            border-top-right-radius: 12px;
+        }
+    }
+    
+    // For the last row in the table body
+    .p-datatable-tbody > tr:last-child > td {
+        &:first-child {
+            border-bottom-left-radius: 12px;
+        }
+        &:last-child {
+            border-bottom-right-radius: 12px;
+        }
+    }
+    
+    // When table is empty
+    .p-datatable-tbody > tr.p-datatable-emptymessage > td {
+        border-bottom-left-radius: 12px;
+        border-bottom-right-radius: 12px;
+    }
 }
 </style>
