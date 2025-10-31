@@ -19,6 +19,7 @@
             dataKey="id"
             :rows="10"
             :filters="filters1"
+            :globalFilterFields="['storageLocation', 'orderType', 'message']"
             responsiveLayout="scroll"
             stripedRows
             rowHover

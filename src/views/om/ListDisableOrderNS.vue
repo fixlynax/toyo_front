@@ -6,24 +6,10 @@
         </div>
 
         <!-- 🟢 Only show LoadingPage during initial load, hide DataTable completely -->
-        <LoadingPage 
-            v-if="loading" 
-            :message="'Loading Disable Orders NS...'" 
-            :sub-message="'Fetching your Disable Orders NS list'" 
-        />
+        <LoadingPage v-if="loading" :message="'Loading Disable Orders NS...'" :sub-message="'Fetching your Disable Orders NS list'" />
 
         <!-- DataTable -->
-        <DataTable
-        v-else
-            :value="disabledOrders"
-            dataKey="id"
-            :rows="10"
-            :filters="filters1"
-            responsiveLayout="scroll"
-            stripedRows
-            rowHover
-            class="rounded-xl overflow-hidden"
-        >
+        <DataTable v-else :value="disabledOrders" dataKey="id" :rows="10" :filters="filters1" :globalFilterFields="['storageLocation', 'orderType', 'message']" responsiveLayout="scroll" stripedRows rowHover class="rounded-xl overflow-hidden">
             <template #header>
                 <div class="flex items-center justify-between gap-4 w-full flex-wrap">
                     <!-- Search -->
@@ -36,9 +22,8 @@
                         </IconField>
                         <Button type="button" icon="pi pi-cog" class="p-button" />
                     </div>
-                    </div>
+                </div>
             </template>
-
 
             <template #empty>
                 <div class="text-center p-6">
@@ -60,10 +45,7 @@
             <Column header="Order Types" style="min-width: 12rem">
                 <template #body="{ data }">
                     <div class="flex flex-wrap gap-1">
-                        <Tag
-                            :value="getOrderTypeLabel(data.orderType)"
-                            :severity="getOrderTypeSeverity(data.orderType)"
-                        />
+                        <Tag :value="getOrderTypeLabel(data.orderType)" :severity="getOrderTypeSeverity(data.orderType)" />
                     </div>
                 </template>
             </Column>
@@ -103,20 +85,11 @@
         </DataTable>
 
         <!-- Create Popup Dialog -->
-        <Dialog
-            v-model:visible="createPopupVisible"
-            header="Create Disable Order"
-            modal
-            class="rounded-2xl shadow-md"
-            :style="{ width: '40rem', maxWidth: '95vw' }"
-            :closable="false"
-        >
+        <Dialog v-model:visible="createPopupVisible" header="Create Disable Order" modal class="rounded-2xl shadow-md" :style="{ width: '40rem', maxWidth: '95vw' }" :closable="false">
             <div class="p-fluid formgrid grid gap-4 mt-2">
                 <!-- Storage Locations -->
                 <div class="field col-12">
-                    <label for="storageLocations" class="font-semibold text-gray-700">
-                        Storage Locations <span class="text-red-500">*</span>
-                    </label>
+                    <label for="storageLocations" class="font-semibold text-gray-700"> Storage Locations <span class="text-red-500">*</span> </label>
                     <Dropdown
                         id="storageLocations"
                         v-model="newOrder.storageLocation"
@@ -132,9 +105,7 @@
 
                 <!-- Order Types -->
                 <div class="field col-12">
-                    <label for="orderTypes" class="font-semibold text-gray-700">
-                        Order Types <span class="text-red-500">*</span>
-                    </label>
+                    <label for="orderTypes" class="font-semibold text-gray-700"> Order Types <span class="text-red-500">*</span> </label>
                     <Dropdown
                         id="orderTypes"
                         v-model="newOrder.orderType"
@@ -150,35 +121,13 @@
 
                 <!-- Period -->
                 <div class="field col-12">
-                    <label for="period" class="font-semibold text-gray-700">
-                        Period <span class="text-red-500">*</span>
-                    </label>
+                    <label for="period" class="font-semibold text-gray-700"> Period <span class="text-red-500">*</span> </label>
                     <div class="flex gap-2 flex-col md:flex-row">
-                        <Calendar
-                            v-model="newOrder.startPeriod"
-                            showTime
-                            hourFormat="24"
-                            :minDate="minDate"
-                            placeholder="Start Date/Time"
-                            class="flex-1"
-                            :class="{ 'p-invalid': submitted && !newOrder.startPeriod }"
-                        />
-                        <Calendar
-                            v-model="newOrder.endPeriod"
-                            showTime
-                            hourFormat="24"
-                            :minDate="newOrder.startPeriod || minDate"
-                            placeholder="End Date/Time"
-                            class="flex-1"
-                            :class="{ 'p-invalid': submitted && !newOrder.endPeriod }"
-                        />
+                        <Calendar v-model="newOrder.startPeriod" showTime hourFormat="24" :minDate="minDate" placeholder="Start Date/Time" class="flex-1" :class="{ 'p-invalid': submitted && !newOrder.startPeriod }" />
+                        <Calendar v-model="newOrder.endPeriod" showTime hourFormat="24" :minDate="newOrder.startPeriod || minDate" placeholder="End Date/Time" class="flex-1" :class="{ 'p-invalid': submitted && !newOrder.endPeriod }" />
                     </div>
-                    <small v-if="submitted && (!newOrder.startPeriod || !newOrder.endPeriod)" class="p-error block mt-1">
-                        Both start and end date are required
-                    </small>
-                    <small v-if="newOrder.endPeriod && newOrder.startPeriod && newOrder.endPeriod <= newOrder.startPeriod" class="p-error block mt-1">
-                        End date must be after start date
-                    </small>
+                    <small v-if="submitted && (!newOrder.startPeriod || !newOrder.endPeriod)" class="p-error block mt-1"> Both start and end date are required </small>
+                    <small v-if="newOrder.endPeriod && newOrder.startPeriod && newOrder.endPeriod <= newOrder.startPeriod" class="p-error block mt-1"> End date must be after start date </small>
                 </div>
 
                 <!-- Message -->
@@ -197,20 +146,11 @@
         </Dialog>
 
         <!-- Edit Popup Dialog -->
-        <Dialog
-            v-model:visible="editPopupVisible"
-            header="Edit Disable Order"
-            modal
-            class="rounded-2xl shadow-md"
-            :style="{ width: '40rem', maxWidth: '95vw' }"
-            :closable="false"
-        >
+        <Dialog v-model:visible="editPopupVisible" header="Edit Disable Order" modal class="rounded-2xl shadow-md" :style="{ width: '40rem', maxWidth: '95vw' }" :closable="false">
             <div class="p-fluid formgrid grid gap-4 mt-2" v-if="editingOrder">
                 <!-- Storage Locations -->
                 <div class="field col-12">
-                    <label for="editStorageLocations" class="font-semibold text-gray-700">
-                        Storage Locations <span class="text-red-500">*</span>
-                    </label>
+                    <label for="editStorageLocations" class="font-semibold text-gray-700"> Storage Locations <span class="text-red-500">*</span> </label>
                     <Dropdown
                         id="editStorageLocations"
                         v-model="editingOrder.storageLocation"
@@ -226,9 +166,7 @@
 
                 <!-- Order Types -->
                 <div class="field col-12">
-                    <label for="editOrderTypes" class="font-semibold text-gray-700">
-                        Order Types <span class="text-red-500">*</span>
-                    </label>
+                    <label for="editOrderTypes" class="font-semibold text-gray-700"> Order Types <span class="text-red-500">*</span> </label>
                     <Dropdown
                         id="editOrderTypes"
                         v-model="editingOrder.orderType"
@@ -244,35 +182,13 @@
 
                 <!-- Period -->
                 <div class="field col-12">
-                    <label for="editPeriod" class="font-semibold text-gray-700">
-                        Period <span class="text-red-500">*</span>
-                    </label>
+                    <label for="editPeriod" class="font-semibold text-gray-700"> Period <span class="text-red-500">*</span> </label>
                     <div class="flex gap-2 flex-col md:flex-row">
-                        <Calendar
-                            v-model="editingOrder.startPeriod"
-                            showTime
-                            hourFormat="24"
-                            :minDate="minDate"
-                            placeholder="Start Date/Time"
-                            class="flex-1"
-                            :class="{ 'p-invalid': submitted && !editingOrder.startPeriod }"
-                        />
-                        <Calendar
-                            v-model="editingOrder.endPeriod"
-                            showTime
-                            hourFormat="24"
-                            :minDate="editingOrder.startPeriod || minDate"
-                            placeholder="End Date/Time"
-                            class="flex-1"
-                            :class="{ 'p-invalid': submitted && !editingOrder.endPeriod }"
-                        />
+                        <Calendar v-model="editingOrder.startPeriod" showTime hourFormat="24" :minDate="minDate" placeholder="Start Date/Time" class="flex-1" :class="{ 'p-invalid': submitted && !editingOrder.startPeriod }" />
+                        <Calendar v-model="editingOrder.endPeriod" showTime hourFormat="24" :minDate="editingOrder.startPeriod || minDate" placeholder="End Date/Time" class="flex-1" :class="{ 'p-invalid': submitted && !editingOrder.endPeriod }" />
                     </div>
-                    <small v-if="submitted && (!editingOrder.startPeriod || !editingOrder.endPeriod)" class="p-error block mt-1">
-                        Both start and end date are required
-                    </small>
-                    <small v-if="editingOrder.endPeriod && editingOrder.startPeriod && editingOrder.endPeriod <= editingOrder.startPeriod" class="p-error block mt-1">
-                        End date must be after start date
-                    </small>
+                    <small v-if="submitted && (!editingOrder.startPeriod || !editingOrder.endPeriod)" class="p-error block mt-1"> Both start and end date are required </small>
+                    <small v-if="editingOrder.endPeriod && editingOrder.startPeriod && editingOrder.endPeriod <= editingOrder.startPeriod" class="p-error block mt-1"> End date must be after start date </small>
                 </div>
 
                 <!-- Message -->
@@ -342,9 +258,9 @@ export default {
             this.loading = true;
             try {
                 const response = await api.get('maintenance/list-disable-order');
-                
+
                 if (response.data.status === 1) {
-                    this.disabledOrders = response.data.admin_data.map(item => ({
+                    this.disabledOrders = response.data.admin_data.map((item) => ({
                         ...item,
                         startPeriod: this.parseApiDate(item.startPeriod),
                         endPeriod: this.parseApiDate(item.endPeriod)
@@ -395,11 +311,11 @@ export default {
 
         getStatus(order) {
             if (!order.startPeriod || !order.endPeriod) return 'Unknown';
-            
+
             const now = new Date();
             const start = new Date(order.startPeriod);
             const end = new Date(order.endPeriod);
-            
+
             if (now < start) return 'Scheduled';
             if (now <= end) return 'Active';
             return 'Inactive';
@@ -419,10 +335,10 @@ export default {
         },
 
         getOrderTypeLabel(value) {
-            const map = { 
-                'OWN': 'Own Use', 
-                'NORMAL': 'Normal', 
-                'ALL': 'All'
+            const map = {
+                OWN: 'Own Use',
+                NORMAL: 'Normal',
+                ALL: 'All'
             };
             return map[value] || value;
         },
@@ -465,12 +381,7 @@ export default {
             this.submitted = true;
 
             // Validation
-            if (
-                !this.newOrder.storageLocation ||
-                !this.newOrder.orderType ||
-                !this.newOrder.startPeriod ||
-                !this.newOrder.endPeriod
-            ) {
+            if (!this.newOrder.storageLocation || !this.newOrder.orderType || !this.newOrder.startPeriod || !this.newOrder.endPeriod) {
                 return;
             }
 
@@ -496,7 +407,7 @@ export default {
 
                 // Note: You'll need to adjust the endpoint based on your actual API
                 const response = await api.post('maintenance/create-disable-order', payload);
-                
+
                 if (response.data.status === 1) {
                     this.$toast.add({
                         severity: 'success',
@@ -504,7 +415,7 @@ export default {
                         detail: 'Disable order created successfully',
                         life: 3000
                     });
-                    
+
                     this.hideCreatePopup();
                     this.fetchDisabledOrders(); // Refresh the list
                 } else {
@@ -529,7 +440,7 @@ export default {
         },
 
         editItem(item) {
-            this.editingOrder = { 
+            this.editingOrder = {
                 ...item,
                 startPeriod: new Date(item.startPeriod),
                 endPeriod: new Date(item.endPeriod)
@@ -542,12 +453,7 @@ export default {
             this.submitted = true;
 
             // Validation
-            if (
-                !this.editingOrder.storageLocation ||
-                !this.editingOrder.orderType ||
-                !this.editingOrder.startPeriod ||
-                !this.editingOrder.endPeriod
-            ) {
+            if (!this.editingOrder.storageLocation || !this.editingOrder.orderType || !this.editingOrder.startPeriod || !this.editingOrder.endPeriod) {
                 return;
             }
 
@@ -574,7 +480,7 @@ export default {
 
                 // Note: You'll need to adjust the endpoint based on your actual API
                 const response = await api.put('maintenance/update-disable-order', payload);
-                
+
                 if (response.data.status === 1) {
                     this.$toast.add({
                         severity: 'success',
@@ -582,7 +488,7 @@ export default {
                         detail: 'Disable order updated successfully',
                         life: 3000
                     });
-                    
+
                     this.hideEditPopup();
                     this.fetchDisabledOrders(); // Refresh the list
                 } else {
@@ -617,7 +523,7 @@ export default {
                 try {
                     // Note: You'll need to adjust the endpoint based on your actual API
                     const response = await api.delete(`maintenance/delete-disable-order/${id}`);
-                    
+
                     if (response.data.status === 1) {
                         this.$toast.add({
                             severity: 'info',
@@ -674,7 +580,7 @@ export default {
     .flex-col {
         flex-direction: column;
     }
-    
+
     .gap-2 > * {
         margin-bottom: 0.5rem;
     }
