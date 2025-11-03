@@ -94,7 +94,8 @@ const filters = ref({
 onMounted(async () => {
     try {
         loading.value = true;
-        const response = await api.get('list_dealer');
+
+        const response = await api.post('list_dealer');
 
         console.log('API Response:', response.data);
 

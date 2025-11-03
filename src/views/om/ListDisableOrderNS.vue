@@ -220,12 +220,16 @@ export default {
             loading: true,
             creating: false,
             updating: false,
+
+            // ✅ Correct FilterMatchMode usage
             filters1: {
                 global: { value: null, matchMode: 'contains' }
             },
+
             createPopupVisible: false,
             editPopupVisible: false,
             submitted: false,
+
             newOrder: {
                 storageLocation: null,
                 orderType: null,
@@ -233,7 +237,9 @@ export default {
                 endPeriod: null,
                 message: ''
             },
+
             editingOrder: null,
+
             storageLocationOptions: [
                 { label: 'TMJB', value: 'TMJB' },
                 { label: 'TMSA', value: 'TMSA' },
@@ -248,11 +254,13 @@ export default {
             ]
         };
     },
+
     computed: {
         minDate() {
             return new Date();
         }
     },
+
     methods: {
         async fetchDisabledOrders() {
             this.loading = true;
@@ -288,13 +296,11 @@ export default {
 
         parseApiDate(dateString) {
             if (!dateString) return null;
-            // Convert from "2025-10-01 00:00:00" to Date object
             return new Date(dateString.replace(' ', 'T'));
         },
 
         formatDateForApi(date) {
             if (!date) return null;
-            // Convert Date object to "2025-10-01 00:00:00" format
             return date.toISOString().replace('T', ' ').substring(0, 19);
         },
 
@@ -323,36 +329,24 @@ export default {
 
         getStatusSeverity(order) {
             switch (this.getStatus(order)) {
-                case 'Scheduled':
-                    return 'warning';
-                case 'Active':
-                    return 'danger';
-                case 'Inactive':
-                    return 'secondary';
-                default:
-                    return 'info';
+                case 'Scheduled': return 'warning';
+                case 'Active': return 'danger';
+                case 'Inactive': return 'secondary';
+                default: return 'info';
             }
         },
 
         getOrderTypeLabel(value) {
-            const map = {
-                OWN: 'Own Use',
-                NORMAL: 'Normal',
-                ALL: 'All'
-            };
+            const map = { OWN: 'Own Use', NORMAL: 'Normal', ALL: 'All' };
             return map[value] || value;
         },
 
         getOrderTypeSeverity(value) {
             switch (value) {
-                case 'OWN':
-                    return 'success';
-                case 'NORMAL':
-                    return 'info';
-                case 'ALL':
-                    return 'warning';
-                default:
-                    return 'secondary';
+                case 'OWN': return 'success';
+                case 'NORMAL': return 'info';
+                case 'ALL': return 'warning';
+                default: return 'secondary';
             }
         },
 
@@ -379,11 +373,7 @@ export default {
 
         async createNewOrder() {
             this.submitted = true;
-
-            // Validation
-            if (!this.newOrder.storageLocation || !this.newOrder.orderType || !this.newOrder.startPeriod || !this.newOrder.endPeriod) {
-                return;
-            }
+            if (!this.newOrder.storageLocation || !this.newOrder.orderType || !this.newOrder.startPeriod || !this.newOrder.endPeriod) return;
 
             if (this.newOrder.endPeriod <= this.newOrder.startPeriod) {
                 this.$toast.add({
@@ -405,7 +395,6 @@ export default {
                     message: this.newOrder.message || 'No message provided'
                 };
 
-                // Note: You'll need to adjust the endpoint based on your actual API
                 const response = await api.post('maintenance/create-disable-order', payload);
 
                 if (response.data.status === 1) {
@@ -417,7 +406,7 @@ export default {
                     });
 
                     this.hideCreatePopup();
-                    this.fetchDisabledOrders(); // Refresh the list
+                    this.fetchDisabledOrders();
                 } else {
                     this.$toast.add({
                         severity: 'error',
@@ -451,11 +440,7 @@ export default {
 
         async updateOrder() {
             this.submitted = true;
-
-            // Validation
-            if (!this.editingOrder.storageLocation || !this.editingOrder.orderType || !this.editingOrder.startPeriod || !this.editingOrder.endPeriod) {
-                return;
-            }
+            if (!this.editingOrder.storageLocation || !this.editingOrder.orderType || !this.editingOrder.startPeriod || !this.editingOrder.endPeriod) return;
 
             if (this.editingOrder.endPeriod <= this.editingOrder.startPeriod) {
                 this.$toast.add({
@@ -478,7 +463,6 @@ export default {
                     message: this.editingOrder.message || 'No message provided'
                 };
 
-                // Note: You'll need to adjust the endpoint based on your actual API
                 const response = await api.put('maintenance/update-disable-order', payload);
 
                 if (response.data.status === 1) {
@@ -490,7 +474,7 @@ export default {
                     });
 
                     this.hideEditPopup();
-                    this.fetchDisabledOrders(); // Refresh the list
+                    this.fetchDisabledOrders();
                 } else {
                     this.$toast.add({
                         severity: 'error',
@@ -521,7 +505,6 @@ export default {
         async deleteItem(id) {
             if (confirm('Are you sure you want to delete this order?')) {
                 try {
-                    // Note: You'll need to adjust the endpoint based on your actual API
                     const response = await api.delete(`maintenance/delete-disable-order/${id}`);
 
                     if (response.data.status === 1) {
@@ -531,7 +514,7 @@ export default {
                             detail: 'Order has been deleted',
                             life: 3000
                         });
-                        this.fetchDisabledOrders(); // Refresh the list
+                        this.fetchDisabledOrders();
                     } else {
                         this.$toast.add({
                             severity: 'error',
@@ -552,11 +535,17 @@ export default {
             }
         }
     },
+
     mounted() {
         this.fetchDisabledOrders();
+    },
+
+    components: {
+        LoadingPage
     }
 };
 </script>
+
 
 <style scoped>
 .line-clamp-2 {
