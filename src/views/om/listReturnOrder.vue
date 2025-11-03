@@ -116,7 +116,7 @@ onBeforeMount(() => {
 <template>
     <div class="card">
         <!-- Header -->
-        <div class="text-2xl font-bold text-gray-800 border-b pb-2 mb-6">List Return Order</div>
+        <div class="text-2xl font-bold text-gray-800 border-b pb-2 ">List Return Order</div>
 
         <!-- 🟢 Loading Page -->
         <LoadingPage v-if="loading" :message="'Loading Return Orders...'" :sub-message="'Fetching Return Order list...'" />
@@ -124,7 +124,7 @@ onBeforeMount(() => {
         <!-- 🟢 Tab Menu and Table -->
         <div v-else>
             <!-- 🟣 Status Tabs -->
-            <TabMenu :model="statusTabs" v-model:activeIndex="activeTabIndex" class="mb-4" />
+            <TabMenu :model="statusTabs" v-model:activeIndex="activeTabIndex" class="mb-6" />
 
             <!-- 🟢 DataTable -->
             <DataTable

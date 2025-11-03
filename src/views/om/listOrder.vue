@@ -152,7 +152,7 @@ const formatDate = (dateString) => {
 
 <template>
     <div class="card">
-        <div class="text-2xl font-bold text-gray-800 border-b pb-2 mb-6">List Order</div>
+        <div class="text-2xl font-bold text-gray-800 border-b pb-2 ">List Order</div>
 
         <!-- 🟢 Use LoadingPage for initial load, hide everything else -->
         <LoadingPage v-if="loading" :message="'Loading Orders...'" :sub-message="'Fetching your order list'" />
@@ -160,7 +160,7 @@ const formatDate = (dateString) => {
         <!-- 🟢 Content only shows when not loading -->
         <div v-else>
             <!-- 🟢 Status Tab Menu -->
-            <TabMenu :model="statusTabs" v-model:activeIndex="activeTabIndex" class="mb-4" />
+            <TabMenu :model="statusTabs" v-model:activeIndex="activeTabIndex" class="mb-6" />
 
             <!-- 🟢 DataTable without loading prop -->
             <DataTable 
