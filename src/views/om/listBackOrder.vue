@@ -1,6 +1,7 @@
 <template>
     <div class="card flex flex-col w-full">
-        <div class="text-2xl font-bold text-gray-800 border-b pb-2 mb-6">📦 List Back Order</div>
+        <div class="text-2xl font-bold text-gray-800 border-b pb-2 ">📦 List Back Order</div>
+        <TabMenu :model="statusTabs" v-model:activeIndex="activeTabIndex" class="mb-6" />
 
         <!-- 🟢 Only show LoadingPage during initial load, hide DataTable completely -->
         <LoadingPage v-if="loading" :sub-message="'Fetching your Back Order list'" class="min-h-[720px]" />
@@ -8,7 +9,7 @@
         <!-- 🟢 Only show DataTable when NOT loading -->
         <DataTable
             v-if="!loading"
-            :value="listData"
+            :value="filteredList"
             :paginator="true"
             :rows="10"
             :rowsPerPageOptions="[5, 10, 20]"
@@ -89,7 +90,7 @@
 </template>
 
 <script setup>
-import { onMounted, ref } from 'vue';
+import { onMounted, ref, watch } from 'vue';
 import { FilterMatchMode } from '@primevue/core/api';
 import api from '@/service/api';
 import ProgressBar from 'primevue/progressbar';
@@ -102,65 +103,79 @@ import InputIcon from 'primevue/inputicon';
 import LoadingPage from '@/components/LoadingPage.vue';
 
 const listData = ref([]);
+const filteredList = ref([]);
 const loading = ref(true);
+const activeTabIndex = ref(0);
+
 const filters = ref({
     global: { value: null, matchMode: FilterMatchMode.CONTAINS }
 });
+
+const statusTabs = [
+    { label: 'Pending', status: 0 },
+    { label: 'Processing', status: 66 },
+    { label: 'Completed', status: 1 }
+];
 
 onMounted(async () => {
     try {
         loading.value = true;
         const response = await api.get('order/list-back-order');
 
-        console.log('API Response:', response.data);
-
         if (response.data.status === 1 && response.data.admin_data) {
             const adminData = response.data.admin_data;
 
-            listData.value = adminData.map((order) => {
-                // Calculate progress percentage
-                const progress = calculateProgress(order);
+            listData.value = adminData.map((order) => ({
+                id: order.id,
+                orderNo: order.bo_orderno || '-',
+                custAccountNo: order.custaccountno,
+                customerName: order.dealerName,
+                deliveryType: order.deliveryType || '-',
+                orderDate: order.created,
+                shipTo: order.shipto || order.custaccountno,
+                deliveryDate: order.deliveryDate,
+                expiry: order.expiry,
+                orderStatus: order.orderstatus,
+                progress: calculateProgress(order),
+                status: order.status
+            }));
 
-                return {
-                    id: order.id,
-                    orderNo: order.bo_orderno || '-',
-                    custAccountNo: order.custaccountno,
-                    customerName: order.dealerName,
-                    customerName: order.dealerName,
-                    deliveryType: order.deliveryType || '-',
-                    orderDate: order.created,
-                    shipTo: order.shipto || order.custaccountno,
-                    deliveryDate: order.deliveryDate,
-                    expiry: order.expiry,
-                    orderStatus: order.orderstatus,
-                    progress: order.fullfill_percentage,
-                    status: order.status
-                };
-            });
+            filterByTab(); // Initial filter
         } else {
-            console.error('API returned error or invalid data:', response.data);
             listData.value = [];
+            filteredList.value = [];
         }
     } catch (error) {
         console.error('Error fetching back order list:', error);
         listData.value = [];
+        filteredList.value = [];
     } finally {
         loading.value = false;
     }
 });
 
+watch(activeTabIndex, () => {
+    filterByTab();
+});
+
+const filterByTab = () => {
+    const selected = statusTabs[activeTabIndex.value];
+    if (!selected) {
+        filteredList.value = listData.value;
+        return;
+    }
+    filteredList.value = listData.value.filter((item) => item.orderStatus == selected.status);
+};
+
 const calculateProgress = (order) => {
     try {
-        // Use fullfill_percentage if available
         if (order.fullfill_percentage !== null && order.fullfill_percentage !== undefined) {
             const progress = parseInt(order.fullfill_percentage);
-            return isNaN(progress) ? 0 : Math.min(100, Math.max(0, progress)); // Ensure between 0-100
+            return isNaN(progress) ? 0 : Math.min(100, Math.max(0, progress));
         }
 
-        // Calculate from backorder_array and remaining_array
         if (order.backorder_array && order.remaining_array) {
             const backorderItems = Array.isArray(order.backorder_array) ? order.backorder_array : JSON.parse(order.backorder_array);
-
             const remainingItems = Array.isArray(order.remaining_array) ? order.remaining_array : JSON.parse(order.remaining_array);
 
             if (Array.isArray(backorderItems) && Array.isArray(remainingItems)) {
@@ -170,7 +185,7 @@ const calculateProgress = (order) => {
                 if (totalOrdered > 0) {
                     const fulfilled = totalOrdered - totalRemaining;
                     const progress = Math.round((fulfilled / totalOrdered) * 100);
-                    return Math.min(100, Math.max(0, progress)); // Ensure between 0-100
+                    return Math.min(100, Math.max(0, progress));
                 }
             }
         }
@@ -183,24 +198,17 @@ const calculateProgress = (order) => {
 };
 
 const getProgressBarClass = (progress) => {
-  if (progress <= 40) return 'progress-low';       // Red
-  if (progress <= 60) return 'progress-fair';      // Orange
-  if (progress < 100) return 'progress-good';      // Yellow
-  return 'progress-excellent';                     // Green (100%)
+    if (progress <= 40) return 'progress-low';
+    if (progress <= 60) return 'progress-fair';
+    if (progress < 100) return 'progress-good';
+    return 'progress-excellent';
 };
-
-
 
 const formatDate = (dateString) => {
     if (!dateString) return '-';
-
     try {
         const date = new Date(dateString);
-        return date.toLocaleDateString('en-US', {
-            year: 'numeric',
-            month: 'short',
-            day: 'numeric'
-        });
+        return date.toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' });
     } catch (error) {
         return dateString;
     }
@@ -210,6 +218,10 @@ const getStatusLabel = (status) => {
     switch (status) {
         case 0:
             return 'Pending';
+        case 66:
+            return 'Processing';
+        case 77:
+            return 'Delivery';
         case 1:
             return 'Completed';
         default:
@@ -221,13 +233,18 @@ const getStatusSeverity = (status) => {
     switch (status) {
         case 0:
             return 'warn';
+        case 66:
+            return 'info';
+        case 77:
+            return 'secondary';
         case 1:
             return 'success';
         default:
-            return 'secondary';
+            return 'contrast';
     }
 };
 </script>
+
 
 <style scoped lang="scss">
 :deep(.p-progressbar) {
