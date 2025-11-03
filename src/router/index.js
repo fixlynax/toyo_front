@@ -190,6 +190,11 @@ const router = createRouter({
                     component: () => import('@/views/om/createSalesProgram.vue')
                 },
                 {
+                    path: '/om/createSalesProgramVersion2',
+                    name: 'Create-Sales-Program-version2',
+                    component: () => import('@/views/om/createSalesProgramVersion2.vue')
+                },
+                {
                     path: '/om/editSalesProgram',
                     name: 'Edit-Sales-Program',
                     component: () => import('@/views/om/editSalesProgram.vue')
