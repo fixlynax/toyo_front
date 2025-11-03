@@ -72,7 +72,7 @@
                             </div>
 
                             <!-- Quantities -->
-                            <h3>Purchase Requirements</h3>
+                            <h4>Purchase Requirements</h4>
                             <div class="grid grid-cols-2 gap-4 mb-4">
                                 <div>
                                     <label class="text-sm text-gray-700 font-medium">Buy Qty</label>
