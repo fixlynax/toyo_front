@@ -113,59 +113,33 @@
                                     />
                                 </div>
 
-<div v-if="item.availableBuyMaterials.length">
-    <!-- Batch Action Bar -->
-    <div
-        v-if="item.selectedBuyMaterials.length"
-        class="flex justify-between items-center bg-blue-50 border border-blue-200 rounded-lg px-4 py-2 mb-2"
-    >
-        <span class="text-sm font-medium text-blue-700">
-            {{ item.selectedBuyMaterials.length }} material(s) selected
-        </span>
-        <Button
-            icon="pi pi-times"
-            label="Remove Selected"
-            class="p-button-danger p-button-sm"
-            @click="clearBuySelection(item)"
-        />
-    </div>
+                                <div v-if="item.availableBuyMaterials.length">
+                                    <!-- Batch Action Bar -->
+                                    <div v-if="item.selectedBuyMaterials.length" class="flex justify-between items-center bg-blue-50 border border-blue-200 rounded-lg px-4 py-2 mb-2">
+                                        <span class="text-sm font-medium text-blue-700"> {{ item.selectedBuyMaterials.length }} material(s) selected </span>
+                                        <div><Button icon="pi pi-times" label="Remove Selected" class="p-button-danger p-button-sm" @click="clearBuySelection(item)" /></div>
+                                    </div>
 
-    <!-- Material Grid -->
-    <div class="max-h-56 overflow-y-auto border rounded-lg">
-        <div class="grid grid-cols-1 md:grid-cols-2 divide-y md:divide-y-0 md:divide-x">
-            <div
-                v-for="mat in item.availableBuyMaterials"
-                :key="mat.id"
-                class="flex items-center gap-3 px-3 py-2 cursor-pointer transition-colors duration-150"
-                :class="isMaterialSelected(item.selectedBuyMaterials, mat.id)
-                    ? 'bg-blue-50 hover:bg-blue-100'
-                    : 'hover:bg-gray-50'"
-                @click="toggleBuyMaterialSelection(item, mat)"
-            >
-                <Checkbox
-                    :inputId="'buyMat-' + mat.id"
-                    :binary="true"
-                    :modelValue="isMaterialSelected(item.selectedBuyMaterials, mat.id)"
-                    @click.stop
-                    @change.stop="toggleBuyMaterialSelection(item, mat)"
-                />
-                <div class="flex-1">
-                    <p class="font-medium text-sm">{{ mat.material }}</p>
-                    <p class="text-xs text-gray-500">
-                        Pattern: {{ mat.pattern }} | Rim: {{ mat.rimDiameter }}"
-                    </p>
-                </div>
-                <Button
-                    icon="pi pi-times"
-                    class="p-button-rounded p-button-text p-button-danger p-button-sm"
-                    @click.stop="removeBuyMaterial(item, mat.id)"
-                    v-tooltip.bottom="'Remove this material from list'"
-                />
-            </div>
-        </div>
-    </div>
-</div>
-
+                                    <!-- Material Grid -->
+                                    <div class="max-h-56 overflow-y-auto border rounded-lg">
+                                        <div class="grid grid-cols-1 md:grid-cols-2 divide-y md:divide-y-0 md:divide-x">
+                                            <div
+                                                v-for="mat in item.availableBuyMaterials"
+                                                :key="mat.id"
+                                                class="flex items-center gap-3 px-3 py-2 cursor-pointer transition-colors duration-150"
+                                                :class="isMaterialSelected(item.selectedBuyMaterials, mat.id) ? 'bg-blue-50 hover:bg-blue-100' : 'hover:bg-gray-50'"
+                                                @click="toggleBuyMaterialSelection(item, mat)"
+                                            >
+                                                <Checkbox :inputId="'buyMat-' + mat.id" :binary="true" :modelValue="isMaterialSelected(item.selectedBuyMaterials, mat.id)" @click.stop @change.stop="toggleBuyMaterialSelection(item, mat)" />
+                                                <div class="flex-1">
+                                                    <p class="font-medium text-sm">{{ mat.material }}</p>
+                                                    <p class="text-xs text-gray-500">Pattern: {{ mat.pattern }} | Rim: {{ mat.rimDiameter }}"</p>
+                                                </div>
+                                                <Button icon="pi pi-times" class="p-button-rounded p-button-text p-button-danger p-button-sm" @click.stop="removeBuyMaterial(item, mat.id)" v-tooltip.bottom="'Remove this material from list'" />
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
 
                                 <p v-else class="text-sm text-gray-500 text-center py-3">No matching materials</p>
                             </div>
@@ -208,9 +182,8 @@
                 <div class="flex justify-end gap-2 mt-8">
                     <div class="w-40">
                         <RouterLink to="/om/listSalesProgram">
-                        <Button label="Cancel" class="w-full p-button-secondary" @click="submitForm" />
+                            <Button label="Cancel" class="w-full p-button-secondary" @click="submitForm" />
                         </RouterLink>
-                        
                     </div>
                     <div class="w-40">
                         <Button label="Submit" class="w-full" @click="submitForm" />
@@ -1081,7 +1054,7 @@ const toggleBuyMaterialSelection = (item, material) => {
 const removeBuyMaterial = (item, materialId) => {
     // Remove from available materials (completely remove from the list)
     item.availableBuyMaterials = item.availableBuyMaterials.filter((material) => material.id !== materialId);
-    
+
     // Also remove from selected materials if it was selected
     item.selectedBuyMaterials = item.selectedBuyMaterials.filter((material) => material.id !== materialId);
 };
