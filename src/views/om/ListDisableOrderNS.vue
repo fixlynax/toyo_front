@@ -5,11 +5,22 @@
             <h5 class="m-0 text-2xl font-bold text-gray-800">DO - Normal Shipment</h5>
         </div>
 
-        <!-- 🟢 Only show LoadingPage during initial load, hide DataTable completely -->
+        <!-- 🟢 Loading Page -->
         <LoadingPage v-if="loading" :message="'Loading Disable Orders NS...'" :sub-message="'Fetching your Disable Orders NS list'" />
 
-        <!-- DataTable -->
-        <DataTable v-else :value="disabledOrders" dataKey="id" :rows="10" :filters="filters1" :globalFilterFields="['storageLocation', 'orderType', 'message']" responsiveLayout="scroll" stripedRows rowHover class="rounded-xl overflow-hidden">
+        <!-- 🟢 Data Table -->
+        <DataTable
+            v-else
+            :value="disabledOrders"
+            dataKey="id"
+            :rows="10"
+            :filters="filters1"
+            :globalFilterFields="['storageLocation', 'orderType', 'message']"
+            responsiveLayout="scroll"
+            stripedRows
+            rowHover
+            class="rounded-xl overflow-hidden"
+        >
             <template #header>
                 <div class="flex items-center justify-between gap-4 w-full flex-wrap">
                     <!-- Search -->
@@ -33,23 +44,30 @@
                 </div>
             </template>
 
-            <!-- Columns -->
+            <!-- 🏷 Storage Location -->
             <Column header="Storage Location" style="min-width: 12rem">
                 <template #body="{ data }">
-                    <div class="text-sm text-gray-700">
-                        {{ data.storageLocation }}
-                    </div>
+                    <div class="text-sm text-gray-700">{{ data.storageLocation }}</div>
                 </template>
             </Column>
 
+            <!-- 🏷 Order Types (text colors only) -->
             <Column header="Order Types" style="min-width: 12rem">
                 <template #body="{ data }">
-                    <div class="flex flex-wrap gap-1">
-                        <Tag :value="getOrderTypeLabel(data.orderType)" :severity="getOrderTypeSeverity(data.orderType)" />
+                    <div class="flex flex-wrap gap-2">
+                        <span 
+                            v-for="(type, index) in normalizeOrderTypes(data.orderType)" 
+                            :key="index"
+                            :class="getOrderTypeTextColor(type)"
+                            class="text-sm font-medium"
+                        >
+                            {{ getOrderTypeLabel(type) }}
+                        </span>
                     </div>
                 </template>
             </Column>
 
+            <!-- 📅 Period -->
             <Column header="Period" style="min-width: 8rem">
                 <template #body="{ data }">
                     <div class="text-sm leading-tight">
@@ -60,20 +78,26 @@
                 </template>
             </Column>
 
+            <!-- 🔖 Status -->
             <Column header="Status" style="min-width: 8rem">
                 <template #body="{ data }">
-                    <Tag :value="getStatus(data)" :severity="getStatusSeverity(data)" />
-                </template>
-            </Column>
-
-            <Column header="Message" style="min-width: 14rem">
-                <template #body="{ data }">
-                    <div class="text-sm text-gray-700 line-clamp-2">
-                        {{ data.message }}
+                    <div class="flex justify-start">
+                        <Tag v-if="getStatus(data) !== '-'" :value="getStatus(data)" :severity="getStatusSeverity(data)" />
+                        <span v-else class="text-gray-400 text-sm">-</span>
                     </div>
                 </template>
             </Column>
 
+            <!-- 💬 Message -->
+            <Column header="Message" style="min-width: 14rem">
+                <template #body="{ data }">
+                    <div class="text-sm text-gray-700 line-clamp-2">
+                        {{ data.message || '-' }}
+                    </div>
+                </template>
+            </Column>
+
+            <!-- ⚙️ Actions -->
             <Column header="Actions" style="min-width: 10rem" bodyClass="text-center">
                 <template #body="{ data }">
                     <div class="flex justify-center gap-2">
@@ -84,10 +108,10 @@
             </Column>
         </DataTable>
 
-        <!-- Create Popup Dialog -->
+        <!-- 🟢 Create Popup -->
         <Dialog v-model:visible="createPopupVisible" header="Create Disable Order" modal class="rounded-2xl shadow-md" :style="{ width: '40rem', maxWidth: '95vw' }" :closable="false">
             <div class="p-fluid formgrid grid gap-4 mt-2">
-                <!-- Storage Locations -->
+                <!-- Storage Location -->
                 <div class="field col-12">
                     <label for="storageLocations" class="font-semibold text-gray-700"> Storage Locations <span class="text-red-500">*</span> </label>
                     <Dropdown
@@ -103,7 +127,7 @@
                     <small v-if="submitted && !newOrder.storageLocation" class="p-error block mt-1">Storage Location is required</small>
                 </div>
 
-                <!-- Order Types -->
+                <!-- Order Type -->
                 <div class="field col-12">
                     <label for="orderTypes" class="font-semibold text-gray-700"> Order Types <span class="text-red-500">*</span> </label>
                     <Dropdown
@@ -127,7 +151,7 @@
                         <Calendar v-model="newOrder.endPeriod" showTime hourFormat="24" :minDate="newOrder.startPeriod || minDate" placeholder="End Date/Time" class="flex-1" :class="{ 'p-invalid': submitted && !newOrder.endPeriod }" />
                     </div>
                     <small v-if="submitted && (!newOrder.startPeriod || !newOrder.endPeriod)" class="p-error block mt-1"> Both start and end date are required </small>
-                    <small v-if="newOrder.endPeriod && newOrder.startPeriod && newOrder.endPeriod <= newOrder.startPeriod" class="p-error block mt-1"> End date must be after start date </small>
+                    <small v-if="newOrder.endPeriod && newOrder.startPeriod && newOrder.endPeriod <= this.newOrder.startPeriod" class="p-error block mt-1"> End date must be after start date </small>
                 </div>
 
                 <!-- Message -->
@@ -145,10 +169,10 @@
             </template>
         </Dialog>
 
-        <!-- Edit Popup Dialog -->
+        <!-- 🟢 Edit Popup -->
         <Dialog v-model:visible="editPopupVisible" header="Edit Disable Order" modal class="rounded-2xl shadow-md" :style="{ width: '40rem', maxWidth: '95vw' }" :closable="false">
             <div class="p-fluid formgrid grid gap-4 mt-2" v-if="editingOrder">
-                <!-- Storage Locations -->
+                <!-- Storage Location -->
                 <div class="field col-12">
                     <label for="editStorageLocations" class="font-semibold text-gray-700"> Storage Locations <span class="text-red-500">*</span> </label>
                     <Dropdown
@@ -164,7 +188,7 @@
                     <small v-if="submitted && !editingOrder.storageLocation" class="p-error block mt-1">Storage Location is required</small>
                 </div>
 
-                <!-- Order Types -->
+                <!-- Order Type -->
                 <div class="field col-12">
                     <label for="editOrderTypes" class="font-semibold text-gray-700"> Order Types <span class="text-red-500">*</span> </label>
                     <Dropdown
@@ -220,26 +244,12 @@ export default {
             loading: true,
             creating: false,
             updating: false,
-
-            // ✅ Correct FilterMatchMode usage
-            filters1: {
-                global: { value: null, matchMode: 'contains' }
-            },
-
+            filters1: { global: { value: null, matchMode: 'contains' } },
             createPopupVisible: false,
             editPopupVisible: false,
             submitted: false,
-
-            newOrder: {
-                storageLocation: null,
-                orderType: null,
-                startPeriod: null,
-                endPeriod: null,
-                message: ''
-            },
-
+            newOrder: { storageLocation: null, orderType: null, startPeriod: null, endPeriod: null, message: '' },
             editingOrder: null,
-
             storageLocationOptions: [
                 { label: 'TMJB', value: 'TMJB' },
                 { label: 'TMSA', value: 'TMSA' },
@@ -266,7 +276,6 @@ export default {
             this.loading = true;
             try {
                 const response = await api.get('maintenance/list-disable-order');
-
                 if (response.data.status === 1) {
                     this.disabledOrders = response.data.admin_data.map((item) => ({
                         ...item,
@@ -274,21 +283,11 @@ export default {
                         endPeriod: this.parseApiDate(item.endPeriod)
                     }));
                 } else {
-                    this.$toast.add({
-                        severity: 'error',
-                        summary: 'Error',
-                        detail: 'Failed to fetch disabled orders',
-                        life: 3000
-                    });
+                    this.$toast.add({ severity: 'error', summary: 'Error', detail: 'Failed to fetch disabled orders', life: 3000 });
                 }
             } catch (error) {
                 console.error('Error fetching disabled orders:', error);
-                this.$toast.add({
-                    severity: 'error',
-                    summary: 'Error',
-                    detail: 'Failed to fetch disabled orders',
-                    life: 3000
-                });
+                this.$toast.add({ severity: 'error', summary: 'Error', detail: 'Failed to fetch disabled orders', life: 3000 });
             } finally {
                 this.loading = false;
             }
@@ -305,7 +304,7 @@ export default {
         },
 
         formatDate(date) {
-            if (!date) return 'N/A';
+            if (!date) return '-';
             return new Date(date).toLocaleString('en-MY', {
                 year: 'numeric',
                 month: 'short',
@@ -316,24 +315,34 @@ export default {
         },
 
         getStatus(order) {
-            if (!order.startPeriod || !order.endPeriod) return 'Unknown';
-
+            if (!order.startPeriod || !order.endPeriod) return '-';
             const now = new Date();
             const start = new Date(order.startPeriod);
             const end = new Date(order.endPeriod);
-
             if (now < start) return 'Scheduled';
             if (now <= end) return 'Active';
             return 'Inactive';
         },
 
         getStatusSeverity(order) {
-            switch (this.getStatus(order)) {
-                case 'Scheduled': return 'warning';
-                case 'Active': return 'danger';
-                case 'Inactive': return 'secondary';
-                default: return 'info';
+            const status = this.getStatus(order);
+            switch (status) {
+                case 'Scheduled':
+                    return 'warning';
+                case 'Active':
+                    return 'success';
+                case 'Inactive':
+                    return 'danger';
+                default:
+                    return null; // Return null for '-' to prevent tag rendering
             }
+        },
+
+        // 🟨🟧⚪ Order Type Helpers
+        normalizeOrderTypes(orderType) {
+            if (Array.isArray(orderType)) return orderType;
+            if (typeof orderType === 'string') return orderType.split(',').map((t) => t.trim().toUpperCase());
+            return [];
         },
 
         getOrderTypeLabel(value) {
@@ -341,12 +350,12 @@ export default {
             return map[value] || value;
         },
 
-        getOrderTypeSeverity(value) {
+        getOrderTypeTextColor(value) {
             switch (value) {
-                case 'OWN': return 'success';
-                case 'NORMAL': return 'info';
-                case 'ALL': return 'warning';
-                default: return 'secondary';
+                case 'OWN': return 'text-own-color';
+                case 'NORMAL': return 'text-normal-color';
+                case 'ALL': return 'text-all-color';
+                default: return 'text-gray-600';
             }
         },
 
@@ -361,30 +370,17 @@ export default {
         },
 
         resetForm() {
-            this.newOrder = {
-                storageLocation: null,
-                orderType: null,
-                startPeriod: null,
-                endPeriod: null,
-                message: ''
-            };
+            this.newOrder = { storageLocation: null, orderType: null, startPeriod: null, endPeriod: null, message: '' };
             this.submitted = false;
         },
 
         async createNewOrder() {
             this.submitted = true;
             if (!this.newOrder.storageLocation || !this.newOrder.orderType || !this.newOrder.startPeriod || !this.newOrder.endPeriod) return;
-
             if (this.newOrder.endPeriod <= this.newOrder.startPeriod) {
-                this.$toast.add({
-                    severity: 'error',
-                    summary: 'Error',
-                    detail: 'End date must be after start date',
-                    life: 3000
-                });
+                this.$toast.add({ severity: 'error', summary: 'Error', detail: 'End date must be after start date', life: 3000 });
                 return;
             }
-
             this.creating = true;
             try {
                 const payload = {
@@ -394,46 +390,24 @@ export default {
                     endPeriod: this.formatDateForApi(this.newOrder.endPeriod),
                     message: this.newOrder.message || 'No message provided'
                 };
-
                 const response = await api.post('maintenance/create-disable-order', payload);
-
                 if (response.data.status === 1) {
-                    this.$toast.add({
-                        severity: 'success',
-                        summary: 'Success',
-                        detail: 'Disable order created successfully',
-                        life: 3000
-                    });
-
+                    this.$toast.add({ severity: 'success', summary: 'Success', detail: 'Disable order created successfully', life: 3000 });
                     this.hideCreatePopup();
                     this.fetchDisabledOrders();
                 } else {
-                    this.$toast.add({
-                        severity: 'error',
-                        summary: 'Error',
-                        detail: response.data.message || 'Failed to create order',
-                        life: 3000
-                    });
+                    this.$toast.add({ severity: 'error', summary: 'Error', detail: response.data.message || 'Failed to create order', life: 3000 });
                 }
             } catch (error) {
                 console.error('Error creating order:', error);
-                this.$toast.add({
-                    severity: 'error',
-                    summary: 'Error',
-                    detail: 'Failed to create disable order',
-                    life: 3000
-                });
+                this.$toast.add({ severity: 'error', summary: 'Error', detail: 'Failed to create disable order', life: 3000 });
             } finally {
                 this.creating = false;
             }
         },
 
         editItem(item) {
-            this.editingOrder = {
-                ...item,
-                startPeriod: new Date(item.startPeriod),
-                endPeriod: new Date(item.endPeriod)
-            };
+            this.editingOrder = { ...item, startPeriod: new Date(item.startPeriod), endPeriod: new Date(item.endPeriod) };
             this.editPopupVisible = true;
             this.submitted = false;
         },
@@ -441,17 +415,10 @@ export default {
         async updateOrder() {
             this.submitted = true;
             if (!this.editingOrder.storageLocation || !this.editingOrder.orderType || !this.editingOrder.startPeriod || !this.editingOrder.endPeriod) return;
-
             if (this.editingOrder.endPeriod <= this.editingOrder.startPeriod) {
-                this.$toast.add({
-                    severity: 'error',
-                    summary: 'Error',
-                    detail: 'End date must be after start date',
-                    life: 3000
-                });
+                this.$toast.add({ severity: 'error', summary: 'Error', detail: 'End date must be after start date', life: 3000 });
                 return;
             }
-
             this.updating = true;
             try {
                 const payload = {
@@ -462,35 +429,17 @@ export default {
                     endPeriod: this.formatDateForApi(this.editingOrder.endPeriod),
                     message: this.editingOrder.message || 'No message provided'
                 };
-
-                const response = await api.put('maintenance/update-disable-order', payload);
-
+                const response = await api.post('maintenance/update-disable-order', payload);
                 if (response.data.status === 1) {
-                    this.$toast.add({
-                        severity: 'success',
-                        summary: 'Success',
-                        detail: 'Disable order updated successfully',
-                        life: 3000
-                    });
-
+                    this.$toast.add({ severity: 'success', summary: 'Success', detail: 'Disable order updated successfully', life: 3000 });
                     this.hideEditPopup();
                     this.fetchDisabledOrders();
                 } else {
-                    this.$toast.add({
-                        severity: 'error',
-                        summary: 'Error',
-                        detail: response.data.message || 'Failed to update order',
-                        life: 3000
-                    });
+                    this.$toast.add({ severity: 'error', summary: 'Error', detail: response.data.message || 'Failed to update order', life: 3000 });
                 }
             } catch (error) {
                 console.error('Error updating order:', error);
-                this.$toast.add({
-                    severity: 'error',
-                    summary: 'Error',
-                    detail: 'Failed to update disable order',
-                    life: 3000
-                });
+                this.$toast.add({ severity: 'error', summary: 'Error', detail: 'Failed to update disable order', life: 3000 });
             } finally {
                 this.updating = false;
             }
@@ -499,60 +448,56 @@ export default {
         hideEditPopup() {
             this.editPopupVisible = false;
             this.editingOrder = null;
-            this.submitted = false;
         },
 
         async deleteItem(id) {
             if (confirm('Are you sure you want to delete this order?')) {
                 try {
                     const response = await api.delete(`maintenance/delete-disable-order/${id}`);
-
                     if (response.data.status === 1) {
-                        this.$toast.add({
-                            severity: 'info',
-                            summary: 'Deleted',
-                            detail: 'Order has been deleted',
-                            life: 3000
-                        });
+                        this.$toast.add({ severity: 'info', summary: 'Deleted', detail: 'Order has been deleted', life: 3000 });
                         this.fetchDisabledOrders();
                     } else {
-                        this.$toast.add({
-                            severity: 'error',
-                            summary: 'Error',
-                            detail: response.data.message || 'Failed to delete order',
-                            life: 3000
-                        });
+                        this.$toast.add({ severity: 'error', summary: 'Error', detail: response.data.message || 'Failed to delete order', life: 3000 });
                     }
                 } catch (error) {
                     console.error('Error deleting order:', error);
-                    this.$toast.add({
-                        severity: 'error',
-                        summary: 'Error',
-                        detail: 'Failed to delete order',
-                        life: 3000
-                    });
+                    this.$toast.add({ severity: 'error', summary: 'Error', detail: 'Failed to delete order', life: 3000 });
                 }
             }
         }
     },
 
-    mounted() {
-        this.fetchDisabledOrders();
+    async mounted() {
+        await this.fetchDisabledOrders();
     },
 
-    components: {
-        LoadingPage
-    }
+    components: { LoadingPage }
 };
 </script>
-
 
 <style scoped>
 .line-clamp-2 {
     display: -webkit-box;
-    -webkit-line-clamp: 2;
+    -webkit-line-2: 2;
     -webkit-box-orient: vertical;
     overflow: hidden;
+}
+
+/* 🟨🟧⚪ Custom Text Colors Only */
+.text-own-color {
+    color: #1578b1;
+    font-weight: 700;
+}
+
+.text-normal-color {
+    color: #d32d8e;
+    font-weight: 700;
+}
+
+.text-all-color {
+    color: #c7ba0b;
+    font-weight: 700;
 }
 
 :deep(.p-dialog .p-dialog-header) {
