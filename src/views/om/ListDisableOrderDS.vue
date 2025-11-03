@@ -358,7 +358,7 @@ export default {
 }
 
 .text-maroon-600 {
-    color: #a14195; /* Maroon */
+    color: #030303; /* Maroon */
 }
 
 :deep(.p-dialog .p-dialog-header) {
