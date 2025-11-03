@@ -4,11 +4,7 @@
             <div class="card flex flex-col gap-6 w-full">
                 <div class="text-2xl font-bold text-gray-800 border-b pb-2 mb-1">Material Exception List</div>
 
-                <LoadingPage
-                    v-if="loading"
-                    :message="'Loading Material Exception...'"
-                    :sub-message="'Fetching your Material Exception list'"
-                />
+                <LoadingPage v-if="loading" :message="'Loading Material Exception...'" :sub-message="'Fetching your Material Exception list'" />
 
                 <DataTable
                     v-else
@@ -35,7 +31,7 @@
                                 <Button type="button" icon="pi pi-cog" class="p-button" />
                             </div>
                             <div>
-                            <Button label="Create" icon="pi pi-plus" class="p-button-primary" @click="openAddDialog" />
+                                <Button label="Create" icon="pi pi-plus" class="p-button-primary" @click="openAddDialog" />
                             </div>
                         </div>
                     </template>
@@ -72,7 +68,9 @@
 
                     <Column header="Type" style="min-width: 10rem">
                         <template #body="{ data }">
-                            <Tag :value="data.exceptionType" :severity="getTypeSeverity(data.exceptionType)" />
+                            <span :class="['px-3 py-1 text-base font-medium rounded-full', data.exceptionType === 'INCLUDE' ? 'text-green-700' : data.exceptionType === 'EXCLUDE' ? 'text-red-700' : 'text-gray-700']">
+                                {{ data.exceptionType }}
+                            </span>
                         </template>
                     </Column>
 
@@ -103,16 +101,8 @@
                     <!-- Expanded Dealers Table -->
                     <template #expansion="{ data }">
                         <div class="p-4 bg-gray-50 border-t border-gray-200 rounded-b-lg">
-                            <h4 class="font-semibold text-gray-700 mb-2">
-                                Dealers for {{ data.materialCode }}
-                            </h4>
-                            <DataTable
-                                :value="data.dealers"
-                                :rows="5"
-                                :paginator="data.dealers && data.dealers.length > 5"
-                                responsiveLayout="scroll"
-                                size="small"
-                            >
+                            <h4 class="font-semibold text-gray-700 mb-2">Dealers for {{ data.materialCode }}</h4>
+                            <DataTable :value="data.dealers" :rows="5" :paginator="data.dealers && data.dealers.length > 5" responsiveLayout="scroll" size="small">
                                 <Column field="label" header="Dealer Name" style="min-width: 12rem" />
                                 <Column field="group" header="Region" style="min-width: 10rem" />
                             </DataTable>
@@ -123,33 +113,14 @@
         </div>
 
         <!-- Add/Edit Dialog -->
-        <Dialog
-            v-model:visible="showAddDialog"
-            :header="editMode ? 'Edit Material Exception' : 'Add Material Exception'"
-            :modal="true"
-            class="p-fluid"
-            :style="{ width: '60rem' }"
-            :closable="!dialogLoading"
-        >
-            <div v-if="dialogLoading" class="text-center py-8">
-                <i class="pi pi-spinner pi-spin text-2xl mr-2"></i> Loading form data...
-            </div>
+        <Dialog v-model:visible="showAddDialog" :header="editMode ? 'Edit Material Exception' : 'Add Material Exception'" :modal="true" class="p-fluid" :style="{ width: '60rem' }" :closable="!dialogLoading">
+            <div v-if="dialogLoading" class="text-center py-8"><i class="pi pi-spinner pi-spin text-2xl mr-2"></i> Loading form data...</div>
 
             <div v-else class="grid grid-cols-1 gap-4">
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
                         <label class="block font-bold text-gray-700 mb-2">Material Code *</label>
-                        <Dropdown
-                            v-if="!editMode"
-                            v-model="currentException.materialCode"
-                            :options="materialOptions"
-                            optionLabel="materialid"
-                            optionValue="materialid"
-                            placeholder="Select Material"
-                            class="w-full"
-                            filter
-                            @change="onMaterialChange"
-                        />
+                        <Dropdown v-if="!editMode" v-model="currentException.materialCode" :options="materialOptions" optionLabel="materialid" optionValue="materialid" placeholder="Select Material" class="w-full" filter @change="onMaterialChange" />
                         <InputText v-else v-model="currentException.materialCode" type="text" placeholder="Material Code" class="w-full" disabled />
                         <small class="text-gray-500">Only materials not in existing exceptions are shown</small>
                     </div>
@@ -175,17 +146,7 @@
                         <Button label="Clear All" class="p-button-outlined p-button-danger p-button-sm" @click="clearAllDealers" />
                     </div>
 
-                    <MultiSelect
-                        v-model="currentException.dealers"
-                        :options="allDealers"
-                        optionLabel="label"
-                        optionValue="value"
-                        filter
-                        display="chip"
-                        placeholder="Search or Select Dealers"
-                        class="w-full"
-                        :maxSelectedLabels="10"
-                    >
+                    <MultiSelect v-model="currentException.dealers" :options="allDealers" optionLabel="label" optionValue="value" filter display="chip" placeholder="Search or Select Dealers" class="w-full" :maxSelectedLabels="10">
                         <template #option="slotProps">
                             <div class="flex flex-col">
                                 <div class="font-medium text-gray-800">{{ slotProps.option.label }}</div>
@@ -215,22 +176,22 @@
 </template>
 
 <script setup>
-import { ref, reactive, computed, onMounted } from 'vue'
-import { FilterMatchMode } from '@primevue/core/api'
-import { useToast } from 'primevue/usetoast'
-import api from '@/service/api'
-import LoadingPage from '@/components/LoadingPage.vue'
+import { ref, reactive, computed, onMounted } from 'vue';
+import { FilterMatchMode } from '@primevue/core/api';
+import { useToast } from 'primevue/usetoast';
+import api from '@/service/api';
+import LoadingPage from '@/components/LoadingPage.vue';
 
-const toast = useToast()
-const loading = ref(false)
-const dialogLoading = ref(false)
-const showAddDialog = ref(false)
-const editMode = ref(false)
-const expandedRows = ref([])
+const toast = useToast();
+const loading = ref(false);
+const dialogLoading = ref(false);
+const showAddDialog = ref(false);
+const editMode = ref(false);
+const expandedRows = ref([]);
 
 const filters = reactive({
     global: { value: null, matchMode: FilterMatchMode.CONTAINS }
-})
+});
 
 const currentException = reactive({
     id: null,
@@ -239,169 +200,173 @@ const currentException = reactive({
     exceptionType: '',
     dealers: [],
     status: true
-})
+});
 
-const materialExceptions = ref([])
-const materialOptions = ref([])
-const dealerOptions = ref([])
+const materialExceptions = ref([]);
+const materialOptions = ref([]);
+const dealerOptions = ref([]);
 
 const exceptionTypeOptions = ref([
     { label: 'INCLUDE', value: 'INCLUDE' },
     { label: 'EXCLUDE', value: 'EXCLUDE' }
-])
+]);
 
 const allDealers = computed(() =>
-    dealerOptions.value.flatMap(group =>
-        group.items.map(d => ({
+    dealerOptions.value.flatMap((group) =>
+        group.items.map((d) => ({
             label: `${d.label}`,
             value: d.value,
             group: group.label
         }))
     )
-)
+);
 
-const isDialogFormValid = computed(() =>
-    currentException.materialCode && currentException.exceptionType && currentException.dealers.length > 0
-)
+const isDialogFormValid = computed(() => currentException.materialCode && currentException.exceptionType && currentException.dealers.length > 0);
 
-const getTypeSeverity = type => (type === 'INCLUDE' ? 'success' : 'warning')
+const getTypeSeverity = (type) => (type === 'INCLUDE' ? 'success' : 'warning');
 
 const onMaterialChange = () => {
-    const selected = materialOptions.value.find(m => m.materialid === currentException.materialCode)
+    const selected = materialOptions.value.find((m) => m.materialid === currentException.materialCode);
     if (selected) {
-        currentException.materialDescription = selected.material || `Material ${selected.materialid}`
+        currentException.materialDescription = selected.material || `Material ${selected.materialid}`;
     }
-}
+};
 
-const selectAllDealers = () => (currentException.dealers = allDealers.value.map(d => d.value))
-const clearAllDealers = () => (currentException.dealers = [])
+const selectAllDealers = () => (currentException.dealers = allDealers.value.map((d) => d.value));
+const clearAllDealers = () => (currentException.dealers = []);
 
 const openAddDialog = async () => {
-    showAddDialog.value = true
-    dialogLoading.value = true
+    showAddDialog.value = true;
+    dialogLoading.value = true;
     try {
-        await Promise.all([fetchMaterials(), fetchDealers()])
+        await Promise.all([fetchMaterials(), fetchDealers()]);
     } catch {
-        toast.add({ severity: 'error', summary: 'Error', detail: 'Failed to load form data', life: 3000 })
+        toast.add({ severity: 'error', summary: 'Error', detail: 'Failed to load form data', life: 3000 });
     } finally {
-        dialogLoading.value = false
+        dialogLoading.value = false;
     }
-}
+};
 
-const editException = async data => {
-    editMode.value = true
-    dialogLoading.value = true
-    showAddDialog.value = true
+const editException = async (data) => {
+    editMode.value = true;
+    dialogLoading.value = true;
+    showAddDialog.value = true;
     try {
-        await fetchDealers()
-        Object.assign(currentException, { ...data, dealers: data.dealers.map(d => d.id) })
+        await fetchDealers();
+        Object.assign(currentException, { ...data, dealers: data.dealers.map((d) => d.id) });
     } finally {
-        dialogLoading.value = false
+        dialogLoading.value = false;
     }
-}
+};
 
-const deleteException = async id => {
-    if (!confirm('Are you sure you want to delete this exception?')) return
+const deleteException = async (id) => {
+    if (!confirm('Are you sure you want to delete this exception?')) return;
     try {
-        loading.value = true
-        const response = await api.delete(`maintenance/delete-material-exception/${id}`)
+        loading.value = true;
+        const response = await api.delete(`maintenance/delete-material-exception/${id}`);
         if (response.data.status === 1) {
-            materialExceptions.value = materialExceptions.value.filter(e => e.id !== id)
-            toast.add({ severity: 'success', summary: 'Deleted', detail: 'Material exception removed', life: 3000 })
+            materialExceptions.value = materialExceptions.value.filter((e) => e.id !== id);
+            toast.add({ severity: 'success', summary: 'Deleted', detail: 'Material exception removed', life: 3000 });
         }
     } finally {
-        loading.value = false
+        loading.value = false;
     }
-}
+};
 
 const saveException = async () => {
     try {
-        loading.value = true
-        dialogLoading.value = true
-        const formData = new FormData()
-        formData.append('materialid', currentException.materialCode)
-        formData.append('status', currentException.status ? '1' : '0')
-        formData.append('type', currentException.exceptionType)
-        formData.append('etenUserID', currentException.dealers.join(','))
+        loading.value = true;
+        dialogLoading.value = true;
+        const formData = new FormData();
+        formData.append('materialid', currentException.materialCode);
+        formData.append('status', currentException.status ? '1' : '0');
+        formData.append('type', currentException.exceptionType);
+        formData.append('etenUserID', currentException.dealers.join(','));
 
-        const endpoint = editMode.value
-            ? `maintenance/update-material-exception/${currentException.id}`
-            : 'maintenance/create-material-exception'
+        const endpoint = editMode.value ? `maintenance/update-material-exception/${currentException.id}` : 'maintenance/create-material-exception';
 
-        const response = await api.post(endpoint, formData, { headers: { 'Content-Type': 'multipart/form-data' } })
+        const response = await api.post(endpoint, formData, { headers: { 'Content-Type': 'multipart/form-data' } });
         if (response.data.status === 1) {
-            await fetchMaterialExceptions()
-            closeDialog()
+            await fetchMaterialExceptions();
+            closeDialog();
             toast.add({
                 severity: 'success',
                 summary: 'Success',
                 detail: `Material exception ${editMode.value ? 'updated' : 'created'} successfully`,
                 life: 3000
-            })
+            });
         }
     } finally {
-        loading.value = false
-        dialogLoading.value = false
+        loading.value = false;
+        dialogLoading.value = false;
     }
-}
+};
 
 const closeDialog = () => {
-    showAddDialog.value = false
-    editMode.value = false
-    dialogLoading.value = false
-    Object.assign(currentException, { id: null, materialCode: '', materialDescription: '', exceptionType: '', dealers: [], status: true })
-}
+    showAddDialog.value = false;
+    editMode.value = false;
+    dialogLoading.value = false;
+    Object.assign(currentException, { id: null, materialCode: '', materialDescription: '', exceptionType: '', dealers: [], status: true });
+};
 
 const fetchMaterials = async () => {
-    const formData = new FormData()
-    formData.append('type', 'EXCEPTION')
-    const response = await api.post('list-material', formData)
-    materialOptions.value = response.data.admin_data?.map(m => ({
-        materialid: m.materialid,
-        material: m.material
-    })) || []
-}
+    const formData = new FormData();
+    formData.append('type', 'EXCEPTION');
+    const response = await api.post('list-material', formData);
+    materialOptions.value =
+        response.data.admin_data?.map((m) => ({
+            materialid: m.materialid,
+            material: m.material
+        })) || [];
+};
 
 const fetchDealers = async () => {
-    const formData = new FormData()
-    formData.append('mainBranch', 1)
-    const response = await api.post('list_dealer', formData)
-    const formatted = []
+    const formData = new FormData();
+    formData.append('mainBranch', 1);
+    const response = await api.post('list_dealer', formData);
+    const formatted = [];
     const mapBranch = (branch, prefix = '', parentState = '') => {
-        const shop = branch.shop
-        const state = shop.state || parentState || 'Unknown'
+        const shop = branch.shop;
+        const state = shop.state || parentState || 'Unknown';
         formatted.push({
             label: `${prefix}${shop.companyName1} (${shop.custAccountNo})`,
             value: shop.id,
             group: state
-        })
-        if (branch.subBranches)
-            Object.values(branch.subBranches).forEach(sub => mapBranch(sub, prefix + '╰┈➤ ', state))
-    }
-    Object.values(response.data.admin_data).forEach(branch => mapBranch(branch))
-    const grouped = {}
-    formatted.forEach(d => {
-        if (!grouped[d.group]) grouped[d.group] = { label: d.group, items: [] }
-        grouped[d.group].items.push({ label: d.label, value: d.value })
-    })
-    dealerOptions.value = Object.values(grouped)
-}
+        });
+        if (branch.subBranches) Object.values(branch.subBranches).forEach((sub) => mapBranch(sub, prefix + '╰┈➤ ', state));
+    };
+    Object.values(response.data.admin_data).forEach((branch) => mapBranch(branch));
+    const grouped = {};
+    formatted.forEach((d) => {
+        if (!grouped[d.group]) grouped[d.group] = { label: d.group, items: [] };
+        grouped[d.group].items.push({ label: d.label, value: d.value });
+    });
+    dealerOptions.value = Object.values(grouped);
+};
 
 const fetchMaterialExceptions = async () => {
-    loading.value = true
-    const response = await api.get('maintenance/list-material-exception')
-    const adminData = response.data.admin_data || []
-    materialExceptions.value = adminData.map(item => {
-        const includeIds = item.i_eten_userID?.split(',').map(id => parseInt(id)).filter(Boolean) || []
-        const excludeIds = item.e_eten_userID?.split(',').map(id => parseInt(id)).filter(Boolean) || []
-        const exceptionType = includeIds.length ? 'INCLUDE' : excludeIds.length ? 'EXCLUDE' : 'Unknown'
+    loading.value = true;
+    const response = await api.get('maintenance/list-material-exception');
+    const adminData = response.data.admin_data || [];
+    materialExceptions.value = adminData.map((item) => {
+        const includeIds =
+            item.i_eten_userID
+                ?.split(',')
+                .map((id) => parseInt(id))
+                .filter(Boolean) || [];
+        const excludeIds =
+            item.e_eten_userID
+                ?.split(',')
+                .map((id) => parseInt(id))
+                .filter(Boolean) || [];
+        const exceptionType = includeIds.length ? 'INCLUDE' : excludeIds.length ? 'EXCLUDE' : 'Unknown';
         const dealerDetails = Array.isArray(item.etenUserList)
-            ? item.etenUserList.map(d => ({
+            ? item.etenUserList.map((d) => ({
                   id: d.id,
                   label: d.companyName1,
                   group: d.state || 'Unknown'
               }))
-            : []
+            : [];
         return {
             id: item.id,
             materialCode: item.materialid,
@@ -411,15 +376,15 @@ const fetchMaterialExceptions = async () => {
             dealerCount: dealerDetails.length,
             status: item.status === 1,
             created: item.created
-        }
-    })
-    await fetchMaterials()
-    materialExceptions.value = materialExceptions.value.map(ex => {
-        const match = materialOptions.value.find(m => m.materialid === ex.materialCode)
-        return { ...ex, materialDescription: match ? match.material : ex.materialDescription }
-    })
-    loading.value = false
-}
+        };
+    });
+    await fetchMaterials();
+    materialExceptions.value = materialExceptions.value.map((ex) => {
+        const match = materialOptions.value.find((m) => m.materialid === ex.materialCode);
+        return { ...ex, materialDescription: match ? match.material : ex.materialDescription };
+    });
+    loading.value = false;
+};
 
-onMounted(fetchMaterialExceptions)
+onMounted(fetchMaterialExceptions);
 </script>
