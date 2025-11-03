@@ -195,7 +195,13 @@
                 </div>
 
                 <!-- Submit -->
-                <div class="flex justify-end mt-8">
+                <div class="flex justify-end gap-2 mt-8">
+                    <div class="w-40">
+                        <RouterLink to="/om/listSalesProgram">
+                        <Button label="Cancel" class="w-full p-button-secondary" @click="submitForm" />
+                        </RouterLink>
+                        
+                    </div>
                     <div class="w-40">
                         <Button label="Submit" class="w-full" @click="submitForm" />
                     </div>
