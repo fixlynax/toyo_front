@@ -48,6 +48,11 @@ const model = ref([
                 icon: 'pi pi-fw pi-users',
                 items: [
                     {
+                        label: 'Members Dashboard',
+                        icon: 'pi pi-fw pi-id-card',
+                        to: '/marketing/memberDashboard'
+                    },
+                    {
                         label: 'Member List',
                         icon: 'pi pi-fw pi-id-card',
                         to: '/marketing/listEtenUser'

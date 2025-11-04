@@ -347,6 +347,11 @@ const router = createRouter({
 
                 // Members
                 {
+                    path: '/marketing/memberDashboard',
+                    name: 'member-Dashboard',
+                    component: () => import('@/views/marketing/memberDashboard.vue')
+                },
+                {
                     path: '/marketing/listEtenUser',
                     name: 'List-Member',
                     component: () => import('@/views/marketing/listEtenUser.vue')
