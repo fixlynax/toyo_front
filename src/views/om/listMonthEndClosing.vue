@@ -17,7 +17,7 @@
                     v-else 
                     :value="closingDates" 
                     :paginator="true" 
-                    :rows="10" 
+                    :rows="12" 
                     :rowsPerPageOptions="[12, 24, 36, 48, 60]" 
                     dataKey="id" 
                     :rowHover="true"  

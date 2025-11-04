@@ -13,8 +13,6 @@ const selectedRows = ref([]);
 const filterStatus = ref(null);
 const showFilterMenu = ref(false);
 
-
-
 function getStatusSeverity(status) {
     const severityMap = {
         0: 'secondary',
@@ -52,10 +50,19 @@ onBeforeMount(async () => {
                 id: item.id,
                 claimRefNo: item.claimRefNo,
                 companyName1: item.eten_data?.companyName1 || 'N/A',
+                custAccountNo: item.eten_data?.custAccountNo || 'N/A',
                 city: item.eten_data?.city || 'N/A',
                 collectDate: item.ctc_data?.collectDate || 'N/A',
                 collectTime: item.ctc_data?.collectTime || '',
-                status: item.status
+                pickupDate: item.ctc_data?.reachWH || 'N/A',
+                createDate: item.ctc_data?.created || 'N/A',
+                collectionAddress:
+                    [item.eten_data?.addressLine1, item.eten_data?.addressLine2, item.eten_data?.addressLine3, item.eten_data?.addressLine4, item.eten_data?.city, item.eten_data?.postcode, item.eten_data?.state]
+                        .filter((part) => part && part.trim() !== '')
+                        .join(' ') || 'N/A',
+                contactNo: item.eten_data?.phoneNumber || 'N/A',
+                status: item.status,
+            
             }));
         } else listData.value = [];
     } catch (error) {
@@ -166,7 +173,7 @@ function filteredList() {
 
             <Column field="customerAccNo" header="Customer Acc No." style="min-width: 8rem">
                 <template #body="{ data }">
-                    {{ data.customerAccNo }}
+                    {{ data.custAccountNo }}
                 </template>
             </Column>
 
@@ -196,13 +203,13 @@ function filteredList() {
 
             <Column field="pickupDatetime" header="Pickup Datetime" style="min-width: 10rem">
                 <template #body="{ data }">
-                    {{ data.collectDate }}
+                    {{ data.pickupDate }}
                 </template>
             </Column>
 
             <Column field="collectedDatetime" header="Collected Datetime" style="min-width: 10rem">
                 <template #body="{ data }">
-                    {{ data.collectedDatetime }}
+                    {{ data.collectDate }} {{ data.collectTime }}
                 </template>
             </Column>
 
