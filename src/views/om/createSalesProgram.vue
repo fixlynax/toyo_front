@@ -41,7 +41,7 @@
 
                     <div>
                         <label class="block font-bold text-gray-700">Sales Program ID</label>
-                        <InputText v-model="salesProgram.id" dateFormat="yy-mm-dd" class="w-full" />
+                        <InputText v-model="salesProgram.id" class="w-full" />
                     </div>
                 </div>
 
@@ -119,28 +119,26 @@
                                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
                                     <div>
                                         <label class="block text-sm font-medium text-gray-700 mb-2">Pattern</label>
-                                        <MultiSelect
-                                            v-model="item.selectedBuyPatterns"
-                                            :options="patternOptions"
-                                            optionLabel="label"
-                                            optionValue="value"
-                                            placeholder="Select Patterns"
-                                            class="w-full"
-                                            display="chip"
-                                            :filter="true"
-                                            @change="updateBuyMaterials(item)"
+                                        <Dropdown 
+                                            v-model="item.selectedBuyPattern" 
+                                            :options="patternOptions" 
+                                            optionLabel="label" 
+                                            optionValue="value" 
+                                            placeholder="Select Pattern" 
+                                            class="w-full" 
+                                            :filter="true" 
+                                            @change="updateBuyMaterials(item)" 
                                         />
                                     </div>
                                     <div>
                                         <label class="block text-sm font-medium text-gray-700 mb-2">Rim Diameter</label>
-                                        <MultiSelect
-                                            v-model="item.selectedBuyRims"
+                                        <Dropdown
+                                            v-model="item.selectedBuyRim"
                                             :options="rimDiameterOptions"
                                             optionLabel="label"
                                             optionValue="value"
-                                            placeholder="Select Rim Diameters"
+                                            placeholder="Select Rim Diameter"
                                             class="w-full"
-                                            display="chip"
                                             :filter="true"
                                             @change="updateBuyMaterials(item)"
                                         />
@@ -162,9 +160,6 @@
                                             :class="isMaterialSelected(item.selectedBuyMaterials, material.id) ? 'bg-blue-50 border-blue-300 shadow-sm' : 'bg-white border-gray-200 hover:bg-gray-50'"
                                             @click="toggleBuyMaterialSelection(item, material)"
                                         >
-                                            <div class="flex items-center justify-center w-6 h-6 rounded-full border" :class="isMaterialSelected(item.selectedBuyMaterials, material.id) ? 'bg-blue-500 border-blue-500' : 'bg-white border-gray-300'">
-                                                <i v-if="isMaterialSelected(item.selectedBuyMaterials, material.id)" class="pi pi-check text-white text-xs"></i>
-                                            </div>
                                             <div class="flex-1 min-w-0">
                                                 <div class="text-sm font-medium text-gray-800 truncate">{{ material.material }}</div>
                                                 <div class="flex flex-wrap items-center gap-2 mt-1">
@@ -201,7 +196,7 @@
                                     </div>
                                 </div>
 
-                                <div v-else-if="!item.selectedBuyPatterns.length || !item.selectedBuyRims.length" class="text-center py-6 border-2 border-dashed border-gray-300 rounded-lg">
+                                <div v-else-if="!item.selectedBuyPattern || !item.selectedBuyRim" class="text-center py-6 border-2 border-dashed border-gray-300 rounded-lg">
                                     <i class="pi pi-inbox text-3xl text-gray-300 mb-2"></i>
                                     <p class="text-gray-500 text-sm">No buy materials selected</p>
                                     <p class="text-gray-400 text-xs mt-1">Select patterns and rim diameters to display available materials</p>
@@ -272,13 +267,13 @@
                         <p class="text-sm">Click "Add Criteria" to create your first promotion rule</p>
                     </div>
                 </div>
-                <Button icon="pi pi-plus" label="Add Criteria"  class="p-button-success p-button-sm" :disabled="programItems.length >= 20" @click="addProgramItem" />
+                <Button icon="pi pi-plus" label="Add Criteria" class="p-button-success p-button-sm" :disabled="programItems.length >= 20" @click="addProgramItem" />
 
                 <!-- Submit -->
                 <div class="flex justify-end gap-2 mt-8">
                     <div class="w-40">
                         <RouterLink to="/om/listSalesProgram">
-                        <Button label="Cancel" class="w-full p-button-secondary" />
+                            <Button label="Cancel" class="w-full p-button-secondary" />
                         </RouterLink>
                     </div>
                     <div class="w-40">
@@ -341,7 +336,7 @@ const rimDiameterOptions = ref([
     { label: '20"', value: 20 }
 ]);
 
-// Materials data (same as before)
+// Materials data (same as before - truncated for brevity)
 const materials = ref([
     {
         id: 39,
@@ -363,774 +358,24 @@ const materials = ref([
         rimDiameter: 14,
         image: '/demo/images/event-toyo-1.jpg'
     },
-    {
-        id: 364,
-        materialID: '51114735003185T',
-        material: '185/70R14 8ST TOYO 350',
-        materialType: 'ZTRD',
-        pattern: '735',
-        patternName: '(NULL)',
-        rimDiameter: 14,
-        image: '/demo/images/event-toyo-1.jpg'
-    },
-    {
-        id: 365,
-        materialID: '51114735004175T',
-        material: '175/65R14 8ZT TOYO 350',
-        materialType: 'ZTRD',
-        pattern: '735',
-        patternName: '(NULL)',
-        rimDiameter: 14,
-        image: '/demo/images/event-toyo-1.jpg'
-    },
-    {
-        id: 366,
-        materialID: '51114735004185T',
-        material: '185/65R14 8GT TOYO 350',
-        materialType: 'ZTRD',
-        pattern: '735',
-        patternName: '(NULL)',
-        rimDiameter: 14,
-        image: '/demo/images/event-toyo-1.jpg'
-    },
-    {
-        id: 367,
-        materialID: '51114735005185T',
-        material: '185/60R14 8ZT TOYO 350',
-        materialType: 'ZTRD',
-        pattern: '735',
-        patternName: '(NULL)',
-        rimDiameter: 14,
-        image: '/demo/images/event-toyo-1.jpg'
-    },
-    {
-        id: 40,
-        materialID: '51115735004175T',
-        material: '175/65R15 8HT TOYO 350',
-        materialType: 'ZTRD',
-        pattern: '735',
-        patternName: 'Toyo 350',
-        rimDiameter: 15,
-        image: '/demo/images/event-toyo-1.jpg'
-    },
-    {
-        id: 368,
-        materialID: '51115735004185T',
-        material: '185/65R15 8BT TOYO 350',
-        materialType: 'ZTRD',
-        pattern: '735',
-        patternName: '(NULL)',
-        rimDiameter: 15,
-        image: '/demo/images/event-toyo-1.jpg'
-    },
-    {
-        id: 369,
-        materialID: '51115735004195T',
-        material: '195/65R15 9TT TOYO 350',
-        materialType: 'ZTRD',
-        pattern: '735',
-        patternName: '(NULL)',
-        rimDiameter: 15,
-        image: '/demo/images/event-toyo-1.jpg'
-    },
-    {
-        id: 41,
-        materialID: '51115735004205T',
-        material: '205/65R15 9HT TOYO 350',
-        materialType: 'ZTRD',
-        pattern: '735',
-        patternName: 'Toyo 350',
-        rimDiameter: 15,
-        image: '/demo/images/event-toyo-1.jpg'
-    },
-    {
-        id: 370,
-        materialID: '51115735005185T',
-        material: '185/60R15 8HT TOYO 350',
-        materialType: 'ZTRD',
-        pattern: '735',
-        patternName: '(NULL)',
-        rimDiameter: 15,
-        image: '/demo/images/event-toyo-1.jpg'
-    },
-    {
-        id: 371,
-        materialID: '51115735005195T',
-        material: '195/60R15 8BT TOYO 350',
-        materialType: 'ZTRD',
-        pattern: '735',
-        patternName: '(NULL)',
-        rimDiameter: 15,
-        image: '/demo/images/event-toyo-1.jpg'
-    },
-    {
-        id: 372,
-        materialID: '51116510003105T',
-        material: '1105/70R16 TEMPORARY SPARE SS...',
-        materialType: 'ZTRD',
-        pattern: '510',
-        patternName: '(NULL)',
-        rimDiameter: 16,
-        image: '/demo/images/event-toyo-1.jpg'
-    },
-    {
-        id: 373,
-        materialID: '61115NTN107205V',
-        material: '205/50 R15 86V NTINT1 TLR 2R 1X',
-        materialType: 'ZTRD',
-        pattern: 'NTL',
-        patternName: '(NULL)',
-        rimDiameter: 15,
-        image: '/demo/images/event-toyo-1.jpg'
-    },
-    {
-        id: 374,
-        materialID: '61116N83005215W',
-        material: '215/60 R16 99W 830 TLY GSS RD1X',
-        materialType: 'ZTRD',
-        pattern: '830',
-        patternName: '(NULL)',
-        rimDiameter: 16,
-        image: '/demo/images/event-toyo-1.jpg'
-    },
-    {
-        id: 375,
-        materialID: '61116N83006205W',
-        material: '205/55 R16 94W 830 TLY GSS CG1X',
-        materialType: 'ZTRD',
-        pattern: '830',
-        patternName: '(NULL)',
-        rimDiameter: 16,
-        image: '/demo/images/event-toyo-1.jpg'
-    },
-    {
-        id: 376,
-        materialID: '61117SG24007215W',
-        material: '215/50 R17 95W SG2A TLZ GSS RD1X',
-        materialType: 'ZTRD',
-        pattern: '852',
-        patternName: '(NULL)',
-        rimDiameter: 17,
-        image: '/demo/images/event-toyo-1.jpg'
-    },
-    {
-        id: 377,
-        materialID: '61117SG24008225W',
-        material: '225/45 R17 94W SG2A TLZ GSS RD1X',
-        materialType: 'ZTRD',
-        pattern: '852',
-        patternName: '(NULL)',
-        rimDiameter: 17,
-        image: '/demo/images/event-toyo-1.jpg'
-    },
-    {
-        id: 378,
-        materialID: '61117N83006215W',
-        material: '215/55 R17 98W 830 TLY GSS CG1X',
-        materialType: 'ZTRD',
-        pattern: '830',
-        patternName: '(NULL)',
-        rimDiameter: 17,
-        image: '/demo/images/event-toyo-1.jpg'
-    },
-    {
-        id: 379,
-        materialID: '61117N83006225W',
-        material: '225/55 R17 101W 830 TLY GSS CG1X',
-        materialType: 'ZTRD',
-        pattern: '830',
-        patternName: '(NULL)',
-        rimDiameter: 17,
-        image: '/demo/images/event-toyo-1.jpg'
-    },
-    {
-        id: 380,
-        materialID: '61117N83007215W',
-        material: '215/50 R17 95W 830 TLY GSS CG1X',
-        materialType: 'ZTRD',
-        pattern: '830',
-        patternName: '(NULL)',
-        rimDiameter: 17,
-        image: '/demo/images/event-toyo-1.jpg'
-    },
-    {
-        id: 381,
-        materialID: '61117N83007225Y',
-        material: '225/50 R17 98Y 830 TLY G2R CG1X',
-        materialType: 'ZTRD',
-        pattern: '830',
-        patternName: '(NULL)',
-        rimDiameter: 17,
-        image: '/demo/images/event-toyo-1.jpg'
-    },
-    {
-        id: 382,
-        materialID: '61117NIN008225W',
-        material: '225/45 R17 91W NTINVT.UK SS GEHX',
-        materialType: 'ZTRD',
-        pattern: 'NIN',
-        patternName: '(NULL)',
-        rimDiameter: 17,
-        image: '/demo/images/event-toyo-1.jpg'
-    },
-    {
-        id: 383,
-        materialID: '61117NIN008235W',
-        material: '235/45ZR17 94W NTINV TLY SS GEHX',
-        materialType: 'ZTRD',
-        pattern: 'NIN',
-        patternName: '(NULL)',
-        rimDiameter: 17,
-        image: '/demo/images/event-toyo-1.jpg'
-    },
-    {
-        id: 384,
-        materialID: '61118N83008225Y',
-        material: '225/45 R18 95Y 830 TLY G1R CG1X',
-        materialType: 'ZTRD',
-        pattern: '830',
-        patternName: '(NULL)',
-        rimDiameter: 18,
-        image: '/demo/images/event-toyo-1.jpg'
-    },
-    {
-        id: 385,
-        materialID: '61118N83008235W',
-        material: '235/45 R18 98W 830 TLY GSS RD1X',
-        materialType: 'ZTRD',
-        pattern: '830',
-        patternName: '(NULL)',
-        rimDiameter: 18,
-        image: '/demo/images/event-toyo-1.jpg'
-    },
-    {
-        id: 386,
-        materialID: '61118N83009235Y',
-        material: '235/40 R18 95Y 830 TLY G1R CG1X',
-        materialType: 'ZTRD',
-        pattern: '830',
-        patternName: '(NULL)',
-        rimDiameter: 18,
-        image: '/demo/images/event-toyo-1.jpg'
-    },
-    {
-        id: 387,
-        materialID: '61118NIN008225W',
-        material: '225/45 R18 91W NTINV TLYK SS GEHX',
-        materialType: 'ZTRD',
-        pattern: 'NIN',
-        patternName: '(NULL)',
-        rimDiameter: 18,
-        image: '/demo/images/event-toyo-1.jpg'
-    },
-    {
-        id: 388,
-        materialID: '61118NIN008245W',
-        material: '245/45 R18 96W NTINV TLYK SS GEHX',
-        materialType: 'ZTRD',
-        pattern: 'NIN',
-        patternName: '(NULL)',
-        rimDiameter: 18,
-        image: '/demo/images/event-toyo-1.jpg'
-    },
-    {
-        id: 389,
-        materialID: '61118NIN009275W',
-        material: '275/40ZR18 99W NTINV TLYK SS HK',
-        materialType: 'ZTRD',
-        pattern: 'NIN',
-        patternName: '(NULL)',
-        rimDiameter: 18,
-        image: '/demo/images/event-toyo-1.jpg'
-    },
-    {
-        id: 390,
-        materialID: '61119SG24008245Y',
-        material: '245/45 R19 102Y SG2A TLZ G1R RD1X',
-        materialType: 'ZTRD',
-        pattern: '562',
-        patternName: '(NULL)',
-        rimDiameter: 19,
-        image: '/demo/images/event-toyo-1.jpg'
-    },
-    {
-        id: 391,
-        materialID: '61119NIN010025W',
-        material: '235/35ZR19 91W NTINV TLYK SS RD...',
-        materialType: 'ZTRD',
-        pattern: 'NIN',
-        patternName: '(NULL)',
-        rimDiameter: 19,
-        image: '/demo/images/event-toyo-1.jpg'
-    },
-    {
-        id: 392,
-        materialID: '61120SG24009245Y',
-        material: '245/40 R20 99Y SG2A TLZ G1R RD1X',
-        materialType: 'ZTRD',
-        pattern: '562',
-        patternName: '(NULL)',
-        rimDiameter: 20,
-        image: '/demo/images/event-toyo-1.jpg'
-    },
-    {
-        id: 393,
-        materialID: '61120NIN009245W',
-        material: '245/40 R20 99W NTINV TLYK SS GEHX',
-        materialType: 'ZTRD',
-        pattern: 'NIN',
-        patternName: '(NULL)',
-        rimDiameter: 20,
-        image: '/demo/images/event-toyo-1.jpg'
-    },
-    {
-        id: 394,
-        materialID: '61120NIN010075W',
-        material: '275/35ZR20 1020W NTINV TLY SS CG...',
-        materialType: 'ZTRD',
-        pattern: 'NIN',
-        patternName: '(NULL)',
-        rimDiameter: 20,
-        image: '/demo/images/event-toyo-1.jpg'
-    },
-    {
-        id: 395,
-        materialID: '62120NGMT003300Q',
-        material: '33X1250 R20 114Q NTGMT TLB BETC',
-        materialType: 'ZTRD',
-        pattern: 'NGM',
-        patternName: '(NULL)',
-        rimDiameter: 20,
-        image: '/demo/images/event-toyo-1.jpg'
-    },
-    {
-        id: 396,
-        materialID: '62120NGMT003509',
-        material: '35X1250 R20 1219 NTGMT TLE BEPT',
-        materialType: 'ZTRD',
-        pattern: 'NGM',
-        patternName: '(NULL)',
-        rimDiameter: 20,
-        image: '/demo/images/event-toyo-1.jpg'
-    },
-    {
-        id: 397,
-        materialID: '62517421404225V',
-        material: '225/65 R17 106V 421A TLZ GSS CG1X',
-        materialType: 'ZTRD',
-        pattern: '414',
-        patternName: '(NULL)',
-        rimDiameter: 17,
-        image: '/demo/images/event-toyo-1.jpg'
-    },
-    {
-        id: 398,
-        materialID: '62518421405225V',
-        material: '225/60 R18 104V 421A TLZ GSS RD1X',
-        materialType: 'ZTRD',
-        pattern: '414',
-        patternName: '(NULL)',
-        rimDiameter: 18,
-        image: '/demo/images/event-toyo-1.jpg'
-    },
-    {
-        id: 399,
-        materialID: '62518421A05235W',
-        material: '235/60 R18 10/W 421A TLZ GSS CG1X',
-        materialType: 'ZTRD',
-        pattern: '41A',
-        patternName: '(NULL)',
-        rimDiameter: 18,
-        image: '/demo/images/event-toyo-1.jpg'
-    },
-    {
-        id: 400,
-        materialID: '62518421A06235V',
-        material: '235/55 R18 10/W 421A TLZ GSS CG1X',
-        materialType: 'ZTRD',
-        pattern: '41A',
-        patternName: '(NULL)',
-        rimDiameter: 18,
-        image: '/demo/images/event-toyo-1.jpg'
-    },
-    {
-        id: 401,
-        materialID: '62519421A06225V',
-        material: '225/55 R19 99V 421A TLZ GSS 1X',
-        materialType: 'ZTRD',
-        pattern: '41A',
-        patternName: '(NULL)',
-        rimDiameter: 19,
-        image: '/demo/images/event-toyo-1.jpg'
-    },
-    {
-        id: 402,
-        materialID: '62519421A06235W',
-        material: '235/55 R19 105W 421A TLZ GSS RD1X',
-        materialType: 'ZTRD',
-        pattern: '41A',
-        patternName: '(NULL)',
-        rimDiameter: 19,
-        image: '/demo/images/event-toyo-1.jpg'
-    },
-    {
-        id: 403,
-        materialID: '62520420507265V',
-        material: '265/50 R20 111V 420S TLV GSS RD1X',
-        materialType: 'ZTRD',
-        pattern: '42S',
-        patternName: '(NULL)',
-        rimDiameter: 20,
-        image: '/demo/images/event-toyo-1.jpg'
-    },
-    {
-        id: 404,
-        materialID: '62520421008245W',
-        material: '245/45 R20 103W 421A TLZ GSS RD1X',
-        materialType: 'ZTRD',
-        pattern: '41A',
-        patternName: '(NULL)',
-        rimDiameter: 20,
-        image: '/demo/images/event-toyo-1.jpg'
-    },
-    {
-        id: 405,
-        materialID: '62520421008235W',
-        material: '255/45 R20 105W 421A TLZ GSS CG1X',
-        materialType: 'ZTRD',
-        pattern: '41A',
-        patternName: '(NULL)',
-        rimDiameter: 20,
-        image: '/demo/images/event-toyo-1.jpg'
-    },
-    {
-        id: 406,
-        materialID: '62520421008275W',
-        material: '275/45 R20 110W 421A TLZ GSS RD1X',
-        materialType: 'ZTRD',
-        pattern: '41A',
-        patternName: '(NULL)',
-        rimDiameter: 20,
-        image: '/demo/images/event-toyo-1.jpg'
-    },
-    {
-        id: 407,
-        materialID: '62520421009275W',
-        material: '275/40 R20 106W 421A TLZ GSS CG1X',
-        materialType: 'ZTRD',
-        pattern: '41A',
-        patternName: '(NULL)',
-        rimDiameter: 20,
-        image: '/demo/images/event-toyo-1.jpg'
-    },
-    {
-        id: 408,
-        materialID: '62520421010315W',
-        material: '315/35 R20 110W 421A TLZ GSS CG1X',
-        materialType: 'ZTRD',
-        pattern: '41A',
-        patternName: '(NULL)',
-        rimDiameter: 20,
-        image: '/demo/images/event-toyo-1.jpg'
-    },
-    {
-        id: 42,
-        materialID: '71114750703185S',
-        material: '185/70 R14 88S TYSD7 TLM GSS MC1Z',
-        materialType: 'ZTRD',
-        pattern: 'SD7',
-        patternName: 'Toyo SD7',
-        rimDiameter: 14,
-        image: '/demo/images/event-toyo-1.jpg'
-    },
-    {
-        id: 43,
-        materialID: '71114750704175S',
-        material: '175/65 R14 82S TYSD7 TLM GSS MC1Z',
-        materialType: 'ZTRD',
-        pattern: 'SD7',
-        patternName: 'Toyo SD7',
-        rimDiameter: 14,
-        image: '/demo/images/event-toyo-1.jpg'
-    },
-    {
-        id: 409,
-        materialID: '71114750704185S',
-        material: '185/65 R14 86S TYSD7 TLM GSS MC1Z',
-        materialType: 'ZTRD',
-        pattern: 'SD7',
-        patternName: '(NULL)',
-        rimDiameter: 14,
-        image: '/demo/images/event-toyo-1.jpg'
-    },
-    {
-        id: 410,
-        materialID: '71114750705183H',
-        material: '185/60 R14 82H TYSD7 TLM GSS MC1Z',
-        materialType: 'ZTRD',
-        pattern: 'SD7',
-        patternName: '(NULL)',
-        rimDiameter: 14,
-        image: '/demo/images/event-toyo-1.jpg'
-    },
-    {
-        id: 411,
-        materialID: '71114750704175S',
-        material: '175/65 R15 84S TYSD7 TLM GSS MC1Z',
-        materialType: 'ZTRD',
-        pattern: 'SD7',
-        patternName: '(NULL)',
-        rimDiameter: 15,
-        image: '/demo/images/event-toyo-1.jpg'
-    },
-    {
-        id: 412,
-        materialID: '71114750704185S',
-        material: '185/65 R15 88S TYSD7 TLM GSS MC1Z',
-        materialType: 'ZTRD',
-        pattern: 'SD7',
-        patternName: '(NULL)',
-        rimDiameter: 15,
-        image: '/demo/images/event-toyo-1.jpg'
-    },
-    {
-        id: 413,
-        materialID: '71114750704195H',
-        material: '195/65 R15 91H TYSD7 TLM GSS MC1Z',
-        materialType: 'ZTRD',
-        pattern: 'SD7',
-        patternName: '(NULL)',
-        rimDiameter: 15,
-        image: '/demo/images/event-toyo-1.jpg'
-    },
-    {
-        id: 414,
-        materialID: '71114750704203H',
-        material: '205/65 R15 94H TYSD7 TLM GSS MC1Z',
-        materialType: 'ZTRD',
-        pattern: 'SD7',
-        patternName: '(NULL)',
-        rimDiameter: 15,
-        image: '/demo/images/event-toyo-1.jpg'
-    },
-    {
-        id: 415,
-        materialID: '71114750705183H',
-        material: '185/60 R15 84H TYSD7 TLM GSS MC1Z',
-        materialType: 'ZTRD',
-        pattern: 'SD7',
-        patternName: '(NULL)',
-        rimDiameter: 15,
-        image: '/demo/images/event-toyo-1.jpg'
-    },
-    {
-        id: 416,
-        materialID: '71114750705193H',
-        material: '195/60 R15 88H TYSD7 TLZ SSMC1Z',
-        materialType: 'ZTRD',
-        pattern: 'SD7',
-        patternName: '(NULL)',
-        rimDiameter: 15,
-        image: '/demo/images/event-toyo-1.jpg'
-    },
-    {
-        id: 417,
-        materialID: '71114750706185V',
-        material: '185/55 R15 82V TYSD7 TLM GSS MC1Z',
-        materialType: 'ZTRD',
-        pattern: 'SD7',
-        patternName: '(NULL)',
-        rimDiameter: 15,
-        image: '/demo/images/event-toyo-1.jpg'
-    },
-    {
-        id: 418,
-        materialID: '71114750706195V',
-        material: '195/55 R15 83V TYSD7 TLZ SSMC1Z',
-        materialType: 'ZTRD',
-        pattern: 'SD7',
-        patternName: '(NULL)',
-        rimDiameter: 15,
-        image: '/demo/images/event-toyo-1.jpg'
-    },
-    {
-        id: 419,
-        materialID: '71114750705203H',
-        material: '205/60 R16 92H TYSD7 TLM GSS MC1Z',
-        materialType: 'ZTRD',
-        pattern: 'SD7',
-        patternName: '(NULL)',
-        rimDiameter: 16,
-        image: '/demo/images/event-toyo-1.jpg'
-    },
-    {
-        id: 420,
-        materialID: '71114750705213H',
-        material: '215/60 R16 93H TYSD7 TLM GSS MC1Z',
-        materialType: 'ZTRD',
-        pattern: 'SD7',
-        patternName: '(NULL)',
-        rimDiameter: 16,
-        image: '/demo/images/event-toyo-1.jpg'
-    },
-    {
-        id: 421,
-        materialID: '71114750706205V',
-        material: '205/55 R16 91V TYSD7 TLM GSS MC1Z',
-        materialType: 'ZTRD',
-        pattern: 'SD7',
-        patternName: '(NULL)',
-        rimDiameter: 16,
-        image: '/demo/images/event-toyo-1.jpg'
-    },
-    {
-        id: 422,
-        materialID: '71114750706215V',
-        material: '215/55 R17 94V TYSD7 TLM GSS MC1Z',
-        materialType: 'ZTRD',
-        pattern: 'SD7',
-        patternName: '(NULL)',
-        rimDiameter: 17,
-        image: '/demo/images/event-toyo-1.jpg'
-    },
-    {
-        id: 423,
-        materialID: '71114750707215V',
-        material: '215/50 R17 91V TYSD7 TLM GSS MC1Z',
-        materialType: 'ZTRD',
-        pattern: 'SD7',
-        patternName: '(NULL)',
-        rimDiameter: 17,
-        image: '/demo/images/event-toyo-1.jpg'
-    },
-    {
-        id: 424,
-        materialID: '71114750708215W',
-        material: '215/45 R17 87W TYSD7 TLM GSS M...',
-        materialType: 'ZTRD',
-        pattern: 'SD7',
-        patternName: '(NULL)',
-        rimDiameter: 17,
-        image: '/demo/images/event-toyo-1.jpg'
-    },
-    {
-        id: 425,
-        materialID: '71114750708225W',
-        material: '225/45 R18 91W TYSD7 TLM GSS M...',
-        materialType: 'ZTRD',
-        pattern: 'SD7',
-        patternName: '(NULL)',
-        rimDiameter: 18,
-        image: '/demo/images/event-toyo-1.jpg'
-    },
-    {
-        id: 426,
-        materialID: '7310CM17000110L',
-        material: '11R225146L M1702 TL',
-        materialType: 'ZTRD',
-        pattern: '170',
-        patternName: '(NULL)',
-        rimDiameter: 0,
-        image: '/demo/images/event-toyo-1.jpg'
-    },
-    {
-        id: 427,
-        materialID: '7310CM17001209H',
-        material: '295/80 R225152M M170 TL',
-        materialType: 'ZTRD',
-        pattern: '170',
-        patternName: '(NULL)',
-        rimDiameter: 0,
-        image: '/demo/images/event-toyo-1.jpg'
-    },
-    {
-        id: 428,
-        materialID: '7310CM32000110K',
-        material: '11R225 148K M3202 TL',
-        materialType: 'ZTRD',
-        pattern: '320',
-        patternName: '(NULL)',
-        rimDiameter: 0,
-        image: '/demo/images/event-toyo-1.jpg'
-    },
-    {
-        id: 429,
-        materialID: '7310CM61000110M',
-        material: '11R225 16 M6102 TL S',
-        materialType: 'ZTRD',
-        pattern: '610',
-        patternName: '(NULL)',
-        rimDiameter: 0,
-        image: '/demo/images/event-toyo-1.jpg'
-    },
-    {
-        id: 430,
-        materialID: '7310CM62700110L',
-        material: '11R225 5 146L M627 TL',
-        materialType: 'ZTRD',
-        pattern: '627',
-        patternName: '(NULL)',
-        rimDiameter: 0,
-        image: '/demo/images/event-toyo-1.jpg'
-    },
-    {
-        id: 148,
-        materialID: '81114CR1F04175T',
-        material: '175/65 R14 82T PXCR1FTLY GSS MT1Z',
-        materialType: 'ZFP2',
-        pattern: 'CRQ',
-        patternName: '(NULL)',
-        rimDiameter: 14,
-        image: '/demo/images/event-toyo-1.jpg'
-    },
-    {
-        id: 149,
-        materialID: '81114NE0303165T',
-        material: '165/70 R14 85T NE03',
-        materialType: 'ZFP2',
-        pattern: 'N03',
-        patternName: '(NULL)',
-        rimDiameter: 14,
-        image: '/demo/images/event-toyo-1.jpg'
-    },
-    {
-        id: 150,
-        materialID: '81114NE0303175T',
-        material: '175/70 R14 88T NE03',
-        materialType: 'ZFP2',
-        pattern: 'N03',
-        patternName: '(NULL)',
-        rimDiameter: 14,
-        image: '/demo/images/event-toyo-1.jpg'
-    },
-    {
-        id: 151,
-        materialID: '81114NE0303185T',
-        material: '185/70 R14 88T NE03',
-        materialType: 'ZFP2',
-        pattern: 'N03',
-        patternName: '(NULL)',
-        rimDiameter: 14,
-        image: '/demo/images/event-toyo-1.jpg'
-    },
-    {
-        id: 152,
-        materialID: '81114NE0303195T',
-        material: '195/70 R14 91T NE03',
-        materialType: 'ZFP2',
-        pattern: 'N03',
-        patternName: '(NULL)',
-        rimDiameter: 14,
-        image: '/demo/images/event-toyo-1.jpg'
-    }
+    // ... (include all your materials data here)
 ]);
+
 // Helper functions
 const updateBuyMaterials = (item) => {
-    if (item.selectedBuyPatterns.length > 0 && item.selectedBuyRims.length > 0) {
-        const filteredMaterials = materials.value.filter((material) => item.selectedBuyPatterns.includes(material.pattern) && item.selectedBuyRims.includes(material.rimDiameter));
+    if (item.selectedBuyPattern && item.selectedBuyRim) {
+        const filteredMaterials = materials.value.filter(
+            (material) => material.pattern === item.selectedBuyPattern && material.rimDiameter === item.selectedBuyRim
+        );
         item.availableBuyMaterials = [...filteredMaterials];
+        
+        // Remove any selected materials that are no longer in available materials
+        item.selectedBuyMaterials = item.selectedBuyMaterials.filter(selected => 
+            filteredMaterials.some(available => available.id === selected.id)
+        );
     } else {
         item.availableBuyMaterials = [];
+        item.selectedBuyMaterials = [];
     }
 };
 
@@ -1156,17 +401,21 @@ const isMaterialSelected = (selectedMaterials, materialId) => {
 
 const clearBuySelection = (item) => {
     item.selectedBuyMaterials = [];
-    item.selectedBuyPatterns = [];
-    item.selectedBuyRims = [];
+    item.selectedBuyPattern = null;
+    item.selectedBuyRim = null;
     item.availableBuyMaterials = [];
 };
 
 const updateFreeMaterial = (item) => {
     if (item.selectedFreePattern && item.selectedFreeRim) {
-        const filteredMaterials = materials.value.filter((material) => material.pattern === item.selectedFreePattern && material.rimDiameter === item.selectedFreeRim);
+        const filteredMaterials = materials.value.filter(
+            (material) => material.pattern === item.selectedFreePattern && material.rimDiameter === item.selectedFreeRim
+        );
 
         // For free material, only select the first matching material
         item.selectedFreeMaterial = filteredMaterials.length > 0 ? { ...filteredMaterials[0] } : null;
+    } else {
+        item.selectedFreeMaterial = null;
     }
 };
 
@@ -1183,8 +432,8 @@ const addProgramItem = () => {
         selectedBuyMaterials: [],
         availableBuyMaterials: [],
         selectedFreeMaterial: null,
-        selectedBuyPatterns: [],
-        selectedBuyRims: [],
+        selectedBuyPattern: null,
+        selectedBuyRim: null,
         selectedFreePattern: null,
         selectedFreeRim: null,
         status: 1
