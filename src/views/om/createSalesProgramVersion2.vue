@@ -60,208 +60,113 @@
                 <div>
                     <!-- Header -->
                     <div class="flex items-center justify-between border-b pb-2 mb-4 mt-6">
-                        <div class="text-xl font-bold text-gray-800">📋 Criteria</div>
+                        <h2 class="text-xl font-bold text-gray-800">📋 Criteria</h2>
                     </div>
 
-                    <!-- Criteria Items -->
-                    <div v-if="programItems.length > 0" class="space-y-6">
-                        <div v-for="(item, index) in programItems" :key="index" class="border rounded-xl p-6 shadow-sm bg-gray-100 hover:shadow-md transition-shadow duration-200">
-                            <!-- Criteria Header -->
-                            <div class="flex items-center justify-between mb-6">
-                                <div class="flex items-center gap-3">
-                                    <div class="w-8 h-8 bg-blue-500 rounded-full flex items-center justify-center shadow-sm">
-                                        <span class="text-white font-bold text-sm">{{ index + 1 }}</span>
-                                    </div>
-                                    <h3 class="font-semibold text-lg text-gray-800">Criteria {{ index + 1 }}</h3>
-                                </div>
-                                <Button icon="pi pi-trash" class="p-button-danger p-button-text p-button-sm" @click="removeProgramItem(index)" />
+                    <div v-if="programItems.length" class="space-y-6">
+                        <div v-for="(item, index) in programItems" :key="index" class="rounded-xl border p-5 bg-gray-100 shadow-sm hover:shadow-md transition">
+                            <!-- Header -->
+                            <div class="flex justify-between items-center mb-4">
+                                <h3 class="font-semibold text-lg text-gray-800">Criteria {{ index + 1 }}</h3>
+                                <Button icon="pi pi-trash" class="p-button-text p-button-danger p-button-sm" @click="removeProgramItem(index)" />
                             </div>
 
-                            <!-- Quantities Card -->
-                            <div class="rounded-lg mb-12">
-                                <h4 class="font-semibold text-blue-800 mb-3 flex items-center gap-2">
-                                    <i class="pi pi-shopping-cart text-blue-600"></i>
-                                    Purchase Requirements
-                                </h4>
-                                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                    <div>
-                                        <label class="block text-sm font-medium text-blue-700 mb-1">Buy Quantity</label>
-                                        <div class="flex items-center gap-2">
-                                            <InputNumber v-model="item.buyQty" class="w-full" :min="1" showButtons />
-                                            <span class="text-sm text-blue-600 font-medium">items</span>
-                                        </div>
-                                        <p class="text-xs text-blue-600 mt-1">Number of items customer needs to purchase</p>
-                                    </div>
-                                    <div>
-                                        <label class="block text-sm font-medium text-green-700 mb-1">Free Quantity</label>
-                                        <div class="flex items-center gap-2">
-                                            <InputNumber v-model="item.freeQty" class="w-full" :min="1" showButtons />
-                                            <span class="text-sm text-green-600 font-medium">items</span>
-                                        </div>
-                                        <p class="text-xs text-green-600 mt-1">Number of free items customer will receive</p>
-                                    </div>
+                            <!-- Quantities -->
+                            <h4>Purchase Requirements</h4>
+                            <div class="grid grid-cols-2 gap-4 mb-4">
+                                <div>
+                                    <label class="text-sm text-gray-700 font-medium">Buy Qty</label>
+                                    <InputNumber v-model="item.buyQty" :min="1" class="w-full" showButtons />
+                                </div>
+                                <div>
+                                    <label class="text-sm text-gray-700 font-medium">Free Qty</label>
+                                    <InputNumber v-model="item.freeQty" :min="1" class="w-full" showButtons />
                                 </div>
                             </div>
 
-                            <!-- Buy Materials Section -->
+                            <!-- Buy Section -->
                             <div class="mb-6 bg-blue-50 p-4 rounded-lg border border-blue-100">
-                                <div class="flex items-center justify-between mb-4">
-                                    <div class="flex items-center gap-2">
-                                        <h4 class="font-semibold text-gray-800 flex items-center gap-2">
-                                            <i class="pi pi-tags text-blue-600"></i>
-                                            Buy Materials
-                                        </h4>
-                                        <span class="text-xs bg-blue-100 text-blue-800 px-2 py-0.5 rounded-full">Click to select multiple</span>
-                                    </div>
+                                <h4 class="font-semibold text-blue-800 mb-3 flex items-center gap-2"><i class="pi pi-tags text-blue-600"></i> Buy Materials</h4>
+
+                                <div class="flex flex-wrap gap-4 mb-3">
+                                    <MultiSelect
+                                        v-model="item.selectedBuyPatterns"
+                                        :options="patternOptions"
+                                        optionLabel="label"
+                                        optionValue="value"
+                                        placeholder="Patterns"
+                                        class="flex-1"
+                                        display="chip"
+                                        :filter="true"
+                                        @change="updateBuyMaterials(item)"
+                                    />
+                                    <MultiSelect
+                                        v-model="item.selectedBuyRims"
+                                        :options="rimDiameterOptions"
+                                        optionLabel="label"
+                                        optionValue="value"
+                                        placeholder="Rims"
+                                        class="flex-1"
+                                        display="chip"
+                                        :filter="true"
+                                        @change="updateBuyMaterials(item)"
+                                    />
                                 </div>
 
-                                <!-- Selection Criteria -->
-                                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-                                    <div>
-                                        <label class="block text-sm font-medium text-gray-700 mb-2">Pattern</label>
-                                        <MultiSelect
-                                            v-model="item.selectedBuyPatterns"
-                                            :options="patternOptions"
-                                            optionLabel="label"
-                                            optionValue="value"
-                                            placeholder="Select Patterns"
-                                            class="w-full"
-                                            display="chip"
-                                            :filter="true"
-                                            @change="updateBuyMaterials(item)"
-                                        />
-                                    </div>
-                                    <div>
-                                        <label class="block text-sm font-medium text-gray-700 mb-2">Rim Diameter</label>
-                                        <MultiSelect
-                                            v-model="item.selectedBuyRims"
-                                            :options="rimDiameterOptions"
-                                            optionLabel="label"
-                                            optionValue="value"
-                                            placeholder="Select Rim Diameters"
-                                            class="w-full"
-                                            display="chip"
-                                            :filter="true"
-                                            @change="updateBuyMaterials(item)"
-                                        />
-                                    </div>
-                                </div>
-
-                                <!-- Available Buy Materials Display -->
-                                <div v-if="item.availableBuyMaterials.length > 0" class="mb-4">
-                                    <div class="flex items-center justify-between mb-3">
-                                        <span class="text-sm font-medium text-gray-700">Available Materials ({{ item.availableBuyMaterials.length }})</span>
-                                        <span class="text-xs text-gray-500">Click to select/deselect</span>
+                                <div v-if="item.availableBuyMaterials.length">
+                                    <!-- Batch Action Bar -->
+                                    <div v-if="item.selectedBuyMaterials.length" class="flex justify-between items-center bg-blue-50 border border-blue-200 rounded-lg px-4 py-2 mb-2">
+                                        <span class="text-sm font-medium text-blue-700"> {{ item.selectedBuyMaterials.length }} material(s) selected </span>
+                                        <div><Button icon="pi pi-times" label="Remove Selected" class="p-button-danger p-button-sm" @click="clearBuySelection(item)" /></div>
                                     </div>
 
-                                    <div class="grid grid-cols-1 md:grid-cols-4 gap-3 max-h-60 overflow-y-auto p-2 border border-gray-200 rounded-lg">
-                                        <div
-                                            v-for="material in item.availableBuyMaterials"
-                                            :key="material.id"
-                                            class="flex items-center gap-3 p-3 border rounded-lg cursor-pointer transition-all duration-200"
-                                            :class="isMaterialSelected(item.selectedBuyMaterials, material.id) ? 'bg-blue-50 border-blue-300 shadow-sm' : 'bg-white border-gray-200 hover:bg-gray-50'"
-                                            @click="toggleBuyMaterialSelection(item, material)"
-                                        >
-                                            <div class="flex items-center justify-center w-6 h-6 rounded-full border" :class="isMaterialSelected(item.selectedBuyMaterials, material.id) ? 'bg-blue-500 border-blue-500' : 'bg-white border-gray-300'">
-                                                <i v-if="isMaterialSelected(item.selectedBuyMaterials, material.id)" class="pi pi-check text-white text-xs"></i>
-                                            </div>
-                                            <div class="flex-1 min-w-0">
-                                                <div class="text-sm font-medium text-gray-800 truncate">{{ material.material }}</div>
-                                                <div class="flex flex-wrap items-center gap-2 mt-1">
-                                                    <span class="text-xs bg-gray-100 px-2 py-0.5 rounded text-gray-700">Pattern: {{ material.pattern }}</span>
-                                                    <span class="text-xs bg-gray-100 px-2 py-0.5 rounded text-gray-700">Rim: {{ material.rimDiameter }}"</span>
+                                    <!-- Material Grid -->
+                                    <div class="max-h-56 overflow-y-auto border rounded-lg">
+                                        <div class="grid grid-cols-1 md:grid-cols-2 divide-y md:divide-y-0 md:divide-x">
+                                            <div
+                                                v-for="mat in item.availableBuyMaterials"
+                                                :key="mat.id"
+                                                class="flex items-center gap-3 px-3 py-2 cursor-pointer transition-colors duration-150"
+                                                :class="isMaterialSelected(item.selectedBuyMaterials, mat.id) ? 'bg-blue-50 hover:bg-blue-100' : 'hover:bg-gray-50'"
+                                                @click="toggleBuyMaterialSelection(item, mat)"
+                                            >
+                                                <Checkbox :inputId="'buyMat-' + mat.id" :binary="true" :modelValue="isMaterialSelected(item.selectedBuyMaterials, mat.id)" @click.stop @change.stop="toggleBuyMaterialSelection(item, mat)" />
+                                                <div class="flex-1">
+                                                    <p class="font-medium text-sm">{{ mat.material }}</p>
+                                                    <p class="text-xs text-gray-500">Pattern: {{ mat.pattern }} | Rim: {{ mat.rimDiameter }}"</p>
                                                 </div>
+                                                <Button icon="pi pi-times" class="p-button-rounded p-button-text p-button-danger p-button-sm" @click.stop="removeBuyMaterial(item, mat.id)" v-tooltip.bottom="'Remove this material from list'" />
                                             </div>
                                         </div>
                                     </div>
                                 </div>
 
-                                <!-- Selected Buy Materials Display -->
-                                <div v-if="item.selectedBuyMaterials.length > 0" class="space-y-3 background-white p-3 rounded-lg border border-blue-200">
-                                    <div class="flex items-center justify-between">
-                                        <span class="text-sm font-medium text-gray-700">Selected Materials ({{ item.selectedBuyMaterials.length }})</span>
-                                        <Button icon="pi pi-times" label="Clear All" style="width: fit-content" class="p-button-text p-button-sm p-button-danger" @click="clearBuySelection(item)" />
-                                    </div>
-
-                                    <div class="grid grid-cols-1 md:grid-cols-4 gap-3">
-                                        <div
-                                            v-for="selectedMaterial in item.selectedBuyMaterials"
-                                            :key="selectedMaterial.id"
-                                            class="flex items-center justify-between gap-3 p-3 bg-blue-50 border border-blue-200 rounded-lg hover:bg-blue-100 transition-colors"
-                                        >
-                                            <div class="flex-1 min-w-0">
-                                                <div class="text-sm font-medium text-blue-800 truncate">{{ selectedMaterial.material }}</div>
-                                                <div class="flex flex-wrap items-center gap-2 mt-1">
-                                                    <span class="text-xs bg-white px-2 py-0.5 rounded text-blue-700 border border-blue-200">Pattern: {{ selectedMaterial.pattern }}</span>
-                                                    <span class="text-xs bg-white px-2 py-0.5 rounded text-blue-700 border border-blue-200">Rim: {{ selectedMaterial.rimDiameter }}"</span>
-                                                </div>
-                                            </div>
-                                            <Button icon="pi pi-times" class="p-button-text p-button-sm p-button-danger" @click="removeBuyMaterial(item, selectedMaterial.id)" />
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <div v-else-if="!item.selectedBuyPatterns.length || !item.selectedBuyRims.length" class="text-center py-6 border-2 border-dashed border-gray-300 rounded-lg">
-                                    <i class="pi pi-inbox text-3xl text-gray-300 mb-2"></i>
-                                    <p class="text-gray-500 text-sm">No buy materials selected</p>
-                                    <p class="text-gray-400 text-xs mt-1">Select patterns and rim diameters to display available materials</p>
-                                </div>
-
-                                <div v-else-if="item.availableBuyMaterials.length === 0" class="text-center py-6 border-2 border-dashed border-gray-300 rounded-lg">
-                                    <i class="pi pi-exclamation-circle text-3xl text-gray-300 mb-2"></i>
-                                    <p class="text-gray-500 text-sm">No materials found</p>
-                                    <p class="text-gray-400 text-xs mt-1">No materials match the selected criteria</p>
-                                </div>
+                                <p v-else class="text-sm text-gray-500 text-center py-3">No matching materials</p>
                             </div>
 
-                            <!-- Free Material Section -->
+                            <!-- Free Section -->
                             <div class="bg-green-50 p-4 rounded-lg border border-green-100">
-                                <div class="flex items-center justify-between mb-4">
-                                    <div class="flex items-center gap-2">
-                                        <h4 class="font-semibold text-gray-800 flex items-center gap-2">
-                                            <i class="pi pi-gift text-green-600"></i>
-                                            Free Material
-                                        </h4>
-                                        <span class="text-xs bg-green-100 text-green-800 px-2 py-0.5 rounded-full">Select one</span>
-                                    </div>
+                                <h4 class="font-semibold text-green-800 mb-3 flex items-center gap-2"><i class="pi pi-gift text-green-600"></i> Free Material</h4>
+
+                                <div class="flex flex-wrap gap-4 mb-3">
+                                    <Dropdown v-model="item.selectedFreePattern" :options="patternOptions" optionLabel="label" optionValue="value" placeholder="Pattern" class="flex-1" @change="updateFreeMaterial(item)" />
+                                    <Dropdown v-model="item.selectedFreeRim" :options="rimDiameterOptions" optionLabel="label" optionValue="value" placeholder="Rim" class="flex-1" @change="updateFreeMaterial(item)" />
                                 </div>
 
-                                <!-- Selection Criteria -->
-                                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                                <div v-if="item.selectedFreeMaterial" class="p-3 border rounded-lg bg-white flex justify-between items-center">
                                     <div>
-                                        <label class="block text-sm font-medium text-gray-700 mb-2">Pattern</label>
-                                        <Dropdown v-model="item.selectedFreePattern" :options="patternOptions" optionLabel="label" optionValue="value" placeholder="Select Pattern" class="w-full" @change="updateFreeMaterial(item)" />
+                                        <p class="font-medium text-green-800">{{ item.selectedFreeMaterial.material }}</p>
+                                        <p class="text-xs text-gray-500">Pattern: {{ item.selectedFreeMaterial.pattern }} | Rim: {{ item.selectedFreeMaterial.rimDiameter }}"</p>
                                     </div>
-                                    <div>
-                                        <label class="block text-sm font-medium text-gray-700 mb-2">Rim Diameter</label>
-                                        <Dropdown v-model="item.selectedFreeRim" :options="rimDiameterOptions" optionLabel="label" optionValue="value" placeholder="Select Rim Diameter" class="w-full" @change="updateFreeMaterial(item)" />
-                                    </div>
+                                    <Button icon="pi pi-times" class="p-button-text p-button-sm p-button-danger" @click="clearFreeSelection(item)" />
                                 </div>
-
-                                <!-- Selected Free Material Display -->
-                                <div v-if="item.selectedFreeMaterial" class="space-y-3">
-                                    <div class="flex items-center justify-between">
-                                        <span class="text-sm font-medium text-gray-700">Selected Free Material</span>
-                                        <Button icon="pi pi-times" label="Clear Selection" style="width: fit-content" class="p-button-text p-button-sm p-button-danger" @click="clearFreeSelection(item)" />
-                                    </div>
-
-                                    <div class="flex items-center gap-4 p-4 bg-green-50 border border-green-200 rounded-lg hover:bg-green-100 transition-colors">
-                                        <div class="flex-1">
-                                            <div class="text-sm font-medium text-green-800">{{ item.selectedFreeMaterial.material }}</div>
-                                            <div class="flex flex-wrap items-center gap-2 mt-1">
-                                                <span class="text-xs bg-white px-2 py-0.5 rounded text-green-700 border border-green-200">Pattern: {{ item.selectedFreeMaterial.pattern }}</span>
-                                                <span class="text-xs bg-white px-2 py-0.5 rounded text-green-700 border border-green-200">Rim: {{ item.selectedFreeMaterial.rimDiameter }}"</span>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <div v-else class="text-center py-6 border-2 border-dashed border-gray-300 rounded-lg">
-                                    <i class="pi pi-gift text-3xl text-gray-300 mb-2"></i>
-                                    <p class="text-gray-500 text-sm">No free material selected</p>
-                                    <p class="text-gray-400 text-xs mt-1">Select pattern and rim diameter to display materials</p>
-                                </div>
+                                <p v-else class="text-sm text-gray-500 text-center py-3">No free material selected</p>
                             </div>
+                        </div>
+
+                        <!-- Add Criteria Button at Bottom -->
+                        <div class="flex justify-center mt-8">
+                            <Button icon="pi pi-plus" label="Add Criteria" class="p-button-success p-button-lg" :disabled="programItems.length >= 20" @click="addProgramItem" />
                         </div>
                     </div>
 
@@ -269,16 +174,15 @@
                     <div v-else class="text-center py-8 text-gray-500">
                         <i class="pi pi-inbox text-4xl text-gray-300 mb-3"></i>
                         <p class="text-lg">No criteria added yet</p>
-                        <p class="text-sm">Click "Add Criteria" to create your first promotion rule</p>
+                        <Button icon="pi pi-plus" label="Add Criteria" class="p-button-success mt-4" :disabled="programItems.length >= 20" @click="addProgramItem" />
                     </div>
                 </div>
-                <Button icon="pi pi-plus" label="Add Criteria"  class="p-button-success p-button-sm" :disabled="programItems.length >= 20" @click="addProgramItem" />
 
                 <!-- Submit -->
                 <div class="flex justify-end gap-2 mt-8">
                     <div class="w-40">
                         <RouterLink to="/om/listSalesProgram">
-                        <Button label="Cancel" class="w-full p-button-secondary" />
+                            <Button label="Cancel" class="w-full p-button-secondary" @click="submitForm" />
                         </RouterLink>
                     </div>
                     <div class="w-40">
@@ -1124,6 +1028,7 @@ const materials = ref([
         image: '/demo/images/event-toyo-1.jpg'
     }
 ]);
+
 // Helper functions
 const updateBuyMaterials = (item) => {
     if (item.selectedBuyPatterns.length > 0 && item.selectedBuyRims.length > 0) {
@@ -1147,6 +1052,10 @@ const toggleBuyMaterialSelection = (item, material) => {
 };
 
 const removeBuyMaterial = (item, materialId) => {
+    // Remove from available materials (completely remove from the list)
+    item.availableBuyMaterials = item.availableBuyMaterials.filter((material) => material.id !== materialId);
+
+    // Also remove from selected materials if it was selected
     item.selectedBuyMaterials = item.selectedBuyMaterials.filter((material) => material.id !== materialId);
 };
 
