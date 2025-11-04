@@ -111,8 +111,9 @@
                                             <i class="pi pi-tags text-blue-600"></i>
                                             Buy Materials
                                         </h4>
-                                        <span class="text-xs bg-blue-100 text-blue-800 px-2 py-0.5 rounded-full">Click to select multiple</span>
+                                        <span class="text-xs bg-blue-100 text-blue-800 px-2 py-0.5 rounded-full">All matching materials will be included</span>
                                     </div>
+                                    <Button v-if="item.selectedBuyPattern || item.selectedBuyRim" icon="pi pi-times" label="Clear Selection" style="width: fit-content" class="p-button-text p-button-sm p-button-danger" @click="clearBuySelection(item)" />
                                 </div>
 
                                 <!-- Selection Criteria -->
@@ -145,53 +146,25 @@
                                     </div>
                                 </div>
 
-                                <!-- Available Buy Materials Display -->
-                                <div v-if="item.availableBuyMaterials.length > 0" class="mb-4">
-                                    <div class="flex items-center justify-between mb-3">
-                                        <span class="text-sm font-medium text-gray-700">Available Materials ({{ item.availableBuyMaterials.length }})</span>
-                                        <span class="text-xs text-gray-500">Click to select/deselect</span>
+                                <!-- Selected Buy Materials Display -->
+                                <div v-if="item.availableBuyMaterials.length > 0" class="space-y-3">
+                                    <div class="flex items-center justify-between">
+                                        <span class="text-sm font-medium text-gray-700">Selected Buy Materials ({{ item.availableBuyMaterials.length }})</span>
                                     </div>
 
-                                    <div class="grid grid-cols-1 md:grid-cols-4 gap-3 max-h-60 overflow-y-auto p-2 border border-gray-200 rounded-lg">
+                                    <div class="grid grid-cols-1 md:grid-cols-4 gap-3 max-h-60 overflow-y-auto p-2 border border-blue-200 rounded-lg bg-white">
                                         <div
                                             v-for="material in item.availableBuyMaterials"
                                             :key="material.id"
-                                            class="flex items-center gap-3 p-3 border rounded-lg cursor-pointer transition-all duration-200"
-                                            :class="isMaterialSelected(item.selectedBuyMaterials, material.id) ? 'bg-blue-50 border-blue-300 shadow-sm' : 'bg-white border-gray-200 hover:bg-gray-50'"
-                                            @click="toggleBuyMaterialSelection(item, material)"
+                                            class="flex items-center gap-3 p-3 bg-blue-50 border border-blue-200 rounded-lg hover:bg-blue-100 transition-colors"
                                         >
                                             <div class="flex-1 min-w-0">
-                                                <div class="text-sm font-medium text-gray-800 truncate">{{ material.material }}</div>
+                                                <div class="text-sm font-medium text-blue-800 truncate">{{ material.material }}</div>
                                                 <div class="flex flex-wrap items-center gap-2 mt-1">
-                                                    <span class="text-xs bg-gray-100 px-2 py-0.5 rounded text-gray-700">Pattern: {{ material.pattern }}</span>
-                                                    <span class="text-xs bg-gray-100 px-2 py-0.5 rounded text-gray-700">Rim: {{ material.rimDiameter }}"</span>
+                                                    <span class="text-xs bg-white px-2 py-0.5 rounded text-blue-700 border border-blue-200">Pattern: {{ material.pattern }}</span>
+                                                    <span class="text-xs bg-white px-2 py-0.5 rounded text-blue-700 border border-blue-200">Rim: {{ material.rimDiameter }}"</span>
                                                 </div>
                                             </div>
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <!-- Selected Buy Materials Display -->
-                                <div v-if="item.selectedBuyMaterials.length > 0" class="space-y-3 background-white p-3 rounded-lg border border-blue-200">
-                                    <div class="flex items-center justify-between">
-                                        <span class="text-sm font-medium text-gray-700">Selected Materials ({{ item.selectedBuyMaterials.length }})</span>
-                                        <Button icon="pi pi-times" label="Clear All" style="width: fit-content" class="p-button-text p-button-sm p-button-danger" @click="clearBuySelection(item)" />
-                                    </div>
-
-                                    <div class="grid grid-cols-1 md:grid-cols-4 gap-3">
-                                        <div
-                                            v-for="selectedMaterial in item.selectedBuyMaterials"
-                                            :key="selectedMaterial.id"
-                                            class="flex items-center justify-between gap-3 p-3 bg-blue-50 border border-blue-200 rounded-lg hover:bg-blue-100 transition-colors"
-                                        >
-                                            <div class="flex-1 min-w-0">
-                                                <div class="text-sm font-medium text-blue-800 truncate">{{ selectedMaterial.material }}</div>
-                                                <div class="flex flex-wrap items-center gap-2 mt-1">
-                                                    <span class="text-xs bg-white px-2 py-0.5 rounded text-blue-700 border border-blue-200">Pattern: {{ selectedMaterial.pattern }}</span>
-                                                    <span class="text-xs bg-white px-2 py-0.5 rounded text-blue-700 border border-blue-200">Rim: {{ selectedMaterial.rimDiameter }}"</span>
-                                                </div>
-                                            </div>
-                                            <Button icon="pi pi-times" class="p-button-text p-button-sm p-button-danger" @click="removeBuyMaterial(item, selectedMaterial.id)" />
                                         </div>
                                     </div>
                                 </div>
@@ -199,10 +172,10 @@
                                 <div v-else-if="!item.selectedBuyPattern || !item.selectedBuyRim" class="text-center py-6 border-2 border-dashed border-gray-300 rounded-lg">
                                     <i class="pi pi-inbox text-3xl text-gray-300 mb-2"></i>
                                     <p class="text-gray-500 text-sm">No buy materials selected</p>
-                                    <p class="text-gray-400 text-xs mt-1">Select patterns and rim diameters to display available materials</p>
+                                    <p class="text-gray-400 text-xs mt-1">Select pattern and rim diameter to display available materials</p>
                                 </div>
 
-                                <div v-else-if="item.availableBuyMaterials.length === 0" class="text-center py-6 border-2 border-dashed border-gray-300 rounded-lg">
+                                <div v-else class="text-center py-6 border-2 border-dashed border-gray-300 rounded-lg">
                                     <i class="pi pi-exclamation-circle text-3xl text-gray-300 mb-2"></i>
                                     <p class="text-gray-500 text-sm">No materials found</p>
                                     <p class="text-gray-400 text-xs mt-1">No materials match the selected criteria</p>
@@ -219,6 +192,7 @@
                                         </h4>
                                         <span class="text-xs bg-green-100 text-green-800 px-2 py-0.5 rounded-full">Select one</span>
                                     </div>
+                                    <Button v-if="item.selectedFreeMaterial" icon="pi pi-times" label="Clear Selection" style="width: fit-content" class="p-button-text p-button-sm p-button-danger" @click="clearFreeSelection(item)" />
                                 </div>
 
                                 <!-- Selection Criteria -->
@@ -237,7 +211,6 @@
                                 <div v-if="item.selectedFreeMaterial" class="space-y-3">
                                     <div class="flex items-center justify-between">
                                         <span class="text-sm font-medium text-gray-700">Selected Free Material</span>
-                                        <Button icon="pi pi-times" label="Clear Selection" style="width: fit-content" class="p-button-text p-button-sm p-button-danger" @click="clearFreeSelection(item)" />
                                     </div>
 
                                     <div class="flex items-center gap-4 p-4 bg-green-50 border border-green-200 rounded-lg hover:bg-green-100 transition-colors">
@@ -286,7 +259,7 @@
 </template>
 
 <script setup>
-import { ref, computed, watch } from 'vue';
+import { ref, watch } from 'vue';
 
 const salesProgram = ref({
     title: '',
@@ -336,7 +309,7 @@ const rimDiameterOptions = ref([
     { label: '20"', value: 20 }
 ]);
 
-// Materials data (same as before - truncated for brevity)
+// Materials data (truncated for brevity - include your full materials array)
 const materials = ref([
     {
         id: 39,
@@ -358,7 +331,7 @@ const materials = ref([
         rimDiameter: 14,
         image: '/demo/images/event-toyo-1.jpg'
     },
-    // ... (include all your materials data here)
+    // ... include all your materials here
 ]);
 
 // Helper functions
@@ -368,39 +341,12 @@ const updateBuyMaterials = (item) => {
             (material) => material.pattern === item.selectedBuyPattern && material.rimDiameter === item.selectedBuyRim
         );
         item.availableBuyMaterials = [...filteredMaterials];
-        
-        // Remove any selected materials that are no longer in available materials
-        item.selectedBuyMaterials = item.selectedBuyMaterials.filter(selected => 
-            filteredMaterials.some(available => available.id === selected.id)
-        );
     } else {
         item.availableBuyMaterials = [];
-        item.selectedBuyMaterials = [];
     }
-};
-
-const toggleBuyMaterialSelection = (item, material) => {
-    const isSelected = item.selectedBuyMaterials.some((selected) => selected.id === material.id);
-
-    if (isSelected) {
-        // Remove from selection
-        item.selectedBuyMaterials = item.selectedBuyMaterials.filter((selected) => selected.id !== material.id);
-    } else {
-        // Add to selection
-        item.selectedBuyMaterials.push({ ...material });
-    }
-};
-
-const removeBuyMaterial = (item, materialId) => {
-    item.selectedBuyMaterials = item.selectedBuyMaterials.filter((material) => material.id !== materialId);
-};
-
-const isMaterialSelected = (selectedMaterials, materialId) => {
-    return selectedMaterials.some((material) => material.id === materialId);
 };
 
 const clearBuySelection = (item) => {
-    item.selectedBuyMaterials = [];
     item.selectedBuyPattern = null;
     item.selectedBuyRim = null;
     item.availableBuyMaterials = [];
@@ -429,8 +375,7 @@ const addProgramItem = () => {
     programItems.value.push({
         buyQty: 1,
         freeQty: 1,
-        selectedBuyMaterials: [],
-        availableBuyMaterials: [],
+        availableBuyMaterials: [], // This is what gets submitted for buy materials
         selectedFreeMaterial: null,
         selectedBuyPattern: null,
         selectedBuyRim: null,
@@ -458,6 +403,9 @@ const onImageSelect = (eventFile, field) => {
 const submitForm = () => {
     console.log('Sales Program Data:', salesProgram.value);
     console.log('Program Items:', programItems.value);
+    
+    // The availableBuyMaterials array contains all the selected buy materials
+    // The selectedFreeMaterial object contains the selected free material
 };
 
 // Watch for type changes to clear program items
