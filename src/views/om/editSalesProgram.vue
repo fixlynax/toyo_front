@@ -38,13 +38,12 @@
 
                     <div>
                         <label class="block font-bold text-gray-700">Program Type</label>
-                        <Dropdown v-model="salesProgram.type" :options="typeOptions" optionLabel="label" optionValue="value" 
-                                 class="w-full" :disabled="isEditMode" />
+                        <InputText v-model="salesProgram.type" class="w-full" disabled />
                     </div>
 
                     <div>
                         <label class="block font-bold text-gray-700">Sales Program ID</label>
-                        <InputText v-model="salesProgram.id" class="w-full" :disabled="isEditMode" />
+                        <InputText v-model="salesProgram.id" class="w-full" disabled />
                     </div>
                 </div>
 
@@ -53,8 +52,7 @@
                     <label class="block font-bold text-gray-700 mb-2">Upload Sales Program Image</label>
                     <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
                         <div>
-                            <FileUpload mode="basic" name="image" accept="image/*" customUpload @select="onImageSelect($event, 'image')" 
-                                :chooseLabel="salesProgram.image ? 'Change Image' : 'Upload Program Image'" class="w-full" />
+                            <FileUpload mode="basic" name="image" accept="image/*" customUpload @select="onImageSelect($event, 'image')" :chooseLabel="salesProgram.image ? 'Change Image' : 'Upload Program Image'" class="w-full" />
                             <img v-if="salesProgram.image" :src="salesProgram.image" alt="Preview" class="mt-2 rounded-lg shadow-md object-cover w-full h-80" />
                         </div>
                     </div>
@@ -65,14 +63,11 @@
                     <!-- Header -->
                     <div class="flex items-center justify-between border-b pb-2 mb-4 mt-6">
                         <div class="text-xl font-bold text-gray-800">📋 Criteria</div>
-                        <Button icon="pi pi-plus" label="Add Criteria" style="width: fit-content" class="p-button-success p-button-sm" 
-                            :disabled="programItems.length >= 20" @click="addProgramItem" />
                     </div>
 
                     <!-- Criteria Items -->
                     <div v-if="programItems.length > 0" class="space-y-6">
-                        <div v-for="(item, index) in programItems" :key="item.id || index" 
-                             class="border rounded-xl p-6 shadow-sm bg-white hover:shadow-md transition-shadow duration-200">
+                        <div v-for="(item, index) in programItems" :key="item.id || index" class="border rounded-xl p-6 shadow-sm bg-gray-100 hover:shadow-md transition-shadow duration-200">
                             <!-- Criteria Header -->
                             <div class="flex items-center justify-between mb-6">
                                 <div class="flex items-center gap-3">
@@ -81,12 +76,11 @@
                                     </div>
                                     <h3 class="font-semibold text-lg text-gray-800">Criteria {{ index + 1 }}</h3>
                                 </div>
-                                <Button icon="pi pi-trash" class="p-button-danger p-button-text p-button-sm" 
-                                    @click="removeProgramItem(index)" />
+                                <Button icon="pi pi-trash" class="p-button-danger p-button-text p-button-sm" @click="removeProgramItem(index)" />
                             </div>
 
                             <!-- Quantities Card -->
-                            <div class="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
+                            <div class="rounded-lg mb-12">
                                 <h4 class="font-semibold text-blue-800 mb-3 flex items-center gap-2">
                                     <i class="pi pi-shopping-cart text-blue-600"></i>
                                     Purchase Requirements
@@ -112,147 +106,72 @@
                             </div>
 
                             <!-- Buy Materials Section -->
-                            <div class="mb-8">
+                            <div class="mb-6 bg-blue-50 p-4 rounded-lg border border-blue-100">
                                 <div class="flex items-center justify-between mb-4">
                                     <div class="flex items-center gap-2">
                                         <h4 class="font-semibold text-gray-800 flex items-center gap-2">
                                             <i class="pi pi-tags text-blue-600"></i>
                                             Buy Materials
                                         </h4>
-                                        <span class="text-xs bg-blue-100 text-blue-800 px-2 py-0.5 rounded-full">Multiple selection</span>
+                                        <span class="text-xs bg-blue-100 text-blue-800 px-2 py-0.5 rounded-full">All matching materials will be included</span>
                                     </div>
-                                    <Button icon="pi pi-plus" label="Select Materials" style="width: fit-content" 
-                                        class="p-button-outlined p-button-sm" @click="openBuyMaterialPopup(item)" />
+                                    <Button
+                                        v-if="item.selectedBuyPattern || item.selectedBuyRim"
+                                        icon="pi pi-times"
+                                        label="Clear Selection"
+                                        style="width: fit-content"
+                                        class="p-button-text p-button-sm p-button-danger"
+                                        @click="clearBuySelection(item)"
+                                    />
                                 </div>
 
                                 <!-- Selection Criteria -->
                                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
                                     <div>
                                         <label class="block text-sm font-medium text-gray-700 mb-2">Pattern</label>
-                                        <MultiSelect 
-                                            v-model="item.selectedBuyPatterns" 
-                                            :options="patternOptions" 
-                                            optionLabel="label"
-                                            optionValue="value"
-                                            placeholder="Select Patterns" 
-                                            class="w-full" 
-                                            display="chip"
-                                            :filter="true"
-                                            @change="updateAvailableBuyMaterials(item)"
-                                        />
+                                        <Dropdown v-model="item.selectedBuyPattern" :options="patternOptions" optionLabel="label" optionValue="value" placeholder="Select Pattern" class="w-full" :filter="true" @change="updateBuyMaterials(item)" />
                                     </div>
                                     <div>
                                         <label class="block text-sm font-medium text-gray-700 mb-2">Rim Diameter</label>
-                                        <MultiSelect 
-                                            v-model="item.selectedBuyRims" 
-                                            :options="rimDiameterOptions" 
+                                        <Dropdown
+                                            v-model="item.selectedBuyRim"
+                                            :options="rimDiameterOptions"
                                             optionLabel="label"
                                             optionValue="value"
-                                            placeholder="Select Rim Diameters" 
-                                            class="w-full" 
-                                            display="chip"
+                                            placeholder="Select Rim Diameter"
+                                            class="w-full"
                                             :filter="true"
-                                            @change="updateAvailableBuyMaterials(item)"
+                                            @change="updateBuyMaterials(item)"
                                         />
-                                    </div>
-                                </div>
-
-                                <!-- Available Buy Materials Display -->
-                                <div v-if="item.availableBuyMaterials.length > 0" class="mb-4">
-                                    <div class="flex items-center justify-between mb-3">
-                                        <span class="text-sm font-medium text-gray-700">
-                                            Available Materials ({{ item.availableBuyMaterials.length }})
-                                        </span>
-                                        <div class="flex gap-2">
-                                            <Button 
-                                                icon="pi pi-check" 
-                                                label="Select All" 
-                                                style="width: fit-content" 
-                                                class="p-button-text p-button-sm" 
-                                                @click="selectAllBuyMaterials(item)" 
-                                            />
-                                            <Button 
-                                                icon="pi pi-times" 
-                                                label="Clear All" 
-                                                style="width: fit-content" 
-                                                class="p-button-text p-button-sm p-button-danger" 
-                                                @click="clearAllBuyMaterials(item)" 
-                                            />
-                                        </div>
-                                    </div>
-
-                                    <div class="grid grid-cols-1 md:grid-cols-2 gap-3 max-h-60 overflow-y-auto p-2 border border-gray-200 rounded-lg">
-                                        <div 
-                                            v-for="material in item.availableBuyMaterials" 
-                                            :key="material.id" 
-                                            class="flex items-center gap-3 p-3 border rounded-lg cursor-pointer transition-all duration-200"
-                                            :class="isMaterialSelected(item.selectedBuyMaterials, material.id) 
-                                                ? 'bg-blue-50 border-blue-300 shadow-sm' 
-                                                : 'bg-white border-gray-200 hover:bg-gray-50'"
-                                            @click="toggleBuyMaterialSelection(item, material)"
-                                        >
-                                            <div class="flex-1 min-w-0">
-                                                <div class="flex flex-wrap items-center gap-2">
-                                                    <span class="text-sm font-medium text-gray-800">{{ material.pattern }}</span>
-                                                    <span class="text-sm text-gray-600">{{ material.rimDiameter }}"</span>
-                                                </div>
-                                            </div>
-                                            <div class="w-5 h-5 border-2 rounded-md flex items-center justify-center flex-shrink-0" 
-                                                 :class="isMaterialSelected(item.selectedBuyMaterials, material.id) 
-                                                    ? 'bg-blue-500 border-blue-500' 
-                                                    : 'border-gray-300'">
-                                                <i v-if="isMaterialSelected(item.selectedBuyMaterials, material.id)" 
-                                                   class="pi pi-check text-white text-xs"></i>
-                                            </div>
-                                        </div>
                                     </div>
                                 </div>
 
                                 <!-- Selected Buy Materials Display -->
-                                <div v-if="item.selectedBuyMaterials.length > 0" class="space-y-3">
+                                <div v-if="item.availableBuyMaterials.length > 0" class="space-y-3">
                                     <div class="flex items-center justify-between">
-                                        <span class="text-sm font-medium text-gray-700"> 
-                                            Selected Materials ({{ item.selectedBuyMaterials.length }}) 
-                                        </span>
-                                        <div class="flex gap-2">
-                                            <Button icon="pi pi-pencil" label="Edit in Popup" style="width: fit-content" 
-                                                class="p-button-text p-button-sm" @click="openBuyMaterialPopup(item)" />
-                                            <Button 
-                                                icon="pi pi-times" 
-                                                label="Clear All" 
-                                                style="width: fit-content" 
-                                                class="p-button-text p-button-sm p-button-danger" 
-                                                @click="clearAllBuyMaterials(item)" 
-                                            />
-                                        </div>
+                                        <span class="text-sm font-medium text-gray-700">Selected Buy Materials ({{ item.availableBuyMaterials.length }})</span>
                                     </div>
 
-                                    <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
-                                        <div v-for="selectedMaterial in item.selectedBuyMaterials" :key="selectedMaterial.id" 
-                                             class="flex items-center justify-between gap-3 p-3 bg-blue-50 border border-blue-200 rounded-lg hover:bg-blue-100 transition-colors">
-                                            <div class="flex items-center gap-3 flex-1 min-w-0">
-                                                <div class="flex-1 min-w-0">
-                                                    <div class="flex flex-wrap items-center gap-2">
-                                                        <span class="font-medium text-sm text-blue-800">{{ selectedMaterial.pattern }}</span>
-                                                        <span class="text-sm text-blue-600">{{ selectedMaterial.rimDiameter }}"</span>
-                                                    </div>
+                                    <div class="grid grid-cols-1 md:grid-cols-4 gap-3 max-h-60 overflow-y-auto p-2 border border-blue-200 rounded-lg bg-white">
+                                        <div v-for="material in item.availableBuyMaterials" :key="material.id" class="flex items-center gap-3 p-3 bg-blue-50 border border-blue-200 rounded-lg hover:bg-blue-100 transition-colors">
+                                            <div class="flex-1 min-w-0">
+                                                <div class="text-sm font-medium text-blue-800 truncate">{{ material.material }}</div>
+                                                <div class="flex flex-wrap items-center gap-2 mt-1">
+                                                    <span class="text-xs bg-white px-2 py-0.5 rounded text-blue-700 border border-blue-200">Pattern: {{ material.pattern }}</span>
+                                                    <span class="text-xs bg-white px-2 py-0.5 rounded text-blue-700 border border-blue-200">Rim: {{ material.rimDiameter }}"</span>
                                                 </div>
                                             </div>
-                                            <Button icon="pi pi-times" class="p-button-text p-button-sm p-button-danger" 
-                                                @click.stop="removeBuyMaterial(item, selectedMaterial)" />
                                         </div>
                                     </div>
                                 </div>
 
-                                <div v-else-if="!item.selectedBuyPatterns.length || !item.selectedBuyRims.length" 
-                                     class="text-center py-6 border-2 border-dashed border-gray-300 rounded-lg">
+                                <div v-else-if="!item.selectedBuyPattern || !item.selectedBuyRim" class="text-center py-6 border-2 border-dashed border-gray-300 rounded-lg">
                                     <i class="pi pi-inbox text-3xl text-gray-300 mb-2"></i>
                                     <p class="text-gray-500 text-sm">No buy materials selected</p>
-                                    <p class="text-gray-400 text-xs mt-1">Select patterns and rim diameters to display available materials</p>
+                                    <p class="text-gray-400 text-xs mt-1">Select pattern and rim diameter to display available materials</p>
                                 </div>
 
-                                <div v-else-if="item.availableBuyMaterials.length === 0" 
-                                     class="text-center py-6 border-2 border-dashed border-gray-300 rounded-lg">
+                                <div v-else class="text-center py-6 border-2 border-dashed border-gray-300 rounded-lg">
                                     <i class="pi pi-exclamation-circle text-3xl text-gray-300 mb-2"></i>
                                     <p class="text-gray-500 text-sm">No materials found</p>
                                     <p class="text-gray-400 text-xs mt-1">No materials match the selected criteria</p>
@@ -260,108 +179,44 @@
                             </div>
 
                             <!-- Free Material Section -->
-                            <div>
+                            <div class="bg-green-50 p-4 rounded-lg border border-green-100">
                                 <div class="flex items-center justify-between mb-4">
                                     <div class="flex items-center gap-2">
                                         <h4 class="font-semibold text-gray-800 flex items-center gap-2">
                                             <i class="pi pi-gift text-green-600"></i>
                                             Free Material
                                         </h4>
-                                        <span class="text-xs bg-green-100 text-green-800 px-2 py-0.5 rounded-full">Single selection</span>
+                                        <span class="text-xs bg-green-100 text-green-800 px-2 py-0.5 rounded-full">Select one</span>
                                     </div>
-                                    <Button icon="pi pi-plus" label="Select Material" style="width: fit-content" 
-                                        class="p-button-outlined p-button-sm" @click="openFreeMaterialPopup(item)" />
+                                    <Button v-if="item.selectedFreeMaterial" icon="pi pi-times" label="Clear Selection" style="width: fit-content" class="p-button-text p-button-sm p-button-danger" @click="clearFreeSelection(item)" />
                                 </div>
 
                                 <!-- Selection Criteria -->
                                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
                                     <div>
                                         <label class="block text-sm font-medium text-gray-700 mb-2">Pattern</label>
-                                        <Dropdown 
-                                            v-model="item.selectedFreePattern" 
-                                            :options="patternOptions" 
-                                            optionLabel="label"
-                                            optionValue="value"
-                                            placeholder="Select Pattern" 
-                                            class="w-full" 
-                                            @change="updateAvailableFreeMaterials(item)"
-                                        />
+                                        <Dropdown v-model="item.selectedFreePattern" :options="patternOptions" optionLabel="label" optionValue="value" placeholder="Select Pattern" class="w-full" @change="updateFreeMaterial(item)" />
                                     </div>
                                     <div>
                                         <label class="block text-sm font-medium text-gray-700 mb-2">Rim Diameter</label>
-                                        <Dropdown 
-                                            v-model="item.selectedFreeRim" 
-                                            :options="rimDiameterOptions" 
-                                            optionLabel="label"
-                                            optionValue="value"
-                                            placeholder="Select Rim Diameter" 
-                                            class="w-full" 
-                                            @change="updateAvailableFreeMaterials(item)"
-                                        />
-                                    </div>
-                                </div>
-
-                                <!-- Available Free Materials Display -->
-                                <div v-if="item.availableFreeMaterials.length > 0" class="mb-4">
-                                    <div class="flex items-center justify-between mb-3">
-                                        <span class="text-sm font-medium text-gray-700">
-                                            Available Free Materials ({{ item.availableFreeMaterials.length }})
-                                        </span>
-                                    </div>
-
-                                    <div class="grid grid-cols-1 md:grid-cols-2 gap-3 max-h-40 overflow-y-auto p-2 border border-gray-200 rounded-lg">
-                                        <div 
-                                            v-for="material in item.availableFreeMaterials" 
-                                            :key="material.id" 
-                                            class="flex items-center gap-3 p-3 border rounded-lg cursor-pointer transition-all duration-200"
-                                            :class="item.selectedFreeMaterial?.id === material.id
-                                                ? 'bg-green-50 border-green-300 shadow-sm' 
-                                                : 'bg-white border-gray-200 hover:bg-gray-50'"
-                                            @click="selectFreeMaterial(item, material)"
-                                        >
-                                            <div class="flex-1 min-w-0">
-                                                <div class="flex flex-wrap items-center gap-2">
-                                                    <span class="text-sm font-medium text-gray-800">{{ material.pattern }}</span>
-                                                    <span class="text-sm text-gray-600">{{ material.rimDiameter }}"</span>
-                                                </div>
-                                            </div>
-                                            <div class="w-5 h-5 border-2 rounded-full flex items-center justify-center flex-shrink-0" 
-                                                 :class="item.selectedFreeMaterial?.id === material.id
-                                                    ? 'bg-green-500 border-green-500' 
-                                                    : 'border-gray-300'">
-                                                <i v-if="item.selectedFreeMaterial?.id === material.id" 
-                                                   class="pi pi-check text-white text-xs"></i>
-                                            </div>
-                                        </div>
+                                        <Dropdown v-model="item.selectedFreeRim" :options="rimDiameterOptions" optionLabel="label" optionValue="value" placeholder="Select Rim Diameter" class="w-full" @change="updateFreeMaterial(item)" />
                                     </div>
                                 </div>
 
                                 <!-- Selected Free Material Display -->
                                 <div v-if="item.selectedFreeMaterial" class="space-y-3">
                                     <div class="flex items-center justify-between">
-                                        <span class="text-sm font-medium text-gray-700"> Selected Free Material </span>
-                                        <div class="flex gap-2">
-                                            <Button icon="pi pi-pencil" label="Change Selection" style="width: fit-content" 
-                                                class="p-button-text p-button-sm" @click="openFreeMaterialPopup(item)" />
-                                            <Button 
-                                                icon="pi pi-times" 
-                                                label="Clear" 
-                                                style="width: fit-content" 
-                                                class="p-button-text p-button-sm p-button-danger" 
-                                                @click="item.selectedFreeMaterial = null" 
-                                            />
-                                        </div>
+                                        <span class="text-sm font-medium text-gray-700">Selected Free Material</span>
                                     </div>
 
                                     <div class="flex items-center gap-4 p-4 bg-green-50 border border-green-200 rounded-lg hover:bg-green-100 transition-colors">
                                         <div class="flex-1">
-                                            <div class="flex flex-wrap items-center gap-3">
-                                                <span class="font-semibold text-green-800 text-sm">Pattern: {{ item.selectedFreeMaterial.pattern }}</span>
-                                                <span class="font-semibold text-green-800 text-sm">Rim: {{ item.selectedFreeMaterial.rimDiameter }}"</span>
+                                            <div class="text-sm font-medium text-green-800">{{ item.selectedFreeMaterial.material }}</div>
+                                            <div class="flex flex-wrap items-center gap-2 mt-1">
+                                                <span class="text-xs bg-white px-2 py-0.5 rounded text-green-700 border border-green-200">Pattern: {{ item.selectedFreeMaterial.pattern }}</span>
+                                                <span class="text-xs bg-white px-2 py-0.5 rounded text-green-700 border border-green-200">Rim: {{ item.selectedFreeMaterial.rimDiameter }}"</span>
                                             </div>
                                         </div>
-                                        <Button icon="pi pi-times" class="p-button-text p-button-sm p-button-danger" 
-                                            @click="item.selectedFreeMaterial = null" />
                                     </div>
                                 </div>
 
@@ -381,12 +236,12 @@
                         <p class="text-sm">Click "Add Criteria" to create your first promotion rule</p>
                     </div>
                 </div>
+                <Button icon="pi pi-plus" label="Add Criteria" class="p-button-success p-button-sm" :disabled="programItems.length >= 20" @click="addProgramItem" />
 
                 <!-- Submit -->
                 <div class="flex justify-end mt-8 gap-4">
                     <div class="w-40">
-                        <Button label="Cancel" class="w-full p-button-outlined p-button-secondary" 
-                            @click="cancelEdit" v-if="isEditMode" />
+                        <Button label="Cancel" class="w-full p-button-secondary" @click="cancelEdit" />
                     </div>
                     <div class="w-40">
                         <Button :label="isEditMode ? 'Update' : 'Submit'" class="w-full" @click="submitForm" />
@@ -394,193 +249,11 @@
                 </div>
             </div>
         </div>
-
-        <!-- Buy Material Selection Dialog -->
-        <Dialog v-model:visible="showBuyMaterialDialog" :style="{ width: '90vw', maxWidth: '1200px' }" 
-                header="Select Buy Materials" :modal="true" class="p-fluid">
-            <div class="grid grid-cols-1 lg:grid-cols-4 gap-6">
-                <!-- Filters Sidebar -->
-                <div class="lg:col-span-1">
-                    <div class="bg-gray-50 p-4 rounded-lg border border-gray-200">
-                        <h5 class="font-semibold text-gray-700 mb-4">Filter Materials</h5>
-
-                        <div class="space-y-4">
-                            <div>
-                                <label class="block text-sm font-medium text-gray-600 mb-2">By Pattern</label>
-                                <MultiSelect 
-                                    v-model="currentBuyFilters.patterns" 
-                                    :options="uniquePatterns" 
-                                    placeholder="All Patterns" 
-                                    class="w-full" 
-                                    display="chip"
-                                    :filter="true"
-                                    @change="filterMaterials('buy')" 
-                                />
-                            </div>
-                            <div>
-                                <label class="block text-sm font-medium text-gray-600 mb-2">By Rim Diameter</label>
-                                <MultiSelect 
-                                    v-model="currentBuyFilters.rims" 
-                                    :options="uniqueRimDiameters" 
-                                    placeholder="All Rim Diameters" 
-                                    class="w-full" 
-                                    display="chip"
-                                    :filter="true"
-                                    @change="filterMaterials('buy')" 
-                                />
-                            </div>
-                            <div class="pt-4 border-t border-gray-200">
-                                <div class="flex items-center justify-between text-sm">
-                                    <span class="text-gray-600">Showing:</span>
-                                    <span class="font-semibold text-blue-600">{{ filteredBuyMaterials.length }} materials</span>
-                                </div>
-                                <div class="flex items-center justify-between text-sm mt-1">
-                                    <span class="text-gray-600">Selected:</span>
-                                    <span class="font-semibold text-green-600">{{ currentBuySelections.length }} materials</span>
-                                </div>
-                                <div class="flex gap-2 mt-3">
-                                    <Button 
-                                        icon="pi pi-check" 
-                                        label="Select All" 
-                                        class="p-button-text p-button-sm" 
-                                        @click="selectAllInPopup('buy')" 
-                                    />
-                                    <Button 
-                                        icon="pi pi-times" 
-                                        label="Clear All" 
-                                        class="p-button-text p-button-sm p-button-danger" 
-                                        @click="clearAllInPopup('buy')" 
-                                    />
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Materials Grid -->
-                <div class="lg:col-span-3">
-                    <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4 max-h-96 overflow-y-auto p-2">
-                        <div
-                            v-for="material in filteredBuyMaterials"
-                            :key="material.id"
-                            class="border border-gray-200 rounded-lg p-4 hover:shadow-md transition-all cursor-pointer"
-                            :class="isMaterialSelected(material, 'buy') ? 'border-2 border-blue-500 bg-blue-50' : ''"
-                            @click="toggleMaterialSelection(material, 'buy')"
-                        >
-                            <div class="flex items-center justify-between">
-                                <div class="flex flex-col">
-                                    <span class="font-semibold text-gray-800">{{ material.pattern }}</span>
-                                    <span class="text-sm text-gray-600">{{ material.rimDiameter }}"</span>
-                                </div>
-                                <div class="w-5 h-5 border-2 rounded-md flex items-center justify-center flex-shrink-0" 
-                                     :class="isMaterialSelected(material, 'buy') ? 'bg-blue-500 border-blue-500' : 'border-gray-300'">
-                                    <i v-if="isMaterialSelected(material, 'buy')" class="pi pi-check text-white text-xs"></i>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div v-if="filteredBuyMaterials.length === 0" class="text-center py-8 text-gray-500">
-                        <i class="pi pi-search text-3xl text-gray-300 mb-2"></i>
-                        <p>No materials found matching your filters</p>
-                    </div>
-                </div>
-            </div>
-
-            <template #footer>
-                <div class="flex justify-between items-center w-full">
-                    <div class="text-sm text-gray-600">
-                        <span class="font-semibold text-green-600">{{ currentBuySelections.length }}</span> materials selected
-                    </div>
-                    <div class="flex gap-2">
-                        <Button label="Cancel" icon="pi pi-times" @click="showBuyMaterialDialog = false" class="p-button-text" />
-                        <Button label="Apply Selection" icon="pi pi-check" @click="applyBuyMaterialSelection" class="p-button-primary" />
-                    </div>
-                </div>
-            </template>
-        </Dialog>
-
-        <!-- Free Material Selection Dialog -->
-        <Dialog v-model:visible="showFreeMaterialDialog" :style="{ width: '90vw', maxWidth: '1200px' }" 
-                header="Select Free Material" :modal="true" class="p-fluid">
-            <div class="grid grid-cols-1 lg:grid-cols-4 gap-6">
-                <!-- Filters Sidebar -->
-                <div class="lg:col-span-1">
-                    <div class="bg-gray-50 p-4 rounded-lg border border-gray-200">
-                        <h5 class="font-semibold text-gray-700 mb-4">Filter Materials</h5>
-
-                        <div class="space-y-4">
-                            <div>
-                                <label class="block text-sm font-medium text-gray-600 mb-2">By Pattern</label>
-                                <Dropdown v-model="currentFreeFilters.pattern" :options="uniquePatterns" placeholder="All Patterns" 
-                                    class="w-full" @change="filterMaterials('free')" />
-                            </div>
-                            <div>
-                                <label class="block text-sm font-medium text-gray-600 mb-2">By Rim Diameter</label>
-                                <Dropdown v-model="currentFreeFilters.rim" :options="uniqueRimDiameters" placeholder="All Rim Diameters" 
-                                    class="w-full" @change="filterMaterials('free')" />
-                            </div>
-                            <div class="pt-4 border-t border-gray-200">
-                                <div class="flex items-center justify-between text-sm">
-                                    <span class="text-gray-600">Showing:</span>
-                                    <span class="font-semibold text-blue-600">{{ filteredFreeMaterials.length }} materials</span>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Materials Grid -->
-                <div class="lg:col-span-3">
-                    <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4 max-h-96 overflow-y-auto p-2">
-                        <div
-                            v-for="material in filteredFreeMaterials"
-                            :key="material.id"
-                            class="border border-gray-200 rounded-lg p-4 hover:shadow-md transition-all cursor-pointer"
-                            :class="currentFreeSelection?.id === material.id ? 'border-2 border-green-500 bg-green-50' : ''"
-                            @click="selectFreeMaterialInPopup(material)"
-                        >
-                            <div class="flex items-center justify-between">
-                                <div class="flex flex-col">
-                                    <span class="font-semibold text-gray-800">{{ material.pattern }}</span>
-                                    <span class="text-sm text-gray-600">{{ material.rimDiameter }}"</span>
-                                </div>
-                                <div class="w-5 h-5 border-2 rounded-full flex items-center justify-center flex-shrink-0" 
-                                     :class="currentFreeSelection?.id === material.id ? 'bg-green-500 border-green-500' : 'border-gray-300'">
-                                    <i v-if="currentFreeSelection?.id === material.id" class="pi pi-check text-white text-xs"></i>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div v-if="filteredFreeMaterials.length === 0" class="text-center py-8 text-gray-500">
-                        <i class="pi pi-search text-3xl text-gray-300 mb-2"></i>
-                        <p>No materials found matching your filters</p>
-                    </div>
-                </div>
-            </div>
-
-            <template #footer>
-                <div class="flex justify-between items-center w-full">
-                    <div class="text-sm text-gray-600">
-                        <span v-if="currentFreeSelection" class="font-semibold text-green-600">1</span>
-                        <span v-else class="text-gray-400">0</span> material selected
-                    </div>
-                    <div class="flex gap-2">
-                        <Button label="Cancel" icon="pi pi-times" @click="showFreeMaterialDialog = false" class="p-button-text" />
-                        <Button label="Apply Selection" icon="pi pi-check" @click="applyFreeMaterialSelection" class="p-button-primary" 
-                                :disabled="!currentFreeSelection" />
-                    </div>
-                </div>
-            </template>
-        </Dialog>
     </Fluid>
 </template>
 
 <script setup>
 import { ref, computed, watch, onMounted } from 'vue';
-import Dialog from 'primevue/dialog';
-import MultiSelect from 'primevue/multiselect';
 import { useRoute, useRouter } from 'vue-router';
 
 const route = useRoute();
@@ -589,7 +262,7 @@ const router = useRouter();
 const isEditMode = ref(false);
 const originalData = ref(null);
 
-// Pre-filled existing sales program data
+// Sales program data
 const salesProgram = ref({
     id: 'ABC4321',
     title: 'Year End Discount',
@@ -643,15 +316,6 @@ const rimDiameterOptions = ref([
 ]);
 
 const programItems = ref([]);
-
-// Popup states
-const showBuyMaterialDialog = ref(false);
-const showFreeMaterialDialog = ref(false);
-const currentEditingItem = ref(null);
-const currentBuySelections = ref([]);
-const currentFreeSelection = ref(null);
-const currentBuyFilters = ref({ patterns: [], rims: [] });
-const currentFreeFilters = ref({ pattern: null, rim: null });
 
 // Materials data
 const materials = ref([
@@ -777,45 +441,61 @@ const materials = ref([
     }
 ]);
 
-// Computed properties for filters
-const uniquePatterns = computed(() => {
-    const patterns = new Set();
-    materials.value.forEach((material) => {
-        if (material.pattern && material.pattern !== '(NULL)') {
-            patterns.add(material.pattern);
-        }
-    });
-    return Array.from(patterns).sort();
-});
+// Helper functions
+const updateBuyMaterials = (item) => {
+    if (item.selectedBuyPattern && item.selectedBuyRim) {
+        const filteredMaterials = materials.value.filter((material) => material.pattern === item.selectedBuyPattern && material.rimDiameter === item.selectedBuyRim);
+        item.availableBuyMaterials = [...filteredMaterials];
+    } else {
+        item.availableBuyMaterials = [];
+    }
+};
 
-const uniqueRimDiameters = computed(() => {
-    const rims = new Set();
-    materials.value.forEach((material) => {
-        if (material.rimDiameter && material.rimDiameter > 0) {
-            rims.add(material.rimDiameter);
-        }
-    });
-    return Array.from(rims).sort((a, b) => a - b);
-});
+const clearBuySelection = (item) => {
+    item.selectedBuyPattern = null;
+    item.selectedBuyRim = null;
+    item.availableBuyMaterials = [];
+};
 
-// Filtered materials for popups
-const filteredBuyMaterials = computed(() => {
-    return materials.value.filter((material) => {
-        const patternMatch = currentBuyFilters.value.patterns.length === 0 || 
-                           currentBuyFilters.value.patterns.includes(material.pattern);
-        const rimMatch = currentBuyFilters.value.rims.length === 0 || 
-                       currentBuyFilters.value.rims.includes(material.rimDiameter);
-        return patternMatch && rimMatch;
-    });
-});
+const updateFreeMaterial = (item) => {
+    if (item.selectedFreePattern && item.selectedFreeRim) {
+        const filteredMaterials = materials.value.filter((material) => material.pattern === item.selectedFreePattern && material.rimDiameter === item.selectedFreeRim);
 
-const filteredFreeMaterials = computed(() => {
-    return materials.value.filter((material) => {
-        const patternMatch = !currentFreeFilters.value.pattern || material.pattern === currentFreeFilters.value.pattern;
-        const rimMatch = !currentFreeFilters.value.rim || material.rimDiameter === currentFreeFilters.value.rim;
-        return patternMatch && rimMatch;
+        // For free material, only select the first matching material
+        item.selectedFreeMaterial = filteredMaterials.length > 0 ? { ...filteredMaterials[0] } : null;
+    } else {
+        item.selectedFreeMaterial = null;
+    }
+};
+
+const clearFreeSelection = (item) => {
+    item.selectedFreeMaterial = null;
+    item.selectedFreePattern = null;
+    item.selectedFreeRim = null;
+};
+
+const addProgramItem = () => {
+    programItems.value.push({
+        buyQty: 1,
+        freeQty: 1,
+        availableBuyMaterials: [], // This is what gets submitted for buy materials
+        selectedFreeMaterial: null,
+        selectedBuyPattern: null,
+        selectedBuyRim: null,
+        selectedFreePattern: null,
+        selectedFreeRim: null,
+        status: 1
     });
-});
+};
+
+const removeProgramItem = (index) => {
+    programItems.value.splice(index, 1);
+};
+
+// Helper function to find material by ID
+const findMaterialById = (id) => {
+    return materials.value.find((material) => material.id === id) || null;
+};
 
 // Initialize edit mode
 onMounted(() => {
@@ -835,33 +515,25 @@ const prefillSampleCriteria = () => {
             id: 1,
             buyQty: 2,
             freeQty: 1,
-            selectedBuyMaterials: [
-                findMaterialById(39),  // 175/70R13 8ZT TOYO 350
+            availableBuyMaterials: [
+                findMaterialById(39), // 175/70R13 8ZT TOYO 350
                 findMaterialById(363), // 1115/70D14 TEMPORARY SPARE SS...
-                findMaterialById(365)  // 175/65R14 8ZT TOYO 350
+                findMaterialById(365) // 175/65R14 8ZT TOYO 350
             ],
-            selectedFreeMaterial: findMaterialById(364),  // 185/70R14 8ST TOYO 350
-            selectedBuyPatterns: ['735', '510'],
-            selectedBuyRims: [13, 14],
+            selectedFreeMaterial: findMaterialById(364), // 185/70R14 8ST TOYO 350
+            selectedBuyPattern: '735',
+            selectedBuyRim: 13,
             selectedFreePattern: '735',
             selectedFreeRim: 14,
-            availableBuyMaterials: [],
-            availableFreeMaterials: [],
             status: 1
         }
     ];
-    
-    // Initialize available materials for each item
-    programItems.value.forEach(item => {
-        updateAvailableBuyMaterials(item);
-        updateAvailableFreeMaterials(item);
-    });
 };
 
 // Load existing sales program data
 const loadSalesProgram = (id) => {
     console.log(`Loading sales program with ID: ${id}`);
-    
+
     setTimeout(() => {
         const mockData = {
             title: 'Summer Tire Promotion 2023',
@@ -874,10 +546,10 @@ const loadSalesProgram = (id) => {
             image: '/demo/images/event-toyo-1.jpg',
             id: id
         };
-        
+
         salesProgram.value = { ...mockData };
         originalData.value = JSON.parse(JSON.stringify(mockData));
-        
+
         loadProgramItems(id);
     }, 500);
 };
@@ -889,184 +561,17 @@ const loadProgramItems = (programId) => {
             id: 1,
             buyQty: 2,
             freeQty: 1,
-            selectedBuyMaterials: [
-                findMaterialById(39),
-                findMaterialById(363),
-                findMaterialById(365)
-            ],
+            availableBuyMaterials: [findMaterialById(39), findMaterialById(363), findMaterialById(365)],
             selectedFreeMaterial: findMaterialById(364),
-            selectedBuyPatterns: ['735', '510'],
-            selectedBuyRims: [13, 14],
+            selectedBuyPattern: '735',
+            selectedBuyRim: 13,
             selectedFreePattern: '735',
             selectedFreeRim: 14,
-            availableBuyMaterials: [],
-            availableFreeMaterials: [],
             status: 1
         }
     ];
-    
+
     programItems.value = [...mockItems];
-    
-    // Initialize available materials for each item
-    programItems.value.forEach(item => {
-        updateAvailableBuyMaterials(item);
-        updateAvailableFreeMaterials(item);
-    });
-};
-
-// Helper function to find material by ID
-const findMaterialById = (id) => {
-    return materials.value.find(material => material.id === id) || null;
-};
-
-// Buy Materials Functions
-const updateAvailableBuyMaterials = (item) => {
-    if (item.selectedBuyPatterns.length > 0 && item.selectedBuyRims.length > 0) {
-        const filteredMaterials = materials.value.filter(material => 
-            item.selectedBuyPatterns.includes(material.pattern) && 
-            item.selectedBuyRims.includes(material.rimDiameter)
-        );
-        item.availableBuyMaterials = [...filteredMaterials];
-    } else {
-        item.availableBuyMaterials = [];
-    }
-};
-
-const toggleBuyMaterialSelection = (item, material) => {
-    const isSelected = item.selectedBuyMaterials.some(selected => selected.id === material.id);
-    
-    if (isSelected) {
-        item.selectedBuyMaterials = item.selectedBuyMaterials.filter(selected => selected.id !== material.id);
-    } else {
-        item.selectedBuyMaterials.push({...material});
-    }
-};
-
-const selectAllBuyMaterials = (item) => {
-    item.selectedBuyMaterials = [...item.availableBuyMaterials];
-};
-
-const clearAllBuyMaterials = (item) => {
-    item.selectedBuyMaterials = [];
-};
-
-const removeBuyMaterial = (item, material) => {
-    const index = item.selectedBuyMaterials.findIndex((m) => m.id === material.id);
-    if (index !== -1) {
-        item.selectedBuyMaterials.splice(index, 1);
-    }
-};
-
-// Free Materials Functions
-const updateAvailableFreeMaterials = (item) => {
-    if (item.selectedFreePattern && item.selectedFreeRim) {
-        const filteredMaterials = materials.value.filter(material => 
-            material.pattern === item.selectedFreePattern && 
-            material.rimDiameter === item.selectedFreeRim
-        );
-        item.availableFreeMaterials = [...filteredMaterials];
-    } else {
-        item.availableFreeMaterials = [];
-    }
-};
-
-const selectFreeMaterial = (item, material) => {
-    item.selectedFreeMaterial = {...material};
-};
-
-// Popup functions
-const openBuyMaterialPopup = (item) => {
-    currentEditingItem.value = item;
-    currentBuySelections.value = [...item.selectedBuyMaterials];
-    currentBuyFilters.value = { patterns: [...item.selectedBuyPatterns], rims: [...item.selectedBuyRims] };
-    showBuyMaterialDialog.value = true;
-};
-
-const openFreeMaterialPopup = (item) => {
-    currentEditingItem.value = item;
-    currentFreeSelection.value = item.selectedFreeMaterial;
-    currentFreeFilters.value = { pattern: item.selectedFreePattern, rim: item.selectedFreeRim };
-    showFreeMaterialDialog.value = true;
-};
-
-const toggleMaterialSelection = (material, type) => {
-    if (type === 'buy') {
-        const index = currentBuySelections.value.findIndex((m) => m.id === material.id);
-        if (index === -1) {
-            currentBuySelections.value.push(material);
-        } else {
-            currentBuySelections.value.splice(index, 1);
-        }
-    }
-};
-
-const selectFreeMaterialInPopup = (material) => {
-    currentFreeSelection.value = material;
-};
-
-const isMaterialSelected = (material, type) => {
-    if (type === 'buy') {
-        return currentBuySelections.value.some((m) => m.id === material.id);
-    }
-    return false;
-};
-
-const selectAllInPopup = (type) => {
-    if (type === 'buy') {
-        currentBuySelections.value = [...filteredBuyMaterials.value];
-    }
-};
-
-const clearAllInPopup = (type) => {
-    if (type === 'buy') {
-        currentBuySelections.value = [];
-    }
-};
-
-const applyBuyMaterialSelection = () => {
-    if (currentEditingItem.value) {
-        currentEditingItem.value.selectedBuyMaterials = [...currentBuySelections.value];
-        currentEditingItem.value.selectedBuyPatterns = [...currentBuyFilters.value.patterns];
-        currentEditingItem.value.selectedBuyRims = [...currentBuyFilters.value.rims];
-        updateAvailableBuyMaterials(currentEditingItem.value);
-    }
-    showBuyMaterialDialog.value = false;
-};
-
-const applyFreeMaterialSelection = () => {
-    if (currentEditingItem.value) {
-        currentEditingItem.value.selectedFreeMaterial = currentFreeSelection.value;
-        currentEditingItem.value.selectedFreePattern = currentFreeFilters.value.pattern;
-        currentEditingItem.value.selectedFreeRim = currentFreeFilters.value.rim;
-        updateAvailableFreeMaterials(currentEditingItem.value);
-    }
-    showFreeMaterialDialog.value = false;
-};
-
-const filterMaterials = (type) => {
-    // Filters are applied automatically through computed properties
-};
-
-const addProgramItem = () => {
-    const newItem = {
-        id: Date.now(),
-        buyQty: 1,
-        freeQty: 1,
-        selectedBuyMaterials: [],
-        selectedFreeMaterial: null,
-        selectedBuyPatterns: [],
-        selectedBuyRims: [],
-        selectedFreePattern: null,
-        selectedFreeRim: null,
-        availableBuyMaterials: [],
-        availableFreeMaterials: [],
-        status: 1
-    };
-    programItems.value.push(newItem);
-};
-
-const removeProgramItem = (index) => {
-    programItems.value.splice(index, 1);
 };
 
 const onImageSelect = (eventFile, field) => {
@@ -1083,7 +588,7 @@ const onImageSelect = (eventFile, field) => {
 const submitForm = () => {
     console.log('Sales Program Data:', salesProgram.value);
     console.log('Program Items:', programItems.value);
-    
+
     if (isEditMode.value) {
         console.log('Updating sales program...');
         alert('Sales program updated successfully!');

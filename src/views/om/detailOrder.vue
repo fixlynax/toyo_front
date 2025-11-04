@@ -244,7 +244,7 @@
             <Dialog v-model:visible="showPasswordDialog" header="Enter Admin Password" modal :closable="false" style="width: 25rem">
                 <div class="flex flex-col gap-3">
                     <span class="text-gray-700">Please enter the admin password to continue:</span>
-                    <Password v-model="adminPassword" placeholder="Enter password" toggleMask feedback="false" class="w-full" />
+                    <Password v-model="adminPassword" placeholder="Enter password" toggleMask :feedback="false" class="w-full" />
                 </div>
 
                 <template #footer>
@@ -281,7 +281,7 @@ const cancelDialog = () => {
 
 const confirmPassword = () => {
     if (adminPassword.value === 'admin123') {
-        toast.add({ severity: 'success', summary: 'Access Granted', detail: 'You may proceed with Return Order.', life: 3000 });
+        toast.add({ severity: 'success', summary: 'Access Granted', detail: 'Return Order Sucessfully Submitted.', life: 3000 });
         showPasswordDialog.value = false;
         adminPassword.value = '';
     } else {
