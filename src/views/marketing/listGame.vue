@@ -71,9 +71,21 @@
                     </template>
                 </Column>
 
+                <Column field="game Duration" header="Duration" style="min-width: 6rem">
+                    <template #body="{ data }">
+                        {{ data.startDate }}
+                        <span class="font-semibold"> - </span>
+                        {{ data.endDate }}
+                    </template>
+                </Column>
                 <Column field="publishDate" header="Publish Date" style="min-width: 6rem">
                     <template #body="{ data }">
                         {{ data.publishDate }}
+                    </template>
+                </Column>
+                <Column field="Total Participant" header="Total Participant" style="min-width: 6rem">
+                    <template #body="{ data }">
+                        {{ data.totalParticipant }}
                     </template>
                 </Column>
 
@@ -119,7 +131,10 @@ onMounted(async () => {
                 title: game.title || 'Untitled',
                 type: game.type || 'N/A',
                 publishDate: game.publishDate || 'N/A',
-                status: game.status
+                status: game.status,
+                totalParticipant: game.totalParticipant || 'No Participants',
+                startDate: game.startDate || '-',
+                endDate: game.endDate || '-'
             }));
         } else {
             console.error('API returned error or invalid data:', response.data);
@@ -153,17 +168,17 @@ const getOverallStatusSeverity = (status) => {
     border-radius: 12px;
     overflow: hidden;
     border: 1px solid #e5e7eb;
-    
+
     .p-datatable-header {
         border-top-left-radius: 12px;
         border-top-right-radius: 12px;
     }
-    
+
     .p-paginator-bottom {
         border-bottom-left-radius: 12px;
         border-bottom-right-radius: 12px;
     }
-    
+
     .p-datatable-thead > tr > th {
         &:first-child {
             border-top-left-radius: 12px;
@@ -172,7 +187,7 @@ const getOverallStatusSeverity = (status) => {
             border-top-right-radius: 12px;
         }
     }
-    
+
     // For the last row in the table body
     .p-datatable-tbody > tr:last-child > td {
         &:first-child {
@@ -182,7 +197,7 @@ const getOverallStatusSeverity = (status) => {
             border-bottom-right-radius: 0;
         }
     }
-    
+
     // When table is empty
     .p-datatable-tbody > tr.p-datatable-emptymessage > td {
         border-bottom-left-radius: 12px;
