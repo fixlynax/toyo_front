@@ -26,7 +26,7 @@
             <TabMenu :model="purposeTabs" v-model:activeIndex="activeTabIndex" class="mb-4 border-b" />
 
             <!-- Use your custom LoadingPage component -->
-        <LoadingPage v-if="loading" :sub-message="'Loading Catalogue Item'" class="min-h-[800px]"/>
+        <LoadingPage v-if="loading" :sub-message="'Loading Catalogue Item'" class="mt-8"/>
 
             <div v-else-if="error" class="text-center py-8 text-red-500">
                 <i class="pi pi-exclamation-triangle text-2xl mb-2"></i>

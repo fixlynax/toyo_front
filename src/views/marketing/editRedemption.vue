@@ -39,6 +39,10 @@
 
                     <div class="grid grid-cols-4 gap-4">
                         <!-- Recipient Name -->
+                        <div class="col-span-4">
+                            <label class="block text-gray-700 font-semibold">Shipping Date</label>
+                            <Calendar v-model="form.shippedDate" class="w-full" placeholder="Select Shipping Date" />
+                        </div>
                         <div class="col-span-2">
                             <label class="block text-gray-700 font-semibold">Recipient</label>
                             <InputText v-model="form.recipientName" type="text" class="w-full border p-2 rounded" placeholder="Recipient Name" />
@@ -130,10 +134,7 @@
                                     <td class="px-4 py-2 font-medium">Redeem Date</td>
                                     <td class="px-4 py-2 text-right">{{ redemption.redemptionDate }}</td>
                                 </tr>
-                                <tr class="border-b" v-if="redemption.shippedDate">
-                                    <td class="px-4 py-2 font-medium">Shipped Date</td>
-                                    <td class="px-4 py-2 text-right">{{ redemption.shippedDate }}</td>
-                                </tr>
+
                                 <tr class="border-b">
                                     <td class="px-4 py-2 font-medium">Created</td>
                                     <td class="px-4 py-2 text-right">{{ redemption.created }}</td>

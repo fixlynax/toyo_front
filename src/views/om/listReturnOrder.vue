@@ -41,21 +41,22 @@ const activeTabIndex = ref(0);
 
 // 🧩 Status Map (frontend view)
 const STATUS_MAP = {
-    0: { label: 'Pending Approval', severity: 'warning' },
-    1: { label: 'Approved', severity: 'info' },
+    0: { label: 'Pending Approval', severity: 'warn' },
+    1: { label: 'Approved', severity: 'success' },
     2: { label: 'Rejected', severity: 'danger' },
-    66: { label: 'Processing', severity: 'success' },
+    66: { label: 'Processing', severity: 'info' },
     77: { label: 'Pending Collection', severity: 'secondary' },
     9: { label: 'Completed', severity: 'primary' }
 };
 
 // 🧩 Helpers
-const getOverallStatusSeverity = (status) => {
-    return STATUS_MAP[Number(status)]?.severity || 'danger';
+const getOverallStatusSeverity = (orderStatus) => {
+    return STATUS_MAP[Number(orderStatus)]?.severity || 'warn';
 };
 
-const getOverallStatusLabel = (status) => {
-    return STATUS_MAP[Number(status)]?.label || 'Unknown';
+const getOverallStatusLabel = (orderStatus) => {
+    return STATUS_MAP[Number(orderStatus)]?.label || 'Pending';
+    
 };
 
 // 🧩 Date Formatter
@@ -80,7 +81,7 @@ const fetchReturnOrders = async (tabStatus = 'PENDING') => {
             listData.value = response.data.admin_data.map((returnOrder) => ({
                 id: returnOrder.id,
                 returnRequestNo: returnOrder.return_orderNo_ref || '-',
-                custAccountNo: returnOrder.custaccountno || '-',
+                custAccountNo: returnOrder.custAccountNo || '-',
                 customerName: returnOrder.dealerName || '-',
                 reasonCode: returnOrder.reason_code || '-',
                 reasonMessage: returnOrder.reason_message || '-',
@@ -111,6 +112,8 @@ onBeforeMount(() => {
     const firstTab = statusTabs[activeTabIndex.value]?.status;
     fetchReturnOrders(firstTab);
 });
+
+
 </script>
 
 <template>

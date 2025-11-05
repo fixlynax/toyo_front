@@ -64,65 +64,74 @@
                     </div>
                 </div>
 
-                <!-- Point Configuration Card -->
-                <div class="card flex flex-col gap-6 w-full">
-                    <div class="text-xl font-bold text-gray-800 border-b pb-2">🏅 Point Configuration</div>
-                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                        <div>
-                            <label class="block font-bold text-gray-700 mb-1">Silver Point</label>
-                            <InputNumber v-model="event.point2" class="w-full" />
-                        </div>
-                        <div>
-                            <label class="block font-bold text-gray-700 mb-1">Gold Point</label>
-                            <InputNumber v-model="event.point3" class="w-full" />
-                        </div>
-                        <div>
-                            <label class="block font-bold text-gray-700 mb-1">Platinum Point</label>
-                            <InputNumber v-model="event.point4" class="w-full" />
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Survey Questions Card -->
+                <!-- Survey Configuration -->
                 <div v-if="event.isSurvey === 1" class="card flex flex-col gap-6 w-full">
-                    <div class="text-xl font-bold text-gray-800 border-b pb-2">📝 Survey Questions</div>
+                    <div class="text-2xl font-bold text-gray-800 border-b pb-2">📝 Survey Configuration</div>
 
-                    <div v-if="questions.length > 0" class="space-y-4">
-                        <div v-for="(q, index) in questions" :key="index" class="border rounded-lg p-4 shadow-sm bg-gray-50">
-                            <div class="flex items-center justify-between mb-2">
-                                <label class="font-semibold text-gray-800">Question {{ index + 1 }}</label>
-                                <Button icon="pi pi-trash" class="p-button-danger p-button-text p-button-sm" @click="removeQuestion(index)" />
+                    <!-- Point Setting -->
+                    <div class="mt-4">
+                        <div class="text-xl font-bold text-gray-800 border-b pb-2 mb-4">🏆 Point Setting</div>
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                            <div>
+                                <label class="block font-bold text-gray-700 mb-1">Silver</label>
+                                <InputNumber v-model="event.point1" class="w-full" />
                             </div>
-
-                            <!-- Question Text -->
-                            <InputText v-model="q.text" placeholder="Enter your question" class="w-full mb-4" />
-
-                            <!-- Answer Inputs with Labels -->
-                            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                                <FloatLabel v-for="(ans, i) in q.options" :key="i" variant="on" class="w-full">
-                                    <InputText :id="`answer-${index}-${i}`" v-model="q.options[i]" class="w-full" />
-                                    <label :for="`answer-${index}-${i}`">Answer {{ i + 1 }}</label>
-                                </FloatLabel>
+                            <div>
+                                <label class="block font-bold text-gray-700 mb-1">Gold</label>
+                                <InputNumber v-model="event.point2" class="w-full" />
+                            </div>
+                            <div>
+                                <label class="block font-bold text-gray-700 mb-1">Platinum</label>
+                                <InputNumber v-model="event.point3" class="w-full" />
                             </div>
                         </div>
                     </div>
 
-                    <div v-else class="text-gray-500 italic">No questions added yet.</div>
+                    <!-- Survey Questions -->
+                    <div class="mt-8">
+                        <div class="text-xl font-bold text-gray-800 border-b pb-2 mb-4">📝 Survey Questions</div>
 
-                    <!-- Add Question Button -->
-                    <div class="flex justify-start mt-4">
-                        <Button icon="pi pi-plus" label="Add Question" style="width: fit-content" class="p-button-success p-button-sm" :disabled="questions.length >= 10" @click="addQuestion" />
+                        <div v-if="questions.length > 0" class="space-y-4">
+                            <div v-for="(q, index) in questions" :key="index" class="border rounded-lg p-4 shadow-sm bg-gray-50">
+                                <div class="flex items-center justify-between mb-2">
+                                    <label class="font-semibold text-gray-800"> Question {{ index + 1 }} </label>
+                                    <Button icon="pi pi-trash" class="p-button-danger p-button-text p-button-sm" @click="removeQuestion(index)" />
+                                </div>
+
+                                <!-- Question Input -->
+                                <InputText v-model="q.question" placeholder="Enter your question" class="w-full mb-4" />
+
+                                <!-- Answer Inputs -->
+                                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                                    <FloatLabel v-for="(ans, i) in q.answers" :key="i" variant="on" class="w-full">
+                                        <InputText :id="`answer-${index}-${i}`" v-model="q.answers[i]" class="w-full" />
+                                        <label :for="`answer-${index}-${i}`">Answer {{ i + 1 }}</label>
+                                    </FloatLabel>
+                                </div>
+
+                                <!-- Correct Answer -->
+                                <div class="mt-4">
+                                    <label class="block font-semibold text-gray-700 mb-2">Correct Answer</label>
+                                    <Dropdown v-model="q.correctAnswer" :options="getCorrectAnswerOptions(q.answers)" optionLabel="label" optionValue="value" placeholder="Select correct answer" class="w-full" />
+                                </div>
+                            </div>
+                        </div>
+
+                        <div v-else class="text-gray-500 italic">No questions added yet.</div>
+
+                        <!-- Add Question -->
+                        <div class="flex justify-start mt-4">
+                            <Button icon="pi pi-plus" label="Add Question" class="p-button-success p-button-sm" :disabled="questions.length >= 10" @click="addQuestion" />
+                        </div>
                     </div>
 
-                    <!-- Submit Buttons -->
+                    <!-- Actions -->
                     <div class="flex justify-end mt-8 gap-2">
                         <div class="w-40">
                             <Button label="Cancel" class="p-button-secondary w-full mr-2" @click="$router.back()" />
                         </div>
                         <div class="w-40">
-                            <RouterLink to="/marketing/detailEvent">
-                                <Button label="Update" class="w-full" />
-                            </RouterLink>
+                            <Button label="Submit" class="w-full" @click="submitEvent" />
                         </div>
                     </div>
                 </div>
@@ -149,9 +158,9 @@ const event = ref({
     id: 1,
     audience: 'TC',
     isSurvey: 1,
+    point1: 50,
     point2: 90,
     point3: 95,
-    point4: 100,
     title: 'Toyo Tires Drift Challenge 2025',
     image1URL: '/demo/images/event-toyo-1.jpg',
     image2URL: '/demo/images/event-toyo-2.jpg',
@@ -164,21 +173,37 @@ const event = ref({
 });
 
 const questions = ref([
-    { text: 'How do you rate the durability of the tires?', options: ['Low', 'Average', 'High'] },
-    { text: 'How do you rate the comfort while driving?', options: ['Low', 'Average', 'High'] }
+    {
+        question: 'How do you rate the durability of the tires?',
+        answers: ['Low', 'Average', 'High'],
+        correctAnswer: 'High',
+    },
+    {
+        question: 'How do you rate the comfort while driving?',
+        answers: ['Low', 'Average', 'High'],
+        correctAnswer: 'Average',
+    }
 ]);
 
 const addQuestion = () => {
     if (questions.value.length < 10) {
         questions.value.push({
-            text: '',
-            options: ['Low', 'Average', 'High']
+            question: '',
+            answers: ['', '', ''],
+            correctAnswer: null
         });
     }
 };
 
 const removeQuestion = (index) => {
     questions.value.splice(index, 1);
+};
+
+const getCorrectAnswerOptions = (answers) => {
+    return answers.map((ans, idx) => ({
+        label: ans || `Answer ${idx + 1}`,
+        value: ans || `Answer ${idx + 1}`
+    }));
 };
 
 const onImageSelect = (eventFile, field) => {
@@ -194,5 +219,10 @@ const onImageSelect = (eventFile, field) => {
 
 const removeImage = (property) => {
     event.value[property] = null;
+};
+
+const submitEvent = () => {
+    console.log('Submitted Event:', event.value);
+    console.log('Survey Questions:', questions.value);
 };
 </script>
