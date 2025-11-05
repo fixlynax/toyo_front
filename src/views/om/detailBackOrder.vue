@@ -4,11 +4,14 @@
             <!-- LEFT SIDE -->
             <div class="md:w-2/3 flex flex-col gap-2">
                 <div class="card flex flex-col gap-6 w-full">
-                    <div class="flex items-center gap-2 border-b">
+                    <div class="flex items-center gap-2 border-b pb-2">
                         <RouterLink to="/om/listBackOrder">
                             <Button icon="pi pi-arrow-left font-bold" class="p-button-text p-button-secondary text-xl" size="big" v-tooltip="'Back'" />
                         </RouterLink>
                         <div class="text-2xl font-bold text-gray-800">Back Order Detail</div>
+                        <div class="flex-grow flex justify-end">
+                            <Button label="Export" style="width:fit-content;" icon="pi pi-file-export" class="p-button" />
+                        </div>
                     </div>
 
                     <div class="font-semibold text-xl border-b pb-2 mt-2">🏬 Customer Information</div>
