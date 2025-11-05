@@ -1,6 +1,6 @@
 <template>
     <div class="card flex flex-col w-full">
-        <div class="text-2xl font-bold text-gray-800 border-b pb-2 ">📦 List Back Order</div>
+        <div class="text-2xl font-bold text-gray-800 border-b pb-2">📦 List Back Order</div>
         <TabMenu :model="statusTabs" v-model:activeIndex="activeTabIndex" class="mb-6" />
 
         <!-- 🟢 Only show LoadingPage during initial load, hide DataTable completely -->
@@ -58,12 +58,6 @@
             </Column>
 
             <Column field="shipTo" header="Ship To Acc No." style="min-width: 8rem" />
-
-            <Column field="deliveryDate" header="Delivery Date" style="min-width: 8rem">
-                <template #body="{ data }">
-                    {{ formatDate(data.deliveryDate) }}
-                </template>
-            </Column>
 
             <Column field="expiry" header="Back Order Expiry" style="min-width: 10rem">
                 <template #body="{ data }">
@@ -133,7 +127,6 @@ onMounted(async () => {
                 deliveryType: order.deliveryType || '-',
                 orderDate: order.created,
                 shipTo: order.shipto || order.custaccountno,
-                deliveryDate: order.deliveryDate,
                 expiry: order.expiry,
                 orderStatus: order.orderstatus,
                 progress: calculateProgress(order),
@@ -245,51 +238,52 @@ const getStatusSeverity = (status) => {
 };
 </script>
 
-
 <style scoped lang="scss">
 :deep(.p-progressbar) {
-  height: 0.8rem;
-  border-radius: 9999px;
-  background-color: #f3f4f6; // Neutral background
-  box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.08);
-  overflow: hidden;
-
-  .p-progressbar-value {
+    height: 0.8rem;
     border-radius: 9999px;
-    transition: width 0.4s ease, background 0.4s ease;
-  }
+    background-color: #f3f4f6; // Neutral background
+    box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.08);
+    overflow: hidden;
 
-  // 🔴 Low: 0–40%
-  &.progress-low {
     .p-progressbar-value {
-      background: linear-gradient(90deg, #f87171,);
-      box-shadow: 0 0 6px rgba(239, 68, 68, 0.3);
+        border-radius: 9999px;
+        transition:
+            width 0.4s ease,
+            background 0.4s ease;
     }
-  }
 
-  // 🟠 Fair: 41–60%
-  &.progress-fair {
-    .p-progressbar-value {
-      background: linear-gradient(90deg, #fb923c, );
-      box-shadow: 0 0 6px rgba(251, 146, 60, 0.3);
+    // 🔴 Low: 0–40%
+    &.progress-low {
+        .p-progressbar-value {
+            background: linear-gradient(90deg, #f87171);
+            box-shadow: 0 0 6px rgba(239, 68, 68, 0.3);
+        }
     }
-  }
 
-  // 🟡 Good: 61–99%
-  &.progress-good {
-    .p-progressbar-value {
-      background: linear-gradient(90deg, #fde047, );
-      box-shadow: 0 0 6px rgba(250, 204, 21, 0.3);
+    // 🟠 Fair: 41–60%
+    &.progress-fair {
+        .p-progressbar-value {
+            background: linear-gradient(90deg, #fb923c);
+            box-shadow: 0 0 6px rgba(251, 146, 60, 0.3);
+        }
     }
-  }
 
-  // 🟢 Excellent: 100%
-  &.progress-excellent {
-    .p-progressbar-value {
-      background: linear-gradient(90deg, #34d399,);
-      box-shadow: 0 0 6px rgba(52, 211, 153, 0.4);
+    // 🟡 Good: 61–99%
+    &.progress-good {
+        .p-progressbar-value {
+            background: linear-gradient(90deg, #fde047);
+            box-shadow: 0 0 6px rgba(250, 204, 21, 0.3);
+        }
     }
-  }
+
+    // 🟢 Excellent: 100%
+    &.progress-excellent {
+        .p-progressbar-value {
+            background: linear-gradient(90deg, #34d399);
+            box-shadow: 0 0 6px rgba(52, 211, 153, 0.4);
+        }
+    }
 }
 
 :deep(.p-datatable-frozen-tbody) {
@@ -304,17 +298,17 @@ const getStatusSeverity = (status) => {
     border-radius: 12px;
     overflow: hidden;
     border: 1px solid #e5e7eb;
-    
+
     .p-datatable-header {
         border-top-left-radius: 12px;
         border-top-right-radius: 12px;
     }
-    
+
     .p-paginator-bottom {
         border-bottom-left-radius: 12px;
         border-bottom-right-radius: 12px;
     }
-    
+
     .p-datatable-thead > tr > th {
         &:first-child {
             border-top-left-radius: 12px;
@@ -323,8 +317,7 @@ const getStatusSeverity = (status) => {
             border-top-right-radius: 12px;
         }
     }
-    
-    
+
     .p-datatable-tbody > tr:last-child > td {
         &:first-child {
             border-bottom-left-radius: 0;
@@ -333,13 +326,10 @@ const getStatusSeverity = (status) => {
             border-bottom-right-radius: 0;
         }
     }
-    
-    
+
     .p-datatable-tbody > tr.p-datatable-emptymessage > td {
         border-bottom-left-radius: 12px;
         border-bottom-right-radius: 12px;
     }
 }
 </style>
-
-

@@ -41,7 +41,7 @@ const activeTabIndex = ref(0);
 
 // 🧩 Status Map (frontend view)
 const STATUS_MAP = {
-    0: { label: 'Pending Approval', severity: 'warning' },
+    0: { label: 'Pending', severity: 'warning' },
     1: { label: 'Approved', severity: 'info' },
     2: { label: 'Rejected', severity: 'danger' },
     66: { label: 'Processing', severity: 'success' },
@@ -80,7 +80,7 @@ const fetchReturnOrders = async (tabStatus = 'PENDING') => {
             listData.value = response.data.admin_data.map((returnOrder) => ({
                 id: returnOrder.id,
                 returnRequestNo: returnOrder.return_orderNo_ref || '-',
-                custAccountNo: returnOrder.custaccountno || '-',
+                custAccountNo: returnOrder.custAccountNo || '-',
                 customerName: returnOrder.dealerName || '-',
                 reasonCode: returnOrder.reason_code || '-',
                 reasonMessage: returnOrder.reason_message || '-',

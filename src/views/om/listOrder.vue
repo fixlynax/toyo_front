@@ -39,7 +39,6 @@ const statusMap = {
 
 // 🟢 Tab setup - Added "All" tab and fixed status mapping
 const statusTabs = [
-    { label: 'Pending', status: 0 },
     { label: 'Processing', status: 66 },
     { label: 'Delivery', status: 77 },
     { label: 'Completed', status: 1 }
@@ -53,13 +52,12 @@ const fetchOrders = async (status = null) => {
 
         // Map frontend status to backend status labels
         const statusMapping = {
-            0: 'PENDING',
             66: 'PROCESSING',
             77: 'DELIVERY',
-            1: 'COMPLETE',
+            1: 'COMPLETE'
         };
 
-        const tabs = statusMapping[status] || 'PENDING';
+        const tabs = statusMapping[status] || 'PROCESSING';
 
         const response = await api.post('order/list-order', { tabs });
 
@@ -71,7 +69,7 @@ const fetchOrders = async (status = null) => {
                 id: order.id,
                 orderNo: order.order_no,
                 custAccountNo: order.custaccountno,
-                companyName: order.dealerName || `${order.companyName1 || ''} ${order.companyName2 || ''}`.trim(),
+                companyName: order.dealerName,
                 sapOrderType: order.sapordertype,
                 orderType: order.orderDesc,
                 deliveryType: order.deliveryType,
@@ -152,7 +150,7 @@ const formatDate = (dateString) => {
 
 <template>
     <div class="card">
-        <div class="text-2xl font-bold text-gray-800 border-b pb-2 ">List Order</div>
+        <div class="text-2xl font-bold text-gray-800 border-b pb-2">List Order</div>
 
         <!-- 🟢 Use LoadingPage for initial load, hide everything else -->
         <LoadingPage v-if="loading" :message="'Loading Orders...'" :sub-message="'Fetching your order list'" />
@@ -163,14 +161,14 @@ const formatDate = (dateString) => {
             <TabMenu :model="statusTabs" v-model:activeIndex="activeTabIndex" class="mb-6" />
 
             <!-- 🟢 DataTable without loading prop -->
-            <DataTable 
-                :value="filteredOrders" 
-                :paginator="true" 
-                :rows="10" 
-                dataKey="id" 
-                :rowHover="true" 
-                :filters="filters1" 
-                filterDisplay="menu" 
+            <DataTable
+                :value="filteredOrders"
+                :paginator="true"
+                :rows="10"
+                dataKey="id"
+                :rowHover="true"
+                :filters="filters1"
+                filterDisplay="menu"
                 :globalFilterFields="['orderNo', 'custAccountNo', 'companyName', 'shipToAccountNo']"
                 class="rounded-table"
             >
@@ -211,7 +209,7 @@ const formatDate = (dateString) => {
                 </Column>
                 <Column field="companyName" header="Dealer Name" style="min-width: 10rem">
                     <template #body="{ data }">
-                        {{ data.companyName1 || '-' }}
+                        {{ data.companyName || '-' }}
                     </template>
                 </Column>
 
@@ -315,17 +313,17 @@ const formatDate = (dateString) => {
     border-radius: 12px;
     overflow: hidden;
     border: 1px solid #e5e7eb;
-    
+
     .p-datatable-header {
         border-top-left-radius: 12px;
         border-top-right-radius: 12px;
     }
-    
+
     .p-paginator-bottom {
         border-bottom-left-radius: 12px;
         border-bottom-right-radius: 12px;
     }
-    
+
     .p-datatable-thead > tr > th {
         &:first-child {
             border-top-left-radius: 12px;
@@ -334,8 +332,7 @@ const formatDate = (dateString) => {
             border-top-right-radius: 12px;
         }
     }
-    
-    
+
     .p-datatable-tbody > tr:last-child > td {
         &:first-child {
             border-bottom-left-radius: 0;
@@ -344,8 +341,7 @@ const formatDate = (dateString) => {
             border-bottom-right-radius: 0;
         }
     }
-    
-    
+
     .p-datatable-tbody > tr.p-datatable-emptymessage > td {
         border-bottom-left-radius: 12px;
         border-bottom-right-radius: 12px;
