@@ -50,6 +50,10 @@
 
                     <!-- Shipping Info -->
                     <div class="grid grid-cols-4 gap-2 text-sm">
+                        <div class="col-span-4">
+                            <span class="text-sm font-bold text-gray-700">Shipping Date</span>
+                            <p class="text-lg font-medium">{{ redemption.shippedDate }}</p>
+                        </div>
                         <div class="col-span-2">
                             <span class="text-sm font-bold text-gray-700">Recipient</span>
                             <p class="text-lg font-medium">{{ redemption.recipientName }}</p>
@@ -129,7 +133,7 @@
                                     <td class="px-4 py-2 text-right">{{ redemption.refno }}</td>
                                 </tr>
                                 <tr class="border-b">
-                                    <td class="px-4 py-2 font-medium">Tc User ID</td>
+                                    <td class="px-4 py-2 font-medium">Member Code</td>
                                     <td class="px-4 py-2 text-right">{{ redemption.tc_userID }}</td>
                                 </tr>
                                 <tr class="border-b">
@@ -140,20 +144,12 @@
                                     <td class="px-4 py-2 font-medium">Redeem Date</td>
                                     <td class="px-4 py-2 text-right">{{ redemption.redemptionDate }}</td>
                                 </tr>
-                                <tr class="border-b" v-if="redemption.shippedDate">
-                                    <td class="px-4 py-2 font-medium">Shipped Date</td>
-                                    <td class="px-4 py-2 text-right">{{ redemption.shippedDate }}</td>
-                                </tr>
-                                <tr class="border-b">
-                                    <td class="px-4 py-2 font-medium">Created</td>
-                                    <td class="px-4 py-2 text-right">{{ redemption.created }}</td>
-                                </tr>
                                 <tr class="border-b">
                                     <td class="px-4 py-2 font-medium">Verified Date</td>
                                     <td class="px-4 py-2 text-right">{{ redemption.verifiedDate }}</td>
                                 </tr>
                                 <tr class="border-b" v-if="redemption.approvedDate">
-                                    <td class="px-4 py-2 font-medium">Approved Date</td>
+                                    <td class="px-4 py-2 font-medium">Approve/Reject Date</td>
                                     <td class="px-4 py-2 text-right">{{ redemption.approvedDate }}</td>
                                 </tr>
                                 <tr class="border-b" v-if="redemption.rejectedDate">
@@ -216,8 +212,8 @@
                 </div>
                 <div class="bg-blue-50 p-3 rounded-md">
                     <p class="text-sm text-blue-700">
-                        <strong>Item:</strong> {{ redemption.itemName }}<br>
-                        <strong>Recipient:</strong> {{ redemption.recipientName }}<br>
+                        <strong>Item:</strong> {{ redemption.itemName }}<br />
+                        <strong>Recipient:</strong> {{ redemption.recipientName }}<br />
                         <strong>Points:</strong> {{ redemption.totalPoint }}
                     </p>
                 </div>
@@ -319,24 +315,24 @@ const submitApprove = () => {
 // Helper functions for status label
 const statusLabel = (status) => {
     const statusMap = {
-        'Pending': 'Pending',
-        'Approved': 'Approved',
-        'Rejected': 'Rejected',
-        'Packing': 'Packing',
-        'Shipped': 'Shipped',
-        'Delivered': 'Delivered'
+        Pending: 'Pending',
+        Approved: 'Approved',
+        Rejected: 'Rejected',
+        Packing: 'Packing',
+        Shipped: 'Shipped',
+        Delivered: 'Delivered'
     };
     return statusMap[status] || 'Unknown';
 };
 
 const statusSeverity = (status) => {
     const severityMap = {
-        'Pending': 'warning',
-        'Approved': 'success',
-        'Rejected': 'danger',
-        'Packing': 'info',
-        'Shipped': 'warn',
-        'Delivered': 'success'
+        Pending: 'warning',
+        Approved: 'success',
+        Rejected: 'danger',
+        Packing: 'info',
+        Shipped: 'warn',
+        Delivered: 'success'
     };
     return severityMap[status] || 'secondary';
 };

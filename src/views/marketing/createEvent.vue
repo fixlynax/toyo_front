@@ -71,10 +71,11 @@
                     </div>
                 </div>
 
-                <!-- Point Configuration -->
+                <!-- Survey Questions -->
                 <div v-if="event.isSurvey === 'yes'" class="card flex flex-col gap-6 w-full">
-                    <div class="text-xl font-bold text-gray-800 border-b pb-2">🏆 Point Configuration</div>
-                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div class="text-2xl font-bold text-gray-800 border-b pb-2">📝 Survey Configuration</div>
+                    <div class="mt-8 text-xl font-bold text-gray-800 border-b pb-2">🏆 Point Setting</div>
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4 ">
                         <div>
                             <label class="block font-bold text-gray-700 mb-1">Silver</label>
                             <InputNumber v-model="event.point1" class="w-full" />
@@ -88,12 +89,9 @@
                             <InputNumber v-model="event.point3" showIcon class="w-full" />
                         </div>
                     </div>
-                </div>
-
-                <!-- Survey Questions -->
-                <div v-if="event.isSurvey === 'yes'" class="card flex flex-col gap-6 w-full">
-                    <div class="text-xl font-bold text-gray-800 border-b pb-2">📝 Survey Questions</div>
                     <div v-if="questions.length > 0" class="space-y-4">
+                        <div class="mt-8 text-xl font-bold text-gray-800 border-b pb-2 mb-8">Answer Options</div>
+
                         <div v-for="(q, index) in questions" :key="index" class="border rounded-lg p-4 shadow-sm bg-gray-50">
                             <div class="flex items-center justify-between mb-2">
                                 <label class="font-semibold text-gray-800">Question {{ index + 1 }}</label>
@@ -119,7 +117,7 @@
                     <div v-else class="text-gray-500 italic">No questions added yet.</div>
 
                     <div class="flex justify-start">
-                        <Button icon="pi pi-plus" label="Add Question" style="width: fit-content" class="p-button-success p-button-sm" :disabled="questions.length >= 10" @click="addQuestion" />
+                        <Button icon="pi pi-plus" label="Add Question" class="p-button-success p-button-sm p-button-raised" :disabled="questions.length >= 10" @click="addQuestion" />
                     </div>
 
                     <div class="flex justify-end mt-8 gap-2">

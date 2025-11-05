@@ -1,14 +1,17 @@
 <template>
     <div class="card">
-        <div class="text-2xl font-bold text-gray-800 border-b pb-2 mb-6">List User</div>
+        <div class="text-2xl font-bold text-gray-800 border-b pb-2">List User</div>
 
         <!-- Show LoadingPage only during initial page load -->
         <LoadingPage v-if="initialLoading" :message="'Loading Users...'" :sub-message="'Fetching user data'" />
 
         <!-- Show content area when not in initial loading -->
         <div v-else>
+            <!-- Tab Menu for Status Filter -->
+            <TabMenu :model="statusTabs" v-model:activeIndex="activeTabIndex" class="mb-6" />
+
             <DataTable
-                :value="listData"
+                :value="filteredUsers"
                 :paginator="true"
                 :rows="10"
                 :rowsPerPageOptions="[5, 10, 20]"
@@ -19,9 +22,7 @@
                 filterDisplay="menu"
                 :globalFilterFields="['etenUserID', 'firstName', 'lastName', 'gender', 'race', 'state', 'level', 'memberSince', 'lastLogin', 'status']"
                 class="rounded-table"
-
             >
-
                 <template #header>
                     <div class="flex items-center justify-between gap-4 w-full flex-wrap">
                         <!-- Left: Search Field + Cog Button -->
@@ -53,9 +54,6 @@
                     </div>
                 </template>
 
-                <!-- ========================= -->
-                <!-- Data Columns -->
-                <!-- ========================= -->
                 <Column field="etenUserID" header="Mem Code" style="min-width: 8rem">
                     <template #body="{ data }">
                         <RouterLink :to="`/marketing/detailEtenUser/${data.id}`" class="hover:underline font-bold">
@@ -69,19 +67,10 @@
                 </Column>
 
                 <Column field="gender" header="Gender" style="min-width: 6rem" />
-
-                <Column field="race" header="Race" style="min-width: 6rem">
-                    <template #body="{ data }">
-                        {{ data.race }}
-                    </template>
-                </Column>
-
+                <Column field="race" header="Race" style="min-width: 6rem" />
                 <Column field="state" header="State" style="min-width: 6rem" />
-
                 <Column field="level" header="Level" style="min-width: 6rem" />
-
                 <Column field="memberSince" header="Mem Since" style="min-width: 8rem" />
-
                 <Column field="lastLogin" header="Last Login" style="min-width: 8rem" />
 
                 <Column field="status" header="Status" style="min-width: 6rem">
@@ -95,21 +84,33 @@
 </template>
 
 <script setup>
-import { onMounted, ref } from 'vue';
+import { onMounted, ref, computed } from 'vue';
 import { FilterMatchMode } from '@primevue/core/api';
 import api from '@/service/api';
 import LoadingPage from '@/components/LoadingPage.vue';
 
 // Data variables
 const listData = ref([]);
-const initialLoading = ref(true); // For initial page load
-const tableLoading = ref(false); // For table operations
+const initialLoading = ref(true);
+const tableLoading = ref(false);
 
 // Filters for quick search
 const filters = ref({
     global: { value: null, matchMode: FilterMatchMode.CONTAINS }
 });
 
+// Tabs for status filtering
+const statusTabs = ref([{ label: 'Active' }, { label: 'Inactive' }]);
+const activeTabIndex = ref(0);
+
+// Computed: Filter listData based on active tab
+const filteredUsers = computed(() => {
+    if (activeTabIndex.value === 0) {
+        return listData.value.filter((user) => user.status === 1);
+    } else {
+        return listData.value.filter((user) => user.status !== 1);
+    }
+});
 
 onMounted(async () => {
     try {
@@ -117,27 +118,22 @@ onMounted(async () => {
         tableLoading.value = true;
 
         const response = await api.get('cares/userList');
-
-        console.log('API Response:', response.data);
-
         if (response.data.status === 1 && response.data.admin_data) {
-            // Combine active and inactive users
             const allUsers = [...(response.data.admin_data.active_user || []), ...(response.data.admin_data.inactive_user || [])];
 
             listData.value = allUsers.map((user) => ({
                 id: user.id,
                 etenUserID: user.member_code || '-',
                 firstName: user.full_name || '-',
-                gender: user.gender || '-', 
+                gender: user.gender || '-',
                 race: user.race || '-',
-                state: user.state || '-', 
+                state: user.state || '-',
                 level: user.member_level || '-',
-                memberSince: user.member_since || '-', 
-                lastLogin: user.last_login || '-', 
+                memberSince: user.member_since || '-',
+                lastLogin: user.last_login || '-',
                 status: user.status
             }));
         } else {
-            console.error('API returned error or invalid data:', response.data);
             listData.value = [];
         }
     } catch (error) {
@@ -155,22 +151,21 @@ const getOverallStatusSeverity = (status) => {
 </script>
 
 <style scoped>
-
 :deep(.rounded-table) {
     border-radius: 12px;
     overflow: hidden;
     border: 1px solid #e5e7eb;
-    
+
     .p-datatable-header {
         border-top-left-radius: 12px;
         border-top-right-radius: 12px;
     }
-    
+
     .p-paginator-bottom {
         border-bottom-left-radius: 12px;
         border-bottom-right-radius: 12px;
     }
-    
+
     .p-datatable-thead > tr > th {
         &:first-child {
             border-top-left-radius: 12px;
@@ -179,8 +174,7 @@ const getOverallStatusSeverity = (status) => {
             border-top-right-radius: 12px;
         }
     }
-    
-    
+
     .p-datatable-tbody > tr:last-child > td {
         &:first-child {
             border-bottom-left-radius: 0;
@@ -189,8 +183,7 @@ const getOverallStatusSeverity = (status) => {
             border-bottom-right-radius: 0;
         }
     }
-    
-    
+
     .p-datatable-tbody > tr.p-datatable-emptymessage > td {
         border-bottom-left-radius: 12px;
         border-bottom-right-radius: 12px;

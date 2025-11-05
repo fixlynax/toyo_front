@@ -166,7 +166,7 @@
                 <div class="card flex flex-col w-full" v-if="event.isSurvey === 'Yes' && participants.length > 0">
                     <div class="flex items-center justify-between border-b pb-3 mb-4">
                         <div class="text-2xl font-bold text-gray-800">👨🏻‍💻 Participant List</div>
-                        <Button icon="pi pi-file-import" label="Import" style="width: fit-content" class="p-button-danger p-button-sm" />
+                        <Button icon="pi pi-file-export" label="Export" style="width: fit-content" class="p-button-danger p-button-sm" />
                     </div>
 
                     <DataTable :value="participants" :paginator="true" :rows="10" dataKey="id" :rowHover="true" responsiveLayout="scroll" class="text-sm">
