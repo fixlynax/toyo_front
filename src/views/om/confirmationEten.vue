@@ -258,6 +258,47 @@
                         <p class="text-lg font-medium">{{ form.signboardBrand ? 'Yes' : 'No' }}</p>
                     </div>
                 </div>
+            </div>
+        </div>
+        <div class="flex mt-8">
+            <div class="card flex flex-col gap-4 w-full">
+                <div class="font-semibold text-xl border-b pb-2">👤 Master User</div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                        <span class="text-sm  text-gray-500">First Name</span>
+                        <p class="text-lg font-medium">{{ form.firstname }}</p>
+                    </div>
+                    <div>
+                        <span class="text-sm  text-gray-500">Last Name</span>
+                        <p class="text-lg font-medium">{{ form.lastname }}</p>
+                    </div>
+                    <div>
+                        <span class="text-sm text-gray-500">Email</span>
+                        <p class="text-lg font-medium">{{ form.emailAddress }}</p>
+                    </div>
+                    <div>
+                        <span class="text-sm text-gray-500">Phone No.</span>
+                        <p class="text-lg font-medium">{{ form.phoneNumber }}</p>
+                    </div>
+                    <div>
+                        <div class="w-full">
+                            <span class="text-xm font-bold text-black-700">Password</span>
+                            <div class="flex items-center">
+                                <p class="text-lg font-medium mr-2 mb-0">
+                                    {{ showPassword ? form.password : '••••••••' }}
+                                </p>
+                                <!-- Toggle Button -->
+                                <button type="button" @click="showPassword = !showPassword" class="text-gray-500 hover:text-gray-700">
+                                    <div class="text-lg font-medium mr-2 mb-0">
+                                        <i v-if="showPassword" class="pi pi-eye-slash"></i>
+                                        <i v-else class="pi pi-eye"></i>
+                                    </div>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
 
                 <div class="flex flex-col md:flex-row justify-end mt-4">
                     <div class="w-40">
@@ -279,8 +320,12 @@
 <script setup>
 import { ref } from 'vue';
 
+const showPassword = ref(false);
 const form = ref({
     memberCode: 'E346572',
+    firstname: 'John',
+    lastname: 'Doe',
+    password: 'Password123!',
     custAccountNo: '6080100900',
     companyName1: 'PS Tyres & Battery Auto Services Sdn. Bhd',
     companyName2: '',
