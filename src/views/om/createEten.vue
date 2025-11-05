@@ -1,13 +1,13 @@
 <script setup>
-import { ref } from 'vue';
-import { ListEtenService } from '@/service/ListEten.js';
+import { ref, onMounted } from 'vue';
 import LoadingPage from '@/components/LoadingPage.vue';
+import api from '@/service/api';
 
 // UI state
 const isLoading = ref(false);
 const showDetails = ref(false);
 
-// Account No input (no dummy data)
+// Account No input
 const accountNo = ref('');
 const form = ref({}); // store selected ETEN data
 
@@ -33,7 +33,8 @@ const dropdownPriceListValue = ref([
     { name: 'Sabah', code: '02' },
     { name: 'Sarawak', code: '03' },
     { name: 'Langkawi', code: '04' },
-    { name: 'Labuan', code: '05' }
+    { name: 'Labuan', code: '05' },
+    { name: 'Semananjung', code: '06' }
 ]);
 
 const dropdownSignboardTypeValue = ref([
@@ -52,31 +53,135 @@ const dropdownAccountType = ref(null);
 const dropdownPriceList = ref(null);
 const dropdownSignboardType = ref(null);
 
-const allDealers = ref([
-    { label: 'Dealer Johor', value: 'JHR', group: '6012131311' },
-    { label: 'Dealer Kedah', value: 'KDH', group: '52352312313' },
-    { label: 'Dealer Kelantan', value: 'KTN', group: '34532134135' },
-    { label: 'Dealer Melaka', value: 'MLK', group: '345154654' },
-    { label: 'Dealer Negeri Sembilan', value: 'NSN', group: '2134234132' },
-    { label: 'Dealer Pahang', value: 'PHG', group: '31325546' },
-    { label: 'Dealer Penang', value: 'PNG', group: '1231556464' },
-    { label: 'Dealer Perak', value: 'PRK', group: '784523342' },
-    { label: 'Dealer Perlis', value: 'PLS', group: '435346123' },
-    { label: 'Dealer Sabah', value: 'SBH', group: '54345614' },
-    { label: 'Dealer Sarawak', value: 'SWK', group: '456233414' },
-    { label: 'Dealer Selangor', value: 'SGR', group: '245326234' },
-    { label: 'Dealer Terengganu', value: 'TRG', group: '42352623414' },
-    { label: 'Dealer Kuala Lumpur', value: 'KUL', group: '4562624141' },
-    { label: 'Dealer Putrajaya', value: 'PJY', group: '87574625' },
-    { label: 'Dealer Labuan', value: 'LBN', group: '643551241' }
-]);
+const allDealers = ref([]);
 
 const currentException = ref({
     dealers: []
 });
 
+// Fetch main branch dealer list
+async function fetchDealerList() {
+    try {
+        const formData = new FormData();
+        formData.append('mainBranch', 1);
+
+        const response = await api.post('list_dealer', formData);
+
+        if (response.data.status === 1 && response.data.admin_data) {
+            const adminData = response.data.admin_data;
+            const dealers = [];
+
+            // 🔍 admin_data may contain multiple keys (like '6028010500', etc.)
+            Object.values(adminData).forEach((item) => {
+                if (item.shop) {
+                    const shop = item.shop;
+                    dealers.push({
+                        label: shop.companyName1 + shop.companyName2 + shop.companyName3 + companyName4 + (shop.custAccountNo ? ` - ${shop.custAccountNo}` : ''),
+                        value: shop.id,
+                        group: shop.state || '-'
+                    });
+                }
+            });
+
+            allDealers.value = dealers;
+        } else {
+            allDealers.value = [];
+            console.warn('No dealers found or invalid response format');
+        }
+    } catch (error) {
+        console.error('Error fetching dealer list:', error);
+    }
+}
+
+// Function to call SAP API
+async function fetchDealerDetails(accountNo) {
+    try {
+        const response = await api.post('detail_dealer_SAP', {
+            custAccountNo: accountNo
+        });
+
+        return response.data;
+    } catch (error) {
+        console.error('Error fetching dealer details:', error);
+        throw error;
+    }
+}
+
+// Function to map SAP response to form fields
+function mapSapResponseToForm(sapData) {
+    const customerMaster = sapData.customermaster;
+
+    return {
+        // Company Details
+        companyRegNo: customerMaster.companyregno || '',
+        companyName1: customerMaster.companyname1 || '',
+        companyName2: customerMaster.companyname2 || '',
+        companyName3: customerMaster.companyname3 || '',
+        companyName4: customerMaster.companyname4 || '',
+        salesTaxNo: customerMaster.salestaxno || '',
+        serviceTaxNo: customerMaster.servicetaxno || '',
+        tinNo: customerMaster.tin || '',
+        vatNo: customerMaster.vatno || '',
+
+        // Address & Contact Details
+        addressLine1: customerMaster.addressline1 || '',
+        addressLine2: customerMaster.addressline2 || '',
+        addressLine3: customerMaster.addressline3 || '',
+        addressLine4: customerMaster.addressline4 || '',
+        city: customerMaster.city || '',
+        postcode: customerMaster.postcode || '',
+        state: customerMaster.state || '',
+        country: customerMaster.country || '',
+        phoneNumber: customerMaster.phoneno || '',
+        emailAddress: customerMaster.emailaddress || '',
+
+        // Account Details
+        accountType: '', // Not in SAP response, will use dropdown
+        paymentTerms: customerMaster.paymentterms || '',
+        riskCategory: customerMaster.riskcategory || '',
+        creditLimit: customerMaster.creditlimit || '',
+        customerAccountGroup: customerMaster.customeraccountgroup || '',
+        customerCondGrp: customerMaster.customercondgrp || '',
+
+        // Pricing & Sales Info
+        pricelist: customerMaster.pricelist || '',
+        priceGroup: customerMaster.pricegroup || '',
+        priceProcedure: customerMaster.priceprocedure || '',
+        salesOffice: customerMaster.salesoffice || '',
+        salesDistrict: customerMaster.salesdistrict || '',
+        startingSalesAmt: '', // Not in SAP response
+
+        // Signboard / Branding
+        signboardType: customerMaster.signboardtype || '',
+        signboardBrand: customerMaster.signboardbrand || '',
+
+        // Shipping & Delivery
+        shippingCond: customerMaster.shippingcond || '',
+        allowLalamove: '', // Not in SAP response
+
+        // Other Settings
+        showOnList: '', // Not in SAP response
+        ifFamilyChannel: '', // Not in SAP response
+
+        // Master User (not in SAP response)
+        firstname: '',
+        lastname: '',
+        email: '',
+        phoneno: '',
+        password: '',
+        confirmpassword: '',
+
+        // Additional fields from SAP
+        custAccountNo: customerMaster.custaccountno || '',
+        mobilePhoneNo: customerMaster.mobilephoneno || '',
+        accountStatus: customerMaster.accountstatus || '',
+        accountLastUpdate: customerMaster.accountlastupdate || '',
+        accountCreation: customerMaster.accountcreation || ''
+    };
+}
+
 // Function for Next button
-function goNext() {
+async function goNext() {
     if (!accountNo.value) {
         alert('Please enter Account No.');
         return;
@@ -85,30 +190,40 @@ function goNext() {
     isLoading.value = true;
     showDetails.value = false;
 
-    setTimeout(() => {
-        // find data from service
-        const etenList = ListEtenService.getListEtenData();
-        const matched = etenList.find((item) => item.custAccountNo === accountNo.value);
+    try {
+        const response = await fetchDealerDetails(accountNo.value);
 
-        if (matched) {
-            form.value = { ...matched };
+        if (response.status === 1 && response.admin_data && response.admin_data[0]) {
+            const sapData = response.admin_data[0];
+            form.value = mapSapResponseToForm(sapData);
 
-            // pre-select dropdowns
-            dropdownAccountType.value = dropdownAccountTypeValue.value.find((opt) => opt.code === matched.accountType);
-            dropdownPriceList.value = dropdownPriceListValue.value.find((opt) => opt.code === matched.pricelist);
-            dropdownSignboardType.value = dropdownSignboardTypeValue.value.find((opt) => opt.code === matched.signboardType);
-            dropdownShippingCondition.value = dropdownShippingConditionValue.value.find((opt) => opt.code === matched.shippingCond);
-            dropdownYesNo.value = dropdownYesNoValue.value.find((opt) => opt.code === String(matched.allowLalamove));
+            // Pre-select dropdowns based on SAP data
+            dropdownAccountType.value = dropdownAccountTypeValue.value.find((opt) => opt.code === form.value.accountType);
+            dropdownPriceList.value = dropdownPriceListValue.value.find((opt) => opt.code === form.value.pricelist);
+            dropdownSignboardType.value = dropdownSignboardTypeValue.value.find((opt) => opt.code === form.value.signboardType);
+            dropdownShippingCondition.value = dropdownShippingConditionValue.value.find((opt) => opt.code === form.value.shippingCond);
+
+            // Set default values for Yes/No dropdowns
+            dropdownYesNo.value = dropdownYesNoValue.value.find((opt) => opt.code === '1'); // Default to Yes
+
+            showDetails.value = true;
         } else {
             alert('No record found for Account No: ' + accountNo.value);
             form.value = {};
         }
-
+    } catch (error) {
+        console.error('Error:', error);
+        alert('Error fetching dealer details. Please try again.');
+    } finally {
         isLoading.value = false;
-        showDetails.value = true;
-    }, 1500); // simulate delay
+    }
 }
+
+onMounted(() => {
+    fetchDealerList();
+});
 </script>
+
 <template>
     <Fluid>
         <!-- Header -->
@@ -192,7 +307,7 @@ function goNext() {
                     <div class="flex flex-col md:flex-row gap-4">
                         <div class="w-full">
                             <label for="mainBranch">Main Branch Account</label>
-                            <Dropdown v-model="currentException.dealers" :options="allDealers" optionLabel="label" optionValue="value" filter placeholder="Search or Select Main Branch" class="w-full">
+                            <Dropdown v-model="currentException.dealers" :disabled="isLoading || accountNo.endsWith('00')" :options="allDealers" optionLabel="label" optionValue="value" filter placeholder="Search or Select Main Branch" class="w-full">
                                 <template #option="slotProps">
                                     <div class="flex flex-col">
                                         <div class="font-medium text-gray-800">{{ slotProps.option.label }}</div>
@@ -414,27 +529,27 @@ function goNext() {
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div>
                             <label for="firstname">First Name</label>
-                            <InputText :disabled="!!form.firstname" id="firstname" type="text" v-model="form.firstname" />
+                            <InputText :disabled="!!form.firstname" id="firstname" type="text" v-model="form.firstname" required />
                         </div>
                         <div>
                             <label for="lastname">Last Name</label>
-                            <InputText :disabled="!!form.lastname" id="lastname" type="text" v-model="form.lastname" />
+                            <InputText :disabled="!!form.lastname" id="lastname" type="text" v-model="form.lastname" required />
                         </div>
                         <div>
                             <label for="email">Email</label>
-                            <InputText :disabled="!!form.email" id="email" type="text" v-model="form.email" />
+                            <InputText :disabled="!!form.email" id="email" type="text" v-model="form.email" required />
                         </div>
                         <div>
                             <label for="phoneno">Phone No</label>
-                            <InputText :disabled="!!form.phoneno" id="phoneno" type="text" v-model="form.phoneno" />
+                            <InputText :disabled="!!form.phoneno" id="phoneno" type="text" v-model="form.phoneno" required />
                         </div>
                         <div>
                             <label for="password">Password</label>
-                            <Password id="password" v-model="form.password" toggleMask class="w-full" />
+                            <Password id="password" v-model="form.password" toggleMask class="w-full" required />
                         </div>
                         <div>
                             <label for="password">Confirm Password</label>
-                            <Password id="confirmpassword" v-model="form.confirmpassword" toggleMask :feedback="false" class="w-full" />
+                            <Password id="confirmpassword" v-model="form.confirmpassword" toggleMask :feedback="false" class="w-full" required />
                         </div>
                     </div>
 
