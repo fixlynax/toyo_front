@@ -56,6 +56,7 @@ const getOverallStatusSeverity = (orderStatus) => {
 
 const getOverallStatusLabel = (orderStatus) => {
     return STATUS_MAP[Number(orderStatus)]?.label || 'Pending';
+    
 };
 
 // 🧩 Date Formatter
@@ -80,7 +81,7 @@ const fetchReturnOrders = async (tabStatus = 'PENDING') => {
             listData.value = response.data.admin_data.map((returnOrder) => ({
                 id: returnOrder.id,
                 returnRequestNo: returnOrder.return_orderNo_ref || '-',
-                custAccountNo: returnOrder.custaccountno || '-',
+                custAccountNo: returnOrder.custAccountNo || '-',
                 customerName: returnOrder.dealerName || '-',
                 reasonCode: returnOrder.reason_code || '-',
                 reasonMessage: returnOrder.reason_message || '-',
@@ -111,6 +112,8 @@ onBeforeMount(() => {
     const firstTab = statusTabs[activeTabIndex.value]?.status;
     fetchReturnOrders(firstTab);
 });
+
+
 </script>
 
 <template>
