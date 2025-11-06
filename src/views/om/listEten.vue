@@ -114,8 +114,8 @@ onMounted(async () => {
                     companyName1: shop.companyName1,
                     city: shop.city, 
                     state: shop.state, 
-                    phoneNumber: shop.phoneNumber || 'N/A',
-                    signboardType: shop.signboardType || 'N/A',
+                    phoneNumber: shop.phoneNumber || '-',
+                    signboardType: shop.signboardType || '-',
                     status: shop.status,
                     user_list: customer.user_list 
                 };
