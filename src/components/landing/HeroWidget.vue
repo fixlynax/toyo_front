@@ -1,7 +1,7 @@
 <template>
     <div
         id="hero"
-        class="flex flex-col-reverse md:flex-row items-center justify-between pt-40 pb-80 px-6 md:px-16 lg:px-40 overflow-hidden"
+        class="flex flex-col-reverse md:flex-row items-center justify-between pt-40 pb-40 px-6 md:px-16 lg:px-40 overflow-hidden"
         style="background: linear-gradient(135deg, #dbeafe 0%, #2563eb1a 100%); clip-path: ellipse(150% 90% at 93% 10%)"
     >
         <!-- Left Content -->
@@ -18,7 +18,7 @@
 
         <!-- Right Image -->
         <div class="flex justify-center md:justify-end md:w-1/2">
-            <img src="/demo/images/landingpage.png" alt="Hero Image" class="w-1/12 md:w-9/12 lg:w-8/12 object-contain drop-shadow-lg" />
+            <img src="/demo/images/toyor_tayar4.png" alt="Hero Image" class="w-1/12 md:w-9/12 lg:w-8/12 object-contain drop-shadow-lg" />
         </div>
     </div>
 </template>
