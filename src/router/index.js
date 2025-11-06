@@ -75,9 +75,10 @@ const router = createRouter({
                     component: () => import('@/views/om/createEten.vue')
                 },
                 {
-                    path: '/om/detailEten',
+                    path: '/om/detailEten/:custAccNo',
                     name: 'Detail-Eten',
-                    component: () => import('@/views/om/detailEten.vue')
+                    component: () => import('@/views/om/detailEten.vue'),
+                    props: true
                 },
                 {
                     path: '/om/editEtenUser',

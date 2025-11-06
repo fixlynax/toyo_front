@@ -35,7 +35,7 @@ export const tokenService = {
     logout() {
         this.removeToken();
         // Redirect to login page if needed
-        window.location.href = '/login';
+        // window.location.href = '/auth/login';
     }
 };
 

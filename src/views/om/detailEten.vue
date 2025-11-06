@@ -13,7 +13,7 @@
                                 <div class="text-2xl font-bold text-gray-800">Customer Information</div>
                             </div>
 
-                            <RouterLink to="/om/editEten">
+                            <RouterLink :to="`/om/editEten/${$route.params.custAccNo}`">
                                 <Button type="button" label="Edit" />
                             </RouterLink>
                         </div>
@@ -50,23 +50,23 @@
                             </div>
                             <div>
                                 <span class="text-sm text-gray-500">Sales Tax No</span>
-                                <p class="text-lg font-medium">{{ form.salesTaxNo }}</p>
+                                <p class="text-lg font-medium">{{ form.salesTaxNo || '-' }}</p>
                             </div>
                             <div>
                                 <span class="text-sm text-gray-500">Service Tax No</span>
-                                <p class="text-lg font-medium">{{ form.serviceTaxNo }}</p>
+                                <p class="text-lg font-medium">{{ form.serviceTaxNo || '-' }}</p>
                             </div>
                             <div>
                                 <span class="text-sm text-gray-500">TIN No</span>
-                                <p class="text-lg font-medium">{{ form.tinNo }}</p>
+                                <p class="text-lg font-medium">{{ form.tinNo || '-' }}</p>
                             </div>
                             <div>
                                 <span class="text-sm text-gray-500">VAT No</span>
-                                <p class="text-lg font-medium">{{ form.vatNo }}</p>
+                                <p class="text-lg font-medium">{{ form.vatNo || '-' }}</p>
                             </div>
                             <div>
-                                <span class="text-sm text-gray-500">Main  Branch</span>
-                                <p class="text-lg font-medium">{{ form.mainBranch }}</p>
+                                <span class="text-sm text-gray-500">Main Branch</span>
+                                <p class="text-lg font-medium">{{ form.mainBranch || '-' }}</p>
                             </div>
                         </div>
                     </div>
@@ -77,11 +77,11 @@
                         <div class="grid md:grid-cols-2 gap-4">
                             <div>
                                 <span class="text-sm text-gray-500">Address Line 1</span>
-                                <p class="text-lg font-medium">{{ form.addressLine1 }}</p>
+                                <p class="text-lg font-medium">{{ form.addressLine1 || '-' }}</p>
                             </div>
                             <div>
                                 <span class="text-sm text-gray-500">Address Line 2</span>
-                                <p class="text-lg font-medium">{{ form.addressLine2 }}</p>
+                                <p class="text-lg font-medium">{{ form.addressLine2 || '-' }}</p>
                             </div>
                             <div>
                                 <span class="text-sm text-gray-500">Address Line 3</span>
@@ -93,35 +93,35 @@
                             </div>
                             <div>
                                 <span class="text-sm text-gray-500">City</span>
-                                <p class="text-lg font-medium">{{ form.city }}</p>
+                                <p class="text-lg font-medium">{{ form.city || '-' }}</p>
                             </div>
                             <div>
                                 <span class="text-sm text-gray-500">Postcode</span>
-                                <p class="text-lg font-medium">{{ form.postcode }}</p>
+                                <p class="text-lg font-medium">{{ form.postcode || '-' }}</p>
                             </div>
                             <div>
                                 <span class="text-sm text-gray-500">State</span>
-                                <p class="text-lg font-medium">{{ form.state }}</p>
+                                <p class="text-lg font-medium">{{ form.state || '-' }}</p>
                             </div>
                             <div>
                                 <span class="text-sm text-gray-500">Country</span>
-                                <p class="text-lg font-medium">{{ form.country }}</p>
+                                <p class="text-lg font-medium">{{ form.country || '-' }}</p>
                             </div>
                             <div>
                                 <span class="text-sm text-gray-500">Map Latitude</span>
-                                <p class="text-lg font-medium">{{ form.mapLatitude }}</p>
+                                <p class="text-lg font-medium">{{ form.mapLatitude || '-' }}</p>
                             </div>
                             <div>
                                 <span class="text-sm text-gray-500">Map Longitude</span>
-                                <p class="text-lg font-medium">{{ form.mapLongitude }}</p>
+                                <p class="text-lg font-medium">{{ form.mapLongitude || '-' }}</p>
                             </div>
                             <div>
                                 <span class="text-sm text-gray-500">Phone No</span>
-                                <p class="text-lg font-medium">{{ form.phoneNumber }}</p>
+                                <p class="text-lg font-medium">{{ form.phoneNumber || '-' }}</p>
                             </div>
                             <div>
                                 <span class="text-sm text-gray-500">Email</span>
-                                <p class="text-lg font-medium">{{ form.emailAddress }}</p>
+                                <p class="text-lg font-medium">{{ form.emailAddress || '-' }}</p>
                             </div>
                         </div>
                     </div>
@@ -132,27 +132,27 @@
                         <div class="grid md:grid-cols-2 gap-4">
                             <div>
                                 <span class="text-sm text-gray-500">Account Type</span>
-                                <p class="text-lg font-medium">{{ form.accountType }}</p>
+                                <p class="text-lg font-medium">{{ form.accountType || '-' }}</p>
                             </div>
                             <div>
                                 <span class="text-sm text-gray-500">Payment Terms</span>
-                                <p class="text-lg font-medium">{{ form.paymentTerms }}</p>
+                                <p class="text-lg font-medium">{{ form.paymentTerms || '-' }}</p>
                             </div>
                             <div>
                                 <span class="text-sm text-gray-500">Risk Category</span>
-                                <p class="text-lg font-medium">{{ form.riskCategory }}</p>
+                                <p class="text-lg font-medium">{{ form.riskCategory || '-' }}</p>
                             </div>
                             <div>
                                 <span class="text-sm text-gray-500">Credit Limit</span>
-                                <p class="text-lg font-medium">{{ form.creditLimit }}</p>
+                                <p class="text-lg font-medium">{{ formatCurrency(form.creditLimit) }}</p>
                             </div>
                             <div>
                                 <span class="text-sm text-gray-500">Customer Account Group</span>
-                                <p class="text-lg font-medium">{{ form.customerAccountGroup }}</p>
+                                <p class="text-lg font-medium">{{ form.customerAccountGroup || '-' }}</p>
                             </div>
                             <div>
                                 <span class="text-sm text-gray-500">Customer Condition Group</span>
-                                <p class="text-lg font-medium">{{ form.customerCondGrp }}</p>
+                                <p class="text-lg font-medium">{{ form.customerCondGrp || '-' }}</p>
                             </div>
                         </div>
                     </div>
@@ -163,27 +163,27 @@
                         <div class="grid md:grid-cols-3 gap-4">
                             <div>
                                 <span class="text-sm text-gray-500">Price List</span>
-                                <p class="text-lg font-medium">{{ form.pricelist }}</p>
+                                <p class="text-lg font-medium">{{ form.pricelist || '-' }}</p>
                             </div>
                             <div>
                                 <span class="text-sm text-gray-500">Price Group</span>
-                                <p class="text-lg font-medium">{{ form.priceGroup }}</p>
+                                <p class="text-lg font-medium">{{ form.priceGroup || '-' }}</p>
                             </div>
                             <div>
                                 <span class="text-sm text-gray-500">Price Procedure</span>
-                                <p class="text-lg font-medium">{{ form.priceProcedure }}</p>
+                                <p class="text-lg font-medium">{{ form.priceProcedure || '-' }}</p>
                             </div>
                             <div>
                                 <span class="text-sm text-gray-500">Sales Office</span>
-                                <p class="text-lg font-medium">{{ form.salesOffice }}</p>
+                                <p class="text-lg font-medium">{{ form.salesOffice || '-' }}</p>
                             </div>
                             <div>
                                 <span class="text-sm text-gray-500">Sales District</span>
-                                <p class="text-lg font-medium">{{ form.salesDistrict }}</p>
+                                <p class="text-lg font-medium">{{ form.salesDistrict || '-' }}</p>
                             </div>
                             <div>
                                 <span class="text-sm text-gray-500">Starting Sales Amount</span>
-                                <p class="text-lg font-medium">{{ form.startingSalesAmt }}</p>
+                                <p class="text-lg font-medium">{{ formatCurrency(form.startingSalesAmt) }}</p>
                             </div>
                         </div>
                     </div>
@@ -194,7 +194,7 @@
                         <div class="grid md:grid-cols-2 gap-4">
                             <div>
                                 <span class="text-sm text-gray-500">Shipping Condition</span>
-                                <p class="text-lg font-medium">{{ form.shippingCond }}</p>
+                                <p class="text-lg font-medium">{{ form.shippingCond || '-' }}</p>
                             </div>
                             <div>
                                 <span class="text-sm text-gray-500">Allow Lalamove</span>
@@ -209,11 +209,11 @@
                         <div class="grid md:grid-cols-2 gap-4">
                             <div>
                                 <span class="text-sm text-gray-500">Signboard Type</span>
-                                <p class="text-lg font-medium">{{ form.signboardType }}</p>
+                                <p class="text-lg font-medium">{{ form.signboardType || '-' }}</p>
                             </div>
                             <div>
                                 <span class="text-sm text-gray-500">Signboard Brand</span>
-                                <p class="text-lg font-medium">{{ form.signboardBrand ? 'Yes' : 'No' }}</p>
+                                <p class="text-lg font-medium">{{ form.signboardBrand || '-' }}</p>
                             </div>
                         </div>
                     </div>
@@ -234,28 +234,30 @@
                                 <!-- Terms -->
                                 <tr class="border-b">
                                     <td class="px-4 py-2 font-medium">Terms</td>
-                                    <td class="px-4 py-2 text-right">NET30</td>
+                                    <td class="px-4 py-2 text-right">{{ form.paymentTerms || 'NET30' }}</td>
                                 </tr>
 
                                 <!-- Risk Category -->
                                 <tr class="border-b">
                                     <td class="px-4 py-2 font-medium">Risk Category</td>
                                     <td class="px-4 py-2 text-right">
-                                        <span class="px-2 py-1 text-xs font-semibold text-green-700 bg-green-100 rounded"> Low </span>
+                                        <span class="px-2 py-1 text-xs font-semibold text-green-700 bg-green-100 rounded"> {{ form.riskCategory || 'Low' }} </span>
                                     </td>
                                 </tr>
 
                                 <!-- Credit Limit -->
                                 <tr class="border-b">
                                     <td class="px-4 py-2 font-medium">Credit Limit</td>
-                                    <td class="px-4 py-2 text-right">50,000</td>
+                                    <td class="px-4 py-2 text-right">{{ formatCurrency(form.creditLimit) }}</td>
                                 </tr>
 
                                 <!-- Status -->
                                 <tr class="border-b">
                                     <td class="px-4 py-2 font-medium">Status</td>
                                     <td class="px-4 py-2 text-right">
-                                        <span class="inline-flex items-center px-2 py-1 text-xs font-semibold text-green-700 bg-green-100 rounded"> <i class="pi pi-check-circle mr-1"></i> Active </span>
+                                        <span class="inline-flex items-center px-2 py-1 text-xs font-semibold text-green-700 bg-green-100 rounded">
+                                            <i class="pi pi-check-circle mr-1"></i> {{ form.accountStatus === 'false' ? 'Inactive' : 'Active' }}
+                                        </span>
                                     </td>
                                 </tr>
 
@@ -271,11 +273,13 @@
                     </div>
                 </div>
 
-                <!-- Device List -->
+                <!-- Forecast vs Actual Chart -->
                 <div class="card flex flex-col w-full">
                     <div class="text-2xl font-bold text-gray-800 border-b pb-2 mb-3">Forecast vs Actual Comparison</div>
-                    <Chart type="bar" :data="chartData" :options="chartOptions" class="h-[30rem]" />
-                    <div class="overflow-x-auto"></div>
+                    <div v-if="salesForecast && salesForecast.comparison" class="h-[30rem]">
+                        <Chart type="bar" :data="chartData" :options="chartOptions" class="h-full" />
+                    </div>
+                    <div v-else class="h-[30rem] flex items-center justify-center text-gray-500">No forecast data available</div>
                 </div>
 
                 <!-- Finance Document -->
@@ -349,26 +353,43 @@
                 <!-- Header -->
                 <div class="flex items-center justify-between border-b pb-2 mb-4">
                     <div class="text-2xl font-bold text-gray-800">Ship To</div>
-                    <!-- Optional button area (keep empty for consistency) -->
                     <div></div>
                 </div>
 
                 <!-- Ship To Table -->
                 <DataTable :value="shiptoList" :rows="5" dataKey="id" :rowHover="true" responsiveLayout="scroll" class="text-sm">
-                    <Column field="companyName1" header="Company Name" style="min-width: 12rem" />
+                    <Column header="Company Name" style="min-width: 16rem">
+                        <template #body="{ data }">
+                            {{ data.companyName1 || '' }}<br />
+                            <span v-if="data.companyName2">{{ data.companyName2 }}<br /></span>
+                            <span v-if="data.companyName3">{{ data.companyName3 }}<br /></span>
+                            <span v-if="data.companyName4">{{ data.companyName4 }}<br /></span>
+                            ({{ data.custAccountNo }})
+                        </template>
+                    </Column>
                     <Column header="Address" style="min-width: 16rem">
                         <template #body="{ data }">
-                            {{ data.addressLine1 }}<br />
+                            {{ data.addressLine1 || '' }}<br />
                             <span v-if="data.addressLine2">{{ data.addressLine2 }}<br /></span>
                             <span v-if="data.addressLine3">{{ data.addressLine3 }}<br /></span>
-                            <span v-if="data.addressLine4">{{ data.addressLine4 }}</span>
+                            <span v-if="data.addressLine4">{{ data.addressLine4 }}<br /></span>
                             {{ data.city }}, {{ data.state }} {{ data.postcode }}<br />
                             {{ data.country }}
                         </template>
+                        <template #filterapply="slotProps"></template>
+                        <template #filterclear="slotProps"></template>
                     </Column>
 
-                    <Column field="phoneNumber" header="Phone No" style="min-width: 10rem" />
-                    <Column field="emailAddress" header="Email" style="min-width: 14rem" />
+                    <Column field="phoneNumber" header="Phone No" style="min-width: 10rem">
+                        <template #body="slotProps">
+                            {{ slotProps.data.phoneNumber || '-' }}
+                        </template>
+                    </Column>
+                    <Column header="Email" style="min-width: 14rem">
+                        <template #body="slotProps">
+                            {{ slotProps.data.emailAddress || '-' }}
+                        </template>
+                    </Column>
                 </DataTable>
             </div>
         </div>
@@ -379,7 +400,7 @@
                 <div class="flex items-center justify-between border-b pb-2 mb-4">
                     <div class="text-2xl font-bold text-gray-800">User List</div>
                     <div class="inline-flex items-center gap-2">
-                        <RouterLink to="/om/createUserEten">
+                        <RouterLink :to="`/om/createUserEten/${form.id}`">
                             <Button label="Create" class="p-button-info" size="small" />
                         </RouterLink>
                     </div>
@@ -390,29 +411,35 @@
                     <Column header="User Info" style="min-width: 1rem">
                         <template #body="{ data }">
                             <div class="flex flex-col">
-                                <RouterLink to="/om/detailUser" class="hover:underline font-bold">
-                                    {{ data.name }}
+                                <RouterLink :to="`/om/detailUser/${data.id}`" class="hover:underline font-bold">
+                                    {{ data.firstName }} {{ data.lastName }}
                                     <span v-if="data.isMaster === 1" class="text-blue-400">(Admin)</span>
                                 </RouterLink>
+                                <span class="text-sm text-gray-500">{{ data.emailAddress }}</span>
+                                <span class="text-sm text-gray-500">{{ data.countryCode }}{{ data.mobileNumber }}</span>
                             </div>
                         </template>
                     </Column>
 
                     <Column header="Module" style="min-width: 8rem">
                         <template #body="{ data }">
-                            {{ data.modules.join(', ') }}
+                            {{ getUserModules(data) }}
                         </template>
                     </Column>
-                    <Column field="lastLogin" header="Last Login" style="min-width: 8rem" />
+                    <Column field="lastLogin" header="Last Login" style="min-width: 8rem">
+                        <template #body="{ data }">
+                            {{ formatDate(data.lastLogin) }}
+                        </template>
+                    </Column>
 
                     <Column header="Status" style="min-width: 8rem">
                         <template #body="{ data }">
                             <Tag :value="data.status === 1 ? 'Active' : 'Inactive'" :severity="data.status === 1 ? 'success' : 'danger'" />
                         </template>
                     </Column>
-                    <Column field="activationCode" header="Activation Code" style="min-width: 8rem">
+                    <Column header="Activation Code" style="min-width: 8rem">
                         <template #body="{ data }">
-                            <Button icon="pi pi-send" label="Send" style="width: fit-content" class="p-button-info p-button-sm" @click="sendSetting(data)" />
+                            <Button icon="pi pi-send" label="Send" style="width: fit-content" class="p-button-info p-button-sm" @click="sendActivationCode(data)" />
                         </template>
                     </Column>
                 </DataTable>
@@ -422,21 +449,132 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue';
+import { ref, onMounted, computed, watch } from 'vue';
+import { useRoute } from 'vue-router';
+import api from '@/service/api';
+import { useToast } from 'primevue/usetoast';
 
-onMounted(() => {
-    chartData.value = setChartData();
-    chartOptions.value = setChartOptions();
-});
+const toast = useToast();
+const route = useRoute();
 
+// Reactive data
+const form = ref({});
+const users = ref([]);
+const shiptoList = ref([]);
+const salesForecast = ref(null);
+const loading = ref(false);
+const isSuspended = ref(false);
+
+// Chart data
 const chartData = ref();
 const chartOptions = ref();
 
+// Fetch dealer profile data
+const fetchDealerProfile = async () => {
+    loading.value = true;
+    try {
+        const custAccNo = route.params.custAccNo;
+        const response = await api.get(`profile_dealer/${custAccNo}`);
+
+        if (response.data.status === 1 && response.data.admin_data && response.data.admin_data.length > 0) {
+            const dealerData = response.data.admin_data[0];
+            form.value = dealerData;
+            users.value = dealerData.user_list || [];
+            shiptoList.value = dealerData.shipTo_list || [];
+            salesForecast.value = dealerData.salesForecast;
+
+            // Update chart data
+            if (salesForecast.value && salesForecast.value.comparison) {
+                chartData.value = setChartData();
+                chartOptions.value = setChartOptions();
+            }
+        } else {
+            console.log('No dealer data found');
+        }
+    } catch (error) {
+        console.error('Error fetching dealer profile:', error);
+    } finally {
+        loading.value = false;
+    }
+};
+
+// Format currency
+const formatCurrency = (value) => {
+    if (!value) return '-';
+    return new Intl.NumberFormat('en-MY', {
+        style: 'currency',
+        currency: 'MYR',
+        minimumFractionDigits: 0,
+        maximumFractionDigits: 0
+    }).format(value);
+};
+
+// Format date
+const formatDate = (dateString) => {
+    if (!dateString) return '-';
+    return new Date(dateString).toLocaleDateString('en-MY', {
+        day: '2-digit',
+        month: '2-digit',
+        year: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit'
+    });
+};
+
+// Get user modules
+const getUserModules = (user) => {
+    const modules = [];
+    if (user.allow_warranty) modules.push('Warranty');
+    if (user.allow_order) modules.push('Order');
+    if (user.allow_billing) modules.push('Billing');
+    if (user.allow_sale) modules.push('Sales');
+    if (user.allow_user) modules.push('User');
+    return modules.length > 0 ? modules.join(', ') : '-';
+};
+
+// Send activation code
+// Send activation code
+const sendActivationCode = async (user) => {
+    try {
+        const response = await api.get(`resend-OTP/${user.id}`);
+
+        if (response.data.status === 1) {
+            console.log('Activation code sent successfully');
+
+            // ✅ Correct toast syntax
+            toast.add({
+                severity: 'success',
+                summary: 'Success',
+                detail: 'Activation code sent successfully',
+                life: 3000
+            });
+        } else {
+            console.error('Failed to send activation code');
+            toast.add({
+                severity: 'error',
+                summary: 'Failed',
+                detail: 'Failed to send activation code',
+                life: 3000
+            });
+        }
+    } catch (error) {
+        console.error('Error sending activation code:', error);
+        toast.add({
+            severity: 'error',
+            summary: 'Error',
+            detail: 'An error occurred while sending the activation code',
+            life: 3000
+        });
+    }
+};
+
+// Chart configuration
 const setChartData = () => {
     const documentStyle = getComputedStyle(document.documentElement);
+    const comparison = salesForecast.value.comparison;
 
     return {
-        labels: ['January', 'February', 'March', 'April', 'May', 'June', 'July'],
+        labels: Object.keys(comparison),
         datasets: [
             {
                 label: 'Forecast',
@@ -445,7 +583,7 @@ const setChartData = () => {
                 borderWidth: 0,
                 borderRadius: 16,
                 borderSkipped: false,
-                data: [65, 59, 80, 81, 56, 55, 40]
+                data: Object.values(comparison).map((item) => item.forecast)
             },
             {
                 label: 'Actual',
@@ -454,7 +592,7 @@ const setChartData = () => {
                 borderWidth: 0,
                 borderRadius: 16,
                 borderSkipped: false,
-                data: [28, 48, 40, 19, 86, 27, 90]
+                data: Object.values(comparison).map((item) => item.actual)
             }
         ]
     };
@@ -483,8 +621,8 @@ const setChartOptions = () => {
                 }
             },
             tooltip: {
-                mode: 'nearest', // Changed from 'index' to 'nearest'
-                intersect: true, // Changed to true to only show tooltip when directly hovering
+                mode: 'nearest',
+                intersect: true,
                 backgroundColor: 'rgba(255, 255, 255, 0.95)',
                 titleColor: '#1f2937',
                 bodyColor: '#374151',
@@ -497,7 +635,6 @@ const setChartOptions = () => {
                 usePointStyle: true,
                 callbacks: {
                     title: function (context) {
-                        // Show month name as title
                         return context[0].label;
                     },
                     label: function (context) {
@@ -560,8 +697,8 @@ const setChartOptions = () => {
             }
         },
         interaction: {
-            mode: 'nearest', // Changed from 'index' to 'nearest'
-            intersect: true // Changed to true
+            mode: 'nearest',
+            intersect: true
         },
         elements: {
             bar: {
@@ -580,163 +717,23 @@ const setChartOptions = () => {
         categoryPercentage: 0.8
     };
 };
-const form = ref({
-    memberCode: 'E346572',
-    custAccountNo: '6080100900',
-    companyName1: 'PS Tyres & Battery Auto Services Sdn. Bhd',
-    companyName2: '',
-    companyName3: '',
-    companyName4: '',
-    companyRegNo: 'MY123456789',
-    salesTaxNo: 'SST123456',
-    serviceTaxNo: 'STX120987',
-    tinNo: '1256734321',
-    vatNo: '0976213456',
-    mainBranch: 'Toyo Tire Seri Petaling',
-    addressLine1: '123 Toyo Road',
-    addressLine2: 'Toyo Industrial Park',
-    addressLine3: '',
-    addressLine4: '',
-    city: 'Kuala Lumpur',
-    postcode: '50000',
-    state: 'Kuala Lumpur',
-    country: 'Malaysia',
-    mapLatitude: '3.1390',
-    mapLongitude: '101.6869',
-    phoneNumber: '+60 3-1234 5678',
-    mobilreNumber: '+60 19-1234 567',
-    emailAddress: 'sales@toyotires.com.my',
-    accountType: 'Retailer',
-    priceGroup: 'A',
-    priceProcedure: 'Standard',
-    customerAccountGroup: 'Group1',
-    customerCondGrp: 'Cond1',
-    paymentTerms: 'NET 30',
-    riskCategory: 'Low',
-    creditLimit: 50000,
-    pricelist: '01',
-    signboardType: 'T10',
-    signboardBrand: 'Toyo',
-    salesOffice: 'Kuala Lumpur',
-    salesDistrict: 'Central',
-    shippingCond: 'RE',
-    accountCreation: '2023-01-15',
-    showOnList: 1,
-    ifFamilyChannel: 0,
-    allowLalamove: 1,
-    startingSalesAmt: 1000,
-    status: 0
-});
 
-// 1. Suspend/Un-suspend
-const isSuspended = ref(false);
+// Suspend account function
 const confirmSuspend = () => {
     isSuspended.value = !isSuspended.value;
+    // You can add API call here to update account status
 };
 
-// 2. Block/Un-block Device List
-const devices = ref([
-    {
-        id: 1,
-        name: 'iPhone 16',
-        uniqueId: '00008030-001E3D400043402E',
-        lastActive: '8/9/2025 10:54 pm',
-        isBlocked: false
-    },
-    {
-        id: 2,
-        name: 'Samsung Galaxy',
-        uniqueId: 'a8098c1a-f86e-11da-bd1a-00112444be1e',
-        lastActive: '8/9/2025 5:13 pm',
-        isBlocked: true
+// Lifecycle
+onMounted(() => {
+    fetchDealerProfile();
+});
+
+// Watch for route changes
+watch(
+    () => route.params.custAccNo,
+    () => {
+        fetchDealerProfile();
     }
-]);
-
-const toggleBlock = (device) => {
-    device.isBlocked = !device.isBlocked;
-};
-
-const users = ref([
-    { id: 'U001', name: 'John Doe', phone: '0123456789', modules: ['Marketing', 'Sales'], account: '6080100900', lastLogin: '11/9/2025 8:00am', status: 1, isMaster: 1 },
-    { id: 'U002', name: 'Jane Smith', phone: '0198765432', modules: ['OM', 'Technical'], account: '6080100901', lastLogin: '10/9/2025 8:00am', status: 1, isMaster: 0 },
-    { id: 'U003', name: 'Alex Tan', phone: '0172233445', modules: ['ITBilling'], account: '6080100902', lastLogin: '23/7/2025 8:00am', status: 0, isMaster: 0 },
-    { id: 'U004', name: 'Siti Aminah', phone: '0111122233', modules: ['SCM', 'Sales', 'Marketing'], account: '6080100903', lastLogin: '09/9/2025 8:00am', status: 1, isMaster: 0 },
-    { id: 'U005', name: 'Michael Lee', phone: '0139988776', modules: ['Technical', 'IT'], account: '6080100904', lastLogin: '07/8/2025 8:00am', status: 0, isMaster: 0 }
-]);
-
-const billingDocs = ref([
-    { id: 1, name: 'Invoice #001', type: 'Invoice' },
-    { id: 2, name: 'Credit Note #100', type: 'CN' },
-    { id: 3, name: 'Debit Note #200', type: 'DN' },
-    { id: 4, name: 'SOA Jan 2025', type: 'SOA Statement' },
-    { id: 5, name: 'Refund Note #10', type: 'Refund Note' }
-]);
-
-const viewDoc = (doc) => {
-    console.log('Viewing billing document:', doc);
-};
-
-// 4. Finance Documents
-const financeDocs = ref([
-    { id: 1, name: 'Payment Receipt' },
-    { id: 2, name: 'Tax Certificate' },
-    { id: 3, name: 'Bank Statement' },
-    { id: 4, name: 'Audit Report' },
-    { id: 5, name: 'Financial Summary' }
-]);
-
-const viewFinance = (doc) => {
-    console.log('Viewing finance document:', doc);
-};
-
-const manageUser = (user) => {
-    console.log('Managing user:', user);
-};
-
-const shiptoList = ref([
-    {
-        id: 1,
-        companyName1: 'Tan Know Car Tires',
-        companyName2: '',
-        companyName3: '',
-        companyName4: '',
-        addressLine1: 'Lot 123, Jalan Sungai',
-        addressLine2: 'Seksyen 15',
-        addressLine3: '',
-        addressLine4: '',
-        city: 'Shah Alam',
-        state: 'Selangor',
-        postcode: '40150',
-        country: 'Malaysia',
-        phoneNumber: '03-55123456',
-        mobileNumber: '012-3456789',
-        emailAddress: 'info@toyotires.my'
-    },
-    {
-        id: 2,
-        companyName1: 'Shiro Auto Parts',
-        companyName2: 'Warehouse Division',
-        companyName3: '',
-        companyName4: '',
-        addressLine1: 'No 45, Jalan Merdeka',
-        addressLine2: '',
-        addressLine3: '',
-        addressLine4: '',
-        city: 'Kuala Lumpur',
-        state: 'Wilayah Persekutuan',
-        postcode: '50450',
-        country: 'Malaysia',
-        phoneNumber: '03-98765432',
-        mobileNumber: '019-8765432',
-        emailAddress: 'contact@shiroauto.com'
-    }
-]);
-
-const onManageDevice = () => {
-    console.log('Manage device clicked');
-};
-
-const sendSetting = (data) => {
-    console.log('Sending activation code to:', data.name);
-};
+);
 </script>

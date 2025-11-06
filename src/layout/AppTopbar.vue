@@ -1,8 +1,28 @@
 <script setup>
 import { useLayout } from '@/layout/composables/layout';
-// import AppConfigurator from './AppConfigurator.vue';
+import api from '@/service/api';
+import { useRouter } from 'vue-router';
 
 const { toggleMenu, toggleDarkMode, isDarkTheme } = useLayout();
+const router = useRouter();
+
+const handleLogout = async () => {
+    try {
+        // Call the logout API
+        await api.post('logout');
+        
+        // Remove token and redirect
+        api.tokenService.logout();
+        
+        // Redirect to login page
+        router.push('/auth/login');
+    } catch (error) {
+        console.error('Logout failed:', error);
+        // Even if API call fails, clear local token and redirect
+        api.tokenService.logout();
+        router.push('/auth/login');
+    }
+};
 </script>
 
 <template>
@@ -14,25 +34,12 @@ const { toggleMenu, toggleDarkMode, isDarkTheme } = useLayout();
             <router-link to="/" class="layout-topbar-logo">
                 <img src="/demo/images/toyo_tires.png" alt="Logo" style="height: 130px; object-fit: contain;" />
             </router-link>
-            <span class="text-xl font-bold ml-5">John Doe</span>
+            <span class="text-xl font-bold ml-5">Admin User</span>
         </div>
-
 
         <div class="layout-topbar-actions">
             <div class="layout-config-menu">
-                <!-- <button type="button" class="layout-topbar-action" @click="toggleDarkMode">
-                    <i :class="['pi', { 'pi-moon': isDarkTheme, 'pi-sun': !isDarkTheme }]"></i>
-                </button> -->
-                <!-- <div class="relative">
-                    <button
-                        v-styleclass="{ selector: '@next', enterFromClass: 'hidden', enterActiveClass: 'animate-scalein', leaveToClass: 'hidden', leaveActiveClass: 'animate-fadeout', hideOnOutsideClick: true }"
-                        type="button"
-                        class="layout-topbar-action layout-topbar-action-highlight"
-                    >
-                        <i class="pi pi-palette"></i>
-                    </button>
-                    <AppConfigurator />
-                </div> -->
+                <!-- Dark mode toggle commented out -->
             </div>
 
             <button
@@ -44,18 +51,9 @@ const { toggleMenu, toggleDarkMode, isDarkTheme } = useLayout();
 
             <div class="layout-topbar-menu hidden lg:block">
                 <div class="layout-topbar-menu-content">
-                    <!-- <button type="button" class="layout-topbar-action">
-                        <i class="pi pi-calendar"></i>
-                        <span>Calendar</span>
-                    </button>
-                    <button type="button" class="layout-topbar-action">
-                        <i class="pi pi-inbox"></i>
-                        <span>Messages</span>
-                    </button> -->
-
-                    <button type="button" class="layout-topbar-action">
+                    <button type="button" class="layout-topbar-action" @click="handleLogout">
                         <i class="pi pi-user font-bold"></i>
-                        <span>Profile</span>
+                        <span>Logout</span>
                     </button>
                 </div>
             </div>
