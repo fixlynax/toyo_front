@@ -400,7 +400,7 @@
                 <div class="flex items-center justify-between border-b pb-2 mb-4">
                     <div class="text-2xl font-bold text-gray-800">User List</div>
                     <div class="inline-flex items-center gap-2">
-                        <RouterLink :to="`/om/createUserEten/${form.id}`">
+                        <RouterLink :to="`/om/createUserEten/${form.custAccountNo}`">
                             <Button label="Create" class="p-button-info" size="small" />
                         </RouterLink>
                     </div>

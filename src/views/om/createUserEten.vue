@@ -8,34 +8,54 @@
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
                         <label class="block font-bold text-gray-700">First Name</label>
-                        <InputText v-model="form.firstName" class="w-full" placeholder="Enter first name" />
+                        <InputText v-model="form.first_name" class="w-full" placeholder="Enter first name" />
+                        <small class="text-red-500" v-if="errors.first_name">{{ errors.first_name }}</small>
                     </div>
                     <div>
                         <label class="block font-bold text-gray-700">Last Name</label>
-                        <InputText v-model="form.lastName" class="w-full" placeholder="Enter last name" />
+                        <InputText v-model="form.last_name" class="w-full" placeholder="Enter last name" />
                     </div>
                     <div>
                         <label class="block font-bold text-gray-700">Email</label>
                         <InputText v-model="form.email" type="email" class="w-full" placeholder="Enter email" />
+                        <small class="text-red-500" v-if="errors.email">{{ errors.email }}</small>
                     </div>
-                    <div>
-                        <label class="block font-bold text-gray-700">Mobile No</label>
-                        <InputText v-model="form.mobile" class="w-full" placeholder="Enter mobile number" />
+                    <div class="grid grid-cols-2 gap-2">
+                        <div>
+                            <label class="block font-bold text-gray-700">Country Code</label>
+                            <Dropdown v-model="form.countryCode" :options="countryCodes" optionLabel="label" optionValue="value" 
+                                     class="w-full" placeholder="Select" />
+                            <small class="text-red-500" v-if="errors.countryCode">{{ errors.countryCode }}</small>
+                        </div>
+                        <div>
+                            <label class="block font-bold text-gray-700">Mobile No</label>
+                            <InputText v-model="form.mobileNum" class="w-full" placeholder="Enter mobile number" />
+                            <small class="text-red-500" v-if="errors.mobileNum">{{ errors.mobileNum }}</small>
+                        </div>
                     </div>
                     <div>
                         <label class="block font-bold text-gray-700">Password</label>
                         <Password v-model="form.password" :feedback="false" toggleMask class="w-full" placeholder="Enter password" />
+                        <small class="text-red-500" v-if="errors.password">{{ errors.password }}</small>
                     </div>
                     <div>
                         <label class="block font-bold text-gray-700">Confirm Password</label>
-                        <Password v-model="form.confirmPassword" :feedback="false" toggleMask class="w-full" placeholder="Confirm password" />
+                        <Password v-model="form.confirm_password" :feedback="false" toggleMask class="w-full" placeholder="Confirm password" />
+                        <small class="text-red-500" v-if="errors.confirm_password">{{ errors.confirm_password }}</small>
+                    </div>
+                    <div>
+                        <label class="block font-bold text-gray-700">Master User</label>
+                        <Dropdown v-model="form.isMaster" :options="masterOptions" optionLabel="label" optionValue="value" 
+                                 class="w-full" placeholder="Select" />
+                        <small class="text-gray-500">Master users have access to all modules</small>
+                        <small class="text-red-500" v-if="errors.isMaster">{{ errors.isMaster }}</small>
                     </div>
                 </div>
             </div>
         </div>
 
         <!-- Modules -->
-        <div class="card flex flex-col gap-8 w-full">
+        <div class="card flex flex-col gap-8 w-full" v-if="form.isMaster === 0">
             <div>
                 <h3 class="text-xl font-semibold text-gray-700 border-b p-2 mb-4">🧩 Modules Access</h3>
                 <div class="grid grid-cols-2 gap-4">
@@ -45,17 +65,15 @@
                     </div>
                 </div>
             </div>
+        </div>
 
+        <div class="card flex flex-col gap-8 w-full">
             <div class="flex flex-col md:flex-row justify-end gap-2 mt-4">
                 <div class="w-40">
-                    <RouterLink to="/om/detailEten">
-                        <Button label="Cancel" class="w-full p-button-secondary" />
-                    </RouterLink>
+                    <Button label="Cancel" class="w-full p-button-secondary" @click="handleCancel" />
                 </div>
                 <div class="w-40">
-                    <RouterLink to="/om/detailEten">
-                        <Button label="Submit" class="w-full" />
-                    </RouterLink>
+                    <Button label="Submit" class="w-full" @click="handleSubmit" :loading="loading" />
                 </div>
             </div>
         </div>
@@ -63,86 +81,195 @@
 </template>
 
 <script setup>
-import { ref } from 'vue';
-import { useRouter } from 'vue-router';
+import { ref, onMounted, watch } from 'vue';
+import { useRouter, useRoute } from 'vue-router';
+import api from '@/service/api'
+import { useToast } from 'primevue/usetoast';
 
+const toast = useToast();
 const router = useRouter();
+const route = useRoute();
+const loading = ref(false);
 
-const form = ref({
-    firstName: '',
-    lastName: '',
-    email: '',
-    mobile: '',
-    gender: '',
-    state: '',
-    race: '',
-    memberLevel: '',
-    password: '',
-    confirmPassword: '',
-    dealerAcc: '',
-    shipToAcc: '',
-    address1: '',
-    address2: '',
-    address3: '',
-    address4: '',
-    city: '',
-    postcode: '',
-    shippingState: '',
-    country: '',
-    modules: []
-});
+const countryCodes = ref([
+    { label: 'Malaysia (+60)', value: '60' },
+    { label: 'Singapore (+65)', value: '65' }
+]);
 
-const dealerList = [
-    { code: '6080100900', name: 'PS Tyres & Battery Auto Services Sdn. Bhd' },
-    { code: '6080102300', name: 'Toyo Auto Centre UHP Tyres Sdn Bhd' },
-    { code: '6080102301', name: 'Tek Ming Auto Service Sdn. Bhd.' },
-    { code: '6080102302', name: 'Apex Tyre & Car Care' },
-    { code: '6080114400', name: 'JS Motorsports Sdn Bhd' },
-    { code: '6080125300', name: 'Weng Tat Tyre Service' }
-];
-
-const raceOptions = [
-    { label: 'Malay', value: 'Malay' },
-    { label: 'Chinese', value: 'Chinese' },
-    { label: 'Indian', value: 'Indian' },
-    { label: 'Other', value: 'Other' }
-];
-
-const stateOptions = [
-    { label: 'Johor', value: 'Johor' },
-    { label: 'Kelantan', value: 'Kelantan' },
-    { label: 'Kuala Lumpur', value: 'Kuala Lumpur' },
-    { label: 'Kedah', value: 'Kedah' },
-    { label: 'Melaka', value: 'Melaka' },
-    { label: 'Negeri Sembilan', value: 'Negeri Sembilan' },
-    { label: 'Pulau Pinang', value: 'Pulau Pinang' },
-    { label: 'Pahang', value: 'Pahang' },
-    { label: 'Perak', value: 'Perak' },
-    { label: 'Perlis', value: 'Perlis' },
-    { label: 'Selangor', value: 'Selangor' },
-    { label: 'Sabah', value: 'Sabah' },
-    { label: 'Sarawak', value: 'Sarawak' },
-    { label: 'Terengganu', value: 'Terengganu' }
-];
-
-const levelOptions = [
-    { label: 'Silver', value: 'Silver' },
-    { label: 'Gold', value: 'Gold' },
-    { label: 'Platinum', value: 'Platinum' }
-];
-
-const genderOptions = [
-    { label: 'Male', value: 'Male' },
-    { label: 'Female', value: 'Female' }
-];
+const masterOptions = ref([
+    { label: 'No', value: 0 },
+    { label: 'Yes', value: 1 }
+]);
 
 const moduleOptions = [
-    { label: 'Marketing', value: 'marketing' },
-    { label: 'Technical', value: 'technical' },
-    { label: 'OM', value: 'om' },
-    { label: 'SCM', value: 'scm' },
-    { label: 'IT', value: 'it' },
-    { label: 'Billing', value: 'billing' },
-    { label: 'Sales', value: 'sales' }
+    { label: 'Warranty Management', value: 'mod_warranty' },
+    { label: 'Order Management', value: 'mod_order' },
+    { label: 'Billing Management', value: 'mod_billing' },
+    { label: 'Sales Management', value: 'mod_sale' },
+    { label: 'User Management', value: 'mod_user' }
 ];
+
+const form = ref({
+    first_name: '',
+    last_name: '',
+    email: '',
+    mobileNum: '',
+    countryCode: '60',
+    password: '',
+    confirm_password: '',
+    dealerAccountNo: '',
+    shiptoID: null,
+    modules: [],
+    isMaster: 0,
+});
+
+const errors = ref({});
+
+// Watch for isMaster changes to handle module access
+watch(() => form.value.isMaster, (newValue) => {
+    if (newValue === 1) {
+        // If master user, select all modules
+        form.value.modules = moduleOptions.map(module => module.value);
+    }
+});
+
+onMounted(() => {
+    // Set dealer account number from route parameter
+    form.value.dealerAccountNo = route.params.custAccNo;
+});
+
+const validateForm = () => {
+    errors.value = {};
+
+    if (!form.value.first_name.trim()) {
+        errors.value.first_name = 'First name is required';
+    }
+
+    if (!form.value.email.trim()) {
+        errors.value.email = 'Email is required';
+    } else if (!/^\S+@\S+\.\S+$/.test(form.value.email)) {
+        errors.value.email = 'Please enter a valid email address';
+    }
+
+    if (!form.value.countryCode) {
+        errors.value.countryCode = 'Country code is required';
+    }
+
+    if (!form.value.mobileNum.trim()) {
+        errors.value.mobileNum = 'Mobile number is required';
+    }
+
+    if (!form.value.password) {
+        errors.value.password = 'Password is required';
+    } else if (form.value.password.length < 6) {
+        errors.value.password = 'Password must be at least 6 characters';
+    }
+
+    if (!form.value.confirm_password) {
+        errors.value.confirm_password = 'Please confirm your password';
+    } else if (form.value.password !== form.value.confirm_password) {
+        errors.value.confirm_password = 'Passwords do not match';
+    }
+
+    return Object.keys(errors.value).length === 0;
+};
+
+const createFormData = () => {
+    const formData = new FormData();
+    
+    // Append all form fields
+    formData.append('first_name', form.value.first_name || '');
+    formData.append('last_name', form.value.last_name || '');
+    formData.append('email', form.value.email || '');
+    formData.append('countryCode', form.value.countryCode || '');
+    formData.append('mobileNum', form.value.mobileNum || '');
+    formData.append('password', form.value.password || '');
+    formData.append('confirm_password', form.value.confirm_password || '');
+    formData.append('dealerAccountNo', form.value.dealerAccountNo || '');
+    formData.append('shiptoID', form.value.shiptoID || '');
+    formData.append('isMaster', form.value.isMaster || 0);
+    
+    // Append module permissions
+    formData.append('mod_warranty', form.value.isMaster === 1 ? 1 : (form.value.modules.includes('mod_warranty') ? 1 : 0));
+    formData.append('mod_order', form.value.isMaster === 1 ? 1 : (form.value.modules.includes('mod_order') ? 1 : 0));
+    formData.append('mod_billing', form.value.isMaster === 1 ? 1 : (form.value.modules.includes('mod_billing') ? 1 : 0));
+    formData.append('mod_sale', form.value.isMaster === 1 ? 1 : (form.value.modules.includes('mod_sale') ? 1 : 0));
+    formData.append('mod_user', form.value.isMaster === 1 ? 1 : (form.value.modules.includes('mod_user') ? 1 : 0));
+
+    return formData;
+};
+
+const handleSubmit = async () => {
+    if (!validateForm()) {
+        toast.add({
+            severity: 'error',
+            summary: 'Validation Error',
+            detail: 'Please fix the errors in the form',
+            life: 5000
+        });
+        return;
+    }
+
+    loading.value = true;
+
+    try {
+        // Create FormData object and append all fields
+        const formData = createFormData();
+
+        // Log form data for debugging (remove in production)
+        console.log('Submitting form data:');
+        for (let [key, value] of formData.entries()) {
+            console.log(`${key}: ${value}`);
+        }
+
+        const response = await api.post('add_dealer_user', formData, {
+            headers: {
+                'Content-Type': 'multipart/form-data'
+            }
+        });
+
+        if (response.data.status === 1) {
+            toast.add({
+                severity: 'success',
+                summary: 'Success',
+                detail: 'User created successfully',
+                life: 5000
+            });
+
+            // Redirect to detailEten page after successful creation
+            router.push('/om/detailEten/' + form.value.dealerAccountNo);
+        } else {
+            // Handle API errors
+            const errorMessage = response.data.error?.message || 'Failed to create user';
+            toast.add({
+                severity: 'error',
+                summary: 'Error',
+                detail: errorMessage,
+                life: 5000
+            });
+        }
+    } catch (error) {
+        console.error('Error creating user:', error);
+        
+        let errorMessage = 'An error occurred while creating user';
+        if (error.response?.data?.error?.message) {
+            errorMessage = error.response.data.error.message;
+        } else if (error.response?.data?.message) {
+            errorMessage = error.response.data.message;
+        }
+        
+        toast.add({
+            severity: 'error',
+            summary: 'Error',
+            detail: errorMessage,
+            life: 5000
+        });
+    } finally {
+        loading.value = false;
+    }
+};
+
+const handleCancel = () => {
+    router.push('/om/detailEten/' + form.value.dealerAccountNo);
+};
 </script>
