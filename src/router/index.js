@@ -81,9 +81,10 @@ const router = createRouter({
                     props: true
                 },
                 {
-                    path: '/om/editEtenUser',
+                    path: '/om/editEtenUser/:id',
                     name: 'Edit-Eten-User',
-                    component: () => import('@/views/om/editEtenUser.vue')
+                    component: () => import('@/views/om/editEtenUser.vue'),
+                    props: true
                 },
                 {
                     path: '/om/confirmationEten',
