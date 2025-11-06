@@ -3,7 +3,9 @@ import { ref, onMounted } from 'vue';
 import LoadingPage from '@/components/LoadingPage.vue';
 import api from '@/service/api';
 import { useRouter } from 'vue-router';
+import { useToast } from 'primevue/usetoast';
 
+const toast = useToast();
 const router = useRouter();
 
 // Interfaces
@@ -281,12 +283,22 @@ function handleSubmit() {
     try {
         // Validate required fields
         if (!form.value.firstname || !form.value.lastname || !form.value.email || !form.value.phoneno || !form.value.password) {
-            alert('Please fill in all required Master User fields');
+            toast.add({
+                severity: 'warn',
+                summary: 'Incomplete Form',
+                detail: 'Please fill in all required Master User fields.',
+                life: 3000
+            });
             return;
         }
 
         if (form.value.password !== form.value.confirmpassword) {
-            alert('Password and Confirm Password do not match');
+            toast.add({
+                severity: 'error',
+                summary: 'Password Mismatch',
+                detail: 'Password and Confirm Password do not match.',
+                life: 3000
+            });
             return;
         }
 
@@ -314,7 +326,12 @@ function handleSubmit() {
         router.push('/om/confirmationEten');
     } catch (err) {
         console.error('Error saving form to localStorage:', err);
-        alert('Something went wrong while saving your form.');
+        toast.add({
+            severity: 'error',
+            summary: 'Error',
+            detail: 'Something went wrong while saving your form.',
+            life: 4000
+        });
     }
 }
 
@@ -373,7 +390,7 @@ function mapSapResponseToForm(sapData: SapResponseItem): FormData {
 
     // Store ShipTo addresses
     shipToAddresses.value = customerMaster.ShipTo || [];
-    
+
     // Track which ShipTo fields have SAP data
     shipToAddresses.value.forEach((shipTo, index) => {
         const shipToFields = new Set<string>();
@@ -459,7 +476,12 @@ function mapSapResponseToForm(sapData: SapResponseItem): FormData {
 // Function for Next button
 async function goNext() {
     if (!accountNo.value) {
-        alert('Please enter Account No.');
+        toast.add({
+            severity: 'warn',
+            summary: 'Input Required',
+            detail: 'Please enter Account No.',
+            life: 4000
+        });
         return;
     }
 
@@ -494,12 +516,22 @@ async function goNext() {
 
             showDetails.value = true;
         } else {
-            alert('No record found for Account No: ' + accountNo.value);
+            toast.add({
+                severity: 'warn',
+                summary: 'No Record Found',
+                detail: `No record found for Account No: ${accountNo.value}`,
+                life: 4000
+            });
             resetForm();
         }
     } catch (error) {
         console.error('Error:', error);
-        alert('Error fetching dealer details. Please try again.');
+        toast.add({
+            severity: 'error',
+            summary: 'Error',
+            detail: 'Error fetching dealer details. Please try again.',
+            life: 4000
+        });
         resetForm();
     } finally {
         isLoading.value = false;
@@ -871,13 +903,11 @@ onMounted(() => {
                 <div class="card w-full">
                     <div class="font-semibold text-xl border-b pb-2 mb-4 flex items-center gap-2">
                         📍 Ship To Accounts
-                        <i class="pi pi-info-circle cursor-pointer font-bold" 
-                           v-tooltip="'Fields with SAP data are read-only. You can only edit empty fields.'"></i>
+                        <i class="pi pi-info-circle cursor-pointer font-bold" v-tooltip="'Fields with SAP data are read-only. You can only edit empty fields.'"></i>
                     </div>
 
                     <!-- Loop through all Ship To addresses -->
-                    <div v-for="(shipTo, index) in shipToAddresses" :key="shipTo.custaccountno" 
-                         class="border rounded-2xl p-5 mb-6 bg-gray-50 shadow-sm">
+                    <div v-for="(shipTo, index) in shipToAddresses" :key="shipTo.custaccountno" class="border rounded-2xl p-5 mb-6 bg-gray-50 shadow-sm">
                         <div class="font-bold text-lg text-gray-700 mb-4 flex justify-between items-center">
                             <span>Account {{ index + 1 }}</span>
                             <span class="text-sm font-normal text-gray-500">
@@ -889,21 +919,23 @@ onMounted(() => {
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                             <div>
                                 <label class="font-medium text-gray-600">Ship To Account No</label>
-                                <InputText 
-                                    :disabled="isSapShipToField(shipTo.custaccountno, 'custaccountno')" 
-                                    v-model="shipTo.custaccountno" 
-                                    placeholder="Enter account number" 
-                                    class="w-full" 
-                                    :class="{ 'bg-gray-100': isSapShipToField(shipTo.custaccountno, 'custaccountno') }" />
+                                <InputText
+                                    :disabled="isSapShipToField(shipTo.custaccountno, 'custaccountno')"
+                                    v-model="shipTo.custaccountno"
+                                    placeholder="Enter account number"
+                                    class="w-full"
+                                    :class="{ 'bg-gray-100': isSapShipToField(shipTo.custaccountno, 'custaccountno') }"
+                                />
                             </div>
                             <div>
                                 <label class="font-medium text-gray-600">Email</label>
-                                <InputText 
-                                    :disabled="isSapShipToField(shipTo.custaccountno, 'emailaddress')" 
-                                    v-model="shipTo.emailaddress" 
-                                    placeholder="example@email.com" 
+                                <InputText
+                                    :disabled="isSapShipToField(shipTo.custaccountno, 'emailaddress')"
+                                    v-model="shipTo.emailaddress"
+                                    placeholder="example@email.com"
                                     class="w-full"
-                                    :class="{ 'bg-gray-100': isSapShipToField(shipTo.custaccountno, 'emailaddress') }" />
+                                    :class="{ 'bg-gray-100': isSapShipToField(shipTo.custaccountno, 'emailaddress') }"
+                                />
                             </div>
                         </div>
 
@@ -911,39 +943,43 @@ onMounted(() => {
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
                             <div>
                                 <label class="font-medium text-gray-600">Company Name 1</label>
-                                <InputText 
-                                    :disabled="isSapShipToField(shipTo.custaccountno, 'companyname1')" 
-                                    v-model="shipTo.companyname1" 
-                                    placeholder="Company Name Line 1" 
+                                <InputText
+                                    :disabled="isSapShipToField(shipTo.custaccountno, 'companyname1')"
+                                    v-model="shipTo.companyname1"
+                                    placeholder="Company Name Line 1"
                                     class="w-full"
-                                    :class="{ 'bg-gray-100': isSapShipToField(shipTo.custaccountno, 'companyname1') }" />
+                                    :class="{ 'bg-gray-100': isSapShipToField(shipTo.custaccountno, 'companyname1') }"
+                                />
                             </div>
                             <div>
                                 <label class="font-medium text-gray-600">Company Name 2</label>
-                                <InputText 
-                                    :disabled="isSapShipToField(shipTo.custaccountno, 'companyname2')" 
-                                    v-model="shipTo.companyname2" 
-                                    placeholder="Company Name Line 2" 
+                                <InputText
+                                    :disabled="isSapShipToField(shipTo.custaccountno, 'companyname2')"
+                                    v-model="shipTo.companyname2"
+                                    placeholder="Company Name Line 2"
                                     class="w-full"
-                                    :class="{ 'bg-gray-100': isSapShipToField(shipTo.custaccountno, 'companyname2') }" />
+                                    :class="{ 'bg-gray-100': isSapShipToField(shipTo.custaccountno, 'companyname2') }"
+                                />
                             </div>
                             <div>
                                 <label class="font-medium text-gray-600">Company Name 3</label>
-                                <InputText 
-                                    :disabled="isSapShipToField(shipTo.custaccountno, 'companyname3')" 
-                                    v-model="shipTo.companyname3" 
-                                    placeholder="Company Name Line 3" 
+                                <InputText
+                                    :disabled="isSapShipToField(shipTo.custaccountno, 'companyname3')"
+                                    v-model="shipTo.companyname3"
+                                    placeholder="Company Name Line 3"
                                     class="w-full"
-                                    :class="{ 'bg-gray-100': isSapShipToField(shipTo.custaccountno, 'companyname3') }" />
+                                    :class="{ 'bg-gray-100': isSapShipToField(shipTo.custaccountno, 'companyname3') }"
+                                />
                             </div>
                             <div>
                                 <label class="font-medium text-gray-600">Company Name 4</label>
-                                <InputText 
-                                    :disabled="isSapShipToField(shipTo.custaccountno, 'companyname4')" 
-                                    v-model="shipTo.companyname4" 
-                                    placeholder="Company Name Line 4" 
+                                <InputText
+                                    :disabled="isSapShipToField(shipTo.custaccountno, 'companyname4')"
+                                    v-model="shipTo.companyname4"
+                                    placeholder="Company Name Line 4"
                                     class="w-full"
-                                    :class="{ 'bg-gray-100': isSapShipToField(shipTo.custaccountno, 'companyname4') }" />
+                                    :class="{ 'bg-gray-100': isSapShipToField(shipTo.custaccountno, 'companyname4') }"
+                                />
                             </div>
                         </div>
 
@@ -951,39 +987,43 @@ onMounted(() => {
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
                             <div>
                                 <label class="font-medium text-gray-600">Address Line 1</label>
-                                <InputText 
-                                    :disabled="isSapShipToField(shipTo.custaccountno, 'addressline1')" 
-                                    v-model="shipTo.addressline1" 
-                                    placeholder="Address Line 1" 
+                                <InputText
+                                    :disabled="isSapShipToField(shipTo.custaccountno, 'addressline1')"
+                                    v-model="shipTo.addressline1"
+                                    placeholder="Address Line 1"
                                     class="w-full"
-                                    :class="{ 'bg-gray-100': isSapShipToField(shipTo.custaccountno, 'addressline1') }" />
+                                    :class="{ 'bg-gray-100': isSapShipToField(shipTo.custaccountno, 'addressline1') }"
+                                />
                             </div>
                             <div>
                                 <label class="font-medium text-gray-600">Address Line 2</label>
-                                <InputText 
-                                    :disabled="isSapShipToField(shipTo.custaccountno, 'addressline2')" 
-                                    v-model="shipTo.addressline2" 
-                                    placeholder="Address Line 2" 
+                                <InputText
+                                    :disabled="isSapShipToField(shipTo.custaccountno, 'addressline2')"
+                                    v-model="shipTo.addressline2"
+                                    placeholder="Address Line 2"
                                     class="w-full"
-                                    :class="{ 'bg-gray-100': isSapShipToField(shipTo.custaccountno, 'addressline2') }" />
+                                    :class="{ 'bg-gray-100': isSapShipToField(shipTo.custaccountno, 'addressline2') }"
+                                />
                             </div>
                             <div>
                                 <label class="font-medium text-gray-600">Address Line 3</label>
-                                <InputText 
-                                    :disabled="isSapShipToField(shipTo.custaccountno, 'addressline3')" 
-                                    v-model="shipTo.addressline3" 
-                                    placeholder="Address Line 3" 
+                                <InputText
+                                    :disabled="isSapShipToField(shipTo.custaccountno, 'addressline3')"
+                                    v-model="shipTo.addressline3"
+                                    placeholder="Address Line 3"
                                     class="w-full"
-                                    :class="{ 'bg-gray-100': isSapShipToField(shipTo.custaccountno, 'addressline3') }" />
+                                    :class="{ 'bg-gray-100': isSapShipToField(shipTo.custaccountno, 'addressline3') }"
+                                />
                             </div>
                             <div>
                                 <label class="font-medium text-gray-600">Address Line 4</label>
-                                <InputText 
-                                    :disabled="isSapShipToField(shipTo.custaccountno, 'addressline4')" 
-                                    v-model="shipTo.addressline4" 
-                                    placeholder="Address Line 4" 
+                                <InputText
+                                    :disabled="isSapShipToField(shipTo.custaccountno, 'addressline4')"
+                                    v-model="shipTo.addressline4"
+                                    placeholder="Address Line 4"
                                     class="w-full"
-                                    :class="{ 'bg-gray-100': isSapShipToField(shipTo.custaccountno, 'addressline4') }" />
+                                    :class="{ 'bg-gray-100': isSapShipToField(shipTo.custaccountno, 'addressline4') }"
+                                />
                             </div>
                         </div>
 
@@ -991,39 +1031,25 @@ onMounted(() => {
                         <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mt-4">
                             <div>
                                 <label class="font-medium text-gray-600">City</label>
-                                <InputText 
-                                    :disabled="isSapShipToField(shipTo.custaccountno, 'city')" 
-                                    v-model="shipTo.city" 
-                                    placeholder="City" 
-                                    class="w-full"
-                                    :class="{ 'bg-gray-100': isSapShipToField(shipTo.custaccountno, 'city') }" />
+                                <InputText :disabled="isSapShipToField(shipTo.custaccountno, 'city')" v-model="shipTo.city" placeholder="City" class="w-full" :class="{ 'bg-gray-100': isSapShipToField(shipTo.custaccountno, 'city') }" />
                             </div>
                             <div>
                                 <label class="font-medium text-gray-600">Postcode</label>
-                                <InputText 
-                                    :disabled="isSapShipToField(shipTo.custaccountno, 'postcode')" 
-                                    v-model="shipTo.postcode" 
-                                    placeholder="Postcode" 
+                                <InputText
+                                    :disabled="isSapShipToField(shipTo.custaccountno, 'postcode')"
+                                    v-model="shipTo.postcode"
+                                    placeholder="Postcode"
                                     class="w-full"
-                                    :class="{ 'bg-gray-100': isSapShipToField(shipTo.custaccountno, 'postcode') }" />
+                                    :class="{ 'bg-gray-100': isSapShipToField(shipTo.custaccountno, 'postcode') }"
+                                />
                             </div>
                             <div>
                                 <label class="font-medium text-gray-600">State</label>
-                                <InputText 
-                                    :disabled="isSapShipToField(shipTo.custaccountno, 'state')" 
-                                    v-model="shipTo.state" 
-                                    placeholder="State" 
-                                    class="w-full"
-                                    :class="{ 'bg-gray-100': isSapShipToField(shipTo.custaccountno, 'state') }" />
+                                <InputText :disabled="isSapShipToField(shipTo.custaccountno, 'state')" v-model="shipTo.state" placeholder="State" class="w-full" :class="{ 'bg-gray-100': isSapShipToField(shipTo.custaccountno, 'state') }" />
                             </div>
                             <div>
                                 <label class="font-medium text-gray-600">Country</label>
-                                <InputText 
-                                    :disabled="isSapShipToField(shipTo.custaccountno, 'country')" 
-                                    v-model="shipTo.country" 
-                                    placeholder="Country" 
-                                    class="w-full"
-                                    :class="{ 'bg-gray-100': isSapShipToField(shipTo.custaccountno, 'country') }" />
+                                <InputText :disabled="isSapShipToField(shipTo.custaccountno, 'country')" v-model="shipTo.country" placeholder="Country" class="w-full" :class="{ 'bg-gray-100': isSapShipToField(shipTo.custaccountno, 'country') }" />
                             </div>
                         </div>
 
@@ -1031,21 +1057,23 @@ onMounted(() => {
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
                             <div>
                                 <label class="font-medium text-gray-600">Phone No</label>
-                                <InputText 
-                                    :disabled="isSapShipToField(shipTo.custaccountno, 'phoneno')" 
-                                    v-model="shipTo.phoneno" 
-                                    placeholder="e.g. 03-1234567" 
+                                <InputText
+                                    :disabled="isSapShipToField(shipTo.custaccountno, 'phoneno')"
+                                    v-model="shipTo.phoneno"
+                                    placeholder="e.g. 03-1234567"
                                     class="w-full"
-                                    :class="{ 'bg-gray-100': isSapShipToField(shipTo.custaccountno, 'phoneno') }" />
+                                    :class="{ 'bg-gray-100': isSapShipToField(shipTo.custaccountno, 'phoneno') }"
+                                />
                             </div>
                             <div>
                                 <label class="font-medium text-gray-600">Mobile No</label>
-                                <InputText 
-                                    :disabled="isSapShipToField(shipTo.custaccountno, 'mobilephoneno')" 
-                                    v-model="shipTo.mobilephoneno" 
-                                    placeholder="e.g. 012-3456789" 
+                                <InputText
+                                    :disabled="isSapShipToField(shipTo.custaccountno, 'mobilephoneno')"
+                                    v-model="shipTo.mobilephoneno"
+                                    placeholder="e.g. 012-3456789"
                                     class="w-full"
-                                    :class="{ 'bg-gray-100': isSapShipToField(shipTo.custaccountno, 'mobilephoneno') }" />
+                                    :class="{ 'bg-gray-100': isSapShipToField(shipTo.custaccountno, 'mobilephoneno') }"
+                                />
                             </div>
                         </div>
                     </div>
@@ -1103,5 +1131,4 @@ onMounted(() => {
     content: ' *';
     color: red;
 }
-
 </style>

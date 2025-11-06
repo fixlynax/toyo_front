@@ -71,7 +71,7 @@
                         <p class="text-lg font-medium">{{ form.vatNo || '-' }}</p>
                     </div>
                 </div>
-                
+
                 <div class="w-full">
                     <span class="text-sm text-gray-500">Main Branch</span>
                     <p class="text-lg font-medium">{{ getMainBranchLabel(form.mainBranchDealer) || '-' }}</p>
@@ -286,8 +286,7 @@
                 <div class="font-semibold text-xl border-b pb-2">📍 Ship To Accounts</div>
 
                 <!-- Loop through all Ship To addresses -->
-                <div v-for="(shipTo, index) in form.shipToAddresses" :key="shipTo.custaccountno" 
-                     class="border rounded-2xl p-5 mb-6 bg-gray-50 shadow-sm">
+                <div v-for="(shipTo, index) in form.shipToAddresses" :key="shipTo.custaccountno" class="border rounded-2xl p-5 mb-6 bg-gray-50 shadow-sm">
                     <div class="font-bold text-lg text-gray-700 mb-4">Account {{ index + 1 }}</div>
 
                     <!-- Account Info -->
@@ -446,8 +445,10 @@
 import { ref, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
 import api from '@/service/api';
+import { useToast } from 'primevue/usetoast';
 
 const router = useRouter();
+const toast = useToast();
 
 const showPassword = ref(false);
 const ConfirmationshowPassword = ref(false);
@@ -488,14 +489,14 @@ const shippingConditionOptions = [
 // Helper function to get dropdown label from code
 function getDropdownLabel(code, options) {
     if (!code) return '-';
-    const option = options.find(opt => opt.code === code);
+    const option = options.find((opt) => opt.code === code);
     return option ? option.name : code;
 }
 
 // Helper function to get main branch label
 function getMainBranchLabel(dealerId) {
     if (!dealerId) return '-';
-    const dealer = allDealers.value.find(d => d.value === dealerId);
+    const dealer = allDealers.value.find((d) => d.value === dealerId);
     return dealer ? dealer.label : `Dealer ID: ${dealerId}`;
 }
 
@@ -528,25 +529,25 @@ function extractMobileNumber(phoneNumber) {
     if (!phoneNumber) return '';
     // Remove country code and any non-digit characters
     let cleanNumber = phoneNumber.replace(/\D/g, '');
-    
+
     // Remove Malaysia country code
     if (cleanNumber.startsWith('60')) {
         cleanNumber = cleanNumber.substring(2);
     }
-    
+
     // Remove leading zero if present
     if (cleanNumber.startsWith('0')) {
         cleanNumber = cleanNumber.substring(1);
     }
-    
+
     return cleanNumber;
 }
 
 // Prepare Ship To array for API
 function prepareShipToArray(shipToAddresses) {
     if (!shipToAddresses || !Array.isArray(shipToAddresses)) return [];
-    
-    return shipToAddresses.map(shipTo => ({
+
+    return shipToAddresses.map((shipTo) => ({
         s_custAccNo: shipTo.custaccountno || '',
         s_compName1: shipTo.companyname1 || '',
         s_compName2: shipTo.companyname2 || '',
@@ -645,7 +646,7 @@ function loadFormData() {
         if (storedData) {
             form.value = JSON.parse(storedData);
             console.log('Loaded form data:', form.value);
-            
+
             // Check if ShipTo data exists
             if (form.value.shipToAddresses) {
                 console.log('ShipTo addresses found:', form.value.shipToAddresses.length);
@@ -698,24 +699,35 @@ function handleEdit() {
 // Handle form submission
 async function handleSubmit() {
     isSubmitting.value = true;
-    
+
     try {
         // Validate required fields
         if (!form.value.firstname || !form.value.email || !form.value.phoneno || !form.value.password) {
-            alert('Please ensure all required Master User fields are filled in.');
+            toast.add({
+                severity: 'warn',
+                summary: 'Missing Information',
+                detail: 'Please ensure all required Master User fields are filled in.',
+                life: 3000
+            });
             isSubmitting.value = false;
-            return;
+            return false;
         }
 
+        // Validate password match
         if (form.value.password !== form.value.confirmpassword) {
-            alert('Password and Confirm Password do not match.');
+            toast.add({
+                severity: 'error',
+                summary: 'Password Mismatch',
+                detail: 'Password and Confirm Password do not match.',
+                life: 3000
+            });
             isSubmitting.value = false;
-            return;
+            return false;
         }
 
         // Prepare FormData for API request
         const formData = mapFormToFormData(form.value);
-        
+
         // Log FormData contents for debugging
         console.log('FormData contents:');
         for (let [key, value] of formData.entries()) {
@@ -735,26 +747,46 @@ async function handleSubmit() {
 
         if (response.data.status === 1) {
             // Success
-            alert('Dealer created successfully! An activation email has been sent to the master user.');
-            
+            toast.add({
+                severity: 'success',
+                summary: 'Dealer Created',
+                detail: 'Dealer created successfully! An activation email has been sent to the master user.',
+                life: 4000
+            });
+
             // Clear localStorage after successful submission
             localStorage.removeItem('etenFormData');
-            
+
             // Navigate to detail page or success page
             router.push('/om/detailEten');
         } else {
             // Handle API error
             const errorMessage = response.data.error?.message || 'Failed to create dealer. Please try again.';
-            alert(`Error: ${errorMessage}`);
+
+            toast.add({
+                severity: 'error',
+                summary: 'Error',
+                detail: errorMessage,
+                life: 4000
+            });
         }
-        
     } catch (error) {
         console.error('Error submitting form:', error);
-        
+
         if (error.response?.data?.error) {
-            alert(`Error: ${error.response.data.error.message || 'Failed to create dealer.'}`);
+            toast.add({
+                severity: 'error',
+                summary: 'Error',
+                detail: error.response.data.error.message || 'Failed to create dealer.',
+                life: 4000
+            });
         } else {
-            alert('Network error. Please check your connection and try again.');
+            toast.add({
+                severity: 'error',
+                summary: 'Error',
+                detail: 'An unexpected error occurred. Please try again.',
+                life: 4000
+            });
         }
     } finally {
         isSubmitting.value = false;
@@ -772,7 +804,9 @@ onMounted(() => {
     background: white;
     border-radius: 8px;
     padding: 1.5rem;
-    box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
+    box-shadow:
+        0 1px 3px 0 rgba(0, 0, 0, 0.1),
+        0 1px 2px 0 rgba(0, 0, 0, 0.06);
 }
 
 .border-b {
