@@ -758,7 +758,7 @@ async function handleSubmit() {
             localStorage.removeItem('etenFormData');
 
             // Navigate to detail page or success page
-            router.push('/om/detailEten');
+            router.push('/om/detailEten/' + response.data.custAccountNo);
         } else {
             // Handle API error
             const errorMessage = response.data.error?.message || 'Failed to create dealer. Please try again.';
