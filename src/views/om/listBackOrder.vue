@@ -107,7 +107,6 @@ const filters = ref({
 
 const statusTabs = [
     { label: 'Pending', status: 0 },
-    { label: 'Processing', status: 66 },
     { label: 'Completed', status: 1 }
 ];
 
@@ -211,10 +210,6 @@ const getStatusLabel = (status) => {
     switch (status) {
         case 0:
             return 'Pending';
-        case 66:
-            return 'Processing';
-        case 77:
-            return 'Delivery';
         case 1:
             return 'Completed';
         default:
@@ -225,11 +220,7 @@ const getStatusLabel = (status) => {
 const getStatusSeverity = (status) => {
     switch (status) {
         case 0:
-            return 'warn';
-        case 66:
             return 'info';
-        case 77:
-            return 'secondary';
         case 1:
             return 'success';
         default:
