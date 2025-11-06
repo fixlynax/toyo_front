@@ -32,9 +32,12 @@ const handleLogout = async () => {
                 <i class="pi pi-bars"></i>
             </button>
             <router-link to="/" class="layout-topbar-logo">
-                <img src="/demo/images/toyo_tires.png" alt="Logo" style="height: 130px; object-fit: contain;" />
+                <img src="/demo/images/toyo_tires.png" alt="Logo" style="height: 35px; object-fit: contain;" />
             </router-link>
-            <span class="text-xl font-bold ml-5">Admin User</span>
+        </div>
+
+        <div class="layout-topbar-separator">
+            <span class="text-xl font-bold ml-5">John Doe</span>
         </div>
 
         <div class="layout-topbar-actions">
