@@ -613,7 +613,7 @@ function mapFormToFormData(formData) {
     formDataObj.append('salesDistrict', formData.salesDistrict || '');
     formDataObj.append('shippingCond', formData.shippingCond || '');
     formDataObj.append('storageLoc', formData.storageLocation || '');
-    formDataObj.append('accountStatus', formData.accountStatus || '0');
+    formDataObj.append('accountStatus', 1); // Default active
     formDataObj.append('accountLastUpdate', formData.accountLastUpdate || '');
     formDataObj.append('accountCreation', formData.accountCreation || new Date().toISOString().split('T')[0]);
     formDataObj.append('showOnList', formData.showOnList || '0');
