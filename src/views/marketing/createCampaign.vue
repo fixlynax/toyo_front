@@ -40,15 +40,15 @@
                     <div class="grid grid-cols-1 md:grid-cols-3 gap-4 md:col-span-2">
                         <div>
                             <label class="block font-bold text-gray-700">Publish Date</label>
-                            <Calendar v-model="campaign.publishDate" showIcon dateFormat="yy-mm-dd" class="w-full" />
+                            <Calendar v-model="campaign.publishDate" showIcon dateFormat="dd-mm-yy" class="w-full" />
                         </div>
                         <div>
                             <label class="block font-bold text-gray-700">Start Date</label>
-                            <Calendar v-model="campaign.startDate" showIcon dateFormat="yy-mm-dd" class="w-full" />
+                            <Calendar v-model="campaign.startDate" showIcon dateFormat="dd-mm-yy" class="w-full" />
                         </div>
                         <div>
                             <label class="block font-bold text-gray-700">End Date</label>
-                            <Calendar v-model="campaign.endDate" showIcon dateFormat="yy-mm-dd" class="w-full" />
+                            <Calendar v-model="campaign.endDate" showIcon dateFormat="dd-mm-yy" class="w-full" />
                         </div>
                     </div>
                 </div>
@@ -57,7 +57,7 @@
                 <div>
                     <label class="block font-bold text-gray-700 mb-2">Upload Campaign Images</label>
                     <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                        <div v-for="(field, idx) in ['image1Path', 'image2Path', 'image3Path']" :key="idx">
+                        <div v-for="(field, idx) in ['image1', 'image2', 'image3']" :key="idx">
                             <FileUpload mode="basic" :name="field" accept="image/*" customUpload @select="onImageSelect($event, field)" :chooseLabel="`Upload Image ${idx + 1}`" class="w-full" />
                             <img v-if="campaign[field]" :src="campaign[field]" :alt="`Preview ${idx + 1}`" class="mt-2 rounded-lg shadow-md object-cover w-full h-60" />
                         </div>
@@ -86,18 +86,18 @@
                     <InputNumber v-model="campaign.point3" class="w-full" />
                 </div>
             </div>
-            <div  v-if="campaign.isGamification == 0" class="flex justify-end mt-8 gap-2">
+            <div v-if="campaign.isGamification === 'off'" class="flex justify-end mt-8 gap-2">
                 <div class="w-40">
                     <Button label="Cancel" class="p-button-secondary w-full mr-2" @click="$router.back()" />
                 </div>
                 <div class="w-40">
-                    <Button label="Submit" class="w-full" @click="submitEvent" />
+                    <Button label="Submit" class="w-full" @click="submitEvent" :loading="isSubmitting" />
                 </div>
             </div>
         </div>
 
         <!-- 📋 Criteria Section -->
-        <div v-if="campaign.isGamification == 1" class="card flex flex-col w-full mt-8">
+        <div v-if="campaign.isGamification === 'on'" class="card flex flex-col w-full mt-8">
             <div class="flex items-center justify-between border-b pb-2 mb-4">
                 <div class="text-xl font-bold text-gray-800">📋 Criteria</div>
             </div>
@@ -112,19 +112,19 @@
                     <div class="grid grid-cols-1 gap-4 items-end">
                         <div>
                             <label class="block font-bold text-gray-700 mb-1">Select Tyre Pattern</label>
-                            <Dropdown v-model="criteria.selected" :options="listCriteria" optionLabel="name" placeholder="Select pattern" class="w-full mb-4">
+                            <Dropdown v-model="criteria.selected" :options="listCriteria" optionLabel="material" placeholder="Select pattern" class="w-full mb-4">
                                 <template #option="slotProps">
                                     <div class="flex items-center gap-3">
                                         <div>
-                                            <div class="font-semibold">{{ slotProps.option.name }}</div>
-                                            <small class="text-gray-500"> {{ slotProps.option.pattern }} • {{ slotProps.option.size }} • {{ slotProps.option.type }}</small>
+                                            <div class="font-semibold">{{ slotProps.option.material }}</div>
+                                            <small class="text-gray-500">{{ slotProps.option.pattern_name }} • {{ slotProps.option.sectionwidth }}/{{ slotProps.option.tireseries }} R{{ slotProps.option.rimdiameter }}</small>
                                         </div>
                                     </div>
                                 </template>
                             </Dropdown>
                             <div v-if="criteria.selected">
                                 <label class="block font-bold text-gray-700 mb-1">Min. Qty</label>
-                                <InputNumber v-model="criteria.selected.minQty" class="w-full mt-2" placeholder="Minimum Quantity" />
+                                <InputNumber v-model="criteria.minQty" class="w-full mt-2" placeholder="Minimum Quantity" :min="1" />
                             </div>
                         </div>
                     </div>
@@ -139,7 +139,7 @@
         </div>
 
         <!-- 🏆 Reward Section -->
-        <div v-if="campaign.isGamification == 1" class="card flex flex-col w-full mt-8">
+        <div v-if="campaign.isGamification === 'on'" class="card flex flex-col w-full mt-8">
             <div class="flex items-center justify-between border-b pb-2 mb-4">
                 <div class="text-xl font-bold text-gray-800">🏆 Reward Section</div>
             </div>
@@ -154,13 +154,16 @@
                     <div class="grid grid-cols-1 md:grid-cols-3 gap-4 items-end">
                         <div class="md:col-span-2">
                             <label class="block font-bold text-gray-700 mb-1">Select Reward</label>
-                            <Dropdown v-model="reward.selected" :options="listPrize" optionLabel="prizeName" placeholder="Select a reward" class="w-full">
+                            <Dropdown v-model="reward.selected" :options="listPrize" optionLabel="title" placeholder="Select a reward" class="w-full">
                                 <template #option="slotProps">
                                     <div class="flex items-center gap-3">
-                                        <img :src="slotProps.option.imageURL" class="w-28 h-16 object-cover rounded" />
+                                        <img v-if="slotProps.option.imageURL" :src="slotProps.option.imageURL" class="w-28 h-16 object-cover rounded" />
+                                        <div v-else class="w-28 h-16 bg-gray-200 rounded flex items-center justify-center">
+                                            <i class="pi pi-image text-gray-400"></i>
+                                        </div>
                                         <div class="flex flex-col">
-                                            <span class="font-semibold text-gray-800">{{ slotProps.option.prizeName }}</span>
-                                            <small class="text-gray-500">{{ slotProps.option.prizeType }}</small>
+                                            <span class="font-semibold text-gray-800">{{ slotProps.option.title }}</span>
+                                            <small class="text-gray-500">{{ slotProps.option.type }} • {{ slotProps.option.purpose }}</small>
                                         </div>
                                     </div>
                                 </template>
@@ -188,7 +191,7 @@
                     <Button label="Cancel" class="p-button-secondary w-full mr-2" @click="$router.back()" />
                 </div>
                 <div class="w-40">
-                    <Button label="Submit" class="w-full" @click="submitEvent" />
+                    <Button label="Submit" class="w-full" @click="submitEvent" :loading="isSubmitting" />
                 </div>
             </div>
         </div>
@@ -196,20 +199,24 @@
 </template>
 
 <script setup>
-import { ref } from 'vue';
+import { ref, onMounted } from 'vue';
+import { useRouter } from 'vue-router';
+import api from '@/service/api';
+
+const router = useRouter();
 
 // Campaign data
 const campaign = ref({
     title: '',
     description: '',
     termCondition: '',
-    image1Path: '',
-    image2Path: '',
-    image3Path: '',
+    image1: '',
+    image2: '',
+    image3: '',
     publishDate: '',
     startDate: '',
     endDate: '',
-    isGamification: 0,
+    isGamification: 'off', // Changed to string to match dropdown
     quota: 0,
     maxPerUser: 1,
     point1: 0,
@@ -218,32 +225,60 @@ const campaign = ref({
     status: 1
 });
 
-// Gamification toggle
+// UI state
+const isSubmitting = ref(false);
+
+// Gamification toggle - using strings 'on'/'off' as per API requirement
 const gamificationOnOff = [
-    { label: 'ON', value: 1 },
-    { label: 'OFF', value: 0 }
+    { label: 'ON', value: 'on' },
+    { label: 'OFF', value: 'off'}
 ];
 
 // Criteria section
 const criterias = ref([]);
-const listCriteria = ref([
-    { id: 1, name: 'Toyo Proxes Sport', pattern: 'PS1', size: '225/45R17', minQty: 2, image: '/demo/images/tyre1.jpg', type: 'Summer' },
-    { id: 2, name: 'Toyo Open Country', pattern: 'OC2', size: '265/60R18', minQty: 4, image: '/demo/images/tyre2.jpg', type: 'All-Terrain' },
-    { id: 3, name: 'Toyo Extensa A/S', pattern: 'EA1', size: '205/55R16', minQty: 2, image: '/demo/images/tyre3.jpg', type: 'All-Season' },
-    { id: 4, name: 'Toyo Proxes T1 Sport', pattern: 'T1S', size: '245/40R18', minQty: 2, image: '/demo/images/tyre4.jpg', type: 'Performance' }
-]);
-const addCriteria = () => criterias.value.push({ selected: null });
-const removeCriteria = (index) => criterias.value.splice(index, 1);
+const listCriteria = ref([]);
 
 // Reward section
 const rewards = ref([]);
-const listPrize = ref([
-    { id: 1, imageURL: '/demo/images/bonus-point.png', prizeName: 'Bonus Point Toyo', prizeType: 'Point' },
-    { id: 2, imageURL: 'https://assets.bharian.com.my/images/articles/tng13jan_BHfield_image_socialmedia.var_1610544082.jpg', prizeName: 'MYR 50 E-Wallet', prizeType: 'E-Wallet' },
-    { id: 3, imageURL: 'https://assets.offgamers.com/img/offer/kr_fdf75033-56ee-4ce6-929c-1f9c93a4c642_1b1c60fc-e950-4c62-8ee7-471d42484619.webp', prizeName: 'Shopee E-Voucher', prizeType: 'E-Voucher' },
-    { id: 4, imageURL: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRdSHDEYMxmOB1Z63V0UB1ohMHGZ5cs5DG4zg&s', prizeName: 'Toyo Tumbler', prizeType: 'Item' }
-]);
-const addReward = () => rewards.value.push({ selected: null, qty: 1 });
+const listPrize = ref([]);
+
+// API functions
+const fetchMaterials = async () => {
+    try {
+        const response = await api.post('list-material', { type: 'EXCEPTION' });
+        if (response.data.status === 1) {
+            listCriteria.value = response.data.admin_data || [];
+        }
+    } catch (error) {
+        console.error('Error fetching materials:', error);
+    }
+};
+
+const fetchCatalog = async () => {
+    try {
+        const response = await api.get('catalog/catalogList');
+        if (response.data.status === 1) {
+            listPrize.value = response.data.admin_data || [];
+        }
+    } catch (error) {
+        console.error('Error fetching catalog:', error);
+    }
+};
+
+// Criteria management
+const addCriteria = () => criterias.value.push({ 
+    selected: null, 
+    minQty: 1 
+});
+
+const removeCriteria = (index) => criterias.value.splice(index, 1);
+
+// Reward management
+const addReward = () => rewards.value.push({ 
+    selected: null, 
+    qty: 1 
+});
+
 const removeReward = (index) => rewards.value.splice(index, 1);
 
 // Image upload
@@ -258,10 +293,157 @@ const onImageSelect = (event, field) => {
     }
 };
 
-// Submit
-const submitForm = () => {
-    console.log('Campaign:', campaign.value);
-    console.log('Criterias:', criterias.value);
-    console.log('Rewards:', rewards.value);
+// Format date to dd-mm-yyyy
+const formatDate = (date) => {
+    if (!date) return '';
+    const d = new Date(date);
+    const day = String(d.getDate()).padStart(2, '0');
+    const month = String(d.getMonth() + 1).padStart(2, '0');
+    const year = d.getFullYear();
+    return `${day}-${month}-${year}`;
 };
+
+// Validation
+const validateForm = () => {
+    if (!campaign.value.title || !campaign.value.description || !campaign.value.termCondition) {
+        alert('Please fill in all required fields: Title, Description, and Terms & Conditions');
+        return false;
+    }
+
+    if (!campaign.value.publishDate || !campaign.value.startDate || !campaign.value.endDate) {
+        alert('Please select all dates: Publish Date, Start Date, and End Date');
+        return false;
+    }
+
+    // Fixed: Check for string 'on' instead of number 1
+    if (campaign.value.isGamification === 'on') {
+        if (criterias.value.length === 0) {
+            alert('Please add at least one criteria for gamification campaign');
+            return false;
+        }
+
+        // Validate criteria
+        for (let i = 0; i < criterias.value.length; i++) {
+            const criteria = criterias.value[i];
+            if (!criteria.selected || !criteria.minQty) {
+                alert(`Please complete all fields for Criteria ${i + 1}`);
+                return false;
+            }
+        }
+
+        if (rewards.value.length === 0) {
+            alert('Please add at least one reward for gamification campaign');
+            return false;
+        }
+
+        // Validate rewards
+        for (let i = 0; i < rewards.value.length; i++) {
+            const reward = rewards.value[i];
+            if (!reward.selected || !reward.qty) {
+                alert(`Please complete all fields for Reward ${i + 1}`);
+                return false;
+            }
+        }
+    }
+
+    return true;
+};
+
+// Submit event - FIXED VERSION
+const submitEvent = async () => {
+    if (!validateForm()) return;
+
+    isSubmitting.value = true;
+
+    try {
+        const formData = new FormData();
+
+        // Basic campaign data
+        formData.append('title', campaign.value.title);
+        formData.append('description', campaign.value.description);
+        formData.append('tnc', campaign.value.termCondition);
+        formData.append('publishDate', formatDate(campaign.value.publishDate));
+        formData.append('startDate', formatDate(campaign.value.startDate));
+        formData.append('endDate', formatDate(campaign.value.endDate));
+        formData.append('quota', campaign.value.quota.toString());
+        formData.append('maxPerUser', campaign.value.maxPerUser.toString());
+        formData.append('isGamification', campaign.value.isGamification); // Already string 'on'/'off'
+        formData.append('point1', campaign.value.point1.toString());
+        formData.append('point2', campaign.value.point2.toString());
+        formData.append('point3', campaign.value.point3.toString());
+
+        // Handle images
+        if (campaign.value.image1 && typeof campaign.value.image1 !== 'string') {
+            formData.append('image1', campaign.value.image1);
+        }
+        if (campaign.value.image2 && typeof campaign.value.image2 !== 'string') {
+            formData.append('image2', campaign.value.image2);
+        }
+        if (campaign.value.image3 && typeof campaign.value.image3 !== 'string') {
+            formData.append('image3', campaign.value.image3);
+        }
+
+        // FIXED: Always send criteria and reward_option, even if empty
+        let criteriaArray = [];
+        let rewardOptions = [];
+
+        // Only populate arrays if gamification is ON
+        if (campaign.value.isGamification === 'on') {
+            // Prepare criteria array
+            criteriaArray = criterias.value.map(criteria => ({
+                title: criteria.selected.material,
+                type: criteria.selected.materialtype,
+                pattern: criteria.selected.pattern,
+                size: criteria.selected.rimdiameter.toString(),
+                minQty: criteria.minQty.toString()
+            }));
+
+            // Prepare reward options array
+            rewardOptions = rewards.value.map(reward => ({
+                catalogID: reward.selected.id.toString(),
+                quantity: reward.qty.toString()
+            }));
+        }
+
+        // FIXED: Always append these fields, even if empty
+        formData.append('criteria', JSON.stringify(criteriaArray));
+        formData.append('reward_option', JSON.stringify(rewardOptions));
+
+        console.log('Submitting form data:', {
+            title: campaign.value.title,
+            isGamification: campaign.value.isGamification,
+            criteria: criteriaArray,
+            reward_option: rewardOptions
+        });
+
+        const response = await api.post('campaign/create', formData, {
+            headers: {
+                'Content-Type': 'multipart/form-data'
+            }
+        });
+
+        if (response.data.status === 1) {
+            alert('Campaign created successfully!');
+            router.back();
+        } else {
+            alert('Failed to create campaign: ' + (response.data.message || 'Unknown error'));
+        }
+    } catch (error) {
+        console.error('Error creating campaign:', error);
+        if (error.response?.data) {
+            console.error('API Error response:', error.response.data);
+            alert('Error creating campaign: ' + (error.response.data.error?.messageEnglish || 'Validation error'));
+        } else {
+            alert('Error creating campaign. Please try again.');
+        }
+    } finally {
+        isSubmitting.value = false;
+    }
+};
+
+// Initialize data
+onMounted(() => {
+    fetchMaterials();
+    fetchCatalog();
+});
 </script>

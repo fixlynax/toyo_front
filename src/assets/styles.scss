@@ -3,3 +3,19 @@
 @use '@/assets/tailwind.css';
 @use '@/assets/layout/layout.scss';
 @use '@/assets/demo/demo.scss';
+
+:root {
+  --p-primary-50:  #e6f3fb !important;
+  --p-primary-100: #cce7f7 !important;
+  --p-primary-200: #99cff0 !important;
+  --p-primary-300: #66b7e8 !important;
+  --p-primary-400: #006fbe !important; /* Main TOYO Blue */
+  --p-primary-500: #0063ab !important;
+  --p-primary-600: #00589a !important;
+  --p-primary-700: #004c87 !important;
+  --p-primary-800: #004276 !important;
+  --p-primary-900: #00345d !important;
+  --p-primary-color: var(--p-primary-400) !important;
+}
+
+

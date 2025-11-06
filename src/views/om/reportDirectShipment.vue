@@ -10,52 +10,29 @@
                 <!-- Filters Section -->
                 <div class="border rounded-lg p-4 bg-gray-50">
                     <div class="text-lg font-bold text-gray-800 mb-4">Report Filters</div>
-                    <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
-                        <!-- Date Range -->
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <!-- Customer Account -->
                         <div>
-                            <label class="block font-bold text-gray-700 mb-2">Date Range</label>
-                            <Calendar
-                                v-model="filters.dateRange"
-                                selectionMode="range"
-                                :manualInput="false"
-                                placeholder="Select Date Range"
-                                class="w-full"
-                            />
-                        </div>
-
-                        <!-- Shipment Status -->
-                        <div>
-                            <label class="block font-bold text-gray-700 mb-2">Shipment Status</label>
+                            <label class="block font-bold text-gray-700 mb-2">Customer Account</label>
                             <Dropdown
-                                v-model="filters.status"
-                                :options="statusOptions"
+                                v-model="filters.customerAcc"
+                                :options="customerOptions"
                                 optionLabel="label"
                                 optionValue="value"
-                                placeholder="All Status"
+                                placeholder="Select Customer Account"
                                 class="w-full"
                             />
                         </div>
 
-                        <!-- Customer Type -->
+                        <!-- Month -->
                         <div>
-                            <label class="block font-bold text-gray-700 mb-2">Customer Type</label>
+                            <label class="block font-bold text-gray-700 mb-2">Month</label>
                             <Dropdown
-                                v-model="filters.customerType"
-                                :options="customerTypeOptions"
+                                v-model="filters.month"
+                                :options="monthOptions"
                                 optionLabel="label"
                                 optionValue="value"
-                                placeholder="All Types"
-                                class="w-full"
-                            />
-                        </div>
-
-                        <!-- Region -->
-                        <div>
-                            <label class="block font-bold text-gray-700 mb-2">Region</label>
-                            <Dropdown
-                                v-model="filters.region"
-                                :options="regionOptions"
-                                placeholder="All Regions"
+                                placeholder="Select Month"
                                 class="w-full"
                             />
                         </div>
@@ -74,199 +51,134 @@
                             @click="generateReport"
                         />
                         <Button
-                            label="Export Summary"
-                            icon="pi pi-download"
+                            label="Export Excel"
+                            icon="pi pi-file-excel"
                             class="p-button-success"
-                            @click="exportSummary"
+                            @click="exportExcel"
                         />
                     </div>
                 </div>
             </div>
 
-            <!-- Summary Stats -->
-            <!-- (unchanged section for brevity, same as your version) -->
-
-            <!-- Charts Section -->
-            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                <div class="card p-4 bg-white border rounded-lg">
-                    <div class="text-lg font-bold text-gray-800 mb-4">Shipment Status Distribution</div>
-                    <Chart type="doughnut" :data="statusChartData" :options="chartOptions" style="height: 300px" />
-                </div>
-
-                <div class="card p-4 bg-white border rounded-lg">
-                    <div class="text-lg font-bold text-gray-800 mb-4">Monthly Shipment Trend</div>
-                    <Chart type="bar" :data="monthlyTrendChartData" :options="chartOptions" style="height: 300px" />
-                </div>
+            <!-- Data Table -->
+            <div class="card p-4 bg-white border rounded-lg">
+                <div class="text-lg font-bold text-gray-800 mb-4">Shipment Data</div>
+                <DataTable
+                    v-if="shipmentData.length"
+                    :value="shipmentData"
+                    :paginator="true"
+                    :rows="10"
+                    responsiveLayout="scroll"
+                >
+                    <Column field="shipmentId" header="Shipment ID" style="min-width: 140px" />
+                    <Column field="orderDate" header="Order Date" style="min-width: 120px" />
+                    <Column field="customerName" header="Customer Name" style="min-width: 200px" />
+                    <Column field="region" header="Region" style="min-width: 120px" />
+                    <Column field="status" header="Status" style="min-width: 100px" />
+                    <Column field="totalValue" header="Total Value (RM)" style="min-width: 130px" />
+                    <template #empty>
+                        <div class="text-center text-gray-500 py-4">
+                            No data available for selected filters.
+                        </div>
+                    </template>
+                </DataTable>
             </div>
-
-            <!-- DataTable + other sections unchanged -->
         </div>
     </Fluid>
 </template>
 
 <script setup>
-import { ref, reactive, onMounted } from 'vue';
-import Chart from 'primevue/chart';
+import { ref, reactive } from 'vue'
 
-// ✅ Loading state
-const loading = ref(false);
 
 // ✅ Filters
 const filters = reactive({
-    dateRange: null,
-    status: null,
-    customerType: null,
-    region: null
-});
+    customerAcc: null,
+    month: null
+})
 
 // ✅ Dropdown Options
-const statusOptions = [
-    { label: 'Delivered', value: 'Delivered' },
-    { label: 'Shipped', value: 'Shipped' },
-    { label: 'Processing', value: 'Processing' },
-    { label: 'Pending', value: 'Pending' },
-    { label: 'Cancelled', value: 'Cancelled' }
-];
+const customerOptions = [
+    { label: 'PS Tyres & Battery Auto Services', value: 'PS001' },
+    { label: 'Toyo Auto Centre UHP Tyres', value: 'TOYO002' },
+    { label: 'Maxspeed Tyres Trading', value: 'MAX003' }
+]
 
-const customerTypeOptions = [
-    { label: 'Dealer', value: 'Dealer' },
-    { label: 'Distributor', value: 'Distributor' },
-    { label: 'Corporate', value: 'Corporate' },
-    { label: 'Retail', value: 'Retail' }
-];
-
-const regionOptions = [
-    { label: 'Central', value: 'Central' },
-    { label: 'Southern', value: 'Southern' },
-    { label: 'Northern', value: 'Northern' },
-    { label: 'East Coast', value: 'East Coast' },
-    { label: 'East Malaysia', value: 'East Malaysia' }
-];
-
-// ✅ Summary Stats
-const summaryStats = reactive({
-    totalShipments: 1247,
-    completedShipments: 985,
-    completionRate: 79,
-    totalValue: 4589200,
-    avgDeliveryTime: 3.2
-});
+const monthOptions = [
+    { label: 'January', value: 'Jan' },
+    { label: 'February', value: 'Feb' },
+    { label: 'March', value: 'Mar' },
+    { label: 'April', value: 'Apr' },
+    { label: 'May', value: 'May' },
+    { label: 'June', value: 'Jun' },
+    { label: 'July', value: 'Jul' },
+    { label: 'August', value: 'Aug' },
+    { label: 'September', value: 'Sep' },
+    { label: 'October', value: 'Oct' },
+    { label: 'November', value: 'Nov' },
+    { label: 'December', value: 'Dec' }
+]
 
 // ✅ Sample Data
-const shipmentData = ref([
-    {
-        shipmentId: 'DS-2024-001234',
-        orderDate: new Date('2024-01-15'),
-        customerName: 'PS Tyres & Battery Auto Services',
-        customerType: 'Dealer',
-        region: 'Central Region',
-        totalValue: 24500,
-        status: 'Delivered',
-        shipmentDate: new Date('2024-01-16'),
-        deliveryDate: new Date('2024-01-18'),
-        deliveryTime: 2
-    },
-    {
-        shipmentId: 'DS-2024-001235',
-        orderDate: new Date('2024-01-16'),
-        customerName: 'Toyo Auto Centre UHP Tyres',
-        customerType: 'Distributor',
-        region: 'Southern Region',
-        totalValue: 18700,
-        status: 'Shipped',
-        shipmentDate: new Date('2024-01-17'),
-        deliveryDate: null,
-        deliveryTime: null
-    }
-]);
+const shipmentData = ref([])
 
-// ✅ Performance Metrics, Top Customers, Shipment Issues (unchanged)
-
-// ✅ Chart Data
-const statusChartData = ref({
-    labels: ['Delivered', 'Shipped', 'Processing', 'Pending', 'Cancelled'],
-    datasets: [
-        {
-            data: [65, 15, 12, 6, 2],
-            backgroundColor: ['#10B981', '#3B82F6', '#F59E0B', '#6B7280', '#EF4444']
-        }
-    ]
-});
-
-const monthlyTrendChartData = ref({
-    labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
-    datasets: [
-        {
-            label: 'Shipments',
-            data: [120, 135, 98, 156, 145, 167, 189, 176, 154, 198, 210, 195],
-            backgroundColor: '#3B82F6'
-        }
-    ]
-});
-
-// ✅ Chart Options
-const chartOptions = ref({
-    plugins: {
-        legend: {
-            position: 'bottom',
-            labels: { usePointStyle: true }
-        }
-    },
-    maintainAspectRatio: false
-});
-
-// ✅ Utility Methods
-const formatDate = (date) =>
-    new Date(date).toLocaleDateString('en-MY', { year: 'numeric', month: 'short', day: 'numeric' });
-
-const getStatusSeverity = (status) => {
-    switch (status) {
-        case 'Delivered': return 'success';
-        case 'Shipped': return 'info';
-        case 'Processing': return 'warning';
-        case 'Pending': return 'secondary';
-        case 'Cancelled': return 'danger';
-        default: return 'info';
-    }
-};
-
-const getDeliveryTimeClass = (days) => {
-    if (!days) return 'text-gray-400';
-    if (days <= 2) return 'text-green-600';
-    if (days <= 4) return 'text-orange-600';
-    return 'text-red-600';
-};
-
-// ✅ Action Methods
+// ✅ Clear Filters
 const clearFilters = () => {
-    Object.keys(filters).forEach((key) => (filters[key] = null));
-};
+    filters.customerAcc = null
+    filters.month = null
+    shipmentData.value = []
+}
 
+// ✅ Generate Report
 const generateReport = () => {
-    loading.value = true;
-    setTimeout(() => {
-        loading.value = false;
-        console.log('Report generated with filters:', filters);
-    }, 1000);
-};
+    // Normally, fetch filtered data from API here
+    shipmentData.value = [
+        {
+            shipmentId: 'DS-2024-001234',
+            orderDate: '2024-01-15',
+            customerName: 'PS Tyres & Battery Auto Services',
+            region: 'Central',
+            status: 'Delivered',
+            totalValue: 24500
+        },
+        {
+            shipmentId: 'DS-2024-001235',
+            orderDate: '2024-01-18',
+            customerName: 'PS Tyres & Battery Auto Services',
+            region: 'Central',
+            status: 'Shipped',
+            totalValue: 18700
+        }
+    ]
+}
 
-const exportSummary = () => alert('Summary export functionality would be implemented here');
-const exportToCSV = () => alert('CSV export functionality would be implemented here');
+// ✅ Export to Excel
+const exportExcel = () => {
+    if (!shipmentData.value.length) {
+        alert('No data to export.')
+        return
+    }
 
-const viewShipmentDetails = (shipment) => alert(`Viewing details for ${shipment.shipmentId}`);
-const printReport = () => window.print();
+    const exportData = shipmentData.value.map(item => ({
+        'Shipment ID': item.shipmentId,
+        'Order Date': item.orderDate,
+        'Customer Name': item.customerName,
+        'Region': item.region,
+        'Status': item.status,
+        'Total Value (RM)': item.totalValue
+    }))
 
-onMounted(() => console.log('Direct Shipment Summary mounted'));
+    const worksheet = utils.json_to_sheet(exportData)
+    const workbook = utils.book_new()
+    utils.book_append_sheet(workbook, worksheet, 'Direct Shipment Summary')
+
+    const filename = `Direct_Shipment_Summary_${filters.month || 'All'}_${Date.now()}.xlsx`
+    writeFileXLSX(workbook, filename)
+}
 </script>
 
 <style scoped>
-:deep(.p-calendar),
 :deep(.p-dropdown) {
     width: 100%;
-}
-@media print {
-    .no-print {
-        display: none !important;
-    }
 }
 </style>
