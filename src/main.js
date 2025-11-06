@@ -7,14 +7,6 @@ import PrimeVue from 'primevue/config';
 import ConfirmationService from 'primevue/confirmationservice';
 import ToastService from 'primevue/toastservice';
 import 'quill/dist/quill.snow.css';
-
-
-
-
-// import 'quill/dist/quill.bubble.css' // optional theme
-
-
-
 import '@/assets/styles.scss';
 
 const app = createApp(App);
