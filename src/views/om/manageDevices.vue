@@ -7,9 +7,7 @@
                     <!-- Header -->
                     <div class="flex items-center justify-between border-b pb-3 mb-3">
                         <div class="flex items-center space-x-3">
-                            <RouterLink to="/om/detailUSer">
-                                <Button icon="pi pi-arrow-left font-bold" class="p-button-text p-button-secondary text-xl" size="big" v-tooltip="'Back'" />
-                            </RouterLink>
+                            <Button icon="pi pi-arrow-left font-bold" class="p-button-text p-button-secondary text-xl" size="big" v-tooltip="'Back'" @click="$router.back()" />
                             <div class="text-2xl font-bold text-gray-800">Devices</div>
                         </div>
                         <div class="flex items-center gap-2 w-full max-w-md">
