@@ -2,26 +2,39 @@
 import { useLayout } from '@/layout/composables/layout';
 import api from '@/service/api';
 import { useRouter } from 'vue-router';
+import { useConfirm } from 'primevue/useconfirm';
+import { useToast } from 'primevue/usetoast';
 
-const { toggleMenu, toggleDarkMode, isDarkTheme } = useLayout();
+const { toggleMenu } = useLayout();
 const router = useRouter();
+const confirm = useConfirm();
+const toast = useToast();
 
 const handleLogout = async () => {
     try {
-        // Call the logout API
         await api.post('logout');
-        
-        // Remove token and redirect
         api.tokenService.logout();
-        
-        // Redirect to login page
         router.push('/auth/login');
     } catch (error) {
         console.error('Logout failed:', error);
-        // Even if API call fails, clear local token and redirect
         api.tokenService.logout();
         router.push('/auth/login');
     }
+};
+
+const confirmLogout = () => {
+    confirm.require({
+        message: 'Are you sure you want to log out?',
+        header: 'Confirm Logout',
+        icon: 'pi pi-exclamation-triangle',
+        acceptClass: 'p-button-danger',
+        acceptLabel: 'Yes, Logout',
+        rejectLabel: 'Cancel',
+        accept: async () => {
+            await handleLogout();
+            toast.add({ severity: 'info', summary: 'Logged out', detail: 'You have been logged out successfully.', life: 3000 });
+        }
+    });
 };
 </script>
 
@@ -32,18 +45,12 @@ const handleLogout = async () => {
                 <i class="pi pi-bars"></i>
             </button>
             <router-link to="/" class="layout-topbar-logo">
-                <img src="/demo/images/toyo_tires.png" alt="Logo" style="height: 35px; object-fit: contain;" />
+                <img src="/demo/images/toyo_tires.png" alt="Logo" style="height: 25px; object-fit: contain" />
             </router-link>
         </div>
 
-        <div class="layout-topbar-separator">
-            <span class="text-xl font-bold ml-5">John Doe</span>
-        </div>
-
-        <div class="layout-topbar-actions">
-            <div class="layout-config-menu">
-                <!-- Dark mode toggle commented out -->
-            </div>
+        <div class="layout-topbar-actions flex items-center gap-4">
+            <span class="text-lg font-semibold text-gray-800">John Doe</span>
 
             <button
                 class="layout-topbar-menu-button layout-topbar-action"
@@ -54,12 +61,15 @@ const handleLogout = async () => {
 
             <div class="layout-topbar-menu hidden lg:block">
                 <div class="layout-topbar-menu-content">
-                    <button type="button" class="layout-topbar-action" @click="handleLogout">
-                        <i class="pi pi-user font-bold"></i>
+                    <button type="button" class="layout-topbar-action" @click="confirmLogout">
+                        <i class="pi pi-sign-out font-bold"></i>
                         <span>Logout</span>
                     </button>
                 </div>
             </div>
         </div>
     </div>
+
+    <ConfirmDialog />
+    <Toast />
 </template>
