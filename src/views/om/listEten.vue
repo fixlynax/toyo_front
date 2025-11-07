@@ -46,7 +46,7 @@
             
             <Column field="memberCode" header="Mem Code" style="min-width: 6rem">
                 <template #body="{ data }">
-                    <RouterLink :to="`/om/detailEten/${data.custAccountNo}`" class="hover:underline font-bold">
+                    <RouterLink :to="`/om/detailEten/${data.custAccountNo}`" class="hover:underline font-bold text-primary-400">
                         {{ data.memberCode }}
                     </RouterLink>
                 </template>

@@ -23,7 +23,7 @@
             responsiveLayout="scroll"
             stripedRows
             rowHover
-            class="rounded-xl overflow-hidden"
+            class="rounded-table"
         >
             <template #header>
                 <div class="flex items-center justify-between gap-4 w-full flex-wrap">
@@ -51,7 +51,7 @@
             <!-- 🏷 Storage Location -->
             <Column header="Storage Location" style="min-width: 12rem">
                 <template #body="{ data }">
-                    <div class="text-sm text-gray-700">{{ data.storageLocation }}</div>
+                    <div class="text-sl text-black-700 font-bold">{{ data.storageLocation }}</div>
                 </template>
             </Column>
 
@@ -59,7 +59,7 @@
             <Column header="Order Type" style="min-width: 12rem">
                 <template #body="{ data }">
                     <div class="flex flex-wrap gap-2">
-                        <span class="text-purple-600 font-bold text-sm">
+                        <span class="text-purple-600 font-bold text-sl">
                             {{ getOrderTypeLabel(data.orderType) }}
                         </span>
                     </div>
@@ -69,10 +69,10 @@
             <!-- 📅 Period -->
             <Column header="Period" style="min-width: 8rem">
                 <template #body="{ data }">
-                    <div class="text-sm leading-tight">
-                        <div class="font-semibold">{{ formatDate(data.startPeriod) }}</div>
-                        <div class="text-gray-500 text-xs">to</div>
-                        <div class="font-semibold">{{ formatDate(data.endPeriod) }}</div>
+                    <div class="leading-tight">
+                        <div class="font-semibold text-sl">{{ formatDate(data.startPeriod) }}</div>
+                        <div class="text-gray-500 text-xs align">to</div>
+                        <div class="font-semibold text-sl">{{ formatDate(data.endPeriod) }}</div>
                     </div>
                 </template>
             </Column>
@@ -712,6 +712,45 @@ export default {
 
 :deep(.p-dialog .p-dialog-content) {
     padding: 1.5rem;
+}
+
+:deep(.rounded-table) {
+    border-radius: 12px;
+    overflow: hidden;
+    border: 1px solid #e5e7eb;
+    
+    .p-datatable-header {
+        border-top-left-radius: 12px;
+        border-top-right-radius: 12px;
+    }
+    
+    .p-paginator-bottom {
+        border-bottom-left-radius: 12px;
+        border-bottom-right-radius: 12px;
+    }
+    
+    .p-datatable-thead > tr > th {
+        &:first-child {
+            border-top-left-radius: 12px;
+        }
+        &:last-child {
+            border-top-right-radius: 12px;
+        }
+    }
+    
+    .p-datatable-tbody > tr:last-child > td {
+        &:first-child {
+            border-bottom-left-radius: 0;
+        }
+        &:last-child {
+            border-bottom-right-radius:0;
+        }
+    }
+    
+    .p-datatable-tbody > tr.p-datatable-emptymessage > td {
+        border-bottom-left-radius: 12px;
+        border-bottom-right-radius: 12px;
+    }
 }
 
 /* Responsive improvements */

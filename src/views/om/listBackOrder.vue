@@ -41,7 +41,7 @@
 
             <Column field="orderNo" header="Order No." style="min-width: 10rem">
                 <template #body="{ data }">
-                    <RouterLink :to="`/om/detailBackOrder/${data.id}`" class="hover:underline font-bold text-black-600">
+                    <RouterLink :to="`/om/detailBackOrder/${data.id}`" class="hover:underline font-bold text-primary-400">
                         {{ data.orderNo }}
                     </RouterLink>
                 </template>

@@ -2,7 +2,7 @@
     <Fluid>
         <div class="flex flex-col md:flex-row gap-8">
             <div class="card flex flex-col gap-6 w-full">
-                <div class="text-2xl font-bold text-gray-800 border-b pb-2 mb-1">Material Exception List</div>
+                <div class="text-2xl font-bold text-gray-800 border-b pb-2 mb-1">List Material Exception</div>
 
                 <LoadingPage v-if="loading" :message="'Loading Material Exception...'" :sub-message="'Fetching your Material Exception list'" />
 
@@ -101,8 +101,8 @@
                     <!-- Expanded Dealers Table -->
                     <template #expansion="{ data }">
                         <div class="p-4 bg-gray-50 border-t border-gray-200 rounded-b-lg">
-                            <h4 class="font-semibold text-gray-700 mb-2">Dealers for {{ data.materialCode }}</h4>
-                            <DataTable :value="data.dealers" :rows="5" :paginator="data.dealers && data.dealers.length > 5" responsiveLayout="scroll" size="small">
+                            <DataTable :value="data.dealers" :rows="5" :paginator="data.dealers && data.dealers.length > 5" responsiveLayout="scroll" size="small" class="rounded-table">
+                                <h4 class="font-semibold text-gray-700 p-3 ml-2">Dealers for <span class="font-bold text-primary-400">{{ data.materialCode }}</span> </h4>
                                 <Column field="label" header="Dealer Name" style="min-width: 12rem" />
                                 <Column field="group" header="State" style="min-width: 10rem" />
                             </DataTable>
@@ -388,3 +388,44 @@ const fetchMaterialExceptions = async () => {
 
 onMounted(fetchMaterialExceptions);
 </script>
+
+<style scoped>
+:deep(.rounded-table) {
+    border-radius: 12px;
+    overflow: hidden;
+    border: 1px solid #e5e7eb;
+    
+    .p-datatable-header {
+        border-top-left-radius: 12px;
+        border-top-right-radius: 12px;
+    }
+    
+    .p-paginator-bottom {
+        border-bottom-left-radius: 12px;
+        border-bottom-right-radius: 12px;
+    }
+    
+    .p-datatable-thead > tr > th {
+        &:first-child {
+            border-top-left-radius: 12px;
+        }
+        &:last-child {
+            border-top-right-radius: 12px;
+        }
+    }
+    
+    .p-datatable-tbody > tr:last-child > td {
+        &:first-child {
+            border-bottom-left-radius: 0;
+        }
+        &:last-child {
+            border-bottom-right-radius:0;
+        }
+    }
+    
+    .p-datatable-tbody > tr.p-datatable-emptymessage > td {
+        border-bottom-left-radius: 12px;
+        border-bottom-right-radius: 12px;
+    }
+}
+</style>

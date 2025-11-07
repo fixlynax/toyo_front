@@ -89,7 +89,7 @@ onBeforeMount(async () => {
             <!-- Program ID -->
             <Column field="programId" header="Program ID" style="min-width: 8rem">
                 <template #body="{ data }">
-                    <RouterLink :to="`/om/detailSalesProgram/${data.id}`" class="hover:underline font-bold">
+                    <RouterLink :to="`/om/detailSalesProgram/${data.id}`" class="hover:underline font-bold text-primary-400">
                         {{ data.programId }}
                     </RouterLink>
                 </template>
