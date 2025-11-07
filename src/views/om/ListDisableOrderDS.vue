@@ -70,19 +70,7 @@
             <Column header="Period" style="min-width: 8rem">
                 <template #body="{ data }">
                     <div class="leading-tight">
-                        <div class="font-semibold text-sl">{{ formatDate(data.startPeriod) }}</div>
-                        <div class="text-gray-500 text-xs align">to</div>
-                        <div class="font-semibold text-sl">{{ formatDate(data.endPeriod) }}</div>
-                    </div>
-                </template>
-            </Column>
-
-            <!-- 🔖 Status -->
-            <Column header="Status" style="min-width: 8rem">
-                <template #body="{ data }">
-                    <div class="flex justify-start">
-                        <Tag v-if="getStatus(data) !== '-'" :value="getStatus(data)" :severity="getStatusSeverity(data)" />
-                        <span v-else class="text-gray-400 text-sm">-</span>
+                        <div class="font-semibold text-sl">{{ formatDate(data.startPeriod) }} ⟶ {{ formatDate(data.endPeriod) }}</div>
                     </div>
                 </template>
             </Column>
@@ -90,8 +78,18 @@
             <!-- 💬 Message -->
             <Column header="Message" style="min-width: 14rem">
                 <template #body="{ data }">
-                    <div class="text-sm text-gray-700 line-clamp-2">
+                    <div class="font-bold text-sl text-black-700 line-clamp-2">
                         {{ data.message || '-' }}
+                    </div>
+                </template>
+            </Column>
+
+             <!-- 🔖 Status -->
+            <Column header="Status" style="min-width: 8rem">
+                <template #body="{ data }">
+                    <div class="flex justify-start">
+                        <Tag v-if="getStatus(data) !== '-'" :value="getStatus(data)" :severity="getStatusSeverity(data)" />
+                        <span v-else class="font-bold text-sl text-black-700">-</span>
                     </div>
                 </template>
             </Column>
@@ -99,9 +97,9 @@
             <!-- ⚙️ Actions -->
             <Column header="Actions" style="min-width: 10rem" bodyClass="text-center">
                 <template #body="{ data }">
-                    <div class="flex justify-center gap-2">
+                    <div class="flex justify-left gap-2">
                         <Button icon="pi pi-pencil" class="p-button-text p-button-info p-button-sm" v-tooltip="'Edit'" @click="editItem(data)" />
-                        <Button icon="pi pi-trash" class="p-button-text p-button-danger p-button-sm" v-tooltip="'Delete'" @click="deleteItem(data.id)" />
+                        <!-- <Button icon="pi pi-trash" class="p-button-text p-button-danger p-button-sm" v-tooltip="'Delete'" @click="deleteItem(data.id)" /> -->
                     </div>
                 </template>
             </Column>

@@ -19,7 +19,6 @@
             :globalFilterFields="['memberCode', 'custAccountNo', 'companyName1', 'city', 'state', 'phoneNumber', 'signboardType', 'status']"
             class="rounded-table"
         >
-           
             <template #header>
                 <div class="flex items-center justify-between gap-4 w-full flex-wrap">
                     <!-- Left: Search Field + Cog Button -->
@@ -40,38 +39,39 @@
                 </div>
             </template>
 
-            
             <template #empty> No customers found. </template>
 
-            
             <Column field="memberCode" header="Mem Code" style="min-width: 6rem">
                 <template #body="{ data }">
                     <RouterLink :to="`/om/detailEten/${data.custAccountNo}`" class="hover:underline font-bold text-primary-400">
                         {{ data.memberCode }}
+
+                        <div class="flex flex-wrap gap-1 mt-1">
+                            <!-- Main: if custAccountNo ends with 00 -->
+                            <span v-if="String(data.custAccountNo).endsWith('00')" class="text-[10px] font-semibold text-white bg-blue-700 px-2 py-[2px] rounded shadow-sm"> Main </span>
+
+                            <!-- Sub: otherwise -->
+                            <span v-else class="text-[10px] font-semibold text-white bg-green-700 px-2 py-[2px] rounded shadow-sm"> Sub </span>
+                        </div>
                     </RouterLink>
                 </template>
             </Column>
-            
+
             <Column field="custAccountNo" header="Acc No" style="min-width: 6rem" />
-            
+
             <Column field="companyName1" header="Company Name" style="min-width: 8rem" />
-            
+
             <Column field="location" header="Location" style="min-width: 8rem">
-                <template #body="{ data }">
-                    {{ data.city }}, {{ data.state }}
-                </template>
+                <template #body="{ data }"> {{ data.city }}, {{ data.state }} </template>
             </Column>
-            
+
             <Column field="phoneNumber" header="Phone No" style="min-width: 8rem" />
-            
+
             <Column field="signboardType" header="Signboard" style="min-width: 8rem" />
-            
+
             <Column field="status" header="Status" style="min-width: 6rem">
                 <template #body="{ data }">
-                    <Tag 
-                        :value="data.status === 1 ? 'Active' : 'Inactive'" 
-                        :severity="getOverallStatusSeverity(data.status)" 
-                    />
+                    <Tag :value="data.status === 1 ? 'Active' : 'Inactive'" :severity="getOverallStatusSeverity(data.status)" />
                 </template>
             </Column>
         </DataTable>
@@ -100,24 +100,23 @@ onMounted(async () => {
         console.log('API Response:', response.data);
 
         if (response.data.status === 1 && response.data.admin_data) {
-           
             const adminData = response.data.admin_data;
-            
-            listData.value = Object.keys(adminData).map(key => {
+
+            listData.value = Object.keys(adminData).map((key) => {
                 const customer = adminData[key];
                 const shop = customer.shop;
-                
+
                 return {
                     id: shop.id,
                     memberCode: shop.memberCode || 'Untitled',
                     custAccountNo: shop.custAccountNo,
                     companyName1: shop.companyName1,
-                    city: shop.city, 
-                    state: shop.state, 
+                    city: shop.city,
+                    state: shop.state,
                     phoneNumber: shop.phoneNumber || '-',
                     signboardType: shop.signboardType || '-',
                     status: shop.status,
-                    user_list: customer.user_list 
+                    user_list: customer.user_list
                 };
             });
         } else {
@@ -150,17 +149,17 @@ const getOverallStatusSeverity = (status) => {
     border-radius: 12px;
     overflow: hidden;
     border: 1px solid #e5e7eb;
-    
+
     .p-datatable-header {
         border-top-left-radius: 12px;
         border-top-right-radius: 12px;
     }
-    
+
     .p-paginator-bottom {
         border-bottom-left-radius: 12px;
         border-bottom-right-radius: 12px;
     }
-    
+
     .p-datatable-thead > tr > th {
         &:first-child {
             border-top-left-radius: 12px;
@@ -169,8 +168,7 @@ const getOverallStatusSeverity = (status) => {
             border-top-right-radius: 12px;
         }
     }
-    
-    
+
     .p-datatable-tbody > tr:last-child > td {
         &:first-child {
             border-bottom-left-radius: 0;
@@ -179,8 +177,7 @@ const getOverallStatusSeverity = (status) => {
             border-bottom-right-radius: 0;
         }
     }
-    
-    
+
     .p-datatable-tbody > tr.p-datatable-emptymessage > td {
         border-bottom-left-radius: 12px;
         border-bottom-right-radius: 12px;
