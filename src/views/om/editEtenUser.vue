@@ -81,7 +81,7 @@
         <div class="card flex flex-col gap-8 w-full">
             <div class="flex flex-col md:flex-row justify-end gap-2 mt-4">
                 <div class="w-40">
-                    <Button label="Cancel" class="w-full p-button-secondary" @click="handleCancel" />
+                    <Button label="Cancel" class="w-full p-button-secondary" @click="$router.back()" />
                 </div>
                 <div class="w-40">
                     <Button label="Update" class="w-full" @click="handleUpdate" :loading="loading" />
@@ -327,7 +327,7 @@ const handleUpdate = async () => {
             });
 
             // // Redirect to detailEten page after successful update
-            // router.push('/om/detailEten/' + form.value.dealerAccountNo);
+             router.back();
         } else {
             // Handle API errors
             const errorMessage = response.data.error?.message || 'Failed to update user';
