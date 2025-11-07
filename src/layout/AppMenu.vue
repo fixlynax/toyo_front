@@ -137,7 +137,7 @@ const model = ref([
             {
                 label: 'Dashboard',
                 icon: 'pi pi-fw pi-home',
-                to: '/'
+                to: '/om/omDashboard'
             },
             {
                 label: 'Customer',

@@ -65,6 +65,11 @@ const router = createRouter({
                 // ===============================
                 // Customer eTEN
                 {
+                    path: '/om/omDashboard',
+                    name: 'OM-Dashboard',
+                    component: () => import('@/views/om/omDashboard.vue')
+                },
+                {
                     path: '/om/listEten',
                     name: 'List-Eten',
                     component: () => import('@/views/om/listEten.vue')

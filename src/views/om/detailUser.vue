@@ -37,7 +37,6 @@
                             <div class="w-full">
                                 <span class="text-xm font-bold text-black-700">Name</span>
                                 <p class="text-lg font-medium">{{ memberDetail.firstName }} {{ memberDetail.lastName }} <span v-if="memberDetail.isMaster === 1" class="font-bold text-primary">(Master)</span></p>
-                                
                             </div>
                             <div class="w-full">
                                 <span class="text-xm font-bold text-black-700">Mobile Number</span>
@@ -83,15 +82,17 @@
                             <div class="w-full">
                                 <span class="text-xm font-bold text-black-700">Status</span>
                                 <p class="text-lg font-medium">
-                                    <Tag :value="memberDetail.status === 1 ? 'Active' : 'Inactive'" 
-                                          :severity="memberDetail.status === 1 ? 'success' : 'danger'" />
+                                    <span :class="memberDetail.status === 1 ? 'text-green-600 font-medium' : 'text-red-600 font-medium'">
+                                        {{ memberDetail.status === 1 ? 'Active' : 'Inactive' }}
+                                    </span>
                                 </p>
                             </div>
                             <div class="w-full">
                                 <span class="text-xm font-bold text-black-700">Activated</span>
                                 <p class="text-lg font-medium">
-                                    <Tag :value="memberDetail.activated === 1 ? 'Yes' : 'No'" 
-                                          :severity="memberDetail.activated === 1 ? 'success' : 'warning'" />
+                                    <span :class="memberDetail.activated === 1 ? 'text-green-600 font-medium' : 'text-red-600 font-medium'">
+                                        {{ memberDetail.activated === 1 ? 'Yes' : 'No' }}
+                                    </span>
                                 </p>
                             </div>
                         </div>
@@ -100,7 +101,6 @@
             </div>
 
             <div class="md:w-1/3">
-
                 <!-- Permissions Section -->
                 <div class="card">
                     <div class="flex items-center justify-between border-b pb-4 mb-4">
@@ -156,23 +156,9 @@
                                                 <div>Platform: {{ device.platform }}</div>
                                             </div>
                                         </td>
-
-                                        <td class="px-4 py-3 text-right align-top">
-                                            <Button 
-                                                :label="device.isBlocked ? 'Unblock' : 'Block'" 
-                                                :severity="device.isBlocked ? 'success' : 'danger'" 
-                                                size="small" 
-                                                class="!py-1 !px-2 text-xs w-fit" 
-                                                @click="toggleBlock(device)" 
-                                                :loading="device.loading"
-                                                :disabled="device.loading"
-                                            />
-                                        </td>
                                     </tr>
                                     <tr v-if="devices.length === 0">
-                                        <td colspan="2" class="px-4 py-3 text-center text-gray-500">
-                                            No devices found
-                                        </td>
+                                        <td colspan="2" class="px-4 py-3 text-center text-gray-500">No devices found</td>
                                     </tr>
                                 </tbody>
                             </table>
@@ -234,9 +220,9 @@ const fetchMemberDetail = async () => {
     try {
         loading.value = true;
         error.value = null;
-        
+
         const response = await api.get(`detail_dealer_user/${memberId}`);
-        
+
         if (response.data.status === 1) {
             // Map API response to frontend structure
             const userData = response.data.admin_data.userData;
@@ -262,7 +248,7 @@ const fetchMemberDetail = async () => {
             };
 
             // Map devices data
-            devices.value = response.data.admin_data.device_data.map(device => ({
+            devices.value = response.data.admin_data.device_data.map((device) => ({
                 id: device.device_id,
                 name: device.device_model || 'Unknown Device',
                 uniqueId: device.device_id,
@@ -271,14 +257,13 @@ const fetchMemberDetail = async () => {
                 isBlocked: device.is_blocked === 1,
                 loading: false
             }));
-
         } else {
             throw new Error(response.data.error?.message || 'Failed to fetch member details');
         }
     } catch (err) {
         console.error('Error fetching member details:', err);
         error.value = err.response?.data?.error?.message || err.message || 'An error occurred while fetching member details';
-        
+
         toast.add({
             severity: 'error',
             summary: 'Error',
@@ -287,44 +272,6 @@ const fetchMemberDetail = async () => {
         });
     } finally {
         loading.value = false;
-    }
-};
-
-const toggleBlock = async (device) => {
-    try {
-        device.loading = true;
-        
-        const action = device.isBlocked ? 'unblock' : 'block';
-        const response = await api.post('block_user_device', {
-            deviceUUID: device.uniqueId,
-            device_model: device.name,
-            action: action,
-            user_id: memberId
-        });
-
-        if (response.data.status === 1) {
-            device.isBlocked = !device.isBlocked;
-            
-            toast.add({
-                severity: 'success',
-                summary: 'Success',
-                detail: `Device ${action}ed successfully`,
-                life: 3000
-            });
-        } else {
-            throw new Error(response.data.error?.message || `Failed to ${action} device`);
-        }
-    } catch (err) {
-        console.error('Error toggling device block:', err);
-        
-        toast.add({
-            severity: 'error',
-            summary: 'Error',
-            detail: err.response?.data?.error?.message || err.message || 'An error occurred',
-            life: 5000
-        });
-    } finally {
-        device.loading = false;
     }
 };
 
@@ -363,7 +310,9 @@ onMounted(() => {
 .card {
     background: white;
     border-radius: 8px;
-    box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
+    box-shadow:
+        0 1px 3px 0 rgba(0, 0, 0, 0.1),
+        0 1px 2px 0 rgba(0, 0, 0, 0.06);
     padding: 1.5rem;
 }
 </style>

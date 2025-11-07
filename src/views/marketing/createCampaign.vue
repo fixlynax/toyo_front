@@ -157,13 +157,14 @@
                             <Dropdown v-model="reward.selected" :options="listPrize" optionLabel="title" placeholder="Select a reward" class="w-full">
                                 <template #option="slotProps">
                                     <div class="flex items-center gap-3">
-                                        <img v-if="slotProps.option.imageURL" :src="slotProps.option.imageURL" class="w-28 h-16 object-cover rounded" />
+                                        <img v-if="getFullImageUrl(slotProps.option.imageURL)" :src="getFullImageUrl(slotProps.option.imageURL)" class="w-28 h-16 object-cover rounded" />
                                         <div v-else class="w-28 h-16 bg-gray-200 rounded flex items-center justify-center">
                                             <i class="pi pi-image text-gray-400"></i>
                                         </div>
                                         <div class="flex flex-col">
                                             <span class="font-semibold text-gray-800">{{ slotProps.option.title }}</span>
                                             <small class="text-gray-500">{{ slotProps.option.type }} • {{ slotProps.option.purpose }}</small>
+                                            <small class="text-xs text-gray-400">Available: {{ slotProps.option.availableqty }}/{{ slotProps.option.totalqty }}</small>
                                         </div>
                                     </div>
                                 </template>
@@ -172,9 +173,12 @@
 
                         <div class="w-full">
                             <FloatLabel>
-                                <InputNumber id="qty" v-model="reward.qty" :min="1" class="w-full" />
+                                <InputNumber id="qty" v-model="reward.qty" :min="1" :max="reward.selected ? reward.selected.availableqty : null" class="w-full" />
                                 <label for="qty">Quantity</label>
                             </FloatLabel>
+                            <small v-if="reward.selected" class="text-gray-500 text-xs mt-1">
+                                Available: {{ reward.selected.availableqty }}
+                            </small>
                         </div>
                     </div>
                 </div>
@@ -216,19 +220,19 @@ const campaign = ref({
     publishDate: '',
     startDate: '',
     endDate: '',
-    isGamification: 'off', // Changed to string to match dropdown
+    isGamification: 'off',
     quota: 0,
-    maxPerUser: 1,
+    maxPerUser: 0,
     point1: 0,
     point2: 0,
     point3: 0,
-    status: 1
+    status: 0
 });
 
 // UI state
 const isSubmitting = ref(false);
 
-// Gamification toggle - using strings 'on'/'off' as per API requirement
+// Gamification toggle
 const gamificationOnOff = [
     { label: 'ON', value: 'on' },
     { label: 'OFF', value: 'off'}
@@ -241,6 +245,14 @@ const listCriteria = ref([]);
 // Reward section
 const rewards = ref([]);
 const listPrize = ref([]);
+
+// Get full image URL
+const getFullImageUrl = (imagePath) => {
+    if (!imagePath) return null;
+    if (imagePath.startsWith('http')) return imagePath;
+    // Assuming your API base URL is available, otherwise adjust accordingly
+    return `${api.defaults.baseURL}${imagePath}`;
+};
 
 // API functions
 const fetchMaterials = async () => {
@@ -256,9 +268,12 @@ const fetchMaterials = async () => {
 
 const fetchCatalog = async () => {
     try {
-        const response = await api.get('catalog/catalogList');
+        const response = await api.get('campaign/catalogs');
         if (response.data.status === 1) {
             listPrize.value = response.data.admin_data || [];
+            console.log('Fetched catalog items:', listPrize.value);
+        } else {
+            console.error('Failed to fetch catalog:', response.data);
         }
     } catch (error) {
         console.error('Error fetching catalog:', error);
@@ -283,24 +298,40 @@ const removeReward = (index) => rewards.value.splice(index, 1);
 
 // Image upload
 const onImageSelect = (event, field) => {
-    const file = event.files[0];
-    if (file) {
+    let file = event.files?.[0];
+
+    if (file && !(file instanceof File) && file instanceof Blob) {
+        file = new File([file], file.name || 'upload.jpg', { type: file.type });
+    }
+
+    if (file instanceof File) {
+        console.log('✅ Real file selected:', file);
+
+        // Store File object for upload
+        campaign.value[`${field}File`] = file;
+
+        // Create Base64 preview for UI
         const reader = new FileReader();
         reader.onload = (e) => {
             campaign.value[field] = e.target.result;
         };
         reader.readAsDataURL(file);
+    } else {
+        console.warn('⚠️ Not a real File object:', file);
     }
 };
 
-// Format date to dd-mm-yyyy
-const formatDate = (date) => {
+// Format date to YYYY-MM-DD HH:mm:ss for API
+const formatDateForAPI = (date) => {
     if (!date) return '';
     const d = new Date(date);
-    const day = String(d.getDate()).padStart(2, '0');
-    const month = String(d.getMonth() + 1).padStart(2, '0');
     const year = d.getFullYear();
-    return `${day}-${month}-${year}`;
+    const month = String(d.getMonth() + 1).padStart(2, '0');
+    const day = String(d.getDate()).padStart(2, '0');
+    const hours = String(d.getHours()).padStart(2, '0');
+    const minutes = String(d.getMinutes()).padStart(2, '0');
+    const seconds = String(d.getSeconds()).padStart(2, '0');
+    return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
 };
 
 // Validation
@@ -315,7 +346,6 @@ const validateForm = () => {
         return false;
     }
 
-    // Fixed: Check for string 'on' instead of number 1
     if (campaign.value.isGamification === 'on') {
         if (criterias.value.length === 0) {
             alert('Please add at least one criteria for gamification campaign');
@@ -339,8 +369,16 @@ const validateForm = () => {
         // Validate rewards
         for (let i = 0; i < rewards.value.length; i++) {
             const reward = rewards.value[i];
-            if (!reward.selected || !reward.qty) {
-                alert(`Please complete all fields for Reward ${i + 1}`);
+            if (!reward.selected) {
+                alert(`Please select a reward for Reward ${i + 1}`);
+                return false;
+            }
+            if (!reward.qty || reward.qty < 1) {
+                alert(`Please enter a valid quantity for Reward ${i + 1}`);
+                return false;
+            }
+            if (reward.qty > reward.selected.availableqty) {
+                alert(`Quantity for ${reward.selected.title} exceeds available quantity (${reward.selected.availableqty})`);
                 return false;
             }
         }
@@ -349,7 +387,7 @@ const validateForm = () => {
     return true;
 };
 
-// Submit event - FIXED VERSION
+// Submit event - UPDATED FOR CATALOG API
 const submitEvent = async () => {
     if (!validateForm()) return;
 
@@ -362,32 +400,31 @@ const submitEvent = async () => {
         formData.append('title', campaign.value.title);
         formData.append('description', campaign.value.description);
         formData.append('tnc', campaign.value.termCondition);
-        formData.append('publishDate', formatDate(campaign.value.publishDate));
-        formData.append('startDate', formatDate(campaign.value.startDate));
-        formData.append('endDate', formatDate(campaign.value.endDate));
+        formData.append('publishDate', formatDateForAPI(campaign.value.publishDate));
+        formData.append('startDate', formatDateForAPI(campaign.value.startDate));
+        formData.append('endDate', formatDateForAPI(campaign.value.endDate));
         formData.append('quota', campaign.value.quota.toString());
         formData.append('maxPerUser', campaign.value.maxPerUser.toString());
-        formData.append('isGamification', campaign.value.isGamification); // Already string 'on'/'off'
+        formData.append('isGamification', campaign.value.isGamification);
         formData.append('point1', campaign.value.point1.toString());
         formData.append('point2', campaign.value.point2.toString());
         formData.append('point3', campaign.value.point3.toString());
 
         // Handle images
-        if (campaign.value.image1 && typeof campaign.value.image1 !== 'string') {
-            formData.append('image1', campaign.value.image1);
+        if (campaign.value.image1File) {
+            formData.append('image1', campaign.value.image1File);
         }
-        if (campaign.value.image2 && typeof campaign.value.image2 !== 'string') {
-            formData.append('image2', campaign.value.image2);
+        if (campaign.value.image2File) {
+            formData.append('image2', campaign.value.image2File);
         }
-        if (campaign.value.image3 && typeof campaign.value.image3 !== 'string') {
-            formData.append('image3', campaign.value.image3);
-        }
+        if (campaign.value.image3File) {
+            formData.append('image3', campaign.value.image3File);
+        }       
 
-        // FIXED: Always send criteria and reward_option, even if empty
+        // Prepare criteria and reward_option based on gamification
         let criteriaArray = [];
         let rewardOptions = [];
 
-        // Only populate arrays if gamification is ON
         if (campaign.value.isGamification === 'on') {
             // Prepare criteria array
             criteriaArray = criterias.value.map(criteria => ({
@@ -398,23 +435,25 @@ const submitEvent = async () => {
                 minQty: criteria.minQty.toString()
             }));
 
-            // Prepare reward options array
+            // Prepare reward options array - using catalog IDs
             rewardOptions = rewards.value.map(reward => ({
                 catalogID: reward.selected.id.toString(),
                 quantity: reward.qty.toString()
             }));
         }
 
-        // FIXED: Always append these fields, even if empty
+        // Always append these fields (empty arrays if gamification is off)
         formData.append('criteria', JSON.stringify(criteriaArray));
         formData.append('reward_option', JSON.stringify(rewardOptions));
 
-        console.log('Submitting form data:', {
-            title: campaign.value.title,
-            isGamification: campaign.value.isGamification,
-            criteria: criteriaArray,
-            reward_option: rewardOptions
-        });
+        // Log FormData for debugging
+        for (const [key, value] of formData.entries()) {
+            if (value instanceof File) {
+                console.log(`${key}:`, value.name, value.type, value.size);
+            } else {
+                console.log(`${key}:`, value);
+            }
+        }
 
         const response = await api.post('campaign/create', formData, {
             headers: {
@@ -432,7 +471,7 @@ const submitEvent = async () => {
         console.error('Error creating campaign:', error);
         if (error.response?.data) {
             console.error('API Error response:', error.response.data);
-            alert('Error creating campaign: ' + (error.response.data.error?.messageEnglish || 'Validation error'));
+            alert('Error creating campaign: ' + (error.response.data.message || 'Validation error'));
         } else {
             alert('Error creating campaign. Please try again.');
         }

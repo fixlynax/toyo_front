@@ -78,7 +78,7 @@ onBeforeMount(async () => {
 
                     <!-- Create Button -->
                     <RouterLink to="/om/createSalesProgram">
-                        <Button type="button" label="Add New" icon="pi pi-plus" class="p-button-success" />
+                        <Button type="button" label="Add New" icon="pi pi-plus" class="p-button" />
                     </RouterLink>
                 </div>
             </template>
