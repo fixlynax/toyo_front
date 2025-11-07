@@ -134,23 +134,16 @@
                             <Dropdown v-model="prize.selected" :options="listPrize" optionLabel="prizeName" placeholder="Select a prize" class="w-full">
                                 <template #option="slotProps">
                                     <div class="flex items-center gap-3">
-                                        <img :src="slotProps.option.imageURL" class="w-28 h-16 object-cover rounded" />
+                                        <div class="w-28 h-16 flex items-center justify-center bg-gray-100 rounded border">
+                                            <img :src="slotProps.option.processedImageURL" :alt="slotProps.option.prizeName" class="max-w-full max-h-full object-contain" @load="onImageLoad" @error="onImageError" />
+                                        </div>
                                         <div class="flex flex-col">
                                             <span class="font-semibold text-gray-800">{{ slotProps.option.prizeName }}</span>
                                             <small class="text-gray-500">{{ slotProps.option.prizeType }}</small>
                                         </div>
                                     </div>
                                 </template>
-                                <template #value="slotProps">
-                                    <div v-if="slotProps.value" class="flex items-center gap-3">
-                                        <img :src="slotProps.value.imageURL" class="w-8 h-8 object-cover rounded" />
-                                        <div>
-                                            <span class="font-semibold text-gray-800">{{ slotProps.value.prizeName }}</span>
-                                            <small class="block text-gray-500">{{ slotProps.value.prizeType }}</small>
-                                        </div>
-                                    </div>
-                                    <span v-else class="text-gray-400">Select Prize</span>
-                                </template>
+
                             </Dropdown>
                             <small v-if="errors[`prize_${index}`]" class="text-red-500">{{ errors[`prize_${index}`] }}</small>
                         </div>
@@ -187,7 +180,7 @@
 </template>
 
 <script setup>
-import { ref } from 'vue';
+import { ref, onMounted } from 'vue';
 import api from '@/service/api';
 import { useRouter } from 'vue-router';
 import { useToast } from 'primevue/usetoast';
@@ -228,12 +221,116 @@ const typeOptions = [
 ];
 
 // 🎁 Prize List Dropdown Data
-const listPrize = ref([
-    { id: 1, imageURL: '/demo/images/bonus-point.png', prizeName: 'Bonus Point Toyo', prizeType: 'Point', prizeQuota: 50, prizeRemain: 20 },
-    { id: 2, imageURL: 'https://assets.bharian.com.my/images/articles/tng13jan_BHfield_image_socialmedia.var_1610544082.jpg', prizeName: 'MYR 50 E-Wallet', prizeType: 'E-Wallet', prizeQuota: 100, prizeRemain: 40 },
-    { id: 3, imageURL: 'https://assets.offgamers.com/img/offer/kr_fdf75033-56ee-4ce6-929c-1f9c93a4c642_1b1c60fc-e950-4c62-8ee7-471d42484619.webp', prizeName: 'Shopee E-Voucher', prizeType: 'E-Voucher', prizeQuota: 30, prizeRemain: 10 },
-    { id: 4, imageURL: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRdSHDEYMxmOB1Z63V0UB1ohMHGZ5cs5DG4zg&s', prizeName: 'Toyo Tumbler', prizeType: 'Item', prizeQuota: 15, prizeRemain: 5 }
-]);
+const listPrize = ref([]);
+
+// Process private images using the API method
+const processCatalogueImages = async (catalogueItems) => {
+    const processedItems = [];
+
+    for (const item of catalogueItems) {
+        if (item.imageURL && typeof item.imageURL === 'string') {
+            try {
+                console.log('Processing private image:', item.imageURL);
+                const blobUrl = await api.getPrivateFile(item.imageURL);
+                if (blobUrl) {
+                    processedItems.push({
+                        ...item,
+                        processedImageURL: blobUrl
+                    });
+                    console.log('Successfully processed image:', item.prizeName, blobUrl);
+                } else {
+                    // Fallback to original URL if private file loading fails
+                    processedItems.push({
+                        ...item,
+                        processedImageURL: item.imageURL
+                    });
+                    console.warn('Failed to process private image, using original:', item.imageURL);
+                }
+            } catch (error) {
+                console.error(`Error loading catalogue image for ${item.prizeName}:`, error);
+                // Fallback to original URL
+                processedItems.push({
+                    ...item,
+                    processedImageURL: item.imageURL
+                });
+            }
+        } else {
+            // No image URL, use placeholder
+            processedItems.push({
+                ...item,
+                processedImageURL: 'https://via.placeholder.com/150x100?text=No+Image'
+            });
+        }
+    }
+
+    return processedItems;
+};
+
+// Image event handlers
+const onImageLoad = (event) => {
+    console.log('Image loaded successfully:', event.target.src);
+    event.target.style.opacity = '1';
+};
+
+const onImageError = (event) => {
+    console.error('Image failed to load:', event.target.src);
+    event.target.src = 'https://via.placeholder.com/150x100?text=Image+Error';
+    event.target.style.opacity = '1';
+    event.target.onerror = null; // Prevent infinite loop
+};
+
+const fetchCatalog = async () => {
+    try {
+        console.log('Fetching catalog...');
+        const response = await api.get('game/catalogs');
+        console.log('Catalog API response:', response.data);
+
+        if (response.data.status === 1) {
+            // Transform API data to match frontend expectations
+            const transformedItems = (response.data.admin_data || []).map((item) => ({
+                id: item.id,
+                imageURL: item.imageURL, // ✅ FIXED: Changed from 'image' to 'imageURL'
+                prizeName: item.title, // Map 'title' to 'prizeName'
+                prizeType: item.type, // Map 'type' to 'prizeType'
+                prizeQuota: item.totalqty,
+                prizeRemain: item.availableqty,
+                description: item.description,
+                valueAmount: item.valueAmount,
+                valueType: item.valueType,
+                processedImageURL: null // Will be populated by processCatalogueImages
+            }));
+
+            console.log('Transformed items before processing:', transformedItems);
+
+            // Process private images
+            const processedItems = await processCatalogueImages(transformedItems);
+            listPrize.value = processedItems;
+
+            console.log('Final processed prize list:', listPrize.value);
+        } else {
+            console.error('API returned status 0:', response.data);
+            toast.add({
+                severity: 'error',
+                summary: 'Error',
+                detail: 'Failed to load prize catalog: API returned status 0',
+                life: 5000
+            });
+        }
+    } catch (error) {
+        console.error('Error fetching catalog:', error);
+        toast.add({
+            severity: 'error',
+            summary: 'Error',
+            detail: 'Failed to load prize catalog: ' + error.message,
+            life: 5000
+        });
+    }
+};
+
+// Initialize data
+onMounted(() => {
+    fetchCatalog();
+});
 
 const prizes = ref([]);
 
@@ -303,6 +400,8 @@ const validateFields = () => {
         }
         if (!prize.qty || prize.qty <= 0) {
             errors.value[`qty_${index}`] = 'Valid quantity is required';
+        } else if (prize.selected && prize.qty > prize.selected.prizeRemain) {
+            errors.value[`qty_${index}`] = `Quantity exceeds available stock (${prize.selected.prizeRemain} available)`;
         }
     });
 
