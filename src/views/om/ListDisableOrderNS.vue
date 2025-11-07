@@ -66,7 +66,7 @@
                     </div>
                 </template>
             </Column>
-
+            
             <!-- 📅 Period -->
             <Column header="Period" style="min-width: 8rem">
                 <template #body="{ data }">
@@ -78,21 +78,21 @@
                 </template>
             </Column>
 
-            <!-- 🔖 Status -->
-            <Column header="Status" style="min-width: 8rem">
-                <template #body="{ data }">
-                    <div class="flex justify-start">
-                        <Tag v-if="getStatus(data) !== '-'" :value="getStatus(data)" :severity="getStatusSeverity(data)" />
-                        <span v-else class="text-gray-400 text-sm">-</span>
-                    </div>
-                </template>
-            </Column>
-
             <!-- 💬 Message -->
             <Column header="Message" style="min-width: 14rem">
                 <template #body="{ data }">
                     <div class="text-sm text-gray-700 line-clamp-2">
                         {{ data.message || '-' }}
+                    </div>
+                </template>
+            </Column>
+
+             <!-- 🔖 Status -->
+            <Column header="Status" style="min-width: 8rem">
+                <template #body="{ data }">
+                    <div class="flex justify-start">
+                        <Tag v-if="getStatus(data) !== '-'" :value="getStatus(data)" :severity="getStatusSeverity(data)" />
+                        <span v-else class="text-gray-400 text-sm">-</span>
                     </div>
                 </template>
             </Column>
@@ -109,7 +109,7 @@
         </DataTable>
 
         <!-- 🟢 Create Popup -->
-        <Dialog v-model:visible="createPopupVisible" header="Create Disable Order" modal class="rounded-2xl shadow-md" :style="{ width: '40rem', maxWidth: '95vw' }" :closable="false">
+        <Dialog v-model:visible="createPopupVisible" header="Create Disable Order" modal class="rounded-2xl shadow-md" :style="{ width: '50rem', maxWidth: '95vw' }" :closable="false">
             <div class="p-fluid formgrid grid gap-4 mt-2">
                 <!-- Storage Location -->
                 <div class="field col-12">
@@ -127,37 +127,123 @@
                     <small v-if="submitted && !newOrder.storageLocation" class="p-error block mt-1">Storage Location is required</small>
                 </div>
 
-                <!-- Order Type -->
+                <!-- Order Type - MultiSelect -->
                 <div class="field col-12">
                     <label for="orderTypes" class="font-semibold text-gray-700"> Order Types <span class="text-red-500">*</span> </label>
-                    <Dropdown
+                    <MultiSelect
                         id="orderTypes"
                         v-model="newOrder.orderType"
                         :options="orderTypeOptions"
                         optionLabel="label"
                         optionValue="value"
-                        placeholder="Select Order Type"
+                        placeholder="Select Order Types"
+                        display="chip"
                         class="w-full"
-                        :class="{ 'p-invalid': submitted && !newOrder.orderType }"
+                        :class="{ 'p-invalid': submitted && (!newOrder.orderType || newOrder.orderType.length === 0) }"
                     />
-                    <small v-if="submitted && !newOrder.orderType" class="p-error block mt-1">Order Type is required</small>
+                    <small v-if="submitted && (!newOrder.orderType || newOrder.orderType.length === 0)" class="p-error block mt-1">At least one Order Type is required</small>
+                    <small class="text-gray-500 block mt-1">Selecting ALL or all three types (NORMAL, OWN, DIRECTSHIP) will send as 'ALL'</small>
                 </div>
 
-                <!-- Period -->
+                <!-- Start Date & Time -->
+                <div class="field col-12 md:col-6">
+                    <label for="startDate" class="font-semibold text-gray-700"> Start Date <span class="text-red-500">*</span> </label>
+                    <Calendar
+                        id="startDate"
+                        v-model="newOrder.startDate"
+                        :minDate="minDate"
+                        dateFormat="yy-mm-dd"
+                        placeholder="YYYY-MM-DD"
+                        class="w-full"
+                        :class="{ 'p-invalid': submitted && !newOrder.startDate }"
+                    />
+                    <small v-if="submitted && !newOrder.startDate" class="p-error block mt-1">Start Date is required</small>
+                </div>
+
+                <div class="field col-12 md:col-6">
+                    <label for="startTime" class="font-semibold text-gray-700"> Start Time <span class="text-red-500">*</span> </label>
+                    <Calendar
+                        id="startTime"
+                        v-model="newOrder.startTime"
+                        timeOnly
+                        hourFormat="24"
+                        placeholder="HH:MM"
+                        class="w-full"
+                        :class="{ 'p-invalid': submitted && !newOrder.startTime }"
+                    />
+                    <small v-if="submitted && !newOrder.startTime" class="p-error block mt-1">Start Time is required</small>
+                </div>
+
+                <!-- End Date & Time -->
+                <div class="field col-12 md:col-6">
+                    <label for="endDate" class="font-semibold text-gray-700"> End Date <span class="text-red-500">*</span> </label>
+                    <Calendar
+                        id="endDate"
+                        v-model="newOrder.endDate"
+                        :minDate="newOrder.startDate || minDate"
+                        dateFormat="yy-mm-dd"
+                        placeholder="YYYY-MM-DD"
+                        class="w-full"
+                        :class="{ 'p-invalid': submitted && !newOrder.endDate }"
+                    />
+                    <small v-if="submitted && !newOrder.endDate" class="p-error block mt-1">End Date is required</small>
+                </div>
+
+                <div class="field col-12 md:col-6">
+                    <label for="endTime" class="font-semibold text-gray-700"> End Time <span class="text-red-500">*</span> </label>
+                    <Calendar
+                        id="endTime"
+                        v-model="newOrder.endTime"
+                        timeOnly
+                        hourFormat="24"
+                        placeholder="HH:MM"
+                        class="w-full"
+                        :class="{ 'p-invalid': submitted && !newOrder.endTime }"
+                    />
+                    <small v-if="submitted && !newOrder.endTime" class="p-error block mt-1">End Time is required</small>
+                </div>
+
+                <!-- Status -->
                 <div class="field col-12">
-                    <label for="period" class="font-semibold text-gray-700"> Period <span class="text-red-500">*</span> </label>
-                    <div class="flex gap-2 flex-col md:flex-row">
-                        <Calendar v-model="newOrder.startPeriod" showTime hourFormat="24" :minDate="minDate" placeholder="Start Date/Time" class="flex-1" :class="{ 'p-invalid': submitted && !newOrder.startPeriod }" />
-                        <Calendar v-model="newOrder.endPeriod" showTime hourFormat="24" :minDate="newOrder.startPeriod || minDate" placeholder="End Date/Time" class="flex-1" :class="{ 'p-invalid': submitted && !newOrder.endPeriod }" />
+                    <label class="font-semibold text-gray-700 mb-3 block">Status <span class="text-red-500">*</span></label>
+                    <div class="flex gap-4">
+                        <div class="flex items-center">
+                            <RadioButton 
+                                v-model="newOrder.status" 
+                                inputId="status_active" 
+                                name="status" 
+                                :value="1" 
+                                :class="{ 'p-invalid': submitted && newOrder.status === null }"
+                            />
+                            <label for="status_active" class="ml-2">Active</label>
+                        </div>
+                        <div class="flex items-center">
+                            <RadioButton 
+                                v-model="newOrder.status" 
+                                inputId="status_inactive" 
+                                name="status" 
+                                :value="0" 
+                                :class="{ 'p-invalid': submitted && newOrder.status === null }"
+                            />
+                            <label for="status_inactive" class="ml-2">Inactive</label>
+                        </div>
                     </div>
-                    <small v-if="submitted && (!newOrder.startPeriod || !newOrder.endPeriod)" class="p-error block mt-1"> Both start and end date are required </small>
-                    <small v-if="newOrder.endPeriod && newOrder.startPeriod && newOrder.endPeriod <= this.newOrder.startPeriod" class="p-error block mt-1"> End date must be after start date </small>
+                    <small v-if="submitted && newOrder.status === null" class="p-error block mt-1">Status is required</small>
                 </div>
 
                 <!-- Message -->
                 <div class="field col-12">
-                    <label for="message" class="font-semibold text-gray-700">Message</label>
-                    <Textarea id="message" v-model="newOrder.message" rows="3" autoResize placeholder="Enter message (optional)" class="w-full" />
+                    <label for="message" class="font-semibold text-gray-700">Message <span class="text-red-500">*</span></label>
+                    <Textarea 
+                        id="message" 
+                        v-model="newOrder.message" 
+                        rows="3" 
+                        autoResize 
+                        placeholder="Enter message" 
+                        class="w-full" 
+                        :class="{ 'p-invalid': submitted && !newOrder.message }"
+                    />
+                    <small v-if="submitted && !newOrder.message" class="p-error block mt-1">Message is required</small>
                 </div>
             </div>
 
@@ -170,7 +256,7 @@
         </Dialog>
 
         <!-- 🟢 Edit Popup -->
-        <Dialog v-model:visible="editPopupVisible" header="Edit Disable Order" modal class="rounded-2xl shadow-md" :style="{ width: '40rem', maxWidth: '95vw' }" :closable="false">
+        <Dialog v-model:visible="editPopupVisible" header="Edit Disable Order" modal class="rounded-2xl shadow-md" :style="{ width: '50rem', maxWidth: '95vw' }" :closable="false">
             <div class="p-fluid formgrid grid gap-4 mt-2" v-if="editingOrder">
                 <!-- Storage Location -->
                 <div class="field col-12">
@@ -188,37 +274,123 @@
                     <small v-if="submitted && !editingOrder.storageLocation" class="p-error block mt-1">Storage Location is required</small>
                 </div>
 
-                <!-- Order Type -->
+                <!-- Order Type - MultiSelect -->
                 <div class="field col-12">
                     <label for="editOrderTypes" class="font-semibold text-gray-700"> Order Types <span class="text-red-500">*</span> </label>
-                    <Dropdown
+                    <MultiSelect
                         id="editOrderTypes"
                         v-model="editingOrder.orderType"
                         :options="orderTypeOptions"
                         optionLabel="label"
                         optionValue="value"
-                        placeholder="Select Order Type"
+                        placeholder="Select Order Types"
+                        display="chip"
                         class="w-full"
-                        :class="{ 'p-invalid': submitted && !editingOrder.orderType }"
+                        :class="{ 'p-invalid': submitted && (!editingOrder.orderType || editingOrder.orderType.length === 0) }"
                     />
-                    <small v-if="submitted && !editingOrder.orderType" class="p-error block mt-1">Order Type is required</small>
+                    <small v-if="submitted && (!editingOrder.orderType || editingOrder.orderType.length === 0)" class="p-error block mt-1">At least one Order Type is required</small>
+                    <small class="text-gray-500 block mt-1">Selecting ALL or all three types (NORMAL, OWN, DIRECTSHIP) will send as 'ALL'</small>
                 </div>
 
-                <!-- Period -->
+                <!-- Start Date & Time -->
+                <div class="field col-12 md:col-6">
+                    <label for="editStartDate" class="font-semibold text-gray-700"> Start Date <span class="text-red-500">*</span> </label>
+                    <Calendar
+                        id="editStartDate"
+                        v-model="editingOrder.startDate"
+                        :minDate="minDate"
+                        dateFormat="yy-mm-dd"
+                        placeholder="YYYY-MM-DD"
+                        class="w-full"
+                        :class="{ 'p-invalid': submitted && !editingOrder.startDate }"
+                    />
+                    <small v-if="submitted && !editingOrder.startDate" class="p-error block mt-1">Start Date is required</small>
+                </div>
+
+                <div class="field col-12 md:col-6">
+                    <label for="editStartTime" class="font-semibold text-gray-700"> Start Time <span class="text-red-500">*</span> </label>
+                    <Calendar
+                        id="editStartTime"
+                        v-model="editingOrder.startTime"
+                        timeOnly
+                        hourFormat="24"
+                        placeholder="HH:MM"
+                        class="w-full"
+                        :class="{ 'p-invalid': submitted && !editingOrder.startTime }"
+                    />
+                    <small v-if="submitted && !editingOrder.startTime" class="p-error block mt-1">Start Time is required</small>
+                </div>
+
+                <!-- End Date & Time -->
+                <div class="field col-12 md:col-6">
+                    <label for="editEndDate" class="font-semibold text-gray-700"> End Date <span class="text-red-500">*</span> </label>
+                    <Calendar
+                        id="editEndDate"
+                        v-model="editingOrder.endDate"
+                        :minDate="editingOrder.startDate || minDate"
+                        dateFormat="yy-mm-dd"
+                        placeholder="YYYY-MM-DD"
+                        class="w-full"
+                        :class="{ 'p-invalid': submitted && !editingOrder.endDate }"
+                    />
+                    <small v-if="submitted && !editingOrder.endDate" class="p-error block mt-1">End Date is required</small>
+                </div>
+
+                <div class="field col-12 md:col-6">
+                    <label for="editEndTime" class="font-semibold text-gray-700"> End Time <span class="text-red-500">*</span> </label>
+                    <Calendar
+                        id="editEndTime"
+                        v-model="editingOrder.endTime"
+                        timeOnly
+                        hourFormat="24"
+                        placeholder="HH:MM"
+                        class="w-full"
+                        :class="{ 'p-invalid': submitted && !editingOrder.endTime }"
+                    />
+                    <small v-if="submitted && !editingOrder.endTime" class="p-error block mt-1">End Time is required</small>
+                </div>
+
+                <!-- Status -->
                 <div class="field col-12">
-                    <label for="editPeriod" class="font-semibold text-gray-700"> Period <span class="text-red-500">*</span> </label>
-                    <div class="flex gap-2 flex-col md:flex-row">
-                        <Calendar v-model="editingOrder.startPeriod" showTime hourFormat="24" :minDate="minDate" placeholder="Start Date/Time" class="flex-1" :class="{ 'p-invalid': submitted && !editingOrder.startPeriod }" />
-                        <Calendar v-model="editingOrder.endPeriod" showTime hourFormat="24" :minDate="editingOrder.startPeriod || minDate" placeholder="End Date/Time" class="flex-1" :class="{ 'p-invalid': submitted && !editingOrder.endPeriod }" />
+                    <label class="font-semibold text-gray-700 mb-3 block">Status <span class="text-red-500">*</span></label>
+                    <div class="flex gap-4">
+                        <div class="flex items-center">
+                            <RadioButton 
+                                v-model="editingOrder.status" 
+                                inputId="editStatus_active" 
+                                name="editStatus" 
+                                :value="1" 
+                                :class="{ 'p-invalid': submitted && editingOrder.status === null }"
+                            />
+                            <label for="editStatus_active" class="ml-2">Active</label>
+                        </div>
+                        <div class="flex items-center">
+                            <RadioButton 
+                                v-model="editingOrder.status" 
+                                inputId="editStatus_inactive" 
+                                name="editStatus" 
+                                :value="0" 
+                                :class="{ 'p-invalid': submitted && editingOrder.status === null }"
+                            />
+                            <label for="editStatus_inactive" class="ml-2">Inactive</label>
+                        </div>
                     </div>
-                    <small v-if="submitted && (!editingOrder.startPeriod || !editingOrder.endPeriod)" class="p-error block mt-1"> Both start and end date are required </small>
-                    <small v-if="editingOrder.endPeriod && editingOrder.startPeriod && editingOrder.endPeriod <= editingOrder.startPeriod" class="p-error block mt-1"> End date must be after start date </small>
+                    <small v-if="submitted && editingOrder.status === null" class="p-error block mt-1">Status is required</small>
                 </div>
 
                 <!-- Message -->
                 <div class="field col-12">
-                    <label for="editMessage" class="font-semibold text-gray-700">Message</label>
-                    <Textarea id="editMessage" v-model="editingOrder.message" rows="3" autoResize placeholder="Enter message (optional)" class="w-full" />
+                    <label for="editMessage" class="font-semibold text-gray-700">Message <span class="text-red-500">*</span></label>
+                    <Textarea 
+                        id="editMessage" 
+                        v-model="editingOrder.message" 
+                        rows="3" 
+                        autoResize 
+                        placeholder="Enter message" 
+                        class="w-full" 
+                        :class="{ 'p-invalid': submitted && !editingOrder.message }"
+                    />
+                    <small v-if="submitted && !editingOrder.message" class="p-error block mt-1">Message is required</small>
                 </div>
             </div>
 
@@ -248,7 +420,16 @@ export default {
             createPopupVisible: false,
             editPopupVisible: false,
             submitted: false,
-            newOrder: { storageLocation: null, orderType: null, startPeriod: null, endPeriod: null, message: '' },
+            newOrder: { 
+                storageLocation: null, 
+                orderType: [], 
+                startDate: null, 
+                startTime: null, 
+                endDate: null, 
+                endTime: null, 
+                message: '',
+                status: 1
+            },
             editingOrder: null,
             storageLocationOptions: [
                 { label: 'TMJB', value: 'TMJB' },
@@ -259,8 +440,9 @@ export default {
             ],
             orderTypeOptions: [
                 { label: 'Normal', value: 'NORMAL' },
-                { label: 'All', value: 'ALL' },
-                { label: 'Own Use', value: 'OWN' }
+                { label: 'Own', value: 'OWN' },
+                { label: 'Directship', value: 'DIRECTSHIP' },
+                { label: 'All', value: 'ALL' }
             ]
         };
     },
@@ -298,11 +480,6 @@ export default {
             return new Date(dateString.replace(' ', 'T'));
         },
 
-        formatDateForApi(date) {
-            if (!date) return null;
-            return date.toISOString().replace('T', ' ').substring(0, 19);
-        },
-
         formatDate(date) {
             if (!date) return '-';
             return new Date(date).toLocaleString('en-MY', {
@@ -312,6 +489,16 @@ export default {
                 hour: '2-digit',
                 minute: '2-digit'
             });
+        },
+
+        formatDateForApi(date) {
+            if (!date) return null;
+            return date.toISOString().split('T')[0]; // YYYY-MM-DD
+        },
+
+        formatTimeForApi(date) {
+            if (!date) return null;
+            return date.toTimeString().split(' ')[0].substring(0, 5); // HH:MM
         },
 
         getStatus(order) {
@@ -334,7 +521,7 @@ export default {
                 case 'Inactive':
                     return 'danger';
                 default:
-                    return null; // Return null for '-' to prevent tag rendering
+                    return null;
             }
         },
 
@@ -346,7 +533,7 @@ export default {
         },
 
         getOrderTypeLabel(value) {
-            const map = { OWN: 'Own Use', NORMAL: 'Normal', ALL: 'All' };
+            const map = { OWN: 'Own Use', NORMAL: 'Normal', ALL: 'All', DIRECTSHIP: 'Directship' };
             return map[value] || value;
         },
 
@@ -355,8 +542,28 @@ export default {
                 case 'OWN': return 'text-own-color';
                 case 'NORMAL': return 'text-normal-color';
                 case 'ALL': return 'text-all-color';
+                case 'DIRECTSHIP': return 'text-purple-600';
                 default: return 'text-gray-600';
             }
+        },
+
+        // Format order types for API
+        formatOrderTypesForApi(selectedTypes) {
+            if (!selectedTypes || selectedTypes.length === 0) return '';
+            
+            // Check if ALL is selected or all three types (NORMAL, OWN, DIRECTSHIP) are selected
+            const hasAll = selectedTypes.includes('ALL');
+            const hasNormal = selectedTypes.includes('NORMAL');
+            const hasOwn = selectedTypes.includes('OWN');
+            const hasDirectship = selectedTypes.includes('DIRECTSHIP');
+            
+            // If ALL is selected OR all three types are selected, send 'ALL'
+            if (hasAll || (hasNormal && hasOwn && hasDirectship)) {
+                return 'ALL';
+            }
+            
+            // Otherwise, send the selected types as comma-separated string
+            return selectedTypes.join(',');
         },
 
         showCreatePopup() {
@@ -370,26 +577,64 @@ export default {
         },
 
         resetForm() {
-            this.newOrder = { storageLocation: null, orderType: null, startPeriod: null, endPeriod: null, message: '' };
+            this.newOrder = { 
+                storageLocation: null, 
+                orderType: [], 
+                startDate: null, 
+                startTime: null, 
+                endDate: null, 
+                endTime: null, 
+                message: '',
+                status: 1
+            };
             this.submitted = false;
         },
 
         async createNewOrder() {
             this.submitted = true;
-            if (!this.newOrder.storageLocation || !this.newOrder.orderType || !this.newOrder.startPeriod || !this.newOrder.endPeriod) return;
-            if (this.newOrder.endPeriod <= this.newOrder.startPeriod) {
-                this.$toast.add({ severity: 'error', summary: 'Error', detail: 'End date must be after start date', life: 3000 });
+            
+            // Validation
+            if (!this.newOrder.storageLocation || 
+                !this.newOrder.orderType || 
+                this.newOrder.orderType.length === 0 ||
+                !this.newOrder.startDate ||
+                !this.newOrder.startTime ||
+                !this.newOrder.endDate ||
+                !this.newOrder.endTime ||
+                this.newOrder.status === null ||
+                !this.newOrder.message) {
                 return;
             }
+
+            // Validate date order
+            const startDateTime = new Date(this.newOrder.startDate);
+            const startTime = new Date(this.newOrder.startTime);
+            startDateTime.setHours(startTime.getHours(), startTime.getMinutes());
+
+            const endDateTime = new Date(this.newOrder.endDate);
+            const endTime = new Date(this.newOrder.endTime);
+            endDateTime.setHours(endTime.getHours(), endTime.getMinutes());
+
+            if (endDateTime <= startDateTime) {
+                this.$toast.add({ severity: 'error', summary: 'Error', detail: 'End date/time must be after start date/time', life: 3000 });
+                return;
+            }
+
             this.creating = true;
             try {
                 const payload = {
-                    storageLocation: this.newOrder.storageLocation,
-                    orderType: this.newOrder.orderType,
-                    startPeriod: this.formatDateForApi(this.newOrder.startPeriod),
-                    endPeriod: this.formatDateForApi(this.newOrder.endPeriod),
-                    message: this.newOrder.message || 'No message provided'
+                    storageloc: this.newOrder.storageLocation,
+                    ordertype: this.formatOrderTypesForApi(this.newOrder.orderType),
+                    startdate: this.formatDateForApi(this.newOrder.startDate),
+                    starttime: this.formatTimeForApi(this.newOrder.startTime),
+                    enddate: this.formatDateForApi(this.newOrder.endDate),
+                    endtime: this.formatTimeForApi(this.newOrder.endTime),
+                    message: this.newOrder.message,
+                    status: this.newOrder.status
                 };
+
+                console.log('Sending payload:', payload);
+
                 const response = await api.post('maintenance/create-disable-order', payload);
                 if (response.data.status === 1) {
                     this.$toast.add({ severity: 'success', summary: 'Success', detail: 'Disable order created successfully', life: 3000 });
@@ -407,29 +652,72 @@ export default {
         },
 
         editItem(item) {
-            this.editingOrder = { ...item, startPeriod: new Date(item.startPeriod), endPeriod: new Date(item.endPeriod) };
+            // Parse the existing order type
+            const orderTypes = this.normalizeOrderTypes(item.orderType);
+            
+            // Parse dates and times from the existing period
+            const startDate = new Date(item.startPeriod);
+            const endDate = new Date(item.endPeriod);
+
+            this.editingOrder = { 
+                ...item, 
+                orderType: orderTypes,
+                startDate: startDate,
+                startTime: new Date(startDate.getFullYear(), startDate.getMonth(), startDate.getDate(), startDate.getHours(), startDate.getMinutes()),
+                endDate: endDate,
+                endTime: new Date(endDate.getFullYear(), endDate.getMonth(), endDate.getDate(), endDate.getHours(), endDate.getMinutes()),
+                status: item.status
+            };
             this.editPopupVisible = true;
             this.submitted = false;
         },
 
         async updateOrder() {
             this.submitted = true;
-            if (!this.editingOrder.storageLocation || !this.editingOrder.orderType || !this.editingOrder.startPeriod || !this.editingOrder.endPeriod) return;
-            if (this.editingOrder.endPeriod <= this.editingOrder.startPeriod) {
-                this.$toast.add({ severity: 'error', summary: 'Error', detail: 'End date must be after start date', life: 3000 });
+            
+            // Validation
+            if (!this.editingOrder.storageLocation || 
+                !this.editingOrder.orderType || 
+                this.editingOrder.orderType.length === 0 ||
+                !this.editingOrder.startDate ||
+                !this.editingOrder.startTime ||
+                !this.editingOrder.endDate ||
+                !this.editingOrder.endTime ||
+                this.editingOrder.status === null ||
+                !this.editingOrder.message) {
                 return;
             }
+
+            // Validate date order
+            const startDateTime = new Date(this.editingOrder.startDate);
+            const startTime = new Date(this.editingOrder.startTime);
+            startDateTime.setHours(startTime.getHours(), startTime.getMinutes());
+
+            const endDateTime = new Date(this.editingOrder.endDate);
+            const endTime = new Date(this.editingOrder.endTime);
+            endDateTime.setHours(endTime.getHours(), endTime.getMinutes());
+
+            if (endDateTime <= startDateTime) {
+                this.$toast.add({ severity: 'error', summary: 'Error', detail: 'End date/time must be after start date/time', life: 3000 });
+                return;
+            }
+
             this.updating = true;
             try {
                 const payload = {
-                    id: this.editingOrder.id,
-                    storageLocation: this.editingOrder.storageLocation,
-                    orderType: this.editingOrder.orderType,
-                    startPeriod: this.formatDateForApi(this.editingOrder.startPeriod),
-                    endPeriod: this.formatDateForApi(this.editingOrder.endPeriod),
-                    message: this.editingOrder.message || 'No message provided'
+                    storageloc: this.editingOrder.storageLocation,
+                    ordertype: this.formatOrderTypesForApi(this.editingOrder.orderType),
+                    startdate: this.formatDateForApi(this.editingOrder.startDate),
+                    starttime: this.formatTimeForApi(this.editingOrder.startTime),
+                    enddate: this.formatDateForApi(this.editingOrder.endDate),
+                    endtime: this.formatTimeForApi(this.editingOrder.endTime),
+                    message: this.editingOrder.message,
+                    status: this.editingOrder.status
                 };
-                const response = await api.post('maintenance/update-disable-order', payload);
+
+                console.log('Sending update payload:', payload);
+
+                const response = await api.post(`maintenance/update-disable-order/${this.editingOrder.id}`, payload);
                 if (response.data.status === 1) {
                     this.$toast.add({ severity: 'success', summary: 'Success', detail: 'Disable order updated successfully', life: 3000 });
                     this.hideEditPopup();
@@ -497,6 +785,11 @@ export default {
 
 .text-all-color {
     color: #c7ba0b;
+    font-weight: 700;
+}
+
+.text-purple-600 {
+    color: #6b21a8;
     font-weight: 700;
 }
 

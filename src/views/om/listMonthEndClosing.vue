@@ -26,7 +26,7 @@
                     responsiveLayout="scroll" 
                     :filters="filters"
                     filterDisplay="menu"
-                    :globalFilterFields="['monthYear', 'closingDateTime', 'status']"
+                    :globalFilterFields="['monthYear', 'closingDateFormatted', 'closingTime', 'status']"
                     class="rounded-table"
                 >
                     <template #header>
@@ -70,21 +70,21 @@
                         </template>
                     </Column>
 
-                    <Column field="closingDateTime" header="Closing Date" style="min-width: 15rem" >
+                    <Column field="closingDateFormatted" header="Closing Date" style="min-width: 15rem" >
                         <template #body="{ data }">
                             <div class="text-sm">
                                 <div class="font-semibold text-gray-800">
-                                    {{ formatDate(data.closingDateTime) }}
+                                    {{ data.closingDateFormatted }}
                                 </div>
                             </div>
                         </template>
                     </Column>
 
-                    <Column field="closingDateTime" header="Closing Time" style="min-width: 15rem" >
+                    <Column field="closingTime" header="Closing Time" style="min-width: 15rem" >
                         <template #body="{ data }">
                             <div class="text-sm">
                                 <div class="font-semibold text-gray-800">
-                                    {{ formatTime(data.closingDateTime) }}
+                                    {{ formatTimeDisplay(data.closingTime) }}
                                 </div>
                             </div>
                         </template>
@@ -118,10 +118,30 @@
                     </div>
                 </div>
 
-                <!-- Closing Date & Time -->
+                <!-- Closing Date -->
                 <div>
-                    <label class="block font-bold text-gray-700 mb-2">Closing Date & Time *</label>
-                    <Calendar v-model="currentDate.closingDateTime" showTime hourFormat="24" placeholder="Select Closing Date and Time" class="w-full" :minDate="minDate" :maxDate="maxDate" />
+                    <label class="block font-bold text-gray-700 mb-2">Closing Date *</label>
+                    <Calendar 
+                        v-model="currentDate.closingDate" 
+                        :minDate="minDate" 
+                        :maxDate="maxDate" 
+                        dateFormat="dd" 
+                        placeholder="Select Day" 
+                        class="w-full" 
+                        :showIcon="true"
+                    />
+                </div>
+
+                <!-- Closing Time -->
+                <div>
+                    <label class="block font-bold text-gray-700 mb-2">Closing Time *</label>
+                    <Calendar 
+                        v-model="currentDate.closingTime" 
+                        timeOnly 
+                        hourFormat="24" 
+                        placeholder="Select Time" 
+                        class="w-full"
+                    />
                 </div>
 
                 <!-- Status -->
@@ -140,7 +160,7 @@
                 </div>
 
                 <!-- Preview -->
-                <div v-if="currentDate.monthYear && currentDate.closingDateTime" class="border rounded-lg p-4 bg-gray-50">
+                <div v-if="currentDate.monthYear && currentDate.closingDate && currentDate.closingTime" class="border rounded-lg p-4 bg-gray-50">
                     <label class="block font-bold text-gray-700 mb-2">Preview</label>
                     <div class="text-sm space-y-1">
                         <div class="flex justify-between">
@@ -149,11 +169,11 @@
                         </div>
                         <div class="flex justify-between">
                             <span class="text-gray-600">Closing Date:</span>
-                            <span class="font-semibold">{{ formatDatePreview(currentDate.closingDateTime) }}</span>
+                            <span class="font-semibold">{{ getCurrentDate() }} {{ formatMonth(currentDate.monthYear) }}</span>
                         </div>
                         <div class="flex justify-between">
                             <span class="text-gray-600">Closing Time:</span>
-                            <span class="font-semibold">{{ formatTimePreview(currentDate.closingDateTime) }}</span>
+                            <span class="font-semibold">{{ formatTimePreview(currentDate.closingTime) }}</span>
                         </div>
                         <div class="flex justify-between">
                             <span class="text-gray-600">Status:</span>
@@ -190,28 +210,12 @@ const filters = ref({
 const currentDate = reactive({
     id: null,
     monthYear: null,
-    closingDateTime: null,
+    closingDate: null,
+    closingTime: null,
     status: 1
 });
 
 const closingDates = ref([]);
-
-// Computed property to count filtered records
-const filteredRecordsCount = computed(() => {
-    if (filters.value.global.value) {
-        const searchTerm = filters.value.global.value.toLowerCase();
-        return closingDates.value.filter(date => {
-            const monthYear = formatMonth(date.monthYear).toLowerCase();
-            const closingDate = formatDate(date.closingDateTime).toLowerCase();
-            const status = getApiStatus(date.status).toLowerCase();
-            
-            return monthYear.includes(searchTerm) || 
-                   closingDate.includes(searchTerm) || 
-                   status.includes(searchTerm);
-        }).length;
-    }
-    return closingDates.value.length;
-});
 
 // Date constraints
 const minDate = computed(() => {
@@ -231,18 +235,10 @@ const maxDate = computed(() => {
 
 // Computed properties
 const isDialogFormValid = computed(() => {
-    return currentDate.closingDateTime !== null && currentDate.status !== null;
+    return currentDate.closingDate !== null && currentDate.closingTime !== null && currentDate.status !== null;
 });
 
 // Methods
-const formatDate = (date) => {
-    return new Date(date).toLocaleDateString('en-MY', {
-        year: 'numeric',
-        month: 'long',
-        day: 'numeric'
-    });
-};
-
 const formatMonth = (date) => {
     return new Date(date).toLocaleDateString('en-MY', {
         year: 'numeric',
@@ -250,28 +246,24 @@ const formatMonth = (date) => {
     });
 };
 
-const formatTime = (date) => {
-    return new Date(date).toLocaleTimeString('en-MY', {
-        hour: '2-digit',
-        minute: '2-digit',
-        hour12: false
-    });
-};
-
-const formatDatePreview = (date) => {
-    return new Date(date).toLocaleDateString('en-MY', {
-        year: 'numeric',
-        month: 'short',
-        day: 'numeric'
-    });
+const formatTimeDisplay = (timeString) => {
+    if (!timeString) return '';
+    // Convert "14:44:00" to "14:44"
+    return timeString.substring(0, 5);
 };
 
 const formatTimePreview = (date) => {
+    if (!date) return '';
     return new Date(date).toLocaleTimeString('en-MY', {
         hour: '2-digit',
         minute: '2-digit',
         hour12: false
     });
+};
+
+const getCurrentDate = () => {
+    if (!currentDate.closingDate) return '';
+    return new Date(currentDate.closingDate).getDate();
 };
 
 // API Status handling
@@ -285,10 +277,21 @@ const getApiStatusSeverity = (status) => {
 
 const editDate = (date) => {
     editMode.value = true;
+    
+    // Create closing date from monthYear and closingDate
+    const closingDate = new Date(date.monthYear);
+    closingDate.setDate(date.closingDate);
+    
+    // Create closing time from closingTime string
+    const [hours, minutes] = date.closingTime.split(':');
+    const closingTime = new Date();
+    closingTime.setHours(parseInt(hours), parseInt(minutes), 0, 0);
+    
     Object.assign(currentDate, {
         id: date.id,
         monthYear: new Date(date.monthYear),
-        closingDateTime: new Date(date.closingDateTime),
+        closingDate: closingDate,
+        closingTime: closingTime,
         status: date.status
     });
     showEditDialog.value = true;
@@ -298,32 +301,29 @@ const saveDate = async () => {
     try {
         loading.value = true;
         
-        // Prepare data for API update
+        // Prepare data for API update - match the expected format
         const updateData = {
-            id: currentDate.id,
-            closingDate: new Date(currentDate.closingDateTime).getDate(),
-            closingMonth: new Date(currentDate.monthYear).toLocaleDateString('en-MY', { month: 'long' }),
-            closingYear: new Date(currentDate.monthYear).getFullYear().toString(),
-            closingTime: new Date(currentDate.closingDateTime).toLocaleTimeString('en-MY', { 
-                hour: '2-digit', 
-                minute: '2-digit',
-                second: '2-digit',
-                hour12: false 
-            }),
+            date: new Date(currentDate.closingDate).getDate(), // Only the day number
+            time: formatTimePreview(currentDate.closingTime), // HH:mm format
             status: currentDate.status
         };
 
-        // Call API to update the closing date
-        const response = await api.put('maintenance/update-monthly-end', updateData);
+        console.log('Sending update data:', updateData);
+
+        // Call API to update the closing date - note the endpoint uses POST with ID in URL
+        const response = await api.post(`maintenance/update-monthly-end/${currentDate.id}`, updateData);
         
         if (response.data.status === 1) {
             // Update local data
             const index = closingDates.value.findIndex((date) => date.id === currentDate.id);
             if (index !== -1) {
+                // Update the specific fields that were changed
                 closingDates.value[index] = {
                     ...closingDates.value[index],
-                    closingDateTime: new Date(currentDate.closingDateTime),
-                    status: currentDate.status
+                    closingDate: updateData.date,
+                    closingTime: updateData.time + ':00', // Add seconds for display
+                    status: updateData.status,
+                    closingDateFormatted: response.data.admin_data?.closingDateFormatted || closingDates.value[index].closingDateFormatted
                 };
             }
             closeDialog();
@@ -347,7 +347,8 @@ const closeDialog = () => {
     Object.assign(currentDate, {
         id: null,
         monthYear: null,
-        closingDateTime: null,
+        closingDate: null,
+        closingTime: null,
         status: 1
     });
 };
@@ -355,17 +356,14 @@ const closeDialog = () => {
 // Helper function to convert API data to component format
 const transformApiData = (apiData) => {
     return apiData.map(item => {
-        // Create a date string from the API data
-        const dateString = `${item.closingDate} ${item.closingMonth} ${item.closingYear} ${item.closingTime}`;
-        const closingDateTime = new Date(dateString);
-        
-        // Create monthYear from closing date (first day of the month)
-        const monthYear = new Date(item.closingYear, getMonthNumber(item.closingMonth), 1);
+        // Create monthYear from closing month and year (first day of the month)
+        const monthYear = new Date(item.closingYear, getMonthNumber(item.closingMonth) - 1, 1);
         
         return {
             id: item.id,
             monthYear: monthYear,
-            closingDateTime: closingDateTime,
+            closingDate: parseInt(item.closingDate), // Store as number for editing
+            closingTime: item.closingTime,
             status: item.status,
             updated: item.updated,
             closingDateFormatted: item.closingDateFormatted
@@ -373,11 +371,11 @@ const transformApiData = (apiData) => {
     });
 };
 
-// Helper function to convert month name to number
+// Helper function to convert month name to number (0-indexed for JavaScript Date)
 const getMonthNumber = (monthName) => {
     const months = {
-        'January': 0, 'February': 1, 'March': 2, 'April': 3, 'May': 4, 'June': 5,
-        'July': 6, 'August': 7, 'September': 8, 'October': 9, 'November': 10, 'December': 11
+        'January': 1, 'February': 2, 'March': 3, 'April': 4, 'May': 5, 'June': 6,
+        'July': 7, 'August': 8, 'September': 9, 'October': 10, 'November': 11, 'December': 12
     };
     return months[monthName] || 0;
 };

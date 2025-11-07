@@ -1,3 +1,4 @@
+
 <template>
     <Fluid>
         <!-- 🎯 Create Campaign -->
@@ -86,18 +87,10 @@
                     <InputNumber v-model="campaign.point3" class="w-full" />
                 </div>
             </div>
-            <div v-if="campaign.isGamification === 'off'" class="flex justify-end mt-8 gap-2">
-                <div class="w-40">
-                    <Button label="Cancel" class="p-button-secondary w-full mr-2" @click="$router.back()" />
-                </div>
-                <div class="w-40">
-                    <Button label="Submit" class="w-full" @click="submitEvent" :loading="isSubmitting" />
-                </div>
-            </div>
         </div>
 
         <!-- 📋 Criteria Section -->
-        <div v-if="campaign.isGamification === 'on'" class="card flex flex-col w-full mt-8">
+        <div  class="card flex flex-col w-full mt-8">
             <div class="flex items-center justify-between border-b pb-2 mb-4">
                 <div class="text-xl font-bold text-gray-800">📋 Criteria</div>
             </div>
@@ -139,7 +132,7 @@
         </div>
 
         <!-- 🏆 Reward Section -->
-        <div v-if="campaign.isGamification === 'on'" class="card flex flex-col w-full mt-8">
+        <div  class="card flex flex-col w-full mt-8">
             <div class="flex items-center justify-between border-b pb-2 mb-4">
                 <div class="text-xl font-bold text-gray-800">🏆 Reward Section</div>
             </div>
@@ -218,11 +211,11 @@ const campaign = ref({
     endDate: '',
     isGamification: 'off', // Changed to string to match dropdown
     quota: 0,
-    maxPerUser: 1,
+    maxPerUser: 0,
     point1: 0,
     point2: 0,
     point3: 0,
-    status: 1
+    status: 0
 });
 
 // UI state
@@ -256,7 +249,7 @@ const fetchMaterials = async () => {
 
 const fetchCatalog = async () => {
     try {
-        const response = await api.get('catalog/catalogList');
+        const response = await api.get('campaign/catalogs');
         if (response.data.status === 1) {
             listPrize.value = response.data.admin_data || [];
         }
@@ -283,15 +276,32 @@ const removeReward = (index) => rewards.value.splice(index, 1);
 
 // Image upload
 const onImageSelect = (event, field) => {
-    const file = event.files[0];
-    if (file) {
+    // PrimeVue emits wrapper objects sometimes — extract the real File
+    let file = event.files?.[0];
+
+    // 🔍 Safety check: convert to real File if needed
+    if (file && !(file instanceof File) && file instanceof Blob) {
+        // Some PrimeVue versions wrap Blob; fix that
+        file = new File([file], file.name || 'upload.jpg', { type: file.type });
+    }
+
+    if (file instanceof File) {
+        console.log('✅ Real file selected:', file);
+
+        // Store File object for upload
+        campaign.value[`${field}File`] = file;
+
+        // Create Base64 preview for UI
         const reader = new FileReader();
         reader.onload = (e) => {
             campaign.value[field] = e.target.result;
         };
         reader.readAsDataURL(file);
+    } else {
+        console.warn('⚠️ Not a real File object:', file);
     }
 };
+
 
 // Format date to dd-mm-yyyy
 const formatDate = (date) => {
@@ -316,8 +326,8 @@ const validateForm = () => {
     }
 
     // Fixed: Check for string 'on' instead of number 1
-    if (campaign.value.isGamification === 'on') {
-        if (criterias.value.length === 0) {
+    if (campaign.value.isGamification) {
+        if (criterias.value.length ) {
             alert('Please add at least one criteria for gamification campaign');
             return false;
         }
@@ -349,6 +359,8 @@ const validateForm = () => {
     return true;
 };
 
+
+
 // Submit event - FIXED VERSION
 const submitEvent = async () => {
     if (!validateForm()) return;
@@ -373,22 +385,24 @@ const submitEvent = async () => {
         formData.append('point3', campaign.value.point3.toString());
 
         // Handle images
-        if (campaign.value.image1 && typeof campaign.value.image1 !== 'string') {
-            formData.append('image1', campaign.value.image1);
+        // Handle formData submission
+        if (campaign.value.image1File) {
+            formData.append('image1', campaign.value.image1File);
         }
-        if (campaign.value.image2 && typeof campaign.value.image2 !== 'string') {
-            formData.append('image2', campaign.value.image2);
+        if (campaign.value.image2File) {
+            formData.append('image2', campaign.value.image2File);
         }
-        if (campaign.value.image3 && typeof campaign.value.image3 !== 'string') {
-            formData.append('image3', campaign.value.image3);
-        }
+        if (campaign.value.image3File) {
+            formData.append('image3', campaign.value.image3File);
+        }       
+        
 
         // FIXED: Always send criteria and reward_option, even if empty
         let criteriaArray = [];
         let rewardOptions = [];
 
         // Only populate arrays if gamification is ON
-        if (campaign.value.isGamification === 'on') {
+        if (campaign.value.isGamification ){
             // Prepare criteria array
             criteriaArray = criterias.value.map(criteria => ({
                 title: criteria.selected.material,
@@ -409,14 +423,18 @@ const submitEvent = async () => {
         formData.append('criteria', JSON.stringify(criteriaArray));
         formData.append('reward_option', JSON.stringify(rewardOptions));
 
-        console.log('Submitting form data:', {
-            title: campaign.value.title,
-            isGamification: campaign.value.isGamification,
-            criteria: criteriaArray,
-            reward_option: rewardOptions
-        });
-
-        const response = await api.post('campaign/create', formData, {
+        // ✅ Log all FormData contents
+        for (const [key, value] of formData.entries()) {
+        if (value instanceof File) {
+            console.log(`${key}:`, value.name, value.type, value.size, value);
+        } else {
+            console.log(`${key}:`, value);
+        }
+}
+            const response = await api.customRequest({
+            method: 'POST',
+            url: '/api/campaign/create',
+            data: formData,
             headers: {
                 'Content-Type': 'multipart/form-data'
             }
