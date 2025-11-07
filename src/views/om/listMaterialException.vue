@@ -104,7 +104,7 @@
                             <h4 class="font-semibold text-gray-700 mb-2">Dealers for {{ data.materialCode }}</h4>
                             <DataTable :value="data.dealers" :rows="5" :paginator="data.dealers && data.dealers.length > 5" responsiveLayout="scroll" size="small">
                                 <Column field="label" header="Dealer Name" style="min-width: 12rem" />
-                                <Column field="group" header="Region" style="min-width: 10rem" />
+                                <Column field="group" header="State" style="min-width: 10rem" />
                             </DataTable>
                         </div>
                     </template>
@@ -322,7 +322,7 @@ const fetchMaterials = async () => {
 
 const fetchDealers = async () => {
     const formData = new FormData();
-    formData.append('mainBranch', 1);
+    formData.append('mainBranch', 0);
     const response = await api.post('list_dealer', formData);
     const formatted = [];
     const mapBranch = (branch, prefix = '', parentState = '') => {
