@@ -130,6 +130,11 @@ const router = createRouter({
                     component: () => import('@/views/om/listOrder.vue')
                 },
                 {
+                    path: '/om/createOrder',
+                    name: 'create-Order',
+                    component: () => import('@/views/om/createOrder.vue')
+                },
+                {
                     path: '/om/detailOrder',
                     name: 'Detail-Order',
                     component: () => import('@/views/om/detailOrder.vue')

@@ -185,6 +185,11 @@ const formatDate = (dateString) => {
                             </IconField>
                             <Button type="button" icon="pi pi-cog" class="p-button" />
                         </div>
+                        <div>
+                            <RouterLink to="/om/createOrder">
+                                <Button label="Create Order" icon="pi pi-plus" class="p-button-primary" />
+                            </RouterLink>
+                        </div>
                     </div>
                 </template>
 
