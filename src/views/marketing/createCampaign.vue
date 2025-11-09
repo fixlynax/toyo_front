@@ -132,7 +132,7 @@
         </div>
 
         <!-- 🏆 Reward Section -->
-        <div  class="card flex flex-col w-full mt-8">
+        <div class="card flex flex-col w-full mt-8">
             <div class="flex items-center justify-between border-b pb-2 mb-4">
                 <div class="text-xl font-bold text-gray-800">🏆 Reward Section</div>
             </div>
@@ -150,7 +150,7 @@
                             <Dropdown v-model="reward.selected" :options="listPrize" optionLabel="title" placeholder="Select a reward" class="w-full">
                                 <template #option="slotProps">
                                     <div class="flex items-center gap-3">
-                                        <img v-if="slotProps.option.imageURL" :src="slotProps.option.imageURL" class="w-28 h-16 object-cover rounded" />
+                                        <img v-if="slotProps.option.processedImageURL" :src="slotProps.option.processedImageURL" class="w-28 h-16 object-cover rounded" />
                                         <div v-else class="w-28 h-16 bg-gray-200 rounded flex items-center justify-center">
                                             <i class="pi pi-image text-gray-400"></i>
                                         </div>
@@ -200,9 +200,9 @@ const router = useRouter();
 
 // Campaign data
 const campaign = ref({
-    title: '',
-    description: '',
-    termCondition: '',
+    title: 'TEST OFF',
+    description: 'TEST OFF',
+    termCondition: 'TEST OFF',
     image1: '',
     image2: '',
     image3: '',
@@ -210,12 +210,12 @@ const campaign = ref({
     startDate: '',
     endDate: '',
     isGamification: 'off', // Changed to string to match dropdown
-    quota: 0,
-    maxPerUser: 0,
-    point1: 0,
-    point2: 0,
-    point3: 0,
-    status: 0
+    quota: 1,
+    maxPerUser: 1,
+    point1: 1,
+    point2: 1,
+    point3: 1,
+    status: 1
 });
 
 // UI state
@@ -253,6 +253,20 @@ const fetchCatalog = async () => {
         if (response.data.status === 1) {
             listPrize.value = response.data.admin_data || [];
         }
+                    // Transform API data to match frontend expectations
+            const transformedItems = (response.data.admin_data || []).map((item) => ({
+                imageURL: item.imageURL, 
+                title: item.title, 
+                type: item.type, 
+                purpose: item.purpose, 
+                processedImageURL: null // Will be populated by processCatalogueImages
+            }));
+
+            console.log('Transformed items before processing:', transformedItems);
+
+            // Process private images
+            const processedItems = await processCatalogueImages(transformedItems);
+            listPrize.value = processedItems;
     } catch (error) {
         console.error('Error fetching catalog:', error);
     }
@@ -286,7 +300,7 @@ const onImageSelect = (event, field) => {
     }
 
     if (file instanceof File) {
-        console.log('✅ Real file selected:', file);
+        // console.log('✅ Real file selected:', file);
 
         // Store File object for upload
         campaign.value[`${field}File`] = file;
@@ -302,6 +316,48 @@ const onImageSelect = (event, field) => {
     }
 };
 
+// Process private images using the API method
+const processCatalogueImages = async (catalogueItems) => {
+    const processedItems = [];
+
+    for (const item of catalogueItems) {
+        if (item.imageURL && typeof item.imageURL === 'string') {
+            try {
+                console.log('Processing private image:', item.imageURL);
+                const blobUrl = await api.getPrivateFile(item.imageURL);
+                if (blobUrl) {
+                    processedItems.push({
+                        ...item,
+                        processedImageURL: blobUrl
+                    });
+                    console.log('Successfully processed image:', item.prizeName, blobUrl);
+                } else {
+                    // Fallback to original URL if private file loading fails
+                    processedItems.push({
+                        ...item,
+                        processedImageURL: item.imageURL
+                    });
+                    console.warn('Failed to process private image, using original:', item.imageURL);
+                }
+            } catch (error) {
+                console.error(`Error loading catalogue image for ${item.prizeName}:`, error);
+                // Fallback to original URL
+                processedItems.push({
+                    ...item,
+                    processedImageURL: item.imageURL
+                });
+            }
+        } else {
+            // No image URL, use placeholder
+            processedItems.push({
+                ...item,
+                processedImageURL: 'https://via.placeholder.com/150x100?text=No+Image'
+            });
+        }
+    }
+
+    return processedItems;
+};
 
 // Format date to dd-mm-yyyy
 const formatDate = (date) => {
@@ -326,8 +382,8 @@ const validateForm = () => {
     }
 
     // Fixed: Check for string 'on' instead of number 1
-    if (campaign.value.isGamification) {
-        if (criterias.value.length ) {
+
+        if (criterias.value.length === 0) {
             alert('Please add at least one criteria for gamification campaign');
             return false;
         }
@@ -354,11 +410,10 @@ const validateForm = () => {
                 return false;
             }
         }
-    }
+    
 
     return true;
 };
-
 
 
 // Submit event - FIXED VERSION
@@ -401,8 +456,8 @@ const submitEvent = async () => {
         let criteriaArray = [];
         let rewardOptions = [];
 
-        // Only populate arrays if gamification is ON
-        if (campaign.value.isGamification ){
+       
+   
             // Prepare criteria array
             criteriaArray = criterias.value.map(criteria => ({
                 title: criteria.selected.material,
@@ -417,7 +472,7 @@ const submitEvent = async () => {
                 catalogID: reward.selected.id.toString(),
                 quantity: reward.qty.toString()
             }));
-        }
+        
 
         // FIXED: Always append these fields, even if empty
         formData.append('criteria', JSON.stringify(criteriaArray));
@@ -426,9 +481,9 @@ const submitEvent = async () => {
         // ✅ Log all FormData contents
         for (const [key, value] of formData.entries()) {
         if (value instanceof File) {
-            console.log(`${key}:`, value.name, value.type, value.size, value);
+            // console.log(`${key}:`, value.name, value.type, value.size, value);
         } else {
-            console.log(`${key}:`, value);
+            // console.log(`${key}:`, value);
         }
 }
             const response = await api.customRequest({
