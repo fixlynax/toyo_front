@@ -102,33 +102,51 @@
 
             <div class="md:w-1/3">
                 <!-- Permissions Section -->
-                <div class="card">
+                <!-- Permissions Section -->
+                <div class="card p-6 shadow-md rounded-2xl bg-white dark:bg-gray-900">
                     <div class="flex items-center justify-between border-b pb-4 mb-4">
-                        <div class="text-2xl font-bold text-gray-800">Permissions</div>
+                        <div class="text-2xl font-bold text-gray-800 dark:text-gray-100">Permissions</div>
                     </div>
+
                     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-4">
-                        <div class="flex items-center justify-between p-3 border rounded-lg">
-                            <span class="font-medium text-gray-700">Warranty</span>
-                            <ToggleSwitch disabled :modelValue="memberDetail.allow_warranty === 1" class="custom-toggle" />
+                        <!-- Permission Item -->
+                        <div class="flex items-center justify-between p-4 border rounded-xl hover:bg-gray-50 dark:hover:bg-gray-800 transition">
+                            <span class="font-medium text-gray-700 dark:text-gray-200">Warranty</span>
+                            <span :class="memberDetail.allow_warranty === 1 ? 'bg-green-100 text-green-700 px-3 py-1 rounded-full text-sm font-semibold' : 'bg-red-100 text-red-700 px-3 py-1 rounded-full text-sm font-semibold'">
+                                {{ memberDetail.allow_warranty === 1 ? 'Allowed' : 'Restricted' }}
+                            </span>
                         </div>
-                        <div class="flex items-center justify-between p-3 border rounded-lg">
-                            <span class="font-medium text-gray-700">Order</span>
-                            <ToggleSwitch disabled :modelValue="memberDetail.allow_order === 1" class="custom-toggle" />
+
+                        <div class="flex items-center justify-between p-4 border rounded-xl hover:bg-gray-50 dark:hover:bg-gray-800 transition">
+                            <span class="font-medium text-gray-700 dark:text-gray-200">Order</span>
+                            <span :class="memberDetail.allow_order === 1 ? 'bg-green-100 text-green-700 px-3 py-1 rounded-full text-sm font-semibold' : 'bg-red-100 text-red-700 px-3 py-1 rounded-full text-sm font-semibold'">
+                                {{ memberDetail.allow_order === 1 ? 'Allowed' : 'Restricted' }}
+                            </span>
                         </div>
-                        <div class="flex items-center justify-between p-3 border rounded-lg">
-                            <span class="font-medium text-gray-700">Billing</span>
-                            <ToggleSwitch disabled :modelValue="memberDetail.allow_billing === 1" class="custom-toggle" />
+
+                        <div class="flex items-center justify-between p-4 border rounded-xl hover:bg-gray-50 dark:hover:bg-gray-800 transition">
+                            <span class="font-medium text-gray-700 dark:text-gray-200">Billing</span>
+                            <span :class="memberDetail.allow_billing === 1 ? 'bg-green-100 text-green-700 px-3 py-1 rounded-full text-sm font-semibold' : 'bg-red-100 text-red-700 px-3 py-1 rounded-full text-sm font-semibold'">
+                                {{ memberDetail.allow_billing === 1 ? 'Allowed' : 'Restricted' }}
+                            </span>
                         </div>
-                        <div class="flex items-center justify-between p-3 border rounded-lg">
-                            <span class="font-medium text-gray-700">Sales</span>
-                            <ToggleSwitch disabled :modelValue="memberDetail.allow_sale === 1" class="custom-toggle" />
+
+                        <div class="flex items-center justify-between p-4 border rounded-xl hover:bg-gray-50 dark:hover:bg-gray-800 transition">
+                            <span class="font-medium text-gray-700 dark:text-gray-200">Sales</span>
+                            <span :class="memberDetail.allow_sale === 1 ? 'bg-green-100 text-green-700 px-3 py-1 rounded-full text-sm font-semibold' : 'bg-red-100 text-red-700 px-3 py-1 rounded-full text-sm font-semibold'">
+                                {{ memberDetail.allow_sale === 1 ? 'Allowed' : 'Restricted' }}
+                            </span>
                         </div>
-                        <div class="flex items-center justify-between p-3 border rounded-lg">
-                            <span class="font-medium text-gray-700">User Management</span>
-                            <ToggleSwitch disabled :modelValue="memberDetail.allow_user === 1" class="custom-toggle" />
+
+                        <div class="flex items-center justify-between p-4 border rounded-xl hover:bg-gray-50 dark:hover:bg-gray-800 transition">
+                            <span class="font-medium text-gray-700 dark:text-gray-200">User Management</span>
+                            <span :class="memberDetail.allow_user === 1 ? 'bg-green-100 text-green-700 px-3 py-1 rounded-full text-sm font-semibold' : 'bg-red-100 text-red-700 px-3 py-1 rounded-full text-sm font-semibold'">
+                                {{ memberDetail.allow_user === 1 ? 'Allowed' : 'Restricted' }}
+                            </span>
                         </div>
                     </div>
                 </div>
+
                 <!-- Devices -->
                 <div class="card flex flex-col border-b w-full">
                     <div class="flex items-center justify-between border-b pb-2 mb-3">
@@ -174,9 +192,7 @@
 import { ref, onMounted, computed } from 'vue';
 import { useRoute } from 'vue-router';
 import api from '@/service/api';
-import ToggleSwitch from 'primevue/toggleswitch';
 import ProgressSpinner from 'primevue/progressspinner';
-import Tag from 'primevue/tag';
 import { useToast } from 'primevue/usetoast';
 
 const route = useRoute();

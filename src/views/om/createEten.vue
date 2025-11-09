@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, onMounted } from 'vue';
+import { ref, onMounted, watch } from 'vue';
 import LoadingPage from '@/components/LoadingPage.vue';
 import api from '@/service/api';
 import { useRouter } from 'vue-router';
@@ -8,7 +8,7 @@ import { useToast } from 'primevue/usetoast';
 const toast = useToast();
 const router = useRouter();
 
-// Interfaces
+// Interfaces (keep existing interfaces the same)
 interface DropdownOption {
     name: string;
     code: string;
@@ -218,11 +218,11 @@ const form = ref<FormData>({
 const shipToAddresses = ref<ShipToAddress[]>([]);
 const selectedShipTo = ref<ShipToAddress | null>(null);
 
-// Track SAP populated fields
+// Track SAP populated fields - NEW: Track all fields from SAP (including null/empty ones)
 const sapPopulatedFields = ref(new Set<string>());
 const sapPopulatedShipToFields = ref<Map<string, Set<string>>>(new Map());
 
-// Dropdowns
+// Dropdowns (keep existing dropdowns)
 const dropdownYesNoValue = ref<DropdownOption[]>([
     { name: 'Yes', code: '1' },
     { name: 'No', code: '0' }
@@ -269,7 +269,15 @@ const currentException = ref({
     dealers: null as string | null
 });
 
-// Helper functions
+// NEW: Computed property to check if account is main branch
+const isMainBranch = ref(false);
+
+// Watch accountNo to update isMainBranch
+watch(accountNo, (newVal) => {
+    isMainBranch.value = newVal.endsWith('00');
+});
+
+// Helper functions - UPDATED: All SAP fields should be disabled regardless of value
 function isSapField(fieldName: string): boolean {
     return sapPopulatedFields.value.has(fieldName);
 }
@@ -335,12 +343,12 @@ function handleSubmit() {
     }
 }
 
-// Fetch main branch dealer list
+// Fetch main branch dealer list - UPDATED: Always pass mainBranch=1
 async function fetchDealerList() {
     try {
         const formData = new FormData();
-        formData.append('mainBranch', '1');
-        formData.append('custaccountno', accountNo.value);
+        formData.append('mainBranch', '1'); // Always pass mainBranch=1 as per requirement
+        // Remove custaccountno from this call as it's not needed for listing all main branches
 
         const response = await api.post('list_dealer', formData);
 
@@ -383,23 +391,84 @@ async function fetchDealerDetails(accountNo: string): Promise<ApiResponse> {
     }
 }
 
-// Function to map SAP response to form fields
+// Function to map SAP response to form fields - UPDATED: Mark all SAP fields as populated
 function mapSapResponseToForm(sapData: SapResponseItem): FormData {
     const customerMaster = sapData.customermaster;
     sapPopulatedFields.value.clear();
     sapPopulatedShipToFields.value.clear();
 
     // Store ShipTo addresses
-    shipToAddresses.value = customerMaster.ShipTo || [];
+    if (customerMaster.ShipTo && Array.isArray(customerMaster.ShipTo)) {
+        shipToAddresses.value = customerMaster.ShipTo;
+    } else if (customerMaster.ShipTo && typeof customerMaster.ShipTo === 'object') {
+        // Handle case where ShipTo is a single object instead of array
+        shipToAddresses.value = [customerMaster.ShipTo];
+    } else {
+        shipToAddresses.value = [];
+    }
 
-    // Track which ShipTo fields have SAP data
-    shipToAddresses.value.forEach((shipTo, index) => {
-        const shipToFields = new Set<string>();
-        Object.keys(shipTo).forEach((key) => {
-            if (shipTo[key as keyof ShipToAddress]) {
-                shipToFields.add(key);
-            }
-        });
+    // NEW: Track ALL fields from SAP (including null/empty ones)
+    const sapFieldKeys = [
+        'companyRegNo',
+        'companyName1',
+        'companyName2',
+        'companyName3',
+        'companyName4',
+        'salesTaxNo',
+        'serviceTaxNo',
+        'tinNo',
+        'vatNo',
+        'addressLine1',
+        'addressLine2',
+        'addressLine3',
+        'addressLine4',
+        'city',
+        'postcode',
+        'state',
+        'country',
+        'phoneNumber',
+        'emailAddress',
+        'paymentTerms',
+        'riskCategory',
+        'creditLimit',
+        'customerAccountGroup',
+        'customerCondGrp',
+        'priceGroup',
+        'priceProcedure',
+        'salesOffice',
+        'salesDistrict',
+        'signboardBrand',
+        'custAccountNo',
+        'mobilePhoneNo',
+        'accountStatus',
+        'accountLastUpdate',
+        'accountCreation'
+    ];
+
+    sapFieldKeys.forEach((key) => {
+        sapPopulatedFields.value.add(key);
+    });
+
+    // Track which ShipTo fields have SAP data (all fields from SAP)
+    shipToAddresses.value.forEach((shipTo) => {
+        const shipToFields = new Set<string>([
+            'custaccountno',
+            'companyname1',
+            'companyname2',
+            'companyname3',
+            'companyname4',
+            'addressline1',
+            'addressline2',
+            'addressline3',
+            'addressline4',
+            'city',
+            'postcode',
+            'state',
+            'country',
+            'phoneno',
+            'mobilephoneno',
+            'emailaddress'
+        ]);
         sapPopulatedShipToFields.value.set(shipTo.custaccountno, shipToFields);
     });
 
@@ -463,13 +532,6 @@ function mapSapResponseToForm(sapData: SapResponseItem): FormData {
         mapLatitude: '',
         mapLongitude: ''
     };
-
-    // Track which fields have SAP data
-    Object.keys(mappedData).forEach((key) => {
-        if (mappedData[key as keyof FormData]) {
-            sapPopulatedFields.value.add(key);
-        }
-    });
 
     return mappedData;
 }
@@ -595,7 +657,12 @@ function resetForm() {
     currentException.value.dealers = null;
     shipToAddresses.value = [];
     selectedShipTo.value = null;
+    isMainBranch.value = false;
 }
+
+const handleBack = () => {
+    router.push('/om/listEten');
+};
 
 onMounted(() => {
     fetchDealerList();
@@ -612,7 +679,7 @@ onMounted(() => {
                     <div class="flex-1">
                         <div class="flex items-center gap-2 mb-1">
                             <label for="accountNo" class="font-medium">Account No.</label>
-                            <i class="pi pi-info-circle cursor-pointer font-bold" v-tooltip="'SAP account number for the dealer'"></i>
+                            <i class="pi pi-info-circle cursor-pointer font-bold" v-tooltip="'SAP account number for the dealer. Can be main branch (ending with 00) or sub-branch.'"></i>
                         </div>
                         <InputText v-model="accountNo" id="accountNo" type="text" class="w-full" placeholder="Enter SAP account number" />
                     </div>
@@ -682,10 +749,11 @@ onMounted(() => {
                         </div>
                     </div>
 
+                    <!-- UPDATED: Main Branch dropdown - disabled only for main branch accounts -->
                     <div class="flex flex-col md:flex-row gap-4">
                         <div class="w-full">
                             <label for="mainBranch">Main Branch Account</label>
-                            <Dropdown v-model="currentException.dealers" :disabled="isLoading || accountNo.endsWith('00')" :options="allDealers" optionLabel="label" optionValue="value" filter placeholder="Search or Select Main Branch" class="w-full">
+                            <Dropdown v-model="currentException.dealers" :disabled="isMainBranch" :options="allDealers" optionLabel="label" optionValue="value" filter placeholder="Search or Select Main Branch" class="w-full">
                                 <template #option="slotProps">
                                     <div class="flex flex-col">
                                         <div class="font-medium text-gray-800">{{ slotProps.option.label }}</div>
@@ -693,6 +761,7 @@ onMounted(() => {
                                     </div>
                                 </template>
                             </Dropdown>
+                            <small v-if="isMainBranch" class="text-gray-500">This field is disabled for main branch accounts (ending with 00)</small>
                         </div>
                     </div>
                 </div>
@@ -904,16 +973,14 @@ onMounted(() => {
                 <div class="card w-full">
                     <div class="font-semibold text-xl border-b pb-2 mb-4 flex items-center gap-2">
                         📍 Ship To Accounts
-                        <i class="pi pi-info-circle cursor-pointer font-bold" v-tooltip="'Fields with SAP data are read-only. You can only edit empty fields.'"></i>
+                        <i class="pi pi-info-circle cursor-pointer font-bold" v-tooltip="'All fields from SAP are read-only. You can only edit empty fields.'"></i>
                     </div>
 
                     <!-- Loop through all Ship To addresses -->
                     <div v-for="(shipTo, index) in shipToAddresses" :key="shipTo.custaccountno" class="border rounded-2xl p-5 mb-6 bg-gray-50 shadow-sm">
                         <div class="font-bold text-lg text-gray-700 mb-4 flex justify-between items-center">
                             <span>Account {{ index + 1 }}</span>
-                            <span class="text-sm font-normal text-gray-500">
-                                {{ isSapShipToField(shipTo.custaccountno, 'custaccountno') ? '(SAP Data)' : '(Manual Entry)' }}
-                            </span>
+                            <span class="text-sm font-normal text-gray-500"> (SAP Data - Read Only) </span>
                         </div>
 
                         <!-- Account Info -->
@@ -1115,7 +1182,7 @@ onMounted(() => {
 
                     <div class="flex flex-col md:flex-row justify-end gap-2 mt-4">
                         <div class="w-40">
-                            <Button label="Cancel" class="w-full p-button-secondary" @click="resetForm" />
+                            <Button label="Cancel" class="w-full p-button-secondary" @click="handleBack" />
                         </div>
                         <div class="w-40">
                             <Button label="Submit" class="w-full" @click="handleSubmit" />

@@ -15,10 +15,9 @@
                                 <InputIcon>
                                     <i class="pi pi-search" />
                                 </InputIcon>
-                                <!-- ✅ Fixed: use searchQuery -->
                                 <InputText v-model="searchQuery" placeholder="Quick Search..." class="w-full" />
                             </IconField>
-                            <Button type="button" icon="pi pi-cog" class="p-button" />
+                            <Button icon="pi pi-refresh" class="p-button" @click="fetchDeviceList" v-tooltip="'Refresh List'" />
                         </div>
                     </div>
 
@@ -26,22 +25,25 @@
                     <TabView v-model:activeIndex="activeTabIndex">
                         <!-- 🧩 ALL DEVICES -->
                         <TabPanel :header="`All Devices (${filteredAllDevices.length})`">
-                            <div class="overflow-x-auto">
+                            <div v-if="isLoading" class="text-center py-6 text-gray-500">Loading devices...</div>
+                            <div v-else-if="filteredAllDevices.length === 0" class="text-center py-6 text-gray-500">No devices found</div>
+                            <div v-else class="overflow-x-auto">
                                 <table class="w-full text-sm text-left">
                                     <tbody>
-                                        <tr v-for="device in filteredAllDevices" :key="device.id" class="border-b hover:bg-gray-50">
+                                        <tr v-for="device in filteredAllDevices" :key="device.device_id" class="border-b hover:bg-gray-50">
                                             <td class="px-4 py-3">
                                                 <div class="flex items-center gap-2 text-gray-800 font-bold">
                                                     <i :class="device.isBlocked ? 'pi pi-ban text-red-500' : 'pi pi-tablet text-black-500'"></i>
-                                                    {{ device.name }}
+                                                    {{ device.device_model }}
                                                 </div>
                                                 <div class="ml-6 text-gray-500 text-xs mt-2">
-                                                    <div>ID: {{ device.uniqueId }}</div>
-                                                    <div>Last Active: {{ formatDate(device.lastActive) }}</div>
+                                                    <div>ID: {{ device.device_id }}</div>
+                                                    <div>Platform: {{ device.device_platform }}</div>
+                                                    <div>Last Active: {{ formatDate(device.last_used_at) }}</div>
                                                 </div>
                                             </td>
                                             <td class="px-4 py-3 text-right align-top">
-                                                <Button :label="device.isBlocked ? 'Unblock' : 'Block'" :severity="device.isBlocked ? 'success' : 'danger'" size="small" class="!py-1 !px-2 text-xs w-fit" @click="toggleBlock(device)" />
+                                                <Button :label="device.isBlocked ? 'Unblock' : 'Block'" :severity="device.isBlocked ? 'success' : 'danger'" size="small" class="!py-1 !px-2 text-xs w-fit" @click="openBlockModal(device)" />
                                             </td>
                                         </tr>
                                     </tbody>
@@ -51,22 +53,25 @@
 
                         <!-- ✅ ACTIVE DEVICES -->
                         <TabPanel :header="`Active Devices (${filteredActiveDevices.length})`">
-                            <div class="overflow-x-auto">
+                            <div v-if="isLoading" class="text-center py-6 text-gray-500">Loading devices...</div>
+                            <div v-else-if="filteredActiveDevices.length === 0" class="text-center py-6 text-gray-500">No active devices found</div>
+                            <div v-else class="overflow-x-auto">
                                 <table class="w-full text-sm text-left">
                                     <tbody>
-                                        <tr v-for="device in filteredActiveDevices" :key="device.id" class="border-b hover:bg-gray-50">
+                                        <tr v-for="device in filteredActiveDevices" :key="device.device_id" class="border-b hover:bg-gray-50">
                                             <td class="px-4 py-3">
                                                 <div class="flex items-center gap-2 text-gray-800 font-bold">
                                                     <i class="pi pi-tablet text-black-500"></i>
-                                                    {{ device.name }}
+                                                    {{ device.device_model }}
                                                 </div>
                                                 <div class="ml-6 text-gray-500 text-xs mt-2">
-                                                    <div>ID: {{ device.uniqueId }}</div>
-                                                    <div>Last Active: {{ formatDate(device.lastActive) }}</div>
+                                                    <div>ID: {{ device.device_id }}</div>
+                                                    <div>Platform: {{ device.device_platform }}</div>
+                                                    <div>Last Active: {{ formatDate(device.last_used_at) }}</div>
                                                 </div>
                                             </td>
                                             <td class="px-4 py-3 text-right align-top">
-                                                <Button label="Block" severity="danger" size="small" class="!py-1 !px-2 text-xs w-fit" @click="toggleBlock(device)" />
+                                                <Button label="Block" severity="danger" size="small" class="!py-1 !px-2 text-xs w-fit" @click="openBlockModal(device)" />
                                             </td>
                                         </tr>
                                     </tbody>
@@ -76,22 +81,25 @@
 
                         <!-- 🚫 BLOCKED DEVICES -->
                         <TabPanel :header="`Blocked Devices (${filteredBlockedDevices.length})`">
-                            <div class="overflow-x-auto">
+                            <div v-if="isLoading" class="text-center py-6 text-gray-500">Loading devices...</div>
+                            <div v-else-if="filteredBlockedDevices.length === 0" class="text-center py-6 text-gray-500">No blocked devices found</div>
+                            <div v-else class="overflow-x-auto">
                                 <table class="w-full text-sm text-left">
                                     <tbody>
-                                        <tr v-for="device in filteredBlockedDevices" :key="device.id" class="border-b hover:bg-gray-50">
+                                        <tr v-for="device in filteredBlockedDevices" :key="device.device_id" class="border-b hover:bg-gray-50">
                                             <td class="px-4 py-3">
                                                 <div class="flex items-center gap-2 text-gray-800 font-bold">
                                                     <i class="pi pi-ban text-red-500"></i>
-                                                    {{ device.name }}
+                                                    {{ device.device_model }}
                                                 </div>
                                                 <div class="ml-6 text-gray-500 text-xs mt-2">
-                                                    <div>ID: {{ device.uniqueId }}</div>
-                                                    <div>Last Active: {{ formatDate(device.lastActive) }}</div>
+                                                    <div>ID: {{ device.device_id }}</div>
+                                                    <div>Platform: {{ device.device_platform }}</div>
+                                                    <div>Last Active: {{ formatDate(device.last_used_at) }}</div>
                                                 </div>
                                             </td>
                                             <td class="px-4 py-3 text-right align-top">
-                                                <Button label="Unblock" severity="success" size="small" class="!py-1 !px-2 text-xs w-fit" @click="toggleBlock(device)" />
+                                                <Button label="Unblock" severity="success" size="small" class="!py-1 !px-2 text-xs w-fit" @click="openBlockModal(device)" />
                                             </td>
                                         </tr>
                                     </tbody>
@@ -102,50 +110,247 @@
                 </div>
             </div>
         </div>
+
+        <!-- Block/Unblock Confirmation Modal -->
+        <Dialog v-model:visible="blockModal.visible" :style="{ width: '500px' }" header="Device Action Confirmation" :modal="true" :closable="false">
+            <div class="flex flex-col gap-4">
+                <!-- Device Preview -->
+                <div class="bg-gray-50 p-4 rounded-lg border">
+                    <div class="font-semibold text-lg mb-2">Device Information</div>
+                    <div class="grid grid-cols-2 gap-2 text-sm">
+                        <div class="text-gray-600">Model:</div>
+                        <div class="font-medium">{{ blockModal.device?.device_model }}</div>
+
+                        <div class="text-gray-600">Device ID:</div>
+                        <div class="font-medium">{{ blockModal.device?.device_id }}</div>
+
+                        <div class="text-gray-600">Platform:</div>
+                        <div class="font-medium">{{ blockModal.device?.device_platform }}</div>
+
+                        <div class="text-gray-600">Last Active:</div>
+                        <div class="font-medium">{{ formatDate(blockModal.device?.last_used_at) }}</div>
+
+                        <div class="text-gray-600">Current Status:</div>
+                        <div class="font-medium">
+                            <span :class="blockModal.device?.isBlocked ? 'text-red-500' : 'text-green-500'">
+                                {{ blockModal.device?.isBlocked ? 'Blocked' : 'Active' }}
+                            </span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Action Type Display -->
+                <div class="text-center p-3 rounded-lg" :class="blockModal.isBlocking ? 'bg-red-50 border border-red-200' : 'bg-green-50 border border-green-200'">
+                    <i :class="blockModal.isBlocking ? 'pi pi-ban text-red-500 text-xl' : 'pi pi-check-circle text-green-500 text-xl'"></i>
+                    <div class="font-semibold mt-2" :class="blockModal.isBlocking ? 'text-red-700' : 'text-green-700'">
+                        {{ blockModal.isBlocking ? 'Block Device' : 'Unblock Device' }}
+                    </div>
+                    <div class="text-sm text-gray-600 mt-1">
+                        {{ blockModal.isBlocking ? 'This device will be blocked from accessing the system.' : 'This device will be allowed to access the system again.' }}
+                    </div>
+                </div>
+
+                <!-- Reason Input -->
+                <div class="field">
+                    <label for="reason" class="font-medium block mb-2"> Reason for {{ blockModal.isBlocking ? 'Blocking' : 'Unblocking' }} * </label>
+                    <Textarea id="reason" v-model="blockModal.reason" :placeholder="`Enter reason for ${blockModal.isBlocking ? 'blocking' : 'unblocking'} this device...`" rows="3" class="w-full" :autoResize="true" />
+                    <small class="text-gray-500">This reason will be recorded in the audit log.</small>
+                </div>
+            </div>
+
+            <template #footer>
+                <div class="flex justify-end gap-2">
+                    <Button label="Cancel" icon="pi pi-times" class="p-button-text" @click="closeBlockModal" />
+                    <Button
+                        :label="blockModal.isBlocking ? 'Block Device' : 'Unblock Device'"
+                        :icon="blockModal.isBlocking ? 'pi pi-ban' : 'pi pi-check'"
+                        :severity="blockModal.isBlocking ? 'danger' : 'success'"
+                        :disabled="!blockModal.reason.trim()"
+                        @click="confirmBlockAction"
+                    />
+                </div>
+            </template>
+        </Dialog>
     </Fluid>
 </template>
 
 <script setup>
-import { ref, computed } from 'vue';
+import { ref, computed, onMounted } from 'vue';
+import api from '@/service/api';
+import { useToast } from 'primevue/usetoast';
 
-// Active tab
+const toast = useToast();
 const activeTabIndex = ref(0);
-
-// ✅ Quick search text
 const searchQuery = ref('');
+const isLoading = ref(false);
+const devices = ref([]);
+const etenUserId = ref(1); // ✅ Replace with actual user ID (e.g. from route params)
 
-// Dummy device data
-const devices = ref([
-    { id: 1, name: 'iPhone 14 Pro', uniqueId: 'A1B2C3', lastActive: '2025-10-22 09:45', isBlocked: false },
-    { id: 2, name: 'Samsung S22', uniqueId: 'D4E5F6', lastActive: '2025-10-20 19:30', isBlocked: true },
-    { id: 3, name: 'HP Laptop', uniqueId: 'G7H8I9', lastActive: '2025-10-21 22:00', isBlocked: false },
-    { id: 4, name: 'iPad Air', uniqueId: 'J1K2L3', lastActive: '2025-10-17 08:45', isBlocked: true },
-    { id: 5, name: 'MacBook Air', uniqueId: 'M4N5O6', lastActive: '2025-10-22 06:30', isBlocked: false },
-    { id: 6, name: 'Lenovo ThinkPad', uniqueId: 'P7Q8R9', lastActive: '2025-10-19 11:20', isBlocked: false },
-    { id: 7, name: 'Asus ROG', uniqueId: 'S1T2U3', lastActive: '2025-10-16 13:10', isBlocked: true }
-]);
+// Block Modal State
+const blockModal = ref({
+    visible: false,
+    device: null,
+    isBlocking: false,
+    reason: ''
+});
 
-// ✅ Search filter logic
+// ✅ Open Block Modal
+function openBlockModal(device) {
+    blockModal.value = {
+        visible: true,
+        device: device,
+        isBlocking: !device.isBlocked,
+        reason: ''
+    };
+}
+
+// ✅ Close Block Modal
+function closeBlockModal() {
+    blockModal.value = {
+        visible: false,
+        device: null,
+        isBlocking: false,
+        reason: ''
+    };
+}
+
+// ✅ Fetch devices from API
+async function fetchDeviceList() {
+    try {
+        isLoading.value = true;
+        const response = await api.get(`deviceList/${etenUserId.value}`);
+        if (response.data.status === 1) {
+            // First, get all devices from sessions
+            const sessionDevices = response.data.admin_data.map((d) => ({
+                device_model: d.device_model,
+                device_id: d.device_id,
+                device_platform: d.device_platform,
+                last_used_at: d.last_used_at,
+                isBlocked: false // Default to false
+            }));
+
+            // Then fetch blocklist status for these devices
+            await fetchBlocklistStatus(sessionDevices);
+        } else {
+            toast.add({ severity: 'warn', summary: 'No Data', detail: 'No devices found.', life: 3000 });
+        }
+    } catch (err) {
+        console.error('Error fetching devices:', err);
+        toast.add({ severity: 'error', summary: 'Error', detail: 'Failed to load devices.', life: 3000 });
+    } finally {
+        isLoading.value = false;
+    }
+}
+
+// ✅ Fetch blocklist status for devices
+async function fetchBlocklistStatus(sessionDevices) {
+    try {
+        const deviceIds = sessionDevices.map((d) => d.device_id);
+
+        // Create FormData for the request
+        const formData = new FormData();
+        formData.append('eten_userListID', etenUserId.value);
+        formData.append('deviceUUIDs', JSON.stringify(deviceIds));
+
+        const response = await api.post('device_blocklist_status', formData);
+
+        if (response.data.status === 1) {
+            const blockedDevices = response.data.blocked_devices || [];
+
+            // Update session devices with block status
+            devices.value = sessionDevices.map((device) => ({
+                ...device,
+                isBlocked: blockedDevices.some((blocked) => blocked.deviceUUID === device.device_id && blocked.status === 'blocked')
+            }));
+        } else {
+            // If blocklist API fails, just use session devices
+            devices.value = sessionDevices;
+        }
+    } catch (error) {
+        console.error('Error fetching blocklist status:', error);
+        // If blocklist API fails, just use session devices
+        devices.value = sessionDevices;
+    }
+}
+
+// ✅ Confirm Block/Unblock Action
+async function confirmBlockAction() {
+    if (!blockModal.value.reason.trim()) {
+        toast.add({
+            severity: 'warn',
+            summary: 'Reason Required',
+            detail: 'Please enter a reason for this action.',
+            life: 3000
+        });
+        return;
+    }
+
+    try {
+        const { device, isBlocking, reason } = blockModal.value;
+
+        // Create FormData for the request
+        const formData = new FormData();
+        formData.append('eten_userListID', etenUserId.value);
+        formData.append('deviceUUID', device.device_id);
+        formData.append('device_model', device.device_model);
+        formData.append('status', isBlocking ? 'blocked' : 'unblocked');
+
+        if (isBlocking) {
+            formData.append('block_reason', reason);
+        } else {
+            formData.append('unblock_reason', reason);
+        }
+
+        const response = await api.post('block_user_device', formData);
+
+        if (response.data.status === 1) {
+            // Update local device status
+            const deviceIndex = devices.value.findIndex((d) => d.device_id === device.device_id);
+            if (deviceIndex !== -1) {
+                devices.value[deviceIndex].isBlocked = isBlocking;
+            }
+
+            toast.add({
+                severity: 'success',
+                summary: 'Success',
+                detail: response.data.message,
+                life: 3000
+            });
+
+            closeBlockModal();
+        } else {
+            toast.add({
+                severity: 'warn',
+                summary: 'Warning',
+                detail: response.data.message || 'Action failed.',
+                life: 3000
+            });
+        }
+    } catch (err) {
+        console.error('Error updating device status:', err);
+        toast.add({
+            severity: 'error',
+            summary: 'Error',
+            detail: 'Failed to update device status.',
+            life: 3000
+        });
+    }
+}
+
+// ✅ Filters
 const filterDevices = (list) => {
     if (!searchQuery.value.trim()) return list;
     const q = searchQuery.value.toLowerCase();
-    return list.filter((d) => d.name.toLowerCase().includes(q) || d.uniqueId.toLowerCase().includes(q));
+    return list.filter((d) => d.device_model.toLowerCase().includes(q) || d.device_id.toLowerCase().includes(q) || d.device_platform.toLowerCase().includes(q));
 };
 
-// ✅ Computed filtered lists
-const filteredAllDevices = computed(() => filterDevices([...devices.value].sort((a, b) => new Date(b.lastActive) - new Date(a.lastActive))));
+const filteredAllDevices = computed(() => filterDevices(devices.value));
+const filteredActiveDevices = computed(() => filterDevices(devices.value.filter((d) => !d.isBlocked)));
+const filteredBlockedDevices = computed(() => filterDevices(devices.value.filter((d) => d.isBlocked)));
 
-const filteredActiveDevices = computed(() => filterDevices(devices.value.filter((d) => !d.isBlocked).sort((a, b) => new Date(b.lastActive) - new Date(a.lastActive))));
-
-const filteredBlockedDevices = computed(() => filterDevices(devices.value.filter((d) => d.isBlocked).sort((a, b) => new Date(b.lastActive) - new Date(a.lastActive))));
-
-// ✅ Toggle block/unblock
-function toggleBlock(device) {
-    device.isBlocked = !device.isBlocked;
-}
-
-// ✅ Format date helper
+// ✅ Format date
 function formatDate(date) {
+    if (!date) return '-';
     return new Date(date).toLocaleString('en-MY', {
         year: 'numeric',
         month: 'short',
@@ -154,4 +359,7 @@ function formatDate(date) {
         minute: '2-digit'
     });
 }
+
+// ✅ Load on mount
+onMounted(fetchDeviceList);
 </script>
