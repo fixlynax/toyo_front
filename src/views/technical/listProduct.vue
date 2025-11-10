@@ -7,16 +7,13 @@
             :paginator="true"
             :rows="10"
             :rowsPerPageOptions="[5, 10, 20]"
-            dataKey="id"
+            dataKey="materialid"
             :rowHover="true"
             :loading="loading"
             :filters="filters"
             filterDisplay="menu"
-            :globalFilterFields="['materialid', 'itemdesc', 'pattern', 'origin', 'size', 'status']"
+            :globalFilterFields="['materialid', 'pattern', 'origin', 'status']"
         >
-            <!-- ========================= -->
-            <!-- Header Section -->
-            <!-- ========================= -->
             <template #header>
                 <div class="flex items-center justify-between gap-4 w-full flex-wrap">
                     <!-- Left: Search Field + Sort Menu Button -->
@@ -40,32 +37,65 @@
                 </div>
             </template>
 
-            <!-- ========================= -->
-            <!-- Empty / Loading Messages -->
-            <!-- ========================= -->
             <template #empty> No data found. </template>
             <template #loading> Loading data. Please wait... </template>
 
-            <!-- ========================= -->
-            <!-- Data Columns -->
-            <!-- ========================= -->
             <Column field="materialid" header="Material ID" style="min-width: 6rem">
                 <template #body="{ data }">
                     <div class="flex flex-col items-start gap-1">
+                        <RouterLink :to="`/technical/detailProduct/${data.id}`" class="hover:underline font-bold">
                         {{ data.materialid }}
-
-                        <div class="flex flex-wrap gap-1">
-                            <span v-if="data.isTWP === 1" class="text-[10px] font-semibold text-white bg-[#0062B0] px-1.5 py-[1px] rounded"> TWP </span>
-                            <span v-if="data.status === 'Warranty'" class="text-[10px] font-semibold text-white bg-gray-500 px-1.5 py-[1px] rounded"> Warranty </span>
-                        </div>
+                        </RouterLink>
                     </div>
                 </template>
             </Column>
 
-            <Column field="itemdesc" header="Pattern" style="min-width: 8rem">
+            <!-- TWP Column with Checkbox -->
+            <Column field="twp" header="TWP" style="min-width: 8rem">
+                <template #body="{ data }">
+                    <div class="flex justify-center">
+                        <Checkbox 
+                            v-model="data.twp" 
+                            :binary="true" 
+                            :disabled="true"
+                            :class="data.twp ? 'p-checkbox-checked' : ''"
+                        />
+                    </div>
+                </template>
+            </Column>
+
+            <!-- Warranty Column with Checkbox -->
+            <Column field="warranty" header="Warranty" style="min-width: 8rem">
+                <template #body="{ data }">
+                    <div class="flex justify-center">
+                        <Checkbox 
+                            v-model="data.warranty" 
+                            :binary="true" 
+                            :disabled="true"
+                            :class="data.warranty ? 'p-checkbox-checked' : ''"
+                        />
+                    </div>
+                </template>
+            </Column>
+
+            <!-- Sell Column with Checkbox -->
+            <Column field="sell" header="Sell" style="min-width: 6rem">
+                <template #body="{ data }">
+                    <div class="flex justify-center">
+                        <Checkbox 
+                            v-model="data.sell" 
+                            :binary="true" 
+                            :disabled="true"
+                            :class="data.sell ? 'p-checkbox-checked' : ''"
+                        />
+                    </div>
+                </template>
+            </Column>
+
+            <Column field="pattern" header="Pattern" style="min-width: 8rem">
                 <template #body="{ data }">
                     <RouterLink to="/technical/detailProduct" class="block text-gray-800 hover:text-gray-600 transition-colors">
-                        <div class="font-semibold">{{ data.pattern }}</div>
+                        <div class="font-semibold">{{ data.pattern_name }}</div>
                     </RouterLink>
                 </template>
             </Column>
@@ -81,7 +111,7 @@
                     <div class="flex flex-col leading-relaxed text-sm text-gray-700">
                         <div class="flex">
                             <span class="w-40 text-gray-800 font-semibold">Section Width:</span>
-                            <span>{{ data.sectionWidth }}</span>
+                            <span>{{ data.sectionwidth }}</span>
                         </div>
                         <div class="flex">
                             <span class="w-40 text-gray-800 font-semibold">Tire Series:</span>
@@ -89,7 +119,7 @@
                         </div>
                         <div class="flex">
                             <span class="w-40 text-gray-800 font-semibold">Rim Diameter:</span>
-                            <span>{{ data.rimDiameter }}"</span>
+                            <span>{{ data.rimdiameter }}"</span>
                         </div>
                         <div class="flex">
                             <span class="w-40 text-gray-800 font-semibold">Speed Rating:</span>
@@ -105,21 +135,17 @@
 <script setup>
 import { onMounted, ref } from 'vue';
 import { FilterMatchMode } from '@primevue/core/api';
-import { ListTyreService } from '@/service/listProduct';
+import api from '@/service/api';
 
 // Data variables
 const tyres = ref([]);
 const loading = ref(true);
-
 
 // Filters for quick search
 const filters = ref({
     global: { value: null, matchMode: FilterMatchMode.CONTAINS }
 });
 
-// =========================
-// Sort Menu
-// =========================
 const sortMenu = ref();
 const sortItems = ref([
     {
@@ -135,7 +161,7 @@ const sortItems = ref([
     {
         label: 'Sort by Pattern (A-Z)',
         icon: 'pi pi-tag',
-        command: () => sortBy('pattern', 'asc')
+        command: () => sortBy('pattern_name', 'asc')
     },
     {
         label: 'Sort by Origin',
@@ -145,7 +171,7 @@ const sortItems = ref([
     {
         label: 'Sort by Status',
         icon: 'pi pi-check-circle',
-        command: () => sortBy('status', 'asc')
+        command: () => sortBy('isSell', 'asc')
     }
 ]);
 
@@ -158,18 +184,40 @@ const sortBy = (field, order) => {
     });
 };
 
-// =========================
-// Fetch data on mount
-// =========================
 onMounted(async () => {
-    loading.value = true;
-    tyres.value = await ListTyreService.getListTyre();
-    loading.value = false;
+    try {
+        loading.value = true;
+
+        const response = await api.get('material');
+
+        console.log('API Response:', response.data);
+
+        if (response.data.status === 1 && Array.isArray(response.data.admin_data)) {
+            tyres.value = response.data.admin_data.map((product) => ({
+                materialid: product.materialid,
+                twp: product.isTWP === 1,
+                warranty: product.isWarranty === 1,
+                sell: product.isSell === 1,
+                pattern: product.pattern,
+                pattern_name: product.pattern_name,
+                origin: product.origin,
+                sectionwidth: product.sectionwidth,
+                tireseries: product.tireseries,
+                rimdiameter: product.rimdiameter,
+                speedplyrating: product.speedplyrating
+            }));
+        } else {
+            console.error('API returned error or invalid data:', response.data);
+            tyres.value = [];
+        }
+    } catch (error) {
+        console.error('Error fetching product list:', error);
+        tyres.value = [];
+    } finally {
+        loading.value = false;
+    }
 });
 
-// =========================
-// Helper functions for status display
-// =========================
 const getOverallStatusLabel = (deleted) => {
     return deleted ? 'Inactive' : 'Active';
 };

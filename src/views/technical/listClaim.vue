@@ -1,6 +1,6 @@
 <script setup>
 import { FilterMatchMode } from '@primevue/core/api';
-import { listWarantyClaimService } from '@/service/ListWarrantyClaim';
+import api from '@/service/api';
 import { onBeforeMount, ref } from 'vue';
 
 const listData = ref([]);
@@ -41,8 +41,25 @@ const filters = ref({
 
 // Fetch data on component mount
 onBeforeMount(async () => {
-    listData.value = await listWarantyClaimService.getListWarantyData();
-    loading.value = false;
+    try {
+        loading.value = true;
+        const response = await api.get('warranty_claim');
+        if (response.data.status === 1) {
+            listData.value = response.data.admin_data.map((item) => ({
+                id: item.id,
+                refNo: item.claimRefNo,
+                dealerName: item.dealer ,
+                claimType: item.warrantyType,
+                claimDate: item.eten_data?.city || 'N/A',
+                status: item.status,
+            }));
+        } else listData.value = [];
+    } catch (error) {
+        console.error('Error fetching collection list:', error);
+        listData.value = [];
+    } finally {
+        loading.value = false;
+    }
 });
 </script>
 
