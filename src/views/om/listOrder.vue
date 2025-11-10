@@ -187,7 +187,7 @@ const formatDate = (dateString) => {
                         </div>
                         <div>
                             <RouterLink to="/om/createOrder">
-                                <Button label="Create Order" icon="pi pi-plus" class="p-button-primary" />
+                                <Button label="Create" icon="pi pi-plus" class="p-button-primary" />
                             </RouterLink>
                         </div>
                     </div>

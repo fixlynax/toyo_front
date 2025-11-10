@@ -6,9 +6,10 @@
 
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <!-- Customer Account -->
+                <!-- Customer Account -->
                 <div class="md:col-span-2">
                     <label class="block font-bold text-gray-700">Customer Account</label>
-                    <Dropdown filter v-model="selectedCustomer" :options="customerOptions" optionLabel="name" placeholder="Select a Customer" class="w-full" />
+                    <Dropdown filter v-model="selectedCustomer" :options="customerOptions" optionLabel="display" placeholder="Select a Customer" class="w-full" />
                 </div>
 
                 <!-- Order Type -->
@@ -240,10 +241,14 @@ const datetime24h = ref(null);
 
 const containerSizeOptions = ['20ft', '40ft'];
 const customerOptions = [
-    { name: 'ABC Motors Sdn Bhd', code: 'CUST001' },
-    { name: 'Speed Tyre Enterprise', code: 'CUST002' },
-    { name: 'GoAuto Garage', code: 'CUST003' }
-];
+    { name: 'ABC Motors Sdn Bhd', code: '6601035101' },
+    { name: 'Speed Tyre Enterprise', code: '660103512313' },
+    { name: 'GoAuto Garage', code: '6601035221' }
+].map((c) => ({
+    ...c,
+    display: `${c.name} (${c.code})` // Shows: "ABC Motors Sdn Bhd (CUST001)"
+}));
+
 const orderTypeOptions = ['Normal', 'DS', 'Own-Use'];
 const deliveryMethodOptions = ['Pickup', 'Delivery', 'Lalamove'];
 

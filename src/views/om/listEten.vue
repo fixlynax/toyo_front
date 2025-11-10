@@ -34,7 +34,7 @@
 
                     <!-- Right: Create Customer Button -->
                     <RouterLink to="/om/createEten">
-                        <Button type="button" label="Create" />
+                        <Button type="button" label="Create" icon="pi pi-plus" />
                     </RouterLink>
                 </div>
             </template>
