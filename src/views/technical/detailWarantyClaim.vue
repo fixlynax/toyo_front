@@ -2,7 +2,7 @@
     <div class="flex flex-col md:flex-row gap-8">
         <!-- Loading State -->
         <div v-if="loading" class="text-center py-20 text-gray-500 text-lg w-full">Loading warranty details...</div>
-        
+
         <!-- Error State -->
         <div v-else-if="error" class="text-center py-20 text-red-500 text-lg w-full">
             {{ error }}
@@ -17,7 +17,9 @@
                     <div class="flex items-center justify-between border-b pb-2">
                         <div class="text-2xl font-bold text-gray-800">Warranty Detail</div>
                         <div class="inline-flex items-center gap-2">
-                            <Button label="Report Download" class="p-button-danger" size="small" @click="downloadReport" />
+                            <Button label="Reject Warranty" class="p-button-danger" size="small" @click="openRejectDialog" :disabled="rejecting" />
+                            <Button label="Request CTC" class="p-button-info" size="small" @click="requestCTCSubmit" />
+                            <Button label="Request Scrap" class="p-button-warning" size="small" @click="requestScrapSubmit" />
                         </div>
                     </div>
                     <div class="mt-6">
@@ -163,136 +165,53 @@
                             <span class="font-bold">Problem Description</span>
                             <p>{{ warantyDetail.problem || 'No description' }}</p>
                         </div>
-                        <div class="flex justify-between">
-                            <div>
-                                <span class="font-bold">Claim %</span>
-                                <p>{{ warantyDetail.claimPercent || '0' }}%</p>
-                            </div>
-                            <div>
-                                <span class="font-bold">Usable %</span>
-                                <p>{{ warantyDetail.usablePercent || '0' }}%</p>
-                            </div>
-                            <div>
-                                <span class="font-bold">Worn %</span>
-                                <p>{{ warantyDetail.wornPercent || '0' }}%</p>
-                            </div>
-                        </div>
                     </div>
 
-                    <div v-if="warantyDetail.damageCode && !claimFinalStatus" class="flex justify-end gap-2 mt-4">
-                        <Button label="Approve" class="p-button-success" size="small" @click="onApproveClaim" />
-                        <Button label="Reject" class="p-button-danger" size="small" @click="onRejectClaim" />
+                    <div v-if="warantyDetail.status === 4" class="flex justify-end gap-2 mt-4">
+                        <Button label="Replacement" class="p-button-info" size="small" @click="createReplacement" />
+                        <Button label="Reimbursement" class="p-button-warning" size="small" @click="createReimbursement" />
                     </div>
-                    <div v-else-if="claimFinalStatus" class="text-right mt-3 text-sm font-bold" :class="claimFinalStatus === 'approved' ? 'text-green-600' : 'text-red-600'">
-                        Claim {{ claimFinalStatus }}
-                    </div>
+                    <div v-else-if="claimFinalStatus" class="text-right mt-3 text-sm font-bold" :class="claimFinalStatus === 'approved' ? 'text-green-600' : 'text-red-600'">Claim {{ claimFinalStatus }}</div>
                 </div>
 
                 <!-- 3. Scrap Detail -->
-                <div v-if="claimFinalStatus === 'approved' || warantyDetail.isScrap === 1" class="card w-full mb-4">
-                    <div class="flex items-center justify-between border-b pb-2 mb-2">
+                <div v-if="warantyDetail.status === 4 && warantyDetail.isScrap === 1" class="card w-full mb-4">
+                    <div class="flex items-center justify-between border-b pb-2 mb-4">
                         <div class="text-2xl font-bold text-gray-800">Scrap Detail</div>
                     </div>
 
-                    <Galleria 
-                        :value="scrapImages" 
-                        :responsiveOptions="galleriaResponsiveOptions" 
-                        :numVisible="3" 
-                        containerStyle="max-width: 640px; margin: 0 auto" 
-                        :circular="true" 
-                        :showItemNavigators="true" 
-                        :showThumbnails="false"
-                    >
-                        <template #item="slotProps">
-                            <img :src="slotProps.item.itemImageSrc" class="rounded-xl object-cover w-full h-60 shadow-sm" />
-                        </template>
-                        <template #thumbnail="slotProps">
-                            <img :src="slotProps.item.thumbnailImageSrc" class="rounded-md h-16 w-16 object-cover" />
-                        </template>
-                    </Galleria>
-
-                    <!-- Approve / Reject -->
-                    <div v-if="warantyDetail.isScrap === 0 && scrapStatus === ''" class="flex justify-end gap-2 mt-4">
-                        <Button label="Approve" class="p-button-success" size="small" @click="approveScrap" />
-                        <Button label="Reject" class="p-button-danger" size="small" @click="rejectScrap" />
-                    </div>
-                    <div v-else-if="scrapStatus || warantyDetail.isScrap === 1" class="text-right mt-3 text-sm font-bold" :class="(scrapStatus === 'approved' || warantyDetail.isScrap === 1) ? 'text-green-600' : 'text-red-600'">
-                        Scrap {{ scrapStatus || 'approved' }}
-                    </div>
-
-                    <!-- Select Action -->
-                    <div v-if="(scrapStatus === 'approved' || warantyDetail.isScrap === 1) && !replacementSubmitted && !reimbursementSubmitted" class="mt-4">
-                        <label class="block text-sm font-bold mb-1">Select Action</label>
-                        <select v-model="scrapAction" class="w-full border p-2 rounded">
-                            <option value="">-- Select --</option>
-                            <option v-if="warantyDetail.claimPercent >= 90" value="replacement">Replacement</option>
-                            <option value="reimbursement">Reimbursement</option>
-                        </select>
+                    <!-- Scrap Images Gallery -->
+                    <div v-if="scrapImages.length > 0" class="mb-6">
+                        <Galleria
+                            :value="scrapImages"
+                            :responsiveOptions="galleriaResponsiveOptions"
+                            :numVisible="5"
+                            containerStyle="max-width: 100%; margin: 0 auto"
+                            :circular="true"
+                            :showItemNavigators="true"
+                            :showThumbnails="true"
+                            :showIndicators="true"
+                            :showThumbnailNavigators="true"
+                            thumbnailsPosition="bottom"
+                        >
+                            <template #item="slotProps">
+                                <img :src="slotProps.item.itemImageSrc" :alt="`Scrap image ${slotProps.index + 1}`" class="rounded-xl object-contain w-full h-80 shadow-sm bg-gray-100" />
+                            </template>
+                            <template #thumbnail="slotProps">
+                                <img
+                                    :src="slotProps.item.thumbnailImageSrc"
+                                    :alt="`Scrap thumbnail ${slotProps.index + 1}`"
+                                    class="rounded-md h-16 w-16 object-cover border-2 border-transparent hover:border-primary transition-all"
+                                    :class="{ 'border-primary': slotProps.index === slotProps.activeIndex }"
+                                />
+                            </template>
+                        </Galleria>
                     </div>
 
-                    <!-- Replacement Form -->
-                    <div v-if="scrapAction === 'replacement' && !replacementSubmitted" class="mt-4">
-                        <label class="block text-sm font-bold mb-1">Material ID</label>
-                        <input v-model="replacementForm.materialId" type="text" class="w-full border p-2 rounded mb-2" placeholder="Enter material ID" />
-
-                        <div class="flex justify-end mt-4">
-                            <Button label="Submit Replacement" class="p-button-success" size="small" @click="submitReplacement" :loading="saving" />
-                        </div>
-                    </div>
-
-                    <!-- Replacement Output -->
-                    <div v-if="replacementSubmitted" class="mt-6 p-5 rounded-xl shadow-sm border border-green-200 bg-green-50">
-                        <div class="flex items-center justify-between mb-3">
-                            <h3 class="text-xl font-bold text-green-800 flex items-center gap-2">
-                                <i class="pi pi-sync text-green-600"></i>
-                                Replacement Detail
-                            </h3>
-                        </div>
-
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm text-gray-800">
-                            <div>
-                                <span class="block text-gray-600 font-semibold">Sales Order No</span>
-                                <p class="text-lg font-bold text-gray-900 mt-1">{{ replacementResult.sap_sono }}</p>
-                            </div>
-                            <div>
-                                <span class="block text-gray-600 font-semibold">Delivery Order No</span>
-                                <p class="text-lg font-bold text-gray-900 mt-1">{{ replacementResult.sap_dono }}</p>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Reimbursement Form -->
-                    <div v-if="scrapAction === 'reimbursement' && !reimbursementSubmitted" class="mt-4">
-                        <label class="block text-sm font-bold mb-1">Material ID</label>
-                        <input v-model="reimbursementForm.materialId" type="text" class="w-full border p-2 rounded mb-2" placeholder="Enter material ID" />
-
-                        <label class="block text-sm font-bold mb-1">Claimable Percentage</label>
-                        <input v-model.number="reimbursementForm.claimablePercent" type="number" class="w-full border p-2 rounded mb-2" placeholder="Enter claimable percentage" />
-
-                        <div class="flex justify-end mt-4">
-                            <Button label="Submit Reimbursement" class="p-button-success" size="small" @click="submitReimbursement" :loading="saving" />
-                        </div>
-                    </div>
-
-                    <!-- Reimbursement Output -->
-                    <div v-if="reimbursementSubmitted" class="mt-6 p-5 rounded-xl shadow-sm border border-blue-200 bg-blue-50">
-                        <div class="flex items-center justify-between mb-3">
-                            <h3 class="text-xl font-bold text-blue-800 flex items-center gap-2">
-                                <i class="pi pi-wallet text-blue-600"></i>
-                                Reimbursement Detail
-                            </h3>
-                        </div>
-
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm text-gray-800">
-                            <div>
-                                <span class="block text-gray-600 font-semibold">Invoice Amount</span>
-                                <p class="text-lg font-bold text-blue-700 mt-1">RM {{ reimbursementResult.invoice_amount?.toFixed(2) }}</p>
-                            </div>
-                            <div>
-                                <span class="block text-gray-600 font-semibold">Current Price</span>
-                                <p class="text-lg font-bold text-gray-900 mt-1">RM {{ reimbursementResult.curr_price }}</p>
-                            </div>
-                        </div>
+                    <!-- No Images Message -->
+                    <div v-else class="text-center py-8 bg-gray-50 rounded-lg mb-6">
+                        <i class="pi pi-image text-4xl text-gray-400 mb-3"></i>
+                        <p class="text-gray-500 font-medium">No scrap images available</p>
                     </div>
                 </div>
 
@@ -323,37 +242,102 @@
                         <Button label="Approve" class="p-button-success" size="small" @click="approveInvoice" />
                         <Button label="Reject" class="p-button-danger" size="small" @click="rejectInvoice" />
                     </div>
-                    <div v-else-if="invoiceStatus" class="text-right mt-3 text-sm font-bold" :class="invoiceStatus === 'approved' ? 'text-green-600' : 'text-red-600'">
-                        Invoice {{ invoiceStatus }}
-                    </div>
+                    <div v-else-if="invoiceStatus" class="text-right mt-3 text-sm font-bold" :class="invoiceStatus === 'approved' ? 'text-green-600' : 'text-red-600'">Invoice {{ invoiceStatus }}</div>
                 </div>
             </div>
         </div>
     </div>
-            <Dialog v-model:visible="showCreateCTCDialog" header="Create CTC" :modal="true" class="p-fluid" :style="{ width: '40rem' }">
-            <div class="grid grid-cols-1 gap-4">
-                <!-- Month Display -->
 
-                <!-- Closing Date -->
+    <Dialog v-model:visible="showCreateCTCDialog" header="Create CTC" :modal="true" class="p-fluid" :style="{ width: '40rem' }">
+        <div class="grid grid-cols-1 gap-4">
+            <!-- Month Display -->
+
+            <!-- Closing Date -->
+            <div>
+                <label class="block font-bold text-gray-700 mb-2">Schedule *</label>
+                <Calendar v-model="ctcdate" dateFormat="dd/mm/yy" placeholder="Select Date & Time" class="w-full" :showIcon="true" :showTime="true" hourFormat="24" />
+            </div>
+        </div>
+
+        <template #footer>
+            <Button label="Cancel" icon="pi pi-times" class="p-button-text" @click="closeCTCDialog" />
+            <Button label="Create" icon="pi pi-check" class="p-button-primary" @click="saveCTC" />
+        </template>
+    </Dialog>
+
+    <Dialog v-model:visible="showCreateReplacementDialog" header="Submit Replacement" :modal="true" class="p-fluid" :style="{ width: '40rem' }">
+        <label class="block font-bold text-gray-700 mb-1">Select Material ID</label>
+        <Dropdown v-model="selectedMaterial" :options="listMaterial" optionLabel="material" placeholder="Select pattern" class="w-full mb-4">
+            <template #option="slotProps">
+                <div class="flex items-center gap-3">
+                    <div>
+                        <div class="font-semibold">{{ slotProps.option.material }}</div>
+                    </div>
+                </div>
+            </template>
+        </Dropdown>
+
+        <template #footer>
+            <Button label="Cancel" icon="pi pi-times" class="p-button-text" @click="closeReplacementDialog" />
+            <Button label="Create" icon="pi pi-check" class="p-button-primary" @click="submitReplacement" />
+        </template>
+    </Dialog>
+
+    <Dialog v-model:visible="showCreateReimbursementDialog" header="Submit Reimbursement" :modal="true" class="p-fluid" :style="{ width: '40rem' }">
+        <div class="field">
+            <label class="block font-bold text-gray-700 mb-1">Select Material ID</label>
+            <Dropdown v-model="selectedMaterial" :options="listMaterial" optionLabel="material" placeholder="Select pattern" class="w-full mb-4">
+                <template #option="slotProps">
+                    <div class="flex items-center gap-3">
+                        <div>
+                            <div class="font-semibold">{{ slotProps.option.material }}</div>
+                        </div>
+                    </div>
+                </template>
+            </Dropdown>
+        </div>
+
+        <div class="field">
+            <label for="claimablePercent" class="block font-bold text-gray-700 mb-1">Claimable Percent (%)</label>
+            <InputNumber id="claimablePercent" v-model="reimbursementForm.claimablePercent" mode="decimal" :min="0" :max="100" :minFractionDigits="2" :maxFractionDigits="2" placeholder="Enter claimable percentage" class="w-full mb-4" />
+        </div>
+
+        <template #footer>
+            <Button label="Cancel" icon="pi pi-times" class="p-button-text" @click="closeReimbursementDialog" />
+            <Button label="Create" icon="pi pi-check" class="p-button-primary" @click="submitReimbursement" />
+        </template>
+    </Dialog>
+
+    <Dialog v-model:visible="showRejectDialog" header="Reject Warranty Claim" :modal="true" class="p-fluid" :style="{ width: '40rem' }">
+        <div class="field">
+            <label class="block font-bold text-gray-700 mb-1">Select Rejection Reason *</label>
+            <Dropdown v-model="selectedRejectReason" :options="rejectReasons" optionLabel="damageMode" optionValue="id" placeholder="Select rejection reason" class="w-full mb-4" :class="{ 'p-invalid': !selectedRejectReason && rejecting }">
+                <template #option="slotProps">
+                    <div class="flex flex-col gap-1 py-2">
+                        <div class="font-semibold text-gray-800">{{ slotProps.option.damageMode }}</div>
+                        <div class="text-sm text-gray-600"><span class="font-medium">Code:</span> {{ slotProps.option.code }} | <span class="font-medium">Part:</span> {{ slotProps.option.part }}</div>
+                        <div class="text-xs text-gray-500">{{ slotProps.option.grouping }}</div>
+                    </div>
+                </template>
+            </Dropdown>
+            <small v-if="!selectedRejectReason && rejecting" class="p-error">Please select a rejection reason.</small>
+        </div>
+
+        <div class="bg-yellow-50 border border-yellow-200 rounded-lg p-4 mt-4">
+            <div class="flex items-start gap-3">
+                <i class="pi pi-exclamation-triangle text-yellow-600 mt-1"></i>
                 <div>
-                    <label class="block font-bold text-gray-700 mb-2">Schedule *</label>
-                    <Calendar 
-                        v-model="ctcdate" 
-                        dateFormat="dd/mm/yy" 
-                        placeholder="Select Date & Time" 
-                        class="w-full" 
-                        :showIcon="true"
-                        :showTime="true"    
-                        hourFormat="24"      
-                    />
+                    <p class="font-semibold text-yellow-800">Warning</p>
+                    <p class="text-yellow-700 text-sm mt-1">This action will reject the warranty claim and cannot be undone.</p>
                 </div>
             </div>
+        </div>
 
-            <template #footer>
-                <Button label="Cancel" icon="pi pi-times" class="p-button-text" @click="closeCTCDialog" />
-                <Button label="Create" icon="pi pi-check" class="p-button-primary"  @click="saveCTC" />
-            </template>
-        </Dialog>
+        <template #footer>
+            <Button label="Cancel" icon="pi pi-times" class="p-button-text" @click="closeRejectDialog" :disabled="rejecting" />
+            <Button label="Reject Claim" icon="pi pi-times-circle" class="p-button-danger" @click="confirmRejectWarranty" :loading="rejecting" :disabled="!selectedRejectReason || rejecting" />
+        </template>
+    </Dialog>
 </template>
 
 <script setup>
@@ -363,7 +347,6 @@ import { useToast } from 'primevue/usetoast';
 import Galleria from 'primevue/galleria';
 import Button from 'primevue/button';
 import api from '@/service/api';
-// import { useRouter } from 'vue-router';
 
 // const router = useRouter();
 const route = useRoute();
@@ -372,6 +355,8 @@ const toast = useToast();
 // Reactive data
 const ctcdate = ref(new Date());
 const showCreateCTCDialog = ref(false);
+const showCreateReimbursementDialog = ref(false);
+const showCreateReplacementDialog = ref(false);
 
 const warantyDetail = ref({});
 const loading = ref(true);
@@ -396,19 +381,54 @@ const reimbursementSubmitted = ref(false);
 
 // Images
 const scrapImages = ref([]);
+const listMaterial = ref([]);
+const selectedMaterial = ref(null);
 
 const galleriaResponsiveOptions = ref([
-    { breakpoint: '1024px', numVisible: 3 },
-    { breakpoint: '768px', numVisible: 2 },
-    { breakpoint: '560px', numVisible: 1 }
+    {
+        breakpoint: '1024px',
+        numVisible: 5
+    },
+    {
+        breakpoint: '768px',
+        numVisible: 3
+    },
+    {
+        breakpoint: '560px',
+        numVisible: 1
+    }
 ]);
+
+//reject
+const showRejectDialog = ref(false);
+const rejectReasons = ref([]);
+const selectedRejectReason = ref(null);
+const rejecting = ref(false);
 
 // Computed properties
 const hasScrapImages = computed(() => {
-    return warantyDetail.value.scrapImage1URL || 
-           warantyDetail.value.scrapImage2URL || 
-           warantyDetail.value.scrapImage3URL;
+    return warantyDetail.value.scrapImage1URL || warantyDetail.value.scrapImage2URL || warantyDetail.value.scrapImage3URL;
 });
+
+const fetchMaterial = async () => {
+    try {
+        const response = await api.get('material');
+        console.log(response.data);
+        if (response.data.status === 1) {
+            listMaterial.value = response.data.admin_data || [];
+        }
+        // Transform API data to match frontend expectations
+        // const transformedItems = (response.data.admin_data || []).map((item) => ({
+        //     imageURL: item.imageURL,
+        //     title: item.title,
+        //     type: item.type,
+        //     purpose: item.purpose,
+        //     processedImageURL: null // Will be populated by processCatalogueImages
+        // }));
+    } catch (error) {
+        console.error('Error fetching catalog:', error);
+    }
+};
 
 // Methods
 const fetchWarrantyDetail = async () => {
@@ -416,7 +436,7 @@ const fetchWarrantyDetail = async () => {
         loading.value = true;
         const id = route.params.id;
         const response = await api.get(`warranty_claim/${id}`);
-        console.log(response.data);
+        // console.log(response.data);
         if (response.data.status === 1) {
             warantyDetail.value = response.data.admin_data;
             await loadScrapImages();
@@ -431,55 +451,206 @@ const fetchWarrantyDetail = async () => {
     }
 };
 
+// Fetch rejection reasons
+const fetchRejectReasons = async () => {
+    try {
+        const response = await api.get('rejectReasonList');
+        if (response.data.status === 1) {
+            rejectReasons.value = response.data.admin_data || [];
+        } else {
+            console.error('Failed to fetch rejection reasons');
+        }
+    } catch (error) {
+        console.error('Error fetching rejection reasons:', error);
+        toast.add({
+            severity: 'error',
+            summary: 'Error',
+            detail: 'Failed to load rejection reasons',
+            life: 3000
+        });
+    }
+};
+
+// Open reject dialog
+const openRejectDialog = () => {
+    showRejectDialog.value = true;
+    selectedRejectReason.value = null;
+};
+
+// Close reject dialog
+const closeRejectDialog = () => {
+    showRejectDialog.value = false;
+    selectedRejectReason.value = null;
+    rejecting.value = false;
+};
+
+// Confirm and reject warranty
+const confirmRejectWarranty = async () => {
+    if (!selectedRejectReason.value) {
+        toast.add({
+            severity: 'error',
+            summary: 'Error',
+            detail: 'Please select a rejection reason',
+            life: 3000
+        });
+        return;
+    }
+
+    try {
+        rejecting.value = true;
+        
+        const response = await api.post('warranty_claim/reject', {
+            claim_id: warantyDetail.value.id,
+            reject_reason_id: selectedRejectReason.value
+        });
+
+        if (response.data.status === 1) {
+            toast.add({
+                severity: 'success',
+                summary: 'Success',
+                detail: 'Warranty claim rejected successfully',
+                life: 3000
+            });
+            
+            // Refresh the warranty details to reflect the rejection
+            await fetchWarrantyDetail();
+            closeRejectDialog();
+        } else {
+            throw new Error(response.data.message || 'Rejection failed');
+        }
+    } catch (err) {
+        console.error('Error rejecting warranty:', err);
+        toast.add({
+            severity: 'error',
+            summary: 'Error',
+            detail: err.response?.data?.message || 'Failed to reject warranty claim',
+            life: 3000
+        });
+    } finally {
+        rejecting.value = false;
+    }
+};
+
+// Remove the old rejectWarranty function and replace it with the new implementation above
+
+// Methods
+const requestCTCSubmit = async () => {
+    try {
+        loading.value = true;
+        const id = warantyDetail.value.id;
+        const response = await api.put(`warranty_claim/requestCTC/${id}`);
+        // console.log(response.data);
+        if (response.data.status === 1) {
+            toast.add({
+                severity: 'success',
+                summary: 'Success',
+                detail: 'Request CTC successfully',
+                life: 3000
+            });
+        } else {
+            error.value = 'Request CTC fails.';
+        }
+    } catch (err) {
+        error.value = 'Failed to request CTC.';
+        console.error('Error Request CTC:', err);
+    } finally {
+        loading.value = false;
+    }
+};
+
+const requestScrapSubmit = async () => {
+    try {
+        loading.value = true;
+        const id = warantyDetail.value.id;
+        const response = await api.put(`warranty_claim/requestScrap/${id}`);
+        // console.log(response.data);
+        if (response.data.status === 1) {
+            toast.add({
+                severity: 'success',
+                summary: 'Success',
+                detail: 'Request Scrap successfully',
+                life: 3000
+            });
+        } else {
+            error.value = 'Request Scrap fails.';
+        }
+    } catch (err) {
+        error.value = 'Failed to request Scrap.';
+        console.error('Error Request Scrap:', err);
+    } finally {
+        loading.value = false;
+    }
+};
+
 const loadScrapImages = async () => {
     const images = [];
-    
-    // Load scrap images if they exist
-    const imageUrls = [
-        warantyDetail.value.scrapImage1URL,
-        warantyDetail.value.scrapImage2URL, 
-        warantyDetail.value.scrapImage3URL
-    ].filter(url => url);
 
-    for (const url of imageUrls) {
+    // Load scrap images from the database fields
+    const imageUrls = [warantyDetail.value.scrapImage1URL, warantyDetail.value.scrapImage2URL, warantyDetail.value.scrapImage3URL].filter((url) => url && url !== 'null' && url !== null);
+
+    console.log('Found scrap images:', imageUrls);
+
+    for (const [index, url] of imageUrls.entries()) {
         try {
             const imageSrc = await api.getPrivateFile(url);
             images.push({
                 itemImageSrc: imageSrc,
-                thumbnailImageSrc: imageSrc
+                thumbnailImageSrc: imageSrc,
+                alt: `Scrap Image ${index + 1}`
             });
         } catch (err) {
             console.error('Error loading scrap image:', err);
+            // Add placeholder for failed images
+            images.push({
+                itemImageSrc: '/placeholder-image.jpg', // Add a placeholder image
+                thumbnailImageSrc: '/placeholder-image.jpg',
+                alt: `Scrap Image ${index + 1} - Failed to load`
+            });
         }
     }
 
     scrapImages.value = images;
+
+    // If no images but scrap is marked, show a message
+    if (scrapImages.value.length === 0 && warantyDetail.value.isScrap === 1) {
+        console.log('No scrap images found for scrap entry');
+    }
 };
 
 defineProps({
-  id: String, // now the component explicitly accepts id
+    id: String // now the component explicitly accepts id
 });
 
 const createCTC = () => {
     showCreateCTCDialog.value = true;
-    // toast.add({
-    //     severity: 'info',
-    //     summary: 'Info',
-    //     detail: 'CTC creation functionality to be implemented',
-    //     life: 3000
-    // });
+};
+
+const createReplacement = () => {
+    showCreateReplacementDialog.value = true;
+};
+
+const createReimbursement = () => {
+    showCreateReimbursementDialog.value = true;
 };
 
 const closeCTCDialog = () => {
     showCreateCTCDialog.value = false;
     ctcdate.value = new Date();
 };
+
+const closeReplacementDialog = () => {
+    showCreateReplacementDialog.value = false;
+};
+
+const closeReimbursementDialog = () => {
+    showCreateReimbursementDialog.value = false;
+};
 const saveCTC = async () => {
     try {
         loading.value = true;
-        
+
         // Prepare data for API update - match the expected format
-        const pad = n => n.toString().padStart(2, '0');
+        const pad = (n) => n.toString().padStart(2, '0');
         const d = ctcdate.value;
 
         const createData = {
@@ -489,7 +660,7 @@ const saveCTC = async () => {
         // console.log('Sending create ctc:', createData);
 
         const response = await api.post(`collection/createCTC`, createData);
-        
+
         if (response.data.status === 1) {
             closeCTCDialog();
         } else {
@@ -567,28 +738,8 @@ const onRejectClaim = async () => {
     }
 };
 
-const approveScrap = () => {
-    scrapStatus.value = 'approved';
-    toast.add({
-        severity: 'success',
-        summary: 'Success',
-        detail: 'Scrap approved successfully',
-        life: 3000
-    });
-};
-
-const rejectScrap = () => {
-    scrapStatus.value = 'rejected';
-    toast.add({
-        severity: 'info',
-        summary: 'Info',
-        detail: 'Scrap rejected',
-        life: 3000
-    });
-};
-
 const submitReplacement = async () => {
-    if (!replacementForm.value.materialId) {
+    if (!selectedMaterial.value) {
         toast.add({
             severity: 'error',
             summary: 'Error',
@@ -602,9 +753,9 @@ const submitReplacement = async () => {
         saving.value = true;
         const response = await api.post('warranty_claim/approveReplacement', {
             claim_id: warantyDetail.value.id,
-            materialid: replacementForm.value.materialId
+            materialid: selectedMaterial.value.materialid
         });
-
+        console.log('Replacement asdasdasd:', response);
         if (response.data.status === 1) {
             replacementResult.value = response.data.admin_data;
             replacementSubmitted.value = true;
@@ -625,11 +776,12 @@ const submitReplacement = async () => {
         });
     } finally {
         saving.value = false;
+        closeReplacementDialog();
     }
 };
 
 const submitReimbursement = async () => {
-    if (!reimbursementForm.value.materialId || !reimbursementForm.value.claimablePercent) {
+    if (!selectedMaterial.value || reimbursementForm.value.claimablePercent <= 0) {
         toast.add({
             severity: 'error',
             summary: 'Error',
@@ -643,7 +795,7 @@ const submitReimbursement = async () => {
         saving.value = true;
         const response = await api.post('warranty_claim/approveReimbursement', {
             claim_id: warantyDetail.value.id,
-            materialid: reimbursementForm.value.materialId,
+            materialid: selectedMaterial.value.materialid,
             claimable_percent: reimbursementForm.value.claimablePercent
         });
 
@@ -667,6 +819,7 @@ const submitReimbursement = async () => {
         });
     } finally {
         saving.value = false;
+        closeReimbursementDialog();
     }
 };
 
@@ -767,5 +920,7 @@ const getCTCStatus = (isCTC) => {
 // Lifecycle
 onMounted(() => {
     fetchWarrantyDetail();
+    fetchMaterial();
+    fetchRejectReasons(); // Add this line
 });
 </script>
