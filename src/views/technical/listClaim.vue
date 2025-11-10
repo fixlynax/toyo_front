@@ -44,13 +44,14 @@ onBeforeMount(async () => {
     try {
         loading.value = true;
         const response = await api.get('warranty_claim');
+        console.log(response.data);
         if (response.data.status === 1) {
             listData.value = response.data.admin_data.map((item) => ({
-                id: item.id,
+                id: item.claim_id,
                 refNo: item.claimRefNo,
                 dealerName: item.dealer ,
                 claimType: item.warrantyType,
-                claimDate: item.eten_data?.city || 'N/A',
+                claimDate: item.claim_date,
                 status: item.status,
             }));
         } else listData.value = [];
@@ -95,7 +96,7 @@ onBeforeMount(async () => {
             <!-- Columns -->
             <Column field="refNo" header="Ref No" style="min-width: 8rem">
                 <template #body="{ data }">
-                    <RouterLink to="/technical/detailWarantyClaim" class="hover:underline font-bold">
+                    <RouterLink :to="`/technical/detailWarantyClaim/${data.id}`" class="hover:underline font-bold">
                         {{ data.refNo }}
                         {{ data.dealerName }}
                     </RouterLink>
