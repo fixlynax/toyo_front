@@ -193,21 +193,13 @@ const submitPattern = async () => {
             formData.append('pattern_code', pattern.value.code.trim());
         }
 
-        // Debug: Log FormData contents
-        console.log('FormData contents:');
-        for (let [key, value] of formData.entries()) {
-            console.log(key + ': ', value);
-        }
 
         // Make API request
-        const response = await api.post('patternCreate', formData, {
+        const response = await api.postExtra('patternCreate', formData, {
             headers: {
                 'Content-Type': 'multipart/form-data'
             },
-            timeout: 30000 // 30 second timeout
         });
-
-        console.log('API Response:', response.data);
 
         if (response.data.status === 1 || response.status === 200) {
             successMessage.value = 'Pattern created successfully!';
@@ -215,47 +207,13 @@ const submitPattern = async () => {
             // Redirect to list page after success
             setTimeout(() => {
                 router.push('/technical/listPattern');
-            }, 2000);
+            }, 1000);
         } else {
             errorMessage.value = response.data.message || 'Failed to create pattern';
             debugInfo.value = JSON.stringify(response.data, null, 2);
         }
     } catch (error) {
         console.error('Error creating pattern:', error);
-        
-        // Enhanced error logging
-        debugInfo.value = `Error Details:
-Status: ${error.response?.status}
-Message: ${error.message}
-Response Data: ${JSON.stringify(error.response?.data, null, 2)}
-        `;
-
-        if (error.response) {
-            // Server responded with error status
-            const errorData = error.response.data;
-            
-            if (error.response.status === 400) {
-                errorMessage.value = errorData.message || 'Bad request. Please check your input.';
-                
-                // Handle validation errors
-                if (errorData.errors) {
-                    const errorList = Object.values(errorData.errors).flat().join(', ');
-                    errorMessage.value += `: ${errorList}`;
-                }
-            } else if (error.response.status === 413) {
-                errorMessage.value = 'File too large. Please select a smaller image.';
-            } else if (error.response.status === 415) {
-                errorMessage.value = 'Unsupported file type. Please use JPEG, PNG, or other common image formats.';
-            } else {
-                errorMessage.value = errorData.message || `Server error (${error.response.status})`;
-            }
-        } else if (error.request) {
-            // Request was made but no response received
-            errorMessage.value = 'Network error. Please check your internet connection and try again.';
-        } else {
-            // Something else happened
-            errorMessage.value = 'An unexpected error occurred. Please try again.';
-        }
     } finally {
         loading.value = false;
     }
