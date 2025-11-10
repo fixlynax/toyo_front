@@ -165,7 +165,7 @@ function filteredList() {
             </Column>
             <Column field="collectRef" header="Ref No" style="min-width: 8rem">
                 <template #body="{ data }">
-                    <RouterLink to="/scm/detailCollection" class="hover:underline font-bold text-primary">
+                    <RouterLink :to="`/technical/detailWarantyClaim/${data.id}`" class="hover:underline font-bold text-primary">
                         {{ data.claimRefNo }}
                     </RouterLink>
                 </template>
