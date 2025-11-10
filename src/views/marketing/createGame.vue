@@ -32,11 +32,11 @@
                         <small v-if="errors.quota" class="text-red-500">{{ errors.quota }}</small>
                     </div>
 
-                    <div>
+                    <!-- <div>
                         <label class="block font-bold text-gray-700">Type Game</label>
                         <Dropdown v-model="game.type" :options="typeOptions" optionLabel="label" optionValue="value" class="w-full" />
                         <small v-if="errors.type" class="text-red-500">{{ errors.type }}</small>
-                    </div>
+                    </div> -->
                 </div>
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-4 md:col-span-2">
                     <div>
@@ -197,7 +197,7 @@ const game = ref({
     startDate: '',
     endDate: '',
     quota: null,
-    type: 'sPiN',
+    // type: 'sPiN',
     point1: null,
     point2: null,
     point3: null,
@@ -215,10 +215,10 @@ const imageFiles = ref({
 
 const errors = ref({});
 
-const typeOptions = [
-    { label: 'Spin', value: 'sPiN' },
-    { label: 'Random', value: 'RANdom' }
-];
+// const typeOptions = [
+//     { label: 'Spin', value: 'sPiN' },
+//     { label: 'Random', value: 'RANdom' }
+// ];
 
 // 🎁 Prize List Dropdown Data
 const listPrize = ref([]);
@@ -380,7 +380,7 @@ const validateFields = () => {
     if (!game.value.startDate) errors.value.startDate = 'Start date is required';
     if (!game.value.endDate) errors.value.endDate = 'End date is required';
     if (!game.value.quota || game.value.quota <= 0) errors.value.quota = 'Valid quota is required';
-    if (!game.value.type) errors.value.type = 'Game type is required';
+    // if (!game.value.type) errors.value.type = 'Game type is required';
     if (!game.value.tnc.trim()) errors.value.tnc = 'Terms & Conditions are required';
 
     // Points validation
@@ -450,7 +450,7 @@ const submitGame = async () => {
         formData.append('endDate', formatDate(game.value.endDate));
         formData.append('quota', game.value.quota.toString());
         formData.append('location', game.value.location);
-        formData.append('type', game.value.type);
+        // formData.append('type', game.value.type);
         formData.append('point1', game.value.point1.toString());
         formData.append('point2', game.value.point2.toString());
         formData.append('point3', game.value.point3.toString());
