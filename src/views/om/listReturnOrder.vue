@@ -156,7 +156,7 @@ onBeforeMount(() => {
                         </div>
                         
                      <!-- Right: Create Customer Button -->
-                    <RouterLink to="/om/createEten">
+                    <RouterLink to="/om/createReturnOrder">
                         <Button type="button" label="Create" />
                     </RouterLink>
                 </div>
