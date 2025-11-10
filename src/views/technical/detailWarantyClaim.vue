@@ -483,21 +483,19 @@ const saveCTC = async () => {
         const d = ctcdate.value;
 
         const createData = {
-        claim_id: warantyDetail.value.id,
-        collect_datetime: `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())} ${pad(d.getHours())}:${pad(d.getMinutes())}`
+            claim_id: warantyDetail.value.id,
+            collect_datetime: `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())} ${pad(d.getHours())}:${pad(d.getMinutes())}:${pad(d.getSeconds())}`
         };
+        // console.log('Sending create ctc:', createData);
 
-        console.log('Sending create ctc:', createData);
-
-        // Call API to update the closing date - note the endpoint uses POST with ID in URL
-        // const response = await api.post(`warranty_claim/createCTC/`, createData);
+        const response = await api.post(`collection/createCTC`, createData);
         
-        // if (response.data.status === 1) {
-        //     closeCTCDialog();
-        // } else {
-        //     console.error('Failed to create date:', response.data);
-        //     alert('Failed to create ctc. Please try again.');
-        // }
+        if (response.data.status === 1) {
+            closeCTCDialog();
+        } else {
+            console.error('Failed to create date:', response.data);
+            alert('Failed to create ctc. Please try again.');
+        }
     } catch (error) {
         console.error('Error create ctc:', error);
     } finally {
