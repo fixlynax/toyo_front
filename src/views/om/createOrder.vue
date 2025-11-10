@@ -88,10 +88,10 @@
 
         <!-- Product Selection Section -->
         <div class="card flex flex-col gap-6">
-            <div class="flex items-center justify-between border-b pb-2 mb-4">
+            <div class="flex items-center justify-between border-b pb-2">
                 <div class="text-2xl font-bold text-gray-800">Select Products</div>
                 <div class="gap-2 flex">
-                    <Button v-if="selectedOrderType === 'DS'" icon="pi pi-file-import" label="Template" class="p-button-success" style="width: fit-content " />
+                    <Button v-if="selectedOrderType === 'DS'" icon="pi pi-file-import" label="Template" class="p-button-success" style="width: fit-content" />
                     <Button v-if="selectedOrderType === 'DS'" icon="pi pi-download" label="Import" style="width: fit-content" />
                 </div>
             </div>
@@ -102,7 +102,8 @@
                     <InputIcon><i class="pi pi-search" /></InputIcon>
                     <InputText v-model="searchTerm" placeholder="Quick search by ID, pattern, or size..." class="w-full" />
                 </IconField>
-                <Button type="button" icon="pi pi-cog" class="p-button" />
+                <Menu :model="sortItems" popup ref="sortMenu" />
+                <Button type="button" icon="pi pi-cog" class="p-button" @click="$refs.sortMenu.toggle($event)" />
             </div>
 
             <!-- Pattern Grid -->
@@ -255,6 +256,37 @@ const patterns = ref([
 ]);
 
 const cart = ref([]);
+
+const sortItems = [
+    {
+        label: 'Pattern',
+        icon: 'pi pi-tag',
+        command: () => sortBy('pattern')
+    },
+    {
+        label: 'Size',
+        icon: 'pi pi-arrows-v',
+        command: () => sortBy('size')
+    }
+];
+
+const sortField = ref('');
+const sortOrder = ref(1); // 1 = ascending, -1 = descending
+
+const sortBy = (field) => {
+    if (sortField.value === field)
+        sortOrder.value *= -1; // toggle ascending/descending
+    else sortOrder.value = 1;
+
+    sortField.value = field;
+
+    // Apply sorting to your paginatedPatterns
+    patterns.value.sort((a, b) => {
+        if (a[field] < b[field]) return -1 * sortOrder.value;
+        if (a[field] > b[field]) return 1 * sortOrder.value;
+        return 0;
+    });
+};
 
 const filteredPatterns = computed(() => {
     if (!searchTerm.value.trim()) return patterns.value;
