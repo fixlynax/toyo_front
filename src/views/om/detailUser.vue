@@ -172,6 +172,12 @@
                                                 <div>ID: {{ device.uniqueId }}</div>
                                                 <div>Active at: {{ device.lastActive }}</div>
                                                 <div>Platform: {{ device.platform }}</div>
+                                                <div class="mt-2">
+                                                    Status:
+                                                    <Tag :class="device.isBlocked ? 'text-red-600 font-semibold' : 'text-green-600 font-semibold'">
+                                                        {{ device.isBlocked ? 'Blocked' : 'Active' }}
+                                                    </Tag>
+                                                </div>
                                             </div>
                                         </td>
                                     </tr>

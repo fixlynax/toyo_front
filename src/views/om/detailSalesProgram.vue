@@ -1,6 +1,9 @@
 <template>
     <Fluid>
         <div class="flex flex-col gap-8">
+            <!-- Toast Notification -->
+            <Toast />
+
             <!-- TOP SECTION: Detail Event + Advance Info -->
             <div class="flex flex-col md:flex-row gap-8">
                 <!-- LEFT SIDE (2/3) -->
@@ -11,68 +14,89 @@
                                 <RouterLink to="/om/listSalesProgram">
                                     <Button icon="pi pi-arrow-left font-bold" class="p-button-text p-button-secondary text-xl" size="big" v-tooltip="'Back'" />
                                 </RouterLink>
-                                <div class="text-2xl font-bold text-gray-800">Sales Program Detail</div>
+                                <div class="text-2xl font-bold text-black-800">Sales Program Detail</div>
                             </div>
                             <div class="inline-flex items-center gap-2">
-                                <RouterLink to="/om/editSalesProgram">
+                                <RouterLink :to="`/om/editSalesProgram/${programId}`">
                                     <Button label="Edit" class="p-button-info" size="small" />
                                 </RouterLink>
-                                <Button label="Delete" class="p-button-danger" size="small" />
+                                <Button label="Delete" class="p-button-danger" size="small" @click="confirmDelete" />
                             </div>
                         </div>
 
-                        <div class="grid grid-cols-1 gap-4 mt-4">
-                            <img :src="salesProgram.image" alt="Sales Program Image" class="rounded-xl shadow-sm object-cover w-full h-80" />
+                        <!-- Loading State -->
+                        <div v-if="loading" class="flex justify-center items-center py-12">
+                            <ProgressSpinner style="width: 50px; height: 50px" strokeWidth="4" />
                         </div>
 
-                        <div class="mt-6">
-                            <h1 class="text-2xl font-bold text-gray-800">{{ salesProgram.title }}</h1>
-                            <p class="text-lg font-medium">{{ salesProgram.desc }}</p>
+                        <!-- Error State -->
+                        <div v-else-if="error" class="text-center py-12 text-red-600">
+                            <i class="pi pi-exclamation-triangle text-4xl mb-4"></i>
+                            <p class="text-lg">Failed to load sales program data</p>
+                            <Button label="Retry" class="p-button-outlined p-button-danger mt-4" @click="fetchSalesProgram" />
+                        </div>
+
+                        <!-- Content -->
+                        <div v-else class="grid grid-cols-1 gap-4 mt-4">
+                            <img 
+                                :src="salesProgram.imageUrl" 
+                                :alt="salesProgram.title"
+                                class="rounded-xl shadow-sm object-cover w-full h-80"
+                                @error="handleImageError"
+                            />
+                        </div>
+
+                        <div v-if="!loading && !error" class="mt-6">
+                            <h1 class="text-2xl font-bold text-black-800">{{ salesProgram.title }}</h1>
+                            <p class="text-lg font-medium text-black-600">{{ salesProgram.desc }}</p>
 
                             <div class="flex flex-col md:flex-row gap-4 mt-3">
                                 <div class="w-full">
-                                    <span class="block text-sm font-bold text-gray-700">Start Date</span>
-                                    <p class="text-lg font-medium">{{ salesProgram.startDate }}</p>
+                                    <span class="block text-sm font-bold text-black-700">Start Date</span>
+                                    <p class="text-lg font-medium">{{ formatDate(salesProgram.startDate) }}</p>
                                 </div>
                                 <div class="w-full">
-                                    <span class="block text-sm font-bold text-gray-700">End Date</span>
-                                    <p class="text-lg font-medium">{{ salesProgram.endDate }}</p>
+                                    <span class="block text-sm font-bold text-black-700">End Date</span>
+                                    <p class="text-lg font-medium">{{ formatDate(salesProgram.endDate) }}</p>
                                 </div>
                             </div>
                         </div>
                     </div>
                 </div>
 
-                <!-- RIGHT SIDE -->
+                <!-- RIGHT SIDE - Simplified Advance Info -->
                 <div class="md:w-1/3 flex flex-col">
                     <div class="card flex flex-col w-full">
                         <div class="flex items-center justify-between border-b pb-2 mb-2">
-                            <div class="text-2xl font-bold text-gray-800">ℹ️ Advance Info</div>
-                            <Tag :value="salesProgram.status === 1 ? 'Active' : 'Inactive'" :severity="salesProgram.status === 1 ? 'success' : 'danger'" />
+                            <div class="text-2xl font-bold text-black-800">ℹ️ Advance Info</div>
+                            <Tag 
+                                :value="salesProgram.status === 1 ? 'Active' : 'Inactive'" 
+                                :severity="salesProgram.status === 1 ? 'success' : 'danger'" 
+                            />
                         </div>
 
-                        <div class="overflow-x-auto">
-                            <table class="w-full text-sm text-left text-gray-700">
+                        <div v-if="!loading && !error" class="overflow-x-auto">
+                            <table class="w-full text-sm text-left text-black-700">
                                 <tbody>
                                     <tr class="border-b">
                                         <td class="px-4 py-2 font-medium">Program No</td>
-                                        <td class="px-4 py-2 text-right">{{ salesProgram.programId }}</td>
+                                        <td class="px-4 py-2 text-right font-semibold">{{ salesProgram.programid }}</td>
                                     </tr>
                                     <tr class="border-b">
                                         <td class="px-4 py-2 font-medium">Created</td>
-                                        <td class="px-4 py-2 text-right">{{ salesProgram.created }}</td>
+                                        <td class="px-4 py-2 text-right">{{ formatDateTime(salesProgram.created) }}</td>
                                     </tr>
                                     <tr class="border-b">
                                         <td class="px-4 py-2 font-medium">Type</td>
-                                        <td class="px-4 py-2 text-right">{{ salesProgram.type }}</td>
+                                        <td class="px-4 py-2 text-right">
+                                            <span class="px-2 py-1 bg-blue-100 text-blue-800 rounded-full text-xs font-medium">
+                                                {{ salesProgram.type }}
+                                            </span>
+                                        </td>
                                     </tr>
                                     <tr class="border-b">
                                         <td class="px-4 py-2 font-medium">Price Group</td>
-                                        <td class="px-4 py-2 text-right">{{ salesProgram.priceGroup }}</td>
-                                    </tr>
-                                    <tr class="border-b">
-                                        <td class="px-4 py-2 font-medium">Total Criteria</td>
-                                        <td class="px-4 py-2 text-right">{{ criteriaList.length }}</td>
+                                        <td class="px-4 py-2 text-right font-semibold">{{ salesProgram.pricegroup }}</td>
                                     </tr>
                                 </tbody>
                             </table>
@@ -81,83 +105,151 @@
                 </div>
             </div>
 
-            <!-- ✅ FOC INFO FULL SCREEN SECTION -->
-            <div v-if="salesProgram.type === 'FOC'" class="card flex flex-col w-full">
-                <div class="flex items-center justify-between border-b pb-2 mb-2">
-                    <div class="text-2xl font-bold text-gray-800">📋 FOC Criteria</div>
-                    <div class="text-sm text-gray-600">Total {{ criteriaList.length }} criteria</div>
-                </div>
-
-                <div v-if="criteriaList.length" class="space-y-6 mt-6">
-                    <div v-for="(criteria, criteriaIndex) in criteriaList" :key="criteria.material" class="border border-gray-200 rounded-xl p-6 bg-gray-100 shadow-sm hover:shadow-md transition-shadow">
-                        <div class="flex items-center justify-between mb-4 pb-3 border-b border-gray-100">
-                            <div class="flex items-center gap-3">
-                                <div class="w-8 h-8 bg-blue-500 rounded-full flex items-center justify-center shadow-sm">
-                                    <span class="text-white font-bold text-sm">{{ criteriaIndex + 1 }}</span>
-                                </div>
-                                <h3 class="font-semibold text-lg text-gray-800">Criteria {{ criteriaIndex + 1 }}</h3>
-                            </div>
-                            <div class="flex items-center gap-2">
-                                <span class="text-sm font-medium text-gray-600">Buy {{ criteria.buyQty }}, Get {{ criteria.freeQty }} Free</span>
-                                <div class="flex items-center gap-2">
-                                    <ToggleSwitch v-model="criteria.status" :true-value="1" :false-value="0" />
-                                    <span class="font-medium" :class="criteria.status === 1 ? 'text-green-600' : 'text-red-600'">
-                                        {{ criteria.status === 1 ? 'Active' : 'Inactive' }}
-                                    </span>
-                                </div>
-                            </div>
+            <!-- ✅ ENHANCED FOC CRITERIA SECTION -->
+            <div v-if="!loading && !error && salesProgram.type === 'FOC'" class="card flex flex-col w-full">
+                <div class="flex items-center justify-between border-b pb-4 mb-6">
+                    <div class="flex items-center gap-3">
+                        <div class="w-10 h-10 bg-gradient-to-r from-blue-500 to-purple-600 rounded-lg flex items-center justify-center shadow-md">
+                            <i class="pi pi-tags text-white text-lg"></i>
                         </div>
-
-                        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                            <!-- Buy Materials -->
-                            <div>
-                                <h4 class="font-semibold text-gray-700 mb-3 flex items-center gap-2">
-                                    <i class="pi pi-shopping-cart text-blue-600"></i>
-                                    Buy Materials ({{ criteria.buyMaterials.length }})
-                                </h4>
-                                <div class="space-y-3">
-                                    <div v-for="material in criteria.buyMaterials" :key="material.id" class="flex items-center gap-3 p-3 bg-blue-50 border border-blue-200 rounded-lg hover:bg-blue-100 transition-colors">
-                                        <div class="flex-1 min-w-0">
-                                            <div class="text-sm font-medium text-blue-800 truncate">{{ material.material }}</div>
-                                            <div class="flex flex-wrap items-center gap-2 mt-1">
-                                                <span class="text-xs bg-white px-2 py-0.5 rounded text-blue-700 border border-blue-200">Pattern: {{ material.pattern }}</span>
-                                                <span class="text-xs bg-white px-2 py-0.5 rounded text-blue-700 border border-blue-200">Rim: {{ material.rimDiameter }}"</span>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <!-- Free Materials -->
-                            <div>
-                                <h4 class="font-semibold text-gray-700 mb-3 flex items-center gap-2">
-                                    <i class="pi pi-gift text-green-600"></i>
-                                    Free Materials ({{ criteria.freeMaterials.length }})
-                                </h4>
-                                <div v-if="criteria.freeMaterials.length" class="space-y-3">
-                                    <div v-for="material in criteria.freeMaterials" :key="material.id" class="flex items-center gap-3 p-3 bg-green-50 border border-green-200 rounded-lg hover:bg-green-100 transition-colors">
-                                        <div class="flex-1 min-w-0">
-                                            <div class="text-sm font-medium text-green-800 truncate">{{ material.material }}</div>
-                                            <div class="flex flex-wrap items-center gap-2 mt-1">
-                                                <span class="text-xs bg-white px-2 py-0.5 rounded text-green-700 border border-green-200">Pattern: {{ material.pattern }}</span>
-                                                <span class="text-xs bg-white px-2 py-0.5 rounded text-green-700 border border-green-200">Rim: {{ material.rimDiameter }}"</span>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div v-else class="text-center py-6 border-2 border-dashed border-gray-300 rounded-lg">
-                                    <i class="pi pi-gift text-3xl text-gray-300 mb-2"></i>
-                                    <p class="text-gray-500 text-sm">No free materials selected</p>
-                                </div>
-                            </div>
+                        <div>
+                            <div class="text-2xl font-bold text-black-800">🎯 FOC Promotion Criteria</div>
+                            <div class="text-sm text-black-600 mt-1">Total {{ criteriaList.length }} criteria patterns</div>
+                        </div>
+                    </div>
+                    <div class="flex items-center gap-3">
+                        <div class="text-right">
+                            <div class="text-sm font-medium text-black-600">Program Status</div>
+                            <Tag 
+                                :value="salesProgram.status === 1 ? 'Active' : 'Inactive'" 
+                                :severity="salesProgram.status === 1 ? 'success' : 'danger'"
+                                class="font-semibold"
+                            />
                         </div>
                     </div>
                 </div>
 
-                <div v-else class="text-center py-8 text-gray-500">
-                    <i class="pi pi-inbox text-4xl text-gray-300 mb-3"></i>
-                    <p class="text-lg">No criteria defined</p>
-                    <p class="text-sm">Add criteria to define promotion rules</p>
+                <!-- Promotion Summary Card -->
+                
+
+                <!-- Free Material Information -->
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+                    <!-- Free Material Details -->
+                    <div class="border border-black-200 rounded-xl p-5 bg-white shadow-sm">
+                        <div class="flex items-center gap-3 mb-4">
+                            <div class="w-10 h-10 bg-green-100 rounded-lg flex items-center justify-center">
+                                <i class="pi pi-box text-green-600 text-lg"></i>
+                            </div>
+                            <div>
+                                <h3 class="font-semibold text-black-800 text-lg">Free Material Details</h3>
+                                <p class="text-sm text-black-600">Item provided as free gift</p>
+                            </div>
+                        </div>
+                        <div class="space-y-3">
+                            <div class="flex justify-between items-center py-2 border-b border-black-100">
+                                <span class="text-xm font-medium text-black-600">Material Code</span>
+                                <span class="text-xm font-semibold text-black-800 bg-green-50 px-3 py-1 rounded">{{ salesProgram.free_material }}</span>
+                            </div>
+                            <div class="flex justify-between items-start py-2">
+                                <span class="text-xm font-medium text-black-600">Description</span>
+                                <span class="text-xm text-black-800 text-right max-w-xs">{{ salesProgram.free_material_desc }}</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Promotion Rule Summary -->
+                    <div class="border border-black-200 rounded-xl p-5 bg-white shadow-sm">
+                        <div class="flex items-center gap-3 mb-4">
+                            <div class="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center">
+                                <i class="pi pi-info-circle text-blue-600 text-lg"></i>
+                            </div>
+                            <div>
+                                <h3 class="font-semibold text-black-800 text-lg">Promotion Rule</h3>
+                                <p class="text-sm text-black-600">Buy X Get Y Free</p>
+                            </div>
+                        </div>
+                        <div class="text-center py-4">
+                            <div class="flex items-center justify-center gap-4 mb-3">
+                                <div class="bg-blue-500 text-white px-4 py-3 rounded-lg shadow-md">
+                                    <div class="text-2xl font-bold">{{ salesProgram.buyQty }}</div>
+                                    <div class="text-xs">BUY</div>
+                                </div>
+                                <div class="text-2xl text-black-400">→</div>
+                                <div class="bg-green-500 text-white px-4 py-3 rounded-lg shadow-md">
+                                    <div class="text-2xl font-bold">{{ salesProgram.freeQty }}</div>
+                                    <div class="text-xs">GET FREE</div>
+                                </div>
+                            </div>
+                            <p class="text-sm text-black-600">
+                                For every <span class="font-semibold text-blue-600">{{ salesProgram.buyQty }}</span> items purchased, 
+                                get <span class="font-semibold text-green-600">{{ salesProgram.freeQty }}</span> items free
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Criteria Patterns List -->
+                <div class="border-t pt-6">
+                    <div class="flex items-center justify-between mb-6">
+                        <div>
+                            <h3 class="text-xl font-bold text-black-800">🎨 Eligible Patterns</h3>
+                            <p class="text-sm text-black-600 mt-1">Tire patterns that qualify for this promotion</p>
+                        </div>
+                        <Badge :value="`${criteriaList.length} patterns`" severity="info" />
+                    </div>
+
+                    <div v-if="criteriaList.length" class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+                        <div 
+                            v-for="(criteria, criteriaIndex) in criteriaList" 
+                            :key="criteria.id" 
+                            class="border border-black-200 rounded-xl p-5 bg-white shadow-sm hover:shadow-md transition-all duration-300 hover:border-blue-300"
+                        >
+                            <div class="flex items-start justify-between mb-4">
+                                <div class="flex items-center gap-3">
+                                    <div>
+                                        <h4 class="font-bold text-black-800">Pattern {{ criteriaIndex + 1 }}</h4>
+                                    </div>
+                                </div>
+                                <div class="flex flex-col items-end gap-1">
+                                    <Tag 
+                                        :value="criteria.status === 1 ? 'Active' : 'Inactive'" 
+                                        :severity="criteria.status === 1 ? 'success' : 'danger'"
+                                        class="text-xs"
+                                    />
+                                </div>
+                            </div>
+
+                            <div class="space-y-3">
+                                <div class="flex items-center justify-between text-xm">
+                                    <span class="text-black-600">Pattern Code:</span>
+                                    <span class="font-mono font-semibold text-black-800">{{ criteria.pattern }}</span>
+                                </div>
+                                <div class="flex items-center justify-between text-xm">
+                                    <span class="text-black-600">Pattern Name:</span>
+                                    <span class="font-semibold text-black-800">{{ criteria.pattern_name }}</span>
+                                </div>
+                                <div class="flex items-center justify-between text-xm">
+                                    <span class="text-black-600">Rim Size:</span>
+                                    <span class="font-semibold text-blue-600">{{ criteria.size }}"</span>
+                                </div>
+                            </div>
+
+                            <div class="mt-4 pt-3 border-t border-black-100 text-xm text-black-500">
+                                <div class="flex justify-between">
+                                    <span>Created:</span>
+                                    <span>{{ formatDateTime(criteria.created) }}</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div v-else class="text-center py-12 border-2 border-dashed border-black-300 rounded-xl bg-black-50">
+                        <i class="pi pi-inbox text-5xl text-black-300 mb-4"></i>
+                        <p class="text-lg font-medium text-black-500 mb-2">No Criteria Patterns</p>
+                        <p class="text-sm text-black-400 max-w-md mx-auto">
+                            No tire patterns have been added to this promotion yet. Add patterns to define which tires qualify for this FOC offer.
+                        </p>
+                    </div>
                 </div>
             </div>
         </div>
@@ -165,47 +257,114 @@
 </template>
 
 <script setup>
-import { ref, computed } from 'vue';
+import { ref, onMounted } from 'vue';
+import { useRoute, useRouter } from 'vue-router';
+import { useToast } from 'primevue/usetoast';
+import api from '@/service/api';
 
-const salesProgram = ref({
-    programId: 'ABC4321',
-    priceGroup: '06',
-    type: 'FOC',
-    title: 'Year End Discount',
-    desc: 'Exclusive year-end discounts on selected Toyo Tires models. Limited time offer!',
-    image: '/demo/images/event-toyo-2.jpg',
-    startDate: '2025-09-01',
-    endDate: '2025-10-30',
-    status: 1,
-    created: '2025-09-08'
+const route = useRoute();
+const router = useRouter();
+const toast = useToast();
+
+const programId = ref(route.params.id);
+const loading = ref(false);
+const error = ref(false);
+const salesProgram = ref({});
+const criteriaList = ref([]);
+
+// Process private images using the API method
+const processPrivateImages = async () => {
+    const imageFields = ['imageUrl'];
+
+    for (const field of imageFields) {
+        if (salesProgram.value[field] && typeof salesProgram.value[field] === 'string') {
+            try {
+                const blobUrl = await api.getPrivateFile(salesProgram.value[field]);
+                if (blobUrl) {
+                    salesProgram.value.imageUrl = blobUrl;
+                }
+            } catch (error) {
+                console.error(`Error loading image ${field}:`, error);
+                // Fallback to default image
+                salesProgram.value.imageUrl = '/demo/images/event-toyo-2.jpg';
+            }
+        }
+    }
+};
+
+const fetchSalesProgram = async () => {
+    loading.value = true;
+    error.value = false;
+    
+    try {
+        const response = await api.get(`sales-program/detail-sales-program/${programId.value}`);
+        
+        if (response.data.status === 1 && response.data.admin_data.length > 0) {
+            const programData = response.data.admin_data[0];
+            salesProgram.value = programData;
+            criteriaList.value = programData.salesProgramFOC || [];
+
+            // Process private images
+            await processPrivateImages();
+
+            showToast('success', 'Success', 'Sales program data loaded successfully');
+        } else {
+            error.value = true;
+            showToast('error', 'Error', 'No sales program data found');
+        }
+    } catch (err) {
+        console.error('Error fetching sales program:', err);
+        error.value = true;
+        showToast('error', 'Error', 'Failed to load sales program data');
+    } finally {
+        loading.value = false;
+    }
+};
+
+const handleImageError = (event) => {
+    event.target.src = '/demo/images/event-toyo-2.jpg'; // Fallback image
+};
+
+const formatDate = (dateString) => {
+    if (!dateString) return 'N/A';
+    return new Date(dateString).toLocaleDateString('en-US', {
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric'
+    });
+};
+
+const formatDateTime = (dateTimeString) => {
+    if (!dateTimeString) return 'N/A';
+    return new Date(dateTimeString).toLocaleString('en-US', {
+        year: 'numeric',
+        month: 'short',
+        day: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit'
+    });
+};
+
+const showToast = (severity, summary, detail) => {
+    toast.add({
+        severity,
+        summary,
+        detail,
+        life: 3000
+    });
+};
+
+const confirmDelete = () => {
+    // Implement delete confirmation logic here
+    showToast('warn', 'Delete', 'Delete functionality to be implemented');
+};
+
+onMounted(() => {
+    if (!programId.value) {
+        showToast('error', 'Error', 'No program ID provided');
+        router.push('/om/listSalesProgram');
+        return;
+    }
+    fetchSalesProgram();
 });
-
-const materialsData = [
-    { id: 39, materialID: '51113735003175T', material: '175/70R13 8ZT TOYO 350', pattern: '735', rimDiameter: 13 },
-    { id: 40, materialID: '51115735004175T', material: '175/65R15 8HT TOYO 350', pattern: '735', rimDiameter: 15 },
-    { id: 41, materialID: '51115735004205T', material: '205/65R15 9HT TOYO 350', pattern: '735', rimDiameter: 15 },
-    { id: 42, materialID: '51116735005225T', material: '225/60R16 9HT TOYO 350', pattern: '735', rimDiameter: 16 },
-    { id: 43, materialID: '51117735006245T', material: '245/50R17 10HT TOYO 350', pattern: '735', rimDiameter: 17 }
-];
-
-const criteriaList = ref([
-    { material: 1, buyQty: 4, freeQty: 1, buyMaterials: [materialsData[0], materialsData[1]], freeMaterials: [materialsData[2]], status: 1, created: '2025-10-01' },
-    { material: 2, buyQty: 6, freeQty: 2, buyMaterials: [materialsData[0], materialsData[1], materialsData[2]], freeMaterials: [materialsData[3]], status: 1, created: '2025-10-05' },
-    { material: 3, buyQty: 8, freeQty: 3, buyMaterials: [materialsData[1]], freeMaterials: [materialsData[4]], status: 1, created: '2025-10-10' }
-]);
-
-const FOClistPrize = computed(() =>
-    criteriaList.value.flatMap((criteria) =>
-        criteria.buyMaterials.map((buyMaterial) => ({
-            salesProgramID: salesProgram.value.programId,
-            buy_material: buyMaterial.material,
-            buyQty: criteria.buyQty,
-            free_materials: criteria.freeMaterials.map((f) => f.material),
-            freeQty: criteria.freeQty,
-            status: criteria.status,
-            created: criteria.created,
-            criteriaId: criteria.material
-        }))
-    )
-);
 </script>

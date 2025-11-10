@@ -9,7 +9,7 @@
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div class="md:col-span-2">
                         <label class="block font-bold text-gray-700">Title</label>
-                        <InputText v-model="salesProgram.title" class="w-full" />
+                        <InputText v-model="salesProgram.programName" class="w-full" />
                     </div>
 
                     <div class="md:col-span-2">
@@ -20,28 +20,28 @@
                     <div class="grid grid-cols-1 md:grid-cols-3 gap-4 md:col-span-2">
                         <div>
                             <label class="block font-bold text-gray-700">Start Date</label>
-                            <Calendar v-model="salesProgram.startDate" dateFormat="yy-mm-dd" class="w-full" />
+                            <Calendar v-model="salesProgram.startdate" showIcon dateFormat="yy-mm-dd" class="w-full" />
                         </div>
 
                         <div>
                             <label class="block font-bold text-gray-700">End Date</label>
-                            <Calendar v-model="salesProgram.endDate" dateFormat="yy-mm-dd" class="w-full" />
+                            <Calendar v-model="salesProgram.enddate" showIcon dateFormat="yy-mm-dd" class="w-full" />
                         </div>
 
                         <div>
                             <label class="block font-bold text-gray-700">Price Group</label>
-                            <InputText v-model="salesProgram.priceGroup" class="w-full" />
+                            <InputText v-model="salesProgram.pricegroup" class="w-full" />
                         </div>
                     </div>
 
                     <div>
                         <label class="block font-bold text-gray-700">Program Type</label>
-                        <InputText v-model="salesProgram.type" :options="typeOptions" optionValue="value" class="w-full" disabled />
+                        <InputText v-model="salesProgram.type" class="w-full" disabled />
                     </div>
 
                     <div>
                         <label class="block font-bold text-gray-700">Sales Program ID</label>
-                        <InputText v-model="salesProgram.id" class="w-full" />
+                        <InputText v-model="salesProgram.programID" class="w-full" />
                     </div>
                 </div>
 
@@ -50,8 +50,8 @@
                     <label class="block font-bold text-gray-700 mb-2">Upload Sales Program Image</label>
                     <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
                         <div>
-                            <FileUpload mode="basic" name="image" accept="image/*" customUpload @select="onImageSelect($event, 'image')" chooseLabel="Upload Program Image" class="w-full" />
-                            <img v-if="salesProgram.image" :src="salesProgram.image" alt="Preview" class="mt-2 rounded-lg shadow-md object-cover w-full h-80" />
+                            <FileUpload mode="basic" name="image" accept="image/*" customUpload @select="onImageSelect" chooseLabel="Upload Program Image" class="w-full" />
+                            <img v-if="imagePreview" :src="imagePreview" alt="Preview" class="mt-2 rounded-lg shadow-md object-cover w-full h-80" />
                         </div>
                     </div>
                 </div>
@@ -113,23 +113,30 @@
                                         </h4>
                                         <span class="text-xs bg-blue-100 text-blue-800 px-2 py-0.5 rounded-full">All matching materials will be included</span>
                                     </div>
-                                    <Button v-if="item.selectedBuyPattern || item.selectedBuyRims.length > 0" icon="pi pi-times" label="Clear Selection" style="width: fit-content" class="p-button-text p-button-sm p-button-danger" @click="clearBuySelection(item)" />
+                                    <Button
+                                        v-if="item.selectedBuyPattern || item.selectedBuyRims.length > 0"
+                                        icon="pi pi-times"
+                                        label="Clear Selection"
+                                        style="width: fit-content"
+                                        class="p-button-text p-button-sm p-button-danger"
+                                        @click="clearBuySelection(item)"
+                                    />
                                 </div>
 
                                 <!-- Selection Criteria -->
                                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
                                     <div>
                                         <label class="block text-sm font-medium text-gray-700 mb-2">Pattern</label>
-                                        <Dropdown 
-                                            v-model="item.selectedBuyPattern" 
-                                            :options="buyPatternOptions" 
-                                            optionLabel="label" 
-                                            optionValue="value" 
-                                            placeholder="Select Pattern" 
-                                            class="w-full" 
-                                            :filter="true" 
+                                        <Dropdown
+                                            v-model="item.selectedBuyPattern"
+                                            :options="buyPatternOptions"
+                                            optionLabel="label"
+                                            optionValue="value"
+                                            placeholder="Select Pattern"
+                                            class="w-full"
+                                            :filter="true"
                                             :loading="loadingBuyPatterns"
-                                            @change="onBuyPatternChange(item)" 
+                                            @change="onBuyPatternChange(item)"
                                         />
                                     </div>
                                     <div>
@@ -150,22 +157,18 @@
                                 </div>
 
                                 <!-- Selected Buy Materials Display -->
-                                <div v-if="item.availableBuyMaterials.length > 0" class="space-y-3">
+                                <div v-if="item.buyMaterials.length > 0" class="space-y-3">
                                     <div class="flex items-center justify-between">
-                                        <span class="text-sm font-medium text-gray-700">Selected Buy Materials ({{ item.availableBuyMaterials.length }})</span>
+                                        <span class="text-sm font-medium text-gray-700">Selected Buy Materials ({{ item.buyMaterials.length }})</span>
                                     </div>
 
                                     <div class="grid grid-cols-1 md:grid-cols-4 gap-3 max-h-60 overflow-y-auto p-2 border border-blue-200 rounded-lg bg-white">
-                                        <div
-                                            v-for="material in item.availableBuyMaterials"
-                                            :key="material.materialid"
-                                            class="flex items-center gap-3 p-3 bg-blue-50 border border-blue-200 rounded-lg hover:bg-blue-100 transition-colors"
-                                        >
+                                        <div v-for="material in item.buyMaterials" :key="material.pattern + '_' + material.size" class="flex items-center gap-3 p-3 bg-blue-50 border border-blue-200 rounded-lg hover:bg-blue-100 transition-colors">
                                             <div class="flex-1 min-w-0">
-                                                <div class="text-sm font-medium text-blue-800 truncate">{{ material.material }}</div>
+                                                <div class="text-sm font-medium text-blue-800 truncate">{{ material.patternname }}</div>
                                                 <div class="flex flex-wrap items-center gap-2 mt-1">
                                                     <span class="text-xs bg-white px-2 py-0.5 rounded text-blue-700 border border-blue-200">Pattern: {{ material.pattern }}</span>
-                                                    <span class="text-xs bg-white px-2 py-0.5 rounded text-blue-700 border border-blue-200">Rim: {{ material.rimdiameter }}"</span>
+                                                    <span class="text-xs bg-white px-2 py-0.5 rounded text-blue-700 border border-blue-200">Rim: {{ material.size }}"</span>
                                                 </div>
                                             </div>
                                         </div>
@@ -199,39 +202,45 @@
                                 </div>
 
                                 <!-- Free Material Selection -->
-                                <div class="mb-4">
-                                    <label class="block text-sm font-medium text-gray-700 mb-2">Free Material</label>
-                                    <Dropdown 
-                                        v-model="item.selectedFreeMaterial" 
-                                        :options="freeMaterialOptions" 
-                                        optionLabel="material" 
-                                        optionValue="materialid" 
-                                        placeholder="Select Free Material" 
-                                        class="w-full" 
-                                        :filter="true"
-                                        :loading="loadingFreeMaterials"
-                                        @change="onFreeMaterialChange(item)"
-                                    >
-                                        <template #value="slotProps">
-                                            <div v-if="slotProps.value" class="flex items-center">
-                                                <div>
-                                                    <div class="font-medium">{{ getFreeMaterialLabel(slotProps.value) }}</div>
-                                                    <div class="text-xs text-gray-500">{{ slotProps.value }}</div>
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                                    <div class="md:col-span-2">
+                                        <label class="block text-sm font-medium text-gray-700 mb-2">Free Material</label>
+                                        <Dropdown
+                                            v-model="item.selectedFreeMaterial"
+                                            :options="freeMaterialOptions"
+                                            optionLabel="material"
+                                            optionValue="materialid"
+                                            placeholder="Select Free Material"
+                                            class="w-full"
+                                            :filter="true"
+                                            :loading="loadingFreeMaterials"
+                                            @change="onFreeMaterialChange(item)"
+                                        >
+                                            <template #value="slotProps">
+                                                <div v-if="slotProps.value" class="flex items-center">
+                                                    <div>
+                                                        <div class="font-medium">{{ getFreeMaterialLabel(slotProps.value) }}</div>
+                                                        <div class="text-xs text-gray-500">{{ slotProps.value }}</div>
+                                                    </div>
                                                 </div>
-                                            </div>
-                                            <span v-else>
-                                                {{ slotProps.placeholder }}
-                                            </span>
-                                        </template>
-                                        <template #option="slotProps">
-                                            <div class="flex items-center">
-                                                <div>
-                                                    <div class="font-medium">{{ slotProps.option.material }}</div>
-                                                    <div class="text-xs text-gray-500">{{ slotProps.option.materialid }}</div>
+                                                <span v-else>
+                                                    {{ slotProps.placeholder }}
+                                                </span>
+                                            </template>
+                                            <template #option="slotProps">
+                                                <div class="flex items-center">
+                                                    <div>
+                                                        <div class="font-medium">{{ slotProps.option.material }}</div>
+                                                        <div class="text-xs text-gray-500">{{ slotProps.option.materialid }}</div>
+                                                    </div>
                                                 </div>
-                                            </div>
-                                        </template>
-                                    </Dropdown>
+                                            </template>
+                                        </Dropdown>
+                                    </div>
+                                    <div class="md:col-span-2">
+                                        <label class="block text-sm font-medium text-gray-700 mb-2">Free Quota</label>
+                                        <InputNumber v-model="item.freeQuota" class="w-full" :min="1" showButtons />
+                                    </div>
                                 </div>
 
                                 <!-- Selected Free Material Display -->
@@ -287,17 +296,18 @@ import { ref, onMounted, watch } from 'vue';
 import api from '@/service/api';
 
 const salesProgram = ref({
-    title: '',
-    desc: '',
-    startDate: '',
-    endDate: '',
-    priceGroup: '06',
+    programID: '',
+    pricegroup: '06',
     type: 'FOC',
-    status: 1,
-    image: ''
+    programName: '',
+    desc: '',
+    startdate: '',
+    enddate: '',
+    status: 1
 });
 
-const typeOptions = [{ label: 'FOC (Free of Charge)', value: 'FOC' }];
+const imageFile = ref(null);
+const imagePreview = ref('');
 
 const programItems = ref([]);
 
@@ -311,9 +321,9 @@ const loadingFreeMaterials = ref(false);
 // Helper functions
 const onBuyPatternChange = async (item) => {
     item.selectedBuyRims = [];
-    item.availableBuyMaterials = [];
+    item.buyMaterials = [];
     item.availableBuyRims = [];
-    
+
     if (item.selectedBuyPattern) {
         await loadBuyRims(item);
     }
@@ -323,22 +333,20 @@ const updateBuyMaterials = async (item) => {
     if (item.selectedBuyPattern && item.selectedBuyRims.length > 0) {
         await loadBuyMaterials(item);
     } else {
-        item.availableBuyMaterials = [];
+        item.buyMaterials = [];
     }
 };
 
 const clearBuySelection = (item) => {
     item.selectedBuyPattern = null;
     item.selectedBuyRims = [];
-    item.availableBuyMaterials = [];
+    item.buyMaterials = [];
     item.availableBuyRims = [];
 };
 
 const onFreeMaterialChange = (item) => {
     if (item.selectedFreeMaterial) {
-        const selectedMaterial = freeMaterialOptions.value.find(
-            material => material.materialid === item.selectedFreeMaterial
-        );
+        const selectedMaterial = freeMaterialOptions.value.find((material) => material.materialid === item.selectedFreeMaterial);
         item.freeMaterialData = selectedMaterial ? { ...selectedMaterial } : null;
     } else {
         item.freeMaterialData = null;
@@ -351,7 +359,7 @@ const clearFreeSelection = (item) => {
 };
 
 const getFreeMaterialLabel = (materialId) => {
-    const material = freeMaterialOptions.value.find(m => m.materialid === materialId);
+    const material = freeMaterialOptions.value.find((m) => m.materialid === materialId);
     return material ? material.material : materialId;
 };
 
@@ -359,7 +367,8 @@ const addProgramItem = () => {
     programItems.value.push({
         buyQty: 1,
         freeQty: 1,
-        availableBuyMaterials: [],
+        freeQuota: null,
+        buyMaterials: [],
         selectedFreeMaterial: null,
         freeMaterialData: null,
         selectedBuyPattern: null,
@@ -373,12 +382,13 @@ const removeProgramItem = (index) => {
     programItems.value.splice(index, 1);
 };
 
-const onImageSelect = (eventFile, field) => {
-    const file = eventFile.files[0];
+const onImageSelect = (event) => {
+    const file = event.files[0];
     if (file) {
+        imageFile.value = file;
         const reader = new FileReader();
         reader.onload = (e) => {
-            salesProgram.value[field] = e.target.result;
+            imagePreview.value = e.target.result;
         };
         reader.readAsDataURL(file);
     }
@@ -389,11 +399,11 @@ const loadBuyPatterns = async () => {
     try {
         loadingBuyPatterns.value = true;
         const response = await api.get('criteria-selection');
-        
+
         if (response.data.status === 1) {
             const patternsData = response.data.admin_data;
             const patterns = [];
-            
+
             for (const [patternCode, patternData] of Object.entries(patternsData)) {
                 for (const [patternName, rimSizes] of Object.entries(patternData)) {
                     patterns.push({
@@ -404,7 +414,7 @@ const loadBuyPatterns = async () => {
                     });
                 }
             }
-            
+
             buyPatternOptions.value = patterns;
         }
     } catch (error) {
@@ -417,14 +427,12 @@ const loadBuyPatterns = async () => {
 const loadBuyRims = async (item) => {
     try {
         loadingBuyRims.value = true;
-        const selectedPattern = buyPatternOptions.value.find(
-            pattern => pattern.value === item.selectedBuyPattern
-        );
-        
+        const selectedPattern = buyPatternOptions.value.find((pattern) => pattern.value === item.selectedBuyPattern);
+
         if (selectedPattern && selectedPattern.rimSizes) {
-            item.availableBuyRims = selectedPattern.rimSizes.map(size => ({
+            item.availableBuyRims = selectedPattern.rimSizes.map((size) => ({
                 label: `${size}"`,
-                value: parseInt(size)
+                value: size.toString()
             }));
         } else {
             item.availableBuyRims = [];
@@ -439,22 +447,20 @@ const loadBuyRims = async (item) => {
 
 const loadBuyMaterials = async (item) => {
     try {
-        // Since we don't have a direct API to get materials by pattern and rim,
-        // we'll simulate this based on the available data
-        // In a real scenario, you would call an API that filters materials
-        
-        // For now, we'll create mock materials based on the selection
-        const mockMaterials = item.selectedBuyRims.map(rim => ({
-            materialid: `MAT_${item.selectedBuyPattern}_${rim}`,
-            material: `${item.selectedBuyPattern} Material - ${rim}"`,
-            pattern: item.selectedBuyPattern,
-            rimdiameter: rim
-        }));
-        
-        item.availableBuyMaterials = mockMaterials;
+        const selectedPattern = buyPatternOptions.value.find((pattern) => pattern.value === item.selectedBuyPattern);
+
+        if (selectedPattern) {
+            // Create buyMaterials array with the exact structure required
+            item.buyMaterials = item.selectedBuyRims.map((rim) => ({
+                pattern: item.selectedBuyPattern,
+                patternname: selectedPattern.patternName,
+                size: rim,
+                status: 1
+            }));
+        }
     } catch (error) {
         console.error('Error loading buy materials:', error);
-        item.availableBuyMaterials = [];
+        item.buyMaterials = [];
     }
 };
 
@@ -464,7 +470,7 @@ const loadFreeMaterials = async () => {
         const response = await api.post('list-material', {
             type: 'SALESPROGRAM'
         });
-        
+
         if (response.data.status === 1) {
             freeMaterialOptions.value = response.data.admin_data;
         }
@@ -477,72 +483,78 @@ const loadFreeMaterials = async () => {
 
 const submitForm = async () => {
     try {
-        // Prepare data for API
-        const formData = new FormData();
-        
-        // Sales Program Data
-        formData.append('programID', salesProgram.value.id);
-        formData.append('pricegroup', salesProgram.value.priceGroup);
-        formData.append('type', salesProgram.value.type);
-        formData.append('programName', salesProgram.value.title);
-        formData.append('desc', salesProgram.value.desc);
-        formData.append('startdate', salesProgram.value.startDate);
-        formData.append('enddate', salesProgram.value.endDate);
-        formData.append('status', salesProgram.value.status);
-        
-        // Image file
-        if (salesProgram.value.image && salesProgram.value.image.startsWith('data:')) {
-            const blob = dataURLtoBlob(salesProgram.value.image);
-            formData.append('image', blob, 'sales-program-image.jpg');
+        // Validation
+        if (!salesProgram.value.programID) {
+            alert('Please enter Sales Program ID');
+            return;
         }
-        
-        // Prepare spFOC_array from program items
-        const spFOCArray = programItems.value.map(item => {
-            // For buy materials, we need to create entries for each pattern+rim combination
-            const buyEntries = [];
-            
-            if (item.selectedBuyPattern && item.selectedBuyRims.length > 0) {
-                item.selectedBuyRims.forEach(rim => {
-                    buyEntries.push({
-                        pattern: item.selectedBuyPattern,
-                        patternname: buyPatternOptions.value.find(p => p.value === item.selectedBuyPattern)?.patternName || '',
-                        size: rim,
-                        status: item.status
-                    });
-                });
+
+        if (!salesProgram.value.programName) {
+            alert('Please enter Program Name');
+            return;
+        }
+
+        if (!salesProgram.value.startdate || !salesProgram.value.enddate) {
+            alert('Please select both Start Date and End Date');
+            return;
+        }
+
+        if (!imageFile.value) {
+            alert('Please upload an image');
+            return;
+        }
+
+        if (programItems.value.length === 0) {
+            alert('Please add at least one criteria');
+            return;
+        }
+
+        // Validate each program item
+        for (const item of programItems.value) {
+            if (!item.selectedBuyPattern || item.selectedBuyRims.length === 0) {
+                alert('Please select buy materials for all criteria');
+                return;
             }
-            
-            return {
-                buyQty: item.buyQty,
-                freeQty: item.freeQty,
-                freematerialid: item.selectedFreeMaterial,
-                freematerialdesc: item.freeMaterialData?.material || '',
-                freeQuota: null, // Add if needed
-                buyEntries: buyEntries
-            };
+            if (!item.selectedFreeMaterial) {
+                alert('Please select free material for all criteria');
+                return;
+            }
+            if (!item.freeQuota || item.freeQuota < 1) {
+                alert('Please enter free quota for all criteria');
+                return;
+            }
+        }
+
+        // Prepare spFOC_array by combining all buy materials from all criteria
+        const spFOCArray = [];
+        programItems.value.forEach((item) => {
+            spFOCArray.push(...item.buyMaterials);
         });
-        
-        // Flatten the buy entries
-        const flattenedSpFOCArray = [];
-        spFOCArray.forEach(item => {
-            item.buyEntries.forEach(entry => {
-                flattenedSpFOCArray.push({
-                    pattern: entry.pattern,
-                    patternname: entry.patternname,
-                    size: entry.size,
-                    status: entry.status,
-                    buyQty: item.buyQty,
-                    freeQty: item.freeQty,
-                    freematerialid: item.freematerialid,
-                    freematerialdesc: item.freematerialdesc,
-                    freeQuota: item.freeQuota
-                });
-            });
-        });
-        
-        formData.append('spFOC_array', JSON.stringify(flattenedSpFOCArray));
-        
-        // For the first item (assuming single free material per submission)
+
+        console.log('Generated spFOC_array:', spFOCArray);
+
+        // Prepare FormData
+        const formData = new FormData();
+
+        // Sales Program Data
+        formData.append('programID', salesProgram.value.programID);
+        formData.append('pricegroup', salesProgram.value.pricegroup);
+        formData.append('type', salesProgram.value.type);
+        formData.append('programName', salesProgram.value.programName);
+        formData.append('desc', salesProgram.value.desc);
+        formData.append('startdate', formatDate(salesProgram.value.startdate));
+        formData.append('enddate', formatDate(salesProgram.value.enddate));
+        formData.append('status', salesProgram.value.status);
+        formData.append('type', salesProgram.value.type);
+        formData.append('status', salesProgram.value.status);
+
+        // Image file
+        formData.append('image', imageFile.value);
+
+        // spFOC_array as JSON string - this will create the exact structure you need
+        formData.append('spFOC_array', JSON.stringify(spFOCArray));
+
+        // For the first item (backend expects these individual fields)
         const firstItem = programItems.value[0];
         if (firstItem) {
             formData.append('freematerialid', firstItem.selectedFreeMaterial || '');
@@ -551,36 +563,54 @@ const submitForm = async () => {
             formData.append('freeQty', firstItem.freeQty);
             formData.append('freeQuota', firstItem.freeQuota || '');
         }
-        
+
+        console.log('Submitting form data:', {
+            programID: salesProgram.value.programID,
+            pricegroup: salesProgram.value.pricegroup,
+            programName: salesProgram.value.programName,
+            desc: salesProgram.value.desc,
+            startdate: formatDate(salesProgram.value.startdate),
+            enddate: formatDate(salesProgram.value.enddate),
+            spFOC_array: spFOCArray,
+            freematerialid: firstItem?.selectedFreeMaterial,
+            freematerialdesc: firstItem?.freeMaterialData?.material,
+            buyQty: firstItem?.buyQty,
+            freeQty: firstItem?.freeQty,
+            freeQuota: firstItem?.freeQuota,
+            imageFile: imageFile.value.name,
+            status: salesProgram.value.status,
+            type: salesProgram.value.type
+        });
+
         const response = await api.post('sales-program/create-sales-program', formData, {
             headers: {
                 'Content-Type': 'multipart/form-data'
             }
         });
-        
+
         if (response.data.status === 1) {
             console.log('Sales program created successfully');
-            // Redirect or show success message
+            alert('Sales program created successfully!');
+            // Redirect to list page
+            window.location.href = '/om/listSalesProgram';
         } else {
             console.error('Error creating sales program:', response.data.error);
+            alert('Error creating sales program: ' + (response.data.error?.message || 'Unknown error'));
         }
-        
     } catch (error) {
         console.error('Error submitting form:', error);
+        alert('Error submitting form: ' + error.message);
     }
 };
 
-// Helper function to convert data URL to blob
-const dataURLtoBlob = (dataURL) => {
-    const arr = dataURL.split(',');
-    const mime = arr[0].match(/:(.*?);/)[1];
-    const bstr = atob(arr[1]);
-    let n = bstr.length;
-    const u8arr = new Uint8Array(n);
-    while (n--) {
-        u8arr[n] = bstr.charCodeAt(n);
-    }
-    return new Blob([u8arr], { type: mime });
+// Helper function to format date as YYYY-MM-DD
+const formatDate = (date) => {
+    if (!date) return '';
+    const d = new Date(date);
+    const year = d.getFullYear();
+    const month = String(d.getMonth() + 1).padStart(2, '0');
+    const day = String(d.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
 };
 
 // Watch for type changes to clear program items

@@ -204,9 +204,10 @@ const router = createRouter({
                     component: () => import('@/views/om/listSalesProgram.vue')
                 },
                 {
-                    path: '/om/detailSalesProgram',
+                    path: '/om/detailSalesProgram/:id',
                     name: 'Detail-Sales-Program',
-                    component: () => import('@/views/om/detailSalesProgram.vue')
+                    component: () => import('@/views/om/detailSalesProgram.vue'),
+                    props: true
                 },
                 {
                     path: '/om/createSalesProgram',

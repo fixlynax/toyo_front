@@ -41,6 +41,7 @@
                                                     <div>Platform: {{ device.device_platform }}</div>
                                                     <div>Last Active: {{ formatDate(device.last_used_at) }}</div>
                                                     <div v-if="device.is_blocked" class="text-red-500 font-semibold">Status: Blocked</div>
+                                                    <div v-if="device.is_active" class="text-green-500 font-semibold">Status: Active</div>
                                                 </div>
                                             </td>
                                             <td class="px-4 py-3 text-right align-top">
@@ -224,11 +225,12 @@ async function fetchDeviceList() {
 
         if (response.data.status === 1) {
             devices.value = response.data.admin_data.map((device) => ({
-                device_model: device.device_model,
+                device_model: device.device_model || 'Unknown Device',
                 device_id: device.device_id,
                 device_platform: device.device_platform,
                 last_used_at: device.last_used_at,
-                is_blocked: device.is_blocked === 1 // Convert to boolean
+                is_blocked: device.is_blocked === 1, // Convert to boolean
+                is_active: device.is_blocked === 0 // Convert to boolean,
             }));
         } else {
             toast.add({
