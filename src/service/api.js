@@ -8,7 +8,6 @@ const apiClient = axios.create({
         'X-Api-Key': import.meta.env.VITE_API_KEY
     }
 });
-
 // Token management functions
 export const tokenService = {
     getToken() {
@@ -78,9 +77,18 @@ export default {
         return apiClient.get(`/api/${endpoint}`);
     },
 
+    getDownload(endpoint, options = {}) {
+        return apiClient.get(`/api/${endpoint}`,options);
+    },
+
     // POST request
     post(endpoint, data) {
         return apiClient.post(`/api/${endpoint}`, data);
+    },
+
+    // POST request
+    postExtra(endpoint, data, options = {}) {
+        return apiClient.post(`/api/${endpoint}`, data ,options);
     },
 
     // PUT request
