@@ -115,12 +115,12 @@
             <!-- RIGHT SIDE -->
             <div class="md:w-1/3 flex flex-col">
                 <!-- 1. CTC Detail -->
-                <div class="card w-full mb-4">
+                <div class="card w-full mb-4" v-if="warantyDetail.isCTC === 1 && warantyDetail.isScrap === 0 && warantyDetail.status === 4">
                     <div class="flex items-center justify-between border-b pb-2 mb-2">
                         <div class="text-2xl font-bold text-gray-800">CTC Detail</div>
-                        <Button v-if="warantyDetail.isCTC === 0" label="Create" class="p-button-info" size="small" @click="createCTC" />
+                        <Button v-if="warantyDetail.isCTC === 1 && warantyDetail.isScrap === 0 && warantyDetail.status === 4" label="Create" class="p-button-info" size="small" @click="createCTC" />
                     </div>
-                    <div class="grid grid-cols-2 md:grid-cols-2 gap-4 text-sm text-gray-800">
+                    <!-- <div class="grid grid-cols-2 md:grid-cols-2 gap-4 text-sm text-gray-800">
                         <div>
                             <span class="font-bold">Warranty Entry ID</span>
                             <p>{{ warantyDetail.id }}</p>
@@ -145,7 +145,7 @@
                             <span class="font-bold">Overall Status</span>
                             <p>{{ getStatusText(warantyDetail.status) }}</p>
                         </div>
-                    </div>
+                    </div> -->
                 </div>
 
                 <!-- 2. Claim Detail -->
@@ -330,6 +330,30 @@
             </div>
         </div>
     </div>
+            <Dialog v-model:visible="showCreateCTCDialog" header="Create CTC" :modal="true" class="p-fluid" :style="{ width: '40rem' }">
+            <div class="grid grid-cols-1 gap-4">
+                <!-- Month Display -->
+
+                <!-- Closing Date -->
+                <div>
+                    <label class="block font-bold text-gray-700 mb-2">Schedule *</label>
+                    <Calendar 
+                        v-model="ctcdate" 
+                        dateFormat="dd/mm/yy" 
+                        placeholder="Select Date & Time" 
+                        class="w-full" 
+                        :showIcon="true"
+                        :showTime="true"    
+                        hourFormat="24"      
+                    />
+                </div>
+            </div>
+
+            <template #footer>
+                <Button label="Cancel" icon="pi pi-times" class="p-button-text" @click="closeCTCDialog" />
+                <Button label="Create" icon="pi pi-check" class="p-button-primary"  @click="saveCTC" />
+            </template>
+        </Dialog>
 </template>
 
 <script setup>
@@ -339,11 +363,16 @@ import { useToast } from 'primevue/usetoast';
 import Galleria from 'primevue/galleria';
 import Button from 'primevue/button';
 import api from '@/service/api';
+// import { useRouter } from 'vue-router';
 
+// const router = useRouter();
 const route = useRoute();
 const toast = useToast();
 
 // Reactive data
+const ctcdate = ref(new Date());
+const showCreateCTCDialog = ref(false);
+
 const warantyDetail = ref({});
 const loading = ref(true);
 const error = ref(null);
@@ -427,15 +456,56 @@ const loadScrapImages = async () => {
     scrapImages.value = images;
 };
 
+defineProps({
+  id: String, // now the component explicitly accepts id
+});
+
 const createCTC = () => {
-    toast.add({
-        severity: 'info',
-        summary: 'Info',
-        detail: 'CTC creation functionality to be implemented',
-        life: 3000
-    });
+    showCreateCTCDialog.value = true;
+    // toast.add({
+    //     severity: 'info',
+    //     summary: 'Info',
+    //     detail: 'CTC creation functionality to be implemented',
+    //     life: 3000
+    // });
 };
 
+const closeCTCDialog = () => {
+    showCreateCTCDialog.value = false;
+    ctcdate.value = new Date();
+};
+const saveCTC = async () => {
+    try {
+        loading.value = true;
+        
+        // Prepare data for API update - match the expected format
+        const pad = n => n.toString().padStart(2, '0');
+        const d = ctcdate.value;
+
+        const createData = {
+        claim_id: warantyDetail.value.id,
+        collect_datetime: `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())} ${pad(d.getHours())}:${pad(d.getMinutes())}`
+        };
+
+        console.log('Sending create ctc:', createData);
+
+        // Call API to update the closing date - note the endpoint uses POST with ID in URL
+        // const response = await api.post(`warranty_claim/createCTC/`, createData);
+        
+        // if (response.data.status === 1) {
+        //     closeCTCDialog();
+        // } else {
+        //     console.error('Failed to create date:', response.data);
+        //     alert('Failed to create ctc. Please try again.');
+        // }
+    } catch (error) {
+        console.error('Error create ctc:', error);
+    } finally {
+        loading.value = false;
+        closeCTCDialog();
+        // router.go(0);
+    }
+};
 const createClaim = () => {
     toast.add({
         severity: 'info',
