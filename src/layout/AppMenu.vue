@@ -130,6 +130,11 @@ const model = ref([
                         label: 'Pattern List',
                         icon: 'pi pi-fw pi-slack',
                         to: '/technical/listPattern'
+                    },
+                    {
+                        label: 'OE Tire LIst',
+                        icon: 'pi pi-fw pi-slack',
+                        to: '/technical/listOETire'
                     }
                 ]
             }

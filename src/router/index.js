@@ -509,6 +509,11 @@ const router = createRouter({
                     component: () => import('@/views/technical/listProduct.vue')
                 },
                 {
+                    path: '/technical/listOETire',
+                    name: 'List-OE-Tire',
+                    component: () => import('@/views/technical/listOETire.vue')
+                },
+                {
                     path: '/technical/listPattern',
                     name: 'List-Pattern',
                     component: () => import('@/views/technical/listPattern.vue')
