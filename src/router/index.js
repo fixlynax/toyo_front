@@ -136,6 +136,11 @@ const router = createRouter({
                     component: () => import('@/views/om/createOrder.vue')
                 },
                 {
+                    path: '/om/confirmOrder',
+                    name: 'confirm-Order',
+                    component: () => import('@/views/om/confirmOrder.vue')
+                },
+                {
                     path: '/om/detailOrder',
                     name: 'Detail-Order',
                     component: () => import('@/views/om/detailOrder.vue')
