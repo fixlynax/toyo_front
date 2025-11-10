@@ -6,7 +6,7 @@
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
                 <div class="md:col-span-2">
                     <label class="block font-bold text-gray-700">Customer Account</label>
-                    <Dropdown v-model="selectedCustomer" :options="customerOptions" optionLabel="name" placeholder="Select a Customer" class="w-full" />
+                    <Dropdown filter v-model="selectedCustomer" :options="customerOptions" optionLabel="name" placeholder="Select a Customer" class="w-full" />
                 </div>
 
                 <div class="md:col-span-2">
@@ -35,6 +35,23 @@
                 <div>
                     <label class="block font-bold text-gray-700">Ship To Address</label>
                     <Dropdown placeholder="Select Delivery Method" class="w-full" />
+                </div>
+            </div>
+        </div>
+        <div v-if="selectedOrderType === 'DS'" class="card">
+            <div class="text-2xl font-bold text-gray-800 border-b pb-2 mb-6">Ship To Details</div>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                <div>
+                    <label class="block font-bold text-gray-700">Ship To Account No.</label>
+                    <Dropdown placeholder="Select Delivery Method" class="w-full" />
+                </div>
+                <div>
+                    <label class="block font-bold text-gray-700">Ship To Address</label>
+                    <Dropdown placeholder="Select Delivery Method" class="w-full" />
+                </div>
+                <div>
+                    <label class="block font-bold text-gray-700">Estimated Time Arrival</label>
+                    <Calendar id="calendar-24h" v-model="datetime24h" showTime hourFormat="24" placeholder="Select ETA"/>
                 </div>
             </div>
         </div>
@@ -131,7 +148,7 @@
                     <template #body="slotProps"> RM {{ (slotProps.data.price * slotProps.data.quantity).toFixed(2) }} </template>
                 </Column>
 
-                <Column field="quantity" header="Quantity" :style="{ width: '220px' }">
+                <Column field="quantity" header="Quantity" :style="{ width: '180px' }">
                     <template #body="slotProps">
                         <div class="flex justify-center" style="justify-content: fit-content">
                             <InputNumber
@@ -146,6 +163,13 @@
                                 :min="1"
                                 class="w-32"
                             />
+                        </div>
+                    </template>
+                </Column>
+                <Column header="Available Qty">
+                    <template #body="slotProps">
+                        <div class="text-center">
+                            {{ slotProps.data.avlQty }}
                         </div>
                     </template>
                 </Column>
@@ -169,7 +193,9 @@
                     </RouterLink>
                 </div>
                 <div class="w-40">
-                    <Button label="Submit" class="w-full" @click="handleSubmit" />
+                    <RouterLink to="/om/confirmOrder">
+                        <Button label="Submit" class="w-full" @click="handleSubmit" />
+                    </RouterLink>
                 </div>
             </div>
         </div>
@@ -202,16 +228,16 @@ const deliveryMethodOptions = ['Pickup', 'Delivery', 'Lalamove'];
 const deliveryOptionOptions = ['Deliver', 'Pickup'];
 
 const patterns = ref([
-    { image: '/demo/images/toyor_tayar1.png', materialId: 'MAT-1001', pattern: 'Classic Stripe', size: '225/45R17 94W', origin: 'Malaysia', price: 320.5, quantity: 0 },
-    { image: '/demo/images/toyor_tayar2.png', materialId: 'MAT-1002', pattern: 'Sport Mesh', size: '235/40R18 95Y', origin: 'Japan', price: 420.0, quantity: 0 },
-    { image: '/demo/images/toyor_tayar3.png', materialId: 'MAT-1003', pattern: 'Luxury Diamond', size: '245/45R19 98W', origin: 'Thailand', price: 480.75, quantity: 0 },
-    { image: '/demo/images/toyor_tayar4.png', materialId: 'MAT-1004', pattern: 'Eco Line', size: '255/50R20 105V', origin: 'Indonesia', price: 350.0, quantity: 0 },
-    { image: '/demo/images/toyor_tayar1.png', materialId: 'MAT-1005', pattern: 'Offroad Grip', size: '265/60R21 110H', origin: 'Malaysia', price: 560.25, quantity: 0 },
-    { image: '/demo/images/toyor_tayar2.png', materialId: 'MAT-1006', pattern: 'City Runner', size: '275/45R22 112V', origin: 'Japan', price: 510.0, quantity: 0 },
-    { image: '/demo/images/toyor_tayar3.png', materialId: 'MAT-1007', pattern: 'Urban Drift', size: '285/40R23 111Y', origin: 'Thailand', price: 465.5, quantity: 0 },
-    { image: '/demo/images/toyor_tayar4.png', materialId: 'MAT-1008', pattern: 'Hybrid Plus', size: '295/35R24 110W', origin: 'Indonesia', price: 495.0, quantity: 0 },
-    { image: '/demo/images/toyor_tayar1.png', materialId: 'MAT-1009', pattern: 'Extreme Trail', size: '305/55R25 113V', origin: 'Malaysia', price: 580.75, quantity: 0 },
-    { image: '/demo/images/toyor_tayar2.png', materialId: 'MAT-1010', pattern: 'Smooth Road', size: '315/30R26 105Y', origin: 'Japan', price: 430.0, quantity: 0 }
+    { image: '/demo/images/toyor_tayar1.png', materialId: 'MAT-1001', pattern: 'Classic Stripe', size: '225/45R17 94W', origin: 'Malaysia', price: 320.5, quantity: 0, avlQty: 50 },
+    { image: '/demo/images/toyor_tayar2.png', materialId: 'MAT-1002', pattern: 'Sport Mesh', size: '235/40R18 95Y', origin: 'Japan', price: 420.0, quantity: 0, avlQty: 30 },
+    { image: '/demo/images/toyor_tayar3.png', materialId: 'MAT-1003', pattern: 'Luxury Diamond', size: '245/45R19 98W', origin: 'Thailand', price: 480.75, quantity: 0, avlQty: 20 },
+    { image: '/demo/images/toyor_tayar4.png', materialId: 'MAT-1004', pattern: 'Eco Line', size: '255/50R20 105V', origin: 'Indonesia', price: 350.0, quantity: 0, avlQty: 40 },
+    { image: '/demo/images/toyor_tayar1.png', materialId: 'MAT-1005', pattern: 'Offroad Grip', size: '265/60R21 110H', origin: 'Malaysia', price: 560.25, quantity: 0, avlQty: 15 },
+    { image: '/demo/images/toyor_tayar2.png', materialId: 'MAT-1006', pattern: 'City Runner', size: '275/45R22 112V', origin: 'Japan', price: 510.0, quantity: 0, avlQty: 25 },
+    { image: '/demo/images/toyor_tayar3.png', materialId: 'MAT-1007', pattern: 'Urban Drift', size: '285/40R23 111Y', origin: 'Thailand', price: 465.5, quantity: 0, avlQty: 35 },
+    { image: '/demo/images/toyor_tayar4.png', materialId: 'MAT-1008', pattern: 'Hybrid Plus', size: '295/35R24 110W', origin: 'Indonesia', price: 495.0, quantity: 0, avlQty: 45 },
+    { image: '/demo/images/toyor_tayar1.png', materialId: 'MAT-1009', pattern: 'Extreme Trail', size: '305/55R25 113V', origin: 'Malaysia', price: 580.75, quantity: 0, avlQty: 10 },
+    { image: '/demo/images/toyor_tayar2.png', materialId: 'MAT-1010', pattern: 'Smooth Road', size: '315/30R26 105Y', origin: 'Japan', price: 430.0, quantity: 0, avlQty: 60 }
 ]);
 
 const cart = ref([]);
