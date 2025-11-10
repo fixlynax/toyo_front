@@ -14,17 +14,25 @@ const filters = ref({
 onBeforeMount(async () => {
     try {
         loading.value = true;
-        const response = await api.get('list_appointment');
-        if (response.data.status === 1) {
-            listData.value = response.data.data.map((item) => ({
-                id: item.appointment_id,
-                memberName: item.member_name,
-                phoneNo: item.phone_no,
-                dealerCustAcc: item.dealer_cust_acc,
-                dealerShortName: item.dealer_short_name,
-                bookDateTime: item.book_datetime
+        const response = await api.get('appointment'); // adjust endpoint
+        console.log(response.data);
+
+        if (response.data.status === 1 && Array.isArray(response.data.admin_data)) {
+            listData.value = response.data.admin_data.map((item) => ({
+                id: item.id,
+                appointmentCode: item.appointmentCode,
+                requestDate: item.appointmentRequestDate,
+                requestSession: item.appointmentRequestSession,
+                appointmentDate: item.appointmentDate,
+                appointmentTime: item.appointmentTime,
+                dealerShop: item.dealerShop,
+                dealerCustAccountNo: item.dealerCustAccountNo,
+                status: item.status,
+                statusString: item.status_string
             }));
-        } else listData.value = [];
+        } else {
+            listData.value = [];
+        }
     } catch (error) {
         console.error('Error fetching appointment list:', error);
         listData.value = [];
