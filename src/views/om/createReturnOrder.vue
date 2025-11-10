@@ -8,82 +8,105 @@
                 <!-- Customer Account -->
                 <div class="md:col-span-2">
                     <label class="block font-bold text-gray-700">Customer Account</label>
-                    <Dropdown filter v-model="selectedCustomer" :options="customerOptions" optionLabel="name" placeholder="Select a Customer" class="w-full" />
+                    <Dropdown
+                        filter
+                        showClear
+                        v-model="selectedCustomer"
+                        :options="customerOptions"
+                        optionLabel="display"
+                        placeholder="Select a Customer"
+                        class="w-full"
+                        @change="onCustomerChange"
+                    />
                 </div>
-            </div>
-        </div>
 
-        <!-- Ship To / Pickup Section -->
-        <div v-if="selectedDeliveryMethod === 'Delivery' || selectedDeliveryMethod === 'Lalamove'" class="card">
-            <div class="text-2xl font-bold text-gray-800 border-b pb-2 mb-6">Ship To Details</div>
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-                <div class="md:col-span-2">
-                    <label class="block font-bold text-gray-700">Ship To Account No.</label>
-                    <Dropdown v-model="shipToAccount" placeholder="Select Account" class="w-full" />
-                </div>
-                <div>
-                    <label class="block font-bold text-gray-700">Address Line 1</label>
-                    <InputText v-model="shipToAddress1" placeholder="Insert Ship Address" class="w-full" />
-                </div>
-                <div>
-                    <label class="block font-bold text-gray-700">Address Line 2</label>
-                    <InputText v-model="shipToAddress2" placeholder="Insert Ship Address" class="w-full" />
-                </div>
-                <div>
-                    <label class="block font-bold text-gray-700">Address Line 3</label>
-                    <InputText v-model="shipToAddress3" placeholder="Insert Ship Address" class="w-full" />
-                </div>
-                <div>
-                    <label class="block font-bold text-gray-700">Address Line 4</label>
-                    <InputText v-model="shipToAddress4" placeholder="Insert Ship Address" class="w-full" />
-                </div>
-                <div class="md:col-span-2">
-                    <label class="block font-bold text-gray-700">Estimated Return Arrival</label>
-                    <Calendar v-model="datetime24h" showTime hourFormat="24" placeholder="Select ETA" class="w-full" />
-                </div>
-            </div>
-        </div>
-
-        <div v-if="selectedReturnType === 'Pickup'" class="card">
-            <div class="text-2xl font-bold text-gray-800 border-b pb-2 mb-6">Pickup Information</div>
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-                <div>
-                    <label class="block font-bold text-gray-700">Name</label>
-                    <InputText v-model="pickupName" placeholder="Insert Name" class="w-full" />
-                </div>
-                <div>
-                    <label class="block font-bold text-gray-700">Contact Number</label>
-                    <InputText v-model="pickupPhone" placeholder="Insert Contact Number" class="w-full" />
-                </div>
-                <div>
-                    <label class="block font-bold text-gray-700">Truck Plate Number</label>
-                    <InputText v-model="pickupTruckPlate" placeholder="Insert Truck Plate Number" class="w-full" />
-                </div>
-                <div>
-                    <label class="block font-bold text-gray-700">Driver IC Number</label>
-                    <InputText v-model="pickupDriverIC" placeholder="Insert Driver IC Number" class="w-full" />
+                <!-- Order Selection with Quick Search -->
+                <div v-if="ordersForCustomer.length" class="md:col-span-2">
+                    <label class="block font-bold text-gray-700">Select Order</label>
+                    <Dropdown
+                        filter
+                        showClear
+                        v-model="selectedOrder"
+                        :options="ordersForCustomer"
+                        optionLabel="orderNumber"
+                        placeholder="Select an Order"
+                        class="w-full"
+                        :filterBy="'orderNumber'"
+                        :filterFunction="customOrderFilter"
+                        @change="onOrderChange"
+                    />
                 </div>
             </div>
         </div>
 
         <!-- Products Table -->
-        <div class="card flex flex-col gap-6">
-            <div class="text-2xl font-bold text-gray-800 border-b pb-2 mb-4">Products</div>
+        <div v-if="selectedOrder" class="card flex flex-col gap-6 mt-4">
+            <div class="text-2xl font-bold text-gray-800 border-b pb-2 mb-4">Products in Order</div>
 
-            <DataTable :value="patterns" class="w-full">
+            <DataTable :value="orderProducts" class="w-full">
                 <Column field="pattern" header="Pattern" />
                 <Column field="size" header="Size" />
-                <Column field="avlQty" header="Available Quantity" />
+                <Column field="origin" header="Origin" />
+                <Column field="avlQty" header="Ordered Quantity" />
                 <Column header="Return Quantity">
                     <template #body="slotProps">
-                        <InputNumber v-model="slotProps.data.quantity" inputClass="text-center w-24" showButtons buttonLayout="horizontal" incrementButtonIcon="pi pi-plus" decrementButtonIcon="pi pi-minus" :min="0" :max="slotProps.data.avlQty" />
+                        <InputNumber
+                            v-model="slotProps.data.returnQty"
+                            inputClass="text-center w-24"
+                            showButtons
+                            buttonLayout="horizontal"
+                            incrementButtonIcon="pi pi-plus"
+                            decrementButtonIcon="pi pi-minus"
+                            :min="0"
+                            :max="slotProps.data.avlQty"
+                        />
                     </template>
                 </Column>
             </DataTable>
         </div>
-        <div class="card">
-            <div class="text-lg font-bold text-gray-800 mb-2">Return Reason</div>
-            <InputText placeholder="Enter the reason for this return order" class="w-full" style="background-color: #f5f5f5" />
+
+        <!-- Return Reason and Image Upload -->
+        <div v-if="selectedOrder" class="card mt-4 p-6 bg-white shadow-lg rounded-2xl">
+            <div class="text-lg font-bold text-gray-800 mb-4 border-b pb-2">Return Reason & Images</div>
+
+            <!-- Image Upload -->
+            <div class="mb-6">
+                <label class="block font-semibold text-gray-700 mb-2">Upload Image(s) (Optional)</label>
+                <div
+                    class="border-2 border-dashed border-gray-300 rounded-lg p-4 flex flex-col items-center justify-center cursor-pointer hover:border-primary transition"
+                    @click="$refs.fileInput.click()"
+                >
+                    <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        class="h-10 w-10 text-gray-400 mb-2"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        stroke="currentColor"
+                    >
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16V4m0 0L3 8m4-4l4 4M21 16v-6m0 0l-4 4m4-4l-4-4" />
+                    </svg>
+                    <span class="text-gray-500 text-sm">Click or drag file here to upload</span>
+                </div>
+                <input type="file" accept="image/*" ref="fileInput" @change="onImageChange" class="hidden" />
+
+                <div v-if="returnImage" class="mt-4 flex gap-4 items-center flex-wrap relative">
+                    <div class="relative inline-block">
+                        <img :src="returnImage" alt="Uploaded Image" class="h-32 object-contain border rounded-lg shadow-sm" />
+                        <button
+                            type="button"
+                            class="absolute top-1 right-0 text-red-600 bg-transparent hover:text-red-500 font-bold text-2xl p-1"
+                            @click="returnImage = null"
+                        >
+                            ×
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Text Reason -->
+            <label class="block font-semibold text-gray-700 mb-2">Reason for Return</label>
+            <InputText v-model="returnReason" placeholder="Enter the reason for this return order" class="w-full" style="background-color: #f5f5f5" />
+
             <div class="flex flex-col md:flex-row justify-end gap-2 mt-4">
                 <div class="w-40">
                     <RouterLink to="/om/listReturnOrder">
@@ -91,9 +114,7 @@
                     </RouterLink>
                 </div>
                 <div class="w-40">
-                    <RouterLink to="/om/confirmReturnOrder">
-                        <Button label="Submit" class="w-full" @click="handleSubmit" />
-                    </RouterLink>
+                    <Button label="Submit" class="w-full" @click="handleSubmit" />
                 </div>
             </div>
         </div>
@@ -104,39 +125,88 @@
 import { ref } from 'vue';
 
 const selectedCustomer = ref(null);
-const selectedReturnType = ref(null);
-const selectedDeliveryMethod = ref(null);
-
-const shipToAccount = ref('');
-const shipToAddress1 = ref('');
-const shipToAddress2 = ref('');
-const shipToAddress3 = ref('');
-const shipToAddress4 = ref('');
-const datetime24h = ref(null);
-
-const pickupName = ref('');
-const pickupPhone = ref('');
-const pickupTruckPlate = ref('');
-const pickupDriverIC = ref('');
-
+const selectedOrder = ref(null);
 const returnReason = ref('');
+const returnImage = ref(null);
 
+// Options with display (name + account no)
 const customerOptions = [
     { name: 'ABC Motors Sdn Bhd', code: 'CUST001' },
     { name: 'Speed Tyre Enterprise', code: 'CUST002' },
     { name: 'GoAuto Garage', code: 'CUST003' }
-];
+].map((c) => ({ ...c, display: `${c.name} (${c.code})` }));
 
-const patterns = ref([
-    { image: '/demo/images/toyor_tayar1.png', materialId: 'MAT-1001', pattern: 'Classic Stripe', size: '225/45R17 94W', origin: 'Malaysia', quantity: 0, avlQty: 50 },
-    { image: '/demo/images/toyor_tayar2.png', materialId: 'MAT-1002', pattern: 'Sport Mesh', size: '235/40R18 95Y', origin: 'Japan', quantity: 0, avlQty: 30 },
-    { image: '/demo/images/toyor_tayar3.png', materialId: 'MAT-1003', pattern: 'Luxury Diamond', size: '245/45R19 98W', origin: 'Thailand', quantity: 0, avlQty: 20 }
-]);
+// Orders for selected customer
+const ordersForCustomer = ref([]);
+const orderProducts = ref([]);
 
+// Mock data for orders
+const allOrders = {
+    CUST001: [
+        {
+            orderNumber: 'ORD-1001',
+            products: [
+                { pattern: 'Classic Stripe', size: '225/45R17', origin: 'Malaysia', avlQty: 4, returnQty: 0 },
+                { pattern: 'Sport Mesh', size: '235/40R18', origin: 'Japan', avlQty: 2, returnQty: 0 }
+            ]
+        },
+        { orderNumber: 'ORD-1002', products: [{ pattern: 'Luxury Diamond', size: '245/45R19', origin: 'Thailand', avlQty: 1, returnQty: 0 }] }
+    ],
+    CUST002: [{ orderNumber: 'ORD-2001', products: [{ pattern: 'Eco Line', size: '255/50R20', origin: 'Indonesia', avlQty: 3, returnQty: 0 }] }]
+};
+
+// When customer changes
+const onCustomerChange = () => {
+    selectedOrder.value = null;
+    orderProducts.value = [];
+    ordersForCustomer.value = allOrders[selectedCustomer.value?.code] || [];
+};
+
+// When order changes
+const onOrderChange = () => {
+    if (selectedOrder.value) {
+        orderProducts.value = selectedOrder.value.products.map((p) => ({ ...p }));
+    } else {
+        orderProducts.value = [];
+    }
+};
+
+// Custom filter function for orders dropdown
+const customOrderFilter = (option, filter) => {
+    if (!filter) return true;
+    return option.orderNumber.toLowerCase().includes(filter.toLowerCase());
+};
+
+// Handle image selection
+const onImageChange = (event) => {
+    const file = event.target.files[0];
+    if (file) {
+        const reader = new FileReader();
+        reader.onload = (e) => (returnImage.value = e.target.result);
+        reader.readAsDataURL(file);
+    } else {
+        returnImage.value = null;
+    }
+};
+
+// Submit return order
 const handleSubmit = () => {
-    console.log('Submitting return order:', {
-        products: patterns.value,
-        reason: returnReason.value
+    const productsToReturn = orderProducts.value.filter((p) => p.returnQty > 0);
+    if (!selectedCustomer.value || !selectedOrder.value) {
+        alert('Please select a customer and an order.');
+        return;
+    }
+    if (!productsToReturn.length) {
+        alert('Please enter return quantity for at least one product.');
+        return;
+    }
+    console.log('Submitting Return Order:', {
+        customer: selectedCustomer.value,
+        order: selectedOrder.value?.orderNumber,
+        products: productsToReturn,
+        reason: returnReason.value,
+        image: returnImage.value
     });
+    alert('Return Order submitted! Check console for details.');
 };
 </script>

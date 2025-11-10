@@ -1,5 +1,4 @@
 <script setup>
-import FloatingConfigurator from '@/components/FloatingConfigurator.vue';
 import { ref } from 'vue';
 import { useRouter } from 'vue-router';
 import api from '@/service/api';
@@ -11,46 +10,41 @@ const checked = ref(false);
 const loading = ref(false);
 
 const handleLogin = async () => {
-    try {
-        loading.value = true;
+  try {
+    loading.value = true;
 
-        const loginData = {
-            email: email.value,
-            password: password.value
-        };
+    const loginData = {
+      email: email.value,
+      password: password.value
+    };
 
-        const response = await api.post('login', loginData);
+    const response = await api.post('login', loginData);
 
-        if (response.data.status === 1) {
-            const tokenData = response.data.admin_data[0];
+    if (response.data.status === 1) {
+      const tokenData = response.data.admin_data[0];
 
-            // Store token in localStorage
-            localStorage.setItem('auth_token', tokenData.access_token);
-            localStorage.setItem('token_expires_at', tokenData.expires_at);
-            localStorage.setItem('token_type', tokenData.token_type);
+      localStorage.setItem('auth_token', tokenData.access_token);
+      localStorage.setItem('token_expires_at', tokenData.expires_at);
+      localStorage.setItem('token_type', tokenData.token_type);
 
-            // The token will now be automatically added to all future requests
-            // via the axios interceptor in api.js
-
-            // Redirect to dashboard or intended page
-            router.push('/');
-        } else {
-            console.error('Login failed:', response.data);
-            // Handle login error (show message to user)
-        }
-    } catch (error) {
-        console.error('Login error:', error);
-        // Handle error (show message to user)
-    } finally {
-        loading.value = false;
+      router.push('/');
+    } else {
+      console.error('Login failed:', response.data);
+      // Optionally show error to user
     }
+  } catch (error) {
+    console.error('Login error:', error);
+    // Optionally show error to user
+  } finally {
+    loading.value = false;
+  }
 };
 </script>
 
 <template>
   <div class="flex min-h-screen">
     <!-- Left Side: Logo / Image -->
-    <div class="hidden md:flex w-1/2 bg-gradient-to-b from-blue-600 to-blue-400 items-center justify-center">
+    <div class="hidden md:flex w-1/2 bg-gradient-to-b from-blue-300 to-blue-400 items-center justify-center">
       <div class="text-center px-8">
         <img src="/demo/images/toyo_logo.png" alt="Logo" class="h-20 mx-auto mb-6 object-contain" />
         <h2 class="text-3xl font-bold text-white mb-2">TOYO Admin</h2>
@@ -59,7 +53,7 @@ const handleLogin = async () => {
     </div>
 
     <!-- Right Side: Login Form -->
-    <div class="flex w-full md:w-1/2 items-center justify-center bg-gray-50 dark:bg-gray-900 px-4">
+    <div class="flex w-full md:w-1/2 items-center justify-center bg-gray-300 dark:bg-gray-900 px-4">
       <div class="w-full max-w-md bg-white dark:bg-gray-800 rounded-2xl shadow-lg p-10 sm:p-12">
         <div class="text-center mb-10">
           <h1 class="text-2xl font-semibold text-gray-900 dark:text-white mb-2">Login to your account</h1>
@@ -67,30 +61,38 @@ const handleLogin = async () => {
         </div>
 
         <div class="space-y-6">
+          <!-- Email Input -->
           <div>
-            <label for="email1" class="block text-gray-700 dark:text-gray-200 font-medium mb-2">Email</label>
+            <label for="email1" class="block text-gray-700 dark:text-gray-200 font-medium mb-2">
+              Email
+            </label>
             <InputText
               id="email1"
               type="email"
               placeholder="Email address"
-              class="w-full  border-gray-300 dark:border-gray-600 rounded-lg px-4 py-3 focus:border-primary focus:ring-1 focus:ring-primary transition"
               v-model="email"
+              class="w-full border-gray-300 dark:border-gray-600 rounded-lg"
+              input-class="w-full px-4 py-3 rounded-lg focus:border-primary focus:ring-1 focus:ring-primary transition"
             />
           </div>
 
+          <!-- Password Input -->
           <div>
-            <label for="password1" class="block text-gray-700 dark:text-gray-200 font-medium mb-2">Password</label>
+            <label for="password1" class="block text-gray-700 dark:text-gray-200 font-medium mb-2">
+              Password
+            </label>
             <Password
               id="password1"
               v-model="password"
               placeholder="Password"
               :toggleMask="true"
-              class="w-full  border-gray-300 dark:border-gray-600 rounded-lg px-4 py-3 focus:border-primary focus:ring-1 focus:ring-primary transition"
               :feedback="false"
-              fluid
+              class="w-full border-gray-300 dark:border-gray-600 rounded-lg"
+              input-class="w-full px-4 py-3 rounded-lg focus:border-primary focus:ring-1 focus:ring-primary transition"
             />
           </div>
 
+          <!-- Remember me & Forgot password -->
           <div class="flex items-center justify-between text-gray-600 dark:text-gray-300">
             <div class="flex items-center gap-2">
               <Checkbox v-model="checked" id="rememberme1" binary />
@@ -99,6 +101,7 @@ const handleLogin = async () => {
             <span class="text-primary font-medium cursor-pointer hover:underline">Forgot password?</span>
           </div>
 
+          <!-- Login Button -->
           <Button
             label="Log In"
             class="w-full bg-primary text-white rounded-lg py-3 font-semibold hover:bg-primary-dark transition"
@@ -112,49 +115,11 @@ const handleLogin = async () => {
   </div>
 </template>
 
-
-
-<!-- <template>
-    <div class="bg-surface-50 dark:bg-surface-950 flex items-center justify-center min-h-screen min-w-[100vw] overflow-hidden">
-        <div class="flex flex-col items-center justify-center">
-            <div style="border-radius: 56px; padding: 0.3rem; background: linear-gradient(180deg, var(--primary-color) 10%, rgba(33, 150, 243, 0) 30%)">
-                <div class="w-full bg-surface-0 dark:bg-surface-900 py-20 px-8 sm:px-20" style="border-radius: 53px">
-                    <div class="text-center mb-8">
-                        <img src="/demo/images/toyo_logo.png" alt="Logo" class="h-[35px] object-contain mb-20 mx-auto" />
-                        <div class="text-surface-900 dark:text-surface-0 text-3xl font-medium mb-4">Welcome TOYO Admin!</div>
-                        <span class="text-muted-color font-medium">Log in to continue</span>
-                    </div>
-
-                    <div>
-                        <label for="email1" class="block text-surface-900 dark:text-surface-0 text-xl font-medium mb-2"> Email </label>
-                        <InputText id="email1" type="text" placeholder="Email address" class="w-full md:w-[30rem] mb-8" v-model="email" />
-
-                        <label for="password1" class="block text-surface-900 dark:text-surface-0 font-medium text-xl mb-2"> Password </label>
-                        <Password id="password1" v-model="password" placeholder="Password" :toggleMask="true" class="mb-4" fluid :feedback="false"></Password>
-
-                        <div class="flex items-center justify-between mt-2 mb-8 gap-8">
-                            <div class="flex items-center">
-                                <Checkbox v-model="checked" id="rememberme1" binary class="mr-2" />
-                                <label for="rememberme1">Remember me</label>
-                            </div>
-                            <span class="font-medium no-underline ml-2 text-right cursor-pointer text-primary">Forgot password?</span>
-                        </div>
-                        <Button label="Log In" class="w-full" @click="handleLogin" :loading="loading" :disabled="loading" />
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-</template>
-
 <style scoped>
-.pi-eye {
-    transform: scale(1.6);
-    margin-right: 1rem;
-}
-
+/* Adjust password eye icon size to match input height */
+.pi-eye,
 .pi-eye-slash {
-    transform: scale(1.6);
-    margin-right: 1rem;
+  transform: scale(1.2);
+  margin-right: 0.5rem;
 }
-</style> -->
+</style>
