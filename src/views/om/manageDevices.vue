@@ -33,17 +33,18 @@
                                         <tr v-for="device in filteredAllDevices" :key="device.device_id" class="border-b hover:bg-gray-50">
                                             <td class="px-4 py-3">
                                                 <div class="flex items-center gap-2 text-gray-800 font-bold">
-                                                    <i :class="device.isBlocked ? 'pi pi-ban text-red-500' : 'pi pi-tablet text-black-500'"></i>
+                                                    <i :class="device.is_blocked ? 'pi pi-ban text-red-500' : 'pi pi-tablet text-black-500'"></i>
                                                     {{ device.device_model }}
                                                 </div>
                                                 <div class="ml-6 text-gray-500 text-xs mt-2">
                                                     <div>ID: {{ device.device_id }}</div>
                                                     <div>Platform: {{ device.device_platform }}</div>
                                                     <div>Last Active: {{ formatDate(device.last_used_at) }}</div>
+                                                    <div v-if="device.is_blocked" class="text-red-500 font-semibold">Status: Blocked</div>
                                                 </div>
                                             </td>
                                             <td class="px-4 py-3 text-right align-top">
-                                                <Button :label="device.isBlocked ? 'Unblock' : 'Block'" :severity="device.isBlocked ? 'success' : 'danger'" size="small" class="!py-1 !px-2 text-xs w-fit" @click="openBlockModal(device)" />
+                                                <Button :label="device.is_blocked ? 'Unblock' : 'Block'" :severity="device.is_blocked ? 'success' : 'danger'" size="small" class="!py-1 !px-2 text-xs w-fit" @click="openBlockModal(device)" />
                                             </td>
                                         </tr>
                                     </tbody>
@@ -96,6 +97,7 @@
                                                     <div>ID: {{ device.device_id }}</div>
                                                     <div>Platform: {{ device.device_platform }}</div>
                                                     <div>Last Active: {{ formatDate(device.last_used_at) }}</div>
+                                                    <div class="text-red-500 font-semibold">Status: Blocked</div>
                                                 </div>
                                             </td>
                                             <td class="px-4 py-3 text-right align-top">
@@ -132,8 +134,8 @@
 
                         <div class="text-gray-600">Current Status:</div>
                         <div class="font-medium">
-                            <span :class="blockModal.device?.isBlocked ? 'text-red-500' : 'text-green-500'">
-                                {{ blockModal.device?.isBlocked ? 'Blocked' : 'Active' }}
+                            <span :class="blockModal.device?.is_blocked ? 'text-red-500' : 'text-green-500'">
+                                {{ blockModal.device?.is_blocked ? 'Blocked' : 'Active' }}
                             </span>
                         </div>
                     </div>
@@ -199,7 +201,7 @@ function openBlockModal(device) {
     blockModal.value = {
         visible: true,
         device: device,
-        isBlocking: !device.isBlocked,
+        isBlocking: !device.is_blocked,
         reason: ''
     };
 }
@@ -214,66 +216,44 @@ function closeBlockModal() {
     };
 }
 
-// ✅ Fetch devices from API
+// ✅ Fetch devices from API - Updated to use single endpoint
 async function fetchDeviceList() {
     try {
         isLoading.value = true;
         const response = await api.get(`deviceList/${etenUserId.value}`);
-        if (response.data.status === 1) {
-            // First, get all devices from sessions
-            const sessionDevices = response.data.admin_data.map((d) => ({
-                device_model: d.device_model,
-                device_id: d.device_id,
-                device_platform: d.device_platform,
-                last_used_at: d.last_used_at,
-                isBlocked: false // Default to false
-            }));
 
-            // Then fetch blocklist status for these devices
-            await fetchBlocklistStatus(sessionDevices);
+        if (response.data.status === 1) {
+            devices.value = response.data.admin_data.map((device) => ({
+                device_model: device.device_model,
+                device_id: device.device_id,
+                device_platform: device.device_platform,
+                last_used_at: device.last_used_at,
+                is_blocked: device.is_blocked === 1 // Convert to boolean
+            }));
         } else {
-            toast.add({ severity: 'warn', summary: 'No Data', detail: 'No devices found.', life: 3000 });
+            toast.add({
+                severity: 'warn',
+                summary: 'No Data',
+                detail: 'No devices found.',
+                life: 3000
+            });
+            devices.value = [];
         }
     } catch (err) {
         console.error('Error fetching devices:', err);
-        toast.add({ severity: 'error', summary: 'Error', detail: 'Failed to load devices.', life: 3000 });
+        toast.add({
+            severity: 'error',
+            summary: 'Error',
+            detail: 'Failed to load devices.',
+            life: 3000
+        });
+        devices.value = [];
     } finally {
         isLoading.value = false;
     }
 }
 
-// ✅ Fetch blocklist status for devices
-async function fetchBlocklistStatus(sessionDevices) {
-    try {
-        const deviceIds = sessionDevices.map((d) => d.device_id);
-
-        // Create FormData for the request
-        const formData = new FormData();
-        formData.append('eten_userListID', etenUserId.value);
-        formData.append('deviceUUIDs', JSON.stringify(deviceIds));
-
-        const response = await api.post('device_blocklist_status', formData);
-
-        if (response.data.status === 1) {
-            const blockedDevices = response.data.blocked_devices || [];
-
-            // Update session devices with block status
-            devices.value = sessionDevices.map((device) => ({
-                ...device,
-                isBlocked: blockedDevices.some((blocked) => blocked.deviceUUID === device.device_id && blocked.status === 'blocked')
-            }));
-        } else {
-            // If blocklist API fails, just use session devices
-            devices.value = sessionDevices;
-        }
-    } catch (error) {
-        console.error('Error fetching blocklist status:', error);
-        // If blocklist API fails, just use session devices
-        devices.value = sessionDevices;
-    }
-}
-
-// ✅ Confirm Block/Unblock Action
+// ✅ Confirm Block/Unblock Action - Updated to match API requirements
 async function confirmBlockAction() {
     if (!blockModal.value.reason.trim()) {
         toast.add({
@@ -288,26 +268,30 @@ async function confirmBlockAction() {
     try {
         const { device, isBlocking, reason } = blockModal.value;
 
-        // Create FormData for the request
-        const formData = new FormData();
-        formData.append('eten_userListID', etenUserId.value);
-        formData.append('deviceUUID', device.device_id);
-        formData.append('device_model', device.device_model);
-        formData.append('status', isBlocking ? 'blocked' : 'unblocked');
+        // Prepare request data according to API
+        const requestData = {
+            eten_userListID: etenUserId.value,
+            deviceUUID: device.device_id,
+            device_model: device.device_model,
+            status: isBlocking ? 'blocked' : 'unblocked'
+        };
 
+        // Add appropriate reason field based on action
         if (isBlocking) {
-            formData.append('block_reason', reason);
+            requestData.block_reason = reason;
+            requestData.unblock_reason = null;
         } else {
-            formData.append('unblock_reason', reason);
+            requestData.unblock_reason = reason;
+            requestData.block_reason = null;
         }
 
-        const response = await api.post('block_user_device', formData);
+        const response = await api.post('block_user_device', requestData);
 
         if (response.data.status === 1) {
             // Update local device status
             const deviceIndex = devices.value.findIndex((d) => d.device_id === device.device_id);
             if (deviceIndex !== -1) {
-                devices.value[deviceIndex].isBlocked = isBlocking;
+                devices.value[deviceIndex].is_blocked = isBlocking;
             }
 
             toast.add({
@@ -345,8 +329,8 @@ const filterDevices = (list) => {
 };
 
 const filteredAllDevices = computed(() => filterDevices(devices.value));
-const filteredActiveDevices = computed(() => filterDevices(devices.value.filter((d) => !d.isBlocked)));
-const filteredBlockedDevices = computed(() => filterDevices(devices.value.filter((d) => d.isBlocked)));
+const filteredActiveDevices = computed(() => filterDevices(devices.value.filter((d) => !d.is_blocked)));
+const filteredBlockedDevices = computed(() => filterDevices(devices.value.filter((d) => d.is_blocked)));
 
 // ✅ Format date
 function formatDate(date) {
