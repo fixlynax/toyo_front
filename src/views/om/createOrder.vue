@@ -30,11 +30,11 @@
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
                 <div>
                     <label class="block font-bold text-gray-700">Ship To Account No.</label>
-                    <Dropdown placeholder="Select Delivery Method" class="w-full" />
+                    <Dropdown filter placeholder="Select Delivery Method" class="w-full" />
                 </div>
                 <div>
                     <label class="block font-bold text-gray-700">Ship To Address</label>
-                    <Dropdown placeholder="Select Delivery Method" class="w-full" />
+                    <InputText placeholder="Select Delivery Method" class="w-full" />
                 </div>
             </div>
         </div>
@@ -47,10 +47,10 @@
                 </div>
                 <div>
                     <label class="block font-bold text-gray-700">Ship To Address</label>
-                    <Dropdown placeholder="Select Delivery Method" class="w-full" />
+                    <InputText placeholder="Select Delivery Method" class="w-full" />
                 </div>
                 <div>
-                    <label class="block font-bold text-gray-700">Estimated Time Arrival</label>
+                    <label class="block font-bold text-gray-700">Estimated Delivery Arrival</label>
                     <Calendar id="calendar-24h" v-model="datetime24h" showTime hourFormat="24" placeholder="Select ETA"/>
                 </div>
             </div>
