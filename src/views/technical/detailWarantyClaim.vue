@@ -120,34 +120,30 @@
                 <div class="card w-full mb-4" v-if="warantyDetail.isCTC === 1 && warantyDetail.isScrap === 0 && warantyDetail.status === 4">
                     <div class="flex items-center justify-between border-b pb-2 mb-2">
                         <div class="text-2xl font-bold text-gray-800">CTC Detail</div>
-                        <Button v-if="warantyDetail.isCTC === 1 && warantyDetail.isScrap === 0 && warantyDetail.status === 4" label="Create" class="p-button-info" size="small" @click="createCTC" />
+                        <Button v-if="warantyDetail.isCTC === 1 && warantyDetail.isScrap === 0 && warantyDetail.status === 4  && !warantyDetail.ctc_details" label="Create" class="p-button-info" size="small" @click="createCTC" />
                     </div>
-                    <!-- <div class="grid grid-cols-2 md:grid-cols-2 gap-4 text-sm text-gray-800">
+                    <div class="grid grid-cols-2 md:grid-cols-2 gap-4 text-sm text-gray-800" v-if="warantyDetail.ctc_details" >
                         <div>
                             <span class="font-bold">Warranty Entry ID</span>
-                            <p>{{ warantyDetail.id }}</p>
+                            <p>{{ warantyDetail.ctc_details.id }}</p>
                         </div>
                         <div>
-                            <span class="font-bold">Submitted Date</span>
-                            <p>{{ formatDate(warantyDetail.submitDate) }}</p>
+                            <span class="font-bold">Collect Date</span>
+                            <p>{{ formatDate(warantyDetail.ctc_details.collectDate) }}</p>
                         </div>
                         <div>
-                            <span class="font-bold">Verified Date</span>
-                            <p>{{ formatDate(warantyDetail.verifiedDate) }}</p>
+                            <span class="font-bold">Collect Time</span>
+                            <p>{{formatTime(warantyDetail.ctc_details.collectTime) }}</p>
                         </div>
                         <div>
                             <span class="font-bold">Created Date</span>
-                            <p>{{ formatDate(warantyDetail.created) }}</p>
+                            <p>{{ formatDate(warantyDetail.ctc_details.created) }}</p>
                         </div>
                         <div>
                             <span class="font-bold">CTC Status</span>
-                            <p>{{ getCTCStatus(warantyDetail.isCTC) }}</p>
+                            <p>{{ getCTCStatus(warantyDetail.ctc_details.status) }}</p>
                         </div>
-                        <div>
-                            <span class="font-bold">Overall Status</span>
-                            <p>{{ getStatusText(warantyDetail.status) }}</p>
-                        </div>
-                    </div> -->
+                    </div>
                 </div>
 
                 <!-- 2. Claim Detail -->
@@ -901,6 +897,16 @@ const downloadReport = () => {
 const formatDate = (dateString) => {
     if (!dateString) return 'N/A';
     return new Date(dateString).toLocaleDateString('en-MY');
+};
+
+const formatTime = (timeStr) => {
+  if (!timeStr) return '';
+  const date = new Date(`1970-01-01T${timeStr}`);
+  return date.toLocaleTimeString('en-MY', {
+    hour: '2-digit',
+    minute: '2-digit',
+    hour12: true
+  });
 };
 
 const getStatusText = (status) => {
