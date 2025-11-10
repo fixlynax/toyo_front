@@ -6,30 +6,17 @@ import { onBeforeMount, ref } from 'vue';
 const listData = ref([]);
 const loading = ref(true);
 
-// Map status → label
-const getOverallStatusLabel = (status) => {
-    switch (status) {
-        case 0: return 'Pending';
-        case 1: return 'ETEN Approved';
-        case 2: return 'ETEN Rejected';
-        case 3: return 'Processing';
-        case 4: return 'Toyo Approved';
-        case 5: return 'Toyo Rejected';
-        case 9: return 'Deleted';
-        default: return 'Unknown';
-    }
-};
 
-// Map status → severity (PrimeVue Tag colors)
+// Map status → severity (PrimeVue Tag colors) - CORRECTED
 const getOverallStatusSeverity = (status) => {
     switch (status) {
-        case 0: return 'warn';     // Pending
-        case 1: return 'success';  // ETEN Approved
-        case 2: return 'danger';   // ETEN Rejected
-        case 3: return 'info';     // Processing
-        case 4: return 'success';  // Toyo Approved
-        case 5: return 'danger';   // Toyo Rejected
-        case 9: return 'secondary';// Deleted
+        case "Pending Dealer": return 'warn';     
+        case "Dealer Approved" :return 'success';  
+        case "Dealer Rejected": return 'danger';   
+        case "Processing": return 'info';     
+        case "In Progress": return 'warning';  
+        case "Admin Approved": return 'success';  
+        case "Admin Rejected": return 'danger';   
         default: return 'secondary';
     }
 };
@@ -119,7 +106,7 @@ onBeforeMount(async () => {
             </Column>
             <Column header="Status" style="min-width: 6rem">
                 <template #body="{ data }">
-                    <Tag :value="getOverallStatusLabel(data.status)" :severity="getOverallStatusSeverity(data.status)" />
+                    <Tag :value="data.status" :severity="getOverallStatusSeverity(data.status)" />
                 </template>
             </Column>
         </DataTable>

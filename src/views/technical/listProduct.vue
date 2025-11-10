@@ -50,48 +50,7 @@
                 </template>
             </Column>
 
-            <!-- TWP Column with Checkbox -->
-            <Column field="twp" header="TWP" style="min-width: 8rem">
-                <template #body="{ data }">
-                    <div class="flex justify-center">
-                        <Checkbox 
-                            v-model="data.twp" 
-                            :binary="true" 
-                            :disabled="true"
-                            :class="data.twp ? 'p-checkbox-checked' : ''"
-                        />
-                    </div>
-                </template>
-            </Column>
-
-            <!-- Warranty Column with Checkbox -->
-            <Column field="warranty" header="Warranty" style="min-width: 8rem">
-                <template #body="{ data }">
-                    <div class="flex justify-center">
-                        <Checkbox 
-                            v-model="data.warranty" 
-                            :binary="true" 
-                            :disabled="true"
-                            :class="data.warranty ? 'p-checkbox-checked' : ''"
-                        />
-                    </div>
-                </template>
-            </Column>
-
-            <!-- Sell Column with Checkbox -->
-            <Column field="sell" header="Sell" style="min-width: 6rem">
-                <template #body="{ data }">
-                    <div class="flex justify-center">
-                        <Checkbox 
-                            v-model="data.sell" 
-                            :binary="true" 
-                            :disabled="true"
-                            :class="data.sell ? 'p-checkbox-checked' : ''"
-                        />
-                    </div>
-                </template>
-            </Column>
-
+            
             <Column field="pattern" header="Pattern" style="min-width: 8rem">
                 <template #body="{ data }">
                     <RouterLink to="/technical/detailProduct" class="block text-gray-800 hover:text-gray-600 transition-colors">
@@ -125,6 +84,48 @@
                             <span class="w-40 text-gray-800 font-semibold">Speed Rating:</span>
                             <span>{{ data.speedplyrating }}</span>
                         </div>
+                    </div>
+                </template>
+            </Column>
+            
+            <!-- TWP Column with Checkbox -->
+            <Column field="twp" header="TWP" style="min-width: 8rem">
+                <template #body="{ data }">
+                    <div class="flex justify-center">
+                        <Checkbox 
+                            v-model="data.twp" 
+                            :binary="true" 
+                            :disabled="true"
+                            :class="data.twp ? 'p-checkbox-checked' : ''"
+                        />
+                    </div>
+                </template>
+            </Column>
+    
+            <!-- Warranty Column with Checkbox -->
+            <Column field="warranty" header="Warranty" style="min-width: 8rem">
+                <template #body="{ data }">
+                    <div class="flex justify-center">
+                        <Checkbox 
+                            v-model="data.warranty" 
+                            :binary="true" 
+                            :disabled="true"
+                            :class="data.warranty ? 'p-checkbox-checked' : ''"
+                        />
+                    </div>
+                </template>
+            </Column>
+    
+            <!-- Sell Column with Checkbox -->
+            <Column field="sell" header="Sell" style="min-width: 6rem">
+                <template #body="{ data }">
+                    <div class="flex justify-center">
+                        <Checkbox 
+                            v-model="data.sell" 
+                            :binary="true" 
+                            :disabled="true"
+                            :class="data.sell ? 'p-checkbox-checked' : ''"
+                        />
                     </div>
                 </template>
             </Column>

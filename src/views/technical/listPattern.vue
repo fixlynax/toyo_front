@@ -4,20 +4,17 @@
 
         <DataTable
             v-model:expandedRows="expandedRows"
-            :value="tyres"
+            :value="patterns"
             :paginator="true"
             :rows="10"
-            dataKey="id"
+            dataKey="pattern_id"
             :rowHover="true"
             :loading="loading"
             :filters="filters"
             filterDisplay="menu"
-            :globalFilterFields="['materialid', 'pattern', 'imageURL']"
+            :globalFilterFields="['pattern_code', 'pattern_name', 'image_url']"
             tableStyle="min-width: 60rem"
         >
-            <!-- ========================= -->
-            <!-- Header Section -->
-            <!-- ========================= -->
             <template #header>
                 <div class="flex items-center justify-between gap-4 w-full flex-wrap">
                     <div class="flex items-center gap-2 w-full max-w-md">
@@ -43,36 +40,48 @@
                 </div>
             </template>
 
-            <!-- ========================= -->
-            <!-- Empty / Loading Messages -->
-            <!-- ========================= -->
             <template #empty> No data found. </template>
             <template #loading> Loading data. Please wait... </template>
 
-            <!-- ========================= -->
-            <!-- Data Columns -->
-            <!-- ========================= -->
-            <Column field="imageURL" header="Image" style="min-width: 8rem; text-align: center">
+            <Column field="processedImageURL" header="Image" style="min-width: 8rem; text-align: center">
                 <template #body="{ data }">
-                    <img :src="getImagePath(data.imageURL)" alt="Tyre Image" class="w-16 h-16 object-contain rounded-md shadow-sm border border-gray-200 cursor-pointer hover:scale-105 transition-transform" @click="openImage(data.imageURL)" />
+                    <img 
+                        v-if="data.processedImageURL" 
+                        :src="getImagePath(data.processedImageURL)" 
+                        alt="Pattern Image" 
+                        class="w-16 h-16 object-contain rounded-md shadow-sm border border-gray-200 cursor-pointer hover:scale-105 transition-transform" 
+                        @click="openImage(data.processedImageURL)" 
+                    />
+                    <div v-else class="w-16 h-16 flex items-center justify-center bg-gray-100 rounded-md border border-gray-200 text-gray-400 text-xs">
+                        No Image
+                    </div>
                 </template>
             </Column>
 
-            <Column field="pattern" header="Pattern" style="min-width: 8rem">
+            <Column field="pattern_code" header="Pattern Code" style="min-width: 8rem">
                 <template #body="{ data }">
-                    <span class="font-semibold ml-1">{{ data.pattern }}</span>
+                    <span class="font-semibold ml-1">{{ data.pattern_code }}</span>
                 </template>
             </Column>
 
-            <Column field="pattern" header="Pattern Name" style="min-width: 8rem">
+            <Column field="pattern_name" header="Pattern Name" style="min-width: 8rem">
                 <template #body="{ data }">
-                    <span class="font-semibold ml-1">{{ data.patternName }}</span>
+                    <span class="font-semibold ml-1">{{ data.pattern_name || 'N/A' }}</span>
+                </template>
+            </Column>
+
+            <Column field="created" header="Created Date" style="min-width: 10rem">
+                <template #body="{ data }">
+                    <span class="text-gray-600">{{ formatDate(data.created) }}</span>
                 </template>
             </Column>
         </DataTable>
 
         <!-- ✅ Image Preview Dialog -->
         <Dialog v-model:visible="showImageDialog" modal :style="{ width: '40vw' }" dismissableMask>
+            <template #header>
+                <div class="text-xl font-bold">Pattern Image</div>
+            </template>
             <div class="flex justify-center items-center">
                 <img :src="getImagePath(selectedImage)" alt="Preview" class="max-w-full max-h-[70vh] object-contain rounded-lg shadow-lg" />
             </div>
@@ -83,13 +92,10 @@
 <script setup>
 import { ref, onMounted } from 'vue';
 import { FilterMatchMode } from '@primevue/core/api';
-import { ListTyreService } from '@/service/listProduct';
+import api from '@/service/api';
 import Dialog from 'primevue/dialog';
 
-// =========================
-// State Variables
-// =========================
-const tyres = ref([]);
+const patterns = ref([]);
 const loading = ref(true);
 const expandedRows = ref([]);
 
@@ -98,48 +104,60 @@ const filters = ref({
     global: { value: null, matchMode: FilterMatchMode.CONTAINS }
 });
 
-// =========================
-// Sort Menu
-// =========================
 const sortMenu = ref();
 const sortItems = ref([
     {
-        label: 'Sort by Material ID (A-Z)',
+        label: 'Sort by Pattern Code (A-Z)',
         icon: 'pi pi-sort-alpha-down',
-        command: () => sortBy('materialid', 'asc')
+        command: () => sortBy('pattern_code', 'asc')
     },
     {
-        label: 'Sort by Material ID (Z-A)',
+        label: 'Sort by Pattern Code (Z-A)',
         icon: 'pi pi-sort-alpha-up',
-        command: () => sortBy('materialid', 'desc')
+        command: () => sortBy('pattern_code', 'desc')
     },
     {
-        label: 'Sort by Pattern (A-Z)',
+        label: 'Sort by Pattern Name (A-Z)',
         icon: 'pi pi-tag',
-        command: () => sortBy('pattern', 'asc')
+        command: () => sortBy('pattern_name', 'asc')
     },
     {
-        label: 'Sort by Pattern (Z-A)',
+        label: 'Sort by Pattern Name (Z-A)',
         icon: 'pi pi-tag',
-        command: () => sortBy('pattern', 'desc')
+        command: () => sortBy('pattern_name', 'desc')
+    },
+    {
+        label: 'Sort by Created Date (Newest)',
+        icon: 'pi pi-calendar',
+        command: () => sortBy('created', 'desc')
+    },
+    {
+        label: 'Sort by Created Date (Oldest)',
+        icon: 'pi pi-calendar',
+        command: () => sortBy('created', 'asc')
     }
 ]);
 
 const sortBy = (field, order) => {
-    tyres.value.sort((a, b) => {
-        if (a[field] < b[field]) return order === 'asc' ? -1 : 1;
-        if (a[field] > b[field]) return order === 'asc' ? 1 : -1;
+    patterns.value.sort((a, b) => {
+        let aValue = a[field];
+        let bValue = b[field];
+        
+        // Handle null values
+        if (aValue === null) aValue = '';
+        if (bValue === null) bValue = '';
+        
+        if (aValue < bValue) return order === 'asc' ? -1 : 1;
+        if (aValue > bValue) return order === 'asc' ? 1 : -1;
         return 0;
     });
 };
 
-// =========================
-// Image Preview Logic
-// =========================
 const showImageDialog = ref(false);
 const selectedImage = ref(null);
 
 const openImage = (imagePath) => {
+    if (!imagePath) return;
     selectedImage.value = imagePath;
     showImageDialog.value = true;
 };
@@ -149,22 +167,96 @@ const getImagePath = (path) => {
     return path.replace(/^public\//, '/');
 };
 
-// =========================
-// Fetch Data
-// =========================
+const formatDate = (dateString) => {
+    if (!dateString) return 'N/A';
+    try {
+        const date = new Date(dateString);
+        return date.toLocaleDateString('en-US', {
+            year: 'numeric',
+            month: 'short',
+            day: 'numeric'
+        });
+    } catch (error) {
+        return 'Invalid Date';
+    }
+};
+
+const processCatalogueImages = async (catalogueItems) => {
+    const processedItems = [];
+
+    for (const item of catalogueItems) {
+        if (item.imageURL && typeof item.imageURL === 'string') {
+            try {
+                console.log('Processing private image:', item.imageURL);
+                const blobUrl = await api.getPrivateFile(item.imageURL);
+                if (blobUrl) {
+                    processedItems.push({
+                        ...item,
+                        processedImageURL: blobUrl
+                    });
+                    console.log('Successfully processed image:', item.prizeName, blobUrl);
+                } else {
+                    // Fallback to original URL if private file loading fails
+                    processedItems.push({
+                        ...item,
+                        processedImageURL: item.imageURL
+                    });
+                    console.warn('Failed to process private image, using original:', item.imageURL);
+                }
+            } catch (error) {
+                console.error(`Error loading catalogue image for ${item.prizeName}:`, error);
+                // Fallback to original URL
+                processedItems.push({
+                    ...item,
+                    processedImageURL: item.imageURL
+                });
+            }
+        } else {
+            // No image URL, use placeholder
+            processedItems.push({
+                ...item,
+                processedImageURL: ''
+            });
+        }
+    }
+
+    return processedItems;
+};
+
 onMounted(async () => {
-    loading.value = true;
-    const data = await ListTyreService.getListTyre();
+    try {
+        loading.value = true;
 
-    // Example nested structure (you can adjust based on your actual data)
-    tyres.value = data.map((tyre) => ({
-        ...tyre,
-        sizes: [
-            { size: '215/45R17', productdesc: 'PROXES CR1', origin: 'Japan', status: 'Active', materialid: tyre.materialid },
-            { size: '205/55R16', productdesc: 'PROXES TR1', origin: 'Thailand', status: 'Inactive', materialid: tyre.materialid }
-        ]
-    }));
+        const response = await api.get('patternList');
 
-    loading.value = false;
+        console.log('API Response:', response.data);
+
+
+        if (response.data.status === 1 && Array.isArray(response.data.material_patterns)) {
+            const transformedItems = response.data.material_patterns.map((pattern) => ({
+                pattern_id: pattern.pattern_id,
+                pattern_code: pattern.pattern_code,
+                pattern_name: pattern.pattern_name,
+                imageURL: pattern.image_url,
+                created: pattern.created,
+                processedImageURL: null // For private image processing
+            }));
+
+            // Process private images
+            const processedItems = await processCatalogueImages(transformedItems);
+            patterns.value = processedItems;
+
+        } else {
+            console.error('API returned error or invalid data:', response.data);
+            patterns.value = [];
+        }
+    } catch (error) {
+        console.error('Error fetching Pattern list:', error);
+        patterns.value = [];
+    } finally {
+        loading.value = false;
+    }
 });
+
+
 </script>
