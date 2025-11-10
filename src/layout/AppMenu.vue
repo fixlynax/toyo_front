@@ -92,6 +92,11 @@ const model = ref([
                 to: '/technical/dashboardTechnical'
             },
             {
+                label: 'Appoitment',
+                icon: 'pi pi-book',
+                to: '/technical/listAppoitment'
+            },
+            {
                 label: 'Warranty Claim',
                 icon: 'pi pi-fw pi-file',
                 items: [

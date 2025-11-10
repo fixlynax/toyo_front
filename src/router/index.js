@@ -439,6 +439,16 @@ const router = createRouter({
                     name: 'Dashboard-Technical',
                     component: () => import('@/views/technical/dashboardTechnical.vue')
                 },
+                {
+                    path: '/technical/listAppoitment',
+                    name: 'List-Appointment',
+                    component: () => import('@/views/technical/listAppoitment.vue')
+                },
+                {
+                    path: '/technical/detailAppointment',
+                    name: 'Detail-Appointment',
+                    component: () => import('@/views/technical/detailAppointment.vue')
+                },
 
                 // Warranty Claims
                 {
