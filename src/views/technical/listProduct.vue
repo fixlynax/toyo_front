@@ -2,8 +2,6 @@
     <div class="card">
         <div class="text-2xl font-bold text-gray-800 border-b pb-2">List Product</div>
 
-
-
         <DataTable
             :value="tyres"
             :paginator="true"
@@ -38,16 +36,16 @@
                         label="Material" 
                         icon="pi pi-sync" 
                         class="p-button"
-                        :loading="exportLoading"
-                        @click="handleExport"
+                        :loading="materialLoading"
+                        @click="handleMaterial"
                         />
                         <Button 
                         type="button" 
                         label="Stock Level" 
                         icon="pi pi-sync" 
                         class="p-button"
-                        :loading="exportLoading"
-                        @click="handleExport"
+                        :loading="stockLevelLoading"
+                        @click="handleStockLevel"
                         />
                         <Button 
                         type="button" 
@@ -221,6 +219,8 @@ const loading = ref(true);
 const exportLoading = ref(false);
 const importLoading = ref(false);
 const refreshLoading = ref(false);
+const materialLoading = ref(false);
+const stockLevelLoading = ref(false);
 const importInput = ref();
 const selectedExportIds = ref(new Set());
 
@@ -308,6 +308,81 @@ const fetchData = async () => {
     }
 };
 
+// Material update function
+const handleMaterial = async () => {
+    try {
+        materialLoading.value = true;
+        const response = await api.get('updatematerialmaster');
+        
+        if (response.data.success) {
+            const updatedCount = response.data.updated ? response.data.updated.length : 0;
+            toast.add({ 
+                severity: 'success', 
+                summary: 'Material Updated', 
+                detail: `Material master updated successfully. ${updatedCount} records processed.`, 
+                life: 5000 
+            });
+            
+            // Refresh the data to show updated materials
+            await fetchData();
+        } else {
+            toast.add({ 
+                severity: 'warn', 
+                summary: 'Material Update', 
+                detail: response.data.message || 'Material update completed with warnings', 
+                life: 5000 
+            });
+        }
+    } catch (error) {
+        console.error('Error updating material master:', error);
+        toast.add({ 
+            severity: 'error', 
+            summary: 'Update Failed', 
+            detail: 'Failed to update material master', 
+            life: 3000 
+        });
+    } finally {
+        materialLoading.value = false;
+    }
+};
+
+// Stock level update function
+const handleStockLevel = async () => {
+    try {
+        stockLevelLoading.value = true;
+        const response = await api.get('updatestocklevel');
+        
+        if (response.data.success) {
+            toast.add({ 
+                severity: 'success', 
+                summary: 'Stock Level Updated', 
+                detail: 'Stock levels updated successfully', 
+                life: 5000 
+            });
+            
+            // Refresh the data to show updated stock levels
+            await fetchData();
+        } else {
+            toast.add({ 
+                severity: 'warn', 
+                summary: 'Stock Level Update', 
+                detail: response.data.message || 'Stock level update completed with warnings', 
+                life: 5000 
+            });
+        }
+    } catch (error) {
+        console.error('Error updating stock level:', error);
+        toast.add({ 
+            severity: 'error', 
+            summary: 'Update Failed', 
+            detail: 'Failed to update stock levels', 
+            life: 3000 
+        });
+    } finally {
+        stockLevelLoading.value = false;
+    }
+};
+
 // Computed boolean: are all rows selected?
 const allSelected = computed(() => {
   return tyres.value.length > 0 && selectedExportIds.value.size === tyres.value.length;
@@ -333,6 +408,7 @@ const toggleSelectAll = () => {
     tyres.value.forEach(row => selectedExportIds.value.add(row.id));
   }
 };
+
 // Toggle functions
 const handleToggleTWP = async (data) => {
     try {
