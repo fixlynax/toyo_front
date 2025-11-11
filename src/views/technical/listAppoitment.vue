@@ -2,6 +2,7 @@
 import { FilterMatchMode } from '@primevue/core/api';
 import api from '@/service/api';
 import { onBeforeMount, ref } from 'vue';
+import LoadingPage from '@/components/LoadingPage.vue';
 
 const listData = ref([]);
 const loading = ref(true);
