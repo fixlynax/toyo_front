@@ -13,7 +13,7 @@
                     <div class="flex items-center justify-between w-full">
                         <div>
                             <span class="block text-sm font-bold text-gray-700">Customer Account No.</span>
-                            <span class="text-lg font-medium">{{ backOrder.custAccountNo }}</span>
+                            <span class="text-lg font-medium">{{ orderData.custaccountno || 'N/A' }}</span>
                         </div>
                     </div>
 
@@ -22,33 +22,33 @@
                     <div class="flex flex-col md:flex-row gap-4">
                         <div class="w-full">
                             <span class="text-sm font-bold text-gray-700">Dealer Name</span>
-                            <p class="text-lg font-medium">{{ backOrder.customerName }}</p>
+                            <p class="text-lg font-medium">{{ customerInfo.dealerName || 'N/A' }}</p>
                         </div>
                         <div class="w-full">
                             <span class="text-sm font-bold text-gray-700">Location</span>
-                            <p class="text-lg font-medium">{{ backOrder.location }}</p>
+                            <p class="text-lg font-medium">{{ getFullAddress(shippingDetail) || 'N/A' }}</p>
                         </div>
                     </div>
 
                     <div class="flex flex-col md:flex-row gap-4">
                         <div class="w-full">
                             <span class="text-sm font-bold text-gray-700">Signboard</span>
-                            <p class="text-lg font-medium">{{ backOrder.signboard }}</p>
+                            <p class="text-lg font-medium">{{ customerInfo.signboard || 'N/A' }}</p>
                         </div>
                         <div class="w-full">
                             <span class="text-sm font-bold text-gray-700">Distribution Channel</span>
-                            <p class="text-lg font-medium">{{ backOrder.distributionChannel }}</p>
+                            <p class="text-lg font-medium">{{ orderData.distributionchannel || 'N/A' }}</p>
                         </div>
                     </div>
 
                     <div class="flex flex-col md:flex-row gap-4">
                         <div class="w-full">
                             <span class="text-sm font-bold text-gray-700">Contact Person</span>
-                            <p class="text-lg font-medium">{{ warantyDetail.contactPerson }}</p>
+                            <p class="text-lg font-medium">{{ shippingDetail?.companyName1 || 'N/A' }}</p>
                         </div>
                         <div class="w-full">
                             <span class="text-sm font-bold text-gray-700">Contact Number</span>
-                            <p class="text-lg font-medium">{{ warantyDetail.contactNo }}</p>
+                            <p class="text-lg font-medium">{{ shippingDetail?.phoneNumber || shippingDetail?.mobileNumber || 'N/A' }}</p>
                         </div>
                     </div>
                 </div>
@@ -59,79 +59,56 @@
                         <div>
                             <span class="text-sm font-bold text-gray-700">Ship To</span>
                             <p class="text-lg font-medium">
-                                {{ backOrdering.deliveryType === 'DELIVER' ? backOrdering.shipTo : 'Customer Self Pickup' }}
+                                {{ orderData.deliveryType === 'DELIVER' ? shippingDetail?.companyName1 : 'Customer Self Pickup' }}
                             </p>
                         </div>
                         <div>
-                            <span class="text-sm font-bold text-gray-700">Description</span>
-                            <p class="text-lg font-medium">{{ backOrdering.orderDesc }}</p>
-                        </div>
-                        <div>
                             <span class="text-sm font-bold text-gray-700">Shipping Cond</span>
-                            <p class="text-lg font-medium">{{ backOrdering.shippingCond }}</p>
+                            <p class="text-lg font-medium">{{ orderData.shippingcond || 'Standard' }}</p>
                         </div>
                         <div>
                             <span class="text-sm font-bold text-gray-700">Delivery Type</span>
-                            <p class="text-lg font-medium">{{ backOrdering.deliveryType }}</p>
+                            <p class="text-lg font-medium">{{ orderData.deliveryType || 'N/A' }}</p>
                         </div>
                         <div>
                             <span class="text-sm font-bold text-gray-700">Delivery ETA</span>
-                            <p class="text-lg font-medium">{{ backOrdering.deliveryETA }}</p>
+                            <p class="text-lg font-medium">{{ formatDate(orderData.deliveryDate) }}</p>
                         </div>
                         <div>
                             <span class="text-sm font-bold text-gray-700">Delivery Status</span>
                             <p class="text-lg font-medium">
-                                <span class="text-green-600 font-bold">
-                                    {{ backOrdering.deliveryStatus }}
+                                <span :class="statusClass(orderData.status_string)">
+                                    {{ orderData.status_string || 'N/A' }}
                                 </span>
                             </p>
-                            <p class="text-xs text-gray-500 mt-1">Last updated: {{ backOrdering.lastUpdated }}</p>
+                            <p class="text-xs text-gray-500 mt-1">Last updated: {{ formatDateTime(orderData.updated_at) }}</p>
                         </div>
                     </div>
                 </div>
                 <div class="card flex flex-col w-full">
                     <div class="font-semibold text-xl border-b pb-2">📦 Order Items</div>
 
-                    <DataTable :value="orderItems" dataKey="id" responsiveLayout="scroll" class="text-sm" stripedRows>
-                        <Column field="itemLineNo" header="Item Line No." style="min-width: 6rem; text-align: center">
+                    <DataTable :value="orderItems" selectionMode="multiple" v-model:selection="selectedReturnItems" dataKey="materialid">
+                        <Column selectionMode="multiple" headerStyle="width: 3rem"></Column>
+                        <Column field="materialid" header="Material ID"></Column>
+                        <Column field="itemcategory" header="Item Category">
                             <template #body="{ data }">
-                                <span class="font-bold text-lg">{{ data.itemLineNo }}</span>
+                                {{ data.itemcategory || 'ZRO2' }}
                             </template>
                         </Column>
-
-                        <Column field="materialId" header="Material ID" style="min-width: 8rem; text-align: center">
+                        <Column field="qty" header="Available Qty">
                             <template #body="{ data }">
-                                <span class="font-medium text-lg">{{ data.materialId }}</span>
+                                {{ data.qty - getReturnedQty(data.materialid) }}
                             </template>
                         </Column>
-
-                        <Column field="salesProgramId" header="Sales Program ID" style="min-width: 8rem; text-align: center">
+                        <!-- <Column header="Return Qty">
                             <template #body="{ data }">
-                                <span class="text-lg">{{ data.salesProgramId }}</span>
+                                <InputNumber v-model="returnQuantities[data.materialid]" :min="0" :max="data.qty - getReturnedQty(data.materialid)" showButtons class="w-full" />
                             </template>
-                        </Column>
-
-                        <Column field="priceGroup" header="Price Group" style="min-width: 6rem; text-align: center">
+                        </Column> -->
+                        <Column field="unitprice" header="Price">
                             <template #body="{ data }">
-                                <span class="text-lg">{{ data.priceGroup }}</span>
-                            </template>
-                        </Column>
-
-                        <Column field="quantity" header="Qty" style="text-align: center">
-                            <template #body="{ data }">
-                                <span class="text-lg">{{ data.quantity }}</span>
-                            </template>
-                        </Column>
-
-                        <Column field="unitPrice" header="Unit Price (RM)" style="min-width: 8rem; text-align: right">
-                            <template #body="{ data }">
-                                <span class="text-lg font-semibold text-green-600">{{ data.unitPrice.toFixed(2) }}</span>
-                            </template>
-                        </Column>
-
-                        <Column field="totalPrice" header="Total (RM)" style="min-width: 8rem; text-align: right">
-                            <template #body="{ data }">
-                                <span class="text-lg font-bold text-green-700">{{ (data.quantity * data.unitPrice).toFixed(2) }}</span>
+                                RM {{ parseFloat(data.unitprice).toFixed(2) }}
                             </template>
                         </Column>
                     </DataTable>
@@ -146,39 +123,37 @@
                 <div class="card flex flex-col w-full">
                     <div class="flex items-center justify-between border-b pb-3 mb-4">
                         <div class="text-2xl font-bold text-gray-800">Advance Info</div>
-                        <Tag :value="form.status === 1 ? 'Complete' : 'Pending'" :severity="form.status === 1 ? 'success' : 'warn'" />
+                        <Tag :value="orderData.orderstatus === 1 ? 'Complete' : 'Pending'" :severity="orderData.orderstatus === 1 ? 'success' : 'warn'" />
                     </div>
                     <div class="overflow-x-auto">
                         <table class="w-full text-sm text-left text-gray-700">
                             <tbody>
                                 <tr class="border-b">
                                     <td class="px-4 py-2 font-medium">Price Group</td>
-                                    <td class="px-4 py-2 text-right font-semibold">{{ backOrder.division }}</td>
+                                    <td class="px-4 py-2 text-right font-semibold">{{ orderData.pricegroup || 'N/A' }}</td>
                                 </tr>
                                 <tr class="border-b">
                                     <td class="px-4 py-2 font-medium">Customer Group</td>
-                                    <td class="px-4 py-2 text-right font-semibold">{{ backOrder.sapOrderType }}</td>
+                                    <td class="px-4 py-2 text-right font-semibold">{{ orderData.customerCondGrp || 'N/A' }}</td>
                                 </tr>
                                 <tr class="border-b">
                                     <td class="px-4 py-2 font-medium">Storage Location</td>
-                                    <td class="px-4 py-2 text-right font-semibold">{{ backOrder.salesOrg }}</td>
+                                    <td class="px-4 py-2 text-right font-semibold">{{ orderData.storagelocation || 'N/A' }}</td>
                                 </tr>
                                 <tr class="border-b">
                                     <td class="px-4 py-2 font-medium">User Approved</td>
-                                    <td class="px-4 py-2 text-right font-semibold">{{ backOrder.deliveryDate }}</td>
+                                    <td class="px-4 py-2 text-right font-semibold">{{ orderData.approved_by || 'N/A' }}</td>
                                 </tr>
                                 <tr class="border-b">
                                     <td class="px-4 py-2 font-medium">Date Approved</td>
-                                    <td class="px-4 py-2 text-right font-semibold">{{ backOrder.deliveryDate }}</td>
+                                    <td class="px-4 py-2 text-right font-semibold">{{ formatDate(orderData.approved_at) }}</td>
                                 </tr>
                                 <tr>
                                     <td></td>
                                     <td class="px-2 py-2 text-right">
                                         <div class="flex justify-end gap-2">
-                                            <Button label="Return Order" class="p-button-danger text-sm !w-fit" @click="showPasswordDialog = true" />
-                                            <RouterLink to="/billing">
-                                                <Button label="Pull SAP Update" class="text-sm !w-fit" />
-                                            </RouterLink>
+                                            <Button label="Return Order" class="p-button-danger text-sm !w-fit" @click="showReturnOrderDialog = true" :disabled="orderData.orderstatus !== 1" />
+                                            <Button label="Pull SAP Update" class="text-sm !w-fit" @click="pullSAPUpdate" :loading="loadingSAP" />
                                         </div>
                                     </td>
                                 </tr>
@@ -194,64 +169,58 @@
                             <tbody>
                                 <tr class="border-b">
                                     <td class="px-4 py-2 font-medium">SO No.</td>
-                                    <td class="px-4 py-2 text-right font-semibold">{{ billing.soNo }}</td>
+                                    <td class="px-4 py-2 text-right font-semibold">{{ orderData.so_no || 'N/A' }}</td>
                                 </tr>
                                 <tr class="border-b">
                                     <td class="px-4 py-2 font-medium">DO No.</td>
-                                    <td class="px-4 py-2 text-right font-semibold">{{ billing.doNo }}</td>
+                                    <td class="px-4 py-2 text-right font-semibold">{{ orderData.do_no || 'N/A' }}</td>
                                 </tr>
                                 <tr class="border-b">
                                     <td class="px-4 py-2 font-medium">Invoice No</td>
-                                    <td class="px-4 py-2 text-right font-semibold">{{ billing.invoiceNo }}</td>
+                                    <td class="px-4 py-2 text-right font-semibold">{{ orderData.inv_no || 'N/A' }}</td>
                                 </tr>
                                 <tr class="border-b">
                                     <td class="px-4 py-2 font-medium">Last Updated</td>
-                                    <td class="px-4 py-2 text-right font-semibold">{{ billing.lastUpdated }}</td>
+                                    <td class="px-4 py-2 text-right font-semibold">{{ formatDateTime(orderData.updated_at) }}</td>
                                 </tr>
                             </tbody>
                         </table>
                     </div>
                 </div>
-                <div class="card flex flex-col w-full">
-                    <div class="text-2xl font-bold text-gray-800 border-b pb-2 mb-3">📦 Order Logs</div>
+            </div>
 
-                    <DataTable :value="orderLogs.slice(0, 10)" dataKey="id" responsiveLayout="scroll" class="text-sm" stripedRows>
-                        <Column field="timestamp" header="Date & Time" style="min-width: 10rem">
+            <!-- Return Order Dialog -->
+            <Dialog v-model:visible="showReturnOrderDialog" header="Return Order" modal :style="{ width: '50rem' }">
+                <div class="flex flex-col gap-4">
+                    <div class="p-fluid">
+                        <label for="returnReason" class="font-semibold">Return Reason</label>
+                        <Dropdown id="returnReason" v-model="returnReason" :options="returnReasons" optionLabel="name" optionValue="code" placeholder="Select return reason" class="w-full" />
+                    </div>
+
+                    <div class="font-semibold">Select Items to Return</div>
+                    <DataTable :value="orderItems" selectionMode="multiple" v-model:selection="selectedReturnItems" dataKey="materialid">
+                        <Column selectionMode="multiple" headerStyle="width: 3rem"></Column>
+                        <Column field="materialid" header="Material ID"></Column>
+                        <Column field="itemcategory" header="Item Category">
                             <template #body="{ data }">
-                                <span class="font-medium text-gray-800">{{ data.timestamp }}</span>
+                                {{ data.itemcategory || 'ZRO2' }}
+                            </template>
+                            </Column>   
+                        <Column field="qty" header="Available Qty">
+                            <template #body="{ data }">
+                                {{ data.qty - getReturnedQty(data.materialid) }}
                             </template>
                         </Column>
-
-                        <Column field="stage" header="Stage" style="min-width: 8rem">
+                        <Column header="Return Qty">
                             <template #body="{ data }">
-                                <span class="font-semibold">{{ data.stage }}</span>
-                            </template>
-                        </Column>
-
-                        <Column field="description" header="Activity Description" style="width: 16rem">
-                            <template #body="{ data }">
-                                <span>{{ data.description }}</span>
+                                <InputNumber v-model="returnQuantities[data.materialid]" :min="0" :max="data.qty - getReturnedQty(data.materialid)" showButtons class="w-full" />
                             </template>
                         </Column>
                     </DataTable>
-
-                    <div class="flex justify-end items-center border-t px-4 py-2">
-                        <span class="text-sm text-gray-500">Showing latest 10 activities</span>
-                    </div>
                 </div>
-            </div>
-
-            <Dialog v-model:visible="showPasswordDialog" header="Enter Admin Password" modal :closable="false" style="width: 25rem">
-                <div class="flex flex-col gap-3">
-                    <span class="text-gray-700">Please enter the admin password to continue:</span>
-                    <Password v-model="adminPassword" placeholder="Enter password" toggleMask :feedback="false" class="w-full" />
-                </div>
-
                 <template #footer>
-                    <div class="flex justify-end gap-2">
-                        <Button label="Cancel" icon="pi pi-times" class="p-button-text" @click="cancelDialog" />
-                        <Button label="Confirm" icon="pi pi-check" class="p-button-success" @click="confirmPassword" />
-                    </div>
+                    <Button label="Cancel" icon="pi pi-times" class="p-button-text" @click="cancelReturnOrder" />
+                    <Button label="Submit Return" icon="pi pi-check" class="p-button-success" @click="submitReturnOrder" />
                 </template>
             </Dialog>
         </div>
@@ -259,97 +228,220 @@
 </template>
 
 <script setup>
-import { ref, computed } from 'vue';
+import { ref, computed, onMounted } from 'vue';
+import { useRoute, useRouter } from 'vue-router';
 import { useToast } from 'primevue/usetoast';
-import Dialog from 'primevue/dialog';
-import Button from 'primevue/button';
-import Password from 'primevue/password';
-import Tag from 'primevue/tag';
-import DataTable from 'primevue/datatable';
-import Column from 'primevue/column';
-import Fluid from 'primevue/fluid';
-import { RouterLink } from 'vue-router';
+import api from '@/service/api';
 
 const toast = useToast();
-const showPasswordDialog = ref(false);
-const adminPassword = ref('');
+const route = useRoute();
+const router = useRouter();
 
-const cancelDialog = () => {
-    showPasswordDialog.value = false;
-    adminPassword.value = '';
+// Reactive data
+const orderData = ref({});
+const customerInfo = ref({});
+const shippingDetail = ref({});
+const orderItems = ref([]);
+const loadingSAP = ref(false);
+const showReturnOrderDialog = ref(false);
+const returnReason = ref('');
+const selectedReturnItems = ref([]);
+const returnQuantities = ref({});
+
+// Return reasons
+const returnReasons = ref([
+    { code: 'Y01', name: 'Wrong DOM' },
+    { code: 'Y09', name: 'Receive Wrong Item' },
+    { code: 'Y11', name: 'Delivered Wrong Address' }
+]);
+
+// Computed properties
+const totalAmount = computed(() => {
+    return orderItems.value.reduce((sum, item) => {
+        return sum + parseFloat(item.qty) * parseFloat(item.unitprice || 0);
+    }, 0);
+});
+
+// Methods
+const formatDate = (dateString) => {
+    if (!dateString) return 'N/A';
+    return new Date(dateString).toLocaleDateString('en-MY');
 };
 
-const confirmPassword = () => {
-    if (adminPassword.value === 'admin123') {
-        toast.add({ severity: 'success', summary: 'Access Granted', detail: 'Return Order Sucessfully Submitted.', life: 3000 });
-        showPasswordDialog.value = false;
-        adminPassword.value = '';
-    } else {
-        toast.add({ severity: 'error', summary: 'Invalid Password', detail: 'Please try again.', life: 3000 });
+const formatDateTime = (dateString) => {
+    if (!dateString) return 'N/A';
+    return new Date(dateString).toLocaleString('en-MY');
+};
+
+const statusClass = (status) => {
+    const statusMap = {
+        COMPLETED: 'text-green-600 font-bold',
+        DELIVERY: 'text-blue-600 font-bold',
+        PROCESSING: 'text-orange-600 font-bold',
+        PENDING: 'text-gray-600 font-bold'
+    };
+    return statusMap[status] || 'text-gray-600 font-bold';
+};
+
+const getFullAddress = (shipping) => {
+    if (!shipping) return 'N/A';
+    const addressParts = [shipping.addressLine1, shipping.addressLine2, shipping.addressLine3, shipping.addressLine4, shipping.city, shipping.state, shipping.postcode].filter((part) => part && part.trim() !== '');
+
+    return addressParts.join(', ') || 'N/A';
+};
+
+const getReturnedQty = (materialId) => {
+    // This should be implemented based on your return order history
+    // For now, return 0 as placeholder
+    return 0;
+};
+
+// API Calls
+const fetchOrderDetail = async () => {
+    try {
+        const orderNo = route.params.orderNo;
+        const response = await api.get(`order/detail-order/${orderNo}`);
+
+        if (response.data.status === 1) {
+            const data = response.data.admin_data[0];
+            orderData.value = data;
+
+            // Extract order items from order_array and merge with fullfill_order_array
+            if (data.order_array && Array.isArray(data.order_array)) {
+                const orderArray = data.order_array;
+                const fullfillArray = data.fullfill_order_array || [];
+
+                orderItems.value = orderArray.map((orderItem) => {
+                    const fullfillItem = fullfillArray.find((fItem) => fItem.materialid === orderItem.materialid) || {};
+                    return {
+                        materialid: orderItem.materialid,
+                        itemcategory: orderItem.itemcategory || 'ZRO2',
+                        qty: parseFloat(orderItem.qty) || 0,
+                        unitprice: parseFloat(fullfillItem.unitprice) || 0,
+                        totalamt: parseFloat(fullfillItem.totalamt) || 0,
+                        itemno: orderItem.itemno || fullfillItem.itemno
+                    };
+                });
+            }
+
+            // Extract shipping details
+            if (data.shippingDetail && data.shippingDetail.length > 0) {
+                shippingDetail.value = data.shippingDetail[0];
+            }
+
+            // Set customer info
+            customerInfo.value = {
+                dealerName: data.customer_name || shippingDetail.value?.companyName1 || 'N/A',
+                division: data.division || 'N/A',
+                sapOrderType: data.sapordertype || 'N/A',
+                salesOrg: data.salesorg || 'N/A',
+                distributionChannel: data.distributionchannel || 'N/A'
+            };
+        } else {
+            toast.add({ severity: 'error', summary: 'Error', detail: 'Failed to fetch order details', life: 3000 });
+        }
+    } catch (error) {
+        console.error('Error fetching order details:', error);
+        toast.add({ severity: 'error', summary: 'Error', detail: 'Failed to fetch order details', life: 3000 });
     }
 };
 
-const form = ref({ status: 0 });
+const pullSAPUpdate = async () => {
+    try {
+        loadingSAP.value = true;
+        const orderNo = route.params.orderNo;
+        const response = await api.get(`order/order-update/${orderNo}`);
 
-const backOrder = ref({
-    custAccountNo: '6080100900',
-    customerName: 'PS Tyres & Battery Auto Services Sdn. Bhd',
-    location: '123 Toyo Road, Toyo Industrial Park, 50000 Kuala Lumpur, Malaysia',
-    signboard: 'T10',
-    distributionChannel: 'ETEN',
-    division: 'DIV01',
-    sapOrderType: 'NORMAL',
-    salesOrg: 'SO001',
-    shipTo: 'YESSIR TYRES SOLUTION SDN BHD',
-    shippingCond: 'Standard',
-    deliveryType: 'DELIVER',
-    deliveryDate: '2023-10-15',
-    orderDesc: 'Order for electronics',
-    boOrderNo: 'BO1001'
+        if (response.data.status === 1) {
+            toast.add({ severity: 'success', summary: 'Success', detail: 'SAP data updated successfully', life: 3000 });
+            // Refresh order data
+            await fetchOrderDetail();
+        } else {
+            toast.add({ severity: 'error', summary: 'Error', detail: response.data.message || 'Failed to update SAP data', life: 3000 });
+        }
+    } catch (error) {
+        console.error('Error pulling SAP update:', error);
+        toast.add({ severity: 'error', summary: 'Error', detail: 'Failed to update SAP data', life: 3000 });
+    } finally {
+        loadingSAP.value = false;
+    }
+};
+
+const submitReturnOrder = async () => {
+    try {
+        if (!returnReason.value) {
+            toast.add({ severity: 'warn', summary: 'Warning', detail: 'Please select a return reason', life: 3000 });
+            return;
+        }
+
+        const returnItems = selectedReturnItems.value
+            .filter((item) => returnQuantities.value[item.materialid] > 0)
+            .map((item, index) => ({
+                materialid: item.materialid,
+                itemcategory: item.itemcategory || 'ZRO2',
+                qty: returnQuantities.value[item.materialid].toString(),
+                salesdoclineitem: ((index + 1) * 10).toString()
+            }));
+
+        if (returnItems.length === 0) {
+            toast.add({ severity: 'warn', summary: 'Warning', detail: 'Please select items and quantities to return', life: 3000 });
+            return;
+        }
+
+        const payload = {
+            order_array: returnItems,
+            returnReason: returnReason.value // Send the code, not the name
+        };
+
+        console.log('Return Order Payload:', payload);
+
+        const orderNo = route.params.orderNo;
+        const response = await api.post(`order/create-return-order/${orderNo}`, payload);
+
+        if (response.data.status === 1) {
+            toast.add({
+                severity: 'success',
+                summary: 'Success',
+                detail: `Return order created: ${response.data.admin_data}`,
+                life: 3000
+            });
+            showReturnOrderDialog.value = false;
+            resetReturnForm();
+
+            // Refresh order data to reflect the return
+            await fetchOrderDetail();
+        } else {
+            toast.add({
+                severity: 'error',
+                summary: 'Error',
+                detail: response.data.message || 'Failed to create return order',
+                life: 3000
+            });
+        }
+    } catch (error) {
+        console.error('Error creating return order:', error);
+        toast.add({
+            severity: 'error',
+            summary: 'Error',
+            detail: 'Failed to create return order',
+            life: 3000
+        });
+    }
+};
+
+const cancelReturnOrder = () => {
+    showReturnOrderDialog.value = false;
+    resetReturnForm();
+};
+
+const resetReturnForm = () => {
+    returnReason.value = '';
+    selectedReturnItems.value = [];
+    returnQuantities.value = {};
+};
+
+// Lifecycle
+onMounted(() => {
+    fetchOrderDetail();
 });
-
-const billing = ref({
-    soNo: 'SO1001',
-    doNo: 'DO1001',
-    invoiceNo: 'INV1001',
-    lastUpdated: '2025-10-22'
-});
-
-const warantyDetail = ref({
-    contactPerson: 'Ahmad Zaki',
-    contactNo: '+6012-3456789'
-});
-
-const orderLogs = ref([
-    { id: 1, timestamp: '2025-10-20 09:45', stage: 'Customer Created', description: 'Order submitted by customer', status: 'Completed' },
-    { id: 2, timestamp: '2025-10-20 10:02', stage: 'Order Validated', description: 'Order verified in system', status: 'Completed' },
-    { id: 3, timestamp: '2025-10-20 10:10', stage: 'Awaiting Approval', description: 'Pending admin approval', status: 'Pending' },
-    { id: 4, timestamp: '2025-10-20 11:15', stage: 'Approved', description: 'Admin approved the order', status: 'Completed' },
-    { id: 5, timestamp: '2025-10-20 12:30', stage: 'Dispatched to SAP', description: 'Order sent to SAP for processing', status: 'Completed' },
-    { id: 6, timestamp: '2025-10-20 13:00', stage: 'SAP Validation', description: 'SAP validating order details', status: 'Completed' },
-    { id: 7, timestamp: '2025-10-20 14:20', stage: 'Processing in SAP', description: 'Order being processed in SAP', status: 'Completed' },
-    { id: 8, timestamp: '2025-10-20 15:45', stage: 'Delivery Created', description: 'SAP created delivery order', status: 'Completed' },
-    { id: 9, timestamp: '2025-10-20 17:00', stage: 'Invoice Generated', description: 'SAP invoice successfully generated', status: 'Completed' },
-    { id: 10, timestamp: '2025-10-20 18:10', stage: 'Order Completed', description: 'Order marked completed in SAP', status: 'Completed' }
-]);
-
-const backOrdering = ref({
-    shipTo: 'YESSIR TYRES SOLUTION SDN BHD',
-    orderDesc: 'Order for electronics',
-    shippingCond: 'Standard',
-    deliveryType: 'DELIVER',
-    deliveryDate: '2025-10-22',
-    boOrderNo: 'BO1001',
-    deliveryETA: '2025-10-24',
-    deliveryStatus: 'Delivered',
-    lastUpdated: '2025-10-23 09:45 AM'
-});
-
-const orderItems = ref([
-    { id: 1, itemLineNo: 10, materialId: 'MAT-1001', salesProgramId: 'SP-2025A', priceGroup: 'PG-A', quantity: 5, unitPrice: 120.0 },
-    { id: 2, itemLineNo: 20, materialId: 'MAT-2002', salesProgramId: 'SP-2025B', priceGroup: 'PG-B', quantity: 2, unitPrice: 250.5 },
-    { id: 3, itemLineNo: 30, materialId: 'MAT-3003', salesProgramId: 'SP-2025C', priceGroup: 'PG-C', quantity: 1, unitPrice: 499.99 }
-]);
-
-const totalAmount = computed(() => orderItems.value.reduce((sum, item) => sum + item.quantity * item.unitPrice, 0));
 </script>

@@ -141,9 +141,10 @@ const router = createRouter({
                     component: () => import('@/views/om/confirmOrder.vue')
                 },
                 {
-                    path: '/om/detailOrder',
+                    path: '/om/detailOrder/:orderNo',
                     name: 'Detail-Order',
-                    component: () => import('@/views/om/detailOrder.vue')
+                    component: () => import('@/views/om/detailOrder.vue'),
+                    props: true
                 },
 
                 // Back Order
@@ -155,7 +156,8 @@ const router = createRouter({
                 {
                     path: '/om/detailBackOrder/:boNo',
                     name: 'Detail-Back-Order',
-                    component: () => import('@/views/om/detailBackOrder.vue')
+                    component: () => import('@/views/om/detailBackOrder.vue'),
+                    props: true
                 },
 
                 // Return Order

@@ -10,7 +10,7 @@
                         </RouterLink>
                         <div class="text-2xl font-bold text-gray-800">Back Order Detail</div>
                         <div class="flex-grow flex justify-end">
-                            <Button label="Export" style="width:fit-content;" icon="pi pi-file-export" class="p-button" />
+                            <Button label="Export" style="width: fit-content" icon="pi pi-file-export" class="p-button" />
                         </div>
                     </div>
 
@@ -64,7 +64,7 @@
                         </div>
                         <div>
                             <span class="text-sm text-gray-500">Delivery Date</span>
-                            <p class="text-lg font-medium">{{ order.deliveryDate }}</p>
+                            <p class="text-lg font-medium">{{ formatDate(order.deliveryDate) }}</p>
                         </div>
                         <div>
                             <span class="text-sm text-gray-500">Back Order No</span>
@@ -72,96 +72,125 @@
                         </div>
                         <div>
                             <span class="text-sm text-gray-500">Expiry</span>
-                            <p class="text-lg font-medium">{{ order.expiry }}</p>
+                            <p class="text-lg font-medium">{{ formatDate(order.expiry) }}</p>
                         </div>
                         <div>
-                            <span class="text-sm text-gray-700">Delivery Status</span>
+                            <span class="text-sm text-gray-700">Fulfillment Status</span>
                             <p class="text-lg font-medium">
-                                <span class="text-green-600 font-bold">
-                                    {{ backOrdering.deliveryStatus }}
+                                <span :class="fulfillmentStatus.class" class="font-bold">
+                                    {{ fulfillmentStatus.text }}
                                 </span>
                             </p>
-                            <p class="text-xs text-gray-500 mt-1">Last updated: {{ backOrdering.lastUpdated }}</p>
+                            <p class="text-xs text-gray-500 mt-1">Last updated: {{ formatDate(order.modified) }}</p>
                         </div>
                     </div>
                 </div>
 
+                <!-- BACK ORDER ITEMS -->
                 <div class="card flex flex-col w-full">
-                    <div class="font-semibold text-xl border-b pb-2">📦 Order Items</div>
+                    <div class="flex items-center justify-between mb-4">
+                        <div class="font-semibold text-xl">📦 Back Order Items</div>
+                        <div class="flex items-center gap-2">
+                            <Tag :value="`${fulfillmentPercentage}% Fulfilled`" :severity="fulfillmentPercentage === 100 ? 'success' : fulfillmentPercentage > 0 ? 'warning' : 'danger'" />
+                            <Button v-if="canProcessBackOrder" label="Process Available Stock" icon="pi pi-play" severity="success" size="small" @click="processBackOrder(1)" :loading="processing" class="!w-fit" />
+                        </div>
+                    </div>
 
-                    <DataTable :value="orderItems" dataKey="id" responsiveLayout="scroll" class="text-sm" stripedRows>
-                        <Column field="itemLineNo" header="Item Line No." style="min-width: 6rem; text-align: center">
+                    <DataTable :value="backOrderItems" dataKey="id" responsiveLayout="scroll" class="text-sm" stripedRows>
+                        <Column field="itemno" header="Item No" style="min-width: 6rem; text-align: center">
                             <template #body="{ data }">
-                                <span class="font-bold text-lg">{{ data.itemLineNo }}</span>
+                                <span class="font-bold text-lg">{{ data.itemno }}</span>
                             </template>
                         </Column>
 
-                        <Column field="materialId" header="Material ID" style="min-width: 8rem; text-align: center">
+                        <Column field="materialid" header="Material ID" style="min-width: 8rem; text-align: center">
                             <template #body="{ data }">
-                                <span class="font-medium text-lg">{{ data.materialId }}</span>
+                                <span class="font-medium text-lg">{{ data.materialid }}</span>
                             </template>
                         </Column>
 
-                        <Column field="salesProgramId" header="Sales Program ID" style="min-width: 8rem; text-align: center">
+                        <Column field="itemcategory" header="Item Category" style="min-width: 8rem; text-align: center">
                             <template #body="{ data }">
-                                <span class="text-lg">{{ data.salesProgramId }}</span>
+                                <span class="text-lg">{{ data.itemcategory }}</span>
                             </template>
                         </Column>
 
-                        <Column field="priceGroup" header="Price Group" style="min-width: 6rem; text-align: center">
+                        <Column field="plant" header="Plant" style="min-width: 6rem; text-align: center">
                             <template #body="{ data }">
-                                <span class="text-lg">{{ data.priceGroup }}</span>
+                                <span class="text-lg">{{ data.plant }}</span>
                             </template>
                         </Column>
 
-                        <Column field="quantity" header="Qty" style="text-align: center">
+                        <Column field="qty" header="Original Qty" style="text-align: center">
                             <template #body="{ data }">
-                                <span class="text-lg">{{ data.quantity }}</span>
+                                <span class="text-lg font-semibold">{{ data.qty }}</span>
                             </template>
                         </Column>
 
-                        <Column field="unitPrice" header="Unit Price (RM)" style="min-width: 8rem; text-align: right">
+                        <Column field="fulfilledQty" header="Fulfilled Qty" style="text-align: center">
                             <template #body="{ data }">
-                                <span class="text-lg font-semibold text-green-600">{{ data.unitPrice.toFixed(2) }}</span>
+                                <span class="text-lg" :class="getFulfillmentClass(data)">
+                                    {{ getFulfilledQuantity(data.materialid) }}
+                                </span>
                             </template>
                         </Column>
 
-                        <Column field="totalPrice" header="Total (RM)" style="min-width: 8rem; text-align: right">
+                        <Column field="remainingQty" header="Remaining Qty" style="text-align: center">
                             <template #body="{ data }">
-                                <span class="text-lg font-bold text-green-700">{{ (data.quantity * data.unitPrice).toFixed(2) }}</span>
+                                <span class="text-lg font-bold" :class="getRemainingClass(data)">
+                                    {{ getRemainingQuantity(data.materialid) }}
+                                </span>
                             </template>
                         </Column>
                     </DataTable>
-
-                    <div class="flex justify-end items-center border-t px-4 py-2">
-                        <span class="text-lg font-semibold text-gray-800">Grand Total: RM {{ totalAmount.toFixed(2) }}</span>
-                    </div>
                 </div>
 
-                <div class="card flex flex-col gap-4">
-                    <div class="font-semibold text-xl border-b pb-2">📦 Fulfilment Details</div>
-                    <DataTable :value="order.fulfil_array" class="text-sm" stripedRows>
-                        <Column field="materialid" header="Material ID" style="min-width: 8rem">
-                            <template #body="{ data }">
-                                <span class="font-bold text-lg">{{ data.materialid }}</span>
-                            </template>
-                        </Column>
-                        <Column field="qty" header="Qty" style="min-width: 5rem">
-                            <template #body="{ data }">
-                                <span class="text-lg">{{ data.qty }}</span>
-                            </template>
-                        </Column>
-                        <Column field="date" header="Date" style="min-width: 6rem">
-                            <template #body="{ data }">
-                                <span class="text-lg">{{ data.date }}</span>
-                            </template>
-                        </Column>
-                        <Column field="saporder_no" header="SAP Order No" style="min-width: 8rem">
-                            <template #body="{ data }">
-                                <span class="text-lg">{{ data.saporder_no }}</span>
-                            </template>
-                        </Column>
-                    </DataTable>
+                <!-- FULFILLMENT ORDERS -->
+                <div class="card flex flex-col gap-4" v-if="order.list_order && order.list_order.length > 0">
+                    <div class="font-semibold text-xl border-b pb-2">🚛 Fulfillment Orders</div>
+
+                    <div v-for="fulfillOrder in order.list_order" :key="fulfillOrder.id" class="border rounded-lg p-4 mb-4 bg-gray-50">
+                        <div class="flex justify-between items-center mb-3">
+                            <div>
+                                <span class="font-bold text-lg text-blue-700">Order: {{ fulfillOrder.order_no }}</span>
+                                <Tag :value="getOrderStatusText(fulfillOrder.orderstatus)" :severity="getOrderStatusSeverity(fulfillOrder.orderstatus)" class="ml-2" />
+                            </div>
+                            <div class="text-sm text-gray-500">Created: {{ formatDate(fulfillOrder.created) }}</div>
+                        </div>
+
+                        <DataTable :value="getFulfillmentItems(fulfillOrder)" class="text-sm" stripedRows>
+                            <Column field="materialid" header="Material ID" style="min-width: 8rem">
+                                <template #body="{ data }">
+                                    <span class="font-bold">{{ data.materialid }}</span>
+                                </template>
+                            </Column>
+                            <Column field="qty" header="Qty" style="min-width: 5rem">
+                                <template #body="{ data }">
+                                    <span>{{ data.qty }}</span>
+                                </template>
+                            </Column>
+                            <Column field="unitprice" header="Unit Price (RM)" style="min-width: 6rem">
+                                <template #body="{ data }">
+                                    <span class="font-semibold text-green-600">{{ data.unitprice }}</span>
+                                </template>
+                            </Column>
+                            <Column field="totalamt" header="Total (RM)" style="min-width: 6rem">
+                                <template #body="{ data }">
+                                    <span class="font-bold text-green-700">{{ data.totalamt }}</span>
+                                </template>
+                            </Column>
+                            <Column field="itemno" header="Item No" style="min-width: 6rem">
+                                <template #body="{ data }">
+                                    <span class="text-gray-600">{{ data.itemno }}</span>
+                                </template>
+                            </Column>
+                        </DataTable>
+
+                        <div class="flex justify-between items-center mt-3 pt-3 border-t">
+                            <div class="text-sm text-gray-600">Delivery: {{ formatDate(fulfillOrder.deliveryDate) }}</div>
+                            <div class="text-lg font-bold text-blue-800">Total: RM {{ fulfillOrder.total }}</div>
+                        </div>
+                    </div>
                 </div>
             </div>
 
@@ -171,7 +200,7 @@
                 <div class="card flex flex-col w-full">
                     <div class="flex items-center justify-between border-b pb-3 mb-4">
                         <div class="text-2xl font-bold text-gray-800">Advance Info</div>
-                        <Tag :value="order.orderstatus === 1 ? 'Complete' : 'Pending'" :severity="order.orderstatus === 1 ? 'success' : 'warn'" />
+                        <Tag :value="getBackOrderStatusText(order.orderstatus)" :severity="getBackOrderStatusSeverity(order.orderstatus)" />
                     </div>
 
                     <div class="overflow-x-auto">
@@ -187,51 +216,60 @@
                                 </tr>
                                 <tr class="border-b">
                                     <td class="px-4 py-2 font-medium">Created</td>
-                                    <td class="px-4 py-2 text-right">{{ order.created }}</td>
+                                    <td class="px-4 py-2 text-right">{{ formatDate(order.created) }}</td>
                                 </tr>
                                 <tr class="border-b">
                                     <td class="px-4 py-2 font-medium">Modified</td>
-                                    <td class="px-4 py-2 text-right">{{ order.modified }}</td>
+                                    <td class="px-4 py-2 text-right">{{ formatDate(order.modified) }}</td>
                                 </tr>
                                 <tr>
                                     <td class="px-4 py-2 font-medium">Expiry</td>
-                                    <td class="px-4 py-2 text-right">{{ order.expiry }}</td>
+                                    <td class="px-4 py-2 text-right">{{ formatDate(order.expiry) }}</td>
+                                </tr>
+                                <tr class="border-t">
+                                    <td class="px-4 py-2 font-medium">Total Orders</td>
+                                    <td class="px-4 py-2 text-right font-bold">{{ order.list_order ? order.list_order.length : 0 }}</td>
                                 </tr>
                             </tbody>
                         </table>
                     </div>
 
                     <div class="flex justify-end mt-4 gap-2">
-                        <Button label="Cancel Back-Order" severity="danger" size="small" class="!w-fit" />
-                        <Button label="Process Back-Order" severity="success" size="small" class="!w-fit" />
+                        <Button label="Cancel Back-Order" severity="danger" size="small" class="!w-fit" @click="confirmCancelBackOrder" :disabled="!canCancelBackOrder" :loading="cancelling" />
+                        <Button label="Process Back-Order" severity="success" size="small" class="!w-fit" @click="processBackOrder(1)" :disabled="!canProcessBackOrder" :loading="processing" />
                     </div>
                 </div>
 
-                <div class="card flex flex-col w-full">
-                    <div class="text-2xl font-bold text-gray-800 border-b pb-2 mb-3">📦 Order Logs</div>
+                <!-- FULFILLMENT SUMMARY -->
+                <div class="card flex flex-col w-full" v-if="fulfillmentSummary.length > 0">
+                    <div class="text-2xl font-bold text-gray-800 border-b pb-2 mb-3">📊 Fulfillment Summary</div>
 
-                    <DataTable :value="orderLogs.slice(0, 10)" dataKey="id" responsiveLayout="scroll" class="text-sm" stripedRows>
-                        <Column field="timestamp" header="Date & Time" style="min-width: 10rem">
-                            <template #body="{ data }">
-                                <span class="font-medium text-gray-800">{{ data.timestamp }}</span>
-                            </template>
-                        </Column>
+                    <div v-for="item in fulfillmentSummary" :key="item.materialid" class="mb-3 p-3 border rounded">
+                        <div class="flex justify-between items-center mb-2">
+                            <span class="font-bold text-sm">{{ item.materialid }}</span>
+                            <Tag :value="`${item.fulfillmentRate}%`" :severity="item.fulfillmentRate === 100 ? 'success' : item.fulfillmentRate > 0 ? 'warning' : 'danger'" />
+                        </div>
+                        <div class="w-full bg-gray-200 rounded-full h-2">
+                            <div class="bg-green-500 h-2 rounded-full" :style="{ width: `${item.fulfillmentRate}%` }"></div>
+                        </div>
+                        <div class="flex justify-between text-xs mt-1">
+                            <span>Fulfilled: {{ item.fulfilled }}/{{ item.original }}</span>
+                            <span class="font-semibold">Remaining: {{ item.remaining }}</span>
+                        </div>
+                    </div>
+                </div>
 
-                        <Column field="stage" header="Stage" style="min-width: 8rem">
-                            <template #body="{ data }">
-                                <span class="font-semibold">{{ data.stage }}</span>
-                            </template>
-                        </Column>
-
-                        <Column field="description" header="Activity Description" style="width: 16rem">
-                            <template #body="{ data }">
-                                <span>{{ data.description }}</span>
-                            </template>
-                        </Column>
-                    </DataTable>
-
-                    <div class="flex justify-end items-center border-t px-4 py-2">
-                        <span class="text-sm text-gray-500">Showing latest 10 activities</span>
+                <!-- STOCK AVAILABILITY -->
+                <div class="card flex flex-col w-full" v-if="canProcessBackOrder">
+                    <div class="text-2xl font-bold text-gray-800 border-b pb-2 mb-3">📦 Stock Availability</div>
+                    <div class="text-sm text-gray-600 mb-3">Click "Process Back-Order" to create orders for available stock items.</div>
+                    <div v-for="item in backOrderItems" :key="item.materialid" class="mb-2 p-2 border rounded">
+                        <div class="flex justify-between items-center">
+                            <span class="font-medium text-sm">{{ item.materialid }}</span>
+                            <span class="text-xs font-semibold" :class="getRemainingQuantity(item.materialid) > 0 ? 'text-orange-500' : 'text-green-500'">
+                                {{ getRemainingQuantity(item.materialid) > 0 ? 'Partial Stock' : 'Full Stock' }}
+                            </span>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -240,69 +278,248 @@
 </template>
 
 <script setup>
-import { ref, computed } from 'vue';
-import Fluid from 'primevue/fluid';
-import Tag from 'primevue/tag';
-import Button from 'primevue/button';
-import DataTable from 'primevue/datatable';
-import Column from 'primevue/column';
+import { ref, computed, onMounted } from 'vue';
+import { useRoute } from 'vue-router';
+import { useToast } from 'primevue/usetoast';
+import { useConfirm } from 'primevue/useconfirm';
+import api from '@/service/api';
 
-const order = ref({
-    id: 2,
-    etenUserListID: 1,
-    etenUserID: 1,
-    custaccountno: '6020201500',
-    salesorg: 'TSM',
-    distributionchannel: '10',
-    division: '10',
-    pricegroup: '06',
-    sapordertype: 'ZRP1',
-    customerCondGrp: '04',
-    shipto: '6020201500',
-    shippingcond: 'KL',
-    storagelocation: 'TMSA',
-    orderDesc: 'NORMAL',
-    channel: 'ETEN',
-    deliveryType: 'DELIVER',
-    deliveryDate: '2025-09-30',
-    bo_orderno: '001212',
-    backorder_array: [{ materialid: '81114NE0304175H', qty: '2', price: '100.00', salesprogramid: '0' }],
-    fulfil_array: [{ materialid: '81114NE0304175H', qty: '1', salesprogramid: '0', date: '2025-09-09', saporder_no: '12345678', orderID: '1' }],
-    orderstatus: 0,
-    expiry: '2025-09-12 00:00:00',
-    created: '2025-09-08 00:00:00',
-    modified: '2025-09-09 00:00:00'
+const route = useRoute();
+const toast = useToast();
+const confirm = useConfirm();
+
+const order = ref({});
+const loading = ref(false);
+const processing = ref(false);
+const cancelling = ref(false);
+
+// Fetch back order details
+const fetchBackOrderDetail = async () => {
+    try {
+        loading.value = true;
+        const boNo = route.params.boNo;
+        const response = await api.get(`order/detail-back-order/${boNo}`);
+
+        if (response.data.status === 1 && response.data.admin_data.length > 0) {
+            order.value = response.data.admin_data[0];
+        } else {
+            toast.add({ severity: 'error', summary: 'Error', detail: 'Back order not found', life: 3000 });
+        }
+    } catch (error) {
+        console.error('Error fetching back order details:', error);
+        toast.add({ severity: 'error', summary: 'Error', detail: 'Failed to fetch back order details', life: 3000 });
+    } finally {
+        loading.value = false;
+    }
+};
+
+// Process back order
+const processBackOrder = async (status) => {
+    try {
+        processing.value = true;
+        const boNo = route.params.boNo;
+        const response = await api.post(`order/create-backorder/${boNo}`, { status });
+
+        if (response.data.status === 1) {
+            toast.add({ severity: 'success', summary: 'Success', detail: 'Back order processed successfully', life: 3000 });
+            // Refresh the data
+            await fetchBackOrderDetail();
+        } else {
+            toast.add({ severity: 'error', summary: 'Error', detail: response.data.error?.message || 'Failed to process back order', life: 3000 });
+        }
+    } catch (error) {
+        console.error('Error processing back order:', error);
+        toast.add({ severity: 'error', summary: 'Error', detail: 'Failed to process back order', life: 3000 });
+    } finally {
+        processing.value = false;
+    }
+};
+
+// Cancel back order
+const cancelBackOrder = async () => {
+    try {
+        cancelling.value = true;
+        const boNo = route.params.boNo;
+        const response = await api.post(`order/create-backorder/${boNo}`, { status: 9 });
+
+        if (response.data.status === 1) {
+            toast.add({ severity: 'success', summary: 'Success', detail: 'Back order cancelled successfully', life: 3000 });
+            // Refresh the data
+            await fetchBackOrderDetail();
+        } else {
+            toast.add({ severity: 'error', summary: 'Error', detail: response.data.error?.message || 'Failed to cancel back order', life: 3000 });
+        }
+    } catch (error) {
+        console.error('Error cancelling back order:', error);
+        toast.add({ severity: 'error', summary: 'Error', detail: 'Failed to cancel back order', life: 3000 });
+    } finally {
+        cancelling.value = false;
+    }
+};
+
+// Confirm cancellation
+const confirmCancelBackOrder = () => {
+    confirm.require({
+        message: 'Are you sure you want to cancel this back order? This action cannot be undone.',
+        header: 'Confirm Cancellation',
+        icon: 'pi pi-exclamation-triangle',
+        accept: () => {
+            cancelBackOrder();
+        },
+        reject: () => {
+            // Do nothing
+        }
+    });
+};
+
+// Computed properties
+const backOrderItems = computed(() => {
+    return order.value.backorder_array || [];
 });
 
-const orderLogs = ref([
-    { id: 1, timestamp: '2025-10-20 09:45', stage: 'Customer Created', description: 'Order submitted by customer', status: 'Completed' },
-    { id: 2, timestamp: '2025-10-20 10:02', stage: 'Order Validated', description: 'Order verified in system', status: 'Completed' },
-    { id: 3, timestamp: '2025-10-20 10:10', stage: 'Awaiting Approval', description: 'Pending admin approval', status: 'Pending' },
-    { id: 4, timestamp: '2025-10-20 11:15', stage: 'Approved', description: 'Admin approved the order', status: 'Completed' },
-    { id: 5, timestamp: '2025-10-20 12:30', stage: 'Dispatched to SAP', description: 'Order sent to SAP for processing', status: 'Completed' },
-    { id: 6, timestamp: '2025-10-20 13:00', stage: 'SAP Validation', description: 'SAP validating order details', status: 'Completed' },
-    { id: 7, timestamp: '2025-10-20 14:20', stage: 'Processing in SAP', description: 'Order being processed in SAP', status: 'Completed' },
-    { id: 8, timestamp: '2025-10-20 15:45', stage: 'Delivery Created', description: 'SAP created delivery order', status: 'Completed' },
-    { id: 9, timestamp: '2025-10-20 17:00', stage: 'Invoice Generated', description: 'SAP invoice successfully generated', status: 'Completed' },
-    { id: 10, timestamp: '2025-10-20 18:10', stage: 'Order Completed', description: 'Order marked completed in SAP', status: 'Completed' }
-]);
-
-const backOrdering = ref({
-    shipTo: 'YESSIR TYRES SOLUTION SDN BHD',
-    orderDesc: 'Order for electronics',
-    shippingCond: 'Standard',
-    deliveryType: 'DELIVER',
-    deliveryDate: '2025-10-22',
-    boOrderNo: 'BO1001',
-    deliveryETA: '2025-10-24',
-    deliveryStatus: 'Delivered',
-    lastUpdated: '2025-10-23 09:45 AM'
+const fulfillmentPercentage = computed(() => {
+    return order.value.fullfill_percentage || 0;
 });
 
-const orderItems = ref([
-    { id: 1, itemLineNo: '0010', materialId: '81114NE0304175H', salesProgramId: 'SP1001', priceGroup: '06', quantity: 2, unitPrice: 100 },
-    { id: 2, itemLineNo: '0020', materialId: '81114NE0304120K', salesProgramId: 'SP1002', priceGroup: '06', quantity: 1, unitPrice: 150 }
-]);
+const fulfillmentStatus = computed(() => {
+    if (fulfillmentPercentage.value === 100) {
+        return { text: 'Completed', class: 'text-green-600' };
+    } else if (fulfillmentPercentage.value > 0) {
+        return { text: 'Partially Fulfilled', class: 'text-orange-500' };
+    } else {
+        return { text: 'Pending Fulfillment', class: 'text-red-600' };
+    }
+});
 
-const totalAmount = computed(() => orderItems.value.reduce((sum, item) => sum + item.quantity * item.unitPrice, 0));
+// Business logic for button states
+const canProcessBackOrder = computed(() => {
+    return order.value.orderstatus === 0 && fulfillmentPercentage.value < 100 && isNotExpired.value;
+});
+
+const canCancelBackOrder = computed(() => {
+    return order.value.orderstatus === 0 && isNotExpired.value;
+});
+
+const isNotExpired = computed(() => {
+    if (!order.value.expiry) return true;
+    return new Date(order.value.expiry) >= new Date();
+});
+
+// Fulfillment summary
+const fulfillmentSummary = computed(() => {
+    if (!backOrderItems.value.length) return [];
+
+    return backOrderItems.value.map((item) => {
+        const fulfilled = getFulfilledQuantity(item.materialid);
+        const original = parseFloat(item.qty);
+        const remaining = original - fulfilled;
+        const fulfillmentRate = original > 0 ? Math.round((fulfilled / original) * 100) : 0;
+
+        return {
+            materialid: item.materialid,
+            original: original,
+            fulfilled: fulfilled,
+            remaining: remaining,
+            fulfillmentRate: fulfillmentRate
+        };
+    });
+});
+
+// Helper methods
+const getFulfilledQuantity = (materialId) => {
+    if (!order.value.list_order) return 0;
+
+    let totalFulfilled = 0;
+    order.value.list_order.forEach((orderItem) => {
+        if (orderItem.fullfill_order_array) {
+            orderItem.fullfill_order_array.forEach((fulfillItem) => {
+                if (fulfillItem.materialid === materialId) {
+                    totalFulfilled += parseFloat(fulfillItem.qty);
+                }
+            });
+        }
+    });
+    return totalFulfilled;
+};
+
+const getRemainingQuantity = (materialId) => {
+    const backOrderItem = backOrderItems.value.find((item) => item.materialid === materialId);
+    if (!backOrderItem) return 0;
+
+    const originalQty = parseFloat(backOrderItem.qty);
+    const fulfilledQty = getFulfilledQuantity(materialId);
+    return originalQty - fulfilledQty;
+};
+
+const getFulfillmentClass = (data) => {
+    const fulfilled = getFulfilledQuantity(data.materialid);
+    const original = parseFloat(data.qty);
+
+    if (fulfilled === 0) return 'text-red-600';
+    if (fulfilled < original) return 'text-orange-500';
+    return 'text-green-600 font-bold';
+};
+
+const getRemainingClass = (data) => {
+    const remaining = getRemainingQuantity(data.materialid);
+    if (remaining === 0) return 'text-green-600';
+    if (remaining > 0) return 'text-orange-500';
+    return 'text-red-600';
+};
+
+const getFulfillmentItems = (fulfillOrder) => {
+    return fulfillOrder.fullfill_order_array || [];
+};
+
+const getOrderStatusText = (status) => {
+    const statusMap = {
+        0: 'Processing',
+        1: 'Approved',
+        9: 'Rejected',
+        66: 'Processing in SAP'
+    };
+    return statusMap[status] || 'Unknown';
+};
+
+const getOrderStatusSeverity = (status) => {
+    const severityMap = {
+        0: 'warn',
+        1: 'success',
+        9: 'danger',
+        66: 'info'
+    };
+    return severityMap[status] || 'secondary';
+};
+
+const getBackOrderStatusText = (status) => {
+    const statusMap = {
+        0: 'In Progress',
+        1: 'Complete',
+        9: 'Cancelled'
+    };
+    return statusMap[status] || 'Unknown';
+};
+
+const getBackOrderStatusSeverity = (status) => {
+    const severityMap = {
+        0: 'warn',
+        1: 'success',
+        9: 'danger'
+    };
+    return severityMap[status] || 'secondary';
+};
+
+const formatDate = (dateString) => {
+    if (!dateString) return 'N/A';
+    return new Date(dateString).toLocaleDateString('en-MY', {
+        year: 'numeric',
+        month: 'short',
+        day: 'numeric'
+    });
+};
+
+// Lifecycle
+onMounted(() => {
+    fetchBackOrderDetail();
+});
 </script>
