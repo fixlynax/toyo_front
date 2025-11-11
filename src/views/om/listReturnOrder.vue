@@ -5,16 +5,6 @@ import { onBeforeMount, ref, computed, watch } from 'vue';
 import { RouterLink } from 'vue-router';
 import LoadingPage from '@/components/LoadingPage.vue';
 
-// 🟢 PrimeVue Components
-import TabMenu from 'primevue/tabmenu';
-import DataTable from 'primevue/datatable';
-import Column from 'primevue/column';
-import Tag from 'primevue/tag';
-import Button from 'primevue/button';
-import InputText from 'primevue/inputtext';
-import IconField from 'primevue/iconfield';
-import InputIcon from 'primevue/inputicon';
-
 // 🟢 State variables
 const filters = ref({});
 const listData = ref([]);
@@ -33,7 +23,6 @@ const statusTabs = [
     { label: 'Pending', status: 'PENDING' },
     { label: 'Approved', status: 'APPROVED' },
     { label: 'Rejected', status: 'REJECTED' },
-    { label: 'Processing', status: 'PROCESSING' },
     { label: 'Pending Collection', status: 'PENDING_COLLECTION' },
     { label: 'Completed', status: 'COMPLETE' }
 ];
@@ -44,7 +33,6 @@ const STATUS_MAP = {
     0: { label: 'Pending Approval', severity: 'warn' },
     1: { label: 'Approved', severity: 'success' },
     2: { label: 'Rejected', severity: 'danger' },
-    66: { label: 'Processing', severity: 'info' },
     77: { label: 'Pending Collection', severity: 'secondary' },
     9: { label: 'Completed', severity: 'primary' }
 };
@@ -56,7 +44,15 @@ const getOverallStatusSeverity = (orderStatus) => {
 
 const getOverallStatusLabel = (orderStatus) => {
     return STATUS_MAP[Number(orderStatus)]?.label || 'Pending';
-    
+};
+
+// 🧩 Check if status is completed
+const isCompletedStatus = (orderStatus) => {
+    return Number(orderStatus) === 9; // 9 represents 'Completed' in your STATUS_MAP
+};
+// 🧩 Check if status is completed
+const isPendingCTCStatus = (orderStatus) => {
+    return Number(orderStatus) === 77; // 9 represents 'Completed' in your STATUS_MAP
 };
 
 // 🧩 Date Formatter
@@ -86,7 +82,9 @@ const fetchReturnOrders = async (tabStatus = 'PENDING') => {
                 reasonCode: returnOrder.reason_code || '-',
                 reasonMessage: returnOrder.reason_message || '-',
                 createdDate: returnOrder.created || '-',
-                orderStatus: returnOrder.orderstatus || '-'
+                orderStatus: returnOrder.orderstatus || '-',
+                recieve_date: returnOrder.recieve_date || '-', // Add received date from API
+                ctcDate: returnOrder.ctcDate || '-' // Add collection date from API
             }));
         } else {
             console.warn('Unexpected API response:', response.data);
@@ -106,20 +104,29 @@ watch(activeTabIndex, (newIndex) => {
     fetchReturnOrders(selectedStatus);
 });
 
+// 🟢 Computed property to check if current tab shows completed orders
+const isCompletedTab = computed(() => {
+    const currentTabStatus = statusTabs[activeTabIndex.value]?.status;
+    return currentTabStatus === 'COMPLETE';
+});
+// 🟢 Computed property to check if current tab shows completed orders
+const isPendingCTCTab = computed(() => {
+    const currentTabStatus = statusTabs[activeTabIndex.value]?.status;
+    return currentTabStatus === 'PENDING_COLLECTION';
+});
+
 // 🟢 Initial data load
 onBeforeMount(() => {
     initFilters();
     const firstTab = statusTabs[activeTabIndex.value]?.status;
     fetchReturnOrders(firstTab);
 });
-
-
 </script>
 
 <template>
     <div class="card">
         <!-- Header -->
-        <div class="text-2xl font-bold text-gray-800 border-b pb-2 ">List Return Order</div>
+        <div class="text-2xl font-bold text-gray-800 border-b pb-2">List Return Order</div>
 
         <!-- 🟢 Loading Page -->
         <LoadingPage v-if="loading" :message="'Loading Return Orders...'" :sub-message="'Fetching Return Order list...'" />
@@ -139,6 +146,7 @@ onBeforeMount(() => {
                 :rowHover="true"
                 :filters="filters"
                 filterDisplay="menu"
+                :sortOrder="-1"
                 :globalFilterFields="['returnRequestNo', 'custAccountNo', 'customerName', 'reasonCode', 'orderStatus']"
                 class="rounded-table"
             >
@@ -154,19 +162,26 @@ onBeforeMount(() => {
                             </IconField>
                             <Button type="button" icon="pi pi-cog" class="p-button" />
                         </div>
-                        
-                     <!-- Right: Create Customer Button -->
-                    <RouterLink to="/om/createReturnOrder">
-                        <Button type="button" label="Create" />
-                    </RouterLink>
-                </div>
+
+                        <!-- Right: Create Customer Button -->
+                        <RouterLink to="/om/createReturnOrder">
+                            <Button type="button" label="Create" />
+                        </RouterLink>
+                    </div>
                 </template>
 
                 <template #empty>
                     <div class="text-center py-4 text-gray-500">No return orders found for this status.</div>
                 </template>
 
-                <!-- Columns -->
+                <!-- Created Date Column -->
+                <Column field="createdDate" header="Created Date" style="min-width: 8rem">
+                    <template #body="{ data }">
+                        {{ formatDate(data.createdDate) }}
+                    </template>
+                </Column>
+
+                <!-- Return Request No Column -->
                 <Column field="returnRequestNo" header="Return Req No." style="min-width: 8rem">
                     <template #body="{ data }">
                         <RouterLink :to="`/om/detailReturnOrder/${data.returnRequestNo}`" class="hover:underline font-bold text-primary-400">
@@ -175,36 +190,54 @@ onBeforeMount(() => {
                     </template>
                 </Column>
 
+                <!-- Account No Column -->
                 <Column field="custAccountNo" header="Acc No." style="min-width: 8rem">
                     <template #body="{ data }">
                         {{ data.custAccountNo }}
                     </template>
                 </Column>
 
+                <!-- Customer Name Column -->
                 <Column field="customerName" header="Requester Name" style="min-width: 8rem">
                     <template #body="{ data }">
                         {{ data.customerName }}
                     </template>
                 </Column>
 
+                <!-- Reason Code Column -->
                 <Column field="reasonCode" header="Reason Code" style="min-width: 8rem">
                     <template #body="{ data }">
                         {{ data.reasonCode || 'N/A' }}
                     </template>
                 </Column>
 
+                <!-- Reason Message Column -->
                 <Column field="reasonMessage" header="Reason Message" style="min-width: 10rem">
                     <template #body="{ data }">
                         {{ data.reasonMessage || 'N/A' }}
                     </template>
                 </Column>
 
-                <Column field="createdDate" header="Date" style="min-width: 8rem">
+                <!-- Received Date Column - Only show for completed orders -->
+                <Column v-if="isPendingCTCTab" field="recieve_date" header="Pickup ETA" style="min-width: 8rem">
+         
+                </Column>
+
+                <!-- Received Date Column - Only show for completed orders -->
+                <Column v-if="isCompletedTab" field="recieve_date" header="Received Date" style="min-width: 8rem">
                     <template #body="{ data }">
-                        {{ formatDate(data.createdDate) }}
+                        {{ formatDate(data.recieve_date) }}
                     </template>
                 </Column>
 
+                <!-- Collection Date Column - Only show for completed orders -->
+                <Column v-if="isCompletedTab" field="ctcDate" header="Collection Date" style="min-width: 8rem">
+                    <template #body="{ data }">
+                        {{ formatDate(data.ctcDate) }}
+                    </template>
+                </Column>
+
+                <!-- Status Column -->
                 <Column field="orderStatus" header="Status" style="min-width: 8rem">
                     <template #body="{ data }">
                         <Tag :value="getOverallStatusLabel(data.orderStatus)" :severity="getOverallStatusSeverity(data.orderStatus)" />
@@ -245,17 +278,17 @@ onBeforeMount(() => {
     border-radius: 12px;
     overflow: hidden;
     border: 1px solid #e5e7eb;
-    
+
     .p-datatable-header {
         border-top-left-radius: 12px;
         border-top-right-radius: 12px;
     }
-    
+
     .p-paginator-bottom {
         border-bottom-left-radius: 12px;
         border-bottom-right-radius: 12px;
     }
-    
+
     .p-datatable-thead > tr > th {
         &:first-child {
             border-top-left-radius: 12px;
@@ -264,8 +297,7 @@ onBeforeMount(() => {
             border-top-right-radius: 12px;
         }
     }
-    
-    
+
     .p-datatable-tbody > tr:last-child > td {
         &:first-child {
             border-bottom-left-radius: 0;
@@ -274,8 +306,7 @@ onBeforeMount(() => {
             border-bottom-right-radius: 0;
         }
     }
-    
-    
+
     .p-datatable-tbody > tr.p-datatable-emptymessage > td {
         border-bottom-left-radius: 12px;
         border-bottom-right-radius: 12px;

@@ -18,15 +18,15 @@
                         </div>
                         <div>
                             <span class="text-sm text-gray-500">Account Number</span>
-                            <p class="text-lg font-medium">{{ dealerShop.custAccountNo  || '-'}}</p>
+                            <p class="text-lg font-medium">{{ dealerShop.custAccountNo || '-' }}</p>
                         </div>
                         <div>
                             <span class="text-sm text-gray-500">Member Code</span>
-                            <p class="text-lg font-medium">{{ dealerShop.memberCode || '-'}}</p>
+                            <p class="text-lg font-medium">{{ dealerShop.memberCode || '-' }}</p>
                         </div>
                         <div>
                             <span class="text-sm text-gray-500">Location</span>
-                            <p class="text-lg font-medium">{{ dealerShop.city || '-'}} {{ dealerShop.state }}</p>
+                            <p class="text-lg font-medium">{{ dealerShop.city || '-' }} {{ dealerShop.state }}</p>
                         </div>
                         <div>
                             <span class="text-sm text-gray-500">Return Code</span>
@@ -39,7 +39,7 @@
 
                         <div>
                             <span class="text-sm text-gray-500">Channel</span>
-                            <p class="text-lg font-medium">{{ order.channel || '-'}}</p>
+                            <p class="text-lg font-medium">{{ order.channel || '-' }}</p>
                         </div>
                     </div>
                 </div>
@@ -63,7 +63,7 @@
                         </div>
                         <div>
                             <span class="text-sm font-bold text-gray-700">Delivery Type</span>
-                            <p class="text-lg font-medium">{{ order.deliveryType  || '-'}}</p>
+                            <p class="text-lg font-medium">{{ order.deliveryType || '-' }}</p>
                         </div>
                         <div>
                             <span class="text-sm font-bold text-gray-700">Delivery ETA</span>
@@ -89,36 +89,31 @@
                         </Column>
                         <Column field="materialid" header="Material ID" style="min-width: 8rem">
                             <template #body="{ data }">
-                                <span class="font-bold text-lg">{{ data.materialid || '-'}}</span>
+                                <span class="font-bold text-lg">{{ data.materialid || '-' }}</span>
                             </template>
                         </Column>
                         <Column field="itemcategory" header="Item Category" style="min-width: 6rem">
                             <template #body="{ data }">
-                                <span class="text-lg">{{ data.itemcategory || '-'}}</span>
-                            </template>
-                        </Column>
-                        <Column field="plant" header="Plant" style="min-width: 6rem">
-                            <template #body="{ data }">
-                                <span class="text-lg">{{ data.plant || '-' }}</span>
+                                <span class="text-lg">{{ data.itemcategory || '-' }}</span>
                             </template>
                         </Column>
                         <Column field="qty" header="Qty" style="min-width: 4rem">
                             <template #body="{ data }">
-                                <span class="text-lg">{{ data.qty  || '-'}}</span>
+                                <span class="text-lg">{{ data.qty || '-' }}</span>
                             </template>
                         </Column>
                         <Column field="total" header="Total" style="min-width: 6rem">
                             <template #body>
-                                <span class="text-lg">RM {{ order.total  || '-'}}</span>
+                                <span class="text-lg">RM {{ order.price || '-' }}</span>
                             </template>
                         </Column>
                         <Column field="tax" header="Tax" style="min-width: 6rem">
                             <template #body>
-                                <span class="text-lg text-red-600">RM {{ order.tax || '-'}}</span>
+                                <span class="text-lg text-red-600">RM {{ order.tax || '-' }}</span>
                             </template>
                         </Column>
                     </DataTable>
-                    <div class="mt-2 flex justify-end text-lg font-semibold">Subtotal: RM {{ order.subtotal || '-'}}</div>
+                    <div class="mt-2 flex justify-end text-lg font-semibold">Subtotal: RM {{ order.subtotal || '-' }}</div>
                 </div>
             </div>
 
@@ -134,11 +129,11 @@
                             <tbody>
                                 <tr class="border-b">
                                     <td class="px-4 py-2 font-medium">Order Ref</td>
-                                    <td class="px-4 py-2 text-right">{{ order.return_orderNo_ref || '-'}}</td>
+                                    <td class="px-4 py-2 text-right">{{ order.return_orderNo_ref || '-' }}</td>
                                 </tr>
                                 <tr class="border-b">
                                     <td class="px-4 py-2 font-medium">Order No</td>
-                                    <td class="px-4 py-2 text-right">{{ order.order_no || '-'}}</td>
+                                    <td class="px-4 py-2 text-right">{{ order.order_no || '-' }}</td>
                                 </tr>
                                 <tr class="border-b">
                                     <td class="px-4 py-2 font-medium">SO No</td>
@@ -146,7 +141,7 @@
                                 </tr>
                                 <tr class="border-b">
                                     <td class="px-4 py-2 font-medium">DO No</td>
-                                    <td class="px-4 py-2 text-right">{{ order.do_no || '-'}}</td>
+                                    <td class="px-4 py-2 text-right">{{ order.do_no || '-' }}</td>
                                 </tr>
                                 <tr class="border-b">
                                     <td class="px-4 py-2 font-medium">Invoice No</td>
@@ -154,15 +149,15 @@
                                 </tr>
                                 <tr class="border-b">
                                     <td class="px-4 py-2 font-medium">SAP Order Type</td>
-                                    <td class="px-4 py-2 text-right">{{ order.sapordertype || '-'}}</td>
+                                    <td class="px-4 py-2 text-right">{{ order.sapordertype || '-' }}</td>
                                 </tr>
                                 <tr class="border-b">
                                     <td class="px-4 py-2 font-medium">Division</td>
-                                    <td class="px-4 py-2 text-right">{{ order.division || '-'}}</td>
+                                    <td class="px-4 py-2 text-right">{{ order.division || '-' }}</td>
                                 </tr>
                                 <tr class="border-b">
                                     <td class="px-4 py-2 font-medium">Delivery Date</td>
-                                    <td class="px-4 py-2 text-right">{{ order.deliveryDate || '-'}}</td>
+                                    <td class="px-4 py-2 text-right">{{ order.deliveryDate || '-' }}</td>
                                 </tr>
                                 <tr>
                                     <td class="px-4 py-2 font-medium">Created</td>
