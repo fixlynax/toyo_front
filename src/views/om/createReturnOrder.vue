@@ -8,16 +8,7 @@
                 <!-- Customer Account -->
                 <div class="md:col-span-2">
                     <label class="block font-bold text-gray-700">Customer Account</label>
-                    <Dropdown
-                        filter
-                        showClear
-                        v-model="selectedCustomer"
-                        :options="customerOptions"
-                        optionLabel="display"
-                        placeholder="Select a Customer"
-                        class="w-full"
-                        @change="onCustomerChange"
-                    />
+                    <Dropdown filter showClear v-model="selectedCustomer" :options="customerOptions" optionLabel="display" placeholder="Select a Customer" class="w-full" @change="onCustomerChange" />
                 </div>
 
                 <!-- Order Selection with Quick Search -->
@@ -47,18 +38,25 @@
                 <Column field="pattern" header="Pattern" />
                 <Column field="size" header="Size" />
                 <Column field="origin" header="Origin" />
-                <Column field="avlQty" header="Ordered Quantity" />
+                <Column field="avlQty" header="Ordered Quantity">
+                    <template #body="slotProps">
+                        <div class="text-start w-full">
+                            {{ slotProps.data.avlQty }}
+                        </div>
+                    </template>
+                </Column>
                 <Column header="Return Quantity">
                     <template #body="slotProps">
                         <InputNumber
                             v-model="slotProps.data.returnQty"
-                            inputClass="text-center w-24"
+                            inputClass="!w-8 !h-7 text-sm text-center"
                             showButtons
                             buttonLayout="horizontal"
-                            incrementButtonIcon="pi pi-plus"
-                            decrementButtonIcon="pi pi-minus"
+                            incrementButtonIcon="pi pi-plus text-xs"
+                            decrementButtonIcon="pi pi-minus text-xs"
                             :min="0"
                             :max="slotProps.data.avlQty"
+                            class="p-inputnumber-sm"
                         />
                     </template>
                 </Column>
@@ -72,17 +70,8 @@
             <!-- Image Upload -->
             <div class="mb-6">
                 <label class="block font-semibold text-gray-700 mb-2">Upload Image(s) (Optional)</label>
-                <div
-                    class="border-2 border-dashed border-gray-300 rounded-lg p-4 flex flex-col items-center justify-center cursor-pointer hover:border-primary transition"
-                    @click="$refs.fileInput.click()"
-                >
-                    <svg
-                        xmlns="http://www.w3.org/2000/svg"
-                        class="h-10 w-10 text-gray-400 mb-2"
-                        fill="none"
-                        viewBox="0 0 24 24"
-                        stroke="currentColor"
-                    >
+                <div class="border-2 border-dashed border-gray-300 rounded-lg p-4 flex flex-col items-center justify-center cursor-pointer hover:border-primary transition" @click="$refs.fileInput.click()">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-10 w-10 text-gray-400 mb-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16V4m0 0L3 8m4-4l4 4M21 16v-6m0 0l-4 4m4-4l-4-4" />
                     </svg>
                     <span class="text-gray-500 text-sm">Click or drag file here to upload</span>
@@ -92,13 +81,7 @@
                 <div v-if="returnImage" class="mt-4 flex gap-4 items-center flex-wrap relative">
                     <div class="relative inline-block">
                         <img :src="returnImage" alt="Uploaded Image" class="h-32 object-contain border rounded-lg shadow-sm" />
-                        <button
-                            type="button"
-                            class="absolute top-1 right-0 text-red-600 bg-transparent hover:text-red-500 font-bold text-2xl p-1"
-                            @click="returnImage = null"
-                        >
-                            ×
-                        </button>
+                        <button type="button" class="absolute top-1 right-0 text-red-600 bg-transparent hover:text-red-500 font-bold text-2xl p-1" @click="returnImage = null">×</button>
                     </div>
                 </div>
             </div>
