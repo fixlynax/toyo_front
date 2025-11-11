@@ -31,8 +31,36 @@
 
                     <!-- Right: Export & Batch Buttons -->
                     <div class="flex items-center gap-2 ml-auto">
-                        <Button type="button" label="Export" icon="pi pi-file-export" class="p-button" />
-                        <Button type="button" label="Bulk" icon="pi pi-file-import" class="p-button" />
+                        <Button 
+                            type="button" 
+                            label="Export" 
+                            icon="pi pi-file-export" 
+                            class="p-button"
+                            :loading="exportLoading"
+                            @click="handleExport"
+                        />
+                        <Button 
+                            type="button" 
+                            label="Import" 
+                            icon="pi pi-file-import" 
+                            class="p-button"
+                            @click="importInput?.click()"
+                            :loading="importLoading"
+                        />
+                        <input 
+                            ref="importInput"
+                            type="file" 
+                            accept=".xlsx,.xls" 
+                            style="display: none" 
+                            @change="handleImport"
+                        />
+                        <Button 
+                            type="button" 
+                            icon="pi pi-refresh" 
+                            class="p-button"
+                            :loading="refreshLoading"
+                            @click="refreshData"
+                        />
                     </div>
                 </div>
             </template>
@@ -40,17 +68,17 @@
             <template #empty> No data found. </template>
             <template #loading> Loading data. Please wait... </template>
 
+            
             <Column field="materialid" header="Material ID" style="min-width: 6rem">
                 <template #body="{ data }">
                     <div class="flex flex-col items-start gap-1">
-                        <RouterLink :to="`/technical/detailProduct/${data.id}`" class="hover:underline font-bold text-primary-400">
-                        {{ data.materialid }}
+                        <RouterLink :to="`/technical/detailProduct/${data.id}`" class="hover:underline font-bold">
+                            {{ data.materialid }}
                         </RouterLink>
                     </div>
                 </template>
             </Column>
 
-            
             <Column field="pattern" header="Pattern" style="min-width: 8rem">
                 <template #body="{ data }">
                     <RouterLink to="/technical/detailProduct" class="block text-gray-800 hover:text-gray-600 transition-colors">
@@ -87,6 +115,39 @@
                     </div>
                 </template>
             </Column>
+
+            <!-- Sell Column with Checkbox -->
+            <Column field="sell" header="Sell" style="min-width: 6rem">
+                <template #body="{ data }">
+                    <div class="flex justify-center">
+                        <Checkbox 
+                            v-model="data.sell" 
+                            :binary="true" 
+                            :disabled="data.updatingSell"
+                            @change="handleToggleSell(data)"
+                            :class="data.sell ? 'p-checkbox-checked' : ''"
+                        />
+                        <i v-if="data.updatingSell" class="pi pi-spin pi-spinner ml-2"></i>
+                    </div>
+                </template>
+            </Column>
+            
+            
+            <!-- Warranty Column with Checkbox -->
+            <Column field="warranty" header="Warranty" style="min-width: 8rem">
+                <template #body="{ data }">
+                    <div class="flex justify-center">
+                        <Checkbox 
+                        v-model="data.warranty" 
+                        :binary="true" 
+                        :disabled="data.updatingWarranty"
+                        @change="handleToggleWarranty(data)"
+                        :class="data.warranty ? 'p-checkbox-checked' : ''"
+                        />
+                        <i v-if="data.updatingWarranty" class="pi pi-spin pi-spinner ml-2"></i>
+                    </div>
+                </template>
+            </Column>
             
             <!-- TWP Column with Checkbox -->
             <Column field="twp" header="TWP" style="min-width: 8rem">
@@ -95,37 +156,11 @@
                         <Checkbox 
                             v-model="data.twp" 
                             :binary="true" 
-                            :disabled="true"
+                            :disabled="data.updatingTWP"
+                            @change="handleToggleTWP(data)"
                             :class="data.twp ? 'p-checkbox-checked' : ''"
                         />
-                    </div>
-                </template>
-            </Column>
-    
-            <!-- Warranty Column with Checkbox -->
-            <Column field="warranty" header="Warranty" style="min-width: 8rem">
-                <template #body="{ data }">
-                    <div class="flex justify-center">
-                        <Checkbox 
-                            v-model="data.warranty" 
-                            :binary="true" 
-                            :disabled="true"
-                            :class="data.warranty ? 'p-checkbox-checked' : ''"
-                        />
-                    </div>
-                </template>
-            </Column>
-    
-            <!-- Sell Column with Checkbox -->
-            <Column field="sell" header="Sell" style="min-width: 6rem">
-                <template #body="{ data }">
-                    <div class="flex justify-center">
-                        <Checkbox 
-                            v-model="data.sell" 
-                            :binary="true" 
-                            :disabled="true"
-                            :class="data.sell ? 'p-checkbox-checked' : ''"
-                        />
+                        <i v-if="data.updatingTWP" class="pi pi-spin pi-spinner ml-2"></i>
                     </div>
                 </template>
             </Column>
@@ -137,10 +172,17 @@
 import { onMounted, ref } from 'vue';
 import { FilterMatchMode } from '@primevue/core/api';
 import api from '@/service/api';
+import { useToast } from 'primevue/usetoast';
+
+const toast = useToast();
 
 // Data variables
 const tyres = ref([]);
 const loading = ref(true);
+const exportLoading = ref(false);
+const importLoading = ref(false);
+const refreshLoading = ref(false);
+const importInput = ref();
 
 // Filters for quick search
 const filters = ref({
@@ -185,16 +227,17 @@ const sortBy = (field, order) => {
     });
 };
 
-onMounted(async () => {
+// Fetch data function
+const fetchData = async () => {
     try {
         loading.value = true;
-
         const response = await api.get('material');
 
         console.log('API Response:', response.data);
 
         if (response.data.status === 1 && Array.isArray(response.data.admin_data)) {
             tyres.value = response.data.admin_data.map((product) => ({
+                id: product.id, // Make sure this is included for API calls
                 materialid: product.materialid,
                 twp: product.isTWP === 1,
                 warranty: product.isWarranty === 1,
@@ -205,18 +248,159 @@ onMounted(async () => {
                 sectionwidth: product.sectionwidth,
                 tireseries: product.tireseries,
                 rimdiameter: product.rimdiameter,
-                speedplyrating: product.speedplyrating
+                speedplyrating: product.speedplyrating,
+                updatingTWP: false,
+                updatingWarranty: false,
+                updatingSell: false
             }));
         } else {
             console.error('API returned error or invalid data:', response.data);
             tyres.value = [];
+            toast.add({ severity: 'error', summary: 'Error', detail: 'Failed to load data', life: 3000 });
         }
     } catch (error) {
         console.error('Error fetching product list:', error);
         tyres.value = [];
+        toast.add({ severity: 'error', summary: 'Error', detail: 'Failed to load data', life: 3000 });
     } finally {
         loading.value = false;
+        refreshLoading.value = false;
     }
+};
+
+// Toggle functions
+const handleToggleTWP = async (data) => {
+    try {
+        data.updatingTWP = true;
+        const newStatus = data.twp ? 1 : 0;
+        console.log('TWP new status:', data);
+        await api.put(`material/toggleTWP/${data.id}`, {
+
+        });
+        
+        toast.add({ severity: 'success', summary: 'Success', detail: 'TWP status updated', life: 3000 });
+    } catch (error) {
+        console.error('Error updating TWP:', error);
+        data.twp = !data.twp; // Revert on error
+        toast.add({ severity: 'error', summary: 'Error', detail: 'Failed to update TWP status', life: 3000 });
+    } finally {
+        data.updatingTWP = false;
+    }
+};
+
+const handleToggleWarranty = async (data) => {
+    try {
+        data.updatingWarranty = true;
+        const newStatus = data.warranty ? 1 : 0;
+        
+        await api.put(`material/toggleWarranty/${data.id}`, {
+            status: newStatus
+        });
+        
+        toast.add({ severity: 'success', summary: 'Success', detail: 'Warranty status updated', life: 3000 });
+    } catch (error) {
+        console.error('Error updating warranty:', error);
+        data.warranty = !data.warranty; // Revert on error
+        toast.add({ severity: 'error', summary: 'Error', detail: 'Failed to update warranty status', life: 3000 });
+    } finally {
+        data.updatingWarranty = false;
+    }
+};
+
+const handleToggleSell = async (data) => {
+    try {
+        data.updatingSell = true;
+        const newStatus = data.sell ? 1 : 0;
+        
+        await api.put(`material/toggleSell/${data.id}`, {
+            status: newStatus
+        });
+        
+        toast.add({ severity: 'success', summary: 'Success', detail: 'Sell status updated', life: 3000 });
+    } catch (error) {
+        console.error('Error updating sell status:', error);
+        data.sell = !data.sell; // Revert on error
+        toast.add({ severity: 'error', summary: 'Error', detail: 'Failed to update sell status', life: 3000 });
+    } finally {
+        data.updatingSell = false;
+    }
+};
+
+// Export function
+const handleExport = async () => {
+    try {
+        exportLoading.value = true;
+        
+        // Get all material IDs
+        const materialIds = tyres.value.map(tyre => tyre.id);
+        
+        const response = await api.post('material/export', {
+            material_id: materialIds
+        }, {
+            responseType: 'blob'
+        });
+        
+        // Create download link
+        const url = window.URL.createObjectURL(new Blob([response.data]));
+        const link = document.createElement('a');
+        link.href = url;
+        link.setAttribute('download', 'materials.xlsx');
+        document.body.appendChild(link);
+        link.click();
+        link.remove();
+        window.URL.revokeObjectURL(url);
+        
+        toast.add({ severity: 'success', summary: 'Success', detail: 'Export completed', life: 3000 });
+    } catch (error) {
+        console.error('Error exporting data:', error);
+        toast.add({ severity: 'error', summary: 'Error', detail: 'Failed to export data', life: 3000 });
+    } finally {
+        exportLoading.value = false;
+    }
+};
+
+// Import function
+const handleImport = async (event) => {
+    const file = event.target.files[0];
+    if (!file) return;
+
+    try {
+        importLoading.value = true;
+        
+        const formData = new FormData();
+        formData.append('material_file', file);
+        
+        await api.post('material/import', formData, {
+            headers: {
+                'Content-Type': 'multipart/form-data'
+            }
+        });
+        
+        // Refresh data after import
+        await fetchData();
+        
+        // Reset file input
+        if (importInput.value) {
+            importInput.value.value = '';
+        }
+        
+        toast.add({ severity: 'success', summary: 'Success', detail: 'Import completed', life: 3000 });
+    } catch (error) {
+        console.error('Error importing data:', error);
+        toast.add({ severity: 'error', summary: 'Error', detail: 'Failed to import data', life: 3000 });
+    } finally {
+        importLoading.value = false;
+    }
+};
+
+// Refresh function
+const refreshData = () => {
+    refreshLoading.value = true;
+    fetchData();
+};
+
+onMounted(() => {
+    fetchData();
 });
 
 const getOverallStatusLabel = (deleted) => {
