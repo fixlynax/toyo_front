@@ -68,7 +68,27 @@
             <template #empty> No data found. </template>
             <template #loading> Loading data. Please wait... </template>
 
-            
+            <Column header="Select All" style="min-width: 8rem">
+                <template #header>
+                    <div class="flex justify-center">
+                    <Checkbox
+                        :binary="true"
+                        :model-value="false"  
+                        @change="() => toggleSelectAll()"  
+                    />
+                    </div>
+                </template>
+
+                <template #body="{ data }">
+                    <div class="flex justify-center">
+                    <Checkbox
+                        :binary="true"
+                        :model-value="selectedExportIds.has(data.id)"
+                        @change="() => handleToggleExport(data.id)"
+                    />
+                    </div>
+                </template>
+            </Column>
             <Column field="materialid" header="Material ID" style="min-width: 6rem">
                 <template #body="{ data }">
                     <div class="flex flex-col items-start gap-1">
@@ -169,7 +189,7 @@
 </template>
 
 <script setup>
-import { onMounted, ref } from 'vue';
+import { onMounted, ref, computed  } from 'vue';
 import { FilterMatchMode } from '@primevue/core/api';
 import api from '@/service/api';
 import { useToast } from 'primevue/usetoast';
@@ -183,6 +203,7 @@ const exportLoading = ref(false);
 const importLoading = ref(false);
 const refreshLoading = ref(false);
 const importInput = ref();
+const selectedExportIds = ref(new Set());
 
 // Filters for quick search
 const filters = ref({
@@ -268,6 +289,31 @@ const fetchData = async () => {
     }
 };
 
+// Computed boolean: are all rows selected?
+const allSelected = computed(() => {
+  return tyres.value.length > 0 && selectedExportIds.value.size === tyres.value.length;
+});
+
+// Toggle functions
+const handleToggleExport = (id) => {
+  if (selectedExportIds.value.has(id)) {
+    selectedExportIds.value.delete(id);
+  } else {
+    selectedExportIds.value.add(id);
+  }
+  console.log(selectedExportIds.value);
+};
+
+// Check all
+const toggleSelectAll = () => {
+  if (allSelected.value) {
+    // Unselect all
+    selectedExportIds.value.clear();
+  } else {
+    // Select all
+    tyres.value.forEach(row => selectedExportIds.value.add(row.id));
+  }
+};
 // Toggle functions
 const handleToggleTWP = async (data) => {
     try {
@@ -328,29 +374,42 @@ const handleToggleSell = async (data) => {
 
 // Export function
 const handleExport = async () => {
+     const idsArray = Array.from(selectedExportIds.value).map(id => Number(id));
+
+    if (idsArray.length === 0) {
+        alert('Please select at least one row.');
+        return;
+    }
     try {
         exportLoading.value = true;
         
-        // Get all material IDs
-        const materialIds = tyres.value.map(tyre => tyre.id);
-        
-        const response = await api.post('material/export', {
-            material_id: materialIds
-        }, {
-            responseType: 'blob'
+            const response = await api.postExtra(
+        'material/export',
+        { material_id: idsArray }, 
+        {
+            headers: {
+            'Content-Type': 'application/json',
+            'Accept': 'application/json' // add Accept header like Postman
+            }
+        }
+        );
+        console.log("herererer");
+        console.log(response);
+        const blob = new Blob([response.data], { 
+        type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' 
         });
-        
-        // Create download link
-        const url = window.URL.createObjectURL(new Blob([response.data]));
-        const link = document.createElement('a');
-        link.href = url;
-        link.setAttribute('download', 'materials.xlsx');
-        document.body.appendChild(link);
-        link.click();
-        link.remove();
+
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = 'Material_Download.xlsx';
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
         window.URL.revokeObjectURL(url);
-        
+
         toast.add({ severity: 'success', summary: 'Success', detail: 'Export completed', life: 3000 });
+        selectedExportIds.value.clear();
     } catch (error) {
         console.error('Error exporting data:', error);
         toast.add({ severity: 'error', summary: 'Error', detail: 'Failed to export data', life: 3000 });
