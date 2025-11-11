@@ -17,7 +17,7 @@
                     <div class="flex items-center justify-between border-b pb-2">
                         <div class="text-2xl font-bold text-gray-800">Warranty Detail</div>
                         <div class="inline-flex items-center gap-2">
-                             <Button v-if="warantyDetail.isCTC === 1 &&  warantyDetail.status >= 4  && !warantyDetail.ctc_details" label="Approve" class="p-button-success" size="small" @click="Approve" />
+                             <Button  label="Approve" class="p-button-success" size="small" @click="Approve" />
                             <!-- <Button label="Reject Warranty" class="p-button-danger" size="small" @click="openRejectDialog" :disabled="rejecting" />
                             <Button label="Request CTC" class="p-button-info" size="small" @click="requestCTCSubmit" />
                             <Button label="Request Scrap" class="p-button-warning" size="small" @click="requestScrapSubmit" /> -->
@@ -705,9 +705,41 @@ const createReplacement = () => {
     showCreateReplacementDialog.value = true;
 };
 
-const createReimbursement = () => {
-    showApproveDialog.value = false;
-    showCreateReimbursementDialog.value = true;
+const createReimbursement = async () => {
+
+    try {
+        saving.value = true;
+        const response = await api.put('warranty_claim/approveInvoice/72', {
+        });
+        if (response.data.status === 1) {
+
+            toast.add({
+                severity: 'success',
+                summary: 'Success',
+                detail: 'Reimbursement approved successfully',
+                life: 3000
+            });
+        }else {
+            toast.add({
+                severity: 'error',
+                summary: 'Error',
+                detail: response.data.error,
+                life: 3000
+            });
+        }
+    } catch (err) {
+        console.error('Error submitting reimbursement:', err);
+        toast.add({
+            severity: 'error',
+            summary: 'Error',
+            detail: 'Failed to submit reimbursement',
+            life: 3000
+        });
+    } finally {
+        saving.value = false;
+        showApproveDialog.value = false;
+
+    }
 };
 
 const closeCTCDialog = () => {
