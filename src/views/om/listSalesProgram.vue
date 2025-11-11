@@ -8,7 +8,6 @@ const filters1 = ref(null);
 const listData = ref([]);
 const loading = ref(true);
 
-
 const statusMap = {
     0: { label: 'Inactive', severity: 'danger' },
     1: { label: 'Active', severity: 'success' }
@@ -29,17 +28,17 @@ onBeforeMount(async () => {
 
         console.log('API Response:', response.data);
 
-       
         if (response.data.status === 1 && Array.isArray(response.data.admin_data)) {
-            listData.value = response.data.admin_data.map(sales => ({
+            listData.value = response.data.admin_data.map((sales) => ({
                 id: sales.id,
                 programId: sales.programid,
                 title: sales.title,
-                startDate: sales.startDate ,
-                endDate: sales.endDate ,
+                startDate: sales.startDate,
+                endDate: sales.endDate,
+                freeQuota: sales.freeQuota || '-',
                 status: sales.status
             }));
-            
+
             console.log('Transformed data:', listData.value);
         } else {
             console.error('API returned error or invalid data:', response.data);
@@ -57,11 +56,10 @@ onBeforeMount(async () => {
 <template>
     <div class="card">
         <div class="text-2xl font-bold text-gray-800 border-b pb-2 mb-3">List Sales Program</div>
-          <!-- 🟢 Use LoadingPage for initial load, hide everything else -->
+        <!-- 🟢 Use LoadingPage for initial load, hide everything else -->
         <LoadingPage v-if="loading" :message="'Loading your Sales Progtame...'" :sub-message="'Fetching your Sales Progtame'" />
 
-
-        <DataTable v-else :value="listData" :paginator="true" :rows="10" dataKey="programId" :rowHover="true"  :filters="filters1" filterDisplay="menu " class="rounded-table">
+        <DataTable v-else :value="listData" :paginator="true" :rows="10" dataKey="programId" :rowHover="true" :filters="filters1" filterDisplay="menu " class="rounded-table">
             <!-- Header -->
             <template #header>
                 <div class="flex items-center justify-between gap-4 w-full flex-wrap">
@@ -84,7 +82,6 @@ onBeforeMount(async () => {
             </template>
 
             <template #empty> No sales programs found. </template>
-            
 
             <!-- Program ID -->
             <Column field="programId" header="Program ID" style="min-width: 8rem">
@@ -102,7 +99,7 @@ onBeforeMount(async () => {
             <Column header="Period" style="min-width: 12rem">
                 <template #body="{ data }"> {{ data.startDate }} → {{ data.endDate }} </template>
             </Column>
-
+            <Column field="freeQuota" header="Quota" style="min-width: 12rem" />
             <!-- Status -->
             <Column header="Status" style="min-width: 8rem">
                 <template #body="{ data }">
@@ -134,17 +131,17 @@ onBeforeMount(async () => {
     border-radius: 12px;
     overflow: hidden;
     border: 1px solid #e5e7eb;
-    
+
     .p-datatable-header {
         border-top-left-radius: 12px;
         border-top-right-radius: 12px;
     }
-    
+
     .p-paginator-bottom {
         border-bottom-left-radius: 12px;
         border-bottom-right-radius: 12px;
     }
-    
+
     .p-datatable-thead > tr > th {
         &:first-child {
             border-top-left-radius: 12px;
@@ -153,8 +150,7 @@ onBeforeMount(async () => {
             border-top-right-radius: 12px;
         }
     }
-    
-    
+
     .p-datatable-tbody > tr:last-child > td {
         &:first-child {
             border-bottom-left-radius: 0;
@@ -163,8 +159,7 @@ onBeforeMount(async () => {
             border-bottom-right-radius: 0;
         }
     }
-    
-    
+
     .p-datatable-tbody > tr.p-datatable-emptymessage > td {
         border-bottom-left-radius: 12px;
         border-bottom-right-radius: 12px;

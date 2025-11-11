@@ -150,6 +150,10 @@
                                 <span class="text-xm font-medium text-black-600">Material Code</span>
                                 <span class="text-xm font-semibold text-black-800 bg-green-50 px-3 py-1 rounded">{{ salesProgram.free_material }}</span>
                             </div>
+                            <div class="flex justify-between items-center py-2 border-b border-black-100">
+                                <span class="text-xm font-medium text-black-600">Quota</span>
+                                <span class="text-xm font-bold text-black-800 bg-green-50 px-3 py-1 rounded">{{ salesProgram.freeQuota }}</span>
+                            </div>
                             <div class="flex justify-between items-start py-2">
                                 <span class="text-xm font-medium text-black-600">Description</span>
                                 <span class="text-xm text-black-800 text-right max-w-xs">{{ salesProgram.free_material_desc }}</span>

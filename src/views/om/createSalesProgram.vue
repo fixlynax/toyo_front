@@ -346,7 +346,9 @@ const clearBuySelection = (item) => {
 
 const onFreeMaterialChange = (item) => {
     if (item.selectedFreeMaterial) {
-        const selectedMaterial = freeMaterialOptions.value.find((material) => material.materialid === item.selectedFreeMaterial);
+        const selectedMaterial = freeMaterialOptions.value.find(
+            (material) => material.materialid === item.selectedFreeMaterial
+        );
         item.freeMaterialData = selectedMaterial ? { ...selectedMaterial } : null;
     } else {
         item.freeMaterialData = null;
@@ -427,7 +429,9 @@ const loadBuyPatterns = async () => {
 const loadBuyRims = async (item) => {
     try {
         loadingBuyRims.value = true;
-        const selectedPattern = buyPatternOptions.value.find((pattern) => pattern.value === item.selectedBuyPattern);
+        const selectedPattern = buyPatternOptions.value.find(
+            (pattern) => pattern.value === item.selectedBuyPattern
+        );
 
         if (selectedPattern && selectedPattern.rimSizes) {
             item.availableBuyRims = selectedPattern.rimSizes.map((size) => ({
@@ -447,10 +451,11 @@ const loadBuyRims = async (item) => {
 
 const loadBuyMaterials = async (item) => {
     try {
-        const selectedPattern = buyPatternOptions.value.find((pattern) => pattern.value === item.selectedBuyPattern);
+        const selectedPattern = buyPatternOptions.value.find(
+            (pattern) => pattern.value === item.selectedBuyPattern
+        );
 
         if (selectedPattern) {
-            // Create buyMaterials array with the exact structure required
             item.buyMaterials = item.selectedBuyRims.map((rim) => ({
                 pattern: item.selectedBuyPattern,
                 patternname: selectedPattern.patternName,
@@ -525,18 +530,21 @@ const submitForm = async () => {
             }
         }
 
-        // Prepare spFOC_array by combining all buy materials from all criteria
-        const spFOCArray = [];
-        programItems.value.forEach((item) => {
-            spFOCArray.push(...item.buyMaterials);
-        });
+        // ✅ Clean and flat spFOC_array format
+        const spFOCArray = programItems.value.flatMap((item) =>
+            item.buyMaterials.map((mat) => ({
+                pattern: mat.pattern,
+                patternname: mat.patternname,
+                size: mat.size,
+                status: 1
+            }))
+        );
 
-        console.log('Generated spFOC_array:', spFOCArray);
+        console.log('Generated spFOC_array (clean):', JSON.stringify(spFOCArray, null, 2));
 
         // Prepare FormData
         const formData = new FormData();
 
-        // Sales Program Data
         formData.append('programID', salesProgram.value.programID);
         formData.append('pricegroup', salesProgram.value.pricegroup);
         formData.append('type', salesProgram.value.type);
@@ -545,13 +553,9 @@ const submitForm = async () => {
         formData.append('startdate', formatDate(salesProgram.value.startdate));
         formData.append('enddate', formatDate(salesProgram.value.enddate));
         formData.append('status', salesProgram.value.status);
-        formData.append('type', salesProgram.value.type);
-        formData.append('status', salesProgram.value.status);
-
-        // Image file
         formData.append('image', imageFile.value);
 
-        // spFOC_array as JSON string - this will create the exact structure you need
+        // ✅ Append spFOC_array as a JSON string
         formData.append('spFOC_array', JSON.stringify(spFOCArray));
 
         // For the first item (backend expects these individual fields)
@@ -577,21 +581,18 @@ const submitForm = async () => {
             buyQty: firstItem?.buyQty,
             freeQty: firstItem?.freeQty,
             freeQuota: firstItem?.freeQuota,
-            imageFile: imageFile.value.name,
+            imageFile: imageFile.value.name || 'N/A',
             status: salesProgram.value.status,
             type: salesProgram.value.type
         });
 
         const response = await api.post('sales-program/create-sales-program', formData, {
-            headers: {
-                'Content-Type': 'multipart/form-data'
-            }
+            headers: { 'Content-Type': 'multipart/form-data' }
         });
 
         if (response.data.status === 1) {
             console.log('Sales program created successfully');
             alert('Sales program created successfully!');
-            // Redirect to list page
             window.location.href = '/om/listSalesProgram';
         } else {
             console.error('Error creating sales program:', response.data.error);
@@ -616,7 +617,7 @@ const formatDate = (date) => {
 // Watch for type changes to clear program items
 watch(
     () => salesProgram.value.type,
-    (newType) => {
+    () => {
         programItems.value = [];
     }
 );
@@ -627,3 +628,4 @@ onMounted(() => {
     loadFreeMaterials();
 });
 </script>
+
