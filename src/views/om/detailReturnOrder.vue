@@ -173,7 +173,7 @@
                     </div>
 
                     <!-- Action Buttons -->
-                    <div class="flex justify-end mt-4 gap-2" v-if="order.orderstatus === 66">
+                    <div class="flex justify-end mt-4 gap-2" v-if="order.orderstatus === 0">
                         <Button label="Reject" severity="danger" size="small" @click="onRejectReturnOrder" :loading="loadingAction === 'reject'" />
                         <Button label="Approve" severity="success" size="small" @click="onApproveReturnOrder" :loading="loadingAction === 'approve'" />
                     </div>
