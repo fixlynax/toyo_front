@@ -200,7 +200,7 @@ const formatDate = (dateString) => {
                 <!-- 🟢 Order Info -->
                 <Column header="Order No" style="min-width: 6rem">
                     <template #body="{ data }">
-                        <RouterLink :to="`/om/detailOrder/${data.id}`" class="hover:underline font-bold text-primary-400">
+                        <RouterLink :to="`/om/detailOrder/${data.orderNo}`" class="hover:underline font-bold text-primary-400">
                             {{ data.orderNo || '-' }}
                         </RouterLink>
                     </template>

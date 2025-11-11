@@ -41,7 +41,7 @@
 
             <Column field="orderNo" header="Order No." style="min-width: 10rem">
                 <template #body="{ data }">
-                    <RouterLink :to="`/om/detailBackOrder/${data.id}`" class="hover:underline font-bold text-primary-400">
+                    <RouterLink :to="`/om/detailBackOrder/${data.orderNo}`" class="hover:underline font-bold text-primary-400">
                         {{ data.orderNo }}
                     </RouterLink>
                 </template>
@@ -87,13 +87,7 @@
 import { onMounted, ref, watch } from 'vue';
 import { FilterMatchMode } from '@primevue/core/api';
 import api from '@/service/api';
-import ProgressBar from 'primevue/progressbar';
-import Tag from 'primevue/tag';
 import { RouterLink } from 'vue-router';
-import InputText from 'primevue/inputtext';
-import Button from 'primevue/button';
-import IconField from 'primevue/iconfield';
-import InputIcon from 'primevue/inputicon';
 import LoadingPage from '@/components/LoadingPage.vue';
 
 const listData = ref([]);
