@@ -93,10 +93,82 @@
                         </div>
                     </div>
                 </div>
-            </div>
+                <div class="card flex flex-col w-full">
+                    <div class="flex items-center justify-between border-b pb-2">
+                        <div class="flex items-center gap-3">
+                            <div class="text-2xl font-bold text-gray-800">Order Details</div>
+                        </div>
+                    </div>
 
+                    <div class="mt-6 mb-4">
+                        <div>
+                            <span class="block text-sm font-bold text-black-700">Order No</span>
+                            <span class="text-lg font-medium">{{ returnList.order_data.order_no }}</span>
+                        </div>
+                    </div>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm text-gray-700">
+                        <div>
+                            <span class="block text-sm font-bold text-black-700">Inv No</span>
+                            <p class="font-medium text-lg">{{ returnList.order_data.inv_no }}</p>
+                        </div>
+                        <div>
+                            <span class="block text-sm font-bold text-black-700">Type</span>
+                            <p class="font-medium text-lg">{{ returnList.order_data.deliveryType }}</p>
+                        </div>
+                        <div>
+                            <span class="block text-sm font-bold text-black-700">Description</span>
+                            <p class="font-medium text-lg">{{ returnList.order_data.orderDesc }}</p>
+                        </div>
+                        <div>
+                            <span class="block text-sm font-bold text-black-700">Rating</span>
+                            <p class="font-medium text-lg">{{ returnList.order_data.orderReceiveRating }}</p>
+                        </div>
+                        <div>
+                            <span class="block text-sm font-bold text-black-700">Recieve Remarks</span>
+                            <p class="font-medium text-lg">{{ returnList.order_data.orderReceiveRemarks }}</p>
+                        </div>
+                         <div>
+                            <span class="block text-sm font-bold text-black-700">SO No</span>
+                            <p class="font-medium text-lg">{{ returnList.order_data.so_no }}</p>
+                        </div>
+                        <div>
+                            <span class="block text-sm font-bold text-black-700">Tax</span>
+                            <p class="font-medium text-lg">{{ returnList.order_data.tax }}</p>
+                        </div>
+                         <div>
+                            <span class="block text-sm font-bold text-black-700">Subtotal</span>
+                            <p class="font-medium text-lg">{{ returnList.order_data.subtotal }}</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
             <!-- RIGHT SIDE -->
             <div class="md:w-1/3 flex flex-col">
+                <!-- Dealer Information -->
+                <div class="card flex flex-col w-full">
+                    <div class="flex items-center justify-between border-b pb-2 mb-2">
+                        <div class="text-2xl font-bold text-gray-800">🏬 Delivery Information</div>
+                    </div>
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-sm text-left text-gray-700">
+                            <tbody>
+                                <tr class="border-b">
+                                    <td class="px-4 py-2 font-medium">Pickup Date</td>
+                                    <td class="px-4 py-2 text-right">{{ formatDate(returnList.delivery_information.pickup_datetime) }}</td>
+                                </tr>
+                                <tr class="border-b">
+                                    <td class="px-4 py-2 font-medium">Dealer Code</td>
+                                    <td class="px-4 py-2 text-right">{{ formatDate(returnList.delivery_information.receive_datetime) }}</td>
+                                </tr>
+                                <tr class="border-b">
+                                    <td class="px-4 py-2 font-medium">Status</td>
+                                    <td class="px-4 py-2 text-right">{{ returnList.delivery_status }}</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
                 <!-- Dealer Information -->
                 <div class="card flex flex-col w-full">
                     <div class="flex items-center justify-between border-b pb-2 mb-2">
@@ -185,9 +257,14 @@ const returnList = ref({
     dealer_shop: {},
   },
   shiptoData: {},
+  delivery_information: {},
+  order_data: {},
 });
 const loading = ref(true);
-
+function formatDate(dateString) {
+    if (!dateString) return '';
+    return new Date(dateString).toLocaleDateString();
+}
 const InitfetchData = async () => {
     try {
         loading.value = true;

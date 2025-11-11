@@ -67,33 +67,43 @@
                     </div>
                 </template>
             </Column>
-             <Column field="deliveryDate" header="Ref No" dataType="date" style="min-width: 8rem">
+             <Column field="return_orderNo_ref" header="Ref No" dataType="date" style="min-width: 8rem">
                 <template #body="{ data }">
                     <RouterLink :to="`/scm/detailReturnOrder/${data.id}`" class="hover:underline font-bold text-primary-400">
                     {{ data.return_orderNo_ref }}
                     </RouterLink>
                 </template>
             </Column>
-            <Column field="deliveryDate" header="Dealer Name" dataType="date" style="min-width: 8rem">
+            <Column field="dealerName" header="Dealer Name" dataType="date" style="min-width: 8rem">
                 <template #body="{ data }">
-                    {{ data.return_orderNo_ref }}
+                    {{ data.dealerName }}
                 </template>
             </Column>
-            <Column field="returnRequestNo" header="Customer Acc No" style="min-width: 10rem">
+            <Column field="custAccountNo" header="Customer Acc No" style="min-width: 10rem">
                 <template #body="{ data }">
                     {{ data.custAccountNo }}
                 </template>
             </Column>
-            <Column field="deliveryDate" header="Company Name" dataType="date" style="min-width: 8rem">
+            <Column field="companyName1" header="Company Name" dataType="date" style="min-width: 8rem">
                 <template #body="{ data }">
                     {{ `${data.companyName1} ${data.companyName2} ${data.companyName3} ${data.companyName4}` }}
                 </template>
             </Column>
-            <Column field="size" header="Return Items" style="min-width: 12rem">
+            <Column field="length" header="Return Items" style="min-width: 12rem">
                 <template #body="{ data }">
                         {{ data.return_order_array.length }}
                 </template>
             </Column>
+            <!-- <Column field="created" header="Collection Date" style="min-width: 10rem">
+                <template #body="{ data }">
+                    {{ formatDate(data.created) }}
+                </template>
+            </Column>
+            <Column field="created" header="Receiving Date" style="min-width: 10rem">
+                <template #body="{ data }">
+                    {{ formatDate(data.created) }}
+                </template>
+            </Column> -->
             <Column header="Status" style="min-width: 8rem">
                 <template #body="{ data }">
                     <Tag :value="getStatusLabel(data.orderstatus)" :severity="getStatusSeverity(data.orderstatus)" />
