@@ -1,7 +1,7 @@
 <template>
     <Fluid>
         <div class="flex flex-col md:flex-row gap-8">
-            <div class="md:w-2/3 flex flex-col gap-8">
+            <div class="md:w-2/3 flex flex-col">
                 <div class="card flex flex-col gap-6 w-full">
                     <div class="flex items-center gap-2 border-b">
                         <RouterLink to="/om/listReturnOrder">
@@ -30,7 +30,7 @@
                         </div>
                         <div>
                             <span class="text-sm text-gray-500">Return Code</span>
-                            <p class="text-lg font-semibold">{{ order.reason_code }}</p>
+                            <p class="text-lg font-semibold">{{ order.reason_code || 'N/A' }}</p>
                         </div>
                         <div>
                             <span class="text-sm text-gray-500">Return Reason</span>
@@ -72,7 +72,7 @@
                         <div>
                             <span class="text-sm font-bold text-gray-700">Delivery Status</span>
                             <p class="text-lg font-medium">
-                                <Tag value="Delivered" severity="success" />
+                                <Tag :value="getOrderStatusText(order.orderstatus)" :severity="getOrderStatusSeverity(order.orderstatus)" />
                             </p>
                             <p class="text-xs text-gray-500 mt-1">Last updated: {{ order.created }}</p>
                         </div>
@@ -83,8 +83,8 @@
                     <div class="font-semibold text-xl border-b pb-2 mt-2">📦 Return Materials</div>
                     <DataTable :value="returnOrderArray" class="text-sm" stripedRows>
                         <Column field="salesdoclineitem" header="Line Item No." style="min-width: 6rem">
-                            <template #body="{ data }">
-                                <span class="text-lg">{{ data.salesdoclineitem }}</span>
+                            <template #body="{ data, index }">
+                                <span class="text-lg">{{ index + 1 }}</span>
                             </template>
                         </Column>
                         <Column field="materialid" header="Material ID" style="min-width: 8rem">
@@ -108,12 +108,12 @@
                             </template>
                         </Column>
                         <Column field="total" header="Total" style="min-width: 6rem">
-                            <template #body="{ data }">
+                            <template #body>
                                 <span class="text-lg">RM {{ order.total }}</span>
                             </template>
                         </Column>
                         <Column field="tax" header="Tax" style="min-width: 6rem">
-                            <template #body="{ data }">
+                            <template #body>
                                 <span class="text-lg text-red-600">RM {{ order.tax }}</span>
                             </template>
                         </Column>
@@ -126,7 +126,7 @@
                 <div class="card flex flex-col w-full">
                     <div class="flex items-center justify-between border-b pb-3 mb-4">
                         <div class="text-2xl font-bold text-gray-800">Advance Info</div>
-                        <Tag :value="order.orderstatus === 1 ? 'Complete' : 'Pending'" :severity="order.orderstatus === 1 ? 'success' : 'warn'" />
+                        <Tag :value="getOrderStatusText(order.orderstatus)" :severity="getOrderStatusSeverity(order.orderstatus)" />
                     </div>
 
                     <div class="overflow-x-auto">
@@ -150,7 +150,7 @@
                                 </tr>
                                 <tr class="border-b">
                                     <td class="px-4 py-2 font-medium">Invoice No</td>
-                                    <td class="px-4 py-2 text-right">{{ order.inv_no }}</td>
+                                    <td class="px-4 py-2 text-right">{{ order.inv_no || 'N/A' }}</td>
                                 </tr>
                                 <tr class="border-b">
                                     <td class="px-4 py-2 font-medium">SAP Order Type</td>
@@ -172,109 +172,169 @@
                         </table>
                     </div>
 
-                    <div class="flex justify-end mt-4 gap-2">
-                        <Button label="Reject" severity="danger" size="small" @click="showRejectPopup = true" />
-                        <Button label="Approve" severity="success" size="small" @click="onApproveReturnOrder" />
+                    <!-- Action Buttons -->
+                    <div class="flex justify-end mt-4 gap-2" v-if="order.orderstatus === 66">
+                        <Button label="Reject" severity="danger" size="small" @click="onRejectReturnOrder" :loading="loadingAction === 'reject'" />
+                        <Button label="Approve" severity="success" size="small" @click="onApproveReturnOrder" :loading="loadingAction === 'approve'" />
+                    </div>
+
+                    <!-- Status Labels after action -->
+                    <div class="flex justify-end mt-4" v-else>
+                        <Tag :value="getActionStatusLabel(order.orderstatus)" :severity="getActionStatusSeverity(order.orderstatus)" />
                     </div>
                 </div>
             </div>
         </div>
 
-        <Dialog v-model:visible="showRejectPopup" header="Reject Return Order" modal class="w-96">
-            <div class="flex flex-col gap-3">
-                <p class="text-gray-700 text-sm">Select a reason for rejection:</p>
-                <Dropdown v-model="rejectReason" :options="rejectReasonOptions" placeholder="-- Please Select --" optionLabel="label" optionValue="value" class="w-full" />
-                <div class="flex justify-end gap-2 mt-4">
-                    <Button label="Cancel" size="small" @click="showRejectPopup = false" />
-                    <Button label="Submit" severity="danger" size="small" :disabled="!rejectReason" @click="submitRejectReturnOrder" />
-                </div>
-            </div>
-        </Dialog>
+        <Toast />
     </Fluid>
 </template>
 
 <script setup>
-import { ref } from 'vue';
-import Fluid from 'primevue/fluid';
-import Tag from 'primevue/tag';
-import Button from 'primevue/button';
-import Dialog from 'primevue/dialog';
-import Dropdown from 'primevue/dropdown';
-import DataTable from 'primevue/datatable';
-import Column from 'primevue/column';
+import { ref, onMounted } from 'vue';
+import { useRoute } from 'vue-router';
+import { useToast } from 'primevue/usetoast';
+import api from '@/service/api';
 
-const apiResponse = {
-    status: 1,
-    admin_data: [
-        {
-            returnID: 24,
-            id: 61,
-            orderID: 61,
-            etenUserListID: 1,
-            etenUserID: 1,
-            return_orderNo_ref: 'RTNORD-000000020',
-            return_order_array: '[{"materialid":"81114NE0304175H","itemcategory":"ZR02","plant":"TSM","qty":"3","salesdoclineitem":"10"}]',
-            reason_code: 'Y01',
-            reason_message: 'Wrong DOM',
-            orderstatus: 1,
-            sap_timestamp: '2025-10-09 15:52:12',
-            created: '2025-10-09 15:52:12',
-            custaccountno: '6020201500',
-            salesorg: 'TSM',
-            distributionchannel: '10',
-            division: '10',
-            pricegroup: '06',
-            sapordertype: 'ZRP1',
-            customerCondGrp: '04',
-            shipto: '6020201500',
-            shippingcond: 'JB',
-            storagelocation: 'TMSA',
-            orderDesc: 'NORMAL',
-            channel: 'ETEN',
-            containerSize: null,
-            deliveryType: 'DELIVER',
-            deliveryDate: '2025-10-11',
-            eten_user_shiptoID: 1,
-            order_no: 'ORD-000000044',
-            so_no: '0910002078',
-            do_no: '0920001446',
-            inv_no: 'INV6565757',
-            subtotal: '750.00',
-            tax: '0.00',
-            total: '750.00',
-            dealer: {
-                dealer_shop: {
-                    memberCode: 'TY001',
-                    custAccountNo: '6020201500',
-                    companyName1: 'YIP BROTHERS TYRE & AUTO CAR WORKS',
-                    companyName2: 'SDN. BHD.',
-                    city: 'SHAH ALAM,',
-                    state: 'SELANGOR'
-                }
-            }
+const route = useRoute();
+const toast = useToast();
+const returnOrderNo = route.params.retOrdNo;
+
+const order = ref({});
+const dealerShop = ref({});
+const returnOrderArray = ref([]);
+const loading = ref(true);
+const loadingAction = ref(null);
+const error = ref(null);
+
+// ✅ Status mapping functions
+const getOrderStatusText = (status) => {
+    const statusMap = {
+        0: 'Pending',
+        1: 'Approved',
+        2: 'Rejected',
+        66: 'Processing',
+        77: 'Pending Collection',
+        9: 'Completed'
+    };
+    return statusMap[status] || `Status: ${status}`;
+};
+
+const getOrderStatusSeverity = (status) => {
+    const severityMap = {
+        0: 'warn',
+        1: 'success',
+        2: 'danger',
+        66: 'info',
+        77: 'warn',
+        9: 'success'
+    };
+    return severityMap[status] || 'secondary';
+};
+
+const getActionStatusLabel = (status) => {
+    const actionMap = {
+        1: 'Approved',
+        2: 'Rejected'
+    };
+    return actionMap[status] || '';
+};
+
+const getActionStatusSeverity = (status) => {
+    const severityMap = {
+        1: 'success',
+        2: 'danger'
+    };
+    return severityMap[status] || 'secondary';
+};
+
+// Toast helper
+const showToast = (severity, summary, detail) => {
+    toast.add({
+        severity,
+        summary,
+        detail,
+        life: 5000
+    });
+};
+
+// Fetch order details
+const fetchReturnOrderDetail = async () => {
+    try {
+        loading.value = true;
+        error.value = null;
+
+        const response = await api.get(`order/detail-return-order/${returnOrderNo}`);
+        if (response.data.status === 0 && response.data.admin_data && response.data.admin_data.length > 0) {
+            order.value = response.data.admin_data[0];
+            dealerShop.value = order.value.dealer?.dealer_shop || {};
+            returnOrderArray.value = order.value.return_order_array || [];
+        } else {
+            error.value = 'No data found for this return order';
+            showToast('error', 'Error', error.value);
         }
-    ]
+    } catch (err) {
+        console.error('Error fetching return order details:', err);
+        showToast('error', 'Error', 'Failed to load return order details');
+    } finally {
+        loading.value = false;
+    }
 };
 
-const order = ref(apiResponse.admin_data[0]);
-const dealerShop = ref(order.value.dealer.dealer_shop);
-const returnOrderArray = ref(JSON.parse(order.value.return_order_array));
+// ✅ Approve return order
+const onApproveReturnOrder = async () => {
+    try {
+        loadingAction.value = 'approve';
+        const formData = new FormData();
+        formData.append('status', '1'); // 1 = Approved
 
-const showRejectPopup = ref(false);
-const rejectReason = ref(null);
-const rejectReasonOptions = ref([
-    { label: 'Incorrect Details', value: 'Incorrect Details' },
-    { label: 'Invalid Return Reason', value: 'Invalid Return Reason' },
-    { label: 'Duplicate Request', value: 'Duplicate Request' },
-    { label: 'Other', value: 'Other' }
-]);
+        const response = await api.post(`order/update-return-order/${returnOrderNo}`, formData, {
+            headers: { 'Content-Type': 'multipart/form-data' }
+        });
 
-const onApproveReturnOrder = () => {
-    alert('Return order approved');
+        if (response.data.status === 1) {
+            showToast('success', 'Success', 'Return order approved successfully!');
+            // ✅ Instantly update local status (no need to refetch)
+            order.value.orderstatus = 1;
+        } else {
+            const msg = response.data.error?.message || 'Failed to approve return order';
+            showToast('error', 'Error', msg);
+        }
+    } catch (err) {
+        console.error(err);
+        showToast('error', 'Error', 'Failed to approve return order');
+    } finally {
+        loadingAction.value = null;
+    }
 };
 
-const submitRejectReturnOrder = () => {
-    alert(`Return order rejected: ${rejectReason.value}`);
-    showRejectPopup.value = false;
+// ✅ Reject return order
+const onRejectReturnOrder = async () => {
+    try {
+        loadingAction.value = 'reject';
+        const formData = new FormData();
+        formData.append('status', '2'); // ✅ 2 = Rejected (previously used 9 incorrectly)
+
+        const response = await api.post(`order/update-return-order/${returnOrderNo}`, formData, {
+            headers: { 'Content-Type': 'multipart/form-data' }
+        });
+
+        if (response.data.status === 1) {
+            showToast('success', 'Success', 'Return order rejected successfully!');
+            // ✅ Instantly update local status
+            order.value.orderstatus = 2;
+        } else {
+            const msg = response.data.error?.message || 'Failed to reject return order';
+            showToast('error', 'Error', msg);
+        }
+    } catch (err) {
+        console.error(err);
+        showToast('error', 'Error', 'Failed to reject return order');
+    } finally {
+        loadingAction.value = null;
+    }
 };
+
+// Fetch initial data
+onMounted(() => fetchReturnOrderDetail());
 </script>

@@ -165,9 +165,10 @@ const router = createRouter({
                     component: () => import('@/views/om/listReturnOrder.vue')
                 },
                 {
-                    path: '/om/detailReturnOrder',
+                    path: '/om/detailReturnOrder/:retOrdNo',
                     name: 'Detail-Return-Order',
-                    component: () => import('@/views/om/detailReturnOrder.vue')
+                    component: () => import('@/views/om/detailReturnOrder.vue'),
+                    props: true
                 },
                 {
                     path: '/om/createReturnOrder',
