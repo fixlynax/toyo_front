@@ -165,8 +165,8 @@
                     </div>
 
                     <div v-if="warantyDetail.status === 4" class="flex justify-end gap-2 mt-4">
-                        <Button label="Replacement" class="p-button-info" size="small" @click="createReplacement" />
-                        <Button label="Reimbursement" class="p-button-warning" size="small" @click="createReimbursement" />
+                        <!-- <Button label="Replacement" class="p-button-info" size="small" @click="createReplacement" />
+                        <Button label="Reimbursement" class="p-button-warning" size="small" @click="createReimbursement" /> -->
                     </div>
                     <div v-else-if="claimFinalStatus" class="text-right mt-3 text-sm font-bold" :class="claimFinalStatus === 'approved' ? 'text-green-600' : 'text-red-600'">Claim {{ claimFinalStatus }}</div>
                 </div>
@@ -327,10 +327,10 @@
             </Dropdown>
         </div>
 
-        <div class="field">
+        <!-- <div class="field">
             <label for="claimablePercent" class="block font-bold text-gray-700 mb-1">Claimable Percent (%)</label>
             <InputNumber id="claimablePercent" v-model="reimbursementForm.claimablePercent" mode="decimal" :min="0" :max="100" :minFractionDigits="2" :maxFractionDigits="2" placeholder="Enter claimable percentage" class="w-full mb-4" />
-        </div>
+        </div> -->
 
         <template #footer>
             <Button label="Cancel" icon="pi pi-times" class="p-button-text" @click="closeReimbursementDialog" />
@@ -405,7 +405,7 @@ const rejectingInvoice = ref(false);
 
 // Forms
 const replacementForm = ref({ materialId: '' });
-const reimbursementForm = ref({ materialId: '', claimablePercent: 0 });
+const reimbursementForm = ref({ materialId: ''});
 
 // Results
 const replacementResult = ref({});
@@ -817,6 +817,14 @@ const submitReplacement = async () => {
                 life: 3000
             });
         }
+        else {
+            toast.add({
+                severity: 'error',
+                summary: 'Error',
+                detail: response.data.error,
+                life: 3000
+            });
+        }
     } catch (err) {
         console.error('Error submitting replacement:', err);
         toast.add({
@@ -827,12 +835,13 @@ const submitReplacement = async () => {
         });
     } finally {
         saving.value = false;
-        closeReplacementDialog();
+        showApproveDialog.value = false;
+       showCreateReplacementDialog.value = false;
     }
 };
 
 const submitReimbursement = async () => {
-    if (!selectedMaterial.value || reimbursementForm.value.claimablePercent <= 0) {
+    if (!selectedMaterial.value ) {
         toast.add({
             severity: 'error',
             summary: 'Error',
@@ -847,7 +856,6 @@ const submitReimbursement = async () => {
         const response = await api.post('warranty_claim/approveReimbursement', {
             claim_id: warantyDetail.value.id,
             materialid: selectedMaterial.value.materialid,
-            claimable_percent: reimbursementForm.value.claimablePercent
         });
 
         if (response.data.status === 1) {
@@ -857,6 +865,13 @@ const submitReimbursement = async () => {
                 severity: 'success',
                 summary: 'Success',
                 detail: 'Reimbursement approved successfully',
+                life: 3000
+            });
+        }else {
+            toast.add({
+                severity: 'error',
+                summary: 'Error',
+                detail: response.data.error,
                 life: 3000
             });
         }
@@ -870,7 +885,8 @@ const submitReimbursement = async () => {
         });
     } finally {
         saving.value = false;
-        closeReimbursementDialog();
+        showApproveDialog.value = false;
+        showCreateReimbursementDialog.value = false;
     }
 };
 
