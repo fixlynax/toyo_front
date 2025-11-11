@@ -316,11 +316,15 @@ function getStatusLabel(status) {
         case 0:
             return 'Pending';
         case 1:
-            return 'Completed';
+            return 'Approve';
+        case 2:
+            return 'Rejected';
         case 66:
             return 'Processing';
         case 77:
-            return 'Delivery';
+            return 'Pending Collection';
+        case 9:
+            return 'Completed';
         default:
             return 'Unknown';
     }
@@ -332,10 +336,14 @@ function getStatusSeverity(status) {
             return 'warn';
         case 1:
             return 'success';
+        case 2:
+            return 'error';
         case 66:
             return 'info';
         case 77:
             return 'primary';
+        case 9:
+            return 'success';
         default:
             return 'secondary';
     }

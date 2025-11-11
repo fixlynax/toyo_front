@@ -32,7 +32,7 @@
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm text-gray-700">
                         <div>
                             <span class="block text-sm font-bold text-black-700">Status</span>
-                            <p class="font-medium text-lg">{{ returnList.orderstatus }}</p>
+                             <Tag :value="getStatusLabel(returnList.orderstatus)" :severity="getStatusSeverity(returnList.orderstatus)" />
                         </div>
                         <div>
                             <span class="block text-sm font-bold text-black-700">Reason</span>
@@ -208,6 +208,43 @@ const InitfetchData = async () => {
         loading.value = false;
     }
 };
+function getStatusLabel(status) {
+    switch (status) {
+        case 0:
+            return 'Pending';
+        case 1:
+            return 'Approve';
+        case 2:
+            return 'Rejected';
+        case 66:
+            return 'Processing';
+        case 77:
+            return 'Pending Collection';
+        case 9:
+            return 'Completed';
+        default:
+            return 'Unknown';
+    }
+}
+
+function getStatusSeverity(status) {
+    switch (status) {
+        case 0:
+            return 'warn';
+        case 1:
+            return 'success';
+        case 2:
+            return 'error';
+        case 66:
+            return 'info';
+        case 77:
+            return 'primary';
+        case 9:
+            return 'success';
+        default:
+            return 'secondary';
+    }
+}
 const handleExport = async () => {
  const idexport = route.params.id;
     try {
