@@ -43,36 +43,33 @@
             <!-- ========================= -->
             <Column field="custAccountNo" header="Dealer Acc No" style="min-width: 8rem">
                 <template #body="{ data }">
-                    <RouterLink to="/scm/detailSCMBackOrder" class="hover:underline font-bold">
+                    <RouterLink to="/scm/detailSCMBackOrder" class="hover:underline font-bold text-primary-400">
                         {{ data.custAccountNo }}
                     </RouterLink>
                 </template>
             </Column>
-            
+
             <Column field="customerName" header="Name" style="min-width: 8rem">
                 <template #body="{ data }">
                     {{ data.customerName }}
                 </template>
             </Column>
-            
+
             <Column field="deliveryDate" header="Order Date" style="min-width: 8rem">
                 <template #body="{ data }">
                     {{ data.deliveryDate }}
                 </template>
             </Column>
-            
+
             <Column field="expiry" header="Back Order Expiry" style="min-width: 8rem">
                 <template #body="{ data }">
                     {{ data.expiry }}
                 </template>
             </Column>
-            
+
             <Column field="orderStatus" header="Status" style="min-width: 8rem">
                 <template #body="{ data }">
-                    <Tag 
-                        :value="data.orderStatus === 1 ? 'Active' : 'Inactive'" 
-                        :severity="getOverallStatusSeverity(data.orderStatus)" 
-                    />
+                    <Tag :value="data.orderStatus === 1 ? 'Active' : 'Inactive'" :severity="getOverallStatusSeverity(data.orderStatus)" />
                 </template>
             </Column>
         </DataTable>

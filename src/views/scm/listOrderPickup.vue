@@ -29,7 +29,7 @@
             <!-- Columns -->
             <Column field="orderNo" header="Order No" style="min-width: 8rem">
                 <template #body="{ data }">
-                    <RouterLink :to="'/scm/detailOrderPickup'" class="hover:underline font-bold">
+                    <RouterLink :to="'/scm/detailOrderPickup'" class="hover:underline font-bold text-primary-400">
                         {{ data.orderNo }}
                     </RouterLink>
                 </template>

@@ -169,7 +169,7 @@ onBeforeMount(() => {
                 <!-- Columns -->
                 <Column field="returnRequestNo" header="Return Req No." style="min-width: 8rem">
                     <template #body="{ data }">
-                        <RouterLink :to="`/om/detailReturnOrder/${data.id}`" class="hover:underline font-bold text-primary-400">
+                        <RouterLink :to="`/om/detailReturnOrder/${data.returnRequestNo}`" class="hover:underline font-bold text-primary-400">
                             {{ data.returnRequestNo }}
                         </RouterLink>
                     </template>

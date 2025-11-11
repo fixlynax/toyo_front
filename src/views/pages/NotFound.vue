@@ -17,7 +17,7 @@ import FloatingConfigurator from '@/components/FloatingConfigurator.vue';
                         </span>
                         <span class="ml-6 flex flex-col">
                             <span class="text-surface-900 dark:text-surface-0 lg:text-xl font-medium mb-0 block">Frequently Asked Questions</span>
-                            <span class="text-surface-600 dark:text-surface-200 lg:text-xl">Ultricies mi quis hendrerit dolor.</span>
+                            <span class="text-surface-600 dark:text-surface-200 lg:text-xl">Any Question Ask Administrator.</span>
                         </span>
                     </router-link>
                     <router-link to="/" class="w-full flex items-center py-8 border-surface-300 dark:border-surface-500 border-b">
@@ -26,7 +26,7 @@ import FloatingConfigurator from '@/components/FloatingConfigurator.vue';
                         </span>
                         <span class="ml-6 flex flex-col">
                             <span class="text-surface-900 dark:text-surface-0 lg:text-xl font-medium mb-0">Solution Center</span>
-                            <span class="text-surface-600 dark:text-surface-200 lg:text-xl">Phasellus faucibus scelerisque eleifend.</span>
+                            <span class="text-surface-600 dark:text-surface-200 lg:text-xl">Contact Developer For Any Changes.</span>
                         </span>
                     </router-link>
                     <router-link to="/" class="w-full flex items-center mb-8 py-8 border-surface-300 dark:border-surface-500 border-b">
@@ -35,7 +35,7 @@ import FloatingConfigurator from '@/components/FloatingConfigurator.vue';
                         </span>
                         <span class="ml-6 flex flex-col">
                             <span class="text-surface-900 dark:text-surface-0 lg:text-xl font-medium mb-0">Permission Manager</span>
-                            <span class="text-surface-600 dark:text-surface-200 lg:text-xl">Accumsan in nisl nisi scelerisque</span>
+                            <span class="text-surface-600 dark:text-surface-200 lg:text-xl">Ask Administrator For Permission.</span>
                         </span>
                     </router-link>
                     <Button as="router-link" label="Go to Dashboard" to="/" />
