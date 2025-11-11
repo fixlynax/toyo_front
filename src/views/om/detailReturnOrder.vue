@@ -50,29 +50,29 @@
                         <div>
                             <span class="text-sm font-bold text-gray-700">Ship To</span>
                             <p class="text-lg font-medium">
-                                {{ order.deliveryType === 'DELIVER' ? dealerShop.companyName1 : 'Customer Self Pickup' }}
+                                {{ orderData.deliveryType === 'DELIVER' ? dealerShop.companyName1 : 'Customer Self Pickup' }}
                             </p>
                         </div>
                         <div>
                             <span class="text-sm font-bold text-gray-700">Description</span>
-                            <p class="text-lg font-medium">{{ order.orderDesc || '-' }}</p>
+                            <p class="text-lg font-medium">{{ orderData.orderDesc || '-' }}</p>
                         </div>
                         <div>
                             <span class="text-sm font-bold text-gray-700">Shipping Cond</span>
-                            <p class="text-lg font-medium">{{ order.shippingcond || '-' }}</p>
+                            <p class="text-lg font-medium">{{ orderData.shippingcond || '-' }}</p>
                         </div>
                         <div>
                             <span class="text-sm font-bold text-gray-700">Delivery Type</span>
-                            <p class="text-lg font-medium">{{ order.deliveryType || '-' }}</p>
+                            <p class="text-lg font-medium">{{ orderData.deliveryType || '-' }}</p>
                         </div>
                         <div>
                             <span class="text-sm font-bold text-gray-700">Delivery ETA</span>
-                            <p class="text-lg font-medium">{{ order.deliveryDate || '-' }}</p>
+                            <p class="text-lg font-medium">{{ orderData.deliveryDate || '-' }}</p>
                         </div>
                         <div>
                             <span class="text-sm font-bold text-gray-700">Delivery Status</span>
                             <p class="text-lg font-medium">
-                                <Tag :value="getOrderStatusText(order.orderstatus)" :severity="getOrderStatusSeverity(order.orderstatus)" />
+                                <Tag :value="getdeliveryOrderStatusText(order.delivery_status)" :severity="getOrderStatusSeverity(order.orderstatus)" />
                             </p>
                             <p class="text-xs text-gray-500 mt-1">Last updated: {{ order.created || '-' }}</p>
                         </div>
@@ -103,17 +103,12 @@
                             </template>
                         </Column>
                         <Column field="total" header="Total" style="min-width: 6rem">
-                            <template #body>
-                                <span class="text-lg">RM {{ order.price || '-' }}</span>
-                            </template>
-                        </Column>
-                        <Column field="tax" header="Tax" style="min-width: 6rem">
-                            <template #body>
-                                <span class="text-lg text-red-600">RM {{ order.tax || '-' }}</span>
+                            <template #body="{ data }">
+                                <span class="text-lg">RM {{ data.unitprice || '-' }}</span>
                             </template>
                         </Column>
                     </DataTable>
-                    <div class="mt-2 flex justify-end text-lg font-semibold">Subtotal: RM {{ order.subtotal || '-' }}</div>
+                    <div class="mt-2 flex justify-end text-lg font-bold">Subtotal: RM {{ order.subtotal || '-' }}</div>
                 </div>
             </div>
 
@@ -133,35 +128,35 @@
                                 </tr>
                                 <tr class="border-b">
                                     <td class="px-4 py-2 font-medium">Order No</td>
-                                    <td class="px-4 py-2 text-right">{{ order.order_no || '-' }}</td>
+                                    <td class="px-4 py-2 text-right">{{ orderData.order_no || '-' }}</td>
                                 </tr>
                                 <tr class="border-b">
                                     <td class="px-4 py-2 font-medium">SO No</td>
-                                    <td class="px-4 py-2 text-right">{{ order.so_no || '-' }}</td>
+                                    <td class="px-4 py-2 text-right">{{ orderData.so_no || '-' }}</td>
                                 </tr>
                                 <tr class="border-b">
                                     <td class="px-4 py-2 font-medium">DO No</td>
-                                    <td class="px-4 py-2 text-right">{{ order.do_no || '-' }}</td>
+                                    <td class="px-4 py-2 text-right">{{ orderData.do_no || '-' }}</td>
                                 </tr>
                                 <tr class="border-b">
                                     <td class="px-4 py-2 font-medium">Invoice No</td>
-                                    <td class="px-4 py-2 text-right">{{ order.inv_no || '-' }}</td>
+                                    <td class="px-4 py-2 text-right">{{ orderData.inv_no || '-' }}</td>
                                 </tr>
                                 <tr class="border-b">
                                     <td class="px-4 py-2 font-medium">SAP Order Type</td>
-                                    <td class="px-4 py-2 text-right">{{ order.sapordertype || '-' }}</td>
+                                    <td class="px-4 py-2 text-right">{{ orderData.sapordertype || '-' }}</td>
                                 </tr>
                                 <tr class="border-b">
                                     <td class="px-4 py-2 font-medium">Division</td>
-                                    <td class="px-4 py-2 text-right">{{ order.division || '-' }}</td>
+                                    <td class="px-4 py-2 text-right">{{ orderData.division || '-' }}</td>
                                 </tr>
                                 <tr class="border-b">
                                     <td class="px-4 py-2 font-medium">Delivery Date</td>
-                                    <td class="px-4 py-2 text-right">{{ order.deliveryDate || '-' }}</td>
+                                    <td class="px-4 py-2 text-right">{{ orderData.deliveryDate || '-' }}</td>
                                 </tr>
                                 <tr>
                                     <td class="px-4 py-2 font-medium">Created</td>
-                                    <td class="px-4 py-2 text-right">{{ order.created || '-' }}</td>
+                                    <td class="px-4 py-2 text-right">{{ orderData.created || '-' }}</td>
                                 </tr>
                             </tbody>
                         </table>
@@ -197,12 +192,24 @@ const returnOrderNo = route.params.retOrdNo;
 
 const order = ref({});
 const dealerShop = ref({});
+const orderData = ref({});
 const returnOrderArray = ref([]);
 const loading = ref(true);
 const loadingAction = ref(null);
 const error = ref(null);
 
 // ✅ Status mapping functions
+const getdeliveryOrderStatusText = (status) => {
+    const statusMap = {
+        PENDING: 'Pending',
+        APPROVED: 'Approved',
+        REJECTED: 'Rejected',
+        PENDING_COLLECTION: 'Pending Collection',
+        COMPLETED: 'Completed'
+    };
+    return statusMap[status?.toUpperCase()] || ` ${status || '-'}`;
+};
+
 const getOrderStatusText = (status) => {
     const statusMap = {
         0: 'Pending',
@@ -263,7 +270,15 @@ const fetchReturnOrderDetail = async () => {
         if (response.data.status === 0 && response.data.admin_data && response.data.admin_data.length > 0) {
             order.value = response.data.admin_data[0];
             dealerShop.value = order.value.dealer?.dealer_shop || {};
+            orderData.value = order.value.order_data || {};
             returnOrderArray.value = order.value.return_order_array || [];
+            order.value.subtotal = returnOrderArray.value
+                .reduce((sum, item) => {
+                    const qty = Number(item.qty) || 0;
+                    const price = Number(item.unitprice) || 0;
+                    return sum + qty * price;
+                }, 0)
+                .toFixed(2);
         } else {
             error.value = 'No data found for this return order';
             showToast('error', 'Error', error.value);
