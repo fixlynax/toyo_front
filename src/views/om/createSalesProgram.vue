@@ -565,8 +565,8 @@ const submitForm = async () => {
         formData.append('image', imageFile.value);
 
         // ✅ Append spFOC_array as a JSON string
-        formData.append('spFOC_array', JSON.stringify(spFOCArray));
-        
+        // formData.append('spFOC_array', JSON.stringify(spFOCArray));
+        formData.append('spFOC_array', null);
         // Append individual fields
         formData.append('freematerialid', programItem.value.selectedFreeMaterial || '');
         formData.append('freematerialdesc', programItem.value.freeMaterialData?.material || '');

@@ -685,6 +685,7 @@ async function fetchDealerList() {
     try {
         const formData = new FormData();
         formData.append('mainBranch', 1);
+        formData.append('custaccountno', custAccountNo);
         const response = await api.post('list_dealer', formData);
         if (response.data.status === 1 && response.data.admin_data) {
             const adminData = response.data.admin_data;
@@ -743,7 +744,7 @@ async function handleSubmit() {
         }
 
         // Submit API
-        const response = await api.post('add_dealer', formData, {
+        const response = await api.postExtra('add_dealer', formData, {
             headers: { 'Content-Type': 'multipart/form-data' }
         });
         
@@ -759,12 +760,13 @@ async function handleSubmit() {
             localStorage.removeItem('etenFormData');
             
             if (response.data.custAccountNo) {
-                router.push('/om/detailEten/' + response.data.custAccountNo);
+                // router.push('/om/detailEten/' + response.data.custAccountNo);
+                router.push('/om/etenList');
             } else {
                 router.push('/om/etenList');
             }
         } else {
-            let errorMsg = 'Failed to create dealer.';
+            let errorMsg = 'Duplicate entry or an error occurred.';
             
             if (response.data.validation_errors) {
                 // Handle validation errors
