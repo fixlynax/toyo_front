@@ -11,7 +11,8 @@
                         </div>
 
                         <div class="flex items-center gap-2">
-                            <Button icon="pi pi-file-import" label="Import" class="p-button-success" @click="importInput?.click()":loading="importLoading"/>
+                            <Button icon="pi pi-file-export" label="Export" class="p-button-success" :loading="exportLoading" @click="handleExport" />
+                            <Button icon="pi pi-file-import" label="Import"  @click="importInput?.click()":loading="importLoading"/>
                             <input 
                             ref="importInput"
                             type="file" 
@@ -19,7 +20,7 @@
                             style="display: none" 
                             @change="handleImport"
                             />
-                            <Button icon="pi pi-file-export" label="Export" class="p-button-danger" :loading="exportLoading" @click="handleExport" />
+                            
                         </div>
                     </div>
 

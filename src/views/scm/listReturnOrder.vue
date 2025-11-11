@@ -30,7 +30,7 @@
                         </div>
                         <div class="flex justify-end gap-2">
                             <Button type="button" label="Export" icon="pi pi-download" class="p-button-success" :loading="exportLoading" @click="handleExport"/>
-                            <Button type="button" label="Bulk" icon="pi pi-upload" @click="importInput?.click()":loading="importLoading" />
+                            <Button type="button" label="Bulk Import" icon="pi pi-upload" @click="importInput?.click()":loading="importLoading" />
                             <input 
                             ref="importInput"
                             type="file" 
