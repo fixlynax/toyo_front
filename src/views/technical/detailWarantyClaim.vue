@@ -230,13 +230,13 @@
                         </div>
                         <div>
                             <span class="font-bold">Amount</span>
-                            <p>RM {{ warantyDetail.invAmount?.toFixed(2) || '0.00' }}</p>
+                            <p>RM {{ warantyDetail.invAmount || '0.00' }}</p>
                         </div>
                     </div>
                     
                     <!-- Invoice Actions -->
                     <div class="flex justify-end p-1 gap-2 mt-2">
-                        <Button v-if="warantyDetail.invAttachURL" icon="pi pi-eye" class="p-button-info" size="small" @click="viewInvoice(warantyDetail.invAttachURL)" />
+                        <Button v-if="warantyDetail.invAttachURL" icon="pi pi-eye" class="p-button-info" size="small" @click="processInvoice(warantyDetail.invAttachURL)" />
                         <Button v-if="warantyDetail.invAttachURL" icon="pi pi-download" class="p-button-danger" size="small" @click="downloadInvoice(warantyDetail.invAttachURL)" />
                     </div>
                     
@@ -827,6 +827,27 @@ const viewInvoice = (url) => {
     if (url) {
         window.open(url, '_blank');
     }
+};
+
+const processInvoice = async (url, filename = 'file.pdf') => {
+  try {
+    const response = await api.getPrivateFile(url); // must return { responseType: 'blob' }
+
+    const blob = new Blob([response.data]);
+    const blobUrl = window.URL.createObjectURL(blob);
+
+    const link = document.createElement('a');
+    link.href = blobUrl;
+    link.download = filename;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+
+    // Clean up URL after a few seconds
+    setTimeout(() => window.URL.revokeObjectURL(blobUrl), 5000);
+  } catch (error) {
+    console.error('❌ Failed to download file:', error);
+  }
 };
 
 const downloadInvoice = async (url) => {
