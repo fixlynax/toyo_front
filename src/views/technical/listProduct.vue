@@ -2,6 +2,8 @@
     <div class="card">
         <div class="text-2xl font-bold text-gray-800 border-b pb-2">List Product</div>
 
+
+
         <DataTable
             :value="tyres"
             :paginator="true"
@@ -24,51 +26,67 @@
                             </InputIcon>
                             <InputText v-model="filters['global'].value" placeholder="Quick Search" class="w-full" />
                         </IconField>
-
+                        
                         <Button type="button" icon="pi pi-cog" @click="sortMenu.toggle($event)" />
                         <Menu ref="sortMenu" :model="sortItems" :popup="true" />
                     </div>
-
+                    
                     <!-- Right: Export & Batch Buttons -->
                     <div class="flex items-center gap-2 ml-auto">
                         <Button 
-                            type="button" 
-                            label="Export" 
-                            icon="pi pi-file-export" 
-                            class="p-button"
-                            :loading="exportLoading"
-                            @click="handleExport"
+                        type="button" 
+                        label="Material" 
+                        icon="pi pi-sync" 
+                        class="p-button"
+                        :loading="exportLoading"
+                        @click="handleExport"
                         />
                         <Button 
-                            type="button" 
-                            label="Import" 
-                            icon="pi pi-file-import" 
-                            class="p-button"
-                            @click="importInput?.click()"
-                            :loading="importLoading"
+                        type="button" 
+                        label="Stock Level" 
+                        icon="pi pi-sync" 
+                        class="p-button"
+                        :loading="exportLoading"
+                        @click="handleExport"
+                        />
+                        <Button 
+                        type="button" 
+                        label="Export" 
+                        icon="pi pi-file-export" 
+                        class="p-button"
+                        :loading="exportLoading"
+                        @click="handleExport"
+                        />
+                        <Button 
+                        type="button" 
+                        label="Import" 
+                        icon="pi pi-file-import" 
+                        class="p-button"
+                        @click="importInput?.click()"
+                        :loading="importLoading"
                         />
                         <input 
-                            ref="importInput"
-                            type="file" 
-                            accept=".xlsx,.xls" 
-                            style="display: none" 
-                            @change="handleImport"
+                        ref="importInput"
+                        type="file" 
+                        accept=".xlsx,.xls" 
+                        style="display: none" 
+                        @change="handleImport"
                         />
                         <Button 
-                            type="button" 
-                            icon="pi pi-refresh" 
-                            class="p-button"
-                            :loading="refreshLoading"
-                            @click="refreshData"
+                        type="button" 
+                        icon="pi pi-refresh" 
+                        class="p-button"
+                        :loading="refreshLoading"
+                        @click="refreshData"
                         />
                     </div>
                 </div>
             </template>
-
+            
             <template #empty> No data found. </template>
             <template #loading> Loading data. Please wait... </template>
-
             
+
             <Column field="materialid" header="Material ID" style="min-width: 6rem">
                 <template #body="{ data }">
                     <div class="flex flex-col items-start gap-1">
@@ -173,6 +191,7 @@ import { onMounted, ref } from 'vue';
 import { FilterMatchMode } from '@primevue/core/api';
 import api from '@/service/api';
 import { useToast } from 'primevue/usetoast';
+import LoadingPage from '@/components/LoadingPage.vue';
 
 const toast = useToast();
 
