@@ -482,14 +482,12 @@ const handleExport = async () => {
         'material/export',
         { material_id: idsArray }, 
         {
+            responseType: 'blob',
             headers: {
             'Content-Type': 'application/json',
-            'Accept': 'application/json' // add Accept header like Postman
             }
         }
         );
-        console.log("herererer");
-        console.log(response);
         const blob = new Blob([response.data], { 
         type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' 
         });
@@ -516,6 +514,9 @@ const handleExport = async () => {
 // Import function
 const handleImport = async (event) => {
     const file = event.target.files[0];
+   
+
+
     if (!file) return;
 
     try {
@@ -523,22 +524,35 @@ const handleImport = async (event) => {
         
         const formData = new FormData();
         formData.append('material_file', file);
-        
-        await api.post('material/import', formData, {
+        const response = await api.postExtra('material/import', formData, {
             headers: {
                 'Content-Type': 'multipart/form-data'
             }
-        });
+            });
         
-        // Refresh data after import
-        await fetchData();
-        
-        // Reset file input
-        if (importInput.value) {
-            importInput.value.value = '';
+        if (response.data.status === 1) {
+            // Refresh data after import
+            await fetchData();
+
+            // Reset file input
+            if (importInput.value) {
+                importInput.value.value = '';
+            }
+
+            toast.add({
+                severity: 'success',
+                summary: 'Success',
+                detail: 'File imported successfully',
+                life: 3000
+            });
+            } else {
+            toast.add({
+                severity: 'error',
+                summary: 'Import Failed',
+                detail: response.data.error || 'Server did not confirm success',
+                life: 3000
+            });
         }
-        
-        toast.add({ severity: 'success', summary: 'Success', detail: 'Import completed', life: 3000 });
     } catch (error) {
         console.error('Error importing data:', error);
         toast.add({ severity: 'error', summary: 'Error', detail: 'Failed to import data', life: 3000 });
