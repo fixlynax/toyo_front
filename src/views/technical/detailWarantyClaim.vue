@@ -1,5 +1,4 @@
 <template>
-    <div class="flex flex-col md:flex-row gap-8">
         <!-- Loading State -->
         <!-- <div v-if="loading" class="text-center py-20 text-gray-500 text-lg w-full">Loading warranty details...</div> -->
          <LoadingPage v-if="loading" :message="'Loading Details Warranty Claim...'"  />
@@ -10,7 +9,7 @@
         </div>
 
         <!-- Main Content -->
-        <div v-else class="flex flex-col md:flex-row w-full">
+        <div v-else class="flex flex-col md:flex-row gap-8">
             <!-- LEFT SIDE -->
             <div class="md:w-2/3 flex flex-col">
                 <!-- Claim Detail -->
@@ -18,9 +17,10 @@
                     <div class="flex items-center justify-between border-b pb-2">
                         <div class="text-2xl font-bold text-gray-800">Warranty Detail</div>
                         <div class="inline-flex items-center gap-2">
-                            <Button label="Reject Warranty" class="p-button-danger" size="small" @click="openRejectDialog" :disabled="rejecting" />
+                             <Button v-if="warantyDetail.isCTC === 1 &&  warantyDetail.status >= 4  && !warantyDetail.ctc_details" label="Approve" class="p-button-success" size="small" @click="Approve" />
+                            <!-- <Button label="Reject Warranty" class="p-button-danger" size="small" @click="openRejectDialog" :disabled="rejecting" />
                             <Button label="Request CTC" class="p-button-info" size="small" @click="requestCTCSubmit" />
-                            <Button label="Request Scrap" class="p-button-warning" size="small" @click="requestScrapSubmit" />
+                            <Button label="Request Scrap" class="p-button-warning" size="small" @click="requestScrapSubmit" /> -->
                         </div>
                     </div>
                     <div class="mt-6">
@@ -118,7 +118,7 @@
             <!-- RIGHT SIDE -->
             <div class="md:w-1/3 flex flex-col">
                 <!-- 1. CTC Detail -->
-                <div class="card w-full mb-4" v-if="warantyDetail.isCTC === 1 &&  warantyDetail.status >= 4">
+                <!-- <div class="card w-full mb-4" v-if="warantyDetail.isCTC === 1 &&  warantyDetail.status >= 4">
                     <div class="flex items-center justify-between border-b pb-2 mb-2">
                         <div class="text-2xl font-bold text-gray-800">CTC Detail</div>
                         <Button v-if="warantyDetail.isCTC === 1 &&  warantyDetail.status >= 4  && !warantyDetail.ctc_details" label="Create" class="p-button-info" size="small" @click="createCTC" />
@@ -145,13 +145,13 @@
                             <p>{{ getCTCStatus(warantyDetail.ctc_details.status) }}</p>
                         </div>
                     </div>
-                </div>
+                </div> -->
 
                 <!-- 2. Claim Detail -->
                 <div class="card w-full mb-4">
                     <div class="flex items-center justify-between border-b pb-2 mb-2">
                         <div class="text-2xl font-bold text-gray-800">Claim Detail</div>
-                        <Button v-if="!warantyDetail.damageCode" label="Create" class="p-button-info" size="small" @click="createClaim" />
+                        <!-- <Button v-if="!warantyDetail.damageCode" label="Create" class="p-button-info" size="small" @click="createClaim" /> -->
                     </div>
                     <div class="grid grid-cols-1 gap-2 text-sm text-gray-800">
                         <div>
@@ -213,12 +213,11 @@
                 </div>
 
                 <!-- 4. Invoice Detail - Only show when status >= 4, reimbursement approved, and invoice exists -->
-                <div v-if="warantyDetail.status >= 4  " class="card w-full mb-4">
+                <!-- <div v-if="warantyDetail.status >= 4  " class="card w-full mb-4">
                     <div class="flex items-center justify-between border-b pb-2 mb-2">
                         <div class="text-2xl font-bold text-gray-800">Invoice Detail</div>
                     </div>
 
-                    <!-- Invoice Details -->
                     <div class="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm text-gray-800">
                         <div>
                             <span class="font-bold">Invoice Number</span>
@@ -234,13 +233,13 @@
                         </div>
                     </div>
                     
-                    <!-- Invoice Actions -->
+
                     <div class="flex justify-end p-1 gap-2 mt-2">
                         <Button v-if="warantyDetail.invAttachURL" icon="pi pi-eye" class="p-button-info" size="small" @click="viewInvoice(warantyDetail.invAttachURL)" />
                         <Button v-if="warantyDetail.invAttachURL" icon="pi pi-download" class="p-button-danger" size="small" @click="downloadInvoice(warantyDetail.invAttachURL)" />
                     </div>
                     
-                    <!-- Admin Approval Section -->
+
                     <div v-if="warantyDetail.invNo && !invoiceStatus && warantyDetail.invStatus !== 1" class="flex justify-end gap-2 mt-4">
                         <Button label="Approve Invoice" class="p-button-success" size="small" @click="approveInvoice" :loading="approvingInvoice" />
                         <Button label="Reject Invoice" class="p-button-danger" size="small" @click="rejectInvoice" :loading="rejectingInvoice" />
@@ -248,9 +247,9 @@
                     <div v-else-if="invoiceStatus || warantyDetail.invStatus === 1" class="text-right mt-3 text-sm font-bold" :class="(invoiceStatus === 'approved' || warantyDetail.invStatus === 1) ? 'text-green-600' : 'text-red-600'">
                         Invoice {{ invoiceStatus === 'approved' || warantyDetail.invStatus === 1 ? 'approved' : 'rejected' }}
                     </div>
-                </div>
+                </div> -->
 
-                <!-- Invoice Upload Required Notice -->
+
                 <div v-else-if="warantyDetail.status >= 4 && warantyDetail.isReimbursement === 1 " class="card w-full mb-4">
                     <div class="flex items-center justify-between border-b pb-2 mb-2">
                         <div class="text-2xl font-bold text-gray-800">Invoice Detail</div>
@@ -268,7 +267,7 @@
                 </div>
             </div>
         </div>
-    </div>
+
 
     <!-- Existing Dialogs (CTC, Replacement, Reimbursement, Reject) -->
     <Dialog v-model:visible="showCreateCTCDialog" header="Create CTC" :modal="true" class="p-fluid" :style="{ width: '40rem' }">
@@ -282,6 +281,17 @@
         <template #footer>
             <Button label="Cancel" icon="pi pi-times" class="p-button-text" @click="closeCTCDialog" />
             <Button label="Create" icon="pi pi-check" class="p-button-primary" @click="saveCTC" />
+        </template>
+    </Dialog>
+
+    <Dialog v-model:visible="showApproveDialog" header="Select" :modal="true" class="p-fluid" :style="{ width: '40rem' }">
+        <div class="grid grid-cols-1 gap-4">
+            <Button label="Replacement"  class="p-button-primary"  @click="createReplacement"/>
+            <Button label="Reimbursement"  class="p-button-primary"  @click="createReimbursement"/>
+        </div>
+
+        <template #footer>
+            <Button label="Cancel" icon="pi pi-times" class="p-button-text" @click="closeApproveDialog" />
         </template>
     </Dialog>
 
@@ -328,7 +338,7 @@
         </template>
     </Dialog>
 
-    <Dialog v-model:visible="showRejectDialog" header="Reject Warranty Claim" :modal="true" class="p-fluid" :style="{ width: '40rem' }">
+    <!-- <Dialog v-model:visible="showRejectDialog" header="Reject Warranty Claim" :modal="true" class="p-fluid" :style="{ width: '40rem' }">
         <div class="field">
             <label class="block font-bold text-gray-700 mb-1">Select Rejection Reason *</label>
             <Dropdown v-model="selectedRejectReason" :options="rejectReasons" optionLabel="damageMode" optionValue="id" placeholder="Select rejection reason" class="w-full mb-4" :class="{ 'p-invalid': !selectedRejectReason && rejecting }">
@@ -357,7 +367,7 @@
             <Button label="Cancel" icon="pi pi-times" class="p-button-text" @click="closeRejectDialog" :disabled="rejecting" />
             <Button label="Reject Claim" icon="pi pi-times-circle" class="p-button-danger" @click="confirmRejectWarranty" :loading="rejecting" :disabled="!selectedRejectReason || rejecting" />
         </template>
-    </Dialog>
+    </Dialog> -->
 </template>
 
 <script setup>
@@ -378,6 +388,7 @@ const ctcdate = ref(new Date());
 const showCreateCTCDialog = ref(false);
 const showCreateReimbursementDialog = ref(false);
 const showCreateReplacementDialog = ref(false);
+const showApproveDialog = ref(false);
 
 const warantyDetail = ref({});
 const loading = ref(true);
@@ -681,11 +692,17 @@ const createCTC = () => {
     showCreateCTCDialog.value = true;
 };
 
+const Approve = () => {
+    showApproveDialog.value = true;
+};
+
 const createReplacement = () => {
+    showApproveDialog.value = false;
     showCreateReplacementDialog.value = true;
 };
 
 const createReimbursement = () => {
+    showApproveDialog.value = false;
     showCreateReimbursementDialog.value = true;
 };
 
@@ -694,15 +711,49 @@ const closeCTCDialog = () => {
     ctcdate.value = new Date();
 };
 
+const closeApproveDialog = () => {
+    showApproveDialog.value = false;
+};
+
 const closeReplacementDialog = () => {
     showCreateReplacementDialog.value = false;
+    showApproveDialog.value = true;
 };
 
 const closeReimbursementDialog = () => {
     showCreateReimbursementDialog.value = false;
+    showApproveDialog.value = true;
 };
 
+
 const saveCTC = async () => {
+    try {
+        loading.value = true;
+        const pad = (n) => n.toString().padStart(2, '0');
+        const d = ctcdate.value;
+
+        const createData = {
+            claim_id: warantyDetail.value.id,
+            collect_datetime: `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())} ${pad(d.getHours())}:${pad(d.getMinutes())}:${pad(d.getSeconds())}`
+        };
+
+        const response = await api.post(`collection/createCTC`, createData);
+
+        if (response.data.status === 1) {
+            closeCTCDialog();
+        } else {
+            console.error('Failed to create date:', response.data);
+            alert('Failed to create ctc. Please try again.');
+        }
+    } catch (error) {
+        console.error('Error create ctc:', error);
+    } finally {
+        loading.value = false;
+        closeCTCDialog();
+    }
+};
+
+const SaveSelect = async () => {
     try {
         loading.value = true;
         const pad = (n) => n.toString().padStart(2, '0');
