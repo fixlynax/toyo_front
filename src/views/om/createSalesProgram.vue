@@ -56,224 +56,238 @@
                     </div>
                 </div>
 
-                <!-- Criteria Section -->
+                <!-- Single Criteria Section -->
                 <div>
                     <!-- Header -->
                     <div class="flex items-center justify-between border-b pb-2 mb-4 mt-6">
                         <div class="text-xl font-bold text-gray-800">📋 Criteria</div>
                     </div>
 
-                    <!-- Criteria Items -->
-                    <div v-if="programItems.length > 0" class="space-y-6">
-                        <div v-for="(item, index) in programItems" :key="index" class="border rounded-xl p-6 shadow-sm bg-gray-100 hover:shadow-md transition-shadow duration-200">
-                            <!-- Criteria Header -->
-                            <div class="flex items-center justify-between mb-6">
-                                <div class="flex items-center gap-3">
-                                    <div class="w-8 h-8 bg-blue-500 rounded-full flex items-center justify-center shadow-sm">
-                                        <span class="text-white font-bold text-sm">{{ index + 1 }}</span>
-                                    </div>
-                                    <h3 class="font-semibold text-lg text-gray-800">Criteria {{ index + 1 }}</h3>
-                                </div>
-                                <Button icon="pi pi-trash" class="p-button-danger p-button-text p-button-sm" @click="removeProgramItem(index)" />
-                            </div>
-
-                            <!-- Quantities Card -->
-                            <div class="rounded-lg mb-12">
-                                <h4 class="font-semibold text-blue-800 mb-3 flex items-center gap-2">
-                                    <i class="pi pi-shopping-cart text-blue-600"></i>
-                                    Purchase Requirements
-                                </h4>
-                                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                    <div>
-                                        <label class="block text-sm font-medium text-blue-700 mb-1">Buy Quantity</label>
-                                        <div class="flex items-center gap-2">
-                                            <InputNumber v-model="item.buyQty" class="w-full" :min="1" showButtons />
-                                            <span class="text-sm text-blue-600 font-medium">items</span>
-                                        </div>
-                                        <p class="text-xs text-blue-600 mt-1">Number of items customer needs to purchase</p>
-                                    </div>
-                                    <div>
-                                        <label class="block text-sm font-medium text-green-700 mb-1">Free Quantity</label>
-                                        <div class="flex items-center gap-2">
-                                            <InputNumber v-model="item.freeQty" class="w-full" :min="1" showButtons />
-                                            <span class="text-sm text-green-600 font-medium">items</span>
-                                        </div>
-                                        <p class="text-xs text-green-600 mt-1">Number of free items customer will receive</p>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <!-- Buy Materials Section -->
-                            <div class="mb-6 bg-blue-50 p-4 rounded-lg border border-blue-100">
-                                <div class="flex items-center justify-between mb-4">
+                    <!-- Single Criteria Item -->
+                    <div class="border rounded-xl p-6 shadow-sm bg-gray-100 hover:shadow-md transition-shadow duration-200">
+                        <!-- Quantities Card -->
+                        <div class="rounded-lg mb-6">
+                            <h4 class="font-semibold text-blue-800 mb-3 flex items-center gap-2">
+                                <i class="pi pi-shopping-cart text-blue-600"></i>
+                                Purchase Requirements
+                            </h4>
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div>
+                                    <label class="block text-sm font-medium text-blue-700 mb-1">Buy Quantity</label>
                                     <div class="flex items-center gap-2">
-                                        <h4 class="font-semibold text-gray-800 flex items-center gap-2">
-                                            <i class="pi pi-tags text-blue-600"></i>
-                                            Buy Materials
-                                        </h4>
-                                        <span class="text-xs bg-blue-100 text-blue-800 px-2 py-0.5 rounded-full">All matching materials will be included</span>
+                                        <InputNumber v-model="programItem.buyQty" class="w-full" :min="1" showButtons />
+                                        <span class="text-sm text-blue-600 font-medium">items</span>
                                     </div>
-                                    <Button
-                                        v-if="item.selectedBuyPattern || item.selectedBuyRims.length > 0"
-                                        icon="pi pi-times"
-                                        label="Clear Selection"
-                                        style="width: fit-content"
-                                        class="p-button-text p-button-sm p-button-danger"
-                                        @click="clearBuySelection(item)"
+                                    <p class="text-xs text-blue-600 mt-1">Number of items customer needs to purchase</p>
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-green-700 mb-1">Free Quantity</label>
+                                    <div class="flex items-center gap-2">
+                                        <InputNumber v-model="programItem.freeQty" class="w-full" :min="1" showButtons />
+                                        <span class="text-sm text-green-600 font-medium">items</span>
+                                    </div>
+                                    <p class="text-xs text-green-600 mt-1">Number of free items customer will receive</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Buy Materials Section - Multiple Patterns -->
+                        <div class="mb-6 bg-blue-50 p-4 rounded-lg border border-blue-100">
+                            <div class="flex items-center justify-between mb-4">
+                                <div class="flex items-center gap-2">
+                                    <h4 class="font-semibold text-gray-800 flex items-center gap-2">
+                                        <i class="pi pi-tags text-blue-600"></i>
+                                        Buy Materials
+                                    </h4>
+                                    <span class="text-xs bg-blue-100 text-blue-800 px-2 py-0.5 rounded-full">Select multiple patterns and rim diameters</span>
+                                </div>
+                                <Button 
+                                    v-if="programItem.patternSelections.length > 0" 
+                                    icon="pi pi-times" 
+                                    label="Clear All Selections" 
+                                    style="width: fit-content" 
+                                    class="p-button-text p-button-sm p-button-danger" 
+                                    @click="clearAllBuySelections" 
+                                />
+                            </div>
+
+                            <!-- Pattern Selection Section -->
+                            <div class="space-y-4">
+                                <!-- Add New Pattern Button -->
+                                <div class="flex justify-end">
+                                    <Button 
+                                        icon="pi pi-plus" 
+                                        label="Add Pattern" 
+                                        class="p-button-success p-button-sm"
+                                        @click="addPatternSelection"
                                     />
                                 </div>
 
-                                <!-- Selection Criteria -->
-                                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-                                    <div>
-                                        <label class="block text-sm font-medium text-gray-700 mb-2">Pattern</label>
-                                        <Dropdown
-                                            v-model="item.selectedBuyPattern"
-                                            :options="buyPatternOptions"
-                                            optionLabel="label"
-                                            optionValue="value"
-                                            placeholder="Select Pattern"
-                                            class="w-full"
-                                            :filter="true"
-                                            :loading="loadingBuyPatterns"
-                                            @change="onBuyPatternChange(item)"
+                                <!-- Pattern Selections -->
+                                <div v-for="(patternSelection, index) in programItem.patternSelections" :key="index" class="border border-blue-200 rounded-lg p-4 bg-white">
+                                    <div class="flex items-center justify-between mb-3">
+                                        <h5 class="font-medium text-gray-700 flex items-center gap-2">
+                                            <i class="pi pi-filter text-blue-500"></i>
+                                            Pattern Selection {{ index + 1 }}
+                                        </h5>
+                                        <Button 
+                                            v-if="programItem.patternSelections.length > 1"
+                                            icon="pi pi-trash" 
+                                            class="p-button-danger p-button-text p-button-sm" 
+                                            @click="removePatternSelection(index)" 
                                         />
                                     </div>
-                                    <div>
-                                        <label class="block text-sm font-medium text-gray-700 mb-2">Rim Diameter</label>
-                                        <MultiSelect
-                                            v-model="item.selectedBuyRims"
-                                            :options="item.availableBuyRims"
-                                            optionLabel="label"
-                                            optionValue="value"
-                                            placeholder="Select Rim Diameter"
-                                            class="w-full"
-                                            :filter="true"
-                                            :disabled="!item.selectedBuyPattern"
-                                            :loading="loadingBuyRims"
-                                            @change="updateBuyMaterials(item)"
-                                        />
+
+                                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                        <div>
+                                            <label class="block text-sm font-medium text-gray-700 mb-2">Pattern</label>
+                                            <Dropdown
+                                                v-model="patternSelection.selectedPattern"
+                                                :options="buyPatternOptions"
+                                                optionLabel="label"
+                                                optionValue="value"
+                                                placeholder="Select Pattern"
+                                                class="w-full"
+                                                :filter="true"
+                                                :loading="loadingBuyPatterns"
+                                                @change="onPatternChange(patternSelection)"
+                                            />
+                                        </div>
+                                        <div>
+                                            <label class="block text-sm font-medium text-gray-700 mb-2">Rim Diameter</label>
+                                            <MultiSelect
+                                                v-model="patternSelection.selectedRims"
+                                                :options="patternSelection.availableRims"
+                                                optionLabel="label"
+                                                optionValue="value"
+                                                placeholder="Select Rim Diameter"
+                                                class="w-full"
+                                                :filter="true"
+                                                :disabled="!patternSelection.selectedPattern"
+                                                :loading="loadingBuyRims"
+                                                @change="updateBuyMaterials"
+                                            />
+                                        </div>
                                     </div>
                                 </div>
+                            </div>
 
-                                <!-- Selected Buy Materials Display -->
-                                <div v-if="item.buyMaterials.length > 0" class="space-y-3">
-                                    <div class="flex items-center justify-between">
-                                        <span class="text-sm font-medium text-gray-700">Selected Buy Materials ({{ item.buyMaterials.length }})</span>
-                                    </div>
+                            <!-- Selected Buy Materials Display -->
+                            <div v-if="programItem.buyMaterials.length > 0" class="mt-4 space-y-3">
+                                <div class="flex items-center justify-between">
+                                    <span class="text-sm font-medium text-gray-700">Selected Buy Materials ({{ programItem.buyMaterials.length }})</span>
+                                </div>
 
-                                    <div class="grid grid-cols-1 md:grid-cols-4 gap-3 max-h-60 overflow-y-auto p-2 border border-blue-200 rounded-lg bg-white">
-                                        <div v-for="material in item.buyMaterials" :key="material.pattern + '_' + material.size" class="flex items-center gap-3 p-3 bg-blue-50 border border-blue-200 rounded-lg hover:bg-blue-100 transition-colors">
-                                            <div class="flex-1 min-w-0">
-                                                <div class="text-sm font-medium text-blue-800 truncate">{{ material.patternname }}</div>
-                                                <div class="flex flex-wrap items-center gap-2 mt-1">
-                                                    <span class="text-xs bg-white px-2 py-0.5 rounded text-blue-700 border border-blue-200">Pattern: {{ material.pattern }}</span>
-                                                    <span class="text-xs bg-white px-2 py-0.5 rounded text-blue-700 border border-blue-200">Rim: {{ material.size }}"</span>
-                                                </div>
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-3 max-h-60 overflow-y-auto p-2 border border-blue-200 rounded-lg bg-white">
+                                    <div v-for="material in programItem.buyMaterials" :key="material.pattern + '_' + material.size" class="flex items-center gap-3 p-3 bg-blue-50 border border-blue-200 rounded-lg hover:bg-blue-100 transition-colors">
+                                        <div class="flex-1 min-w-0">
+                                            <div class="text-sm font-medium text-blue-800 truncate">{{ material.patternname }}</div>
+                                            <div class="flex flex-wrap items-center gap-2 mt-1">
+                                                <span class="text-xs bg-white px-2 py-0.5 rounded text-blue-700 border border-blue-200">Pattern: {{ material.pattern }}</span>
+                                                <span class="text-xs bg-white px-2 py-0.5 rounded text-blue-700 border border-blue-200">Rim: {{ material.size }}"</span>
                                             </div>
                                         </div>
                                     </div>
                                 </div>
+                            </div>
 
-                                <div v-else-if="!item.selectedBuyPattern || item.selectedBuyRims.length === 0" class="text-center py-6 border-2 border-dashed border-gray-300 rounded-lg">
-                                    <i class="pi pi-inbox text-3xl text-gray-300 mb-2"></i>
-                                    <p class="text-gray-500 text-sm">No buy materials selected</p>
-                                    <p class="text-gray-400 text-xs mt-1">Select pattern and rim diameter to display available materials</p>
+                            <div v-else-if="programItem.patternSelections.length === 0 || !programItem.patternSelections.some(ps => ps.selectedPattern)" class="text-center py-6 border-2 border-dashed border-gray-300 rounded-lg">
+                                <i class="pi pi-inbox text-3xl text-gray-300 mb-2"></i>
+                                <p class="text-gray-500 text-sm">No buy materials selected</p>
+                                <p class="text-gray-400 text-xs mt-1">Add patterns and select rim diameters to display available materials</p>
+                            </div>
+
+                            <div v-else-if="programItem.buyMaterials.length === 0" class="text-center py-6 border-2 border-dashed border-gray-300 rounded-lg">
+                                <i class="pi pi-exclamation-circle text-3xl text-gray-300 mb-2"></i>
+                                <p class="text-gray-500 text-sm">No materials found</p>
+                                <p class="text-gray-400 text-xs mt-1">No materials match the selected criteria</p>
+                            </div>
+                        </div>
+
+                        <!-- Free Material Section -->
+                        <div class="bg-green-50 p-4 rounded-lg border border-green-100">
+                            <div class="flex items-center justify-between mb-4">
+                                <div class="flex items-center gap-2">
+                                    <h4 class="font-semibold text-gray-800 flex items-center gap-2">
+                                        <i class="pi pi-gift text-green-600"></i>
+                                        Free Material
+                                    </h4>
+                                    <span class="text-xs bg-green-100 text-green-800 px-2 py-0.5 rounded-full">Select one</span>
                                 </div>
+                                <Button 
+                                    v-if="programItem.selectedFreeMaterial" 
+                                    icon="pi pi-times" 
+                                    label="Clear Selection" 
+                                    style="width: fit-content" 
+                                    class="p-button-text p-button-sm p-button-danger" 
+                                    @click="clearFreeSelection" 
+                                />
+                            </div>
 
-                                <div v-else class="text-center py-6 border-2 border-dashed border-gray-300 rounded-lg">
-                                    <i class="pi pi-exclamation-circle text-3xl text-gray-300 mb-2"></i>
-                                    <p class="text-gray-500 text-sm">No materials found</p>
-                                    <p class="text-gray-400 text-xs mt-1">No materials match the selected criteria</p>
+                            <!-- Free Material Selection -->
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                                <div class="md:col-span-2">
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">Free Material</label>
+                                    <Dropdown
+                                        v-model="programItem.selectedFreeMaterial"
+                                        :options="freeMaterialOptions"
+                                        optionLabel="material"
+                                        optionValue="materialid"
+                                        placeholder="Select Free Material"
+                                        class="w-full"
+                                        :filter="true"
+                                        :loading="loadingFreeMaterials"
+                                        @change="onFreeMaterialChange"
+                                    >
+                                        <template #value="slotProps">
+                                            <div v-if="slotProps.value" class="flex items-center">
+                                                <div>
+                                                    <div class="font-medium">{{ getFreeMaterialLabel(slotProps.value) }}</div>
+                                                    <div class="text-xs text-gray-500">{{ slotProps.value }}</div>
+                                                </div>
+                                            </div>
+                                            <span v-else>
+                                                {{ slotProps.placeholder }}
+                                            </span>
+                                        </template>
+                                        <template #option="slotProps">
+                                            <div class="flex items-center">
+                                                <div>
+                                                    <div class="font-medium">{{ slotProps.option.material }}</div>
+                                                    <div class="text-xs text-gray-500">{{ slotProps.option.materialid }}</div>
+                                                </div>
+                                            </div>
+                                        </template>
+                                    </Dropdown>
+                                </div>
+                                <div class="md:col-span-2">
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">Free Quota</label>
+                                    <InputNumber v-model="programItem.freeQuota" class="w-full" :min="1" showButtons />
                                 </div>
                             </div>
 
-                            <!-- Free Material Section -->
-                            <div class="bg-green-50 p-4 rounded-lg border border-green-100">
-                                <div class="flex items-center justify-between mb-4">
-                                    <div class="flex items-center gap-2">
-                                        <h4 class="font-semibold text-gray-800 flex items-center gap-2">
-                                            <i class="pi pi-gift text-green-600"></i>
-                                            Free Material
-                                        </h4>
-                                        <span class="text-xs bg-green-100 text-green-800 px-2 py-0.5 rounded-full">Select one</span>
-                                    </div>
-                                    <Button v-if="item.selectedFreeMaterial" icon="pi pi-times" label="Clear Selection" style="width: fit-content" class="p-button-text p-button-sm p-button-danger" @click="clearFreeSelection(item)" />
+                            <!-- Selected Free Material Display -->
+                            <div v-if="programItem.selectedFreeMaterial && programItem.freeMaterialData" class="space-y-3">
+                                <div class="flex items-center justify-between">
+                                    <span class="text-sm font-medium text-gray-700">Selected Free Material</span>
                                 </div>
 
-                                <!-- Free Material Selection -->
-                                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-                                    <div class="md:col-span-2">
-                                        <label class="block text-sm font-medium text-gray-700 mb-2">Free Material</label>
-                                        <Dropdown
-                                            v-model="item.selectedFreeMaterial"
-                                            :options="freeMaterialOptions"
-                                            optionLabel="material"
-                                            optionValue="materialid"
-                                            placeholder="Select Free Material"
-                                            class="w-full"
-                                            :filter="true"
-                                            :loading="loadingFreeMaterials"
-                                            @change="onFreeMaterialChange(item)"
-                                        >
-                                            <template #value="slotProps">
-                                                <div v-if="slotProps.value" class="flex items-center">
-                                                    <div>
-                                                        <div class="font-medium">{{ getFreeMaterialLabel(slotProps.value) }}</div>
-                                                        <div class="text-xs text-gray-500">{{ slotProps.value }}</div>
-                                                    </div>
-                                                </div>
-                                                <span v-else>
-                                                    {{ slotProps.placeholder }}
-                                                </span>
-                                            </template>
-                                            <template #option="slotProps">
-                                                <div class="flex items-center">
-                                                    <div>
-                                                        <div class="font-medium">{{ slotProps.option.material }}</div>
-                                                        <div class="text-xs text-gray-500">{{ slotProps.option.materialid }}</div>
-                                                    </div>
-                                                </div>
-                                            </template>
-                                        </Dropdown>
-                                    </div>
-                                    <div class="md:col-span-2">
-                                        <label class="block text-sm font-medium text-gray-700 mb-2">Free Quota</label>
-                                        <InputNumber v-model="item.freeQuota" class="w-full" :min="1" showButtons />
+                                <div class="flex items-center gap-4 p-4 bg-green-50 border border-green-200 rounded-lg hover:bg-green-100 transition-colors">
+                                    <div class="flex-1">
+                                        <div class="text-sm font-medium text-green-800">{{ programItem.freeMaterialData.material }}</div>
+                                        <div class="text-xs text-green-600 mt-1">Material ID: {{ programItem.freeMaterialData.materialid }}</div>
                                     </div>
                                 </div>
+                            </div>
 
-                                <!-- Selected Free Material Display -->
-                                <div v-if="item.selectedFreeMaterial && item.freeMaterialData" class="space-y-3">
-                                    <div class="flex items-center justify-between">
-                                        <span class="text-sm font-medium text-gray-700">Selected Free Material</span>
-                                    </div>
-
-                                    <div class="flex items-center gap-4 p-4 bg-green-50 border border-green-200 rounded-lg hover:bg-green-100 transition-colors">
-                                        <div class="flex-1">
-                                            <div class="text-sm font-medium text-green-800">{{ item.freeMaterialData.material }}</div>
-                                            <div class="text-xs text-green-600 mt-1">Material ID: {{ item.freeMaterialData.materialid }}</div>
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <div v-else class="text-center py-6 border-2 border-dashed border-gray-300 rounded-lg">
-                                    <i class="pi pi-gift text-3xl text-gray-300 mb-2"></i>
-                                    <p class="text-gray-500 text-sm">No free material selected</p>
-                                    <p class="text-gray-400 text-xs mt-1">Select a free material from the dropdown</p>
-                                </div>
+                            <div v-else class="text-center py-6 border-2 border-dashed border-gray-300 rounded-lg">
+                                <i class="pi pi-gift text-3xl text-gray-300 mb-2"></i>
+                                <p class="text-gray-500 text-sm">No free material selected</p>
+                                <p class="text-gray-400 text-xs mt-1">Select a free material from the dropdown</p>
                             </div>
                         </div>
                     </div>
-
-                    <!-- Empty State -->
-                    <div v-else class="text-center py-8 text-gray-500">
-                        <i class="pi pi-inbox text-4xl text-gray-300 mb-3"></i>
-                        <p class="text-lg">No criteria added yet</p>
-                        <p class="text-sm">Click "Add Criteria" to create your first promotion rule</p>
-                    </div>
                 </div>
-                <Button icon="pi pi-plus" label="Add Criteria" class="p-button-success p-button-sm" :disabled="programItems.length >= 20" @click="addProgramItem" />
 
                 <!-- Submit -->
                 <div class="flex justify-end gap-2 mt-8">
@@ -293,6 +307,7 @@
 
 <script setup>
 import { ref, onMounted, watch } from 'vue';
+import { RouterLink } from 'vue-router';
 import api from '@/service/api';
 
 const salesProgram = ref({
@@ -309,7 +324,17 @@ const salesProgram = ref({
 const imageFile = ref(null);
 const imagePreview = ref('');
 
-const programItems = ref([]);
+// Single program item with multiple pattern selections
+const programItem = ref({
+    buyQty: 1,
+    freeQty: 1,
+    freeQuota: null,
+    buyMaterials: [],
+    selectedFreeMaterial: null,
+    freeMaterialData: null,
+    patternSelections: [], // Array to hold multiple pattern selections
+    status: 1
+});
 
 // API Data
 const buyPatternOptions = ref([]);
@@ -319,69 +344,80 @@ const loadingBuyRims = ref(false);
 const loadingFreeMaterials = ref(false);
 
 // Helper functions
-const onBuyPatternChange = async (item) => {
-    item.selectedBuyRims = [];
-    item.buyMaterials = [];
-    item.availableBuyRims = [];
+const addPatternSelection = () => {
+    programItem.value.patternSelections.push({
+        selectedPattern: null,
+        selectedRims: [],
+        availableRims: []
+    });
+};
 
-    if (item.selectedBuyPattern) {
-        await loadBuyRims(item);
+const removePatternSelection = (index) => {
+    programItem.value.patternSelections.splice(index, 1);
+    updateBuyMaterials();
+};
+
+const onPatternChange = async (patternSelection) => {
+    patternSelection.selectedRims = [];
+    patternSelection.availableRims = [];
+
+    if (patternSelection.selectedPattern) {
+        await loadPatternRims(patternSelection);
     }
+    updateBuyMaterials();
 };
 
-const updateBuyMaterials = async (item) => {
-    if (item.selectedBuyPattern && item.selectedBuyRims.length > 0) {
-        await loadBuyMaterials(item);
-    } else {
-        item.buyMaterials = [];
-    }
+const updateBuyMaterials = () => {
+    // Clear existing materials
+    programItem.value.buyMaterials = [];
+    
+    // Collect all materials from all pattern selections
+    programItem.value.patternSelections.forEach(patternSelection => {
+        if (patternSelection.selectedPattern && patternSelection.selectedRims.length > 0) {
+            const selectedPattern = buyPatternOptions.value.find(
+                pattern => pattern.value === patternSelection.selectedPattern
+            );
+
+            if (selectedPattern) {
+                patternSelection.selectedRims.forEach(rim => {
+                    programItem.value.buyMaterials.push({
+                        pattern: patternSelection.selectedPattern,
+                        patternname: selectedPattern.patternName,
+                        size: rim,
+                        status: 1
+                    });
+                });
+            }
+        }
+    });
 };
 
-const clearBuySelection = (item) => {
-    item.selectedBuyPattern = null;
-    item.selectedBuyRims = [];
-    item.buyMaterials = [];
-    item.availableBuyRims = [];
+const clearAllBuySelections = () => {
+    programItem.value.patternSelections = [];
+    programItem.value.buyMaterials = [];
+    // Add back one empty pattern selection
+    addPatternSelection();
 };
 
-const onFreeMaterialChange = (item) => {
-    if (item.selectedFreeMaterial) {
+const onFreeMaterialChange = () => {
+    if (programItem.value.selectedFreeMaterial) {
         const selectedMaterial = freeMaterialOptions.value.find(
-            (material) => material.materialid === item.selectedFreeMaterial
+            (material) => material.materialid === programItem.value.selectedFreeMaterial
         );
-        item.freeMaterialData = selectedMaterial ? { ...selectedMaterial } : null;
+        programItem.value.freeMaterialData = selectedMaterial ? { ...selectedMaterial } : null;
     } else {
-        item.freeMaterialData = null;
+        programItem.value.freeMaterialData = null;
     }
 };
 
-const clearFreeSelection = (item) => {
-    item.selectedFreeMaterial = null;
-    item.freeMaterialData = null;
+const clearFreeSelection = () => {
+    programItem.value.selectedFreeMaterial = null;
+    programItem.value.freeMaterialData = null;
 };
 
 const getFreeMaterialLabel = (materialId) => {
     const material = freeMaterialOptions.value.find((m) => m.materialid === materialId);
     return material ? material.material : materialId;
-};
-
-const addProgramItem = () => {
-    programItems.value.push({
-        buyQty: 1,
-        freeQty: 1,
-        freeQuota: null,
-        buyMaterials: [],
-        selectedFreeMaterial: null,
-        freeMaterialData: null,
-        selectedBuyPattern: null,
-        selectedBuyRims: [],
-        availableBuyRims: [],
-        status: 1
-    });
-};
-
-const removeProgramItem = (index) => {
-    programItems.value.splice(index, 1);
 };
 
 const onImageSelect = (event) => {
@@ -426,46 +462,26 @@ const loadBuyPatterns = async () => {
     }
 };
 
-const loadBuyRims = async (item) => {
+const loadPatternRims = async (patternSelection) => {
     try {
         loadingBuyRims.value = true;
         const selectedPattern = buyPatternOptions.value.find(
-            (pattern) => pattern.value === item.selectedBuyPattern
+            (pattern) => pattern.value === patternSelection.selectedPattern
         );
 
         if (selectedPattern && selectedPattern.rimSizes) {
-            item.availableBuyRims = selectedPattern.rimSizes.map((size) => ({
+            patternSelection.availableRims = selectedPattern.rimSizes.map((size) => ({
                 label: `${size}"`,
                 value: size.toString()
             }));
         } else {
-            item.availableBuyRims = [];
+            patternSelection.availableRims = [];
         }
     } catch (error) {
-        console.error('Error loading buy rims:', error);
-        item.availableBuyRims = [];
+        console.error('Error loading pattern rims:', error);
+        patternSelection.availableRims = [];
     } finally {
         loadingBuyRims.value = false;
-    }
-};
-
-const loadBuyMaterials = async (item) => {
-    try {
-        const selectedPattern = buyPatternOptions.value.find(
-            (pattern) => pattern.value === item.selectedBuyPattern
-        );
-
-        if (selectedPattern) {
-            item.buyMaterials = item.selectedBuyRims.map((rim) => ({
-                pattern: item.selectedBuyPattern,
-                patternname: selectedPattern.patternName,
-                size: rim,
-                status: 1
-            }));
-        }
-    } catch (error) {
-        console.error('Error loading buy materials:', error);
-        item.buyMaterials = [];
     }
 };
 
@@ -509,38 +525,31 @@ const submitForm = async () => {
             return;
         }
 
-        if (programItems.value.length === 0) {
-            alert('Please add at least one criteria');
+        // Validate buy materials
+        if (programItem.value.buyMaterials.length === 0) {
+            alert('Please select at least one buy material');
             return;
         }
 
-        // Validate each program item
-        for (const item of programItems.value) {
-            if (!item.selectedBuyPattern || item.selectedBuyRims.length === 0) {
-                alert('Please select buy materials for all criteria');
-                return;
-            }
-            if (!item.selectedFreeMaterial) {
-                alert('Please select free material for all criteria');
-                return;
-            }
-            if (!item.freeQuota || item.freeQuota < 1) {
-                alert('Please enter free quota for all criteria');
-                return;
-            }
+        // Validate free material
+        if (!programItem.value.selectedFreeMaterial) {
+            alert('Please select free material');
+            return;
+        }
+        if (!programItem.value.freeQuota || programItem.value.freeQuota < 1) {
+            alert('Please enter free quota');
+            return;
         }
 
-        // ✅ Clean and flat spFOC_array format
-        const spFOCArray = programItems.value.flatMap((item) =>
-            item.buyMaterials.map((mat) => ({
-                pattern: mat.pattern,
-                patternname: mat.patternname,
-                size: mat.size,
-                status: 1
-            }))
-        );
+        // ✅ Generate spFOC_array in the correct format
+        const spFOCArray = programItem.value.buyMaterials.map(material => ({
+            pattern: material.pattern,
+            patternname: material.patternname,
+            size: material.size,
+            status: 1
+        }));
 
-        console.log('Generated spFOC_array (clean):', JSON.stringify(spFOCArray, null, 2));
+        console.log('Generated spFOC_array:', JSON.stringify(spFOCArray, null, 2));
 
         // Prepare FormData
         const formData = new FormData();
@@ -557,16 +566,13 @@ const submitForm = async () => {
 
         // ✅ Append spFOC_array as a JSON string
         formData.append('spFOC_array', JSON.stringify(spFOCArray));
-
-        // For the first item (backend expects these individual fields)
-        const firstItem = programItems.value[0];
-        if (firstItem) {
-            formData.append('freematerialid', firstItem.selectedFreeMaterial || '');
-            formData.append('freematerialdesc', firstItem.freeMaterialData?.material || '');
-            formData.append('buyQty', firstItem.buyQty);
-            formData.append('freeQty', firstItem.freeQty);
-            formData.append('freeQuota', firstItem.freeQuota || '');
-        }
+        
+        // Append individual fields
+        formData.append('freematerialid', programItem.value.selectedFreeMaterial || '');
+        formData.append('freematerialdesc', programItem.value.freeMaterialData?.material || '');
+        formData.append('buyQty', programItem.value.buyQty);
+        formData.append('freeQty', programItem.value.freeQty);
+        formData.append('freeQuota', programItem.value.freeQuota || '');
 
         console.log('Submitting form data:', {
             programID: salesProgram.value.programID,
@@ -575,13 +581,13 @@ const submitForm = async () => {
             desc: salesProgram.value.desc,
             startdate: formatDate(salesProgram.value.startdate),
             enddate: formatDate(salesProgram.value.enddate),
-            spFOC_array: spFOCArray,
-            freematerialid: firstItem?.selectedFreeMaterial,
-            freematerialdesc: firstItem?.freeMaterialData?.material,
-            buyQty: firstItem?.buyQty,
-            freeQty: firstItem?.freeQty,
-            freeQuota: firstItem?.freeQuota,
-            imageFile: imageFile.value.name || 'N/A',
+            spFOC_array: JSON.stringify(spFOCArray),
+            freematerialid: programItem.value.selectedFreeMaterial,
+            freematerialdesc: programItem.value.freeMaterialData?.material,
+            buyQty: programItem.value.buyQty,
+            freeQty: programItem.value.freeQty,
+            freeQuota: programItem.value.freeQuota,
+            imageFile: imageFile.value?.name || 'N/A',
             status: salesProgram.value.status,
             type: salesProgram.value.type
         });
@@ -602,6 +608,7 @@ const submitForm = async () => {
         console.error('Error submitting form:', error);
         alert('Error submitting form: ' + error.message);
     }
+     console.log('API Response:', response.data.error);
 };
 
 // Helper function to format date as YYYY-MM-DD
@@ -618,14 +625,26 @@ const formatDate = (date) => {
 watch(
     () => salesProgram.value.type,
     () => {
-        programItems.value = [];
+        programItem.value = {
+            buyQty: 1,
+            freeQty: 1,
+            freeQuota: null,
+            buyMaterials: [],
+            selectedFreeMaterial: null,
+            freeMaterialData: null,
+            patternSelections: [],
+            status: 1
+        };
+        // Add initial pattern selection after reset
+        addPatternSelection();
     }
 );
 
-// Load initial data
+// Load initial data and add first pattern selection
 onMounted(() => {
     loadBuyPatterns();
     loadFreeMaterials();
+    // Add initial pattern selection
+    addPatternSelection();
 });
 </script>
-

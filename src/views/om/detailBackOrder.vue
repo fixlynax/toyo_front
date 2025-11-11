@@ -115,11 +115,7 @@
                             </template>
                         </Column>
 
-                        <Column field="plant" header="Plant" style="min-width: 6rem; text-align: center">
-                            <template #body="{ data }">
-                                <span class="text-lg">{{ data.plant }}</span>
-                            </template>
-                        </Column>
+
 
                         <Column field="qty" header="Original Qty" style="text-align: center">
                             <template #body="{ data }">
@@ -195,7 +191,7 @@
             </div>
 
             <!-- RIGHT SIDE -->
-            <div class="md:w-1/3 flex flex-col gap-6">
+            <div class="md:w-1/3 flex flex-col gap-2">
                 <!-- ADVANCE INFO -->
                 <div class="card flex flex-col w-full">
                     <div class="flex items-center justify-between border-b pb-3 mb-4">
@@ -260,7 +256,7 @@
                 </div>
 
                 <!-- STOCK AVAILABILITY -->
-                <div class="card flex flex-col w-full" v-if="canProcessBackOrder">
+                <!-- <div class="card flex flex-col w-full" v-if="canProcessBackOrder">
                     <div class="text-2xl font-bold text-gray-800 border-b pb-2 mb-3">📦 Stock Availability</div>
                     <div class="text-sm text-gray-600 mb-3">Click "Process Back-Order" to create orders for available stock items.</div>
                     <div v-for="item in backOrderItems" :key="item.materialid" class="mb-2 p-2 border rounded">
@@ -271,7 +267,7 @@
                             </span>
                         </div>
                     </div>
-                </div>
+                </div> -->
             </div>
         </div>
     </Fluid>
@@ -510,7 +506,7 @@ const getBackOrderStatusSeverity = (status) => {
 };
 
 const formatDate = (dateString) => {
-    if (!dateString) return 'N/A';
+    if (!dateString) return '-';
     return new Date(dateString).toLocaleDateString('en-MY', {
         year: 'numeric',
         month: 'short',
