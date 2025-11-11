@@ -48,7 +48,7 @@
             <!-- ========================= -->
             <Column field="companyName" header="Company Name" style="min-width: 6rem">
                 <template #body="{ data }">
-                    <RouterLink to="/scm/detailLogistic" class="hover:underline font-bold">
+                    <RouterLink to="/scm/detailLogistic" class="hover:underline font-bold text-primary-400">
                         {{ data.companyName }}
                     </RouterLink>
                 </template>
