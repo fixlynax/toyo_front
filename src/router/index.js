@@ -520,6 +520,12 @@ const router = createRouter({
                     component: () => import('@/views/technical/listPattern.vue')
                 },
                 {
+                    path: '/technical/detailPattern/:id',
+                    name: 'Detail-Pattern',
+                    component: () => import('@/views/technical/detailPattern.vue'),
+                    props: true
+                },
+                {
                     path: '/technical/bulkUpdate',
                     name: 'Bulk-Update',
                     component: () => import('@/views/technical/bulkUpdate.vue')

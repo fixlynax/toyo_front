@@ -1,18 +1,18 @@
 <template>
     <div class="card">
-        <div class="text-2xl font-bold text-gray-800 border-b pb-2">List Product</div>
+        <div class="text-2xl font-bold text-gray-800 border-b pb-2">List OE Tire</div>
 
         <DataTable
             :value="tyres"
             :paginator="true"
             :rows="10"
             :rowsPerPageOptions="[5, 10, 20]"
-            dataKey="materialid"
+            dataKey="id"
             :rowHover="true"
             :loading="loading"
             :filters="filters"
             filterDisplay="menu"
-            :globalFilterFields="['materialid', 'pattern', 'origin', 'status']"
+            :globalFilterFields="['id', 'pattern', 'brand', 'construction']"
         >
             <template #header>
                 <div class="flex items-center justify-between gap-4 w-full flex-wrap">
@@ -31,8 +31,8 @@
 
                     <!-- Right: Export & Batch Buttons -->
                     <div class="flex items-center gap-2 ml-auto">
-                        <Button type="button" label="Export" icon="pi pi-file-export" class="p-button" />
-                        <Button type="button" label="Bulk" icon="pi pi-file-import" class="p-button" />
+                        <Button type="button" label="Export" icon="pi pi-file-export" class="p-button" @click="fetchExportOE" />
+                        <Button type="button" label="Import" icon="pi pi-file-import" class="p-button" @click="importOE" />
                     </div>
                 </div>
             </template>
@@ -40,65 +40,74 @@
             <template #empty> No data found. </template>
             <template #loading> Loading data. Please wait... </template>
 
-            <Column field="materialid" header="Material ID" style="min-width: 6rem">
+            <Column field="materialid" header="ID" style="min-width: 6rem">
                 <template #body="{ data }">
-                    <div class="flex flex-col items-start gap-1">
-                        <RouterLink :to="`/technical/detailProduct/${data.id}`" class="hover:underline font-bold">
-                            {{ data.materialid }}
-                        </RouterLink>
-                    </div>
+                    {{ data.id }}
                 </template>
             </Column>
 
             <Column field="pattern" header="Pattern" style="min-width: 8rem">
                 <template #body="{ data }">
-                    <RouterLink to="/technical/detailProduct" class="block text-gray-800 hover:text-gray-600 transition-colors">
-                        <div class="font-semibold">{{ data.pattern_name }}</div>
-                    </RouterLink>
+                    {{ data.pattern }}
                 </template>
             </Column>
 
+            <Column field="origin" header="Brand" style="min-width: 8rem">
+                <template #body="{ data }">
+                    {{ data.brand }}
+                </template>
+            </Column>
             <Column field="origin" header="Origin" style="min-width: 8rem">
                 <template #body="{ data }">
-                    {{ data.origin }}
+                    {{ data.construction }}
                 </template>
             </Column>
-
             <Column field="size" header="Size" style="min-width: 12rem">
                 <template #body="{ data }">
                     <div class="flex flex-col leading-relaxed text-sm text-gray-700">
                         <div class="flex">
                             <span class="w-40 text-gray-800 font-semibold">Section Width:</span>
-                            <span>{{ data.sectionwidth }}</span>
+                            <span>{{ data.section_width }}</span>
                         </div>
                         <div class="flex">
-                            <span class="w-40 text-gray-800 font-semibold">Tire Series:</span>
-                            <span>{{ data.tireseries }}</span>
+                            <span class="w-40 text-gray-800 font-semibold">Tire Size:</span>
+                            <span>{{ data.tyre_size }}</span>
                         </div>
                         <div class="flex">
                             <span class="w-40 text-gray-800 font-semibold">Rim Diameter:</span>
-                            <span>{{ data.rimdiameter }}"</span>
+                            <span>{{ data.rim_diameter }}"</span>
                         </div>
                         <div class="flex">
-                            <span class="w-40 text-gray-800 font-semibold">Speed Rating:</span>
-                            <span>{{ data.speedplyrating }}</span>
+                            <span class="w-40 text-gray-800 font-semibold">Load Index:</span>
+                            <span>{{ data.load_index }}</span>
                         </div>
                     </div>
                 </template>
             </Column>
         </DataTable>
     </div>
+    <Dialog v-model:visible="showImportDialog" header="Import File OE" :modal="true" class="p-fluid" :style="{ width: '40rem' }">
+                <FileUpload ref="fileUpload"  name="importOe" :maxFileSize="1000000" customUpload />
+        <template #footer>
+            <Button label="Close" icon="pi pi-times" class="p-button-text" @click="closeImportDialog" />
+            <Button label="Upload File" icon="pi pi-check" class="p-button-primary" @click="importOEApi" />
+        </template>
+    </Dialog>
 </template>
 
 <script setup>
 import { onMounted, ref } from 'vue';
 import { FilterMatchMode } from '@primevue/core/api';
 import api from '@/service/api';
+import axios from 'axios';
+import { useRouter } from 'vue-router';
 
+const router = useRouter();
 // Data variables
 const tyres = ref([]);
 const loading = ref(true);
-
+const showImportDialog = ref(false);
+const fileUpload = ref(null);
 // Filters for quick search
 const filters = ref({
     global: { value: null, matchMode: FilterMatchMode.CONTAINS }
@@ -107,24 +116,24 @@ const filters = ref({
 const sortMenu = ref();
 const sortItems = ref([
     {
-        label: 'Sort by Material ID (A-Z)',
+        label: 'Sort by ID (A-Z)',
         icon: 'pi pi-sort-alpha-down',
-        command: () => sortBy('materialid', 'asc')
+        command: () => sortBy('id', 'asc')
     },
     {
-        label: 'Sort by Material ID (Z-A)',
+        label: 'Sort by ID (Z-A)',
         icon: 'pi pi-sort-alpha-up',
-        command: () => sortBy('materialid', 'desc')
+        command: () => sortBy('id', 'desc')
     },
     {
         label: 'Sort by Pattern (A-Z)',
         icon: 'pi pi-tag',
-        command: () => sortBy('pattern_name', 'asc')
+        command: () => sortBy('pattern', 'asc')
     },
     {
         label: 'Sort by Origin',
         icon: 'pi pi-globe',
-        command: () => sortBy('origin', 'asc')
+        command: () => sortBy('construction', 'asc')
     }
 ]);
 
@@ -136,46 +145,99 @@ const sortBy = (field, order) => {
         return 0;
     });
 };
+const fetchExportOE = async () => {
+    try {
+        loading.value = true;
 
+        const response = await api.getDownload('oeTire/downloadData', {
+        responseType: 'arraybuffer',
+        });
+
+        const blob = new Blob([response.data], { 
+        type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' 
+        });
+
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = 'OE_Download.xlsx';
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        window.URL.revokeObjectURL(url);
+
+    } catch (err) {
+        console.error('rror fetching OE Tire export:', err);
+    } finally {
+        loading.value = false;
+    }
+};
+
+const importOEApi = async () => {
+    const filesoem = fileUpload.value.files;
+    if (!filesoem.length) {
+            alert('Please select a file first!');
+            return;
+        }
+    try {
+        loading.value = true;
+        const formData = new FormData();
+        formData.append('excel_file', filesoem[0]);
+        const response = await api.postExtra('oeTire/uploadExcel', formData, {
+        headers: {
+            'Content-Type': 'multipart/form-data',
+        },
+        });
+    } catch (err) {
+        console.error('❌ Upload failed:', err);
+    } finally {
+        loading.value = false;
+        closeImportDialog();
+        router.go(0);
+    }
+};
+
+const importOE = () => {
+    showImportDialog.value = true;
+};
+
+const closeImportDialog = () => {
+    showImportDialog.value = false;
+    fileUpload.value.clear();
+};
 onMounted(async () => {
     try {
         loading.value = true;
 
         const response = await api.get('oeTireList');
 
-        console.log('API Response:', response.data);
+        // console.log('API Response:', response.data);
 
-        if (response.data.status === 1 && Array.isArray(response.data.admin_data)) {
-            tyres.value = response.data.admin_data.map((product) => ({
-                materialid: product.materialid,
-                twp: product.isTWP === 1,
-                warranty: product.isWarranty === 1,
-                sell: product.isSell === 1,
+        if (response.data.status === 1 && Array.isArray(response.data.oe_tires)) {
+            tyres.value = response.data.oe_tires.map((product) => ({
+                id: product.tire_id,
+                brand: product.brand,
+                construction: product.construction,
+                created: product.created,
+                load_index: product.load_index,
+                model: product.model,
                 pattern: product.pattern,
-                pattern_name: product.pattern_name,
-                origin: product.origin,
-                sectionwidth: product.sectionwidth,
-                tireseries: product.tireseries,
-                rimdiameter: product.rimdiameter,
-                speedplyrating: product.speedplyrating
+                rim_diameter: product.rim_diameter,
+                section_width: product.section_width,
+                status: product.status,
+                tyre_size: product.tyre_size
             }));
         } else {
             console.error('API returned error or invalid data:', response.data);
             tyres.value = [];
         }
     } catch (error) {
-        console.error('Error fetching product list:', error);
+        console.error('Error fetching OE list:', error);
         tyres.value = [];
     } finally {
         loading.value = false;
     }
+
 });
 
-const getOverallStatusLabel = (deleted) => {
-    return deleted ? 'Inactive' : 'Active';
-};
-
-const getOverallStatusSeverity = (deleted) => {
-    return deleted ? 'danger' : 'success';
-};
 </script>
