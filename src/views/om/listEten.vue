@@ -16,6 +16,8 @@
             :rowHover="true"
             :filters="filters"
             filterDisplay="menu"
+            :sortField="'created'"
+            :sortOrder="-1"
             :globalFilterFields="['memberCode', 'custAccountNo', 'companyName1', 'city', 'state', 'phoneNumber', 'signboardType', 'status']"
             class="rounded-table"
         >
@@ -57,6 +59,7 @@
                 </template>
             </Column>
 
+            <Column field="created" header="CreatedTime" class="hidden" />
             <Column field="custAccountNo" header="Acc No" style="min-width: 6rem" />
 
             <Column field="companyName1" header="Company Name" style="min-width: 8rem" />
@@ -116,7 +119,8 @@ onMounted(async () => {
                     phoneNumber: shop.phoneNumber || '-',
                     signboardType: shop.signboardType || '-',
                     status: shop.status,
-                    user_list: customer.user_list
+                    user_list: customer.user_list,
+                    created: shop.created
                 };
             });
         } else {
