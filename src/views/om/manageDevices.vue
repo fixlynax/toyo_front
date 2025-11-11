@@ -23,7 +23,7 @@
 
                     <!-- Tabs -->
                     <TabView v-model:activeIndex="activeTabIndex">
-                        <!-- 🧩 ALL DEVICES -->
+                        <!-- ALL DEVICES -->
                         <TabPanel :header="`All Devices (${filteredAllDevices.length})`">
                             <div v-if="isLoading" class="text-center py-6 text-gray-500">Loading devices...</div>
                             <div v-else-if="filteredAllDevices.length === 0" class="text-center py-6 text-gray-500">No devices found</div>
@@ -53,7 +53,7 @@
                             </div>
                         </TabPanel>
 
-                        <!-- ✅ ACTIVE DEVICES -->
+                        <!-- ACTIVE DEVICES -->
                         <TabPanel :header="`Active Devices (${filteredActiveDevices.length})`">
                             <div v-if="isLoading" class="text-center py-6 text-gray-500">Loading devices...</div>
                             <div v-else-if="filteredActiveDevices.length === 0" class="text-center py-6 text-gray-500">No active devices found</div>
@@ -81,7 +81,7 @@
                             </div>
                         </TabPanel>
 
-                        <!-- 🚫 BLOCKED DEVICES -->
+                        <!-- BLOCKED DEVICES -->
                         <TabPanel :header="`Blocked Devices (${filteredBlockedDevices.length})`">
                             <div v-if="isLoading" class="text-center py-6 text-gray-500">Loading devices...</div>
                             <div v-else-if="filteredBlockedDevices.length === 0" class="text-center py-6 text-gray-500">No blocked devices found</div>
