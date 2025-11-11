@@ -84,7 +84,7 @@
             <template #empty> No data found. </template>
             <template #loading> Loading data. Please wait... </template>
 
-            <Column header="Select All" style="min-width: 8rem">
+            <Column header="Export All" style="min-width: 8rem">
                 <template #header>
                     <div class="flex justify-center">
                     <Checkbox
