@@ -83,7 +83,7 @@ onBeforeMount(async () => {
             <!-- Columns -->
             <Column field="refNo" header="Ref No" style="min-width: 8rem">
                 <template #body="{ data }">
-                    <RouterLink :to="`/technical/detailWarantyClaim/${data.id}`" class="hover:underline font-bold">
+                    <RouterLink :to="`/technical/detailWarantyClaim/${data.id}`" class="hover:underline font-bold text-primary-400">
                         {{ data.refNo }}
                         {{ data.dealerName }}
                     </RouterLink>

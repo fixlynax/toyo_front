@@ -34,7 +34,7 @@
             </Column>
             <Column field="returnRequestNo" header="Return Order No" style="min-width: 10rem">
                 <template #body="{ data }">
-                    <RouterLink to="/scm/detailReturnOrder" class="hover:underline font-bold">
+                    <RouterLink to="/scm/detailReturnOrder" class="hover:underline font-bold text-primary-400">
                         {{ data.returnRequestNo }}
                     </RouterLink>
                 </template>
