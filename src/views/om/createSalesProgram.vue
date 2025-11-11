@@ -592,7 +592,7 @@ const submitForm = async () => {
             type: salesProgram.value.type
         });
 
-        const response = await api.post('sales-program/create-sales-program', formData, {
+        const response = await api.postExtra('sales-program/create-sales-program', formData, {
             headers: { 'Content-Type': 'multipart/form-data' }
         });
 
