@@ -86,7 +86,7 @@ export default {
         return apiClient.post(`/api/${endpoint}`, data);
     },
 
-    // POST request
+    // POST request (multipart/form-data)
     postExtra(endpoint, data, options = {}) {
         return apiClient.post(`/api/${endpoint}`, data ,options);
     },

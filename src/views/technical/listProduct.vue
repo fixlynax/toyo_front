@@ -159,7 +159,7 @@
                         <Checkbox 
                             v-model="data.sell" 
                             :binary="true" 
-                            :disabled="data.updatingSell"
+                            :disabled="true"
                             @change="handleToggleSell(data)"
                             :class="data.sell ? 'p-checkbox-checked' : ''"
                         />
@@ -176,7 +176,7 @@
                         <Checkbox 
                         v-model="data.warranty" 
                         :binary="true" 
-                        :disabled="data.updatingWarranty"
+                        :disabled="true"
                         @change="handleToggleWarranty(data)"
                         :class="data.warranty ? 'p-checkbox-checked' : ''"
                         />
@@ -192,7 +192,7 @@
                         <Checkbox 
                             v-model="data.twp" 
                             :binary="true" 
-                            :disabled="data.updatingTWP"
+                            :disabled="true"
                             @change="handleToggleTWP(data)"
                             :class="data.twp ? 'p-checkbox-checked' : ''"
                         />

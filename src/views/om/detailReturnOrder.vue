@@ -39,7 +39,7 @@
 
                         <div>
                             <span class="text-sm text-gray-500">Channel</span>
-                            <p class="text-lg font-medium">{{ order.channel || '-' }}</p>
+                            <p class="text-lg font-medium">{{ orderData.channel || '-' }}</p>
                         </div>
                     </div>
                 </div>

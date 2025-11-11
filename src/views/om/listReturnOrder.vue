@@ -219,7 +219,7 @@ onBeforeMount(() => {
                 </Column>
 
                 <!-- Received Date Column - Only show for completed orders -->
-                <Column v-if="isPendingCTCTab" field="recieve_date" header="Pickup ETA" style="min-width: 8rem">
+                <Column v-if="isPendingCTCTab" field="recieve_date" header="Pickup Date" style="min-width: 8rem">
                     <template #body="{ data }">
                         {{ formatDate(data.pickup) }}
                     </template>
