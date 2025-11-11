@@ -38,10 +38,14 @@
 
             <template #empty> No back orders found. </template>
             <!-- Removed #loading template since we're using external LoadingPage -->
-
+            <Column field="createdDate" header="Created Date" style="min-width: 8rem">
+                <template #body="{ data }">
+                    {{ formatDate(data.created) }}
+                </template>
+            </Column>
             <Column field="orderNo" header="Order No." style="min-width: 10rem">
                 <template #body="{ data }">
-                    <RouterLink :to="`/om/detailBackOrder/${data.id}`" class="hover:underline font-bold text-primary-400">
+                    <RouterLink :to="`/om/detailBackOrder/${data.orderNo}`" class="hover:underline font-bold text-primary-400">
                         {{ data.orderNo }}
                     </RouterLink>
                 </template>
@@ -127,6 +131,7 @@ onMounted(async () => {
                 orderDate: order.created,
                 shipTo: order.shipto || order.custaccountno,
                 expiry: order.expiry,
+                created: order.created,
                 orderStatus: order.orderstatus,
                 progress: calculateProgress(order),
                 status: order.status

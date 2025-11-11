@@ -153,7 +153,7 @@ const router = createRouter({
                     component: () => import('@/views/om/listBackOrder.vue')
                 },
                 {
-                    path: '/om/detailBackOrder',
+                    path: '/om/detailBackOrder/:boNo',
                     name: 'Detail-Back-Order',
                     component: () => import('@/views/om/detailBackOrder.vue')
                 },

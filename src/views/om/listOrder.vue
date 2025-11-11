@@ -98,10 +98,9 @@ const formatDate = (dateString) => {
     if (!dateString) return '-';
     try {
         const date = new Date(dateString);
-        return date.toISOString().split('T')[0];
+        return date.toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' });
     } catch (error) {
-        console.error('Error formatting date:', dateString, error);
-        return '-';
+        return dateString;
     }
 };
 </script>
@@ -151,7 +150,7 @@ const formatDate = (dateString) => {
 
 
                 <Column field="created" header="Created Date" style="min-width: 4rem">
-                    <template #body="{ data }">{{ formatDate(data.created) }}</template>
+                    <template #body="{ data }">{{formatDate(data.created) }}</template>
                 </Column>
 
                 <Column header="Order No" style="min-width: 6rem">

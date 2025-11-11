@@ -56,14 +56,13 @@ const isPendingCTCStatus = (orderStatus) => {
 };
 
 // 🧩 Date Formatter
-const formatDate = (dateStr) => {
-    if (!dateStr) return '-';
+const formatDate = (dateString) => {
+    if (!dateString) return '-';
     try {
-        const date = new Date(dateStr);
-        return date.toISOString().split('T')[0];
+        const date = new Date(dateString);
+        return date.toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' });
     } catch (error) {
-        console.error('Error formatting date:', dateStr, error);
-        return '-';
+        return dateString;
     }
 };
 
@@ -83,8 +82,9 @@ const fetchReturnOrders = async (tabStatus = 'PENDING') => {
                 reasonMessage: returnOrder.reason_message || '-',
                 createdDate: returnOrder.created || '-',
                 orderStatus: returnOrder.orderstatus || '-',
-                recieve_date: returnOrder.recieve_date || '-', // Add received date from API
-                ctcDate: returnOrder.ctcDate || '-' // Add collection date from API
+                ctcDate: returnOrder.ctcDate || '-', // Add collection date from API
+                // recieve_date: returnOrder.delivery_information.receive_datetime || '-', 
+                // pickup: returnOrder.delivery_information.pickup_datetime || '-',
             }));
         } else {
             console.warn('Unexpected API response:', response.data);
@@ -220,7 +220,9 @@ onBeforeMount(() => {
 
                 <!-- Received Date Column - Only show for completed orders -->
                 <Column v-if="isPendingCTCTab" field="recieve_date" header="Pickup ETA" style="min-width: 8rem">
-         
+                    <template #body="{ data }">
+                        {{ formatDate(data.pickup) }}
+                    </template>
                 </Column>
 
                 <!-- Received Date Column - Only show for completed orders -->
