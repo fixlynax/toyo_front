@@ -13,7 +13,7 @@
                     <div class="flex items-center justify-between w-full">
                         <div>
                             <span class="block text-sm font-bold text-gray-700">Customer Account No.</span>
-                            <span class="text-lg font-medium">{{ orderData.custaccountno || 'N/A' }}</span>
+                            <span class="text-lg font-medium">{{ orderData.custaccountno || '-' }}</span>
                         </div>
                     </div>
 
@@ -22,33 +22,33 @@
                     <div class="flex flex-col md:flex-row gap-4">
                         <div class="w-full">
                             <span class="text-sm font-bold text-gray-700">Dealer Name</span>
-                            <p class="text-lg font-medium">{{ customerInfo.dealerName || 'N/A' }}</p>
+                            <p class="text-lg font-medium">{{ customerInfo.dealerName || '-' }}</p>
                         </div>
                         <div class="w-full">
                             <span class="text-sm font-bold text-gray-700">Location</span>
-                            <p class="text-lg font-medium">{{ getFullAddress(shippingDetail) || 'N/A' }}</p>
+                            <p class="text-lg font-medium">{{ getFullAddress(shippingDetail) || '-' }}</p>
                         </div>
                     </div>
 
                     <div class="flex flex-col md:flex-row gap-4">
                         <div class="w-full">
                             <span class="text-sm font-bold text-gray-700">Signboard</span>
-                            <p class="text-lg font-medium">{{ customerInfo.signboard || 'N/A' }}</p>
+                            <p class="text-lg font-medium">{{ customerInfo.signboard || '-' }}</p>
                         </div>
                         <div class="w-full">
                             <span class="text-sm font-bold text-gray-700">Distribution Channel</span>
-                            <p class="text-lg font-medium">{{ orderData.distributionchannel || 'N/A' }}</p>
+                            <p class="text-lg font-medium">{{ orderData.distributionchannel || '-' }}</p>
                         </div>
                     </div>
 
                     <div class="flex flex-col md:flex-row gap-4">
                         <div class="w-full">
                             <span class="text-sm font-bold text-gray-700">Contact Person</span>
-                            <p class="text-lg font-medium">{{ shippingDetail?.companyName1 || 'N/A' }}</p>
+                            <p class="text-lg font-medium">{{ shippingDetail?.companyName1 || '-' }}</p>
                         </div>
                         <div class="w-full">
                             <span class="text-sm font-bold text-gray-700">Contact Number</span>
-                            <p class="text-lg font-medium">{{ shippingDetail?.phoneNumber || shippingDetail?.mobileNumber || 'N/A' }}</p>
+                            <p class="text-lg font-medium">{{ shippingDetail?.phoneNumber || shippingDetail?.mobileNumber || '-' }}</p>
                         </div>
                     </div>
                 </div>
@@ -68,7 +68,7 @@
                         </div>
                         <div>
                             <span class="text-sm font-bold text-gray-700">Delivery Type</span>
-                            <p class="text-lg font-medium">{{ orderData.deliveryType || 'N/A' }}</p>
+                            <p class="text-lg font-medium">{{ orderData.deliveryType || '-' }}</p>
                         </div>
                         <div>
                             <span class="text-sm font-bold text-gray-700">Delivery ETA</span>
@@ -78,7 +78,7 @@
                             <span class="text-sm font-bold text-gray-700">Delivery Status</span>
                             <p class="text-lg font-medium">
                                 <span :class="statusClass(orderData.status_string)">
-                                    {{ orderData.status_string || 'N/A' }}
+                                    {{ orderData.status_string || '-' }}
                                 </span>
                             </p>
                             <p class="text-xs text-gray-500 mt-1">Last updated: {{ formatDateTime(orderData.updated_at) }}</p>
@@ -130,19 +130,19 @@
                             <tbody>
                                 <tr class="border-b">
                                     <td class="px-4 py-2 font-medium">Price Group</td>
-                                    <td class="px-4 py-2 text-right font-semibold">{{ orderData.pricegroup || 'N/A' }}</td>
+                                    <td class="px-4 py-2 text-right font-semibold">{{ orderData.pricegroup || '-' }}</td>
                                 </tr>
                                 <tr class="border-b">
                                     <td class="px-4 py-2 font-medium">Customer Group</td>
-                                    <td class="px-4 py-2 text-right font-semibold">{{ orderData.customerCondGrp || 'N/A' }}</td>
+                                    <td class="px-4 py-2 text-right font-semibold">{{ orderData.customerCondGrp || '-' }}</td>
                                 </tr>
                                 <tr class="border-b">
                                     <td class="px-4 py-2 font-medium">Storage Location</td>
-                                    <td class="px-4 py-2 text-right font-semibold">{{ orderData.storagelocation || 'N/A' }}</td>
+                                    <td class="px-4 py-2 text-right font-semibold">{{ orderData.storagelocation || '-' }}</td>
                                 </tr>
                                 <tr class="border-b">
                                     <td class="px-4 py-2 font-medium">User Approved</td>
-                                    <td class="px-4 py-2 text-right font-semibold">{{ orderData.approved_by || 'N/A' }}</td>
+                                    <td class="px-4 py-2 text-right font-semibold">{{ orderData.approved_by || '-' }}</td>
                                 </tr>
                                 <tr class="border-b">
                                     <td class="px-4 py-2 font-medium">Date Approved</td>
@@ -169,15 +169,15 @@
                             <tbody>
                                 <tr class="border-b">
                                     <td class="px-4 py-2 font-medium">SO No.</td>
-                                    <td class="px-4 py-2 text-right font-semibold">{{ orderData.so_no || 'N/A' }}</td>
+                                    <td class="px-4 py-2 text-right font-semibold">{{ orderData.so_no || '-' }}</td>
                                 </tr>
                                 <tr class="border-b">
                                     <td class="px-4 py-2 font-medium">DO No.</td>
-                                    <td class="px-4 py-2 text-right font-semibold">{{ orderData.do_no || 'N/A' }}</td>
+                                    <td class="px-4 py-2 text-right font-semibold">{{ orderData.do_no || '-' }}</td>
                                 </tr>
                                 <tr class="border-b">
                                     <td class="px-4 py-2 font-medium">Invoice No</td>
-                                    <td class="px-4 py-2 text-right font-semibold">{{ orderData.inv_no || 'N/A' }}</td>
+                                    <td class="px-4 py-2 text-right font-semibold">{{ orderData.inv_no || '-' }}</td>
                                 </tr>
                                 <tr class="border-b">
                                     <td class="px-4 py-2 font-medium">Last Updated</td>
@@ -264,12 +264,12 @@ const totalAmount = computed(() => {
 
 // Methods
 const formatDate = (dateString) => {
-    if (!dateString) return 'N/A';
+    if (!dateString) return '-';
     return new Date(dateString).toLocaleDateString('en-MY');
 };
 
 const formatDateTime = (dateString) => {
-    if (!dateString) return 'N/A';
+    if (!dateString) return '-';
     return new Date(dateString).toLocaleString('en-MY');
 };
 
@@ -284,10 +284,10 @@ const statusClass = (status) => {
 };
 
 const getFullAddress = (shipping) => {
-    if (!shipping) return 'N/A';
+    if (!shipping) return '-';
     const addressParts = [shipping.addressLine1, shipping.addressLine2, shipping.addressLine3, shipping.addressLine4, shipping.city, shipping.state, shipping.postcode].filter((part) => part && part.trim() !== '');
 
-    return addressParts.join(', ') || 'N/A';
+    return addressParts.join(', ') || '-';
 };
 
 const getReturnedQty = (materialId) => {
@@ -331,11 +331,11 @@ const fetchOrderDetail = async () => {
 
             // Set customer info
             customerInfo.value = {
-                dealerName: data.customer_name || shippingDetail.value?.companyName1 || 'N/A',
-                division: data.division || 'N/A',
-                sapOrderType: data.sapordertype || 'N/A',
-                salesOrg: data.salesorg || 'N/A',
-                distributionChannel: data.distributionchannel || 'N/A'
+                dealerName: data.customer_name || shippingDetail.value?.companyName1 || '-',
+                division: data.division || '-',
+                sapOrderType: data.sapordertype || '-',
+                salesOrg: data.salesorg || '-',
+                distributionChannel: data.distributionchannel || '-'
             };
         } else {
             toast.add({ severity: 'error', summary: 'Error', detail: 'Failed to fetch order details', life: 3000 });
