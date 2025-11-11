@@ -245,12 +245,14 @@ import { ref, onMounted, computed } from 'vue';
 import Button from 'primevue/button';
 import api from '@/service/api';
 import { useRoute } from 'vue-router';
+import { useRouter } from 'vue-router';
 import { useToast } from 'primevue/usetoast';
 
 const toast = useToast();
 const exportLoading = ref(false);
 const importLoading = ref(false);
 const route = useRoute();
+const router = useRouter();
 const importInput = ref();
 const returnList = ref({
   dealer: {
@@ -262,9 +264,18 @@ const returnList = ref({
 });
 const loading = ref(true);
 function formatDate(dateString) {
-    if (!dateString) return '';
-    return new Date(dateString).toLocaleDateString();
-}
+  if (!dateString) return '';
+  const date = new Date(dateString);
+  return date.toLocaleString('en-MY', {
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+    hour: '2-digit',
+    minute: '2-digit',
+    second: '2-digit',
+    hour12: true
+  });
+  }
 const InitfetchData = async () => {
     try {
         loading.value = true;
@@ -324,7 +335,7 @@ function getStatusSeverity(status) {
     }
 }
 const handleExport = async () => {
- const idexport = route.params.id;
+ const idexport = Number(route.params.id);
     try {
         exportLoading.value = true;
             const response = await api.postExtra(

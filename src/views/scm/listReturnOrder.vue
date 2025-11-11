@@ -89,21 +89,21 @@
                     {{ `${data.companyName1} ${data.companyName2} ${data.companyName3} ${data.companyName4}` }}
                 </template>
             </Column>
+            <Column field="created" header="Pickup Date" style="min-width: 10rem">
+                <template #body="{ data }">
+                    {{ formatDate(data.delivery_information.pickup_datetime) }}
+                </template>
+            </Column>
+            <Column field="created" header="Receiving Date" style="min-width: 10rem">
+                <template #body="{ data }">
+                    {{ formatDate(data.delivery_information.receive_datetime) }}
+                </template>
+            </Column>
             <Column field="length" header="Return Items" style="min-width: 12rem">
                 <template #body="{ data }">
                         {{ data.return_order_array.length }}
                 </template>
             </Column>
-            <!-- <Column field="created" header="Collection Date" style="min-width: 10rem">
-                <template #body="{ data }">
-                    {{ formatDate(data.created) }}
-                </template>
-            </Column>
-            <Column field="created" header="Receiving Date" style="min-width: 10rem">
-                <template #body="{ data }">
-                    {{ formatDate(data.created) }}
-                </template>
-            </Column> -->
             <Column header="Status" style="min-width: 8rem">
                 <template #body="{ data }">
                     <Tag :value="getStatusLabel(data.orderstatus)" :severity="getStatusSeverity(data.orderstatus)" />
@@ -317,8 +317,17 @@ onMounted(() => {
     fetchData();
 });
 function formatDate(dateString) {
-    if (!dateString) return '';
-    return new Date(dateString).toLocaleDateString();
+  if (!dateString) return '';
+  const date = new Date(dateString);
+  return date.toLocaleString('en-MY', {
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+    hour: '2-digit',
+    minute: '2-digit',
+    second: '2-digit',
+    hour12: true
+  });
 }
 
 function getStatusLabel(status) {
