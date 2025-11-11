@@ -456,7 +456,7 @@ const isSubmitting = ref(false);
 const form = ref({});
 const allDealers = ref([]);
 
-// Dropdown options for display
+// Dropdown options
 const accountTypeOptions = [
     { name: 'Retailer', code: 'Retailer' },
     { name: 'Wholesaler', code: 'Wholesaler' },
@@ -486,67 +486,56 @@ const shippingConditionOptions = [
     { name: 'TP', code: 'TP' }
 ];
 
-// Helper function to get dropdown label from code
+// Helper functions
 function getDropdownLabel(code, options) {
     if (!code) return '-';
     const option = options.find((opt) => opt.code === code);
     return option ? option.name : code;
 }
 
-// Helper function to get main branch label
 function getMainBranchLabel(dealerId) {
     if (!dealerId) return '-';
     const dealer = allDealers.value.find((d) => d.value === dealerId);
     return dealer ? dealer.label : `Dealer ID: ${dealerId}`;
 }
 
-// Format currency values
 function formatCurrency(value) {
     if (!value) return '-';
     const num = parseFloat(value);
     return isNaN(num) ? value : `RM ${num.toLocaleString('en-MY', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
 }
 
-// Format credit limit
 function formatCreditLimit(value) {
     if (!value) return '-';
     const num = parseFloat(value);
     return isNaN(num) ? value : `RM ${num.toLocaleString('en-MY', { minimumFractionDigits: 0, maximumFractionDigits: 0 })}`;
 }
 
-// Extract country code from phone number
+// Phone number helpers
 function extractCountryCode(phoneNumber) {
-    if (!phoneNumber) return '60'; // Default Malaysia code
-    // Simple extraction - you might need more sophisticated logic
+    if (!phoneNumber) return '60';
     if (phoneNumber.startsWith('+60')) return '60';
     if (phoneNumber.startsWith('60')) return '60';
-    if (phoneNumber.startsWith('01')) return '60'; // Malaysian mobile numbers
-    return '60'; // Default to Malaysia
+    if (phoneNumber.startsWith('01')) return '60';
+    return '60';
 }
 
-// Extract mobile number without country code
 function extractMobileNumber(phoneNumber) {
     if (!phoneNumber) return '';
-    // Remove country code and any non-digit characters
     let cleanNumber = phoneNumber.replace(/\D/g, '');
-
-    // Remove Malaysia country code
     if (cleanNumber.startsWith('60')) {
         cleanNumber = cleanNumber.substring(2);
     }
-
-    // Remove leading zero if present
     if (cleanNumber.startsWith('0')) {
         cleanNumber = cleanNumber.substring(1);
     }
-
     return cleanNumber;
 }
 
-// Prepare Ship To array for API
 function prepareShipToArray(shipToAddresses) {
-    if (!shipToAddresses || !Array.isArray(shipToAddresses)) return [];
-
+    if (!shipToAddresses || !Array.isArray(shipToAddresses) || shipToAddresses.length === 0) {
+        return [];
+    }
     return shipToAddresses.map((shipTo) => ({
         s_custAccNo: shipTo.custaccountno || '',
         s_compName1: shipTo.companyname1 || '',
@@ -567,15 +556,48 @@ function prepareShipToArray(shipToAddresses) {
     }));
 }
 
-// Map form data to FormData for API request
+function validateForm(formData) {
+    const requiredFields = [
+        'custAccountNo',
+        'companyName1',
+        'firstname',
+        'email',
+        'phoneno',
+        'password',
+        'confirmpassword'
+    ];
+
+    const missingFields = requiredFields.filter(field => !formData[field]);
+
+    if (missingFields.length > 0) {
+        return {
+            isValid: false,
+            message: `Missing required fields: ${missingFields.join(', ')}`
+        };
+    }
+
+    if (formData.password !== formData.confirmpassword) {
+        return {
+            isValid: false,
+            message: 'Password and Confirm Password do not match'
+        };
+    }
+
+    return { isValid: true };
+}
+
+// Map form data for API
 function mapFormToFormData(formData) {
     const formDataObj = new FormData();
+
     const mobileNumber = extractMobileNumber(formData.phoneno);
     const countryCode = extractCountryCode(formData.phoneno);
 
-    // Dealer Information
-    formDataObj.append('memberCode', formData.memberCode || '');
-    formDataObj.append('custAccountNo', formData.custAccountNo || formData.accountNo || '');
+    // Ensure custAccountNo is populated
+    const custAccountNo = formData.custAccountNo || formData.accountNo || '';
+
+    // Append data
+    formDataObj.append('custAccountNo', custAccountNo);
     formDataObj.append('eten_userID', formData.eten_userID || '');
     formDataObj.append('compName1', formData.companyName1 || '');
     formDataObj.append('compName2', formData.companyName2 || '');
@@ -606,7 +628,7 @@ function mapFormToFormData(formData) {
     formDataObj.append('custCondGroup', formData.customerCondGrp || '');
     formDataObj.append('paymentTerms', formData.paymentTerms || '');
     formDataObj.append('riskCategory', formData.riskCategory || '');
-    formDataObj.append('creditLimit', formData.creditLimit || '');
+    formDataObj.append('creditLimit', formData.creditLimit || '0');
     formDataObj.append('pricelist', formData.pricelist || '');
     formDataObj.append('signboardType', formData.signboardType || '');
     formDataObj.append('signboardBrand', formData.signboardBrand || '');
@@ -614,20 +636,20 @@ function mapFormToFormData(formData) {
     formDataObj.append('salesDistrict', formData.salesDistrict || '');
     formDataObj.append('shippingCond', formData.shippingCond || '');
     formDataObj.append('storageLoc', formData.storageLocation || '');
-    formDataObj.append('accountStatus', 1); // Default active
+    formDataObj.append('accountStatus', 1);
     formDataObj.append('accountLastUpdate', formData.accountLastUpdate || '');
     formDataObj.append('accountCreation', formData.accountCreation || new Date().toISOString().split('T')[0]);
     formDataObj.append('showOnList', formData.showOnList || '0');
     formDataObj.append('isFamilyChannel', formData.ifFamilyChannel || '0');
     formDataObj.append('allowLalamove', formData.allowLalamove || '0');
-    formDataObj.append('status', formData.status || '0');
+    formDataObj.append('status', 1);
     formDataObj.append('startingSalesAmt', formData.startingSalesAmt || '0');
 
-    // Ship-to Information as JSON array
+    // Ship To array
     const shipToArray = prepareShipToArray(formData.shipToAddresses);
     formDataObj.append('s_array', JSON.stringify(shipToArray));
 
-    // Master User Information
+    // Master user
     formDataObj.append('im_first_name', formData.firstname || '');
     formDataObj.append('im_last_name', formData.lastname || '');
     formDataObj.append('im_email', formData.email || '');
@@ -639,40 +661,34 @@ function mapFormToFormData(formData) {
     return formDataObj;
 }
 
-// Load data from localStorage
+// Load form data
 function loadFormData() {
     try {
         const storedData = localStorage.getItem('etenFormData');
         if (storedData) {
             form.value = JSON.parse(storedData);
-            console.log('Loaded form data:', form.value);
-
-            // Check if ShipTo data exists
-            if (form.value.shipToAddresses) {
-                console.log('ShipTo addresses found:', form.value.shipToAddresses.length);
+            // Ensure custAccountNo is set
+            if (!form.value.custAccountNo && form.value.accountNo) {
+                form.value.custAccountNo = form.value.accountNo;
             }
         } else {
-            console.warn('No form data found in localStorage');
             router.push('/om/createEten');
         }
     } catch (error) {
-        console.error('Error loading form data from localStorage:', error);
+        console.error('Error loading form data:', error);
         router.push('/om/createEten');
     }
 }
 
-// Fetch dealer list for main branch display
+// Fetch dealer list
 async function fetchDealerList() {
     try {
         const formData = new FormData();
         formData.append('mainBranch', 1);
-
         const response = await api.post('list_dealer', formData);
-
         if (response.data.status === 1 && response.data.admin_data) {
             const adminData = response.data.admin_data;
             const dealers = [];
-
             Object.values(adminData).forEach((item) => {
                 if (item.shop) {
                     const shop = item.shop;
@@ -683,7 +699,6 @@ async function fetchDealerList() {
                     });
                 }
             });
-
             allDealers.value = dealers;
         }
     } catch (error) {
@@ -691,103 +706,103 @@ async function fetchDealerList() {
     }
 }
 
-// Handle edit - go back to create form
+// Handle edit
 function handleEdit() {
     router.push('/om/createEten');
 }
 
-// Handle form submission
+// Handle submit
 async function handleSubmit() {
     isSubmitting.value = true;
-
+    
     try {
-        // Validate required fields
-        if (!form.value.firstname || !form.value.email || !form.value.phoneno || !form.value.password) {
+        // Ensure custAccountNo
+        if (!form.value.custAccountNo && form.value.accountNo) {
+            form.value.custAccountNo = form.value.accountNo;
+        }
+
+        // Validate
+        const validation = validateForm(form.value);
+        if (!validation.isValid) {
             toast.add({
                 severity: 'warn',
                 summary: 'Missing Information',
-                detail: 'Please ensure all required Master User fields are filled in.',
-                life: 3000
+                detail: validation.message,
+                life: 4000
             });
-            isSubmitting.value = false;
-            return false;
+            return;
         }
 
-        // Validate password match
-        if (form.value.password !== form.value.confirmpassword) {
-            toast.add({
-                severity: 'error',
-                summary: 'Password Mismatch',
-                detail: 'Password and Confirm Password do not match.',
-                life: 3000
-            });
-            isSubmitting.value = false;
-            return false;
-        }
-
-        // Prepare FormData for API request
+        // Prepare FormData
         const formData = mapFormToFormData(form.value);
 
-        // Log FormData contents for debugging
-        console.log('FormData contents:');
+        // Debug logs
+        console.log('FormData entries:');
         for (let [key, value] of formData.entries()) {
             console.log(`${key}: ${value}`);
         }
 
-        // Log the s_array specifically
-        const shipToArray = prepareShipToArray(form.value.shipToAddresses);
-        console.log('Ship To Array:', shipToArray);
-
-        // Call addDealer API with FormData
+        // Submit API
         const response = await api.post('add_dealer', formData, {
-            headers: {
-                'Content-Type': 'multipart/form-data'
-            }
+            headers: { 'Content-Type': 'multipart/form-data' }
         });
+        
+        console.log('API Response:', response.data);
 
         if (response.data.status === 1) {
-            // Success
             toast.add({
                 severity: 'success',
                 summary: 'Dealer Created',
                 detail: 'Dealer created successfully! An activation email has been sent to the master user.',
-                life: 4000
+                life: 5000
             });
-
-            // Clear localStorage after successful submission
             localStorage.removeItem('etenFormData');
-
-            // Navigate to detail page or success page
-            router.push('/om/detailEten/' + response.data.custAccountNo);
+            
+            if (response.data.custAccountNo) {
+                router.push('/om/detailEten/' + response.data.custAccountNo);
+            } else {
+                router.push('/om/etenList');
+            }
         } else {
-            // Handle API error
-            const errorMessage = response.data.error?.message || 'Failed to create dealer. Please try again.';
-
-            toast.add({
-                severity: 'error',
-                summary: 'Error',
-                detail: errorMessage,
-                life: 4000
+            let errorMsg = 'Failed to create dealer.';
+            
+            if (response.data.validation_errors) {
+                // Handle validation errors
+                const errors = Object.values(response.data.validation_errors).flat();
+                errorMsg = errors.join(', ');
+            } else if (response.data.error?.message) {
+                errorMsg = response.data.error.message;
+            } else if (response.data.error?.description) {
+                errorMsg = response.data.error.description;
+            } else if (response.data.message) {
+                errorMsg = response.data.message;
+            }
+            
+            toast.add({ 
+                severity: 'error', 
+                summary: 'Error', 
+                detail: errorMsg, 
+                life: 5000 
             });
         }
-    } catch (error) {
-        console.error('Error submitting form:', error);
-
-        if (error.response?.data?.error) {
-            toast.add({
-                severity: 'error',
-                summary: 'Error',
-                detail: error.response.data.error.message || 'Failed to create dealer.',
-                life: 4000
-            });
-        } else {
-            toast.add({
-                severity: 'error',
-                summary: 'Error',
-                detail: 'An unexpected error occurred. Please try again.',
-                life: 4000
-            });
+    } catch (err) {
+        console.error('Submission error:', err);
+        let errorMsg = 'An unexpected error occurred.';
+        
+        if (err.response?.data?.error) {
+            errorMsg = err.response.data.error.message || err.response.data.error.description || errorMsg;
+        } else if (err.response?.data?.message) {
+            errorMsg = err.response.data.message;
+        } else if (err.message) {
+            errorMsg = err.message;
         }
+        
+        toast.add({ 
+            severity: 'error', 
+            summary: 'Error', 
+            detail: errorMsg, 
+            life: 5000 
+        });
     } finally {
         isSubmitting.value = false;
     }
