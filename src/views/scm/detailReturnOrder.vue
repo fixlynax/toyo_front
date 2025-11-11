@@ -11,8 +11,15 @@
                         </div>
 
                         <div class="flex items-center gap-2">
-                            <Button icon="pi pi-file-import" label="Import" class="p-button-success" />
-                            <Button icon="pi pi-file-export" label="Export" class="p-button-danger" />
+                            <Button icon="pi pi-file-import" label="Import" class="p-button-success" @click="importInput?.click()":loading="importLoading"/>
+                            <input 
+                            ref="importInput"
+                            type="file" 
+                            accept=".xlsx,.xls" 
+                            style="display: none" 
+                            @change="handleImport"
+                            />
+                            <Button icon="pi pi-file-export" label="Export" class="p-button-danger" :loading="exportLoading" @click="handleExport" />
                         </div>
                     </div>
 
@@ -25,7 +32,7 @@
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm text-gray-700">
                         <div>
                             <span class="block text-sm font-bold text-black-700">Status</span>
-                            <p class="font-medium text-lg">{{ returnList.orderstatus }}</p>
+                             <Tag :value="getStatusLabel(returnList.orderstatus)" :severity="getStatusSeverity(returnList.orderstatus)" />
                         </div>
                         <div>
                             <span class="block text-sm font-bold text-black-700">Reason</span>
@@ -165,8 +172,13 @@ import { ref, onMounted, computed } from 'vue';
 import Button from 'primevue/button';
 import api from '@/service/api';
 import { useRoute } from 'vue-router';
+import { useToast } from 'primevue/usetoast';
 
+const toast = useToast();
+const exportLoading = ref(false);
+const importLoading = ref(false);
 const route = useRoute();
+const importInput = ref();
 const returnList = ref({
   dealer: {
     dealer_shop: {},
@@ -175,35 +187,11 @@ const returnList = ref({
 });
 const loading = ref(true);
 
-const returnOrder = ref({
-    returnRequestNo: 'RR-2025-001',
-    pattern: 'Proxes T1R',
-    size: '215/45R17',
-    dotYear: '2024',
-    qty: 2,
-    deliveryLocation: 'Kuala Lumpur',
-    remark: 'Defective tyre - air leakage'
-});
-
-const dealerInfo = ref({
-    name: 'AutoWorld KL',
-    code: 'DLR-001',
-    contactPerson: 'Ahmad Zaki',
-    contactNo: '+60123456789'
-});
-
-const customerInfo = ref({
-    name: 'Lee Wei Ming',
-    vehicle: 'Toyota Hilux 2.8G',
-    regNo: 'WXY 4567'
-});
-
 const InitfetchData = async () => {
     try {
         loading.value = true;
         const id = route.params.id;
         const response = await api.get(`scm-return-order-detail/${id}`);
-        console.log('API Response:', response.data);
         if ( (response.data.admin_data)) {
             // response.data.status === 1 &&
             returnList.value = response.data.admin_data[0];
@@ -220,7 +208,124 @@ const InitfetchData = async () => {
         loading.value = false;
     }
 };
+function getStatusLabel(status) {
+    switch (status) {
+        case 0:
+            return 'Pending';
+        case 1:
+            return 'Approve';
+        case 2:
+            return 'Rejected';
+        case 66:
+            return 'Processing';
+        case 77:
+            return 'Pending Collection';
+        case 9:
+            return 'Completed';
+        default:
+            return 'Unknown';
+    }
+}
 
+function getStatusSeverity(status) {
+    switch (status) {
+        case 0:
+            return 'warn';
+        case 1:
+            return 'success';
+        case 2:
+            return 'error';
+        case 66:
+            return 'info';
+        case 77:
+            return 'primary';
+        case 9:
+            return 'success';
+        default:
+            return 'secondary';
+    }
+}
+const handleExport = async () => {
+ const idexport = route.params.id;
+    try {
+        exportLoading.value = true;
+            const response = await api.postExtra(
+            'excel/exportsingle-scm-return-order-list',
+        { id: idexport  },
+        {
+            responseType: 'blob',
+            headers: {
+            'Content-Type': 'application/json',
+            }
+        }
+        );
+        const blob = new Blob([response.data], { 
+        type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' 
+        });
+
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `${returnList.value.return_orderNo_ref}_Order_Download.xlsx`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        window.URL.revokeObjectURL(url);
+
+        toast.add({ severity: 'success', summary: 'Success', detail: 'Export completed', life: 3000 });
+    } catch (error) {
+        console.error('Error exporting data:', error);
+        toast.add({ severity: 'error', summary: 'Error', detail: 'Failed to export data', life: 3000 });
+    } finally {
+        exportLoading.value = false;
+    }
+};
+const handleImport = async (event) => {
+    const file = event.target.files[0];
+    if (!file) return;
+
+    try {
+        importLoading.value = true;
+        
+        const formData = new FormData();
+        formData.append('return_order_excel', file);
+        
+        const response = await api.postExtra('excel/import-scm-return-order-list', formData, {
+            headers: {
+                'Content-Type': 'multipart/form-data'
+            }
+            });
+        
+        if (response.data.status === 1) {
+            // Refresh data after import
+            await InitfetchData();
+
+            // Reset file input
+            if (importInput.value) {
+                importInput.value.value = '';
+            }
+
+            toast.add({
+                severity: 'success',
+                summary: 'Success',
+                detail: 'File imported successfully',
+                life: 3000
+            });
+            } else {
+            toast.add({
+                severity: 'error',
+                summary: 'Import Failed',
+                detail: response.data.error || 'Server did not confirm success',
+                life: 3000
+            });
+        }
+    } catch (error) {
+        console.error('Error importing data:', error);
+        toast.add({ severity: 'error', summary: 'Error', detail: 'Failed to import data', life: 3000 });
+    } finally {
+        importLoading.value = false;
+    }
+};
 onMounted(() => {
     InitfetchData();
 });

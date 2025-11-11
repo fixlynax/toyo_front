@@ -442,10 +442,14 @@ const rejecting = ref(false);
 // Fetch Material
 const fetchMaterial = async () => {
     try {
-        const response = await api.get('material');
+        const response = await api.get(`warranty_claim/getClaimMaterial/70`);
+        console.log('hhkhjkhjk');
+
         console.log(response.data);
         if (response.data.status === 1) {
-            listMaterial.value = response.data.admin_data || [];
+                listMaterial.value = (response.data.admin_data || []).map(item => ({
+        material: item // convert string → object
+    }));
         }
     } catch (error) {
         console.error('Error fetching catalog:', error);
@@ -799,12 +803,12 @@ const submitReplacement = async () => {
         });
         return;
     }
-
+console.log('Selected Material:', selectedMaterial.value);
     try {
         saving.value = true;
         const response = await api.post('warranty_claim/approveReplacement', {
             claim_id: warantyDetail.value.id,
-            materialid: selectedMaterial.value.materialid
+            materialid: selectedMaterial.value.material,
         });
         console.log('Replacement asdasdasd:', response);
         if (response.data.status === 1) {
@@ -855,7 +859,7 @@ const submitReimbursement = async () => {
         saving.value = true;
         const response = await api.post('warranty_claim/approveReimbursement', {
             claim_id: warantyDetail.value.id,
-            materialid: selectedMaterial.value.materialid,
+            materialid: selectedMaterial.value.material,
         });
 
         if (response.data.status === 1) {

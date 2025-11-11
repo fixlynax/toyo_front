@@ -29,8 +29,15 @@
                             <Menu ref="sortMenu" :model="sortItems" :popup="true" />
                         </div>
                         <div class="flex justify-end gap-2">
-                            <Button type="button" label="Export" icon="pi pi-download" class="p-button-success" />
-                            <Button type="button" label="Bulk" icon="pi pi-upload" />
+                            <Button type="button" label="Export" icon="pi pi-download" class="p-button-success" :loading="exportLoading" @click="handleExport"/>
+                            <Button type="button" label="Bulk" icon="pi pi-upload" @click="importInput?.click()":loading="importLoading" />
+                            <input 
+                            ref="importInput"
+                            type="file" 
+                            accept=".xlsx,.xls" 
+                            style="display: none" 
+                            @change="handleImport"
+                            />
                         </div>
                     </div>
                 </div>
@@ -39,7 +46,27 @@
             <template #empty> No return orders found. </template>
             <template #loading> Loading return orders data. Please wait. </template>
 
-            <!-- Columns -->
+            <Column header="Export All" style="min-width: 8rem">
+                <template #header>
+                    <div class="flex justify-center">
+                    <Checkbox
+                        :binary="true"
+                        :model-value="false"  
+                        @change="() => toggleSelectAll()"  
+                    />
+                    </div>
+                </template>
+
+                <template #body="{ data }">
+                    <div class="flex justify-center">
+                    <Checkbox
+                        :binary="true"
+                        :model-value="selectedExportIds.has(data.id)"
+                        @change="() => handleToggleExport(data.id)"
+                    />
+                    </div>
+                </template>
+            </Column>
              <Column field="deliveryDate" header="Ref No" dataType="date" style="min-width: 8rem">
                 <template #body="{ data }">
                     <RouterLink :to="`/scm/detailReturnOrder/${data.id}`" class="hover:underline font-bold text-primary-400">
@@ -87,10 +114,15 @@ import InputText from 'primevue/inputtext';
 import InputIcon from 'primevue/inputicon';
 import Tag from 'primevue/tag';
 import api from '@/service/api';
+import { useToast } from 'primevue/usetoast';
 
+const toast = useToast();
+const exportLoading = ref(false);
+const importLoading = ref(false);
 const returnList = ref([]);
 const loading = ref(true);
-
+const importInput = ref();
+const selectedExportIds = ref(new Set());
 
 // Filters for quick search
 const filters = ref({
@@ -134,6 +166,122 @@ const statusOptions = [
     { label: 'Delivery', value: 77 }
 ];
 
+// Computed boolean: are all rows selected?
+const allSelected = computed(() => {
+  return returnList.value.length > 0 && selectedExportIds.value.size === returnList.value.length;
+});
+
+const handleToggleExport = (id) => {
+  if (selectedExportIds.value.has(id)) {
+    selectedExportIds.value.delete(id);
+  } else {
+    selectedExportIds.value.add(id);
+  }
+  console.log(selectedExportIds.value);
+};
+
+// Check all
+const toggleSelectAll = () => {
+  if (allSelected.value) {
+    // Unselect all
+    selectedExportIds.value.clear();
+  } else {
+    // Select all
+    returnList.value.forEach(row => selectedExportIds.value.add(row.id));
+  }
+};
+
+// Export function
+const handleExport = async () => {
+     const idsArray = Array.from(selectedExportIds.value).map(id => ({ id: Number(id) }));
+
+    if (idsArray.length === 0) {
+        alert('Please select at least one row.');
+        return;
+    }
+    try {
+        exportLoading.value = true;
+        
+            const response = await api.postExtra(
+            'excel/export-scm-return-order-list',
+        { returnorderids_array: idsArray }, 
+        {
+            responseType: 'blob',
+            headers: {
+            'Content-Type': 'application/json',
+            }
+        }
+        );
+        const blob = new Blob([response.data], { 
+        type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' 
+        });
+
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = 'BulkOrder_Download.xlsx';
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        window.URL.revokeObjectURL(url);
+
+        toast.add({ severity: 'success', summary: 'Success', detail: 'Export completed', life: 3000 });
+        selectedExportIds.value.clear();
+    } catch (error) {
+        console.error('Error exporting data:', error);
+        toast.add({ severity: 'error', summary: 'Error', detail: 'Failed to export data', life: 3000 });
+    } finally {
+        exportLoading.value = false;
+    }
+};
+
+// Import function
+const handleImport = async (event) => {
+    const file = event.target.files[0];
+    if (!file) return;
+
+    try {
+        importLoading.value = true;
+        
+        const formData = new FormData();
+        formData.append('return_order_excel', file);
+        
+        const response = await api.postExtra('excel/import-scm-return-order-list', formData, {
+            headers: {
+                'Content-Type': 'multipart/form-data'
+            }
+            });
+        
+        if (response.data.status === 1) {
+            // Refresh data after import
+            await fetchData();
+
+            // Reset file input
+            if (importInput.value) {
+                importInput.value.value = '';
+            }
+
+            toast.add({
+                severity: 'success',
+                summary: 'Success',
+                detail: 'File imported successfully',
+                life: 3000
+            });
+            } else {
+            toast.add({
+                severity: 'error',
+                summary: 'Import Failed',
+                detail: response.data.error || 'Server did not confirm success',
+                life: 3000
+            });
+        }
+    } catch (error) {
+        console.error('Error importing data:', error);
+        toast.add({ severity: 'error', summary: 'Error', detail: 'Failed to import data', life: 3000 });
+    } finally {
+        importLoading.value = false;
+    }
+};
 
 const fetchData = async () => {
     try {
@@ -149,7 +297,7 @@ const fetchData = async () => {
         }
     } catch (error) {
         console.error('Error fetching product list:', error);
-        tyres.value = [];
+        returnList.value = [];
         toast.add({ severity: 'error', summary: 'Error', detail: 'Failed to load data', life: 3000 });
     } finally {
         loading.value = false;
@@ -168,11 +316,15 @@ function getStatusLabel(status) {
         case 0:
             return 'Pending';
         case 1:
-            return 'Completed';
+            return 'Approve';
+        case 2:
+            return 'Rejected';
         case 66:
             return 'Processing';
         case 77:
-            return 'Delivery';
+            return 'Pending Collection';
+        case 9:
+            return 'Completed';
         default:
             return 'Unknown';
     }
@@ -184,16 +336,17 @@ function getStatusSeverity(status) {
             return 'warn';
         case 1:
             return 'success';
+        case 2:
+            return 'error';
         case 66:
             return 'info';
         case 77:
             return 'primary';
+        case 9:
+            return 'success';
         default:
             return 'secondary';
     }
 }
 
-function onFilter() {
-    // Trigger recompute - handled automatically by computed property
-}
 </script>
