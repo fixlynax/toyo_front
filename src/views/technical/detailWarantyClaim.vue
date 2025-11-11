@@ -236,7 +236,7 @@
                     
                     <!-- Invoice Actions -->
                     <div class="flex justify-end p-1 gap-2 mt-2">
-                        <Button v-if="warantyDetail.invAttachURL" icon="pi pi-eye" class="p-button-info" size="small" @click="processInvoice(warantyDetail.invAttachURL)" />
+                        <Button v-if="warantyDetail.invAttachURL" icon="pi pi-eye" class="p-button-info" size="small" @click="viewInvoice(warantyDetail.invAttachURL)" />
                         <Button v-if="warantyDetail.invAttachURL" icon="pi pi-download" class="p-button-danger" size="small" @click="downloadInvoice(warantyDetail.invAttachURL)" />
                     </div>
                     
@@ -823,53 +823,38 @@ const submitReimbursement = async () => {
     }
 };
 
-const viewInvoice = (url) => {
-    if (url) {
-        window.open(url, '_blank');
-    }
-};
-
-const processInvoice = async (url, filename = 'file.pdf') => {
+const viewInvoice = async (url) => {
   try {
-    const response = await api.getPrivateFile(url); // must return { responseType: 'blob' }
-
-    const blob = new Blob([response.data]);
-    const blobUrl = window.URL.createObjectURL(blob);
-
-    const link = document.createElement('a');
-    link.href = blobUrl;
-    link.download = filename;
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-
-    // Clean up URL after a few seconds
-    setTimeout(() => window.URL.revokeObjectURL(blobUrl), 5000);
+    const blobUrl = await api.getPrivateFile(url);
+    if (!blobUrl) return;
+    window.open(blobUrl, '_blank'); // opens preview in new tab
   } catch (error) {
-    console.error('❌ Failed to download file:', error);
+    console.error('Failed to preview file:', error);
   }
 };
 
-const downloadInvoice = async (url) => {
-    if (url) {
-        try {
-            const fileBlob = await api.getPrivateFile(url, true);
-            const downloadUrl = window.URL.createObjectURL(fileBlob);
-            const link = document.createElement('a');
-            link.href = downloadUrl;
-            link.download = 'invoice.pdf';
-            link.click();
-            window.URL.revokeObjectURL(downloadUrl);
-        } catch (err) {
-            console.error('Error downloading invoice:', err);
-            toast.add({
-                severity: 'error',
-                summary: 'Error',
-                detail: 'Failed to download invoice',
-                life: 3000
-            });
-        }
-    }
+const downloadInvoice = async (url, filename = 'invoice.pdf') => {
+  try {
+    const blobUrl = await api.getPrivateFile(url);
+    if (!blobUrl) return;
+
+    const a = document.createElement('a');
+    a.href = blobUrl;
+    a.download = filename;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+
+    setTimeout(() => URL.revokeObjectURL(blobUrl), 5000);
+  } catch (error) {
+    console.error('Failed to download file:', error);
+    toast.add({
+        severity: 'error',
+        summary: 'Error',
+        detail: 'Failed to download invoice',
+        life: 3000
+    });
+  }
 };
 
 // Helper functions
