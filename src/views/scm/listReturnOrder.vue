@@ -16,7 +16,8 @@
                             </IconField>
                         </div>
                         <div class="flex justify-end gap-2">
-                            <Button type="button" label="Bulk Update" icon="pi pi-upload" />
+                            <Button type="button" label="Export" icon="pi pi-download" class="p-button-success" />
+                            <Button type="button" label="Bulk" icon="pi pi-upload" />
                         </div>
                     </div>
                 </div>

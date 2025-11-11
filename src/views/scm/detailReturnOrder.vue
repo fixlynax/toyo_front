@@ -5,8 +5,17 @@
             <div class="md:w-2/3 flex flex-col">
                 <div class="card flex flex-col w-full">
                     <div class="flex items-center justify-between border-b pb-2">
-                        <div class="text-2xl font-bold text-gray-800">Return Order Details</div>
+                        <div class="flex items-center gap-3">
+                            <Button icon="pi pi-arrow-left" class="p-button-text p-button-secondary" @click="$router.back()" />
+                            <div class="text-2xl font-bold text-gray-800">Return Order Details</div>
+                        </div>
+
+                        <div class="flex items-center gap-2">
+                            <Button icon="pi pi-file-import" label="Import" class="p-button-success" />
+                            <Button icon="pi pi-file-export" label="Export" class="p-button-danger" />
+                        </div>
                     </div>
+
                     <div class="mt-6 mb-4">
                         <div>
                             <span class="block text-sm font-bold text-black-700">Return Order Number</span>
@@ -104,7 +113,7 @@
 
 <script setup>
 import { ref } from 'vue';
-import Button from "primevue/button";
+import Button from 'primevue/button';
 
 const returnOrder = ref({
     returnRequestNo: 'RR-2025-001',
