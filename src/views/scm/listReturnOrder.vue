@@ -106,7 +106,7 @@
             </Column>
             <Column header="Status" style="min-width: 8rem">
                 <template #body="{ data }">
-                    <Tag :value="getStatusLabel(data.orderstatus)" :severity="getStatusSeverity(data.orderstatus)" />
+                    <Tag :value="data.delivery_status" :severity="getStatusSeverity(data.delivery_status)" />
                 </template>
             </Column>
         </DataTable>
@@ -330,39 +330,33 @@ function formatDate(dateString) {
   });
 }
 
-function getStatusLabel(status) {
-    switch (status) {
-        case 0:
-            return 'Pending';
-        case 1:
-            return 'Approve';
-        case 2:
-            return 'Rejected';
-        case 66:
-            return 'Processing';
-        case 77:
-            return 'Pending Collection';
-        case 9:
-            return 'Completed';
-        default:
-            return 'Unknown';
-    }
-}
+// function getStatusLabel(status) {
+//     switch (status) {
+//         case 0:
+//             return 'Pending';
+//         case 1:
+//             return 'Approve';
+//         case 2:
+//             return 'Rejected';
+//         case 66:
+//             return 'Processing';
+//         case 77:
+//             return 'Pending Collection';
+//         case 9:
+//             return 'Completed';
+//         default:
+//             return 'Unknown';
+//     }
+// }
 
 function getStatusSeverity(status) {
     switch (status) {
-        case 0:
+        case 'PENDING':
             return 'warn';
-        case 1:
+        case 'COMPLETED':
             return 'success';
-        case 2:
-            return 'error';
-        case 66:
+        case 'NEW':
             return 'info';
-        case 77:
-            return 'primary';
-        case 9:
-            return 'success';
         default:
             return 'secondary';
     }
