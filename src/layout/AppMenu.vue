@@ -92,7 +92,7 @@ const model = ref([
                 to: '/technical/dashboardTechnical'
             },
             {
-                label: 'Appoitment',
+                label: 'Appointment',
                 icon: 'pi pi-book',
                 to: '/technical/listAppoitment'
             },
