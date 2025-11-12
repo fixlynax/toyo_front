@@ -102,7 +102,7 @@
 
                         <Column field="itemcategory" header="Item Category">
                             <template #body="{ data }">
-                                {{ data.itemcategory || 'ZR02' }}
+                                {{ mapItemCategory(data.itemcategory) }}
                             </template>
                         </Column>
 
@@ -210,7 +210,7 @@
                         <Column field="materialid" header="Material ID"></Column>
                         <Column field="itemcategory" header="Item Category">
                             <template #body="{ data }">
-                                {{ data.itemcategory || 'ZR02' }}
+                                {{ mapItemCategory(data.itemcategory) }}
                             </template>
                         </Column>
                         <Column field="qty" header="Available Qty">
@@ -228,6 +228,11 @@
                         </Column>
                         <template #loadingicon></template>
                     </DataTable>
+
+                    <div class="flex justify-end gap-2 mt-4">
+                        <Button label="Cancel" class="p-button-secondary" @click="cancelReturnOrder" />
+                        <Button label="Submit Return" class="p-button-primary" @click="submitReturnOrder" />
+                    </div>
                 </div>
             </Dialog>
         </div>
@@ -301,6 +306,18 @@ const getFullAddress = (shipping) => {
     const addressParts = [shipping.addressLine1, shipping.addressLine2, shipping.addressLine3, shipping.addressLine4, shipping.city, shipping.state, shipping.postcode].filter((part) => part && part.trim() !== '');
 
     return addressParts.join(', ') || '-';
+};
+
+// Item category mapping function
+const mapItemCategory = (category) => {
+    if (!category) return 'ZR02';
+
+    const categoryMap = {
+        ZT02: 'ZR02',
+        ZT3F: 'ZR3F'
+    };
+
+    return categoryMap[category] || category;
 };
 
 // Watch for selection changes to enable/disable quantity input
@@ -395,7 +412,7 @@ const submitReturnOrder = async () => {
             .filter((item) => returnQuantities.value[item.materialid] > 0)
             .map((item, index) => ({
                 materialid: item.materialid,
-                itemcategory: item.itemcategory || 'ZR02',
+                itemcategory: mapItemCategory(item.itemcategory), // Use mapped category for return
                 qty: returnQuantities.value[item.materialid].toString(),
                 salesdoclineitem: item.itemno,
                 plant: 'TSM'
