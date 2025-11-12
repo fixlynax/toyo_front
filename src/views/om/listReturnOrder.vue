@@ -235,7 +235,7 @@ onBeforeMount(() => {
                 <!-- Collection Date Column - Only show for completed orders -->
                 <Column v-if="isCompletedTab" field="ctcDate" header="Collection Date" style="min-width: 8rem">
                     <template #body="{ data }">
-                        {{ formatDate(data.ctcDate) }}
+                        {{ formatDate(data.pickup) }}
                     </template>
                 </Column>
 

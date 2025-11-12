@@ -250,9 +250,12 @@ const returnQuantities = ref({});
 
 // Return reasons
 const returnReasons = ref([
-    { code: 'Y01', name: 'Wrong DOM' },
-    { code: 'Y09', name: 'Receive Wrong Item' },
-    { code: 'Y11', name: 'Delivered Wrong Address' }
+    // { code: 'Y01', name: 'Wrong DOM' },
+    // { code: 'Y09', name: 'Receive Wrong Item' },
+    // { code: 'Y11', name: 'Delivered Wrong Address' }
+    { code: 'Wrong DOM', name: 'Wrong DOM' },
+    { code: 'Receive Wrong Item', name: 'Receive Wrong Item' },
+    { code: 'Delivered Wrong Address', name: 'Delivered Wrong Address' }
 ]);
 
 // Computed properties
@@ -380,7 +383,8 @@ const submitReturnOrder = async () => {
                 materialid: item.materialid,
                 itemcategory: item.itemcategory || 'ZRO2',
                 qty: returnQuantities.value[item.materialid].toString(),
-                salesdoclineitem: ((index + 1) * 10).toString()
+                salesdoclineitem: ((index + 1) * 10).toString(),
+                plant: "TSM"
             }));
 
         if (returnItems.length === 0) {
@@ -388,15 +392,21 @@ const submitReturnOrder = async () => {
             return;
         }
 
-        const payload = {
-            order_array: returnItems,
-            returnReason: returnReason.value // Send the code, not the name
-        };
+        const payload = new URLSearchParams();
+        payload.append('returnReason', returnReason.value);
+        payload.append('order_array', JSON.stringify(returnItems));
 
-        console.log('Return Order Payload:', payload);
+        console.log('Return Order Payload:', {
+            returnReason: returnReason.value,
+            order_array: returnItems
+        });
 
         const orderNo = route.params.orderNo;
-        const response = await api.post(`order/create-return-order/${orderNo}`, payload);
+        const response = await api.postExtra(`order/create-return-order/${orderNo}`, payload, {
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded'
+            }
+        });
 
         if (response.data.status === 1) {
             toast.add({
@@ -407,8 +417,6 @@ const submitReturnOrder = async () => {
             });
             showReturnOrderDialog.value = false;
             resetReturnForm();
-
-            // Refresh order data to reflect the return
             await fetchOrderDetail();
         } else {
             toast.add({
@@ -423,7 +431,7 @@ const submitReturnOrder = async () => {
         toast.add({
             severity: 'error',
             summary: 'Error',
-            detail: 'Failed to create return order',
+            detail: 'Failed to create return order: ' + error.message,
             life: 3000
         });
     }
