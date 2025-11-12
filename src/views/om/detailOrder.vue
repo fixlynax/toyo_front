@@ -13,7 +13,7 @@
                     <div class="flex items-center justify-between w-full">
                         <div>
                             <span class="block text-sm font-bold text-gray-700">Customer Account No.</span>
-                            <span class="text-lg font-medium">{{ orderData.custaccountno || '-' }}</span>
+                            <span class="text-lg font-bold text-primary">{{ orderData.custaccountno || '-' }}</span>
                         </div>
                     </div>
 
@@ -85,37 +85,53 @@
                         </div>
                     </div>
                 </div>
-                <div class="card flex flex-col w-full">
-                    <div class="font-semibold text-xl border-b pb-2">📦 Order Items</div>
 
-                    <DataTable :value="orderItems" selectionMode="multiple" v-model:selection="selectedReturnItems" dataKey="materialid">
-                        <Column selectionMode="multiple" headerStyle="width: 3rem"></Column>
+                <div class="card flex flex-col w-full bg-white shadow-sm rounded-2xl border border-gray-100">
+                    <!-- Header -->
+                    <div class="font-semibold text-xl border-b pb-3 px-4 flex items-center gap-2 text-gray-800">📦 <span>Order Item</span></div>
+
+                    <!-- Table -->
+                    <DataTable :value="orderItems" dataKey="materialid" class="rounded-table mt-4">
+                        <Column field="itemno" header="Item No">
+                            <template #body="{ data }">
+                                {{ formatItemNo(data.itemno) }}
+                            </template>
+                        </Column>
+
                         <Column field="materialid" header="Material ID"></Column>
+
                         <Column field="itemcategory" header="Item Category">
                             <template #body="{ data }">
                                 {{ data.itemcategory || 'ZR02' }}
                             </template>
                         </Column>
-                        <Column field="qty" header="Available Qty">
+
+                        <Column field="qty" header="Quantity">
                             <template #body="{ data }">
-                                {{ data.qty - getReturnedQty(data.materialid) }}
+                                {{ parseInt(data.qty) }}
                             </template>
                         </Column>
-                        <!-- <Column header="Return Qty">
-                            <template #body="{ data }">
-                                <InputNumber v-model="returnQuantities[data.materialid]" :min="0" :max="data.qty - getReturnedQty(data.materialid)" showButtons class="w-full" />
+
+                        <!-- 🟦 Unit Price Column -->
+                        <Column field="unitprice" header="Unit Price" class="text-right">
+                            <template #body="{ data }"> RM {{ parseFloat(data.unitprice || 0).toFixed(2) }} </template>
+
+                            <!-- ✅ Footer for label -->
+                            <template #footer>
+                                <div class="flex justify-start pr-2 font-bold text-gray-700">Grand Total</div>
                             </template>
-                        </Column> -->
-                        <Column field="unitprice" header="Price">
-                            <template #body="{ data }">
-                                RM {{ parseFloat(data.unitprice).toFixed(2) }}
+                        </Column>
+
+                        <!-- 🟦 Total Amount Column -->
+                        <Column field="totalamt" header="Total Amount" class="text-right">
+                            <template #body="{ data }"> RM {{ parseFloat(data.totalamt || 0).toFixed(2) }} </template>
+
+                            <!-- ✅ Footer for total value -->
+                            <template #footer>
+                                <div class="flex justify-start pr-3 font-semibold text-blue-600">RM {{ totalAmount.toFixed(2) }}</div>
                             </template>
                         </Column>
                     </DataTable>
-
-                    <div class="flex justify-end items-center border-t px-4 py-2">
-                        <span class="text-lg font-semibold text-gray-800">Grand Total: RM {{ totalAmount.toFixed(2) }}</span>
-                    </div>
                 </div>
             </div>
 
@@ -133,6 +149,18 @@
                                     <td class="px-4 py-2 text-right font-semibold">{{ orderData.order_no || '-' }}</td>
                                 </tr>
                                 <tr class="border-b">
+                                    <td class="px-4 py-2 font-medium">SO No.</td>
+                                    <td class="px-4 py-2 text-right font-semibold">{{ orderData.so_no || '-' }}</td>
+                                </tr>
+                                <tr class="border-b">
+                                    <td class="px-4 py-2 font-medium">DO No.</td>
+                                    <td class="px-4 py-2 text-right font-semibold">{{ orderData.do_no || '-' }}</td>
+                                </tr>
+                                <tr class="border-b">
+                                    <td class="px-4 py-2 font-medium">Invoice No</td>
+                                    <td class="px-4 py-2 text-right font-semibold">{{ orderData.inv_no || '-' }}</td>
+                                </tr>
+                                <tr class="border-b">
                                     <td class="px-4 py-2 font-medium">Price Group</td>
                                     <td class="px-4 py-2 text-right font-semibold">{{ orderData.pricegroup || '-' }}</td>
                                 </tr>
@@ -145,12 +173,8 @@
                                     <td class="px-4 py-2 text-right font-semibold">{{ orderData.storagelocation || '-' }}</td>
                                 </tr>
                                 <tr class="border-b">
-                                    <td class="px-4 py-2 font-medium">User Approved</td>
-                                    <td class="px-4 py-2 text-right font-semibold">{{ orderData.approved_by || '-' }}</td>
-                                </tr>
-                                <tr class="border-b">
-                                    <td class="px-4 py-2 font-medium">Date Approved</td>
-                                    <td class="px-4 py-2 text-right font-semibold">{{ formatDate(orderData.approved_at) }}</td>
+                                    <td class="px-4 py-2 font-medium">Created</td>
+                                    <td class="px-4 py-2 text-right font-semibold">{{ orderData.created || '-' }}</td>
                                 </tr>
                                 <tr>
                                     <td></td>
@@ -165,36 +189,10 @@
                         </table>
                     </div>
                 </div>
-
-                <div class="card flex flex-col w-full">
-                    <div class="text-2xl font-bold text-gray-800 border-b pb-2 mb-2">Document Info</div>
-                    <div class="overflow-x-auto">
-                        <table class="w-full text-sm text-left text-gray-700">
-                            <tbody>
-                                <tr class="border-b">
-                                    <td class="px-4 py-2 font-medium">SO No.</td>
-                                    <td class="px-4 py-2 text-right font-semibold">{{ orderData.so_no || '-' }}</td>
-                                </tr>
-                                <tr class="border-b">
-                                    <td class="px-4 py-2 font-medium">DO No.</td>
-                                    <td class="px-4 py-2 text-right font-semibold">{{ orderData.do_no || '-' }}</td>
-                                </tr>
-                                <tr class="border-b">
-                                    <td class="px-4 py-2 font-medium">Invoice No</td>
-                                    <td class="px-4 py-2 text-right font-semibold">{{ orderData.inv_no || '-' }}</td>
-                                </tr>
-                                <tr class="border-b">
-                                    <td class="px-4 py-2 font-medium">Last Updated</td>
-                                    <td class="px-4 py-2 text-right font-semibold">{{ formatDateTime(orderData.accountLastUpdate) }}</td>
-                                </tr>
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
             </div>
 
             <!-- Return Order Dialog -->
-            <Dialog v-model:visible="showReturnOrderDialog" header="Return Order" modal :style="{ width: '50rem' }">
+            <Dialog v-model:visible="showReturnOrderDialog" header="Return Order" modal :style="{ width: '70rem' }">
                 <div class="flex flex-col gap-4">
                     <div class="p-fluid">
                         <label for="returnReason" class="font-semibold">Return Reason</label>
@@ -202,37 +200,42 @@
                     </div>
 
                     <div class="font-semibold">Select Items to Return</div>
-                    <DataTable :value="orderItems" selectionMode="multiple" v-model:selection="selectedReturnItems" dataKey="materialid">
+                    <DataTable :value="orderItems" selectionMode="multiple" v-model:selection="selectedReturnItems" dataKey="materialid" class="rounded-table">
                         <Column selectionMode="multiple" headerStyle="width: 3rem"></Column>
+                        <Column field="itemno" header="Item No">
+                            <template #body="{ data }">
+                                {{ formatItemNo(data.itemno) }}
+                            </template>
+                        </Column>
                         <Column field="materialid" header="Material ID"></Column>
                         <Column field="itemcategory" header="Item Category">
                             <template #body="{ data }">
-                                {{ data.itemcategory || 'ZRO2' }}
+                                {{ data.itemcategory || 'ZR02' }}
                             </template>
-                            </Column>   
+                        </Column>
                         <Column field="qty" header="Available Qty">
                             <template #body="{ data }">
-                                {{ data.qty - getReturnedQty(data.materialid) }}
+                                {{ parseInt(data.qty) }}
                             </template>
                         </Column>
                         <Column header="Return Qty">
                             <template #body="{ data }">
-                                <InputNumber v-model="returnQuantities[data.materialid]" :min="0" :max="data.qty - getReturnedQty(data.materialid)" showButtons class="w-full" />
+                                <InputNumber v-model="returnQuantities[data.materialid]" :min="0" :max="parseInt(data.qty)" showButtons class="w-full" :disabled="!selectedReturnItems.some((item) => item.materialid === data.materialid)" />
                             </template>
                         </Column>
+                        <Column field="unitprice" header="Unit Price">
+                            <template #body="{ data }"> RM {{ parseFloat(data.unitprice || 0).toFixed(2) }} </template>
+                        </Column>
+                        <template #loadingicon></template>
                     </DataTable>
                 </div>
-                <template #footer>
-                    <Button label="Cancel" icon="pi pi-times" class="p-button-text" @click="cancelReturnOrder" />
-                    <Button label="Submit Return" icon="pi pi-check" class="p-button-success" @click="submitReturnOrder" />
-                </template>
             </Dialog>
         </div>
     </Fluid>
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from 'vue';
+import { ref, computed, onMounted, watch } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { useToast } from 'primevue/usetoast';
 import api from '@/service/api';
@@ -254,9 +257,6 @@ const returnQuantities = ref({});
 
 // Return reasons
 const returnReasons = ref([
-    // { code: 'Y01', name: 'Wrong DOM' },
-    // { code: 'Y09', name: 'Receive Wrong Item' },
-    // { code: 'Y11', name: 'Delivered Wrong Address' }
     { code: 'Wrong DOM', name: 'Wrong DOM' },
     { code: 'Receive Wrong Item', name: 'Receive Wrong Item' },
     { code: 'Delivered Wrong Address', name: 'Delivered Wrong Address' }
@@ -265,7 +265,7 @@ const returnReasons = ref([
 // Computed properties
 const totalAmount = computed(() => {
     return orderItems.value.reduce((sum, item) => {
-        return sum + parseFloat(item.qty) * parseFloat(item.unitprice || 0);
+        return sum + parseFloat(item.totalamt || 0);
     }, 0);
 });
 
@@ -278,6 +278,12 @@ const formatDate = (dateString) => {
 const formatDateTime = (dateString) => {
     if (!dateString) return '-';
     return new Date(dateString).toLocaleString('en-MY');
+};
+
+const formatItemNo = (itemNo) => {
+    if (!itemNo) return '-';
+    // Convert to string and pad with leading zeros to 6 digits
+    return itemNo.toString().padStart(6, '0');
 };
 
 const statusClass = (status) => {
@@ -297,11 +303,15 @@ const getFullAddress = (shipping) => {
     return addressParts.join(', ') || '-';
 };
 
-const getReturnedQty = (materialId) => {
-    // This should be implemented based on your return order history
-    // For now, return 0 as placeholder
-    return 0;
-};
+// Watch for selection changes to enable/disable quantity input
+watch(selectedReturnItems, (newSelection) => {
+    // Reset quantities for items that are no longer selected
+    Object.keys(returnQuantities.value).forEach((materialId) => {
+        if (!newSelection.some((item) => item.materialid === materialId)) {
+            returnQuantities.value[materialId] = 0;
+        }
+    });
+});
 
 // API Calls
 const fetchOrderDetail = async () => {
@@ -313,22 +323,14 @@ const fetchOrderDetail = async () => {
             const data = response.data.admin_data[0];
             orderData.value = data;
 
-            // ✅ Order Items (combine order_array + fullfill_order_array)
-            if (Array.isArray(data.order_array)) {
-                const orderArray = data.order_array;
-                const fullfillArray = data.fullfill_order_array || [];
-
-                orderItems.value = orderArray.map((orderItem) => {
-                    const fullfillItem = fullfillArray.find((fItem) => fItem.itemno === orderItem.itemno?.toString().padStart(6, '0')) || {};
-                    return {
-                        materialid: orderItem.materialid,
-                        itemcategory: orderItem.itemcategory || 'ZRO2',
-                        qty: parseFloat(orderItem.qty) || 0,
-                        unitprice: parseFloat(fullfillItem.unitprice) || 0,
-                        totalamt: parseFloat(fullfillItem.totalamt) || 0,
-                        itemno: orderItem.itemno || fullfillItem.itemno
-                    };
-                });
+            // ✅ Use fullfill_order_array for order items display
+            if (Array.isArray(data.fullfill_order_array)) {
+                orderItems.value = data.fullfill_order_array.map((item) => ({
+                    ...item,
+                    qty: parseInt(item.qty) || 0, // Changed to parseInt for whole numbers
+                    unitprice: parseFloat(item.unitprice) || 0,
+                    totalamt: parseFloat(item.totalamt) || 0
+                }));
             } else {
                 orderItems.value = [];
             }
@@ -360,7 +362,6 @@ const fetchOrderDetail = async () => {
         toast.add({ severity: 'error', summary: 'Error', detail: 'Failed to fetch order details', life: 3000 });
     }
 };
-
 
 const pullSAPUpdate = async () => {
     try {
@@ -394,10 +395,10 @@ const submitReturnOrder = async () => {
             .filter((item) => returnQuantities.value[item.materialid] > 0)
             .map((item, index) => ({
                 materialid: item.materialid,
-                itemcategory: item.itemcategory || 'ZRO2',
+                itemcategory: item.itemcategory || 'ZR02',
                 qty: returnQuantities.value[item.materialid].toString(),
                 salesdoclineitem: item.itemno,
-                plant: "TSM"
+                plant: 'TSM'
             }));
 
         if (returnItems.length === 0) {
@@ -466,3 +467,44 @@ onMounted(() => {
     fetchOrderDetail();
 });
 </script>
+
+<style scoped>
+:deep(.rounded-table) {
+    border-radius: 12px;
+    overflow: hidden;
+    border: 1px solid #e5e7eb;
+
+    .p-datatable-header {
+        border-top-left-radius: 12px;
+        border-top-right-radius: 12px;
+    }
+
+    .p-paginator-bottom {
+        border-bottom-left-radius: 12px;
+        border-bottom-right-radius: 12px;
+    }
+
+    .p-datatable-thead > tr > th {
+        &:first-child {
+            border-top-left-radius: 12px;
+        }
+        &:last-child {
+            border-top-right-radius: 12px;
+        }
+    }
+
+    .p-datatable-tbody > tr:last-child > td {
+        &:first-child {
+            border-bottom-left-radius: 0;
+        }
+        &:last-child {
+            border-bottom-right-radius: 0;
+        }
+    }
+
+    .p-datatable-tbody > tr.p-datatable-emptymessage > td {
+        border-bottom-left-radius: 12px;
+        border-bottom-right-radius: 12px;
+    }
+}
+</style>

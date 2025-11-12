@@ -88,7 +88,7 @@
 
                 <!-- BACK ORDER ITEMS -->
                 <div class="card flex flex-col w-full">
-                    <div class="flex items-center justify-between mb-4">
+                    <div class="flex items-center justify-between mb-4 border-b pb-3">
                         <div class="font-semibold text-xl">📦 Back Order Items</div>
                         <div class="flex items-center gap-2">
                             <Tag :value="`${fulfillmentPercentage}% Fulfilled`" :severity="fulfillmentPercentage === 100 ? 'success' : fulfillmentPercentage > 0 ? 'warning' : 'danger'" />
@@ -96,32 +96,32 @@
                         </div>
                     </div>
 
-                    <DataTable :value="backOrderItems" dataKey="id" responsiveLayout="scroll" class="text-sm" stripedRows>
+                    <DataTable :value="backOrderItems" dataKey="id" responsiveLayout="scroll" class="text-sm rounded-table mt-2" stripedRows>
                         <Column field="itemno" header="Item No" style="min-width: 6rem; text-align: center">
                             <template #body="{ data }">
                                 <span class="font-bold text-lg">{{ data.itemno }}</span>
                             </template>
                         </Column>
 
-                        <Column field="materialid" header="Material ID" style="min-width: 8rem; text-align: center">
+                        <Column field="materialid" header="Material ID" style="min-width: 8rem; text-align: left">
                             <template #body="{ data }">
                                 <span class="font-medium text-lg">{{ data.materialid }}</span>
                             </template>
                         </Column>
 
-                        <Column field="itemcategory" header="Item Category" style="min-width: 8rem; text-align: center">
+                        <Column field="itemcategory" header="Item Category" style="min-width: 8rem; text-align: left">
                             <template #body="{ data }">
                                 <span class="text-lg">{{ data.itemcategory }}</span>
                             </template>
                         </Column>
 
-                        <Column field="qty" header="Original Qty" style="text-align: center">
+                        <Column field="qty" header="Original Qty" style="text-align: left">
                             <template #body="{ data }">
                                 <span class="text-lg font-semibold">{{ formatQuantity(data.qty) }}</span>
                             </template>
                         </Column>
 
-                        <Column field="fulfilledQty" header="Fulfilled Qty" style="text-align: center">
+                        <Column field="fulfilledQty" header="Fulfilled Qty" style="text-align: left">
                             <template #body="{ data }">
                                 <span class="text-lg" :class="getFulfillmentClass(data)">
                                     {{ formatQuantity(getFulfilledQuantity(data.materialid)) }}
@@ -129,7 +129,7 @@
                             </template>
                         </Column>
 
-                        <Column field="remainingQty" header="Remaining Qty" style="text-align: center">
+                        <Column field="remainingQty" header="Remaining Qty" style="text-align: left">
                             <template #body="{ data }">
                                 <span class="text-lg font-bold" :class="getRemainingClass(data)">
                                     {{ formatQuantity(getRemainingQuantity(data.materialid)) }}
@@ -152,7 +152,12 @@
                             <div class="text-sm text-gray-500">Created: {{ formatDate(fulfillOrder.created) }}</div>
                         </div>
 
-                        <DataTable :value="getFulfillmentItems(fulfillOrder)" class="text-sm" stripedRows>
+                        <DataTable :value="getFulfillmentItems(fulfillOrder)" class="text-sm rounded-table" stripedRows>
+                            <Column field="itemno" header="Item No" style="min-width: 6rem">
+                                <template #body="{ data }">
+                                    <span class="text-gray-600">{{ data.itemno }}</span>
+                                </template>
+                            </Column>
                             <Column field="materialid" header="Material ID" style="min-width: 8rem">
                                 <template #body="{ data }">
                                     <span class="font-bold">{{ data.materialid }}</span>
@@ -163,20 +168,24 @@
                                     <span>{{ formatQuantity(data.qty) }}</span>
                                 </template>
                             </Column>
-                            <Column field="unitprice" header="Unit Price (RM)" style="min-width: 6rem">
+                            <Column field="unitprice" header="Unit Price" style="min-width: 6rem">
                                 <template #body="{ data }">
-                                    <span class="font-semibold text-green-600">{{ data.unitprice }}</span>
+                                    <span class="font-semibold text-green-600">RM {{ data.unitprice }}</span>
                                 </template>
+
+                                <!-- ✅ Footer for label -->
+                            <template #footer>
+                                <div class="flex justify-start pr-2 font-bold text-gray-700">Grand Total</div>
+                            </template>
                             </Column>
-                            <Column field="totalamt" header="Total (RM)" style="min-width: 6rem">
+                            <Column field="totalamt" header="Total" style="min-width: 6rem">
                                 <template #body="{ data }">
-                                    <span class="font-bold text-green-700">{{ data.totalamt }}</span>
+                                    <span class="font-bold text-green-700">RM {{ data.totalamt }}</span>
                                 </template>
-                            </Column>
-                            <Column field="itemno" header="Item No" style="min-width: 6rem">
-                                <template #body="{ data }">
-                                    <span class="text-gray-600">{{ data.itemno }}</span>
-                                </template>
+
+                                 <template #footer>
+                                <div class="flex justify-start pr-2 font-bold text-gray-700">RM {{ fulfillOrder.total }}</div>
+                            </template>
                             </Column>
                         </DataTable>
 
@@ -355,11 +364,11 @@ const confirmCancelBackOrder = () => {
 // Helper method to format quantity as whole numbers
 const formatQuantity = (quantity) => {
     if (quantity === null || quantity === undefined || quantity === '') return '0';
-    
+
     // Convert to number and round to nearest whole number
     const num = parseFloat(quantity);
     if (isNaN(num)) return '0';
-    
+
     return Math.round(num).toString();
 };
 
@@ -514,3 +523,44 @@ onMounted(() => {
     fetchBackOrderDetail();
 });
 </script>
+
+<style scoped>
+:deep(.rounded-table) {
+    border-radius: 12px;
+    overflow: hidden;
+    border: 1px solid #e5e7eb;
+
+    .p-datatable-header {
+        border-top-left-radius: 12px;
+        border-top-right-radius: 12px;
+    }
+
+    .p-paginator-bottom {
+        border-bottom-left-radius: 12px;
+        border-bottom-right-radius: 12px;
+    }
+
+    .p-datatable-thead > tr > th {
+        &:first-child {
+            border-top-left-radius: 12px;
+        }
+        &:last-child {
+            border-top-right-radius: 12px;
+        }
+    }
+
+    .p-datatable-tbody > tr:last-child > td {
+        &:first-child {
+            border-bottom-left-radius: 0;
+        }
+        &:last-child {
+            border-bottom-right-radius: 0;
+        }
+    }
+
+    .p-datatable-tbody > tr.p-datatable-emptymessage > td {
+        border-bottom-left-radius: 12px;
+        border-bottom-right-radius: 12px;
+    }
+}
+</style>

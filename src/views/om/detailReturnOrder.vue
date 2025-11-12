@@ -79,36 +79,56 @@
                     </div>
                 </div>
 
-                <div class="card">
-                    <div class="font-semibold text-xl border-b pb-2 mt-2">📦 Return Materials</div>
-                    <DataTable :value="returnOrderArray" class="text-sm" stripedRows>
-                        <Column field="salesdoclineitem" header="Line Item No." style="min-width: 6rem">
-                            <template #body="{ data, index }">
-                                <span class="text-lg">{{ index + 1 }}</span>
+                <div class="card flex flex-col w-full bg-white shadow-sm rounded-2xl border border-gray-100">
+                    <!-- Header -->
+                    <div class="font-semibold text-xl border-b pb-3 px-4 flex items-center gap-2 text-gray-800">📦 <span>Return Item</span></div>
+
+                    <!-- Table -->
+                    <DataTable :value="returnOrderArray" dataKey="materialid" class="rounded-table mt-4">
+                        <Column field="itemno" header="Item No">
+                            <template #body="{ data }">
+                                {{ formatItemNo(data.salesdoclineitem || data.itemno) }}
                             </template>
                         </Column>
-                        <Column field="materialid" header="Material ID" style="min-width: 8rem">
+
+                        <Column field="materialid" header="Material ID"></Column>
+
+                        <Column field="itemcategory" header="Item Category">
                             <template #body="{ data }">
-                                <span class="font-bold text-lg">{{ data.materialid || '-' }}</span>
+                                {{ data.itemcategory || 'ZR02' }}
                             </template>
                         </Column>
-                        <Column field="itemcategory" header="Item Category" style="min-width: 6rem">
+
+                        <Column field="qty" header="Quantity" class="text-right">
                             <template #body="{ data }">
-                                <span class="text-lg">{{ data.itemcategory || '-' }}</span>
+                                {{ parseInt(data.qty) || 0 }}
                             </template>
                         </Column>
-                        <Column field="qty" header="Qty" style="min-width: 4rem">
+
+                        <!-- 🟦 Unit Price Column -->
+                        <Column field="unitprice" header="Unit Price (RM)" class="text-right">
                             <template #body="{ data }">
-                                <span class="text-lg">{{ data.qty || '-' }}</span>
+                                {{ getItemPrice(data).toFixed(2) }}
+                            </template>
+
+                            <!-- ✅ Footer for label -->
+                            <template #footer>
+                                <div class="flex justify-start pr-2 font-bold text-gray-700">Subtotal</div>
                             </template>
                         </Column>
-                        <Column field="total" header="Total" style="min-width: 6rem">
+
+                        <!-- 🟦 Total Amount Column -->
+                        <Column field="totalamt" header="Total Amount (RM)" class="text-right">
                             <template #body="{ data }">
-                                <span class="text-lg">RM {{ data.unitprice || '-' }}</span>
+                                {{ calculateItemTotal(data).toFixed(2) }}
+                            </template>
+
+                            <!-- ✅ Footer for total value -->
+                            <template #footer>
+                                <div class="flex justify-start pr-3 font-semibold text-blue-600">{{ subtotal.toFixed(2) }}</div>
                             </template>
                         </Column>
                     </DataTable>
-                    <div class="mt-2 flex justify-end text-lg font-bold">Subtotal: RM {{ order.subtotal || '-' }}</div>
                 </div>
             </div>
 
@@ -181,7 +201,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue';
+import { ref, onMounted, watch } from 'vue';
 import { useRoute } from 'vue-router';
 import { useToast } from 'primevue/usetoast';
 import api from '@/service/api';
@@ -197,6 +217,7 @@ const returnOrderArray = ref([]);
 const loading = ref(true);
 const loadingAction = ref(null);
 const error = ref(null);
+const subtotal = ref(0);
 
 // ✅ Status mapping functions
 const getdeliveryOrderStatusText = (status) => {
@@ -205,7 +226,8 @@ const getdeliveryOrderStatusText = (status) => {
         APPROVED: 'Approved',
         REJECTED: 'Rejected',
         PENDING_COLLECTION: 'Pending Collection',
-        COMPLETED: 'Completed'
+        COMPLETED: 'Completed',
+        NEW: 'New'
     };
     return statusMap[status?.toUpperCase()] || ` ${status || '-'}`;
 };
@@ -250,6 +272,67 @@ const getActionStatusSeverity = (status) => {
     return severityMap[status] || 'secondary';
 };
 
+// Method to get item price - handle null prices by looking up from original order
+const getItemPrice = (item) => {
+    // If unitprice is provided in return item, use it
+    if (item.unitprice !== null && item.unitprice !== undefined) {
+        return Number(item.unitprice) || 0;
+    }
+
+    // Otherwise, try to find price from original order data
+    if (orderData.value.order_array) {
+        try {
+            const orderItems = typeof orderData.value.order_array === 'string' ? JSON.parse(orderData.value.order_array) : orderData.value.order_array;
+
+            const originalItem = orderItems.find((orderItem) => orderItem.materialid === item.materialid && orderItem.itemno === (item.salesdoclineitem || item.itemno));
+
+            if (originalItem && originalItem.price) {
+                return Number(originalItem.price) || 0;
+            }
+        } catch (error) {
+            console.error('Error parsing order array:', error);
+        }
+    }
+
+    return 0;
+};
+
+// Method to calculate item total
+const calculateItemTotal = (item) => {
+    const qty = parseInt(item.qty) || 0;
+    const price = getItemPrice(item);
+    return qty * price;
+};
+
+// Method to format item number
+const formatItemNo = (itemNo) => {
+    if (!itemNo) return '-';
+    return itemNo.toString().padStart(2, '0');
+};
+
+// Update subtotal when returnOrderArray changes
+const updateSubtotal = () => {
+    subtotal.value = returnOrderArray.value.reduce((sum, item) => {
+        return sum + calculateItemTotal(item);
+    }, 0);
+};
+
+// Watch for changes in returnOrderArray and update subtotal
+watch(
+    returnOrderArray,
+    () => {
+        updateSubtotal();
+    },
+    { deep: true }
+);
+
+// Also update when order data is loaded
+watch(orderData, () => {
+    if (returnOrderArray.value.length > 0) {
+        updateSubtotal();
+    }
+});
+
 // Toast helper
 const showToast = (severity, summary, detail) => {
     toast.add({
@@ -272,13 +355,9 @@ const fetchReturnOrderDetail = async () => {
             dealerShop.value = order.value.dealer?.dealer_shop || {};
             orderData.value = order.value.order_data || {};
             returnOrderArray.value = order.value.return_order_array || [];
-            order.value.subtotal = returnOrderArray.value
-                .reduce((sum, item) => {
-                    const qty = Number(item.qty) || 0;
-                    const price = Number(item.unitprice) || 0;
-                    return sum + qty * price;
-                }, 0)
-                .toFixed(2);
+
+            // Initialize subtotal
+            updateSubtotal();
         } else {
             error.value = 'No data found for this return order';
             showToast('error', 'Error', error.value);
@@ -323,7 +402,7 @@ const onRejectReturnOrder = async () => {
     try {
         loadingAction.value = 'reject';
         const formData = new FormData();
-        formData.append('status', '2'); // ✅ 2 = Rejected (previously used 9 incorrectly)
+        formData.append('status', '2'); // ✅ 2 = Rejected
 
         const response = await api.post(`order/update-return-order/${returnOrderNo}`, formData, {
             headers: { 'Content-Type': 'multipart/form-data' }
@@ -348,3 +427,44 @@ const onRejectReturnOrder = async () => {
 // Fetch initial data
 onMounted(() => fetchReturnOrderDetail());
 </script>
+
+<style scoped>
+:deep(.rounded-table) {
+    border-radius: 12px;
+    overflow: hidden;
+    border: 1px solid #e5e7eb;
+
+    .p-datatable-header {
+        border-top-left-radius: 12px;
+        border-top-right-radius: 12px;
+    }
+
+    .p-paginator-bottom {
+        border-bottom-left-radius: 12px;
+        border-bottom-right-radius: 12px;
+    }
+
+    .p-datatable-thead > tr > th {
+        &:first-child {
+            border-top-left-radius: 12px;
+        }
+        &:last-child {
+            border-top-right-radius: 12px;
+        }
+    }
+
+    .p-datatable-tbody > tr:last-child > td {
+        &:first-child {
+            border-bottom-left-radius: 0;
+        }
+        &:last-child {
+            border-bottom-right-radius: 0;
+        }
+    }
+
+    .p-datatable-tbody > tr.p-datatable-emptymessage > td {
+        border-bottom-left-radius: 12px;
+        border-bottom-right-radius: 12px;
+    }
+}
+</style>
