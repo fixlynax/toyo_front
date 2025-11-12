@@ -81,9 +81,9 @@ const fetchReturnOrders = async (tabStatus = 'PENDING') => {
                 reasonCode: returnOrder.reason_code || '-',
                 reasonMessage: returnOrder.reason_message || '-',
                 createdDate: returnOrder.created || '-',
-                orderStatus: returnOrder.orderstatus || '-',
+                orderStatus: returnOrder.orderstatus || '-'
                 // ctcDate: returnOrder.ctcDate || '-', // Add collection date from API
-                // recieve_date: returnOrder.delivery_information.receive_datetime || '-', 
+                // recieve_date: returnOrder.delivery_information.receive_datetime || '-',
                 // pickup: returnOrder.delivery_information.pickup_datetime || '-',
             }));
         } else {
@@ -146,6 +146,7 @@ onBeforeMount(() => {
                 :rowHover="true"
                 :filters="filters"
                 filterDisplay="menu"
+                sortField="createdDate"
                 :sortOrder="-1"
                 :globalFilterFields="['returnRequestNo', 'custAccountNo', 'customerName', 'reasonCode', 'orderStatus']"
                 class="rounded-table"
