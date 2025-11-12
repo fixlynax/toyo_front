@@ -82,7 +82,7 @@ const fetchReturnOrders = async (tabStatus = 'PENDING') => {
                 reasonMessage: returnOrder.reason_message || '-',
                 createdDate: returnOrder.created || '-',
                 orderStatus: returnOrder.orderstatus || '-',
-                ctcDate: returnOrder.ctcDate || '-', // Add collection date from API
+                // ctcDate: returnOrder.ctcDate || '-', // Add collection date from API
                 // recieve_date: returnOrder.delivery_information.receive_datetime || '-', 
                 // pickup: returnOrder.delivery_information.pickup_datetime || '-',
             }));
@@ -207,28 +207,28 @@ onBeforeMount(() => {
                 <!-- Reason Code Column -->
                 <Column field="reasonCode" header="Reason Code" style="min-width: 8rem">
                     <template #body="{ data }">
-                        {{ data.reasonCode || 'N/A' }}
+                        {{ data.reasonCode || '-' }}
                     </template>
                 </Column>
 
                 <!-- Reason Message Column -->
                 <Column field="reasonMessage" header="Reason Message" style="min-width: 10rem">
                     <template #body="{ data }">
-                        {{ data.reasonMessage || 'N/A' }}
+                        {{ data.reasonMessage || '-' }}
                     </template>
                 </Column>
 
                 <!-- Received Date Column - Only show for completed orders -->
-                <Column v-if="isPendingCTCTab" field="recieve_date" header="Pickup ETA" style="min-width: 8rem">
+                <Column v-if="isPendingCTCTab" field="recieve_date" header="Pickup Date" style="min-width: 8rem">
                     <template #body="{ data }">
-                        {{ formatDate(data.pickup) }}
+                        {{ formatDate(data.pickup) || '-' }}
                     </template>
                 </Column>
 
                 <!-- Received Date Column - Only show for completed orders -->
                 <Column v-if="isCompletedTab" field="recieve_date" header="Received Date" style="min-width: 8rem">
                     <template #body="{ data }">
-                        {{ formatDate(data.recieve_date) }}
+                        {{ formatDate(data.recieve_date) || '-' }}
                     </template>
                 </Column>
 

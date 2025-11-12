@@ -33,7 +33,7 @@
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm text-gray-700">
                         <div>
                             <span class="block text-sm font-bold text-black-700">Status</span>
-                             <Tag :value="getStatusLabel(returnList.orderstatus)" :severity="getStatusSeverity(returnList.orderstatus)" />
+                            <Tag :value="returnList.delivery_status" :severity="getStatusSeverity(returnList.delivery_status)" />
                         </div>
                         <div>
                             <span class="block text-sm font-bold text-black-700">Reason</span>
@@ -93,10 +93,82 @@
                         </div>
                     </div>
                 </div>
-            </div>
+                <div class="card flex flex-col w-full">
+                    <div class="flex items-center justify-between border-b pb-2">
+                        <div class="flex items-center gap-3">
+                            <div class="text-2xl font-bold text-gray-800">Order Details</div>
+                        </div>
+                    </div>
 
+                    <div class="mt-6 mb-4">
+                        <div>
+                            <span class="block text-sm font-bold text-black-700">Order No</span>
+                            <span class="text-lg font-medium">{{ returnList.order_data.order_no }}</span>
+                        </div>
+                    </div>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm text-gray-700">
+                        <div>
+                            <span class="block text-sm font-bold text-black-700">Inv No</span>
+                            <p class="font-medium text-lg">{{ returnList.order_data.inv_no }}</p>
+                        </div>
+                        <div>
+                            <span class="block text-sm font-bold text-black-700">Type</span>
+                            <p class="font-medium text-lg">{{ returnList.order_data.deliveryType }}</p>
+                        </div>
+                        <div>
+                            <span class="block text-sm font-bold text-black-700">Description</span>
+                            <p class="font-medium text-lg">{{ returnList.order_data.orderDesc }}</p>
+                        </div>
+                        <div>
+                            <span class="block text-sm font-bold text-black-700">Rating</span>
+                            <p class="font-medium text-lg">{{ returnList.order_data.orderReceiveRating }}</p>
+                        </div>
+                        <div>
+                            <span class="block text-sm font-bold text-black-700">Recieve Remarks</span>
+                            <p class="font-medium text-lg">{{ returnList.order_data.orderReceiveRemarks }}</p>
+                        </div>
+                         <div>
+                            <span class="block text-sm font-bold text-black-700">SO No</span>
+                            <p class="font-medium text-lg">{{ returnList.order_data.so_no }}</p>
+                        </div>
+                        <div>
+                            <span class="block text-sm font-bold text-black-700">Tax</span>
+                            <p class="font-medium text-lg">{{ returnList.order_data.tax }}</p>
+                        </div>
+                         <div>
+                            <span class="block text-sm font-bold text-black-700">Subtotal</span>
+                            <p class="font-medium text-lg">{{ returnList.order_data.subtotal }}</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
             <!-- RIGHT SIDE -->
             <div class="md:w-1/3 flex flex-col">
+                <!-- Dealer Information -->
+                <div class="card flex flex-col w-full">
+                    <div class="flex items-center justify-between border-b pb-2 mb-2">
+                        <div class="text-2xl font-bold text-gray-800">🏬 Delivery Information</div>
+                    </div>
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-sm text-left text-gray-700">
+                            <tbody>
+                                <tr class="border-b">
+                                    <td class="px-4 py-2 font-medium">Pickup Date</td>
+                                    <td class="px-4 py-2 text-right">{{ formatDate(returnList.delivery_information.pickup_datetime) }}</td>
+                                </tr>
+                                <tr class="border-b">
+                                    <td class="px-4 py-2 font-medium">Dealer Code</td>
+                                    <td class="px-4 py-2 text-right">{{ formatDate(returnList.delivery_information.receive_datetime) }}</td>
+                                </tr>
+                                <tr class="border-b">
+                                    <td class="px-4 py-2 font-medium">Status</td>
+                                    <td class="px-4 py-2 text-right">{{ returnList.delivery_status }}</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
                 <!-- Dealer Information -->
                 <div class="card flex flex-col w-full">
                     <div class="flex items-center justify-between border-b pb-2 mb-2">
@@ -173,21 +245,37 @@ import { ref, onMounted, computed } from 'vue';
 import Button from 'primevue/button';
 import api from '@/service/api';
 import { useRoute } from 'vue-router';
+import { useRouter } from 'vue-router';
 import { useToast } from 'primevue/usetoast';
 
 const toast = useToast();
 const exportLoading = ref(false);
 const importLoading = ref(false);
 const route = useRoute();
+const router = useRouter();
 const importInput = ref();
 const returnList = ref({
   dealer: {
     dealer_shop: {},
   },
   shiptoData: {},
+  delivery_information: {},
+  order_data: {},
 });
 const loading = ref(true);
-
+function formatDate(dateString) {
+  if (!dateString) return '';
+  const date = new Date(dateString);
+  return date.toLocaleString('en-MY', {
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+    hour: '2-digit',
+    minute: '2-digit',
+    second: '2-digit',
+    hour12: true
+  });
+  }
 const InitfetchData = async () => {
     try {
         loading.value = true;
@@ -209,45 +297,39 @@ const InitfetchData = async () => {
         loading.value = false;
     }
 };
-function getStatusLabel(status) {
-    switch (status) {
-        case 0:
-            return 'Pending';
-        case 1:
-            return 'Approve';
-        case 2:
-            return 'Rejected';
-        case 66:
-            return 'Processing';
-        case 77:
-            return 'Pending Collection';
-        case 9:
-            return 'Completed';
-        default:
-            return 'Unknown';
-    }
-}
+// function getStatusLabel(status) {
+//     switch (status) {
+//         case 0:
+//             return 'Pending';
+//         case 1:
+//             return 'Approve';
+//         case 2:
+//             return 'Rejected';
+//         case 66:
+//             return 'Processing';
+//         case 77:
+//             return 'Pending Collection';
+//         case 9:
+//             return 'Completed';
+//         default:
+//             return 'Unknown';
+//     }
+// }
 
 function getStatusSeverity(status) {
     switch (status) {
-        case 0:
+        case 'PENDING':
             return 'warn';
-        case 1:
+        case 'COMPLETED':
             return 'success';
-        case 2:
-            return 'error';
-        case 66:
+        case 'NEW':
             return 'info';
-        case 77:
-            return 'primary';
-        case 9:
-            return 'success';
         default:
             return 'secondary';
     }
 }
 const handleExport = async () => {
- const idexport = route.params.id;
+ const idexport = Number(route.params.id);
     try {
         exportLoading.value = true;
             const response = await api.postExtra(

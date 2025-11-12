@@ -33,7 +33,7 @@
                         </IconField>
                         <Button type="button" icon="pi pi-cog" class="p-button" />
                     </div>
-
+                    <Button type="button" label="Bulk Update" @click="fetchData"/>
                     <!-- Right: Create Customer Button -->
                     <RouterLink to="/om/createEten">
                         <Button type="button" label="Create" icon="pi pi-plus" />
@@ -86,7 +86,11 @@ import { onMounted, ref } from 'vue';
 import { FilterMatchMode } from '@primevue/core/api';
 import api from '@/service/api';
 import LoadingPage from '@/components/LoadingPage.vue';
+import { useRouter } from 'vue-router';
+import { useToast } from 'primevue/usetoast';
 
+const toast = useToast();
+const router = useRouter();
 const listData = ref([]);
 const loading = ref(true);
 
@@ -135,6 +139,25 @@ onMounted(async () => {
     }
 });
 
+const fetchData = async () => {
+
+    try {
+        loading.value = true;
+        const response = await api.get('bulkUpdCust');
+        if (response.data.status === 1) {
+        } else {
+            toast.add({ severity: 'error', summary: 'Error', detail: 'Failed to bulk update', life: 3000 });
+        }
+    } catch (error) {
+        console.error('Error fetching product list:', error);
+        toast.add({ severity: 'error', summary: 'Error', detail: 'Failed to bulk update', life: 3000 });
+    } finally {
+        loading.value = false;
+    //     setTimeout(() => {
+    //     router.go(0);
+    //   }, 1000);
+    }
+};
 const getOverallStatusSeverity = (status) => {
     return status === 1 ? 'success' : 'danger';
 };

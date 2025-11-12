@@ -1,8 +1,9 @@
 <template>
     <div class="card">
         <div class="text-2xl font-bold text-gray-800 border-b pb-2">Return Order List</div>
+        <TabMenu :model="statusTabs" v-model:activeIndex="activeTabIndex" class="mb-6" />
         <DataTable 
-            :value="returnList"
+            :value="filteredList"
             :paginator="true"
             :rows="10"
             :rowsPerPageOptions="[5, 10, 20]"
@@ -67,36 +68,46 @@
                     </div>
                 </template>
             </Column>
-             <Column field="deliveryDate" header="Ref No" dataType="date" style="min-width: 8rem">
+             <Column field="return_orderNo_ref" header="Ref No" dataType="date" style="min-width: 8rem">
                 <template #body="{ data }">
                     <RouterLink :to="`/scm/detailReturnOrder/${data.id}`" class="hover:underline font-bold text-primary-400">
                     {{ data.return_orderNo_ref }}
                     </RouterLink>
                 </template>
             </Column>
-            <Column field="deliveryDate" header="Dealer Name" dataType="date" style="min-width: 8rem">
+            <Column field="dealerName" header="Dealer Name" dataType="date" style="min-width: 8rem">
                 <template #body="{ data }">
-                    {{ data.return_orderNo_ref }}
+                    {{ data.dealerName }}
                 </template>
             </Column>
-            <Column field="returnRequestNo" header="Customer Acc No" style="min-width: 10rem">
+            <Column field="custAccountNo" header="Customer Acc No" style="min-width: 10rem">
                 <template #body="{ data }">
                     {{ data.custAccountNo }}
                 </template>
             </Column>
-            <Column field="deliveryDate" header="Company Name" dataType="date" style="min-width: 8rem">
+            <Column field="companyName1" header="Company Name" dataType="date" style="min-width: 8rem">
                 <template #body="{ data }">
                     {{ `${data.companyName1} ${data.companyName2} ${data.companyName3} ${data.companyName4}` }}
                 </template>
             </Column>
-            <Column field="size" header="Return Items" style="min-width: 12rem">
+            <Column field="created" header="Pickup Date" style="min-width: 10rem">
+                <template #body="{ data }">
+                    {{ data.delivery_information.pickup_datetime ? formatDate(data.delivery_information.pickup_datetime) : 'No date assigned' }}
+                </template>
+            </Column>
+            <Column field="created" header="Receiving Date" style="min-width: 10rem">
+                <template #body="{ data }">
+                    {{ data.delivery_information.receive_datetime ? formatDate(data.delivery_information.receive_datetime) : 'No date assigned' }}
+                </template>
+            </Column>
+            <Column field="length" header="Return Items" style="min-width: 12rem">
                 <template #body="{ data }">
                         {{ data.return_order_array.length }}
                 </template>
             </Column>
             <Column header="Status" style="min-width: 8rem">
                 <template #body="{ data }">
-                    <Tag :value="getStatusLabel(data.orderstatus)" :severity="getStatusSeverity(data.orderstatus)" />
+                    <Tag :value="data.delivery_status" :severity="getStatusSeverity(data.delivery_status)" />
                 </template>
             </Column>
         </DataTable>
@@ -104,7 +115,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted, computed, onBeforeMount } from 'vue';
+import { ref, onMounted, computed, onBeforeMount, watch } from 'vue';
 import { ListReturnOrderService } from '@/service/listReturnOrder';
 import { FilterMatchMode } from '@primevue/core/api';
 import DataTable from 'primevue/datatable';
@@ -120,10 +131,11 @@ const toast = useToast();
 const exportLoading = ref(false);
 const importLoading = ref(false);
 const returnList = ref([]);
+const filteredList = ref([]);
 const loading = ref(true);
 const importInput = ref();
 const selectedExportIds = ref(new Set());
-
+const activeTabIndex = ref(0);
 // Filters for quick search
 const filters = ref({
     global: { value: null, matchMode: FilterMatchMode.CONTAINS }
@@ -159,12 +171,31 @@ const sortItems = ref([
     }
 ]);
 
-const statusOptions = [
-    { label: 'Pending', value: 0 },
-    { label: 'Completed', value: 1 },
-    { label: 'Processing', value: 66 },
-    { label: 'Delivery', value: 77 }
+// const statusOptions = [
+//     { label: 'Pending', value: 0 },
+//     { label: 'Completed', value: 1 },
+//     { label: 'Processing', value: 66 },
+//     { label: 'Delivery', value: 77 }
+// ];
+
+const statusTabs = [
+    { label: 'New', status: 0 },
+    { label: 'Pending', status: 1 },
+    { label: 'Completed', status: 2 }
 ];
+
+watch(activeTabIndex, () => {
+    filterByTab();
+});
+
+const filterByTab = () => {
+    const selected = statusTabs[activeTabIndex.value];
+    if (!selected) {
+        filteredList.value = returnList.value;
+        return;
+    }
+    filteredList.value = returnList.value.filter((item) => item.delivery_status?.toUpperCase() === selected.label.toUpperCase());
+};
 
 // Computed boolean: are all rows selected?
 const allSelected = computed(() => {
@@ -290,14 +321,17 @@ const fetchData = async () => {
         console.log('API Response:', response.data);
         if (response.data.status === 1 && Array.isArray(response.data.admin_data)) {
             returnList.value = response.data.admin_data;
+            filterByTab();
         } else {
             console.error('API returned error or invalid data:', response.data);
             returnList.value = [];
+            filteredList.value = [];
             toast.add({ severity: 'error', summary: 'Error', detail: 'Failed to load data', life: 3000 });
         }
     } catch (error) {
         console.error('Error fetching product list:', error);
         returnList.value = [];
+        filteredList.value = [];
         toast.add({ severity: 'error', summary: 'Error', detail: 'Failed to load data', life: 3000 });
     } finally {
         loading.value = false;
@@ -307,43 +341,46 @@ onMounted(() => {
     fetchData();
 });
 function formatDate(dateString) {
-    if (!dateString) return '';
-    return new Date(dateString).toLocaleDateString();
+  if (!dateString) return '';
+  const date = new Date(dateString);
+  return date.toLocaleString('en-MY', {
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+    hour: '2-digit',
+    minute: '2-digit',
+    second: '2-digit',
+    hour12: true
+  });
 }
 
-function getStatusLabel(status) {
-    switch (status) {
-        case 0:
-            return 'Pending';
-        case 1:
-            return 'Approve';
-        case 2:
-            return 'Rejected';
-        case 66:
-            return 'Processing';
-        case 77:
-            return 'Pending Collection';
-        case 9:
-            return 'Completed';
-        default:
-            return 'Unknown';
-    }
-}
+// function getStatusLabel(status) {
+//     switch (status) {
+//         case 0:
+//             return 'Pending';
+//         case 1:
+//             return 'Approve';
+//         case 2:
+//             return 'Rejected';
+//         case 66:
+//             return 'Processing';
+//         case 77:
+//             return 'Pending Collection';
+//         case 9:
+//             return 'Completed';
+//         default:
+//             return 'Unknown';
+//     }
+// }
 
 function getStatusSeverity(status) {
     switch (status) {
-        case 0:
+        case 'PENDING':
             return 'warn';
-        case 1:
+        case 'COMPLETED':
             return 'success';
-        case 2:
-            return 'error';
-        case 66:
+        case 'NEW':
             return 'info';
-        case 77:
-            return 'primary';
-        case 9:
-            return 'success';
         default:
             return 'secondary';
     }
