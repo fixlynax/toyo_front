@@ -33,7 +33,7 @@
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm text-gray-700">
                         <div>
                             <span class="block text-sm font-bold text-black-700">Status</span>
-                             <Tag :value="getStatusLabel(returnList.orderstatus)" :severity="getStatusSeverity(returnList.orderstatus)" />
+                            <Tag :value="returnList.delivery_status" :severity="getStatusSeverity(returnList.delivery_status)" />
                         </div>
                         <div>
                             <span class="block text-sm font-bold text-black-700">Reason</span>
@@ -297,39 +297,33 @@ const InitfetchData = async () => {
         loading.value = false;
     }
 };
-function getStatusLabel(status) {
-    switch (status) {
-        case 0:
-            return 'Pending';
-        case 1:
-            return 'Approve';
-        case 2:
-            return 'Rejected';
-        case 66:
-            return 'Processing';
-        case 77:
-            return 'Pending Collection';
-        case 9:
-            return 'Completed';
-        default:
-            return 'Unknown';
-    }
-}
+// function getStatusLabel(status) {
+//     switch (status) {
+//         case 0:
+//             return 'Pending';
+//         case 1:
+//             return 'Approve';
+//         case 2:
+//             return 'Rejected';
+//         case 66:
+//             return 'Processing';
+//         case 77:
+//             return 'Pending Collection';
+//         case 9:
+//             return 'Completed';
+//         default:
+//             return 'Unknown';
+//     }
+// }
 
 function getStatusSeverity(status) {
     switch (status) {
-        case 0:
+        case 'PENDING':
             return 'warn';
-        case 1:
+        case 'COMPLETED':
             return 'success';
-        case 2:
-            return 'error';
-        case 66:
+        case 'NEW':
             return 'info';
-        case 77:
-            return 'primary';
-        case 9:
-            return 'success';
         default:
             return 'secondary';
     }
