@@ -223,9 +223,10 @@ const router = createRouter({
                     component: () => import('@/views/om/createSalesProgramVersion2.vue')
                 },
                 {
-                    path: '/om/editSalesProgram',
+                    path: '/om/editSalesProgram/:id',
                     name: 'Edit-Sales-Program',
-                    component: () => import('@/views/om/editSalesProgram.vue')
+                    component: () => import('@/views/om/editSalesProgram.vue'),
+                    props: true
                 },
 
                 // Maintenance

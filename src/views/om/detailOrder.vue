@@ -93,7 +93,7 @@
                         <Column field="materialid" header="Material ID"></Column>
                         <Column field="itemcategory" header="Item Category">
                             <template #body="{ data }">
-                                {{ data.itemcategory || 'ZRO2' }}
+                                {{ data.itemcategory || 'ZR02' }}
                             </template>
                         </Column>
                         <Column field="qty" header="Available Qty">
@@ -383,7 +383,7 @@ const submitReturnOrder = async () => {
                 materialid: item.materialid,
                 itemcategory: item.itemcategory || 'ZRO2',
                 qty: returnQuantities.value[item.materialid].toString(),
-                salesdoclineitem: ((index + 1) * 10).toString(),
+                salesdoclineitem: item.itemno,
                 plant: "TSM"
             }));
 
