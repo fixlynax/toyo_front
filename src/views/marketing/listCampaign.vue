@@ -56,7 +56,7 @@
 
                 <Column field="campaignNo" header="Campaign No" style="min-width: 8rem">
                     <template #body="{ data }">
-                        <RouterLink :to="`/marketing/detailCampaign/${data.id}`" class="hover:underline font-bold">
+                        <RouterLink :to="`/marketing/detailCampaign/${data.id}`" class="hover:underline font-bold text-primary-400">
                             {{ data.campaignNo }}
                         </RouterLink>
                     </template>

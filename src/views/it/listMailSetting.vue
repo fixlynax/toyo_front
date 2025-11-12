@@ -26,9 +26,9 @@
             <Column :expander="true" headerStyle="width: 3rem" />
 
             <!-- Function Column -->
-            <Column field="function" header="Function" style="min-width: 10rem">
+            <Column field="function" header="Function" style="min-width: 10rem" class="font-bold " >
                 <template #body="{ data }">
-                    <div class="font-semibold text-gray-800">
+                    <div class="font-bold text-primary-400">
                         {{ data.function }}
                     </div>
                 </template>

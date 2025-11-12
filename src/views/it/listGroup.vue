@@ -45,7 +45,7 @@
             <!-- ========================= -->
             <!-- Data Columns -->
             <!-- ========================= -->
-            <Column field="usergroup" header="User Group" style="min-width: 20rem">
+            <Column field="usergroup" header="User Group" style="min-width: 20rem" class="font-bold text-primary-400">
                 <template #body="{ data }">
                     <span class="font-bold">{{ data.usergroup }}</span>
                 </template>

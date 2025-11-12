@@ -59,7 +59,7 @@
                         <div class="text-lg font-semibold text-gray-800 truncate">
                             {{ item.title }}
                         </div>
-                        <div class="text-ml font-bold text-gray-600 truncate">
+                        <div class="text-ml font-bold text-primary-400 truncate">
                             {{ item.purpose }}
                         </div>
 

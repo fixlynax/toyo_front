@@ -54,7 +54,7 @@
 
                 <Column field="title" header="Title" style="min-width: 8rem">
                     <template #body="{ data }">
-                        <RouterLink :to="`/marketing/detailEvent/${data.id}`" class="hover:underline font-bold">
+                        <RouterLink :to="`/marketing/detailEvent/${data.id}`" class="hover:underline font-bold text-primary-400">
                             {{ data.title }}
                         </RouterLink>
                     </template>

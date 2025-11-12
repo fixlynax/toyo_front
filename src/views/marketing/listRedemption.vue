@@ -55,7 +55,7 @@
 
                 <Column field="refno" header="Ref No" sortable style="min-width: 8rem">
                     <template #body="{ data }">
-                        <RouterLink :to="`/marketing/detailRedemption/${data.id}`" class="hover:underline font-bold">
+                        <RouterLink :to="`/marketing/detailRedemption/${data.id}`" class="hover:underline font-bold text-primary-400">
                             {{ data.refno }}
                         </RouterLink>
                     </template>

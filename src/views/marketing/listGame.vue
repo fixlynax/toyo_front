@@ -53,7 +53,7 @@
 
                 <Column field="gameNo" header="Game No" style="min-width: 6rem">
                     <template #body="{ data }">
-                        <RouterLink :to="`/marketing/detailGame/${data.id}`" class="hover:underline font-bold">
+                        <RouterLink :to="`/marketing/detailGame/${data.id}`" class="hover:underline font-bold text-primary-400">
                             {{ data.gameNo }}
                         </RouterLink>
                     </template>
