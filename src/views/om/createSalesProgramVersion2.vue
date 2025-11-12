@@ -1,4 +1,4 @@
-<template>
+<!-- <template>
     <Fluid>
         <div class="flex flex-col md:flex-row gap-8">
             <div class="card flex flex-col gap-6 w-full">
@@ -644,4 +644,4 @@ onMounted(() => {
     loadBuyPatterns();
     loadFreeMaterials();
 });
-</script>
+</script> -->
