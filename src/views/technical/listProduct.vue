@@ -108,7 +108,7 @@
             <Column field="materialid" header="Material ID" style="min-width: 6rem">
                 <template #body="{ data }">
                     <div class="flex flex-col items-start gap-1">
-                        <RouterLink :to="`/technical/detailProduct/${data.id}`" class="hover:underline font-bold">
+                        <RouterLink :to="`/technical/detailProduct/${data.id}`" class="hover:underline font-bold text-primary-400">
                             {{ data.materialid }}
                         </RouterLink>
                     </div>

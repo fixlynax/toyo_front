@@ -94,7 +94,7 @@ onBeforeMount(async () => {
             <!-- Columns -->
             <Column field="appointmentCode" header="Appointment Code" style="min-width: 12rem">
                 <template #body="{ data }">
-                    <RouterLink :to="`/technical/detailAppointment/${data.id}`" class="hover:underline font-bold text-blue-600">
+                    <RouterLink :to="`/technical/detailAppointment/${data.id}`" class="hover:underline font-bold text-primary-400">
                         {{ data.appointmentCode }}
                     </RouterLink>
                 </template>

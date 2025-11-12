@@ -30,8 +30,8 @@
                             <Menu ref="sortMenu" :model="sortItems" :popup="true" />
                         </div>
                         <div class="flex justify-end gap-2">
-                            <Button type="button" label="Export" icon="pi pi-download" class="p-button-success" :loading="exportLoading" @click="handleExport"/>
-                            <Button type="button" label="Bulk Import" icon="pi pi-upload" @click="importInput?.click()":loading="importLoading" />
+                            <Button type="button" label="Export" icon="pi pi-file-export" class="p-button-success" :loading="exportLoading" @click="handleExport"/>
+                            <Button type="button" label="Bulk Import" icon="pi pi-file-import" @click="importInput?.click()":loading="importLoading" />
                             <input 
                             ref="importInput"
                             type="file" 
@@ -77,17 +77,17 @@
             </Column>
             <Column field="dealerName" header="Dealer Name" dataType="date" style="min-width: 8rem">
                 <template #body="{ data }">
-                    {{ data.dealerName }}
+                    {{ data?.dealerName || '-' }}
                 </template>
             </Column>
             <Column field="custAccountNo" header="Customer Acc No" style="min-width: 10rem">
                 <template #body="{ data }">
-                    {{ data.custAccountNo }}
+                    {{ data?.custAccountNo || '-' }}
                 </template>
             </Column>
             <Column field="companyName1" header="Company Name" dataType="date" style="min-width: 8rem">
                 <template #body="{ data }">
-                    {{ `${data.companyName1} ${data.companyName2} ${data.companyName3} ${data.companyName4}` }}
+                    {{ `${data?.companyName1 || ''} ${data?.companyName2 || ''} ${data?.companyName3 || ''} ${data?.companyName4 || ''}` }}
                 </template>
             </Column>
             <Column field="created" header="Pickup Date" style="min-width: 10rem">

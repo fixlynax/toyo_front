@@ -20,6 +20,8 @@
             :globalFilterFields="['custAccountNo', 'customerName', 'deliveryDate', 'expiry', 'orderStatus']"
             responsiveLayout="scroll"
             stripedRows
+            sortField="created"
+            :sortOrder="-1"
             class="rounded-table"
         >
             <template #header>

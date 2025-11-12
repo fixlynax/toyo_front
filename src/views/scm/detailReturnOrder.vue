@@ -37,15 +37,39 @@
                         </div>
                         <div>
                             <span class="block text-sm font-bold text-black-700">Reason</span>
-                            <p class="font-medium text-lg">{{ `${returnList.reason_code} ${returnList.reason_message}` }}</p>
+                            <p class="font-medium text-lg">{{ `(${returnList.reason_code}) ${returnList.reason_message}` }}</p>
                         </div>
                         <div>
                             <span class="block text-sm font-bold text-black-700">SAP (Created)</span>
                             <p class="font-medium text-lg">{{ returnList.sap_timestamp }}</p>
                         </div>
                     </div>
+                    <div class="mt-6 mb-4">
+                        <DataTable 
+                            :value="returnList.return_order_array"
+                            :rows="10"
+                            dataKey=""
+                            :rowHover="true">
+
+                            <Column field="materialid" header="Material ID" style="min-width: 10rem">
+                                <template #body="{ data }">
+                                    {{ data?.materialid || '-' }}
+                                </template>
+                            </Column>
+                            <Column field="itemcategory" header="Category" style="min-width: 12rem">
+                                <template #body="{ data }">
+                                        {{ data.itemcategory }}
+                                </template>
+                            </Column>
+                            <Column field="plant" header="Plant" style="min-width: 8rem">
+                                <template #body="{ data }">
+                                        {{ data.plant }}
+                                </template>
+                            </Column>
+                        </DataTable>
+                    </div>
                 </div>
-                <div class="card flex flex-col w-full">
+                <!-- <div class="card flex flex-col w-full">
                     <div class="flex items-center justify-between border-b pb-2">
                         <div class="flex items-center gap-3">
                             <div class="text-2xl font-bold text-gray-800">Dealer Shop Details</div>
@@ -92,7 +116,7 @@
                             <p class="font-medium text-lg">{{ returnList.dealer.dealer_shop.phoneNumber }}</p>
                         </div>
                     </div>
-                </div>
+                </div> -->
                 <div class="card flex flex-col w-full">
                     <div class="flex items-center justify-between border-b pb-2">
                         <div class="flex items-center gap-3">
@@ -148,31 +172,7 @@
                 <!-- Dealer Information -->
                 <div class="card flex flex-col w-full">
                     <div class="flex items-center justify-between border-b pb-2 mb-2">
-                        <div class="text-2xl font-bold text-gray-800">🏬 Delivery Information</div>
-                    </div>
-                    <div class="overflow-x-auto">
-                        <table class="w-full text-sm text-left text-gray-700">
-                            <tbody>
-                                <tr class="border-b">
-                                    <td class="px-4 py-2 font-medium">Pickup Date</td>
-                                    <td class="px-4 py-2 text-right">{{ formatDate(returnList.delivery_information.pickup_datetime) }}</td>
-                                </tr>
-                                <tr class="border-b">
-                                    <td class="px-4 py-2 font-medium">Dealer Code</td>
-                                    <td class="px-4 py-2 text-right">{{ formatDate(returnList.delivery_information.receive_datetime) }}</td>
-                                </tr>
-                                <tr class="border-b">
-                                    <td class="px-4 py-2 font-medium">Status</td>
-                                    <td class="px-4 py-2 text-right">{{ returnList.delivery_status }}</td>
-                                </tr>
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-                <!-- Dealer Information -->
-                <div class="card flex flex-col w-full">
-                    <div class="flex items-center justify-between border-b pb-2 mb-2">
-                        <div class="text-2xl font-bold text-gray-800">🏬 Dealer Information</div>
+                        <div class="text-2xl font-bold text-gray-800">Dealer Information</div>
                     </div>
                     <div class="overflow-x-auto">
                         <table class="w-full text-sm text-left text-gray-700">
@@ -201,14 +201,26 @@
                 <!-- Shipping Information -->
                 <div class="card flex flex-col w-full">
                     <div class="flex items-center justify-between border-b pb-2 mb-2">
-                        <div class="text-2xl font-bold text-gray-800"> Shipping Information</div>
+                        <div class="text-2xl font-bold text-gray-800">Shipping Information</div>
                     </div>
                     <div class="overflow-x-auto">
                         <table class="w-full text-sm text-left text-gray-700">
                             <tbody>
                                 <tr class="border-b">
+                                    <td class="px-4 py-2 font-medium">Pickup Date</td>
+                                    <td class="px-4 py-2 text-right">{{ returnList.delivery_information.pickup_datetime ? formatDate(returnList.delivery_information.pickup_datetime) : 'No date assigned' }}</td>
+                                </tr>
+                                <tr class="border-b">
+                                    <td class="px-4 py-2 font-medium">Delivery Date</td>
+                                    <td class="px-4 py-2 text-right">{{ returnList.delivery_information.receive_datetime ? formatDate(returnList.delivery_information.receive_datetime) : 'No date assigned' }}</td>
+                                </tr>
+                                <tr class="border-b">
+                                    <td class="px-4 py-2 font-medium">Status</td>
+                                    <td class="px-4 py-2 text-right">{{ returnList.delivery_status }}</td>
+                                </tr>
+                                <tr class="border-b">
                                     <td class="px-4 py-2 font-medium">Customer Account No</td>
-                                    <td class="px-4 py-2 text-right">{{ returnList.shiptoData.custAccountNo }}</td>
+                                    <td class="px-4 py-2 text-right">{{ returnList.shiptoData?.custAccountNo  || '' }}</td>
                                 </tr>
                                 <tr class="border-b">
                                     <td class="px-4 py-2 font-medium">Company Name</td>
@@ -217,7 +229,7 @@
                                 </tr>
                                 <tr>
                                     <td class="px-4 py-2 font-medium">Address</td>
-                                    <td class="px-4 py-2 text-right">{{ `${returnList.shiptoData.addressLine1} ${returnList.shiptoData.addressLine2} ${returnList.shiptoData.addressLine3} ${returnList.shiptoData.addressLine4}` }}</td>
+                                    <td class="px-4 py-2 text-right">{{ `${returnList.shiptoData?.addressLine1} ${returnList.shiptoData.addressLine2} ${returnList.shiptoData.addressLine3} ${returnList.shiptoData.addressLine4}` }}</td>
                                 </tr>
                                 <tr class="border-b">
                                     <td class="px-4 py-2 font-medium">City</td>
@@ -241,12 +253,11 @@
 </template>
 
 <script setup>
-import { ref, onMounted, computed } from 'vue';
-import Button from 'primevue/button';
 import api from '@/service/api';
-import { useRoute } from 'vue-router';
-import { useRouter } from 'vue-router';
+import Button from 'primevue/button';
 import { useToast } from 'primevue/usetoast';
+import { onMounted, ref } from 'vue';
+import { useRoute, useRouter } from 'vue-router';
 
 const toast = useToast();
 const exportLoading = ref(false);

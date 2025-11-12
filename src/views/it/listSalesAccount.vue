@@ -30,7 +30,7 @@
             <template #loading> Loading sales accounts. Please wait. </template>
 
             <!-- Columns -->
-            <Column field="Name" class="font-bold" header="Name" style="min-width: 10rem" />
+            <Column field="Name" class="font-bold text-primary-400" header="Name" style="min-width: 10rem" />
             <Column field="title" header="Title" style="min-width: 8rem" />
             <Column field="mobile" header="Mobile No" style="min-width: 10rem" />
             <Column field="email" header="Email" style="min-width: 12rem" />

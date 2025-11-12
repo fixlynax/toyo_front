@@ -56,7 +56,7 @@
 
                 <Column field="etenUserID" header="Mem Code" style="min-width: 8rem">
                     <template #body="{ data }">
-                        <RouterLink :to="`/marketing/detailEtenUser/${data.id}`" class="hover:underline font-bold">
+                        <RouterLink :to="`/marketing/detailEtenUser/${data.id}`" class="hover:underline font-bold text-primary-400">
                             {{ data.etenUserID }}
                         </RouterLink>
                     </template>
