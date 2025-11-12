@@ -37,13 +37,12 @@
                         </div>
 
                         <!-- Content -->
+                        <!-- In your template, update the image section -->
                         <div v-else class="grid grid-cols-1 gap-4 mt-4">
-                            <img 
-                                :src="salesProgram.imageUrl" 
-                                :alt="salesProgram.title"
-                                class="rounded-xl shadow-sm object-cover w-full h-80"
-                                @error="handleImageError"
-                            />
+                            <img :src="salesProgram.imageUrl" :alt="salesProgram.title" class="rounded-xl shadow-sm object-cover w-full h-80" @error="handleImageError" v-if="salesProgram.imageUrl" />
+                            <div v-else class="rounded-xl shadow-sm w-full h-80 bg-gray-200 flex items-center justify-center">
+                                <i class="pi pi-image text-4xl text-gray-400"></i>
+                            </div>
                         </div>
 
                         <div v-if="!loading && !error" class="mt-6">
@@ -69,10 +68,7 @@
                     <div class="card flex flex-col w-full">
                         <div class="flex items-center justify-between border-b pb-2 mb-2">
                             <div class="text-2xl font-bold text-black-800">ℹ️ Advance Info</div>
-                            <Tag 
-                                :value="salesProgram.status === 1 ? 'Active' : 'Inactive'" 
-                                :severity="salesProgram.status === 1 ? 'success' : 'danger'" 
-                            />
+                            <Tag :value="salesProgram.status === 1 ? 'Active' : 'Inactive'" :severity="salesProgram.status === 1 ? 'success' : 'danger'" />
                         </div>
 
                         <div v-if="!loading && !error" class="overflow-x-auto">
@@ -120,17 +116,12 @@
                     <div class="flex items-center gap-3">
                         <div class="text-right">
                             <div class="text-sm font-medium text-black-600">Program Status</div>
-                            <Tag 
-                                :value="salesProgram.status === 1 ? 'Active' : 'Inactive'" 
-                                :severity="salesProgram.status === 1 ? 'success' : 'danger'"
-                                class="font-semibold"
-                            />
+                            <Tag :value="salesProgram.status === 1 ? 'Active' : 'Inactive'" :severity="salesProgram.status === 1 ? 'success' : 'danger'" class="font-semibold" />
                         </div>
                     </div>
                 </div>
 
                 <!-- Promotion Summary Card -->
-                
 
                 <!-- Free Material Information -->
                 <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
@@ -185,8 +176,7 @@
                                 </div>
                             </div>
                             <p class="text-sm text-black-600">
-                                For every <span class="font-semibold text-blue-600">{{ salesProgram.buyQty }}</span> items purchased, 
-                                get <span class="font-semibold text-green-600">{{ salesProgram.freeQty }}</span> items free
+                                For every <span class="font-semibold text-blue-600">{{ salesProgram.buyQty }}</span> items purchased, get <span class="font-semibold text-green-600">{{ salesProgram.freeQty }}</span> items free
                             </p>
                         </div>
                     </div>
@@ -203,11 +193,7 @@
                     </div>
 
                     <div v-if="criteriaList.length" class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
-                        <div 
-                            v-for="(criteria, criteriaIndex) in criteriaList" 
-                            :key="criteria.id" 
-                            class="border border-black-200 rounded-xl p-5 bg-white shadow-sm hover:shadow-md transition-all duration-300 hover:border-blue-300"
-                        >
+                        <div v-for="(criteria, criteriaIndex) in criteriaList" :key="criteria.id" class="border border-black-200 rounded-xl p-5 bg-white shadow-sm hover:shadow-md transition-all duration-300 hover:border-blue-300">
                             <div class="flex items-start justify-between mb-4">
                                 <div class="flex items-center gap-3">
                                     <div>
@@ -215,11 +201,7 @@
                                     </div>
                                 </div>
                                 <div class="flex flex-col items-end gap-1">
-                                    <Tag 
-                                        :value="criteria.status === 1 ? 'Active' : 'Inactive'" 
-                                        :severity="criteria.status === 1 ? 'success' : 'danger'"
-                                        class="text-xs"
-                                    />
+                                    <Tag :value="criteria.status === 1 ? 'Active' : 'Inactive'" :severity="criteria.status === 1 ? 'success' : 'danger'" class="text-xs" />
                                 </div>
                             </div>
 
@@ -250,9 +232,7 @@
                     <div v-else class="text-center py-12 border-2 border-dashed border-black-300 rounded-xl bg-black-50">
                         <i class="pi pi-inbox text-5xl text-black-300 mb-4"></i>
                         <p class="text-lg font-medium text-black-500 mb-2">No Criteria Patterns</p>
-                        <p class="text-sm text-black-400 max-w-md mx-auto">
-                            No tire patterns have been added to this promotion yet. Add patterns to define which tires qualify for this FOC offer.
-                        </p>
+                        <p class="text-sm text-black-400 max-w-md mx-auto">No tire patterns have been added to this promotion yet. Add patterns to define which tires qualify for this FOC offer.</p>
                     </div>
                 </div>
             </div>
@@ -278,20 +258,32 @@ const criteriaList = ref([]);
 
 // Process private images using the API method
 const processPrivateImages = async () => {
-    const imageFields = ['imageUrl'];
+    const imageFields = ['imageUrl']; // This should be an array
 
     for (const field of imageFields) {
         if (salesProgram.value[field] && typeof salesProgram.value[field] === 'string') {
             try {
+                // Check if it's already a valid URL (like fallback image)
+                if (salesProgram.value[field].startsWith('http') || salesProgram.value[field].startsWith('/')) {
+                    // It's already a URL, no need to process
+                    continue;
+                }
+
                 const blobUrl = await api.getPrivateFile(salesProgram.value[field]);
                 if (blobUrl) {
-                    salesProgram.value.imageUrl = blobUrl;
+                    salesProgram.value[field] = blobUrl; // Use the field variable dynamically
+                } else {
+                    // If private file fetch fails, use fallback
+                    salesProgram.value[field] = '/demo/images/event-toyo-2.jpg';
                 }
             } catch (error) {
                 console.error(`Error loading image ${field}:`, error);
                 // Fallback to default image
-                salesProgram.value.imageUrl = '/demo/images/event-toyo-2.jpg';
+                salesProgram.value[field] = '/demo/images/event-toyo-2.jpg';
             }
+        } else if (!salesProgram.value[field]) {
+            // If no image URL is provided, use fallback
+            salesProgram.value[field] = '/demo/images/event-toyo-2.jpg';
         }
     }
 };
@@ -299,10 +291,10 @@ const processPrivateImages = async () => {
 const fetchSalesProgram = async () => {
     loading.value = true;
     error.value = false;
-    
+
     try {
         const response = await api.get(`sales-program/detail-sales-program/${programId.value}`);
-        
+
         if (response.data.status === 1 && response.data.admin_data.length > 0) {
             const programData = response.data.admin_data[0];
             salesProgram.value = programData;

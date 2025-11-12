@@ -77,6 +77,7 @@ export default {
         return apiClient.get(`/api/${endpoint}`);
     },
 
+    // GET request with options
     getDownload(endpoint, options = {}) {
         return apiClient.get(`/api/${endpoint}`,options);
     },
