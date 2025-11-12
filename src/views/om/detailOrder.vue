@@ -129,6 +129,10 @@
                         <table class="w-full text-sm text-left text-gray-700">
                             <tbody>
                                 <tr class="border-b">
+                                    <td class="px-4 py-2 font-medium">Order No.</td>
+                                    <td class="px-4 py-2 text-right font-semibold">{{ orderData.order_no || '-' }}</td>
+                                </tr>
+                                <tr class="border-b">
                                     <td class="px-4 py-2 font-medium">Price Group</td>
                                     <td class="px-4 py-2 text-right font-semibold">{{ orderData.pricegroup || '-' }}</td>
                                 </tr>
@@ -181,7 +185,7 @@
                                 </tr>
                                 <tr class="border-b">
                                     <td class="px-4 py-2 font-medium">Last Updated</td>
-                                    <td class="px-4 py-2 text-right font-semibold">{{ formatDateTime(orderData.updated_at) }}</td>
+                                    <td class="px-4 py-2 text-right font-semibold">{{ formatDateTime(orderData.accountLastUpdate) }}</td>
                                 </tr>
                             </tbody>
                         </table>
@@ -305,17 +309,17 @@ const fetchOrderDetail = async () => {
         const orderNo = route.params.orderNo;
         const response = await api.get(`order/detail-order/${orderNo}`);
 
-        if (response.data.status === 1) {
+        if (response.data.status === 1 && response.data.admin_data.length > 0) {
             const data = response.data.admin_data[0];
             orderData.value = data;
 
-            // Extract order items from order_array and merge with fullfill_order_array
-            if (data.order_array && Array.isArray(data.order_array)) {
+            // ✅ Order Items (combine order_array + fullfill_order_array)
+            if (Array.isArray(data.order_array)) {
                 const orderArray = data.order_array;
                 const fullfillArray = data.fullfill_order_array || [];
 
                 orderItems.value = orderArray.map((orderItem) => {
-                    const fullfillItem = fullfillArray.find((fItem) => fItem.materialid === orderItem.materialid) || {};
+                    const fullfillItem = fullfillArray.find((fItem) => fItem.itemno === orderItem.itemno?.toString().padStart(6, '0')) || {};
                     return {
                         materialid: orderItem.materialid,
                         itemcategory: orderItem.itemcategory || 'ZRO2',
@@ -325,29 +329,38 @@ const fetchOrderDetail = async () => {
                         itemno: orderItem.itemno || fullfillItem.itemno
                     };
                 });
+            } else {
+                orderItems.value = [];
             }
 
-            // Extract shipping details
-            if (data.shippingDetail && data.shippingDetail.length > 0) {
+            // ✅ Shipping Detail
+            if (Array.isArray(data.shippingDetail) && data.shippingDetail.length > 0) {
                 shippingDetail.value = data.shippingDetail[0];
+            } else {
+                shippingDetail.value = {};
             }
 
-            // Set customer info
+            // ✅ Customer Info (from nested `customerInformation`)
+            const customer = data.customerInformation || {};
             customerInfo.value = {
-                dealerName: data.customer_name || shippingDetail.value?.companyName1 || '-',
-                division: data.division || '-',
-                sapOrderType: data.sapordertype || '-',
-                salesOrg: data.salesorg || '-',
-                distributionChannel: data.distributionchannel || '-'
+                dealerName: customer.companyName1 || '-',
+                signboard: customer.signboardBrand || '-',
+                distributionChannel: data.distributionchannel || '-',
+                phoneNumber: customer.phoneNumber || '-',
+                email: customer.emailAddress || '-'
             };
+
+            // ✅ Additional consistency for template use
+            orderData.value.accountLastUpdate = customer.accountLastUpdate || '-';
         } else {
-            toast.add({ severity: 'error', summary: 'Error', detail: 'Failed to fetch order details', life: 3000 });
+            toast.add({ severity: 'error', summary: 'Error', detail: 'Invalid or empty order data', life: 3000 });
         }
     } catch (error) {
         console.error('Error fetching order details:', error);
         toast.add({ severity: 'error', summary: 'Error', detail: 'Failed to fetch order details', life: 3000 });
     }
 };
+
 
 const pullSAPUpdate = async () => {
     try {
