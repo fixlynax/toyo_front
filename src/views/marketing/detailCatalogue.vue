@@ -3,11 +3,8 @@
         <div class="flex flex-col md:flex-row gap-8">
             <!-- Left Content -->
             <div class="md:w-2/3">
-                <!-- ======================== -->
-                <!-- E-Wallet Section (PIN)   -->
-                <!-- ======================== -->
-
-                <div v-if="catalogue.type === 'E-Wallet'" class="card flex flex-col w-full">
+               
+                <div v-if="catalogue.type === 'EWALLET'" class="card flex flex-col w-full">
                     <!-- Header -->
                     <div class="flex items-center justify-between border-b pb-3 mb-6">
                         <div class="flex items-center gap-2">
@@ -19,10 +16,10 @@
 
                         <!-- Edit & Delete Buttons -->
                         <div class="flex items-center gap-2">
-                            <RouterLink to="/marketing/editCatalogue">
+                            <RouterLink :to="`/marketing/editCatalogue/${catalogue.id}`">
                                 <Button label="Edit" class="p-button-info" size="small" />
                             </RouterLink>
-                            <Button label="Delete" class="p-button-danger" size="small" />
+                            <Button label="Delete" class="p-button-danger" size="small" @click="confirmDelete" />
                         </div>
                     </div>
 
@@ -33,7 +30,7 @@
                         </div>
                     </div>
 
-                    <DataTable :value="encodedPins" :paginator="true" :rows="10" dataKey="id" :rowHover="true" :loading="loading">
+                    <DataTable :value="processedPins" :paginator="true" :rows="10" dataKey="id" :rowHover="true" :loading="loading">
                         <template #header>
                             <div class="flex flex-col md:flex-row items-center justify-between gap-4 w-full">
                                 <!-- Summary Info -->
@@ -52,8 +49,8 @@
                                 <div class="flex gap-4 items-end w-full md:w-72">
                                     <Button icon="pi pi-plus" class="p-button-text text-green-600 w-10 h-10 flex items-center justify-center" v-tooltip="'Add PIN'" @click="addPin" />
                                     <Button icon="pi pi-minus" class="p-button-text text-yellow-600 w-10 h-10 flex items-center justify-center" v-tooltip="'Remove PIN'" @click="removePin" />
-                                    <Button icon="pi pi-file-export" label="Export" v-tooltip="'Export Redemption List'" @click="exportRedemptionList" />
-                                    <Button icon="pi pi-file-import" label="Import" v-tooltip="'Export Redemption List'" @click="exportRedemptionList" />
+                                    <Button icon="pi pi-file-export" label="Export" v-tooltip="'Export PIN List'" @click="exportPinList" />
+                                    <Button icon="pi pi-file-import" label="Import" v-tooltip="'Import PIN List'" @click="importPinList" />
                                 </div>
                             </div>
                         </template>
@@ -62,23 +59,30 @@
                         <template #loading> Loading PIN data. Please wait. </template>
 
                         <Column header="Pin" style="min-width: 8rem">
-                            <template #body="{ data }">{{ data.pin }}</template>
+                            <template #body="{ data }">{{ data.pincode }}</template>
+                        </Column>
+                        <Column header="Value" style="min-width: 6rem">
+                            <template #body="{ data }">RM {{ data.value }}</template>
+                        </Column>
+                        <Column header="Provider" style="min-width: 8rem">
+                            <template #body="{ data }">{{ data.provider }}</template>
                         </Column>
                         <Column header="Expiry" style="min-width: 8rem">
-                            <template #body="{ data }">{{ data.expiryDate }}</template>
+                            <template #body="{ data }">{{ formatExpiryDate(data.expiry) }}</template>
                         </Column>
                         <Column header="Date Used" style="min-width: 8rem">
-                            <template #body="{ data }">{{ data.usedDate || '-' }}</template>
+                            <template #body="{ data }">{{ data.redeemed ? formatDate(data.redeemed) : '-' }}</template>
                         </Column>
                         <Column header="Status" style="min-width: 8rem">
                             <template #body="{ data }">
-                                <span :class="data.pinUsedStatus ? 'text-red-600 font-medium' : 'text-green-600 font-medium'">
-                                    {{ data.pinUsedStatus ? 'Used' : 'Available' }}
+                                <span :class="data.status === 'REDEEMED' ? 'text-red-600 font-medium' : 'text-green-600 font-medium'">
+                                    {{ data.status === 'REDEEMED' ? 'Used' : 'Available' }}
                                 </span>
                             </template>
                         </Column>
                     </DataTable>
-                    <!-- Set Point & Delete Buttons -->
+                    
+                    <!-- Set Point Button -->
                     <div class="flex flex-row items-center gap-2 mt-4">
                         <Button label="Set Cost Redeem" class="p-button" size="small" style="width: auto" @click="showSetDialog = true" />
                     </div>
@@ -87,11 +91,11 @@
                     <Dialog v-model:visible="showSetDialog" header="Set Cost Redeem" modal class="w-96">
                         <div class="flex flex-col gap-3">
                             <label for="silverpoint" class="font-medium">Silver Point</label>
-                            <InputNumber v-model="silverpoint" id="silverpoint" showButtons />
+                            <InputNumber v-model="silverPoint" id="silverpoint" showButtons />
                             <label for="goldpoint" class="font-medium">Gold Point</label>
-                            <InputNumber v-model="goldpoint" id="goldpoint" showButtons />
-                            <label for="plantinumpoint" class="font-medium">Plantinum Point</label>
-                            <InputNumber v-model="plantinumpoint" id="plantinumpoint" showButtons />
+                            <InputNumber v-model="goldPoint" id="goldpoint" showButtons />
+                            <label for="plantinumpoint" class="font-medium">Platinum Point</label>
+                            <InputNumber v-model="platinumPoint" id="plantinumpoint" showButtons />
                             <div class="flex justify-end gap-2 mt-3">
                                 <Button label="Cancel" class="p-button-text" @click="showSetDialog = false" />
                                 <Button label="Confirm" class="p-button-success" @click="confirmSetPoint" />
@@ -99,7 +103,9 @@
                         </div>
                     </Dialog>
                 </div>
-                <div v-else-if="catalogue.type === 'E-Voucher'" class="card flex flex-col w-full">
+
+              
+                <div v-else-if="catalogue.type === 'EVOUCHER'" class="card flex flex-col w-full">
                     <!-- Header -->
                     <div class="flex items-center justify-between border-b pb-3 mb-6">
                         <div class="flex items-center gap-2">
@@ -111,32 +117,32 @@
 
                         <!-- Edit & Delete Buttons -->
                         <div class="flex items-center gap-2">
-                            <RouterLink to="/marketing/editCatalogue">
+                            <RouterLink :to="`/marketing/editCatalogue/${catalogue.id}`">
                                 <Button label="Edit" class="p-button-info" size="small" />
                             </RouterLink>
-                            <Button label="Delete" class="p-button-danger" size="small" />
+                            <Button label="Delete" class="p-button-danger" size="small" @click="confirmDelete" />
                         </div>
                     </div>
 
                     <!-- E-Voucher Details -->
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-6 text-gray-800 mb-8">
                         <div>
-                            <span class="block text-sm font-semibold text-gray-500">Quantity</span>
-                            <p class="text-lg font-medium">{{ catalogue.totalVouchers }}</p>
+                            <span class="block text-sm font-semibold text-gray-500">Total Quantity</span>
+                            <p class="text-lg font-medium">{{ catalogue.totalqty }}</p>
                         </div>
                         <div>
-                            <span class="block text-sm font-semibold text-gray-500">Provider</span>
-                            <p class="text-lg font-medium">{{ catalogue.provider || '-' }}</p>
+                            <span class="block text-sm font-semibold text-gray-500">Available Quantity</span>
+                            <p class="text-lg font-medium">{{ catalogue.availableqty }}</p>
                         </div>
                         <div>
                             <span class="block text-sm font-semibold text-gray-500">Value Type</span>
-                            <p class="text-lg font-medium">{{ catalogue.valueType || '-' }}</p>
+                            <p class="text-lg font-medium">{{ formatValueType(catalogue.valueType) }}</p>
                         </div>
                         <div>
                             <span class="block text-sm font-semibold text-gray-500">Value Amount</span>
                             <p class="text-lg font-medium">
-                                <template v-if="catalogue.valueType === 'Percentage'"> {{ catalogue.valueAmount }}% </template>
-                                <template v-else> RM {{ catalogue.valueAmount?.toLocaleString('en-MY', { minimumFractionDigits: 2 }) }} </template>
+                                <template v-if="catalogue.valueType === 'PERCENTAGE'"> {{ catalogue.valueAmount }}% </template>
+                                <template v-else> RM {{ parseFloat(catalogue.valueAmount || 0).toLocaleString('en-MY', { minimumFractionDigits: 2 }) }} </template>
                             </p>
                         </div>
                     </div>
@@ -150,11 +156,11 @@
                     <Dialog v-model:visible="showSetDialog" header="Set Cost Redeem" modal class="w-96">
                         <div class="flex flex-col gap-3">
                             <label for="silverpoint" class="font-medium">Silver Point</label>
-                            <InputNumber v-model="silverpoint" id="silverpoint" showButtons />
+                            <InputNumber v-model="silverPoint" id="silverpoint" showButtons :min="0" />
                             <label for="goldpoint" class="font-medium">Gold Point</label>
-                            <InputNumber v-model="goldpoint" id="goldpoint" showButtons />
-                            <label for="plantinumpoint" class="font-medium">Plantinum Point</label>
-                            <InputNumber v-model="plantinumpoint" id="plantinumpoint" showButtons />
+                            <InputNumber v-model="goldPoint" id="goldpoint" showButtons :min="0" />
+                            <label for="plantinumpoint" class="font-medium">Platinum Point</label>
+                            <InputNumber v-model="platinumPoint" id="plantinumpoint" showButtons :min="0" />
                             <div class="flex justify-end gap-2 mt-3">
                                 <Button label="Cancel" class="p-button-text" @click="showSetDialog = false" />
                                 <Button label="Confirm" class="p-button-success" @click="confirmSetPoint" />
@@ -163,7 +169,8 @@
                     </Dialog>
                 </div>
 
-                <div v-else-if="catalogue.type === 'Item'" class="card flex flex-col w-full">
+            
+                <div v-else-if="catalogue.type === 'ITEM'" class="card flex flex-col w-full">
                     <!-- Header -->
                     <div class="flex items-center justify-between border-b pb-3 mb-6">
                         <div class="flex items-center gap-2">
@@ -175,10 +182,10 @@
 
                         <!-- Edit & Delete Buttons -->
                         <div class="flex items-center gap-2">
-                            <RouterLink to="/marketing/editCatalogue">
+                            <RouterLink :to="`/marketing/editCatalogue/${catalogue.id}`">
                                 <Button label="Edit" class="p-button-info" size="small" />
                             </RouterLink>
-                            <Button label="Delete" class="p-button-danger" size="small" />
+                            <Button label="Delete" class="p-button-danger" size="small" @click="confirmDelete" />
                         </div>
                     </div>
 
@@ -225,7 +232,7 @@
                     <Dialog v-model:visible="showRemoveDialog" header="Remove Quantity" modal class="w-96">
                         <div class="flex flex-col gap-3">
                             <label for="removeQty" class="font-medium">Quantity to Remove</label>
-                            <InputNumber v-model="removeQty" id="removeQty" showButtons min="1" />
+                            <InputNumber v-model="removeQty" id="removeQty" showButtons min="1" :max="catalogue.availableqty" />
                             <div class="flex justify-end gap-2 mt-3">
                                 <Button label="Cancel" class="p-button-text" @click="showRemoveDialog = false" />
                                 <Button label="Confirm" class="p-button-warning" @click="removeStock" />
@@ -233,20 +240,20 @@
                         </div>
                     </Dialog>
 
-                    <!-- Set Point & Delete Buttons -->
+                    <!-- Set Point Button -->
                     <div class="flex flex-row items-center gap-2 mt-4">
-                        <Button label="Cost Redeem" class="p-button" size="small" style="width: auto" @click="showSetDialog = true" />
+                        <Button label="Set Cost Redeem" class="p-button" size="small" style="width: auto" @click="showSetDialog = true" />
                     </div>
 
                     <!-- Set Point Dialog -->
                     <Dialog v-model:visible="showSetDialog" header="Set Cost Redeem" modal class="w-96">
                         <div class="flex flex-col gap-3">
                             <label for="silverpoint" class="font-medium">Silver Point</label>
-                            <InputNumber v-model="silverpoint" id="silverpoint" showButtons />
+                            <InputNumber v-model="silverPoint" id="silverpoint" showButtons :min="0" />
                             <label for="goldpoint" class="font-medium">Gold Point</label>
-                            <InputNumber v-model="goldpoint" id="goldpoint" showButtons />
-                            <label for="plantinumpoint" class="font-medium">Plantinum Point</label>
-                            <InputNumber v-model="plantinumpoint" id="plantinumpoint" showButtons />
+                            <InputNumber v-model="goldPoint" id="goldpoint" showButtons :min="0" />
+                            <label for="plantinumpoint" class="font-medium">Platinum Point</label>
+                            <InputNumber v-model="platinumPoint" id="plantinumpoint" showButtons :min="0" />
                             <div class="flex justify-end gap-2 mt-3">
                                 <Button label="Cancel" class="p-button-text" @click="showSetDialog = false" />
                                 <Button label="Confirm" class="p-button-success" @click="confirmSetPoint" />
@@ -254,50 +261,8 @@
                         </div>
                     </Dialog>
                 </div>
-                <div v-else-if="catalogue.type === 'Point'" class="card flex flex-col w-full">
-                    <div class="flex items-center justify-between border-b pb-3 mb-6">
-                        <div class="flex items-center gap-2">
-                            <RouterLink to="/marketing/listCatalogue">
-                                <Button icon="pi pi-arrow-left font-bold" class="p-button-text p-button-secondary text-xl" v-tooltip="'Back'" />
-                            </RouterLink>
-                            <div class="text-2xl font-bold text-gray-800">Details Catalogue</div>
-                        </div>
 
-                        <div class="flex items-center gap-2">
-                            <RouterLink to="/marketing/editCatalogue">
-                                <Button label="Edit" class="p-button-info" size="small" />
-                            </RouterLink>
-                            <Button label="Delete" class="p-button-danger" size="small" />
-                        </div>
-                    </div>
-
-                    <div class="flex items-center justify-between mb-4">
-                        <div class="flex items-center gap-3">
-                            <div class="text-2xl font-bold text-gray-800">📦 Point</div>
-                        </div>
-                    </div>
-                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-6 text-center">
-                        <div class="p-4 bg-gray-50 rounded-xl shadow-sm">
-                            <span class="block text-sm font-semibold text-gray-500 uppercase">Silver</span>
-                            <p class="text-2xl font-bold text-gray-800 mt-1">{{ catalogue.silverPoint }}</p>
-                        </div>
-                        <div class="p-4 bg-gray-50 rounded-xl shadow-sm">
-                            <span class="block text-sm font-semibold text-gray-500 uppercase">Gold</span>
-                            <p class="text-2xl font-bold text-yellow-600 mt-1">{{ catalogue.goldPoint }}</p>
-                        </div>
-                        <div class="p-4 bg-gray-50 rounded-xl shadow-sm">
-                            <span class="block text-sm font-semibold text-gray-500 uppercase">Platinum</span>
-                            <p class="text-2xl font-bold text-purple-600 mt-1">{{ catalogue.plantinumpoint }}</p>
-                        </div>
-                    </div>
-                    <!-- <div class="flex items-end w-full md:w-72">
-                        <Button label="Edit Point" class="p-button" />
-                    </div> -->
-                </div>
-
-                <!-- ======================== -->
-                <!-- Redemption List Section  -->
-                <!-- ======================== -->
+               
                 <div class="card flex flex-col w-full mt-8">
                     <!-- Header -->
                     <div class="flex items-center justify-between border-b pb-3 mb-4">
@@ -312,17 +277,24 @@
                     </div>
 
                     <!-- DataTable -->
-                    <DataTable :value="participants" :paginator="true" :rows="10" dataKey="id" :rowHover="true" responsiveLayout="scroll" class="text-sm">
+                    <DataTable :value="redeemList" :paginator="true" :rows="10" dataKey="member_code" :rowHover="true" responsiveLayout="scroll" class="text-sm" :loading="loading">
+                        <template #empty> No redemption records found. </template>
+                        <template #loading> Loading redemption data. Please wait. </template>
+
                         <Column header="Member Code" style="min-width: 8rem">
                             <template #body="{ data }">
                                 <span class="font-bold text-gray-800 hover:underline">
-                                    {{ data.memberCode }}
+                                    {{ data.member_code }}
                                 </span>
                             </template>
                         </Column>
 
-                        <Column field="fullName" header="Member Name" style="min-width: 10rem" />
-                        <Column field="date" header="Date Redeemed" style="min-width: 10rem" />
+                        <Column field="full_name" header="Member Name" style="min-width: 10rem" />
+                        <Column header="Date Redeemed" style="min-width: 10rem">
+                            <template #body="{ data }">
+                                {{ formatDate(data.redeem_on) }}
+                            </template>
+                        </Column>
                     </DataTable>
                 </div>
             </div>
@@ -336,43 +308,40 @@
                         <Tag :value="statusLabel(catalogue.status)" :severity="statusSeverity(catalogue.status)" />
                     </div>
 
-                    <!-- catalogue Images -->
+                    <!-- Catalogue Images -->
                     <div class="grid grid-cols-1 md:grid-cols-1 gap-4 mt-4">
-                        <img :src="catalogue.image1URL" alt="catalogue Image 1" class="rounded-xl shadow-sm object-cover w-full h-48" />
+                        <img :src="processedImageURL" :alt="catalogue.title" class="rounded-xl shadow-sm object-cover w-full h-48" @error="handleImageError" />
                     </div>
 
-                    <!-- catalogue Info -->
+                    <!-- Catalogue Info -->
                     <div class="mt-4">
                         <h1 class="text-2xl font-bold text-gray-800">{{ catalogue.title }}</h1>
-                        <p class="text-lg font-medium">{{ catalogue.description }}</p>
+                        <p class="text-lg font-medium text-gray-600 mt-2">{{ catalogue.description }}</p>
                     </div>
 
-                    <div class="flex flex-col md:flex-row gap-4 mt-2">
-                        <div class="w-full">
-                            <span class="block text-xm font-bold text-black-700">Terms</span>
-                            <p class="text-lg font-medium">{{ catalogue.terms }}</p>
+                    <div class="flex flex-col gap-4 mt-4">
+                        <div>
+                            <span class="block text-sm font-bold text-black-700 mb-1">Terms & Conditions</span>
+                            <p class="text-base text-gray-700">{{ catalogue.terms }}</p>
                         </div>
-                        <div class="w-full">
-                            <span class="block text-xm font-bold text-black-700">Instruction</span>
-                            <p class="text-lg font-medium">{{ catalogue.instruction }}</p>
+                        <div>
+                            <span class="block text-sm font-bold text-black-700 mb-1">Instructions</span>
+                            <p class="text-base text-gray-700">{{ catalogue.instruction }}</p>
                         </div>
                     </div>
+                    
                     <div class="flex justify-end mt-8">
                         <div class="w-auto" v-if="catalogue.status === 1">
-                            <RouterLink to="/marketing/detailEvent">
-                                <Button label="Inactivate" class="p-button-danger" size="small" />
-                            </RouterLink>
+                            <Button label="Inactivate" class="p-button-danger" size="small" @click="toggleStatus(2)" />
                         </div>
                         <div class="w-auto" v-if="catalogue.status === 2">
-                            <RouterLink to="/marketing/detailEvent">
-                                <Button label="Activate" class="p-button-success" size="small" />
-                            </RouterLink>
+                            <Button label="Activate" class="p-button-success" size="small" @click="toggleStatus(1)" />
                         </div>
                     </div>
                 </div>
 
                 <!-- Advance Info -->
-                <div class="card flex flex-col w-full">
+                <div class="card flex flex-col w-full mt-6">
                     <div class="flex items-center justify-between border-b pb-2 mb-2">
                         <div class="text-2xl font-bold text-gray-800">ℹ️ Advance Info</div>
                     </div>
@@ -382,7 +351,7 @@
                             <tbody>
                                 <tr class="border-b">
                                     <td class="px-4 py-2 font-medium">Created</td>
-                                    <td class="px-4 py-2 text-right">{{ catalogue.created }}</td>
+                                    <td class="px-4 py-2 text-right">{{ formatDate(catalogue.created) }}</td>
                                 </tr>
                                 <tr class="border-b">
                                     <td class="px-4 py-2 font-medium">SKU</td>
@@ -390,11 +359,11 @@
                                 </tr>
                                 <tr class="border-b">
                                     <td class="px-4 py-2 font-medium">Type</td>
-                                    <td class="px-4 py-2 text-right">{{ catalogue.type }}</td>
+                                    <td class="px-4 py-2 text-right">{{ formatType(catalogue.type) }}</td>
                                 </tr>
                                 <tr class="border-b">
                                     <td class="px-4 py-2 font-medium">Purpose</td>
-                                    <td class="px-4 py-2 text-right">{{ catalogue.purpose }}</td>
+                                    <td class="px-4 py-2 text-right">{{ formatPurpose(catalogue.purpose) }}</td>
                                 </tr>
                                 <tr class="border-b">
                                     <td class="px-4 py-2 font-medium">Birthday Reward</td>
@@ -418,9 +387,9 @@
                                     <td class="px-4 py-2 font-medium">Quantity</td>
                                     <td class="px-4 py-2 text-right">{{ catalogue.availableqty }} of {{ catalogue.totalqty }}</td>
                                 </tr>
-                                <tr class="border-b text-red-600">
+                                <tr class="border-b" :class="getExpiryClass(catalogue.expiry)">
                                     <td class="px-4 py-2 font-medium">Expiry</td>
-                                    <td class="px-4 py-2 text-right">{{ catalogue.expiry }}</td>
+                                    <td class="px-4 py-2 text-right">{{ formatExpiryDate(catalogue.expiry) }}</td>
                                 </tr>
                             </tbody>
                         </table>
@@ -433,100 +402,210 @@
 
 <script setup>
 import { ref, computed, onMounted } from 'vue';
+import { useRoute, useRouter } from 'vue-router';
+import { useToast } from 'primevue/usetoast';
+import { useConfirm } from 'primevue/useconfirm'; // Added useConfirm
+import api from '@/service/api';
 
+const route = useRoute();
+const router = useRouter();
+const toast = useToast();
+const confirm = useConfirm(); // Initialize confirmation dialog
+
+// Reactive data
 const catalogue = ref({
-    id: 1,
-    type: 'E-Voucher', // or 'E-Voucher'
-    image1URL: 'https://assets.bharian.com.my/images/articles/tng13jan_BHfield_image_socialmedia.var_1610544082.jpg',
-    title: 'Touch ’n Go Reload RM20',
-    sku: 'TNG20',
-    valueType: 'RM',
-    valueAmount: 20,
-    description: 'Reload your Touch ’n Go eWallet instantly with RM20 credit.',
-    terms: 'Valid for registered TNG accounts only.',
-    instruction: 'Provide TNG eWallet number during redemption.',
-    point1: 200,
-    point2: 180,
-    point3: 150,
-    purpose: 'Reward',
-    purposelD: 'PR001',
-    totalqty: 4,
-    availableqty: 3,
-    expiry: '2025-12-31',
-    isBirthday: 1,
-    status: 1,
-    created: '2025-01-01',
-    deleted: 0,
-    pins: [],
-    vouchers: [],
-    usedVouchers: 0,
-    totalVouchers: 0,
-    silverPoint: 21,
-    goldPoint: 40,
-    plantinumpoint: 60,
-    valueType: 'Percentage',
-    provider: 'Shopee',
-    totalVouchers: '256',
+    id: 0,
+    type: '',
+    imageURL: '',
+    title: '',
+    sku: '',
+    valueType: '',
+    valueAmount: 0,
+    description: '',
+    terms: '',
+    instruction: '',
+    point1: 0,
+    point2: 0,
+    point3: 0,
+    purpose: '',
+    purposeID: null,
+    totalqty: 0,
+    availableqty: 0,
+    expiry: '',
+    isBirthday: 0,
+    status: 0,
+    created: '',
+    deleted: null,
+    ewallet_pin: [],
+    redeem_list: []
 });
-
-const participants = ref([
-    { id: 1, fullName: 'John Doe', memberCode: '66010345610299', date: '2025-10-05' },
-    { id: 2, fullName: 'Jane Smith', memberCode: '040521250941', date: '2025-09-25' },
-    { id: 3, fullName: 'Ali Ahmad', memberCode: '02010329454432', date: '2025-08-30' }
-]);
 
 const loading = ref(false);
+const processedImageURL = ref('');
 
-// Count used pins
-const usedPins = computed(() => {
-    return catalogue.value.pins.filter((pin) => pin.pinUsedStatus).length;
+// Dialog controls
+const showSetDialog = ref(false);
+const showAddDialog = ref(false);
+const showRemoveDialog = ref(false);
+const addQty = ref(0);
+const removeQty = ref(0);
+const silverPoint = ref(0);
+const goldPoint = ref(0);
+const platinumPoint = ref(0);
+
+onMounted(async () => {
+    await fetchCatalogueDetails();
 });
 
-// Encode pins for display
-const encodedPins = computed(() => {
-    return catalogue.value.pins.map((pin) => ({
+const fetchCatalogueDetails = async () => {
+    loading.value = true;
+    try {
+        const catalogueId = route.params.id;
+        const response = await api.get(`catalog/details/${catalogueId}`);
+        
+        if (response.data.status === 1 && response.data.admin_data) {
+            catalogue.value = response.data.admin_data;
+            
+            // Process image URL
+            if (catalogue.value.imageURL) {
+                try {
+                    const blobUrl = await api.getPrivateFile(catalogue.value.imageURL);
+                    processedImageURL.value = blobUrl;
+                } catch (error) {
+                    console.error('Error loading catalogue image:', error);
+                    processedImageURL.value = catalogue.value.imageURL;
+                }
+            } else {
+                processedImageURL.value = 'https://via.placeholder.com/300x200?text=No+Image';
+            }
+            
+            // Initialize point values for dialog
+            silverPoint.value = catalogue.value.point1 || 0;
+            goldPoint.value = catalogue.value.point2 || 0;
+            platinumPoint.value = catalogue.value.point3 || 0;
+            
+        } else {
+            throw new Error('Invalid response format');
+        }
+    } catch (error) {
+        console.error('Error fetching catalogue details:', error);
+        toast.add({
+            severity: 'error',
+            summary: 'Error',
+            detail: 'Failed to load catalogue details',
+            life: 3000
+        });
+    } finally {
+        loading.value = false;
+    }
+};
+
+// Computed properties
+const processedPins = computed(() => {
+    if (!catalogue.value.ewallet_pin) return [];
+    return catalogue.value.ewallet_pin.map(pin => ({
         ...pin,
-        pin: maskPin(pin.pin)
+        pincode: maskPin(pin.pincode)
     }));
 });
+
+const usedPins = computed(() => {
+    if (!catalogue.value.ewallet_pin) return 0;
+    return catalogue.value.ewallet_pin.filter(pin => pin.status === 'REDEEMED').length;
+});
+
+const redeemList = computed(() => {
+    return catalogue.value.redeem_list || [];
+});
+
+// Helper functions
 const maskPin = (pin) => {
     if (!pin) return '';
-    const str = pin.toString().replace(/-/g, ''); // remove dashes for clean masking
+    const str = pin.toString().replace(/-/g, '');
     if (str.length <= 2) return str;
     return str[0] + '*'.repeat(str.length - 2) + str[str.length - 1];
 };
 
-// Load sample pins
-const loadPins = () => {
-    loading.value = true;
-    setTimeout(() => {
-        catalogue.value.pins = [
-            { id: 1, pin: '1234-5678-9011', expiryDate: '2025-12-31', usedDate: '2025-12-31', pinUsedStatus: true },
-            { id: 2, pin: '9876-5432-1098', expiryDate: '2025-11-30', usedDate: null, pinUsedStatus: false },
-            { id: 3, pin: '5555-2222-3333', expiryDate: '2025-10-31', usedDate: null, pinUsedStatus: false },
-            { id: 4, pin: '3757-5432-5669', expiryDate: '2025-11-30', usedDate: null, pinUsedStatus: false }
-        ];
-        loading.value = false;
-    }, 1000);
+const formatDate = (dateString) => {
+    if (!dateString) return '-';
+    try {
+        // Handle different date formats from API
+        if (dateString.includes('T')) {
+            return new Date(dateString).toLocaleDateString('en-MY');
+        } else {
+            // Handle DD-MM-YYYY format
+            const [day, month, year] = dateString.split('-');
+            return new Date(`${year}-${month}-${day}`).toLocaleDateString('en-MY');
+        }
+    } catch (error) {
+        return dateString;
+    }
 };
 
-const downloadPins = () => {
-    const dataStr = JSON.stringify(catalogue.value.pins, null, 2);
-    const blob = new Blob([dataStr], { type: 'application/json' });
-    const url = URL.createObjectURL(blob);
-
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = 'pins.json';
-    a.click();
-    URL.revokeObjectURL(url);
+const formatExpiryDate = (expiryDate) => {
+    if (!expiryDate) return 'No expiry';
+    try {
+        // Convert from DD-MM-YYYY to DD/MM/YYYY format
+        const [day, month, year] = expiryDate.split('-');
+        return `${day}/${month}/${year}`;
+    } catch (error) {
+        return expiryDate;
+    }
 };
 
-onMounted(() => {
-    loadPins();
-});
+const getExpiryClass = (expiryDate) => {
+    if (!expiryDate) return 'text-gray-500';
 
-// Status helper
+    try {
+        const today = new Date();
+        const [day, month, year] = expiryDate.split('-');
+        const expiry = new Date(`${year}-${month}-${day}`);
+
+        if (isNaN(expiry.getTime())) {
+            return 'text-gray-500';
+        }
+
+        const diffTime = expiry - today;
+        const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+
+        if (diffDays < 0) {
+            return 'text-red-500';
+        } else if (diffDays <= 3) {
+            return 'text-yellow-500';
+        } else {
+            return 'text-green-600';
+        }
+    } catch (error) {
+        return 'text-gray-500';
+    }
+};
+
+const formatType = (type) => {
+    const typeMap = {
+        'EWALLET': 'E-Wallet',
+        'EVOUCHER': 'E-Voucher',
+        'ITEM': 'Item'
+    };
+    return typeMap[type] || type;
+};
+
+const formatValueType = (valueType) => {
+    const typeMap = {
+        'AMOUNT': 'Fixed Amount',
+        'PERCENTAGE': 'Percentage'
+    };
+    return typeMap[valueType] || valueType;
+};
+
+const formatPurpose = (purpose) => {
+    const purposeMap = {
+        'CATALOG': 'Catalog',
+        'CAMPAIGN': 'Campaign',
+        'GAME': 'Game'
+    };
+    return purposeMap[purpose] || purpose;
+};
+
 const statusLabel = (status) => {
     if (status === 0) return 'Draft';
     if (status === 1) return 'Active';
@@ -541,52 +620,205 @@ const statusSeverity = (status) => {
     return 'secondary';
 };
 
-/* ============================================================
-   ✅ ADDED: Item Stock Add / Remove Logic (non-destructive)
-   ============================================================ */
-const itemStocks = ref([
-    { id: 1, batch: 'Batch A', quantity: 2, addedDate: '2025-09-01' },
-    { id: 2, batch: 'Batch B', quantity: 2, addedDate: '2025-09-15' }
-]);
+const handleImageError = (event) => {
+    event.target.src = 'https://via.placeholder.com/300x200?text=No+Image';
+};
 
-const usedStock = ref(1); // example tracking
+// DELETE FUNCTIONALITY - Integrated with API
+const confirmDelete = () => {
+    confirm.require({
+        message: 'Are you sure you want to delete this Catalogue?',
+        header: 'Confirm Delete',
+        icon: 'pi pi-exclamation-triangle',
+        acceptLabel: 'Yes, Delete',
+        rejectLabel: 'Cancel',
+        acceptClass: 'p-button-danger',
+        accept: async () => {
+            try {
+                // API call to delete catalogue - using PUT method as per API specification
+                const response = await api.put(`catalog/delete/${catalogue.value.id}`);
+                
+                if (response.data.status === 1) {
+                    toast.add({
+                        severity: 'success',
+                        summary: 'Deleted',
+                        detail: 'Catalogue deleted successfully.',
+                        life: 3000
+                    });
+                    // Redirect to catalogue list page after successful deletion
+                    router.push('/marketing/listCatalogue');
+                } else {
+                    toast.add({
+                        severity: 'error',
+                        summary: 'Error',
+                        detail: 'Failed to delete Catalogue.',
+                        life: 3000
+                    });
+                }
+            } catch (error) {
+                console.error('Delete failed:', error);
+                toast.add({
+                    severity: 'error',
+                    summary: 'Error',
+                    detail: 'Failed to delete Catalogue.',
+                    life: 3000
+                });
+            }
+        },
+        reject: () => {
+            toast.add({
+                severity: 'info',
+                summary: 'Cancelled',
+                detail: 'Deletion cancelled.',
+                life: 2000
+            });
+        }
+    });
+};
 
-const showAddDialog = ref(false);
-const showRemoveDialog = ref(false);
-const addQty = ref(0);
-const removeQty = ref(0);
+// Action methods
+const addPin = () => {
+    toast.add({
+        severity: 'info',
+        summary: 'Info',
+        detail: 'Add PIN functionality to be implemented',
+        life: 3000
+    });
+};
 
-const addStock = () => {
+const removePin = () => {
+    toast.add({
+        severity: 'info',
+        summary: 'Info',
+        detail: 'Remove PIN functionality to be implemented',
+        life: 3000
+    });
+};
+
+const exportPinList = () => {
+    toast.add({
+        severity: 'info',
+        summary: 'Info',
+        detail: 'Export PIN list functionality to be implemented',
+        life: 3000
+    });
+};
+
+const importPinList = () => {
+    toast.add({
+        severity: 'info',
+        summary: 'Info',
+        detail: 'Import PIN list functionality to be implemented',
+        life: 3000
+    });
+};
+
+const exportRedemptionList = () => {
+    toast.add({
+        severity: 'info',
+        summary: 'Info',
+        detail: 'Export redemption list functionality to be implemented',
+        life: 3000
+    });
+};
+
+const addStock = async () => {
     if (addQty.value > 0) {
-        catalogue.value.totalqty += addQty.value;
-        itemStocks.value.push({
-            id: itemStocks.value.length + 1,
-            batch: `Batch ${String.fromCharCode(65 + itemStocks.value.length)}`,
-            quantity: addQty.value,
-            addedDate: new Date().toISOString().split('T')[0]
+        try {
+            // API call to add stock would go here
+            catalogue.value.totalqty += addQty.value;
+            catalogue.value.availableqty += addQty.value;
+            showAddDialog.value = false;
+            addQty.value = 0;
+            
+            toast.add({
+                severity: 'success',
+                summary: 'Success',
+                detail: 'Stock added successfully',
+                life: 3000
+            });
+        } catch (error) {
+            toast.add({
+                severity: 'error',
+                summary: 'Error',
+                detail: 'Failed to add stock',
+                life: 3000
+            });
+        }
+    }
+};
+
+const removeStock = async () => {
+    if (removeQty.value > 0 && catalogue.value.availableqty >= removeQty.value) {
+        try {
+            // API call to remove stock would go here
+            catalogue.value.availableqty -= removeQty.value;
+            showRemoveDialog.value = false;
+            removeQty.value = 0;
+            
+            toast.add({
+                severity: 'success',
+                summary: 'Success',
+                detail: 'Stock removed successfully',
+                life: 3000
+            });
+        } catch (error) {
+            toast.add({
+                severity: 'error',
+                summary: 'Error',
+                detail: 'Failed to remove stock',
+                life: 3000
+            });
+        }
+    }
+};
+
+const confirmSetPoint = async () => {
+    try {
+        // API call to update points would go here
+        catalogue.value.point1 = silverPoint.value;
+        catalogue.value.point2 = goldPoint.value;
+        catalogue.value.point3 = platinumPoint.value;
+        showSetDialog.value = false;
+        
+        toast.add({
+            severity: 'success',
+            summary: 'Success',
+            detail: 'Cost redeem points updated successfully',
+            life: 3000
         });
-        showAddDialog.value = false;
-        addQty.value = 0;
+    } catch (error) {
+        toast.add({
+            severity: 'error',
+            summary: 'Error',
+            detail: 'Failed to update cost redeem points',
+            life: 3000
+        });
     }
 };
 
-const removeStock = () => {
-    if (removeQty.value > 0 && catalogue.value.totalqty >= removeQty.value) {
-        catalogue.value.totalqty -= removeQty.value;
-        showRemoveDialog.value = false;
-        removeQty.value = 0;
+const toggleStatus = async (newStatus) => {
+    try {
+        // API call to update status would go here
+        catalogue.value.status = newStatus;
+        
+        toast.add({
+            severity: 'success',
+            summary: 'Success',
+            detail: `Catalogue ${newStatus === 1 ? 'activated' : 'inactivated'} successfully`,
+            life: 3000
+        });
+    } catch (error) {
+        toast.add({
+            severity: 'error',
+            summary: 'Error',
+            detail: 'Failed to update catalogue status',
+            life: 3000
+        });
     }
 };
-
-const showSetDialog = ref(false);
-const setPoint = ref(0);
-
-const confirmSetPoint = () => {
-    console.log('Point set to:', setPoint.value);
-    showSetDialog.value = false;
-};
-
-const silverPoint = ref(0);
-const goldPoint = ref(0);
-const platinumPoint = ref(0);
 </script>
+
+<style scoped>
+/* Custom styles if needed */
+</style>

@@ -295,7 +295,7 @@
         </template>
     </Dialog>
 
-    <Dialog v-model:visible="showCreateReplacementDialog" header="Submit Replacement" :modal="true" class="p-fluid" :style="{ width: '40rem' }">
+    <Dialog v-model:visible="showCreateReplacementDialog" header="Submit Replacement" :modal="true" :closable="!loadingAction" class="p-fluid" :style="{ width: '40rem' }">
         <label class="block font-bold text-gray-700 mb-1">Select Material ID</label>
         <Dropdown v-model="selectedMaterial" :options="listMaterial" optionLabel="material" placeholder="Select pattern" class="w-full mb-4">
             <template #option="slotProps">
@@ -308,12 +308,12 @@
         </Dropdown>
 
         <template #footer>
-            <Button label="Cancel" icon="pi pi-times" class="p-button-text" @click="closeReplacementDialog" />
-            <Button label="Create" icon="pi pi-check" class="p-button-primary" @click="submitReplacement" />
+            <Button label="Cancel" icon="pi pi-times" class="p-button-text" :loading="loadingAction" @click="closeReplacementDialog" />
+            <Button label="Create" icon="pi pi-check" class="p-button-primary" :loading="loadingAction"  @click="submitReplacement" />
         </template>
     </Dialog>
 
-    <Dialog v-model:visible="showCreateReimbursementDialog" header="Submit Reimbursement" :modal="true" class="p-fluid" :style="{ width: '40rem' }">
+    <Dialog v-model:visible="showCreateReimbursementDialog" header="Submit Reimbursement" :modal="true" :closable="!loadingAction" class="p-fluid" :style="{ width: '40rem' }">
         <div class="field">
             <label class="block font-bold text-gray-700 mb-1">Select Material ID</label>
             <Dropdown v-model="selectedMaterial" :options="listMaterial" optionLabel="material" placeholder="Select pattern" class="w-full mb-4">
@@ -333,8 +333,8 @@
         </div> -->
 
         <template #footer>
-            <Button label="Cancel" icon="pi pi-times" class="p-button-text" @click="closeReimbursementDialog" />
-            <Button label="Create" icon="pi pi-check" class="p-button-primary" @click="submitReimbursement" />
+            <Button label="Cancel" icon="pi pi-times" class="p-button-text" :loading="loadingAction" @click="closeReimbursementDialog" />
+            <Button label="Create" icon="pi pi-check" class="p-button-primary" :loading="loadingAction" @click="submitReimbursement" />
         </template>
     </Dialog>
 
@@ -389,7 +389,7 @@ const showCreateCTCDialog = ref(false);
 const showCreateReimbursementDialog = ref(false);
 const showCreateReplacementDialog = ref(false);
 const showApproveDialog = ref(false);
-
+const loadingAction = ref(false);
 const warantyDetail = ref({});
 const loading = ref(true);
 const error = ref(null);
@@ -835,8 +835,9 @@ const submitReplacement = async () => {
         });
         return;
     }
-console.log('Selected Material:', selectedMaterial.value);
+// console.log('Selected Material:', selectedMaterial.value);
     try {
+        loadingAction.value = true;
         saving.value = true;
         const response = await api.post('warranty_claim/approveReplacement', {
             claim_id: warantyDetail.value.id,
@@ -870,7 +871,9 @@ console.log('Selected Material:', selectedMaterial.value);
             life: 3000
         });
     } finally {
+        loading.value = false;
         saving.value = false;
+        loadingAction.value = false;
         showApproveDialog.value = false;
        showCreateReplacementDialog.value = false;
     }
@@ -889,6 +892,7 @@ const submitReimbursement = async () => {
 
     try {
         saving.value = true;
+        loadingAction.value = true;
         const response = await api.post('warranty_claim/approveReimbursement', {
             claim_id: warantyDetail.value.id,
             materialid: selectedMaterial.value.material,
@@ -921,6 +925,7 @@ const submitReimbursement = async () => {
         });
     } finally {
         saving.value = false;
+        loadingAction.value = false;
         showApproveDialog.value = false;
         showCreateReimbursementDialog.value = false;
     }
