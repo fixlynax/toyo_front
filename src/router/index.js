@@ -295,9 +295,10 @@ const router = createRouter({
                     props: true
                 },
                 {
-                    path: '/marketing/editEvent',
+                    path: '/marketing/editEvent/:id',
                     name: 'Edit-Event',
-                    component: () => import('@/views/marketing/editEvent.vue')
+                    component: () => import('@/views/marketing/editEvent.vue'),
+                     props: true
                 },
 
                 // Campaigns
