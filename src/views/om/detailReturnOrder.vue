@@ -14,7 +14,7 @@
                     <div class="grid grid-cols-2 gap-4">
                         <div>
                             <span class="text-sm text-gray-500">Dealer Name</span>
-                            <p class="text-lg font-medium">{{ dealerShop.companyName1 || '-' }} {{ dealerShop.companyName2 }}</p>
+                            <p class="text-lg font-medium">{{ dealerShop.companyName1 || '-' }} {{ dealerShop.companyName2 }} {{ dealerShop.companyName3 }} {{ dealerShop.companyName4 }}</p>
                         </div>
                         <div>
                             <span class="text-sm text-gray-500">Account Number</span>
@@ -26,16 +26,20 @@
                         </div>
                         <div>
                             <span class="text-sm text-gray-500">Location</span>
-                            <p class="text-lg font-medium">{{ dealerShop.city || '-' }} {{ dealerShop.state }}</p>
+                            <p class="text-lg font-medium">{{ dealerShop.addressLine1 }} {{ dealerShop.addressLine2 }} {{ dealerShop.addressLine3 }} {{ dealerShop.addressLine4 }}{{ dealerShop.city }}, {{ dealerShop.state }} , {{ dealerShop.postcode }}</p>
                         </div>
-                        <div>
+                            <div>
+                                <span class="text-sm text-gray-500">Contact Person</span>
+                                <p class="text-lg font-medium">{{ dealerShop.phoneNumber || '-' }}</p>
+                            </div>
+                        <!-- <div>
                             <span class="text-sm text-gray-500">Return Code</span>
                             <p class="text-lg font-semibold">{{ order.reason_code || '-' }}</p>
                         </div>
                         <div>
                             <span class="text-sm text-gray-500">Return Reason</span>
                             <p class="text-lg font-medium">{{ order.reason_message || '-' }}</p>
-                        </div>
+                        </div> -->
 
                         <div>
                             <span class="text-sm text-gray-500">Channel</span>
@@ -180,11 +184,11 @@
                                 </tr>
                                 <tr class="border-b">
                                     <td class="px-4 py-2 font-medium">Pickup</td>
-                                    <td class="px-4 py-2 text-right">{{ order.delivery_information.pickup_datetime || '-' }}</td>
+                                    <td class="px-4 py-2 text-right">{{ orderDelivery.pickup_datetime || '-' }}</td>
                                 </tr>
                                 <tr class="border-b">
                                     <td class="px-4 py-2 font-medium">Receive</td>
-                                    <td class="px-4 py-2 text-right">{{ order.delivery_information.receive_datetime || '-' }}</td>
+                                    <td class="px-4 py-2 text-right">{{ orderDelivery.receive_datetime || '-' }}</td>
                                 </tr>
                                 <tr>
                                     <td class="px-4 py-2 font-medium">Created</td>
@@ -225,11 +229,13 @@ const returnOrderNo = route.params.retOrdNo;
 const order = ref({});
 const dealerShop = ref({});
 const orderData = ref({});
+const orderDelivery = ref({});
 const returnOrderArray = ref([]);
 const loading = ref(true);
 const loadingAction = ref(null);
 const error = ref(null);
 const subtotal = ref(0);
+
 
 // ✅ Status mapping functions
 const getdeliveryOrderStatusText = (status) => {
@@ -366,6 +372,7 @@ const fetchReturnOrderDetail = async () => {
             order.value = response.data.admin_data[0];
             dealerShop.value = order.value.dealer?.dealer_shop || {};
             orderData.value = order.value.order_data || {};
+            orderDelivery.value = order.value.delivery_information || {};
             returnOrderArray.value = order.value.return_order_array || [];
 
             // Initialize subtotal
