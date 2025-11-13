@@ -174,23 +174,27 @@
                                 </template>
 
                                 <!-- ✅ Footer for label -->
-                            <template #footer>
-                                <div class="flex justify-start pr-2 font-bold text-gray-700">Grand Total</div>
-                            </template>
+                                <template #footer>
+                                    <div class="flex justify-start pr-2 font-bold text-gray-700">Grand Total</div>
+                                </template>
                             </Column>
                             <Column field="totalamt" header="Total" style="min-width: 6rem">
                                 <template #body="{ data }">
                                     <span class="font-bold text-green-700">RM {{ data.totalamt }}</span>
                                 </template>
 
-                                 <template #footer>
-                                <div class="flex justify-start pr-2 font-bold text-gray-700">RM {{ fulfillOrder.total }}</div>
-                            </template>
+                                <template #footer>
+                                    <div class="flex justify-start pr-2 font-bold text-gray-700">RM {{ fulfillOrder.total }}</div>
+                                </template>
                             </Column>
                         </DataTable>
 
                         <div class="flex justify-between items-center mt-3 pt-3 border-t">
-                            <div class="text-sm text-gray-600">Delivery: {{ formatDate(fulfillOrder.deliveryDate) }}</div>
+                            <div class="text-sm text-gray-600">
+                                <div>SO No: <span class="font-bold">{{ fulfillOrder.so_no || '-' }}</span></div>
+                                <div>DO No: <span class="font-bold">{{ fulfillOrder.do_no || '-' }}</span></div>
+                                <div>Delivery: {{ formatDate(fulfillOrder.deliveryDate) }}</div>
+                            </div>
                             <div class="text-lg font-bold text-blue-800">Total: RM {{ fulfillOrder.total }}</div>
                         </div>
                     </div>
@@ -216,6 +220,14 @@
                                 <tr class="border-b">
                                     <td class="px-4 py-2 font-medium">SAP Order Type</td>
                                     <td class="px-4 py-2 text-right">{{ order.sapordertype }}</td>
+                                </tr>
+                                <tr class="border-b">
+                                    <td class="px-4 py-2 font-medium">SO No.</td>
+                                    <td class="px-4 py-2 text-right">{{ getFirstSoNo() || '-' }}</td>
+                                </tr>
+                                <tr class="border-b">
+                                    <td class="px-4 py-2 font-medium">DO No.</td>
+                                    <td class="px-4 py-2 text-right">{{ getFirstDoNo() || '-' }}</td>
                                 </tr>
                                 <tr class="border-b">
                                     <td class="px-4 py-2 font-medium">Created</td>
@@ -302,7 +314,20 @@ const fetchBackOrderDetail = async () => {
     }
 };
 
-// Process back order
+// Helper methods to get first SO/DO numbers from fulfillment orders
+const getFirstSoNo = () => {
+    if (!order.value.list_order || order.value.list_order.length === 0) return null;
+    const firstOrder = order.value.list_order[0];
+    return firstOrder.so_no;
+};
+
+const getFirstDoNo = () => {
+    if (!order.value.list_order || order.value.list_order.length === 0) return null;
+    const firstOrder = order.value.list_order[0];
+    return firstOrder.do_no;
+};
+
+// ... rest of your existing methods remain the same
 const processBackOrder = async (status) => {
     try {
         processing.value = true;
@@ -311,7 +336,6 @@ const processBackOrder = async (status) => {
 
         if (response.data.status === 1) {
             toast.add({ severity: 'success', summary: 'Success', detail: 'Back order processed successfully', life: 3000 });
-            // Refresh the data
             await fetchBackOrderDetail();
         } else {
             toast.add({ severity: 'error', summary: 'Error', detail: response.data.error?.message || 'Failed to process back order', life: 3000 });
@@ -324,7 +348,6 @@ const processBackOrder = async (status) => {
     }
 };
 
-// Cancel back order
 const cancelBackOrder = async () => {
     try {
         cancelling.value = true;
@@ -333,7 +356,6 @@ const cancelBackOrder = async () => {
 
         if (response.data.status === 1) {
             toast.add({ severity: 'success', summary: 'Success', detail: 'Back order cancelled successfully', life: 3000 });
-            // Refresh the data
             await fetchBackOrderDetail();
         } else {
             toast.add({ severity: 'error', summary: 'Error', detail: response.data.error?.message || 'Failed to cancel back order', life: 3000 });
@@ -346,7 +368,6 @@ const cancelBackOrder = async () => {
     }
 };
 
-// Confirm cancellation
 const confirmCancelBackOrder = () => {
     confirm.require({
         message: 'Are you sure you want to cancel this back order? This action cannot be undone.',
@@ -361,14 +382,10 @@ const confirmCancelBackOrder = () => {
     });
 };
 
-// Helper method to format quantity as whole numbers
 const formatQuantity = (quantity) => {
     if (quantity === null || quantity === undefined || quantity === '') return '0';
-
-    // Convert to number and round to nearest whole number
     const num = parseFloat(quantity);
     if (isNaN(num)) return '0';
-
     return Math.round(num).toString();
 };
 
@@ -391,7 +408,6 @@ const fulfillmentStatus = computed(() => {
     }
 });
 
-// Business logic for button states
 const canProcessBackOrder = computed(() => {
     return order.value.orderstatus === 0 && fulfillmentPercentage.value < 100 && isNotExpired.value;
 });
@@ -405,7 +421,6 @@ const isNotExpired = computed(() => {
     return new Date(order.value.expiry) >= new Date();
 });
 
-// Fulfillment summary
 const fulfillmentSummary = computed(() => {
     if (!backOrderItems.value.length) return [];
 
@@ -425,7 +440,6 @@ const fulfillmentSummary = computed(() => {
     });
 });
 
-// Helper methods
 const getFulfilledQuantity = (materialId) => {
     if (!order.value.list_order) return 0;
 
@@ -518,7 +532,6 @@ const formatDate = (dateString) => {
     });
 };
 
-// Lifecycle
 onMounted(() => {
     fetchBackOrderDetail();
 });
