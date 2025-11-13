@@ -147,9 +147,8 @@
                         <div class="flex justify-between items-center mb-3">
                             <div>
                                 <span class="font-bold text-lg text-blue-700">Order: {{ fulfillOrder.order_no }}</span>
-                                <Tag :value="getOrderStatusText(fulfillOrder.orderstatus)" :severity="getOrderStatusSeverity(fulfillOrder.orderstatus)" class="ml-2" />
                             </div>
-                            <div class="text-sm text-gray-500">Created: {{ formatDate(fulfillOrder.created) }}</div>
+                            <div class="text-xm font-bold text-black-500">SO No: {{ fulfillOrder.so_no }}</div>
                         </div>
 
                         <DataTable :value="getFulfillmentItems(fulfillOrder)" class="text-sm rounded-table" stripedRows>
@@ -191,10 +190,12 @@
 
                         <div class="flex justify-between items-center mt-3 pt-3 border-t">
                             <div class="text-sm text-gray-600">
-                                <div>SO No: <span class="font-bold">{{ fulfillOrder.so_no || '-' }}</span></div>
-                                <div>DO No: <span class="font-bold">{{ fulfillOrder.do_no || '-' }}</span></div>
-                                <div>Delivery: {{ formatDate(fulfillOrder.deliveryDate) }}</div>
+                                <div class="flex gap-8">
+                                    <div class="text-sm text-gray-500">Created: {{ formatDate(fulfillOrder.created) }}</div>
+                                    <!-- <div>Delivery: {{ formatDate(fulfillOrder.deliveryDate) }}</div> -->
+                                </div>
                             </div>
+
                             <div class="text-lg font-bold text-blue-800">Total: RM {{ fulfillOrder.total }}</div>
                         </div>
                     </div>
