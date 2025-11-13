@@ -328,7 +328,7 @@ const fetchRedemptionDetails = async () => {
                 recipient: redemptionData.recipientName || '',
                 contact: redemptionData.contactNumber || '',
                 courier: redemptionData.courierName || '',
-                ship_date: redemptionData.shippedDate ? new Date(redemptionData.shippedDate) : null,
+                ship_date: parseDate(redemptionData.shippedDate),
                 tracking_no: redemptionData.trackingNumber || '',
                 address_line_1: redemptionData.addLine1 || '',
                 address_line_2: redemptionData.addLine2 || '',
@@ -349,6 +349,12 @@ const fetchRedemptionDetails = async () => {
         loading.value = false;
     }
 };
+
+const parseDate = (dateStr) => {
+                if (!dateStr) return '';
+                const [day, month, year] = dateStr.split('-');
+                return new Date(`${year}-${month}-${day}`);
+            };
 
 // Save Changes with FormData
 const saveChanges = async () => {
