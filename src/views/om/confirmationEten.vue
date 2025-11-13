@@ -761,9 +761,9 @@ async function handleSubmit() {
             
             if (response.data.custAccountNo) {
                 // router.push('/om/detailEten/' + response.data.custAccountNo);
-                router.push('/om/etenList');
+                router.push('/om/listEten');
             } else {
-                router.push('/om/etenList');
+                router.push('/om/listEten');
             }
         } else {
             let errorMsg = 'Duplicate entry or an error occurred.';

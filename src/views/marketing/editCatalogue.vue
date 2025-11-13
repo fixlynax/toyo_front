@@ -1,9 +1,7 @@
 <template>
     <Fluid>
         <div class="flex flex-col md:flex-row gap-8">
-            <!-- ======================== -->
-            <!-- Catalogue Edit Section   -->
-            <!-- ======================== -->
+     
             <div class="card flex flex-col gap-6 w-full">
                 <!-- Header -->
                 <div class="text-2xl font-bold text-gray-800 border-b pb-2">Edit Catalogue</div>
@@ -11,32 +9,91 @@
                 <!-- Type & Birthday -->
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4 md:col-span-2">
                     <div>
-                        <label class="block font-bold text-gray-700 mb-1">Type</label>
-                        <Dropdown v-model="catalogue.type" :options="typeOptions" optionLabel="label" disabled optionValue="value" placeholder="Select a type" class="w-full" />
+                        <label class="block font-bold text-gray-700 mb-1">Type *</label>
+                        <Dropdown v-model="catalogue.type" :options="typeOptions" optionLabel="label" optionValue="value" disabled placeholder="Select a type" class="w-full" />
+                        <small v-if="errors.type" class="text-red-500">{{ errors.type }}</small>
                     </div>
                     <div>
-                        <label class="block font-bold text-gray-700 mb-1">Is Birthday?</label>
-                        <Dropdown v-model="catalogue.isBirthday" :options="isBirthday" optionLabel="label" optionValue="value" placeholder="Select an option" class="w-full" />
-                    </div>
-                </div>
-                <!-- catalogue Form -->
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <!-- Title -->
-                    <div class="md:col-span-1">
-                        <label class="block font-bold text-gray-700 mb-1">Title</label>
-                        <InputText v-model="catalogue.title" class="w-full" />
+                        <label class="block font-bold text-gray-700 mb-1">Is Birthday? *</label>
+                        <Dropdown v-model="catalogue.isBirthday" :options="isBirthdayOptions" optionLabel="label" optionValue="value" placeholder="Select an option" class="w-full" />
+                        <small v-if="errors.isBirthday" class="text-red-500">{{ errors.isBirthday }}</small>
                     </div>
 
-                    <!-- SKU -->
+                    <!-- Quantity for ITEM and EVOUCHER -->
+                    <div v-if="catalogue.type === 'ITEM' || catalogue.type === 'EVOUCHER'">
+                        <label class="block font-bold text-gray-700 mb-1">Quantity *</label>
+                        <InputNumber v-model="catalogue.quantity" placeholder="Enter quantity" class="w-full" :min="1" />
+                        <small v-if="errors.quantity" class="text-red-500">{{ errors.quantity }}</small>
+                    </div>
+
+                    <!-- Provider for EVOUCHER -->
+                    <div v-if="catalogue.type === 'EVOUCHER'">
+                        <label class="block font-bold text-gray-700 mb-1">Provider</label>
+                        <InputText v-model="catalogue.provider" placeholder="Enter provider name" class="w-full" />
+                    </div>
+
+                    <!-- Value Type for EVOUCHER and EWALLET -->
+                    <div v-if="catalogue.type === 'EVOUCHER' || catalogue.type === 'EWALLET'">
+                        <label class="block font-bold text-gray-700 mb-1">Value Type *</label>
+                        <Dropdown v-model="catalogue.valueType" :options="valueTypeOptions" optionLabel="label" optionValue="value" placeholder="Select an option" class="w-full" />
+                        <small v-if="errors.valueType" class="text-red-500">{{ errors.valueType }}</small>
+                    </div>
+
+                    <!-- Value Amount for EVOUCHER -->
+                    <div v-if="catalogue.type === 'EVOUCHER'">
+                        <label class="block font-bold text-gray-700 mb-1">Value Amount *</label>
+                        <div>
+                            <InputNumber v-if="catalogue.valueType !== 'PERCENTAGE'" v-model="catalogue.valueAmount" placeholder="Enter Amount" class="w-full" :min="0" />
+                            <div v-else class="flex items-center gap-2">
+                                <InputNumber v-model="catalogue.valueAmount" placeholder="Enter Percentage" :min="0" :max="100" class="w-full" />
+                                <span class="text-gray-600">%</span>
+                            </div>
+                        </div>
+                        <small v-if="errors.valueAmount" class="text-red-500">{{ errors.valueAmount }}</small>
+                    </div>
+                </div>
+
+                <!-- catalogue Form -->
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <!-- Purpose To & Expiry -->
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 md:col-span-2">
+                        <div>
+                            <label class="block font-bold text-gray-700 mb-1">Purpose To</label>
+                            <Dropdown v-model="catalogue.purpose" :options="purposeOptions" optionLabel="label" optionValue="value" placeholder="Select an option" class="w-full" />
+                        </div>
+                        <div>
+                            <label class="block font-bold text-gray-700 mb-1">Expiry *</label>
+                            <Calendar v-model="catalogue.expiry" dateFormat="dd-mm-yy" showIcon class="w-full" />
+                            <small v-if="errors.expiry" class="text-red-500">{{ errors.expiry }}</small>
+                        </div>
+                    </div>
+                    
+                    <!-- Title -->
                     <div>
-                        <label class="block font-bold text-gray-700 mb-1">SKU</label>
+                        <label class="block font-bold text-gray-700 mb-1">Title *</label>
+                        <InputText v-model="catalogue.title" class="w-full" />
+                        <small v-if="errors.title" class="text-red-500">{{ errors.title }}</small>
+                    </div>
+
+                    <!-- SKU - Only for ITEM type -->
+                    <div v-if="catalogue.type === 'ITEM'">
+                        <label class="block font-bold text-gray-700 mb-1">SKU *</label>
                         <InputText v-model="catalogue.sku" class="w-full" />
+                        <small v-if="errors.sku" class="text-red-500">{{ errors.sku }}</small>
+                    </div>
+                    <div v-else>
+                        <!-- Hidden spacer to maintain layout -->
+                        <div class="invisible">
+                            <label class="block font-bold text-gray-700 mb-1">SKU</label>
+                            <InputText class="w-full" />
+                        </div>
                     </div>
 
                     <!-- Description -->
                     <div class="md:col-span-2">
-                        <label class="block font-bold text-gray-700">Description</label>
+                        <label class="block font-bold text-gray-700">Description *</label>
                         <Textarea v-model="catalogue.description" class="w-full" />
+                        <small v-if="errors.description" class="text-red-500">{{ errors.description }}</small>
                     </div>
 
                     <!-- Terms & Instructions -->
@@ -50,16 +107,26 @@
                             <Textarea v-model="catalogue.instruction" class="w-full" />
                         </div>
                     </div>
+                </div>
 
-                    <!-- Purpose To & Publish Date -->
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 md:col-span-2">
+                <!-- Point Configuration for All Types -->
+                <div class="card flex flex-col gap-6 w-full mt-8">
+                    <div class="text-xl font-bold text-gray-800 border-b pb-2">🏆 Point Configuration *</div>
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
                         <div>
-                            <label class="block font-bold text-gray-700 mb-1">Purpose To</label>
-                            <Dropdown v-model="catalogue.purpose" :options="purposeOptions" optionLabel="label" optionValue="value" placeholder="Select an option" class="w-full" />
+                            <label class="block font-bold text-gray-700 mb-1">Silver *</label>
+                            <InputNumber v-model="catalogue.point1" showButtons min="0" class="w-full" />
+                            <small v-if="errors.point1" class="text-red-500">{{ errors.point1 }}</small>
                         </div>
                         <div>
-                            <label class="block font-bold text-gray-700 mb-1">Expiry</label>
-                            <Calendar v-model="catalogue.expiry" class="w-full" />
+                            <label class="block font-bold text-gray-700 mb-1">Gold *</label>
+                            <InputNumber v-model="catalogue.point2" showButtons min="0" class="w-full" />
+                            <small v-if="errors.point2" class="text-red-500">{{ errors.point2 }}</small>
+                        </div>
+                        <div>
+                            <label class="block font-bold text-gray-700 mb-1">Platinum *</label>
+                            <InputNumber v-model="catalogue.point3" showButtons min="0" class="w-full" />
+                            <small v-if="errors.point3" class="text-red-500">{{ errors.point3 }}</small>
                         </div>
                     </div>
                 </div>
@@ -69,242 +136,278 @@
                     <label class="block font-bold text-gray-700 mb-2">Catalogue Images</label>
                     <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
                         <div class="relative">
-                            <FileUpload mode="basic" name="image1" accept="image/*" customUpload @select="onImageSelect($event, 'image1URL')" chooseLabel="Change Image 1" class="w-full" />
+                            <FileUpload mode="basic" name="image1" accept="image/*" 
+                                @select="onImageSelect" 
+                                chooseLabel="Change Image" class="w-full" />
                             <div v-if="catalogue.image1URL" class="relative mt-2">
                                 <img :src="catalogue.image1URL" alt="Preview 1" class="rounded-lg shadow-md object-cover w-full h-80" />
-                                <button @click="removeImage('image1URL')" class="absolute top-2 right-2 bg-red-500 text-white px-2 py-1 rounded-full hover:bg-red-600" title="Remove Image">&times;</button>
+                                <button @click="removeImage" class="absolute top-2 right-2 bg-red-500 text-white px-2 py-1 rounded-full hover:bg-red-600" title="Remove Image">&times;</button>
                             </div>
                         </div>
                     </div>
                 </div>
-                <!-- Submit -->
+
+                <!-- Submit Buttons -->
                 <div class="flex justify-end mt-8 gap-2">
                     <div class="w-40">
                         <Button label="Cancel" class="p-button-secondary w-full mr-2" @click="$router.back()" />
                     </div>
                     <div class="w-40">
-                        <Button label="Submit" class="w-full" @click="$router.back()" />
+                        <Button label="Submit" class="w-full" @click="submitCatalogue" :loading="loading" />
                     </div>
                 </div>
             </div>
         </div>
-
-        <!-- ======================== -->
-        <!-- Birthday Reward Section  -->
-        <!-- ======================== -->
-        <!-- <div v-if="catalogue.isBirthday === 1" class="mt-8">
-            <div class="card flex flex-col w-full">
-                <div class="flex items-center justify-between border-b pb-2 mb-2">
-                    <div class="text-2xl font-bold text-gray-800">🎂 Birthday Reward</div>
-                </div>
-
-                <div class="p-4 text-gray-600">
-                    <div class="mb-4">
-                        <label class="block font-bold text-gray-700 mb-1">Reward Type</label>
-                        <Dropdown v-model="catalogue.birthdayReward.type" :options="birthdayRewardTypeOptions" optionLabel="label" optionValue="value" placeholder="Select reward type" class="w-full" />
-                    </div> -->
-
-        <!-- If Points -->
-        <!-- <div v-if="catalogue.birthdayReward.type === 'Points'" class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                        <div>
-                            <label class="block font-bold text-gray-700 mb-1">Silver Tier Points</label>
-                            <InputNumber v-model="catalogue.birthdayReward.points.silver" class="w-full" />
-                        </div>
-                        <div>
-                            <label class="block font-bold text-gray-700 mb-1">Gold Tier Points</label>
-                            <InputNumber v-model="catalogue.birthdayReward.points.gold" class="w-full" />
-                        </div>
-                        <div>
-                            <label class="block font-bold text-gray-700 mb-1">Platinum Tier Points</label>
-                            <InputNumber v-model="catalogue.birthdayReward.points.platinum" class="w-full" />
-                        </div>
-                    </div> -->
-
-        <!-- If Reward -->
-        <!-- <div v-else-if="catalogue.birthdayReward.type === 'Reward'" class="mt-4">
-                        <label class="block font-bold text-gray-700 mb-1">Select Reward Item</label>
-                        <Dropdown v-model="catalogue.birthdayReward.itemId" :options="rewardItems" optionLabel="title" optionValue="id" placeholder="Select a reward item" class="w-full" />
-                    </div>
-                </div>
-            </div>
-        </div> -->
     </Fluid>
 </template>
 
 <script setup>
 import { ref, computed, onMounted } from 'vue';
+import { useRoute, useRouter } from 'vue-router';
+import { useToast } from 'primevue/usetoast';
+import api from '@/service/api';
 
+const route = useRoute();
+const router = useRouter();
+const toast = useToast();
+const loading = ref(false);
+const errors = ref({});
+
+// Dropdown options
 const typeOptions = [
-    { label: 'E-Wallet', value: 'E-Wallet' },
-    { label: 'E-Voucher', value: 'E-Voucher' },
-    { label: 'Item', value: 'Item' }
+  { label: 'E-Wallet', value: 'EWALLET' },
+  { label: 'E-Voucher', value: 'EVOUCHER' },
+  { label: 'Item', value: 'ITEM' },
 ];
 
-const isBirthday = [
-    { label: 'Yes', value: 1 },
-    { label: 'No', value: 0 }
+const isBirthdayOptions = [
+  { label: 'Yes', value: 'YES' },
+  { label: 'No', value: 'NO' },
+];
+
+const valueTypeOptions = [
+  { label: 'Percentage', value: 'PERCENTAGE' },
+  { label: 'Amount', value: 'AMOUNT' },
 ];
 
 const purposeOptions = [
-    { label: 'Catalogue', value: 'Catalogue' },
-    { label: 'Campaign', value: 'Campaign' },
-    { label: 'Game', value: 'Game' }
+  { label: 'Catalog', value: 'CATALOG' },
+  { label: 'Campaign', value: 'CAMPAIGN' },
+  { label: 'Game', value: 'GAME' },
 ];
 
-const valueOptions = [
-    { label: 'Amount', value: 'Amount' },
-    { label: 'Percentage', value: 'Percentage' }
-];
-
-const birthdayRewardTypeOptions = [
-    { label: 'Points', value: 'Points' },
-    { label: 'Reward', value: 'Reward' }
-];
-
-const rewardItems = [
-    { id: 1, title: 'Touch ’n Go Reload RM20' },
-    { id: 2, title: 'Starbucks Voucher RM10' },
-    { id: 3, title: 'Grab Food Credit RM15' }
-];
-
-/**
- * Catalogue Data
- * PINs are stored decoded (plain text) in `catalogue.value.pins`
- */
+// Form data
 const catalogue = ref({
-    id: 1,
-    type: 'E-Voucher', // or 'E-Voucher'
-    image1URL: 'https://assets.bharian.com.my/images/articles/tng13jan_BHfield_image_socialmedia.var_1610544082.jpg',
-    title: 'Touch ’n Go Reload RM20',
-    sku: 'TNG20',
-    valueType: 'Amount',
-    valueAmount: 20,
-    description: 'Reload your Touch ’n Go eWallet instantly with RM20 credit.',
-    terms: 'Valid for registered TNG accounts only.',
-    instruction: 'Provide TNG eWallet number during redemption.',
-    point1: 200,
-    point2: 180,
-    point3: 150,
-    purpose: 'Catalogue',
-    status: 1,
-    expiry: '2025-06-15',
-    usedPins: 2,
-    totalqty: 5,
-    isBirthday: 1,
-
-    // PINs will be stored in plain text
-    pins: [],
-
-    birthdayReward: {
-        type: 'Points',
-        points: {
-            silver: 0,
-            gold: 0,
-            platinum: 0
-        },
-        itemId: null
-    },
-
-    vouchers: [],
-    usedVouchers: 0,
-    totalVouchers: 0
+  id: null,
+  title: '',
+  description: '',
+  purpose: '',
+  type: '',
+  isBirthday: 'NO',
+  sku: '',
+  terms: '',
+  instruction: '',
+  expiry: null,
+  quantity: '',
+  provider: '',
+  valueType: '',
+  valueAmount: '',
+  point1: 0,
+  point2: 0,
+  point3: 0,
+  image1URL: '',
 });
 
-const loading = ref(false);
+const imageFile = ref(null);
 
-/**
- * Utility: Encode text to Base64 and remove trailing '='
- */
-const encodeBase64NoPadding = (text) => {
-    return btoa(text).replace(/=+$/, '');
-};
+onMounted(async () => {
+  await fetchCatalogueDetails();
+});
 
-/**
- * Utility: Decode Base64 string safely by adding back '=' padding
- */
-const decodeBase64WithPadding = (encoded) => {
-    const pad = encoded.length % 4;
-    if (pad) {
-        encoded += '='.repeat(4 - pad);
+// Fetch catalogue details for pre-filling
+const fetchCatalogueDetails = async () => {
+  loading.value = true;
+  try {
+    const catalogueId = route.params.id;
+    const response = await api.get(`catalog/details/${catalogueId}`);
+    
+    if (response.data.status === 1 && response.data.admin_data) {
+      const data = response.data.admin_data;
+      
+      // Map API data to form structure
+      catalogue.value = {
+        id: data.id,
+        title: data.title || '',
+        description: data.description || '',
+        purpose: data.purpose || '',
+        type: data.type || '',
+        isBirthday: data.isBirthday === 1 ? 'YES' : 'NO',
+        sku: data.sku || '',
+        terms: data.terms || '',
+        instruction: data.instruction || '',
+        expiry: formatDateForCalendar(data.expiry),
+        quantity: data.totalqty || '',
+        provider: data.provider || '',
+        valueType: data.valueType || '',
+        valueAmount: data.valueAmount || '',
+        point1: data.point1 || 0,
+        point2: data.point2 || 0,
+        point3: data.point3 || 0,
+        image1URL: '',
+      };
+
+      // Process image URL
+      if (data.imageURL) {
+        try {
+          const blobUrl = await api.getPrivateFile(data.imageURL);
+          catalogue.value.image1URL = blobUrl;
+        } catch (error) {
+          console.error('Error loading catalogue image:', error);
+          catalogue.value.image1URL = data.imageURL;
+        }
+      }
+      
+    } else {
+      throw new Error('Invalid response format');
     }
-    return atob(encoded);
+  } catch (error) {
+    console.error('Error fetching catalogue details:', error);
+    toast.add({
+      severity: 'error',
+      summary: 'Error',
+      detail: 'Failed to load catalogue details',
+      life: 3000
+    });
+  } finally {
+    loading.value = false;
+  }
 };
 
-/**
- * Computed property:
- * Show encoded PINs in UI while keeping storage plain text
- */
-const encodedPins = computed(() => {
-    return catalogue.value.pins.map((pin) => ({
-        ...pin,
-        pin: encodeBase64NoPadding(pin.pin) // Encode only for display
-    }));
-});
-
-/**
- * Load sample PINs into storage as plain text
- */
-const loadPins = () => {
-    const decodedRawPins = [
-        { id: 1, pin: '1234-5678-9011', pinExpiryDate: '2025-12-31', pinUsedDate: '2025-12-31', pinUsedStatus: true },
-        { id: 2, pin: '9876-5432-1098', pinExpiryDate: '2025-11-30', pinUsedDate: '2025-05-22', pinUsedStatus: false },
-        { id: 3, pin: '5555-2222-3333', pinExpiryDate: '2025-10-31', pinUsedDate: null, pinUsedStatus: false },
-        { id: 4, pin: '3757-5432-5669', pinExpiryDate: '2025-11-30', pinUsedDate: '2025-12-31', pinUsedStatus: true },
-        { id: 5, pin: '4444-6666-7777', pinExpiryDate: '2025-11-30', pinUsedDate: null, pinUsedStatus: false }
-    ];
-
-    // Store plain text pins
-    catalogue.value.pins = decodedRawPins;
+// Convert date from API format (DD-MM-YYYY) to Calendar format
+const formatDateForCalendar = (dateString) => {
+  if (!dateString) return null;
+  try {
+    const [day, month, year] = dateString.split('-');
+    return new Date(`${year}-${month}-${day}`);
+  } catch (error) {
+    console.error('Error formatting date:', error);
+    return null;
+  }
 };
 
-/**
- * Download pins as plain JSON (decoded)
- */
-const downloadPins = () => {
-    const dataStr = JSON.stringify(catalogue.value.pins, null, 2); // plain text
-    const blob = new Blob([dataStr], { type: 'application/json' });
-    const url = URL.createObjectURL(blob);
-
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = 'pins.json';
-    a.click();
-    URL.revokeObjectURL(url);
-};
-
-/**
- * Import pins (JSON format)
- */
-const importPins = () => {
-    alert('Import PIN logic goes here.');
-};
-
-onMounted(() => {
-    loadPins();
-});
-
-// Handle Upload and Remove Image
-/**
- * Handle image selection from PrimeVue FileUpload
- * @param {Object} event - PrimeVue FileUpload event
- * @param {String} property - The target property in catalogue (e.g., 'image1URL')
- */
-const onImageSelect = (event, property) => {
-    const file = event.files ? event.files[0] : null;
-    if (!file) return;
-
+/* File Upload */
+const onImageSelect = (event) => {
+  const file = event.files[0];
+  if (file) {
     const reader = new FileReader();
-    reader.onload = (e) => {
-        catalogue.value[property] = e.target.result; // Update catalogue image preview
-    };
+    reader.onload = (e) => (catalogue.value.image1URL = e.target.result);
     reader.readAsDataURL(file);
+    imageFile.value = file;
+  }
 };
 
-/**
- * Remove the selected image
- * @param {String} property - The target property in catalogue (e.g., 'image1URL')
- */
-const removeImage = (property) => {
-    catalogue.value[property] = ''; // or null, depending on your preference
+const removeImage = () => {
+  catalogue.value.image1URL = '';
+  imageFile.value = null;
+};
+
+/* Format Date -> backend expects d-m-Y */
+const formatDate = (date) => {
+  if (!date) return '';
+  const d = new Date(date);
+  return `${String(d.getDate()).padStart(2, '0')}-${String(d.getMonth() + 1).padStart(2, '0')}-${d.getFullYear()}`;
+};
+
+/* Validation */
+const validateFields = () => {
+  errors.value = {};
+  const c = catalogue.value;
+
+  if (!c.type) errors.value.type = 'Type is required';
+  if (!c.isBirthday) errors.value.isBirthday = 'Is Birthday is required';
+  if (!c.title) errors.value.title = 'Title is required';
+  if (!c.description) errors.value.description = 'Description is required';
+  if (!c.expiry) errors.value.expiry = 'Expiry date is required';
+  if (c.point1 === '' || c.point1 === null) errors.value.point1 = 'Silver point is required';
+  if (c.point2 === '' || c.point2 === null) errors.value.point2 = 'Gold point is required';
+  if (c.point3 === '' || c.point3 === null) errors.value.point3 = 'Platinum point is required';
+
+  if (c.type === 'ITEM' && !c.sku) errors.value.sku = 'SKU is required';
+  if ((c.type === 'EVOUCHER' || c.type === 'ITEM') && (!c.quantity || c.quantity <= 0))
+    errors.value.quantity = 'Quantity is required';
+  if ((c.type === 'EVOUCHER' || c.type === 'EWALLET') && !c.valueType)
+    errors.value.valueType = 'Value Type is required';
+  if (c.type === 'EVOUCHER' && (!c.valueAmount || c.valueAmount <= 0))
+    errors.value.valueAmount = 'Value Amount is required';
+
+  return Object.keys(errors.value).length === 0;
+};
+
+/* Submit using FormData with append */
+const submitCatalogue = async () => {
+  if (!validateFields()) {
+    toast.add({ severity: 'warn', summary: 'Validation', detail: 'Please fix all validation errors', life: 3000 });
+    return;
+  }
+
+  loading.value = true;
+  try {
+    const c = catalogue.value;
+    const formData = new FormData();
+
+    // Append all required fields using FormData
+    formData.append('type', c.type.toUpperCase());
+    formData.append('isBirthday', c.isBirthday.toUpperCase());
+    if (c.purpose) formData.append('purpose', c.purpose.toUpperCase());
+    formData.append('title', c.title);
+    formData.append('description', c.description);
+    formData.append('expiry', formatDate(c.expiry));
+    formData.append('point1', c.point1);
+    formData.append('point2', c.point2);
+    formData.append('point3', c.point3);
+
+    // Optional or conditional fields
+    if (c.terms) formData.append('terms', c.terms);
+    if (c.instruction) formData.append('instruction', c.instruction);
+    if (c.sku) formData.append('sku', c.sku);
+    if (c.quantity) formData.append('quantity', c.quantity);
+    if (c.provider) formData.append('provider', c.provider);
+    if (c.valueType) formData.append('valueType', c.valueType.toUpperCase());
+    if (c.valueAmount) formData.append('valueAmount', c.valueAmount);
+
+    // Handle image - if new image selected, append it; if removed, send empty string
+    if (imageFile.value) {
+      formData.append('image1', imageFile.value);
+    } else if (!catalogue.value.image1URL) {
+      // If image was removed, send empty string to delete it
+      formData.append('image1', '');
+    }
+
+    const response = await api.customRequest({
+      method: 'POST',
+      url: `/api/catalog/edit/${c.id}`,
+      data: formData,
+      headers: { 'Content-Type': 'multipart/form-data' },
+    });
+
+    if (response.data.status === 1) {
+      toast.add({ severity: 'success', summary: 'Success', detail: 'Catalogue updated successfully', life: 3000 });
+      router.push('/marketing/listCatalogue');
+    } else {
+      const message = response.data.error
+        ? Object.values(response.data.error).flat().join(', ')
+        : 'Failed to update catalogue';
+      toast.add({ severity: 'error', summary: 'Error', detail: message, life: 4000 });
+    }
+  } catch (error) {
+    console.error('API Error:', error);
+    const message =
+      error.response?.data?.message ||
+      Object.values(error.response?.data?.error || {}).flat().join(', ') ||
+      'Unexpected error occurred';
+    toast.add({ severity: 'error', summary: 'Error', detail: message, life: 4000 });
+  } finally {
+    loading.value = false;
+  }
 };
 </script>
