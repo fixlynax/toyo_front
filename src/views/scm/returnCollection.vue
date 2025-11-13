@@ -30,28 +30,12 @@
                             </InputIcon>
                             <InputText v-model="filters['global'].value" placeholder="Quick Search" class="w-full" />
                         </IconField>
-                        <Button type="button" icon="pi pi-cog" class="p-button" />
+                        <Button type="button" icon="pi pi-cog" @click="sortMenu.toggle($event)" />
+                        <!-- <Menu ref="sortMenu" :model="sortItems" :popup="true" /> -->
                     </div>
 
                     <!-- Right: Sorting Options -->
-                    <div class="flex items-center gap-2">
-                        <span class="text-sm font-medium whitespace-nowrap">Sort by:</span>
-                        <Dropdown
-                            :options="[
-                                { label: 'Request Date', value: 'requestDate' },
-                                { label: 'CTC Ref No', value: 'collectRef' },
-                                { label: 'Dealer Name', value: 'dealerName' },
-                                { label: 'Piece of Tires', value: 'totalTire' },
-                                { label: 'Status', value: 'status' }
-                            ]"
-                            optionLabel="label"
-                            optionValue="value"
-                            placeholder="Select Field"
-                            class="w-40"
-                        />
-                        <Button icon="pi pi-sort-amount-up" class="p-button-outlined p-button-secondary" v-tooltip="'Ascending'" />
-                        <Button icon="pi pi-sort-amount-down" class="p-button-outlined p-button-secondary" v-tooltip="'Descending'" />
-                    </div>
+
                 </div>
             </template>
 
@@ -135,24 +119,119 @@
 import { onMounted, ref } from 'vue';
 import { FilterMatchMode } from '@primevue/core/api';
 import { ListCollectionService } from '@/service/ListCollection';
+import api from '@/service/api';
 
 // Data variables
 const listData = ref([]);
-const loading = ref(true);
-
+const loading = ref(false);
+const collectionList = ref([]);
+const sortMenu = ref();
 // Filters for quick search
 const filters = ref({
     global: { value: null, matchMode: FilterMatchMode.CONTAINS }
 });
-
+const sortBy = (field, order) => {
+    collectionList.value.sort((a, b) => {
+        if (a[field] < b[field]) return order === 'asc' ? -1 : 1;
+        if (a[field] > b[field]) return order === 'asc' ? 1 : -1;
+        return 0;
+    });
+};
+const sortItems = ref([
+    {
+        label: 'Sort by Ref No (A-Z)',
+        icon: 'pi pi-sort-alpha-down',
+        command: () => sortBy('return_orderNo_ref', 'asc')
+    },
+    {
+        label: 'Sort by Ref No (Z-A)',
+        icon: 'pi pi-sort-alpha-up',
+        command: () => sortBy('return_orderNo_ref', 'desc')
+    },
+    {
+        label: 'Sort by Cust Acc No (A-Z)',
+        icon: 'pi pi-tag',
+        command: () => sortBy('custAccountNo', 'asc')
+    },
+    {
+        label: 'Sort by Company Name',
+        icon: 'pi pi-globe',
+        command: () => sortBy('companyName1', 'asc')
+    },
+    {
+        label: 'Sort by Status',
+        icon: 'pi pi-check-circle',
+        command: () => sortBy('orderstatus', 'asc')
+    }
+]);
 // =========================
 // Fetch data on mount
 // =========================
-onMounted(async () => {
+    onMounted(async () => {
     loading.value = true;
     listData.value = await ListCollectionService.getListCollectionData();
+        // fetchData();
     loading.value = false;
-});
+    });
+
+    function formatDate(dateString) {
+    if (!dateString) return '';
+    const date = new Date(dateString);
+    return date.toLocaleString('en-MY', {
+        year: 'numeric',
+        month: '2-digit',
+        day: '2-digit',
+    });
+    }
+    function formatTime(timeString) {
+    if (!timeString) return '';
+    const [hours, minutes, seconds] = timeString.split(':');
+    const date = new Date();
+    date.setHours(hours, minutes, seconds);
+    return date.toLocaleTimeString('en-MY', {
+        hour: '2-digit',
+        minute: '2-digit',
+        second: '2-digit',
+        hour12: true,
+    });
+    }
+    function formatDateFull(dateString) {
+    if (!dateString) return '';
+    const date = new Date(dateString);
+    return date.toLocaleString('en-MY', {
+        year: 'numeric',
+        month: '2-digit',
+        day: '2-digit',
+        hour: '2-digit',
+        minute: '2-digit',
+        second: '2-digit',
+        hour12: true
+    });
+    }
+const fetchData = async () => {
+    try {
+        loading.value = true;
+        const response = await api.get('scm-collection-list');
+        console.log('API Response:', response.data);
+        if (response.data.status === 1 && Array.isArray(response.data.admin_data)) {
+                    collectionList.value = response.data.admin_data.sort((a, b) => {
+                return new Date(b.created) - new Date(a.created);
+            });
+        } else {
+            console.error('API returned error or invalid data:', response.data);
+            collectionList.value = [];
+            filteredList.value = [];
+            toast.add({ severity: 'error', summary: 'Error', detail: 'Failed to load data', life: 3000 });
+        }
+    } catch (error) {
+        console.error('Error fetching product list:', error);
+        collectionList.value = [];
+        filteredList.value = [];
+        toast.add({ severity: 'error', summary: 'Error', detail: 'Failed to load data', life: 3000 });
+    } finally {
+        loading.value = false;
+    }
+};
 
 // =========================
 // Helper functions for status display
