@@ -92,17 +92,17 @@
             </Column>
             <Column field="created" header="Pickup Date" style="min-width: 10rem">
                 <template #body="{ data }">
-                    {{ data.delivery_information.pickup_datetime ? formatDate(data.delivery_information.pickup_datetime) : 'No date assigned' }}
+                    {{ data.delivery_information?.pickup_datetime ? formatDate(data.delivery_information.pickup_datetime) : 'No date assigned' }}
                 </template>
             </Column>
             <Column field="created" header="Receiving Date" style="min-width: 10rem">
                 <template #body="{ data }">
-                    {{ data.delivery_information.receive_datetime ? formatDate(data.delivery_information.receive_datetime) : 'No date assigned' }}
+                    {{ data.delivery_information?.receive_datetime ? formatDate(data.delivery_information.receive_datetime) : 'No date assigned' }}
                 </template>
             </Column>
             <Column field="length" header="Return Items" style="min-width: 12rem">
                 <template #body="{ data }">
-                        {{ data.return_order_array.length }}
+                        {{ data.return_order_array?.length || 0 }}
                 </template>
             </Column>
             <Column header="Status" style="min-width: 8rem">
@@ -142,7 +142,13 @@ const filters = ref({
 });
 
 const sortMenu = ref();
-            // :globalFilterFields="['return_orderNo_ref', 'custAccountNo', 'companyName1', 'created']">
+const sortBy = (field, order) => {
+    filteredList.value.sort((a, b) => {
+        if (a[field] < b[field]) return order === 'asc' ? -1 : 1;
+        if (a[field] > b[field]) return order === 'asc' ? 1 : -1;
+        return 0;
+    });
+};
 const sortItems = ref([
     {
         label: 'Sort by Ref No (A-Z)',
@@ -320,7 +326,9 @@ const fetchData = async () => {
         const response = await api.get('scm-return-order-list');
         console.log('API Response:', response.data);
         if (response.data.status === 1 && Array.isArray(response.data.admin_data)) {
-            returnList.value = response.data.admin_data;
+                returnList.value = response.data.admin_data.sort((a, b) => {
+        return new Date(b.created) - new Date(a.created);
+    });
             filterByTab();
         } else {
             console.error('API returned error or invalid data:', response.data);
