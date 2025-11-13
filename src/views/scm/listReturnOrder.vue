@@ -92,12 +92,12 @@
             </Column>
             <Column field="created" header="Pickup Date" style="min-width: 10rem">
                 <template #body="{ data }">
-                    {{ data.delivery_information.pickup_datetime ? formatDate(data.delivery_information.pickup_datetime) : 'No date assigned' }}
+                    {{ data.delivery_information?.pickup_datetime ? formatDate(data.delivery_information.pickup_datetime) : 'No date assigned' }}
                 </template>
             </Column>
             <Column field="created" header="Receiving Date" style="min-width: 10rem">
                 <template #body="{ data }">
-                    {{ data.delivery_information.receive_datetime ? formatDate(data.delivery_information.receive_datetime) : 'No date assigned' }}
+                    {{ data.delivery_information?.receive_datetime ? formatDate(data.delivery_information.receive_datetime) : 'No date assigned' }}
                 </template>
             </Column>
             <Column field="length" header="Return Items" style="min-width: 12rem">
