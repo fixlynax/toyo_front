@@ -310,7 +310,7 @@ import api from '@/service/api';
 const toast = useToast();
 
 // Constants
-const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB in bytes
+const MAX_FILE_SIZE = 2 * 1024 * 1024; // 10MB in bytes
 
 const salesProgram = ref({
     programID: '',
@@ -715,18 +715,19 @@ const submitForm = async () => {
         });
 
         if (response.data.status === 1) {
-            console.log('Sales program created successfully');
+            // console.log('Sales program created successfully');
             showSuccess('Sales program created successfully!');
             setTimeout(() => {
                 window.location.href = '/om/listSalesProgram';
             }, 1500);
         } else {
-            console.error('Error creating sales program:', response.data.error);
+            // console.error('Error creating sales program:', response.data.error);
             showError('Error creating sales program: ' + (response.data.error?.message || 'Unknown error'));
         }
     } catch (error) {
         console.error('Error submitting form:', error);
-        showError('Error submitting form: ' + (error.message || 'Please try again'));
+        // showError('Error submitting form: ' + (error.message || 'Please try again'));
+        showError('Error submitting form, please try again');
     } finally {
         submitting.value = false;
     }
