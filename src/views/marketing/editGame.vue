@@ -10,39 +10,60 @@
                     <div class="md:col-span-2">
                         <label class="block font-bold text-gray-700">Title</label>
                         <InputText v-model="game.title" class="w-full" />
+                        <small v-if="errors.title" class="text-red-500">{{ errors.title }}</small>
                     </div>
 
                     <div class="md:col-span-2">
                         <label class="block font-bold text-gray-700">Description</label>
-                        <Textarea v-model="game.desc" rows="3" class="w-full" />
+                        <Textarea v-model="game.description" rows="3" class="w-full" />
+                        <small v-if="errors.description" class="text-red-500">{{ errors.description }}</small>
                     </div>
+                </div>
 
-                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4 md:col-span-2">
-                        <div>
-                            <label class="block font-bold text-gray-700">Location</label>
-                            <InputText v-model="game.location" class="w-full" />
-                        </div>
-
-                        <div>
-                            <label class="block font-bold text-gray-700">Start Date</label>
-                            <Calendar v-model="game.startDate" dateFormat="yy-mm-dd" class="w-full" />
-                        </div>
-
-                        <div>
-                            <label class="block font-bold text-gray-700">End Date</label>
-                            <Calendar v-model="game.endDate" dateFormat="yy-mm-dd" class="w-full" />
-                        </div>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div>
+                        <label class="block font-bold text-gray-700">Location</label>
+                        <InputText v-model="game.location" class="w-full" />
+                        <small v-if="errors.location" class="text-red-500">{{ errors.location }}</small>
                     </div>
 
                     <div>
                         <label class="block font-bold text-gray-700">Quota Player</label>
                         <InputNumber v-model="game.quota" class="w-full" />
+                        <small v-if="errors.quota" class="text-red-500">{{ errors.quota }}</small>
                     </div>
 
                     <div>
                         <label class="block font-bold text-gray-700">Type Game</label>
                         <Dropdown v-model="game.type" :options="typeOptions" optionLabel="label" optionValue="value" class="w-full" />
+                        <small v-if="errors.type" class="text-red-500">{{ errors.type }}</small>
                     </div>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4 md:col-span-2">
+                    <div>
+                        <label class="block font-bold text-gray-700">Publish Date</label>
+                        <Calendar v-model="game.publishDate" showIcon dateFormat="dd-mm-yy" class="w-full" />
+                        <small v-if="errors.publishDate" class="text-red-500">{{ errors.publishDate }}</small>
+                    </div>
+                    <div>
+                        <label class="block font-bold text-gray-700">Start Date</label>
+                        <Calendar v-model="game.startDate" showIcon dateFormat="dd-mm-yy" class="w-full" />
+                        <small v-if="errors.startDate" class="text-red-500">{{ errors.startDate }}</small>
+                    </div>
+
+                    <div>
+                        <label class="block font-bold text-gray-700">End Date</label>
+                        <Calendar v-model="game.endDate" showIcon dateFormat="dd-mm-yy" class="w-full" />
+                        <small v-if="errors.endDate" class="text-red-500">{{ errors.endDate }}</small>
+                    </div>
+                </div>
+
+                <!-- TNC Section -->
+                <div class="md:col-span-2">
+                    <label class="block font-bold text-gray-700">Terms & Conditions</label>
+                    <Textarea v-model="game.tnc" rows="3" class="w-full" />
+                    <small v-if="errors.tnc" class="text-red-500">{{ errors.tnc }}</small>
                 </div>
 
                 <!-- Upload Images -->
@@ -50,29 +71,57 @@
                     <label class="block font-bold text-gray-700 mb-2">Upload Game Images</label>
                     <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
                         <div class="relative">
-                            <FileUpload mode="basic" name="image1" accept="image/*" customUpload @select="onImageSelect($event, 'image1URL')" chooseLabel="Change Image 1" class="w-full" />
+                            <FileUpload mode="basic" name="image1" accept="image/*" customUpload @select="onImageSelect($event, 'image1')" chooseLabel="Change Image 1" class="w-full" />
                             <div v-if="game.image1URL" class="relative mt-2">
                                 <img :src="game.image1URL" alt="Preview 1" class="rounded-lg shadow-md object-cover w-full h-60" />
-                                <button @click="removeImage('image1URL')" class="absolute top-2 right-2 bg-red-500 text-white px-2 py-1 rounded-full hover:bg-red-600">&times;</button>
+                                <button @click="removeImage('image1')" class="absolute top-2 right-2 bg-red-500 text-white px-2 py-1 rounded-full hover:bg-red-600">&times;</button>
                             </div>
+                            <small v-if="errors.image1" class="text-red-500">{{ errors.image1 }}</small>
                         </div>
 
                         <div class="relative">
-                            <FileUpload mode="basic" name="image2" accept="image/*" customUpload @select="onImageSelect($event, 'image2URL')" chooseLabel="Change Image 2" class="w-full" />
+                            <FileUpload mode="basic" name="image2" accept="image/*" customUpload @select="onImageSelect($event, 'image2')" chooseLabel="Change Image 2" class="w-full" />
                             <div v-if="game.image2URL" class="relative mt-2">
                                 <img :src="game.image2URL" alt="Preview 2" class="rounded-lg shadow-md object-cover w-full h-60" />
-                                <button @click="removeImage('image2URL')" class="absolute top-2 right-2 bg-red-500 text-white px-2 py-1 rounded-full hover:bg-red-600">&times;</button>
+                                <button @click="removeImage('image2')" class="absolute top-2 right-2 bg-red-500 text-white px-2 py-1 rounded-full hover:bg-red-600">&times;</button>
                             </div>
+                            <small v-if="errors.image2" class="text-red-500">{{ errors.image2 }}</small>
                         </div>
 
                         <div class="relative">
-                            <FileUpload mode="basic" name="image3" accept="image/*" customUpload @select="onImageSelect($event, 'image3URL')" chooseLabel="Change Image 3" class="w-full" />
+                            <FileUpload mode="basic" name="image3" accept="image/*" customUpload @select="onImageSelect($event, 'image3')" chooseLabel="Change Image 3" class="w-full" />
                             <div v-if="game.image3URL" class="relative mt-2">
                                 <img :src="game.image3URL" alt="Preview 3" class="rounded-lg shadow-md object-cover w-full h-60" />
-                                <button @click="removeImage('image3URL')" class="absolute top-2 right-2 bg-red-500 text-white px-2 py-1 rounded-full hover:bg-red-600">&times;</button>
+                                <button @click="removeImage('image3')" class="absolute top-2 right-2 bg-red-500 text-white px-2 py-1 rounded-full hover:bg-red-600">&times;</button>
                             </div>
+                            <small v-if="errors.image3" class="text-red-500">{{ errors.image3 }}</small>
                         </div>
                     </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 💎 Point Section -->
+        <div class="card flex flex-col w-full mt-8">
+            <div class="flex items-center justify-between border-b pb-2 mb-4">
+                <div class="text-xl font-bold text-gray-800">💎 Point Configuration</div>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div>
+                    <label class="block font-bold text-gray-700">Silver Points</label>
+                    <InputNumber v-model="game.point1" class="w-full" />
+                    <small v-if="errors.point1" class="text-red-500">{{ errors.point1 }}</small>
+                </div>
+                <div>
+                    <label class="block font-bold text-gray-700">Gold Points</label>
+                    <InputNumber v-model="game.point2" class="w-full" />
+                    <small v-if="errors.point2" class="text-red-500">{{ errors.point2 }}</small>
+                </div>
+                <div>
+                    <label class="block font-bold text-gray-700">Platinum Points</label>
+                    <InputNumber v-model="game.point3" class="w-full" />
+                    <small v-if="errors.point3" class="text-red-500">{{ errors.point3 }}</small>
                 </div>
             </div>
         </div>
@@ -98,7 +147,9 @@
                             <Dropdown v-model="prize.selected" :options="listPrize" optionLabel="prizeName" placeholder="Select a prize" class="w-full">
                                 <template #option="slotProps">
                                     <div class="flex items-center gap-3">
-                                        <img :src="slotProps.option.imageURL" class="w-28 h-16 object-cover rounded" />
+                                        <div class="w-28 h-16 flex items-center justify-center bg-gray-100 rounded border">
+                                            <img :src="slotProps.option.processedImageURL" :alt="slotProps.option.prizeName" class="max-w-full max-h-full object-contain" @load="onImageLoad" @error="onImageError" />
+                                        </div>
                                         <div class="flex flex-col">
                                             <span class="font-semibold text-gray-800">{{ slotProps.option.prizeName }}</span>
                                             <small class="text-gray-500">{{ slotProps.option.prizeType }}</small>
@@ -107,7 +158,9 @@
                                 </template>
                                 <template #value="slotProps">
                                     <div v-if="slotProps.value" class="flex items-center gap-3">
-                                        <img :src="slotProps.value.imageURL" class="w-8 h-8 object-cover rounded" />
+                                        <div class="w-8 h-8 flex items-center justify-center bg-gray-100 rounded border">
+                                            <img :src="slotProps.value.processedImageURL" :alt="slotProps.value.prizeName" class="max-w-full max-h-full object-contain" />
+                                        </div>
                                         <div>
                                             <span class="font-semibold text-gray-800">{{ slotProps.value.prizeName }}</span>
                                             <small class="block text-gray-500">{{ slotProps.value.prizeType }}</small>
@@ -116,6 +169,7 @@
                                     <span v-else class="text-gray-400">Select Prize</span>
                                 </template>
                             </Dropdown>
+                            <small v-if="errors[`prize_${index}`]" class="text-red-500">{{ errors[`prize_${index}`] }}</small>
                         </div>
 
                         <!-- Quantity (1/3 with FloatLabel) -->
@@ -124,6 +178,7 @@
                                 <InputNumber id="qty" v-model="prize.qty" :min="1" class="w-full" />
                                 <label for="qty">Quantity</label>
                             </FloatLabel>
+                            <small v-if="errors[`qty_${index}`]" class="text-red-500">{{ errors[`qty_${index}`] }}</small>
                         </div>
                     </div>
                 </div>
@@ -142,7 +197,7 @@
                     <Button label="Cancel" class="p-button-secondary w-full mr-2" @click="$router.back()" />
                 </div>
                 <div class="w-40">
-                    <Button label="Update" class="w-full" @click="updateForm" />
+                    <Button label="Update" class="w-full" @click="updateGame" :loading="loading" />
                 </div>
             </div>
         </div>
@@ -150,39 +205,231 @@
 </template>
 
 <script setup>
-import { ref } from 'vue';
+import { ref, onMounted } from 'vue';
+import { useRoute, useRouter } from 'vue-router';
+import { useToast } from 'primevue/usetoast';
+import api from '@/service/api';
+
+const route = useRoute();
+const router = useRouter();
+const toast = useToast();
+const loading = ref(false);
+const gameId = route.params.id;
 
 const game = ref({
-    id: 1,
-    title: 'Toyo Tires Lucky Spin',
-    desc: 'Spin the wheel and win exclusive prizes sponsored by Toyo Tires!',
-    location: 'Kuala Lumpur Convention Centre',
-    startDate: '2025-03-01',
-    endDate: '2025-03-10',
-    quota: 200,
-    type: 'Spin',
-    image1URL: '/demo/images/event-toyo-1.jpg',
-    image2URL: '/demo/images/event-toyo-2.jpg',
-    image3URL: '/demo/images/event-toyo-3.jpg'
+    title: '',
+    description: '',
+    location: '',
+    publishDate: '',
+    startDate: '',
+    endDate: '',
+    quota: null,
+    type: 'sPiN',
+    point1: null,
+    point2: null,
+    point3: null,
+    tnc: '',
+    image1URL: '',
+    image2URL: '',
+    image3URL: ''
 });
 
+const imageFiles = ref({
+    image1: null,
+    image2: null,
+    image3: null
+});
+
+const errors = ref({});
+
 const typeOptions = [
-    { label: 'Spin', value: 'Spin' },
-    { label: 'Random', value: 'Random' }
+    { label: 'Spin', value: 'sPiN' },
+    { label: 'Random', value: 'RANdom' }
 ];
 
 // 🎁 Prize List Dropdown Data
-const listPrize = ref([
-    { id: 1, imageURL: '/demo/images/bonus-point.png', prizeName: 'Bonus Point Toyo', prizeType: 'Point', prizeQuota: 50, prizeRemain: 20 },
-    { id: 2, imageURL: 'https://assets.bharian.com.my/images/articles/tng13jan_BHfield_image_socialmedia.var_1610544082.jpg', prizeName: 'MYR 50 E-Wallet', prizeType: 'E-Wallet', prizeQuota: 100, prizeRemain: 40 },
-    { id: 3, imageURL: 'https://assets.offgamers.com/img/offer/kr_fdf75033-56ee-4ce6-929c-1f9c93a4c642_1b1c60fc-e950-4c62-8ee7-471d42484619.webp', prizeName: 'Shopee E-Voucher', prizeType: 'E-Voucher', prizeQuota: 30, prizeRemain: 10 },
-    { id: 4, imageURL: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRdSHDEYMxmOB1Z63V0UB1ohMHGZ5cs5DG4zg&s', prizeName: 'Toyo Tumbler', prizeType: 'Item', prizeQuota: 15, prizeRemain: 5 }
-]);
+const listPrize = ref([]);
+const prizes = ref([]);
 
-const prizes = ref([
-    { selected: { prizeName: 'Bonus Point Toyo', prizeType: 'Point', imageURL: '/demo/images/bonus-point.png' }, qty: 5 },
-    { selected: { prizeName: 'Toyo Tumbler', prizeType: 'Item', imageURL: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRdSHDEYMxmOB1Z63V0UB1ohMHGZ5cs5DG4zg&s' }, qty: 2 }
-]);
+// Process private images using the API method
+const processCatalogueImages = async (catalogueItems) => {
+    const processedItems = [];
+
+    for (const item of catalogueItems) {
+        if (item.imageURL && typeof item.imageURL === 'string') {
+            try {
+                console.log('Processing private image:', item.imageURL);
+                const blobUrl = await api.getPrivateFile(item.imageURL);
+                if (blobUrl) {
+                    processedItems.push({
+                        ...item,
+                        processedImageURL: blobUrl
+                    });
+                } else {
+                    processedItems.push({
+                        ...item,
+                        processedImageURL: item.imageURL
+                    });
+                }
+            } catch (error) {
+                console.error(`Error loading catalogue image for ${item.prizeName}:`, error);
+                processedItems.push({
+                    ...item,
+                    processedImageURL: item.imageURL
+                });
+            }
+        } else {
+            processedItems.push({
+                ...item,
+                processedImageURL: 'https://via.placeholder.com/150x100?text=No+Image'
+            });
+        }
+    }
+
+    return processedItems;
+};
+
+// Image event handlers
+const onImageLoad = (event) => {
+    event.target.style.opacity = '1';
+};
+
+const onImageError = (event) => {
+    event.target.src = 'https://via.placeholder.com/150x100?text=Image+Error';
+    event.target.style.opacity = '1';
+    event.target.onerror = null;
+};
+
+const fetchCatalog = async () => {
+    try {
+        console.log('Fetching catalog...');
+        const response = await api.get('game/catalogs');
+        console.log('Catalog API response:', response.data);
+
+        if (response.data.status === 1) {
+            const transformedItems = (response.data.admin_data || []).map((item) => ({
+                id: item.id,
+                imageURL: item.imageURL,
+                prizeName: item.title,
+                prizeType: item.type,
+                prizeQuota: item.totalqty,
+                prizeRemain: item.availableqty,
+                description: item.description,
+                valueAmount: item.valueAmount,
+                valueType: item.valueType,
+                processedImageURL: null
+            }));
+
+            const processedItems = await processCatalogueImages(transformedItems);
+            listPrize.value = processedItems;
+        } else {
+            console.error('API returned status 0:', response.data);
+            toast.add({
+                severity: 'error',
+                summary: 'Error',
+                detail: 'Failed to load prize catalog',
+                life: 5000
+            });
+        }
+    } catch (error) {
+        console.error('Error fetching catalog:', error);
+        toast.add({
+            severity: 'error',
+            summary: 'Error',
+            detail: 'Failed to load prize catalog',
+            life: 5000
+        });
+    }
+};
+
+// Fetch game details for pre-filling
+const fetchGameDetails = async () => {
+    try {
+        loading.value = true;
+        const response = await api.get(`game/details/${gameId}`);
+
+        if (response.data.status === 1) {
+            const adminData = response.data.admin_data;
+            const gameDetails = adminData.game_details;
+
+            // Process game images
+            const processGameImages = async () => {
+                const imageFields = ['image1URL', 'image2URL', 'image3URL'];
+                for (const field of imageFields) {
+                    if (gameDetails[field] && typeof gameDetails[field] === 'string') {
+                        try {
+                            const blobUrl = await api.getPrivateFile(gameDetails[field]);
+                            if (blobUrl) {
+                                gameDetails[field] = blobUrl;
+                            }
+                        } catch (error) {
+                            console.error(`Error loading image ${field}:`, error);
+                        }
+                    }
+                }
+            };
+            const parseDate = (dateStr) => {
+                if (!dateStr) return '';
+                const [day, month, year] = dateStr.split('-');
+                return new Date(`${year}-${month}-${day}`);
+            };
+
+
+            await processGameImages();
+
+            // Map API data to form structure
+            game.value = {
+                title: gameDetails.title || '',
+                description: gameDetails.desc || '',
+                location: gameDetails.location || '',
+                publishDate: parseDate(gameDetails.publishDate),
+                startDate: parseDate(gameDetails.startDate),
+                endDate: parseDate(gameDetails.endDate),
+                quota: gameDetails.quota || null,
+                type: gameDetails.type || 'sPiN',
+                point1: gameDetails.point1 || null,
+                point2: gameDetails.point2 || null,
+                point3: gameDetails.point3 || null,
+                tnc: gameDetails.termCondition || '',
+                image1URL: gameDetails.image1URL || '',
+                image2URL: gameDetails.image2URL || '',
+                image3URL: gameDetails.image3URL || ''
+            };
+
+            // Transform prizes data
+            prizes.value = adminData.prizes.map((prize) => {
+                const catalogItem = listPrize.value.find(item => item.id === prize.catalog.id);
+                return {
+                    selected: catalogItem || {
+                        id: prize.catalog.id,
+                        prizeName: prize.catalog.title,
+                        prizeType: prize.catalog.type,
+                        processedImageURL: prize.catalog.imageURL
+                    },
+                    qty: prize.quantity || 1
+                };
+            });
+
+        } else {
+            toast.add({
+                severity: 'error',
+                summary: 'Error',
+                detail: 'Failed to fetch game details',
+                life: 5000
+            });
+        }
+    } catch (error) {
+        console.error('Error fetching game details:', error);
+        toast.add({
+            severity: 'error',
+            summary: 'Error',
+            detail: 'Error fetching game details',
+            life: 5000
+        });
+    } finally {
+        loading.value = false;
+    }
+};
 
 const addPrize = () => {
     prizes.value.push({
@@ -198,20 +445,184 @@ const removePrize = (index) => {
 const onImageSelect = (eventFile, field) => {
     const file = eventFile.files[0];
     if (file) {
+        imageFiles.value[field] = file;
+
         const reader = new FileReader();
         reader.onload = (e) => {
-            game.value[field] = e.target.result;
+            game.value[`${field}URL`] = e.target.result;
         };
         reader.readAsDataURL(file);
     }
 };
 
 const removeImage = (field) => {
-    game.value[field] = '';
+    game.value[`${field}URL`] = '';
+    imageFiles.value[field] = null;
 };
 
-const updateForm = () => {
-    console.log('Updated Game Data:', game.value);
-    console.log('Updated Prizes:', prizes.value);
+const formatDate = (date) => {
+    if (!date) return '';
+    const d = new Date(date);
+    const day = String(d.getDate()).padStart(2, '0');
+    const month = String(d.getMonth() + 1).padStart(2, '0');
+    const year = d.getFullYear();
+    return `${day}-${month}-${year}`;
 };
+
+const validateFields = () => {
+    errors.value = {};
+
+    // Basic field validation
+    if (!game.value.title.trim()) errors.value.title = 'Title is required';
+    if (!game.value.description.trim()) errors.value.description = 'Description is required';
+    if (!game.value.location.trim()) errors.value.location = 'Location is required';
+    if (!game.value.publishDate) errors.value.publishDate = 'Publish date is required';
+    if (!game.value.startDate) errors.value.startDate = 'Start date is required';
+    if (!game.value.endDate) errors.value.endDate = 'End date is required';
+    if (!game.value.quota || game.value.quota <= 0) errors.value.quota = 'Valid quota is required';
+    if (!game.value.type) errors.value.type = 'Game type is required';
+    if (!game.value.tnc.trim()) errors.value.tnc = 'Terms & Conditions are required';
+
+    // Points validation
+    if (game.value.point1 === null || game.value.point1 < 0) errors.value.point1 = 'Valid silver points are required';
+    if (game.value.point2 === null || game.value.point2 < 0) errors.value.point2 = 'Valid gold points are required';
+    if (game.value.point3 === null || game.value.point3 < 0) errors.value.point3 = 'Valid platinum points are required';
+
+    // Prize validation
+    prizes.value.forEach((prize, index) => {
+        if (!prize.selected) {
+            errors.value[`prize_${index}`] = 'Prize selection is required';
+        }
+        if (!prize.qty || prize.qty <= 0) {
+            errors.value[`qty_${index}`] = 'Valid quantity is required';
+        } else if (prize.selected && prize.qty > prize.selected.prizeRemain) {
+            errors.value[`qty_${index}`] = `Quantity exceeds available stock (${prize.selected.prizeRemain} available)`;
+        }
+    });
+
+    // Date validation
+    if (game.value.startDate && game.value.endDate) {
+        const start = new Date(game.value.startDate);
+        const end = new Date(game.value.endDate);
+        if (end < start) {
+            errors.value.endDate = 'End date cannot be before start date';
+        }
+    }
+
+    if (game.value.publishDate && game.value.startDate) {
+        const publish = new Date(game.value.publishDate);
+        const start = new Date(game.value.startDate);
+        if (start < publish) {
+            errors.value.startDate = 'Start date cannot be before publish date';
+        }
+    }
+
+    return Object.keys(errors.value).length === 0;
+};
+
+const updateGame = async () => {
+    if (!validateFields()) {
+        toast.add({
+            severity: 'error',
+            summary: 'Validation Error',
+            detail: 'Please fix all validation errors',
+            life: 5000
+        });
+        return;
+    }
+
+    loading.value = true;
+
+    try {
+        const formData = new FormData();
+
+        // Append basic fields using append()
+        formData.append('title', game.value.title);
+        formData.append('description', game.value.description);
+        formData.append('publishDate', formatDate(game.value.publishDate));
+        formData.append('startDate', formatDate(game.value.startDate));
+        formData.append('endDate', formatDate(game.value.endDate));
+        formData.append('quota', game.value.quota.toString());
+        formData.append('location', game.value.location);
+        formData.append('type', game.value.type);
+        formData.append('point1', game.value.point1.toString());
+        formData.append('point2', game.value.point2.toString());
+        formData.append('point3', game.value.point3.toString());
+        formData.append('tnc', game.value.tnc);
+
+        // Append image files - only if new files are selected
+        for (let i = 1; i <= 3; i++) {
+            const fieldName = `image${i}`;
+            if (imageFiles.value[fieldName]) {
+                formData.append(fieldName, imageFiles.value[fieldName]);
+            } else if (!game.value[`${fieldName}URL`]) {
+                // If image was removed, send empty string
+                formData.append(fieldName, '');
+            }
+        }
+
+        // Prepare prize selection array
+        const prizeSelection = prizes.value.map((prize) => ({
+            catalogID: prize.selected.id.toString(),
+            quantity: prize.qty.toString()
+        }));
+
+        // Append prize selection as JSON string
+        formData.append('prize_selection', JSON.stringify(prizeSelection));
+
+        // Use customRequest to send FormData with proper headers
+        const response = await api.customRequest({
+            method: 'POST',
+            url: `/api/game/edit/${gameId}`,
+            data: formData,
+            headers: {
+                'Content-Type': 'multipart/form-data'
+            }
+        });
+
+        if (response.data.status === 1) {
+            toast.add({
+                severity: 'success',
+                summary: 'Success',
+                detail: 'Game updated successfully!',
+                life: 3000
+            });
+            router.push('/marketing/listGame');
+        } else {
+            console.error('Backend error:', response.data);
+            toast.add({
+                severity: 'error',
+                summary: 'Error',
+                detail: response.data.messages ? Object.values(response.data.messages).flat().join(', ') : 'Failed to update game',
+                life: 5000
+            });
+        }
+    } catch (error) {
+        console.error('API Error:', error);
+        if (error.response?.data) {
+            console.error('Error response:', error.response.data);
+            toast.add({
+                severity: 'error',
+                summary: 'Error',
+                detail: error.response.data.messages ? Object.values(error.response.data.messages).flat().join(', ') : 'Something went wrong',
+                life: 5000
+            });
+        } else {
+            toast.add({
+                severity: 'error',
+                summary: 'Error',
+                detail: 'Network error or server unavailable',
+                life: 3000
+            });
+        }
+    } finally {
+        loading.value = false;
+    }
+};
+
+// Initialize data
+onMounted(async () => {
+    await fetchCatalog();
+    await fetchGameDetails();
+});
 </script>

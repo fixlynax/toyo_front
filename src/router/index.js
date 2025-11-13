@@ -360,9 +360,10 @@ const router = createRouter({
                     component: () => import('@/views/marketing/createGame.vue')
                 },
                 {
-                    path: 'marketing/editGame',
+                    path: 'marketing/editGame/:id',
                     name: 'Edit-Game',
-                    component: () => import('@/views/marketing/editGame.vue')
+                    component: () => import('@/views/marketing/editGame.vue'),
+                    props: true
                 },
 
                 // Redemptions
