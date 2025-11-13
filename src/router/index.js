@@ -373,9 +373,10 @@ const router = createRouter({
                     component: () => import('@/views/marketing/listRedemption.vue')
                 },
                 {
-                    path: 'marketing/detailRedemption',
+                    path: 'marketing/detailRedemption/:id',
                     name: 'Detail-Redemption',
-                    component: () => import('@/views/marketing/detailRedemption.vue')
+                    component: () => import('@/views/marketing/detailRedemption.vue'),
+                    props: true
                 },
                 {
                     path: 'marketing/editRedemption',
@@ -423,9 +424,10 @@ const router = createRouter({
                     props: true
                 },
                 {
-                    path: 'marketing/editCatalogue',
+                    path: 'marketing/editCatalogue/:id',
                     name: 'Edit-Catalogue',
-                    component: () => import('@/views/marketing/editCatalogue.vue')
+                    component: () => import('@/views/marketing/editCatalogue.vue'),
+                    props: true
                 },
                 {
                     path: 'marketing/createCatalogue',

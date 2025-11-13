@@ -8,41 +8,49 @@
                     <div class="flex items-center justify-between border-b pb-2">
                         <!-- Left Section: Title + Back Button -->
                         <div class="flex items-center gap-3">
-                            <RouterLink to="/marketing/listRedemption"> <Button icon="pi pi-arrow-left font-bold" class="p-button-text p-button-secondary text-xl" size="big" v-tooltip="'Back'" /> </RouterLink>
+                            <RouterLink to="/marketing/listRedemption"> 
+                                <Button icon="pi pi-arrow-left font-bold" class="p-button-text p-button-secondary text-xl" size="big" v-tooltip="'Back'" /> 
+                            </RouterLink>
                             <div class="text-2xl font-bold text-gray-800">🎁 Details Redemption</div>
                         </div>
 
                         <!-- Right Section: Edit & Delete Buttons -->
                         <div class="inline-flex items-center gap-2">
-                            <RouterLink to="/marketing/editRedemption">
+                            <RouterLink :to="`/marketing/editRedemption/${redemptionId}`">
                                 <Button label="Edit" class="p-button-info" size="small" />
                             </RouterLink>
                         </div>
                     </div>
 
-                    <!-- Recipient Info -->
-                    <div class="mt-2 grid grid-cols-2 gap-4">
-                        <div>
-                            <span class="block text-sm font-bold text-gray-700">Recipient</span>
-                            <p class="text-lg font-medium">{{ redemption.recipientName }}</p>
-                        </div>
-                        <div>
-                            <span class="block text-sm font-bold text-gray-700">Contact</span>
-                            <p class="text-lg text-gray-500">{{ redemption.contactNumber }}</p>
-                        </div>
-                        <div>
-                            <span class="block text-sm font-bold text-gray-700">Redeemed Item</span>
-                            <p class="text-lg text-gray-500">{{ redemption.itemName }}</p>
-                        </div>
-                        <div>
-                            <span class="block text-sm font-bold text-gray-700">Approved By</span>
-                            <p class="text-lg text-gray-500">{{ redemption.approvedBy }} ({{ redemption.adminID }})</p>
+                    <!-- Loading State -->
+                    <LoadingPage v-if="loading" :message="'Loading Redemption Details...'" />
+
+                    <!-- Content when not loading -->
+                    <div v-else>
+                        <!-- Recipient Info -->
+                        <div class="mt-2 grid grid-cols-2 gap-4">
+                            <div>
+                                <span class="block text-sm font-bold text-gray-700">Recipient</span>
+                                <p class="text-lg font-medium">{{ redemption.recipientName || 'N/A' }}</p>
+                            </div>
+                            <div>
+                                <span class="block text-sm font-bold text-gray-700">Contact</span>
+                                <p class="text-lg text-gray-500">{{ redemption.contactNumber || 'N/A' }}</p>
+                            </div>
+                            <div>
+                                <span class="block text-sm font-bold text-gray-700">Redeemed Item</span>
+                                <p class="text-lg text-gray-500">{{ redemption.itemName || 'N/A' }}</p>
+                            </div>
+                            <div>
+                                <span class="block text-sm font-bold text-gray-700">Approved By</span>
+                                <p class="text-lg text-gray-500">{{ redemption.approvedBy || 'N/A' }} ({{ redemption.adminID || 'N/A' }})</p>
+                            </div>
                         </div>
                     </div>
                 </div>
 
                 <!-- Shipping Details -->
-                <div class="card flex flex-col gap-6 w-full">
+                <div class="card flex flex-col gap-6 w-full" v-if="!loading">
                     <!-- Header Section -->
                     <div class="flex items-center justify-between border-b pb-2">
                         <h2 class="text-2xl font-bold text-gray-800">🚚 Shipping Details</h2>
@@ -52,33 +60,68 @@
                     <div class="grid grid-cols-4 gap-2 text-sm">
                         <div class="col-span-4">
                             <span class="text-sm font-bold text-gray-700">Shipping Date</span>
-                            <p class="text-lg font-medium">{{ redemption.shippedDate }}</p>
+                            <p class="text-lg font-medium">{{ redemption.shippedDate || 'Not Shipped' }}</p>
                         </div>
                         <div class="col-span-2">
                             <span class="text-sm font-bold text-gray-700">Recipient</span>
-                            <p class="text-lg font-medium">{{ redemption.recipientName }}</p>
+                            <p class="text-lg font-medium">{{ redemption.recipientName || 'N/A' }}</p>
                         </div>
                         <div class="col-span-2">
                             <span class="text-sm font-bold text-gray-700">Contact</span>
-                            <p class="text-lg font-medium">{{ redemption.contactNumber }}</p>
+                            <p class="text-lg font-medium">{{ redemption.contactNumber || 'N/A' }}</p>
                         </div>
                         <div class="col-span-2">
                             <span class="text-sm font-bold text-gray-700">Courier</span>
-                            <p class="text-lg font-medium">{{ redemption.courierName }}</p>
+                            <p class="text-lg font-medium">{{ redemption.courierName || 'Not Assigned' }}</p>
                         </div>
                         <div class="col-span-2">
                             <span class="text-sm font-bold text-gray-700">Tracking No</span>
-                            <p class="text-lg font-medium">{{ redemption.trackingNumber }}</p>
+                            <p class="text-lg font-medium">{{ redemption.trackingNumber || 'Not Assigned' }}</p>
                         </div>
                         <div class="col-span-4">
                             <span class="text-sm font-bold text-gray-700">Delivery Location</span>
-                            <p class="text-lg font-medium">{{ redemption.addLine1 }}, {{ redemption.addLine2 }}, {{ redemption.addCity }}, {{ redemption.addState }}, {{ redemption.addPostcode }}, {{ redemption.addCountry }}</p>
+                            <p class="text-lg font-medium">
+                                {{ [redemption.addLine1, redemption.addLine2, redemption.addCity, redemption.addState, redemption.addPostcode, redemption.addCountry]
+                                    .filter(Boolean).join(', ') || 'No address provided' }}
+                            </p>
                         </div>
                     </div>
                 </div>
 
-                <!-- NEW RESULT CARD BELOW -->
-                <div v-if="redemption.status === 'Approved'" class="card mt-6 border-l-4 border-green-500 bg-green-50 shadow-sm">
+                <!-- Campaign Criteria -->
+                <div class="card flex flex-col gap-6 w-full" v-if="!loading && campaignCriteria.length > 0">
+                    <!-- Header Section -->
+                    <div class="flex items-center justify-between border-b pb-2">
+                        <h2 class="text-2xl font-bold text-gray-800">📋 Campaign Criteria</h2>
+                    </div>
+
+                    <!-- Criteria List -->
+                    <div class="grid grid-cols-1 gap-3">
+                        <div v-for="(criteria, index) in campaignCriteria" :key="index" class="border rounded-lg p-4">
+                            <div class="grid grid-cols-2 gap-4 text-sm">
+                                <div>
+                                    <span class="font-semibold text-gray-700">Title:</span>
+                                    <p class="text-gray-600">{{ criteria.title || 'N/A' }}</p>
+                                </div>
+                                <div>
+                                    <span class="font-semibold text-gray-700">Pattern:</span>
+                                    <p class="text-gray-600">{{ criteria.pattern || 'N/A' }}</p>
+                                </div>
+                                <div>
+                                    <span class="font-semibold text-gray-700">Size:</span>
+                                    <p class="text-gray-600">{{ criteria.size || 'N/A' }}</p>
+                                </div>
+                                <div>
+                                    <span class="font-semibold text-gray-700">Minimum Quantity:</span>
+                                    <p class="text-gray-600">{{ criteria.minQty || 'N/A' }}</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Status Result Cards -->
+                <div v-if="!loading && redemption.status === 1" class="card mt-6 border-l-4 border-green-500 bg-green-50 shadow-sm">
                     <div class="flex items-center gap-2 mb-3">
                         <i class="pi pi-check-circle text-green-600 text-xl"></i>
                         <h3 class="font-bold text-green-700 text-lg">Redemption Approved</h3>
@@ -86,16 +129,16 @@
                     <div class="grid grid-cols-2 gap-3 text-xm">
                         <div>
                             <span class="font-semibold text-gray-700">Approved By:</span>
-                            <p class="text-gray-600">{{ redemption.approvedBy }}</p>
+                            <p class="text-gray-600">{{ redemption.approvedBy || 'N/A' }}</p>
                         </div>
                         <div>
                             <span class="font-semibold text-gray-700">Approved Date:</span>
-                            <p class="text-gray-600">{{ formatDate(redemption.approvedDate) }}</p>
+                            <p class="text-gray-600">{{ formatDate(redemption.verifiedDate) }}</p>
                         </div>
                     </div>
                 </div>
 
-                <div v-if="redemption.status === 'Rejected'" class="card mt-6 border-l-4 border-red-500 bg-red-50 shadow-sm">
+                <div v-if="!loading && redemption.status === 2" class="card mt-6 border-l-4 border-red-500 bg-red-50 shadow-sm">
                     <div class="flex items-center gap-2 mb-3">
                         <i class="pi pi-times-circle text-red-600 text-xl"></i>
                         <h3 class="font-bold text-red-700 text-lg">Redemption Rejected</h3>
@@ -103,7 +146,7 @@
                     <div class="grid grid-cols-2 gap-3 text-xm">
                         <div>
                             <span class="font-semibold text-gray-700">Reason:</span>
-                            <p class="text-gray-600">{{ redemption.rejectReason }}</p>
+                            <p class="text-gray-600">{{ redemption.rejectReason || 'No reason provided' }}</p>
                         </div>
                         <div>
                             <span class="font-semibold text-gray-700">Rejected Date:</span>
@@ -116,7 +159,7 @@
             <!-- ======================= -->
             <!-- RIGHT SECTION: Advance Info -->
             <!-- ======================= -->
-            <div class="md:w-1/3 flex flex-col">
+            <div class="md:w-1/3 flex flex-col" v-if="!loading">
                 <div class="card flex flex-col w-full">
                     <!-- Header with Status Tag -->
                     <div class="flex items-center justify-between border-b pb-2 mb-2">
@@ -130,38 +173,46 @@
                             <tbody>
                                 <tr class="border-b">
                                     <td class="px-4 py-2 font-medium">RefNo</td>
-                                    <td class="px-4 py-2 text-right">{{ redemption.refno }}</td>
+                                    <td class="px-4 py-2 text-right">{{ redemption.refno || 'N/A' }}</td>
                                 </tr>
                                 <tr class="border-b">
                                     <td class="px-4 py-2 font-medium">Member Code</td>
-                                    <td class="px-4 py-2 text-right">{{ redemption.tc_userID }}</td>
+                                    <td class="px-4 py-2 text-right">{{ redemption.tc_member_code || 'N/A' }}</td>
                                 </tr>
                                 <tr class="border-b">
                                     <td class="px-4 py-2 font-medium">Member Level</td>
-                                    <td class="px-4 py-2 text-right">{{ redemption.memberLevel }}</td>
+                                    <td class="px-4 py-2 text-right">{{ redemption.memberLevel || 'N/A' }}</td>
                                 </tr>
                                 <tr class="border-b">
                                     <td class="px-4 py-2 font-medium">Redeem Date</td>
-                                    <td class="px-4 py-2 text-right">{{ redemption.redemptionDate }}</td>
+                                    <td class="px-4 py-2 text-right">{{ formatDate(redemption.created) }}</td>
                                 </tr>
                                 <tr class="border-b">
                                     <td class="px-4 py-2 font-medium">Verified Date</td>
-                                    <td class="px-4 py-2 text-right">{{ redemption.verifiedDate }}</td>
+                                    <td class="px-4 py-2 text-right">{{ formatDate(redemption.verifiedDate) }}</td>
                                 </tr>
-                                <tr class="border-b" v-if="redemption.approvedDate">
-                                    <td class="px-4 py-2 font-medium">Approve/Reject Date</td>
-                                    <td class="px-4 py-2 text-right">{{ redemption.approvedDate }}</td>
+                                <tr class="border-b" v-if="redemption.status === 1">
+                                    <td class="px-4 py-2 font-medium">Approved Date</td>
+                                    <td class="px-4 py-2 text-right">{{ formatDate(redemption.verifiedDate) }}</td>
                                 </tr>
-                                <tr class="border-b" v-if="redemption.rejectedDate">
+                                <tr class="border-b" v-if="redemption.status === 2">
                                     <td class="px-4 py-2 font-medium">Rejected Date</td>
-                                    <td class="px-4 py-2 text-right">{{ redemption.rejectedDate }}</td>
+                                    <td class="px-4 py-2 text-right">{{ formatDate(redemption.rejectedDate) }}</td>
+                                </tr>
+                                <tr class="border-b">
+                                    <td class="px-4 py-2 font-medium">Points Used</td>
+                                    <td class="px-4 py-2 text-right">{{ redemption.totalPoint || 0 }}</td>
+                                </tr>
+                                <tr class="border-b">
+                                    <td class="px-4 py-2 font-medium">Quantity</td>
+                                    <td class="px-4 py-2 text-right">{{ redemption.quantity || 0 }}</td>
                                 </tr>
                             </tbody>
                         </table>
                     </div>
 
                     <!-- Action Buttons - Only show for pending status -->
-                    <div v-if="redemption.status === 'Pending'" class="flex justify-end mt-4 pt-4">
+                    <div v-if="redemption.status === 0" class="flex justify-end mt-4 pt-4">
                         <div class="flex gap-2">
                             <!-- Reject Button -->
                             <Button label="Reject" class="p-button-danger" @click="showRejectDialog = true" />
@@ -212,9 +263,9 @@
                 </div>
                 <div class="bg-blue-50 p-3 rounded-md">
                     <p class="text-sm text-blue-700">
-                        <strong>Item:</strong> {{ redemption.itemName }}<br />
-                        <strong>Recipient:</strong> {{ redemption.recipientName }}<br />
-                        <strong>Points:</strong> {{ redemption.totalPoint }}
+                        <strong>Item:</strong> {{ redemption.itemName || 'N/A' }}<br />
+                        <strong>Recipient:</strong> {{ redemption.recipientName || 'N/A' }}<br />
+                        <strong>Points:</strong> {{ redemption.totalPoint || 0 }}
                     </p>
                 </div>
             </div>
@@ -230,44 +281,108 @@
 </template>
 
 <script setup>
-import { ref } from 'vue';
+import { ref, onMounted } from 'vue';
+import { useRoute } from 'vue-router';
 import Dialog from 'primevue/dialog';
+import api from '@/service/api';
+import LoadingPage from '@/components/LoadingPage.vue';
+
+const route = useRoute();
+const redemptionId = route.params.id;
 
 const showRejectDialog = ref(false);
 const showApproveDialog = ref(false);
 const rejectReason = ref('');
 const showValidationError = ref(false);
+const loading = ref(true);
 
 const redemption = ref({
-    id: 1,
-    refno: 'TYO-MY-1001',
-    tc_userID: 'U1001',
-    memberLevel: 'Gold',
-    recipientName: 'Ahmad Faizal',
-    contactNumber: '012-3456789',
-    addLine1: 'No. 12, Jalan Melur',
-    addLine2: 'Taman Melawati',
-    addCity: 'Kuala Lumpur',
-    addState: 'Selangor',
-    addPostcode: '53100',
-    addCountry: 'Malaysia',
-    totalPoint: 500,
-    itemName: 'Bluetooth Headphones',
-    quantity: 1,
-    redemptionDate: '2024-03-15',
-    courierName: 'DHL Express',
-    trackingNumber: 'DHLMY10001',
-    shippedDate: '2024-04-01',
-    status: 'Pending', // Changed to Pending to show action buttons
-    adminID: 'admin01',
-    approvedBy: 'EtenAdmin',
-    verifiedDate: '2024-04-02',
-    created: '2024-03-25',
+    id: null,
+    refno: '',
+    tc_userID: '',
+    memberLevel: '',
+    recipientName: '',
+    contactNumber: '',
+    addLine1: '',
+    addLine2: '',
+    addCity: '',
+    addState: '',
+    addPostcode: '',
+    addCountry: '',
+    totalPoint: 0,
+    itemName: '',
+    quantity: 0,
+    redemptionDate: '',
+    courierName: '',
+    trackingNumber: '',
+    shippedDate: '',
+    status: 0,
+    adminID: '',
+    approvedBy: '',
+    verifiedDate: '',
+    created: '',
     deleted: false,
     approvedDate: null,
     rejectedDate: null,
-    rejectReason: null
+    rejectReason: null,
+    tc_member_code: ''
 });
+
+const campaignCriteria = ref([]);
+
+// Fetch redemption details from API
+const fetchRedemptionDetails = async () => {
+    try {
+        loading.value = true;
+        const response = await api.get(`redeem/item/${redemptionId}`);
+
+        if (response.data.status === 1 && response.data.admin_data) {
+            const redemptionData = response.data.admin_data.redemption_details;
+            
+            // Map API data to component structure
+            redemption.value = {
+                id: redemptionData.id,
+                refno: redemptionData.refno,
+                tc_userID: redemptionData.tc_userID,
+                memberLevel: redemptionData.memberLevel,
+                recipientName: redemptionData.recipientName,
+                contactNumber: redemptionData.contactNumber,
+                addLine1: redemptionData.addLine1,
+                addLine2: redemptionData.addLine2,
+                addCity: redemptionData.addCity,
+                addState: redemptionData.addState,
+                addPostcode: redemptionData.addPostcode,
+                addCountry: redemptionData.addCountry,
+                totalPoint: redemptionData.totalPoint,
+                itemName: redemptionData.redeem_item,
+                quantity: redemptionData.quantity,
+                redemptionDate: redemptionData.created,
+                courierName: redemptionData.courierName,
+                trackingNumber: redemptionData.trackingNumber,
+                shippedDate: redemptionData.shippedDate,
+                status: redemptionData.status,
+                adminID: redemptionData.adminID,
+                approvedBy: redemptionData.approvedBy,
+                verifiedDate: redemptionData.verifiedDate,
+                created: redemptionData.created,
+                deleted: redemptionData.deleted,
+                approvedDate: redemptionData.approvedDate,
+                rejectedDate: redemptionData.rejectedDate,
+                rejectReason: redemptionData.rejectReason,
+                tc_member_code: redemptionData.tc_member_code
+            };
+
+            // Set campaign criteria if available
+            campaignCriteria.value = response.data.admin_data.campaign_criteria || [];
+        } else {
+            console.error('API returned error or invalid data:', response.data);
+        }
+    } catch (error) {
+        console.error('Error fetching redemption details:', error);
+    } finally {
+        loading.value = false;
+    }
+};
 
 // Close dialog and reset form
 const closeRejectDialog = () => {
@@ -277,37 +392,55 @@ const closeRejectDialog = () => {
 };
 
 // Reject submission handler
-const submitReject = () => {
+const submitReject = async () => {
     if (!rejectReason.value.trim()) {
         showValidationError.value = true;
         return;
     }
 
-    // Update redemption status
-    redemption.value.status = 'Rejected';
-    redemption.value.rejectedDate = new Date().toISOString().split('T')[0];
-    redemption.value.rejectReason = rejectReason.value;
+    try {
+        // API call to reject redemption
+        const response = await api.post(`redeem/reject/${redemptionId}`, {
+            reason: rejectReason.value
+        });
 
-    console.log('Rejected with reason:', rejectReason.value);
-    // Here you would typically make an API call to submit the rejection
+        if (response.data.status === 1) {
+            // Update local state
+            redemption.value.status = 2; // Rejected status
+            redemption.value.rejectedDate = new Date().toISOString();
+            redemption.value.rejectReason = rejectReason.value;
 
-    // Show success message (you can use Toast from PrimeVue)
-    // this.$toast.add({ severity: 'success', summary: 'Rejected', detail: 'Redemption has been rejected successfully', life: 3000 });
+            // Show success message (you can use Toast from PrimeVue)
+            console.log('Redemption rejected successfully');
+        } else {
+            console.error('Failed to reject redemption:', response.data);
+        }
+    } catch (error) {
+        console.error('Error rejecting redemption:', error);
+    }
 
     closeRejectDialog();
 };
 
 // Approve submission handler
-const submitApprove = () => {
-    // Update redemption status
-    redemption.value.status = 'Approved';
-    redemption.value.approvedDate = new Date().toISOString().split('T')[0];
+const submitApprove = async () => {
+    try {
+        // API call to approve redemption
+        const response = await api.post(`redeem/approve/${redemptionId}`);
 
-    console.log('Redemption approved');
-    // Here you would typically make an API call to submit the approval
+        if (response.data.status === 1) {
+            // Update local state
+            redemption.value.status = 1; // Approved status
+            redemption.value.approvedDate = new Date().toISOString();
 
-    // Show success message
-    // this.$toast.add({ severity: 'success', summary: 'Approved', detail: 'Redemption has been approved successfully', life: 3000 });
+            // Show success message
+            console.log('Redemption approved successfully');
+        } else {
+            console.error('Failed to approve redemption:', response.data);
+        }
+    } catch (error) {
+        console.error('Error approving redemption:', error);
+    }
 
     showApproveDialog.value = false;
 };
@@ -315,24 +448,18 @@ const submitApprove = () => {
 // Helper functions for status label
 const statusLabel = (status) => {
     const statusMap = {
-        Pending: 'Pending',
-        Approved: 'Approved',
-        Rejected: 'Rejected',
-        Packing: 'Packing',
-        Shipped: 'Shipped',
-        Delivered: 'Delivered'
+        0: 'Pending',
+        1: 'Approved',
+        2: 'Rejected'
     };
     return statusMap[status] || 'Unknown';
 };
 
 const statusSeverity = (status) => {
     const severityMap = {
-        Pending: 'warning',
-        Approved: 'success',
-        Rejected: 'danger',
-        Packing: 'info',
-        Shipped: 'warn',
-        Delivered: 'success'
+        0: 'warning',
+        1: 'success',
+        2: 'danger'
     };
     return severityMap[status] || 'secondary';
 };
@@ -340,11 +467,35 @@ const statusSeverity = (status) => {
 // Date formatting function
 const formatDate = (dateString) => {
     if (!dateString) return 'N/A';
-    const date = new Date(dateString);
-    return date.toLocaleDateString('en-US', {
-        year: 'numeric',
-        month: 'short',
-        day: 'numeric'
-    });
+    
+    // Handle different date formats from API
+    try {
+        // If date is in DD-MM-YYYY format
+        if (dateString.includes('-')) {
+            const [day, month, year] = dateString.split('-');
+            const date = new Date(`${year}-${month}-${day}`);
+            return date.toLocaleDateString('en-US', {
+                year: 'numeric',
+                month: 'short',
+                day: 'numeric'
+            });
+        }
+        
+        // If date is in ISO format or other standard format
+        const date = new Date(dateString);
+        return date.toLocaleDateString('en-US', {
+            year: 'numeric',
+            month: 'short',
+            day: 'numeric'
+        });
+    } catch (error) {
+        console.error('Error formatting date:', error);
+        return dateString; // Return original string if parsing fails
+    }
 };
+
+// Fetch data when component mounts
+onMounted(() => {
+    fetchRedemptionDetails();
+});
 </script>

@@ -3,10 +3,7 @@
         <div class="flex flex-col md:flex-row gap-8">
             <!-- Left Content -->
             <div class="md:w-2/3">
-                <!-- ======================== -->
-                <!-- E-Wallet Section (PIN)   -->
-                <!-- ======================== -->
-
+               
                 <div v-if="catalogue.type === 'EWALLET'" class="card flex flex-col w-full">
                     <!-- Header -->
                     <div class="flex items-center justify-between border-b pb-3 mb-6">
@@ -22,7 +19,7 @@
                             <RouterLink :to="`/marketing/editCatalogue/${catalogue.id}`">
                                 <Button label="Edit" class="p-button-info" size="small" />
                             </RouterLink>
-                            <Button label="Delete" class="p-button-danger" size="small" @click="deleteCatalogue" />
+                            <Button label="Delete" class="p-button-danger" size="small" @click="confirmDelete" />
                         </div>
                     </div>
 
@@ -107,9 +104,7 @@
                     </Dialog>
                 </div>
 
-                <!-- ======================== -->
-                <!-- E-Voucher Section        -->
-                <!-- ======================== -->
+              
                 <div v-else-if="catalogue.type === 'EVOUCHER'" class="card flex flex-col w-full">
                     <!-- Header -->
                     <div class="flex items-center justify-between border-b pb-3 mb-6">
@@ -125,7 +120,7 @@
                             <RouterLink :to="`/marketing/editCatalogue/${catalogue.id}`">
                                 <Button label="Edit" class="p-button-info" size="small" />
                             </RouterLink>
-                            <Button label="Delete" class="p-button-danger" size="small" @click="deleteCatalogue" />
+                            <Button label="Delete" class="p-button-danger" size="small" @click="confirmDelete" />
                         </div>
                     </div>
 
@@ -174,9 +169,7 @@
                     </Dialog>
                 </div>
 
-                <!-- ======================== -->
-                <!-- Item Section             -->
-                <!-- ======================== -->
+            
                 <div v-else-if="catalogue.type === 'ITEM'" class="card flex flex-col w-full">
                     <!-- Header -->
                     <div class="flex items-center justify-between border-b pb-3 mb-6">
@@ -192,7 +185,7 @@
                             <RouterLink :to="`/marketing/editCatalogue/${catalogue.id}`">
                                 <Button label="Edit" class="p-button-info" size="small" />
                             </RouterLink>
-                            <Button label="Delete" class="p-button-danger" size="small" @click="deleteCatalogue" />
+                            <Button label="Delete" class="p-button-danger" size="small" @click="confirmDelete" />
                         </div>
                     </div>
 
@@ -269,9 +262,7 @@
                     </Dialog>
                 </div>
 
-                <!-- ======================== -->
-                <!-- Redemption List Section  -->
-                <!-- ======================== -->
+               
                 <div class="card flex flex-col w-full mt-8">
                     <!-- Header -->
                     <div class="flex items-center justify-between border-b pb-3 mb-4">
@@ -413,11 +404,13 @@
 import { ref, computed, onMounted } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { useToast } from 'primevue/usetoast';
+import { useConfirm } from 'primevue/useconfirm'; // Added useConfirm
 import api from '@/service/api';
 
 const route = useRoute();
 const router = useRouter();
 const toast = useToast();
+const confirm = useConfirm(); // Initialize confirmation dialog
 
 // Reactive data
 const catalogue = ref({
@@ -631,6 +624,58 @@ const handleImageError = (event) => {
     event.target.src = 'https://via.placeholder.com/300x200?text=No+Image';
 };
 
+// DELETE FUNCTIONALITY - Integrated with API
+const confirmDelete = () => {
+    confirm.require({
+        message: 'Are you sure you want to delete this Catalogue?',
+        header: 'Confirm Delete',
+        icon: 'pi pi-exclamation-triangle',
+        acceptLabel: 'Yes, Delete',
+        rejectLabel: 'Cancel',
+        acceptClass: 'p-button-danger',
+        accept: async () => {
+            try {
+                // API call to delete catalogue - using PUT method as per API specification
+                const response = await api.put(`catalog/delete/${catalogue.value.id}`);
+                
+                if (response.data.status === 1) {
+                    toast.add({
+                        severity: 'success',
+                        summary: 'Deleted',
+                        detail: 'Catalogue deleted successfully.',
+                        life: 3000
+                    });
+                    // Redirect to catalogue list page after successful deletion
+                    router.push('/marketing/listCatalogue');
+                } else {
+                    toast.add({
+                        severity: 'error',
+                        summary: 'Error',
+                        detail: 'Failed to delete Catalogue.',
+                        life: 3000
+                    });
+                }
+            } catch (error) {
+                console.error('Delete failed:', error);
+                toast.add({
+                    severity: 'error',
+                    summary: 'Error',
+                    detail: 'Failed to delete Catalogue.',
+                    life: 3000
+                });
+            }
+        },
+        reject: () => {
+            toast.add({
+                severity: 'info',
+                summary: 'Cancelled',
+                detail: 'Deletion cancelled.',
+                life: 2000
+            });
+        }
+    });
+};
+
 // Action methods
 const addPin = () => {
     toast.add({
@@ -770,31 +815,6 @@ const toggleStatus = async (newStatus) => {
             detail: 'Failed to update catalogue status',
             life: 3000
         });
-    }
-};
-
-const deleteCatalogue = async () => {
-    if (confirm('Are you sure you want to delete this catalogue item?')) {
-        try {
-            // API call to delete would go here
-            await api.delete(`catalog/delete/${catalogue.value.id}`);
-            
-            toast.add({
-                severity: 'success',
-                summary: 'Success',
-                detail: 'Catalogue deleted successfully',
-                life: 3000
-            });
-            
-            router.push('/marketing/listCatalogue');
-        } catch (error) {
-            toast.add({
-                severity: 'error',
-                summary: 'Error',
-                detail: 'Failed to delete catalogue',
-                life: 3000
-            });
-        }
     }
 };
 </script>
