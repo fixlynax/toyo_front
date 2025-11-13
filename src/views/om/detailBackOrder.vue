@@ -43,56 +43,20 @@
                     </div>
                 </div>
 
-                <div class="card">
-                    <div class="font-semibold text-xl border-b pb-2 mt-2 mb-4">🚚 Shipping Information</div>
-                    <div class="grid grid-cols-2 gap-4">
-                        <div>
-                            <span class="text-sm text-gray-500">Ship To</span>
-                            <p class="text-lg font-medium">{{ order.shipto }}</p>
-                        </div>
-                        <div>
-                            <span class="text-sm text-gray-500">Shipping Cond</span>
-                            <p class="text-lg font-medium">{{ order.shippingcond }}</p>
-                        </div>
-                        <div>
-                            <span class="text-sm text-gray-500">Storage Location</span>
-                            <p class="text-lg font-medium">{{ order.storagelocation }}</p>
-                        </div>
-                        <div>
-                            <span class="text-sm text-gray-500">Delivery Type</span>
-                            <p class="text-lg font-medium">{{ order.deliveryType }}</p>
-                        </div>
-                        <div>
-                            <span class="text-sm text-gray-500">Delivery Date</span>
-                            <p class="text-lg font-medium">{{ formatDate(order.deliveryDate) }}</p>
-                        </div>
-                        <div>
-                            <span class="text-sm text-gray-500">Back Order No</span>
-                            <p class="text-lg font-medium">{{ order.bo_orderno }}</p>
-                        </div>
-                        <div>
-                            <span class="text-sm text-gray-500">Expiry</span>
-                            <p class="text-lg font-medium">{{ formatDate(order.expiry) }}</p>
-                        </div>
-                        <div>
-                            <span class="text-sm text-gray-700">Fulfillment Status</span>
-                            <p class="text-lg font-medium">
-                                <span :class="fulfillmentStatus.class" class="font-bold">
-                                    {{ fulfillmentStatus.text }}
-                                </span>
-                            </p>
-                            <p class="text-xs text-gray-500 mt-1">Last updated: {{ formatDate(order.modified) }}</p>
-                        </div>
-                    </div>
-                </div>
-
                 <!-- BACK ORDER ITEMS -->
                 <div class="card flex flex-col w-full">
                     <div class="flex items-center justify-between mb-4 border-b pb-3">
                         <div class="font-semibold text-xl">📦 Back Order Items</div>
                         <div class="flex items-center gap-2">
                             <Tag :value="`${fulfillmentPercentage}% Fulfilled`" :severity="fulfillmentPercentage === 100 ? 'success' : fulfillmentPercentage > 0 ? 'warning' : 'danger'" />
-                            <Button v-if="canProcessBackOrder" label="Process Available Stock" icon="pi pi-play" severity="success" size="small" @click="processBackOrder(1)" :loading="processing" class="!w-fit" />
+                            <!-- <Button v-if="canProcessBackOrder" label="Process Available Stock" icon="pi pi-play" severity="success" size="small" @click="processBackOrder(1)" :loading="processing" class="!w-fit" /> -->
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-1 gap-4 mt-4 mb-2">
+                        <div>
+                            <span class="text-sm text-gray-500">Back Order No</span>
+                            <p class="text-lg font-semibold">{{ order.bo_orderno || '-'}}</p>
                         </div>
                     </div>
 
@@ -264,6 +228,8 @@
                 <!-- FULFILLMENT SUMMARY -->
                 <div class="card flex flex-col w-full" v-if="fulfillmentSummary.length > 0">
                     <div class="text-2xl font-bold text-gray-800 border-b pb-2 mb-3">📊 Fulfillment Summary</div>
+                    
+                    
 
                     <div v-for="item in fulfillmentSummary" :key="item.materialid" class="mb-3 p-3 border rounded">
                         <div class="flex justify-between items-center mb-2">
@@ -279,6 +245,40 @@
                         </div>
                     </div>
                 </div>
+
+                                    <!-- SHIPPING INFO -->
+                    <div class="card flex flex-col w-full mb-4">
+                        <div class="flex items-center justify-between border-b pb-3 mb-4">
+                            <div class="text-2xl font-bold text-gray-800">Shipping Info</div>
+                        </div>
+
+                        <div class="overflow-x-auto">
+                            <table class="w-full text-sm text-left text-gray-700">
+                                <tbody>
+                                    <tr class="border-b even:bg-gray-50">
+                                        <td class="px-4 py-2 font-medium">Company Name</td>
+                                        <td class="px-4 py-2 text-right font-semibold">
+                                            {{ formatCompanyName(shippingDetail) }}
+                                        </td>
+                                    </tr>
+                                    <tr class="border-b even:bg-gray-50">
+                                        <td class="px-4 py-2 font-medium">Address</td>
+                                        <td class="px-4 py-2 text-right font-semibold">
+                                            {{ formatAddress(shippingDetail) }}
+                                        </td>
+                                    </tr>
+                                    <tr class="border-b even:bg-gray-50">
+                                        <td class="px-4 py-2 font-medium">Phone No</td>
+                                        <td class="px-4 py-2 text-right font-semibold">{{ shippingDetail?.phoneNumber || '-' }}</td>
+                                    </tr>
+                                    <tr class="border-b even:bg-gray-50">
+                                        <td class="px-4 py-2 font-medium">Email</td>
+                                        <td class="px-4 py-2 text-right font-semibold">{{ shippingDetail?.emailAddress || '-' }}</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
             </div>
         </div>
     </Fluid>
@@ -320,6 +320,37 @@ const fetchBackOrderDetail = async () => {
     }
 };
 
+// Computed property to get shipping details from the first fulfillment order
+const shippingDetail = computed(() => {
+    if (!order.value.list_order || order.value.list_order.length === 0) {
+        return null;
+    }
+
+    // Get the first fulfillment order that has shipping details
+    const firstOrderWithShipping = order.value.list_order.find((order) => order.shippingDetail && order.shippingDetail.length > 0);
+
+    return firstOrderWithShipping?.shippingDetail?.[0] || null;
+});
+
+// Helper methods to format shipping information
+const formatCompanyName = (shippingDetail) => {
+    if (!shippingDetail) return '-';
+
+    const companyNames = [shippingDetail.companyName1, shippingDetail.companyName2, shippingDetail.companyName3, shippingDetail.companyName4].filter((name) => name && name.trim() !== '');
+
+    return companyNames.length > 0 ? companyNames.join(', ') : '-';
+};
+
+const formatAddress = (shippingDetail) => {
+    if (!shippingDetail) return '-';
+
+    const addressParts = [shippingDetail.addressLine1, shippingDetail.addressLine2, shippingDetail.addressLine3, shippingDetail.addressLine4, shippingDetail.postcode, shippingDetail.city, shippingDetail.state].filter(
+        (part) => part && part.trim() !== ''
+    );
+
+    return addressParts.length > 0 ? addressParts.join(', ') : '-';
+};
+
 // Helper methods to get first SO/DO numbers from fulfillment orders
 const getFirstSoNo = () => {
     if (!order.value.list_order || order.value.list_order.length === 0) return null;
@@ -333,7 +364,6 @@ const getFirstDoNo = () => {
     return firstOrder.do_no;
 };
 
-// ... rest of your existing methods remain the same
 const processBackOrder = async (status) => {
     try {
         processing.value = true;
@@ -393,6 +423,15 @@ const formatQuantity = (quantity) => {
     const num = parseFloat(quantity);
     if (isNaN(num)) return '0';
     return Math.round(num).toString();
+};
+
+const formatDate = (dateString) => {
+    if (!dateString) return '-';
+    return new Date(dateString).toLocaleDateString('en-MY', {
+        year: 'numeric',
+        month: 'short',
+        day: 'numeric'
+    });
 };
 
 // Computed properties
@@ -527,15 +566,6 @@ const getBackOrderStatusSeverity = (status) => {
         9: 'danger'
     };
     return severityMap[status] || 'secondary';
-};
-
-const formatDate = (dateString) => {
-    if (!dateString) return '-';
-    return new Date(dateString).toLocaleDateString('en-MY', {
-        year: 'numeric',
-        month: 'short',
-        day: 'numeric'
-    });
 };
 
 onMounted(() => {

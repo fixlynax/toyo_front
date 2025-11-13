@@ -26,21 +26,14 @@
                         </div>
                         <div>
                             <span class="text-sm text-gray-500">Location</span>
-                            <p class="text-lg font-medium">{{ dealerShop.addressLine1 }} {{ dealerShop.addressLine2 }} {{ dealerShop.addressLine3 }} {{ dealerShop.addressLine4 }}{{ dealerShop.city }}, {{ dealerShop.state }} , {{ dealerShop.postcode }}</p>
-                        </div>
-                            <div>
-                                <span class="text-sm text-gray-500">Contact Person</span>
-                                <p class="text-lg font-medium">{{ dealerShop.phoneNumber || '-' }}</p>
-                            </div>
-                        <!-- <div>
-                            <span class="text-sm text-gray-500">Return Code</span>
-                            <p class="text-lg font-semibold">{{ order.reason_code || '-' }}</p>
+                            <p class="text-lg font-medium">
+                                {{ dealerShop.addressLine1 }} {{ dealerShop.addressLine2 }} {{ dealerShop.addressLine3 }} {{ dealerShop.addressLine4 }}{{ dealerShop.city }}, {{ dealerShop.state }} , {{ dealerShop.postcode }}
+                            </p>
                         </div>
                         <div>
-                            <span class="text-sm text-gray-500">Return Reason</span>
-                            <p class="text-lg font-medium">{{ order.reason_message || '-' }}</p>
-                        </div> -->
-
+                            <span class="text-sm text-gray-500">Contact Person</span>
+                            <p class="text-lg font-medium">{{ dealerShop.phoneNumber || '-' }}</p>
+                        </div>
                         <div>
                             <span class="text-sm text-gray-500">Channel</span>
                             <p class="text-lg font-medium">{{ orderData.channel || '-' }}</p>
@@ -48,51 +41,27 @@
                     </div>
                 </div>
 
-                <div class="card flex flex-col gap-4 w-full">
-                    <div class="font-semibold text-xl border-b pb-2">🚚 Shipping Information</div>
-                    <div class="grid grid-cols-2 gap-4">
-                        <div>
-                            <span class="text-sm font-bold text-gray-700">Ship To</span>
-                            <p class="text-lg font-medium">
-                                {{ orderData.deliveryType === 'DELIVER' ? dealerShop.companyName1 : 'Customer Self Pickup' }}
-                            </p>
-                        </div>
-                        <div>
-                            <span class="text-sm font-bold text-gray-700">Description</span>
-                            <p class="text-lg font-medium">{{ orderData.orderDesc || '-' }}</p>
-                        </div>
-                        <div>
-                            <span class="text-sm font-bold text-gray-700">Shipping Cond</span>
-                            <p class="text-lg font-medium">{{ orderData.shippingcond || '-' }}</p>
-                        </div>
-                        <div>
-                            <span class="text-sm font-bold text-gray-700">Delivery Type</span>
-                            <p class="text-lg font-medium">{{ orderData.deliveryType || '-' }}</p>
-                        </div>
-                        <div>
-                            <span class="text-sm font-bold text-gray-700">Storage Location</span>
-                            <p class="text-lg font-medium">{{ orderData.storagelocation || '-' }}</p>
-                        </div>
-                                                <div>
-                            <span class="text-sm font-bold text-gray-700">Delivery Date</span>
-                            <p class="text-lg font-medium">{{ orderData.deliveryDate || '-' }}</p>
-                        </div>
-                        <div>
-                            <span class="text-sm font-bold text-gray-700">Delivery Status</span>
-                            <p class="text-lg font-medium">
-                                <Tag :value="getdeliveryOrderStatusText(order.delivery_status)" :severity="getOrderStatusSeverity(order.orderstatus)" />
-                            </p>
-                            <p class="text-xs text-gray-500 mt-1">Last updated: {{ order.created || '-' }}</p>
-                        </div>
-                    </div>
-                </div>
-
                 <div class="card flex flex-col w-full bg-white shadow-sm rounded-2xl border border-gray-100">
                     <!-- Header -->
                     <div class="font-semibold text-xl border-b pb-3 px-4 flex items-center gap-2 text-gray-800">📦 <span>Return Item</span></div>
-
+                    <div class="grid grid-cols-1 gap-4 mt-4">
+                        <div>
+                            <span class="text-sm text-gray-500">Return Order No</span>
+                            <p class="text-lg font-semibold">{{ order.return_orderNo_ref || '-' }}</p>
+                        </div>
+                    </div>
+                    <div class="grid grid-cols-2 gap-4 mt-4">
+                        <div>
+                            <span class="text-sm text-gray-500">Return Code</span>
+                            <p class="text-lg font-semibold">{{ order.reason_code || '-' }}</p>
+                        </div>
+                        <div>
+                            <span class="text-sm text-gray-500">Return Reason</span>
+                            <p class="text-lg font-medium">{{ order.reason_message || '-' }}</p>
+                        </div>
+                    </div>
                     <!-- Table -->
-                    <DataTable :value="returnOrderArray" dataKey="materialid" class="rounded-table mt-4">
+                    <DataTable :value="returnOrderArray" dataKey="materialid" class="rounded-table mt-6">
                         <Column field="itemno" header="Item No">
                             <template #body="{ data }">
                                 {{ formatItemNo(data.salesdoclineitem || data.itemno) }}
@@ -151,10 +120,6 @@
                         <table class="w-full text-sm text-left text-gray-700">
                             <tbody>
                                 <tr class="border-b">
-                                    <td class="px-4 py-2 font-medium">Order Ref</td>
-                                    <td class="px-4 py-2 text-right">{{ order.return_orderNo_ref || '-' }}</td>
-                                </tr>
-                                <tr class="border-b">
                                     <td class="px-4 py-2 font-medium">Order No</td>
                                     <td class="px-4 py-2 text-right">{{ orderData.order_no || '-' }}</td>
                                 </tr>
@@ -170,7 +135,7 @@
                                     <td class="px-4 py-2 font-medium">Invoice No</td>
                                     <td class="px-4 py-2 text-right">{{ orderData.inv_no || '-' }}</td>
                                 </tr>
-                                 <tr class="border-b">
+                                <tr class="border-b">
                                     <td class="px-4 py-2 font-medium">SAP Return No</td>
                                     <td class="px-4 py-2 text-right">{{ order.sapreturnno || '-' }}</td>
                                 </tr>
@@ -235,7 +200,6 @@ const loading = ref(true);
 const loadingAction = ref(null);
 const error = ref(null);
 const subtotal = ref(0);
-
 
 // ✅ Status mapping functions
 const getdeliveryOrderStatusText = (status) => {
