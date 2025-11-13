@@ -196,7 +196,7 @@
                                 </div>
                             </div>
 
-                            <div class="text-lg font-bold text-blue-800">Total: RM {{ fulfillOrder.total }}</div>
+                            <!-- <div class="text-lg font-bold text-blue-800">Total: RM {{ fulfillOrder.total }}</div> -->
                         </div>
                     </div>
                 </div>
