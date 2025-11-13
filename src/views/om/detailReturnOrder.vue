@@ -66,7 +66,11 @@
                             <p class="text-lg font-medium">{{ orderData.deliveryType || '-' }}</p>
                         </div>
                         <div>
-                            <span class="text-sm font-bold text-gray-700">Delivery ETA</span>
+                            <span class="text-sm font-bold text-gray-700">Storage Location</span>
+                            <p class="text-lg font-medium">{{ orderData.storagelocation || '-' }}</p>
+                        </div>
+                                                <div>
+                            <span class="text-sm font-bold text-gray-700">Delivery Date</span>
                             <p class="text-lg font-medium">{{ orderData.deliveryDate || '-' }}</p>
                         </div>
                         <div>
@@ -175,8 +179,12 @@
                                     <td class="px-4 py-2 text-right">{{ orderData.division || '-' }}</td>
                                 </tr>
                                 <tr class="border-b">
-                                    <td class="px-4 py-2 font-medium">Delivery Date</td>
-                                    <td class="px-4 py-2 text-right">{{ orderData.deliveryDate || '-' }}</td>
+                                    <td class="px-4 py-2 font-medium">Pickup</td>
+                                    <td class="px-4 py-2 text-right">{{ order.delivery_information.pickup_datetime || '-' }}</td>
+                                </tr>
+                                <tr class="border-b">
+                                    <td class="px-4 py-2 font-medium">Receive</td>
+                                    <td class="px-4 py-2 text-right">{{ order.delivery_information.receive_datetime || '-' }}</td>
                                 </tr>
                                 <tr>
                                     <td class="px-4 py-2 font-medium">Created</td>
