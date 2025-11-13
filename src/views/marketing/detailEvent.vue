@@ -186,18 +186,6 @@
                 </div>
             </div>
         </div>
-
-        <!-- Delete Confirmation Dialog -->
-        <Dialog v-model:visible="deleteDialog" :style="{ width: '450px' }" header="Confirm" :modal="true">
-            <div class="flex align-items-center justify-content-center">
-                <i class="pi pi-exclamation-triangle mr-3" style="font-size: 2rem" />
-                <span>Are you sure you want to delete this event?</span>
-            </div>
-            <template #footer>
-                <Button label="No" icon="pi pi-times" class="p-button-text" @click="deleteDialog = false" />
-                <Button label="Yes" icon="pi pi-check" class="p-button-danger" @click="deleteEvent" />
-            </template>
-        </Dialog>
     </Fluid>
 </template>
 
@@ -205,15 +193,17 @@
 import { ref, onMounted, computed } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { useToast } from 'primevue/usetoast';
+import { useConfirm } from 'primevue/useconfirm'; // Added
 import api from '@/service/api';
 
 const route = useRoute();
 const router = useRouter();
 const toast = useToast();
+const confirm = useConfirm(); // Added
 
 const eventId = route.params.id;
 const loading = ref(true);
-const deleteDialog = ref(false);
+// Removed: const deleteDialog = ref(false);
 
 // Event data
 const event = ref({
@@ -281,6 +271,56 @@ const toggleEventStatus = async () => {
     }
 };
 
+// Confirm before delete
+const confirmDelete = () => {
+    confirm.require({
+        message: 'Are you sure you want to delete this event?',
+        header: 'Confirm Delete',
+        icon: 'pi pi-exclamation-triangle',
+        acceptLabel: 'Yes, Delete',
+        rejectLabel: 'Cancel',
+        acceptClass: 'p-button-danger',
+        accept: async () => {
+            try {
+                const response = await api.put(`event/delete/${event.value.id}`);
+                
+                if (response.data.status === 1) {
+                    toast.add({
+                        severity: 'success',
+                        summary: 'Deleted',
+                        detail: 'Event deleted successfully.',
+                        life: 3000
+                    });
+                    router.push('/marketing/listEvent');
+                } else {
+                    toast.add({
+                        severity: 'error',
+                        summary: 'Error',
+                        detail: 'Failed to delete event.',
+                        life: 3000
+                    });
+                }
+            } catch (error) {
+                console.error('Delete failed:', error);
+                toast.add({
+                    severity: 'error',
+                    summary: 'Error',
+                    detail: 'Failed to delete event.',
+                    life: 3000
+                });
+            }
+        },
+        reject: () => {
+            toast.add({
+                severity: 'info',
+                summary: 'Cancelled',
+                detail: 'Deletion cancelled.',
+                life: 2000
+            });
+        }
+    });
+};
+
 // Fetch event details
 const fetchEventDetails = async () => {
     try {
@@ -345,44 +385,6 @@ const processPrivateImages = async () => {
                 // Keep the original URL if private file loading fails
             }
         }
-    }
-};
-
-// Delete event functions
-const confirmDelete = () => {
-    deleteDialog.value = true;
-};
-
-const deleteEvent = async () => {
-    try {
-        const response = await api.delete(`event/delete/${eventId}`);
-
-        if (response.data.status === 1) {
-            toast.add({
-                severity: 'success',
-                summary: 'Success',
-                detail: 'Event deleted successfully',
-                life: 3000
-            });
-            router.push('/marketing/listEvent');
-        } else {
-            toast.add({
-                severity: 'error',
-                summary: 'Error',
-                detail: 'Failed to delete event',
-                life: 3000
-            });
-        }
-    } catch (error) {
-        console.error('Error deleting event:', error);
-        toast.add({
-            severity: 'error',
-            summary: 'Error',
-            detail: 'Failed to delete event',
-            life: 3000
-        });
-    } finally {
-        deleteDialog.value = false;
     }
 };
 
