@@ -162,6 +162,11 @@
                                     <span class="font-bold">{{ data.materialid }}</span>
                                 </template>
                             </Column>
+                            <Column field="itemcategory" header="Item Category" style="min-width: 8rem">
+                                <template #body="{ data }">
+                                    <span class="font-bold">{{ data.itemcategory }}</span>
+                                </template>
+                            </Column>
                             <Column field="qty" header="Qty" style="min-width: 5rem">
                                 <template #body="{ data }">
                                     <span>{{ formatQuantity(data.qty) }}</span>
