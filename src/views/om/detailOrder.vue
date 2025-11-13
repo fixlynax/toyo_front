@@ -102,7 +102,7 @@
 
                         <Column field="itemcategory" header="Item Category">
                             <template #body="{ data }">
-                                {{ mapItemCategory(data.itemcategory) }}
+                                {{ data.itemcategory }}
                             </template>
                         </Column>
 

@@ -11,7 +11,7 @@
             :value="listData"
             :paginator="true"
             :rows="10"
-            :rowsPerPageOptions="[5, 10, 20]"
+            :rowsPerPageOptions="[10, 50, 100]"
             dataKey="id"
             :rowHover="true"
             :filters="filters"
@@ -33,11 +33,13 @@
                         </IconField>
                         <Button type="button" icon="pi pi-cog" class="p-button" />
                     </div>
+                    <div class="flex gap-2">
                     <Button type="button" label="Bulk Update" @click="fetchData"/>
                     <!-- Right: Create Customer Button -->
                     <RouterLink to="/om/createEten">
                         <Button type="button" label="Create" icon="pi pi-plus" />
                     </RouterLink>
+                    </div>
                 </div>
             </template>
 

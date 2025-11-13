@@ -52,7 +52,7 @@
 
                     <!-- Upload Images -->
                     <div>
-                        <label class="block font-bold text-gray-700 mb-2">Upload Event Image</label>
+                        <label class="block font-bold text-gray-700 mb-2">Upload Event Image <span class="text-xs bg-blue-100 text-blue-800 px-2 py-0.5 rounded-full">(Max file size: 2 MB)</span> </label>
                         <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
                             <div v-for="n in 3" :key="n">
                                 <FileUpload mode="basic" :name="`image${n}`" accept="image/*" customUpload @select="(e) => onImageSelect(e, `image${n}`)" :chooseLabel="`Upload Image ${n}`" class="w-full" />
@@ -75,7 +75,7 @@
                 <div v-if="event.isSurvey === 'yes'" class="card flex flex-col gap-6 w-full">
                     <div class="text-2xl font-bold text-gray-800 border-b pb-2">📝 Survey Configuration</div>
                     <div class="mt-8 text-xl font-bold text-gray-800 border-b pb-2">🏆 Point Setting</div>
-                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4 ">
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
                         <div>
                             <label class="block font-bold text-gray-700 mb-1">Silver</label>
                             <InputNumber v-model="event.point1" class="w-full" />
