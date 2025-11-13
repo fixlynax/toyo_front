@@ -39,12 +39,9 @@
                             <span class="block text-sm font-bold text-black-700">Reason</span>
                             <p class="font-medium text-lg">{{ `(${returnList.reason_code}) ${returnList.reason_message}` }}</p>
                         </div>
-                        <div>
-                            <span class="block text-sm font-bold text-black-700">SAP (Created)</span>
-                            <p class="font-medium text-lg">{{ returnList.sap_timestamp }}</p>
-                        </div>
                     </div>
                     <div class="mt-6 mb-4">
+                        <div class="font-semibold text-xl border-b pb-3 px-4 flex items-center gap-2 text-gray-800"><span>Return Item</span></div>
                         <DataTable 
                             :value="returnList.return_order_array"
                             :rows="10"
@@ -66,102 +63,64 @@
                                         {{ data.plant }}
                                 </template>
                             </Column>
+                            <Column field="quantity" header="Quantity" style="min-width: 8rem">
+                                <template #body="{ data }">
+                                        {{ data.qty }}
+                                </template>
+                            </Column>
+                            <Column field="unitprice" header="Unit Price (RM)" style="min-width: 8rem">
+                                <template #body="{ data }">
+                                        {{ data.unitprice }}
+                                </template>
+                                 <!-- ✅ Footer for label -->
+                            <template #footer>
+                                <div class="flex justify-start pr-2 font-bold text-gray-700">Subtotal</div>
+                            </template>
+                            </Column>
+                            <Column field="unitprice" header="Total Price (RM)" style="min-width: 8rem">
+                                <template #body="{ data }">
+                                        {{ (Number(data.unitprice) * Number(data.qty)).toFixed(2) }}
+                                </template>
+                                <!-- ✅ Footer for total value -->
+                            <template #footer>
+                                <div class="flex justify-start pr-3 font-semibold text-blue-600">{{ subtotal.toFixed(2) }}</div>
+                            </template>
+                            </Column>
                         </DataTable>
                     </div>
                 </div>
-                <!-- <div class="card flex flex-col w-full">
+                 <div class="card flex flex-col w-full">
                     <div class="flex items-center justify-between border-b pb-2">
                         <div class="flex items-center gap-3">
-                            <div class="text-2xl font-bold text-gray-800">Dealer Shop Details</div>
+                            <div class="text-2xl font-bold text-gray-800">Customer Details</div>
                         </div>
                     </div>
-
                     <div class="mt-6 mb-4">
                         <div>
-                            <span class="block text-sm font-bold text-black-700">Return Reference Number</span>
-                            <span class="text-lg font-medium">{{ returnList.dealer.dealer_shop.memberCode }}</span>
+                            <span class="block text-sm font-bold text-black-700">Company Name</span>
+                            <p class="font-medium text-lg">{{ `${returnList.dealer.dealer_shop.companyName1} ${returnList.dealer.dealer_shop.companyName2} ${returnList.dealer.dealer_shop.companyName3} ${returnList.dealer.dealer_shop?.companyName4}` }}</p>
                         </div>
                     </div>
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm text-gray-700">
                         <div>
-                            <span class="block text-sm font-bold text-black-700">Account No</span>
-                            <p class="font-medium text-lg">{{ returnList.dealer.dealer_shop.companyName1 }}</p>
-                        </div>
-                        <div>
-                            <span class="block text-sm font-bold text-black-700">Company Name</span>
-                            <p class="font-medium text-lg">{{ `${returnList.dealer.dealer_shop.companyName1} ${returnList.dealer.dealer_shop.companyName2} ${returnList.dealer.dealer_shop.companyName3} ${returnList.dealer.dealer_shop?.companyName4}` }}</p>
+                            <span class="block text-sm font-bold text-black-700">Member Code</span>
+                            <span class="text-lg font-medium">{{ returnList.dealer.dealer_shop.memberCode }}</span>
                         </div>
                         <div>
                             <span class="block text-sm font-bold text-black-700">Reg No</span>
                             <p class="font-medium text-lg">{{ returnList.dealer.dealer_shop.companyRegNo }}</p>
                         </div>
-                         <div>
-                            <span class="block text-sm font-bold text-black-700">Tax No</span>
-                            <p class="font-medium text-lg">{{ returnList.dealer.dealer_shop.serviceTaxNo }}</p>
+                        <div>
+                            <span class="block text-sm font-bold text-black-700">Address</span>
+                            <p class="font-medium text-lg">{{ `${returnList.dealer.dealer_shop.addressLine1} ${returnList.dealer.dealer_shop?.addressLine2 || ''} ${returnList.dealer.dealer_shop?.addressLine3 || ''} ${returnList.dealer.dealer_shop?.addressLine4 || ''} ${returnList.dealer.dealer_shop.city} ,${returnList.dealer.dealer_shop.postcode}` }}</p>
                         </div>
                         <div>
-                            <span class="block text-sm font-bold text-black-700">Adress</span>
-                            <p class="font-medium text-lg">{{ `${returnList.dealer.dealer_shop.addressLine1} ${returnList.dealer.dealer_shop?.addressLine2 || ''} ${returnList.dealer.dealer_shop?.addressLine3 || ''} ${returnList.dealer.dealer_shop?.addressLine4 || ''}` }}</p>
-                        </div>
-                         <div>
-                            <span class="block text-sm font-bold text-black-700">Postcode</span>
-                            <p class="font-medium text-lg">{{ returnList.dealer.dealer_shop.city }}</p>
-                        </div>
-                        <div>
-                            <span class="block text-sm font-bold text-black-700">City</span>
-                            <p class="font-medium text-lg">{{ returnList.dealer.dealer_shop.city }}</p>
-                        </div>
-                        <div>
-                            <span class="block text-sm font-bold text-black-700">Phone No</span>
+                            <span class="block text-sm font-bold text-black-700">Contact Person</span>
                             <p class="font-medium text-lg">{{ returnList.dealer.dealer_shop.phoneNumber }}</p>
                         </div>
-                    </div>
-                </div> -->
-                <div class="card flex flex-col w-full">
-                    <div class="flex items-center justify-between border-b pb-2">
-                        <div class="flex items-center gap-3">
-                            <div class="text-2xl font-bold text-gray-800">Order Details</div>
-                        </div>
-                    </div>
-
-                    <div class="mt-6 mb-4">
                         <div>
-                            <span class="block text-sm font-bold text-black-700">Order No</span>
-                            <span class="text-lg font-medium">{{ returnList.order_data.order_no }}</span>
-                        </div>
-                    </div>
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm text-gray-700">
-                        <div>
-                            <span class="block text-sm font-bold text-black-700">Inv No</span>
-                            <p class="font-medium text-lg">{{ returnList.order_data.inv_no }}</p>
-                        </div>
-                        <div>
-                            <span class="block text-sm font-bold text-black-700">Type</span>
-                            <p class="font-medium text-lg">{{ returnList.order_data.deliveryType }}</p>
-                        </div>
-                        <div>
-                            <span class="block text-sm font-bold text-black-700">Description</span>
-                            <p class="font-medium text-lg">{{ returnList.order_data.orderDesc }}</p>
-                        </div>
-                        <div>
-                            <span class="block text-sm font-bold text-black-700">Rating</span>
-                            <p class="font-medium text-lg">{{ returnList.order_data.orderReceiveRating }}</p>
-                        </div>
-                        <div>
-                            <span class="block text-sm font-bold text-black-700">Recieve Remarks</span>
-                            <p class="font-medium text-lg">{{ returnList.order_data.orderReceiveRemarks }}</p>
-                        </div>
-                         <div>
-                            <span class="block text-sm font-bold text-black-700">SO No</span>
-                            <p class="font-medium text-lg">{{ returnList.order_data.so_no }}</p>
-                        </div>
-                        <div>
-                            <span class="block text-sm font-bold text-black-700">Tax</span>
-                            <p class="font-medium text-lg">{{ returnList.order_data.tax }}</p>
-                        </div>
-                         <div>
-                            <span class="block text-sm font-bold text-black-700">Subtotal</span>
-                            <p class="font-medium text-lg">{{ returnList.order_data.subtotal }}</p>
+                            <span class="block text-sm font-bold text-black-700">Storage</span>
+                            <p class="font-medium text-lg">{{ returnList.dealer.dealer_shop.storageLocation }}</p>
                         </div>
                     </div>
                 </div>
@@ -169,43 +128,28 @@
             
             <!-- RIGHT SIDE -->
             <div class="md:w-1/3 flex flex-col">
-                <!-- Dealer Information -->
+
                 <div class="card flex flex-col w-full">
-                    <div class="flex items-center justify-between border-b pb-2 mb-2">
-                        <div class="text-2xl font-bold text-gray-800">Dealer Information</div>
+                    <div class="flex items-center justify-between border-b pb-3 mb-4">
+                        <div class="text-2xl font-bold text-gray-800">Advance Information</div>
+                        <Tag :value="returnList.delivery_status" :severity="getStatusSeverity(returnList.delivery_status)" />
                     </div>
+
                     <div class="overflow-x-auto">
                         <table class="w-full text-sm text-left text-gray-700">
                             <tbody>
                                 <tr class="border-b">
-                                    <td class="px-4 py-2 font-medium">Dealer Name</td>
-                                    <td class="px-4 py-2 text-right">{{ `${returnList.dealer.firstName} ${returnList.dealer.lastName}` }}</td>
+                                    <td class="px-4 py-2 font-medium">Order Ref</td>
+                                    <td class="px-4 py-2 text-right">{{ returnList.return_orderNo_ref || '-' }}</td>
                                 </tr>
-                                <tr class="border-b">
-                                    <td class="px-4 py-2 font-medium">Dealer Code</td>
-                                    <td class="px-4 py-2 text-right">{{ returnList.dealer.activationCode}}</td>
-                                </tr>
-                                <tr class="border-b">
-                                    <td class="px-4 py-2 font-medium">Contact Person</td>
-                                    <td class="px-4 py-2 text-right">{{ `${returnList.dealer.emailAddress} ${returnList.dealer.mobileNumber}` }}</td>
+                                 <tr class="border-b">
+                                    <td class="px-4 py-2 font-medium">SAP Return No</td>
+                                    <td class="px-4 py-2 text-right">{{ returnList.sapreturnno || '-' }}</td>
                                 </tr>
                                 <tr>
-                                    <td class="px-4 py-2 font-medium">Email</td>
-                                    <td class="px-4 py-2 text-right">{{ returnList.dealer.emailAddress }}</td>
+                                    <td class="px-4 py-2 font-medium">SAP Created</td>
+                                    <td class="px-4 py-2 text-right">{{ formatDate(returnList.sap_timestamp) }}</td>
                                 </tr>
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-
-                <!-- Shipping Information -->
-                <div class="card flex flex-col w-full">
-                    <div class="flex items-center justify-between border-b pb-2 mb-2">
-                        <div class="text-2xl font-bold text-gray-800">Shipping Information</div>
-                    </div>
-                    <div class="overflow-x-auto">
-                        <table class="w-full text-sm text-left text-gray-700">
-                            <tbody>
                                 <tr class="border-b">
                                     <td class="px-4 py-2 font-medium">Pickup Date</td>
                                     <td class="px-4 py-2 text-right">{{ returnList.delivery_information?.pickup_datetime ? formatDate(returnList.delivery_information?.pickup_datetime) : 'No date assigned' }}</td>
@@ -214,34 +158,45 @@
                                     <td class="px-4 py-2 font-medium">Delivery Date</td>
                                     <td class="px-4 py-2 text-right">{{ returnList.delivery_information?.receive_datetime ? formatDate(returnList.delivery_information?.receive_datetime) : 'No date assigned' }}</td>
                                 </tr>
-                                <tr class="border-b">
-                                    <td class="px-4 py-2 font-medium">Status</td>
-                                    <td class="px-4 py-2 text-right">{{ returnList.delivery_status }}</td>
-                                </tr>
-                                <tr class="border-b">
-                                    <td class="px-4 py-2 font-medium">Customer Account No</td>
-                                    <td class="px-4 py-2 text-right">{{ returnList.shiptoData?.custAccountNo  || '' }}</td>
-                                </tr>
-                                <tr class="border-b">
-                                    <td class="px-4 py-2 font-medium">Company Name</td>
-                                    <td class="px-4 py-2 text-right">{{ `${returnList.shiptoData.companyName1} ${returnList.shiptoData.companyName2} ${returnList.shiptoData.companyName3} ${returnList.shiptoData.companyName4}` }}</td>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                <div class="card flex flex-col w-full">
+                    <div class="flex items-center justify-between border-b pb-3 mb-4">
+                        <div class="text-2xl font-bold text-gray-800">Order Information</div>
+                    </div>
 
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-sm text-left text-gray-700">
+                            <tbody>
+                                <tr class="border-b">
+                                    <td class="px-4 py-2 font-medium">Order No</td>
+                                    <td class="px-4 py-2 text-right">{{ returnList.order_data.order_no || '-' }}</td>
                                 </tr>
-                                <tr>
-                                    <td class="px-4 py-2 font-medium">Address</td>
-                                    <td class="px-4 py-2 text-right">{{ `${returnList.shiptoData?.addressLine1} ${returnList.shiptoData.addressLine2} ${returnList.shiptoData.addressLine3} ${returnList.shiptoData.addressLine4}` }}</td>
+                                 <tr class="border-b">
+                                    <td class="px-4 py-2 font-medium">Inv No</td>
+                                    <td class="px-4 py-2 text-right">{{ returnList.order_data.inv_no || '-' }}</td>
                                 </tr>
                                 <tr class="border-b">
-                                    <td class="px-4 py-2 font-medium">City</td>
-                                    <td class="px-4 py-2 text-right">{{ returnList.shiptoData.city }}</td>
+                                    <td class="px-4 py-2 font-medium">Type</td>
+                                    <td class="px-4 py-2 text-right">{{ returnList.order_data.deliveryType || '-' }}</td>
                                 </tr>
                                 <tr class="border-b">
-                                    <td class="px-4 py-2 font-medium">Company Number</td>
-                                    <td class="px-4 py-2 text-right">{{ returnList.shiptoData.phoneNumber }}</td>
+                                    <td class="px-4 py-2 font-medium">Description</td>
+                                    <td class="px-4 py-2 text-right">{{ returnList.order_data.orderDesc || '-' }}</td>
                                 </tr>
                                 <tr class="border-b">
-                                    <td class="px-4 py-2 font-medium">Contact Person</td>
-                                    <td class="px-4 py-2 text-right">{{ returnList.shiptoData.mobileNumber }}</td>
+                                    <td class="px-4 py-2 font-medium">Remarks</td>
+                                    <td class="px-4 py-2 text-right">{{ returnList.order_data.orderReceiveRemarks || '-' }}</td>
+                                </tr>
+                                <tr class="border-b">
+                                    <td class="px-4 py-2 font-medium">SO No</td>
+                                    <td class="px-4 py-2 text-right">{{ returnList.order_data.so_no || '-' }}</td>
+                                </tr>
+                                <tr class="border-b">
+                                    <td class="px-4 py-2 font-medium">Subtotal</td>
+                                    <td class="px-4 py-2 text-right">{{` RM ${returnList.order_data.subtotal || '-'} `}}</td>
                                 </tr>
                             </tbody>
                         </table>
@@ -256,7 +211,7 @@
 import api from '@/service/api';
 import Button from 'primevue/button';
 import { useToast } from 'primevue/usetoast';
-import { onMounted, ref } from 'vue';
+import { onMounted, ref, computed } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 
 const toast = useToast();
@@ -287,6 +242,10 @@ function formatDate(dateString) {
     hour12: true
   });
   }
+const subtotal = computed(() => {
+    const arr = returnList.value.return_order_array || [];
+    return arr.reduce((sum, item) => sum + (Number(item.unitprice) * Number(item.qty)), 0);
+});
 const InitfetchData = async () => {
     try {
         loading.value = true;
@@ -308,24 +267,6 @@ const InitfetchData = async () => {
         loading.value = false;
     }
 };
-// function getStatusLabel(status) {
-//     switch (status) {
-//         case 0:
-//             return 'Pending';
-//         case 1:
-//             return 'Approve';
-//         case 2:
-//             return 'Rejected';
-//         case 66:
-//             return 'Processing';
-//         case 77:
-//             return 'Pending Collection';
-//         case 9:
-//             return 'Completed';
-//         default:
-//             return 'Unknown';
-//     }
-// }
 
 function getStatusSeverity(status) {
     switch (status) {
@@ -405,11 +346,11 @@ const handleImport = async (event) => {
                 detail: 'File imported successfully',
                 life: 3000
             });
-            } else {
+        } else {
             toast.add({
                 severity: 'error',
                 summary: 'Import Failed',
-                detail: response.data.error || 'Server did not confirm success',
+                detail: response.data.admin_data.error_message || 'Server did not confirm success',
                 life: 3000
             });
         }
