@@ -14,7 +14,7 @@
                             </RouterLink>
 
                             <!-- Delete Event -->
-                            <Button label="Delete" class="p-button-danger" size="small" @click="deleteGame" />
+                            <Button label="Delete" class="p-button-danger" size="small" @click="confirmDelete" />
                         </div>
                     </div>
 
@@ -213,13 +213,16 @@
 
 <script setup>
 import { ref, onMounted, computed } from 'vue';
-import { useRoute } from 'vue-router';
+import { useRoute, useRouter } from 'vue-router';
 import { useToast } from 'primevue/usetoast';
+import { useConfirm } from 'primevue/useconfirm';
 import QrcodeVue from 'qrcode.vue';
 import api from '@/service/api';
 
 const route = useRoute();
+const router = useRouter();
 const toast = useToast();
+const confirm = useConfirm(); // Added useConfirm
 const gameId = route.params.id;
 
 const qrWrapper = ref(null);
@@ -416,42 +419,55 @@ const toggleGameStatus = async () => {
     }
 };
 
-// Delete game
-async function deleteGame() {
-    if (confirm('Are you sure you want to delete this game?')) {
-        try {
-            const response = await api.put(`game/delete/${gameId}`);
-            if (response.data.status === 1) {
-                toast.add({
-                    severity: 'success',
-                    summary: 'Success',
-                    detail: 'Game deleted successfully',
-                    life: 3000
-                });
-                // Redirect to games list after short delay
-                setTimeout(() => {
-                    window.location.href = '/marketing/games';
-                }, 1000);
-            } else {
-                console.error('Failed to delete game');
+// Delete game with confirmation
+const confirmDelete = () => {
+    confirm.require({
+        message: 'Are you sure you want to delete this Game?',
+        header: 'Confirm Delete',
+        icon: 'pi pi-exclamation-triangle',
+        acceptLabel: 'Yes, Delete',
+        rejectLabel: 'Cancel',
+        acceptClass: 'p-button-danger',
+        accept: async () => {
+            try {
+                const response = await api.put(`game/delete/${gameId}`);
+                
+                if (response.data.status === 1) {
+                    toast.add({
+                        severity: 'success',
+                        summary: 'Deleted',
+                        detail: 'Game deleted successfully.',
+                        life: 3000
+                    });
+                    router.push('/marketing/listGame');
+                } else {
+                    toast.add({
+                        severity: 'error',
+                        summary: 'Error',
+                        detail: 'Failed to delete Game.',
+                        life: 3000
+                    });
+                }
+            } catch (error) {
+                console.error('Delete failed:', error);
                 toast.add({
                     severity: 'error',
                     summary: 'Error',
-                    detail: 'Failed to delete game',
+                    detail: 'Failed to delete Game.',
                     life: 3000
                 });
             }
-        } catch (error) {
-            console.error('Error deleting game:', error);
+        },
+        reject: () => {
             toast.add({
-                severity: 'error',
-                summary: 'Error',
-                detail: 'Error deleting game',
-                life: 3000
+                severity: 'info',
+                summary: 'Cancelled',
+                detail: 'Deletion cancelled.',
+                life: 2000
             });
         }
-    }
-}
+    });
+};
 
 // Export participants
 async function exportParticipants() {
