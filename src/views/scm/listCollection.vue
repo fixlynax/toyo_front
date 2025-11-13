@@ -1,10 +1,12 @@
 <script setup>
-import { ref, onBeforeMount } from 'vue';
+import { ref, onBeforeMount, onMounted } from 'vue';
 import api from '@/service/api';
 import { FilterMatchMode } from '@primevue/core/api';
 
 const listData = ref([]);
 const loading = ref(true);
+const importLoading = ref(false);
+const importInput = ref();
 const filters = ref({
     global: { value: null, matchMode: FilterMatchMode.CONTAINS }
 });
@@ -74,7 +76,7 @@ function formatDateFull(dateString) {
     hour12: true
   });
 }
-onBeforeMount(async () => {
+onMounted(async () => {
     try {
         loading.value = true;
         const response = await api.get('collection/list');
@@ -110,6 +112,54 @@ function filteredList() {
     if (filterStatus.value === null) return listData.value;
     return listData.value.filter((x) => x.status === filterStatus.value);
 }
+// Import function
+const handleImport = async (event) => {
+    const file = event.target.files[0];
+    // console.log(file);
+    if (!file) return;
+
+    // try {
+    //     importLoading.value = true;
+        
+    //     const formData = new FormData();
+    //     formData.append('return_order_excel', file);
+        
+    //     const response = await api.postExtra('excel/import-scm-return-order-list', formData, {
+    //         headers: {
+    //             'Content-Type': 'multipart/form-data'
+    //         }
+    //         });
+        
+    //     if (response.data.status === 1) {
+    //         // Refresh data after import
+    //         await fetchData();
+
+    //         // Reset file input
+    //         if (importInput.value) {
+    //             importInput.value.value = '';
+    //         }
+
+    //         toast.add({
+    //             severity: 'success',
+    //             summary: 'Success',
+    //             detail: 'File imported successfully',
+    //             life: 3000
+    //         });
+    //         } else {
+    //         toast.add({
+    //             severity: 'error',
+    //             summary: 'Import Failed',
+    //             detail: response.data.error || 'Server did not confirm success',
+    //             life: 3000
+    //         });
+    //     }
+    // } catch (error) {
+    //     console.error('Error importing data:', error);
+    //     toast.add({ severity: 'error', summary: 'Error', detail: 'Failed to import data', life: 3000 });
+    // } finally {
+    //     importLoading.value = false;
+    // }
+};
 </script>
 
 <template>
@@ -169,9 +219,9 @@ function filteredList() {
 
                                 <div
                                     class="flex items-center gap-2 px-3 py-2 hover:bg-gray-100 cursor-pointer rounded-md"
-                                    :class="{ 'bg-gray-200': filterStatus === 3 }"
+                                    :class="{ 'bg-gray-200': filterStatus === 4 }"
                                     @click="
-                                        filterStatus = 3;
+                                        filterStatus = 4;
                                         showFilterMenu = false;
                                     "
                                 >
@@ -183,7 +233,14 @@ function filteredList() {
                     </div>
 
                     <div class="flex justify-end gap-2">
-                        <Button type="button" label="Bulk Update " icon="pi pi-upload" />
+                        <Button type="button" label="Bulk Import" icon="pi pi-file-import" @click="importInput?.click()":loading="importLoading" />
+                        <input 
+                        ref="importInput"
+                        type="file" 
+                        accept=".xlsx,.xls" 
+                        style="display: none" 
+                        @change="handleImport"
+                        />
                     </div>
                 </div>
             </template>
