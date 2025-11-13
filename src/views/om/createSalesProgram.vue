@@ -48,25 +48,16 @@
 
                 <!-- Upload Image -->
                 <div>
-                    <label class="block font-bold text-gray-700 mb-2">Upload Sales Program Image</label>
+                    <label class="block font-bold text-gray-700 mb-2">
+                        Upload Sales Program Image
+                        <span class="text-xs bg-blue-100 text-blue-800 px-2 py-0.5 rounded-full">(Max file size: 2 MB)</span>
+                    </label>
                     <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
                         <div>
-                            <FileUpload 
-                                mode="basic" 
-                                name="image" 
-                                accept="image/*" 
-                                :maxFileSize="MAX_FILE_SIZE" 
-                                customUpload 
-                                @select="onImageSelect" 
-                                @error="onUploadError"
-                                chooseLabel="Upload Program Image" 
-                                class="w-full" 
-                            />
+                            <FileUpload mode="basic" name="image" accept="image/*" :maxFileSize="2 * 1024 * 1024" customUpload @select="onImageSelect" @error="onUploadError" chooseLabel="Upload Program Image" class="w-full" />
                             <div v-if="imagePreview" class="mt-2">
                                 <img :src="imagePreview" alt="Preview" class="rounded-lg shadow-md object-cover w-full h-80" />
-                                <p class="text-xs text-gray-500 mt-1 text-center">
-                                    File size: {{ formatFileSize(currentFileSize) }}
-                                </p>
+                                <p class="text-xs text-gray-500 mt-1 text-center">File size: {{ formatFileSize(currentFileSize) }}</p>
                             </div>
                         </div>
                     </div>
@@ -287,13 +278,7 @@
                         </RouterLink>
                     </div>
                     <div class="w-40">
-                        <Button 
-                            label="Submit" 
-                            class="w-full" 
-                            @click="submitForm" 
-                            :loading="submitting"
-                            :disabled="submitting"
-                        />
+                        <Button label="Submit" class="w-full" @click="submitForm" :loading="submitting" :disabled="submitting" />
                     </div>
                 </div>
             </div>
@@ -480,9 +465,9 @@ const validateImageFile = (file) => {
 
     // Check file size
     if (file.size > MAX_FILE_SIZE) {
-        return { 
-            valid: false, 
-            message: `File size too large. Maximum allowed size is ${formatFileSize(MAX_FILE_SIZE)}. Your file is ${formatFileSize(file.size)}.` 
+        return {
+            valid: false,
+            message: `File size too large. Maximum allowed size is ${formatFileSize(MAX_FILE_SIZE)}. Your file is ${formatFileSize(file.size)}.`
         };
     }
 
@@ -505,13 +490,13 @@ const onImageSelect = (event) => {
 
         imageFile.value = file;
         currentFileSize.value = file.size;
-        
+
         const reader = new FileReader();
         reader.onload = (e) => {
             imagePreview.value = e.target.result;
         };
         reader.readAsDataURL(file);
-        
+
         showSuccess(`Image selected successfully (${formatFileSize(file.size)})`);
     }
 };
@@ -614,7 +599,7 @@ const validateForm = () => {
     // Validate dates
     const startDate = new Date(salesProgram.value.startdate);
     const endDate = new Date(salesProgram.value.enddate);
-    
+
     if (endDate <= startDate) {
         showError('End date must be after start date');
         return false;

@@ -1,4 +1,3 @@
-
 <template>
     <Fluid>
         <!-- 🎯 Create Campaign -->
@@ -56,7 +55,7 @@
 
                 <!-- Upload Images -->
                 <div>
-                    <label class="block font-bold text-gray-700 mb-2">Upload Campaign Images</label>
+                    <label class="block font-bold text-gray-700 mb-2">Upload Campaign Images <span class="text-xs bg-blue-100 text-blue-800 px-2 py-0.5 rounded-full">(Max file size: 2 MB)</span> </label>
                     <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
                         <div v-for="(field, idx) in ['image1', 'image2', 'image3']" :key="idx">
                             <FileUpload mode="basic" :name="field" accept="image/*" customUpload @select="onImageSelect($event, field)" :chooseLabel="`Upload Image ${idx + 1}`" class="w-full" />
@@ -90,7 +89,7 @@
         </div>
 
         <!-- 📋 Criteria Section -->
-        <div  class="card flex flex-col w-full mt-8">
+        <div class="card flex flex-col w-full mt-8">
             <div class="flex items-center justify-between border-b pb-2 mb-4">
                 <div class="text-xl font-bold text-gray-800">📋 Criteria</div>
             </div>
@@ -224,7 +223,7 @@ const isSubmitting = ref(false);
 // Gamification toggle - using strings 'on'/'off' as per API requirement
 const gamificationOnOff = [
     { label: 'ON', value: 'on' },
-    { label: 'OFF', value: 'off'}
+    { label: 'OFF', value: 'off' }
 ];
 
 // Criteria section
@@ -253,38 +252,40 @@ const fetchCatalog = async () => {
         if (response.data.status === 1) {
             listPrize.value = response.data.admin_data || [];
         }
-                    // Transform API data to match frontend expectations
-            const transformedItems = (response.data.admin_data || []).map((item) => ({
-                imageURL: item.imageURL, 
-                title: item.title, 
-                type: item.type, 
-                purpose: item.purpose, 
-                processedImageURL: null // Will be populated by processCatalogueImages
-            }));
+        // Transform API data to match frontend expectations
+        const transformedItems = (response.data.admin_data || []).map((item) => ({
+            imageURL: item.imageURL,
+            title: item.title,
+            type: item.type,
+            purpose: item.purpose,
+            processedImageURL: null // Will be populated by processCatalogueImages
+        }));
 
-            console.log('Transformed items before processing:', transformedItems);
+        console.log('Transformed items before processing:', transformedItems);
 
-            // Process private images
-            const processedItems = await processCatalogueImages(transformedItems);
-            listPrize.value = processedItems;
+        // Process private images
+        const processedItems = await processCatalogueImages(transformedItems);
+        listPrize.value = processedItems;
     } catch (error) {
         console.error('Error fetching catalog:', error);
     }
 };
 
 // Criteria management
-const addCriteria = () => criterias.value.push({ 
-    selected: null, 
-    minQty: 1 
-});
+const addCriteria = () =>
+    criterias.value.push({
+        selected: null,
+        minQty: 1
+    });
 
 const removeCriteria = (index) => criterias.value.splice(index, 1);
 
 // Reward management
-const addReward = () => rewards.value.push({ 
-    selected: null, 
-    qty: 1 
-});
+const addReward = () =>
+    rewards.value.push({
+        selected: null,
+        qty: 1
+    });
 
 const removeReward = (index) => rewards.value.splice(index, 1);
 
@@ -383,38 +384,36 @@ const validateForm = () => {
 
     // Fixed: Check for string 'on' instead of number 1
 
-        if (criterias.value.length === 0) {
-            alert('Please add at least one criteria for gamification campaign');
+    if (criterias.value.length === 0) {
+        alert('Please add at least one criteria for gamification campaign');
+        return false;
+    }
+
+    // Validate criteria
+    for (let i = 0; i < criterias.value.length; i++) {
+        const criteria = criterias.value[i];
+        if (!criteria.selected || !criteria.minQty) {
+            alert(`Please complete all fields for Criteria ${i + 1}`);
             return false;
         }
+    }
 
-        // Validate criteria
-        for (let i = 0; i < criterias.value.length; i++) {
-            const criteria = criterias.value[i];
-            if (!criteria.selected || !criteria.minQty) {
-                alert(`Please complete all fields for Criteria ${i + 1}`);
-                return false;
-            }
-        }
+    if (rewards.value.length === 0) {
+        alert('Please add at least one reward for gamification campaign');
+        return false;
+    }
 
-        if (rewards.value.length === 0) {
-            alert('Please add at least one reward for gamification campaign');
+    // Validate rewards
+    for (let i = 0; i < rewards.value.length; i++) {
+        const reward = rewards.value[i];
+        if (!reward.selected || !reward.qty) {
+            alert(`Please complete all fields for Reward ${i + 1}`);
             return false;
         }
-
-        // Validate rewards
-        for (let i = 0; i < rewards.value.length; i++) {
-            const reward = rewards.value[i];
-            if (!reward.selected || !reward.qty) {
-                alert(`Please complete all fields for Reward ${i + 1}`);
-                return false;
-            }
-        }
-    
+    }
 
     return true;
 };
-
 
 // Submit event - FIXED VERSION
 const submitEvent = async () => {
@@ -449,30 +448,26 @@ const submitEvent = async () => {
         }
         if (campaign.value.image3File) {
             formData.append('image3', campaign.value.image3File);
-        }       
-        
+        }
 
         // FIXED: Always send criteria and reward_option, even if empty
         let criteriaArray = [];
         let rewardOptions = [];
 
-       
-   
-            // Prepare criteria array
-            criteriaArray = criterias.value.map(criteria => ({
-                title: criteria.selected.material,
-                type: criteria.selected.materialtype,
-                pattern: criteria.selected.pattern,
-                size: criteria.selected.rimdiameter.toString(),
-                minQty: criteria.minQty.toString()
-            }));
+        // Prepare criteria array
+        criteriaArray = criterias.value.map((criteria) => ({
+            title: criteria.selected.material,
+            type: criteria.selected.materialtype,
+            pattern: criteria.selected.pattern,
+            size: criteria.selected.rimdiameter.toString(),
+            minQty: criteria.minQty.toString()
+        }));
 
-            // Prepare reward options array
-            rewardOptions = rewards.value.map(reward => ({
-                catalogID: reward.selected.id.toString(),
-                quantity: reward.qty.toString()
-            }));
-        
+        // Prepare reward options array
+        rewardOptions = rewards.value.map((reward) => ({
+            catalogID: reward.selected.id.toString(),
+            quantity: reward.qty.toString()
+        }));
 
         // FIXED: Always append these fields, even if empty
         formData.append('criteria', JSON.stringify(criteriaArray));
@@ -480,13 +475,13 @@ const submitEvent = async () => {
 
         // ✅ Log all FormData contents
         for (const [key, value] of formData.entries()) {
-        if (value instanceof File) {
-            // console.log(`${key}:`, value.name, value.type, value.size, value);
-        } else {
-            // console.log(`${key}:`, value);
+            if (value instanceof File) {
+                // console.log(`${key}:`, value.name, value.type, value.size, value);
+            } else {
+                // console.log(`${key}:`, value);
+            }
         }
-}
-            const response = await api.customRequest({
+        const response = await api.customRequest({
             method: 'POST',
             url: '/api/campaign/create',
             data: formData,
