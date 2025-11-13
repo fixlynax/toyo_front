@@ -3,7 +3,7 @@ import { createRouter, createWebHistory } from 'vue-router';
 import { tokenService } from '@/service/api';
 import { sassTrue } from 'sass';
 
-const BASE_PATH  = '/etenadmin/ToyoPortal/';
+const BASE_PATH  = '/etenadmin/';
 
 const router = createRouter({
     history: createWebHistory(BASE_PATH ),
