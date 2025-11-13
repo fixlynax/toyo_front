@@ -162,6 +162,10 @@
                                     <td class="px-4 py-2 font-medium">Invoice No</td>
                                     <td class="px-4 py-2 text-right">{{ orderData.inv_no || '-' }}</td>
                                 </tr>
+                                 <tr class="border-b">
+                                    <td class="px-4 py-2 font-medium">SAP Return No</td>
+                                    <td class="px-4 py-2 text-right">{{ order.sapreturnno || '-' }}</td>
+                                </tr>
                                 <tr class="border-b">
                                     <td class="px-4 py-2 font-medium">SAP Order Type</td>
                                     <td class="px-4 py-2 text-right">{{ orderData.sapordertype || '-' }}</td>
