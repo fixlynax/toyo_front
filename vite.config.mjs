@@ -10,7 +10,6 @@ export default defineConfig({
     optimizeDeps: {
         noDiscovery: true
     },
-    base: '/etenadmin/ToyoPortal/',
     plugins: [
         vue(),
         Components({

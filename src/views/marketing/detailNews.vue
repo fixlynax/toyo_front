@@ -2,6 +2,7 @@
     <Fluid>
         <!-- Toast and ConfirmDialog -->
         <Toast />
+        <ConfirmDialog />
 
         <!-- Loading State -->
         <div v-if="loading" class="text-center py-20 text-gray-500 text-lg">Loading news details...</div>
@@ -284,7 +285,6 @@ const confirmDelete = () => {
         }
     });
 };
-
 
 // Publish News
 const publishNews = async () => {
