@@ -1,5 +1,6 @@
 <template>
     <Fluid>
+        <Toast />
         <div class="flex flex-col md:flex-row gap-8">
             <div class="card flex flex-col gap-6 w-full">
                 <!-- Header -->
@@ -50,8 +51,23 @@
                     <label class="block font-bold text-gray-700 mb-2">Upload Sales Program Image</label>
                     <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
                         <div>
-                            <FileUpload mode="basic" name="image" accept="image/*" customUpload @select="onImageSelect" chooseLabel="Upload Program Image" class="w-full" />
-                            <img v-if="imagePreview" :src="imagePreview" alt="Preview" class="mt-2 rounded-lg shadow-md object-cover w-full h-80" />
+                            <FileUpload 
+                                mode="basic" 
+                                name="image" 
+                                accept="image/*" 
+                                :maxFileSize="MAX_FILE_SIZE" 
+                                customUpload 
+                                @select="onImageSelect" 
+                                @error="onUploadError"
+                                chooseLabel="Upload Program Image" 
+                                class="w-full" 
+                            />
+                            <div v-if="imagePreview" class="mt-2">
+                                <img :src="imagePreview" alt="Preview" class="rounded-lg shadow-md object-cover w-full h-80" />
+                                <p class="text-xs text-gray-500 mt-1 text-center">
+                                    File size: {{ formatFileSize(currentFileSize) }}
+                                </p>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -271,7 +287,13 @@
                         </RouterLink>
                     </div>
                     <div class="w-40">
-                        <Button label="Submit" class="w-full" @click="submitForm" />
+                        <Button 
+                            label="Submit" 
+                            class="w-full" 
+                            @click="submitForm" 
+                            :loading="submitting"
+                            :disabled="submitting"
+                        />
                     </div>
                 </div>
             </div>
@@ -282,7 +304,13 @@
 <script setup>
 import { ref, onMounted, watch } from 'vue';
 import { RouterLink } from 'vue-router';
+import { useToast } from 'primevue/usetoast';
 import api from '@/service/api';
+
+const toast = useToast();
+
+// Constants
+const MAX_FILE_SIZE = 2 * 1024 * 1024; // 10MB in bytes
 
 const salesProgram = ref({
     programID: '',
@@ -297,6 +325,8 @@ const salesProgram = ref({
 
 const imageFile = ref(null);
 const imagePreview = ref('');
+const currentFileSize = ref(0);
+const submitting = ref(false);
 
 // Current selection for buy materials
 const currentSelection = ref({
@@ -322,6 +352,43 @@ const freeMaterialOptions = ref([]);
 const loadingBuyPatterns = ref(false);
 const loadingBuyRims = ref(false);
 const loadingFreeMaterials = ref(false);
+
+// Toast notification functions
+const showSuccess = (message) => {
+    toast.add({
+        severity: 'success',
+        summary: 'Success',
+        detail: message,
+        life: 3000
+    });
+};
+
+const showError = (message) => {
+    toast.add({
+        severity: 'error',
+        summary: 'Error',
+        detail: message,
+        life: 5000
+    });
+};
+
+const showWarning = (message) => {
+    toast.add({
+        severity: 'warn',
+        summary: 'Warning',
+        detail: message,
+        life: 4000
+    });
+};
+
+const showInfo = (message) => {
+    toast.add({
+        severity: 'info',
+        summary: 'Information',
+        detail: message,
+        life: 3000
+    });
+};
 
 // Helper functions
 const onPatternChange = async (selection) => {
@@ -359,11 +426,14 @@ const addSelectedMaterials = () => {
         currentSelection.value.selectedPattern = null;
         currentSelection.value.selectedRims = [];
         currentSelection.value.availableRims = [];
+
+        showInfo(`Added ${currentSelection.value.selectedRims.length} rim diameter(s) to buy materials`);
     }
 };
 
 const removeBuyMaterial = (index) => {
     programItem.value.buyMaterials.splice(index, 1);
+    showInfo('Buy material removed');
 };
 
 const clearAllBuySelections = () => {
@@ -371,12 +441,14 @@ const clearAllBuySelections = () => {
     currentSelection.value.selectedPattern = null;
     currentSelection.value.selectedRims = [];
     currentSelection.value.availableRims = [];
+    showInfo('All buy material selections cleared');
 };
 
 const onFreeMaterialChange = () => {
     if (programItem.value.selectedFreeMaterial) {
         const selectedMaterial = freeMaterialOptions.value.find((material) => material.materialid === programItem.value.selectedFreeMaterial);
         programItem.value.freeMaterialData = selectedMaterial ? { ...selectedMaterial } : null;
+        showInfo('Free material selected');
     } else {
         programItem.value.freeMaterialData = null;
     }
@@ -385,6 +457,7 @@ const onFreeMaterialChange = () => {
 const clearFreeSelection = () => {
     programItem.value.selectedFreeMaterial = null;
     programItem.value.freeMaterialData = null;
+    showInfo('Free material selection cleared');
 };
 
 const getFreeMaterialLabel = (materialId) => {
@@ -392,15 +465,62 @@ const getFreeMaterialLabel = (materialId) => {
     return material ? material.material : materialId;
 };
 
+const formatFileSize = (bytes) => {
+    if (bytes === 0) return '0 Bytes';
+    const k = 1024;
+    const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+    const i = Math.floor(Math.log(bytes) / Math.log(k));
+    return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+};
+
+const validateImageFile = (file) => {
+    if (!file) {
+        return { valid: false, message: 'Please select an image file' };
+    }
+
+    // Check file size
+    if (file.size > MAX_FILE_SIZE) {
+        return { 
+            valid: false, 
+            message: `File size too large. Maximum allowed size is ${formatFileSize(MAX_FILE_SIZE)}. Your file is ${formatFileSize(file.size)}.` 
+        };
+    }
+
+    // Check file type
+    if (!file.type.startsWith('image/')) {
+        return { valid: false, message: 'Please select a valid image file' };
+    }
+
+    return { valid: true };
+};
+
 const onImageSelect = (event) => {
     const file = event.files[0];
     if (file) {
+        const validation = validateImageFile(file);
+        if (!validation.valid) {
+            showError(validation.message);
+            return;
+        }
+
         imageFile.value = file;
+        currentFileSize.value = file.size;
+        
         const reader = new FileReader();
         reader.onload = (e) => {
             imagePreview.value = e.target.result;
         };
         reader.readAsDataURL(file);
+        
+        showSuccess(`Image selected successfully (${formatFileSize(file.size)})`);
+    }
+};
+
+const onUploadError = (event) => {
+    if (event.xhr && event.xhr.status) {
+        showError(`Upload failed: ${event.xhr.statusText}`);
+    } else {
+        showError('File upload failed. Please check the file size and try again.');
     }
 };
 
@@ -429,6 +549,7 @@ const loadBuyPatterns = async () => {
         }
     } catch (error) {
         console.error('Error loading buy patterns:', error);
+        showError('Failed to load buy patterns');
     } finally {
         loadingBuyPatterns.value = false;
     }
@@ -450,6 +571,7 @@ const loadPatternRims = async (selection) => {
     } catch (error) {
         console.error('Error loading pattern rims:', error);
         selection.availableRims = [];
+        showError('Failed to load rim diameters');
     } finally {
         loadingBuyRims.value = false;
     }
@@ -467,49 +589,75 @@ const loadFreeMaterials = async () => {
         }
     } catch (error) {
         console.error('Error loading free materials:', error);
+        showError('Failed to load free materials');
     } finally {
         loadingFreeMaterials.value = false;
     }
 };
 
+const validateForm = () => {
+    if (!salesProgram.value.programID) {
+        showError('Please enter Sales Program ID');
+        return false;
+    }
+
+    if (!salesProgram.value.programName) {
+        showError('Please enter Program Name');
+        return false;
+    }
+
+    if (!salesProgram.value.startdate || !salesProgram.value.enddate) {
+        showError('Please select both Start Date and End Date');
+        return false;
+    }
+
+    // Validate dates
+    const startDate = new Date(salesProgram.value.startdate);
+    const endDate = new Date(salesProgram.value.enddate);
+    
+    if (endDate <= startDate) {
+        showError('End date must be after start date');
+        return false;
+    }
+
+    if (!imageFile.value) {
+        showError('Please upload an image');
+        return false;
+    }
+
+    // Validate image file size
+    const imageValidation = validateImageFile(imageFile.value);
+    if (!imageValidation.valid) {
+        showError(imageValidation.message);
+        return false;
+    }
+
+    // Validate buy materials
+    if (programItem.value.buyMaterials.length === 0) {
+        showError('Please select at least one buy material');
+        return false;
+    }
+
+    // Validate free material
+    if (!programItem.value.selectedFreeMaterial) {
+        showError('Please select free material');
+        return false;
+    }
+    if (!programItem.value.freeQuota || programItem.value.freeQuota < 1) {
+        showError('Please enter free quota');
+        return false;
+    }
+
+    return true;
+};
+
 const submitForm = async () => {
+    if (!validateForm()) {
+        return;
+    }
+
     try {
-        // Validation
-        if (!salesProgram.value.programID) {
-            alert('Please enter Sales Program ID');
-            return;
-        }
-
-        if (!salesProgram.value.programName) {
-            alert('Please enter Program Name');
-            return;
-        }
-
-        if (!salesProgram.value.startdate || !salesProgram.value.enddate) {
-            alert('Please select both Start Date and End Date');
-            return;
-        }
-
-        if (!imageFile.value) {
-            alert('Please upload an image');
-            return;
-        }
-
-        // Validate buy materials
-        if (programItem.value.buyMaterials.length === 0) {
-            alert('Please select at least one buy material');
-            return;
-        }
-
-        // Validate free material
-        if (!programItem.value.selectedFreeMaterial) {
-            alert('Please select free material');
-            return;
-        }
-        if (!programItem.value.freeQuota || programItem.value.freeQuota < 1) {
-            alert('Please enter free quota');
-            return;
-        }
+        submitting.value = true;
 
         // ✅ Generate spFOC_array in the correct format
         const spFOCArray = programItem.value.buyMaterials.map((material) => ({
@@ -567,16 +715,21 @@ const submitForm = async () => {
         });
 
         if (response.data.status === 1) {
-            console.log('Sales program created successfully');
-            alert('Sales program created successfully!');
-            window.location.href = '/om/listSalesProgram';
+            // console.log('Sales program created successfully');
+            showSuccess('Sales program created successfully!');
+            setTimeout(() => {
+                window.location.href = '/om/listSalesProgram';
+            }, 1500);
         } else {
-            console.error('Error creating sales program:', response.data.error);
-            alert('Error creating sales program: ' + (response.data.error?.message || 'Unknown error'));
+            // console.error('Error creating sales program:', response.data.error);
+            showError('Error creating sales program: ' + (response.data.error?.message || 'Unknown error'));
         }
     } catch (error) {
         console.error('Error submitting form:', error);
-        alert('Error submitting form: ' + error.message);
+        // showError('Error submitting form: ' + (error.message || 'Please try again'));
+        showError('Error submitting form, please try again');
+    } finally {
+        submitting.value = false;
     }
 };
 
@@ -608,6 +761,7 @@ watch(
             selectedRims: [],
             availableRims: []
         };
+        showInfo('Program type changed - form has been reset');
     }
 );
 
@@ -615,5 +769,6 @@ watch(
 onMounted(() => {
     loadBuyPatterns();
     loadFreeMaterials();
+    showInfo('Sales program form loaded. Please fill in all required fields.');
 });
 </script>

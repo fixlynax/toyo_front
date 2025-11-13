@@ -88,7 +88,7 @@
 
                 <!-- BACK ORDER ITEMS -->
                 <div class="card flex flex-col w-full">
-                    <div class="flex items-center justify-between mb-4">
+                    <div class="flex items-center justify-between mb-4 border-b pb-3">
                         <div class="font-semibold text-xl">📦 Back Order Items</div>
                         <div class="flex items-center gap-2">
                             <Tag :value="`${fulfillmentPercentage}% Fulfilled`" :severity="fulfillmentPercentage === 100 ? 'success' : fulfillmentPercentage > 0 ? 'warning' : 'danger'" />
@@ -96,45 +96,43 @@
                         </div>
                     </div>
 
-                    <DataTable :value="backOrderItems" dataKey="id" responsiveLayout="scroll" class="text-sm" stripedRows>
+                    <DataTable :value="backOrderItems" dataKey="id" responsiveLayout="scroll" class="text-sm rounded-table mt-2" stripedRows>
                         <Column field="itemno" header="Item No" style="min-width: 6rem; text-align: center">
                             <template #body="{ data }">
                                 <span class="font-bold text-lg">{{ data.itemno }}</span>
                             </template>
                         </Column>
 
-                        <Column field="materialid" header="Material ID" style="min-width: 8rem; text-align: center">
+                        <Column field="materialid" header="Material ID" style="min-width: 8rem; text-align: left">
                             <template #body="{ data }">
                                 <span class="font-medium text-lg">{{ data.materialid }}</span>
                             </template>
                         </Column>
 
-                        <Column field="itemcategory" header="Item Category" style="min-width: 8rem; text-align: center">
+                        <Column field="itemcategory" header="Item Category" style="min-width: 8rem; text-align: left">
                             <template #body="{ data }">
                                 <span class="text-lg">{{ data.itemcategory }}</span>
                             </template>
                         </Column>
 
-
-
-                        <Column field="qty" header="Original Qty" style="text-align: center">
+                        <Column field="qty" header="Original Qty" style="text-align: left">
                             <template #body="{ data }">
-                                <span class="text-lg font-semibold">{{ data.qty }}</span>
+                                <span class="text-lg font-semibold">{{ formatQuantity(data.qty) }}</span>
                             </template>
                         </Column>
 
-                        <Column field="fulfilledQty" header="Fulfilled Qty" style="text-align: center">
+                        <Column field="fulfilledQty" header="Fulfilled Qty" style="text-align: left">
                             <template #body="{ data }">
                                 <span class="text-lg" :class="getFulfillmentClass(data)">
-                                    {{ getFulfilledQuantity(data.materialid) }}
+                                    {{ formatQuantity(getFulfilledQuantity(data.materialid)) }}
                                 </span>
                             </template>
                         </Column>
 
-                        <Column field="remainingQty" header="Remaining Qty" style="text-align: center">
+                        <Column field="remainingQty" header="Remaining Qty" style="text-align: left">
                             <template #body="{ data }">
                                 <span class="text-lg font-bold" :class="getRemainingClass(data)">
-                                    {{ getRemainingQuantity(data.materialid) }}
+                                    {{ formatQuantity(getRemainingQuantity(data.materialid)) }}
                                 </span>
                             </template>
                         </Column>
@@ -154,7 +152,12 @@
                             <div class="text-sm text-gray-500">Created: {{ formatDate(fulfillOrder.created) }}</div>
                         </div>
 
-                        <DataTable :value="getFulfillmentItems(fulfillOrder)" class="text-sm" stripedRows>
+                        <DataTable :value="getFulfillmentItems(fulfillOrder)" class="text-sm rounded-table" stripedRows>
+                            <Column field="itemno" header="Item No" style="min-width: 6rem">
+                                <template #body="{ data }">
+                                    <span class="text-gray-600">{{ data.itemno }}</span>
+                                </template>
+                            </Column>
                             <Column field="materialid" header="Material ID" style="min-width: 8rem">
                                 <template #body="{ data }">
                                     <span class="font-bold">{{ data.materialid }}</span>
@@ -162,23 +165,27 @@
                             </Column>
                             <Column field="qty" header="Qty" style="min-width: 5rem">
                                 <template #body="{ data }">
-                                    <span>{{ data.qty }}</span>
+                                    <span>{{ formatQuantity(data.qty) }}</span>
                                 </template>
                             </Column>
-                            <Column field="unitprice" header="Unit Price (RM)" style="min-width: 6rem">
+                            <Column field="unitprice" header="Unit Price" style="min-width: 6rem">
                                 <template #body="{ data }">
-                                    <span class="font-semibold text-green-600">{{ data.unitprice }}</span>
+                                    <span class="font-semibold text-green-600">RM {{ data.unitprice }}</span>
                                 </template>
+
+                                <!-- ✅ Footer for label -->
+                            <template #footer>
+                                <div class="flex justify-start pr-2 font-bold text-gray-700">Grand Total</div>
+                            </template>
                             </Column>
-                            <Column field="totalamt" header="Total (RM)" style="min-width: 6rem">
+                            <Column field="totalamt" header="Total" style="min-width: 6rem">
                                 <template #body="{ data }">
-                                    <span class="font-bold text-green-700">{{ data.totalamt }}</span>
+                                    <span class="font-bold text-green-700">RM {{ data.totalamt }}</span>
                                 </template>
-                            </Column>
-                            <Column field="itemno" header="Item No" style="min-width: 6rem">
-                                <template #body="{ data }">
-                                    <span class="text-gray-600">{{ data.itemno }}</span>
-                                </template>
+
+                                 <template #footer>
+                                <div class="flex justify-start pr-2 font-bold text-gray-700">RM {{ fulfillOrder.total }}</div>
+                            </template>
                             </Column>
                         </DataTable>
 
@@ -249,25 +256,11 @@
                             <div class="bg-green-500 h-2 rounded-full" :style="{ width: `${item.fulfillmentRate}%` }"></div>
                         </div>
                         <div class="flex justify-between text-xs mt-1">
-                            <span>Fulfilled: {{ item.fulfilled }}/{{ item.original }}</span>
-                            <span class="font-semibold">Remaining: {{ item.remaining }}</span>
+                            <span>Fulfilled: {{ formatQuantity(item.fulfilled) }}/{{ formatQuantity(item.original) }}</span>
+                            <span class="font-semibold">Remaining: {{ formatQuantity(item.remaining) }}</span>
                         </div>
                     </div>
                 </div>
-
-                <!-- STOCK AVAILABILITY -->
-                <!-- <div class="card flex flex-col w-full" v-if="canProcessBackOrder">
-                    <div class="text-2xl font-bold text-gray-800 border-b pb-2 mb-3">📦 Stock Availability</div>
-                    <div class="text-sm text-gray-600 mb-3">Click "Process Back-Order" to create orders for available stock items.</div>
-                    <div v-for="item in backOrderItems" :key="item.materialid" class="mb-2 p-2 border rounded">
-                        <div class="flex justify-between items-center">
-                            <span class="font-medium text-sm">{{ item.materialid }}</span>
-                            <span class="text-xs font-semibold" :class="getRemainingQuantity(item.materialid) > 0 ? 'text-orange-500' : 'text-green-500'">
-                                {{ getRemainingQuantity(item.materialid) > 0 ? 'Partial Stock' : 'Full Stock' }}
-                            </span>
-                        </div>
-                    </div>
-                </div> -->
             </div>
         </div>
     </Fluid>
@@ -366,6 +359,17 @@ const confirmCancelBackOrder = () => {
             // Do nothing
         }
     });
+};
+
+// Helper method to format quantity as whole numbers
+const formatQuantity = (quantity) => {
+    if (quantity === null || quantity === undefined || quantity === '') return '0';
+
+    // Convert to number and round to nearest whole number
+    const num = parseFloat(quantity);
+    if (isNaN(num)) return '0';
+
+    return Math.round(num).toString();
 };
 
 // Computed properties
@@ -519,3 +523,44 @@ onMounted(() => {
     fetchBackOrderDetail();
 });
 </script>
+
+<style scoped>
+:deep(.rounded-table) {
+    border-radius: 12px;
+    overflow: hidden;
+    border: 1px solid #e5e7eb;
+
+    .p-datatable-header {
+        border-top-left-radius: 12px;
+        border-top-right-radius: 12px;
+    }
+
+    .p-paginator-bottom {
+        border-bottom-left-radius: 12px;
+        border-bottom-right-radius: 12px;
+    }
+
+    .p-datatable-thead > tr > th {
+        &:first-child {
+            border-top-left-radius: 12px;
+        }
+        &:last-child {
+            border-top-right-radius: 12px;
+        }
+    }
+
+    .p-datatable-tbody > tr:last-child > td {
+        &:first-child {
+            border-bottom-left-radius: 0;
+        }
+        &:last-child {
+            border-bottom-right-radius: 0;
+        }
+    }
+
+    .p-datatable-tbody > tr.p-datatable-emptymessage > td {
+        border-bottom-left-radius: 12px;
+        border-bottom-right-radius: 12px;
+    }
+}
+</style>

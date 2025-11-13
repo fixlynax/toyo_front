@@ -25,9 +25,11 @@
                         </div>
 
                         <!-- Loading State -->
-                        <div v-if="loading" class="flex justify-center items-center py-12">
+                        <!-- <div v-if="loading" class="flex justify-center items-center py-12">
                             <ProgressSpinner style="width: 50px; height: 50px" strokeWidth="4" />
-                        </div>
+                        </div> -->
+
+                        <LoadingPage v-if="loading" :message="'Loading News...'" :sub-message="'Fetching list announcements'" />
 
                         <!-- Error State -->
                         <div v-else-if="error" class="text-center py-12 text-red-600">
@@ -79,10 +81,6 @@
                                         <td class="px-4 py-2 text-right font-semibold">{{ salesProgram.programid }}</td>
                                     </tr>
                                     <tr class="border-b">
-                                        <td class="px-4 py-2 font-medium">Created</td>
-                                        <td class="px-4 py-2 text-right">{{ formatDateTime(salesProgram.created) }}</td>
-                                    </tr>
-                                    <tr class="border-b">
                                         <td class="px-4 py-2 font-medium">Type</td>
                                         <td class="px-4 py-2 text-right">
                                             <span class="px-2 py-1 bg-blue-100 text-blue-800 rounded-full text-xs font-medium">
@@ -93,6 +91,10 @@
                                     <tr class="border-b">
                                         <td class="px-4 py-2 font-medium">Price Group</td>
                                         <td class="px-4 py-2 text-right font-semibold">{{ salesProgram.pricegroup }}</td>
+                                    </tr>
+                                    <tr class="border-b">
+                                        <td class="px-4 py-2 font-medium">Created</td>
+                                        <td class="px-4 py-2 text-right">{{ formatDateTime(salesProgram.created) }}</td>
                                     </tr>
                                 </tbody>
                             </table>
@@ -105,9 +107,9 @@
             <div v-if="!loading && !error && salesProgram.type === 'FOC'" class="card flex flex-col w-full">
                 <div class="flex items-center justify-between border-b pb-4 mb-6">
                     <div class="flex items-center gap-3">
-                        <div class="w-10 h-10 bg-gradient-to-r from-blue-500 to-purple-600 rounded-lg flex items-center justify-center shadow-md">
+                        <!-- <div class="w-10 h-10 bg-gradient-to-r from-blue-500 to-purple-600 rounded-lg flex items-center justify-center shadow-md">
                             <i class="pi pi-tags text-white text-lg"></i>
-                        </div>
+                        </div> -->
                         <div>
                             <div class="text-2xl font-bold text-black-800">🎯 FOC Promotion Criteria</div>
                             <div class="text-sm text-black-600 mt-1">Total {{ criteriaList.length }} criteria patterns</div>
@@ -241,10 +243,11 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue';
+import { ref, onMounted, onUnmounted } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { useToast } from 'primevue/usetoast';
 import api from '@/service/api';
+import LoadingPage from '@/components/LoadingPage.vue';
 
 const route = useRoute();
 const router = useRouter();
@@ -258,34 +261,30 @@ const criteriaList = ref([]);
 
 // Process private images using the API method
 const processPrivateImages = async () => {
-    const imageFields = ['imageUrl']; // This should be an array
+    const imageFields = ['imageUrl'];
+    
+    // Process images in parallel instead of sequentially
+    const imageProcessingPromises = imageFields.map(async (field) => {
+        if (!salesProgram.value[field] || typeof salesProgram.value[field] !== 'string') {
+            salesProgram.value[field] = '/demo/images/event-toyo-2.jpg';
+            return;
+        }
 
-    for (const field of imageFields) {
-        if (salesProgram.value[field] && typeof salesProgram.value[field] === 'string') {
-            try {
-                // Check if it's already a valid URL (like fallback image)
-                if (salesProgram.value[field].startsWith('http') || salesProgram.value[field].startsWith('/')) {
-                    // It's already a URL, no need to process
-                    continue;
-                }
+        // Skip if already a valid URL
+        if (salesProgram.value[field].startsWith('http') || salesProgram.value[field].startsWith('/')) {
+            return;
+        }
 
-                const blobUrl = await api.getPrivateFile(salesProgram.value[field]);
-                if (blobUrl) {
-                    salesProgram.value[field] = blobUrl; // Use the field variable dynamically
-                } else {
-                    // If private file fetch fails, use fallback
-                    salesProgram.value[field] = '/demo/images/event-toyo-2.jpg';
-                }
-            } catch (error) {
-                console.error(`Error loading image ${field}:`, error);
-                // Fallback to default image
-                salesProgram.value[field] = '/demo/images/event-toyo-2.jpg';
-            }
-        } else if (!salesProgram.value[field]) {
-            // If no image URL is provided, use fallback
+        try {
+            const blobUrl = await api.getPrivateFile(salesProgram.value[field]);
+            salesProgram.value[field] = blobUrl || '/demo/images/event-toyo-2.jpg';
+        } catch (error) {
+            console.error(`Error loading image ${field}:`, error);
             salesProgram.value[field] = '/demo/images/event-toyo-2.jpg';
         }
-    }
+    });
+
+    await Promise.all(imageProcessingPromises);
 };
 
 const fetchSalesProgram = async () => {
@@ -295,23 +294,25 @@ const fetchSalesProgram = async () => {
     try {
         const response = await api.get(`sales-program/detail-sales-program/${programId.value}`);
 
-        if (response.data.status === 1 && response.data.admin_data.length > 0) {
-            const programData = response.data.admin_data[0];
-            salesProgram.value = programData;
-            criteriaList.value = programData.salesProgramFOC || [];
-
-            // Process private images
-            await processPrivateImages();
-
-            showToast('success', 'Success', 'Sales program data loaded successfully');
-        } else {
-            error.value = true;
-            showToast('error', 'Error', 'No sales program data found');
+        // More robust data validation
+        if (!response.data?.admin_data?.[0]) {
+            throw new Error('No sales program data found');
         }
+
+        const programData = response.data.admin_data[0];
+        salesProgram.value = programData;
+        criteriaList.value = programData.salesProgramFOC || [];
+
+        await processPrivateImages();
+
+        showToast('success', 'Success', 'Sales program data loaded successfully');
+        
     } catch (err) {
         console.error('Error fetching sales program:', err);
         error.value = true;
-        showToast('error', 'Error', 'Failed to load sales program data');
+        
+        const errorMessage = err.response?.data?.message || err.message || 'Failed to load sales program data';
+        showToast('error', 'Error', errorMessage);
     } finally {
         loading.value = false;
     }
@@ -362,5 +363,12 @@ onMounted(() => {
         return;
     }
     fetchSalesProgram();
+});
+
+// Clean up blob URLs to prevent memory leaks
+onUnmounted(() => {
+    if (salesProgram.value.imageUrl && salesProgram.value.imageUrl.startsWith('blob:')) {
+        URL.revokeObjectURL(salesProgram.value.imageUrl);
+    }
 });
 </script>

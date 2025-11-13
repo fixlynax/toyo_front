@@ -28,7 +28,7 @@
 
                     <!-- Create Button -->
                     <RouterLink to="/om/createMessaging">
-                        <Button type="button" label="Create" icon="pi pi-plus" class="p-button" />
+                        <Button type="button" label="Create" icon="pi pi-plus" class="p-button-success" />
                     </RouterLink>
                 </div>
             </template>
