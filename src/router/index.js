@@ -417,9 +417,10 @@ const router = createRouter({
                     component: () => import('@/views/marketing/listCatalogue.vue')
                 },
                 {
-                    path: 'marketing/detailCatalogue',
+                    path: 'marketing/detailCatalogue/:id',
                     name: 'Detail-Catalogue',
-                    component: () => import('@/views/marketing/detailCatalogue.vue')
+                    component: () => import('@/views/marketing/detailCatalogue.vue'),
+                    props: true
                 },
                 {
                     path: 'marketing/editCatalogue',
