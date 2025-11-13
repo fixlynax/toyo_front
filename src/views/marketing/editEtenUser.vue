@@ -14,106 +14,142 @@
                 <div v-else class="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div class="md:col-span-2">
                         <label class="block font-bold text-gray-700">Member Code</label>
-                        <InputText disabled v-model="memberDetail.etenUserID" class="w-full" />
+                        <InputText disabled v-model="memberDetail.memberCode" class="w-full" />
                     </div>
 
                     <div>
-                        <label class="block font-bold text-gray-700">First Name *</label>
+                        <label class="block font-bold text-gray-700">First Name <span class="text-red-500">*</span></label>
                         <InputText v-model="memberDetail.firstName" class="w-full" :class="{ 'p-invalid': errors.first_name }" />
                         <small v-if="errors.first_name" class="p-error">{{ errors.first_name[0] }}</small>
                     </div>
 
                     <div>
-                        <label class="block font-bold text-gray-700">Last Name *</label>
+                        <label class="block font-bold text-gray-700">Last Name <span class="text-red-500">*</span></label>
                         <InputText v-model="memberDetail.lastName" class="w-full" :class="{ 'p-invalid': errors.last_name }" />
                         <small v-if="errors.last_name" class="p-error">{{ errors.last_name[0] }}</small>
                     </div>
 
                     <div>
-                        <label class="block font-bold text-gray-700">Country Code *</label>
-                        <Dropdown v-model="memberDetail.countryCode" :options="codeOptions" optionLabel="label" optionValue="value" class="w-full" :class="{ 'p-invalid': errors.country_code }" />
+                        <label class="block font-bold text-gray-700">Country Code <span class="text-red-500">*</span></label>
+                        <Dropdown 
+                            v-model="memberDetail.countryCode" 
+                            :options="codeOptions" 
+                            optionLabel="label" 
+                            optionValue="value" 
+                            class="w-full" 
+                            :class="{ 'p-invalid': errors.country_code }"
+                            placeholder="Select Country Code"
+                        />
                         <small v-if="errors.country_code" class="p-error">{{ errors.country_code[0] }}</small>
                     </div>
 
                     <div>
-                        <label class="block font-bold text-gray-700">Mobile Number *</label>
+                        <label class="block font-bold text-gray-700">Mobile Number <span class="text-red-500">*</span></label>
                         <InputText v-model="memberDetail.mobileNumber" class="w-full" :class="{ 'p-invalid': errors.mobile_number }" />
                         <small v-if="errors.mobile_number" class="p-error">{{ errors.mobile_number[0] }}</small>
                     </div>
 
                     <div>
-                        <label class="block font-bold text-gray-700">Email *</label>
+                        <label class="block font-bold text-gray-700">Email <span class="text-red-500">*</span></label>
                         <InputText v-model="memberDetail.emailAddress" class="w-full" :class="{ 'p-invalid': errors.email }" />
                         <small v-if="errors.email" class="p-error">{{ errors.email[0] }}</small>
                     </div>
 
                     <div>
-                        <label class="block font-bold text-gray-700">Date of Birth *</label>
+                        <label class="block font-bold text-gray-700">Date of Birth <span class="text-red-500">*</span></label>
                         <Calendar v-model="memberDetail.dob" dateFormat="dd-mm-yy" class="w-full" :class="{ 'p-invalid': errors.date_of_birth }" />
                         <small v-if="errors.date_of_birth" class="p-error">{{ errors.date_of_birth[0] }}</small>
                     </div>
 
                     <div>
-                        <label class="block font-bold text-gray-700">Gender *</label>
-                        <Dropdown v-model="memberDetail.gender" :options="genderOptions" optionLabel="label" optionValue="value" class="w-full" :class="{ 'p-invalid': errors.gender }" />
+                        <label class="block font-bold text-gray-700">Gender <span class="text-red-500">*</span></label>
+                        <Dropdown 
+                            v-model="memberDetail.gender" 
+                            :options="genderOptions" 
+                            optionLabel="label" 
+                            optionValue="value" 
+                            class="w-full" 
+                            :class="{ 'p-invalid': errors.gender }"
+                            placeholder="Select Gender"
+                        />
                         <small v-if="errors.gender" class="p-error">{{ errors.gender[0] }}</small>
                     </div>
 
                     <div>
-                        <label class="block font-bold text-gray-700">Race *</label>
-                        <Dropdown v-model="memberDetail.race" :options="raceOptions" optionLabel="label" optionValue="value" class="w-full" :class="{ 'p-invalid': errors.race }" />
+                        <label class="block font-bold text-gray-700">Race <span class="text-red-500">*</span></label>
+                        <Dropdown 
+                            v-model="memberDetail.race" 
+                            :options="raceOptions" 
+                            optionLabel="label" 
+                            optionValue="value" 
+                            class="w-full" 
+                            :class="{ 'p-invalid': errors.race }"
+                            placeholder="Select Race"
+                        />
                         <small v-if="errors.race" class="p-error">{{ errors.race[0] }}</small>
                     </div>
 
                     <div>
-                        <label class="block font-bold text-gray-700">City *</label>
+                        <label class="block font-bold text-gray-700">City <span class="text-red-500">*</span></label>
                         <InputText v-model="memberDetail.city" class="w-full" :class="{ 'p-invalid': errors.city }" />
                         <small v-if="errors.city" class="p-error">{{ errors.city[0] }}</small>
                     </div>
 
                     <div>
-                        <label class="block font-bold text-gray-700">State *</label>
-                        <Dropdown v-model="memberDetail.state" :options="stateOptions" optionLabel="label" optionValue="value" class="w-full" :class="{ 'p-invalid': errors.state }" />
+                        <label class="block font-bold text-gray-700">State <span class="text-red-500">*</span></label>
+                        <Dropdown 
+                            v-model="memberDetail.state" 
+                            :options="stateOptions" 
+                            optionLabel="label" 
+                            optionValue="value" 
+                            class="w-full" 
+                            :class="{ 'p-invalid': errors.state }"
+                            placeholder="Select State"
+                        />
                         <small v-if="errors.state" class="p-error">{{ errors.state[0] }}</small>
                     </div>
 
                     <div>
-                        <label class="block font-bold text-gray-700">Postal Code *</label>
+                        <label class="block font-bold text-gray-700">Postal Code <span class="text-red-500">*</span></label>
                         <InputText v-model="memberDetail.postcode" class="w-full" :class="{ 'p-invalid': errors.postal_code }" />
                         <small v-if="errors.postal_code" class="p-error">{{ errors.postal_code[0] }}</small>
                     </div>
 
                     <div>
-                        <label class="block font-bold text-gray-700">Country *</label>
+                        <label class="block font-bold text-gray-700">Country <span class="text-red-500">*</span></label>
                         <InputText v-model="memberDetail.country" class="w-full" :class="{ 'p-invalid': errors.country }" />
                         <small v-if="errors.country" class="p-error">{{ errors.country[0] }}</small>
                     </div>
 
                     <div>
-                        <label class="block font-bold text-gray-700">Member Level *</label>
-                        <Dropdown v-model="memberDetail.level" :options="levelOptions" optionLabel="label" optionValue="value" class="w-full" :class="{ 'p-invalid': errors.member_level }" />
+                        <label class="block font-bold text-gray-700">Member Level <span class="text-red-500">*</span></label>
+                        <Dropdown 
+                            v-model="memberDetail.memberLevel" 
+                            :options="levelOptions" 
+                            optionLabel="label" 
+                            optionValue="value" 
+                            class="w-full" 
+                            :class="{ 'p-invalid': errors.member_level }"
+                            placeholder="Select Member Level"
+                        />
                         <small v-if="errors.member_level" class="p-error">{{ errors.member_level[0] }}</small>
                     </div>
 
                     <div>
                         <label class="block font-bold text-gray-700 mb-1">Password</label>
                         <div class="relative w-full">
-                            <InputText :type="showPassword ? 'text' : 'password'" v-model="memberDetail.password" class="w-full pr-10" />
+                            <InputText 
+                                :type="showPassword ? 'text' : 'password'" 
+                                v-model="memberDetail.password" 
+                                class="w-full pr-10" 
+                                placeholder="Enter new password"
+                            />
                             <button type="button" @click="showPassword = !showPassword" class="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-500 hover:text-gray-700">
                                 <i v-if="showPassword" class="pi pi-eye-slash"></i>
                                 <i v-else class="pi pi-eye"></i>
                             </button>
                         </div>
-                    </div>
-
-                    <div>
-                        <label class="block font-bold text-gray-700">Member Since</label>
-                        <Calendar disabled v-model="memberDetail.memberSince" dateFormat="yy-mm-dd" class="w-full" />
-                    </div>
-
-                    <div>
-                        <label class="block font-bold text-gray-700">Last Login</label>
-                        <Calendar disabled v-model="memberDetail.lastLogin" dateFormat="yy-mm-dd" class="w-full" />
+                        <small class="text-gray-500 text-xs mt-1">Leave blank to keep current password</small>
                     </div>
 
                     <!-- Action Buttons -->
@@ -184,26 +220,24 @@ const codeOptions = [
     { label: '+65', value: '+65' }
 ];
 
-// Member detail data
+// Member detail data - using same structure as detail component
 const memberDetail = ref({
     id: null,
-    etenUserID: '',
-    countryCode: '+60',
-    mobileNumber: '',
-    password: '',
+    memberCode: '',
+    memberLevel: '',
     firstName: '',
     lastName: '',
+    countryCode: '',
+    mobileNumber: '',
     emailAddress: '',
     gender: '',
-    race: '',
-    state: '',
-    level: '',
-    city: '',
-    postcode: '',
-    country: 'Malaysia',
     dob: null,
-    memberSince: '',
-    lastLogin: ''
+    race: '',
+    city: '',
+    state: '',
+    postcode: '',
+    country: '',
+    password: ''
 });
 
 // Fetch member details from API
@@ -218,26 +252,24 @@ const fetchMemberDetail = async () => {
         if (response.data.status === 1 && response.data.admin_data) {
             const userData = response.data.admin_data;
 
-            // Map API response to form structure
+            // Map API response to form structure - using same field names as detail component
             memberDetail.value = {
                 id: userData.id,
-                etenUserID: userData.memberCode || '-',
-                countryCode: userData.countryCode || '+60',
-                mobileNumber: userData.mobileNumber || userData.mobile_number || '',
-                password: '', // Don't prefill password for security
+                memberCode: userData.memberCode || '-',
+                memberLevel: userData.memberLevel || '',
                 firstName: userData.firstName || '',
                 lastName: userData.lastName || '',
+                countryCode: userData.countryCode || '+60',
+                mobileNumber: userData.mobileNumber || userData.mobile_number || '',
                 emailAddress: userData.emailAddress || '',
                 gender: userData.gender || '',
                 race: userData.race || '',
-                state: userData.state || '',
-                level: userData.memberLevel || '',
                 city: userData.city || '',
+                state: userData.state || '',
                 postcode: userData.postcode || '',
                 country: userData.country || 'Malaysia',
-                dob: userData.dob ? new Date(userData.dob) : null,
-                memberSince: userData.created ? new Date(userData.created) : null,
-                lastLogin: userData.lastLogin ? new Date(userData.lastLogin) : null
+                dob: userData.dob ? parseDateString(userData.dob) : null,
+                password: '' // Don't prefill password for security
             };
 
             console.log('Processed member data for edit:', memberDetail.value);
@@ -251,6 +283,31 @@ const fetchMemberDetail = async () => {
     } finally {
         loading.value = false;
     }
+};
+
+// Helper function to parse date string to Date object
+const parseDateString = (dateString) => {
+    if (!dateString || dateString === '-') return null;
+    
+    // Try different date formats
+    const date = new Date(dateString);
+    if (!isNaN(date.getTime())) {
+        return date;
+    }
+    
+    // If the above fails, try parsing common formats
+    const parts = dateString.split(/[-/ ]/);
+    if (parts.length >= 3) {
+        // Try YYYY-MM-DD format
+        const ymd = new Date(parts[0], parts[1] - 1, parts[2]);
+        if (!isNaN(ymd.getTime())) return ymd;
+        
+        // Try DD-MM-YYYY format
+        const dmy = new Date(parts[2], parts[1] - 1, parts[0]);
+        if (!isNaN(dmy.getTime())) return dmy;
+    }
+    
+    return null;
 };
 
 // Update user using FormData with append
@@ -274,13 +331,18 @@ const updateUser = async () => {
         formData.append('state', memberDetail.value.state);
         formData.append('postal_code', memberDetail.value.postcode);
         formData.append('country', memberDetail.value.country);
-        formData.append('member_level', memberDetail.value.level);
+        formData.append('member_level', memberDetail.value.memberLevel);
 
         // Format date for API (dd-mm-yyyy)
         if (memberDetail.value.dob) {
             const dob = new Date(memberDetail.value.dob);
             const formattedDob = `${dob.getDate().toString().padStart(2, '0')}-${(dob.getMonth() + 1).toString().padStart(2, '0')}-${dob.getFullYear()}`;
             formData.append('date_of_birth', formattedDob);
+        }
+
+        // Only append password if it's not empty
+        if (memberDetail.value.password) {
+            formData.append('password', memberDetail.value.password);
         }
 
         console.log('Updating user with data:', Object.fromEntries(formData));
@@ -295,7 +357,7 @@ const updateUser = async () => {
 
         if (response.data.status === 1) {
             showToast('success', 'Success', 'User updated successfully');
-            // Redirect back to user list or detail page after successful update
+            // Redirect back to user detail page after successful update
             setTimeout(() => {
                 router.push(`/marketing/detailEtenUser/${memberId.value}`);
             }, 1500);
@@ -343,5 +405,9 @@ onMounted(() => {
 
 :deep(.p-calendar) {
     width: 100%;
+}
+
+.text-red-500 {
+    color: #ef4444;
 }
 </style>
