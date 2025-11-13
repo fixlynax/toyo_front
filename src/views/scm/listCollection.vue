@@ -40,7 +40,40 @@ function getStatusText(status) {
     };
     return statusMap[status] || 'Unknown';
 }
-
+function formatDate(dateString) {
+  if (!dateString) return '';
+  const date = new Date(dateString);
+  return date.toLocaleString('en-MY', {
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+  });
+}
+function formatTime(timeString) {
+  if (!timeString) return '';
+  const [hours, minutes, seconds] = timeString.split(':');
+  const date = new Date();
+  date.setHours(hours, minutes, seconds);
+  return date.toLocaleTimeString('en-MY', {
+    hour: '2-digit',
+    minute: '2-digit',
+    second: '2-digit',
+    hour12: true,
+  });
+}
+function formatDateFull(dateString) {
+  if (!dateString) return '';
+  const date = new Date(dateString);
+  return date.toLocaleString('en-MY', {
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+    hour: '2-digit',
+    minute: '2-digit',
+    second: '2-digit',
+    hour12: true
+  });
+}
 onBeforeMount(async () => {
     try {
         loading.value = true;
@@ -52,10 +85,10 @@ onBeforeMount(async () => {
                 companyName1: item.eten_data?.companyName1 || 'N/A',
                 custAccountNo: item.eten_data?.custAccountNo || 'N/A',
                 city: item.eten_data?.city || 'N/A',
-                collectDate: item.ctc_data?.collectDate || 'N/A',
-                collectTime: item.ctc_data?.collectTime || '',
-                pickupDate: item.ctc_data?.reachWH || 'N/A',
-                createDate: item.ctc_data?.created || 'N/A',
+                collectDate: formatDate(item.ctc_data?.collectDate) || 'N/A',
+                collectTime: formatTime(item.ctc_data?.collectTime) || '',
+                returnDate: formatDateFull(item.ctc_data?.returnDateTime) || 'N/A',
+                createDate: formatDateFull(item.ctc_data?.created) || 'N/A',
                 collectionAddress:
                     [item.eten_data?.addressLine1, item.eten_data?.addressLine2, item.eten_data?.addressLine3, item.eten_data?.addressLine4, item.eten_data?.city, item.eten_data?.postcode, item.eten_data?.state]
                         .filter((part) => part && part.trim() !== '')
@@ -195,27 +228,16 @@ function filteredList() {
                 </template>
             </Column>
 
-            <Column field="thirdPartyLogistics" header="3PL" style="min-width: 6rem">
-                <template #body="{ data }">
-                    {{ data.thirdPartyLogistics }}
-                </template>
-            </Column>
 
-            <Column field="pickupDatetime" header="Pickup Datetime" style="min-width: 10rem">
-                <template #body="{ data }">
-                    {{ data.pickupDate }}
-                </template>
-            </Column>
-
-            <Column field="collectedDatetime" header="Collected Datetime" style="min-width: 10rem">
+            <Column field="collectedDatetime" header="Collect Date" style="min-width: 10rem">
                 <template #body="{ data }">
                     {{ data.collectDate }} {{ data.collectTime }}
                 </template>
             </Column>
 
-            <Column field="totalPcs" header="Piece of Tires" style="min-width: 6rem; text-align: center">
+                        <Column field="returnDate" header="Return Date" style="min-width: 10rem">
                 <template #body="{ data }">
-                    {{ data.totalPcs }}
+                    {{ data.returnDate }}
                 </template>
             </Column>
 

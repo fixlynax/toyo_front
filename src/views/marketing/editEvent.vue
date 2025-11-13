@@ -436,8 +436,10 @@ const submitEvent = async () => {
                 formData.append(fieldName, '');
             }
         }
-
-        // Use customRequest to send FormData with proper headers
+        // for (let [key, value] of formData.entries()) {
+        //     console.log(key, value);
+        // }
+     // Use customRequest to send FormData with proper headers
         const response = await api.customRequest({
             method: 'POST',
             url: `/api/event/edit/${eventId}`,

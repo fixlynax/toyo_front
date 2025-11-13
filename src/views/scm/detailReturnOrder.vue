@@ -208,11 +208,11 @@
                             <tbody>
                                 <tr class="border-b">
                                     <td class="px-4 py-2 font-medium">Pickup Date</td>
-                                    <td class="px-4 py-2 text-right">{{ returnList.delivery_information.pickup_datetime ? formatDate(returnList.delivery_information.pickup_datetime) : 'No date assigned' }}</td>
+                                    <td class="px-4 py-2 text-right">{{ returnList.delivery_information?.pickup_datetime ? formatDate(returnList.delivery_information?.pickup_datetime) : 'No date assigned' }}</td>
                                 </tr>
                                 <tr class="border-b">
                                     <td class="px-4 py-2 font-medium">Delivery Date</td>
-                                    <td class="px-4 py-2 text-right">{{ returnList.delivery_information.receive_datetime ? formatDate(returnList.delivery_information.receive_datetime) : 'No date assigned' }}</td>
+                                    <td class="px-4 py-2 text-right">{{ returnList.delivery_information?.receive_datetime ? formatDate(returnList.delivery_information?.receive_datetime) : 'No date assigned' }}</td>
                                 </tr>
                                 <tr class="border-b">
                                     <td class="px-4 py-2 font-medium">Status</td>

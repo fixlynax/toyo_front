@@ -360,9 +360,10 @@ const router = createRouter({
                     component: () => import('@/views/marketing/createGame.vue')
                 },
                 {
-                    path: 'marketing/editGame',
+                    path: 'marketing/editGame/:id',
                     name: 'Edit-Game',
-                    component: () => import('@/views/marketing/editGame.vue')
+                    component: () => import('@/views/marketing/editGame.vue'),
+                    props: true
                 },
 
                 // Redemptions
@@ -372,14 +373,16 @@ const router = createRouter({
                     component: () => import('@/views/marketing/listRedemption.vue')
                 },
                 {
-                    path: 'marketing/detailRedemption',
+                    path: 'marketing/detailRedemption/:id',
                     name: 'Detail-Redemption',
-                    component: () => import('@/views/marketing/detailRedemption.vue')
+                    component: () => import('@/views/marketing/detailRedemption.vue'),
+                    props: true
                 },
                 {
-                    path: 'marketing/editRedemption',
+                    path: 'marketing/editRedemption/:id',
                     name: 'Edit-Redemption',
-                    component: () => import('@/views/marketing/editRedemption.vue')
+                    component: () => import('@/views/marketing/editRedemption.vue'),
+                    props: true
                 },
 
                 // Members
@@ -416,14 +419,16 @@ const router = createRouter({
                     component: () => import('@/views/marketing/listCatalogue.vue')
                 },
                 {
-                    path: 'marketing/detailCatalogue',
+                    path: 'marketing/detailCatalogue/:id',
                     name: 'Detail-Catalogue',
-                    component: () => import('@/views/marketing/detailCatalogue.vue')
+                    component: () => import('@/views/marketing/detailCatalogue.vue'),
+                    props: true
                 },
                 {
-                    path: 'marketing/editCatalogue',
+                    path: 'marketing/editCatalogue/:id',
                     name: 'Edit-Catalogue',
-                    component: () => import('@/views/marketing/editCatalogue.vue')
+                    component: () => import('@/views/marketing/editCatalogue.vue'),
+                    props: true
                 },
                 {
                     path: 'marketing/createCatalogue',
