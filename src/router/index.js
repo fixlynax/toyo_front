@@ -397,14 +397,16 @@ const router = createRouter({
                     component: () => import('@/views/marketing/listEtenUser.vue')
                 },
                 {
-                    path: 'marketing/detailEtenUser',
+                    path: 'marketing/detailEtenUser/:id',
                     name: 'Detail-Member',
-                    component: () => import('@/views/marketing/detailEtenUser.vue')
+                    component: () => import('@/views/marketing/detailEtenUser.vue'),
+                    props: true
                 },
                 {
-                    path: 'marketing/editEtenUser',
+                    path: 'marketing/editEtenUser/:id',
                     name: 'Edit-Member',
-                    component: () => import('@/views/marketing/editEtenUser.vue')
+                    component: () => import('@/views/marketing/editEtenUser.vue'),
+                    props: true
                 },
                 {
                     path: 'marketing/referralRewardPoint',

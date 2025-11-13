@@ -37,9 +37,13 @@
                         </div>
 
                         <!-- Right: Export Button -->
-                        <RouterLink to="/marketing/createEten">
-                            <Button type="button" label="Export" icon="pi pi-file-export" class="p-button-danger" />
-                        </RouterLink>
+                        <Button 
+                            type="button" 
+                            label="Export" 
+                            icon="pi pi-file-export" 
+                            class="p-button-danger" 
+                            @click="exportUsers" 
+                        />
                     </div>
                 </template>
 
@@ -63,19 +67,36 @@
                 </Column>
 
                 <Column field="name" header="Name" style="min-width: 8rem">
-                    <template #body="{ data }"> {{ data.firstName }} {{ data.lastName }} </template>
+                    <template #body="{ data }"> 
+                        {{ data.firstName }} {{ data.lastName }} 
+                    </template>
                 </Column>
 
-                <Column field="gender" header="Gender" style="min-width: 6rem" />
+                <Column field="gender" header="Gender" style="min-width: 6rem">
+                    <template #body="{ data }">
+                        {{ formatGender(data.gender) }}
+                    </template>
+                </Column>
+                
                 <Column field="race" header="Race" style="min-width: 6rem" />
                 <Column field="state" header="State" style="min-width: 6rem" />
                 <Column field="level" header="Level" style="min-width: 6rem" />
-                <Column field="memberSince" header="Mem Since" style="min-width: 8rem" />
-                <Column field="lastLogin" header="Last Login" style="min-width: 8rem" />
+                
+                <Column field="memberSince" header="Mem Since" style="min-width: 8rem">
+                    <template #body="{ data }">
+                        {{ formatDate(data.memberSince) }}
+                    </template>
+                </Column>
+                
+                <Column field="lastLogin" header="Last Login" style="min-width: 8rem">
+                    <template #body="{ data }">
+                        {{ formatDateTime(data.lastLogin) }}
+                    </template>
+                </Column>
 
                 <Column field="status" header="Status" style="min-width: 6rem">
                     <template #body="{ data }">
-                        <Tag :value="data.status === 1 ? 'Active' : 'Inactive'" :severity="getOverallStatusSeverity(data.status)" />
+                        <Tag :value="getStatusText(data.status)" :severity="getOverallStatusSeverity(data.status)" />
                     </template>
                 </Column>
             </DataTable>
@@ -100,40 +121,62 @@ const filters = ref({
 });
 
 // Tabs for status filtering
-const statusTabs = ref([{ label: 'Active' }, { label: 'Inactive' }]);
+const statusTabs = ref([
+    { label: 'All Users' }, 
+    { label: 'Active' }, 
+    { label: 'Inactive' }
+]);
 const activeTabIndex = ref(0);
 
 // Computed: Filter listData based on active tab
 const filteredUsers = computed(() => {
-    if (activeTabIndex.value === 0) {
-        return listData.value.filter((user) => user.status === 1);
-    } else {
-        return listData.value.filter((user) => user.status !== 1);
+    switch (activeTabIndex.value) {
+        case 0: // All Users
+            return listData.value;
+        case 1: // Active
+            return listData.value.filter((user) => user.status === 1);
+        case 2: // Inactive
+            return listData.value.filter((user) => user.status !== 1);
+        default:
+            return listData.value;
     }
 });
 
 onMounted(async () => {
+    await fetchUsers();
+});
+
+const fetchUsers = async () => {
     try {
         initialLoading.value = true;
         tableLoading.value = true;
 
         const response = await api.get('cares/userList');
+        console.log('API Response:', response.data);
+        
         if (response.data.status === 1 && response.data.admin_data) {
-            const allUsers = [...(response.data.admin_data.active_user || []), ...(response.data.admin_data.inactive_user || [])];
+            const allUsers = [
+                ...(response.data.admin_data.active_user || []), 
+                ...(response.data.admin_data.inactive_user || [])
+            ];
 
             listData.value = allUsers.map((user) => ({
                 id: user.id,
                 etenUserID: user.member_code || '-',
                 firstName: user.full_name || '-',
+                lastName: '', // API only provides full_name, not separate first/last
                 gender: user.gender || '-',
                 race: user.race || '-',
                 state: user.state || '-',
                 level: user.member_level || '-',
                 memberSince: user.member_since || '-',
                 lastLogin: user.last_login || '-',
-                status: user.status
+                status: user.status === 1 ? 1 : 0 // Normalize status: 1 for active, 0 for inactive
             }));
+            
+            console.log('Processed users:', listData.value);
         } else {
+            console.error('API returned error or invalid data:', response.data);
             listData.value = [];
         }
     } catch (error) {
@@ -143,10 +186,38 @@ onMounted(async () => {
         initialLoading.value = false;
         tableLoading.value = false;
     }
-});
+};
 
 const getOverallStatusSeverity = (status) => {
     return status === 1 ? 'success' : 'danger';
+};
+
+const getStatusText = (status) => {
+    return status === 1 ? 'Active' : 'Inactive';
+};
+
+const formatGender = (gender) => {
+    if (!gender || gender === '-') return '-';
+    if (gender === 'M' || gender === 'Male') return 'Male';
+    if (gender === 'F' || gender === 'Female') return 'Female';
+    return gender;
+};
+
+const formatDate = (dateString) => {
+    if (!dateString || dateString === '-') return '-';
+    return dateString;
+};
+
+const formatDateTime = (dateTimeString) => {
+    if (!dateTimeString || dateTimeString === '-') return '-';
+    return dateTimeString;
+};
+
+const exportUsers = () => {
+    // Implement export functionality here
+    console.log('Export users:', filteredUsers.value);
+    // You can implement CSV/Excel export logic here
+    alert('Export functionality to be implemented');
 };
 </script>
 

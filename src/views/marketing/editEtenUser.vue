@@ -1,70 +1,104 @@
 <template>
     <Fluid>
+        <Toast />
         <!-- Edit User Section -->
         <div class="flex flex-col md:flex-row gap-8">
             <div class="card flex flex-col gap-6 w-full">
                 <!-- Header -->
                 <div class="text-2xl font-bold text-gray-800 border-b pb-2">Edit User</div>
 
+                <!-- Loading State -->
+                <LoadingPage v-if="loading" :message="'Loading User Details...'" :sub-message="'Fetching member data'" />
+
                 <!-- User Form -->
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div v-else class="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div class="md:col-span-2">
                         <label class="block font-bold text-gray-700">Member Code</label>
                         <InputText disabled v-model="memberDetail.etenUserID" class="w-full" />
                     </div>
 
                     <div>
-                        <label class="block font-bold text-gray-700">First Name</label>
-                        <InputText v-model="memberDetail.firstName" class="w-full" />
+                        <label class="block font-bold text-gray-700">First Name *</label>
+                        <InputText v-model="memberDetail.firstName" class="w-full" :class="{ 'p-invalid': errors.first_name }" />
+                        <small v-if="errors.first_name" class="p-error">{{ errors.first_name[0] }}</small>
                     </div>
 
                     <div>
-                        <label class="block font-bold text-gray-700">Last Name</label>
-                        <InputText v-model="memberDetail.lastName" class="w-full" />
+                        <label class="block font-bold text-gray-700">Last Name *</label>
+                        <InputText v-model="memberDetail.lastName" class="w-full" :class="{ 'p-invalid': errors.last_name }" />
+                        <small v-if="errors.last_name" class="p-error">{{ errors.last_name[0] }}</small>
                     </div>
 
                     <div>
-                        <label class="block font-bold text-gray-700">Country Code</label>
-                        <Dropdown v-model="memberDetail.countryCode" :options="codeOptions" optionLabel="label" optionValue="value" class="w-full" />
+                        <label class="block font-bold text-gray-700">Country Code *</label>
+                        <Dropdown v-model="memberDetail.countryCode" :options="codeOptions" optionLabel="label" optionValue="value" class="w-full" :class="{ 'p-invalid': errors.country_code }" />
+                        <small v-if="errors.country_code" class="p-error">{{ errors.country_code[0] }}</small>
                     </div>
 
                     <div>
-                        <label class="block font-bold text-gray-700">Mobile Number</label>
-                        <InputText v-model="memberDetail.mobileNumber" class="w-full" />
+                        <label class="block font-bold text-gray-700">Mobile Number *</label>
+                        <InputText v-model="memberDetail.mobileNumber" class="w-full" :class="{ 'p-invalid': errors.mobile_number }" />
+                        <small v-if="errors.mobile_number" class="p-error">{{ errors.mobile_number[0] }}</small>
                     </div>
 
                     <div>
-                        <label class="block font-bold text-gray-700">Gender</label>
-                        <Dropdown v-model="memberDetail.gender" :options="genderOptions" optionLabel="label" optionValue="value" class="w-full" />
+                        <label class="block font-bold text-gray-700">Email *</label>
+                        <InputText v-model="memberDetail.emailAddress" class="w-full" :class="{ 'p-invalid': errors.email }" />
+                        <small v-if="errors.email" class="p-error">{{ errors.email[0] }}</small>
                     </div>
 
                     <div>
-                        <label class="block font-bold text-gray-700">Race</label>
-                        <Dropdown v-model="memberDetail.race" :options="raceOptions" optionLabel="label" optionValue="value" class="w-full" />
+                        <label class="block font-bold text-gray-700">Date of Birth *</label>
+                        <Calendar v-model="memberDetail.dob" dateFormat="dd-mm-yy" class="w-full" :class="{ 'p-invalid': errors.date_of_birth }" />
+                        <small v-if="errors.date_of_birth" class="p-error">{{ errors.date_of_birth[0] }}</small>
                     </div>
 
                     <div>
-                        <label class="block font-bold text-gray-700">State</label>
-                        <Dropdown v-model="memberDetail.state" :options="stateOptions" optionLabel="label" optionValue="value" class="w-full" />
+                        <label class="block font-bold text-gray-700">Gender *</label>
+                        <Dropdown v-model="memberDetail.gender" :options="genderOptions" optionLabel="label" optionValue="value" class="w-full" :class="{ 'p-invalid': errors.gender }" />
+                        <small v-if="errors.gender" class="p-error">{{ errors.gender[0] }}</small>
                     </div>
 
                     <div>
-                        <label class="block font-bold text-gray-700"> Member Level</label>
-                        <Dropdown v-model="memberDetail.level" :options="levelOptions" optionLabel="label" optionValue="value" class="w-full" />
+                        <label class="block font-bold text-gray-700">Race *</label>
+                        <Dropdown v-model="memberDetail.race" :options="raceOptions" optionLabel="label" optionValue="value" class="w-full" :class="{ 'p-invalid': errors.race }" />
+                        <small v-if="errors.race" class="p-error">{{ errors.race[0] }}</small>
                     </div>
 
                     <div>
-                        <label class="block font-bold text-gray-700">Email</label>
-                        <InputText v-model="memberDetail.emailAddress" class="w-full" />
+                        <label class="block font-bold text-gray-700">City *</label>
+                        <InputText v-model="memberDetail.city" class="w-full" :class="{ 'p-invalid': errors.city }" />
+                        <small v-if="errors.city" class="p-error">{{ errors.city[0] }}</small>
+                    </div>
+
+                    <div>
+                        <label class="block font-bold text-gray-700">State *</label>
+                        <Dropdown v-model="memberDetail.state" :options="stateOptions" optionLabel="label" optionValue="value" class="w-full" :class="{ 'p-invalid': errors.state }" />
+                        <small v-if="errors.state" class="p-error">{{ errors.state[0] }}</small>
+                    </div>
+
+                    <div>
+                        <label class="block font-bold text-gray-700">Postal Code *</label>
+                        <InputText v-model="memberDetail.postcode" class="w-full" :class="{ 'p-invalid': errors.postal_code }" />
+                        <small v-if="errors.postal_code" class="p-error">{{ errors.postal_code[0] }}</small>
+                    </div>
+
+                    <div>
+                        <label class="block font-bold text-gray-700">Country *</label>
+                        <InputText v-model="memberDetail.country" class="w-full" :class="{ 'p-invalid': errors.country }" />
+                        <small v-if="errors.country" class="p-error">{{ errors.country[0] }}</small>
+                    </div>
+
+                    <div>
+                        <label class="block font-bold text-gray-700">Member Level *</label>
+                        <Dropdown v-model="memberDetail.level" :options="levelOptions" optionLabel="label" optionValue="value" class="w-full" :class="{ 'p-invalid': errors.member_level }" />
+                        <small v-if="errors.member_level" class="p-error">{{ errors.member_level[0] }}</small>
                     </div>
 
                     <div>
                         <label class="block font-bold text-gray-700 mb-1">Password</label>
                         <div class="relative w-full">
-                            <!-- Input -->
                             <InputText :type="showPassword ? 'text' : 'password'" v-model="memberDetail.password" class="w-full pr-10" />
-
-                            <!-- Eye toggle button inside input -->
                             <button type="button" @click="showPassword = !showPassword" class="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-500 hover:text-gray-700">
                                 <i v-if="showPassword" class="pi pi-eye-slash"></i>
                                 <i v-else class="pi pi-eye"></i>
@@ -81,16 +115,35 @@
                         <label class="block font-bold text-gray-700">Last Login</label>
                         <Calendar disabled v-model="memberDetail.lastLogin" dateFormat="yy-mm-dd" class="w-full" />
                     </div>
+
+                    <!-- Action Buttons -->
+                    <div class="md:col-span-2 flex justify-end gap-3 mt-4">
+                        <Button label="Cancel" severity="secondary" @click="$router.back()" />
+                        <Button label="Update" :loading="submitting" @click="updateUser" />
+                    </div>
                 </div>
-                <!-- ✅ closes Edit User grid -->
             </div>
         </div>
     </Fluid>
 </template>
 
 <script setup>
-import { ref } from 'vue';
+import { ref, onMounted } from 'vue';
+import { useRoute, useRouter } from 'vue-router';
+import { useToast } from 'primevue/usetoast';
+import api from '@/service/api';
+import LoadingPage from '@/components/LoadingPage.vue';
 
+const route = useRoute();
+const router = useRouter();
+const toast = useToast();
+const memberId = ref(route.params.id);
+const loading = ref(true);
+const submitting = ref(false);
+const showPassword = ref(false);
+const errors = ref({});
+
+// Options for dropdowns
 const raceOptions = [
     { label: 'Malay', value: 'Malay' },
     { label: 'Chinese', value: 'Chinese' },
@@ -101,7 +154,7 @@ const raceOptions = [
 const stateOptions = [
     { label: 'Johor', value: 'Johor' },
     { label: 'Kelantan', value: 'Kelantan' },
-    { label: 'Kuala Lumpur', value: 'Lumpur' },
+    { label: 'Kuala Lumpur', value: 'Kuala Lumpur' },
     { label: 'Kedah', value: 'Kedah' },
     { label: 'Melaka', value: 'Melaka' },
     { label: 'Negeri Sembilan', value: 'Negeri Sembilan' },
@@ -115,17 +168,10 @@ const stateOptions = [
     { label: 'Terengganu', value: 'Terengganu' }
 ];
 
-const platformOptions = [
-    { label: 'Web', value: 'Web' },
-    { label: 'Android', value: 'Android' },
-    { label: 'Huawei', value: 'Huawei' },
-    { label: 'Iphone', value: 'Iphone' }
-];
-
 const levelOptions = [
     { label: 'Silver', value: 'Silver' },
     { label: 'Gold', value: 'Gold' },
-    { label: 'Plantinum', value: 'Plantinum' }
+    { label: 'Platinum', value: 'Platinum' }
 ];
 
 const genderOptions = [
@@ -138,41 +184,164 @@ const codeOptions = [
     { label: '+65', value: '+65' }
 ];
 
-const selectOptions = [
-    { label: 'Yes', value: 1 },
-    { label: 'No', value: 0 }
-];
-
+// Member detail data
 const memberDetail = ref({
-    id: 10,
-    etenUserID: 'EU1010',
-    countryCode: '60',
-    mobileNumber: '1890123456',
-    password: 'hashed_pw_10',
-    firstName: 'Faizal',
-    lastName: 'Rahman',
-    emailAddress: 'faizal.rahman@toyotires.com.my',
-    gender: 'Male',
-    race: 'Malay',
-    state: 'Sabah',
-    level: 'Silver',
-    memberSince: '2025-04-20',
-    lastLogin: '2025-08-01 12:05:00',
-    allow_warranty: 0,
-    allow_order: 1,
-    allow_billing: 0,
-    allow_sale: 1,
-    allow_user: 0,
-    activationCode: 'ACT01234',
-    isMaster: 0,
-    device: 'Windows Laptop',
-    platform: 'Web',
-    fcmToken: 'fcm_token_10',
-    status: 1,
-    activated: 1,
-    created: '2025-04-20',
-    deleted: 0
+    id: null,
+    etenUserID: '',
+    countryCode: '+60',
+    mobileNumber: '',
+    password: '',
+    firstName: '',
+    lastName: '',
+    emailAddress: '',
+    gender: '',
+    race: '',
+    state: '',
+    level: '',
+    city: '',
+    postcode: '',
+    country: 'Malaysia',
+    dob: null,
+    memberSince: '',
+    lastLogin: ''
 });
 
-const showPassword = ref(false);
+// Fetch member details from API
+const fetchMemberDetail = async () => {
+    try {
+        loading.value = true;
+        console.log('Fetching member details for ID:', memberId.value);
+
+        const response = await api.get(`cares/user/${memberId.value}`);
+        console.log('API Response:', response.data);
+
+        if (response.data.status === 1 && response.data.admin_data) {
+            const userData = response.data.admin_data;
+
+            // Map API response to form structure
+            memberDetail.value = {
+                id: userData.id,
+                etenUserID: userData.memberCode || '-',
+                countryCode: userData.countryCode || '+60',
+                mobileNumber: userData.mobileNumber || userData.mobile_number || '',
+                password: '', // Don't prefill password for security
+                firstName: userData.firstName || '',
+                lastName: userData.lastName || '',
+                emailAddress: userData.emailAddress || '',
+                gender: userData.gender || '',
+                race: userData.race || '',
+                state: userData.state || '',
+                level: userData.memberLevel || '',
+                city: userData.city || '',
+                postcode: userData.postcode || '',
+                country: userData.country || 'Malaysia',
+                dob: userData.dob ? new Date(userData.dob) : null,
+                memberSince: userData.created ? new Date(userData.created) : null,
+                lastLogin: userData.lastLogin ? new Date(userData.lastLogin) : null
+            };
+
+            console.log('Processed member data for edit:', memberDetail.value);
+        } else {
+            console.error('API returned error or invalid data:', response.data);
+            showToast('error', 'Error', 'Failed to load user details');
+        }
+    } catch (error) {
+        console.error('Error fetching member details:', error);
+        showToast('error', 'Error', 'Failed to load user details');
+    } finally {
+        loading.value = false;
+    }
+};
+
+// Update user using FormData with append
+const updateUser = async () => {
+    try {
+        submitting.value = true;
+        errors.value = {};
+
+        // Create FormData object
+        const formData = new FormData();
+        
+        // Append all required fields using append()
+        formData.append('first_name', memberDetail.value.firstName);
+        formData.append('last_name', memberDetail.value.lastName);
+        formData.append('email', memberDetail.value.emailAddress);
+        formData.append('country_code', memberDetail.value.countryCode);
+        formData.append('mobile_number', memberDetail.value.mobileNumber);
+        formData.append('gender', memberDetail.value.gender);
+        formData.append('race', memberDetail.value.race);
+        formData.append('city', memberDetail.value.city);
+        formData.append('state', memberDetail.value.state);
+        formData.append('postal_code', memberDetail.value.postcode);
+        formData.append('country', memberDetail.value.country);
+        formData.append('member_level', memberDetail.value.level);
+
+        // Format date for API (dd-mm-yyyy)
+        if (memberDetail.value.dob) {
+            const dob = new Date(memberDetail.value.dob);
+            const formattedDob = `${dob.getDate().toString().padStart(2, '0')}-${(dob.getMonth() + 1).toString().padStart(2, '0')}-${dob.getFullYear()}`;
+            formData.append('date_of_birth', formattedDob);
+        }
+
+        console.log('Updating user with data:', Object.fromEntries(formData));
+
+        const response = await api.post(`cares/edit/${memberId.value}`, formData, {
+            headers: {
+                'Content-Type': 'multipart/form-data'
+            }
+        });
+
+        console.log('Update response:', response.data);
+
+        if (response.data.status === 1) {
+            showToast('success', 'Success', 'User updated successfully');
+            // Redirect back to user list or detail page after successful update
+            setTimeout(() => {
+                router.push(`/marketing/detailEtenUser/${memberId.value}`);
+            }, 1500);
+        } else {
+            if (response.data.error) {
+                errors.value = response.data.error;
+                showToast('error', 'Validation Error', 'Please check the form fields');
+            } else {
+                showToast('error', 'Error', 'Failed to update user');
+            }
+        }
+    } catch (error) {
+        console.error('Error updating user:', error);
+        if (error.response?.data?.error) {
+            errors.value = error.response.data.error;
+            showToast('error', 'Validation Error', 'Please check the form fields');
+        } else {
+            showToast('error', 'Error', 'Failed to update user');
+        }
+    } finally {
+        submitting.value = false;
+    }
+};
+
+// Show toast notification
+const showToast = (severity, summary, detail) => {
+    toast.add({
+        severity: severity,
+        summary: summary,
+        detail: detail,
+        life: 5000
+    });
+};
+
+// Fetch member details when component mounts
+onMounted(() => {
+    fetchMemberDetail();
+});
 </script>
+
+<style scoped>
+.card {
+    box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
+}
+
+:deep(.p-calendar) {
+    width: 100%;
+}
+</style>
