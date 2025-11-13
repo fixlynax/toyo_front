@@ -379,9 +379,10 @@ const router = createRouter({
                     props: true
                 },
                 {
-                    path: 'marketing/editRedemption',
+                    path: 'marketing/editRedemption/:id',
                     name: 'Edit-Redemption',
-                    component: () => import('@/views/marketing/editRedemption.vue')
+                    component: () => import('@/views/marketing/editRedemption.vue'),
+                    props: true
                 },
 
                 // Members

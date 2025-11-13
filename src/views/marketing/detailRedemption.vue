@@ -156,9 +156,7 @@
                 </div>
             </div>
 
-            <!-- ======================= -->
-            <!-- RIGHT SECTION: Advance Info -->
-            <!-- ======================= -->
+
             <div class="md:w-1/3 flex flex-col" v-if="!loading">
                 <div class="card flex flex-col w-full">
                     <!-- Header with Status Tag -->
@@ -277,6 +275,9 @@
                 </div>
             </template>
         </Dialog>
+
+        <!-- Toast Component for notifications -->
+        <Toast />
     </Fluid>
 </template>
 
@@ -284,10 +285,13 @@
 import { ref, onMounted } from 'vue';
 import { useRoute } from 'vue-router';
 import Dialog from 'primevue/dialog';
+import Toast from 'primevue/toast';
+import { useToast } from 'primevue/usetoast';
 import api from '@/service/api';
 import LoadingPage from '@/components/LoadingPage.vue';
 
 const route = useRoute();
+const toast = useToast();
 const redemptionId = route.params.id;
 
 const showRejectDialog = ref(false);
@@ -295,6 +299,7 @@ const showApproveDialog = ref(false);
 const rejectReason = ref('');
 const showValidationError = ref(false);
 const loading = ref(true);
+const processingAction = ref(false);
 
 const redemption = ref({
     id: null,
@@ -376,9 +381,11 @@ const fetchRedemptionDetails = async () => {
             campaignCriteria.value = response.data.admin_data.campaign_criteria || [];
         } else {
             console.error('API returned error or invalid data:', response.data);
+            toast.add({ severity: 'error', summary: 'Error', detail: 'Failed to load redemption details', life: 3000 });
         }
     } catch (error) {
         console.error('Error fetching redemption details:', error);
+        toast.add({ severity: 'error', summary: 'Error', detail: 'Failed to load redemption details', life: 3000 });
     } finally {
         loading.value = false;
     }
@@ -398,10 +405,13 @@ const submitReject = async () => {
         return;
     }
 
+    processingAction.value = true;
+
     try {
-        // API call to reject redemption
-        const response = await api.post(`redeem/reject/${redemptionId}`, {
-            reason: rejectReason.value
+        // API call to verify redemption with status 2 (Rejected)
+        const response = await api.post(`redeem/verify/${redemptionId}`, {
+            status: 2, // Rejected status
+            reject_reason: rejectReason.value // Required for status 2
         });
 
         if (response.data.status === 1) {
@@ -410,23 +420,34 @@ const submitReject = async () => {
             redemption.value.rejectedDate = new Date().toISOString();
             redemption.value.rejectReason = rejectReason.value;
 
-            // Show success message (you can use Toast from PrimeVue)
-            console.log('Redemption rejected successfully');
+            // Show success message
+            toast.add({ severity: 'success', summary: 'Success', detail: 'Redemption has been rejected successfully', life: 3000 });
+            
+            // Refresh data to get updated information from server
+            fetchRedemptionDetails();
         } else {
             console.error('Failed to reject redemption:', response.data);
+            toast.add({ severity: 'error', summary: 'Error', detail: 'Failed to reject redemption', life: 3000 });
         }
     } catch (error) {
         console.error('Error rejecting redemption:', error);
+        toast.add({ severity: 'error', summary: 'Error', detail: 'Failed to reject redemption', life: 3000 });
+    } finally {
+        processingAction.value = false;
+        closeRejectDialog();
     }
-
-    closeRejectDialog();
 };
 
 // Approve submission handler
 const submitApprove = async () => {
+    processingAction.value = true;
+
     try {
-        // API call to approve redemption
-        const response = await api.post(`redeem/approve/${redemptionId}`);
+        // API call to verify redemption with status 1 (Approved)
+        const response = await api.post(`redeem/verify/${redemptionId}`, {
+            status: 1 // Approved status
+            // No reject_reason needed for approval
+        });
 
         if (response.data.status === 1) {
             // Update local state
@@ -434,15 +455,21 @@ const submitApprove = async () => {
             redemption.value.approvedDate = new Date().toISOString();
 
             // Show success message
-            console.log('Redemption approved successfully');
+            toast.add({ severity: 'success', summary: 'Success', detail: 'Redemption has been approved successfully', life: 3000 });
+            
+            // Refresh data to get updated information from server
+            fetchRedemptionDetails();
         } else {
             console.error('Failed to approve redemption:', response.data);
+            toast.add({ severity: 'error', summary: 'Error', detail: 'Failed to approve redemption', life: 3000 });
         }
     } catch (error) {
         console.error('Error approving redemption:', error);
+        toast.add({ severity: 'error', summary: 'Error', detail: 'Failed to approve redemption', life: 3000 });
+    } finally {
+        processingAction.value = false;
+        showApproveDialog.value = false;
     }
-
-    showApproveDialog.value = false;
 };
 
 // Helper functions for status label
@@ -450,16 +477,24 @@ const statusLabel = (status) => {
     const statusMap = {
         0: 'Pending',
         1: 'Approved',
-        2: 'Rejected'
+        2: 'Rejected',
+        3: 'Processing',
+        4: 'Delivery',
+        5: 'Redeemed (Yet to Use)',
+        10: 'Completed'
     };
     return statusMap[status] || 'Unknown';
 };
 
 const statusSeverity = (status) => {
     const severityMap = {
-        0: 'warning',
-        1: 'success',
-        2: 'danger'
+        0: 'warning',   // Pending
+        1: 'success',   // Approved
+        2: 'danger',    // Rejected
+        3: 'info',      // Processing
+        4: 'primary',   // Delivery
+        5: 'secondary', // Redeemed (Yet to Use)
+        10: 'success'   // Completed
     };
     return severityMap[status] || 'secondary';
 };
