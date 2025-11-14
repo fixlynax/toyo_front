@@ -1,39 +1,70 @@
 <template>
-    <div class="flex justify-center px-4 py-8">
-        <div class="grid grid-cols-12 gap-8 w-full">
-            <!-- ===== Summary Cards (unchanged) ===== -->
-            <div v-for="(card, i) in summaryCards" :key="i" class="col-span-12 sm:col-span-6 xl:col-span-3">
-                <div class="card mb-0 shadow-sm hover:shadow-md transition-shadow duration-300 border border-surface-100 dark:border-surface-700">
-                    <div class="flex justify-between mb-4">
-                        <div>
-                            <span class="block text-muted-color font-medium mb-2">{{ card.title }}</span>
-                            <div class="text-surface-900 dark:text-surface-0 font-semibold text-2xl tracking-tight">
-                                {{ card.value }}
+    <div class="flex justify-center items-center w-full">
+        <div class="grid grid-cols-12 gap-8 w-full max-w-4xl">
+
+            <!-- FIRST 4 CARDS (2x2 GRID) -->
+            <template v-for="(card, i) in summaryCards" :key="i">
+                <div
+                    v-if="i < 4"
+                    class="col-span-12 sm:col-span-6"
+                >
+                    <div class="card mb-0 shadow-sm hover:shadow-md transition-shadow duration-300 border border-surface-100 dark:border-surface-700">
+                        <div class="flex justify-between mb-4">
+                            <div>
+                                <span class="block text-muted-color font-medium mb-2">{{ card.title }}</span>
+                                <div class="text-surface-900 dark:text-surface-0 font-semibold text-2xl tracking-tight">
+                                    {{ card.value }}
+                                </div>
+                            </div>
+                            <div
+                                class="flex items-center justify-center rounded-xl"
+                                :class="card.bg"
+                                style="width: 2.8rem; height: 2.8rem"
+                            >
+                                <i :class="card.icon"></i>
                             </div>
                         </div>
-                        <div class="flex items-center justify-center rounded-xl" :class="card.bg" style="width: 2.8rem; height: 2.8rem">
-                            <i :class="card.icon"></i>
+                        <div class="flex items-center gap-1 text-sm">
+                            <span class="text-primary font-semibold">{{ card.change }}</span>
+                            <span class="text-muted-color">{{ card.description }}</span>
                         </div>
                     </div>
-                    <div class="flex items-center gap-1 text-sm">
-                        <span class="text-primary font-semibold">{{ card.change }}</span>
-                        <span class="text-muted-color">{{ card.description }}</span>
+                </div>
+            </template>
+
+            <!-- CUSTOMER CARD (CENTERED) -->
+            <div class="col-span-12 flex justify-center">
+                <div class="w-full sm:w-1/2">
+                    <div class="card mb-0 shadow-sm hover:shadow-md transition-shadow duration-300 border border-surface-100 dark:border-surface-700">
+                        <div class="flex justify-between mb-4">
+                            <div>
+                                <span class="block text-muted-color font-medium mb-2">{{ summaryCards[4].title }}</span>
+                                <div class="text-surface-900 dark:text-surface-0 font-semibold text-2xl tracking-tight">
+                                    {{ summaryCards[4].value }}
+                                </div>
+                            </div>
+                            <div
+                                class="flex items-center justify-center rounded-xl"
+                                :class="summaryCards[4].bg"
+                                style="width: 2.8rem; height: 2.8rem"
+                            >
+                                <i :class="summaryCards[4].icon"></i>
+                            </div>
+                        </div>
+                        <div class="flex items-center gap-1 text-sm">
+                            <span class="text-primary font-semibold">{{ summaryCards[4].change }}</span>
+                            <span class="text-muted-color">{{ summaryCards[4].description }}</span>
+                        </div>
                     </div>
                 </div>
             </div>
-
-         
-
-
-    
 
         </div>
     </div>
 </template>
 
+
 <script setup>
-
-
 
 const summaryCards = [
     {
@@ -61,7 +92,15 @@ const summaryCards = [
         bg: 'bg-cyan-100 dark:bg-cyan-400/10'
     },
     {
-        title: 'Claim Made',
+        title: 'Sales Program',
+        value: '30',
+        change: '+7',
+        description: 'this month',
+        icon: 'pi pi-comment text-purple-500 !text-xl',
+        bg: 'bg-purple-100 dark:bg-purple-400/10'
+    },
+    {
+        title: 'Customer',
         value: '30',
         change: '+7',
         description: 'this month',
@@ -74,4 +113,5 @@ const menuItems = [
     { label: 'Mark all as read', icon: 'pi pi-check' },
     { label: 'Clear notifications', icon: 'pi pi-trash' }
 ];
+
 </script>
