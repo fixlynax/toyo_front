@@ -260,33 +260,30 @@ const salesProgram = ref({});
 const criteriaList = ref([]);
 
 // Process private images using the API method
-const processPrivateImages = async () => {
-    const imageFields = ['imageUrl'];
+// const processPrivateImages = async () => {
+//     const imageFields = ['imageUrl'];
     
-    // Process images in parallel instead of sequentially
-    const imageProcessingPromises = imageFields.map(async (field) => {
-        if (!salesProgram.value[field] || typeof salesProgram.value[field] !== 'string') {
-            salesProgram.value[field] = '/demo/images/event-toyo-2.jpg';
-            return;
-        }
+//     const imageProcessingPromises = imageFields.map(async (field) => {
+//         if (!salesProgram.value[field] || typeof salesProgram.value[field] !== 'string') {
+//             salesProgram.value[field] = '/demo/images/event-toyo-2.jpg';
+//             return;
+//         }
 
-        // Skip if already a valid URL
-        if (salesProgram.value[field].startsWith('http') || salesProgram.value[field].startsWith('/')) {
-            return;
-        }
+//         if (salesProgram.value[field].startsWith('http') || salesProgram.value[field].startsWith('/')) {
+//             return;
+//         }
 
-        try {
-            const blobUrl = await api.getPrivateFile(salesProgram.value[field]);
-            salesProgram.value[field] = blobUrl || '/demo/images/event-toyo-2.jpg';
-        } catch (error) {
-            console.error(`Error loading image ${field}:`, error);
-            salesProgram.value[field] = '/demo/images/event-toyo-2.jpg';
-        }
-    });
+//         try {
+//             const blobUrl = await api.getPrivateFile(salesProgram.value[field]);
+//             salesProgram.value[field] = blobUrl || '/demo/images/event-toyo-2.jpg';
+//         } catch (error) {
+//             console.error(`Error loading image ${field}:`, error);
+//             salesProgram.value[field] = '/demo/images/event-toyo-2.jpg';
+//         }
+//     });
 
-    await Promise.all(imageProcessingPromises);
-};
-
+//     await Promise.all(imageProcessingPromises);
+// };
 const fetchSalesProgram = async () => {
     loading.value = true;
     error.value = false;

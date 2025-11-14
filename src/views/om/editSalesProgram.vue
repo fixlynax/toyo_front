@@ -423,30 +423,30 @@ const showInfo = (message) => {
 };
 
 // Process private images using the API method
-const processPrivateImages = async () => {
-    if (salesProgram.value.imageUrl && typeof salesProgram.value.imageUrl === 'string') {
-        try {
-            // Check if it's already a valid URL (like fallback image)
-            if (salesProgram.value.imageUrl.startsWith('http') || salesProgram.value.imageUrl.startsWith('/')) {
-                // It's already a URL, no need to process
-                return;
-            }
+// const processPrivateImages = async () => {
+//     if (salesProgram.value.imageUrl && typeof salesProgram.value.imageUrl === 'string') {
+//         try {
+//             // Check if it's already a valid URL (like fallback image)
+//             if (salesProgram.value.imageUrl.startsWith('http') || salesProgram.value.imageUrl.startsWith('/')) {
+//                 // It's already a URL, no need to process
+//                 return;
+//             }
 
-            const blobUrl = await api.getPrivateFile(salesProgram.value.imageUrl);
-            if (blobUrl) {
-                salesProgram.value.imageUrl = blobUrl;
-            } else {
-                salesProgram.value.imageUrl = '/demo/images/event-toyo-2.jpg';
-            }
-        } catch (error) {
-            console.error('Error loading image:', error);
-            salesProgram.value.imageUrl = '/demo/images/event-toyo-2.jpg';
-            showWarning('Failed to load program image, using fallback image');
-        }
-    } else if (!salesProgram.value.imageUrl) {
-        salesProgram.value.imageUrl = '/demo/images/event-toyo-2.jpg';
-    }
-};
+//             const blobUrl = await api.getPrivateFile(salesProgram.value.imageUrl);
+//             if (blobUrl) {
+//                 salesProgram.value.imageUrl = blobUrl;
+//             } else {
+//                 salesProgram.value.imageUrl = '/demo/images/event-toyo-2.jpg';
+//             }
+//         } catch (error) {
+//             console.error('Error loading image:', error);
+//             salesProgram.value.imageUrl = '/demo/images/event-toyo-2.jpg';
+//             showWarning('Failed to load program image, using fallback image');
+//         }
+//     } else if (!salesProgram.value.imageUrl) {
+//         salesProgram.value.imageUrl = '/demo/images/event-toyo-2.jpg';
+//     }
+// };
 
 // Fetch sales program data
 const fetchSalesProgram = async () => {
