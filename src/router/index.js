@@ -770,9 +770,10 @@ const router = createRouter({
                     component: () => import('@/views/scm/listLogistic.vue')
                 },
                 {
-                    path: 'scm/detailLogistic',
+                    path: 'scm/detailLogistic/:id',
                     name: 'Detail-Logistic',
-                    component: () => import('@/views/scm/detailLogistic.vue')
+                    component: () => import('@/views/scm/detailLogistic.vue'),
+                    props: true
                 },
                 {
                     path: 'scm/createlogistic',
@@ -780,9 +781,10 @@ const router = createRouter({
                     component: () => import('@/views/scm/createlogistic.vue')
                 },
                 {
-                    path: 'scm/editLogistic',
+                    path: 'scm/editLogistic/:id',
                     name: 'Edit-Logistic',
-                    component: () => import('@/views/scm/editLogistic.vue')
+                    component: () => import('@/views/scm/editLogistic.vue'),
+                    props: true
                 },
 
                 // Back Order
