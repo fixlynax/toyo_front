@@ -196,6 +196,10 @@ import { ref, reactive, computed, onMounted } from 'vue';
 import api from '@/service/api';
 import LoadingPage from '@/components/LoadingPage.vue';
 import { FilterMatchMode } from '@primevue/core/api';
+import { useToast } from 'primevue/usetoast';
+
+const toast = useToast();
+
 
 const loading = ref(false);
 const showEditDialog = ref(false);
@@ -301,44 +305,57 @@ const saveDate = async () => {
     try {
         loading.value = true;
         
-        // Prepare data for API update - match the expected format
+        // Prepare data for API update
         const updateData = {
             date: new Date(currentDate.closingDate).getDate(), // Only the day number
             time: formatTimePreview(currentDate.closingTime), // HH:mm format
             status: currentDate.status
         };
 
-        console.log('Sending update data:', updateData);
-
-        // Call API to update the closing date - note the endpoint uses POST with ID in URL
+        // Call API to update the closing date
         const response = await api.post(`maintenance/update-monthly-end/${currentDate.id}`, updateData);
         
         if (response.data.status === 1) {
             // Update local data
             const index = closingDates.value.findIndex((date) => date.id === currentDate.id);
             if (index !== -1) {
-                // Update the specific fields that were changed
                 closingDates.value[index] = {
                     ...closingDates.value[index],
                     closingDate: updateData.date,
-                    closingTime: updateData.time + ':00', // Add seconds for display
+                    closingTime: updateData.time + ':00',
                     status: updateData.status,
                     closingDateFormatted: response.data.admin_data?.closingDateFormatted || closingDates.value[index].closingDateFormatted
                 };
             }
             closeDialog();
-            console.log('Closing date updated successfully');
+
+            toast.add({
+                severity: 'success',
+                summary: 'Success',
+                detail: 'Closing date updated successfully',
+                life: 3000
+            });
         } else {
-            console.error('Failed to update closing date:', response.data);
-            alert('Failed to update closing date. Please try again.');
+            toast.add({
+                severity: 'warn',
+                summary: 'Failed',
+                detail: 'Failed to update closing date. Please try again.',
+                life: 3000
+            });
         }
     } catch (error) {
+        toast.add({
+            severity: 'error',
+            summary: 'Error',
+            detail: 'An error occurred while updating the closing date',
+            life: 3000
+        });
         console.error('Error updating closing date:', error);
-        alert('Error updating closing date. Please try again.');
     } finally {
         loading.value = false;
     }
 };
+
 
 const closeDialog = () => {
     showEditDialog.value = false;
