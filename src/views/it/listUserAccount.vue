@@ -74,18 +74,26 @@
             </DataTable>
         </div>
 
-        <Dialog v-model:visible="moduleDialogVisible" header="Module List" modal style="width: 60rem">
-            <div class="grid grid-cols-2 gap-4 font-semibold border-b pb-2">
-                <div>Module</div>
-                <div class="text-center">Permission</div>
-            </div>
-            <div class="grid grid-cols-2 gap-4 mt-2">
-                <template v-for="(m, i) in selectedModules" :key="i">
-                    <div><span class="font-bold">- </span>{{ m.name }}</div>
-                    <div class="flex justify-center">
-                        <Tag :value="m.write ? 'Write' : 'Read'" :severity="m.write ? 'success' : 'info'" />
+        <Dialog v-model:visible="moduleDialogVisible" header="Module List" modal style="width: 50rem">
+            <div class="overflow-x-auto">
+                <div class="min-w-full border rounded-lg divide-y divide-gray-200">
+                    <!-- Header -->
+                    <div class="grid grid-cols-2 bg-gray-100 text-gray-700 font-semibold p-3">
+                        <div>Module</div>
+                        <div class="text-center">Permission</div>
                     </div>
-                </template>
+
+                    <!-- Module rows -->
+                    <div v-for="(m, i) in selectedModules" :key="i" class="grid grid-cols-2 p-3 items-center hover:bg-gray-50">
+                        <div class="flex items-center gap-2">
+                            <span class="font-bold">-</span>
+                            <span>{{ m.name }}</span>
+                        </div>
+                        <div class="flex justify-center">
+                            <Tag :value="m.write ? 'Write' : 'Read'" :severity="m.write ? 'success' : 'info'" class="px-3 py-1 text-sm" />
+                        </div>
+                    </div>
+                </div>
             </div>
         </Dialog>
     </Fluid>
@@ -160,8 +168,9 @@ const deleteUser = async (user) => {
     if (!confirm(`Are you sure you want to delete "${user.userlist}"?`)) return;
 
     try {
-        // Make sure endpoint is correct and matches backend
-        const res = await api.post('admin/delete-user-role', { id: user.id });
+      
+        const res = await api.delete(`admin/delete-user-role/${user.id}`);
+    
 
         if (res.data.status === 1) {
             toast.add({
@@ -189,8 +198,8 @@ const deleteUser = async (user) => {
         });
     }
 };
-</script>
 
+</script>
 
 <style scoped lang="scss">
 :deep(.p-datatable-frozen-tbody) {
