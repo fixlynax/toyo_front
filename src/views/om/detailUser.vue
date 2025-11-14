@@ -82,9 +82,7 @@
                             <div class="w-full">
                                 <span class="text-xm font-bold text-black-700">Status</span>
                                 <p class="text-lg font-medium">
-                                    <span :class="memberDetail.status === 1 ? 'text-green-600 font-medium' : 'text-red-600 font-medium'">
-                                        {{ memberDetail.status === 1 ? 'Active' : 'Inactive' }}
-                                    </span>
+                                    <Tag :value="memberDetail.status === 1 ? 'Active' : 'Inactive'" :severity="memberDetail.status === 1 ? 'success' : 'danger'" />
                                 </p>
                             </div>
                             <div class="w-full">

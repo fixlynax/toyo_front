@@ -13,12 +13,8 @@
             filterDisplay="menu"
             :globalFilterFields="['usergroup', 'modules', 'statusUser']"
         >
-            <!-- ========================= -->
-            <!-- Header Section -->
-            <!-- ========================= -->
             <template #header>
                 <div class="flex items-center justify-between gap-4 w-full flex-wrap">
-                    <!-- Left: Search Field + Cog Button -->
                     <div class="flex items-center gap-2 w-full max-w-md">
                         <IconField class="flex-1">
                             <InputIcon>
@@ -29,23 +25,16 @@
                         <Button type="button" icon="pi pi-cog" class="p-button" />
                     </div>
 
-                    <!-- Right: Create Group Button -->
                     <RouterLink to="/it/createGroup">
                         <Button type="button" label="Create" icon="pi pi-plus" />
                     </RouterLink>
                 </div>
             </template>
 
-            <!-- ========================= -->
-            <!-- Empty / Loading Messages -->
-            <!-- ========================= -->
             <template #empty> No User Group found. </template>
             <template #loading> Loading user group data. Please wait. </template>
 
-            <!-- ========================= -->
-            <!-- Data Columns -->
-            <!-- ========================= -->
-            <Column field="usergroup" header="User Group" style="min-width: 20rem" class="font-bold text-primary-400">
+            <Column field="usergroup" header="User Group" style="min-width: 20rem">
                 <template #body="{ data }">
                     <span class="font-bold">{{ data.usergroup }}</span>
                 </template>
@@ -90,27 +79,28 @@
 import { onMounted, ref } from 'vue';
 import { useRouter } from 'vue-router';
 import { FilterMatchMode } from '@primevue/core/api';
-import { ListUserService } from '@/service/ITUser';
+import api from '@/service/api';
 
-// Router
 const router = useRouter();
-
-// Data variables
 const listData = ref([]);
 const loading = ref(true);
 
-// Filters for quick search
 const filters = ref({
     global: { value: null, matchMode: FilterMatchMode.CONTAINS }
 });
 
-// =========================
-// Fetch data on mount
-// =========================
 onMounted(async () => {
     loading.value = true;
     try {
-        listData.value = await ListUserService.getListUser();
+        const res = await api.get('admin/list-user-role'); 
+        const raw = res.data.data;
+
+        listData.value = raw.map(item => ({
+            id: item.id,
+            usergroup: item.name,
+            modules: item.permissions.map(p => p.function_name),
+            statusUser: item.status ? 1 : 0
+        }));
     } catch (error) {
         console.error('Error loading user groups:', error);
         listData.value = [];
@@ -119,15 +109,11 @@ onMounted(async () => {
     }
 });
 
-// =========================
-// Action handlers
-// =========================
 const editUser = (user) => {
-    router.push('/it/editGroup');
+    router.push(`/it/editGroup/${user.id}`);
 };
 
 const deleteUser = (user) => {
     console.log('Deleting user:', user);
-    // Add your delete logic here
 };
 </script>

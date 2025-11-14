@@ -52,39 +52,6 @@
                         </div>
                     </div>
                 </div>
-                <div class="card flex flex-col gap-4 w-full">
-                    <div class="font-semibold text-xl border-b pb-2">🚚 Shipping Information</div>
-
-                    <div class="grid grid-cols-2 gap-4">
-                        <div>
-                            <span class="text-sm font-bold text-gray-700">Ship To</span>
-                            <p class="text-lg font-medium">
-                                {{ orderData.deliveryType === 'DELIVER' ? shippingDetail?.companyName1 : 'Customer Self Pickup' }}
-                            </p>
-                        </div>
-                        <div>
-                            <span class="text-sm font-bold text-gray-700">Shipping Cond</span>
-                            <p class="text-lg font-medium">{{ orderData.shippingcond || 'Standard' }}</p>
-                        </div>
-                        <div>
-                            <span class="text-sm font-bold text-gray-700">Delivery Type</span>
-                            <p class="text-lg font-medium">{{ orderData.deliveryType || '-' }}</p>
-                        </div>
-                        <div>
-                            <span class="text-sm font-bold text-gray-700">Delivery ETA</span>
-                            <p class="text-lg font-medium">{{ formatDate(orderData.deliveryDate) }}</p>
-                        </div>
-                        <div>
-                            <span class="text-sm font-bold text-gray-700">Delivery Status</span>
-                            <p class="text-lg font-medium">
-                                <span :class="statusClass(orderData.status_string)">
-                                    {{ orderData.status_string || '-' }}
-                                </span>
-                            </p>
-                            <p class="text-xs text-gray-500 mt-1">Last updated: {{ formatDateTime(orderData.updated_at) }}</p>
-                        </div>
-                    </div>
-                </div>
 
                 <div class="card flex flex-col w-full bg-white shadow-sm rounded-2xl border border-gray-100">
                     <!-- Header -->
@@ -184,6 +151,43 @@
                                             <Button label="Pull SAP Update" class="text-sm !w-fit" @click="pullSAPUpdate" :loading="loadingSAP" />
                                         </div>
                                     </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <div class="card flex flex-col w-full">
+                    <div class="flex items-center justify-between border-b pb-3 mb-4">
+                        <div class="text-2xl font-bold text-gray-800">Shipping Info</div>
+                    </div>
+
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-sm text-left text-gray-700">
+                            <tbody>
+                                <tr class="border-b even:bg-gray-50">
+                                    <td class="px-4 py-2 font-medium">Company Name</td>
+                                    <td class="px-4 py-2 text-right font-semibold">
+                                        {{ [shippingDetail.companyName1, shippingDetail.companyName2, shippingDetail.companyName3, shippingDetail.companyName4].filter(Boolean).join(', ') }}
+                                    </td>
+                                </tr>
+                                <tr class="border-b even:bg-gray-50">
+                                    <td class="px-4 py-2 font-medium">Address</td>
+                                    <td class="px-4 py-2 text-right font-semibold">
+                                        {{
+                                            [shippingDetail.addressLine1, shippingDetail.addressLine2, shippingDetail.addressLine3, shippingDetail.addressLine4, shippingDetail.postcode, shippingDetail.state, shippingDetail.city]
+                                                .filter(Boolean)
+                                                .join(', ')
+                                        }}
+                                    </td>
+                                </tr>
+                                <tr class="border-b even:bg-gray-50">
+                                    <td class="px-4 py-2 font-medium">Phone No</td>
+                                    <td class="px-4 py-2 text-right font-semibold">{{ shippingDetail.phoneNumber || '-' }}</td>
+                                </tr>
+                                <tr class="border-b even:bg-gray-50">
+                                    <td class="px-4 py-2 font-medium">Email</td>
+                                    <td class="px-4 py-2 text-right font-semibold">{{ shippingDetail.emailAddress || '-' }}</td>
                                 </tr>
                             </tbody>
                         </table>

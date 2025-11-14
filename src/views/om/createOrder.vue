@@ -53,7 +53,8 @@
             <!-- Progress -->
             <div class="bg-gray-100 p-4 rounded-lg">
                 <label class="block font-bold text-gray-700 text-center">Progress</label>
-                <ProgressBar :value="selectedContainerSize ? 100 : 0" class="mt-2 h-4 rounded-full" showValue="false" /> <!-- Need To Update With material Size  -->
+                <ProgressBar :value="selectedContainerSize ? 100 : 0" class="mt-2 h-4 rounded-full" showValue="false" />
+                <!-- Need To Update With material Size  -->
                 <div class="flex justify-between text-sm text-gray-500 mt-1">
                     <span>0% filled</span>
                     <span>Minimum requirement: 95%</span>
@@ -193,16 +194,6 @@
             </DataTable>
 
             <div class="text-right mt-4 font-bold text-lg">Total Price: RM {{ cartTotal.toFixed(2) }}</div>
-            <div class="flex justify-end mt-8 gap-4">
-                <div class="w-32">
-                    <Button label="Cancel" class="p-button-secondary" @click="router.back()" />
-                </div>
-                <div class="w-32">
-                    <RouterLink to="/om/confirmOrder">
-                        <Button label="Checkout" class="flex-1 bg-primary text-white rounded-lg py-2 font-semibold hover:bg-primary-dark transition" />
-                    </RouterLink>
-                </div>
-            </div>
         </div>
         <!-- Ship To Details -->
         <div v-if="selectedDeliveryMethod === 'Delivery' || selectedDeliveryMethod === 'Lalamove' || selectedOrderType === 'DS'" class="card">
@@ -233,6 +224,16 @@
                 <div class="md:col-span-2">
                     <label class="block font-bold text-gray-700">Estimated Delivery Arrival</label>
                     <Calendar v-model="datetime24h" showTime hourFormat="24" placeholder="Select ETA" class="w-full" />
+                </div>
+            </div>
+            <div class="flex justify-end mt-8 gap-4">
+                <div class="w-32">
+                    <Button label="Cancel" class="p-button-secondary" @click="router.back()" />
+                </div>
+                <div class="w-32">
+                    <RouterLink to="/om/confirmOrder">
+                        <Button label="Checkout" class="flex-1 bg-primary text-white rounded-lg py-2 font-semibold hover:bg-primary-dark transition" />
+                    </RouterLink>
                 </div>
             </div>
         </div>
