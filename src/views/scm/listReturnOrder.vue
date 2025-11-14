@@ -52,7 +52,7 @@
                     <div class="flex justify-center">
                     <Checkbox
                         :binary="true"
-                        :model-value="false"  
+                        :model-value="allSelected"  
                         @change="() => toggleSelectAll()"  
                     />
                     </div>
@@ -238,7 +238,7 @@ const handleExport = async () => {
         
             const response = await api.postExtra(
             'excel/export-scm-return-order-list',
-        { returnorderids_array: idsArray }, 
+        { returnorderids_array: JSON.stringify(idsArray) },
         {
             responseType: 'blob',
             headers: {
@@ -290,10 +290,7 @@ const handleImport = async (event) => {
             // Refresh data after import
             await fetchData();
 
-            // Reset file input
-            if (importInput.value) {
-                importInput.value.value = '';
-            }
+
 
             toast.add({
                 severity: 'success',
@@ -314,6 +311,10 @@ const handleImport = async (event) => {
         toast.add({ severity: 'error', summary: 'Error', detail: 'Failed to import data', life: 3000 });
     } finally {
         importLoading.value = false;
+                    // Reset file input
+            if (importInput.value) {
+                importInput.value.value = '';
+            }
     }
 };
 

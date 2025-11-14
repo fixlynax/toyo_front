@@ -5,12 +5,12 @@
             :value="listData" 
             :paginator="true" 
             :rows="10" 
-            :rowsPerPageOptions="[5, 10, 20]"
+            :rowsPerPageOptions="[5, 10, 20]" 
             dataKey="id" 
             :rowHover="true" 
-            :loading="loading"
-            :filters="filters"
-            filterDisplay="menu"
+            :loading="loading" 
+            :filters="filters" 
+            filterDisplay="menu" 
             :globalFilterFields="['usergroup', 'modules', 'statusUser']"
         >
             <!-- ========================= -->
@@ -50,35 +50,24 @@
                     <span class="font-bold">{{ data.usergroup }}</span>
                 </template>
             </Column>
-            
+
             <Column field="modules" header="Module / Function List" style="min-width: 25rem">
                 <template #body="{ data }">
-                    <span>{{ data.modules.join(', ') }}</span>
+                    <span>{{ data.modules }}</span>
                 </template>
             </Column>
-            
+
             <Column field="statusUser" header="Status" style="min-width: 6rem">
                 <template #body="{ data }">
-                    <Tag 
-                        :value="data.statusUser === 1 ? 'Active' : 'Suspend'" 
-                        :severity="data.statusUser === 1 ? 'success' : 'danger'" 
-                    />
+                    <Tag :value="data.statusUser === 1 ? 'Active' : 'Suspend'" :severity="data.statusUser === 1 ? 'success' : 'danger'" />
                 </template>
             </Column>
-            
+
             <Column header="Actions" style="min-width: 10rem">
                 <template #body="{ data }">
                     <div class="flex gap-2">
-                        <Button 
-                            icon="pi pi-pencil" 
-                            class="p-button-text p-button-info p-button-sm" 
-                            @click="editUser(data)" 
-                        />
-                        <Button 
-                            icon="pi pi-trash" 
-                            class="p-button-text p-button-danger p-button-sm" 
-                            @click="deleteUser(data)" 
-                        />
+                        <Button icon="pi pi-pencil" class="p-button-text p-button-info p-button-sm" @click="editGroup(data)" />
+                        <Button icon="pi pi-trash" class="p-button-text p-button-danger p-button-sm" @click="deleteGroup(data)" />
                     </div>
                 </template>
             </Column>
@@ -90,44 +79,55 @@
 import { onMounted, ref } from 'vue';
 import { useRouter } from 'vue-router';
 import { FilterMatchMode } from '@primevue/core/api';
-import { ListUserService } from '@/service/ITUser';
+import api from '@/service/api';
 
-// Router
 const router = useRouter();
-
-// Data variables
 const listData = ref([]);
 const loading = ref(true);
 
-// Filters for quick search
+const moduleDialogVisible = ref(false);
+const selectedModules = ref([]);
+
+// Open module dialog
+function openModuleDialog(modules) {
+    selectedModules.value = modules;
+    moduleDialogVisible.value = true;
+}
+
+// Filters
 const filters = ref({
     global: { value: null, matchMode: FilterMatchMode.CONTAINS }
 });
 
-// =========================
-// Fetch data on mount
-// =========================
+// Fetch group data
 onMounted(async () => {
     loading.value = true;
     try {
-        listData.value = await ListUserService.getListUser();
-    } catch (error) {
-        console.error('Error loading user groups:', error);
+        const res = await api.get('admin/list-function-group'); 
+        const raw = res.data; // <-- fixed
+
+        listData.value = raw.map((group) => ({
+            id: group.id,
+            usergroup: group.name,
+            description: group.description,
+            statusUser: group.status ? 1 : 0,
+            modules: group.functions.map(f => f.name).join(', ')
+        }));
+    } catch (err) {
+        console.error('Error fetching groups:', err);
         listData.value = [];
     } finally {
         loading.value = false;
     }
 });
 
-// =========================
-// Action handlers
-// =========================
-const editUser = (user) => {
-    router.push('/it/editGroup');
+
+// Actions
+const editGroup = (group) => {
+    router.push(`/it/editGroup/${group.id}`);
 };
 
-const deleteUser = (user) => {
-    console.log('Deleting user:', user);
-    // Add your delete logic here
+const deleteGroup = (group) => {
+    console.log('Deleting group:', group);
 };
 </script>
