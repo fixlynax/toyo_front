@@ -325,7 +325,7 @@ const handleImport = async (event) => {
         const formData = new FormData();
         formData.append('return_order_excel', file);
         
-        const response = await api.postExtra('excel/import-scm-return-order-list', formData, {
+        const response = await api.postExtra('excel/importsingle-scm-return-order-list', formData, {
             headers: {
                 'Content-Type': 'multipart/form-data'
             }
@@ -335,10 +335,6 @@ const handleImport = async (event) => {
             // Refresh data after import
             await InitfetchData();
 
-            // Reset file input
-            if (importInput.value) {
-                importInput.value.value = '';
-            }
 
             toast.add({
                 severity: 'success',
@@ -351,7 +347,7 @@ const handleImport = async (event) => {
                 severity: 'error',
                 summary: 'Import Failed',
                 detail: response.data.admin_data.error_message || 'Server did not confirm success',
-                life: 3000
+                life: 5000
             });
         }
     } catch (error) {
@@ -359,6 +355,10 @@ const handleImport = async (event) => {
         toast.add({ severity: 'error', summary: 'Error', detail: 'Failed to import data', life: 3000 });
     } finally {
         importLoading.value = false;
+        // Reset file input
+        if (importInput.value) {
+            importInput.value.value = '';
+        }
     }
 };
 onMounted(() => {
