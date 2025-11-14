@@ -480,7 +480,7 @@ const handleExport = async () => {
         
             const response = await api.postExtra(
         'material/export',
-        { material_id: idsArray }, 
+        { material_id: JSON.stringify(idsArray) }, 
         {
             responseType: 'blob',
             headers: {
