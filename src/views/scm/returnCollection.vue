@@ -38,16 +38,10 @@
 
                 </div>
             </template>
-
-            <!-- ========================= -->
-            <!-- Empty / Loading Messages -->
-            <!-- ========================= -->
+            
             <template #empty> No return records found. </template>
             <template #loading> Loading return data. Please wait. </template>
 
-            <!-- ========================= -->
-            <!-- Data Columns -->
-            <!-- ========================= -->
             <Column field="requestDate" header="Create Date" style="min-width: 8rem">
                 <template #body="{ data }">
                     {{ data.requestDate }}
