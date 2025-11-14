@@ -371,13 +371,13 @@
 </template>
 
 <script setup>
-import { ref, onMounted, computed } from 'vue';
-import { useRoute } from 'vue-router';
-import { useToast } from 'primevue/usetoast';
-import Galleria from 'primevue/galleria';
-import Button from 'primevue/button';
-import api from '@/service/api';
 import LoadingPage from '@/components/LoadingPage.vue';
+import api from '@/service/api';
+import Button from 'primevue/button';
+import Galleria from 'primevue/galleria';
+import { useToast } from 'primevue/usetoast';
+import { onMounted, ref } from 'vue';
+import { useRoute } from 'vue-router';
 
 
 const route = useRoute();
@@ -442,8 +442,9 @@ const rejecting = ref(false);
 // Fetch Material
 const fetchMaterial = async () => {
     try {
-        const response = await api.get(`warranty_claim/getClaimMaterial/70`);
-        console.log('hhkhjkhjk');
+        const id = route.params.id;
+        const response = await api.get(`warranty_claim/getClaimMaterial/${id}`);
+        console.log(response.data);
 
         console.log(response.data);
         if (response.data.status === 1) {
@@ -530,7 +531,7 @@ const approveInvoice = async () => {
             severity: 'error',
             summary: 'Error',
             detail: err.response?.data?.message || 'Failed to approve invoice',
-            life: 3000
+            life: 30000
         });
     } finally {
         approvingInvoice.value = false;
@@ -709,7 +710,8 @@ const createReimbursement = async () => {
 
     try {
         saving.value = true;
-        const response = await api.put('warranty_claim/approveInvoice/72', {
+        const id = warantyDetail.value.id;
+        const response = await api.put(`warranty_claim/approveInvoice/${id}`, {
         });
         if (response.data.status === 1) {
 
