@@ -2,17 +2,14 @@
     <div class="flex flex-col md:flex-row gap-8">
         <!-- LEFT SIDE -->
         <div class="md:w-2/3 flex flex-col">
-            <!-- Claim Detail -->
             <div class="card flex flex-col w-full">
                 <div class="flex items-center justify-between border-b pb-2">
                     <div class="text-2xl font-bold text-gray-800">Warranty Detail</div>
                     <div class="inline-flex items-center gap-2">
-                        <RouterLink to="/marketing/editEvent">
-                            <Button label="Report Download" class="p-button-danger" size="small" />
-                        </RouterLink>
+                        <Button icon="pi pi-file-export" label="Export" class="p-button-success" :loading="exportLoading" @click="handleExport" />
                     </div>
                 </div>
-                <div class="mt-6">
+                <div class="mt-6 mb-2">
                     <div>
                         <span class="block text-sm font-bold text-black-800">Ref No</span>
                         <span class="text-lg font-medium">{{ warantyDetail.claimRefNo }}</span>
@@ -112,7 +109,7 @@
                     <div class="text-2xl font-bold text-gray-800">CTC Detail</div>
                     <!-- FIXED: Show Request button only if CTC data doesn't exist in DB -->
                     <Button 
-                        v-if="!hasCTCData" 
+                        v-if=" !hasCTCData" 
                         label="Request" 
                         class="p-button-info" 
                         size="small" 
@@ -124,20 +121,8 @@
                 <!-- FIXED: Show CTC data if exists in database -->
                 <div v-if="hasCTCData" class="grid grid-cols-2 md:grid-cols-2 gap-4 text-sm text-gray-800">
                     <div>
-                        <span class="font-bold">CTC Reference No</span>
-                        <p>{{ warantyDetail.ctcReferenceNo || 'N/A' }}</p>
-                    </div>
-                    <div>
-                        <span class="font-bold">CTC Created Date</span>
-                        <p>{{ formatDate(warantyDetail.ctcCreatedDate) || 'N/A' }}</p>
-                    </div>
-                    <div>
-                        <span class="font-bold">CTC Status</span>
-                        <p>{{ warantyDetail.ctcStatus || 'N/A' }}</p>
-                    </div>
-                    <div>
-                        <span class="font-bold">CTC Verified By</span>
-                        <p>{{ warantyDetail.ctcVerifiedBy || 'N/A' }}</p>
+                        <span class="font-bold">CTC Details</span>
+                        <p>{{ warantyDetail.ctc_details || 'N/A' }}</p>
                     </div>
                 </div>
                 
@@ -153,7 +138,7 @@
                     <div class="text-2xl font-bold text-gray-800">Claim Detail</div>
                     <!-- FIXED: Show Create button only if no claim data exists AND CTC is available -->
                     <Button 
-                        v-if="!hasClaimDetail && hasCTCData" 
+                        v-if="!hasClaimDetail && !hasCTCData" 
                         label="Create" 
                         class="p-button-info" 
                         size="small" 
@@ -198,39 +183,7 @@
                     No claim data available
                 </div>
 
-                <!-- FIXED: Approve Options Dialog -->
-                <Dialog v-model:visible="showApproveOptions" header="Approve Claim" :modal="true" class="p-fluid" style="width: 500px">
-                    <div class="field">
-                        <label class="font-bold mb-3 block">Select Approval Type:</label>
-                        <div class="flex flex-col gap-3">
-                            <div v-if="warantyDetail.claimPercent >= 90" class="flex items-center">
-                                <RadioButton 
-                                    v-model="selectedApprovalType" 
-                                    inputId="replacement" 
-                                    name="approvalType" 
-                                    value="replacement" 
-                                />
-                                <label for="replacement" class="ml-2 font-medium">Replacement</label>
-                            </div>
-                            <div class="flex items-center">
-                                <RadioButton 
-                                    v-model="selectedApprovalType" 
-                                    inputId="reimbursement" 
-                                    name="approvalType" 
-                                    value="reimbursement" 
-                                />
-                                <label for="reimbursement" class="ml-2 font-medium">Reimbursement</label>
-                            </div>
-                        </div>
-                        <small v-if="warantyDetail.claimPercent < 90" class="text-blue-600 block mt-2">
-                            Note: Only reimbursement is available for claims below 90%
-                        </small>
-                    </div>
-                    <template #footer>
-                        <Button label="Cancel" icon="pi pi-times" class="p-button-text" @click="cancelApprove" />
-                        <Button label="Confirm Approval" icon="pi pi-check" class="p-button-success" @click="confirmApproveClaim" />
-                    </template>
-                </Dialog>
+
 
                 <!-- Status Display -->
                 <div v-if="claimFinalStatus" class="text-right mt-3 text-sm font-bold" :class="claimFinalStatus === 'approved' ? 'text-green-600' : 'text-red-600'">
@@ -239,7 +192,7 @@
             </div>
 
             <!-- 3. Scrap Detail -->
-            <div class="card w-full mb-4">
+            <div class="card w-full mb-4" v-if="claimFinalStatus === 'approved'" >
                 <div class="flex items-center justify-between border-b pb-2 mb-2">
                     <div class="text-2xl font-bold text-gray-800">Scrap Detail</div>
                     <!-- FIXED: Show Request button only if no scrap data exists AND claim is approved -->
@@ -298,9 +251,67 @@
                     No scrap data available
                 </div>
             </div>
+            <div class="card w-full mb-4" v-if="claimFinalStatus === 'rejected'" >
+                <div class="flex items-center justify-between border-b pb-2 mb-2">
+                    <div class="text-2xl font-bold text-gray-800">Reject Details</div>
+                </div>
+
+                <!-- FIXED: Show scrap data if exists in database -->
+                <div class="mb-4">
+                    <div class="grid grid-cols-2 gap-2 text-sm text-gray-800">
+                        <div>
+                            <span class="font-bold">Part</span>
+                            <p>{{ rejectReasonDesc.part }}</p>
+                        </div>
+                        <div>
+                            <span class="font-bold">Code</span>
+                            <p>{{ rejectReasonDesc.code }}</p>
+                        </div>
+                        <div>
+                            <span class="font-bold">Description</span>
+                            <p>{{ rejectReasonDesc.damageMode }}</p>
+                        </div>
+                    </div>
+                    
+                </div>
+                
+
+            </div>
         </div>
     </div>
-
+    <!-- FIXED: Approve Options Dialog -->
+    <Dialog v-model:visible="showApproveOptions" header="Approve Claim" :modal="true" class="p-fluid" style="width: 500px">
+        <div class="field">
+            <label class="font-bold mb-3 block">Select Approval Type:</label>
+            <div class="flex flex-col gap-3">
+                <div v-if="warantyDetail.claimPercent >= 90" class="flex items-center">
+                    <RadioButton 
+                        v-model="selectedApprovalType" 
+                        inputId="replacement" 
+                        name="approvalType" 
+                        value="replacement" 
+                    />
+                    <label for="replacement" class="ml-2 font-medium">Replacement</label>
+                </div>
+                <div class="flex items-center">
+                    <RadioButton 
+                        v-model="selectedApprovalType" 
+                        inputId="reimbursement" 
+                        name="approvalType" 
+                        value="reimbursement" 
+                    />
+                    <label for="reimbursement" class="ml-2 font-medium">Reimbursement</label>
+                </div>
+            </div>
+            <small v-if="warantyDetail.claimPercent < 90" class="text-blue-600 block mt-2">
+                Note: Only reimbursement is available for claims below 90%
+            </small>
+        </div>
+        <template #footer>
+            <Button label="Cancel" icon="pi pi-times" class="p-button-text" @click="cancelApprove" />
+            <Button label="Confirm Approval" icon="pi pi-check" class="p-button-success" @click="confirmApproveClaim" />
+        </template>
+    </Dialog>
     <!-- FIXED: Create Claim Dialog -->
     <Dialog v-model:visible="showClaimDialog" header="Create Claim Detail" :modal="true" class="p-fluid" style="width: 500px">
         <div class="field">
@@ -353,17 +364,17 @@
 </template>
 
 <script setup>
-import { ref, onMounted, computed } from 'vue';
-import { useRoute } from 'vue-router';
 import api from '@/service/api';
-import Galleria from 'primevue/galleria';
 import Button from 'primevue/button';
 import Dialog from 'primevue/dialog';
 import Dropdown from 'primevue/dropdown';
-import InputText from 'primevue/inputtext';
-import Textarea from 'primevue/textarea';
+import Galleria from 'primevue/galleria';
 import InputNumber from 'primevue/inputnumber';
+import InputText from 'primevue/inputtext';
 import RadioButton from 'primevue/radiobutton';
+import Textarea from 'primevue/textarea';
+import { computed, onMounted, ref } from 'vue';
+import { useRoute } from 'vue-router';
 
 const route = useRoute();
 const warantyDetail = ref({});
@@ -398,9 +409,18 @@ const newClaim = ref({
 const loadingCTC = ref(false);
 const loadingScrap = ref(false);
 
+const rejectReasonDesc = computed(() => {
+    if (!rejectReasons.value?.length || !warantyDetail.value?.rejectReasonID) {
+        return 'N/A';
+    }
+    return rejectReasons.value.find(
+        r => r.id == warantyDetail.value.rejectReasonID
+    ) || null;
+});
+
 // Computed properties
 const hasCTCData = computed(() => {
-    return warantyDetail.value.ctcReferenceNo || warantyDetail.value.ctcCreatedDate || warantyDetail.value.ctcStatus;
+    return warantyDetail.value.ctc_details ;
 });
 
 const hasClaimDetail = computed(() => {
@@ -455,7 +475,7 @@ const initializeWorkflowStates = () => {
     // Set claim status
     if (warantyDetail.value.status === 4) {
         claimFinalStatus.value = 'approved';
-    } else if (warantyDetail.value.status === 5) {
+    } else if (warantyDetail.value.status === 6) {
         claimFinalStatus.value = 'rejected';
     }
     
@@ -565,7 +585,41 @@ const resetNewClaim = () => {
         wornPercent: 0
     };
 };
+const handleExport = async () => {
+ const idexport = Number(route.params.id);
+    // try {
+    //     exportLoading.value = true;
+    //         const response = await api.postExtra(
+    //         'excel/warrantywarranty',
+    //     { id: idexport  },
+    //     {
+    //         responseType: 'blob',
+    //         headers: {
+    //         'Content-Type': 'application/json',
+    //         }
+    //     }
+    //     );
+    //     const blob = new Blob([response.data], { 
+    //     type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' 
+    //     });
 
+    //     const url = window.URL.createObjectURL(blob);
+    //     const a = document.createElement('a');
+    //     a.href = url;
+    //     a.download = `${warantyDetail.value.claimRefNo}_Warranty_Download.xlsx`;
+    //     document.body.appendChild(a);
+    //     a.click();
+    //     document.body.removeChild(a);
+    //     window.URL.revokeObjectURL(url);
+
+    //     toast.add({ severity: 'success', summary: 'Success', detail: 'Export completed', life: 3000 });
+    // } catch (error) {
+    //     console.error('Error exporting data:', error);
+    //     toast.add({ severity: 'error', summary: 'Error', detail: 'Failed to export data', life: 3000 });
+    // } finally {
+    //     exportLoading.value = false;
+    // }
+};
 // Approve Claim with options
 const confirmApproveClaim = async () => {
     if (!selectedApprovalType.value) {
