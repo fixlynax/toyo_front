@@ -6,6 +6,7 @@ import { onMounted, ref } from 'vue';
 
 const listData = ref([]);
 const loading = ref(true);
+const exportLoading = ref(false);
 
 const getOverallStatusSeverity = (status) => {
     switch (status) {
@@ -59,6 +60,122 @@ const fetchClaims = async () => {
     }
 };
 
+// Export functionality
+const exportToCSV = () => {
+    exportLoading.value = true;
+    
+    try {
+        // Prepare data for export
+        const exportData = listData.value.map(item => ({
+            'Ref No': item.refNo,
+            'Dealer Name': item.dealerName,
+            'Claim Type': item.claimType,
+            'Claim Date': item.claimDate,
+            'Status': item.status
+        }));
+
+        // Create CSV content
+        const headers = Object.keys(exportData[0]).join(',');
+        const rows = exportData.map(item => 
+            Object.values(item).map(field => 
+                `"${String(field).replace(/"/g, '""')}"`
+            ).join(',')
+        );
+        
+        const csvContent = [headers, ...rows].join('\n');
+        
+        // Create and download file
+        const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+        const link = document.createElement('a');
+        const url = URL.createObjectURL(blob);
+        
+        link.setAttribute('href', url);
+        link.setAttribute('download', `warranty_claims_${new Date().toISOString().split('T')[0]}.csv`);
+        link.style.visibility = 'hidden';
+        
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        
+    } catch (error) {
+        console.error('Export error:', error);
+        // You can add a toast notification here if needed
+        alert('Error exporting data. Please try again.');
+    } finally {
+        exportLoading.value = false;
+    }
+};
+
+// Alternative export function using JSON (uncomment if needed)
+const exportToJSON = () => {
+    exportLoading.value = true;
+    
+    try {
+        const exportData = listData.value.map(item => ({
+            refNo: item.refNo,
+            dealerName: item.dealerName,
+            claimType: item.claimType,
+            claimDate: item.claimDate,
+            status: item.status
+        }));
+
+        const dataStr = JSON.stringify(exportData, null, 2);
+        const blob = new Blob([dataStr], { type: 'application/json' });
+        const link = document.createElement('a');
+        const url = URL.createObjectURL(blob);
+        
+        link.setAttribute('href', url);
+        link.setAttribute('download', `warranty_claims_${new Date().toISOString().split('T')[0]}.json`);
+        link.style.visibility = 'hidden';
+        
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        
+    } catch (error) {
+        console.error('Export error:', error);
+        alert('Error exporting data. Please try again.');
+    } finally {
+        exportLoading.value = false;
+    }
+};
+
+// Export to Excel (if you have xlsx library)
+const exportToExcel = async () => {
+    exportLoading.value = true;
+    
+    try {
+        // Check if xlsx is available
+        if (typeof XLSX === 'undefined') {
+            // If xlsx is not available, fall back to CSV
+            console.warn('XLSX library not found. Falling back to CSV export.');
+            exportToCSV();
+            return;
+        }
+
+        const exportData = listData.value.map(item => ({
+            'Ref No': item.refNo,
+            'Dealer Name': item.dealerName,
+            'Claim Type': item.claimType,
+            'Claim Date': item.claimDate,
+            'Status': item.status
+        }));
+
+        const worksheet = XLSX.utils.json_to_sheet(exportData);
+        const workbook = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(workbook, worksheet, 'Warranty Claims');
+        
+        XLSX.writeFile(workbook, `warranty_claims_${new Date().toISOString().split('T')[0]}.xlsx`);
+        
+    } catch (error) {
+        console.error('Excel export error:', error);
+        // Fallback to CSV
+        exportToCSV();
+    } finally {
+        exportLoading.value = false;
+    }
+};
+
 onMounted(fetchClaims);
 </script>
 
@@ -92,8 +209,15 @@ onMounted(fetchClaims);
                         </div>
 
                         <div class="flex items-center gap-2 ml-auto">
-                            <Button type="button" label="Export" icon="pi pi-file-export" class="p-button-success" />
-                            <Button type="button" label="Template" icon="pi pi-download" class="p-button-danger" />
+                            <Button 
+                                type="button" 
+                                label="Export" 
+                                icon="pi pi-download" 
+                                class="p-button-success" 
+                                @click="exportToCSV"
+                                :loading="exportLoading"
+                                :disabled="listData.length === 0"
+                            />
                         </div>
                     </div>
                 </template>
