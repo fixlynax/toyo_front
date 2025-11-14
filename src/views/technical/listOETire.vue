@@ -32,7 +32,8 @@
                     <!-- Right: Export & Batch Buttons -->
                     <div class="flex items-center gap-2 ml-auto">
                         <Button type="button" label="Export" icon="pi pi-file-export" class="p-button" @click="fetchExportOE" />
-                        <Button type="button" label="Import" icon="pi pi-file-import" class="p-button" @click="importOE" />
+                        <Button type="button" label="Import" icon="pi pi-file-import" class="p-button" @click="importInput?.click()" :loading="importLoading" />
+                        <input ref="importInput" type="file" accept=".xlsx,.xls" style="display: none" @change="handleImport" />
                     </div>
                 </div>
             </template>
@@ -86,27 +87,23 @@
             </Column>
         </DataTable>
     </div>
-    <Dialog v-model:visible="showImportDialog" header="Import File OE" :modal="true" class="p-fluid" :style="{ width: '40rem' }">
-                <FileUpload ref="fileUpload"  name="importOe" :maxFileSize="1000000" customUpload />
-        <template #footer>
-            <Button label="Close" icon="pi pi-times" class="p-button-text" @click="closeImportDialog" />
-            <Button label="Upload File" icon="pi pi-check" class="p-button-primary" @click="importOEApi" />
-        </template>
-    </Dialog>
 </template>
 
 <script setup>
 import { onMounted, ref } from 'vue';
 import { FilterMatchMode } from '@primevue/core/api';
 import api from '@/service/api';
-import axios from 'axios';
 import { useRouter } from 'vue-router';
+import { useToast } from 'primevue/usetoast';
+const toast = useToast();
+
+const importInput = ref();
+const importLoading = ref(false);
 
 const router = useRouter();
 // Data variables
 const tyres = ref([]);
 const loading = ref(true);
-const showImportDialog = ref(false);
 const fileUpload = ref(null);
 // Filters for quick search
 const filters = ref({
@@ -150,11 +147,11 @@ const fetchExportOE = async () => {
         loading.value = true;
 
         const response = await api.getDownload('oeTire/downloadData', {
-        responseType: 'arraybuffer',
+            responseType: 'arraybuffer'
         });
 
-        const blob = new Blob([response.data], { 
-        type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' 
+        const blob = new Blob([response.data], {
+            type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
         });
 
         const url = window.URL.createObjectURL(blob);
@@ -165,7 +162,6 @@ const fetchExportOE = async () => {
         a.click();
         document.body.removeChild(a);
         window.URL.revokeObjectURL(url);
-
     } catch (err) {
         console.error('error fetching OE Tire export:', err);
     } finally {
@@ -173,39 +169,55 @@ const fetchExportOE = async () => {
     }
 };
 
-const importOEApi = async () => {
-    const filesoem = fileUpload.value.files;
-    if (!filesoem.length) {
-            alert('Please select a file first!');
-            return;
-        }
+// Import function
+const handleImport = async (event) => {
+    const file = event.target.files[0];
+   
+
+
+    if (!file) return;
+
     try {
-        loading.value = true;
+        importLoading.value = true;
+        
         const formData = new FormData();
-        formData.append('excel_file', filesoem[0]);
+        formData.append('excel_file', file);
         const response = await api.postExtra('oeTire/uploadExcel', formData, {
-        headers: {
-            'Content-Type': 'multipart/form-data',
-        },
-        });
-    } catch (err) {
-        console.error('❌ Upload failed:', err);
+            headers: {
+                'Content-Type': 'multipart/form-data'
+            }
+            });
+        
+        if (response.data.status === 1) {
+            // Refresh data after import
+            await fetchData();
+
+            toast.add({
+                severity: 'success',
+                summary: 'Success',
+                detail: 'File imported successfully',
+                life: 3000
+            });
+            } else {
+            toast.add({
+                severity: 'error',
+                summary: 'Import Failed',
+                detail: response.data.error || 'Server did not confirm success',
+                life: 3000
+            });
+        }
+    } catch (error) {
+        console.error('Error importing data:', error);
+        toast.add({ severity: 'error', summary: 'Error', detail: 'Failed to import data', life: 3000 });
     } finally {
-        loading.value = false;
-        closeImportDialog();
-        router.go(0);
+        importLoading.value = false;
+                    if (importInput.value) {
+                importInput.value.value = '';
+            }
     }
 };
 
-const importOE = () => {
-    showImportDialog.value = true;
-};
-
-const closeImportDialog = () => {
-    showImportDialog.value = false;
-    fileUpload.value.clear();
-};
-onMounted(async () => {
+const fetchData = async () => {
     try {
         loading.value = true;
 
@@ -237,7 +249,8 @@ onMounted(async () => {
     } finally {
         loading.value = false;
     }
-
+}
+onMounted(async () => {
+    fetchData();
 });
-
 </script>

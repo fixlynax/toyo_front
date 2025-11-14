@@ -2,19 +2,10 @@
 import LoadingPage from '@/components/LoadingPage.vue';
 import api from '@/service/api';
 import { FilterMatchMode } from '@primevue/core/api';
-import { onMounted, ref, computed } from 'vue';
+import { onMounted, ref } from 'vue';
 
 const listData = ref([]);
 const loading = ref(true);
-
-const activeTab = ref(0);
-
-const tabs = [
-    { label: 'Processing', value: 'Processing' },
-    { label: 'In Progress', value: 'In Progress' },
-    { label: 'Completed', value: 'Completed' },
-    { label: 'Reject', value: 'Reject' }
-];
 
 const getOverallStatusSeverity = (status) => {
     switch (status) {
@@ -43,11 +34,6 @@ const getOverallStatusSeverity = (status) => {
 
 const filters = ref({
     global: { value: null, matchMode: FilterMatchMode.CONTAINS }
-});
-
-const filteredList = computed(() => {
-    const status = tabs[activeTab.value].value;
-    return listData.value.filter(item => item.status === status);
 });
 
 const fetchClaims = async () => {
@@ -80,13 +66,11 @@ onMounted(fetchClaims);
     <div class="card">
         <div class="text-2xl font-bold text-gray-800 border-b pb-2">List Claim</div>
 
-        <TabMenu :model="tabs" v-model:activeIndex="activeTab" class="mb-4" />
-
         <LoadingPage v-if="loading" message="Loading Warranty Claim Details..." />
 
         <div v-else>
             <DataTable
-                :value="filteredList"
+                :value="listData"
                 :paginator="true"
                 :rows="10"
                 dataKey="id"
@@ -94,7 +78,6 @@ onMounted(fetchClaims);
                 :filters="filters"
                 filterDisplay="menu"
                 :globalFilterFields="['refNo', 'dealerName', 'claimType', 'claimDate', 'status']"
-                :loading="loading"
             >
                 <template #header>
                     <div class="flex items-center justify-between gap-4 w-full flex-wrap">
@@ -116,7 +99,6 @@ onMounted(fetchClaims);
                 </template>
 
                 <template #empty>No warranty claims found.</template>
-                <template #loading>Loading warranty claim data. Please wait...</template>
 
                 <Column field="refNo" header="Ref No" style="min-width: 8rem">
                     <template #body="{ data }">

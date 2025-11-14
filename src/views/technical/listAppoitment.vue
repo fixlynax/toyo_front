@@ -1,19 +1,38 @@
 <script setup>
 import { FilterMatchMode } from '@primevue/core/api';
 import api from '@/service/api';
-import { onBeforeMount, ref } from 'vue';
+import { onBeforeMount, ref, computed, watch } from 'vue';
 import LoadingPage from '@/components/LoadingPage.vue';
 
 const listData = ref([]);
 const loading = ref(true);
 const exportLoading = ref(false);
 
+// 🟢 Tab setup
+const statusTabs = [
+    { label: 'Pending', status: 0 },
+    { label: 'Accepted', status: 1 },
+    { label: 'Rejected', status: 2 }
+];
+const activeTabIndex = ref(0);
+
 const filters = ref({
     global: { value: null, matchMode: FilterMatchMode.CONTAINS }
 });
 
+// 🟢 Filter appointments based on active tab
+const filteredAppointments = computed(() => {
+    const currentTab = statusTabs[activeTabIndex.value]?.status;
+    
+    if (!currentTab || currentTab === 'ALL') {
+        return listData.value;
+    }
+
+    return listData.value.filter(appointment => appointment.status === currentTab);
+});
+
 // Fetch appointment list
-onBeforeMount(async () => {
+const fetchAppointments = async () => {
     try {
         loading.value = true;
         const response = await api.get('appointment');
@@ -47,7 +66,7 @@ onBeforeMount(async () => {
     } finally {
         loading.value = false;
     }
-});
+};
 
 const fetchExport = async () => {
     try {
@@ -78,6 +97,20 @@ const fetchExport = async () => {
     }
 };
 
+// 🟢 Initial data load
+onBeforeMount(() => {
+    fetchAppointments();
+});
+
+// 🟢 Status color helper
+const getStatusColor = (status) => {
+    switch (status) {
+        case 0: return 'text-yellow-600';
+        case 1: return 'text-green-600';
+        case 2: return 'text-red-600';
+        default: return 'text-gray-600';
+    }
+};
 </script>
 
 <template>
@@ -85,11 +118,23 @@ const fetchExport = async () => {
         <div class="text-2xl font-bold text-gray-800 border-b pb-2 mb-4">List Appointment</div>
         
         <!-- Show loading only -->
-        <LoadingPage v-if="loading" message="Loading Warranty Claim Details..." />
+        <LoadingPage v-if="loading" message="Loading Appointments..." />
         
         <!-- Show table only when not loading -->
         <template v-else>
-            <DataTable :value="listData" :paginator="true" :rows="10" dataKey="id" :rowHover="true" :filters="filters" filterDisplay="menu" :globalFilterFields="['appointmentCode', 'dealerShop', 'dealerCustAccountNo', 'statusString']">
+            <!-- 🟣 Status Tabs -->
+            <TabMenu :model="statusTabs" v-model:activeIndex="activeTabIndex" class="mb-6" />
+            
+            <DataTable 
+                :value="filteredAppointments" 
+                :paginator="true" 
+                :rows="10" 
+                dataKey="id" 
+                :rowHover="true" 
+                :filters="filters" 
+                filterDisplay="menu" 
+                :globalFilterFields="['appointmentCode', 'dealerShop', 'dealerCustAccountNo', 'statusString']"
+            >
                 <template #header>
                     <div class="flex items-center justify-between gap-4 w-full flex-wrap">
                         <!-- Left: Search Field -->
@@ -105,8 +150,21 @@ const fetchExport = async () => {
 
                         <!-- Right: Export & Template -->
                         <div class="flex items-center gap-2 ml-auto">
-                            <Button type="button" label="Export" icon="pi pi-download" class="p-button" :loading="exportLoading" @click="fetchExport" />
+                            <Button 
+                                type="button" 
+                                label="Export" 
+                                icon="pi pi-download" 
+                                class="p-button" 
+                                :loading="exportLoading" 
+                                @click="fetchExport" 
+                            />
                         </div>
+                    </div>
+                </template>
+
+                <template #empty>
+                    <div class="text-center py-4 text-gray-500">
+                        No appointments found for this status.
                     </div>
                 </template>
 
@@ -163,13 +221,7 @@ const fetchExport = async () => {
 
                 <Column field="statusString" header="Status" style="min-width: 8rem">
                     <template #body="{ data }">
-                        <span
-                            :class="{
-                                'text-yellow-600': data.status === 0,
-                                'text-green-600': data.status === 1,
-                                'text-red-600': data.status === 2
-                            }"
-                        >
+                        <span :class="getStatusColor(data.status)">
                             {{ data.statusString }}
                         </span>
                     </template>
@@ -178,3 +230,9 @@ const fetchExport = async () => {
         </template>
     </div>
 </template>
+
+<style scoped>
+:deep(.p-tabmenu .p-tabmenu-nav .p-tabmenuitem.p-highlight .p-menuitem-link) {
+    border-color: #3b82f6;
+}
+</style>
