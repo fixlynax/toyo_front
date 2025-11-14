@@ -30,14 +30,11 @@ onBeforeMount(async () => {
                 dealerCustAccountNo: item.dealerCustAccountNo,
                 status: item.status,
                 statusString: item.status_string,
-                // Additional fields for display
-                memberName: 'N/A', // Not available in API - you might need to adjust this
-                phoneNo: 'N/A',    // Not available in API - you might need to adjust this
+                customerName: item.customerName,
+                customerPhone: item.customerPhone, 
                 dealerCustAcc: item.dealerCustAccountNo,
                 dealerShortName: item.dealerShop,
-                bookDateTime: item.appointmentDate && item.appointmentTime 
-                    ? `${item.appointmentDate} ${item.appointmentTime}`
-                    : 'Not Scheduled'
+                bookDateTime: item.appointmentDate && item.appointmentTime ? `${item.appointmentDate} ${item.appointmentTime}` : 'Not Scheduled'
             }));
         } else {
             listData.value = [];
@@ -56,17 +53,7 @@ onBeforeMount(async () => {
     <div class="card">
         <div class="text-2xl font-bold text-gray-800 border-b pb-2 mb-4">List Appointment</div>
 
-        <DataTable
-            :value="listData"
-            :paginator="true"
-            :rows="10"
-            dataKey="id"
-            :rowHover="true"
-            :loading="loading"
-            :filters="filters"
-            filterDisplay="menu"
-            :globalFilterFields="['appointmentCode', 'dealerShop', 'dealerCustAccountNo', 'statusString']"
-        >
+        <DataTable :value="listData" :paginator="true" :rows="10" dataKey="id" :rowHover="true" :loading="loading" :filters="filters" filterDisplay="menu" :globalFilterFields="['appointmentCode', 'dealerShop', 'dealerCustAccountNo', 'statusString']">
             <template #header>
                 <div class="flex items-center justify-between gap-4 w-full flex-wrap">
                     <!-- Left: Search Field -->
@@ -82,8 +69,7 @@ onBeforeMount(async () => {
 
                     <!-- Right: Export & Template -->
                     <div class="flex items-center gap-2 ml-auto">
-                        <Button type="button" label="Export" icon="pi pi-file-export" class="p-button-success" style="width: fit-content" />
-                        <Button type="button" label="Template" icon="pi pi-download" class="p-button-info" style="width: fit-content" />
+                        <Button type="button" label="Export" icon="pi pi-download" class="p-button" style="width: fit-content" />
                     </div>
                 </div>
             </template>
@@ -100,17 +86,31 @@ onBeforeMount(async () => {
                 </template>
             </Column>
 
-            <Column field="dealerShop" header="Dealer Shop" style="min-width: 12rem">
+            <Column header="Dealer Info" style="min-width: 14rem">
                 <template #body="{ data }">
-                    {{ data.dealerShop }}
+                    <div class="flex flex-col">
+                        <!-- Top -->
+                        <div class="font-semibold">{{ data.dealerShop }}</div>
+
+                        <!-- Bottom -->
+                        <div class="text-gray-600 text-sm">{{ data.dealerCustAccountNo }}</div>
+                    </div>
                 </template>
             </Column>
 
-            <Column field="dealerCustAccountNo" header="Dealer Cust Account" style="min-width: 10rem">
+            <Column header="Customer Info" style="min-width: 14rem">
                 <template #body="{ data }">
-                    {{ data.dealerCustAccountNo }}
+                    <div class="flex flex-col">
+                        <!-- Top -->
+                        <div class="font-semibold">{{ data.customerName }}</div>
+
+                        <!-- Bottom -->
+                        <div class="text-gray-600 text-sm">{{ data.customerPhone }}</div>
+                    </div>
                 </template>
             </Column>
+
+            
 
             <Column field="requestDate" header="Request Date" style="min-width: 10rem">
                 <template #body="{ data }">
@@ -132,11 +132,13 @@ onBeforeMount(async () => {
 
             <Column field="statusString" header="Status" style="min-width: 8rem">
                 <template #body="{ data }">
-                    <span :class="{
-                        'text-yellow-600': data.status === 0,
-                        'text-green-600': data.status === 1,
-                        'text-red-600': data.status === 2
-                    }">
+                    <span
+                        :class="{
+                            'text-yellow-600': data.status === 0,
+                            'text-green-600': data.status === 1,
+                            'text-red-600': data.status === 2
+                        }"
+                    >
                         {{ data.statusString }}
                     </span>
                 </template>
