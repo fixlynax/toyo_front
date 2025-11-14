@@ -229,7 +229,7 @@ const isFormValid = computed(() => {
 });
 
 const handleCancel = () => {
-    if (form.companyname || form.contactperson || form.storage_list.value.length > 0) {
+    if (form.companyname || form.contactperson || form.storage_list.length > 0) {
         if (confirm('You have unsaved changes. Are you sure you want to cancel?')) {
             router.back();
         }
