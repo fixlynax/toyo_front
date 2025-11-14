@@ -105,16 +105,16 @@ const model = ref([
                         icon: 'pi pi-fw pi-list',
                         to: '/technical/listClaim'
                     },
-                    {
-                        label: 'CTC List',
-                        icon: 'pi pi-fw pi-book',
-                        to: '/technical/listCTC'
-                    },
-                    {
-                        label: 'Scrap List',
-                        icon: 'pi pi-fw pi-trash',
-                        to: '/technical/listScrap'
-                    }
+                    // {
+                    //     label: 'CTC List',
+                    //     icon: 'pi pi-fw pi-book', remove need to remove on index js
+                    //     to: '/technical/listCTC'
+                    // },
+                    // {
+                    //     label: 'Scrap List',
+                    //     icon: 'pi pi-fw pi-trash',
+                    //     to: '/technical/listScrap'
+                    // }
                 ]
             },
             {

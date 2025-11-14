@@ -5,7 +5,7 @@
                 <!-- Header -->
                 <div class="flex flex-col">
                     <div class="card flex flex-col gap-4 w-full">
-                        <div class="flex items-center justify-between border-b pb-2 mb-4">
+                        <div class="flex items-center justify-between border-b pb-2 mb-2">
                             <div class="flex items-center gap-2">
                                 <RouterLink to="/om/listEten">
                                     <Button icon="pi pi-arrow-left font-bold" class="p-button-text p-button-secondary text-xl" size="big" v-tooltip="'Back'" />
@@ -14,18 +14,10 @@
                             </div>
 
                             <RouterLink :to="`/om/editEten/${$route.params.custAccNo}`">
-                                <Button type="button" label="Edit" />
+                                <Button type="button" label="Pull SAP" />
                             </RouterLink>
                         </div>
-
-                        <div>
-                            <span class="block text-sm text-gray-500">Account No.</span>
-                            <span class="text-lg font-medium">{{ form.custAccountNo }}</span>
-                        </div>
-                    </div>
-
-                    <div class="card flex flex-col gap-4 w-full">
-                        <div class="text-xl font-semibold border-b pb-2">🏢 Company Details</div>
+                        <div class="text-xl font-semibold pb-2">🏢 Company Details</div>
 
                         <div class="grid md:grid-cols-2 gap-4">
                             <div>
@@ -72,150 +64,101 @@
                     </div>
 
                     <div class="card flex flex-col gap-4 w-full">
-                        <div class="text-xl font-semibold border-b pb-2">📍 Address & Contact Details</div>
-
-                        <div class="grid md:grid-cols-2 gap-4">
-                            <div>
-                                <span class="text-sm text-gray-500">Address Line 1</span>
-                                <p class="text-lg font-medium">{{ form.addressLine1 || '-' }}</p>
-                            </div>
-                            <div>
-                                <span class="text-sm text-gray-500">Address Line 2</span>
-                                <p class="text-lg font-medium">{{ form.addressLine2 || '-' }}</p>
-                            </div>
-                            <div>
-                                <span class="text-sm text-gray-500">Address Line 3</span>
-                                <p class="text-lg font-medium">{{ form.addressLine3 || '-' }}</p>
-                            </div>
-                            <div>
-                                <span class="text-sm text-gray-500">Address Line 4</span>
-                                <p class="text-lg font-medium">{{ form.addressLine4 || '-' }}</p>
-                            </div>
-                            <div>
-                                <span class="text-sm text-gray-500">City</span>
-                                <p class="text-lg font-medium">{{ form.city || '-' }}</p>
-                            </div>
-                            <div>
-                                <span class="text-sm text-gray-500">Postcode</span>
-                                <p class="text-lg font-medium">{{ form.postcode || '-' }}</p>
-                            </div>
-                            <div>
-                                <span class="text-sm text-gray-500">State</span>
-                                <p class="text-lg font-medium">{{ form.state || '-' }}</p>
-                            </div>
-                            <div>
-                                <span class="text-sm text-gray-500">Country</span>
-                                <p class="text-lg font-medium">{{ form.country || '-' }}</p>
-                            </div>
-                            <div>
-                                <span class="text-sm text-gray-500">Map Latitude</span>
-                                <p class="text-lg font-medium">{{ form.mapLatitude || '-' }}</p>
-                            </div>
-                            <div>
-                                <span class="text-sm text-gray-500">Map Longitude</span>
-                                <p class="text-lg font-medium">{{ form.mapLongitude || '-' }}</p>
-                            </div>
-                            <div>
-                                <span class="text-sm text-gray-500">Phone No</span>
-                                <p class="text-lg font-medium">{{ form.phoneNumber || '-' }}</p>
-                            </div>
-                            <div>
-                                <span class="text-sm text-gray-500">Email</span>
-                                <p class="text-lg font-medium">{{ form.emailAddress || '-' }}</p>
-                            </div>
+                        <!-- Header -->
+                        <div class="flex items-center justify-between border-b pb-2 mb-4">
+                            <div class="text-2xl font-bold text-gray-800">Ship To</div>
+                            <div></div>
                         </div>
+
+                        <!-- Ship To Table -->
+                        <DataTable :value="shiptoList" :rows="5" dataKey="id" :rowHover="true" responsiveLayout="scroll" class="text-sm">
+                            <Column header="Company Name" style="min-width: 16rem">
+                                <template #body="{ data }">
+                                    <span class="font-bold"> {{ data.custAccountNo }}<br /></span>
+                                    {{ data.companyName1 || '' }}<br />
+                                    <span v-if="data.companyName2">{{ data.companyName2 }}<br /></span>
+                                    <span v-if="data.companyName3">{{ data.companyName3 }}<br /></span>
+                                    <span v-if="data.companyName4">{{ data.companyName4 }}<br /></span>
+                                </template>
+                            </Column>
+                            <Column header="Address" style="min-width: 16rem">
+                                <template #body="{ data }">
+                                    {{ data.addressLine1 || '' }}<br />
+                                    <span v-if="data.addressLine2">{{ data.addressLine2 }}<br /></span>
+                                    <span v-if="data.addressLine3">{{ data.addressLine3 }}<br /></span>
+                                    <span v-if="data.addressLine4">{{ data.addressLine4 }}<br /></span>
+                                    {{ data.city }}, {{ data.state }} {{ data.postcode }}<br />
+                                    {{ data.country }}
+                                </template>
+                                <template #filterapply="slotProps"></template>
+                                <template #filterclear="slotProps"></template>
+                            </Column>
+
+                            <Column field="phoneNumber" header="Phone No" style="min-width: 10rem">
+                                <template #body="slotProps">
+                                    {{ slotProps.data.phoneNumber || '-' }}
+                                </template>
+                            </Column>
+                            <Column header="Email" style="min-width: 14rem">
+                                <template #body="slotProps">
+                                    {{ slotProps.data.emailAddress || '-' }}
+                                </template>
+                            </Column>
+                        </DataTable>
                     </div>
-
                     <div class="card flex flex-col gap-4 w-full">
-                        <div class="text-xl font-semibold border-b pb-2">👤 Account Details</div>
-
-                        <div class="grid md:grid-cols-2 gap-4">
-                            <div>
-                                <span class="text-sm text-gray-500">Account Type</span>
-                                <p class="text-lg font-medium">{{ form.accountType || '-' }}</p>
-                            </div>
-                            <div>
-                                <span class="text-sm text-gray-500">Payment Terms</span>
-                                <p class="text-lg font-medium">{{ form.paymentTerms || '-' }}</p>
-                            </div>
-                            <div>
-                                <span class="text-sm text-gray-500">Risk Category</span>
-                                <p class="text-lg font-medium">{{ form.riskCategory || '-' }}</p>
-                            </div>
-                            <div>
-                                <span class="text-sm text-gray-500">Credit Limit</span>
-                                <p class="text-lg font-medium">{{ formatCurrency(form.creditLimit) }}</p>
-                            </div>
-                            <div>
-                                <span class="text-sm text-gray-500">Customer Account Group</span>
-                                <p class="text-lg font-medium">{{ form.customerAccountGroup || '-' }}</p>
-                            </div>
-                            <div>
-                                <span class="text-sm text-gray-500">Customer Condition Group</span>
-                                <p class="text-lg font-medium">{{ form.customerCondGrp || '-' }}</p>
+                        <!-- Header -->
+                        <div class="flex items-center justify-between border-b pb-2 mb-4">
+                            <div class="text-2xl font-bold text-gray-800">User List</div>
+                            <div class="inline-flex items-center gap-2">
+                                <RouterLink :to="`/om/createUserEten/${form.custAccountNo}`">
+                                    <Button label="Create" class="p-button-info" size="small" />
+                                </RouterLink>
                             </div>
                         </div>
-                    </div>
 
-                    <div class="card flex flex-col gap-4 w-full">
-                        <div class="text-xl font-semibold border-b pb-2">💲 Pricing & Sales Info</div>
+                        <!-- User Table -->
+                        <DataTable :value="users" :rows="5" dataKey="id" :rowHover="true" responsiveLayout="scroll" class="text-sm">
+                            <Column header="User Info" style="min-width: 1rem">
+                                <template #body="{ data }">
+                                    <div class="flex flex-col">
+                                        <RouterLink :to="`/om/detailUser/${data.id}`" class="hover:underline font-bold">
+                                            {{ data.firstName }} {{ data.lastName }}
+                                            <span v-if="data.isMaster === 1" class="text-blue-400">(Admin)</span>
+                                        </RouterLink>
+                                        <span class="text-sm text-gray-500">{{ data.emailAddress }}</span>
+                                        <span class="text-sm text-gray-500">{{ data.countryCode }}{{ data.mobileNumber }}</span>
+                                    </div>
+                                </template>
+                            </Column>
 
-                        <div class="grid md:grid-cols-3 gap-4">
-                            <div>
-                                <span class="text-sm text-gray-500">Price List</span>
-                                <p class="text-lg font-medium">{{ form.pricelist || '-' }}</p>
-                            </div>
-                            <div>
-                                <span class="text-sm text-gray-500">Price Group</span>
-                                <p class="text-lg font-medium">{{ form.priceGroup || '-' }}</p>
-                            </div>
-                            <div>
-                                <span class="text-sm text-gray-500">Price Procedure</span>
-                                <p class="text-lg font-medium">{{ form.priceProcedure || '-' }}</p>
-                            </div>
-                            <div>
-                                <span class="text-sm text-gray-500">Sales Office</span>
-                                <p class="text-lg font-medium">{{ form.salesOffice || '-' }}</p>
-                            </div>
-                            <div>
-                                <span class="text-sm text-gray-500">Sales District</span>
-                                <p class="text-lg font-medium">{{ form.salesDistrict || '-' }}</p>
-                            </div>
-                            <div>
-                                <span class="text-sm text-gray-500">Starting Sales Amount</span>
-                                <p class="text-lg font-medium">{{ formatCurrency(form.startingSalesAmt) }}</p>
-                            </div>
-                        </div>
-                    </div>
+                            <Column header="Module" style="min-width: 8rem">
+                                <template #body="{ data }">
+                                    {{ getUserModules(data) }}
+                                </template>
+                            </Column>
+                            <Column field="lastLogin" header="Last Login" style="min-width: 8rem">
+                                <template #body="{ data }">
+                                    {{ formatDate(data.lastLogin) }}
+                                </template>
+                            </Column>
+                            <Column field="lastLogin" header="Activated Date" style="min-width: 8rem">
+                                <template #body="{ data }">
+                                    {{ formatDate(data.lastLogin) }}
+                                </template>
+                            </Column>
 
-                    <div class="card flex flex-col gap-4 w-full">
-                        <div class="text-xl font-semibold border-b pb-2">🚚 Shipping & Delivery</div>
-
-                        <div class="grid md:grid-cols-2 gap-4">
-                            <div>
-                                <span class="text-sm text-gray-500">Shipping Condition</span>
-                                <p class="text-lg font-medium">{{ form.shippingCond || '-' }}</p>
-                            </div>
-                            <div>
-                                <span class="text-sm text-gray-500">Allow Lalamove</span>
-                                <p class="text-lg font-medium">{{ form.allowLalamove ? 'Yes' : 'No' }}</p>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="card flex flex-col gap-4 w-full">
-                        <div class="text-xl font-semibold border-b pb-2">🪧 Signboard / Branding</div>
-
-                        <div class="grid md:grid-cols-2 gap-4">
-                            <div>
-                                <span class="text-sm text-gray-500">Signboard Type</span>
-                                <p class="text-lg font-medium">{{ form.signboardType || '-' }}</p>
-                            </div>
-                            <div>
-                                <span class="text-sm text-gray-500">Signboard Brand</span>
-                                <p class="text-lg font-medium">{{ form.signboardBrand || '-' }}</p>
-                            </div>
-                        </div>
+                            <Column header="Status" style="min-width: 8rem">
+                                <template #body="{ data }">
+                                    <Tag :value="data.status === 1 ? 'Active' : 'Inactive'" :severity="data.status === 1 ? 'success' : 'danger'" />
+                                </template>
+                            </Column>
+                            <Column header="Activation Code" style="min-width: 8rem">
+                                <template #body="{ data }">
+                                    <Button icon="pi pi-send" label="Send" style="width: fit-content" class="p-button-info p-button-sm" @click="sendActivationCode(data)" />
+                                </template>
+                            </Column>
+                        </DataTable>
                     </div>
                 </div>
             </div>
@@ -224,7 +167,8 @@
                 <div class="card flex flex-col w-full">
                     <!-- Title -->
                     <div class="flex items-center justify-between border-b pb-3 mb-4">
-                        <div class="text-2xl font-bold text-gray-800">Account Status</div>
+                        <div class="text-2xl font-bold text-gray-800">Account Info</div>
+                        <span class="inline-flex items-center px-3 py-2 text-xs font-semibold text-green-700 bg-green-100 rounded"> <i class="pi pi-check-circle mr-1"></i> {{ form.accountStatus === 'false' ? 'Inactive' : 'Active' }} </span>
                     </div>
 
                     <!-- Table -->
@@ -233,8 +177,16 @@
                             <tbody>
                                 <!-- Terms -->
                                 <tr class="border-b">
+                                    <td class="px-4 py-2 font-medium">Account No.</td>
+                                    <td class="px-4 py-2 font-bold text-right">{{ form.custAccountNo }}</td>
+                                </tr>
+                                <tr class="border-b">
+                                    <td class="px-4 py-2 font-medium">Account Type</td>
+                                    <td class="px-4 py-2 text-right">{{ form.accountType || '-' }}</td>
+                                </tr>
+                                <tr class="border-b">
                                     <td class="px-4 py-2 font-medium">Terms</td>
-                                    <td class="px-4 py-2 text-right">{{ form.paymentTerms || 'NET30' }}</td>
+                                    <td class="px-4 py-2 text-right">{{ form.paymentTerms || '-' }}</td>
                                 </tr>
 
                                 <!-- Risk Category -->
@@ -250,23 +202,102 @@
                                     <td class="px-4 py-2 font-medium">Credit Limit</td>
                                     <td class="px-4 py-2 text-right">{{ formatCurrency(form.creditLimit) }}</td>
                                 </tr>
-
-                                <!-- Status -->
                                 <tr class="border-b">
-                                    <td class="px-4 py-2 font-medium">Status</td>
-                                    <td class="px-4 py-2 text-right">
-                                        <span class="inline-flex items-center px-2 py-1 text-xs font-semibold text-green-700 bg-green-100 rounded">
-                                            <i class="pi pi-check-circle mr-1"></i> {{ form.accountStatus === 'false' ? 'Inactive' : 'Active' }}
-                                        </span>
-                                    </td>
+                                    <td class="px-4 py-2 font-medium">Customer Account Group</td>
+                                    <td class="px-4 py-2 text-right">{{ form.customerAccountGroup || '-' }}</td>
                                 </tr>
 
-                                <!-- Suspend Button -->
-                                <tr>
-                                    <td class="px-4 py-2 font-medium"></td>
-                                    <td class="px-2 py-2 text-right">
-                                        <Button :label="isSuspended ? 'Un-suspend' : 'Suspend'" :severity="isSuspended ? 'success' : 'danger'" size="small" @click="confirmSuspend" />
-                                    </td>
+                                <tr class="border-b">
+                                    <td class="px-4 py-2 font-medium">Address Line 1</td>
+                                    <td class="px-4 py-2 text-right">{{ form.addressLine1 || '-' }}</td>
+                                </tr>
+                                <tr class="border-b">
+                                    <td class="px-4 py-2 font-medium">Address Line 2</td>
+                                    <td class="px-4 py-2 text-right">{{ form.addressLine2 || '-' }}</td>
+                                </tr>
+                                <tr class="border-b">
+                                    <td class="px-4 py-2 font-medium">Address Line 3</td>
+                                    <td class="px-4 py-2 text-right">{{ form.addressLine3 || '-' }}</td>
+                                </tr>
+                                <tr class="border-b">
+                                    <td class="px-4 py-2 font-medium">Address Line 4</td>
+                                    <td class="px-4 py-2 text-right">{{ form.addressLine4 || '-' }}</td>
+                                </tr>
+                                <tr class="border-b">
+                                    <td class="px-4 py-2 font-medium">City</td>
+                                    <td class="px-4 py-2 text-right">{{ form.city || '-' }}</td>
+                                </tr>
+                                <tr class="border-b">
+                                    <td class="px-4 py-2 font-medium">Postcode</td>
+                                    <td class="px-4 py-2 text-right">{{ form.postcode || '-' }}</td>
+                                </tr>
+                                <tr class="border-b">
+                                    <td class="px-4 py-2 font-medium">State</td>
+                                    <td class="px-4 py-2 text-right">{{ form.state || '-' }}</td>
+                                </tr>
+                                <tr class="border-b">
+                                    <td class="px-4 py-2 font-medium">Country</td>
+                                    <td class="px-4 py-2 text-right">{{ form.country || '-' }}</td>
+                                </tr>
+                                <tr class="border-b">
+                                    <td class="px-4 py-2 font-medium">Map Latitude</td>
+                                    <td class="px-4 py-2 text-right">{{ form.mapLatitude || '-' }}</td>
+                                </tr>
+                                <tr class="border-b">
+                                    <td class="px-4 py-2 font-medium">Map Longitude</td>
+                                    <td class="px-4 py-2 text-right">{{ form.mapLongitude || '-' }}</td>
+                                </tr>
+                                <tr class="border-b">
+                                    <td class="px-4 py-2 font-medium">Phone No</td>
+                                    <td class="px-4 py-2 text-right">{{ form.phoneNumber || '-' }}</td>
+                                </tr>
+                                <tr class="border-b">
+                                    <td class="px-4 py-2 font-medium">Email</td>
+                                    <td class="px-4 py-2 text-right">{{ form.emailAddress || '-' }}</td>
+                                </tr>
+                                <tr class="border-b">
+                                    <td class="px-4 py-2 font-medium">Price List</td>
+                                    <td class="px-4 py-2 text-right">{{ form.pricelist || '-' }}</td>
+                                </tr>
+                                <tr class="border-b">
+                                    <td class="px-4 py-2 font-medium">Price Group</td>
+                                    <td class="px-4 py-2 text-right">{{ form.priceGroup || '-' }}</td>
+                                </tr>
+                                <tr class="border-b">
+                                    <td class="px-4 py-2 font-medium">Price Procedure</td>
+                                    <td class="px-4 py-2 text-right">{{ form.priceProcedure || '-' }}</td>
+                                </tr>
+                                <tr class="border-b">
+                                    <td class="px-4 py-2 font-medium">Sales Office</td>
+                                    <td class="px-4 py-2 text-right">{{ form.salesOffice || '-' }}</td>
+                                </tr>
+                                <tr class="border-b">
+                                    <td class="px-4 py-2 font-medium">Sales District</td>
+                                    <td class="px-4 py-2 text-right">{{ form.salesDistrict || '-' }}</td>
+                                </tr>
+                                <tr class="border-b">
+                                    <td class="px-4 py-2 font-medium">Starting Sales Amount</td>
+                                    <td class="px-4 py-2 text-right">{{ form.startingSalesAmt || '-' }}</td>
+                                </tr>
+                                <tr class="border-b">
+                                    <td class="px-4 py-2 font-medium">Customer Condition Group</td>
+                                    <td class="px-4 py-2 text-right">{{ form.customerCondGrp || '-' }}</td>
+                                </tr>
+                                <tr class="border-b">
+                                    <td class="px-4 py-2 font-medium">Shipping Condition</td>
+                                    <td class="px-4 py-2 text-right">{{ form.shippingCond || '-' }}</td>
+                                </tr>
+                                <tr class="border-b">
+                                    <td class="px-4 py-2 font-medium">Allow Lalamove</td>
+                                    <td class="px-4 py-2 text-right">{{ form.allowLalamove || '-' }}</td>
+                                </tr>
+                                <tr class="border-b">
+                                    <td class="px-4 py-2 font-medium">Signboard Type</td>
+                                    <td class="px-4 py-2 text-right">{{ form.signboardType || '-' }}</td>
+                                </tr>
+                                <tr class="border-b">
+                                    <td class="px-4 py-2 font-medium">Signboard Brand</td>
+                                    <td class="px-4 py-2 text-right">{{ form.signboardBrand || '-' }}</td>
                                 </tr>
                             </tbody>
                         </table>
@@ -347,112 +378,14 @@
                 </div>
             </div>
         </div>
-
-        <div class="flex flex-col md:flex-row gap-8 mt-8">
-            <div class="card flex flex-col gap-4 w-full">
-                <!-- Header -->
-                <div class="flex items-center justify-between border-b pb-2 mb-4">
-                    <div class="text-2xl font-bold text-gray-800">Ship To</div>
-                    <div></div>
-                </div>
-
-                <!-- Ship To Table -->
-                <DataTable :value="shiptoList" :rows="5" dataKey="id" :rowHover="true" responsiveLayout="scroll" class="text-sm">
-                    <Column header="Company Name" style="min-width: 16rem">
-                        <template #body="{ data }">
-                            {{ data.companyName1 || '' }}<br />
-                            <span v-if="data.companyName2">{{ data.companyName2 }}<br /></span>
-                            <span v-if="data.companyName3">{{ data.companyName3 }}<br /></span>
-                            <span v-if="data.companyName4">{{ data.companyName4 }}<br /></span>
-                            ({{ data.custAccountNo }})
-                        </template>
-                    </Column>
-                    <Column header="Address" style="min-width: 16rem">
-                        <template #body="{ data }">
-                            {{ data.addressLine1 || '' }}<br />
-                            <span v-if="data.addressLine2">{{ data.addressLine2 }}<br /></span>
-                            <span v-if="data.addressLine3">{{ data.addressLine3 }}<br /></span>
-                            <span v-if="data.addressLine4">{{ data.addressLine4 }}<br /></span>
-                            {{ data.city }}, {{ data.state }} {{ data.postcode }}<br />
-                            {{ data.country }}
-                        </template>
-                        <template #filterapply="slotProps"></template>
-                        <template #filterclear="slotProps"></template>
-                    </Column>
-
-                    <Column field="phoneNumber" header="Phone No" style="min-width: 10rem">
-                        <template #body="slotProps">
-                            {{ slotProps.data.phoneNumber || '-' }}
-                        </template>
-                    </Column>
-                    <Column header="Email" style="min-width: 14rem">
-                        <template #body="slotProps">
-                            {{ slotProps.data.emailAddress || '-' }}
-                        </template>
-                    </Column>
-                </DataTable>
-            </div>
-        </div>
-
-        <div class="flex flex-col md:flex-row gap-8 mt-8">
-            <div class="card flex flex-col gap-4 w-full">
-                <!-- Header -->
-                <div class="flex items-center justify-between border-b pb-2 mb-4">
-                    <div class="text-2xl font-bold text-gray-800">User List</div>
-                    <div class="inline-flex items-center gap-2">
-                        <RouterLink :to="`/om/createUserEten/${form.custAccountNo}`">
-                            <Button label="Create" class="p-button-info" size="small" />
-                        </RouterLink>
-                    </div>
-                </div>
-
-                <!-- User Table -->
-                <DataTable :value="users" :rows="5" dataKey="id" :rowHover="true" responsiveLayout="scroll" class="text-sm">
-                    <Column header="User Info" style="min-width: 1rem">
-                        <template #body="{ data }">
-                            <div class="flex flex-col">
-                                <RouterLink :to="`/om/detailUser/${data.id}`" class="hover:underline font-bold">
-                                    {{ data.firstName }} {{ data.lastName }}
-                                    <span v-if="data.isMaster === 1" class="text-blue-400">(Admin)</span>
-                                </RouterLink>
-                                <span class="text-sm text-gray-500">{{ data.emailAddress }}</span>
-                                <span class="text-sm text-gray-500">{{ data.countryCode }}{{ data.mobileNumber }}</span>
-                            </div>
-                        </template>
-                    </Column>
-
-                    <Column header="Module" style="min-width: 8rem">
-                        <template #body="{ data }">
-                            {{ getUserModules(data) }}
-                        </template>
-                    </Column>
-                    <Column field="lastLogin" header="Last Login" style="min-width: 8rem">
-                        <template #body="{ data }">
-                            {{ formatDate(data.lastLogin) }}
-                        </template>
-                    </Column>
-
-                    <Column header="Status" style="min-width: 8rem">
-                        <template #body="{ data }">
-                            <Tag :value="data.status === 1 ? 'Active' : 'Inactive'" :severity="data.status === 1 ? 'success' : 'danger'" />
-                        </template>
-                    </Column>
-                    <Column header="Activation Code" style="min-width: 8rem">
-                        <template #body="{ data }">
-                            <Button icon="pi pi-send" label="Send" style="width: fit-content" class="p-button-info p-button-sm" @click="sendActivationCode(data)" />
-                        </template>
-                    </Column>
-                </DataTable>
-            </div>
-        </div>
     </Fluid>
 </template>
 
 <script setup>
-import { ref, onMounted, computed, watch } from 'vue';
-import { useRoute } from 'vue-router';
 import api from '@/service/api';
 import { useToast } from 'primevue/usetoast';
+import { onMounted, ref, watch } from 'vue';
+import { useRoute } from 'vue-router';
 
 const toast = useToast();
 const route = useRoute();
