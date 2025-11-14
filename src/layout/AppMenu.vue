@@ -271,7 +271,7 @@ const model = ref([
                 ]
             },
             {
-                label: 'Return Order List',
+                label: 'Return Order',
                 icon: 'pi pi-fw pi-list',
                 to: '/scm/listReturnOrder'
             },
