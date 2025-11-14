@@ -18,7 +18,7 @@
                             <Button type="button" icon="pi pi-cog" class="p-button" />
                         </div>
 
-                        <RouterLink to="/it/createGroup">
+                        <RouterLink to="/it/createUserAccount">
                             <Button type="button" label="Create" icon="pi pi-plus" />
                         </RouterLink>
                     </div>
@@ -96,24 +96,31 @@ import { onMounted, ref } from 'vue';
 import { useRouter } from 'vue-router';
 import { FilterMatchMode } from '@primevue/core/api';
 import api from '@/service/api';
+import { useToast } from 'primevue/usetoast';
 
 const router = useRouter();
+const toast = useToast();
+
 const listData = ref([]);
 const loading = ref(true);
 
 const moduleDialogVisible = ref(false);
 const selectedModules = ref([]);
 
+const filters = ref({
+    global: { value: null, matchMode: FilterMatchMode.CONTAINS }
+});
+
 function openModuleDialog(modules) {
     selectedModules.value = modules;
     moduleDialogVisible.value = true;
 }
 
-const filters = ref({
-    global: { value: null, matchMode: FilterMatchMode.CONTAINS }
+onMounted(async () => {
+    await fetchUsers();
 });
 
-onMounted(async () => {
+const fetchUsers = async () => {
     loading.value = true;
     try {
         const res = await api.get('admin/list-user-role');
@@ -132,21 +139,59 @@ onMounted(async () => {
             })),
             statusUser: item.status ? 1 : 0
         }));
-    } catch {
+    } catch (err) {
         listData.value = [];
+        toast.add({
+            severity: 'error',
+            summary: 'Error',
+            detail: 'Failed to fetch users',
+            life: 3000
+        });
     } finally {
         loading.value = false;
     }
-});
+};
 
 const editUser = (user) => {
     router.push(`/it/editGroup/${user.id}`);
 };
 
-const deleteUser = (user) => {
-    console.log('Deleting user:', user);
+const deleteUser = async (user) => {
+    if (!confirm(`Are you sure you want to delete "${user.userlist}"?`)) return;
+
+    try {
+        // Make sure endpoint is correct and matches backend
+        const res = await api.post('admin/delete-user-role', { id: user.id });
+
+        if (res.data.status === 1) {
+            toast.add({
+                severity: 'success',
+                summary: 'Deleted',
+                detail: `"${user.userlist}" has been deleted.`,
+                life: 3000
+            });
+            await fetchUsers();
+        } else {
+            toast.add({
+                severity: 'error',
+                summary: 'Error',
+                detail: res.data.error?.messageEnglish || 'Failed to delete user',
+                life: 4000
+            });
+        }
+    } catch (err) {
+        console.error(err);
+        toast.add({
+            severity: 'error',
+            summary: 'Error',
+            detail: err.response?.data?.error?.messageEnglish || 'Something went wrong',
+            life: 4000
+        });
+    }
 };
 </script>
+
+
 <style scoped lang="scss">
 :deep(.p-datatable-frozen-tbody) {
     font-weight: bold;

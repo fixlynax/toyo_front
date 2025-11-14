@@ -5,15 +5,15 @@
                 <!-- Header -->
                 <div class="text-2xl font-bold text-gray-800 border-b pb-2">Create User Group</div>
 
-                <!-- User Group Form -->
+                <!-- Form -->
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <!-- User Group Name -->
+                    <!-- Group Name -->
                     <div class="md:col-span-2">
                         <label class="block text-sm font-bold text-gray-700 mb-2">User Group Name</label>
                         <InputText v-model="form.usergroup" placeholder="Enter group name" class="w-full" />
                     </div>
 
-                    <!-- Module / Function Selection -->
+                    <!-- Module / Function -->
                     <div class="md:col-span-2">
                         <label class="block text-sm font-bold text-gray-700 mb-2">Module / Function List</label>
                         <MultiSelect v-model="form.modules" :options="moduleOptions" optionLabel="label" filter placeholder="Select modules" display="chip" class="w-full" />
@@ -26,7 +26,7 @@
                     </div>
                 </div>
 
-                <!-- Action Buttons -->
+                <!-- Buttons -->
                 <div class="flex justify-end mt-8 gap-4">
                     <div class="w-32">
                         <Button label="Cancel" class="w-full p-button-secondary" @click="cancel" />
@@ -43,17 +43,18 @@
 <script setup>
 import { ref } from 'vue';
 import { useRouter } from 'vue-router';
+import { useToast } from 'primevue/usetoast';
+import api from '@/service/api';
 
 const router = useRouter();
+const toast = useToast();
 
-// Form state
 const form = ref({
     usergroup: '',
     modules: [],
     statusUser: 1
 });
 
-// Module options (checkbox list)
 const moduleOptions = [
     { label: 'Marketing', value: 'Marketing' },
     { label: 'Technical', value: 'Technical' },
@@ -63,25 +64,57 @@ const moduleOptions = [
     { label: 'Sales', value: 'Sales' }
 ];
 
-// Status options
 const statusOptions = [
     { label: 'Active', value: 1 },
     { label: 'Suspend', value: 0 }
 ];
 
-// Cancel action
 const cancel = () => {
     router.push('/it/listGroup');
 };
 
-// Save action
-const submitForm = () => {
-    if (!form.value.usergroup) {
-        alert('User Group Name is required');
+const submitForm = async () => {
+    if (!form.value.usergroup || form.value.modules.length === 0) {
+        toast.add({
+            severity: 'warn',
+            summary: 'Missing Fields',
+            detail: 'Please fill in all required fields',
+            life: 3000
+        });
         return;
     }
-    console.log('✅ New User Group Created:', form.value);
-    // TODO: Replace with API call
-    router.push('/it/listGroup');
+
+    try {
+        const response = await api.post('admin/create-user-role', {
+            name: form.value.usergroup,
+            status: form.value.statusUser,
+            functions: form.value.modules // adjust according to API: array of module names or IDs
+        });
+
+        if (response.data.status === 1) {
+            toast.add({
+                severity: 'success',
+                summary: 'Success',
+                detail: 'User group created successfully',
+                life: 3000
+            });
+            router.push('/it/listGroup');
+        } else {
+            toast.add({
+                severity: 'error',
+                summary: 'Error',
+                detail: response.data.error?.message || 'Failed to create user group',
+                life: 3000
+            });
+        }
+    } catch (err) {
+        console.error(err);
+        toast.add({
+            severity: 'error',
+            summary: 'Error',
+            detail: 'Something went wrong',
+            life: 3000
+        });
+    }
 };
 </script>
