@@ -5,16 +5,20 @@
             :value="listData" 
             :paginator="true" 
             :rows="10" 
-            :rowsPerPageOptions="[5, 10, 20]"
+            :rowsPerPageOptions="[5, 10, 20]" 
             dataKey="id" 
             :rowHover="true" 
-            :loading="loading"
-            :filters="filters"
-            filterDisplay="menu"
+            :loading="loading" 
+            :filters="filters" 
+            filterDisplay="menu" 
             :globalFilterFields="['usergroup', 'modules', 'statusUser']"
         >
+            <!-- ========================= -->
+            <!-- Header Section -->
+            <!-- ========================= -->
             <template #header>
                 <div class="flex items-center justify-between gap-4 w-full flex-wrap">
+                    <!-- Left: Search Field + Cog Button -->
                     <div class="flex items-center gap-2 w-full max-w-md">
                         <IconField class="flex-1">
                             <InputIcon>
@@ -25,49 +29,45 @@
                         <Button type="button" icon="pi pi-cog" class="p-button" />
                     </div>
 
+                    <!-- Right: Create Group Button -->
                     <RouterLink to="/it/createGroup">
                         <Button type="button" label="Create" icon="pi pi-plus" />
                     </RouterLink>
                 </div>
             </template>
 
+            <!-- ========================= -->
+            <!-- Empty / Loading Messages -->
+            <!-- ========================= -->
             <template #empty> No User Group found. </template>
             <template #loading> Loading user group data. Please wait. </template>
 
-            <Column field="usergroup" header="User Group" style="min-width: 20rem">
+            <!-- ========================= -->
+            <!-- Data Columns -->
+            <!-- ========================= -->
+            <Column field="usergroup" header="User Group" style="min-width: 20rem" class="font-bold text-primary-400">
                 <template #body="{ data }">
                     <span class="font-bold">{{ data.usergroup }}</span>
                 </template>
             </Column>
-            
+
             <Column field="modules" header="Module / Function List" style="min-width: 25rem">
                 <template #body="{ data }">
-                    <span>{{ data.modules.join(', ') }}</span>
+                    <span>{{ data.modules }}</span>
                 </template>
             </Column>
-            
+
             <Column field="statusUser" header="Status" style="min-width: 6rem">
                 <template #body="{ data }">
-                    <Tag 
-                        :value="data.statusUser === 1 ? 'Active' : 'Suspend'" 
-                        :severity="data.statusUser === 1 ? 'success' : 'danger'" 
-                    />
+                    <Tag :value="data.statusUser === 1 ? 'Active' : 'Suspend'" :severity="data.statusUser === 1 ? 'success' : 'danger'" />
                 </template>
             </Column>
-            
+
             <Column header="Actions" style="min-width: 10rem">
                 <template #body="{ data }">
                     <div class="flex gap-2">
-                        <Button 
-                            icon="pi pi-pencil" 
-                            class="p-button-text p-button-info p-button-sm" 
-                            @click="editUser(data)" 
-                        />
-                        <Button 
-                            icon="pi pi-trash" 
-                            class="p-button-text p-button-danger p-button-sm" 
-                            @click="deleteUser(data)" 
-                        />
+                        <Button icon="pi pi-pencil" class="p-button-text p-button-info p-button-sm" @click="editGroup(data)" />
+                        <Button icon="pi pi-trash" class="p-button-text p-button-danger p-button-sm" @click="deleteGroup(data)" />
                     </div>
                 </template>
             </Column>
@@ -85,35 +85,49 @@ const router = useRouter();
 const listData = ref([]);
 const loading = ref(true);
 
+const moduleDialogVisible = ref(false);
+const selectedModules = ref([]);
+
+// Open module dialog
+function openModuleDialog(modules) {
+    selectedModules.value = modules;
+    moduleDialogVisible.value = true;
+}
+
+// Filters
 const filters = ref({
     global: { value: null, matchMode: FilterMatchMode.CONTAINS }
 });
 
+// Fetch group data
 onMounted(async () => {
     loading.value = true;
     try {
-        const res = await api.get('admin/list-user-role'); 
-        const raw = res.data.data;
+        const res = await api.get('admin/list-function-group'); 
+        const raw = res.data; // <-- fixed
 
-        listData.value = raw.map(item => ({
-            id: item.id,
-            usergroup: item.name,
-            modules: item.permissions.map(p => p.function_name),
-            statusUser: item.status ? 1 : 0
+        listData.value = raw.map((group) => ({
+            id: group.id,
+            usergroup: group.name,
+            description: group.description,
+            statusUser: group.status ? 1 : 0,
+            modules: group.functions.map(f => f.name).join(', ')
         }));
-    } catch (error) {
-        console.error('Error loading user groups:', error);
+    } catch (err) {
+        console.error('Error fetching groups:', err);
         listData.value = [];
     } finally {
         loading.value = false;
     }
 });
 
-const editUser = (user) => {
-    router.push(`/it/editGroup/${user.id}`);
+
+// Actions
+const editGroup = (group) => {
+    router.push(`/it/editGroup/${group.id}`);
 };
 
-const deleteUser = (user) => {
-    console.log('Deleting user:', user);
+const deleteGroup = (group) => {
+    console.log('Deleting group:', group);
 };
 </script>
