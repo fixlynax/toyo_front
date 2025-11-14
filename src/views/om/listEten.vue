@@ -34,35 +34,38 @@
                         <Button type="button" icon="pi pi-cog" class="p-button" />
                     </div>
                     <div class="flex gap-2">
-                    <Button type="button" label="Bulk Update" @click="fetchData"/>
-                    <!-- Right: Create Customer Button -->
-                    <RouterLink to="/om/createEten">
-                        <Button type="button" label="Create" icon="pi pi-plus" />
-                    </RouterLink>
+                        <Button type="button" label="Bulk Update" @click="fetchData" />
+                        <!-- Right: Create Customer Button -->
+                        <RouterLink to="/om/createEten">
+                            <Button type="button" label="Create" icon="pi pi-plus" />
+                        </RouterLink>
                     </div>
                 </div>
             </template>
 
             <template #empty> No customers found. </template>
 
-            <Column field="memberCode" header="Mem Code" style="min-width: 6rem">
+            <Column field="memberCode" header="eTEN Code" style="min-width: 6rem">
                 <template #body="{ data }">
                     <RouterLink :to="`/om/detailEten/${data.custAccountNo}`" class="hover:underline font-bold text-primary-400">
                         {{ data.memberCode }}
-
-                        <div class="flex flex-wrap gap-1 mt-1">
-                            <!-- Main: if custAccountNo ends with 00 -->
-                            <span v-if="String(data.custAccountNo).endsWith('00')" class="text-[10px] font-semibold text-white bg-blue-700 px-2 py-[2px] rounded shadow-sm"> Main </span>
-
-                            <!-- Sub: otherwise -->
-                            <span v-else class="text-[10px] font-semibold text-white bg-green-700 px-2 py-[2px] rounded shadow-sm"> Sub </span>
-                        </div>
                     </RouterLink>
                 </template>
             </Column>
 
             <Column field="created" header="CreatedTime" class="hidden" />
-            <Column field="custAccountNo" header="Acc No" style="min-width: 6rem" />
+            <Column field="custAccountNo" header="Account No" style="min-width: 6rem">
+                <template #body="{ data }">
+                    {{ data.custAccountNo }}
+                    <div class="flex flex-wrap gap-1 mt-1">
+                        <!-- Main: if custAccountNo ends with 00 -->
+                        <span v-if="String(data.custAccountNo).endsWith('00')" class="text-[10px] font-semibold text-white bg-blue-700 px-2 py-[2px] rounded shadow-sm"> Main </span>
+
+                        <!-- Sub: otherwise -->
+                        <span v-else class="text-[10px] font-semibold text-white bg-green-700 px-2 py-[2px] rounded shadow-sm"> Sub </span>
+                    </div>
+                </template></Column
+            >
 
             <Column field="companyName1" header="Company Name" style="min-width: 8rem" />
 
@@ -142,7 +145,6 @@ onMounted(async () => {
 });
 
 const fetchData = async () => {
-
     try {
         loading.value = true;
         const response = await api.get('bulkUpdCust');
@@ -155,9 +157,9 @@ const fetchData = async () => {
         toast.add({ severity: 'error', summary: 'Error', detail: 'Failed to bulk update', life: 3000 });
     } finally {
         loading.value = false;
-    //     setTimeout(() => {
-    //     router.go(0);
-    //   }, 1000);
+        //     setTimeout(() => {
+        //     router.go(0);
+        //   }, 1000);
     }
 };
 const getOverallStatusSeverity = (status) => {
