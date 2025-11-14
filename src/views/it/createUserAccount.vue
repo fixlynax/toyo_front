@@ -5,52 +5,40 @@
                 <!-- Header -->
                 <div class="text-2xl font-bold text-gray-800 border-b pb-2">Create User</div>
 
-                <!-- User Form -->
+                <!-- Form -->
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <!-- User Group -->
-                    <div>
-                        <label class="block text-sm font-bold text-gray-700 mb-2">User Group</label>
-                        <Dropdown v-model="form.usergroup" :options="userGroupOptions" optionLabel="label" optionValue="value" placeholder="Select User Group" class="w-full" />
-                    </div>
-
-                    <!-- Username -->
-                    <div>
-                        <label class="block text-sm font-bold text-gray-700 mb-2">Username</label>
-                        <InputText v-model="form.username" placeholder="Enter username" class="w-full" />
-                    </div>
-
-                    <!-- Department -->
-                    <div>
-                        <label class="block text-sm font-bold text-gray-700 mb-2">Department</label>
-                        <InputText v-model="form.department" placeholder="Enter department" class="w-full" />
-                    </div>
-
-                    <!-- Mobile No -->
-                    <div>
-                        <label class="block text-sm font-bold text-gray-700 mb-2">Mobile No</label>
-                        <InputText v-model="form.mobileno" placeholder="e.g. 01123456789" class="w-full" @keypress="onlyNumbers" />
-                    </div>
-
-                    <!-- Email -->
+                    <!-- User Group Name -->
                     <div class="md:col-span-2">
-                        <label class="block text-sm font-bold text-gray-700 mb-2">Email</label>
-                        <InputText v-model="form.email" placeholder="Enter email" class="w-full" />
+                        <label class="block font-bold text-gray-700 mb-2">User Group Name</label>
+                        <InputText v-model="form.usergroup" placeholder="Enter group name" class="w-full" />
+                    </div>
+
+                    <!-- Description -->
+                    <div class="md:col-span-2">
+                        <label class="block font-bold text-gray-700 mb-2">Description</label>
+                        <Textarea v-model="form.description" rows="3" placeholder="Enter description" class="w-full" />
+                    </div>
+
+                    <!-- Module / Function Selection -->
+                    <div>
+                        <label class="block font-bold text-gray-700 mb-2">Module / Function List</label>
+                        <MultiSelect v-model="form.modules" :options="moduleOptions" optionLabel="label" filter placeholder="Select modules" display="chip" class="w-full" />
                     </div>
 
                     <!-- Status -->
-                    <div class="md:col-span-2">
-                        <label class="block text-sm font-bold text-gray-700 mb-2">Status</label>
+                    <div>
+                        <label class="block font-bold text-gray-700 mb-2">Status</label>
                         <Dropdown v-model="form.statusUser" :options="statusOptions" optionLabel="label" optionValue="value" placeholder="Select status" class="w-full" />
                     </div>
                 </div>
 
                 <!-- Action Buttons -->
-                <div class="flex justify-end mt-8 gap-4">
+                <div class="flex justify-end mt-8 gap-2">
                     <div class="w-32">
                         <Button label="Cancel" class="w-full p-button-secondary" @click="cancel" />
                     </div>
                     <div class="w-32">
-                        <Button label="Create" class="w-full p-button-success" @click="submitForm" />
+                        <Button label="Create" class="w-full p-button" @click="submitForm" />
                     </div>
                 </div>
             </div>
@@ -59,33 +47,31 @@
 </template>
 
 <script setup>
-import { ref } from 'vue';
+import { ref, watch } from 'vue';
 import { useRouter } from 'vue-router';
+import api from '@/service/api';
+import { useToast } from 'primevue/usetoast';
 
 const router = useRouter();
+const toast = useToast();
 
-// Form state (matches your data model)
+// Form state
 const form = ref({
     usergroup: '',
-    username: '',
-    department: '',
-    mobileno: '',
-    email: '',
-    statusUser: 1
+    description: '',
+    modules: [],
+    statusUser: 1,
+    is_super_admin: 0
 });
 
-// User group options
-const userGroupOptions = [
-    { label: 'Technical Consultant', value: 'Technical Consultant' },
-    { label: 'Human Resources', value: 'Human Resources' },
-    { label: 'Information Technology', value: 'Information Technology' },
-    { label: 'Finance', value: 'Finance' },
+// Module options
+const moduleOptions = [
     { label: 'Marketing', value: 'Marketing' },
-    { label: 'Sales', value: 'Sales' },
-    { label: 'Operations', value: 'Operations' },
-    { label: 'Engineering', value: 'Engineering' },
-    { label: 'Quality Assurance', value: 'Quality Assurance' },
-    { label: 'Administration', value: 'Administration' }
+    { label: 'Technical', value: 'Technical' },
+    { label: 'OM', value: 'OM' },
+    { label: 'SCM', value: 'SCM' },
+    { label: 'IT', value: 'IT' },
+    { label: 'Sales', value: 'Sales' }
 ];
 
 // Status options
@@ -94,27 +80,88 @@ const statusOptions = [
     { label: 'Suspend', value: 0 }
 ];
 
-// Cancel button
+// Super Admin options
+const superAdminOptions = [
+    { label: 'Yes', value: 1 },
+    { label: 'No', value: 0 }
+];
+
+// Watch modules selection
+watch(
+    () => form.value.modules,
+    (newVal) => {
+        // If all modules are selected, automatically set super admin
+        if (newVal.length === moduleOptions.length) {
+            form.value.is_super_admin = 1;
+        } else {
+            form.value.is_super_admin = 0;
+        }
+    },
+    { deep: true }
+);
+
+// Cancel action
 const cancel = () => {
-    router.push('/it/listUserAccount'); // adjust route
+    router.push('/it/listUserAccount');
 };
-//Prevent text on phone input
-function onlyNumbers(event) {
-    const char = String.fromCharCode(event.which);
-    if (!/[0-9]/.test(char)) {
-        event.preventDefault();
-    }
-}
 
 // Submit form
-const submitForm = () => {
-    if (!form.value.username || !form.value.email || !form.value.usergroup) {
-        alert('⚠️ Username, Email, and User Group are required');
+const submitForm = async () => {
+    if (!form.value.usergroup) {
+        toast.add({
+            severity: 'warn',
+            summary: 'Validation Error',
+            detail: 'User Group Name is required.',
+            life: 3000
+        });
         return;
     }
 
-    console.log('✅ New User Created:', form.value);
-    // TODO: replace with API call to save user
-    router.push('/it/listUserAccount');
+    if (!form.value.modules.length) {
+        toast.add({
+            severity: 'warn',
+            summary: 'Validation Error',
+            detail: 'Please select at least one module.',
+            life: 3000
+        });
+        return;
+    }
+
+    try {
+        const payload = {
+            name: form.value.usergroup,
+            description: form.value.description,
+            status: form.value.statusUser,
+            functions: form.value.modules,
+            is_super_admin: form.value.is_super_admin
+        };
+
+        const response = await api.post('admin/create-user-role', payload);
+
+        if (response.data.status === 1) {
+            toast.add({
+                severity: 'success',
+                summary: 'Success',
+                detail: 'User group created successfully.',
+                life: 3000
+            });
+            router.push('/it/listUserAccount');
+        } else {
+            toast.add({
+                severity: 'error',
+                summary: 'Error',
+                detail: response.data.error?.messageEnglish || 'Failed to create user group',
+                life: 4000
+            });
+        }
+    } catch (err) {
+        console.error(err);
+        toast.add({
+            severity: 'error',
+            summary: 'Error',
+            detail: err.response?.data?.error?.messageEnglish || 'Something went wrong',
+            life: 4000
+        });
+    }
 };
 </script>

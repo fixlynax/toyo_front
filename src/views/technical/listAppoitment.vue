@@ -6,6 +6,7 @@ import LoadingPage from '@/components/LoadingPage.vue';
 
 const listData = ref([]);
 const loading = ref(true);
+const exportLoading = ref(false);
 
 const filters = ref({
     global: { value: null, matchMode: FilterMatchMode.CONTAINS }
@@ -47,102 +48,133 @@ onBeforeMount(async () => {
         loading.value = false;
     }
 });
+
+const fetchExport = async () => {
+    try {
+        loading.value = true;
+        exportLoading.value = true;
+        const response = await api.getDownload('appointment/export', {
+        responseType: 'arraybuffer',
+        });
+
+        const blob = new Blob([response.data], { 
+        type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' 
+        });
+
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = 'Appointment_Download.xlsx';
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        window.URL.revokeObjectURL(url);
+
+    } catch (err) {
+        console.error('rror fetching OE Tire export:', err);
+    } finally {
+        loading.value = false;
+        exportLoading.value = false;
+    }
+};
+
 </script>
 
 <template>
     <div class="card">
         <div class="text-2xl font-bold text-gray-800 border-b pb-2 mb-4">List Appointment</div>
+        
+        <!-- Show loading only -->
+        <LoadingPage v-if="loading" message="Loading Warranty Claim Details..." />
+        
+        <!-- Show table only when not loading -->
+        <template v-else>
+            <DataTable :value="listData" :paginator="true" :rows="10" dataKey="id" :rowHover="true" :filters="filters" filterDisplay="menu" :globalFilterFields="['appointmentCode', 'dealerShop', 'dealerCustAccountNo', 'statusString']">
+                <template #header>
+                    <div class="flex items-center justify-between gap-4 w-full flex-wrap">
+                        <!-- Left: Search Field -->
+                        <div class="flex items-center gap-2 w-full max-w-md">
+                            <IconField class="flex-1">
+                                <InputIcon>
+                                    <i class="pi pi-search" />
+                                </InputIcon>
+                                <InputText v-model="filters['global'].value" placeholder="Quick Search" class="w-full" />
+                            </IconField>
+                            <Button type="button" icon="pi pi-cog" class="p-button" />
+                        </div>
 
-        <DataTable :value="listData" :paginator="true" :rows="10" dataKey="id" :rowHover="true" :loading="loading" :filters="filters" filterDisplay="menu" :globalFilterFields="['appointmentCode', 'dealerShop', 'dealerCustAccountNo', 'statusString']">
-            <template #header>
-                <div class="flex items-center justify-between gap-4 w-full flex-wrap">
-                    <!-- Left: Search Field -->
-                    <div class="flex items-center gap-2 w-full max-w-md">
-                        <IconField class="flex-1">
-                            <InputIcon>
-                                <i class="pi pi-search" />
-                            </InputIcon>
-                            <InputText v-model="filters['global'].value" placeholder="Quick Search" class="w-full" />
-                        </IconField>
-                        <Button type="button" icon="pi pi-cog" class="p-button" />
-                    </div>
-
-                    <!-- Right: Export & Template -->
-                    <div class="flex items-center gap-2 ml-auto">
-                        <Button type="button" label="Export" icon="pi pi-download" class="p-button" style="width: fit-content" />
-                    </div>
-                </div>
-            </template>
-
-            <template #empty>No appointments found.</template>
-            <template #loading>Loading appointments...</template>
-
-            <!-- Columns -->
-            <Column field="appointmentCode" header="Appointment Code" style="min-width: 12rem">
-                <template #body="{ data }">
-                    <RouterLink :to="`/technical/detailAppointment/${data.id}`" class="hover:underline font-bold text-primary-400">
-                        {{ data.appointmentCode }}
-                    </RouterLink>
-                </template>
-            </Column>
-
-            <Column header="Dealer Info" style="min-width: 14rem">
-                <template #body="{ data }">
-                    <div class="flex flex-col">
-                        <!-- Top -->
-                        <div class="font-semibold">{{ data.dealerShop }}</div>
-
-                        <!-- Bottom -->
-                        <div class="text-gray-600 text-sm">{{ data.dealerCustAccountNo }}</div>
+                        <!-- Right: Export & Template -->
+                        <div class="flex items-center gap-2 ml-auto">
+                            <Button type="button" label="Export" icon="pi pi-download" class="p-button" :loading="exportLoading" @click="fetchExport" />
+                        </div>
                     </div>
                 </template>
-            </Column>
 
-            <Column header="Customer Info" style="min-width: 14rem">
-                <template #body="{ data }">
-                    <div class="flex flex-col">
-                        <!-- Top -->
-                        <div class="font-semibold">{{ data.customerName }}</div>
+                <!-- Columns -->
+                <Column field="appointmentCode" header="Appointment Code" style="min-width: 12rem">
+                    <template #body="{ data }">
+                        <RouterLink :to="`/technical/detailAppointment/${data.id}`" class="hover:underline font-bold text-primary-400">
+                            {{ data.appointmentCode }}
+                        </RouterLink>
+                    </template>
+                </Column>
 
-                        <!-- Bottom -->
-                        <div class="text-gray-600 text-sm">{{ data.customerPhone }}</div>
-                    </div>
-                </template>
-            </Column>
+                <Column header="Dealer Info" style="min-width: 14rem">
+                    <template #body="{ data }">
+                        <div class="flex flex-col">
+                            <!-- Top -->
+                            <div class="font-semibold">{{ data.dealerShop }}</div>
 
-            
+                            <!-- Bottom -->
+                            <div class="text-gray-600 text-sm">{{ data.dealerCustAccountNo }}</div>
+                        </div>
+                    </template>
+                </Column>
 
-            <Column field="requestDate" header="Request Date" style="min-width: 10rem">
-                <template #body="{ data }">
-                    {{ data.requestDate || 'Not specified' }}
-                </template>
-            </Column>
+                <Column header="Customer Info" style="min-width: 14rem">
+                    <template #body="{ data }">
+                        <div class="flex flex-col">
+                            <!-- Top -->
+                            <div class="font-semibold">{{ data.customerName }}</div>
 
-            <Column field="requestSession" header="Request Session" style="min-width: 8rem">
-                <template #body="{ data }">
-                    {{ data.requestSession || 'Not specified' }}
-                </template>
-            </Column>
+                            <!-- Bottom -->
+                            <div class="text-gray-600 text-sm">{{ data.customerPhone }}</div>
+                        </div>
+                    </template>
+                </Column>
 
-            <Column field="bookDateTime" header="Scheduled Date/Time" style="min-width: 12rem">
-                <template #body="{ data }">
-                    {{ data.bookDateTime }}
-                </template>
-            </Column>
+                <Column field="requestDate" header="Request Date" style="min-width: 10rem">
+                    <template #body="{ data }">
+                        {{ data.requestDate || 'Not specified' }}
+                    </template>
+                </Column>
 
-            <Column field="statusString" header="Status" style="min-width: 8rem">
-                <template #body="{ data }">
-                    <span
-                        :class="{
-                            'text-yellow-600': data.status === 0,
-                            'text-green-600': data.status === 1,
-                            'text-red-600': data.status === 2
-                        }"
-                    >
-                        {{ data.statusString }}
-                    </span>
-                </template>
-            </Column>
-        </DataTable>
+                <Column field="requestSession" header="Request Session" style="min-width: 8rem">
+                    <template #body="{ data }">
+                        {{ data.requestSession || 'Not specified' }}
+                    </template>
+                </Column>
+
+                <Column field="bookDateTime" header="Scheduled Date/Time" style="min-width: 12rem">
+                    <template #body="{ data }">
+                        {{ data.bookDateTime }}
+                    </template>
+                </Column>
+
+                <Column field="statusString" header="Status" style="min-width: 8rem">
+                    <template #body="{ data }">
+                        <span
+                            :class="{
+                                'text-yellow-600': data.status === 0,
+                                'text-green-600': data.status === 1,
+                                'text-red-600': data.status === 2
+                            }"
+                        >
+                            {{ data.statusString }}
+                        </span>
+                    </template>
+                </Column>
+            </DataTable>
+        </template>
     </div>
 </template>

@@ -1,6 +1,6 @@
 <template>
     <div class="card">
-        <div class="text-2xl font-bold text-gray-800 border-b pb-2">Return Order List</div>
+        <div class="text-2xl font-bold text-gray-800 border-b pb-2">List Return Order</div>
         <TabMenu :model="statusTabs" v-model:activeIndex="activeTabIndex" class="mb-6" />
         <DataTable 
             :value="filteredList"
