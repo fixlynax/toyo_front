@@ -488,9 +488,10 @@ const router = createRouter({
                     props: true
                 },
                                 {
-                    path: 'technical/detailWarantyClaim_copy',
+                    path: 'technical/detailWarantyClaim_copy/:id',
                     name: 'Hardcode-Waranty-Claim',
-                    component: () => import('@/views/technical/detailWarantyClaim_copy.vue')
+                    component: () => import('@/views/technical/detailWarantyClaim_copy.vue'),
+                    props: true
                 },
                 {
                     path: 'technical/createOrder',
