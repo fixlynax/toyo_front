@@ -169,8 +169,8 @@ const loading = ref(false);
 const loadingData = ref(false);
 
 const countryCodes = ref([
-    { label: 'Malaysia (+60)', value: '60' },
-    { label: 'Singapore (+65)', value: '65' }
+    { label: '(+60)', value: '60' },
+    { label: '(+65)', value: '65' }
 ]);
 
 const masterOptions = ref([

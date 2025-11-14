@@ -86,7 +86,7 @@
                                 </p>
                             </div>
                             <div class="w-full">
-                                <span class="text-xm font-bold text-black-700">Activated</span>
+                                <span class="text-xm font-bold text-black-700">Activated Date</span>
                                 <p class="text-lg font-medium">
                                     <span :class="memberDetail.activated === 1 ? 'text-green-600 font-medium' : 'text-red-600 font-medium'">
                                         {{ memberDetail.activated === 1 ? 'Yes' : 'No' }}

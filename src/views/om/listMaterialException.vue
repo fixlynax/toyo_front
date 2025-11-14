@@ -93,7 +93,6 @@
                         <template #body="{ data }">
                             <div class="flex gap-1">
                                 <Button icon="pi pi-pencil" class="p-button-info p-button-text p-button-sm" v-tooltip="'Edit'" @click="editException(data)" />
-                                <Button icon="pi pi-trash" class="p-button-danger p-button-text p-button-sm" v-tooltip="'Delete'" @click="deleteException(data.id)" />
                             </div>
                         </template>
                     </Column>
@@ -102,7 +101,9 @@
                     <template #expansion="{ data }">
                         <div class="p-4 bg-gray-50 border-t border-gray-200 rounded-b-lg">
                             <DataTable :value="data.dealers" :rows="5" :paginator="data.dealers && data.dealers.length > 5" responsiveLayout="scroll" size="small" class="rounded-table">
-                                <h4 class="font-semibold text-gray-700 p-3 ml-2">Dealers for <span class="font-bold text-primary-400">{{ data.materialCode }}</span> </h4>
+                                <h4 class="font-semibold text-gray-700 p-3 ml-2">
+                                    Dealers for <span class="font-bold text-primary-400">{{ data.materialCode }}</span>
+                                </h4>
                                 <Column field="label" header="Dealer Name" style="min-width: 12rem" />
                                 <Column field="group" header="State" style="min-width: 10rem" />
                             </DataTable>
@@ -259,20 +260,6 @@ const editException = async (data) => {
     }
 };
 
-const deleteException = async (id) => {
-    if (!confirm('Are you sure you want to delete this exception?')) return;
-    try {
-        loading.value = true;
-        const response = await api.delete(`maintenance/delete-material-exception/${id}`);
-        if (response.data.status === 1) {
-            materialExceptions.value = materialExceptions.value.filter((e) => e.id !== id);
-            toast.add({ severity: 'success', summary: 'Deleted', detail: 'Material exception removed', life: 3000 });
-        }
-    } finally {
-        loading.value = false;
-    }
-};
-
 const saveException = async () => {
     try {
         loading.value = true;
@@ -394,17 +381,17 @@ onMounted(fetchMaterialExceptions);
     border-radius: 12px;
     overflow: hidden;
     border: 1px solid #e5e7eb;
-    
+
     .p-datatable-header {
         border-top-left-radius: 12px;
         border-top-right-radius: 12px;
     }
-    
+
     .p-paginator-bottom {
         border-bottom-left-radius: 12px;
         border-bottom-right-radius: 12px;
     }
-    
+
     .p-datatable-thead > tr > th {
         &:first-child {
             border-top-left-radius: 12px;
@@ -413,16 +400,16 @@ onMounted(fetchMaterialExceptions);
             border-top-right-radius: 12px;
         }
     }
-    
+
     .p-datatable-tbody > tr:last-child > td {
         &:first-child {
             border-bottom-left-radius: 0;
         }
         &:last-child {
-            border-bottom-right-radius:0;
+            border-bottom-right-radius: 0;
         }
     }
-    
+
     .p-datatable-tbody > tr.p-datatable-emptymessage > td {
         border-bottom-left-radius: 12px;
         border-bottom-right-radius: 12px;

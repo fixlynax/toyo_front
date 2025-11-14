@@ -1,38 +1,56 @@
 <template>
     <Fluid>
-        <div class="flex flex-col md:flex-row gap-8">
+        <div v-if="loading" class="text-center py-20 text-gray-500 text-lg">Loading logistic data...</div>
+
+        <div v-else class="flex flex-col md:flex-row gap-8">
             <div class="card flex flex-col gap-6 w-full">
                 <!-- Header -->
-                <div class="text-2xl font-bold text-gray-800 border-b pb-2">Edit Logistic</div>
-
+                <div class="text-2xl font-bold text-gray-800 border-b pb-2">Update Logistic</div>
+                <!-- Contact Details -->
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                        <label class="block font-bold text-gray-700 mb-2">Username</label>
+                        <InputText v-model="form.uname" type="text" placeholder="Enter Username" class="w-full" />
+                    </div>
+                    <div>
+                        <label class="block font-bold text-gray-700 mb-2">Email Address</label>
+                        <InputText v-model="form.emailaddress" type="email" placeholder="Enter email Address" class="w-full" />
+                    </div>
+                    <div>
+                        <label class="block font-bold text-gray-700 mb-2">Contact No</label>
+                        <InputText v-model="form.phoneno" type="text" placeholder="Enter Contact No" class="w-full" @keypress="allowOnlyNumbers"/>
+                    </div>
+                </div>
                 <!-- Logistic Form -->
                 <div class="grid grid-cols-1 gap-6">
                     <!-- Company Details -->
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div>
                             <label class="block font-bold text-gray-700 mb-2">Company Name</label>
-                            <InputText v-model="form.companyName" type="text" placeholder="Enter Company Name" class="w-full" />
+                            <InputText v-model="form.companyname" type="text" placeholder="Enter Company Name" class="w-full" />
                         </div>
                         <div>
                             <label class="block font-bold text-gray-700 mb-2">Contact Person</label>
-                            <InputText v-model="form.contactPerson" type="text" placeholder="Enter Contact Person" class="w-full" />
+                            <InputText v-model="form.contactperson" type="text" placeholder="Enter Contact Name" class="w-full" />
+                        </div>
+                        <div>
+                            <label class="block font-bold text-gray-700 mb-2">Contact No</label>
+                            <InputText v-model="form.mobileno" type="text" placeholder="Enter Contact No" class="w-full" @keypress="allowOnlyNumbers"/>
                         </div>
                     </div>
-
-                    <!-- Address Details -->
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div>
-                            <label class="block font-bold text-gray-700 mb-2">Address</label>
-                            <InputText v-model="form.address" type="text" placeholder="Enter Address" class="w-full" />
+                            <label class="block font-bold text-gray-700 mb-2">Address Line 1</label>
+                            <InputText v-model="form.addressline1" type="text" placeholder="Enter Address Line 1" class="w-full" />
+                        </div>
+                        <div>
+                            <label class="block font-bold text-gray-700 mb-2">Address Line 2</label>
+                            <InputText v-model="form.addressline2" type="text" placeholder="Enter Address Line 2" class="w-full" />
                         </div>
                         <div>
                             <label class="block font-bold text-gray-700 mb-2">City</label>
                             <InputText v-model="form.city" type="text" placeholder="Enter City" class="w-full" />
                         </div>
-                    </div>
-
-                    <!-- Location Details -->
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div>
                             <label class="block font-bold text-gray-700 mb-2">State</label>
                             <Dropdown v-model="form.state" :options="states" placeholder="Select State" class="w-full" />
@@ -43,115 +61,53 @@
                         </div>
                     </div>
 
-                    <!-- Contact Details -->
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <div>
-                            <label class="block font-bold text-gray-700 mb-2">Contact No</label>
-                            <InputText v-model="form.contactNo" type="text" placeholder="Enter Contact No" class="w-full" />
-                        </div>
-                        <div>
-                            <label class="block font-bold text-gray-700 mb-2">Username</label>
-                            <InputText v-model="form.username" type="text" placeholder="Enter Username" class="w-full" />
-                        </div>
-                    </div>
 
-                    <!-- Additional Details -->
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <div>
-                            <label class="block font-bold text-gray-700 mb-2">Password</label>
-                            <InputText v-model="form.password" type="password" placeholder="Enter Password" class="w-full" />
-                        </div>
-                        <div>
-                            <label class="block font-bold text-gray-700 mb-2">Status</label>
-                            <Dropdown v-model="form.status" :options="statusOptions" optionLabel="label" optionValue="value" placeholder="Select Status" class="w-full" />
-                        </div>
-                    </div>
-
-                    <!-- Shipping Point Section -->
+                    <!-- Storage Location Selection -->
                     <div class="flex justify-between items-center border-b pb-2 mt-4">
-                        <div class="text-xl font-bold text-gray-800">🚚 Shipping Points</div>
+                        <div class="text-xl font-bold text-gray-800">🏢 Storage Location</div>
                     </div>
-                    
                     <div>
                         <div class="flex items-center justify-between mb-2">
-                            <label class="block font-bold text-gray-700">Shipping Points</label>
-                            <span class="text-sm text-gray-500">{{ selectedShippingPoints.length }} points selected</span>
+                            <label class="block font-bold text-gray-700">Storage Locations</label>
+                            <span class="text-sm text-gray-500">{{ form.storage_list.length }} locations selected</span>
                         </div>
 
                         <MultiSelect
-                            v-model="selectedShippingPoints"
-                            :options="shippingPoints"
+                            v-model="form.storage_list"
+                            :options="storageLocations"
                             optionLabel="code"
+                            optionValue="code" 
                             filter
                             display="chip"
-                            placeholder="Select Shipping Points"
+                            placeholder="Select Storage Locations"
                             class="w-full"
                             :maxSelectedLabels="3"
                         >
                             <template #option="slotProps">
                                 <div class="flex items-center">
-                                    <i class="pi pi-truck mr-2 text-blue-500" />
+                                    <i class="pi pi-warehouse mr-2 text-blue-500" />
                                     <span class="font-semibold">{{ slotProps.option.code }}</span>
                                 </div>
                             </template>
                             <template #value="slotProps">
                                 <div v-if="slotProps.value" class="inline-flex items-center">
-                                    <i class="pi pi-truck mr-1 text-sm" />
-                                    <span>{{ slotProps.value.length }} points selected</span>
+                                    <i class="pi pi-warehouse mr-1 text-sm" />
+                                    <span>{{ slotProps.value.length }} locations selected</span>
                                 </div>
                                 <span v-else>{{ slotProps.placeholder }}</span>
                             </template>
                         </MultiSelect>
                     </div>
 
-                    <!-- Selected Shipping Points Preview -->
-                    <div v-if="selectedShippingPoints.length > 0" class="border rounded-lg p-4 bg-gray-50">
-                        <label class="block font-bold text-gray-700 mb-3">Selected Shipping Points</label>
-                        <DataTable :value="selectedShippingPoints" :paginator="true" :rows="5" :rowsPerPageOptions="[3, 5, 7, 10]" dataKey="code" :rowHover="true" responsiveLayout="scroll">
-                            <Column header="Code" style="min-width: 8rem">
-                                <template #body="{ data }">
-                                    <div class="font-semibold text-gray-800">
-                                        {{ data.code }}
-                                    </div>
-                                </template>
-                            </Column>
+                </div>
 
-                            <Column header="Name" style="min-width: 12rem">
-                                <template #body="{ data }">
-                                    <div class="text-gray-700">
-                                        {{ data.name }}
-                                    </div>
-                                </template>
-                            </Column>
-
-                            <Column header="Description" style="min-width: 15rem">
-                                <template #body="{ data }">
-                                    <div class="text-gray-600">
-                                        {{ data.description }}
-                                    </div>
-                                </template>
-                            </Column>
-
-                            <Column header="Actions" style="min-width: 6rem">
-                                <template #body="{ data }">
-                                    <Button icon="pi pi-trash" class="p-button-danger p-button-text p-button-sm" @click="removeShippingPoint(data)" />
-                                </template>
-                            </Column>
-
-                            <template #empty>
-                                <div class="text-center text-gray-500 py-4">No shipping points selected.</div>
-                            </template>
-                        </DataTable>
+                <!-- Action Buttons -->
+                <div class="flex justify-end gap-4 mt-8">
+                    <div class="w-32">
+                        <Button label="Cancel" class="w-full p-button-outlined p-button-secondary" @click="handleCancel" />
                     </div>
-
-                    <!-- Action Buttons -->
-                    <div class="flex justify-end gap-4">
-                        <div class="w-32">
-                            <Button label="Cancel" class="w-full p-button-outlined p-button-secondary" @click="handleCancel" />
-                        </div>
-                        <div class="w-32">
-                            <Button label="Save" class="w-full" :disabled="!isFormValid" @click="submitForm" />
-                        </div>
+                    <div class="w-32">
+                        <Button label="Update" class="w-full"  @click="submitForm" />
                     </div>
                 </div>
             </div>
@@ -161,32 +117,27 @@
 
 <script setup>
 import { reactive, ref, computed, onMounted } from 'vue';
-import { useRouter } from 'vue-router';
-import MultiSelect from 'primevue/multiselect';
-import Dropdown from 'primevue/dropdown';
+import { useRoute, useRouter } from 'vue-router';
+import { useToast } from 'primevue/usetoast';
+import api from '@/service/api';
 
+const route = useRoute();
+const logisticList = ref({});
+const toast = useToast();
 const router = useRouter();
+const loading = ref(true);
 
-// reactive form data with sample data pre-filled
-const form = reactive({
-    companyName: "JNT",
-    contactPerson: "John Doe",
-    contactNo: "123-456-7890",
-    address: "Toyo Tires Malaysia, Jalan Toyo, Off Jalan Klang Lama",
-    city: "Shah Alam",
-    postcode: "47301",
-    state: "Selangor",
-    username: "jnt_user01",
-    password: "password123",
-    status: "1"
-});
+const allowOnlyNumbers = (event) => {
+  // Allow only digits (0-9)
+  const char = String.fromCharCode(event.charCode);
+  if (!/[0-9]/.test(char)) {
+    event.preventDefault();
+  }
+};
 
-// shipping point selection data
-const selectedShippingPoints = ref([]);
-
-// Shipping points data
-const shippingPoints = ref([
-     {
+// Storage locations data - TMJB, TMSA, RETP, RER, TMSB, TMSK
+const storageLocations = ref([
+    {
         code: 'TMJB',
         name: 'Toyo Malaysia Johor Bahru',
         description: 'Main storage facility in Johor Bahru'
@@ -221,70 +172,127 @@ const shippingPoints = ref([
 // list of states
 const states = ['Johor', 'Kedah', 'Kelantan', 'Melaka', 'Negeri Sembilan', 'Pahang', 'Penang', 'Perak', 'Perlis', 'Sabah', 'Sarawak', 'Selangor', 'Terengganu', 'Kuala Lumpur', 'Putrajaya', 'Labuan'];
 
-// status options
-const statusOptions = ref([
-    { label: 'Active', value: '1' },
-    { label: 'Inactive', value: '0' }
-]);
+const form = reactive({
+    uname: '',
+    companyname: '',
+    addressline1: '',
+    addressline2: '',
+    city: '',
+    state: '',
+    postcode: '',
+    emailaddress: '',
+    phoneno: '',
+    contactperson: '',
+    mobileno: '',
+    storage_list: []  // <-- array for MultiSelect
+});
 
 // form validation
 const isFormValid = computed(() => {
     return (
-        form.companyName.trim() !== '' &&
-        form.contactPerson.trim() !== '' &&
-        form.address.trim() !== '' &&
+        form.uname.trim() !== '' &&
+        form.companyname.trim() !== '' &&
+        form.addressline1.trim() !== '' &&
+        form.addressline2.trim() !== '' &&
         form.city.trim() !== '' &&
         form.state.trim() !== '' &&
         form.postcode.trim() !== '' &&
-        form.contactNo.trim() !== '' &&
-        form.username.trim() !== '' &&
-        form.password.trim() !== '' &&
-        form.status.trim() !== ''
+        form.emailaddress.trim() !== '' &&
+        form.phoneno.trim() !== '' &&
+        form.contactperson.trim() !== '' &&
+        form.mobileno.trim() !== '' &&
+        form.storage_list
     );
 });
 
-// Initialize with some pre-selected shipping points for demonstration
-onMounted(() => {
-    selectedShippingPoints.value = [
-        shippingPoints.value[0], // Main Shipping Point
-        shippingPoints.value[2] // South Region Shipping
-    ];
-});
-
-const removeShippingPoint = (point) => {
-    const index = selectedShippingPoints.value.findIndex((p) => p.code === point.code);
-    if (index !== -1) {
-        selectedShippingPoints.value.splice(index, 1);
-    }
-};
-
 const handleCancel = () => {
-    if (form.companyName || form.contactPerson || selectedShippingPoints.value.length > 0) {
-        if (confirm('You have unsaved changes. Are you sure you want to cancel?')) {
-            router.back();
-        }
-    } else {
-        router.back();
-    }
+    router.back();
 };
 
-const submitForm = () => {
+const submitForm  = async () => {
+    // console.log((form));
     if (!isFormValid.value) {
         alert('Please fill in all required fields.');
         return;
     }
+    const formData = new FormData();
+    formData.append('username', form.uname);
+    formData.append('companyname', form.companyname);
+    formData.append('addressline1', form.addressline1);
+    formData.append('addressline2', form.addressline2);
+    formData.append('city', form.city);
+    formData.append('state', form.state);
+    formData.append('postcode', form.postcode);
+    formData.append('emailaddress', form.emailaddress);
+    formData.append('phoneno', form.phoneno);
+    formData.append('contactperson', form.contactperson);
+    formData.append('mobileno', form.mobileno);
+    formData.append('storage_list', JSON.stringify(form.storage_list));
+    console.log('FormData contents:');
+    for (const [key, value] of formData.entries()) {
+        console.log(key, value);
+    }
+    try {
+        loading.value = true;
+        const id = route.params.id;
+        const response = await api.postExtra(`3pl-users/update/${id}`, formData, {
+            // headers: { 'Content-Type': 'multipart/form-data' }
+        });
+        if (response.data.status === 1) {
+            toast.add({ severity: 'success', summary: 'Success', detail: '3PL updated', life: 3000 });
+        } else {
+            toast.add({ severity: 'error', summary: 'Error', detail: 'Failed to update 3PL', life: 3000 });
+        }
+        console.log(response);
+    } catch (error) {
+            console.error('Error submitting form:', error);
+            toast.add({ severity: 'error', summary: 'Error', detail: 'Failed to update 3PL', life: 3000 });
+    } finally {
+        loading.value = false;
+        router.push('/scm/listLogistic');
+    }
 
-    const formData = {
-        ...form,
-        selectedShippingPoints: selectedShippingPoints.value
-    };
-
-    console.log('Submitted data:', formData);
-    alert('Logistic updated successfully!');
-
-    // Navigate back to logistic list
-    router.push('/scm/listLogistic');
 };
+const InitfetchData = async () => {
+    try {
+        loading.value = true;
+        const id = route.params.id;
+        const response = await api.get(`3pl-users/detail/${id}`);
+        if ( (response.data.admin_data)) {
+            // response.data.status === 1 &&
+            logisticList.value = response.data.admin_data;
+            Object.assign(form, {
+                uname: logisticList.value.uname || '',
+                companyname: logisticList.value.companyname || '',
+                addressline1: logisticList.value.addressline1 || '',
+                addressline2: logisticList.value.addressline2 || '',
+                city: logisticList.value.city || '',
+                state: logisticList.value.state || '',
+                postcode: logisticList.value.postcode || '',
+                emailaddress: logisticList.value.emailaddress || '',
+                phoneno: logisticList.value.phoneno || '',
+                contactperson: logisticList.value.contactperson || '',
+                mobileno: logisticList.value.mobileno || '',
+                storage_list: logisticList.value.storageLocationList
+                    ? logisticList.value.storageLocationList.split(',')
+                    : []
+            });
+        } else {
+            console.error('API returned error or invalid data:', response.data);
+            toast.add({ severity: 'error', summary: 'Error', detail: 'Failed to load data', life: 3000 });
+        }
+    } catch (error) {
+        console.error('Error fetching data list:', error);
+        logisticList.value = [];
+        toast.add({ severity: 'error', summary: 'Error', detail: 'Failed to load data', life: 3000 });
+    } finally {
+        loading.value = false;
+        
+    }
+};
+onMounted(() => {
+    InitfetchData();
+});
 </script>
 
 <style scoped>

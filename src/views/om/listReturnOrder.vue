@@ -163,11 +163,6 @@ onBeforeMount(() => {
                             </IconField>
                             <Button type="button" icon="pi pi-cog" class="p-button" />
                         </div>
-
-                        <!-- Right: Create Customer Button -->
-                        <RouterLink to="/om/createReturnOrder">
-                            <Button type="button" label="Create" />
-                        </RouterLink>
                     </div>
                 </template>
 
