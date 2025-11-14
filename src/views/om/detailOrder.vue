@@ -111,9 +111,9 @@
                     <div class="overflow-x-auto">
                         <table class="w-full text-sm text-left text-gray-700">
                             <tbody>
-                                <tr class="border-b">
+                                <tr class="border-b text-xm">
                                     <td class="px-4 py-2 font-medium">Order No.</td>
-                                    <td class="px-4 py-2 text-right font-semibold">{{ orderData.order_no || '-' }}</td>
+                                    <td class="px-4 py-2 text-right font-bold">{{ orderData.order_no || '-' }}</td>
                                 </tr>
                                 <tr class="border-b">
                                     <td class="px-4 py-2 font-medium">SO No.</td>
