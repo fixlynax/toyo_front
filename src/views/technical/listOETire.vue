@@ -167,7 +167,7 @@ const fetchExportOE = async () => {
         window.URL.revokeObjectURL(url);
 
     } catch (err) {
-        console.error('rror fetching OE Tire export:', err);
+        console.error('error fetching OE Tire export:', err);
     } finally {
         loading.value = false;
     }
