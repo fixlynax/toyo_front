@@ -20,14 +20,8 @@
                                 <RouterLink :to="`/om/editSalesProgram/${programId}`">
                                     <Button label="Edit" class="p-button-info" size="small" />
                                 </RouterLink>
-                                <Button label="Delete" class="p-button-danger" size="small" @click="confirmDelete" />
                             </div>
                         </div>
-
-                        <!-- Loading State -->
-                        <!-- <div v-if="loading" class="flex justify-center items-center py-12">
-                            <ProgressSpinner style="width: 50px; height: 50px" strokeWidth="4" />
-                        </div> -->
 
                         <LoadingPage v-if="loading" :message="'Loading News...'" :sub-message="'Fetching list announcements'" />
 
@@ -259,31 +253,58 @@ const error = ref(false);
 const salesProgram = ref({});
 const criteriaList = ref([]);
 
-// Process private images using the API method
-// const processPrivateImages = async () => {
-//     const imageFields = ['imageUrl'];
-    
-//     const imageProcessingPromises = imageFields.map(async (field) => {
-//         if (!salesProgram.value[field] || typeof salesProgram.value[field] !== 'string') {
-//             salesProgram.value[field] = '/demo/images/event-toyo-2.jpg';
-//             return;
-//         }
+// Fixed image processing function
+const processPrivateImages = async (programData) => {
+    if (!programData || !programData.imageUrl) {
+        return programData;
+    }
 
-//         if (salesProgram.value[field].startsWith('http') || salesProgram.value[field].startsWith('/')) {
-//             return;
-//         }
+    const imageUrl = programData.imageUrl;
 
-//         try {
-//             const blobUrl = await api.getPrivateFile(salesProgram.value[field]);
-//             salesProgram.value[field] = blobUrl || '/demo/images/event-toyo-2.jpg';
-//         } catch (error) {
-//             console.error(`Error loading image ${field}:`, error);
-//             salesProgram.value[field] = '/demo/images/event-toyo-2.jpg';
-//         }
-//     });
+    // If it's already a valid full URL or data URL, return as is
+    if (imageUrl.startsWith('http') || imageUrl.startsWith('data:') || imageUrl.startsWith('blob:')) {
+        return programData;
+    }
 
-//     await Promise.all(imageProcessingPromises);
-// };
+    // If it's a relative path starting with /, construct full URL
+    if (imageUrl.startsWith('/')) {
+        programData.imageUrl = `${window.location.origin}${imageUrl}`;
+        return programData;
+    }
+
+    // If it's a file path that needs API processing
+    try {
+        console.log('Processing private image:', imageUrl);
+        const blobUrl = await api.getPrivateFile(imageUrl);
+        if (blobUrl) {
+            programData.imageUrl = blobUrl;
+        } else {
+            // Fallback to placeholder if API returns null/undefined
+            programData.imageUrl = 'https://via.placeholder.com/800x400?text=Image+Not+Found';
+        }
+    } catch (error) {
+        console.error('Error loading private image:', error);
+        // Fallback strategies
+        if (imageUrl.includes('salesprogramphotos')) {
+            // Try to construct URL for sales program photos
+            programData.imageUrl = `${window.location.origin}/${imageUrl}`;
+        } else {
+            programData.imageUrl = 'https://via.placeholder.com/800x400?text=Image+Not+Found';
+        }
+    }
+
+    return programData;
+};
+
+// Enhanced image error handler
+const handleImageError = (event) => {
+    console.warn('Image failed to load:', event.target.src);
+    event.target.src = 'https://via.placeholder.com/800x400?text=Image+Not+Found';
+
+    // Update the salesProgram data as well
+    salesProgram.value.imageUrl = 'https://via.placeholder.com/800x400?text=Image+Not+Found';
+};
+
 const fetchSalesProgram = async () => {
     loading.value = true;
     error.value = false;
@@ -296,27 +317,25 @@ const fetchSalesProgram = async () => {
             throw new Error('No sales program data found');
         }
 
-        const programData = response.data.admin_data[0];
+        let programData = response.data.admin_data[0];
+
+        // Process images BEFORE setting the reactive data
+        programData = await processPrivateImages(programData);
+
+        // Now set the reactive data
         salesProgram.value = programData;
         criteriaList.value = programData.salesProgramFOC || [];
 
-        await processPrivateImages();
-
         showToast('success', 'Success', 'Sales program data loaded successfully');
-        
     } catch (err) {
         console.error('Error fetching sales program:', err);
         error.value = true;
-        
+
         const errorMessage = err.response?.data?.message || err.message || 'Failed to load sales program data';
         showToast('error', 'Error', errorMessage);
     } finally {
         loading.value = false;
     }
-};
-
-const handleImageError = (event) => {
-    event.target.src = '/demo/images/event-toyo-2.jpg'; // Fallback image
 };
 
 const formatDate = (dateString) => {
@@ -346,11 +365,6 @@ const showToast = (severity, summary, detail) => {
         detail,
         life: 3000
     });
-};
-
-const confirmDelete = () => {
-    // Implement delete confirmation logic here
-    showToast('warn', 'Delete', 'Delete functionality to be implemented');
 };
 
 onMounted(() => {

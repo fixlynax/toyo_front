@@ -257,6 +257,11 @@ const router = createRouter({
                     name: 'Material-Exception',
                     component: () => import('@/views/om/listMaterialException.vue')
                 },
+                {
+                    path: 'om/listContainer',
+                    name: 'Container-List',
+                    component: () => import('@/views/om/listContainer.vue')
+                },
 
                 // ===============================
                 // MARKETING

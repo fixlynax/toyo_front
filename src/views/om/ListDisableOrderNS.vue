@@ -2,7 +2,7 @@
     <div class="card rounded-2xl shadow-sm">
         <!-- Header -->
         <div class="flex justify-between items-center mb-4">
-            <h5 class="m-0 text-2xl font-bold text-gray-800">DO - Normal Shipment</h5>
+            <h5 class="m-0 text-2xl font-bold text-gray-800">Normal Location</h5>
         </div>
 
         <!-- 🟢 Loading Page -->
@@ -200,6 +200,7 @@
                         placeholder="Select Storage Location"
                         class="w-full"
                         :class="{ 'p-invalid': submitted && !editingOrder.storageLocation }"
+                        disabled
                     />
                     <small v-if="submitted && !editingOrder.storageLocation" class="p-error block mt-1">Storage Location is required</small>
                 </div>

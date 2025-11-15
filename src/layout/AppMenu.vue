@@ -209,12 +209,12 @@ const model = ref([
                         icon: 'pi pi-fw pi-ban',
                         items: [
                             {
-                                label: 'Normal Shipment',
+                                label: 'Normal Location',
                                 icon: 'pi pi-fw pi-box',
                                 to: '/om/listDisableOrderNS'
                             },
                             {
-                                label: 'Direct Shipment',
+                                label: 'RER Location',
                                 icon: 'pi pi-fw pi-truck',
                                 to: '/om/listDisableOrderDS'
                             }
@@ -229,6 +229,11 @@ const model = ref([
                         label: 'Material Exception',
                         icon: 'pi pi-fw pi-exclamation-triangle',
                         to: '/om/listMaterialException'
+                    },
+                    {
+                        label: 'Directship Container',
+                        icon: 'pi pi-fw pi-box',
+                        to: '/om/listContainer'
                     }
                 ]
             }

@@ -2,7 +2,7 @@
     <div class="card rounded-2xl shadow-sm">
         <!-- Header -->
         <div class="flex justify-between items-center mb-4">
-            <h5 class="m-0 text-2xl font-bold text-gray-800">DO - Direct Shipment</h5>
+            <h5 class="m-0 text-2xl font-bold text-gray-800">RER Location</h5>
         </div>
 
         <!-- 🟢 Loading Page -->
