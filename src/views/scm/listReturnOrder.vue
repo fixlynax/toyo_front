@@ -29,15 +29,26 @@
                             <Button type="button" icon="pi pi-cog" @click="sortMenu.toggle($event)" />
                             <Menu ref="sortMenu" :model="sortItems" :popup="true" />
                         </div>
-                        <div class="flex justify-end gap-2">
-                            <Button type="button" label="Export" icon="pi pi-file-export" class="p-button-success" :loading="exportLoading" @click="handleExport"/>
-                            <Button type="button" label="Bulk Import" icon="pi pi-file-import" @click="importInput?.click()":loading="importLoading" />
+                        <!-- <div class="flex justify-end gap-2"  v-if="statusTabs[activeTabIndex]?.label === 'New'">
+                            <Button type="button" label="Export" icon="pi pi-file-export" class="p-button-success" :loading="exportLoading1" @click="handleExport1"/>
+                            <Button type="button" label="Bulk Import" icon="pi pi-file-import" @click="importInput1?.click()":loading="importLoading1" />
                             <input 
-                            ref="importInput"
+                            ref="importInput1"
                             type="file" 
                             accept=".xlsx,.xls" 
                             style="display: none" 
-                            @change="handleImport"
+                            @change="handleImport1"
+                            />
+                        </div> -->
+                        <div class="flex justify-end gap-2"  v-if="statusTabs[activeTabIndex]?.label === 'Pending'">
+                            <Button type="button" label="Export" icon="pi pi-file-export" class="p-button-success" :loading="exportLoading2" @click="handleExport2"/>
+                            <Button type="button" label="Bulk Import" icon="pi pi-file-import" @click="importInput2?.click()":loading="importLoading2" />
+                            <input 
+                            ref="importInput2"
+                            type="file" 
+                            accept=".xlsx,.xls" 
+                            style="display: none" 
+                            @change="handleImport2"
                             />
                         </div>
                     </div>
@@ -51,6 +62,7 @@
                 <template #header>
                     <div class="flex justify-center">
                     <Checkbox
+                        :key="filteredList.length" 
                         :binary="true"
                         :model-value="allSelected"  
                         @change="() => toggleSelectAll()"  
@@ -125,12 +137,16 @@ import api from '@/service/api';
 import { useToast } from 'primevue/usetoast';
 
 const toast = useToast();
-const exportLoading = ref(false);
-const importLoading = ref(false);
+const exportLoading1 = ref(false);
+const importLoading1 = ref(false);
+const exportLoading2 = ref(false);
+const importLoading2 = ref(false);
 const returnList = ref([]);
 const filteredList = ref([]);
 const loading = ref(true);
-const importInput = ref();
+const importInput1 = ref();
+const importInput2 = ref();
+
 const selectedExportIds = ref(new Set());
 const activeTabIndex = ref(0);
 // Filters for quick search
@@ -189,6 +205,7 @@ const statusTabs = [
 
 watch(activeTabIndex, () => {
     filterByTab();
+    selectedExportIds.value.clear();
 });
 
 const filterByTab = () => {
@@ -202,7 +219,8 @@ const filterByTab = () => {
 
 // Computed boolean: are all rows selected?
 const allSelected = computed(() => {
-  return returnList.value.length > 0 && selectedExportIds.value.size === returnList.value.length;
+  return filteredList.value.length > 0 &&
+         filteredList.value.every(item => selectedExportIds.value.has(item.id));
 });
 
 const handleToggleExport = (id) => {
@@ -217,16 +235,20 @@ const handleToggleExport = (id) => {
 // Check all
 const toggleSelectAll = () => {
   if (allSelected.value) {
-    // Unselect all
-    selectedExportIds.value.clear();
+    // Unselect all for this tab
+    filteredList.value.forEach(item => {
+      selectedExportIds.value.delete(item.id);
+    });
   } else {
-    // Select all
-    returnList.value.forEach(row => selectedExportIds.value.add(row.id));
+    // Select all for this tab
+    filteredList.value.forEach(item => {
+      selectedExportIds.value.add(item.id);
+    });
   }
 };
 
-// Export function
-const handleExport = async () => {
+// Export function PICKUP ONLY
+const handleExport1 = async () => {
      const idsArray = Array.from(selectedExportIds.value).map(id => ({ id: Number(id) }));
 
     if (idsArray.length === 0) {
@@ -234,7 +256,7 @@ const handleExport = async () => {
         return;
     }
     try {
-        exportLoading.value = true;
+        exportLoading1.value = true;
         
             const response = await api.postExtra(
             'excel/export-scm-return-order-list',
@@ -265,22 +287,65 @@ const handleExport = async () => {
         console.error('Error exporting data:', error);
         toast.add({ severity: 'error', summary: 'Error', detail: 'Failed to export data', life: 3000 });
     } finally {
-        exportLoading.value = false;
+        exportLoading1.value = false;
+    }
+};
+// Export function RECEIVE ONLY
+const handleExport2 = async () => {
+     const idsArray = Array.from(selectedExportIds.value).map(id => ({ id: Number(id) }));
+
+    if (idsArray.length === 0) {
+        alert('Please select at least one row.');
+        return;
+    }
+    try {
+        exportLoading2.value = true;
+        
+            const response = await api.postExtra(
+            'excel/export-scm-receivereturn-order-list',
+        { returnorderids_array: JSON.stringify(idsArray) },
+        {
+            responseType: 'blob',
+            headers: {
+            'Content-Type': 'application/json',
+            }
+        }
+        );
+        const blob = new Blob([response.data], { 
+        type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' 
+        });
+
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = 'BulkOrder_Download.xlsx';
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        window.URL.revokeObjectURL(url);
+
+        toast.add({ severity: 'success', summary: 'Success', detail: 'Export completed', life: 3000 });
+        selectedExportIds.value.clear();
+    } catch (error) {
+        console.error('Error exporting data:', error);
+        toast.add({ severity: 'error', summary: 'Error', detail: 'Failed to export data', life: 3000 });
+    } finally {
+        exportLoading2.value = false;
     }
 };
 
-// Import function
-const handleImport = async (event) => {
+// Import function PICKUP ONLY
+const handleImport1 = async (event) => {
     const file = event.target.files[0];
     if (!file) return;
 
     try {
-        importLoading.value = true;
+        importLoading1.value = true;
         
         const formData = new FormData();
         formData.append('return_order_excel', file);
         
-        const response = await api.postExtra('excel/import-scm-return-order-list', formData, {
+        const response = await api.postExtra('excel/import-scm-receivereturn-order-list', formData, {
             headers: {
                 'Content-Type': 'multipart/form-data'
             }
@@ -310,10 +375,58 @@ const handleImport = async (event) => {
         console.error('Error importing data:', error);
         toast.add({ severity: 'error', summary: 'Error', detail: 'Failed to import data', life: 3000 });
     } finally {
-        importLoading.value = false;
+        importLoading1.value = false;
                     // Reset file input
-            if (importInput.value) {
-                importInput.value.value = '';
+            if (importInput1.value) {
+                importInput1.value.value = '';
+            }
+    }
+};
+// Import function RECEIVE ONLY
+const handleImport2 = async (event) => {
+    const file = event.target.files[0];
+    if (!file) return;
+
+    try {
+        importLoading2.value = true;
+        
+        const formData = new FormData();
+        formData.append('return_order_excel', file);
+        
+        const response = await api.postExtra('import-scm-receivereturn-order-list', formData, {
+            headers: {
+                'Content-Type': 'multipart/form-data'
+            }
+            });
+        
+        if (response.data.status === 1) {
+            // Refresh data after import
+            await fetchData();
+
+
+
+            toast.add({
+                severity: 'success',
+                summary: 'Success',
+                detail: 'File imported successfully',
+                life: 3000
+            });
+            } else {
+            toast.add({
+                severity: 'error',
+                summary: 'Import Failed',
+                detail: response.data.error || 'Server did not confirm success',
+                life: 3000
+            });
+        }
+    } catch (error) {
+        console.error('Error importing data:', error);
+        toast.add({ severity: 'error', summary: 'Error', detail: 'Failed to import data', life: 3000 });
+    } finally {
+        importLoading2.value = false;
+                    // Reset file input
+            if (importInput2.value) {
+                importInput2.value.value = '';
             }
     }
 };
@@ -322,7 +435,7 @@ const fetchData = async () => {
     try {
         loading.value = true;
         const response = await api.get('scm-return-order-list');
-        console.log('API Response:', response.data);
+        // console.log('API Response:', response.data);
         if (response.data.status === 1 && Array.isArray(response.data.admin_data)) {
                 returnList.value = response.data.admin_data.sort((a, b) => {
         return new Date(b.created) - new Date(a.created);
