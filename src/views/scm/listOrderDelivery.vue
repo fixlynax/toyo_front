@@ -211,7 +211,7 @@ const handleToggleExport = (id) => {
   } else {
     selectedExportIds.value.add(id);
   }
-  console.log(selectedExportIds.value);
+//   console.log(selectedExportIds.value);
 };
 
 // Check all
@@ -334,7 +334,7 @@ const handleExport1 = async () => {
         const url = window.URL.createObjectURL(blob);
         const a = document.createElement('a');
         a.href = url;
-        a.download = 'BulkReturnSchedule_Download.xlsx';
+        a.download = 'BulkDeliverySchedule_Download.xlsx';
         document.body.appendChild(a);
         a.click();
         document.body.removeChild(a);
@@ -378,7 +378,7 @@ const handleExport2 = async () => {
         const url = window.URL.createObjectURL(blob);
         const a = document.createElement('a');
         a.href = url;
-        a.download = 'BulkReturnReceive_Download.xlsx';
+        a.download = 'BulkDeliveryReceive_Download.xlsx';
         document.body.appendChild(a);
         a.click();
         document.body.removeChild(a);

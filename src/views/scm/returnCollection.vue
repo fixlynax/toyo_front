@@ -2,7 +2,6 @@
     <div class="card">
         <div class="flex items-center justify-between mb-4">
             <div class="text-2xl font-bold text-gray-800">CTC Return List</div>
-  
         </div>
         <TabMenu :model="statusTabs" v-model:activeIndex="activeTabIndex" class="mb-6" />
         <DataTable
@@ -202,7 +201,7 @@ const handleToggleExport = (id) => {
   } else {
     selectedExportIds.value.add(id);
   }
-  console.log(selectedExportIds.value);
+//   console.log(selectedExportIds.value);
 };
 
 // Check all

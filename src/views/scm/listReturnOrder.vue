@@ -225,7 +225,7 @@ const handleToggleExport = (id) => {
   } else {
     selectedExportIds.value.add(id);
   }
-  console.log(selectedExportIds.value);
+//   console.log(selectedExportIds.value);
 };
 
 // Check all
