@@ -84,18 +84,18 @@ onMounted(async () => {
             listData.value = response.data.admin_data.map((item) => ({
                 id: item.id,
                 claimRefNo: item.claimRefNo,
-                companyName1: item.eten_data?.companyName1 || 'N/A',
-                custAccountNo: item.eten_data?.custAccountNo || 'N/A',
-                city: item.eten_data?.city || 'N/A',
-                collectDate: formatDate(item.ctc_data?.collectDate) || 'N/A',
+                companyName1: item.eten_data?.companyName1 || '-',
+                custAccountNo: item.eten_data?.custAccountNo || '-',
+                city: item.eten_data?.city || '-',
+                collectDate: formatDate(item.ctc_data?.collectDate) || '-',
                 collectTime: formatTime(item.ctc_data?.collectTime) || '',
-                returnDate: formatDateFull(item.ctc_data?.returnDateTime) || 'N/A',
-                createDate: formatDateFull(item.ctc_data?.created) || 'N/A',
+                returnDate: formatDateFull(item.ctc_data?.returnDateTime) || '-',
+                createDate: formatDate(item.ctc_data?.created) || '-',
                 collectionAddress:
                     [item.eten_data?.addressLine1, item.eten_data?.addressLine2, item.eten_data?.addressLine3, item.eten_data?.addressLine4, item.eten_data?.city, item.eten_data?.postcode, item.eten_data?.state]
                         .filter((part) => part && part.trim() !== '')
-                        .join(' ') || 'N/A',
-                contactNo: item.eten_data?.phoneNumber || 'N/A',
+                        .join(' ') || '-',
+                contactNo: item.eten_data?.phoneNumber || '-',
                 status: item.status,
             
             }));
@@ -164,7 +164,7 @@ const handleImport = async (event) => {
 
 <template>
     <div class="card">
-        <div class="text-2xl font-bold text-gray-800 border-b pb-2">List Collection</div>
+        <div class="text-2xl font-bold text-gray-800 border-b pb-2"> CTC List Collection</div>
 
         <DataTable
             v-model:selection="selectedRows"
@@ -292,7 +292,7 @@ const handleImport = async (event) => {
                 </template>
             </Column>
 
-                        <Column field="returnDate" header="Return Date" style="min-width: 10rem">
+                        <Column field="returnDate" header="Receive Date" style="min-width: 10rem">
                 <template #body="{ data }">
                     {{ data.returnDate }}
                 </template>

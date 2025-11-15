@@ -1,12 +1,12 @@
 <template>
     <div class="card">
         <div class="flex items-center justify-between mb-4">
-            <div class="text-2xl font-bold text-gray-800">Return List</div>
+            <div class="text-2xl font-bold text-gray-800">CTC Return List</div>
             <Button icon="pi pi-upload" label="Bulk Update" class="p-button" />
         </div>
 
         <DataTable
-            :value="listData"
+            :value="collectionList"
             :paginator="true"
             :rows="10"
             :rowsPerPageOptions="[5, 10, 20]"
@@ -15,7 +15,7 @@
             :loading="loading"
             :filters="filters"
             filterDisplay="menu"
-            :globalFilterFields="['requestDate', 'collectRef', 'dealerName', 'mailAddr', 'contactNo', 'dealerLoc', 'state', 'totalTire', 'status']"
+            :globalFilterFields="['claimRefNo', 'companyName1', 'custAccountNo', 'problem', 'warrantyCertNo', 'action']"
         >
             <!-- ========================= -->
             <!-- Header Section -->
@@ -31,7 +31,7 @@
                             <InputText v-model="filters['global'].value" placeholder="Quick Search" class="w-full" />
                         </IconField>
                         <Button type="button" icon="pi pi-cog" @click="sortMenu.toggle($event)" />
-                        <!-- <Menu ref="sortMenu" :model="sortItems" :popup="true" /> -->
+                        <Menu ref="sortMenu" :model="sortItems" :popup="true" />
                     </div>
 
                     <!-- Right: Sorting Options -->
@@ -42,67 +42,60 @@
             <template #empty> No return records found. </template>
             <template #loading> Loading return data. Please wait. </template>
 
-            <Column field="requestDate" header="Create Date" style="min-width: 8rem">
+            <Column field="created" header="Create Date" style="min-width: 8rem">
                 <template #body="{ data }">
-                    {{ data.requestDate }}
+                    {{ formatDate(data?.created) ?? '-' }}
                 </template>
             </Column>
 
-            <Column field="collectRef" header="Ref No" style="min-width: 8rem">
+            <Column field="claimRefNo" header="Ref No" style="min-width: 8rem">
                 <template #body="{ data }">
-                    <RouterLink to="/scm/detailReturnList" class="hover:underline font-bold text-primary">
-                        {{ data.collectRef }}
+                    <RouterLink :to="`/technical/detailWarantyClaim/${data.id}`" class="hover:underline font-bold text-primary">
+                        {{ data.claimRefNo }}
                     </RouterLink>
                 </template>
             </Column>
-
-            <Column field="dealerName" header="Customer Acc No." style="min-width: 8rem">
+            <Column field="custAccountNo" header="Customer Acc No" style="min-width: 8rem">
                 <template #body="{ data }">
-                    {{ data.customerID }}
+                    {{ data.eten_data.custAccountNo }}
                 </template>
             </Column>
-            <Column field="dealerName" header="Customer Name" style="min-width: 8rem">
+            <Column field="companyName1" header="Customer Name" style="min-width: 8rem">
                 <template #body="{ data }">
-                    {{ data.dealerName }}
+                    {{ data.eten_data.companyName1 }}
                 </template>
             </Column>
-            <Column field="ctcAddr" header="Collection Address" style="min-width: 8rem">
+            <Column field="addressLine1" header="Collection Address" style="min-width: 8rem">
                 <template #body="{ data }">
-                    {{ data.dealerName }}
+                    {{ `${data.eten_data.addressLine1} ${data.eten_data.addressLine2} ${data.eten_data.addressLine4} ${data.eten_data.addressLine4} ${data.eten_data.city} ${data.eten_data.postcode} ${data.eten_data.state}`}}
                 </template>
             </Column>
-
-            <Column field="contact" header="Contact" style="min-width: 8rem">
+            <Column field="phoneNumber" header="Contact No" style="min-width: 8rem">
                 <template #body="{ data }">
-                    {{ data.mailAddr }}<br />
-                    <small class="text-gray-600">{{ data.contactNo }}</small>
+                    {{ data.eten_data.phoneNumber }}
                 </template>
             </Column>
-            <Column field="contact" header="3PL" style="min-width: 8rem">
-                <template #body="{ data }">
-                    {{ data.PL }}
-                </template>
-            </Column>
-            <Column field="contact" header="Pickup DateTime" style="min-width: 8rem">
-                <template #body="{ data }">
-                    {{ data.PL }}
-                </template>
-            </Column>
-            <Column field="contact" header="Collected DateTime" style="min-width: 8rem">
-                <template #body="{ data }">
-                    {{ data.PL }}
-                </template>
-            </Column>
-
-            <Column field="totalTire" header="Piece of Tires" style="min-width: 6rem">
+            <Column field="totalTire" header="Pcs" style="min-width: 6rem">
                 <template #body="{ data }">
                     <span class="font-bold">{{ data.totalTire }}</span>
                 </template>
             </Column>
-
-            <Column field="status" header="Status" style="min-width: 6rem">
+            <Column field="PL" header="Delivery Date" style="min-width: 8rem">
                 <template #body="{ data }">
-                    <Tag :value="data.status === 1 ? 'Pending' : data.status === 2 ? 'Completed' : 'In Progress'" :severity="getStatusSeverity(data.status)" />
+
+                </template>
+            </Column>
+            <Column field="PL" header="Delivered Date" style="min-width: 8rem">
+                <template #body="{ data }">
+                    {{ data.PL }}
+                </template>
+            </Column>
+
+
+
+            <Column field="action" header="Status" style="min-width: 6rem">
+                <template #body="{ data }">
+                    <Tag :value="data?.action ?? 'PENDING'" :severity="getStatusSeverity(data.action)" />
                 </template>
             </Column>
         </DataTable>
@@ -116,7 +109,6 @@ import { ListCollectionService } from '@/service/ListCollection';
 import api from '@/service/api';
 
 // Data variables
-const listData = ref([]);
 const loading = ref(false);
 const collectionList = ref([]);
 const sortMenu = ref();
@@ -125,37 +117,40 @@ const filters = ref({
     global: { value: null, matchMode: FilterMatchMode.CONTAINS }
 });
 const sortBy = (field, order) => {
-    collectionList.value.sort((a, b) => {
-        if (a[field] < b[field]) return order === 'asc' ? -1 : 1;
-        if (a[field] > b[field]) return order === 'asc' ? 1 : -1;
-        return 0;
-    });
+  collectionList.value = [...collectionList.value].sort((a, b) => {
+    // Helper to get nested value
+    const getField = (obj) => {
+      return field.split('.').reduce((acc, key) => (acc ? acc[key] : ''), obj) ?? '';
+    };
+
+    const aVal = getField(a).toString().toLowerCase();
+    const bVal = getField(b).toString().toLowerCase();
+
+    if (aVal < bVal) return order === 'asc' ? -1 : 1;
+    if (aVal > bVal) return order === 'asc' ? 1 : -1;
+    return 0;
+  });
 };
 const sortItems = ref([
     {
         label: 'Sort by Ref No (A-Z)',
         icon: 'pi pi-sort-alpha-down',
-        command: () => sortBy('return_orderNo_ref', 'asc')
+        command: () => sortBy('claimRefNo', 'asc')
     },
     {
         label: 'Sort by Ref No (Z-A)',
         icon: 'pi pi-sort-alpha-up',
-        command: () => sortBy('return_orderNo_ref', 'desc')
+        command: () => sortBy('claimRefNo', 'desc')
     },
     {
         label: 'Sort by Cust Acc No (A-Z)',
         icon: 'pi pi-tag',
-        command: () => sortBy('custAccountNo', 'asc')
+        command: () => sortBy('eten_data.custAccountNo', 'asc')
     },
     {
         label: 'Sort by Company Name',
         icon: 'pi pi-globe',
-        command: () => sortBy('companyName1', 'asc')
-    },
-    {
-        label: 'Sort by Status',
-        icon: 'pi pi-check-circle',
-        command: () => sortBy('orderstatus', 'asc')
+        command: () => sortBy('eten_data.companyName1', 'asc')
     }
 ]);
 // =========================
@@ -163,8 +158,7 @@ const sortItems = ref([
 // =========================
     onMounted(async () => {
     loading.value = true;
-    listData.value = await ListCollectionService.getListCollectionData();
-        // fetchData();
+        fetchData();
     loading.value = false;
     });
 
@@ -205,7 +199,7 @@ const sortItems = ref([
 const fetchData = async () => {
     try {
         loading.value = true;
-        const response = await api.get('scm-collection-list');
+        const response = await api.get('return-order/list');
         console.log('API Response:', response.data);
         if (response.data.status === 1 && Array.isArray(response.data.admin_data)) {
                     collectionList.value = response.data.admin_data.sort((a, b) => {
@@ -231,6 +225,13 @@ const fetchData = async () => {
 // Helper functions for status display
 // =========================
 const getStatusSeverity = (status) => {
-    return status === 1 ? 'warn' : 'success';
+  switch (status) {
+    case 'REIMBURSEMENT':
+      return 'warn';
+    case 'REPLACEMENT':
+      return 'success';
+    default:
+      return 'info';
+  }
 };
 </script>
