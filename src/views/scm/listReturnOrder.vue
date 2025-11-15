@@ -29,7 +29,7 @@
                             <Button type="button" icon="pi pi-cog" @click="sortMenu.toggle($event)" />
                             <Menu ref="sortMenu" :model="sortItems" :popup="true" />
                         </div>
-                        <!-- <div class="flex justify-end gap-2"  v-if="statusTabs[activeTabIndex]?.label === 'New'">
+                        <div class="flex justify-end gap-2"  v-if="statusTabs[activeTabIndex]?.label === 'New'">
                             <Button type="button" label="Export" icon="pi pi-file-export" class="p-button-success" :loading="exportLoading1" @click="handleExport1"/>
                             <Button type="button" label="Bulk Import" icon="pi pi-file-import" @click="importInput1?.click()":loading="importLoading1" />
                             <input 
@@ -39,7 +39,7 @@
                             style="display: none" 
                             @change="handleImport1"
                             />
-                        </div> -->
+                        </div>
                         <div class="flex justify-end gap-2"  v-if="statusTabs[activeTabIndex]?.label === 'Pending'">
                             <Button type="button" label="Export" icon="pi pi-file-export" class="p-button-success" :loading="exportLoading2" @click="handleExport2"/>
                             <Button type="button" label="Bulk Import" icon="pi pi-file-import" @click="importInput2?.click()":loading="importLoading2" />
