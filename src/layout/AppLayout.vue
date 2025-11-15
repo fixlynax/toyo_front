@@ -3,14 +3,10 @@ import { useLayout } from '@/layout/composables/layout';
 import { computed,onMounted, ref, watch } from 'vue';
 import AppSidebar from './AppSidebar.vue';
 import AppTopbar from './AppTopbar.vue';
-
 import { useMenuStore } from '@/store/menu';
-
 const menuStore = useMenuStore();
-
-onMounted(async () => {
-  await menuStore.loadMenuAndPermissions();
-});
+// reactive menu for sidebar
+const menuItems = computed(() => menuStore.menu);
 
 const { layoutConfig, layoutState, isSidebarActive } = useLayout();
 
@@ -65,7 +61,7 @@ function isOutsideClicked(event) {
 <template>
     <div class="layout-wrapper" :class="containerClass">
         <app-topbar></app-topbar>
-        <app-sidebar :menu="menuStore.menu"></app-sidebar>
+        <app-sidebar :menu="menuItems"></app-sidebar>
         <div class="layout-main-container">
             <div class="layout-main">
                 <router-view></router-view>

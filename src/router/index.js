@@ -997,24 +997,35 @@ router.beforeEach( async(to, from, next) => {
     const relativePath = to.path.replace(BASE_PATH, '/');
     const authRequired = !publicPages.includes(relativePath);
     const loggedIn = tokenService.getToken() && !tokenService.isTokenExpired();
-    const menuStore = useMenuStore();
 
-    // redirect respecting router base
-    if (authRequired && !loggedIn) return next('/auth/login');
-    if (relativePath === '/auth/login' && loggedIn) return next('/'); // default child
+  // Redirect if not logged in
+  if (authRequired && !loggedIn) return next('/auth/login');
+  // Redirect logged-in user away from login page
+  if (relativePath === '/auth/login' && loggedIn) return next('/');
+  // Load menu & permissions if logged in
+  if (loggedIn) {
+    const menuStore = useMenuStore();
     
     if (!menuStore.permissions.length) {
+      try {
         await menuStore.loadMenuAndPermissions();
+      } catch (err) {
+        console.error('Failed to load menu:', err);
+        // Optional: logout user if token invalid
+        tokenService.clearToken();
+        return next('/auth/login');
+      }
     }
 
+    // Check route permissions
     const { permission, access } = to.meta;
-
     if (permission) {
-        if (!menuStore.canView(permission)) return next('/unauthorized_test'); // cannot view
-        if (access === 'write' && !menuStore.canWrite(permission)) return next('/unauthorized_test'); // cannot write
+      if (!menuStore.canView(permission)) return next('/unauthorized_test');
+      if (access === 'write' && !menuStore.canWrite(permission)) return next('/unauthorized_test');
     }
+  }
 
-    next();
+  next();
 });
 
 export default router;
