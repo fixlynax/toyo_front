@@ -3,68 +3,68 @@
         <div class="flex flex-col gap-8">
             <!-- Header -->
             <div class="card flex flex-col gap-6 w-full">
-                <div class="text-2xl font-bold text-gray-800 border-b pb-2 mb-4">
-                    Report Back Order
-                </div>
-            
-                
-                <!-- Summary Stats Row -->
+                <div class="text-2xl font-bold text-gray-800 border-b pb-2 mb-4">Report Back Order</div>
+
+                 <!-- Summary Stats Row -->
                 <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-6">
                     <div class="text-center p-4 border rounded-lg bg-blue-50">
                         <div class="text-3xl font-bold text-blue-600">{{ summaryStats.totalBackOrders.toLocaleString() }}</div>
                         <div class="text-sm font-semibold text-gray-700 mt-2">Total Back Orders</div>
-                        <div class="text-xs text-red-600 mt-1">
-                            <i class="pi pi-arrow-up"></i> 8.3% from last period
-                        </div>
+                        <div class="text-xs text-gray-500 mt-1">Active back orders</div>
+                    </div>
+                    <div class="text-center p-4 border rounded-lg bg-purple-50">
+                        <div class="text-3xl font-bold text-purple-600">{{ summaryStats.pendingItems.toLocaleString() }}</div>
+                        <div class="text-sm font-semibold text-gray-700 mt-2">Pending Items</div>
+                        <div class="text-xs text-gray-500 mt-1">Awaiting fulfillment</div>
                     </div>
 
                     <div class="text-center p-4 border rounded-lg bg-green-50">
                         <div class="text-3xl font-bold text-green-600">{{ summaryStats.fulfilledOrders.toLocaleString() }}</div>
-                        <div class="text-sm font-semibold text-gray-700 mt-2">Fulfilled Orders</div>
-                        <div class="text-xs text-gray-500 mt-1">
-                            {{ summaryStats.fulfillmentRate }}% fulfillment rate
-                        </div>
+                        <div class="text-sm font-semibold text-gray-700 mt-2">Completed Orders</div>
+                        <div class="text-xs text-gray-500 mt-1">{{ summaryStats.fulfillmentRate }}% completion rate</div>
                     </div>
 
                     <div class="text-center p-4 border rounded-lg bg-orange-50">
-                        <div class="text-3xl font-bold text-orange-600">RM {{ (summaryStats.pendingValue / 1000).toFixed(0) }}K</div>
-                        <div class="text-sm font-semibold text-gray-700 mt-2">Pending Value</div>
-                        <div class="text-xs text-red-600 mt-1">
-                            <i class="pi pi-arrow-up"></i> 12.5% from last period
-                        </div>
+                        <div class="text-3xl font-bold text-orange-600">{{ summaryStats.cancelled.toLocaleString() }}</div>
+                        <div class="text-sm font-semibold text-gray-700 mt-2">Cancelled Orders</div>
+                        <div class="text-xs text-gray-500 mt-1">Reject orders</div>
                     </div>
 
-                    <div class="text-center p-4 border rounded-lg bg-purple-50">
-                        <div class="text-3xl font-bold text-purple-600">{{ summaryStats.avgWaitDays }}</div>
-                        <div class="text-sm font-semibold text-gray-700 mt-2">Avg Wait Days</div>
-                        <div class="text-xs text-red-600 mt-1">
-                            <i class="pi pi-arrow-up"></i> 2.1 days longer
-                        </div>
-                    </div>
                 </div>
 
-                <!-- Charts Section -->
-                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
-                    <!-- Status Distribution -->
-                    <div class="p-4 bg-white border rounded-lg">
-                        <div class="text-lg font-bold text-gray-800 mb-4">Status Distribution</div>
-                        <Chart 
-                            type="doughnut" 
-                            :data="statusChartData" 
-                            :options="chartOptions"
-                            style="height: 250px"
-                        />
+                <!-- Filters Section -->
+                <div>
+                    <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+                        <!-- Customer Account -->
+                        <div>
+                            <label class="block font-bold text-gray-700 mb-2">Customer Account</label>
+                            <Dropdown v-model="filters.custAccountNo" :options="customerOptions" optionLabel="label" optionValue="value" placeholder="Select Customer Account" class="w-full" />
+                        </div>
+
+                        <!-- Start Date -->
+                        <div>
+                            <label class="block font-bold text-gray-700 mb-2">Start Date</label>
+                            <Calendar v-model="filters.startdate" dateFormat="yy-mm-dd" placeholder="Select Start Date" class="w-full" />
+                        </div>
+
+                        <!-- End Date -->
+                        <div>
+                            <label class="block font-bold text-gray-700 mb-2">End Date</label>
+                            <Calendar v-model="filters.enddate" dateFormat="yy-mm-dd" placeholder="Select End Date" class="w-full" />
+                        </div>
+
+                        <!-- Status -->
+                        <div>
+                            <label class="block font-bold text-gray-700 mb-2">Status</label>
+                            <Dropdown v-model="filters.status" :options="statusOptions" optionLabel="label" optionValue="value" placeholder="Select Status" class="w-full" />
+                        </div>
                     </div>
 
-                    <!-- Monthly Trend -->
-                    <div class="p-4 bg-white border rounded-lg">
-                        <div class="text-lg font-bold text-gray-800 mb-4">Monthly Trend</div>
-                        <Chart 
-                            type="bar" 
-                            :data="monthlyTrendChartData" 
-                            :options="chartOptions"
-                            style="height: 250px"
-                        />
+                    <!-- Action Buttons -->
+                    <div class="flex justify-end gap-4 mt-4">
+                        <Button label="Clear Filters" class="p-button-outlined p-button-secondary" @click="clearFilters" />
+                        <Button label="Generate Report" class="p-button-primary" @click="generateReport" :loading="loading" />
+                        <Button label="Export Excel" icon="pi pi-file-excel" class="p-button-success" @click="exportExcel" :loading="exportLoading" />
                     </div>
                 </div>
 
@@ -72,114 +72,98 @@
                 <div class="mt-4">
                     <div class="flex justify-between items-center mb-4">
                         <div class="text-lg font-bold text-gray-800">Back Order Details</div>
-                        <div class="flex gap-2">
-                            <Button 
-                                label="Export CSV" 
-                                icon="pi pi-download" 
-                                class="p-button-outlined p-button-secondary"
-                                @click="exportToCSV" 
-                            />
-                            <Button 
-                                label="Print Report" 
-                                icon="pi pi-print" 
-                                class="p-button-outlined"
-                                @click="printReport" 
-                            />
-                        </div>
+                        <div class="text-sm text-gray-600">Total Records: {{ backOrderData.length }}</div>
                     </div>
 
-                    <DataTable 
-                        :value="backOrderData" 
-                        :paginator="true" 
+                    <DataTable
+                        :value="backOrderData"
+                        :paginator="true"
                         :rows="10"
                         :rowsPerPageOptions="[5, 10, 20, 50]"
-                        dataKey="backOrderId" 
+                        dataKey="id"
                         :rowHover="true"
                         :loading="loading"
                         responsiveLayout="scroll"
                         :scrollable="true"
                         scrollHeight="400px"
+                        class="rounded-table"
                     >
-                        <Column field="backOrderId" header="Back Order ID" style="min-width: 120px" :sortable="true">
+                        <Column field="bo_orderno" header="Back Order No" style="min-width: 150px" :sortable="true">
                             <template #body="{ data }">
                                 <div class="font-mono text-sm font-semibold text-blue-600">
-                                    {{ data.backOrderId }}
+                                    {{ data.bo_orderno }}
                                 </div>
                             </template>
                         </Column>
 
-                        <Column field="orderDate" header="Order Date" style="min-width: 100px" :sortable="true">
+                        <Column field="created" header="Order Date" style="min-width: 120px" :sortable="true">
                             <template #body="{ data }">
                                 <div class="text-sm">
-                                    {{ formatDate(data.orderDate) }}
+                                    {{ formatDate(data.created) }}
                                 </div>
                             </template>
                         </Column>
 
-                        <Column field="customerName" header="Customer" style="min-width: 150px" :sortable="true">
+                        <Column field="companyName" header="Customer" style="min-width: 200px" :sortable="true">
                             <template #body="{ data }">
-                                <div class="font-semibold">{{ data.customerName }}</div>
-                                <div class="text-xs text-gray-500">{{ data.customerType }}</div>
+                                <div class="font-semibold">{{ data.companyName }}</div>
+                                <div class="text-xs text-gray-500">{{ data.custaccountno }}</div>
                             </template>
                         </Column>
 
-                        <Column field="productName" header="Product" style="min-width: 150px" :sortable="true">
+                        <Column field="salesorg" header="Sales Org" style="min-width: 100px" :sortable="true">
                             <template #body="{ data }">
-                                <div class="font-semibold">{{ data.productName }}</div>
-                                <div class="text-xs text-gray-500">{{ data.productCategory }}</div>
+                                <div class="text-center font-semibold">{{ data.salesorg }}</div>
                             </template>
                         </Column>
 
-                        <Column field="quantity" header="Qty" style="min-width: 80px" :sortable="true">
+                        <Column field="shippingcond" header="Shipping Condition" style="min-width: 120px" :sortable="true">
+                            <template #body="{ data }">
+                                <div class="text-center">{{ data.shippingcond }}</div>
+                            </template>
+                        </Column>
+
+                        <Column field="orderstatus" header="Status" style="min-width: 140px" :sortable="true">
+                            <template #body="{ data }">
+                                <Tag :value="getStatusText(data.orderstatus)" :severity="getStatusSeverity(data.orderstatus)" />
+                            </template>
+                        </Column>
+
+                        <Column header="Items" style="min-width: 100px">
+                            <template #body="{ data }">
+                                <div class="text-center">
+                                    <Badge :value="data.backorderitem?.length || 0" severity="info" />
+                                </div>
+                            </template>
+                        </Column>
+
+                        <Column header="Total Qty" style="min-width: 100px" :sortable="true">
                             <template #body="{ data }">
                                 <div class="text-center font-bold text-orange-600">
-                                    {{ data.quantity }}
+                                    {{ calculateTotalQty(data.backorderitem) }}
                                 </div>
                             </template>
                         </Column>
 
-                        <Column field="orderValue" header="Order Value" style="min-width: 120px" :sortable="true">
+                        <Column header="Remaining Qty" style="min-width: 120px" :sortable="true">
                             <template #body="{ data }">
-                                <div class="font-bold text-purple-600">
-                                    RM {{ data.orderValue.toLocaleString() }}
+                                <div class="text-center font-bold" :class="getRemainingQtyClass(data.backorderitem)">
+                                    {{ calculateRemainingQty(data.backorderitem) }}
                                 </div>
                             </template>
                         </Column>
 
-                        <Column field="status" header="Status" style="min-width: 120px" :sortable="true">
+                        <Column field="expiry" header="Expiry Date" style="min-width: 120px" :sortable="true">
                             <template #body="{ data }">
-                                <Tag 
-                                    :value="data.status" 
-                                    :severity="getStatusSeverity(data.status)" 
-                                />
-                            </template>
-                        </Column>
-
-                        <Column field="priority" header="Priority" style="min-width: 100px" :sortable="true">
-                            <template #body="{ data }">
-                                <Tag 
-                                    :value="data.priority" 
-                                    :severity="getPrioritySeverity(data.priority)" 
-                                />
-                            </template>
-                        </Column>
-
-                        <Column field="waitDays" header="Wait Days" style="min-width: 100px" :sortable="true">
-                            <template #body="{ data }">
-                                <div class="text-center font-bold" :class="getWaitDaysClass(data.waitDays)">
-                                    {{ data.waitDays }}
+                                <div class="text-sm" :class="getExpiryClass(data.expiry)">
+                                    {{ formatDate(data.expiry) }}
                                 </div>
                             </template>
                         </Column>
 
-                        <Column header="Actions" style="min-width: 80px">
+                        <Column header="Actions" style="min-width: 100px">
                             <template #body="{ data }">
-                                <Button 
-                                    icon="pi pi-eye" 
-                                    class="p-button-info p-button-text p-button-sm" 
-                                    v-tooltip="'View Details'"
-                                    @click="viewBackOrderDetails(data)" 
-                                />
+                                <Button icon="pi pi-eye" class="p-button-info p-button-text p-button-sm" v-tooltip="'View Details'" @click="viewBackOrderDetails(data)" />
                             </template>
                         </Column>
 
@@ -200,197 +184,376 @@
                 </div>
             </div>
         </div>
+
+        <!-- Back Order Details Dialog -->
+        <Dialog v-model:visible="displayOrderDetails" :style="{ width: '700px' }" header="Details" :modal="true">
+            <div v-if="selectedOrder" class="space-y-4">
+
+                <!-- Items Table -->
+                <div class="flex items-center justify-between">
+                    <h4 class="font-bold text-gray-800">Order Items</h4>
+                    <Tag :value="`${selectedOrder.backorderitem?.length || 0} items`" severity="info" />
+                </div>
+
+                <DataTable :value="selectedOrder.backorderitem" class="rounded-table" scrollable scrollHeight="flex" stripedRows showGridlines>
+                    <Column field="materialID" header="Material ID" style="min-width: 240px">
+                        <template #body="{ data }">
+                            <span class="font-medium">{{ data.materialID }}</span>
+                        </template>
+                    </Column>
+
+                    <Column field="material" header="Description" style="min-width: 150px">
+                        <template #body="{ data }">
+                            <span>{{ data.material }}</span>
+                        </template>
+                    </Column>
+
+                    <Column field="initial_qty" header="Initial Qty" style="min-width: 100px; text-align: center">
+                        <template #body="{ data }">
+                            <span class="font-semibold">{{ data.initial_qty }}</span>
+                        </template>
+                    </Column>
+
+                    <Column field="remaining_qty" header="Remaining Qty" style="min-width: 120px; text-align: center">
+                        <template #body="{ data }">
+                            <span class="font-semibold" :class="getItemRemainingClass(data.remaining_qty)">{{ data.remaining_qty }}</span>
+                        </template>
+                    </Column>
+
+                    <Column field="itemCategory" header="Category" style="min-width: 100px; text-align: center">
+                        <template #body="{ data }">
+                            <Tag :value="data.itemCategory" severity="secondary" />
+                        </template>
+                    </Column>
+
+                    <Column field="price" header="Unit Price (RM)" style="min-width: 120px; text-align: right">
+                        <template #body="{ data }">
+                            <span class="font-semibold">{{ formatCurrency(data.price) }}</span>
+                        </template>
+                    </Column>
+
+                    <Column header="Total Value (RM)" style="min-width: 120px; text-align: right">
+                        <template #body="{ data }">
+                            <span class="font-bold text-purple-600">{{ formatCurrency(data.initial_qty * data.price) }}</span>
+                        </template>
+                    </Column>
+                    <template #loading></template>
+                </DataTable>
+            </div>
+        </Dialog>
     </Fluid>
 </template>
 
 <script setup>
-import { ref, reactive, onMounted } from 'vue';
-import Chart from 'primevue/chart';
+import { ref, reactive, onMounted, computed } from 'vue';
+import api from '@/service/api';
 
+// ✅ Filters
+const filters = reactive({
+    custAccountNo: null,
+    startdate: null,
+    enddate: null,
+    status: null
+});
+
+// ✅ Loading states
 const loading = ref(false);
+const exportLoading = ref(false);
 
-// Summary Statistics
-const summaryStats = reactive({
-    totalBackOrders: 347,
-    fulfilledOrders: 189,
-    fulfillmentRate: 54.5,
-    pendingValue: 2456700,
-    avgWaitDays: 7.2
+// ✅ Data
+const backOrderData = ref([]);
+const customerOptions = ref([]);
+
+// ✅ Dialog states
+const displayOrderDetails = ref(false);
+const selectedOrder = ref(null);
+
+// ✅ Status Options based on API data
+const statusOptions = [
+    { label: 'All Status', value: null },
+    { label: 'Pending', value: 0 },
+    { label: 'Completed', value: 1 },
+    { label: 'Cancelled', value: 9 }
+];
+
+// ✅ Status Mapping
+const statusMap = {
+    0: 'Pending',
+    1: 'Completed',
+    9: 'Cancelled'
+};
+
+// ✅ Summary Statistics (computed from actual data)
+const summaryStats = computed(() => {
+    const totalBackOrders = backOrderData.value.length;
+    const fulfilledOrders = backOrderData.value.filter((order) => order.orderstatus === 1).length;
+    const totalItems = backOrderData.value.reduce((sum, order) => sum + (order.backorderitem?.reduce((itemSum, item) => itemSum + (item.initial_qty || 0), 0) || 0), 0);
+    const pendingItems = backOrderData.value.reduce((sum, order) => sum + (order.backorderitem?.reduce((itemSum, item) => itemSum + (item.remaining_qty || 0), 0) || 0), 0);
+    const cancelled = backOrderData.value.filter((order) => order.orderstatus === 9).length;
+
+    const fulfillmentRate = totalBackOrders > 0 ? Math.round((fulfilledOrders / totalBackOrders) * 100) : 0;
+
+    return {
+        totalBackOrders,
+        fulfilledOrders,
+        fulfillmentRate,
+        totalItems,
+        pendingItems,
+        cancelled
+    };
 });
 
-// Sample data
-const backOrderData = ref([
-    {
-        backOrderId: 'BO-2024-001234',
-        orderDate: new Date('2024-01-15'),
-        customerName: 'PS Tyres & Battery Auto Services',
-        customerType: 'Dealer',
-        productName: 'Toyo Proxes 205/55R16',
-        productCategory: 'Passenger Tyres',
-        quantity: 25,
-        orderValue: 18750,
-        status: 'Pending Fulfillment',
-        priority: 'High',
-        waitDays: 5,
-        estimatedArrival: new Date('2024-01-25'),
-        supplier: 'Toyo Tires Malaysia'
-    },
-    {
-        backOrderId: 'BO-2024-001235',
-        orderDate: new Date('2024-01-16'),
-        customerName: 'ABC Motors Sdn Bhd',
-        customerType: 'Corporate',
-        productName: 'Bridgestone Dueler 265/65R17',
-        productCategory: 'SUV Tyres',
-        quantity: 15,
-        orderValue: 22500,
-        status: 'In Transit',
-        priority: 'Medium',
-        waitDays: 3,
-        estimatedArrival: new Date('2024-01-20'),
-        supplier: 'Bridgestone Corp'
-    },
-    {
-        backOrderId: 'BO-2024-001236',
-        orderDate: new Date('2024-01-14'),
-        customerName: 'City Auto Retail',
-        customerType: 'Retail',
-        productName: 'Michelin Pilot Sport 4',
-        productCategory: 'Passenger Tyres',
-        quantity: 8,
-        orderValue: 6400,
-        status: 'Partially Fulfilled',
-        priority: 'Medium',
-        waitDays: 8,
-        estimatedArrival: new Date('2024-01-22'),
-        supplier: 'Michelin Asia'
-    },
-    {
-        backOrderId: 'BO-2024-001237',
-        orderDate: new Date('2024-01-13'),
-        customerName: 'Toyo Auto Centre UHP Tyres',
-        customerType: 'Distributor',
-        productName: 'Goodyear Wrangler AT',
-        productCategory: 'SUV Tyres',
-        quantity: 40,
-        orderValue: 52000,
-        status: 'Ready for Pickup',
-        priority: 'Critical',
-        waitDays: 12,
-        estimatedArrival: new Date('2024-01-18'),
-        supplier: 'Goodyear Malaysia'
-    },
-    {
-        backOrderId: 'BO-2024-001238',
-        orderDate: new Date('2024-01-12'),
-        customerName: 'Borneo Tyre Services',
-        customerType: 'Dealer',
-        productName: 'Continental ContiEco',
-        productCategory: 'Commercial Tyres',
-        quantity: 30,
-        orderValue: 37500,
-        status: 'Cancelled',
-        priority: 'Low',
-        waitDays: 15,
-        estimatedArrival: null,
-        supplier: 'Continental Tires'
-    }
-]);
+// ✅ Generate customer options from back order data
+const generateCustomerOptions = () => {
+    const customers = new Map();
 
-// Chart Data
-const statusChartData = ref({
-    labels: ['Pending', 'In Transit', 'Partial', 'Ready', 'Cancelled'],
-    datasets: [
-        {
-            data: [45, 25, 15, 10, 5],
-            backgroundColor: ['#F59E0B', '#3B82F6', '#8B5CF6', '#10B981', '#EF4444'],
-            hoverBackgroundColor: ['#D97706', '#2563EB', '#7C3AED', '#059669', '#DC2626']
+    backOrderData.value.forEach((item) => {
+        const custAccountNo = item.custaccountno;
+        const companyName = item.companyName || 'Unknown Customer';
+
+        if (custAccountNo && !customers.has(custAccountNo)) {
+            customers.set(custAccountNo, {
+                label: `${companyName} (${custAccountNo})`,
+                value: custAccountNo
+            });
         }
-    ]
-});
+    });
 
-const monthlyTrendChartData = ref({
-    labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
-    datasets: [
-        {
-            label: 'Back Orders',
-            data: [45, 52, 48, 65, 72, 68, 75, 82, 78, 85, 92, 88],
-            backgroundColor: '#3B82F6',
-            borderColor: '#2563EB',
-            borderWidth: 1
-        }
-    ]
-});
+    // Convert to array and sort by label
+    customerOptions.value = Array.from(customers.values()).sort((a, b) => a.label.localeCompare(b.label));
 
-const chartOptions = ref({
-    plugins: {
-        legend: {
-            position: 'bottom',
-            labels: {
-                usePointStyle: true,
-                boxWidth: 8,
-                font: {
-                    size: 11
-                }
-            }
-        }
-    },
-    maintainAspectRatio: false
-});
+    // Add "All Customers" option at the beginning
+    customerOptions.value.unshift({ label: 'All Customers', value: null });
+};
 
-// Methods
-const formatDate = (date) => {
-    return new Date(date).toLocaleDateString('en-MY', {
-        year: 'numeric',
-        month: 'short',
-        day: 'numeric'
+// ✅ Format currency
+const formatCurrency = (value) => {
+    if (!value) return '0.00';
+    return parseFloat(value).toLocaleString('en-MY', {
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2
     });
 };
 
-const getStatusSeverity = (status) => {
-    switch (status) {
-        case 'Ready for Pickup': return 'success';
-        case 'In Transit': return 'info';
-        case 'Partially Fulfilled': return 'warning';
-        case 'Pending Fulfillment': return 'secondary';
-        case 'Cancelled': return 'danger';
-        default: return 'info';
+// ✅ Format date
+const formatDate = (dateString) => {
+    if (!dateString) return '-';
+    const date = new Date(dateString);
+    return date.toLocaleDateString('en-MY');
+};
+
+// ✅ Get status text
+const getStatusText = (statusCode) => {
+    return statusMap[statusCode] || `Status ${statusCode}`;
+};
+
+// ✅ Get status severity for tags
+const getStatusSeverity = (statusCode) => {
+    switch (statusCode) {
+        case 0: // Completed
+            return 'warn';
+        case 1: // Processing
+            return 'success';
+        case 9: // Pending
+            return 'danger';
+        default:
+            return 'info';
     }
 };
 
-const getPrioritySeverity = (priority) => {
-    switch (priority) {
-        case 'Critical': return 'danger';
-        case 'High': return 'warning';
-        case 'Medium': return 'info';
-        case 'Low': return 'success';
-        default: return 'secondary';
+// ✅ Calculate total quantity for an order
+const calculateTotalQty = (backorderitem) => {
+    if (!backorderitem || !Array.isArray(backorderitem)) return 0;
+    return backorderitem.reduce((sum, item) => sum + (parseInt(item.initial_qty) || 0), 0);
+};
+
+// ✅ Calculate remaining quantity for an order
+const calculateRemainingQty = (backorderitem) => {
+    if (!backorderitem || !Array.isArray(backorderitem)) return 0;
+    return backorderitem.reduce((sum, item) => sum + (parseInt(item.remaining_qty) || 0), 0);
+};
+
+// ✅ Get class for remaining quantity display
+const getRemainingQtyClass = (backorderitem) => {
+    const remaining = calculateRemainingQty(backorderitem);
+    const total = calculateTotalQty(backorderitem);
+
+    if (remaining === 0) return 'text-green-600';
+    if (remaining === total) return 'text-red-600';
+    return 'text-orange-600';
+};
+
+// ✅ Get class for individual item remaining quantity
+const getItemRemainingClass = (remainingQty) => {
+    if (remainingQty === 0) return 'text-green-600';
+    return 'text-orange-600';
+};
+
+// ✅ Get expiry date class
+const getExpiryClass = (expiryDate) => {
+    if (!expiryDate) return 'text-gray-500';
+
+    const today = new Date();
+    const expiry = new Date(expiryDate);
+    const diffTime = expiry.getTime() - today.getTime();
+    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+
+    if (diffDays < 0) return 'text-red-600 font-semibold'; // Expired
+    if (diffDays <= 3) return 'text-orange-600 font-semibold'; // Expiring soon
+    return 'text-gray-600';
+};
+
+// ✅ Show back order details
+const viewBackOrderDetails = (order) => {
+    selectedOrder.value = order;
+    displayOrderDetails.value = true;
+};
+
+// ✅ Fetch back order data
+const fetchBackOrderData = async () => {
+    loading.value = true;
+    try {
+        const response = await api.get('order/list-back-order-report');
+        if (response.data.status === 1) {
+            backOrderData.value = response.data.admin_data;
+            generateCustomerOptions();
+        } else {
+            console.error('Failed to fetch back order data:', response.data.error);
+            backOrderData.value = [];
+        }
+    } catch (error) {
+        console.error('Error fetching back order data:', error);
+        backOrderData.value = [];
+    } finally {
+        loading.value = false;
     }
 };
 
-const getWaitDaysClass = (waitDays) => {
-    if (waitDays <= 3) return 'text-green-600';
-    if (waitDays <= 7) return 'text-orange-600';
-    if (waitDays <= 14) return 'text-yellow-600';
-    return 'text-red-600';
+// ✅ Clear Filters
+const clearFilters = () => {
+    filters.custAccountNo = null;
+    filters.startdate = null;
+    filters.enddate = null;
+    filters.status = null;
 };
 
-const exportToCSV = () => {
-    console.log('Exporting to CSV...');
-    alert('CSV export functionality would be implemented here');
+// ✅ Generate Report (apply filters)
+const generateReport = async () => {
+    loading.value = true;
+    try {
+        // For now, we'll use the initial data and filter client-side
+        // In a real scenario, you might want to call a filtered endpoint
+        await new Promise((resolve) => setTimeout(resolve, 100));
+    } catch (error) {
+        console.error('Error generating report:', error);
+    } finally {
+        loading.value = false;
+    }
 };
 
-const printReport = () => {
-    window.print();
+// ✅ Export to Excel
+const exportExcel = async () => {
+    exportLoading.value = true;
+    try {
+        // Prepare filters for export
+        const exportFilters = {
+            custAccountNo: filters.custAccountNo,
+            status: filters.status,
+            startdate: filters.startdate,
+            enddate: filters.enddate
+        };
+
+        const response = await api.postExtra('report/excel-back-order', exportFilters, {
+            responseType: 'blob'
+        });
+
+        // Create blob and download
+        const blob = new Blob([response.data], {
+            type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+        });
+        const url = window.URL.createObjectURL(blob);
+        const link = document.createElement('a');
+
+        // Generate filename based on filters
+        const custaccno = filters.custAccountNo || 'ALL';
+        const filename = `${custaccno}_OMS-Back_Order_Report.xlsx`;
+
+        link.href = url;
+        link.setAttribute('download', filename);
+        document.body.appendChild(link);
+        link.click();
+        link.remove();
+        window.URL.revokeObjectURL(url);
+    } catch (error) {
+        console.error('Error exporting Excel:', error);
+        alert('Failed to export Excel file. Please try again.');
+    } finally {
+        exportLoading.value = false;
+    }
 };
 
-const viewBackOrderDetails = (backOrder) => {
-    console.log('Viewing back order details:', backOrder);
-    alert(`Viewing details for back order: ${backOrder.backOrderId}`);
-};
-
-// Initialize
+// ✅ Load initial data when component mounts
 onMounted(() => {
-    console.log('Report Back Order component mounted');
+    fetchBackOrderData();
 });
 </script>
+
+<style scoped>
+:deep(.p-dropdown) {
+    width: 100%;
+}
+
+:deep(.p-button) {
+    min-width: 90px;
+}
+
+:deep(.p-datatable) {
+    min-height: 400px;
+}
+
+.status-badge {
+    font-size: 0.75rem;
+    padding: 0.25rem 0.5rem;
+    border-radius: 0.25rem;
+    font-weight: 600;
+}
+
+:deep(.rounded-table) {
+    border-radius: 12px;
+    overflow: hidden;
+    border: 1px solid #e5e7eb;
+
+    .p-datatable-header {
+        border-top-left-radius: 12px;
+        border-top-right-radius: 12px;
+    }
+
+    .p-paginator-bottom {
+        border-bottom-left-radius: 12px;
+        border-bottom-right-radius: 12px;
+    }
+
+    .p-datatable-thead > tr > th {
+        &:first-child {
+            border-top-left-radius: 12px;
+        }
+        &:last-child {
+            border-top-right-radius: 12px;
+        }
+    }
+
+    .p-datatable-tbody > tr:last-child > td {
+        &:first-child {
+            border-bottom-left-radius: 0;
+        }
+        &:last-child {
+            border-bottom-right-radius: 0;
+        }
+    }
+
+    .p-datatable-tbody > tr.p-datatable-emptymessage > td {
+        border-bottom-left-radius: 12px;
+        border-bottom-right-radius: 12px;
+    }
+}
+</style>

@@ -35,16 +35,16 @@
                 <div class="flex bg-gray-200 rounded-full w-40 h-12 p-1">
                     <!-- 20FT -->
                     <div
-                        @click="selectedContainerSize = '20ft'"
-                        :class="['flex-1 flex items-center justify-center rounded-full cursor-pointer font-semibold transition-all duration-300', selectedContainerSize === '20ft' ? 'bg-blue-500 text-white' : 'text-gray-700']"
+                        @click="selectedContainerSize = '20FT'"
+                        :class="['flex-1 flex items-center justify-center rounded-full cursor-pointer font-semibold transition-all duration-300', selectedContainerSize === '20FT' ? 'bg-blue-500 text-white' : 'text-gray-700']"
                     >
                         20FT
                     </div>
 
                     <!-- 40FT -->
                     <div
-                        @click="selectedContainerSize = '40ft'"
-                        :class="['flex-1 flex items-center justify-center rounded-full cursor-pointer font-semibold transition-all duration-300', selectedContainerSize === '40ft' ? 'bg-blue-500 text-white' : 'text-gray-700']"
+                        @click="selectedContainerSize = '40FT'"
+                        :class="['flex-1 flex items-center justify-center rounded-full cursor-pointer font-semibold transition-all duration-300', selectedContainerSize === '40FT' ? 'bg-blue-500 text-white' : 'text-gray-700']"
                     >
                         40FT
                     </div>
@@ -315,7 +315,7 @@ const toast = useToast();
 const selectedCustomer = ref(null);
 const selectedOrderType = ref('NORMAL');
 const selectedDeliveryMethod = ref('DELIVER');
-const selectedContainerSize = ref('20ft');
+const selectedContainerSize = ref('20FT');
 
 // Ship To Details
 const shipToAccount = ref(null);
@@ -378,7 +378,7 @@ const cartQuantity = computed(() => selectedTyres.value.reduce((sum, item) => su
 
 const progressValue = computed(() => {
     if (!selectedContainerSize.value || cartQuantity.value === 0) return 0;
-    const containerCapacity = selectedContainerSize.value === '20ft' ? 1000 : 2000;
+    const containerCapacity = selectedContainerSize.value === '20FT' ? 1000 : 2000;
     const progress = Math.min((cartQuantity.value / containerCapacity) * 100, 100);
     return Math.round(progress);
 });
@@ -578,7 +578,41 @@ const fetchMaterials = async (custAccountNo) => {
     }
 };
 
-// Order Flow APIs
+// NEW: Add to Cart API (following Postman structure)
+const addToCartAPI = async () => {
+    if (!selectedCustomer.value || !shipToAccount.value || selectedTyres.value.length === 0) {
+        throw new Error('Missing required data for checkout');
+    }
+
+    // Prepare order array according to Postman API requirements
+    const orderArray = selectedTyres.value.map((item) => ({
+        materialId: item.materialid,
+        qty: item.quantity.toString(),
+        price: item.price.toString()
+    }));
+
+    // Prepare request payload based on Postman reference
+    const payload = {
+        order_array: JSON.stringify(orderArray),
+        orderType: selectedOrderType.value,
+        shipto: shipToAccount.value.id.toString(), // Send ID, not custAccountNo
+        deliveryType: selectedDeliveryMethod.value,
+        custaccountno: selectedCustomer.value.code
+    };
+
+    // Add DIRECTSHIP specific fields
+    if (selectedOrderType.value === 'DIRECTSHIP') {
+        payload.containerSize = selectedContainerSize.value;
+        payload.cartRefNo = currentCartRefNo.value || 'REF000000278'; // Use existing or default
+    }
+
+    console.log('Sending add-to-cart payload:', payload);
+
+    const response = await api.post('order/add-to-cart-admin', payload);
+    return response.data;
+};
+
+// Order Flow APIs (updated for DIRECTSHIP)
 const createEmptyDsCart = async () => {
     if (!selectedCustomer.value) {
         throw new Error('No customer selected');
@@ -761,91 +795,120 @@ const onCheckout = async () => {
     orderError.value = '';
 
     try {
-        // Prepare order data
-        const orderData = {
-            customer: selectedCustomer.value,
-            orderType: selectedOrderType.value,
-            deliveryMethod: selectedDeliveryMethod.value,
-            containerSize: selectedContainerSize.value,
-            shipTo: shipToAccount.value,
-            items: selectedTyres.value,
-            total: cartTotal.value,
-            timestamp: new Date().toISOString()
-        };
+        // For DIRECTSHIP orders, use the new add-to-cart API
+        if (selectedOrderType.value === 'DIRECTSHIP') {
+            orderMessage.value = 'Creating direct shipment order...';
 
-        // Step 1: Create empty cart
-        orderMessage.value = 'Creating order cart...';
-        currentCartRefNo.value = await createEmptyDsCart();
-        console.log('Cart created:', currentCartRefNo.value);
+            // Step 1: Create empty cart for DIRECTSHIP
+            currentCartRefNo.value = await createEmptyDsCart();
+            console.log('DIRECTSHIP Cart created:', currentCartRefNo.value);
 
-        // Step 2: Confirm order
-        orderMessage.value = 'Processing order with SAP...';
-        const result = await confirmOrder(currentCartRefNo.value, orderData);
-        console.log('Order result:', result);
+            // Step 2: Use the add-to-cart API for DIRECTSHIP
+            const result = await addToCartAPI();
+            console.log('DIRECTSHIP Order result:', result);
 
-        if (result.status === 1) {
-            // Order successful
-            orderStatus.value = 'success';
-            orderMessage.value = 'Order created successfully!';
-            orderDetails.value = {
-                orderRefNo: result.eten_data.orderRefNo
-            };
+            if (result.status === 1) {
+                orderStatus.value = 'success';
+                orderMessage.value = 'Direct shipment order created successfully!';
 
-            // Clear cart
-            selectedTyres.value = [];
+                // Clear cart
+                selectedTyres.value = [];
 
-            toast.add({
-                severity: 'success',
-                summary: 'Success',
-                detail: `Order ${result.eten_data.orderRefNo} created successfully`,
-                life: 5000
-            });
-        } else if (result.status === 0 && result.eten_data) {
-            // Handle backorder scenario
-            console.log('Backorder scenario detected:', result.eten_data);
-            
-            const backOrderData = result.eten_data[0];
-            const backOrderItems = backOrderData?.unfulfilled_items
-                ?.filter((item) => item.materialid && item.materialid.trim() !== '')
-                .map((item) => item.materialid) || [];
-
-            console.log('Backorder items:', backOrderItems);
-
-            if (backOrderItems.length > 0) {
-                orderMessage.value = 'Processing order with backorder items...';
-                const backOrderResult = await confirmBackOrder(currentCartRefNo.value, orderData, backOrderItems);
-                console.log('Backorder result:', backOrderResult);
-
-                if (backOrderResult.status === 1) {
-                    orderStatus.value = 'success';
-                    orderMessage.value = 'Order created with backorder items!';
-                    orderDetails.value = {
-                        orderRefNo: backOrderResult.eten_data.orderRefNo,
-                        backOrderRefNo: backOrderResult.eten_data.backOrderRefNo
-                    };
-
-                    // Clear cart
-                    selectedTyres.value = [];
-
-                    toast.add({
-                        severity: 'success',
-                        summary: 'Success',
-                        detail: `Order ${backOrderResult.eten_data.orderRefNo} created with backorder ${backOrderResult.eten_data.backOrderRefNo}`,
-                        life: 5000
-                    });
-                } else {
-                    orderError.value = backOrderResult.message || 'Failed to create back order';
-                    throw new Error(backOrderResult.message || 'Failed to create back order');
-                }
+                toast.add({
+                    severity: 'success',
+                    summary: 'Success',
+                    detail: 'Direct shipment order created successfully',
+                    life: 5000
+                });
             } else {
-                orderError.value = result.message || 'Order processing failed - no items fulfilled';
-                throw new Error(result.message || 'Order processing failed - no items fulfilled');
+                orderError.value = result.message || 'Direct shipment order failed';
+                throw new Error(result.message || 'Direct shipment order failed');
             }
         } else {
-            orderError.value = result.message || 'Order processing failed';
-            throw new Error(result.message || 'Order processing failed');
-        }
+            // For NORMAL orders, use existing flow
+            // Prepare order data
+            const orderData = {
+                customer: selectedCustomer.value,
+                orderType: selectedOrderType.value,
+                deliveryMethod: selectedDeliveryMethod.value,
+                containerSize: selectedContainerSize.value,
+                shipTo: shipToAccount.value,
+                items: selectedTyres.value,
+                total: cartTotal.value,
+                timestamp: new Date().toISOString()
+            };
 
+            // Step 1: Create empty cart
+            orderMessage.value = 'Creating order cart...';
+            currentCartRefNo.value = await createEmptyDsCart();
+            console.log('Cart created:', currentCartRefNo.value);
+
+            // Step 2: Confirm order
+            orderMessage.value = 'Processing order with SAP...';
+            const result = await confirmOrder(currentCartRefNo.value, orderData);
+            console.log('Order result:', result);
+
+            if (result.status === 1) {
+                // Order successful
+                orderStatus.value = 'success';
+                orderMessage.value = 'Order created successfully!';
+                orderDetails.value = {
+                    orderRefNo: result.eten_data.orderRefNo
+                };
+
+                // Clear cart
+                selectedTyres.value = [];
+
+                toast.add({
+                    severity: 'success',
+                    summary: 'Success',
+                    detail: `Order ${result.eten_data.orderRefNo} created successfully`,
+                    life: 5000
+                });
+            } else if (result.status === 0 && result.eten_data) {
+                // Handle backorder scenario
+                console.log('Backorder scenario detected:', result.eten_data);
+
+                const backOrderData = result.eten_data[0];
+                const backOrderItems = backOrderData?.unfulfilled_items?.filter((item) => item.materialid && item.materialid.trim() !== '').map((item) => item.materialid) || [];
+
+                console.log('Backorder items:', backOrderItems);
+
+                if (backOrderItems.length > 0) {
+                    orderMessage.value = 'Processing order with backorder items...';
+                    const backOrderResult = await confirmBackOrder(currentCartRefNo.value, orderData, backOrderItems);
+                    console.log('Backorder result:', backOrderResult);
+
+                    if (backOrderResult.status === 1) {
+                        orderStatus.value = 'success';
+                        orderMessage.value = 'Order created with backorder items!';
+                        orderDetails.value = {
+                            orderRefNo: backOrderResult.eten_data.orderRefNo,
+                            backOrderRefNo: backOrderResult.eten_data.backOrderRefNo
+                        };
+
+                        // Clear cart
+                        selectedTyres.value = [];
+
+                        toast.add({
+                            severity: 'success',
+                            summary: 'Success',
+                            detail: `Order ${backOrderResult.eten_data.orderRefNo} created with backorder ${backOrderResult.eten_data.backOrderRefNo}`,
+                            life: 5000
+                        });
+                    } else {
+                        orderError.value = backOrderResult.message || 'Failed to create back order';
+                        throw new Error(backOrderResult.message || 'Failed to create back order');
+                    }
+                } else {
+                    orderError.value = result.message || 'Order processing failed - no items fulfilled';
+                    throw new Error(result.message || 'Order processing failed - no items fulfilled');
+                }
+            } else {
+                orderError.value = result.message || 'Order processing failed';
+                throw new Error(result.message || 'Order processing failed');
+            }
+        }
     } catch (error) {
         console.error('Checkout error:', error);
         orderStatus.value = 'error';

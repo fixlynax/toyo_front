@@ -187,9 +187,9 @@ const router = createRouter({
 
                 // Report
                 {
-                    path: 'om/reportSalesForecast',
+                    path: 'om/reportSF',
                     name: 'Report-Sales-Forecast',
-                    component: () => import('@/views/om/reportSalesForecast.vue')
+                    component: () => import('@/views/om/reportSF.vue')
                 },
                 {
                     path: 'om/reportBackOrder',

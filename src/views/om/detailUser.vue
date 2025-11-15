@@ -49,21 +49,6 @@
                                 <span class="text-xm font-bold text-black-700">Email</span>
                                 <p class="text-lg font-medium">{{ memberDetail.emailAddress }}</p>
                             </div>
-                            <div class="w-full">
-                                <span class="text-xm font-bold text-black-700">Password</span>
-                                <div class="flex items-center">
-                                    <p class="text-lg font-medium mr-2 mb-0">
-                                        {{ showPassword ? memberDetail.password : '••••••••' }}
-                                    </p>
-                                    <!-- Toggle Button -->
-                                    <button type="button" @click="showPassword = !showPassword" class="text-gray-500 hover:text-gray-700">
-                                        <div class="text-lg font-medium mr-2 mb-0">
-                                            <i v-if="showPassword" class="pi pi-eye-slash"></i>
-                                            <i v-else class="pi pi-eye"></i>
-                                        </div>
-                                    </button>
-                                </div>
-                            </div>
                         </div>
 
                         <!-- Additional Member Information -->
@@ -88,9 +73,7 @@
                             <div class="w-full">
                                 <span class="text-xm font-bold text-black-700">Activated Date</span>
                                 <p class="text-lg font-medium">
-                                    <span :class="memberDetail.activated === 1 ? 'text-green-600 font-medium' : 'text-red-600 font-medium'">
-                                        {{ memberDetail.activated === 1 ? 'Yes' : 'No' }}
-                                    </span>
+                                      <p class="text-lg font-medium">{{ formatDateTime(memberDetail.activated) }}</p>
                                 </p>
                             </div>
                         </div>
