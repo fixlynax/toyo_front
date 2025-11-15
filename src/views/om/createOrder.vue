@@ -18,7 +18,9 @@
                         :loading="loadingCustomers"
                         :class="{ 'p-invalid': !selectedCustomer && step1Validated }"
                     />
+                    <small v-if="loadingCustomers" class="text-blue-600">Loading customers...</small>
                     <small v-if="!selectedCustomer && step1Validated" class="p-error">Customer account is required.</small>
+                    <small v-if="customerOptions.length === 0 && !loadingCustomers" class="text-gray-500">No customers available</small>
                 </div>
 
                 <!-- Order Type -->
@@ -129,9 +131,30 @@
                 </div>
             </div>
 
+            <!-- Debug Info - Remove in production -->
+            <div v-if="false" class="bg-yellow-50 border border-yellow-200 rounded p-3">
+                <div class="font-semibold text-yellow-800">Debug Info:</div>
+                <div class="text-sm">
+                    <div>Materials loaded: {{ tyres.length }}</div>
+                    <div>Ship-to options: {{ shipToOptions.length }}</div>
+                    <div>Selected customer: {{ selectedCustomer?.code }}</div>
+                </div>
+            </div>
+
             <DataTable :value="filteredTyres" :paginator="true" :rows="10" :rowsPerPageOptions="[5, 10, 20]" dataKey="id" :rowHover="true" :loading="loading">
-                <template #empty>No products found.</template>
-                <template #loading>Loading products. Please wait...</template>
+                <template #empty>
+                    <div class="text-center p-4">
+                        <div v-if="loading">Loading products...</div>
+                        <div v-else-if="!selectedCustomer">Please select a customer first</div>
+                        <div v-else>No products found for this customer.</div>
+                    </div>
+                </template>
+                <template #loading>
+                    <div class="text-center p-4">
+                        <ProgressSpinner style="width: 30px; height: 30px" />
+                        <div>Loading products. Please wait...</div>
+                    </div>
+                </template>
 
                 <Column field="materialid" header="Material ID" style="min-width: 6rem" />
                 <Column field="pattern" header="Pattern" style="min-width: 8rem" />
@@ -269,7 +292,9 @@
                         :class="{ 'p-invalid': !shipToAccount && step3Validated }"
                         @change="onShipToAccountChange"
                     />
+                    <small v-if="loadingShipTo" class="text-blue-600">Loading ship-to addresses...</small>
                     <small v-if="!shipToAccount && step3Validated" class="p-error">Ship to account is required.</small>
+                    <small v-if="shipToOptions.length === 0 && !loadingShipTo && selectedCustomer" class="text-gray-500">No ship-to addresses found for this customer</small>
                 </div>
 
                 <div>
@@ -553,26 +578,41 @@ const getMaxQuantity = (tyre) => {
     return Math.min(tyre.stockBalance || 0, 999);
 };
 
-// API Calls
+// API Calls - FIXED VERSION
 const fetchCustomers = async () => {
     loadingCustomers.value = true;
     try {
+        console.log('Fetching customers...');
         const response = await api.post('list_dealer', {
             mainBranch: 0
         });
 
+        console.log('Customers API Response:', response.data);
+
         if (response.data.status === 1) {
             const dealers = response.data.admin_data;
-            customerOptions.value = Object.keys(dealers).map((custAccountNo) => {
-                const shop = dealers[custAccountNo].shop;
-                return {
-                    name: shop.custAccountName || 'Unknown',
-                    code: custAccountNo,
-                    display: `${[shop.companyName1, shop.companyName2, shop.companyName3, shop.companyName4].filter(Boolean).join(', ') || 'Unknown'} (${custAccountNo})`,
-                    shopData: shop
-                };
-            });
+            console.log('Dealers data:', dealers);
+
+            if (dealers && typeof dealers === 'object') {
+                customerOptions.value = Object.keys(dealers).map((custAccountNo) => {
+                    const shop = dealers[custAccountNo].shop;
+                    console.log(`Processing customer ${custAccountNo}:`, shop);
+
+                    return {
+                        name: shop.custAccountName || 'Unknown',
+                        code: custAccountNo,
+                        display: `${[shop.companyName1, shop.companyName2, shop.companyName3, shop.companyName4].filter(Boolean).join(', ') || 'Unknown'} (${custAccountNo})`,
+                        shopData: shop
+                    };
+                });
+            } else {
+                console.warn('No dealers data found in response');
+                customerOptions.value = [];
+            }
+
+            console.log('Final customer options:', customerOptions.value);
         } else {
+            console.error('Customers API returned status 0:', response.data);
             toast.add({ severity: 'error', summary: 'Error', detail: 'Failed to fetch customers', life: 3000 });
         }
     } catch (error) {
@@ -587,17 +627,23 @@ const fetchShipToAddresses = async (custAccountNo) => {
     if (!custAccountNo) return;
 
     loadingShipTo.value = true;
+    shipToOptions.value = []; // Clear previous options
     try {
+        console.log('Fetching ship-to addresses for:', custAccountNo);
         const response = await api.post('list_dealer_shipto', {
             custaccountno: custAccountNo
         });
 
+        console.log('Ship-to API Response:', response.data);
+
         if (response.data.status === 1) {
             const dealerData = response.data.admin_data;
-            shipToOptions.value = [];
+            console.log('Dealer ship-to data:', dealerData);
 
             // Add ship-to addresses from shipto_list
             if (dealerData.shipto_list && dealerData.shipto_list.length > 0) {
+                console.log('Found ship-to list:', dealerData.shipto_list);
+
                 dealerData.shipto_list.forEach((shipto) => {
                     shipToOptions.value.push({
                         id: shipto.id,
@@ -613,14 +659,22 @@ const fetchShipToAddresses = async (custAccountNo) => {
                         country: shipto.country || ''
                     });
                 });
+            } else {
+                console.warn('No shipto_list found in response');
             }
+
+            console.log('Final ship-to options:', shipToOptions.value);
 
             // Set default ship to account
             if (shipToOptions.value.length > 0) {
                 shipToAccount.value = shipToOptions.value[0];
                 updateShipToFields(shipToAccount.value);
+            } else {
+                console.warn('No ship-to options available');
+                toast.add({ severity: 'warn', summary: 'Warning', detail: 'No ship-to addresses found for this customer', life: 3000 });
             }
         } else {
+            console.error('Ship-to API returned status 0:', response.data);
             toast.add({ severity: 'warn', summary: 'Warning', detail: 'No ship-to addresses found', life: 3000 });
         }
     } catch (error) {
@@ -635,37 +689,57 @@ const fetchMaterials = async (custAccountNo) => {
     if (!custAccountNo) return;
 
     loading.value = true;
+    tyres.value = []; // Clear previous materials
     try {
+        console.log('Fetching materials for:', custAccountNo);
         const response = await api.post('list-material', {
             type: 'ADDTOCART',
             custaccountno: custAccountNo
         });
 
+        console.log('Materials API Response:', response.data);
+
         if (response.data.status === 1) {
             const materials = response.data.admin_data || [];
-            tyres.value = materials.map((material) => {
-                const size = `${material.sectionwidth || ''}/${material.tireseries || ''} R${material.rimdiameter || ''}`;
-                const price = parseFloat(material.price) || 0;
-                const stockBalance = material.stockLevel?.stockBalance || 0;
+            console.log('Raw materials data:', materials);
 
-                return {
-                    id: material.materialid,
-                    materialid: material.materialid,
-                    pattern: material.pattern || 'N/A',
-                    size: size,
-                    sectionwidth: material.sectionwidth,
-                    tireseries: material.tireseries,
-                    rimdiameter: material.rimdiameter,
-                    speedplyrating: material.speedplyrating || 'N/A',
-                    origin: material.origin || 'Unknown',
-                    price: price,
-                    stockBalance: stockBalance,
-                    quantity: 1,
-                    itemcategory: material.materialtype || 'ZFP2',
-                    plant: 'TSM'
-                };
-            });
+            if (Array.isArray(materials) && materials.length > 0) {
+                tyres.value = materials.map((material, index) => {
+                    console.log(`Processing material ${index}:`, material);
+
+                    const size = `${material.sectionwidth || ''}/${material.tireseries || ''} R${material.rimdiameter || ''}`;
+                    const price = parseFloat(material.price) || 0;
+
+                    // FIXED: Handle stock data properly
+                    const stockBalance = material.stockLevel?.stockBalance || 0;
+
+                    return {
+                        id: material.materialid || `material-${index}`,
+                        materialid: material.materialid,
+                        pattern: material.pattern || 'N/A',
+                        size: size,
+                        sectionwidth: material.sectionwidth,
+                        tireseries: material.tireseries,
+                        rimdiameter: material.rimdiameter,
+                        speedplyrating: material.speedplyrating || 'N/A',
+                        origin: material.origin || 'Unknown',
+                        price: price,
+                        stockBalance: stockBalance, // FIXED: This was the main issue
+                        quantity: 1,
+                        itemcategory: material.materialtype || 'ZFP2',
+                        plant: 'TSM'
+                    };
+                });
+
+                console.log('Processed tyres:', tyres.value);
+                toast.add({ severity: 'success', summary: 'Success', detail: `Loaded ${tyres.value.length} products`, life: 3000 });
+            } else {
+                console.warn('No materials data available');
+                tyres.value = [];
+                toast.add({ severity: 'warn', summary: 'Warning', detail: 'No products available for this customer', life: 3000 });
+            }
         } else {
+            console.error('Materials API returned status 0:', response.data);
             toast.add({ severity: 'warn', summary: 'Warning', detail: 'No products available for this customer', life: 3000 });
             tyres.value = [];
         }
@@ -949,12 +1023,15 @@ const handleOrderConfirmation = async (confirmResult, orderType) => {
 
 // Event Handlers
 const onCustomerChange = (event) => {
+    console.log('Customer changed:', event.value);
+
     if (event.value && event.value.code) {
         fetchMaterials(event.value.code);
         fetchShipToAddresses(event.value.code);
         selectedTyres.value = []; // Clear cart when customer changes
         currentCartRefNo.value = ''; // Reset cart reference
     } else {
+        console.log('Customer cleared, resetting data');
         resetAllData();
     }
 };
