@@ -485,8 +485,8 @@
         </template>
     </Dialog>
 
-    <Dialog v-model:visible="showCreateReimbursementDialog" header="Submit Reimbursement" :modal="true" :closable="!loadingAction" class="p-fluid" :style="{ width: '40rem' }">
-        <!-- Show success results if reimbursement was submitted -->
+    <!-- <Dialog v-model:visible="showCreateReimbursementDialog" header="Submit Reimbursement" :modal="true" :closable="!loadingAction" class="p-fluid" :style="{ width: '40rem' }">
+        Show success results if reimbursement was submitted
         <div v-if="reimbursementSubmitted && reimbursementResult" class="mb-4 p-3 bg-green-50 border border-green-200 rounded">
             <h4 class="font-bold text-green-800">Reimbursement Approved Successfully!</h4>
             <p class="text-sm text-green-700">Invoice Amount: RM {{ reimbursementResult.invoice_amount }}</p>
@@ -510,7 +510,7 @@
             <Button label="Cancel" icon="pi pi-times" class="p-button-text" :disabled="loadingAction" @click="closeReimbursementDialog" />
             <Button label="Create" icon="pi pi-check" class="p-button-primary" :loading="loadingAction" @click="submitReimbursement" />
         </template>
-    </Dialog>
+    </Dialog> -->
 
     <Dialog v-model:visible="showRejectDialog" header="Reject Warranty Claim" :modal="true" class="p-fluid" :style="{ width: '40rem' }">
         <div class="field">
@@ -549,7 +549,7 @@ const toast = useToast();
 // Reactive data
 const ctcdate = ref(new Date());
 const showCreateCTCDialog = ref(false);
-const showCreateReimbursementDialog = ref(false);
+// const showCreateReimbursementDialog = ref(false);
 const showCreateReplacementDialog = ref(false);
 const showApproveDialog = ref(false);
 const loadingAction = ref(false);
@@ -716,7 +716,7 @@ const fetchMaterial = async () => {
         const id = route.params.id; // Use actual claim ID
         const response = await api.get(`warranty_claim/getClaimMaterial/${id}`);
 
-        console.log(response.data);
+        // console.log(response.data);
         if (response.data.status === 1) {
             listMaterial.value = (response.data.admin_data || []).map((item) => ({
                 material: item // convert string → object
@@ -984,6 +984,7 @@ const fetchWarrantyClaim = async () => {
             warantyDetailChecking .value =response.data.admin_data;
             warantyDetail.value = {
                 // Claim Info
+                id: apiData.claim_info?.id,
                 claimRefNo: apiData.claim_info?.claimRefNo,
                 
                 // Customer Info
@@ -1011,14 +1012,14 @@ const fetchWarrantyClaim = async () => {
                 status: apiData.claim_info?.status,
                 // CTC Info
                 ctc_details: apiData.ctc_info?.[0] || {},
-                
-                // Replacement Detail
-                so_no: apiData.replacement_detail?.so_no,
-                do_no: apiData.replacement_detail?.do_no,
+                reimbursement: apiData.reimbursement?.[0] || {},
+                replacement_detail: apiData.replacement_detail,
+                scrapPhotos: apiData.scrapPhotos?.[0] || {},
+                threadDepthPhotos: apiData.threadDepthPhotos?.[0] || {},
                 
                 // Add other necessary mappings...
             };
-            console.log(warantyDetail);
+            // console.log(warantyDetail);
             await loadScrapImages();
             initializeWorkflowStates();
         } else {
@@ -1048,7 +1049,7 @@ const loadScrapImages = async () => {
     const images = [];
     const imageUrls = [warantyDetail.value.scrapImage1URL, warantyDetail.value.scrapImage2URL, warantyDetail.value.scrapImage3URL].filter((url) => url && url !== 'null' && url !== null);
 
-    console.log('Found scrap images:', imageUrls);
+    // console.log('Found scrap images:', imageUrls);
 
     for (const [index, url] of imageUrls.entries()) {
         try {
@@ -1253,10 +1254,12 @@ const createReplacement = () => {
 
 const createReimbursement = async () => {
     showApproveDialog.value = false;
-    showCreateReimbursementDialog.value = true;
+    // showCreateReimbursementDialog.value = true;
+    console.log(warantyDetail);
     try {
         saving.value = true;
-        const response = await api.put('warranty_claim/approveInvoice/72', {});
+        
+        const response = await api.put(`warranty_claim/approveInvoice/${warantyDetail.value.id}`, {});
         if (response.data.status === 1) {
             toast.add({
                 severity: 'success',
@@ -1300,10 +1303,10 @@ const closeReplacementDialog = () => {
     showApproveDialog.value = true;
 };
 
-const closeReimbursementDialog = () => {
-    showCreateReimbursementDialog.value = false;
-    showApproveDialog.value = true;
-};
+// const closeReimbursementDialog = () => {
+//     showCreateReimbursementDialog.value = false;
+//     showApproveDialog.value = true;
+// };
 
 const saveCTC = async () => {
     try {
@@ -1438,7 +1441,7 @@ const submitReimbursement = async () => {
         });
     } finally {
         loadingAction.value = false;
-        showCreateReimbursementDialog.value = false;
+        // showCreateReimbursementDialog.value = false;
     }
 };
 
