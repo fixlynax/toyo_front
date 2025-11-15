@@ -74,8 +74,8 @@
                     </div>
                 </template>
 
-                <template #empty> No Order Delivery found. </template>
-                <template #loading> Loading Order Delivery data. Please wait. </template>
+                <template #empty> No Order Pickup found. </template>
+                <template #loading> Loading Order Pickup data. Please wait. </template>
 
                 <Column field="created" header="Create Date" style="min-width: 8rem">
                     <template #body="{ data }">

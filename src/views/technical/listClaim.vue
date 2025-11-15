@@ -2,11 +2,21 @@
 import LoadingPage from '@/components/LoadingPage.vue';
 import api from '@/service/api';
 import { FilterMatchMode } from '@primevue/core/api';
-import { onMounted, ref } from 'vue';
+import { onMounted, ref, computed } from 'vue';
 
 const listData = ref([]);
 const loading = ref(true);
 const exportLoading = ref(false);
+
+const activeTab = ref(0);
+
+const tabs = [
+    { label: 'All', value: 'All' },
+    { label: 'Processing', value: 'Processing' },
+    { label: 'In Progress', value: 'In Progress' },
+    { label: 'Completed', value: 'Completed' },
+    { label: 'Reject', value: 'Reject' }
+];
 
 const getOverallStatusSeverity = (status) => {
     switch (status) {
@@ -35,6 +45,15 @@ const getOverallStatusSeverity = (status) => {
 
 const filters = ref({
     global: { value: null, matchMode: FilterMatchMode.CONTAINS }
+});
+
+const filteredList = computed(() => {
+    const status = tabs[activeTab.value].value;
+    if (status === 'All') {
+    // Return everything if "All" tab selected
+    return listData.value;
+  }
+    return listData.value.filter(item => item.status === status);
 });
 
 const fetchClaims = async () => {
@@ -182,12 +201,12 @@ onMounted(fetchClaims);
 <template>
     <div class="card">
         <div class="text-2xl font-bold text-gray-800 border-b pb-2">List Claim</div>
-
-        <LoadingPage v-if="loading" message="Loading Warranty Claim Details..." />
+        <TabMenu :model="tabs" v-model:activeIndex="activeTab" class="mb-4" />
+        <LoadingPage v-if="loading" message="Loading Warranty Claim List..." />
 
         <div v-else>
             <DataTable
-                :value="listData"
+                :value="filteredList"
                 :paginator="true"
                 :rows="10"
                 dataKey="id"
