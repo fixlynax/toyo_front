@@ -728,9 +728,10 @@ const router = createRouter({
                     component: () => import('@/views/scm/listOrderDelivery.vue')
                 },
                 {
-                    path: 'scm/detailOrderDelivery',
+                    path: 'scm/detailOrderDelivery/:id',
                     name: 'Detail-Order-Delivery',
-                    component: () => import('@/views/scm/detailOrderDelivery.vue')
+                    component: () => import('@/views/scm/detailOrderDelivery.vue'),
+                    props: true
                 },
                 {
                     path: 'scm/listOrderPickup',
@@ -738,9 +739,10 @@ const router = createRouter({
                     component: () => import('@/views/scm/listOrderPickup.vue')
                 },
                 {
-                    path: 'scm/detailOrderPickup',
+                    path: 'scm/detailOrderPickup/:id',
                     name: 'Detail-Order-Pickup',
-                    component: () => import('@/views/scm/detailOrderPickup.vue')
+                    component: () => import('@/views/scm/detailOrderPickup.vue'),
+                    props: true
                 },
 
                 // Return
