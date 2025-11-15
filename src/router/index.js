@@ -796,9 +796,10 @@ const router = createRouter({
                     component: () => import('@/views/scm/listSCMBackOrder.vue')
                 },
                 {
-                    path: 'scm/detailSCMBackOrder',
+                    path: 'scm/detailSCMBackOrder/:boNo',
                     name: 'Detail-SCM-BackOrder',
-                    component: () => import('@/views/scm/detailSCMBackOrder.vue')
+                    component: () => import('@/views/scm/detailSCMBackOrder.vue'),
+                    props: true
                 },
 
                 // ===============================
