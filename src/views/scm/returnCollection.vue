@@ -2,11 +2,11 @@
     <div class="card">
         <div class="flex items-center justify-between mb-4">
             <div class="text-2xl font-bold text-gray-800">CTC Return List</div>
-            <Button icon="pi pi-upload" label="Bulk Update" class="p-button" />
+  
         </div>
-
+        <TabMenu :model="statusTabs" v-model:activeIndex="activeTabIndex" class="mb-6" />
         <DataTable
-            :value="collectionList"
+            :value="filteredList"
             :paginator="true"
             :rows="10"
             :rowsPerPageOptions="[5, 10, 20]"
@@ -34,14 +34,55 @@
                         <Menu ref="sortMenu" :model="sortItems" :popup="true" />
                     </div>
 
-                    <!-- Right: Sorting Options -->
-
+                    <div class="flex justify-end gap-2"  v-if="statusTabs[activeTabIndex]?.label === 'New'">
+                        <Button type="button" label="Export" icon="pi pi-file-export" class="p-button-success" :loading="exportLoading1" @click="handleExport1"/>
+                        <Button type="button" label="Bulk Import" icon="pi pi-file-import" @click="importInput1?.click()":loading="importLoading1" />
+                        <input 
+                        ref="importInput1"
+                        type="file" 
+                        accept=".xlsx,.xls" 
+                        style="display: none" 
+                        @change="handleImport1"
+                        />
+                    </div>
+                    <div class="flex justify-end gap-2"  v-if="statusTabs[activeTabIndex]?.label === 'Pending'">
+                        <Button type="button" label="Export" icon="pi pi-file-export" class="p-button-success" :loading="exportLoading2" @click="handleExport2"/>
+                        <Button type="button" label="Bulk Import" icon="pi pi-file-import" @click="importInput2?.click()":loading="importLoading2" />
+                        <input 
+                        ref="importInput2"
+                        type="file" 
+                        accept=".xlsx,.xls" 
+                        style="display: none" 
+                        @change="handleImport2"
+                        />
+                    </div>
                 </div>
             </template>
             
             <template #empty> No return records found. </template>
             <template #loading> Loading return data. Please wait. </template>
+            <Column header="Export All" style="min-width: 8rem">
+                <template #header>
+                    <div class="flex justify-center">
+                    <Checkbox
+                        :key="filteredList.length" 
+                        :binary="true"
+                        :model-value="allSelected"  
+                        @change="() => toggleSelectAll()"  
+                    />
+                    </div>
+                </template>
 
+                <template #body="{ data }">
+                    <div class="flex justify-center">
+                    <Checkbox
+                        :binary="true"
+                        :model-value="selectedExportIds.has(data.id)"
+                        @change="() => handleToggleExport(data.id)"
+                    />
+                    </div>
+                </template>
+            </Column>
             <Column field="created" header="Create Date" style="min-width: 8rem">
                 <template #body="{ data }">
                     {{ formatDate(data?.created) ?? '-' }}
@@ -103,19 +144,82 @@
 </template>
 
 <script setup>
-import { onMounted, ref } from 'vue';
+import { onMounted, ref, watch, computed } from 'vue';
 import { FilterMatchMode } from '@primevue/core/api';
-import { ListCollectionService } from '@/service/ListCollection';
 import api from '@/service/api';
+import { useToast } from 'primevue/usetoast';
+
+const toast = useToast();
+const exportLoading1 = ref(false);
+const importLoading1 = ref(false);
+const exportLoading2 = ref(false);
+const importLoading2 = ref(false);
+const returnList = ref([]);
+const filteredList = ref([]);
+const importInput1 = ref();
+const importInput2 = ref();
 
 // Data variables
 const loading = ref(false);
 const collectionList = ref([]);
 const sortMenu = ref();
+
+const activeTabIndex = ref(0);
+const selectedExportIds = ref(new Set());
 // Filters for quick search
 const filters = ref({
     global: { value: null, matchMode: FilterMatchMode.CONTAINS }
 });
+
+const statusTabs = [
+    { label: 'New', status: 0 ,code: 'REPLACEMENT'},
+    { label: 'Pending', status: 1 ,code: 'REIMBURSEMENT'},
+    { label: 'Completed', status: 2 ,code: ''}
+];
+
+watch(activeTabIndex, () => {
+    filterByTab();
+    selectedExportIds.value.clear();
+});
+
+const filterByTab = () => {
+    const selected = statusTabs[activeTabIndex.value];
+    if (!selected) {
+        filteredList.value = collectionList.value;
+        return;
+    }
+    filteredList.value = collectionList.value.filter((item) => (item.action ?? '').toUpperCase() === selected.code.toUpperCase());
+};
+// Computed boolean: are all rows selected?
+const allSelected = computed(() => {
+  return filteredList.value.length > 0 &&
+         filteredList.value.every(item => selectedExportIds.value.has(item.id));
+});
+
+const handleToggleExport = (id) => {
+  if (selectedExportIds.value.has(id)) {
+    selectedExportIds.value.delete(id);
+  } else {
+    selectedExportIds.value.add(id);
+  }
+  console.log(selectedExportIds.value);
+};
+
+// Check all
+const toggleSelectAll = () => {
+  if (allSelected.value) {
+    // Unselect all for this tab
+    filteredList.value.forEach(item => {
+      selectedExportIds.value.delete(item.id);
+    });
+  } else {
+    // Select all for this tab
+    filteredList.value.forEach(item => {
+      selectedExportIds.value.add(item.id);
+    });
+  }
+};
+
 const sortBy = (field, order) => {
   collectionList.value = [...collectionList.value].sort((a, b) => {
     // Helper to get nested value
@@ -157,12 +261,10 @@ const sortItems = ref([
 // Fetch data on mount
 // =========================
     onMounted(async () => {
-    loading.value = true;
         fetchData();
-    loading.value = false;
     });
 
-    function formatDate(dateString) {
+function formatDate(dateString) {
     if (!dateString) return '';
     const date = new Date(dateString);
     return date.toLocaleString('en-MY', {
@@ -171,7 +273,7 @@ const sortItems = ref([
         day: '2-digit',
     });
     }
-    function formatTime(timeString) {
+function formatTime(timeString) {
     if (!timeString) return '';
     const [hours, minutes, seconds] = timeString.split(':');
     const date = new Date();
@@ -183,7 +285,7 @@ const sortItems = ref([
         hour12: true,
     });
     }
-    function formatDateFull(dateString) {
+function formatDateFull(dateString) {
     if (!dateString) return '';
     const date = new Date(dateString);
     return date.toLocaleString('en-MY', {
@@ -196,15 +298,197 @@ const sortItems = ref([
         hour12: true
     });
     }
+// Export function SCHEDULE ONLY
+const handleExport1 = async () => {
+     const idsArray = Array.from(selectedExportIds.value).map(id => ({ id: Number(id) }));
+
+    if (idsArray.length === 0) {
+        alert('Please select at least one row.');
+        return;
+    }
+    // console.log("export 1",idsArray);
+    try {
+        exportLoading1.value = true;
+        
+            const response = await api.postExtra(
+            'excel/export-schedule-warranty',
+        { warrantyentryids_array: JSON.stringify(idsArray) },
+        {
+            responseType: 'blob',
+            headers: {
+            'Content-Type': 'application/json',
+            }
+        }
+        );
+        const blob = new Blob([response.data], { 
+        type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' 
+        });
+
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = 'BulkReturnSchedule_Download.xlsx';
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        window.URL.revokeObjectURL(url);
+
+        toast.add({ severity: 'success', summary: 'Success', detail: 'Export completed', life: 3000 });
+        selectedExportIds.value.clear();
+    } catch (error) {
+        console.error('Error exporting data:', error);
+        toast.add({ severity: 'error', summary: 'Error', detail: 'Failed to export data', life: 3000 });
+    } finally {
+        exportLoading1.value = false;
+    }
+};
+// Export function RECIEVE ONLY
+const handleExport2 = async () => {
+     const idsArray = Array.from(selectedExportIds.value).map(id => ({ id: Number(id) }));
+
+    if (idsArray.length === 0) {
+        alert('Please select at least one row.');
+        return;
+    }
+    // console.log("export 2",idsArray);
+    try {
+        exportLoading2.value = true;
+        
+            const response = await api.postExtra(
+            'excel/export-receive-warranty',
+        { warrantyentryids_array: JSON.stringify(idsArray) },
+        {
+            responseType: 'blob',
+            headers: {
+            'Content-Type': 'application/json',
+            }
+        }
+        );
+        const blob = new Blob([response.data], { 
+        type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' 
+        });
+
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = 'BulkReturnReceive_Download.xlsx';
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        window.URL.revokeObjectURL(url);
+
+        toast.add({ severity: 'success', summary: 'Success', detail: 'Export completed', life: 3000 });
+        selectedExportIds.value.clear();
+    } catch (error) {
+        console.error('Error exporting data:', error);
+        toast.add({ severity: 'error', summary: 'Error', detail: 'Failed to export data', life: 3000 });
+    } finally {
+        exportLoading2.value = false;
+    }
+};
+
+// Import function SCHEDULE ONLY
+const handleImport1 = async (event) => {
+    const file = event.target.files[0];
+    if (!file) return;
+    // console.log("import 1",file);
+    try {
+        importLoading1.value = true;
+        
+        const formData = new FormData();
+        formData.append('warranty_excel', file);
+        
+        const response = await api.postExtra('excel/import-schedule-warranty', formData, {
+            headers: {
+                'Content-Type': 'multipart/form-data'
+            }
+            });
+        
+        if (response.data.status === 1) {
+            // Refresh data after import
+            await fetchData();
+
+            toast.add({
+                severity: 'success',
+                summary: 'Success',
+                detail: 'File imported successfully',
+                life: 3000
+            });
+            } else {
+            toast.add({
+                severity: 'error',
+                summary: 'Import Failed',
+                detail: response.data.error || 'Server did not confirm success',
+                life: 3000
+            });
+        }
+    } catch (error) {
+        console.error('Error importing data:', error);
+        toast.add({ severity: 'error', summary: 'Error', detail: 'Failed to import data', life: 3000 });
+    } finally {
+        importLoading1.value = false;
+                    // Reset file input
+            if (importInput1.value) {
+                importInput1.value.value = '';
+            }
+    }
+};
+// Import function RECIEVE ONLY
+const handleImport2 = async (event) => {
+    const file = event.target.files[0];
+    if (!file) return;
+    // console.log("import 2",file);
+    try {
+        importLoading2.value = true;
+        
+        const formData = new FormData();
+        formData.append('warranty_excel', file);
+        
+        const response = await api.postExtra('excel/import-receive-warranty', formData, {
+            headers: {
+                'Content-Type': 'multipart/form-data'
+            }
+            });
+        
+        if (response.data.status === 1) {
+            // Refresh data after import
+            await fetchData();
+
+            toast.add({
+                severity: 'success',
+                summary: 'Success',
+                detail: 'File imported successfully',
+                life: 3000
+            });
+            } else {
+            toast.add({
+                severity: 'error',
+                summary: 'Import Failed',
+                detail: response.data.error || 'Server did not confirm success',
+                life: 3000
+            });
+        }
+    } catch (error) {
+        console.error('Error importing data:', error);
+        toast.add({ severity: 'error', summary: 'Error', detail: 'Failed to import data', life: 3000 });
+    } finally {
+        importLoading2.value = false;
+                    // Reset file input
+            if (importInput2.value) {
+                importInput2.value.value = '';
+            }
+    }
+};
 const fetchData = async () => {
     try {
         loading.value = true;
         const response = await api.get('return-order/list');
-        console.log('API Response:', response.data);
+        // console.log('API Response:', response.data);
         if (response.data.status === 1 && Array.isArray(response.data.admin_data)) {
                     collectionList.value = response.data.admin_data.sort((a, b) => {
                 return new Date(b.created) - new Date(a.created);
             });
+            filterByTab();
         } else {
             console.error('API returned error or invalid data:', response.data);
             collectionList.value = [];
