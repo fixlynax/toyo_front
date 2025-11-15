@@ -7,7 +7,7 @@
                     <!-- Header -->
                     <div class="flex items-center justify-between border-b pb-3 mb-3">
                         <div class="flex items-center space-x-3">
-                            <Button icon="pi pi-arrow-left font-bold" class="p-button-text p-button-secondary text-xl" size="big" v-tooltip="'Back'" @click="$router.back()" />
+                            <Button icon="pi pi-arrow-left" class="p-button-text p-button-secondary text-xl" size="big" v-tooltip="'Back'" @click="$router.back()" />
                             <div class="text-2xl font-bold text-gray-800">Devices</div>
                         </div>
                         <div class="flex items-center gap-2 w-full max-w-md">
@@ -33,7 +33,7 @@
                                         <tr v-for="device in filteredAllDevices" :key="device.device_id" class="border-b hover:bg-gray-50">
                                             <td class="px-4 py-3">
                                                 <div class="flex items-center gap-2 text-gray-800 font-bold">
-                                                    <i :class="device.is_blocked ? 'pi pi-ban text-red-500' : 'pi pi-tablet text-black-500'"></i>
+                                                    <i :class="device.is_blocked ? 'pi pi-ban text-red-500' : 'pi pi-tablet text-blue-500'"></i>
                                                     {{ device.device_model }}
                                                 </div>
                                                 <div class="ml-6 text-gray-500 text-xs mt-2">
@@ -41,7 +41,8 @@
                                                     <div>Platform: {{ device.device_platform }}</div>
                                                     <div>Last Active: {{ formatDate(device.last_used_at) }}</div>
                                                     <div v-if="device.is_blocked" class="text-red-500 font-semibold">Status: Blocked</div>
-                                                    <div v-if="device.is_active" class="text-green-500 font-semibold">Status: Active</div>
+                                                    <div v-else-if="device.is_active" class="text-green-500 font-semibold">Status: Active</div>
+                                                    <div v-else class="text-gray-500 font-semibold">Status: Inactive</div>
                                                 </div>
                                             </td>
                                             <td class="px-4 py-3 text-right align-top">
@@ -63,7 +64,7 @@
                                         <tr v-for="device in filteredActiveDevices" :key="device.device_id" class="border-b hover:bg-gray-50">
                                             <td class="px-4 py-3">
                                                 <div class="flex items-center gap-2 text-gray-800 font-bold">
-                                                    <i class="pi pi-tablet text-black-500"></i>
+                                                    <i class="pi pi-tablet text-blue-500"></i>
                                                     {{ device.device_model }}
                                                 </div>
                                                 <div class="ml-6 text-gray-500 text-xs mt-2">
@@ -179,15 +180,21 @@
 
 <script setup>
 import { ref, computed, onMounted } from 'vue';
+import { useRouter } from 'vue-router';
 import api from '@/service/api';
 import { useToast } from 'primevue/usetoast';
 
+const router = useRouter();
 const toast = useToast();
+
 const activeTabIndex = ref(0);
 const searchQuery = ref('');
 const isLoading = ref(false);
 const devices = ref([]);
-const etenUserId = ref(1); // ✅ Replace with actual user ID (e.g. from route params)
+
+// Extract user ID from route params
+const route = router.currentRoute;
+const etenUserId = ref(route.value.params.id);
 
 // Block Modal State
 const blockModal = ref({
@@ -217,7 +224,7 @@ function closeBlockModal() {
     };
 }
 
-// ✅ Fetch devices from API - Updated to use single endpoint
+// ✅ Fetch devices from API
 async function fetchDeviceList() {
     try {
         isLoading.value = true;
@@ -230,7 +237,7 @@ async function fetchDeviceList() {
                 device_platform: device.device_platform,
                 last_used_at: device.last_used_at,
                 is_blocked: device.is_blocked === 1, // Convert to boolean
-                is_active: device.is_blocked === 0 // Convert to boolean,
+                is_active: device.is_blocked === 0 // Convert to boolean
             }));
         } else {
             toast.add({
@@ -255,7 +262,7 @@ async function fetchDeviceList() {
     }
 }
 
-// ✅ Confirm Block/Unblock Action - Updated to match API requirements
+// ✅ Confirm Block/Unblock Action
 async function confirmBlockAction() {
     if (!blockModal.value.reason.trim()) {
         toast.add({
@@ -327,7 +334,11 @@ async function confirmBlockAction() {
 const filterDevices = (list) => {
     if (!searchQuery.value.trim()) return list;
     const q = searchQuery.value.toLowerCase();
-    return list.filter((d) => d.device_model.toLowerCase().includes(q) || d.device_id.toLowerCase().includes(q) || d.device_platform.toLowerCase().includes(q));
+    return list.filter((d) => 
+        d.device_model.toLowerCase().includes(q) || 
+        d.device_id.toLowerCase().includes(q) || 
+        d.device_platform.toLowerCase().includes(q)
+    );
 };
 
 const filteredAllDevices = computed(() => filterDevices(devices.value));

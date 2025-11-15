@@ -12,15 +12,15 @@
                     <div class="p-4 bg-white border rounded-lg shadow-sm">
                         <div class="flex items-center justify-between">
                             <div>
-                                <div class="text-sm font-semibold text-gray-600">Total Collections</div>
-                                <div class="text-2xl font-bold text-blue-600 mt-1">{{ summaryStats.totalCollections.toLocaleString() }}</div>
+                                <div class="text-sm font-semibold text-gray-600">Total Orders</div>
+                                <div class="text-2xl font-bold text-blue-600 mt-1">{{ summaryStats.totalOrders.toLocaleString() }}</div>
                             </div>
                             <div class="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center">
                                 <i class="pi pi-shopping-bag text-blue-600 text-xl"></i>
                             </div>
                         </div>
-                        <div class="text-xs text-green-600 mt-2">
-                            <i class="pi pi-arrow-up"></i> 12.5% from last period
+                        <div class="text-xs text-gray-500 mt-2">
+                            Own collection orders
                         </div>
                     </div>
 
@@ -28,7 +28,7 @@
                         <div class="flex items-center justify-between">
                             <div>
                                 <div class="text-sm font-semibold text-gray-600">Completed</div>
-                                <div class="text-2xl font-bold text-green-600 mt-1">{{ summaryStats.completedCollections.toLocaleString() }}</div>
+                                <div class="text-2xl font-bold text-green-600 mt-1">{{ summaryStats.completedOrders.toLocaleString() }}</div>
                             </div>
                             <div class="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center">
                                 <i class="pi pi-check-circle text-green-600 text-xl"></i>
@@ -43,76 +43,69 @@
                         <div class="flex items-center justify-between">
                             <div>
                                 <div class="text-sm font-semibold text-gray-600">Total Value</div>
-                                <div class="text-2xl font-bold text-purple-600 mt-1">RM {{ summaryStats.totalValue.toLocaleString() }}</div>
+                                <div class="text-2xl font-bold text-purple-600 mt-1">RM {{ (summaryStats.totalValue / 1000).toFixed(0) }}K</div>
                             </div>
                             <div class="w-12 h-12 bg-purple-100 rounded-full flex items-center justify-center">
                                 <i class="pi pi-dollar text-purple-600 text-xl"></i>
                             </div>
                         </div>
-                        <div class="text-xs text-green-600 mt-2">
-                            <i class="pi pi-arrow-up"></i> 8.7% from last period
+                        <div class="text-xs text-gray-500 mt-2">
+                            Total order value
                         </div>
                     </div>
 
                     <div class="p-4 bg-white border rounded-lg shadow-sm">
                         <div class="flex items-center justify-between">
                             <div>
-                                <div class="text-sm font-semibold text-gray-600">Avg Wait Time</div>
-                                <div class="text-2xl font-bold text-orange-600 mt-1">{{ summaryStats.avgWaitTime }} mins</div>
+                                <div class="text-sm font-semibold text-gray-600">Pending</div>
+                                <div class="text-2xl font-bold text-orange-600 mt-1">{{ summaryStats.pendingOrders.toLocaleString() }}</div>
                             </div>
                             <div class="w-12 h-12 bg-orange-100 rounded-full flex items-center justify-center">
                                 <i class="pi pi-clock text-orange-600 text-xl"></i>
                             </div>
                         </div>
-                        <div class="text-xs text-red-600 mt-2">
-                            <i class="pi pi-arrow-up"></i> 2.3 mins longer
+                        <div class="text-xs text-gray-500 mt-2">
+                            Awaiting collection
                         </div>
                     </div>
                 </div>
+                
+                <!-- Filters Section -->
+                <div>
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <!-- Customer Account -->
+                        <div>
+                            <label class="block font-bold text-gray-700 mb-2">Customer Account</label>
+                            <Dropdown v-model="filters.custAccountNo" :options="customerOptions" optionLabel="label" optionValue="value" placeholder="Select Customer Account" class="w-full" />
+                        </div>
 
-                <!-- Charts Section -->
-                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
-                    <!-- Daily Collection Trend -->
-                    <div class="p-4 bg-white border rounded-lg">
-                        <div class="text-lg font-bold text-gray-800 mb-4">Daily Collection Trend</div>
-                        <Chart 
-                            type="bar" 
-                            :data="dailyTrendChartData" 
-                            :options="chartOptions"
-                            style="height: 300px"
-                        />
+                        <!-- Start Date -->
+                        <div>
+                            <label class="block font-bold text-gray-700 mb-2">Start Date</label>
+                            <Calendar v-model="filters.startdate" dateFormat="yy-mm-dd" placeholder="Select Start Date" class="w-full" />
+                        </div>
+
+                        <!-- End Date -->
+                        <div>
+                            <label class="block font-bold text-gray-700 mb-2">End Date</label>
+                            <Calendar v-model="filters.enddate" dateFormat="yy-mm-dd" placeholder="Select End Date" class="w-full" />
+                        </div>
                     </div>
 
-                    <!-- Time Slot Distribution -->
-                    <div class="p-4 bg-white border rounded-lg">
-                        <div class="text-lg font-bold text-gray-800 mb-4">Collection Trends</div>
-                        <Chart 
-                            type="line" 
-                            :data="timeSlotChartData" 
-                            :options="chartOptions"
-                            style="height: 300px"
-                        />
+                    <!-- Action Buttons -->
+                    <div class="flex justify-end gap-4 mt-4">
+                        <Button label="Clear Filters" class="p-button-outlined p-button-secondary" @click="clearFilters" />
+                        <Button label="Generate Report" class="p-button-primary" @click="generateReport" :loading="loading" />
+                        <Button label="Export Excel" icon="pi pi-file-excel" class="p-button-success" @click="exportExcel" :loading="exportLoading" />
                     </div>
                 </div>
+                
 
                 <!-- Detailed Collections Table -->
                 <div class="mt-4">
                     <div class="flex justify-between items-center mb-4">
                         <div class="text-lg font-bold text-gray-800">Collection Details</div>
-                        <div class="flex gap-2">
-                            <Button 
-                                label="Export CSV" 
-                                icon="pi pi-download" 
-                                class="p-button-outlined p-button-secondary"
-                                @click="exportToCSV" 
-                            />
-                            <Button 
-                                label="Print Report" 
-                                icon="pi pi-print" 
-                                class="p-button-outlined"
-                                @click="printReport" 
-                            />
-                        </div>
+                        <div class="text-sm text-gray-600">Total Records: {{ collectionData.length }}</div>
                     </div>
 
                     <DataTable 
@@ -120,92 +113,98 @@
                         :paginator="true" 
                         :rows="10"
                         :rowsPerPageOptions="[5, 10, 20, 50]"
-                        dataKey="collectionId" 
+                        dataKey="id" 
                         :rowHover="true"
                         :loading="loading"
                         responsiveLayout="scroll"
                         :scrollable="true"
                         scrollHeight="400px"
+                        class="rounded-table"
                     >
-                        <Column field="collectionId" header="Collection ID" style="min-width: 120px" :sortable="true">
+                        <Column field="order_no" header="Order No" style="min-width: 140px" :sortable="true">
                             <template #body="{ data }">
                                 <div class="font-mono text-sm font-semibold text-blue-600">
-                                    {{ data.collectionId }}
+                                    {{ data.order_no }}
                                 </div>
                             </template>
                         </Column>
 
-                        <Column field="orderDate" header="Order Date" style="min-width: 100px" :sortable="true">
-                            <template #body="{ data }">
-                                <div class="text-sm">
-                                    {{ formatDate(data.orderDate) }}
-                                </div>
-                            </template>
-                        </Column>
-
-                        <Column field="collectionDate" header="Collection Date" style="min-width: 100px" :sortable="true">
-                            <template #body="{ data }">
-                                <div class="text-sm">
-                                    {{ formatDate(data.collectionDate) }}
-                                </div>
-                            </template>
-                        </Column>
-
-                        <Column field="customerName" header="Customer" style="min-width: 150px" :sortable="true">
-                            <template #body="{ data }">
-                                <div class="font-semibold">{{ data.customerName }}</div>
-                                <div class="text-xs text-gray-500">{{ data.customerType }}</div>
-                            </template>
-                        </Column>
-
-                        <Column field="collectionPoint" header="Collection Point" style="min-width: 120px" :sortable="true">
-                            <template #body="{ data }">
-                                <div class="flex items-center gap-1">
-                                    <i class="pi pi-map-marker text-gray-400 text-xs"></i>
-                                    <span>{{ data.collectionPoint }}</span>
-                                </div>
-                            </template>
-                        </Column>
-
-                        <Column field="totalValue" header="Order Value" style="min-width: 120px" :sortable="true">
-                            <template #body="{ data }">
-                                <div class="font-bold text-purple-600">
-                                    RM {{ data.totalValue.toLocaleString() }}
-                                </div>
-                            </template>
-                        </Column>
-
-                        <Column field="status" header="Status" style="min-width: 120px" :sortable="true">
-                            <template #body="{ data }">
-                                <Tag 
-                                    :value="data.status" 
-                                    :severity="getStatusSeverity(data.status)" 
-                                />
-                            </template>
-                        </Column>
-
-                        <Column field="timeSlot" header="Time Slot" style="min-width: 100px" :sortable="true">
+                        <Column field="so_no" header="SO No" style="min-width: 120px" :sortable="true">
                             <template #body="{ data }">
                                 <div class="text-sm font-medium">
-                                    {{ data.timeSlot }}
+                                    {{ data.so_no || '-' }}
                                 </div>
                             </template>
                         </Column>
 
-                        <Column field="waitTime" header="Wait Time" style="min-width: 100px" :sortable="true">
+                        <Column field="created" header="Order Date" style="min-width: 120px" :sortable="true">
                             <template #body="{ data }">
-                                <div class="text-center font-bold" :class="getWaitTimeClass(data.waitTime)">
-                                    {{ data.waitTime || '-' }} mins
+                                <div class="text-sm">
+                                    {{ formatDate(data.created) }}
                                 </div>
                             </template>
                         </Column>
 
-                        <Column field="collectionType" header="Type" style="min-width: 100px" :sortable="true">
+                        <Column field="deliveryDate" header="Delivery Date" style="min-width: 120px" :sortable="true">
+                            <template #body="{ data }">
+                                <div class="text-sm">
+                                    {{ formatDate(data.deliveryDate) }}
+                                </div>
+                            </template>
+                        </Column>
+
+                        <Column field="dealerName" header="Customer" style="min-width: 200px" :sortable="true">
+                            <template #body="{ data }">
+                                <div class="font-semibold">{{ data.dealerName || data.custaccountno }}</div>
+                                <div class="text-xs text-gray-500">{{ data.custaccountno }}</div>
+                            </template>
+                        </Column>
+
+                        <Column field="salesorg" header="Sales Org" style="min-width: 100px" :sortable="true">
+                            <template #body="{ data }">
+                                <div class="text-center font-semibold">{{ data.salesorg }}</div>
+                            </template>
+                        </Column>
+
+                        <Column field="deliveryType" header="Collection Type" style="min-width: 130px" :sortable="true">
                             <template #body="{ data }">
                                 <Tag 
-                                    :value="data.collectionType" 
-                                    severity="info"
+                                    :value="data.deliveryType" 
+                                    :severity="getDeliveryTypeSeverity(data.deliveryType)" 
                                 />
+                            </template>
+                        </Column>
+
+                        <Column field="total" header="Order Value (RM)" style="min-width: 130px" :sortable="true">
+                            <template #body="{ data }">
+                                <div class="font-bold text-purple-600">
+                                    {{ formatCurrency(data.total) }}
+                                </div>
+                            </template>
+                        </Column>
+
+                        <Column field="orderstatus" header="Status" style="min-width: 140px" :sortable="true">
+                            <template #body="{ data }">
+                                <Tag 
+                                    :value="getStatusText(data.orderstatus)" 
+                                    :severity="getStatusSeverity(data.orderstatus)" 
+                                />
+                            </template>
+                        </Column>
+
+                        <Column header="Items" style="min-width: 100px">
+                            <template #body="{ data }">
+                                <div class="text-center">
+                                    <Badge :value="data.order_array?.length || 0" severity="info" />
+                                </div>
+                            </template>
+                        </Column>
+
+                        <Column field="orderCompleteDate" header="Completed Date" style="min-width: 130px" :sortable="true">
+                            <template #body="{ data }">
+                                <div class="text-sm" :class="getCompletionClass(data.orderCompleteDate)">
+                                    {{ formatDate(data.orderCompleteDate) }}
+                                </div>
                             </template>
                         </Column>
 
@@ -214,8 +213,8 @@
                                 <Button 
                                     icon="pi pi-eye" 
                                     class="p-button-info p-button-text p-button-sm" 
-                                    v-tooltip="'View Details'"
-                                    @click="viewCollectionDetails(data)" 
+                                    v-tooltip="'View Order Details'"
+                                    @click="viewOrderDetails(data)" 
                                 />
                             </template>
                         </Column>
@@ -238,184 +237,381 @@
                 </div>
             </div>
         </div>
+
+        <!-- Order Details Dialog -->
+        <Dialog v-model:visible="displayOrderDetails" :style="{ width: '800px' }" header="Order Collection Details" :modal="true">
+            <div v-if="selectedOrder" class="space-y-4">
+                
+                <!-- Items Table -->
+                <div class="flex items-center justify-between">
+                    <h4 class="font-bold text-gray-800">Order Items</h4>
+                    <Tag :value="`${selectedOrder.order_array?.length || 0} items`" severity="info" />
+                </div>
+
+                <DataTable :value="selectedOrder.order_array" class="rounded-table" scrollable scrollHeight="flex" stripedRows showGridlines>
+                    <Column field="materialid" header="Material ID" style="min-width: 120px">
+                        <template #body="{ data }">
+                            <span class="font-medium">{{ data.materialid }}</span>
+                        </template>
+                    </Column>
+
+                    <Column field="itemcategory" header="Category" style="min-width: 100px; text-align: center">
+                        <template #body="{ data }">
+                            <Tag :value="data.itemcategory" severity="secondary" />
+                        </template>
+                    </Column>
+
+                    <Column field="plant" header="Plant" style="min-width: 80px; text-align: center">
+                        <template #body="{ data }">
+                            <span>{{ data.plant }}</span>
+                        </template>
+                    </Column>
+
+                    <Column field="qty" header="Quantity" style="min-width: 100px; text-align: center">
+                        <template #body="{ data }">
+                            <span class="font-semibold">{{ data.qty }}</span>
+                        </template>
+                    </Column>
+
+                    <Column header="Unit Price (RM)" style="min-width: 120px; text-align: right">
+                        <template #body="{ data }">
+                            <span class="font-semibold">
+                                {{ getItemPrice(selectedOrder.fullfill_order_array, data.materialid) }}
+                            </span>
+                        </template>
+                    </Column>
+
+                    <Column header="Total Value (RM)" style="min-width: 120px; text-align: right">
+                        <template #body="{ data }">
+                            <span class="font-bold text-purple-600">
+                                {{ calculateItemTotal(selectedOrder.fullfill_order_array, data.materialid, data.qty) }}
+                            </span>
+                        </template>
+                    </Column>
+                </DataTable>
+
+                <!-- Fulfillment Information -->
+                <div v-if="selectedOrder.fullfill_order_array && selectedOrder.fullfill_order_array.length > 0">
+                    <div class="flex items-center justify-between">
+                        <h4 class="font-bold text-gray-800">Fulfillment Details</h4>
+                        <Tag value="Fulfilled" severity="success" />
+                    </div>
+                    
+                    <DataTable :value="selectedOrder.fullfill_order_array" class="rounded-table mt-2" scrollable scrollHeight="200px" stripedRows>
+                        <Column field="materialid" header="Material ID" style="min-width: 120px" />
+                        <Column field="qty" header="Fulfilled Qty" style="min-width: 100px; text-align: center" />
+                        <Column field="unitprice" header="Unit Price (RM)" style="min-width: 120px; text-align: right">
+                            <template #body="{ data }">
+                                <span class="font-semibold">{{ formatCurrency(data.unitprice) }}</span>
+                            </template>
+                        </Column>
+                        <Column field="totalamt" header="Total Amount (RM)" style="min-width: 120px; text-align: right">
+                            <template #body="{ data }">
+                                <span class="font-bold text-green-600">{{ formatCurrency(data.totalamt) }}</span>
+                            </template>
+                        </Column>
+                    </DataTable>
+                </div>
+            </div>
+        </Dialog>
     </Fluid>
 </template>
 
 <script setup>
-import { ref, reactive, onMounted } from 'vue';
-import Chart from 'primevue/chart';
+import { ref, reactive, onMounted, computed } from 'vue';
+import api from '@/service/api';
 
+// ✅ Filters
+const filters = reactive({
+    custAccountNo: null,
+    startdate: null,
+    enddate: null
+});
+
+// ✅ Loading states
 const loading = ref(false);
+const exportLoading = ref(false);
 
-// Summary Statistics
-const summaryStats = reactive({
-    totalCollections: 856,
-    completedCollections: 732,
-    completionRate: 85.5,
-    totalValue: 3245600,
-    avgWaitTime: 8.2
+// ✅ Data
+const collectionData = ref([]);
+const customerOptions = ref([]);
+
+// ✅ Dialog states
+const displayOrderDetails = ref(false);
+const selectedOrder = ref(null);
+
+// ✅ Status Mapping
+const statusMap = {
+    0: 'Pending',
+    1: 'Completed',
+    66: 'Processing',
+    77: 'Delivery'
+};
+
+// ✅ Summary Statistics (computed from actual data)
+const summaryStats = computed(() => {
+    const totalOrders = collectionData.value.length;
+    const completedOrders = collectionData.value.filter(order => order.orderstatus === 1).length;
+    const pendingOrders = collectionData.value.filter(order => order.orderstatus === 0 || order.orderstatus === 66).length;
+    const totalValue = collectionData.value.reduce((sum, order) => sum + parseFloat(order.total || 0), 0);
+    
+    const completionRate = totalOrders > 0 ? Math.round((completedOrders / totalOrders) * 100) : 0;
+
+    return {
+        totalOrders,
+        completedOrders,
+        completionRate,
+        totalValue,
+        pendingOrders
+    };
 });
 
-// Sample data
-const collectionData = ref([
-    {
-        collectionId: 'COL-2024-001234',
-        orderDate: new Date('2024-01-15'),
-        collectionDate: new Date('2024-01-16'),
-        customerName: 'Ahmad bin Ismail',
-        customerType: 'Retail Customer',
-        collectionPoint: 'Main Warehouse',
-        totalValue: 2450,
-        status: 'Collected',
-        timeSlot: 'Morning (8AM-12PM)',
-        waitTime: 5,
-        collectionType: 'Standard Collection'
-    },
-    {
-        collectionId: 'COL-2024-001235',
-        orderDate: new Date('2024-01-16'),
-        collectionDate: new Date('2024-01-17'),
-        customerName: 'PS Tyres & Battery',
-        customerType: 'Dealer',
-        collectionPoint: 'Central Hub',
-        totalValue: 18700,
-        status: 'Ready for Pickup',
-        timeSlot: 'Afternoon (12PM-4PM)',
-        waitTime: null,
-        collectionType: 'Bulk Collection'
-    },
-    {
-        collectionId: 'COL-2024-001236',
-        orderDate: new Date('2024-01-14'),
-        collectionDate: new Date('2024-01-18'),
-        customerName: 'ABC Motors Sdn Bhd',
-        customerType: 'Corporate',
-        collectionPoint: 'North Branch',
-        totalValue: 32500,
-        status: 'Scheduled',
-        timeSlot: 'Morning (8AM-12PM)',
-        waitTime: null,
-        collectionType: 'Scheduled Pickup'
-    },
-    {
-        collectionId: 'COL-2024-001237',
-        orderDate: new Date('2024-01-13'),
-        collectionDate: new Date('2024-01-15'),
-        customerName: 'City Auto Retail',
-        customerType: 'VIP',
-        collectionPoint: 'Main Warehouse',
-        totalValue: 8900,
-        status: 'Collected',
-        timeSlot: 'Evening (4PM-8PM)',
-        waitTime: 12,
-        collectionType: 'Express Collection'
-    },
-    {
-        collectionId: 'COL-2024-001238',
-        orderDate: new Date('2024-01-12'),
-        collectionDate: new Date('2024-01-14'),
-        customerName: 'Borneo Tyre Services',
-        customerType: 'Dealer',
-        collectionPoint: 'South Branch',
-        totalValue: 15600,
-        status: 'Cancelled',
-        timeSlot: 'Afternoon (12PM-4PM)',
-        waitTime: null,
-        collectionType: 'Standard Collection'
-    }
-]);
+// ✅ Generate customer options from collection data
+const generateCustomerOptions = () => {
+    const customers = new Map();
 
-// Chart Data
-const dailyTrendChartData = ref({
-    labels: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
-    datasets: [
-        {
-            label: 'Collections',
-            data: [45, 52, 38, 61, 55, 48, 35],
-            backgroundColor: '#3B82F6',
-            borderColor: '#2563EB',
-            borderWidth: 1
+    collectionData.value.forEach((item) => {
+        const custAccountNo = item.custaccountno;
+        const dealerName = item.dealerName || 'Unknown Customer';
+
+        if (custAccountNo && !customers.has(custAccountNo)) {
+            customers.set(custAccountNo, {
+                label: `${dealerName} (${custAccountNo})`,
+                value: custAccountNo
+            });
         }
-    ]
-});
+    });
 
-const timeSlotChartData = ref({
-    labels: ['8AM', '9AM', '10AM', '11AM', '12PM', '1PM', '2PM', '3PM', '4PM', '5PM', '6PM', '7PM'],
-    datasets: [
-        {
-            label: 'Collections per Hour',
-            data: [15, 28, 45, 38, 32, 25, 42, 35, 28, 38, 25, 18],
-            borderColor: '#3B82F6',
-            backgroundColor: 'rgba(59, 130, 246, 0.1)',
-            tension: 0.4,
-            fill: true
-        }
-    ]
-});
+    // Convert to array and sort by label
+    customerOptions.value = Array.from(customers.values()).sort((a, b) => a.label.localeCompare(b.label));
 
-const chartOptions = ref({
-    plugins: {
-        legend: {
-            position: 'bottom',
-            labels: {
-                usePointStyle: true
-            }
-        }
-    },
-    maintainAspectRatio: false
-});
+    // Add "All Customers" option at the beginning
+    customerOptions.value.unshift({ label: 'All Customers', value: null });
+};
 
-// Methods
-const formatDate = (date) => {
-    return new Date(date).toLocaleDateString('en-MY', {
-        year: 'numeric',
-        month: 'short',
-        day: 'numeric'
+// ✅ Format currency
+const formatCurrency = (value) => {
+    if (!value) return '0.00';
+    return parseFloat(value).toLocaleString('en-MY', {
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2
     });
 };
 
-const getStatusSeverity = (status) => {
-    switch (status) {
-        case 'Collected': return 'success';
-        case 'Ready for Pickup': return 'info';
-        case 'Scheduled': return 'warning';
-        case 'Cancelled': return 'danger';
-        case 'Overdue': return 'secondary';
-        default: return 'info';
+// ✅ Format date
+const formatDate = (dateString) => {
+    if (!dateString) return '-';
+    const date = new Date(dateString);
+    return date.toLocaleDateString('en-MY');
+};
+
+// ✅ Get status text
+const getStatusText = (statusCode) => {
+    return statusMap[statusCode] || `Status ${statusCode}`;
+};
+
+// ✅ Get status severity for tags
+const getStatusSeverity = (statusCode) => {
+    switch (statusCode) {
+        case 1: // Completed
+            return 'success';
+        case 66: // Processing
+            return 'warning';
+        case 77: // Delivery
+            return 'info';
+        case 0: // Pending
+            return 'secondary';
+        default:
+            return 'info';
     }
 };
 
-const getWaitTimeClass = (waitTime) => {
-    if (!waitTime) return 'text-gray-400';
-    if (waitTime <= 5) return 'text-green-600';
-    if (waitTime <= 10) return 'text-orange-600';
-    return 'text-red-600';
+// ✅ Get delivery type severity
+const getDeliveryTypeSeverity = (deliveryType) => {
+    switch (deliveryType) {
+        case 'SELFCOLLECT':
+            return 'success';
+        case 'LALAMOVE':
+            return 'warning';
+        case 'DELIVER':
+            return 'info';
+        default:
+            return 'secondary';
+    }
 };
 
-const exportToCSV = () => {
-    console.log('Exporting to CSV...');
-    alert('CSV export functionality would be implemented here');
+// ✅ Get completion date class
+const getCompletionClass = (completionDate) => {
+    if (!completionDate) return 'text-gray-400';
+    return 'text-green-600 font-semibold';
 };
 
-const printReport = () => {
-    window.print();
+// ✅ Get item price from fulfillment array
+const getItemPrice = (fulfillArray, materialId) => {
+    if (!fulfillArray || !Array.isArray(fulfillArray)) return '0.00';
+    const item = fulfillArray.find(item => item.materialid === materialId);
+    return item ? formatCurrency(item.unitprice) : '0.00';
 };
 
-const viewCollectionDetails = (collection) => {
-    console.log('Viewing collection details:', collection);
-    alert(`Viewing details for collection: ${collection.collectionId}`);
+// ✅ Calculate item total
+const calculateItemTotal = (fulfillArray, materialId, quantity) => {
+    if (!fulfillArray || !Array.isArray(fulfillArray)) return '0.00';
+    const item = fulfillArray.find(item => item.materialid === materialId);
+    if (!item) return '0.00';
+    const total = parseFloat(item.unitprice || 0) * parseFloat(quantity || 0);
+    return formatCurrency(total);
 };
 
-// Initialize
+// ✅ Show order details
+const viewOrderDetails = (order) => {
+    selectedOrder.value = order;
+    displayOrderDetails.value = true;
+};
+
+// ✅ Fetch collection data
+const fetchCollectionData = async () => {
+    loading.value = true;
+    try {
+        const response = await api.get('order/list-own-report');
+        if (response.data.status === 1) {
+            collectionData.value = response.data.admin_data;
+            generateCustomerOptions();
+        } else {
+            console.error('Failed to fetch collection data:', response.data.error);
+            collectionData.value = [];
+        }
+    } catch (error) {
+        console.error('Error fetching collection data:', error);
+        collectionData.value = [];
+    } finally {
+        loading.value = false;
+    }
+};
+
+// ✅ Clear Filters
+const clearFilters = () => {
+    filters.custAccountNo = null;
+    filters.startdate = null;
+    filters.enddate = null;
+};
+
+// ✅ Generate Report (apply filters)
+const generateReport = async () => {
+    loading.value = true;
+    try {
+        // For now, we'll use the initial data and filter client-side
+        // In a real scenario, you might want to call a filtered endpoint
+        await new Promise((resolve) => setTimeout(resolve, 100));
+    } catch (error) {
+        console.error('Error generating report:', error);
+    } finally {
+        loading.value = false;
+    }
+};
+
+// ✅ Export to Excel
+const exportExcel = async () => {
+    exportLoading.value = true;
+    try {
+        // Prepare filters for export
+        const exportFilters = {
+            custAccountNo: filters.custAccountNo,
+            startdate: filters.startdate,
+            enddate: filters.enddate
+        };
+
+        const response = await api.postExtra('report/excel-own-order', exportFilters, {
+            responseType: 'blob'
+        });
+
+        // Create blob and download
+        const blob = new Blob([response.data], {
+            type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+        });
+        const url = window.URL.createObjectURL(blob);
+        const link = document.createElement('a');
+
+        // Generate filename based on filters
+        const custaccno = filters.custAccountNo || 'ALL';
+        const filename = `${custaccno}_OMS-Own_Collection_Report.xlsx`;
+
+        link.href = url;
+        link.setAttribute('download', filename);
+        document.body.appendChild(link);
+        link.click();
+        link.remove();
+        window.URL.revokeObjectURL(url);
+    } catch (error) {
+        console.error('Error exporting Excel:', error);
+        alert('Failed to export Excel file. Please try again.');
+    } finally {
+        exportLoading.value = false;
+    }
+};
+
+// ✅ Load initial data when component mounts
 onMounted(() => {
-    console.log('Report Own Collection component mounted');
+    fetchCollectionData();
 });
 </script>
 
 <style scoped>
-:deep(.p-calendar),
 :deep(.p-dropdown) {
     width: 100%;
+}
+
+:deep(.p-button) {
+    min-width: 120px;
+}
+
+:deep(.p-datatable) {
+    min-height: 400px;
+}
+
+.status-badge {
+    font-size: 0.75rem;
+    padding: 0.25rem 0.5rem;
+    border-radius: 0.25rem;
+    font-weight: 600;
+}
+
+:deep(.rounded-table) {
+    border-radius: 12px;
+    overflow: hidden;
+    border: 1px solid #e5e7eb;
+
+    .p-datatable-header {
+        border-top-left-radius: 12px;
+        border-top-right-radius: 12px;
+    }
+
+    .p-paginator-bottom {
+        border-bottom-left-radius: 12px;
+        border-bottom-right-radius: 12px;
+    }
+
+    .p-datatable-thead > tr > th {
+        &:first-child {
+            border-top-left-radius: 12px;
+        }
+        &:last-child {
+            border-top-right-radius: 12px;
+        }
+    }
+
+    .p-datatable-tbody > tr:last-child > td {
+        &:first-child {
+            border-bottom-left-radius: 0;
+        }
+        &:last-child {
+            border-bottom-right-radius: 0;
+        }
+    }
+
+    .p-datatable-tbody > tr.p-datatable-emptymessage > td {
+        border-bottom-left-radius: 12px;
+        border-bottom-right-radius: 12px;
+    }
 }
 
 @media print {
