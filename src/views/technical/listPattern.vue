@@ -32,7 +32,14 @@
 
                     <!-- Right: Export & Create Buttons -->
                     <div class="flex items-center gap-2 ml-auto">
-                        <!-- <Button type="button" label="Export" icon="pi pi-file-export" class="p-button" /> -->
+                        <Button 
+                            type="button" 
+                            label="Export" 
+                            icon="pi pi-file-export" 
+                            class="p-button-success" 
+                            @click="exportToCSV"
+                            :disabled="patterns.length === 0"
+                        />
                         <RouterLink to="/technical/createPattern">
                         <Button type="button" label="Create" icon="pi pi-plus" class="p-button" />
                         </RouterLink>
@@ -183,6 +190,97 @@ const formatDate = (dateString) => {
     }
 };
 
+// Export function to CSV
+const exportToCSV = () => {
+    if (patterns.value.length === 0) {
+        console.warn('No data to export');
+        return;
+    }
+
+    try {
+        // Define CSV headers
+        const headers = ['Pattern Code', 'Pattern Name', 'Created Date', 'Image URL'];
+        
+        // Prepare data rows
+        const csvData = patterns.value.map(pattern => [
+            `"${pattern.pattern_code || ''}"`,
+            `"${pattern.pattern_name || 'N/A'}"`,
+            `"${formatDate(pattern.created)}"`,
+            `"${pattern.imageURL || ''}"`
+        ]);
+
+        // Combine headers and data
+        const csvContent = [
+            headers.join(','),
+            ...csvData.map(row => row.join(','))
+        ].join('\n');
+
+        // Create and download the file
+        const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+        const link = document.createElement('a');
+        const url = URL.createObjectURL(blob);
+        
+        link.setAttribute('href', url);
+        link.setAttribute('download', `pattern_list_${new Date().toISOString().split('T')[0]}.csv`);
+        link.style.visibility = 'hidden';
+        
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        
+        URL.revokeObjectURL(url);
+        
+        console.log('Export successful');
+    } catch (error) {
+        console.error('Error exporting data:', error);
+    }
+};
+
+// Alternative export function for Excel format (using CSV with .xls extension)
+const exportToExcel = () => {
+    if (patterns.value.length === 0) {
+        console.warn('No data to export');
+        return;
+    }
+
+    try {
+        // Create worksheet data
+        const worksheetData = [
+            ['Pattern Code', 'Pattern Name', 'Created Date', 'Image URL'],
+            ...patterns.value.map(pattern => [
+                pattern.pattern_code || '',
+                pattern.pattern_name || 'N/A',
+                formatDate(pattern.created),
+                pattern.imageURL || ''
+            ])
+        ];
+
+        // Convert to CSV format
+        const csvContent = worksheetData.map(row => 
+            row.map(field => `"${field}"`).join(',')
+        ).join('\n');
+
+        // Create and download the file with .xls extension
+        const blob = new Blob([csvContent], { type: 'application/vnd.ms-excel;charset=utf-8;' });
+        const link = document.createElement('a');
+        const url = URL.createObjectURL(blob);
+        
+        link.setAttribute('href', url);
+        link.setAttribute('download', `pattern_list_${new Date().toISOString().split('T')[0]}.xls`);
+        link.style.visibility = 'hidden';
+        
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        
+        URL.revokeObjectURL(url);
+        
+        console.log('Excel export successful');
+    } catch (error) {
+        console.error('Error exporting to Excel:', error);
+    }
+};
+
 const processCatalogueImages = async (catalogueItems) => {
     const processedItems = [];
 
@@ -233,7 +331,6 @@ onMounted(async () => {
 
         console.log('API Response:', response.data);
 
-
         if (response.data.status === 1 && Array.isArray(response.data.material_patterns)) {
             const transformedItems = response.data.material_patterns.map((pattern) => ({
                 pattern_id: pattern.pattern_id,
@@ -259,6 +356,4 @@ onMounted(async () => {
         loading.value = false;
     }
 });
-
-
 </script>
