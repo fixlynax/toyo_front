@@ -106,14 +106,20 @@ const filters = ref({
 });
 
 const statusTabs = [
-    { label: 'Pending', status: 0 },
-    { label: 'Completed', status: 1 }
+    { label: 'Pending', status: 0, type: 'PENDING' },
+    { label: 'Completed', status: 1, type: 'COMPLETED' },
+    { label: 'Cancelled', status: 2, type: 'CANCELLED' },
+    { label: 'Expired', status: 3, type: 'EXPIRED' }
 ];
-
-onMounted(async () => {
+const fetchBackOrders = async () => {
     try {
+        const formData = new FormData();
+        const selectedType = statusTabs[activeTabIndex.value].type;
+
+        // Append all form fields
+        formData.append('type', selectedType);
         loading.value = true;
-        const response = await api.get('order/list-back-order');
+        const response = await api.post('order/list-back-order', formData);
 
         if (response.data.status === 1 && response.data.admin_data) {
             const adminData = response.data.admin_data;
@@ -145,10 +151,13 @@ onMounted(async () => {
     } finally {
         loading.value = false;
     }
+}
+onMounted(async () => {
+    fetchBackOrders();
 });
 
 watch(activeTabIndex, () => {
-    filterByTab();
+    fetchBackOrders();
 });
 
 const filterByTab = () => {
