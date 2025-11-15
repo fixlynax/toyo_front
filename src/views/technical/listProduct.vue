@@ -31,7 +31,7 @@
                     
                     <!-- Right: Export & Batch Buttons -->
                     <div class="flex items-center gap-2 ml-auto">
-                        <Button 
+                        <!-- <Button 
                         type="button" 
                         label="Material" 
                         icon="pi pi-sync" 
@@ -46,7 +46,7 @@
                         class="p-button"
                         :loading="stockLevelLoading"
                         @click="handleStockLevel"
-                        />
+                        /> -->
                         <Button 
                         type="button" 
                         label="Export" 
