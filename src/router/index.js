@@ -282,6 +282,11 @@ const router = createRouter({
                     component: () => import('@/views/om/listMaterialException.vue'),
                     meta: { permission: 'Maintenance Mode', access: 'view' },
                 },
+                {
+                    path: 'om/listContainer',
+                    name: 'Container-List',
+                    component: () => import('@/views/om/listContainer.vue')
+                },
 
                 // ===============================
                 // MARKETING
