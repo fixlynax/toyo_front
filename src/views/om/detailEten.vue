@@ -57,8 +57,52 @@
                                 <p class="text-lg font-medium">{{ form.vatNo || '-' }}</p>
                             </div>
                             <div>
-                                <span class="text-sm text-gray-500">Main Branch</span>
-                                <p class="text-lg font-medium">{{ form.mainBranch || '-' }}</p>
+                                <span class="text-sm text-gray-500">Address Line 1 </span>
+                                <p class="text-lg font-medium">{{ form.addressLine1 || '-' }}</p>
+                            </div>
+                            <div>
+                                <span class="text-sm text-gray-500">Address Line 2</span>
+                                <p class="text-lg font-medium">{{ form.addressLine2 || '-' }}</p>
+                            </div>
+                            <div>
+                                <span class="text-sm text-gray-500">Address Line 3 </span>
+                                <p class="text-lg font-medium">{{ form.addressLine3 || '-' }}</p>
+                            </div>
+                            <div>
+                                <span class="text-sm text-gray-500">Address Line 4</span>
+                                <p class="text-lg font-medium">{{ form.addressLine4 || '-' }}</p>
+                            </div>
+                            <div>
+                                <span class="text-sm text-gray-500">City</span>
+                                <p class="text-lg font-medium">{{ form.city || '-' }}</p>
+                            </div>
+                            <div>
+                                <span class="text-sm text-gray-500">Postcode</span>
+                                <p class="text-lg font-medium">{{ form.postcode || '-' }}</p>
+                            </div>
+                            <div>
+                                <span class="text-sm text-gray-500">State</span>
+                                <p class="text-lg font-medium">{{ form.state || '-' }}</p>
+                            </div>
+                            <div>
+                                <span class="text-sm text-gray-500">Country</span>
+                                <p class="text-lg font-medium">{{ form.country || '-' }}</p>
+                            </div>
+                            <div>
+                                <span class="text-sm text-gray-500">Map Longtitude</span>
+                                <p class="text-lg font-medium">{{ form.mapLongitude || '-' }}</p>
+                            </div>
+                            <div>
+                                <span class="text-sm text-gray-500">Map Latitude</span>
+                                <p class="text-lg font-medium">{{ form.mapLatitude || '-' }}</p>
+                            </div>
+                            <div>
+                                <span class="text-sm text-gray-500">Phone No.</span>
+                                <p class="text-lg font-medium">{{ form.phoneNumber || '-' }}</p>
+                            </div>
+                            <div>
+                                <span class="text-sm text-gray-500">Email</span>
+                                <p class="text-lg font-medium">{{ form.emailAddress || '-' }}</p>
                             </div>
                         </div>
                     </div>
@@ -72,7 +116,7 @@
 
                         <!-- Ship To Table -->
                         <DataTable :value="shiptoList" :rows="5" dataKey="id" :rowHover="true" responsiveLayout="scroll" class="text-sm">
-                            <Column header="Company Name" style="min-width: 16rem">
+                            <Column header="Company Name" style="min-width: 13rem">
                                 <template #body="{ data }">
                                     <span class="font-bold"> {{ data.custAccountNo }}<br /></span>
                                     {{ data.companyName1 || '' }}<br />
@@ -81,7 +125,7 @@
                                     <span v-if="data.companyName4">{{ data.companyName4 }}<br /></span>
                                 </template>
                             </Column>
-                            <Column header="Address" style="min-width: 16rem">
+                            <Column header="Address" style="min-width: 13rem">
                                 <template #body="{ data }">
                                     {{ data.addressLine1 || '' }}<br />
                                     <span v-if="data.addressLine2">{{ data.addressLine2 }}<br /></span>
@@ -207,54 +251,7 @@
                                     <td class="px-4 py-2 text-right">{{ form.customerAccountGroup || '-' }}</td>
                                 </tr>
 
-                                <tr class="border-b">
-                                    <td class="px-4 py-2 font-medium">Address Line 1</td>
-                                    <td class="px-4 py-2 text-right">{{ form.addressLine1 || '-' }}</td>
-                                </tr>
-                                <tr class="border-b">
-                                    <td class="px-4 py-2 font-medium">Address Line 2</td>
-                                    <td class="px-4 py-2 text-right">{{ form.addressLine2 || '-' }}</td>
-                                </tr>
-                                <tr class="border-b">
-                                    <td class="px-4 py-2 font-medium">Address Line 3</td>
-                                    <td class="px-4 py-2 text-right">{{ form.addressLine3 || '-' }}</td>
-                                </tr>
-                                <tr class="border-b">
-                                    <td class="px-4 py-2 font-medium">Address Line 4</td>
-                                    <td class="px-4 py-2 text-right">{{ form.addressLine4 || '-' }}</td>
-                                </tr>
-                                <tr class="border-b">
-                                    <td class="px-4 py-2 font-medium">City</td>
-                                    <td class="px-4 py-2 text-right">{{ form.city || '-' }}</td>
-                                </tr>
-                                <tr class="border-b">
-                                    <td class="px-4 py-2 font-medium">Postcode</td>
-                                    <td class="px-4 py-2 text-right">{{ form.postcode || '-' }}</td>
-                                </tr>
-                                <tr class="border-b">
-                                    <td class="px-4 py-2 font-medium">State</td>
-                                    <td class="px-4 py-2 text-right">{{ form.state || '-' }}</td>
-                                </tr>
-                                <tr class="border-b">
-                                    <td class="px-4 py-2 font-medium">Country</td>
-                                    <td class="px-4 py-2 text-right">{{ form.country || '-' }}</td>
-                                </tr>
-                                <tr class="border-b">
-                                    <td class="px-4 py-2 font-medium">Map Latitude</td>
-                                    <td class="px-4 py-2 text-right">{{ form.mapLatitude || '-' }}</td>
-                                </tr>
-                                <tr class="border-b">
-                                    <td class="px-4 py-2 font-medium">Map Longitude</td>
-                                    <td class="px-4 py-2 text-right">{{ form.mapLongitude || '-' }}</td>
-                                </tr>
-                                <tr class="border-b">
-                                    <td class="px-4 py-2 font-medium">Phone No</td>
-                                    <td class="px-4 py-2 text-right">{{ form.phoneNumber || '-' }}</td>
-                                </tr>
-                                <tr class="border-b">
-                                    <td class="px-4 py-2 font-medium">Email</td>
-                                    <td class="px-4 py-2 text-right">{{ form.emailAddress || '-' }}</td>
-                                </tr>
+                               
                                 <tr class="border-b">
                                     <td class="px-4 py-2 font-medium">Price List</td>
                                     <td class="px-4 py-2 text-right">{{ form.pricelist || '-' }}</td>
