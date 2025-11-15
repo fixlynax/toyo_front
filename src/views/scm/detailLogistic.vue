@@ -205,7 +205,7 @@ const InitfetchData = async () => {
         }
     } catch (error) {
         console.error('Error fetching data list:', error);
-        tyres.value = [];
+        logisticList.value = [];
         toast.add({ severity: 'error', summary: 'Error', detail: 'Failed to load data', life: 3000 });
     } finally {
         loading.value = false;
