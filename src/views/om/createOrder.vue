@@ -16,6 +16,7 @@
                         placeholder="Select a Customer"
                         class="w-full"
                         :loading="loadingCustomers"
+                        @change="onCustomerChange" 
                         :class="{ 'p-invalid': !selectedCustomer && step1Validated }"
                     />
                     <small v-if="loadingCustomers" class="text-blue-600">Loading customers...</small>
