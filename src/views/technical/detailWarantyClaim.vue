@@ -16,9 +16,9 @@
             <div class="card flex flex-col w-full">
                 <div class="flex items-center justify-between border-b pb-2">
                     <div class="flex items-center gap-3">
-                            <Button icon="pi pi-arrow-left" class="p-button-text p-button-secondary" @click="$router.back()" />
-                            <div class="text-2xl font-bold text-gray-800">Warranty Detail</div>
-                        </div>
+                        <Button icon="pi pi-arrow-left" class="p-button-text p-button-secondary" @click="$router.back()" />
+                        <div class="text-2xl font-bold text-gray-800">Warranty Detail</div>
+                    </div>
                     <!-- <div class="inline-flex items-center gap-2">
                              <Button  label="Approve" class="p-button-success" size="small" @click="Approve" />
                         </div> -->
@@ -167,11 +167,11 @@
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div>
                             <span class="font-bold text-gray-700">Damage Code</span>
-                            <p class="text-lg font-semibold text-blue-600 mt-1">{{ warantyDetail.damageCode || 'N/A' }}</p>
+                            <p class="text-lg font-semibold text-black mt-1">{{ warantyDetail.damageCode || 'N/A' }}</p>
                         </div>
                         <div>
                             <span class="font-bold text-gray-700">Problem Description</span>
-                            <p class="text-lg font-semibold mt-1">{{ warantyDetail.problem || 'N/A' }}</p>
+                            <p class="text-lg font-semibold text-black mt-1">{{ warantyDetail.problem || 'N/A' }}</p>
                         </div>
                     </div>
 
@@ -180,16 +180,16 @@
                         <span class="font-bold text-gray-700 block mb-3">Claim Percentages</span>
                         <div class="flex justify-between items-center">
                             <div class="text-center">
-                                <span class="block font-bold text-red-600">Claim %</span>
-                                <p class="text-xl font-bold">{{ warantyDetail.claimPercent || '0' }}%</p>
+                                <span class="block font-bold text--600">Claim %</span>
+                                <p class="text-xl font-bold text-black">{{ warantyDetail.claimPercent || '0' }}%</p>
                             </div>
                             <div class="text-center">
-                                <span class="block font-bold text-green-600">Usable %</span>
-                                <p class="text-xl font-bold">{{ warantyDetail.usablePercent || '0' }}%</p>
+                                <span class="block font-bold text--600">Usable %</span>
+                                <p class="text-xl font-bold text-black">{{ warantyDetail.usablePercent || '0' }}%</p>
                             </div>
                             <div class="text-center">
-                                <span class="block font-bold text-orange-600">Worn %</span>
-                                <p class="text-xl font-bold">{{ warantyDetail.wornPercent || '0' }}%</p>
+                                <span class="block font-bold text--600">Worn %</span>
+                                <p class="text-xl font-bold text-black">{{ warantyDetail.wornPercent || '0' }}%</p>
                             </div>
                         </div>
                     </div>
@@ -407,7 +407,6 @@
                     <small v-if="(newClaimData.wornPercent === null || newClaimData.wornPercent === undefined) && creatingClaim" class="p-error">Worn percentage is required.</small>
                 </div>
             </div>
-
         </div>
 
         <template #footer>
@@ -630,11 +629,9 @@ const hasCTCData = computed(() => {
     return warantyDetail.value.ctc_details && !ctcSkipped.value;
 });
 
-
 const hasScrapData = computed(() => {
     return warantyDetail.value.scrapImage1URL || warantyDetail.value.scrapImage2URL || warantyDetail.value.scrapImage3URL;
 });
-
 
 // Add these methods to the methods section
 
@@ -657,7 +654,6 @@ const closeCreateClaimDialog = () => {
     showCreateClaimDialog.value = false;
     creatingClaim.value = false;
 };
-
 
 // Submit Claim Details
 const submitClaimDetails = async () => {
@@ -691,7 +687,6 @@ const submitClaimDetails = async () => {
                 detail: 'Claim details created successfully',
                 life: 3000
             });
-
         } else {
             throw new Error(response.data.message || 'Failed to create claim details');
         }
@@ -977,16 +972,16 @@ const fetchWarrantyClaim = async () => {
         loading.value = true;
         const id = route.params.id;
         const response = await api.get(`warranty_claim/${id}`); // ✅ Correct endpoint with ID
-        
+
         if (response.data.status === 1) {
             // Map the API response structure to your component data
             const apiData = response.data.admin_data;
-            warantyDetailChecking .value =response.data.admin_data;
+            warantyDetailChecking.value = response.data.admin_data;
             warantyDetail.value = {
                 // Claim Info
                 id: apiData.claim_info?.id,
                 claimRefNo: apiData.claim_info?.claimRefNo,
-                
+
                 // Customer Info
                 firstName: apiData.customer_info?.[0]?.name?.split(' ')[0] || '',
                 lastName: apiData.customer_info?.[0]?.name?.split(' ').slice(1).join(' ') || '',
@@ -997,12 +992,12 @@ const fetchWarrantyClaim = async () => {
                 status: apiData.claim_info?.[0]?.mobileNo,
                 // Dealer Info
                 dealer_details: apiData.dealer_info?.[0] || {},
-                
+
                 // Tire Info
                 pattern: apiData.tire_info?.[0]?.pattern,
                 size: apiData.tire_info?.[0]?.tyresize,
                 tire_details: apiData.tire_info?.[0] || {},
-                
+
                 // Claim Detail
                 damageCode: apiData.claim_detail?.damageCode,
                 problem: apiData.claim_detail?.problem,
@@ -1015,8 +1010,8 @@ const fetchWarrantyClaim = async () => {
                 reimbursement: apiData.reimbursement?.[0] || {},
                 replacement_detail: apiData.replacement_detail,
                 scrapPhotos: apiData.scrapPhotos?.[0] || {},
-                threadDepthPhotos: apiData.threadDepthPhotos?.[0] || {},
-                
+                threadDepthPhotos: apiData.threadDepthPhotos?.[0] || {}
+
                 // Add other necessary mappings...
             };
             // console.log(warantyDetail);
@@ -1258,7 +1253,7 @@ const createReimbursement = async () => {
     console.log(warantyDetail);
     try {
         saving.value = true;
-        
+
         const response = await api.put(`warranty_claim/approveInvoice/${warantyDetail.value.id}`, {});
         if (response.data.status === 1) {
             toast.add({
