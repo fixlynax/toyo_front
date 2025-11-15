@@ -1,119 +1,181 @@
 <template>
     <Fluid>
         <div class="flex flex-col md:flex-row gap-8">
-            <!-- LEFT SIDE -->
             <div class="md:w-2/3 flex flex-col">
-                <div class="card flex flex-col w-full">
-                    <div class="flex items-center justify-between border-b pb-2">
-                        <div class="text-2xl font-bold text-gray-800">Order Pickup Details</div>
-                        <div class="inline-flex items-center gap-2">
-                            <Button label="Collected" class="p-button-success" size="small" @click="markCollected" :disabled="pickupData.collected" />
+                <div class="card flex flex-col gap-6 w-full">
+                    <div class="flex items-center gap-2 border-b">
+                        <RouterLink to="/scm/listOrderDelivery">
+                            <Button icon="pi pi-arrow-left font-bold" class="p-button-text p-button-secondary text-xl" size="big" v-tooltip="'Back'" />
+                        </RouterLink>
+                        <div class="text-2xl font-bold text-gray-800">Order Delivery Details</div>
+                    </div>
+
+                    <div class="font-semibold text-xl border-b pb-2 mt-2">Customer Details</div>
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <span class="text-sm text-gray-500">Dealer Name</span>
+                            <p class="text-lg font-medium">{{ orderDelList.eten_user?.companyName1 || '-' }} {{ orderDelList.eten_user?.companyName2 }} {{ orderDelList.eten_user?.companyName3 }} {{ orderDelList.eten_user?.companyName4 }}</p>
+                        </div>
+                        <div>
+                            <span class="text-sm text-gray-500">Account Number</span>
+                            <p class="text-lg font-medium">{{ orderDelList.eten_user?.custAccountNo || '-' }}</p>
+                        </div>
+                        <div>
+                            <span class="text-sm text-gray-500">Member Code</span>
+                            <p class="text-lg font-medium">{{ orderDelList.eten_user?.memberCode || '-' }}</p>
+                        </div>
+                        <div>
+                            <span class="text-sm text-gray-500">Location</span>
+                            <p class="text-lg font-medium">
+                                {{ orderDelList.eten_user?.addressLine1 }} {{ orderDelList.eten_user?.addressLine2 }} {{ orderDelList.eten_user?.addressLine3 }} {{ orderDelList.eten_user?.addressLine4 }}, {{ orderDelList.eten_user?.postcode }} {{ orderDelList.eten_user?.city }} {{ orderDelList.eten_user?.state }} 
+                            </p>
+                        </div>
+                        <div>
+                            <span class="text-sm text-gray-500">Contact Person</span>
+                            <p class="text-lg font-medium">{{ orderDelList.eten_user?.phoneNumber || '-' }}</p>
+                        </div>
+                        <div>
+                            <span class="text-sm text-gray-500">Channel</span>
+                            <p class="text-lg font-medium">{{ orderDelList.eten_user?.channel || '-' }}</p>
                         </div>
                     </div>
-                    <div class="mt-6 mb-4">
+                </div>
+
+                <div class="card flex flex-col w-full bg-white shadow-sm rounded-2xl border border-gray-100">
+                    <!-- Header -->
+                    <div class="font-semibold text-xl border-b pb-2 mt-2">Order Item</div>
+                    <div class="grid grid-cols-1 gap-4 mt-4">
                         <div>
-                            <span class="block text-sm font-bold text-black-700">Order Number</span>
-                            <span class="text-lg font-medium">{{ pickupData.orderNo }}</span>
+                            <span class="text-sm text-gray-500">Order Type</span>
+                            <p class="text-lg font-semibold">{{ orderDelList.orderDesc || '-' }}</p>
                         </div>
                     </div>
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm text-gray-700">
+                    <div class="grid grid-cols-2 gap-4 mt-4">
                         <div>
-                            <span class="block text-sm font-bold text-black-700">Pattern</span>
-                            <p class="font-medium text-lg">{{ pickupData.pattern }}</p>
+                            <span class="text-sm text-gray-500">Ship To</span>
+                            <p class="text-lg font-semibold">{{ orderDelList.shipto || '-' }}</p>
                         </div>
                         <div>
-                            <span class="block text-sm font-bold text-black-700">Size</span>
-                            <p class="font-medium text-lg">{{ pickupData.size }}</p>
-                        </div>
-                        <div>
-                            <span class="block text-sm font-bold text-black-700">DOT (year)</span>
-                            <p class="font-medium text-lg">{{ pickupData.dotYear }}</p>
-                        </div>
-                        <div>
-                            <span class="block text-sm font-bold text-black-700">Quantity</span>
-                            <p class="font-medium text-lg">{{ pickupData.qty }}</p>
-                        </div>
-                        <div>
-                            <span class="block text-sm font-bold text-black-700">Driver Name</span>
-                            <p class="font-medium text-lg">{{ pickupData.driverName }}</p>
-                        </div>
-                        <div>
-                            <span class="block text-sm font-bold text-black-700">Mobile No</span>
-                            <p class="font-medium text-lg">{{ pickupData.mobileNo }}</p>
-                        </div>
-                        <div>
-                            <span class="block text-sm font-bold text-black-700">Vehicle No</span>
-                            <p class="font-medium text-lg">{{ pickupData.vehicleNo }}</p>
-                        </div>
-                        <div>
-                            <span class="block text-sm font-bold text-black-700">Pickup Type</span>
-                            <p class="font-medium text-lg">{{ pickupData.pickupType }}</p>
+                            <span class="text-sm text-gray-500">Inv No</span>
+                            <p class="text-lg font-medium">{{ orderDelList.inv_no || '-' }}</p>
                         </div>
                     </div>
-                    <div class="mt-4">
-                        <span class="block text-sm font-bold text-black-700">Remark</span>
-                        <p class="font-medium text-lg">{{ pickupData.remark }}</p>
-                    </div>
-                    <div v-if="pickupData.collected" class="mt-4 p-4 bg-green-100 border border-green-300 rounded">
-                        <span class="block text-sm font-bold text-green-700">Collected Date & Time</span>
-                        <p class="font-medium text-lg text-green-800">{{ pickupData.collectedDateTime }}</p>
-                    </div>
+                    <!-- Table -->
+                    <DataTable :value="orderDelList.fullfill_order_array" dataKey="materialid" class="rounded-table mt-6">
+                        <Column field="itemno" header="Item No">
+                            <template #body="{ data }">
+                                {{ formatItemNo(data.salesprogramid || data.itemno) }}
+                            </template>
+                        </Column>
+
+                        <Column field="materialid" header="Item Category">
+                            <template #body="{ data }">
+                                {{ data.materialid }}
+                            </template>
+                        </Column>
+
+                        <Column field="itemcategory" header="Item Category">
+                            <template #body="{ data }">
+                                {{ data.itemcategory }}
+                            </template>
+                        </Column>
+
+                        <Column field="qty" header="Quantity" class="text-right">
+                            <template #body="{ data }">
+                                {{ data.qty }}
+                            </template>
+                        </Column>
+
+                        <!-- 🟦 Unit Price Column -->
+                        <Column field="unitprice" header="Unit Price (RM)" class="text-right">
+                            <template #body="{ data }">
+                                {{ data.unitprice }}
+                            </template>
+
+                            <!-- ✅ Footer for label -->
+                            <template #footer>
+                                <div class="flex justify-start pr-2 font-bold text-gray-700">Subtotal</div>
+                            </template>
+                        </Column>
+
+                        <!-- 🟦 Total Amount Column -->
+                        <Column field="totalamt" header="Total Amount (RM)" class="text-right">
+                            <template #body="{ data }">
+                                {{ (Number(data.unitprice) * Number(data.qty)).toFixed(2) }}
+                            </template>
+
+                            <!-- ✅ Footer for total value -->
+                            <template #footer>
+                                <div class="flex justify-start pr-3 font-semibold text-blue-600">{{ subtotal.toFixed(2) }}</div>
+                            </template>
+                        </Column>
+                    </DataTable>
                 </div>
             </div>
 
-            <!-- RIGHT SIDE -->
             <div class="md:w-1/3 flex flex-col">
-                <!-- Dealer Information -->
                 <div class="card flex flex-col w-full">
-                    <div class="flex items-center justify-between border-b pb-2 mb-2">
-                        <div class="text-2xl font-bold text-gray-800">🏬 Dealer Information</div>
+                    <div class="flex items-center justify-between border-b pb-3 mb-4">
+                        <div class="text-2xl font-bold text-gray-800">Advance Info</div>
+                        <Tag :value="getOrderStatusText(orderDelList.orderstatus)" :severity="getOrderStatusSeverity(orderDelList.orderstatus)" />
                     </div>
-                    <div class="overflow-x-auto">
-                        <table class="w-full text-sm text-left text-gray-700">
-                            <tbody>
-                                <tr class="border-b">
-                                    <td class="px-4 py-2 font-medium">Dealer Name</td>
-                                    <td class="px-4 py-2 text-right">{{ dealerInfo.name }}</td>
-                                </tr>
-                                <tr class="border-b">
-                                    <td class="px-4 py-2 font-medium">Dealer Code</td>
-                                    <td class="px-4 py-2 text-right">{{ dealerInfo.code }}</td>
-                                </tr>
-                                <tr class="border-b">
-                                    <td class="px-4 py-2 font-medium">Contact Person</td>
-                                    <td class="px-4 py-2 text-right">{{ dealerInfo.contactPerson }}</td>
-                                </tr>
-                                <tr>
-                                    <td class="px-4 py-2 font-medium">Contact Number</td>
-                                    <td class="px-4 py-2 text-right">{{ dealerInfo.contactNo }}</td>
-                                </tr>
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
 
-                <!-- Customer Information -->
-                <div class="card flex flex-col w-full">
-                    <div class="flex items-center justify-between border-b pb-2 mb-2">
-                        <div class="text-2xl font-bold text-gray-800">👤 Customer Information</div>
-                    </div>
                     <div class="overflow-x-auto">
                         <table class="w-full text-sm text-left text-gray-700">
                             <tbody>
                                 <tr class="border-b">
-                                    <td class="px-4 py-2 font-medium">Customer Name</td>
-                                    <td class="px-4 py-2 text-right">{{ customerInfo.name }}</td>
+                                    <td class="px-4 py-2 font-medium">Order No</td>
+                                    <td class="px-4 py-2 text-right">{{ orderDelList.order_no || '-' }}</td>
                                 </tr>
                                 <tr class="border-b">
-                                    <td class="px-4 py-2 font-medium">Vehicle</td>
-                                    <td class="px-4 py-2 text-right">{{ customerInfo.vehicle }}</td>
+                                    <td class="px-4 py-2 font-medium">SO No</td>
+                                    <td class="px-4 py-2 text-right">{{ orderDelList.so_no || '-' }}</td>
+                                </tr>
+                                <tr class="border-b">
+                                    <td class="px-4 py-2 font-medium">DO No</td>
+                                    <td class="px-4 py-2 text-right">{{ orderDelList.do_no || '-' }}</td>
+                                </tr>
+                                <tr class="border-b">
+                                    <td class="px-4 py-2 font-medium">Invoice No</td>
+                                    <td class="px-4 py-2 text-right">{{ orderDelList.inv_no || '-' }}</td>
+                                </tr>
+                                <tr class="border-b">
+                                    <td class="px-4 py-2 font-medium">SAP Return No</td>
+                                    <td class="px-4 py-2 text-right">{{ orderDelList.sapreturnno || '-' }}</td>
+                                </tr>
+                                <tr class="border-b">
+                                    <td class="px-4 py-2 font-medium">SAP Order Type</td>
+                                    <td class="px-4 py-2 text-right">{{ orderDelList.sapordertype || '-' }}</td>
+                                </tr>
+                                <tr class="border-b">
+                                    <td class="px-4 py-2 font-medium">Division</td>
+                                    <td class="px-4 py-2 text-right">{{ orderDelList.division || '-' }}</td>
+                                </tr>
+                                <tr class="border-b">
+                                    <td class="px-4 py-2 font-medium">Pickup</td>
+                                    <td class="px-4 py-2 text-right">{{ orderDelList.pickup_datetime || '-' }}</td>
+                                </tr>
+                                <tr class="border-b">
+                                    <td class="px-4 py-2 font-medium">Receive</td>
+                                    <td class="px-4 py-2 text-right">{{ orderDelList.receive_datetime || '-' }}</td>
                                 </tr>
                                 <tr>
-                                    <td class="px-4 py-2 font-medium">Registration Number</td>
-                                    <td class="px-4 py-2 text-right">{{ customerInfo.regNo }}</td>
+                                    <td class="px-4 py-2 font-medium">Created</td>
+                                    <td class="px-4 py-2 text-right">{{ orderDelList.created || '-' }}</td>
                                 </tr>
                             </tbody>
                         </table>
+                    </div>
+
+                    <!-- Action Buttons -->
+                    <div class="flex justify-end mt-4 gap-2" v-if="orderDelList.orderstatus === 0">
+                        <Button label="Reject" severity="danger" size="small" @click="onRejectReturnOrder" :loading="loadingAction === 'reject'" />
+                        <Button label="Approve" severity="success" size="small" @click="onApproveReturnOrder" :loading="loadingAction === 'approve'" />
+                    </div>
+
+                    <!-- Status Labels after action -->
+                    <div class="flex justify-end mt-4" v-else>
+                        <Tag :value="getOrderStatusText(orderDelList.orderstatus)" :severity="getOrderStatusSeverity(orderDelList.orderstatus)" />
                     </div>
                 </div>
             </div>
@@ -122,41 +184,102 @@
 </template>
 
 <script setup>
-import { ref } from 'vue';
-import Button from "primevue/button";
+import api from '@/service/api';
+import { useToast } from 'primevue/usetoast';
+import { onMounted, ref, computed } from 'vue';
+import { useRoute, useRouter } from 'vue-router';
 
-const pickupData = ref({
-    orderNo: 'PU-2025-001',
-    pattern: 'Proxes T1R',
-    size: '215/45R17',
-    dotYear: '2024',
-    qty: 4,
-    driverName: 'Ahmad Zaki',
-    mobileNo: '+60123456789',
-    vehicleNo: 'ABC 1234',
-    pickupType: 'Self Collection',
-    remark: 'Pickup at dealer location',
-    collected: false,
-    collectedDateTime: null
+const route = useRoute();
+const router = useRouter();
+const orderDelList = ref({});
+const loading = ref(false);
+
+const formatItemNo = (itemNo) => {
+    if (!itemNo) return '-';
+    return itemNo.toString().padStart(2, '0');
+};
+const subtotal = computed(() => {
+    const arr = orderDelList.value.fullfill_order_array || [];
+    return arr.reduce((sum, item) => sum + (Number(item.unitprice) * Number(item.qty)), 0);
 });
+function formatDate(dateString) {
+    if (!dateString) return '';
+    const date = new Date(dateString);
+    return date.toLocaleString('en-MY', {
+        year: 'numeric',
+        month: '2-digit',
+        day: '2-digit',
+    });
+    }
+function formatTime(timeString) {
+    if (!timeString) return '';
+    const [hours, minutes, seconds] = timeString.split(':');
+    const date = new Date();
+    date.setHours(hours, minutes, seconds);
+    return date.toLocaleTimeString('en-MY', {
+        hour: '2-digit',
+        minute: '2-digit',
+        second: '2-digit',
+        hour12: true,
+    });
+    }
+function formatDateFull(dateString) {
+    if (!dateString) return '';
+    const date = new Date(dateString);
+    return date.toLocaleString('en-MY', {
+        year: 'numeric',
+        month: '2-digit',
+        day: '2-digit',
+        hour: '2-digit',
+        minute: '2-digit',
+        second: '2-digit',
+        hour12: true
+    });
+    }
+    const getOrderStatusText = (status) => {
+    const statusMap = {
+        0: 'Pending',
+        1: 'Approved',
+        2: 'Rejected',
+        66: 'Processing',
+        77: 'Pending Collection',
+        9: 'Completed'
+    };
+    return statusMap[status] || `Status: ${status}`;
+};
+const getOrderStatusSeverity = (status) => {
+    const severityMap = {
+        0: 'warn',
+        1: 'success',
+        2: 'danger',
+        66: 'info',
+        77: 'warn',
+        9: 'success'
+    };
+    return severityMap[status] || 'secondary';
+};
 
-const dealerInfo = ref({
-    name: 'AutoWorld KL',
-    code: 'DLR-001',
-    contactPerson: 'Ahmad Zaki',
-    contactNo: '+60123456789'
+const InitfetchData = async () => {
+    try {
+        loading.value = true;
+        const id = route.params.id;
+        const response = await api.get(`order-pickup/detail/${id}`);
+        if ( (response.data.admin_data)) {
+            // response.data.status === 1 &&
+            orderDelList.value = response.data.admin_data;
+        } else {
+            console.error('API returned error or invalid data:', response.data);
+            toast.add({ severity: 'error', summary: 'Error', detail: 'Failed to load data', life: 3000 });
+        }
+    } catch (error) {
+        console.error('Error fetching data list:', error);
+        orderDelList.value = [];
+        toast.add({ severity: 'error', summary: 'Error', detail: 'Failed to load data', life: 3000 });
+    } finally {
+        loading.value = false;
+    }
+};
+onMounted(() => {
+    InitfetchData();
 });
-
-const customerInfo = ref({
-    name: 'Lee Wei Ming',
-    vehicle: 'Toyota Hilux 2.8G',
-    regNo: 'WXY 4567'
-});
-
-function markCollected() {
-    pickupData.value.collected = true;
-    pickupData.value.collectedDateTime = new Date().toLocaleString();
-    // Here you would typically send a request to the server to record the collected date time
-    console.log('Order collected at:', pickupData.value.collectedDateTime);
-}
 </script>

@@ -1,12 +1,24 @@
 <template>
     <div class="card">
         <div class="text-2xl font-bold text-gray-800 border-b pb-2">Order Pickup List</div>
-        <DataTable :value="filteredPickups" :paginator="true" :rows="10" dataKey="id" :rowHover="true" :loading="loading" filterDisplay="menu" :filters="filters" @filter="onFilter">
-            <template #header>
-                <div class="flex flex-col gap-4 w-full">
-                    <!-- Search and Filters Row -->
+
+        <LoadingPage v-if="loading" message="Loading Order Delivery Details..." />
+        <div v-else>
+            <DataTable
+            
+                :value="filteredListfunc()"
+                :paginator="true"
+                :rows="10"
+                :rowsPerPageOptions="[5, 10, 20]"
+                dataKey="id"
+                :rowHover="true"
+                :loading="loading"
+                :filters="filters"
+                filterDisplay="menu"
+                :globalFilterFields="['order_no', 'custAccountNo', 'companyName1', 'orderDesc', 'phoneNumber', 'orderstatus']"
+            >
+                <template #header>
                     <div class="flex items-center justify-between gap-4 w-full flex-wrap">
-                        <!-- Left: Search Field -->
                         <div class="flex items-center gap-2 w-full max-w-md">
                             <IconField class="flex-1">
                                 <InputIcon>
@@ -14,190 +26,229 @@
                                 </InputIcon>
                                 <InputText v-model="filters['global'].value" placeholder="Quick Search" class="w-full" />
                             </IconField>
+
+                            <div class="relative">
+                                <Button type="button" icon="pi pi-cog" class="p-button" @click="showFilterMenu = !showFilterMenu" />
+                                <div v-if="showFilterMenu" class="absolute right-0 mt-2 w-48 bg-white border rounded-lg shadow-lg p-2 z-10">
+                                    <div
+                                        class="flex items-center gap-2 px-3 py-2 hover:bg-gray-100 cursor-pointer rounded-md"
+                                        :class="{ 'bg-gray-200': filterStatus === null }"
+                                        @click="
+                                            filterStatus = null;
+                                            showFilterMenu = false;
+                                        "
+                                    >
+                                        <i class="pi pi-list text-gray-600"></i>
+                                        <span>All</span>
+                                    </div>
+
+                                    <div
+                                        class="flex items-center gap-2 px-3 py-2 hover:bg-gray-100 cursor-pointer rounded-md"
+                                        :class="{ 'bg-gray-200': filterStatus === 0 }"
+                                        @click="
+                                            filterStatus = 0;
+                                            showFilterMenu = false;
+                                        "
+                                    >
+                                        <i class="pi pi-clock text-yellow-500"></i>
+                                        <span>Pending</span>
+                                    </div>
+                                    <div
+                                        class="flex items-center gap-2 px-3 py-2 hover:bg-gray-100 cursor-pointer rounded-md"
+                                        :class="{ 'bg-gray-200': filterStatus === 1 }"
+                                        @click="
+                                            filterStatus = 1;
+                                            showFilterMenu = false;
+                                        "
+                                    >
+                                        <i class="pi pi-check text-green-500"></i>
+                                        <span>Completed</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="flex justify-end gap-2">
+                            <Button type="button" label="Bulk Update" icon="pi pi-upload" />
                         </div>
                     </div>
-                </div>
-            </template>
-
-            <template #empty>
-                <div class="text-center py-4 text-gray-500">No pickup orders found.</div>
-            </template>
-            <template #loading>
-                <div class="text-center py-4">Loading pickup orders data. Please wait.</div>
-            </template>
-
-            <!-- Columns -->
-            <Column field="orderNo" header="Order No" style="min-width: 8rem">
-                <template #body="{ data }">
-                    <RouterLink :to="'/scm/detailOrderPickup'" class="hover:underline font-bold text-primary-400">
-                        {{ data.orderNo }}
-                    </RouterLink>
                 </template>
-            </Column>
-            <Column field="driverName" header="Driver Name" style="min-width: 10rem" />
-            <Column field="vehicleNo" header="Vehicle No" style="min-width: 10rem" />
-            <Column field="mobileNo" header="Mobile No" style="min-width: 10rem" />
-            <Column header="Status" style="min-width: 8rem">
-                <template #body="{ data }">
-                    <Tag :value="getStatusLabel(data.orderStatus)" :severity="getStatusSeverity(data.orderStatus)" />
-                </template>
-            </Column>
-        </DataTable>
+
+                <template #empty> No Order Delivery found. </template>
+                <template #loading> Loading Order Delivery data. Please wait. </template>
+
+                <Column field="created" header="Create Date" style="min-width: 8rem">
+                    <template #body="{ data }">
+                        {{ formatDate(data.created) }}
+                    </template>
+                </Column>
+
+                <Column field="order_no" header="Order No" style="min-width: 8rem">
+                    <template #body="{ data }">
+                        <RouterLink :to="`/scm/detailOrderPickup/${data.id}`" class="hover:underline font-bold text-primary-400">
+                            {{ data.order_no }}
+                        </RouterLink>
+                    </template>
+                </Column>
+
+                <Column field="custAccountNo" header="Customer Acc No." style="min-width: 8rem">
+                    <template #body="{ data }">
+                        {{ data.eten_user.custAccountNo }}
+                    </template>
+                </Column>
+
+                <Column field="companyName1" header="Customer Name" style="min-width: 12rem">
+                    <template #body="{ data }">
+                    {{` ${data.eten_user.companyName1} ${data.eten_user.companyName2} ${data.eten_user.companyName3} ${data.eten_user.companyName4} ` }}
+                    </template>
+                </Column>
+
+                <Column field="addressLine1" header="Collection Address" style="min-width: 12rem">
+                    <template #body="{ data }">
+                         {{` ${data.eten_user.addressLine1} ${data.eten_user.addressLine2} ${data.eten_user.addressLine3} ${data.eten_user.addressLine4}, ${data.eten_user.city} ${data.eten_user.postcode} ${data.eten_user.state} ` }}
+                    </template>
+                </Column>
+
+                <Column field="orderDesc" header="Order Type" style="min-width: 10rem">
+                    <template #body="{ data }">
+                        {{ data.orderDesc }}
+                    </template>
+                </Column>
+
+                <Column field="phoneNumber" header="Contact" style="min-width: 8rem">
+                    <template #body="{ data }">
+                        {{ data.eten_user.phoneNumber || '-' }}
+                    </template>
+                </Column>
+
+
+                <Column field="pickupDatetime" header="Pickup Date" style="min-width: 10rem">
+                    <template #body="{ data }">
+                        {{ data.pickupDatetime }}
+                    </template>
+                </Column>
+
+                <Column field="collectedDatetime" header="Delivery Date" style="min-width: 10rem">
+                    <template #body="{ data }">
+                        {{ data.collectedDatetime }}
+                    </template>
+                </Column>
+
+                <Column field="orderstatus" header="Status" style="min-width: 8rem">
+                    <template #body="{ data }">
+                        <Tag :value="getStatusLabel(data.orderstatus)" :severity="getStatusSeverity(data.orderstatus)" />
+                    </template>
+                </Column>
+            </DataTable>
+        </div>
     </div>
 </template>
 
 <script setup>
 import { ref, computed, onBeforeMount } from 'vue';
 import { FilterMatchMode } from '@primevue/core/api';
+import { RouterLink } from 'vue-router';
+import api from '@/service/api';
+import LoadingPage from '@/components/LoadingPage.vue';
 
-// Import your pickup service (create this service if it doesn't exist)
-// import { ListPickupService } from '@/service/listPickup';
-
-const pickups = ref([]);
+const listData = ref([]);
 const loading = ref(true);
-const error = ref(null);
-
+const selectedRows = ref([]);
+const showFilterMenu = ref(false);
+const filterStatus = ref(null);
+const orderDelList = ref([]);
+const filteredList  = ref([]);
 const filters = ref({
     global: { value: null, matchMode: FilterMatchMode.CONTAINS }
 });
-
-const filteredPickups = computed(() => {
-    let filtered = pickups.value;
-
-    // Global search
-    if (filters.value.global.value) {
-        const search = filters.value.global.value.toLowerCase();
-        filtered = filtered.filter(
-            (pickup) =>
-                (pickup.orderNo?.toLowerCase() || '').includes(search) ||
-                (pickup.driverName?.toLowerCase() || '').includes(search) ||
-                (pickup.vehicleNo?.toLowerCase() || '').includes(search) ||
-                (pickup.mobileNo?.toLowerCase() || '').includes(search) ||
-                (getStatusLabel(pickup.orderStatus)?.toLowerCase() || '').includes(search)
-        );
-    }
-
-    return filtered;
-});
+function filteredListfunc() {
+    if (filterStatus.value === null) return orderDelList.value;
+    return orderDelList.value.filter((x) => x.orderstatus === filterStatus.value);
+}
 
 onBeforeMount(async () => {
-    await loadPickupData();
+    // listData.value = await ListOrderService.getListOrder();
+    fetchData();
 });
 
-async function loadPickupData() {
+function formatDate(dateString) {
+    if (!dateString) return '';
+    const date = new Date(dateString);
+    return date.toLocaleString('en-MY', {
+        year: 'numeric',
+        month: '2-digit',
+        day: '2-digit',
+    });
+    }
+function formatTime(timeString) {
+    if (!timeString) return '';
+    const [hours, minutes, seconds] = timeString.split(':');
+    const date = new Date();
+    date.setHours(hours, minutes, seconds);
+    return date.toLocaleTimeString('en-MY', {
+        hour: '2-digit',
+        minute: '2-digit',
+        second: '2-digit',
+        hour12: true,
+    });
+    }
+function formatDateFull(dateString) {
+    if (!dateString) return '';
+    const date = new Date(dateString);
+    return date.toLocaleString('en-MY', {
+        year: 'numeric',
+        month: '2-digit',
+        day: '2-digit',
+        hour: '2-digit',
+        minute: '2-digit',
+        second: '2-digit',
+        hour12: true
+    });
+    }
+const fetchData = async () => {
     try {
         loading.value = true;
-        error.value = null;
-
-        // Option 1: Use your actual API service
-        // pickups.value = await ListPickupService.getListPickup();
-
-        // Option 2: Use the sample data with orderStatus field
-        pickups.value = [
-            {
-                id: 1,
-                orderNo: 'PU001',
-                driverName: 'Ahmad Zaki',
-                vehicleNo: 'ABC 1234',
-                mobileNo: '+60123456789',
-                orderStatus: 1 // Completed
-            },
-            {
-                id: 2,
-                orderNo: 'PU002',
-                driverName: 'Siti Aminah',
-                vehicleNo: 'XYZ 5678',
-                mobileNo: '+60198765432',
-                orderStatus: 77 // Delivery
-            },
-            {
-                id: 3,
-                orderNo: 'PU003',
-                driverName: 'Raj Kumar',
-                vehicleNo: 'DEF 9012',
-                mobileNo: '+60134567890',
-                orderStatus: 0 // Pending
-            },
-            {
-                id: 4,
-                orderNo: 'PU004',
-                driverName: 'Lee Wei Ming',
-                vehicleNo: 'GHI 3456',
-                mobileNo: '+60145678901',
-                orderStatus: 1 // Completed
-            },
-            {
-                id: 5,
-                orderNo: 'PU005',
-                driverName: 'Fatimah Hassan',
-                vehicleNo: 'JKL 7890',
-                mobileNo: '+60156789012',
-                orderStatus: 66 // Processing
-            },
-            {
-                id: 6,
-                orderNo: 'PU006',
-                driverName: 'Mohd Ali',
-                vehicleNo: 'MNO 1234',
-                mobileNo: '+60167890123',
-                orderStatus: 0 // Pending
-            },
-            {
-                id: 7,
-                orderNo: 'PU007',
-                driverName: 'Nur Aisyah',
-                vehicleNo: 'PQR 5678',
-                mobileNo: '+60178901234',
-                orderStatus: 1 // Completed
-            },
-            {
-                id: 8,
-                orderNo: 'PU008',
-                driverName: 'Tan Wei Jie',
-                vehicleNo: 'STU 9012',
-                mobileNo: '+60189012345',
-                orderStatus: 0 // Pending
-            }
-        ];
-    } catch (err) {
-        error.value = 'Failed to load pickup orders data.';
-        console.error('Error loading pickup data:', err);
+        const response = await api.get('order-pickup/list');
+        console.log('API Response:', response.data);
+        if (response.data.status === 1 && Array.isArray(response.data.admin_data)) {
+                    orderDelList.value = response.data.admin_data.sort((a, b) => {
+                return new Date(b.created) - new Date(a.created);
+            });
+        } else {
+            console.error('API returned error or invalid data:', response.data);
+            orderDelList.value = [];
+            filteredList.value = [];
+            toast.add({ severity: 'error', summary: 'Error', detail: 'Failed to load data', life: 3000 });
+        }
+    } catch (error) {
+        console.error('Error fetching product list:', error);
+        orderDelList.value = [];
+        filteredList.value = [];
+        toast.add({ severity: 'error', summary: 'Error', detail: 'Failed to load data', life: 3000 });
     } finally {
         loading.value = false;
     }
-}
+};
 
+
+// Status Label and Severity
 function getStatusLabel(status) {
-    switch (status) {
-        case 0:
-            return 'Pending';
-        case 1:
-            return 'Completed';
-        case 66:
-            return 'Processing';
-        case 77:
-            return 'Delivery';
-        default:
-            return 'Unknown';
-    }
+    const map = {
+        0: 'Pending',
+        1: 'Completed',
+        66: 'Processing',
+        77: 'Delivery'
+    };
+    return map[status] || 'Unknown';
 }
 
 function getStatusSeverity(status) {
-    switch (status) {
-        case 0:
-            return 'warn';
-        case 1:
-            return 'success';
-        case 66:
-            return 'info';
-        case 77:
-            return 'primary';
-        default:
-            return 'secondary';
-    }
-}
-
-function onFilter() {
-    // Trigger recompute - this is handled automatically by the computed property
+    const map = {
+        0: 'warn',
+        1: 'success',
+        66: 'info',
+        77: 'primary'
+    };
+    return map[status] || 'secondary';
 }
 </script>
