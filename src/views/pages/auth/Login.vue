@@ -92,8 +92,8 @@ const handleLogin = async () => {
             />
           </div>
 
-          <!-- Remember me & Forgot password -->
-          <!-- <div class="flex items-center justify-between text-gray-600 dark:text-gray-300">
+          <!-- Remember me & Forgot password NEED API -->
+          <!-- <div class="flex items-center justify-between text-gray-600 dark:text-gray-300"> 
             <div class="flex items-center gap-2">
               <Checkbox v-model="checked" id="rememberme1" binary />
               <label for="rememberme1">Remember me</label>
