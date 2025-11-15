@@ -6,14 +6,14 @@
             <!-- User Information Card -->
             <Card class="mb-4">
                 <template #title>
-                    <div class="flex items-center gap-2">
+                    <div class="flex items-center gap-2 mb-4">
                         <i class="pi pi-user text-primary"></i>
                         <span class="text-xl font-semibold">User Information</span>
                     </div>
                 </template>
                 <template #content>
                     <!-- Member Code (Readonly) -->
-                    <div class="mb-6 p-4 bg-gray-50 rounded-lg">
+                    <div class="mb-6 p-4 bg-gray-50 rounded-lg hidden">
                         <label class="block font-semibold text-gray-700 mb-2">Member Code</label>
                         <InputText disabled v-model="memberDetail.etenUserID" class="w-full" />
                     </div>
@@ -81,7 +81,7 @@
                         </div>
 
                         <!-- Master User -->
-                        <div class="space-y-2">
+                        <div class="space-y-2 hidden">
                             <label class="block font-semibold text-gray-700 required">Master User</label>
                             <Dropdown v-model="form.isMaster" :options="masterOptions" optionLabel="label" optionValue="value" class="w-full" placeholder="Select" :class="{ 'p-invalid': errors.isMaster }" />
                             <small class="text-gray-500 text-sm flex items-center gap-1">
@@ -169,8 +169,8 @@ const loading = ref(false);
 const loadingData = ref(false);
 
 const countryCodes = ref([
-    { label: '(+60)', value: '60' },
-    { label: '(+65)', value: '65' }
+    { label: '( +60 )', value: '60' },
+    { label: '( +65 )', value: '65' }
 ]);
 
 const masterOptions = ref([

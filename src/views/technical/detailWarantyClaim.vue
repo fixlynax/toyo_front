@@ -1070,7 +1070,7 @@ const loadScrapImages = async () => {
 // Initialize workflow states
 const initializeWorkflowStates = () => {
     // Set claim status
-    if (warantyDetail.value.status === 4) {
+    if (warantyDetail.value.status === 5) {
         claimFinalStatus.value = 'approved';
     } else if (warantyDetail.value.status === 6) {
         claimFinalStatus.value = 'rejected';
