@@ -4,11 +4,36 @@ import api from '@/service/api';
 import { useRouter } from 'vue-router';
 import { useConfirm } from 'primevue/useconfirm';
 import { useToast } from 'primevue/usetoast';
+import { ref, onMounted } from 'vue';
 
 const { toggleMenu } = useLayout();
 const router = useRouter();
 const confirm = useConfirm();
 const toast = useToast();
+const adminName = ref('');
+const showSettingsMenu = ref(false);
+const showChangePasswordDialog = ref(false);
+const loading = ref(false);
+
+// Password form data
+const passwordForm = ref({
+    current_password: '',
+    new_password: '',
+    new_password_confirmation: ''
+});
+
+// Fetch admin name directly
+const fetchAdminName = async () => {
+    try {
+        const response = await api.get('navigation');
+        if (response.data.success) {
+            adminName.value = response.data.data.admin_name;
+        }
+    } catch (error) {
+        console.error('Failed to fetch admin name:', error);
+        adminName.value = 'Admin';
+    }
+};
 
 const handleLogout = async () => {
     try {
@@ -32,10 +57,77 @@ const confirmLogout = () => {
         rejectLabel: 'Cancel',
         accept: async () => {
             await handleLogout();
-            toast.add({ severity: 'info', summary: 'Logged out', detail: 'You have been logged out successfully.', life: 3000 });
+            toast.add({
+                severity: 'info',
+                summary: 'Logged out',
+                detail: 'You have been logged out successfully.',
+                life: 3000
+            });
         }
     });
 };
+
+const openChangePassword = () => {
+    // Reset form
+    passwordForm.value = {
+        current_password: '',
+        new_password: '',
+        new_password_confirmation: ''
+    };
+    showChangePasswordDialog.value = true;
+    showSettingsMenu.value = false;
+};
+
+const changePassword = async () => {
+    loading.value = true;
+    try {
+        const response = await api.post('change-password', passwordForm.value);
+
+        if (response.data.success) {
+            toast.add({
+                severity: 'success',
+                summary: 'Success',
+                detail: response.data.message || 'Password changed successfully',
+                life: 5000
+            });
+            showChangePasswordDialog.value = false;
+        }
+    } catch (error) {
+        console.error('Password change failed:', error);
+
+        if (error.response?.data?.errors) {
+            // Show validation errors
+            const errors = error.response.data.errors;
+            Object.keys(errors).forEach((field) => {
+                toast.add({
+                    severity: 'error',
+                    summary: 'Validation Error',
+                    detail: errors[field][0],
+                    life: 5000
+                });
+            });
+        } else {
+            toast.add({
+                severity: 'error',
+                summary: 'Error',
+                detail: error.response?.data?.message || 'Failed to change password',
+                life: 5000
+            });
+        }
+    } finally {
+        loading.value = false;
+    }
+};
+
+// Close settings menu when clicking outside
+const closeSettingsMenu = () => {
+    showSettingsMenu.value = false;
+};
+
+// Fetch admin name when component mounts
+onMounted(() => {
+    fetchAdminName();
+});
 </script>
 
 <template>
@@ -50,19 +142,43 @@ const confirmLogout = () => {
         </div>
 
         <div class="layout-topbar-actions flex items-center gap-4">
-            <span class="text-lg font-semibold text-gray-800">John Doe</span>
+            <!-- Admin info with avatar -->
+            <div class="flex items-center gap-3 bg-gray-50 rounded-full px-4 py-2 border border-gray-200">
+                <div class="w-8 h-8 rounded-full bg-primary flex items-center justify-center text-white font-semibold">
+                    {{ adminName ? adminName.charAt(0).toUpperCase() : 'A' }}
+                </div>
+                <span class="text-sm font-medium text-gray-700">{{ adminName || 'Loading...' }}</span>
+            </div>
 
-            <button
-                class="layout-topbar-menu-button layout-topbar-action"
-                v-styleclass="{ selector: '@next', enterFromClass: 'hidden', enterActiveClass: 'animate-scalein', leaveToClass: 'hidden', leaveActiveClass: 'animate-fadeout', hideOnOutsideClick: true }"
-            >
-                <i class="pi pi-ellipsis-v"></i>
-            </button>
+            <!-- Settings dropdown trigger -->
+            <div class="relative">
+                <button
+                    class="layout-topbar-action p-link settings-button"
+                    @click="showSettingsMenu = !showSettingsMenu"
+                    v-styleclass="{
+                        selector: '@next',
+                        enterFromClass: 'hidden',
+                        enterActiveClass: 'animate-scalein',
+                        leaveToClass: 'hidden',
+                        leaveActiveClass: 'animate-fadeout',
+                        hideOnOutsideClick: true
+                    }"
+                >
+                    <i class="pi pi-cog"></i>
+                </button>
 
-            <div class="layout-topbar-menu hidden lg:block">
-                <div class="layout-topbar-menu-content">
-                    <button type="button" class="layout-topbar-action" @click="confirmLogout">
-                        <i class="pi pi-sign-out font-bold"></i>
+                <!-- Settings dropdown menu -->
+                <div v-if="showSettingsMenu" class="absolute right-0 mt-2 w-56 bg-white rounded-xl shadow-xl py-2 z-50 border-0 settings-menu">
+                    <div class="px-4 py-2 border-b border-gray-100">
+                        <p class="text-xs font-medium text-gray-500">Account Settings</p>
+                    </div>
+                    <button @click="openChangePassword" class="flex items-center w-full px-4 py-3 text-sm text-gray-700 hover:bg-blue-50 transition-colors duration-200">
+                        <i class="pi pi-key mr-3 text-blue-500"></i>
+                        <span>Change Password</span>
+                    </button>
+                    <div class="border-t border-gray-100 my-1"></div>
+                    <button @click="confirmLogout" class="flex items-center w-full px-4 py-3 text-sm text-red-600 hover:bg-red-50 transition-colors duration-200">
+                        <i class="pi pi-sign-out mr-3"></i>
                         <span>Logout</span>
                     </button>
                 </div>
@@ -70,6 +186,185 @@ const confirmLogout = () => {
         </div>
     </div>
 
+    <!-- Change Password Dialog -->
+    <Dialog v-model:visible="showChangePasswordDialog" modal header="Change Password" :style="{ width: '450px' }" :closable="!loading" :closeOnEscape="!loading" class="password-dialog">
+        <div class="p-fluid">
+            <div class="field mb-4">
+                <label for="current_password" class="block text-sm font-medium text-gray-700 mb-2">Current Password</label>
+                <Password id="current_password" v-model="passwordForm.current_password" :feedback="false" toggleMask class="w-full custom-password" :disabled="loading" inputClass="w-full" :inputStyle="{ padding: '0.75rem' }" />
+            </div>
+
+            <div class="field mb-4">
+                <label for="new_password" class="block text-sm font-medium text-gray-700 mb-2">New Password</label>
+                <Password id="new_password" v-model="passwordForm.new_password" toggleMask class="w-full custom-password" :disabled="loading" :feedback="true" inputClass="w-full" :inputStyle="{ padding: '0.75rem' }" />
+                <small class="text-xs text-gray-500 mt-1 block">Must contain both letters and numbers, at least 8 characters.</small>
+            </div>
+
+            <div class="field mb-2">
+                <label for="new_password_confirmation" class="block text-sm font-medium text-gray-700 mb-2">Confirm New Password</label>
+                <Password id="new_password_confirmation" v-model="passwordForm.new_password_confirmation" :feedback="false" toggleMask class="w-full custom-password" :disabled="loading" inputClass="w-full" :inputStyle="{ padding: '0.75rem' }" />
+            </div>
+        </div>
+
+        <template #footer>
+            <div class="flex justify-end gap-2 w-full">
+                <Button label="Cancel" icon="pi pi-times" class="p-button-text p-button-secondary" @click="showChangePasswordDialog = false" :disabled="loading" />
+                <Button label="Change Password" icon="pi pi-check" class="p-button-primary" @click="changePassword" :loading="loading" :disabled="loading" />
+            </div>
+        </template>
+    </Dialog>
+
     <ConfirmDialog />
     <Toast />
 </template>
+
+<style scoped>
+.layout-topbar {
+    background:  #fdfdfd;
+    padding: 0.75rem 1.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    transition: all 0.3s ease;
+}
+
+.layout-topbar-logo-container {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.layout-menu-button {
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    color: rgb(0, 0, 0);
+    border-radius: 8px;
+    width: 2.5rem;
+    height: 2.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s ease;
+}
+
+.layout-menu-button:hover {
+    background: rgba(255, 255, 255, 0.2);
+}
+
+.layout-topbar-logo {
+    display: flex;
+    align-items: center;
+}
+
+.settings-button {
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    color: rgb(0, 0, 0);
+    border-radius: 8px;
+    width: 2.5rem;
+    height: 2.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s ease;
+}
+
+.settings-button:hover {
+    background: rgba(255, 255, 255, 0.2);
+}
+
+.settings-menu {
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+    backdrop-filter: blur(10px);
+    background: rgba(255, 255, 255, 0.95);
+}
+
+:deep(.password-dialog) {
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+}
+
+:deep(.password-dialog .p-dialog-header) {
+    background: linear-gradient(135deg, #1e293b 0%, #334155 100%);
+    color: white;
+    padding: 1.25rem 1.5rem;
+}
+
+:deep(.password-dialog .p-dialog-content) {
+    padding: 1.5rem;
+}
+
+:deep(.custom-password .p-password input) {
+    border-radius: 8px;
+    border: 1px solid #d1d5db;
+    transition: all 0.2s ease;
+}
+
+:deep(.custom-password .p-password input:focus) {
+    border-color: #3b82f6;
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+:deep(.custom-password .p-icon-wrapper) {
+    color: #6b7280;
+}
+
+:deep(.p-button) {
+    border-radius: 8px;
+    font-weight: 500;
+    transition: all 0.2s ease;
+}
+
+:deep(.p-button-primary) {
+    background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
+    border: none;
+}
+
+:deep(.p-button-primary:hover) {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+}
+
+:deep(.p-button-text) {
+    color: #6b7280;
+}
+
+:deep(.p-button-text:hover) {
+    background: #f3f4f6;
+    color: #374151;
+}
+
+:deep(.p-password-panel) {
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    border: 1px solid #e5e7eb;
+}
+
+:deep(.p-toast) {
+    border-radius: 8px;
+}
+
+:deep(.p-toast .p-toast-message) {
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+:deep(.p-confirm-dialog) {
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+}
+
+:deep(.p-confirm-dialog .p-dialog-header) {
+    background: linear-gradient(135deg, #1e293b 0%, #334155 100%);
+    color: white;
+    padding: 1.25rem 1.5rem;
+}
+
+:deep(.p-confirm-dialog .p-dialog-content) {
+    padding: 1.5rem;
+}
+</style>
