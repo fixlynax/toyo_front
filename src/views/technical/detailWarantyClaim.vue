@@ -300,11 +300,12 @@
                         <Button label="Reject Scrap" class="p-button-danger" size="small" @click="rejectScrap" :loading="loadingScrapAction" />
                     </div> -->
                 </div>
-                <div v-else class="text-center py-8 bg-gray-50 rounded-lg">
+                
+                <!-- <div v-else class="text-center py-8 bg-gray-50 rounded-lg">
                     <i class="pi pi-file-edit text-4xl text-gray-400 mb-3"></i>
                     <p class="text-gray-500 font-medium">No claim assessment created yet</p>
                     <p class="text-gray-400 text-sm mt-2">Click 'Create Claim' to assess this warranty claim</p>
-                </div>
+                </div> -->
 
                 <!-- No Images Message -->
                 <div v-else class="text-center py-8 bg-gray-50 rounded-lg mb-6">
@@ -346,20 +347,11 @@
                     </div>
                 </div>
                 
-
-                <!-- <div class="flex justify-end p-1 gap-2 mt-2">
+                <div class="flex justify-end p-1 gap-2 mt-2">
                     <Button v-if="warantyDetail.invAttachURL" icon="pi pi-eye" class="p-button-info" size="small" @click="viewInvoice(warantyDetail.invAttachURL)" />
                     <Button v-if="warantyDetail.invAttachURL" icon="pi pi-download" class="p-button-danger" size="small" @click="downloadInvoice(warantyDetail.invAttachURL)" />
                 </div>
                 
-
-                <div v-if="warantyDetail.invNo && !invoiceStatus && warantyDetail.invStatus !== 1" class="flex justify-end gap-2 mt-4">
-                    <Button label="Approve Invoice" class="p-button-success" size="small" @click="approveInvoice" :loading="approvingInvoice" />
-                    <Button label="Reject Invoice" class="p-button-danger" size="small" @click="rejectInvoice" :loading="rejectingInvoice" />
-                </div>
-                <div v-else-if="invoiceStatus || warantyDetail.invStatus === 1" class="text-right mt-3 text-sm font-bold" :class="(invoiceStatus === 'approved' || warantyDetail.invStatus === 1) ? 'text-green-600' : 'text-red-600'">
-                    Invoice {{ invoiceStatus === 'approved' || warantyDetail.invStatus === 1 ? 'approved' : 'rejected' }}
-                </div> -->
             </div>
 
             <div v-else-if="warantyDetail.reimbursement && claimFinalStatus === 'approved'" class="card w-full mb-4">
@@ -375,6 +367,10 @@
                             <p class="text-yellow-700 text-sm mt-1">Invoice will be uploaded by dealer for reimbursement processing.</p>
                         </div>
                     </div>
+                </div>
+                <div v-if="warantyDetail.reimbursement" class="flex justify-end gap-2 mt-4">
+                    <Button label="Approve Invoice" class="p-button-success" size="small" @click="approveInvoice" :loading="approvingInvoice" />
+                    <!-- <Button label="Reject Invoice" class="p-button-danger" size="small" @click="rejectInvoice" :loading="rejectingInvoice" /> -->
                 </div>
             </div>
         </div>
@@ -494,9 +490,7 @@
                 <Button label="Replacement" class="p-button-primary w-full" @click="createReplacement" />
             </div>
             <!-- Always show Reimbursement option -->
-            <!-- <Button label="Reimbursement" class="p-button-primary" @click="createReimbursement" /> -->
-            <Button label="Reimbursement" class="p-button-primary" @click="submitReimbursement" />
-
+            <Button label="Reimbursement" class="p-button-primary" @click="createReimbursement" />
         </div>
 
         <template #footer>
@@ -526,6 +520,26 @@
         <template #footer>
             <Button label="Cancel" icon="pi pi-times" class="p-button-text" :disabled="loadingAction" @click="closeReplacementDialog" />
             <Button label="Create" icon="pi pi-check" class="p-button-primary" :loading="loadingAction" @click="submitReplacement" />
+        </template>
+    </Dialog>
+
+    <Dialog v-model:visible="showCreateReimbursementDialog" header="Submit Reimbursement" :modal="true" :closable="!loadingAction" class="p-fluid" :style="{ width: '40rem' }">
+        <!-- Show success results if replacement was submitted -->
+
+        <label class="block font-bold text-gray-700 mb-1">Select Material ID</label>
+        <Dropdown v-model="selectedMaterial" :options="listMaterial" optionLabel="material" placeholder="Select material" class="w-full mb-4">
+            <template #option="slotProps">
+                <div class="flex items-center gap-3">
+                    <div>
+                        <div class="font-semibold">{{ slotProps.option.material }}</div>
+                    </div>
+                </div>
+            </template>
+        </Dropdown>
+
+        <template #footer>
+            <Button label="Cancel" icon="pi pi-times" class="p-button-text" :disabled="loadingAction" @click="closeReimbursementDialog" />
+            <Button label="Create" icon="pi pi-check" class="p-button-primary" :loading="loadingAction" @click="submitReimbursement" />
         </template>
     </Dialog>
 
@@ -566,7 +580,7 @@ const toast = useToast();
 // Reactive data
 const ctcdate = ref(new Date());
 const showCreateCTCDialog = ref(false);
-// const showCreateReimbursementDialog = ref(false);
+const showCreateReimbursementDialog = ref(false);
 const showCreateReplacementDialog = ref(false);
 const showApproveDialog = ref(false);
 const loadingAction = ref(false);
@@ -1127,22 +1141,13 @@ const initializeWorkflowStates = () => {
     } else if (warantyDetail.value.status === 6) {
         claimFinalStatus.value = 'rejected';
     }
-
-    // // Set scrap status
-    // if (warantyDetail.value.isScrap === 1) {
-    //     scrapApprovalStatus.value = 'approved';
-    // } else if (warantyDetail.value.isScrap === 2) {
-    //     scrapApprovalStatus.value = 'rejected';
-    // }
 };
 
 // Approve Invoice
 const approveInvoice = async () => {
     try {
         approvingInvoice.value = true;
-        const response = await api.put(`warranty_claim/approveInvoice/${warantyDetail.value.id}`, {
-            status: 1
-        });
+        const response = await api.put(`warranty_claim/approveInvoice/${warantyDetail.value.id}`);
 
         if (response.data.status === 1) {
             invoiceStatus.value = 'approved';
@@ -1154,7 +1159,12 @@ const approveInvoice = async () => {
             });
             await fetchWarrantyClaim(); // Refresh data
         } else {
-            throw new Error(response.data.message || 'Invoice approval failed');
+            toast.add({
+            severity: 'error',
+            summary: 'Error',
+            detail: response.data.message || 'Failed to approve invoice',
+            life: 3000
+        });
         }
     } catch (err) {
         console.error('Error approving invoice:', err);
@@ -1171,35 +1181,35 @@ const approveInvoice = async () => {
 
 // Reject Invoice
 const rejectInvoice = async () => {
-    try {
-        rejectingInvoice.value = true;
-        const response = await api.put(`warranty_claim/approveInvoice/${warantyDetail.value.id}`, {
-            status: 2 // Assuming 2 is for rejected status
-        });
+    // try {
+    //     rejectingInvoice.value = true;
+    //     const response = await api.put(`warranty_claim/approveInvoice/${warantyDetail.value.id}`, {
+    //         status: 2 // Assuming 2 is for rejected status
+    //     });
 
-        if (response.data.status === 1) {
-            invoiceStatus.value = 'rejected';
-            toast.add({
-                severity: 'success',
-                summary: 'Success',
-                detail: 'Invoice rejected successfully',
-                life: 3000
-            });
-            await fetchWarrantyClaim(); // Refresh data
-        } else {
-            throw new Error(response.data.message || 'Invoice rejection failed');
-        }
-    } catch (err) {
-        console.error('Error rejecting invoice:', err);
-        toast.add({
-            severity: 'error',
-            summary: 'Error',
-            detail: err.response?.data?.message || 'Failed to reject invoice',
-            life: 3000
-        });
-    } finally {
-        rejectingInvoice.value = false;
-    }
+    //     if (response.data.status === 1) {
+    //         invoiceStatus.value = 'rejected';
+    //         toast.add({
+    //             severity: 'success',
+    //             summary: 'Success',
+    //             detail: 'Invoice rejected successfully',
+    //             life: 3000
+    //         });
+    //         await fetchWarrantyClaim(); // Refresh data
+    //     } else {
+    //         throw new Error(response.data.message || 'Invoice rejection failed');
+    //     }
+    // } catch (err) {
+    //     console.error('Error rejecting invoice:', err);
+    //     toast.add({
+    //         severity: 'error',
+    //         summary: 'Error',
+    //         detail: err.response?.data?.message || 'Failed to reject invoice',
+    //         life: 3000
+    //     });
+    // } finally {
+    //     rejectingInvoice.value = false;
+    // }
 };
 
 const openRejectDialog = () => {
@@ -1258,29 +1268,6 @@ const confirmRejectWarranty = async () => {
     }
 };
 
-// API Methods
-// const requestCTC = async () => {
-//     loadingCTC.value = true;
-//     try {
-//         const id = route.params.id;
-//         const response = await api.put(`warranty_claim/requestCTC/${id}`);
-
-//         if (response.data.status === 1) {
-//             toast.add({
-//                 severity: 'success',
-//                 summary: 'Success',
-//                 detail: 'Request CTC successfully',
-//                 life: 3000
-//             });
-//             fetchWarrantyClaim();
-//         }
-//     } catch (error) {
-//         console.error('Error requesting CTC:', error);
-//     } finally {
-//         loadingCTC.value = false;
-//     }
-// };
-
 const Approve = () => {
     showApproveDialog.value = true;
 };
@@ -1292,39 +1279,7 @@ const createReplacement = () => {
 
 const createReimbursement = async () => {
     showApproveDialog.value = false;
-    // showCreateReimbursementDialog.value = true;
-    console.log(warantyDetail);
-    try {
-        saving.value = true;
-
-        const response = await api.put(`warranty_claim/approveInvoice/${warantyDetail.value.id}`, {});
-        if (response.data.status === 1) {
-            toast.add({
-                severity: 'success',
-                summary: 'Success',
-                detail: 'Reimbursement approved successfully',
-                life: 3000
-            });
-        } else {
-            toast.add({
-                severity: 'error',
-                summary: 'Error',
-                detail: response.data.error,
-                life: 3000
-            });
-        }
-    } catch (err) {
-        console.error('Error submitting reimbursement:', err);
-        toast.add({
-            severity: 'error',
-            summary: 'Error',
-            detail: 'Failed to submit reimbursement',
-            life: 3000
-        });
-    } finally {
-        saving.value = false;
-        showApproveDialog.value = false;
-    }
+    showCreateReimbursementDialog.value = true;
 };
 
 const closeCTCDialog = () => {
@@ -1341,10 +1296,10 @@ const closeReplacementDialog = () => {
     showApproveDialog.value = true;
 };
 
-// const closeReimbursementDialog = () => {
-//     showCreateReimbursementDialog.value = false;
-//     showApproveDialog.value = true;
-// };
+const closeReimbursementDialog = () => {
+    showCreateReimbursementDialog.value = false;
+    showApproveDialog.value = true;
+};
 
 const saveCTC = async () => {
     try {
@@ -1374,15 +1329,15 @@ const saveCTC = async () => {
 };
 
 const submitReplacement = async () => {
-    // if (!selectedMaterial.value) {
-    //     toast.add({
-    //         severity: 'error',
-    //         summary: 'Error',
-    //         detail: 'Please select Material ID',
-    //         life: 3000
-    //     });
-    //     return;
-    // }
+    if (!selectedMaterial.value) {
+        toast.add({
+            severity: 'error',
+            summary: 'Error',
+            detail: 'Please select Material ID',
+            life: 3000
+        });
+        return;
+    }
     showApproveDialog.value = false;
     try {
         loadingAction.value = true;
@@ -1482,7 +1437,7 @@ const submitReimbursement = async () => {
         });
     } finally {
         loadingAction.value = false;
-        // showCreateReimbursementDialog.value = false;
+        showCreateReimbursementDialog.value = false;
     }
 };
 
