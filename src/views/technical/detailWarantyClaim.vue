@@ -235,15 +235,15 @@
                     <div class="grid grid-cols-2 gap-2 text-sm text-gray-800">
                         <div>
                             <span class="font-bold">Part</span>
-                            <p>{{ rejectReasonDesc.part }}</p>
+                            <p>{{ warantyDetail.rejectReason?.part }}</p>
                         </div>
                         <div>
                             <span class="font-bold">Code</span>
-                            <p>{{ rejectReasonDesc.code }}</p>
+                            <p>{{ warantyDetail.rejectReason?.code }}</p>
                         </div>
                         <div>
                             <span class="font-bold">Description</span>
-                            <p>{{ rejectReasonDesc.damageMode }}</p>
+                            <p>{{ warantyDetail.rejectReason?.damageMode }}</p>
                         </div>
                     </div>
                     
@@ -1047,7 +1047,7 @@ const fetchWarrantyClaim = async () => {
                 isDeliveredReplacement: apiData.claim_info?.isDeliveredReplacement,
                 isReimbursement: apiData.claim_info?.isReimbursement,
                 isScrap: apiData.claim_info?.isScrap,
-
+                rejectReason: apiData.claim_info?.rejectReason,
                 // Customer Info
                 firstName: apiData.customer_info?.[0]?.name?.split(' ')[0] || '',
                 lastName: apiData.customer_info?.[0]?.name?.split(' ').slice(1).join(' ') || '',

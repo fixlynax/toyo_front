@@ -192,8 +192,8 @@ const fetchExportETA = async () => {
     try {
         loading.value = true;
         exportLoading.value = true;
-        const response = await api.post('excel/export-ETA', {
-            // responseType: 'arraybuffer'
+        const response = await api.post('excel/export-ETA', {},{
+            responseType: 'blob'
         });
 
         const blob = new Blob([response.data], {
