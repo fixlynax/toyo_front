@@ -153,11 +153,11 @@
                                 </tr>
                                 <tr class="border-b">
                                     <td class="px-4 py-2 font-medium">Pickup</td>
-                                    <td class="px-4 py-2 text-right">{{ orderDelList.pickup_datetime || '-' }}</td>
+                                    <td class="px-4 py-2 text-right">{{ data.scm_deliver_detail?.scheduled_delivery_time ? formatDate(data.scm_deliver_detail.scheduled_delivery_time) : 'Not Assigned' }}</td>
                                 </tr>
                                 <tr class="border-b">
                                     <td class="px-4 py-2 font-medium">Receive</td>
-                                    <td class="px-4 py-2 text-right">{{ orderDelList.receive_datetime || '-' }}</td>
+                                    <td class="px-4 py-2 text-right">{{ data.scm_deliver_detail?.delivered_datetime? formatDate(data.scm_deliver_detail.delivered_datetime): 'Not Assigned' }}</td>
                                 </tr>
                                 <tr>
                                     <td class="px-4 py-2 font-medium">Created</td>
