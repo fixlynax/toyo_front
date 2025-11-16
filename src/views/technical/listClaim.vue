@@ -265,19 +265,10 @@ onMounted(fetchClaims);
                         <div class="flex items-center gap-2 ml-auto">
                             <Button 
                                 type="button" 
-                                label="Export CSV" 
+                                label="Export " 
                                 icon="pi pi-download" 
-                                class="p-button-success" 
+                                class="p-button-success"
                                 @click="exportToCSV"
-                                :loading="exportLoading"
-                                :disabled="filteredList.length === 0"
-                            />
-                            <Button 
-                                type="button" 
-                                label="Export JSON" 
-                                icon="pi pi-download" 
-                                class="p-button-help" 
-                                @click="exportToJSON"
                                 :loading="exportLoading"
                                 :disabled="filteredList.length === 0"
                             />
