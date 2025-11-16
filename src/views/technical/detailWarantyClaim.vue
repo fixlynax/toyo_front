@@ -347,20 +347,11 @@
                     </div>
                 </div>
                 
-
-                <!-- <div class="flex justify-end p-1 gap-2 mt-2">
+                <div class="flex justify-end p-1 gap-2 mt-2">
                     <Button v-if="warantyDetail.invAttachURL" icon="pi pi-eye" class="p-button-info" size="small" @click="viewInvoice(warantyDetail.invAttachURL)" />
                     <Button v-if="warantyDetail.invAttachURL" icon="pi pi-download" class="p-button-danger" size="small" @click="downloadInvoice(warantyDetail.invAttachURL)" />
                 </div>
                 
-
-                <div v-if="warantyDetail.invNo && !invoiceStatus && warantyDetail.invStatus !== 1" class="flex justify-end gap-2 mt-4">
-                    <Button label="Approve Invoice" class="p-button-success" size="small" @click="approveInvoice" :loading="approvingInvoice" />
-                    <Button label="Reject Invoice" class="p-button-danger" size="small" @click="rejectInvoice" :loading="rejectingInvoice" />
-                </div>
-                <div v-else-if="invoiceStatus || warantyDetail.invStatus === 1" class="text-right mt-3 text-sm font-bold" :class="(invoiceStatus === 'approved' || warantyDetail.invStatus === 1) ? 'text-green-600' : 'text-red-600'">
-                    Invoice {{ invoiceStatus === 'approved' || warantyDetail.invStatus === 1 ? 'approved' : 'rejected' }}
-                </div> -->
             </div>
 
             <div v-else-if="warantyDetail.reimbursement && claimFinalStatus === 'approved'" class="card w-full mb-4">
@@ -376,6 +367,10 @@
                             <p class="text-yellow-700 text-sm mt-1">Invoice will be uploaded by dealer for reimbursement processing.</p>
                         </div>
                     </div>
+                </div>
+                <div v-if="warantyDetail.reimbursement" class="flex justify-end gap-2 mt-4">
+                    <Button label="Approve Invoice" class="p-button-success" size="small" @click="approveInvoice" :loading="approvingInvoice" />
+                    <!-- <Button label="Reject Invoice" class="p-button-danger" size="small" @click="rejectInvoice" :loading="rejectingInvoice" /> -->
                 </div>
             </div>
         </div>
@@ -1146,22 +1141,13 @@ const initializeWorkflowStates = () => {
     } else if (warantyDetail.value.status === 6) {
         claimFinalStatus.value = 'rejected';
     }
-
-    // // Set scrap status
-    // if (warantyDetail.value.isScrap === 1) {
-    //     scrapApprovalStatus.value = 'approved';
-    // } else if (warantyDetail.value.isScrap === 2) {
-    //     scrapApprovalStatus.value = 'rejected';
-    // }
 };
 
 // Approve Invoice
 const approveInvoice = async () => {
     try {
         approvingInvoice.value = true;
-        const response = await api.put(`warranty_claim/approveInvoice/${warantyDetail.value.id}`, {
-            status: 1
-        });
+        const response = await api.put(`warranty_claim/approveInvoice/${warantyDetail.value.id}`);
 
         if (response.data.status === 1) {
             invoiceStatus.value = 'approved';
@@ -1173,7 +1159,12 @@ const approveInvoice = async () => {
             });
             await fetchWarrantyClaim(); // Refresh data
         } else {
-            throw new Error(response.data.message || 'Invoice approval failed');
+            toast.add({
+            severity: 'error',
+            summary: 'Error',
+            detail: response.data.message || 'Failed to approve invoice',
+            life: 3000
+        });
         }
     } catch (err) {
         console.error('Error approving invoice:', err);
@@ -1190,35 +1181,35 @@ const approveInvoice = async () => {
 
 // Reject Invoice
 const rejectInvoice = async () => {
-    try {
-        rejectingInvoice.value = true;
-        const response = await api.put(`warranty_claim/approveInvoice/${warantyDetail.value.id}`, {
-            status: 2 // Assuming 2 is for rejected status
-        });
+    // try {
+    //     rejectingInvoice.value = true;
+    //     const response = await api.put(`warranty_claim/approveInvoice/${warantyDetail.value.id}`, {
+    //         status: 2 // Assuming 2 is for rejected status
+    //     });
 
-        if (response.data.status === 1) {
-            invoiceStatus.value = 'rejected';
-            toast.add({
-                severity: 'success',
-                summary: 'Success',
-                detail: 'Invoice rejected successfully',
-                life: 3000
-            });
-            await fetchWarrantyClaim(); // Refresh data
-        } else {
-            throw new Error(response.data.message || 'Invoice rejection failed');
-        }
-    } catch (err) {
-        console.error('Error rejecting invoice:', err);
-        toast.add({
-            severity: 'error',
-            summary: 'Error',
-            detail: err.response?.data?.message || 'Failed to reject invoice',
-            life: 3000
-        });
-    } finally {
-        rejectingInvoice.value = false;
-    }
+    //     if (response.data.status === 1) {
+    //         invoiceStatus.value = 'rejected';
+    //         toast.add({
+    //             severity: 'success',
+    //             summary: 'Success',
+    //             detail: 'Invoice rejected successfully',
+    //             life: 3000
+    //         });
+    //         await fetchWarrantyClaim(); // Refresh data
+    //     } else {
+    //         throw new Error(response.data.message || 'Invoice rejection failed');
+    //     }
+    // } catch (err) {
+    //     console.error('Error rejecting invoice:', err);
+    //     toast.add({
+    //         severity: 'error',
+    //         summary: 'Error',
+    //         detail: err.response?.data?.message || 'Failed to reject invoice',
+    //         life: 3000
+    //     });
+    // } finally {
+    //     rejectingInvoice.value = false;
+    // }
 };
 
 const openRejectDialog = () => {
