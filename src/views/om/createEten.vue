@@ -275,6 +275,11 @@ const isMainBranch = ref(false);
 // Watch accountNo to update isMainBranch
 watch(accountNo, (newVal) => {
     isMainBranch.value = newVal.endsWith('00');
+    
+    // Fetch dealer list when accountNo changes (but only if it has value)
+    if (newVal && newVal.trim() !== '') {
+        fetchDealerList();
+    }
 });
 
 // Helper functions - UPDATED: All SAP fields should be disabled regardless of value
@@ -344,13 +349,16 @@ function handleSubmit() {
 }
 
 // Fetch main branch dealer list - UPDATED: Always pass mainBranch=1
+// Fetch main branch dealer list - FIXED: Pass both mainBranch=1 and custaccountno
 async function fetchDealerList() {
     try {
-        const formData = new FormData();
-        formData.append('mainBranch', '1'); // Always pass mainBranch=1 as per requirement
-        // Remove custaccountno from this call as it's not needed for listing all main branches
+        // Use JSON object instead of FormData
+        const requestData = {
+            mainBranch: '1', // Always pass mainBranch=1 as per requirement
+            custaccountno: accountNo.value // Pass current accountNo to exclude self from list
+        };
 
-        const response = await api.post('list_dealer', formData);
+        const response = await api.post('list_dealer', requestData);
 
         if (response.data.status === 1 && response.data.admin_data) {
             const adminData = response.data.admin_data;
@@ -402,7 +410,7 @@ function mapSapResponseToForm(sapData: SapResponseItem): FormData {
         shipToAddresses.value = customerMaster.ShipTo;
     } else if (customerMaster.ShipTo && typeof customerMaster.ShipTo === 'object') {
         // Handle case where ShipTo is a single object instead of array
-        shipToAddresses.value = [customerMaster.ShipTo];
+        shipToAddresses.value = [customerMaster.ShipTo]; 
     } else {
         shipToAddresses.value = [];
     }
@@ -665,7 +673,7 @@ const handleBack = () => {
 };
 
 onMounted(() => {
-    fetchDealerList();
+    // fetchDealerList();
 });
 </script>
 

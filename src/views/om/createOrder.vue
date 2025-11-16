@@ -16,7 +16,7 @@
                         placeholder="Select a Customer"
                         class="w-full"
                         :loading="loadingCustomers"
-                        @change="onCustomerChange" 
+                        @change="onCustomerChange"
                         :class="{ 'p-invalid': !selectedCustomer && step1Validated }"
                     />
                     <small v-if="loadingCustomers" class="text-blue-600">Loading customers...</small>
@@ -27,7 +27,16 @@
                 <!-- Order Type -->
                 <div class="md:col-span-2">
                     <label class="block font-bold text-gray-700">Order Type *</label>
-                    <Dropdown v-model="selectedOrderType" :options="orderTypeOptions" optionLabel="label" optionValue="value" placeholder="Select Order Type" class="w-full" :class="{ 'p-invalid': !selectedOrderType && step1Validated }" />
+                    <Dropdown
+                        v-model="selectedOrderType"
+                        :options="orderTypeOptions"
+                        optionLabel="label"
+                        optionValue="value"
+                        placeholder="Select Order Type"
+                        class="w-full"
+                        :class="{ 'p-invalid': !selectedOrderType && step1Validated }"
+                        @change="onOrderTypeChange"
+                    />
                     <small v-if="!selectedOrderType && step1Validated" class="p-error">Order type is required.</small>
                 </div>
 
@@ -142,7 +151,7 @@
                 </div>
             </div>
 
-            <DataTable :value="filteredTyres" :paginator="true" :rows="10" :rowsPerPageOptions="[5, 10, 20]" dataKey="id" :rowHover="true" :loading="loading">
+            <DataTable :value="filteredTyres" :paginator="true" :rows="10" :rowsPerPageOptions="[5, 10, 20]" class="rounded-table" dataKey="id" :rowHover="true" :loading="loading">
                 <template #empty>
                     <div class="text-center p-4">
                         <div v-if="loading">Loading products...</div>
@@ -197,35 +206,62 @@
             </DataTable>
 
             <!-- Cart Summary -->
-            <div v-if="selectedTyres.length" class="bg-gray-50 border rounded-lg p-4">
-                <div class="flex items-center justify-between mb-3">
-                    <div class="font-semibold text-lg">Selected Products ({{ selectedTyres.length }})</div>
-                    <div class="font-bold text-lg">Total: RM {{ cartTotal.toFixed(2) }}</div>
+            <div v-if="selectedTyres.length" class="bg-white border rounded-xl shadow-md p-6 mt-6">
+                <!-- Header -->
+                <div class="flex items-center justify-between mb-5">
+                    <div class="text-xl font-bold text-gray-900">🛒 Selected Products</div>
+                    <div class="text-2xl font-extrabold text-indigo-700">Total: RM {{ cartTotal.toFixed(2) }}</div>
                 </div>
 
-                <div class="space-y-2 max-h-40 overflow-y-auto">
-                    <div v-for="tyre in selectedTyres" :key="tyre.id" class="flex items-center justify-between p-2 bg-white rounded border">
-                        <div class="flex-1">
-                            <div class="font-medium">{{ tyre.pattern }} - {{ tyre.size }}</div>
-                            <div class="text-sm text-gray-600">Qty: {{ tyre.quantity }} | Stock: {{ tyre.stockBalance }}</div>
-                        </div>
-                        <div class="flex items-center gap-2">
+                <!-- DataTable Cart -->
+                <DataTable :value="selectedTyres" class="rounded-table" scrollable scrollHeight="250px" stripedRows>
+                    <!-- Pattern + Size -->
+                    <Column header="Product" style="min-width: 14rem">
+                        <template #body="{ data }">
+                            <div class="font-semibold text-gray-800">{{ data.pattern }} - {{ data.size }}</div>
+                            <div class="text-xs text-gray-500">Stock: {{ data.stockBalance }}</div>
+                        </template>
+                    </Column>
+
+                    <!-- Price -->
+                    <Column header="Price" field="price" style="min-width: 7rem; text-align: center">
+                        <template #body="{ data }">
+                            <div class="font-medium">RM {{ data.price }}</div>
+                        </template>
+                    </Column>
+
+                    <!-- Quantity Editor -->
+                    <Column header="Qty" style="min-width: 6rem; text-align: center">
+                        <template #body="{ data }">
                             <InputNumber
-                                v-model="tyre.quantity"
+                                v-model="data.quantity"
                                 :min="1"
-                                :max="getMaxQuantity(tyre)"
+                                :max="getMaxQuantity(data)"
                                 :showButtons="true"
                                 buttonLayout="horizontal"
-                                incrementButtonClass="p-button-outlined p-button-sm"
-                                decrementButtonClass="p-button-outlined p-button-sm"
+                                incrementButtonClass="p-button-text p-button-sm"
+                                decrementButtonClass="p-button-text p-button-sm"
                                 incrementButtonIcon="pi pi-plus"
                                 decrementButtonIcon="pi pi-minus"
-                                class="w-20 text-center"
+                                class="w-20 mx-auto"
                             />
-                            <Button icon="pi pi-times" class="p-button-danger p-button-sm p-button-text" @click="removeFromCart(tyre)" />
-                        </div>
-                    </div>
-                </div>
+                        </template>
+                    </Column>
+
+                    <!-- Subtotal -->
+                    <Column header="Subtotal" style="min-width: 8rem; text-align: center">
+                        <template #body="{ data }">
+                            <span class="font-bold text-gray-900"> RM {{ (data.price * data.quantity).toFixed(2) }} </span>
+                        </template>
+                    </Column>
+
+                    <!-- Remove Button -->
+                    <Column header="Action" style="min-width: 5rem; text-align: center">
+                        <template #body="{ data }">
+                            <Button icon="pi pi-trash" class="p-button-danger p-button-text p-button-sm" @click="removeFromCart(data)" />
+                        </template>
+                    </Column>
+                </DataTable>
             </div>
 
             <div class="flex justify-between mt-4">
@@ -407,11 +443,11 @@
                     <div v-for="item in unfulfilledItems" :key="item.materialid" class="flex justify-between items-center py-2 border-b">
                         <div>
                             <div class="font-medium">{{ item.materialid }}</div>
-                            <div class="text-sm text-gray-600">Requested: {{ item.requestedQty }}</div>
+                            <div class="text-sm text-gray-600">Requested: {{ item.requested_qty }}</div>
                         </div>
                         <div class="text-right">
-                            <div class="text-green-600 font-semibold">Accepted: {{ item.acceptedQty }}</div>
-                            <div class="text-orange-600">Back Order: {{ item.backOrderQty }}</div>
+                            <div class="text-green-600 font-semibold">Accepted: {{ item.accepted_qty }}</div>
+                            <div class="text-orange-600">Back Order: {{ item.backorder_qty }}</div>
                         </div>
                     </div>
                 </div>
@@ -551,7 +587,7 @@ const filteredTyres = computed(() => {
 });
 
 // Step Navigation
-const goToStep = (step) => {
+const goToStep = async (step) => {
     if (step === 2 && !canProceedToStep2.value) {
         step1Validated.value = true;
         return;
@@ -562,8 +598,14 @@ const goToStep = (step) => {
         return;
     }
 
+    // For DIRECTSHIP, ensure cart is created before proceeding to step 3
     if (step === 3 && selectedOrderType.value === 'DIRECTSHIP' && !currentCartRefNo.value) {
-        createDirectShipCart();
+        try {
+            await createDirectShipCart();
+        } catch (error) {
+            toast.add({ severity: 'error', summary: 'Error', detail: 'Failed to create cart. Please try again.', life: 3000 });
+            return;
+        }
     }
 
     currentStep.value = step;
@@ -579,7 +621,7 @@ const getMaxQuantity = (tyre) => {
     return Math.min(tyre.stockBalance || 0, 999);
 };
 
-// API Calls - FIXED VERSION
+// API Calls - OPTIMIZED VERSION
 const fetchCustomers = async () => {
     loadingCustomers.value = true;
     try {
@@ -725,7 +767,7 @@ const fetchMaterials = async (custAccountNo) => {
                         speedplyrating: material.speedplyrating || 'N/A',
                         origin: material.origin || 'Unknown',
                         price: price,
-                        stockBalance: stockBalance, // FIXED: This was the main issue
+                        stockBalance: stockBalance,
                         quantity: 1,
                         itemcategory: material.materialtype || 'ZFP2',
                         plant: 'TSM'
@@ -879,7 +921,7 @@ const confirmBackOrderAPI = async (cartRefNo, orderArray, backOrderArray) => {
     }
 };
 
-// Main Order Placement Function
+// Main Order Placement Function - OPTIMIZED
 const placeOrder = async () => {
     if (!canPlaceOrder.value) {
         step3Validated.value = true;
@@ -894,10 +936,21 @@ const placeOrder = async () => {
     orderDetails.value = null;
 
     try {
+        // Prepare order array for both order types
+        const orderArray = selectedTyres.value.map((item, index) => ({
+            materialid: item.materialid,
+            itemno: String(index + 1).padStart(5, '0'),
+            itemcategory: item.itemcategory || 'ZFP2',
+            plant: item.plant || 'TSM',
+            qty: item.quantity.toString(),
+            price: item.price.toString(),
+            salesprogramid: null
+        }));
+
         if (selectedOrderType.value === 'DIRECTSHIP') {
-            await processDirectShipOrder();
+            await processDirectShipOrder(orderArray);
         } else {
-            await processNormalOrder();
+            await processNormalOrder(orderArray);
         }
     } catch (error) {
         console.error('Order placement error:', error);
@@ -916,68 +969,40 @@ const placeOrder = async () => {
     }
 };
 
-// Process DIRECTSHIP Order
-const processDirectShipOrder = async () => {
-    orderMessage.value = 'Creating direct shipment cart...';
-
-    // Ensure cart exists
-    if (!currentCartRefNo.value) {
-        currentCartRefNo.value = await createDirectShipCart();
-    }
-
+// Process DIRECTSHIP Order - OPTIMIZED
+const processDirectShipOrder = async (orderArray) => {
     orderMessage.value = 'Adding items to direct shipment...';
+
     const addToCartResult = await addToCartAPI(currentCartRefNo.value);
 
     if (addToCartResult.status === 1) {
         orderMessage.value = 'Confirming direct shipment order...';
-
-        const orderArray = selectedTyres.value.map((item, index) => ({
-            materialid: item.materialid,
-            itemno: String(index + 1).padStart(5, '0'),
-            itemcategory: item.itemcategory || 'ZFP2',
-            plant: item.plant || 'TSM',
-            qty: item.quantity.toString(),
-            price: item.price.toString(),
-            salesprogramid: null
-        }));
-
         const confirmResult = await confirmOrderAPI(currentCartRefNo.value, orderArray);
-
         await handleOrderConfirmation(confirmResult, 'DIRECTSHIP');
     } else {
         throw new Error(addToCartResult.message || 'Failed to add items to direct shipment cart');
     }
 };
 
-// Process NORMAL Order
-const processNormalOrder = async () => {
+// Process NORMAL Order - OPTIMIZED
+const processNormalOrder = async (orderArray) => {
     orderMessage.value = 'Adding items to cart...';
     const addToCartResult = await addToCartAPI();
 
     if (addToCartResult.status === 1) {
         orderMessage.value = 'Confirming order with SAP...';
-
-        const orderArray = selectedTyres.value.map((item, index) => ({
-            materialid: item.materialid,
-            itemno: String(index + 1).padStart(5, '0'),
-            itemcategory: item.itemcategory || 'ZFP2',
-            plant: item.plant || 'TSM',
-            qty: item.quantity.toString(),
-            price: item.price.toString(),
-            salesprogramid: null
-        }));
-
-        const cartRefNo = addToCartResult.eten_data?.cartRefNo || `TEMP-${Date.now()}`;
+        const cartRefNo = addToCartResult.eten_data?.cartRefNo;
         const confirmResult = await confirmOrderAPI(cartRefNo, orderArray);
-
         await handleOrderConfirmation(confirmResult, 'NORMAL');
     } else {
         throw new Error(addToCartResult.message || 'Failed to add items to cart');
     }
 };
 
-// Handle Order Confirmation Response
+// Handle Order Confirmation Response - OPTIMIZED
 const handleOrderConfirmation = async (confirmResult, orderType) => {
+    console.log('Order confirmation result:', confirmResult);
+
     if (confirmResult.status === 1) {
         // Order successful
         orderStatus.value = 'success';
@@ -999,16 +1024,21 @@ const handleOrderConfirmation = async (confirmResult, orderType) => {
         });
     } else if (confirmResult.status === 0 && confirmResult.eten_data) {
         // Handle backorder scenario
-        const backOrderData = confirmResult.eten_data[0];
+        const backOrderData = Array.isArray(confirmResult.eten_data) ? confirmResult.eten_data[0] : confirmResult.eten_data;
         const unfulfilled = backOrderData?.unfulfilled_items || [];
 
-        if (unfulfilled.length > 0 && unfulfilled[0].materialid && unfulfilled[0].materialid.trim() !== '') {
+        console.log('Unfulfilled items:', unfulfilled);
+
+        // Check if there are actual unfulfilled items
+        const hasUnfulfilledItems = unfulfilled.some((item) => item.materialid && item.materialid.trim() !== '' && item.backorder_qty > 0);
+
+        if (hasUnfulfilledItems) {
             // Show back order dialog
             unfulfilledItems.value = unfulfilled.map((item) => ({
                 materialid: item.materialid,
-                requestedQty: item.requested_qty || 0,
-                acceptedQty: item.accepted_qty || 0,
-                backOrderQty: item.backorder_qty || 0
+                requested_qty: item.requested_qty || 0,
+                accepted_qty: item.accepted_qty || 0,
+                backorder_qty: item.backorder_qty || 0
             }));
 
             showBackOrderDialog.value = true;
@@ -1022,80 +1052,7 @@ const handleOrderConfirmation = async (confirmResult, orderType) => {
     }
 };
 
-// Event Handlers
-const onCustomerChange = (event) => {
-    console.log('Customer changed:', event.value);
-
-    if (event.value && event.value.code) {
-        fetchMaterials(event.value.code);
-        fetchShipToAddresses(event.value.code);
-        selectedTyres.value = []; // Clear cart when customer changes
-        currentCartRefNo.value = ''; // Reset cart reference
-    } else {
-        console.log('Customer cleared, resetting data');
-        resetAllData();
-    }
-};
-
-const onOrderTypeChange = (event) => {
-    if (event.value === 'DIRECTSHIP') {
-        selectedDeliveryMethod.value = 'DELIVER';
-    }
-    // Clear cart when order type changes
-    selectedTyres.value = [];
-    currentCartRefNo.value = '';
-};
-
-const onShipToAccountChange = (event) => {
-    if (event.value) {
-        updateShipToFields(event.value);
-    } else {
-        resetShipToFields();
-    }
-};
-
-const onColumnFilter = (field, value) => {
-    filters.value[field].value = value;
-};
-
-const addToCart = (tyre) => {
-    if (tyre.stockBalance === 0) {
-        toast.add({ severity: 'warn', summary: 'Out of Stock', detail: 'This product is currently out of stock', life: 3000 });
-        return;
-    }
-
-    if (selectedOrderType.value === 'DIRECTSHIP' && cartQuantity.value >= containerCapacity.value) {
-        toast.add({ severity: 'warn', summary: 'Container Full', detail: 'Container capacity reached', life: 3000 });
-        return;
-    }
-
-    const existing = selectedTyres.value.find((t) => t.id === tyre.id);
-    if (existing) {
-        if (existing.quantity < getMaxQuantity(tyre)) {
-            existing.quantity += 1;
-            toast.add({ severity: 'success', summary: 'Success', detail: 'Quantity updated in cart', life: 2000 });
-        } else {
-            toast.add({ severity: 'warn', summary: 'Stock Limit', detail: 'Cannot exceed available stock', life: 3000 });
-        }
-    } else {
-        selectedTyres.value.push({
-            ...tyre,
-            quantity: 1
-        });
-        toast.add({ severity: 'success', summary: 'Success', detail: 'Product added to cart', life: 2000 });
-    }
-};
-
-const removeFromCart = (tyre) => {
-    const index = selectedTyres.value.findIndex((t) => t.id === tyre.id);
-    if (index !== -1) {
-        selectedTyres.value.splice(index, 1);
-        toast.add({ severity: 'info', summary: 'Removed', detail: 'Product removed from cart', life: 2000 });
-    }
-};
-
-const isInCart = (tyre) => selectedTyres.value.some((t) => t.id === tyre.id);
-
+// Back Order Processing - OPTIMIZED
 const proceedWithBackOrder = async () => {
     showBackOrderDialog.value = false;
     showOrderDialog.value = true;
@@ -1110,26 +1067,26 @@ const proceedWithBackOrder = async () => {
         selectedTyres.value.forEach((item) => {
             const unfulfilledItem = unfulfilledItems.value.find((bo) => bo.materialid === item.materialid);
 
-            if (unfulfilledItem) {
+            if (unfulfilledItem && unfulfilledItem.backorder_qty > 0) {
                 // Add to back order array with remaining quantity
                 backOrderArray.push({
                     materialid: item.materialid,
                     itemno: '00010',
                     itemcategory: item.itemcategory || 'ZFP2',
                     plant: item.plant || 'TSM',
-                    qty: unfulfilledItem.backOrderQty.toString(),
+                    qty: unfulfilledItem.backorder_qty.toString(),
                     price: item.price.toString(),
                     salesprogramid: null
                 });
 
                 // If there's any accepted quantity, add to fulfilled array
-                if (unfulfilledItem.acceptedQty > 0) {
+                if (unfulfilledItem.accepted_qty > 0) {
                     fulfilledArray.push({
                         materialid: item.materialid,
                         itemno: '00010',
                         itemcategory: item.itemcategory || 'ZFP2',
                         plant: item.plant || 'TSM',
-                        qty: unfulfilledItem.acceptedQty.toString(),
+                        qty: unfulfilledItem.accepted_qty.toString(),
                         price: item.price.toString(),
                         salesprogramid: null
                     });
@@ -1200,8 +1157,8 @@ const proceedWithoutBackOrder = async () => {
         selectedTyres.value.forEach((item) => {
             const unfulfilledItem = unfulfilledItems.value.find((bo) => bo.materialid === item.materialid);
 
-            if (!unfulfilledItem || unfulfilledItem.acceptedQty > 0) {
-                const quantity = unfulfilledItem ? unfulfilledItem.acceptedQty : item.quantity;
+            if (!unfulfilledItem || unfulfilledItem.accepted_qty > 0) {
+                const quantity = unfulfilledItem ? unfulfilledItem.accepted_qty : item.quantity;
 
                 if (quantity > 0) {
                     orderArray.push({
@@ -1258,6 +1215,84 @@ const proceedWithoutBackOrder = async () => {
         });
     }
 };
+
+// Event Handlers
+const onCustomerChange = (event) => {
+    console.log('Customer changed:', event.value);
+
+    if (event.value && event.value.code) {
+        fetchMaterials(event.value.code);
+        fetchShipToAddresses(event.value.code);
+        selectedTyres.value = []; // Clear cart when customer changes
+        currentCartRefNo.value = ''; // Reset cart reference
+    } else {
+        console.log('Customer cleared, resetting data');
+        resetAllData();
+    }
+};
+
+const onOrderTypeChange = (event) => {
+    console.log('Order type changed to:', event.value);
+
+    // Clear cart when order type changes
+    selectedTyres.value = [];
+    currentCartRefNo.value = '';
+
+    // Auto-set delivery method for DIRECTSHIP
+    if (event.value === 'DIRECTSHIP') {
+        selectedDeliveryMethod.value = 'DELIVER';
+    }
+};
+
+const onShipToAccountChange = (event) => {
+    if (event.value) {
+        updateShipToFields(event.value);
+    } else {
+        resetShipToFields();
+    }
+};
+
+const onColumnFilter = (field, value) => {
+    filters.value[field].value = value;
+};
+
+const addToCart = (tyre) => {
+    if (tyre.stockBalance === 0) {
+        toast.add({ severity: 'warn', summary: 'Out of Stock', detail: 'This product is currently out of stock', life: 3000 });
+        return;
+    }
+
+    if (selectedOrderType.value === 'DIRECTSHIP' && cartQuantity.value >= containerCapacity.value) {
+        toast.add({ severity: 'warn', summary: 'Container Full', detail: 'Container capacity reached', life: 3000 });
+        return;
+    }
+
+    const existing = selectedTyres.value.find((t) => t.id === tyre.id);
+    if (existing) {
+        if (existing.quantity < getMaxQuantity(tyre)) {
+            existing.quantity += 1;
+            toast.add({ severity: 'success', summary: 'Success', detail: 'Quantity updated in cart', life: 2000 });
+        } else {
+            toast.add({ severity: 'warn', summary: 'Stock Limit', detail: 'Cannot exceed available stock', life: 3000 });
+        }
+    } else {
+        selectedTyres.value.push({
+            ...tyre,
+            quantity: 1
+        });
+        toast.add({ severity: 'success', summary: 'Success', detail: 'Product added to cart', life: 2000 });
+    }
+};
+
+const removeFromCart = (tyre) => {
+    const index = selectedTyres.value.findIndex((t) => t.id === tyre.id);
+    if (index !== -1) {
+        selectedTyres.value.splice(index, 1);
+        toast.add({ severity: 'info', summary: 'Removed', detail: 'Product removed from cart', life: 2000 });
+    }
+};
+
+const isInCart = (tyre) => selectedTyres.value.some((t) => t.id === tyre.id);
 
 const viewOrderDetails = () => {
     if (orderDetails.value?.orderRefNo) {
@@ -1316,6 +1351,7 @@ const resetFilters = () => {
 
 // Watchers
 watch(selectedOrderType, (newType) => {
+    console.log('Order type watcher:', newType);
     if (newType === 'DIRECTSHIP') {
         selectedDeliveryMethod.value = 'DELIVER';
     }
@@ -1332,3 +1368,44 @@ onMounted(() => {
     fetchCustomers();
 });
 </script>
+
+<style scoped>
+:deep(.rounded-table) {
+    border-radius: 12px;
+    overflow: hidden;
+    border: 1px solid #e5e7eb;
+
+    .p-datatable-header {
+        border-top-left-radius: 12px;
+        border-top-right-radius: 12px;
+    }
+
+    .p-paginator-bottom {
+        border-bottom-left-radius: 12px;
+        border-bottom-right-radius: 12px;
+    }
+
+    .p-datatable-thead > tr > th {
+        &:first-child {
+            border-top-left-radius: 12px;
+        }
+        &:last-child {
+            border-top-right-radius: 12px;
+        }
+    }
+
+    .p-datatable-tbody > tr:last-child > td {
+        &:first-child {
+            border-bottom-left-radius: 0;
+        }
+        &:last-child {
+            border-bottom-right-radius: 0;
+        }
+    }
+
+    .p-datatable-tbody > tr.p-datatable-emptymessage > td {
+        border-bottom-left-radius: 12px;
+        border-bottom-right-radius: 12px;
+    }
+}
+</style>
