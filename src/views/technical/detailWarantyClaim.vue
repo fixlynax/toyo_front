@@ -31,24 +31,24 @@
                 </div>
             </div>
 
-            <!-- Tire Detail Section -->
+            <!-- Tire Detail -->
             <div class="card flex flex-col w-full">
                 <div class="flex items-center justify-between border-b pb-2 mb-4">
                     <div class="text-2xl font-bold text-gray-800">Tire Detail</div>
                 </div>
 
-                <div v-if="warantyDetail.pattern || warantyDetail.size" class="grid grid-cols-2 md:grid-cols-2 gap-4">
+                <div class="grid grid-cols-2 md:grid-cols-2 gap-4">
                     <div>
                         <span class="block text-sm font-bold text-black-800">Serial Number</span>
                         <p class="text-lg font-medium">{{ warantyDetail.plateSerial || 'N/A' }}</p>
                     </div>
                     <div>
                         <span class="block text-sm font-bold text-black-800">Pattern</span>
-                        <p class="text-lg font-medium">{{ warantyDetail.pattern || 'N/A' }}</p>
+                        <p class="text-lg font-medium">{{ warantyDetail.pattern }}</p>
                     </div>
                     <div>
                         <span class="block text-sm font-bold text-black-800">Size</span>
-                        <p class="text-lg font-medium">{{ warantyDetail.size || 'N/A' }}</p>
+                        <p class="text-lg font-medium">{{ warantyDetail.size }}</p>
                     </div>
                     <div>
                         <span class="block text-sm font-bold text-black-800">Tire Specification</span>
@@ -63,13 +63,6 @@
                         <p class="text-lg font-medium">{{ warantyDetail.tire_details?.weekcode || 'N/A' }}</p>
                     </div>
                 </div>
-                <div v-else class="text-center py-4 text-gray-500">No tire information available</div>
-            </div>
-            <!-- Tire Detail -->
-            <div v-if="warantyDetail.threadDepthPhotos > 0" class="card flex flex-col w-full">
-                <div class="flex items-center justify-between border-b pb-2 mb-4">
-                    <div class="text-2xl font-bold text-gray-800">Tire Depth Image</div>
-                </div>
             </div>
             <!-- Tire Detail -->
             <div v-if="warantyDetail.threadDepthPhotos > 0" class="card flex flex-col w-full">
@@ -80,10 +73,10 @@
 
             <!-- Customer and Dealer Information -->
             <div class="flex flex-col md:flex-row gap-8">
-                <!-- Customer Information Section -->
+                <!-- Customer -->
                 <div class="md:w-1/2 card">
                     <div class="border-b pb-2 mb-2 text-2xl font-bold text-gray-800">Consumer Information</div>
-                    <div v-if="warantyDetail.firstName || warantyDetail.lastName" class="grid grid-cols-2 md:grid-cols-2 gap-4">
+                    <div class="grid grid-cols-2 md:grid-cols-2 gap-4">
                         <div>
                             <span class="block text-sm font-bold text-black-800">Name</span>
                             <p class="text-lg font-medium">{{ warantyDetail.firstName }} {{ warantyDetail.lastName }}</p>
@@ -101,7 +94,6 @@
                             <p class="text-lg font-medium">{{ warantyDetail.mobileNumber }}</p>
                         </div>
                     </div>
-                    <div v-else class="text-center py-4 text-gray-500">No customer information available</div>
                 </div>
 
                 <!-- Dealer -->
@@ -174,7 +166,7 @@
                 <div v-else class="text-center py-4 text-gray-500">No CTC data available</div>
             </div>
 
-            <!-- Claim Detail Section - Updated Status Display -->
+            <!-- 2. Claim Detail -->
             <div class="card w-full mb-4">
                 <div class="flex items-center justify-between border-b pb-2 mb-2">
                     <div class="text-2xl font-bold text-gray-800">Claim Detail</div>
@@ -217,12 +209,6 @@
                             </div>
                         </div>
                     </div>
-
-                    <!-- APPROVE/REJECT BUTTONS - Only show if no final decision -->
-                    <div v-if="!claimFinalStatus" class="flex justify-end gap-2 mt-4 pt-4 border-t">
-                        <Button label="Approve Claim" class="p-button-success" size="small" @click="Approve" icon="pi pi-check" />
-                        <Button label="Reject Claim" class="p-button-danger" size="small" @click="showRejectDialog = true" icon="pi pi-times" />
-                    </div>
                 </div>
 
                 <!-- Show empty state if no claim data -->
@@ -232,60 +218,11 @@
                     <p class="text-gray-400 text-sm mt-2">Click 'Create Claim' to assess this warranty claim</p>
                 </div>
 
-                <!-- STATUS DISPLAY - Show after approval/rejection -->
-                <div v-if="claimFinalStatus" class="mt-4 p-4 rounded-lg" :class="claimFinalStatus === 'approved' ? 'bg-green-50 border border-green-200' : 'bg-red-50 border border-red-200'">
-                    <div class="flex items-center justify-between">
-                        <div class="flex items-center gap-3">
-                            <i :class="claimFinalStatus === 'approved' ? 'pi pi-check-circle text-green-600 text-2xl' : 'pi pi-times-circle text-red-600 text-2xl'"></i>
-                            <div>
-                                <p class="font-bold text-lg" :class="claimFinalStatus === 'approved' ? 'text-green-800' : 'text-red-800'">Claim {{ claimFinalStatus.toUpperCase() }}</p>
-                                <p v-if="claimFinalStatus === 'approved'" class="text-green-700">
-                                    Type: <span class="font-semibold capitalize">{{ approvalType }}</span>
-                                </p>
-                                <p v-if="claimFinalStatus === 'rejected' && rejectReasonDesc" class="text-red-700">
-                                    Reason: <span class="font-semibold">{{ rejectReasonDesc.damageMode }}</span>
-                                </p>
-                                <p v-if="claimFinalStatus === 'rejected' && rejectReasonDesc" class="text-red-600 text-sm">{{ rejectReasonDesc.code }} | {{ rejectReasonDesc.part }} | {{ rejectReasonDesc.grouping }}</p>
-                            </div>
-                        </div>
-                        <div class="text-right text-sm" :class="claimFinalStatus === 'approved' ? 'text-green-600' : 'text-red-600'">
-                            <i class="pi pi-calendar mr-1"></i>
-                            {{ new Date().toLocaleDateString('en-MY') }}
-                        </div>
-                    </div>
+                <!-- Status Display -->
+                <div v-if="claimFinalStatus" class="text-right mt-3 text-sm font-bold" :class="claimFinalStatus === 'approved' ? 'text-green-600' : 'text-red-600'">
+                    <i :class="claimFinalStatus === 'approved' ? 'pi pi-check-circle' : 'pi pi-times-circle'" class="mr-2"></i>
+                    Claim {{ claimFinalStatus }}
                 </div>
-
-                <!-- Show empty state if no claim data -->
-                <div v-else class="text-center py-8 bg-gray-50 rounded-lg">
-                    <!-- ... existing empty state ... -->
-                </div>
-            </div>
-
-            <div class="card w-full mb-4" v-if="claimFinalStatus === 'rejected'" >
-                <div class="flex items-center justify-between border-b pb-2 mb-2">
-                    <div class="text-2xl font-bold text-gray-800">Reject Details</div>
-                </div>
-
-                <!-- FIXED: Show scrap data if exists in database -->
-                <div class="mb-4">
-                    <div class="grid grid-cols-2 gap-2 text-sm text-gray-800">
-                        <div>
-                            <span class="font-bold">Part</span>
-                            <p>{{ rejectReasonDesc.part }}</p>
-                        </div>
-                        <div>
-                            <span class="font-bold">Code</span>
-                            <p>{{ rejectReasonDesc.code }}</p>
-                        </div>
-                        <div>
-                            <span class="font-bold">Description</span>
-                            <p>{{ rejectReasonDesc.damageMode }}</p>
-                        </div>
-                    </div>
-                    
-                </div>
-                
-
             </div>
 
             <div class="card w-full mb-4" v-if="claimFinalStatus === 'rejected'" >
@@ -378,7 +315,7 @@
 
 
                 <!-- Stock Check Result Display -->
-                <!-- <div v-if="scrapApprovalStatus === 'approved' && stockCheckResult" class="mt-4 p-3 rounded-lg" :class="stockCheckResult.hasStock ? 'bg-green-50 border border-green-200' : 'bg-blue-50 border border-blue-200'">
+                <div v-if="scrapApprovalStatus === 'approved' && stockCheckResult" class="mt-4 p-3 rounded-lg" :class="stockCheckResult.hasStock ? 'bg-green-50 border border-green-200' : 'bg-blue-50 border border-blue-200'">
                     <div class="flex items-start gap-3">
                         <i class="pi" :class="stockCheckResult.hasStock ? 'pi-check-circle text-green-600' : 'pi-info-circle text-blue-600'"></i>
                         <div>
@@ -386,11 +323,11 @@
                                 {{ stockCheckResult.message }}
                             </p>
                             <p class="text-sm mt-1" :class="stockCheckResult.hasStock ? 'text-green-700' : 'text-blue-700'">
-                                Final Type: <span class="font-bold capitalize">{{ stockCheckResult.finalType }}</span>
+                                {{ stockCheckResult.hasStock ? 'Proceeding with replacement...' : 'Switching to reimbursement process...' }}
                             </p>
                         </div>
                     </div>
-                </div> -->
+                </div>
             </div>
 
             <div v-if="warantyDetail.replacement_detail && claimFinalStatus === 'approved'" class="card w-full mb-4">
@@ -442,28 +379,6 @@
             </div>
         </div>
     </div>
-
-    <!-- Material Selection Dialog for Replacement -->
-    <Dialog v-model:visible="showMaterialDialog" header="Select Replacement Material" :modal="true" class="p-fluid" :style="{ width: '40rem' }">
-        <div class="field">
-            <label class="block font-bold text-gray-700 mb-2">Material ID *</label>
-            <Dropdown
-                v-model="selectedMaterial"
-                :options="availableMaterials"
-                optionLabel="materialCode"
-                optionValue="id"
-                placeholder="Select material for replacement"
-                class="w-full"
-                :class="{ 'p-invalid': !selectedMaterial && processingReplacement }"
-            />
-            <small v-if="!selectedMaterial && processingReplacement" class="p-error">Please select a material for replacement.</small>
-        </div>
-
-        <template #footer>
-            <Button label="Cancel" icon="pi pi-times" class="p-button-text" @click="closeMaterialDialog" />
-            <Button label="Confirm Replacement" icon="pi pi-check" class="p-button-success" @click="processReplacementWithMaterial" :loading="processingReplacement" />
-        </template>
-    </Dialog>
 
     <!-- Create Claim Dialog -->
     <Dialog v-model:visible="showCreateClaimDialog" header="Create Claim Details" :modal="true" class="p-fluid" :style="{ width: '40rem' }">
@@ -651,6 +566,7 @@ const toast = useToast();
 // Reactive data
 const ctcdate = ref(new Date());
 const showCreateCTCDialog = ref(false);
+// const showCreateReimbursementDialog = ref(false);
 const showCreateReplacementDialog = ref(false);
 const showApproveDialog = ref(false);
 const loadingAction = ref(false);
@@ -691,7 +607,7 @@ const reimbursementSubmitted = ref(false);
 const props = defineProps(['id']);
 // Images
 const scrapImages = ref([]);
-// const listMaterial = ref([]);
+const listMaterial = ref([]);
 const selectedMaterial = ref(null);
 
 const galleriaResponsiveOptions = ref([
@@ -735,11 +651,7 @@ const hasScrapData = computed(() => {
     return warantyDetail.value.scrapImage1URL || warantyDetail.value.scrapImage2URL || warantyDetail.value.scrapImage3URL;
 });
 
-// Add this variable to track approval type
-const approvalType = ref(''); // 'replacement' or 'reimbursement'
-const showMaterialDialog = ref(false);
-const availableMaterials = ref([]);
-const processingReplacement = ref(false);
+// Add these methods to the methods section
 
 // Open Create Claim Dialog
 const openCreateClaimDialog = () => {
@@ -948,90 +860,30 @@ const approveScrap = async () => {
         });
 
         if (response.data.status === 1) {
-            availableMaterials.value = response.data.materials;
-        } else {
-            throw new Error('No materials available');
-        }
-    } catch (error) {
-        console.error('Error fetching materials:', error);
-        toast.add({
-            severity: 'error',
-            summary: 'Error',
-            detail: 'Failed to load available materials',
-            life: 3000
-        });
-    }
-};
-
-// Process replacement with material selection
-const processReplacementWithMaterial = async () => {
-    if (!selectedMaterial.value) {
-        toast.add({
-            severity: 'error',
-            summary: 'Error',
-            detail: 'Please select a material',
-            life: 3000
-        });
-        return;
-    }
-
-    try {
-        processingReplacement.value = true;
-
-        // 1. First check stock availability
-        const stockResponse = await api.get(`/stock/check/${selectedMaterial.value.materialCode}`);
-        const hasStock = stockResponse.data.hasStock;
-
-        if (hasStock) {
-            // 2. If stock available, process replacement with material
-            const replacementResponse = await api.post('warranty_claim/approveReplacement', {
-                claim_id: warantyDetail.value.id,
-                materialid: selectedMaterial.value.id
+            scrapApprovalStatus.value = 'approved';
+            toast.add({
+                severity: 'success',
+                summary: 'Success',
+                detail: 'Scrap approved successfully',
+                life: 3000
             });
 
-            if (replacementResponse.data.status === 1) {
-                // 3. Approve scrap
-                await api.post('warranty_claim/approveScrap', {
-                    claim_id: warantyDetail.value.id
-                });
-
-                scrapApprovalStatus.value = 'approved';
-                approvalType.value = 'replacement';
-
-                // Show success message
-                stockCheckResult.value = {
-                    hasStock: true,
-                    message: 'Stock available - Replacement processed successfully',
-                    finalType: 'replacement'
-                };
-
-                toast.add({
-                    severity: 'success',
-                    summary: 'Success',
-                    detail: 'Replacement processed successfully with available stock',
-                    life: 3000
-                });
-            }
+            // After scrap approval, check stock and proceed
+            await checkStockAndProceed();
         } else {
-            throw new Error('No materials available');
+            throw new Error('Scrap approval failed');
         }
     } catch (error) {
-        console.error('Error fetching materials:', error);
+        console.error('Error approving scrap:', error);
         toast.add({
             severity: 'error',
             summary: 'Error',
-            detail: 'Failed to load available materials',
+            detail: 'Failed to approve scrap',
             life: 3000
         });
+    } finally {
+        loadingScrapAction.value = false;
     }
-};
-
-
-// Close material dialog
-const closeMaterialDialog = () => {
-    showMaterialDialog.value = false;
-    selectedMaterial.value = null;
-    processingReplacement.value = false;
 };
 
 const rejectScrap = async () => {
@@ -1065,19 +917,6 @@ const rejectScrap = async () => {
         loadingScrapAction.value = false;
     }
 };
-
-// Add this computed property or method
-const hasCustomerInfo = computed(() => {
-    return warantyDetail.value.firstName || warantyDetail.value.lastName || warantyDetail.value.mobileNumber;
-});
-
-const hasTireInfo = computed(() => {
-    return warantyDetail.value.pattern || warantyDetail.value.size || warantyDetail.value.plateSerial;
-});
-
-const hasDealerInfo = computed(() => {
-    return warantyDetail.value.dealer_details?.custAccountNo || warantyDetail.value.dealer_details?.companyName1;
-});
 
 // Check stock and proceed based on initial selection
 // const checkStockAndProceed = async () => {
@@ -1179,13 +1018,12 @@ const fetchWarrantyClaim = async () => {
     try {
         loading.value = true;
         const id = route.params.id;
-        const response = await api.get(`warranty_claim/${id}`);
+        const response = await api.get(`warranty_claim/${id}`); // ✅ Correct endpoint with ID
 
         if (response.data.status === 1) {
+            // Map the API response structure to your component data
             const apiData = response.data.admin_data;
-            warantyDetailChecking.value = apiData;
-
-            // Properly map the API response to component data
+            warantyDetailChecking.value = response.data.admin_data;
             warantyDetail.value = {
                 // Claim Info
                 id: apiData.claim_info?.id,
@@ -1207,20 +1045,10 @@ const fetchWarrantyClaim = async () => {
                 // Dealer Info
                 dealer_details: apiData.dealer_info?.[0] || {},
 
-                // Tire Info - take first item from array or empty object
-                ...(apiData.tire_info?.[0]
-                    ? {
-                          pattern: apiData.tire_info[0].pattern,
-                          size: apiData.tire_info[0].tyresize,
-                          plateSerial: apiData.tire_info[0].plateSerial,
-                          tire_details: apiData.tire_info[0]
-                      }
-                    : {
-                          pattern: '',
-                          size: '',
-                          plateSerial: '',
-                          tire_details: {}
-                      }),
+                // Tire Info
+                pattern: apiData.tire_info?.[0]?.pattern,
+                size: apiData.tire_info?.[0]?.tyresize,
+                tire_details: apiData.tire_info?.[0] || {},
 
                 // Claim Detail
                 damageCode: apiData.claim_detail?.damageCode,
@@ -1228,8 +1056,8 @@ const fetchWarrantyClaim = async () => {
                 claimPercent: apiData.claim_detail?.claimPercent,
                 usablePercent: apiData.claim_detail?.usablePercent,
                 wornPercent: apiData.claim_detail?.wornPercent,
-
-                // CTC Info - take first item from array or empty object
+                status: apiData.claim_info?.status,
+                // CTC Info
                 ctc_details: apiData.ctc_info?.[0] || {},
                 reimbursement: apiData.reimbursement?.[0] || {},
                 replacement_detail: apiData.replacement_detail,
@@ -1250,20 +1078,6 @@ const fetchWarrantyClaim = async () => {
     } finally {
         loading.value = false;
     }
-};
-
-// Helper function to determine approval type from API data
-const getApprovalTypeFromData = (apiData) => {
-    // If replacement data exists, it's replacement
-    if (apiData.replacement_detail && apiData.replacement_detail.length > 0) {
-        return 'replacement';
-    }
-    // If reimbursement data exists, it's reimbursement
-    if (apiData.reimbursement && apiData.reimbursement.length > 0) {
-        return 'reimbursement';
-    }
-    // Default based on claim status or other indicators
-    return '';
 };
 
 // Fetch reject reasons
@@ -1307,7 +1121,7 @@ const loadScrapImages = async () => {
 
 // Initialize workflow states
 const initializeWorkflowStates = () => {
-    // Set claim status based on API status
+    // Set claim status
     if (warantyDetail.value.status === 5) {
         claimFinalStatus.value = 'approved';
     } else if (warantyDetail.value.status === 6) {
@@ -1336,7 +1150,7 @@ const approveInvoice = async () => {
                 severity: 'success',
                 summary: 'Success',
                 detail: 'Invoice approved successfully',
-                life: 30000
+                life: 3000
             });
             await fetchWarrantyClaim(); // Refresh data
         } else {
@@ -1348,7 +1162,7 @@ const approveInvoice = async () => {
             severity: 'error',
             summary: 'Error',
             detail: err.response?.data?.message || 'Failed to approve invoice',
-            life: 30000
+            life: 3000
         });
     } finally {
         approvingInvoice.value = false;
@@ -1369,7 +1183,7 @@ const rejectInvoice = async () => {
                 severity: 'success',
                 summary: 'Success',
                 detail: 'Invoice rejected successfully',
-                life: 30000
+                life: 3000
             });
             await fetchWarrantyClaim(); // Refresh data
         } else {
@@ -1381,7 +1195,7 @@ const rejectInvoice = async () => {
             severity: 'error',
             summary: 'Error',
             detail: err.response?.data?.message || 'Failed to reject invoice',
-            life: 30000
+            life: 3000
         });
     } finally {
         rejectingInvoice.value = false;
@@ -1405,7 +1219,7 @@ const confirmRejectWarranty = async () => {
             severity: 'error',
             summary: 'Error',
             detail: 'Please select a rejection reason',
-            life: 30000
+            life: 3000
         });
         return;
     }
@@ -1419,21 +1233,26 @@ const confirmRejectWarranty = async () => {
         });
 
         if (response.data.status === 1) {
-            // UPDATE STATUS
-            claimFinalStatus.value = 'rejected';
-
             toast.add({
                 severity: 'success',
                 summary: 'Success',
                 detail: 'Warranty claim rejected successfully',
-                life: 30000
+                life: 3000
             });
 
             await fetchWarrantyClaim();
             closeRejectDialog();
+        } else {
+            throw new Error(response.data.message || 'Rejection failed');
         }
     } catch (err) {
-        // Error handling
+        console.error('Error rejecting warranty:', err);
+        toast.add({
+            severity: 'error',
+            summary: 'Error',
+            detail: err.response?.data?.message || 'Failed to reject warranty claim',
+            life: 3000
+        });
     } finally {
         rejecting.value = false;
     }
@@ -1466,89 +1285,45 @@ const Approve = () => {
     showApproveDialog.value = true;
 };
 
-const createReplacement = async () => {
-    try {
-        loadingAction.value = true;
-        showApproveDialog.value = false;
-
-        // 1. DIRECT APPROVAL API CALL
-        const replacementResponse = await api.post('warranty_claim/approveReplacement', {
-            claim_id: warantyDetail.value.id
-        });
-
-        if (replacementResponse.data.status === 1) {
-            // 2. AUTO REQUEST SCRAP
-            await api.put(`warranty_claim/requestScrap/${warantyDetail.value.id}`, {
-                status: 1
-            });
-
-            // 3. UPDATE STATUS AND STORE APPROVAL TYPE
-            approvalType.value = 'replacement';
-            warantyDetail.value.approvalType = 'replacement'; // Store in main data
-            claimFinalStatus.value = 'approved';
-
-            toast.add({
-                severity: 'success',
-                summary: 'Success',
-                detail: 'Replacement approved and scrap requested successfully',
-                life: 3000
-            });
-
-            await fetchWarrantyClaim(); // Refresh data
-        }
-    } catch (error) {
-        console.error('Error approving replacement:', error);
-        toast.add({
-            severity: 'error',
-            summary: 'Error',
-            detail: 'Failed to approve replacement',
-            life: 3000
-        });
-    } finally {
-        loadingAction.value = false;
-    }
+const createReplacement = () => {
+    showApproveDialog.value = false;
+    showCreateReplacementDialog.value = true;
 };
 
 const createReimbursement = async () => {
+    showApproveDialog.value = false;
+    // showCreateReimbursementDialog.value = true;
+    console.log(warantyDetail);
     try {
-        loadingAction.value = true;
-        showApproveDialog.value = false;
+        saving.value = true;
 
-        // 1. DIRECT APPROVAL API CALL
-        const reimbursementResponse = await api.post('warranty_claim/approveReimbursement', {
-            claim_id: warantyDetail.value.id
-        });
-
-        if (reimbursementResponse.data.status === 1) {
-            // 2. AUTO REQUEST SCRAP
-            await api.put(`warranty_claim/requestScrap/${warantyDetail.value.id}`, {
-                status: 1
-            });
-
-            // 3. UPDATE STATUS AND STORE APPROVAL TYPE
-            approvalType.value = 'reimbursement';
-            warantyDetail.value.approvalType = 'reimbursement'; // Store in main data
-            claimFinalStatus.value = 'approved';
-
+        const response = await api.put(`warranty_claim/approveInvoice/${warantyDetail.value.id}`, {});
+        if (response.data.status === 1) {
             toast.add({
                 severity: 'success',
                 summary: 'Success',
-                detail: 'Reimbursement approved and scrap requested successfully',
+                detail: 'Reimbursement approved successfully',
                 life: 3000
             });
-
-            await fetchWarrantyClaim(); // Refresh data
+        } else {
+            toast.add({
+                severity: 'error',
+                summary: 'Error',
+                detail: response.data.error,
+                life: 3000
+            });
         }
-    } catch (error) {
-        console.error('Error approving reimbursement:', error);
+    } catch (err) {
+        console.error('Error submitting reimbursement:', err);
         toast.add({
             severity: 'error',
             summary: 'Error',
-            detail: 'Failed to approve reimbursement',
+            detail: 'Failed to submit reimbursement',
             life: 3000
         });
     } finally {
-        loadingAction.value = false;
+        saving.value = false;
+        showApproveDialog.value = false;
     }
 };
 
@@ -1774,6 +1549,7 @@ const getStatusText = (status) => {
 // Lifecycle
 onMounted(() => {
     fetchWarrantyClaim();
+    fetchMaterial();
     fetchRejectReasons();
 });
 </script>
