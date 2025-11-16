@@ -530,7 +530,7 @@ const router = createRouter({
                     meta: { permission: 'Appointment', access: 'view' },
                 },
                 {
-                    path: 'technical/detailAppointment',
+                    path: 'technical/detailAppointment/:id',
                     name: 'Detail-Appointment',
                     component: () => import('@/views/technical/detailAppointment.vue'),
                     meta: { permission: 'Appointment', access: 'view' },
