@@ -2,7 +2,7 @@ import AppLayout from '@/layout/AppLayout.vue';
 import { createRouter, createWebHistory } from 'vue-router';
 import { tokenService } from '@/service/api';
 import { sassTrue } from 'sass';
-
+import { useMenuStore } from '@/store/menu'; 
 const BASE_PATH  = '/etenadmin/';
 
 const router = createRouter({
@@ -47,11 +47,11 @@ const router = createRouter({
                 // ===============================
                 // TEST API CONNECTION
                 // ===============================
-                {
-                    path: 'test-api',
-                    name: 'Test-API',
-                    component: () => import('@/views/TestAPI.vue')
-                },
+                // {
+                //     path: 'test-api',
+                //     name: 'Test-API',
+                //     component: () => import('@/views/TestAPI.vue')
+                // },
 
                 // ===============================
                 // DASHBOARD
@@ -61,12 +61,6 @@ const router = createRouter({
                     name: 'dashboard',
                     component: () => import('@/views/Dashboard.vue')
                 },
-                {
-                    path: 'FUNC_TEST',
-                    name: 'test',
-                    component: () => import('@/views/Dashboard.vue'),
-                    meta: { requiresAuth: true, requiredFunc: 'CAN_VIEW_DASHBOARD' }
-                },
                 // ===============================
                 // OM (Order Management)
                 // ===============================
@@ -74,83 +68,100 @@ const router = createRouter({
                 {
                     path: 'om/omDashboard',
                     name: 'OM-Dashboard',
-                    component: () => import('@/views/om/omDashboard.vue')
+                    component: () => import('@/views/om/omDashboard.vue'),
+                    meta: { permission: 'Order Dashboard', access: 'view' }
                 },
                 {
                     path: 'om/listEten',
                     name: 'List-Eten',
-                    component: () => import('@/views/om/listEten.vue')
+                    component: () => import('@/views/om/listEten.vue'),
+                    meta: { permission: 'Customer', access: 'view' }
+
                 },
                 {
                     path: 'om/createEten',
                     name: 'Create-Eten',
-                    component: () => import('@/views/om/createEten.vue')
+                    component: () => import('@/views/om/createEten.vue'),
+                    meta: { permission: 'Customer', access: 'write' }
+
                 },
                 {
                     path: 'om/detailEten/:custAccNo',
                     name: 'Detail-Eten',
                     component: () => import('@/views/om/detailEten.vue'),
+                    meta: { permission: 'Customer', access: 'view' },
                     props: true
                 },
                 {
                     path: 'om/editEtenUser/:id',
                     name: 'Edit-Eten-User',
                     component: () => import('@/views/om/editEtenUser.vue'),
+                    meta: { permission: 'Customer', access: 'write' },
                     props: true
                 },
                 {
                     path: 'om/confirmationEten',
                     name: 'Confirmation-Eten',
-                    component: () => import('@/views/om/confirmationEten.vue')
+                    component: () => import('@/views/om/confirmationEten.vue'),
+                    meta: { permission: 'Customer', access: 'view' },
                 },
                 {
                     path: 'om/editEten',
                     name: 'Edit-Eten',
-                    component: () => import('@/views/om/editEten.vue')
+                    component: () => import('@/views/om/editEten.vue'),
+                    meta: { permission: 'Customer', access: 'write' },
                 },
                 {
                     path: 'om/createUserEten/:custAccNo',
                     name: 'Create-User-Eten',
                     component: () => import('@/views/om/createUserEten.vue'),
+                    meta: { permission: 'Customer', access: 'write' },
                     props: true
                 },
                 {
                     path: 'om/detailUser/:id',
                     name: 'Detail-User',
-                    component: () => import('@/views/om/detailUser.vue')
+                    component: () => import('@/views/om/detailUser.vue'),
+                    meta: { permission: 'Customer', access: 'view' },
                 },
                 {
                     path: 'om/manageDevices/:id',
                     name: 'Manage-Devices',
                     component: () => import('@/views/om/manageDevices.vue'),
+                    meta: { permission: 'Customer', access: 'view' },
                     props: true
                 },
                 {
                     path: 'om/editUser',
                     name: 'Edit-User',
-                    component: () => import('@/views/om/editUser.vue')
+                    component: () => import('@/views/om/editUser.vue'),
+                    meta: { permission: 'Customer', access: 'write' },
                 },
 
                 // Order Management
                 {
                     path: 'om/listOrder',
                     name: 'List-Order',
-                    component: () => import('@/views/om/listOrder.vue')
+                    component: () => import('@/views/om/listOrder.vue'),
+                    meta: { permission: 'Order', access: 'view' },
                 },
                 {
                     path: 'om/createOrder',
                     name: 'create-Order',
-                    component: () => import('@/views/om/createOrder.vue')
+                    component: () => import('@/views/om/createOrder.vue'),
+                    meta: { permission: 'Order', access: 'write' },
                 },
                 {
                     path: 'om/confirmOrder',
                     name: 'confirm-Order',
-                    component: () => import('@/views/om/confirmOrder.vue')
+                    component: () => import('@/views/om/confirmOrder.vue'),
+                    meta: { permission: 'Order', access: 'write' },
                 },
                 {
                     path: 'om/detailOrder/:orderNo',
                     name: 'Detail-Order',
                     component: () => import('@/views/om/detailOrder.vue'),
+                    meta: { permission: 'Order', access: 'view' },
                     props: true
                 },
 
@@ -158,12 +169,14 @@ const router = createRouter({
                 {
                     path: 'om/listBackOrder',
                     name: 'List-Back-Order',
-                    component: () => import('@/views/om/listBackOrder.vue')
+                    component: () => import('@/views/om/listBackOrder.vue'),
+                    meta: { permission: 'Back Order', access: 'view' },
                 },
                 {
                     path: 'om/detailBackOrder/:boNo',
                     name: 'Detail-Back-Order',
                     component: () => import('@/views/om/detailBackOrder.vue'),
+                    meta: { permission: 'Back Order', access: 'view' },
                     props: true
                 },
 
@@ -171,18 +184,21 @@ const router = createRouter({
                 {
                     path: 'om/listReturnOrder',
                     name: 'List-Return-Order',
-                    component: () => import('@/views/om/listReturnOrder.vue')
+                    component: () => import('@/views/om/listReturnOrder.vue'),
+                    meta: { permission: 'Return Order', access: 'view' },
                 },
                 {
                     path: 'om/detailReturnOrder/:retOrdNo',
                     name: 'Detail-Return-Order',
                     component: () => import('@/views/om/detailReturnOrder.vue'),
+                    meta: { permission: 'Return Order', access: 'view' },
                     props: true
                 },
                 {
                     path: 'om/createReturnOrder',
                     name: 'Create-Return-Order',
-                    component: () => import('@/views/om/createReturnOrder.vue')
+                    component: () => import('@/views/om/createReturnOrder.vue'),
+                    meta: { permission: 'Return Order', access: 'create' },
                 },
 
                 // Report
@@ -211,28 +227,33 @@ const router = createRouter({
                 {
                     path: 'om/listSalesProgram',
                     name: 'List-SalesProgram',
-                    component: () => import('@/views/om/listSalesProgram.vue')
+                    component: () => import('@/views/om/listSalesProgram.vue'),
+                    meta: { permission: 'Sales Program', access: 'view' },
                 },
                 {
                     path: 'om/detailSalesProgram/:id',
                     name: 'Detail-Sales-Program',
                     component: () => import('@/views/om/detailSalesProgram.vue'),
+                    meta: { permission: 'Sales Program', access: 'view' },
                     props: true
                 },
                 {
                     path: 'om/createSalesProgram',
                     name: 'Create-Sales-Program',
-                    component: () => import('@/views/om/createSalesProgram.vue')
+                    component: () => import('@/views/om/createSalesProgram.vue'),
+                    meta: { permission: 'Sales Program', access: 'create' },
                 },
                 {
                     path: 'om/createSalesProgramVersion2',
                     name: 'Create-Sales-Program-version2',
-                    component: () => import('@/views/om/createSalesProgramVersion2.vue')
+                    component: () => import('@/views/om/createSalesProgramVersion2.vue'),
+                    meta: { permission: 'Sales Program', access: 'view' },
                 },
                 {
                     path: 'om/editSalesProgram/:id',
                     name: 'Edit-Sales-Program',
                     component: () => import('@/views/om/editSalesProgram.vue'),
+                    meta: { permission: 'Sales Program', access: 'view' },
                     props: true
                 },
 
@@ -240,22 +261,31 @@ const router = createRouter({
                 {
                     path: 'om/listDisableOrderNS',
                     name: 'Disable-Order-NS',
-                    component: () => import('@/views/om/ListDisableOrderNS.vue')
+                    component: () => import('@/views/om/ListDisableOrderNS.vue'),
+                    meta: { permission: 'Maintenance Mode', access: 'view' },
                 },
                 {
                     path: 'om/listDisableOrderDS',
                     name: 'Disable-Order-DS',
-                    component: () => import('@/views/om/ListDisableOrderDS.vue')
+                    component: () => import('@/views/om/ListDisableOrderDS.vue'),
+                    meta: { permission: 'Maintenance Mode', access: 'view' },
                 },
                 {
                     path: 'om/listMonthEndClosing',
                     name: 'Month-End-Closing',
-                    component: () => import('@/views/om/listMonthEndClosing.vue')
+                    component: () => import('@/views/om/listMonthEndClosing.vue'),
+                    meta: { permission: 'Maintenance Mode', access: 'view' },
                 },
                 {
                     path: 'om/ListMaterialException',
                     name: 'Material-Exception',
-                    component: () => import('@/views/om/listMaterialException.vue')
+                    component: () => import('@/views/om/listMaterialException.vue'),
+                    meta: { permission: 'Maintenance Mode', access: 'view' },
+                },
+                {
+                    path: 'om/listContainer',
+                    name: 'Container-List',
+                    component: () => import('@/views/om/listContainer.vue')
                 },
 
                 // ===============================
@@ -265,23 +295,27 @@ const router = createRouter({
                 {
                     path: 'marketing/listNews',
                     name: 'List-News',
-                    component: () => import('@/views/marketing/listNews.vue')
+                    component: () => import('@/views/marketing/listNews.vue'),
+                    meta: { permission: 'News Management', access: 'view' },
                 },
                 {
                     path: 'marketing/createNews',
                     name: 'Create-News',
-                    component: () => import('@/views/marketing/createNews.vue')
+                    component: () => import('@/views/marketing/createNews.vue'),
+                    meta: { permission: 'News Management', access: 'create' },
                 },
                 {
                     path: 'marketing/detailNews/:id',
                     name: 'Detail-News',
                     component: () => import('@/views/marketing/detailNews.vue'),
+                    meta: { permission: 'News Management', access: 'view' },
                     props: true
                 },
                 {
                     path: 'marketing/editNews/:id',
                     name: 'Edit-News',
                     component: () => import('@/views/marketing/editNews.vue'),
+                    meta: { permission: 'News Management', access: 'create' },
                     props: true
                 },
 
@@ -289,23 +323,28 @@ const router = createRouter({
                 {
                     path: 'marketing/listEvent',
                     name: 'List-Event',
-                    component: () => import('@/views/marketing/listEvent.vue')
+                    component: () => import('@/views/marketing/listEvent.vue'),
+                    meta: { permission: 'Events Management', access: 'view' },
                 },
                 {
                     path: 'marketing/createEvent',
                     name: 'Create-Event',
-                    component: () => import('@/views/marketing/createEvent.vue')
+                    component: () => import('@/views/marketing/createEvent.vue'),
+                    meta: { permission: 'Events Management', access: 'create' },
+
                 },
                 {
                     path: 'marketing/detailEvent/:id',
                     name: 'Detail-Event',
                     component: () => import('@/views/marketing/detailEvent.vue'),
+                    meta: { permission: 'Events Management', access: 'view' },
                     props: true
                 },
                 {
                     path: 'marketing/editEvent/:id',
                     name: 'Edit-Event',
                     component: () => import('@/views/marketing/editEvent.vue'),
+                    meta: { permission: 'Events Management', access: 'create' },
                      props: true
                 },
 
@@ -313,56 +352,66 @@ const router = createRouter({
                 {
                     path: 'marketing/listCampaign',
                     name: 'List-Campaign',
-                    component: () => import('@/views/marketing/listCampaign.vue')
+                    component: () => import('@/views/marketing/listCampaign.vue'),
+                    meta: { permission: 'Campaign Management', access: 'view' },
                 },
                 {
                     path: 'marketing/detailCampaign/:id',
                     name: 'Detail-Campaign',
                     component: () => import('@/views/marketing/detailCampaign.vue'),
+                    meta: { permission: 'Campaign Management', access: 'create' },
                     props: true
                 },
                 {
                     path: 'marketing/createCampaign',
                     name: 'Create-Campaign',
-                    component: () => import('@/views/marketing/createCampaign.vue')
+                    component: () => import('@/views/marketing/createCampaign.vue'),
+                    meta: { permission: 'Campaign Management', access: 'create' },
                 },
                 {
                     path: 'marketing/editCampaign',
                     name: 'Edit-Campaign',
-                    component: () => import('@/views/marketing/editCampaign.vue')
+                    component: () => import('@/views/marketing/editCampaign.vue'),
+                    meta: { permission: 'Campaign Management', access: 'create' },
                 },
                 {
                     path: 'marketing/inviteDealer',
                     name: 'Invite-Dealer',
-                    component: () => import('@/views/marketing/inviteDealer.vue')
+                    component: () => import('@/views/marketing/inviteDealer.vue'),
+                    meta: { permission: 'Campaign Management', access: 'create' },
                 },
                 {
                     path: 'marketing/detailParticipant',
                     name: 'Detail-Participant',
-                    component: () => import('@/views/marketing/detailParticipant.vue')
+                    component: () => import('@/views/marketing/detailParticipant.vue'),
+                    meta: { permission: 'Campaign Management', access: 'create' },
                 },
 
                 // Games
                 {
                     path: 'marketing/listGame',
                     name: 'List-Game',
-                    component: () => import('@/views/marketing/listGame.vue')
+                    component: () => import('@/views/marketing/listGame.vue'),
+                    meta: { permission: 'Game Management', access: 'view' },
                 },
                 {
                     path: 'marketing/detailGame/:id',
                     name: 'Detail-Game',
                     component: () => import('@/views/marketing/detailGame.vue'),
+                    meta: { permission: 'Game Management', access: 'view' },
                     props: true
                 },
                 {
                     path: 'marketing/createGame',
                     name: 'Create-Game',
-                    component: () => import('@/views/marketing/createGame.vue')
+                    component: () => import('@/views/marketing/createGame.vue'),
+                    meta: { permission: 'Game Management', access: 'create' },
                 },
                 {
                     path: 'marketing/editGame/:id',
                     name: 'Edit-Game',
                     component: () => import('@/views/marketing/editGame.vue'),
+                    meta: { permission: 'Game Management', access: 'create' },
                     props: true
                 },
 
@@ -370,18 +419,21 @@ const router = createRouter({
                 {
                     path: 'marketing/listRedemption',
                     name: 'List-Redemption',
-                    component: () => import('@/views/marketing/listRedemption.vue')
+                    component: () => import('@/views/marketing/listRedemption.vue'),
+                    meta: { permission: 'Redemption Management', access: 'view' },
                 },
                 {
                     path: 'marketing/detailRedemption/:id',
                     name: 'Detail-Redemption',
                     component: () => import('@/views/marketing/detailRedemption.vue'),
+                    meta: { permission: 'Redemption Management', access: 'view' },
                     props: true
                 },
                 {
                     path: 'marketing/editRedemption/:id',
                     name: 'Edit-Redemption',
                     component: () => import('@/views/marketing/editRedemption.vue'),
+                    meta: { permission: 'Redemption Management', access: 'create' },
                     props: true
                 },
 
@@ -389,65 +441,76 @@ const router = createRouter({
                 {
                     path: 'marketing/memberDashboard',
                     name: 'member-Dashboard',
-                    component: () => import('@/views/marketing/memberDashboard.vue')
+                    component: () => import('@/views/marketing/memberDashboard.vue'),
+                    meta: { permission: 'Members Dashboard', access: 'view' },
                 },
                 {
                     path: 'marketing/listEtenUser',
                     name: 'List-Member',
-                    component: () => import('@/views/marketing/listEtenUser.vue')
+                    component: () => import('@/views/marketing/listEtenUser.vue'),
+                    meta: { permission: 'Member List', access: 'view' },
                 },
                 {
                     path: 'marketing/detailEtenUser/:id',
                     name: 'Detail-Member',
                     component: () => import('@/views/marketing/detailEtenUser.vue'),
+                    meta: { permission: 'Member List', access: 'create' },
                     props: true
                 },
                 {
                     path: 'marketing/editEtenUser/:id',
                     name: 'Edit-Member',
                     component: () => import('@/views/marketing/editEtenUser.vue'),
+                    meta: { permission: 'Member List', access: 'create' },
                     props: true
                 },
                 {
                     path: 'marketing/referralRewardPoint',
                     name: 'Referral-Reward-Point',
-                    component: () => import('@/views/marketing/referralRewardPoint.vue')
+                    component: () => import('@/views/marketing/referralRewardPoint.vue'),
+                    meta: { permission: 'Referral Reward Point', access: 'view' },
                 },
 
                 // Catalogue
                 {
                     path: 'marketing/listCatalogue',
                     name: 'List-Catalogue',
-                    component: () => import('@/views/marketing/listCatalogue.vue')
+                    component: () => import('@/views/marketing/listCatalogue.vue'),
+                    meta: { permission: 'Reward Catalogue', access: 'view' },
                 },
                 {
                     path: 'marketing/detailCatalogue/:id',
                     name: 'Detail-Catalogue',
                     component: () => import('@/views/marketing/detailCatalogue.vue'),
+                    meta: { permission: 'Reward Catalogue', access: 'view' },
                     props: true
                 },
                 {
                     path: 'marketing/editCatalogue/:id',
                     name: 'Edit-Catalogue',
                     component: () => import('@/views/marketing/editCatalogue.vue'),
+                    meta: { permission: 'Reward Catalogue', access: 'create' },
                     props: true
                 },
                 {
                     path: 'marketing/createCatalogue',
                     name: 'Create-Catalogue',
-                    component: () => import('@/views/marketing/createCatalogue.vue')
+                    component: () => import('@/views/marketing/createCatalogue.vue'),
+                    meta: { permission: 'Reward Catalogue', access: 'create' },
                 },
 
                 // Report
                 {
                     path: 'marketing/reportMember',
                     name: 'Report-Member',
-                    component: () => import('@/views/marketing/reportMember.vue')
+                    component: () => import('@/views/marketing/reportMember.vue'),
+                    meta: { permission: 'Member Report', access: 'view' },
                 },
                 {
                     path: 'marketing/reportReferral',
                     name: 'Report-Referral',
-                    component: () => import('@/views/marketing/reportReferral.vue')
+                    component: () => import('@/views/marketing/reportReferral.vue'),
+                    meta: { permission: 'Referral', access: 'view' },
                 },
 
                 // ===============================
@@ -457,114 +520,104 @@ const router = createRouter({
                 {
                     path: 'technical/dashboardTechnical',
                     name: 'Dashboard-Technical',
-                    component: () => import('@/views/technical/dashboardTechnical.vue')
+                    component: () => import('@/views/technical/dashboardTechnical.vue'),
+                    meta: { permission: 'Dashboard', access: 'view' },
                 },
                 {
                     path: 'technical/listAppoitment',
                     name: 'List-Appointment',
-                    component: () => import('@/views/technical/listAppoitment.vue')
+                    component: () => import('@/views/technical/listAppoitment.vue'),
+                    meta: { permission: 'Appointment', access: 'view' },
                 },
                 {
                     path: 'technical/detailAppointment/:id',
                     name: 'Detail-Appointment',
                     component: () => import('@/views/technical/detailAppointment.vue'),
-                    props: true
+                    meta: { permission: 'Appointment', access: 'view' },
                 },
 
                 // Warranty Claims
                 {
                     path: 'technical/listClaim',
                     name: 'List-Claim',
-                    component: () => import('@/views/technical/listClaim.vue')
+                    component: () => import('@/views/technical/listClaim.vue'),
+                    meta: { permission: 'Warranty Claim', access: 'view' },
                 },
                 {
                     path: 'technical/listClaim_copy',
                     name: 'Backup-List-Claim',
-                    component: () => import('@/views/technical/listClaim_copy.vue')
+                    component: () => import('@/views/technical/listClaim_copy.vue'),
+                    meta: { permission: 'Warranty Claim', access: 'view' },
                 },
                 {
                     path: 'technical/detailWarantyClaim/:id',
                     name: 'Detail-Waranty-Claim',
                     component: () => import('@/views/technical/detailWarantyClaim.vue'),
+                    meta: { permission: 'Warranty Claim', access: 'view' },
                     props: true
                 },
                                 {
                     path: 'technical/detailWarantyClaim_copy/:id',
                     name: 'Hardcode-Waranty-Claim',
                     component: () => import('@/views/technical/detailWarantyClaim_copy.vue'),
+                    meta: { permission: 'Warranty Claim', access: 'view' },
                     props: true
                 },
                 {
                     path: 'technical/createOrder',
                     name: 'Create-Order',
-                    component: () => import('@/views/technical/createOrder.vue')
+                    component: () => import('@/views/technical/createOrder.vue'),
+                    meta: { permission: 'Warranty Claim', access: 'create' },
+
                 },
                 {
                     path: 'technical/confirmationOrder',
                     name: 'Confirmation-Order',
-                    component: () => import('@/views/technical/confirmationOrder.vue')
-                },
-
-                // CTC (Customer Technical Complaint)
-                {
-                    path: 'technical/listCTC',
-                    name: 'List-CTC',
-                    component: () => import('@/views/technical/listCTC.vue')
-                },
-                {
-                    path: 'technical/createCTC',
-                    name: 'Create-CTC',
-                    component: () => import('@/views/technical/createCTC.vue')
-                },
-
-                // Scrap Management
-                {
-                    path: 'technical/listScrap',
-                    name: 'List-Scrap',
-                    component: () => import('@/views/technical/listScrap.vue')
-                },
-                {
-                    path: 'technical/createScrap',
-                    name: 'Create-Scrap',
-                    component: () => import('@/views/technical/createScrap.vue')
+                    component: () => import('@/views/technical/confirmationOrder.vue'),
+                    meta: { permission: 'Warranty Claim', access: 'create' },
                 },
 
                 // Products
                 {
                     path: 'technical/listProduct',
                     name: 'List-Product',
-                    component: () => import('@/views/technical/listProduct.vue')
+                    component: () => import('@/views/technical/listProduct.vue'),
+                    meta: { permission: 'Product List', access: 'view' },
                 },
                 {
                     path: 'technical/listOETire',
                     name: 'List-OE-Tire',
-                    component: () => import('@/views/technical/listOETire.vue')
+                    component: () => import('@/views/technical/listOETire.vue'),
+                    meta: { permission: 'OE Tire LIst', access: 'view' },
                 },
                 {
                     path: 'technical/listPattern',
                     name: 'List-Pattern',
-                    component: () => import('@/views/technical/listPattern.vue')
+                    component: () => import('@/views/technical/listPattern.vue'),
+                    meta: { permission: 'Pattern List', access: 'view' },
                 },
                 {
                     path: 'technical/detailPattern/:id',
                     name: 'Detail-Pattern',
                     component: () => import('@/views/technical/detailPattern.vue'),
+                    meta: { permission: 'Pattern List', access: 'view' },
                     props: true
                 },
-                {
-                    path: 'technical/bulkUpdate',
-                    name: 'Bulk-Update',
-                    component: () => import('@/views/technical/bulkUpdate.vue')
-                },
-                {
-                    path: 'technical/detailProduct',
-                    name: 'Detail-Product',
-                    component: () => import('@/views/technical/detailProduct.vue')
-                },
+                // {
+                //     path: 'technical/bulkUpdate',
+                //     name: 'Bulk-Update',
+                //     component: () => import('@/views/technical/bulkUpdate.vue')
+                // },
+                // {
+                //     path: 'technical/detailProduct',
+                //     name: 'Detail-Product',
+                //     component: () => import('@/views/technical/detailProduct.vue')
+                // },
                 {
                     path: 'technical/createPattern',
                     name: 'Create-Pattern',
-                    component: () => import('@/views/technical/createPattern.vue')
+                    component: () => import('@/views/technical/createPattern.vue'),
+                    meta: { permission: 'Pattern List', access: 'create' },
                 },
 
                 // ===============================
@@ -655,7 +708,7 @@ const router = createRouter({
                 {
                     path: 'billing/listAccountDetail',
                     name: 'Billing-Account',
-                    component: () => import('@/views/billing/listAccountDetail.vue')
+                    component: () => import('@/views/billing/listAccountDetail.vue'),
                 },
 
                 // Billing History
@@ -703,46 +756,56 @@ const router = createRouter({
                 {
                     path: 'scm/listCollection',
                     name: 'Collection-List',
-                    component: () => import('@/views/scm/listCollection.vue')
+                    component: () => import('@/views/scm/listCollection.vue'),
+                    meta: { permission: 'CTC Collection', access: 'view' },
                 },
                 {
                     path: 'scm/detailCollection',
                     name: 'Collection-Detail',
                     component: () => import('@/views/scm/detailCollection.vue'),
+                    meta: { permission: 'CTC Collection', access: 'view' },
                     props: true
                 },
                 {
                     path: 'scm/returnCollection',
                     name: 'Return-Collection',
-                    component: () => import('@/views/scm/returnCollection.vue')
+                    component: () => import('@/views/scm/returnCollection.vue'),
+                    meta: { permission: 'CTC Return', access: 'view' },
                 },
                 {
                     path: 'scm/detailReturnList',
                     name: 'Return-List',
-                    component: () => import('@/views/scm/detailReturnList.vue')
+                    component: () => import('@/views/scm/detailReturnList.vue'),
+                    meta: { permission: 'CTC Return', access: 'view' },
                 },
 
                 // Order
                 {
                     path: 'scm/listOrderDelivery',
                     name: 'List-Order-Delivery',
-                    component: () => import('@/views/scm/listOrderDelivery.vue')
+                    component: () => import('@/views/scm/listOrderDelivery.vue'),
+                    meta: { permission: 'Order Delivery', access: 'view' },
+
                 },
                 {
                     path: 'scm/detailOrderDelivery/:id',
                     name: 'Detail-Order-Delivery',
                     component: () => import('@/views/scm/detailOrderDelivery.vue'),
+                    meta: { permission: 'Order Delivery', access: 'view' },
                     props: true
                 },
                 {
                     path: 'scm/listOrderPickup',
                     name: 'List-Order-Pickup',
-                    component: () => import('@/views/scm/listOrderPickup.vue')
+                    component: () => import('@/views/scm/listOrderPickup.vue'),
+                    meta: { permission: 'Order Delivery', access: 'view' },
+
                 },
                 {
                     path: 'scm/detailOrderPickup/:id',
                     name: 'Detail-Order-Pickup',
                     component: () => import('@/views/scm/detailOrderPickup.vue'),
+                    meta: { permission: 'Order Delivery', access: 'view' },
                     props: true
                 },
 
@@ -750,12 +813,14 @@ const router = createRouter({
                 {
                     path: 'scm/listReturnOrder',
                     name: 'List-Return-Order-SCM',
-                    component: () => import('@/views/scm/listReturnOrder.vue')
+                    component: () => import('@/views/scm/listReturnOrder.vue'),
+                    meta: { permission: 'Return Order Collection', access: 'view' },
                 },
                 {
                     path: 'scm/detailReturnOrder/:id',
                     name: 'Detail-Return-Order-SCM',
                     component: () => import('@/views/scm/detailReturnOrder.vue'),
+                    meta: { permission: 'Return Order Collection', access: 'view' },
                     props: true
                 },
 
@@ -763,30 +828,35 @@ const router = createRouter({
                 {
                     path: 'scm/listAreaETA',
                     name: 'List-Area-ETA',
-                    component: () => import('@/views/scm/listAreaETA.vue')
+                    component: () => import('@/views/scm/listAreaETA.vue'),
+                    meta: { permission: 'Area ETA', access: 'view' },
                 },
 
                 // Logistic Account
                 {
                     path: 'scm/listLogistic',
                     name: 'List-Logistic',
-                    component: () => import('@/views/scm/listLogistic.vue')
+                    component: () => import('@/views/scm/listLogistic.vue'),
+                    meta: { permission: '3PL Account', access: 'view' },
                 },
                 {
                     path: 'scm/detailLogistic/:id',
                     name: 'Detail-Logistic',
                     component: () => import('@/views/scm/detailLogistic.vue'),
+                    meta: { permission: '3PL Account', access: 'view' },
                     props: true
                 },
                 {
                     path: 'scm/createlogistic',
                     name: 'Create-Logistic',
-                    component: () => import('@/views/scm/createlogistic.vue')
+                    component: () => import('@/views/scm/createlogistic.vue'),
+                    meta: { permission: '3PL Account', access: 'create' },
                 },
                 {
                     path: 'scm/editLogistic/:id',
                     name: 'Edit-Logistic',
                     component: () => import('@/views/scm/editLogistic.vue'),
+                    meta: { permission: '3PL Account', access: 'create' },
                     props: true
                 },
 
@@ -794,12 +864,14 @@ const router = createRouter({
                 {
                     path: 'scm/listSCMBackOrder',
                     name: 'List-SCM-BackOrder',
-                    component: () => import('@/views/scm/listSCMBackOrder.vue')
+                    component: () => import('@/views/scm/listSCMBackOrder.vue'),
+                    meta: { permission: '3PL Account', access: 'view' },
                 },
                 {
                     path: 'scm/detailSCMBackOrder/:boNo',
                     name: 'Detail-SCM-BackOrder',
                     component: () => import('@/views/scm/detailSCMBackOrder.vue'),
+                    meta: { permission: 'Back Order', access: 'view' },
                     props: true
                 },
 
@@ -919,22 +991,41 @@ const router = createRouter({
 });
 
 // Route guard
-router.beforeEach((to, from, next) => {
+router.beforeEach( async(to, from, next) => {
     const publicPages = ['/auth/login', '/auth/access', '/auth/error', '/landing', '/pages/notfound'];
     
     const relativePath = to.path.replace(BASE_PATH, '/');
     const authRequired = !publicPages.includes(relativePath);
     const loggedIn = tokenService.getToken() && !tokenService.isTokenExpired();
-    const userFuncs = ['CANNOT_VIEW_DASHBOARD']
-    // redirect respecting router base
-    if (authRequired && !loggedIn) return next('/auth/login');
-    if (relativePath === '/auth/login' && loggedIn) return next('/'); // default child
+
+  // Redirect if not logged in
+  if (authRequired && !loggedIn) return next('/auth/login');
+  // Redirect logged-in user away from login page
+  if (relativePath === '/auth/login' && loggedIn) return next('/');
+  // Load menu & permissions if logged in
+  if (loggedIn) {
+    const menuStore = useMenuStore();
     
-    if (to.meta.requiredFunc && !userFuncs.includes(to.meta.requiredFunc)) {
-        return next('/unauthorized_test');
+    if (!menuStore.permissions.length) {
+      try {
+        await menuStore.loadMenuAndPermissions();
+      } catch (err) {
+        console.error('Failed to load menu:', err);
+        // Optional: logout user if token invalid
+        tokenService.clearToken();
+        return next('/auth/login');
+      }
     }
 
-    next();
+    // Check route permissions
+    const { permission, access } = to.meta;
+    if (permission) {
+      if (!menuStore.canView(permission)) return next('/unauthorized_test');
+      if (access === 'write' && !menuStore.canWrite(permission)) return next('/unauthorized_test');
+    }
+  }
+
+  next();
 });
 
 export default router;

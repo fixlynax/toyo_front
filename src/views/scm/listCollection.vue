@@ -1,16 +1,121 @@
 <script setup>
-import { ref, onBeforeMount, onMounted } from 'vue';
+import { ref, onBeforeMount, onMounted, watch ,computed} from 'vue';
 import api from '@/service/api';
 import { FilterMatchMode } from '@primevue/core/api';
-
+import { useToast } from 'primevue/usetoast';
 const listData = ref([]);
 const loading = ref(true);
 const importLoading = ref(false);
 const importInput = ref();
+
+
+const toast = useToast();
+const exportLoading1 = ref(false);
+const importLoading1 = ref(false);
+const exportLoading2 = ref(false);
+const importLoading2 = ref(false);
+const filteredList = ref([]);
+const importInput1 = ref();
+const importInput2 = ref();
+
+// Data variables
+const sortMenu = ref();
+const activeTabIndex = ref(0);
+const selectedExportIds = ref(new Set());
+
 const filters = ref({
     global: { value: null, matchMode: FilterMatchMode.CONTAINS }
 });
 
+        // 3: 'Processing',
+        // 4: 'Schedule',
+        // 5: 'Collected',
+
+const statusTabs = [
+    { label: 'New', status: 0 ,code: 3},
+    { label: 'Pending', status: 1 ,code: 4},
+    { label: 'Completed', status: 2 ,code: 5}
+];
+
+watch(activeTabIndex, () => {
+    filterByTab();
+    selectedExportIds.value.clear();
+});
+
+const filterByTab = () => {
+    const selected = statusTabs[activeTabIndex.value];
+    if (!selected) {
+        filteredList.value = listData.value;
+        return;
+    }
+    filteredList.value = listData.value.filter((item) => (item.status) === selected.code);
+};
+const allSelected = computed(() => {
+  return filteredList.value.length > 0 &&
+         filteredList.value.every(item => selectedExportIds.value.has(item.id));
+});
+
+const handleToggleExport = (id) => {
+  if (selectedExportIds.value.has(id)) {
+    selectedExportIds.value.delete(id);
+  } else {
+    selectedExportIds.value.add(id);
+  }
+//   console.log(selectedExportIds.value);
+};
+
+// Check all
+const toggleSelectAll = () => {
+  if (allSelected.value) {
+    // Unselect all for this tab
+    filteredList.value.forEach(item => {
+      selectedExportIds.value.delete(item.id);
+    });
+  } else {
+    // Select all for this tab
+    filteredList.value.forEach(item => {
+      selectedExportIds.value.add(item.id);
+    });
+  }
+};
+
+const sortBy = (field, order) => {
+  filteredList.value = [...filteredList.value].sort((a, b) => {
+    // Helper to get nested value
+    const getField = (obj) => {
+      return field.split('.').reduce((acc, key) => (acc ? acc[key] : ''), obj) ?? '';
+    };
+
+    const aVal = getField(a).toString().toLowerCase();
+    const bVal = getField(b).toString().toLowerCase();
+
+    if (aVal < bVal) return order === 'asc' ? -1 : 1;
+    if (aVal > bVal) return order === 'asc' ? 1 : -1;
+    return 0;
+  });
+};
+const sortItems = ref([
+    {
+        label: 'Sort by Ref No (A-Z)',
+        icon: 'pi pi-sort-alpha-down',
+        command: () => sortBy('claimRefNo', 'asc')
+    },
+    {
+        label: 'Sort by Ref No (Z-A)',
+        icon: 'pi pi-sort-alpha-up',
+        command: () => sortBy('claimRefNo', 'desc')
+    },
+    {
+        label: 'Sort by Cust Acc No (A-Z)',
+        icon: 'pi pi-tag',
+        command: () => sortBy('custAccountNo', 'asc')
+    },
+    {
+        label: 'Sort by Company Name',
+        icon: 'pi pi-globe',
+        command: () => sortBy('companyName1', 'asc')
+    }
+]);
 const selectedRows = ref([]);
 const filterStatus = ref(null);
 const showFilterMenu = ref(false);
@@ -76,17 +181,200 @@ function formatDateFull(dateString) {
     hour12: true
   });
 }
-onMounted(async () => {
+// Export function SCHEDULE ONLY
+const handleExport1 = async () => {
+        const idsArray = Array.from(selectedExportIds.value).map(id => Number(id));
+
+    if (idsArray.length === 0) {
+        alert('Please select at least one row.');
+        return;
+    }
+    // console.log("export 1",idsArray);
+    try {
+        exportLoading1.value = true;
+        
+            const response = await api.postExtra(
+            'excel/export-scm-ctc-list',
+        { claim_id: JSON.stringify(idsArray) },
+        {
+            responseType: 'blob',
+            headers: {
+            'Content-Type': 'application/json',
+            }
+        }
+        );
+        const blob = new Blob([response.data], { 
+        type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' 
+        });
+
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = 'BulkCollection_Download.xlsx';
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        window.URL.revokeObjectURL(url);
+
+        toast.add({ severity: 'success', summary: 'Success', detail: 'Export completed', life: 3000 });
+        selectedExportIds.value.clear();
+    } catch (error) {
+        console.error('Error exporting data:', error);
+        toast.add({ severity: 'error', summary: 'Error', detail: 'Failed to export data', life: 3000 });
+    } finally {
+        exportLoading1.value = false;
+    }
+};
+// Export function RECIEVE ONLY
+const handleExport2 = async () => {
+    const idsArray = Array.from(selectedExportIds.value).map(id => Number(id));
+
+    if (idsArray.length === 0) {
+        alert('Please select at least one row.');
+        return;
+    }
+    // console.log("export 2",idsArray);
+    try {
+        exportLoading2.value = true;
+        
+            const response = await api.postExtra(
+            'excel/export-scm-ctc-list',
+        { claim_id: JSON.stringify(idsArray) },
+        {
+            responseType: 'blob',
+            headers: {
+            'Content-Type': 'application/json',
+            }
+        }
+        );
+        const blob = new Blob([response.data], { 
+        type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' 
+        });
+
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = 'BulkCollectionReceieve_Download.xlsx';
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        window.URL.revokeObjectURL(url);
+
+        toast.add({ severity: 'success', summary: 'Success', detail: 'Export completed', life: 3000 });
+        selectedExportIds.value.clear();
+    } catch (error) {
+        console.error('Error exporting data:', error);
+        toast.add({ severity: 'error', summary: 'Error', detail: 'Failed to export data', life: 3000 });
+    } finally {
+        exportLoading2.value = false;
+    }
+};
+
+// Import function SCHEDULE ONLY
+const handleImport1 = async (event) => {
+    const file = event.target.files[0];
+    if (!file) return;
+    // console.log("import 1",file);
+    try {
+        importLoading1.value = true;
+        
+        const formData = new FormData();
+        formData.append('ctc_excel', file);
+        
+        const response = await api.postExtra('excel/import-scm-ctc-collect', formData, {
+            headers: {
+                'Content-Type': 'multipart/form-data'
+            }
+            });
+        
+        if (response.data.status === 1) {
+            // Refresh data after import
+            await fetchData();
+
+            toast.add({
+                severity: 'success',
+                summary: 'Success',
+                detail: 'File imported successfully',
+                life: 3000
+            });
+            } else {
+            toast.add({
+                severity: 'error',
+                summary: 'Import Failed',
+                detail: response.data.error || 'Server did not confirm success',
+                life: 3000
+            });
+        }
+    } catch (error) {
+        console.error('Error importing data:', error);
+        toast.add({ severity: 'error', summary: 'Error', detail: 'Failed to import data', life: 3000 });
+    } finally {
+        importLoading1.value = false;
+                    // Reset file input
+            if (importInput1.value) {
+                importInput1.value.value = '';
+            }
+    }
+};
+// Import function RECIEVE ONLY
+const handleImport2 = async (event) => {
+    const file = event.target.files[0];
+    if (!file) return;
+    // console.log("import 2",file);
+    try {
+        importLoading2.value = true;
+        
+        const formData = new FormData();
+        formData.append('ctc_excel', file);
+        
+        const response = await api.postExtra('excel/import-scm-ctc-reach', formData, {
+            headers: {
+                'Content-Type': 'multipart/form-data'
+            }
+            });
+        
+        if (response.data.status === 1) {
+            // Refresh data after import
+            await fetchData();
+
+            toast.add({
+                severity: 'success',
+                summary: 'Success',
+                detail: 'File imported successfully',
+                life: 3000
+            });
+            } else {
+            toast.add({
+                severity: 'error',
+                summary: 'Import Failed',
+                detail: response.data.error || 'Server did not confirm success',
+                life: 3000
+            });
+        }
+    } catch (error) {
+        console.error('Error importing data:', error);
+        toast.add({ severity: 'error', summary: 'Error', detail: 'Failed to import data', life: 3000 });
+    } finally {
+        importLoading2.value = false;
+                    // Reset file input
+            if (importInput2.value) {
+                importInput2.value.value = '';
+            }
+    }
+};
+const fetchData = async () => {
     try {
         loading.value = true;
         const response = await api.get('collection/list');
         if (response.data.status === 1) {
+            
             listData.value = response.data.admin_data.map((item) => ({
                 id: item.id,
                 claimRefNo: item.claimRefNo,
                 companyName1: item.eten_data?.companyName1 || '-',
                 custAccountNo: item.eten_data?.custAccountNo || '-',
                 city: item.eten_data?.city || '-',
+                createDateRaw: item.ctc_data?.created ? new Date(item.ctc_data.collectDate) : null, // raw Date
                 collectDate: formatDate(item.ctc_data?.collectDate) || '-',
                 collectTime: formatTime(item.ctc_data?.collectTime) || '',
                 returnDate: formatDateFull(item.ctc_data?.returnDateTime) || '-',
@@ -98,7 +386,8 @@ onMounted(async () => {
                 contactNo: item.eten_data?.phoneNumber || '-',
                 status: item.status,
             
-            }));
+            })).sort((a, b) => (b.createDateRaw || 0) - (a.createDateRaw || 0)); // sort by raw Date
+            filterByTab();
         } else listData.value = [];
     } catch (error) {
         console.error('Error fetching collection list:', error);
@@ -106,12 +395,12 @@ onMounted(async () => {
     } finally {
         loading.value = false;
     }
+}
+onMounted(async () => {
+    fetchData();
 });
 
-function filteredList() {
-    if (filterStatus.value === null) return listData.value;
-    return listData.value.filter((x) => x.status === filterStatus.value);
-}
+
 // Import function
 const handleImport = async (event) => {
     const file = event.target.files[0];
@@ -165,11 +454,9 @@ const handleImport = async (event) => {
 <template>
     <div class="card">
         <div class="text-2xl font-bold text-gray-800 border-b pb-2"> CTC List Collection</div>
-
+        <TabMenu :model="statusTabs" v-model:activeIndex="activeTabIndex" class="mb-6" />
         <DataTable
-            v-model:selection="selectedRows"
-            selectionMode="checkbox"
-            :value="filteredList()"
+            :value="filteredList"
             :paginator="true"
             :rows="10"
             :rowsPerPageOptions="[5, 10, 20]"
@@ -189,57 +476,30 @@ const handleImport = async (event) => {
                             </InputIcon>
                             <InputText v-model="filters['global'].value" placeholder="Quick Search" class="w-full" />
                         </IconField>
-
-                        <div class="relative">
-                            <Button type="button" icon="pi pi-cog" class="p-button" @click="showFilterMenu = !showFilterMenu" />
-                            <div v-if="showFilterMenu" class="absolute right-0 mt-2 w-48 bg-white border rounded-lg shadow-lg p-2 z-10">
-                                <div
-                                    class="flex items-center gap-2 px-3 py-2 hover:bg-gray-100 cursor-pointer rounded-md"
-                                    :class="{ 'bg-gray-200': filterStatus === null }"
-                                    @click="
-                                        filterStatus = null;
-                                        showFilterMenu = false;
-                                    "
-                                >
-                                    <i class="pi pi-list text-gray-600"></i>
-                                    <span>All</span>
-                                </div>
-
-                                <div
-                                    class="flex items-center gap-2 px-3 py-2 hover:bg-gray-100 cursor-pointer rounded-md"
-                                    :class="{ 'bg-gray-200': filterStatus === 0 }"
-                                    @click="
-                                        filterStatus = 0;
-                                        showFilterMenu = false;
-                                    "
-                                >
-                                    <i class="pi pi-clock text-yellow-500"></i>
-                                    <span>Pending</span>
-                                </div>
-
-                                <div
-                                    class="flex items-center gap-2 px-3 py-2 hover:bg-gray-100 cursor-pointer rounded-md"
-                                    :class="{ 'bg-gray-200': filterStatus === 4 }"
-                                    @click="
-                                        filterStatus = 4;
-                                        showFilterMenu = false;
-                                    "
-                                >
-                                    <i class="pi pi-calendar text-blue-500"></i>
-                                    <span>Schedule</span>
-                                </div>
-                            </div>
-                        </div>
+                        <Button type="button" icon="pi pi-cog" @click="sortMenu.toggle($event)" />
+                        <Menu ref="sortMenu" :model="sortItems" :popup="true" />
                     </div>
 
-                    <div class="flex justify-end gap-2">
-                        <Button type="button" label="Bulk Import" icon="pi pi-file-import" @click="importInput?.click()":loading="importLoading" />
+                    <div class="flex justify-end gap-2"  v-if="statusTabs[activeTabIndex]?.label === 'New'">
+                        <Button type="button" label="Export" icon="pi pi-file-export" class="p-button-success" :loading="exportLoading1" @click="handleExport1"/>
+                        <Button type="button" label="Bulk Import" icon="pi pi-file-import" @click="importInput1?.click()":loading="importLoading1" />
                         <input 
-                        ref="importInput"
+                        ref="importInput1"
                         type="file" 
                         accept=".xlsx,.xls" 
                         style="display: none" 
-                        @change="handleImport"
+                        @change="handleImport1"
+                        />
+                    </div>
+                    <div class="flex justify-end gap-2"  v-if="statusTabs[activeTabIndex]?.label === 'Pending'">
+                        <Button type="button" label="Export" icon="pi pi-file-export" class="p-button-success" :loading="exportLoading2" @click="handleExport2"/>
+                        <Button type="button" label="Bulk Import" icon="pi pi-file-import" @click="importInput2?.click()":loading="importLoading2" />
+                        <input 
+                        ref="importInput2"
+                        type="file" 
+                        accept=".xlsx,.xls" 
+                        style="display: none" 
+                        @change="handleImport2"
                         />
                     </div>
                 </div>
@@ -247,7 +507,28 @@ const handleImport = async (event) => {
 
             <template #empty> No Collection found. </template>
             <template #loading> Loading Collection data. Please wait. </template>
+            <Column header="Export All" style="min-width: 8rem">
+                <template #header>
+                    <div class="flex justify-center">
+                    <Checkbox
+                        :key="filteredList.length" 
+                        :binary="true"
+                        :model-value="allSelected"  
+                        @change="() => toggleSelectAll()"  
+                    />
+                    </div>
+                </template>
 
+                <template #body="{ data }">
+                    <div class="flex justify-center">
+                    <Checkbox
+                        :binary="true"
+                        :model-value="selectedExportIds.has(data.id)"
+                        @change="() => handleToggleExport(data.id)"
+                    />
+                    </div>
+                </template>
+            </Column>
             <Column field="createDate" header="Create Date" style="min-width: 8rem">
                 <template #body="{ data }">
                     {{ data.createDate }}

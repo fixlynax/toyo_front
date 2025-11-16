@@ -1,10 +1,16 @@
 <script setup>
 import AppMenu from './AppMenu.vue';
+const props = defineProps({
+  menu: {
+    type: Array,
+    default: () => []
+  }
+});
 </script>
 
 <template>
     <div class="layout-sidebar">
-        <app-menu></app-menu>
+        <app-menu :Navbar="menu"></app-menu>
     </div>
 </template>
 

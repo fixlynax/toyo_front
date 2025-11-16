@@ -17,12 +17,7 @@
                 </div>
 
                 <!-- Loading State -->
-                <!-- <div v-if="loading" class="flex justify-center items-center py-12">
-                    <ProgressSpinner style="width: 50px; height: 50px" strokeWidth="4" />
-                </div> -->
-                <LoadingPage v-if="loading" :message="'Loading News...'" :sub-message="'Fetching list announcements'" />
-
-
+                <LoadingPage v-if="loading" :message="'Loading Sales Program...'" :sub-message="'Fetching program details'" />
 
                 <!-- Error State -->
                 <div v-else-if="error" class="text-center py-12 text-red-600">
@@ -37,7 +32,7 @@
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div class="md:col-span-2">
                             <label class="block font-bold text-gray-700">Title</label>
-                            <InputText v-model="salesProgram.title" class="w-full" />
+                            <InputText v-model="salesProgram.programName" class="w-full" />
                         </div>
 
                         <div class="md:col-span-2">
@@ -48,12 +43,12 @@
                         <div class="grid grid-cols-1 md:grid-cols-3 gap-4 md:col-span-2">
                             <div>
                                 <label class="block font-bold text-gray-700">Start Date</label>
-                                <Calendar v-model="salesProgram.startDate" dateFormat="yy-mm-dd" class="w-full" />
+                                <Calendar v-model="salesProgram.startdate" showIcon dateFormat="yy-mm-dd" class="w-full" />
                             </div>
 
                             <div>
                                 <label class="block font-bold text-gray-700">End Date</label>
-                                <Calendar v-model="salesProgram.endDate" dateFormat="yy-mm-dd" class="w-full" />
+                                <Calendar v-model="salesProgram.enddate" showIcon dateFormat="yy-mm-dd" class="w-full" />
                             </div>
 
                             <div>
@@ -69,13 +64,16 @@
 
                         <div>
                             <label class="block font-bold text-gray-700">Sales Program ID</label>
-                            <InputText v-model="salesProgram.programid" class="w-full" disabled />
+                            <InputText v-model="salesProgram.programID" class="w-full" disabled />
                         </div>
                     </div>
 
                     <!-- Upload Image -->
                     <div>
-                        <label class="block font-bold text-gray-700 mb-2">Sales Program Image</label>
+                        <label class="block font-bold text-gray-700 mb-2">
+                            Sales Program Image
+                            <span class="text-xs bg-blue-100 text-blue-800 px-2 py-0.5 rounded-full">(Max file size: 2 MB)</span>
+                        </label>
                         <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
                             <div>
                                 <FileUpload
@@ -135,7 +133,7 @@
                                 </div>
                             </div>
 
-                            <!-- Buy Materials Section - Single Selection with Select Button -->
+                            <!-- Buy Materials Section -->
                             <div class="mb-6 bg-blue-50 p-4 rounded-lg border border-blue-100">
                                 <div class="flex items-center justify-between mb-4">
                                     <div class="flex items-center gap-2">
@@ -169,7 +167,7 @@
                                                     class="w-full"
                                                     :filter="true"
                                                     :loading="loadingBuyPatterns"
-                                                    @change="onPatternChange(currentSelection)"
+                                                    @change="onPatternChange"
                                                 />
                                             </div>
                                             <div>
@@ -325,7 +323,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted, watch } from 'vue';
+import { ref, onMounted } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { useToast } from 'primevue/usetoast';
 import api from '@/service/api';
@@ -336,22 +334,22 @@ const router = useRouter();
 const toast = useToast();
 
 // Constants
-const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB in bytes
+const MAX_FILE_SIZE = 2 * 1024 * 1024; // 2MB in bytes
 
 const programId = ref(route.params.id);
 const loading = ref(false);
 const error = ref(false);
 const submitting = ref(false);
 
-// Sales Program Data
+// Sales Program Data - using create component structure
 const salesProgram = ref({
-    programid: '',
+    programID: '',
     pricegroup: '06',
     type: 'FOC',
-    title: '',
+    programName: '',
     desc: '',
-    startDate: '',
-    endDate: '',
+    startdate: '',
+    enddate: '',
     status: 1,
     imageUrl: ''
 });
@@ -423,30 +421,40 @@ const showInfo = (message) => {
 };
 
 // Process private images using the API method
-// const processPrivateImages = async () => {
-//     if (salesProgram.value.imageUrl && typeof salesProgram.value.imageUrl === 'string') {
-//         try {
-//             // Check if it's already a valid URL (like fallback image)
-//             if (salesProgram.value.imageUrl.startsWith('http') || salesProgram.value.imageUrl.startsWith('/')) {
-//                 // It's already a URL, no need to process
-//                 return;
-//             }
+const processPrivateImages = async (programData) => {
+    if (!programData || !programData.imageUrl) {
+        return programData;
+    }
 
-//             const blobUrl = await api.getPrivateFile(salesProgram.value.imageUrl);
-//             if (blobUrl) {
-//                 salesProgram.value.imageUrl = blobUrl;
-//             } else {
-//                 salesProgram.value.imageUrl = '/demo/images/event-toyo-2.jpg';
-//             }
-//         } catch (error) {
-//             console.error('Error loading image:', error);
-//             salesProgram.value.imageUrl = '/demo/images/event-toyo-2.jpg';
-//             showWarning('Failed to load program image, using fallback image');
-//         }
-//     } else if (!salesProgram.value.imageUrl) {
-//         salesProgram.value.imageUrl = '/demo/images/event-toyo-2.jpg';
-//     }
-// };
+    const imageUrl = programData.imageUrl;
+
+    // If it's already a valid full URL or data URL, return as is
+    if (imageUrl.startsWith('http') || imageUrl.startsWith('data:') || imageUrl.startsWith('blob:')) {
+        return programData;
+    }
+
+    // If it's a relative path starting with /, construct full URL
+    if (imageUrl.startsWith('/')) {
+        programData.imageUrl = `${window.location.origin}${imageUrl}`;
+        return programData;
+    }
+
+    // If it's a file path that needs API processing
+    try {
+        console.log('Processing private image:', imageUrl);
+        const blobUrl = await api.getPrivateFile(imageUrl);
+        if (blobUrl) {
+            programData.imageUrl = blobUrl;
+        } else {
+            programData.imageUrl = '';
+        }
+    } catch (error) {
+        console.error('Error loading private image:', error);
+        programData.imageUrl = '';
+    }
+
+    return programData;
+};
 
 // Fetch sales program data
 const fetchSalesProgram = async () => {
@@ -457,26 +465,26 @@ const fetchSalesProgram = async () => {
         const response = await api.get(`sales-program/detail-sales-program/${programId.value}`);
 
         if (response.data.status === 1 && response.data.admin_data.length > 0) {
-            const programData = response.data.admin_data[0];
+            let programData = response.data.admin_data[0];
 
-            // Map API data to form structure
+            // Process image first
+            programData = await processPrivateImages(programData);
+
+            // Map API data to form structure (using create component field names)
             salesProgram.value = {
-                programid: programData.programid,
+                programID: programData.programid,
                 pricegroup: programData.pricegroup,
                 type: programData.type,
-                title: programData.title,
+                programName: programData.title, // Map title to programName
                 desc: programData.desc,
-                startDate: new Date(programData.startDate),
-                endDate: new Date(programData.endDate),
+                startdate: new Date(programData.startDate),
+                enddate: new Date(programData.endDate),
                 status: programData.status,
                 imageUrl: programData.imageUrl
             };
 
-            // Process image
-            await processPrivateImages();
-
             // Load FOC criteria data
-            if (programData.salesProgramFOC && programData.salesProgramFOC.length > 0) {
+            if (programData.type === 'FOC') {
                 await loadProgramCriteria(programData);
             }
 
@@ -505,7 +513,10 @@ const loadProgramCriteria = async (programData) => {
 
     // Load free material data
     if (programData.free_material) {
-        await loadFreeMaterials();
+        // Ensure free materials are loaded first
+        if (freeMaterialOptions.value.length === 0) {
+            await loadFreeMaterials();
+        }
         const freeMaterial = freeMaterialOptions.value.find((m) => m.materialid === programData.free_material);
         if (freeMaterial) {
             programItem.value.freeMaterialData = freeMaterial;
@@ -525,12 +536,12 @@ const loadProgramCriteria = async (programData) => {
 };
 
 // Helper functions
-const onPatternChange = async (selection) => {
-    selection.selectedRims = [];
-    selection.availableRims = [];
+const onPatternChange = async () => {
+    currentSelection.value.selectedRims = [];
+    currentSelection.value.availableRims = [];
 
-    if (selection.selectedPattern) {
-        await loadPatternRims(selection);
+    if (currentSelection.value.selectedPattern) {
+        await loadPatternRims();
     }
 };
 
@@ -659,7 +670,7 @@ const onUploadError = (event) => {
 };
 
 const handleImageError = (event) => {
-    event.target.src = '/demo/images/event-toyo-2.jpg';
+    event.target.src = '';
 };
 
 // API Functions
@@ -693,22 +704,22 @@ const loadBuyPatterns = async () => {
     }
 };
 
-const loadPatternRims = async (selection) => {
+const loadPatternRims = async () => {
     try {
         loadingBuyRims.value = true;
-        const selectedPattern = buyPatternOptions.value.find((pattern) => pattern.value === selection.selectedPattern);
+        const selectedPattern = buyPatternOptions.value.find((pattern) => pattern.value === currentSelection.value.selectedPattern);
 
         if (selectedPattern && selectedPattern.rimSizes) {
-            selection.availableRims = selectedPattern.rimSizes.map((size) => ({
+            currentSelection.value.availableRims = selectedPattern.rimSizes.map((size) => ({
                 label: `${size}"`,
                 value: size.toString()
             }));
         } else {
-            selection.availableRims = [];
+            currentSelection.value.availableRims = [];
         }
     } catch (error) {
         console.error('Error loading pattern rims:', error);
-        selection.availableRims = [];
+        currentSelection.value.availableRims = [];
         showError('Failed to load rim diameters');
     } finally {
         loadingBuyRims.value = false;
@@ -735,19 +746,19 @@ const loadFreeMaterials = async () => {
 
 // Form Validation
 const validateForm = () => {
-    if (!salesProgram.value.title) {
+    if (!salesProgram.value.programName) {
         showError('Please enter Program Title');
         return false;
     }
 
-    if (!salesProgram.value.startDate || !salesProgram.value.endDate) {
+    if (!salesProgram.value.startdate || !salesProgram.value.enddate) {
         showError('Please select both Start Date and End Date');
         return false;
     }
 
     // Validate dates
-    const startDate = new Date(salesProgram.value.startDate);
-    const endDate = new Date(salesProgram.value.endDate);
+    const startDate = new Date(salesProgram.value.startdate);
+    const endDate = new Date(salesProgram.value.enddate);
 
     if (endDate <= startDate) {
         showError('End date must be after start date');
@@ -763,20 +774,23 @@ const validateForm = () => {
         }
     }
 
-    // Validate buy materials
-    if (programItem.value.buyMaterials.length === 0) {
-        showError('Please select at least one buy material');
-        return false;
-    }
+    // For FOC programs, validate criteria
+    if (salesProgram.value.type === 'FOC') {
+        // Validate buy materials
+        if (programItem.value.buyMaterials.length === 0) {
+            showError('Please select at least one buy material');
+            return false;
+        }
 
-    // Validate free material
-    if (!programItem.value.selectedFreeMaterial) {
-        showError('Please select free material');
-        return false;
-    }
-    if (!programItem.value.freeQuota || programItem.value.freeQuota < 1) {
-        showError('Please enter free quota');
-        return false;
+        // Validate free material
+        if (!programItem.value.selectedFreeMaterial) {
+            showError('Please select free material');
+            return false;
+        }
+        if (!programItem.value.freeQuota || programItem.value.freeQuota < 1) {
+            showError('Please enter free quota');
+            return false;
+        }
     }
 
     return true;
@@ -805,13 +819,13 @@ const submitForm = async () => {
         // Prepare FormData
         const formData = new FormData();
 
-        formData.append('programID', salesProgram.value.programid);
+        formData.append('programID', salesProgram.value.programID);
         formData.append('pricegroup', salesProgram.value.pricegroup);
         formData.append('type', salesProgram.value.type);
-        formData.append('programName', salesProgram.value.title);
+        formData.append('programName', salesProgram.value.programName);
         formData.append('desc', salesProgram.value.desc);
-        formData.append('startdate', formatDate(salesProgram.value.startDate));
-        formData.append('enddate', formatDate(salesProgram.value.endDate));
+        formData.append('startdate', formatDate(salesProgram.value.startdate));
+        formData.append('enddate', formatDate(salesProgram.value.enddate));
         formData.append('status', salesProgram.value.status);
 
         // Append image if changed
@@ -819,19 +833,22 @@ const submitForm = async () => {
             formData.append('image', imageFile.value);
         }
 
-        // Append spFOC_array as a JSON string
-        formData.append('spFOC_array', JSON.stringify(spFOCArray));
+        // For FOC programs, append criteria data
+        if (salesProgram.value.type === 'FOC') {
+            // Append spFOC_array as a JSON string
+            formData.append('spFOC_array', JSON.stringify(spFOCArray));
 
-        // Append individual fields
-        formData.append('freematerialid', programItem.value.selectedFreeMaterial || '');
-        formData.append('freematerialdesc', programItem.value.freeMaterialData?.material || '');
-        formData.append('buyQty', programItem.value.buyQty);
-        formData.append('freeQty', programItem.value.freeQty);
-        formData.append('freeQuota', programItem.value.freeQuota || '');
+            // Append individual fields
+            formData.append('freematerialid', programItem.value.selectedFreeMaterial || '');
+            formData.append('freematerialdesc', programItem.value.freeMaterialData?.material || '');
+            formData.append('buyQty', programItem.value.buyQty);
+            formData.append('freeQty', programItem.value.freeQty);
+            formData.append('freeQuota', programItem.value.freeQuota || '');
+        }
 
-        console.log('Updating sales program:', salesProgram.value.programid);
+        console.log('Updating sales program:', salesProgram.value.programID);
 
-        const response = await api.postExtra(`sales-program/update-sales-program/${salesProgram.value.programid}`, formData, {
+        const response = await api.postExtra(`sales-program/update-sales-program/${salesProgram.value.programID}`, formData, {
             headers: { 'Content-Type': 'multipart/form-data' }
         });
 
@@ -872,7 +889,7 @@ onMounted(() => {
     }
 
     // Load all necessary data
-    Promise.all([fetchSalesProgram(), loadBuyPatterns(), loadFreeMaterials()]).catch((error) => {
+    Promise.all([loadBuyPatterns(), loadFreeMaterials(), fetchSalesProgram()]).catch((error) => {
         console.error('Error loading initial data:', error);
         showError('Failed to load required data');
     });

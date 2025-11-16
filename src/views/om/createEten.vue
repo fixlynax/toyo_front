@@ -1170,14 +1170,14 @@ onMounted(() => {
                             <label for="phoneno" class="required">Phone No</label>
                             <InputText id="phoneno" type="text" v-model="form.phoneno" required />
                         </div>
-                        <div>
+                        <!-- <div>
                             <label for="password" class="required">Password</label>
                             <Password id="password" v-model="form.password" toggleMask class="w-full" required />
                         </div>
                         <div>
                             <label for="confirmpassword" class="required">Confirm Password</label>
                             <Password id="confirmpassword" v-model="form.confirmpassword" toggleMask :feedback="false" class="w-full" required />
-                        </div>
+                        </div> -->
                     </div>
 
                     <div class="flex flex-col md:flex-row justify-end gap-2 mt-4">

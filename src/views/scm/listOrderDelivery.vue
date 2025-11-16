@@ -4,9 +4,9 @@
 
         <LoadingPage v-if="loading" message="Loading Order Delivery Details..." />
         <div v-else>
+            <TabMenu :model="statusTabs" v-model:activeIndex="activeTabIndex" class="mb-6" />
             <DataTable
-            
-                :value="filteredListfunc()"
+                :value="filteredList"
                 :paginator="true"
                 :rows="10"
                 :rowsPerPageOptions="[5, 10, 20]"
@@ -26,57 +26,59 @@
                                 </InputIcon>
                                 <InputText v-model="filters['global'].value" placeholder="Quick Search" class="w-full" />
                             </IconField>
-
-                            <div class="relative">
-                                <Button type="button" icon="pi pi-cog" class="p-button" @click="showFilterMenu = !showFilterMenu" />
-                                <div v-if="showFilterMenu" class="absolute right-0 mt-2 w-48 bg-white border rounded-lg shadow-lg p-2 z-10">
-                                    <div
-                                        class="flex items-center gap-2 px-3 py-2 hover:bg-gray-100 cursor-pointer rounded-md"
-                                        :class="{ 'bg-gray-200': filterStatus === null }"
-                                        @click="
-                                            filterStatus = null;
-                                            showFilterMenu = false;
-                                        "
-                                    >
-                                        <i class="pi pi-list text-gray-600"></i>
-                                        <span>All</span>
-                                    </div>
-
-                                    <div
-                                        class="flex items-center gap-2 px-3 py-2 hover:bg-gray-100 cursor-pointer rounded-md"
-                                        :class="{ 'bg-gray-200': filterStatus === 0 }"
-                                        @click="
-                                            filterStatus = 0;
-                                            showFilterMenu = false;
-                                        "
-                                    >
-                                        <i class="pi pi-clock text-yellow-500"></i>
-                                        <span>Pending</span>
-                                    </div>
-                                    <div
-                                        class="flex items-center gap-2 px-3 py-2 hover:bg-gray-100 cursor-pointer rounded-md"
-                                        :class="{ 'bg-gray-200': filterStatus === 1 }"
-                                        @click="
-                                            filterStatus = 1;
-                                            showFilterMenu = false;
-                                        "
-                                    >
-                                        <i class="pi pi-check text-green-500"></i>
-                                        <span>Completed</span>
-                                    </div>
-                                </div>
-                            </div>
+                            <Button type="button" icon="pi pi-cog" @click="sortMenu.toggle($event)" />
+                            <Menu ref="sortMenu" :model="sortItems" :popup="true" />
                         </div>
 
-                        <div class="flex justify-end gap-2">
-                            <Button type="button" label="Bulk Update" icon="pi pi-upload" />
+                        <div class="flex justify-end gap-2"  v-if="statusTabs[activeTabIndex]?.label === 'Pending'">
+                            <Button type="button" label="Export" icon="pi pi-file-export" class="p-button-success" :loading="exportLoading1" @click="handleExport1"/>
+                            <Button type="button" label="Bulk Import" icon="pi pi-file-import" @click="importInput1?.click()":loading="importLoading1" />
+                            <input 
+                            ref="importInput1"
+                            type="file" 
+                            accept=".xlsx,.xls" 
+                            style="display: none" 
+                            @change="handleImport1"
+                            />
+                        </div>
+                        <div class="flex justify-end gap-2"  v-if="statusTabs[activeTabIndex]?.label === 'Delivery'">
+                            <Button type="button" label="Export" icon="pi pi-file-export" class="p-button-success" :loading="exportLoading2" @click="handleExport2"/>
+                            <Button type="button" label="Bulk Import" icon="pi pi-file-import" @click="importInput2?.click()":loading="importLoading2" />
+                            <input 
+                            ref="importInput2"
+                            type="file" 
+                            accept=".xlsx,.xls" 
+                            style="display: none" 
+                            @change="handleImport2"
+                            />
                         </div>
                     </div>
                 </template>
 
                 <template #empty> No Order Delivery found. </template>
                 <template #loading> Loading Order Delivery data. Please wait. </template>
+                <Column header="Export All" style="min-width: 8rem">
+                    <template #header>
+                        <div class="flex justify-center">
+                        <Checkbox
+                            :key="filteredList.length" 
+                            :binary="true"
+                            :model-value="allSelected"  
+                            @change="() => toggleSelectAll()"  
+                        />
+                        </div>
+                    </template>
 
+                    <template #body="{ data }">
+                        <div class="flex justify-center">
+                        <Checkbox
+                            :binary="true"
+                            :model-value="selectedExportIds.has(data.id)"
+                            @change="() => handleToggleExport(data.id)"
+                        />
+                        </div>
+                    </template>
+                </Column>
                 <Column field="created" header="Create Date" style="min-width: 8rem">
                     <template #body="{ data }">
                         {{ formatDate(data.created) }}
@@ -145,29 +147,127 @@
 </template>
 
 <script setup>
-import { ref, computed, onBeforeMount } from 'vue';
+import { ref, computed, onBeforeMount, onMounted, watch } from 'vue';
 import { FilterMatchMode } from '@primevue/core/api';
 import { RouterLink } from 'vue-router';
 import api from '@/service/api';
 import LoadingPage from '@/components/LoadingPage.vue';
+import { useToast } from 'primevue/usetoast';
 
-const listData = ref([]);
+const toast = useToast();
+const exportLoading1 = ref(false);
+const importLoading1 = ref(false);
+const exportLoading2 = ref(false);
+const importLoading2 = ref(false);
+const returnList = ref([]);
+const importInput1 = ref();
+const importInput2 = ref();
+
+// Data variables
+const sortMenu = ref();
+const activeTabIndex = ref(0);
+const selectedExportIds = ref(new Set());
+
 const loading = ref(true);
-const selectedRows = ref([]);
-const showFilterMenu = ref(false);
-const filterStatus = ref(null);
 const orderDelList = ref([]);
 const filteredList  = ref([]);
 const filters = ref({
     global: { value: null, matchMode: FilterMatchMode.CONTAINS }
 });
-function filteredListfunc() {
-    if (filterStatus.value === null) return orderDelList.value;
-    return orderDelList.value.filter((x) => x.orderstatus === filterStatus.value);
-}
 
-onBeforeMount(async () => {
-    // listData.value = await ListOrderService.getListOrder();
+        // 0: 'Pending',
+        // 1: 'Completed',
+        // 66: 'Processing',
+        // 77: 'Delivery'
+
+const statusTabs = [
+    { label: 'Pending', status: 0 ,code: 66},
+    { label: 'Delivery', status: 1 ,code: 77},
+    { label: 'Completed', status: 2 ,code: 1}
+];
+
+watch(activeTabIndex, () => {
+    filterByTab();
+    selectedExportIds.value.clear();
+});
+
+const filterByTab = () => {
+    const selected = statusTabs[activeTabIndex.value];
+    if (!selected) {
+        filteredList.value = orderDelList.value;
+        return;
+    }
+    filteredList.value = orderDelList.value.filter((item) => (item.orderstatus) === selected.code);
+};
+// Computed boolean: are all rows selected?
+const allSelected = computed(() => {
+  return filteredList.value.length > 0 &&
+         filteredList.value.every(item => selectedExportIds.value.has(item.id));
+});
+
+const handleToggleExport = (id) => {
+  if (selectedExportIds.value.has(id)) {
+    selectedExportIds.value.delete(id);
+  } else {
+    selectedExportIds.value.add(id);
+  }
+//   console.log(selectedExportIds.value);
+};
+
+// Check all
+const toggleSelectAll = () => {
+  if (allSelected.value) {
+    // Unselect all for this tab
+    filteredList.value.forEach(item => {
+      selectedExportIds.value.delete(item.id);
+    });
+  } else {
+    // Select all for this tab
+    filteredList.value.forEach(item => {
+      selectedExportIds.value.add(item.id);
+    });
+  }
+};
+
+const sortBy = (field, order) => {
+  filteredList.value = [...filteredList.value].sort((a, b) => {
+    // Helper to get nested value
+    const getField = (obj) => {
+      return field.split('.').reduce((acc, key) => (acc ? acc[key] : ''), obj) ?? '';
+    };
+
+    const aVal = getField(a).toString().toLowerCase();
+    const bVal = getField(b).toString().toLowerCase();
+
+    if (aVal < bVal) return order === 'asc' ? -1 : 1;
+    if (aVal > bVal) return order === 'asc' ? 1 : -1;
+    return 0;
+  });
+};
+const sortItems = ref([
+    {
+        label: 'Sort by Order No (A-Z)',
+        icon: 'pi pi-sort-alpha-down',
+        command: () => sortBy('order_no', 'asc')
+    },
+    {
+        label: 'Sort by Order No (Z-A)',
+        icon: 'pi pi-sort-alpha-up',
+        command: () => sortBy('order_no', 'desc')
+    },
+    {
+        label: 'Sort by Cust Acc No (A-Z)',
+        icon: 'pi pi-tag',
+        command: () => sortBy('eten_user.custAccountNo', 'asc')
+    },
+    {
+        label: 'Sort by Company Name',
+        icon: 'pi pi-globe',
+        command: () => sortBy('eten_user.companyName1', 'asc')
+    }
+]);
+
+onMounted(async () => {
     fetchData();
 });
 
@@ -205,6 +305,187 @@ function formatDateFull(dateString) {
         hour12: true
     });
     }
+    // Export function SCHEDULE ONLY
+const handleExport1 = async () => {
+     const idsArray = Array.from(selectedExportIds.value).map(id => ({ id: Number(id) }));
+
+    if (idsArray.length === 0) {
+        alert('Please select at least one row.');
+        return;
+    }
+    // console.log("export 1",idsArray);
+    try {
+        exportLoading1.value = true;
+        
+            const response = await api.postExtra(
+            'excel/export-schedule-order',
+        { orderids_array: JSON.stringify(idsArray) },
+        {
+            responseType: 'blob',
+            headers: {
+            'Content-Type': 'application/json',
+            }
+        }
+        );
+        const blob = new Blob([response.data], { 
+        type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' 
+        });
+
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = 'BulkDeliverySchedule_Download.xlsx';
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        window.URL.revokeObjectURL(url);
+
+        toast.add({ severity: 'success', summary: 'Success', detail: 'Export completed', life: 3000 });
+        selectedExportIds.value.clear();
+    } catch (error) {
+        console.error('Error exporting data:', error);
+        toast.add({ severity: 'error', summary: 'Error', detail: 'Failed to export data', life: 3000 });
+    } finally {
+        exportLoading1.value = false;
+    }
+};
+// Export function RECIEVE ONLY
+const handleExport2 = async () => {
+     const idsArray = Array.from(selectedExportIds.value).map(id => ({ id: Number(id) }));
+
+    if (idsArray.length === 0) {
+        alert('Please select at least one row.');
+        return;
+    }
+    // console.log("export 2",idsArray);
+    try {
+        exportLoading2.value = true;
+        
+            const response = await api.postExtra(
+            'excel/export-delivered-order',
+        { orderids_array: JSON.stringify(idsArray) },
+        {
+            responseType: 'blob',
+            headers: {
+            'Content-Type': 'application/json',
+            }
+        }
+        );
+        const blob = new Blob([response.data], { 
+        type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' 
+        });
+
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = 'BulkDeliveryReceive_Download.xlsx';
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        window.URL.revokeObjectURL(url);
+
+        toast.add({ severity: 'success', summary: 'Success', detail: 'Export completed', life: 3000 });
+        selectedExportIds.value.clear();
+    } catch (error) {
+        console.error('Error exporting data:', error);
+        toast.add({ severity: 'error', summary: 'Error', detail: 'Failed to export data', life: 3000 });
+    } finally {
+        exportLoading2.value = false;
+    }
+};
+
+// Import function SCHEDULE ONLY
+const handleImport1 = async (event) => {
+    const file = event.target.files[0];
+    if (!file) return;
+    // console.log("import 1",file);
+    try {
+        importLoading1.value = true;
+        
+        const formData = new FormData();
+        formData.append('order_schedule_excel', file);
+        
+        const response = await api.postExtra('excel/import-schedule-order', formData, {
+            headers: {
+                'Content-Type': 'multipart/form-data'
+            }
+            });
+        
+        if (response.data.status === 1) {
+            // Refresh data after import
+            await fetchData();
+
+            toast.add({
+                severity: 'success',
+                summary: 'Success',
+                detail: 'File imported successfully',
+                life: 3000
+            });
+            } else {
+            toast.add({
+                severity: 'error',
+                summary: 'Import Failed',
+                detail: response.data.error || 'Server did not confirm success',
+                life: 3000
+            });
+        }
+    } catch (error) {
+        console.error('Error importing data:', error);
+        toast.add({ severity: 'error', summary: 'Error', detail: 'Failed to import data', life: 3000 });
+    } finally {
+        importLoading1.value = false;
+                    // Reset file input
+            if (importInput1.value) {
+                importInput1.value.value = '';
+            }
+    }
+};
+// Import function RECIEVE ONLY
+const handleImport2 = async (event) => {
+    const file = event.target.files[0];
+    if (!file) return;
+    // console.log("import 2",file);
+    try {
+        importLoading2.value = true;
+        
+        const formData = new FormData();
+        formData.append('order_schedule_excel', file);
+        
+        const response = await api.postExtra('excel/import-delivered-order', formData, {
+            headers: {
+                'Content-Type': 'multipart/form-data'
+            }
+            });
+        
+        if (response.data.status === 1) {
+            // Refresh data after import
+            await fetchData();
+
+            toast.add({
+                severity: 'success',
+                summary: 'Success',
+                detail: 'File imported successfully',
+                life: 3000
+            });
+            } else {
+            toast.add({
+                severity: 'error',
+                summary: 'Import Failed',
+                detail: response.data.error || 'Server did not confirm success',
+                life: 3000
+            });
+        }
+    } catch (error) {
+        console.error('Error importing data:', error);
+        toast.add({ severity: 'error', summary: 'Error', detail: 'Failed to import data', life: 3000 });
+    } finally {
+        importLoading2.value = false;
+                    // Reset file input
+            if (importInput2.value) {
+                importInput2.value.value = '';
+            }
+    }
+};
 const fetchData = async () => {
     try {
         loading.value = true;
@@ -214,6 +495,7 @@ const fetchData = async () => {
                     orderDelList.value = response.data.admin_data.sort((a, b) => {
                 return new Date(b.created) - new Date(a.created);
             });
+            filterByTab();
         } else {
             console.error('API returned error or invalid data:', response.data);
             orderDelList.value = [];

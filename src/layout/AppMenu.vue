@@ -1,8 +1,12 @@
 <script setup>
-import { ref } from 'vue';
+
 
 import AppMenuItem from './AppMenuItem.vue';
+import { computed, onMounted } from 'vue'
+import { ref } from 'vue';
+import { defineProps } from 'vue';
 
+// LOCAL
 const model = ref([
     {
         label: 'Marketing',
@@ -105,16 +109,6 @@ const model = ref([
                         icon: 'pi pi-fw pi-list',
                         to: '/technical/listClaim'
                     },
-                    // {
-                    //     label: 'CTC List',
-                    //     icon: 'pi pi-fw pi-book', remove need to remove on index js
-                    //     to: '/technical/listCTC'
-                    // },
-                    // {
-                    //     label: 'Scrap List',
-                    //     icon: 'pi pi-fw pi-trash',
-                    //     to: '/technical/listScrap'
-                    // }
                 ]
             },
             {
@@ -209,12 +203,12 @@ const model = ref([
                         icon: 'pi pi-fw pi-ban',
                         items: [
                             {
-                                label: 'Normal Shipment',
+                                label: 'Normal Location',
                                 icon: 'pi pi-fw pi-box',
                                 to: '/om/listDisableOrderNS'
                             },
                             {
-                                label: 'Direct Shipment',
+                                label: 'RER Location',
                                 icon: 'pi pi-fw pi-truck',
                                 to: '/om/listDisableOrderDS'
                             }
@@ -229,7 +223,12 @@ const model = ref([
                         label: 'Material Exception',
                         icon: 'pi pi-fw pi-exclamation-triangle',
                         to: '/om/listMaterialException'
-                    }
+                    },
+                   {
+                       label: 'Directship Container',
+                       icon: 'pi pi-fw pi-box',
+                       to: '/om/listContainer'
+                   }
                 ]
             }
         ]
@@ -382,8 +381,19 @@ const model = ref([
         ]
     }
 ]);
+// LOCAL
+
+// STAGING
+const props = defineProps({
+  Navbar: {
+    type: Array,
+    default: () => []
+  }
+});
+// STAGING
 </script>
 
+<!-- LOCAL -->
 <template>
     <ul class="layout-menu">
         <template v-for="(item, i) in model" :key="item">
@@ -392,5 +402,17 @@ const model = ref([
         </template>
     </ul>
 </template>
+<!-- LOCAL -->
+
+<!-- STAGING -->
+<!-- <template>
+    <ul class="layout-menu">
+        <template v-for="(item, i) in props.Navbar" :key="item.label">
+            <app-menu-item v-if="!item.separator" :item="item" :index="i"></app-menu-item>
+            <li v-if="item.separator" class="menu-separator"></li>
+        </template>
+    </ul>
+</template> -->
+<!-- STAGING -->
 
 <style lang="scss" scoped></style>
