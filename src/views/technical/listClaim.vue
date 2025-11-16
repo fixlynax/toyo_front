@@ -11,7 +11,6 @@ const exportLoading = ref(false);
 const activeTab = ref(0);
 
 const tabs = [
-    { label: 'All', value: 'All' },
     { label: 'Processing', value: 'Processing' },
     { label: 'In Progress', value: 'In Progress' },
     { label: 'Completed', value: 'Completed' },
