@@ -14,7 +14,7 @@
                             </div>
 
                             <RouterLink :to="`/om/editEten/${$route.params.custAccNo}`">
-                                <Button type="button" label="Pull SAP" />
+                                <Button type="button" label="Edit Profile" />
                             </RouterLink>
                         </div>
                         <div class="text-xl font-semibold pb-2">🏢 Company Details</div>
@@ -22,11 +22,11 @@
                         <div class="grid md:grid-cols-2 gap-4">
                             <div>
                                 <span class="text-sm text-gray-500">Company Registration No</span>
-                                <p class="text-lg font-medium">{{ form.companyRegNo }}</p>
+                                <p class="text-lg font-medium">{{ form.companyRegNo || '-' }}</p>
                             </div>
                             <div>
                                 <span class="text-sm text-gray-500">Company Name 1</span>
-                                <p class="text-lg font-medium">{{ form.companyName1 }}</p>
+                                <p class="text-lg font-medium">{{ form.companyName1 || '-' }}</p>
                             </div>
                             <div>
                                 <span class="text-sm text-gray-500">Company Name 2</span>
@@ -168,7 +168,7 @@
                                     <div class="flex flex-col">
                                         <RouterLink :to="`/om/detailUser/${data.id}`" class="hover:underline font-bold">
                                             {{ data.firstName }} {{ data.lastName }}
-                                            <span v-if="data.isMaster === 1" class="text-blue-400">(Admin)</span>
+                                            <span v-if="data.isMaster === 1" class="text-blue-400">(Master)</span>
                                         </RouterLink>
                                         <span class="text-sm text-gray-500">{{ data.emailAddress }}</span>
                                         <span class="text-sm text-gray-500">{{ data.countryCode }}{{ data.mobileNumber }}</span>
@@ -181,14 +181,16 @@
                                     {{ getUserModules(data) }}
                                 </template>
                             </Column>
+
                             <Column field="lastLogin" header="Last Login" style="min-width: 8rem">
                                 <template #body="{ data }">
                                     {{ formatDate(data.lastLogin) }}
                                 </template>
                             </Column>
+
                             <Column field="lastLogin" header="Activated Date" style="min-width: 8rem">
                                 <template #body="{ data }">
-                                    {{ formatDate(data.lastLogin) }}
+                                    {{ formatDate(data.activated) }}
                                 </template>
                             </Column>
 
@@ -197,9 +199,11 @@
                                     <Tag :value="data.status === 1 ? 'Active' : 'Inactive'" :severity="data.status === 1 ? 'success' : 'danger'" />
                                 </template>
                             </Column>
+
                             <Column header="Activation Code" style="min-width: 8rem">
                                 <template #body="{ data }">
-                                    <Button icon="pi pi-send" label="Send" style="width: fit-content" class="p-button-info p-button-sm" @click="sendActivationCode(data)" />
+                                    <Button v-if="data.activated === null" icon="pi pi-send" label="Send" style="width: fit-content" class="p-button-info p-button-sm" @click="sendActivationCode(data)" />
+                                    <label v-else>-</label>
                                 </template>
                             </Column>
                         </DataTable>
@@ -251,7 +255,6 @@
                                     <td class="px-4 py-2 text-right">{{ form.customerAccountGroup || '-' }}</td>
                                 </tr>
 
-                               
                                 <tr class="border-b">
                                     <td class="px-4 py-2 font-medium">Price List</td>
                                     <td class="px-4 py-2 text-right">{{ form.pricelist || '-' }}</td>
@@ -317,24 +320,24 @@
 
                     <!-- Document Items -->
                     <div class="space-y-3">
-                        <!-- Billing -->
-                        <div class="flex items-center justify-between px-2">
-                            <div class="flex items-center gap-2 text-gray-700">
-                                <i class="pi pi-folder text-blue-500"></i>
-                                <span>Billing</span>
-                            </div>
-                            <RouterLink to="/billing">
-                                <Button label="Go" size="small" />
-                            </RouterLink>
-                        </div>
-
                         <!-- Account Details -->
                         <div class="flex items-center justify-between px-2 mt-2">
                             <div class="flex items-center gap-2 text-gray-700">
                                 <i class="pi pi-folder text-green-500"></i>
                                 <span>Account Details</span>
                             </div>
-                            <RouterLink to="/account-details">
+                            <RouterLink to="/billing/listEbilling">
+                                <Button label="Go" size="small" />
+                            </RouterLink>
+                        </div>
+
+                        <!-- Billing -->
+                        <div class="flex items-center justify-between px-2">
+                            <div class="flex items-center gap-2 text-gray-700">
+                                <i class="pi pi-folder text-blue-500"></i>
+                                <span>Billing</span>
+                            </div>
+                            <RouterLink to="/billing/listAccountDetail">
                                 <Button label="Go" size="small" />
                             </RouterLink>
                         </div>
@@ -343,9 +346,9 @@
                         <div class="flex items-center justify-between px-2 mt-2">
                             <div class="flex items-center gap-2 text-gray-700">
                                 <i class="pi pi-folder text-purple-500"></i>
-                                <span>Staff Billing</span>
+                                <span>E-invoice Billing</span>
                             </div>
-                            <RouterLink to="/staff-billing">
+                            <RouterLink to="/billing/listEbilling">
                                 <Button label="Go" size="small" />
                             </RouterLink>
                         </div>
@@ -356,7 +359,7 @@
                                 <i class="pi pi-folder text-pink-500"></i>
                                 <span>Statement</span>
                             </div>
-                            <RouterLink to="/statement">
+                            <RouterLink to="/billing/listStatement">
                                 <Button label="Go" size="small" />
                             </RouterLink>
                         </div>
@@ -365,9 +368,9 @@
                         <div class="flex items-center justify-between px-2 mt-2">
                             <div class="flex items-center gap-2 text-gray-700">
                                 <i class="pi pi-folder text-orange-500"></i>
-                                <span>Finance Document</span>
+                                <span>Other</span>
                             </div>
-                            <RouterLink to="/finance-document">
+                            <RouterLink to="/billing/listOther">
                                 <Button label="Go" size="small" />
                             </RouterLink>
                         </div>
@@ -459,10 +462,14 @@ const getUserModules = (user) => {
     if (user.allow_billing) modules.push('Billing');
     if (user.allow_sale) modules.push('Sales');
     if (user.allow_user) modules.push('User');
-    return modules.length > 0 ? modules.join(', ') : '-';
+
+    // Check if all modules are allowed
+    const allModules = ['Warranty', 'Order', 'Billing', 'Sales', 'User'];
+    const hasAllModules = allModules.every((module) => modules.includes(module));
+
+    return hasAllModules ? 'Full Access' : modules.length > 0 ? modules.join(', ') : '-';
 };
 
-// Send activation code
 // Send activation code
 const sendActivationCode = async (user) => {
     try {

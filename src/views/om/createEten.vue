@@ -348,7 +348,7 @@ async function fetchDealerList() {
     try {
         const formData = new FormData();
         formData.append('mainBranch', '1'); // Always pass mainBranch=1 as per requirement
-        // Remove custaccountno from this call as it's not needed for listing all main branches
+       formData.append('custaccountno,', custAccountNo.value);
 
         const response = await api.post('list_dealer', formData);
 
