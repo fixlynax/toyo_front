@@ -52,7 +52,6 @@
 
             <Column field="processedImageURL" header="Image" style="min-width: 8rem; text-align: center">
                 <template #body="{ data }">
-                     <RouterLink :to="`/technical/detailPattern/${data.pattern_id}`">
                     <img 
                         v-if="data.processedImageURL" 
                         :src="getImagePath(data.processedImageURL)" 
@@ -63,13 +62,14 @@
                     <div v-else class="w-16 h-16 flex items-center justify-center bg-gray-100 rounded-md border border-gray-200 text-gray-400 text-xs">
                         No Image
                     </div>
-                    </RouterLink>
                 </template>
             </Column>
 
             <Column field="pattern_code" header="Pattern Code" style="min-width: 8rem">
                 <template #body="{ data }">
+                     <RouterLink :to="`/technical/detailPattern/${data.id}`" class="hover:underline font-bold text-primary-400">
                     <span class="font-semibold ml-1">{{ data.pattern_code }}</span>
+                    </RouterLink>
                 </template>
             </Column>
 

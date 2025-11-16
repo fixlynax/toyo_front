@@ -41,11 +41,11 @@
             <template #empty> No data found. </template>
             <template #loading> Loading data. Please wait... </template>
 
-            <Column field="materialid" header="ID" style="min-width: 6rem">
+            <!-- <Column field="materialid" header="ID" style="min-width: 6rem">
                 <template #body="{ data }">
                     {{ data.id }}
                 </template>
-            </Column>
+            </Column> -->
 
             <Column field="pattern" header="Pattern" style="min-width: 8rem">
                 <template #body="{ data }">
