@@ -48,7 +48,7 @@ const filterByTab = () => {
         filteredList.value = listData.value;
         return;
     }
-    filteredList.value = listData.value.filter((item) => (item.status) === selected.code);
+    filteredList.value = listData.value.filter((item) => (item.status) === selected.status);
 };
 const allSelected = computed(() => {
   return filteredList.value.length > 0 &&
@@ -104,16 +104,6 @@ const sortItems = ref([
         label: 'Sort by Ref No (Z-A)',
         icon: 'pi pi-sort-alpha-up',
         command: () => sortBy('claimRefNo', 'desc')
-    },
-    {
-        label: 'Sort by Cust Acc No (A-Z)',
-        icon: 'pi pi-tag',
-        command: () => sortBy('custAccountNo', 'asc')
-    },
-    {
-        label: 'Sort by Company Name',
-        icon: 'pi pi-globe',
-        command: () => sortBy('companyName1', 'asc')
     }
 ]);
 const selectedRows = ref([]);
@@ -122,28 +112,18 @@ const showFilterMenu = ref(false);
 
 function getStatusSeverity(status) {
     const severityMap = {
-        0: 'secondary',
+        0: 'warning',
         1: 'info',
-        2: 'danger',
-        3: 'warning',
-        4: 'warning',
-        5: 'success',
-        6: 'danger',
-        9: 'secondary'
+        2: 'success',
     };
     return severityMap[status] || 'secondary';
 }
 
 function getStatusText(status) {
     const statusMap = {
-        0: 'Pending',
-        1: 'ETEN Approved',
-        2: 'ETEN Rejected',
-        3: 'Processing',
-        4: 'Schedule',
-        5: 'Collected',
-        6: 'Toyo Rejected',
-        9: 'Deleted'
+        0: 'New',
+        1: 'Pending',
+        2: 'Completed'
     };
     return statusMap[status] || 'Unknown';
 }
@@ -368,25 +348,9 @@ const fetchData = async () => {
         const response = await api.get('collection/list');
         if (response.data.status === 1) {
             
-            listData.value = response.data.admin_data.map((item) => ({
-                id: item.id,
-                claimRefNo: item.claimRefNo,
-                companyName1: item.eten_data?.companyName1 || '-',
-                custAccountNo: item.eten_data?.custAccountNo || '-',
-                city: item.eten_data?.city || '-',
-                createDateRaw: item.ctc_data?.created ? new Date(item.ctc_data.collectDate) : null, // raw Date
-                collectDate: formatDate(item.ctc_data?.collectDate) || '-',
-                collectTime: formatTime(item.ctc_data?.collectTime) || '',
-                returnDate: formatDateFull(item.ctc_data?.returnDateTime) || '-',
-                createDate: formatDate(item.ctc_data?.created) || '-',
-                collectionAddress:
-                    [item.eten_data?.addressLine1, item.eten_data?.addressLine2, item.eten_data?.addressLine3, item.eten_data?.addressLine4, item.eten_data?.city, item.eten_data?.postcode, item.eten_data?.state]
-                        .filter((part) => part && part.trim() !== '')
-                        .join(' ') || '-',
-                contactNo: item.eten_data?.phoneNumber || '-',
-                status: item.status,
-            
-            })).sort((a, b) => (b.createDateRaw || 0) - (a.createDateRaw || 0)); // sort by raw Date
+        listData.value = response.data.admin_data.sort((a, b) => {
+                return new Date(b.created) - new Date(a.created);
+            }); // sort by raw Date
             filterByTab();
         } else listData.value = [];
     } catch (error) {
@@ -400,55 +364,6 @@ onMounted(async () => {
     fetchData();
 });
 
-
-// Import function
-const handleImport = async (event) => {
-    const file = event.target.files[0];
-    // console.log(file);
-    if (!file) return;
-
-    // try {
-    //     importLoading.value = true;
-        
-    //     const formData = new FormData();
-    //     formData.append('return_order_excel', file);
-        
-    //     const response = await api.postExtra('excel/import-scm-return-order-list', formData, {
-    //         headers: {
-    //             'Content-Type': 'multipart/form-data'
-    //         }
-    //         });
-        
-    //     if (response.data.status === 1) {
-    //         // Refresh data after import
-    //         await fetchData();
-
-    //         // Reset file input
-    //         if (importInput.value) {
-    //             importInput.value.value = '';
-    //         }
-
-    //         toast.add({
-    //             severity: 'success',
-    //             summary: 'Success',
-    //             detail: 'File imported successfully',
-    //             life: 3000
-    //         });
-    //         } else {
-    //         toast.add({
-    //             severity: 'error',
-    //             summary: 'Import Failed',
-    //             detail: response.data.error || 'Server did not confirm success',
-    //             life: 3000
-    //         });
-    //     }
-    // } catch (error) {
-    //     console.error('Error importing data:', error);
-    //     toast.add({ severity: 'error', summary: 'Error', detail: 'Failed to import data', life: 3000 });
-    // } finally {
-    //     importLoading.value = false;
-    // }
-};
 </script>
 
 <template>
@@ -531,51 +446,24 @@ const handleImport = async (event) => {
             </Column>
             <Column field="createDate" header="Create Date" style="min-width: 8rem">
                 <template #body="{ data }">
-                    {{ data.createDate }}
+                    {{ formatDate(data.created) }}
                 </template>
             </Column>
             <Column field="collectRef" header="Ref No" style="min-width: 8rem">
                 <template #body="{ data }">
-                    <RouterLink :to="`/technical/detailWarantyClaim/${data.id}`" class="hover:underline font-bold text-primary">
-                        {{ data.claimRefNo }}
+                    <RouterLink :to="`/scm/detailCollection/${data.id}`" class="hover:underline font-bold text-primary">
+                        {{ data.claimRefno }}
                     </RouterLink>
                 </template>
             </Column>
-
-            <Column field="customerAccNo" header="Customer Acc No." style="min-width: 8rem">
-                <template #body="{ data }">
-                    {{ data.custAccountNo }}
-                </template>
-            </Column>
-
-            <Column field="customerName" header="Customer Name" style="min-width: 10rem">
-                <template #body="{ data }">
-                    {{ data.companyName1 }}
-                </template>
-            </Column>
-
-            <Column field="collectionAddress" header="Collection Address" style="min-width: 12rem">
-                <template #body="{ data }">
-                    {{ data.collectionAddress }}
-                </template>
-            </Column>
-
-            <Column field="contactNo" header="Contact" style="min-width: 8rem">
-                <template #body="{ data }">
-                    {{ data.contactNo }}
-                </template>
-            </Column>
-
-
             <Column field="collectedDatetime" header="Collect Date" style="min-width: 10rem">
                 <template #body="{ data }">
-                    {{ data.collectDate }} {{ data.collectTime }}
+                    {{ data.collectDate && data.collectTime ? formatDate(data.collectDate) + ' ' + formatTime(data.collectTime): 'Not Assigned'}}
                 </template>
             </Column>
-
-                        <Column field="returnDate" header="Receive Date" style="min-width: 10rem">
+            <Column field="returnDate" header="Receive Date" style="min-width: 10rem">
                 <template #body="{ data }">
-                    {{ data.returnDate }}
+                    {{ data.reachWH ? formatDate(data.reachWH) : 'Not Assigned' }}
                 </template>
             </Column>
 

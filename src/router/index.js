@@ -760,7 +760,7 @@ const router = createRouter({
                     meta: { permission: 'CTC Collection', access: 'view' },
                 },
                 {
-                    path: 'scm/detailCollection',
+                    path: 'scm/detailCollection/:id',
                     name: 'Collection-Detail',
                     component: () => import('@/views/scm/detailCollection.vue'),
                     meta: { permission: 'CTC Collection', access: 'view' },
@@ -773,10 +773,11 @@ const router = createRouter({
                     meta: { permission: 'CTC Return', access: 'view' },
                 },
                 {
-                    path: 'scm/detailReturnList',
+                    path: 'scm/detailReturnList/:id',
                     name: 'Return-List',
                     component: () => import('@/views/scm/detailReturnList.vue'),
                     meta: { permission: 'CTC Return', access: 'view' },
+                    props: true
                 },
 
                 // Order

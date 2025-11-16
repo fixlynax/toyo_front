@@ -1,6 +1,6 @@
 <template>
     <div class="card">
-        <div class="text-2xl font-bold text-gray-800 border-b pb-2">Order Pickup List</div>
+        <div class="text-2xl font-bold text-gray-800 border-b pb-2">Self Order Pickup List</div>
 
         <LoadingPage v-if="loading" message="Loading Order Delivery Details..." />
         <div v-else>
@@ -145,7 +145,7 @@
 </template>
 
 <script setup>
-import { ref, computed, onBeforeMount } from 'vue';
+import { ref, computed, onBeforeMount, onMounted } from 'vue';
 import { FilterMatchMode } from '@primevue/core/api';
 import { RouterLink } from 'vue-router';
 import api from '@/service/api';
@@ -166,8 +166,7 @@ function filteredListfunc() {
     return orderDelList.value.filter((x) => x.orderstatus === filterStatus.value);
 }
 
-onBeforeMount(async () => {
-    // listData.value = await ListOrderService.getListOrder();
+onMounted(async () => {
     fetchData();
 });
 

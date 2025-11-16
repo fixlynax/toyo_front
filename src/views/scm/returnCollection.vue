@@ -14,7 +14,7 @@
             :loading="loading"
             :filters="filters"
             filterDisplay="menu"
-            :globalFilterFields="['claimRefNo', 'companyName1', 'custAccountNo', 'problem', 'warrantyCertNo', 'action']"
+            :globalFilterFields="['claimRefno', 'created', 'deliveryDate', 'scheduleDeliveryDate', 'status', 'deliveryDate']"
         >
             <!-- ========================= -->
             <!-- Header Section -->
@@ -76,8 +76,8 @@
                     <div class="flex justify-center">
                     <Checkbox
                         :binary="true"
-                        :model-value="selectedExportIds.has(data.id)"
-                        @change="() => handleToggleExport(data.id)"
+                        :model-value="selectedExportIds.has(data?.id)"
+                        @change="() => handleToggleExport(data?.id)"
                     />
                     </div>
                 </template>
@@ -90,44 +90,19 @@
 
             <Column field="claimRefNo" header="Ref No" style="min-width: 8rem">
                 <template #body="{ data }">
-                    <RouterLink :to="`/technical/detailWarantyClaim/${data.id}`" class="hover:underline font-bold text-primary">
-                        {{ data.claimRefNo }}
+                    <RouterLink :to="`/scm/detailReturnList/${data?.id}`" class="hover:underline font-bold text-primary">
+                        {{ data?.claimRefno ?? '-' }}
                     </RouterLink>
                 </template>
             </Column>
-            <Column field="custAccountNo" header="Customer Acc No" style="min-width: 8rem">
+            <Column field="delivery_information.pickup_datetime" header="Delivery Date" style="min-width: 8rem">
                 <template #body="{ data }">
-                    {{ data.eten_data.custAccountNo }}
+                     {{ data.scheduleDeliveryDate ? formatDateFull(data.scheduleDeliveryDate) : 'Not Assigned' }}
                 </template>
             </Column>
-            <Column field="companyName1" header="Customer Name" style="min-width: 8rem">
+            <Column field="receive_datetime" header="Delivered Date" style="min-width: 8rem">
                 <template #body="{ data }">
-                    {{ data.eten_data.companyName1 }}
-                </template>
-            </Column>
-            <Column field="addressLine1" header="Collection Address" style="min-width: 8rem">
-                <template #body="{ data }">
-                    {{ `${data.eten_data.addressLine1} ${data.eten_data.addressLine2} ${data.eten_data.addressLine4} ${data.eten_data.addressLine4} ${data.eten_data.city} ${data.eten_data.postcode} ${data.eten_data.state}`}}
-                </template>
-            </Column>
-            <Column field="phoneNumber" header="Contact No" style="min-width: 8rem">
-                <template #body="{ data }">
-                    {{ data.eten_data.phoneNumber }}
-                </template>
-            </Column>
-            <Column field="totalTire" header="Pcs" style="min-width: 6rem">
-                <template #body="{ data }">
-                    <span class="font-bold">{{ data.totalTire }}</span>
-                </template>
-            </Column>
-            <Column field="PL" header="Delivery Date" style="min-width: 8rem">
-                <template #body="{ data }">
-
-                </template>
-            </Column>
-            <Column field="PL" header="Delivered Date" style="min-width: 8rem">
-                <template #body="{ data }">
-                    {{ data.PL }}
+                    {{ data.deliveryDate && data.deliveryTime ? formatDate(data.deliveryDate) + ' ' + formatTime(data.deliveryTime): 'Not Assigned'}}
                 </template>
             </Column>
 
@@ -135,7 +110,7 @@
 
             <Column field="action" header="Status" style="min-width: 6rem">
                 <template #body="{ data }">
-                    <Tag :value="data?.action ?? 'PENDING'" :severity="getStatusSeverity(data.action)" />
+                    <Tag :value="getStatusText(data.status)" :severity="getStatusSeverity(data.status)" />
                 </template>
             </Column>
         </DataTable>
@@ -171,9 +146,9 @@ const filters = ref({
 });
 
 const statusTabs = [
-    { label: 'New', status: 0 ,code: 'REPLACEMENT'},
-    { label: 'Pending', status: 1 ,code: 'REIMBURSEMENT'},
-    { label: 'Completed', status: 2 ,code: ''}
+    { label: 'New', status: 0 ,code: 'NEW'},
+    { label: 'Pending', status: 1 ,code: 'PENDING'},
+    { label: 'Completed', status: 2 ,code: 'COMPLETED'}
 ];
 
 watch(activeTabIndex, () => {
@@ -187,7 +162,7 @@ const filterByTab = () => {
         filteredList.value = collectionList.value;
         return;
     }
-    filteredList.value = collectionList.value.filter((item) => (item.action ?? '').toUpperCase() === selected.code.toUpperCase());
+    filteredList.value = collectionList.value.filter((item) => (item.status) === selected.status);
 };
 // Computed boolean: are all rows selected?
 const allSelected = computed(() => {
@@ -244,16 +219,6 @@ const sortItems = ref([
         label: 'Sort by Ref No (Z-A)',
         icon: 'pi pi-sort-alpha-up',
         command: () => sortBy('claimRefNo', 'desc')
-    },
-    {
-        label: 'Sort by Cust Acc No (A-Z)',
-        icon: 'pi pi-tag',
-        command: () => sortBy('eten_data.custAccountNo', 'asc')
-    },
-    {
-        label: 'Sort by Company Name',
-        icon: 'pi pi-globe',
-        command: () => sortBy('eten_data.companyName1', 'asc')
     }
 ]);
 // =========================
@@ -481,7 +446,7 @@ const handleImport2 = async (event) => {
 const fetchData = async () => {
     try {
         loading.value = true;
-        const response = await api.get('return-order/list');
+        const response = await api.get('return/list');
         // console.log('API Response:', response.data);
         if (response.data.status === 1 && Array.isArray(response.data.admin_data)) {
                     collectionList.value = response.data.admin_data.sort((a, b) => {
@@ -507,14 +472,20 @@ const fetchData = async () => {
 // =========================
 // Helper functions for status display
 // =========================
-const getStatusSeverity = (status) => {
-  switch (status) {
-    case 'REIMBURSEMENT':
-      return 'warn';
-    case 'REPLACEMENT':
-      return 'success';
-    default:
-      return 'info';
-  }
-};
+function getStatusSeverity(status) {
+    const severityMap = {
+        0: 'warning',
+        1: 'info',
+        2: 'success',
+    };
+    return severityMap[status] || 'secondary';
+}
+function getStatusText(status) {
+    const statusMap = {
+        0: 'New',
+        1: 'Pending',
+        2: 'Completed'
+    };
+    return statusMap[status] || 'Unknown';
+}
 </script>
