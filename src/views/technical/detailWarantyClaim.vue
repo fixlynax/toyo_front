@@ -378,7 +378,7 @@
 
 
                 <!-- Stock Check Result Display -->
-                <div v-if="stockCheckResult" class="mt-4 p-3 rounded-lg" :class="stockCheckResult.hasStock ? 'bg-green-50 border border-green-200' : 'bg-blue-50 border border-blue-200'">
+                <!-- <div v-if="scrapApprovalStatus === 'approved' && stockCheckResult" class="mt-4 p-3 rounded-lg" :class="stockCheckResult.hasStock ? 'bg-green-50 border border-green-200' : 'bg-blue-50 border border-blue-200'">
                     <div class="flex items-start gap-3">
                         <i class="pi" :class="stockCheckResult.hasStock ? 'pi-check-circle text-green-600' : 'pi-info-circle text-blue-600'"></i>
                         <div>
@@ -390,7 +390,7 @@
                             </p>
                         </div>
                     </div>
-                </div>
+                </div> -->
             </div>
 
             <div v-if="warantyDetail.replacement_detail && claimFinalStatus === 'approved'" class="card w-full mb-4">
@@ -651,8 +651,7 @@ const toast = useToast();
 // Reactive data
 const ctcdate = ref(new Date());
 const showCreateCTCDialog = ref(false);
-// const showCreateReimbursementDialog = ref(false);
-// const showCreateReplacementDialog = ref(false);
+const showCreateReplacementDialog = ref(false);
 const showApproveDialog = ref(false);
 const loadingAction = ref(false);
 const warantyDetail = ref({});
@@ -1027,164 +1026,6 @@ const processReplacementWithMaterial = async () => {
     }
 };
 
-// Process replacement with material selection
-const processReplacementWithMaterial = async () => {
-    if (!selectedMaterial.value) {
-        toast.add({
-            severity: 'error',
-            summary: 'Error',
-            detail: 'Please select a material',
-            life: 3000
-        });
-        return;
-    }
-
-    try {
-        processingReplacement.value = true;
-
-        // 1. First check stock availability
-        const stockResponse = await api.get(`/stock/check/${selectedMaterial.value.materialCode}`);
-        const hasStock = stockResponse.data.hasStock;
-
-        if (hasStock) {
-            // 2. If stock available, process replacement with material
-            const replacementResponse = await api.post('warranty_claim/approveReplacement', {
-                claim_id: warantyDetail.value.id,
-                materialid: selectedMaterial.value.id
-            });
-
-            if (replacementResponse.data.status === 1) {
-                // 3. Approve scrap
-                await api.post('warranty_claim/approveScrap', {
-                    claim_id: warantyDetail.value.id
-                });
-
-                scrapApprovalStatus.value = 'approved';
-                approvalType.value = 'replacement';
-
-                // Show success message
-                stockCheckResult.value = {
-                    hasStock: true,
-                    message: 'Stock available - Replacement processed successfully',
-                    finalType: 'replacement'
-                };
-
-                toast.add({
-                    severity: 'success',
-                    summary: 'Success',
-                    detail: 'Replacement processed successfully with available stock',
-                    life: 3000
-                });
-            }
-        } else {
-            // 4. If no stock, switch to reimbursement
-            await processReimbursementAfterStockCheck();
-        }
-    } catch (error) {
-        console.error('Error processing replacement:', error);
-        toast.add({
-            severity: 'error',
-            summary: 'Error',
-            detail: 'Failed to process replacement',
-            life: 3000
-        });
-    } finally {
-        processingReplacement.value = false;
-        showMaterialDialog.value = false;
-        await fetchWarrantyClaim();
-    }
-};
-
-// Process reimbursement directly (when pre-approved as reimbursement)
-const processReimbursementDirect = async () => {
-    try {
-        // Get the initial approval type from claim data
-        const initialApprovalType = warantyDetail.value.approvalType; // This should come from your claim approval
-
-//         // Check stock availability
-//         const stockResponse = await api.get(`stock/check/${warantyDetail.value.tirePattern}`);
-//         const hasStock = stockResponse.data.hasStock;
-
-//         // Determine final path
-//         if (initialApprovalType === 'replacement' && hasStock) {
-//             // Proceed with replacement
-//             stockCheckResult.value = {
-//                 hasStock: true,
-//                 message: 'Stock available - Replacement confirmed',
-//                 finalType: 'replacement'
-//             };
-
-            // Execute replacement
-            await executeReplacement();
-        } else if (initialApprovalType === 'replacement' && !hasStock) {
-            // Auto-switch to reimbursement
-            stockCheckResult.value = {
-                hasStock: false,
-                message: 'Reimbursement approved successfully',
-                finalType: 'reimbursement'
-            };
-
-            // Switch to reimbursement
-            await executeReimbursement();
-        } else if (initialApprovalType === 'reimbursement') {
-            // Proceed with reimbursement as selected
-            stockCheckResult.value = {
-                hasStock: false,
-                message: 'Reimbursement process initiated',
-                finalType: 'reimbursement'
-            };
-
-//             // Execute reimbursement
-//             await executeReimbursement();
-//         }
-//     } catch (error) {
-//         console.error('Error checking stock:', error);
-//         toast.add({
-//             severity: 'error',
-//             summary: 'Error',
-//             detail: 'Failed to check stock availability',
-//             life: 3000
-//         });
-//     }
-// };
-
-// Process reimbursement after stock check fails (replacement → reimbursement switch)
-const processReimbursementAfterStockCheck = async () => {
-    try {
-        // 1. Process reimbursement instead
-        await api.post('warranty_claim/approveReimbursement', {
-            claim_id: warantyDetail.value.id
-        });
-
-        // 2. Approve scrap
-        await api.post('warranty_claim/approveScrap', {
-            claim_id: warantyDetail.value.id
-        });
-
-        scrapApprovalStatus.value = 'approved';
-        approvalType.value = 'reimbursement';
-
-        // Show stock switch message
-        stockCheckResult.value = {
-            hasStock: false,
-            message: 'No stock available - Automatically switched to reimbursement',
-            finalType: 'reimbursement'
-        };
-
-        toast.add({
-            severity: 'info',
-            summary: 'Stock Unavailable',
-            detail: 'Switched to reimbursement due to insufficient stock',
-            life: 4000
-        });
-
-        // Refresh to show invoice section
-        await fetchWarrantyClaim();
-    } catch (error) {
-        console.error('Error switching to reimbursement:', error);
-        throw error;
-    }
-};
 
 // Close material dialog
 const closeMaterialDialog = () => {
