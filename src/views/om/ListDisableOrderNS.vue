@@ -320,7 +320,7 @@ export default {
             orderTypeOptions: [
                 { label: 'Normal', value: 'NORMAL' },
                 { label: 'Own', value: 'OWN' },
-                { label: 'Directship', value: 'DIRECTSHIP' },
+                { label: 'Direct Shipment', value: 'DIRECTSHIP' },
                 { label: 'All', value: 'ALL' }
             ]
         };
@@ -412,7 +412,7 @@ export default {
         },
 
         getOrderTypeLabel(value) {
-            const map = { OWN: 'Own Use', NORMAL: 'Normal', ALL: 'All', DIRECTSHIP: 'Directship' };
+            const map = { OWN: 'Own Use', NORMAL: 'Normal', ALL: 'All', DIRECTSHIP: 'Direct Shipment' };
             return map[value] || value;
         },
 

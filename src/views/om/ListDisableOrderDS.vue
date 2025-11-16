@@ -128,7 +128,7 @@
                 <div class="field col-12">
                     <label for="orderType" class="font-semibold text-gray-700"> Order Type </label>
                     <div class="p-inputtext p-component w-full bg-gray-100 text-gray-700">
-                        Directship
+                        Direct Shipment
                     </div>
                     <small class="text-gray-500 block mt-1">Direct Shipment orders are automatically set to DIRECTSHIP</small>
                 </div>
@@ -267,7 +267,7 @@
                 <div class="field col-12">
                     <label for="editOrderType" class="font-semibold text-gray-700"> Order Type </label>
                     <div class="p-inputtext p-component w-full bg-gray-100 text-gray-700">
-                        Directship
+                        Direct Shipment
                     </div>
                     <small class="text-gray-500 block mt-1">Direct Shipment orders are fixed to DIRECTSHIP</small>
                 </div>
@@ -496,7 +496,7 @@ export default {
 
         getOrderTypeLabel(value) {
             const map = {
-                'DIRECTSHIP': 'Directship'
+                'DIRECTSHIP': 'Direct Shipment'
             };
             return map[value] || value;
         },
