@@ -126,13 +126,13 @@
 
                 <Column field="pickupDatetime" header="Pickup Date" style="min-width: 10rem">
                     <template #body="{ data }">
-                        {{ data.pickupDatetime }}
+                        {{ data.scm_deliver_detail?.scheduled_delivery_time ? formatDate(data.scm_deliver_detail.scheduled_delivery_time) : 'Not Assigned' }}
                     </template>
                 </Column>
 
                 <Column field="collectedDatetime" header="Delivery Date" style="min-width: 10rem">
                     <template #body="{ data }">
-                        {{ data.collectedDatetime }}
+                          {{ data.scm_deliver_detail?.delivered_datetime? formatDate(data.scm_deliver_detail.delivered_datetime): 'Not Assigned' }}
                     </template>
                 </Column>
 
@@ -181,15 +181,23 @@ const filters = ref({
         // 77: 'Delivery'
 
 const statusTabs = [
-    { label: 'Pending', status: 0 ,code: 66},
-    { label: 'Delivery', status: 1 ,code: 77},
-    { label: 'Completed', status: 2 ,code: 1}
+    { label: 'Pending', status: 0 },
+    { label: 'Delivery', status: 1 },
+    { label: 'Completed', status: 2}
 ];
 
 watch(activeTabIndex, () => {
     filterByTab();
     selectedExportIds.value.clear();
 });
+const getOrderStatus = (data) => {
+    const detail = data.scm_deliver_detail;
+
+    if (!detail) return 0;                     // Pending / New
+    if (detail.delivered_datetime) return 2;    // Completed
+    if (detail.scheduled_delivery_time) return 1; // Delivery
+    return 0; // fallback to Pending
+};
 
 const filterByTab = () => {
     const selected = statusTabs[activeTabIndex.value];
@@ -197,7 +205,7 @@ const filterByTab = () => {
         filteredList.value = orderDelList.value;
         return;
     }
-    filteredList.value = orderDelList.value.filter((item) => (item.orderstatus) === selected.code);
+    filteredList.value = orderDelList.value.filter(item => getOrderStatus(item) === selected.status);
 };
 // Computed boolean: are all rows selected?
 const allSelected = computed(() => {
