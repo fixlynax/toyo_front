@@ -4,9 +4,10 @@
 
         <LoadingPage v-if="loading" message="Loading Order Delivery Details..." />
         <div v-else>
+            <TabMenu :model="statusTabs" v-model:activeIndex="activeTabIndex" class="mb-6" />
             <DataTable
             
-                :value="filteredListfunc()"
+                :value="filteredList"
                 :paginator="true"
                 :rows="10"
                 :rowsPerPageOptions="[5, 10, 20]"
@@ -29,42 +30,6 @@
 
                             <div class="relative">
                                 <Button type="button" icon="pi pi-cog" class="p-button" @click="showFilterMenu = !showFilterMenu" />
-                                <div v-if="showFilterMenu" class="absolute right-0 mt-2 w-48 bg-white border rounded-lg shadow-lg p-2 z-10">
-                                    <div
-                                        class="flex items-center gap-2 px-3 py-2 hover:bg-gray-100 cursor-pointer rounded-md"
-                                        :class="{ 'bg-gray-200': filterStatus === null }"
-                                        @click="
-                                            filterStatus = null;
-                                            showFilterMenu = false;
-                                        "
-                                    >
-                                        <i class="pi pi-list text-gray-600"></i>
-                                        <span>All</span>
-                                    </div>
-
-                                    <div
-                                        class="flex items-center gap-2 px-3 py-2 hover:bg-gray-100 cursor-pointer rounded-md"
-                                        :class="{ 'bg-gray-200': filterStatus === 0 }"
-                                        @click="
-                                            filterStatus = 0;
-                                            showFilterMenu = false;
-                                        "
-                                    >
-                                        <i class="pi pi-clock text-yellow-500"></i>
-                                        <span>Pending</span>
-                                    </div>
-                                    <div
-                                        class="flex items-center gap-2 px-3 py-2 hover:bg-gray-100 cursor-pointer rounded-md"
-                                        :class="{ 'bg-gray-200': filterStatus === 1 }"
-                                        @click="
-                                            filterStatus = 1;
-                                            showFilterMenu = false;
-                                        "
-                                    >
-                                        <i class="pi pi-check text-green-500"></i>
-                                        <span>Completed</span>
-                                    </div>
-                                </div>
                             </div>
                         </div>
 
@@ -131,7 +96,7 @@
                 </Column>
                 <Column field="orderstatus" header="Status" style="min-width: 8rem">
                     <template #body="{ data }">
-                        <Tag :value="getStatusLabel(data.orderstatus)" :severity="getStatusSeverity(data.orderstatus)" />
+                        <Tag :value="getStatusLabel2(data.status)" :severity="getStatusSeverity2(data.status)" />
                     </template>
                 </Column>
             </DataTable>
@@ -140,7 +105,7 @@
 </template>
 
 <script setup>
-import { ref, computed, onBeforeMount, onMounted } from 'vue';
+import { ref, computed, onBeforeMount, onMounted, watch } from 'vue';
 import { FilterMatchMode } from '@primevue/core/api';
 import { RouterLink } from 'vue-router';
 import api from '@/service/api';
@@ -153,14 +118,28 @@ const showFilterMenu = ref(false);
 const filterStatus = ref(null);
 const orderDelList = ref([]);
 const filteredList  = ref([]);
+const activeTabIndex = ref(0);
 const filters = ref({
     global: { value: null, matchMode: FilterMatchMode.CONTAINS }
 });
-function filteredListfunc() {
-    if (filterStatus.value === null) return orderDelList.value;
-    return orderDelList.value.filter((x) => x.orderstatus === filterStatus.value);
-}
+const statusTabs = [
+    { label: 'Pending', status: 0  ,code:"NEW"},
+    { label: 'Completed', status: 1 ,code:"COMPLETED" },
+];
 
+watch(activeTabIndex, () => {
+    filterByTab();
+});
+
+
+const filterByTab = () => {
+    const selected = statusTabs[activeTabIndex.value];
+    if (!selected) {
+        filteredList.value = orderDelList.value;
+        return;
+    }
+    filteredList.value = orderDelList.value.filter(item => (item.status) === selected.code);
+};
 onMounted(async () => {
     fetchData();
 });
@@ -208,6 +187,7 @@ const fetchData = async () => {
                     orderDelList.value = response.data.admin_data.sort((a, b) => {
                 return new Date(b.created) - new Date(a.created);
             });
+            filterByTab();
         } else {
             console.error('API returned error or invalid data:', response.data);
             orderDelList.value = [];
@@ -245,4 +225,20 @@ function getStatusSeverity(status) {
     };
     return map[status] || 'secondary';
 }
+const getStatusLabel2 = (status) => {
+    const statusMap = {
+        "NEW": 'Pending',
+        "PENDING": 'Delivery',
+        "COMPLETED": 'Completed',
+    };
+    return statusMap[status] || `Status: ${status}`;
+};
+const getStatusSeverity2 = (status) => {
+    const severityMap = {
+        "NEW": 'info',
+        "PENDING": 'warn',
+        "COMPLETED": 'success',
+    };
+    return severityMap[status] || 'secondary';
+};
 </script>

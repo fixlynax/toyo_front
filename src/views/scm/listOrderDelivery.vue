@@ -138,7 +138,7 @@
 
                 <Column field="orderstatus" header="Status" style="min-width: 8rem">
                     <template #body="{ data }">
-                        <Tag :value="getStatusLabel(data.orderstatus)" :severity="getStatusSeverity(data.orderstatus)" />
+                        <Tag :value="getStatusLabel2(data.status)" :severity="getStatusSeverity2(data.status)" />
                     </template>
                 </Column>
             </DataTable>
@@ -541,4 +541,20 @@ function getStatusSeverity(status) {
     };
     return map[status] || 'secondary';
 }
+const getStatusLabel2 = (status) => {
+    const statusMap = {
+        "NEW": 'Pending',
+        "PENDING": 'Delivery',
+        "COMPLETED": 'Completed',
+    };
+    return statusMap[status] || `Status: ${status}`;
+};
+const getStatusSeverity2 = (status) => {
+    const severityMap = {
+        "NEW": 'info',
+        "PENDING": 'warn',
+        "COMPLETED": 'success',
+    };
+    return severityMap[status] || 'secondary';
+};
 </script>

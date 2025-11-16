@@ -19,17 +19,25 @@
                                 <span class="block text-sm font-bold text-gray-800">Ref No</span>
                                 <p class="font-medium font-semibold text-lg">{{ listData.claim?.claim_ref_no }}</p>
                             </div>
-                            <div>
-                                <span class="block text-sm font-bold text-gray-800">Description</span>
-                                <p class="font-medium text-lg">{{ listData.claim?.description }}</p>
+                             <div>
+                            <span class="block text-sm font-bold text-gray-800">Description</span>
+                             <p class="font-medium text-lg">{{ listData.claim?.tire?.description }}</p>
                             </div>
                             <div>
                                 <span class="block text-sm font-bold text-gray-800">Pattern</span>
-                                <p class="font-medium text-lg">{{ listData.claim?.pattern }}</p>
+                                <p class="font-medium text-lg">{{ listData.claim?.tire?.pattern }}</p>
                             </div>
                             <div>
                                 <span class="block text-sm font-bold text-gray-800">Plate Serial</span>
-                                <p class="font-medium text-lg">{{ listData.claim?.plateSerial }}</p>
+                                <p class="font-medium text-lg">{{ listData.claim?.tire?.plateSerial }}</p>
+                            </div>
+                            <div>
+                                <span class="block text-sm font-bold text-gray-800">Tire Size</span>
+                                <p class="font-medium text-lg">{{ listData.claim?.tire?.tyresize }}</p>
+                            </div>
+                            <div>
+                                <span class="block text-sm font-bold text-gray-800">Code</span>
+                                <p class="font-medium text-lg">{{ listData.claim?.tire?.weekcode || '-' }}</p>
                             </div>
                         </div>
                     </div>
