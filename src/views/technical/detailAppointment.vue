@@ -1,13 +1,15 @@
 <script setup>
-import { ref, onBeforeMount } from 'vue';
+import { ref, onMounted, computed } from 'vue';
 import api from '@/service/api';
 import { useRoute } from 'vue-router';
+import Button from 'primevue/button';
 
 const route = useRoute();
-const appointment = ref(null);
+const appointment = ref({});
 const loading = ref(true);
 
-onBeforeMount(async () => {
+// Fetch appointment details
+const fetchAppointmentDetail = async () => {
     try {
         const response = await api.get(`appointment/${route.params.id}`);
         console.log('API Response:', response.data);
@@ -22,125 +24,221 @@ onBeforeMount(async () => {
     } finally {
         loading.value = false;
     }
+};
+
+// Computed properties for conditional checks
+const hasSubmittedPhotos = computed(() => {
+    return appointment.value.submitted_photos && (
+        appointment.value.submitted_photos.mileageFileURL ||
+        appointment.value.submitted_photos.serialNoFileURL ||
+        appointment.value.submitted_photos.tireSizeFileURL ||
+        appointment.value.submitted_photos.defectAreaFileURL
+    );
+});
+
+const appointmentStatusClass = computed(() => {
+    const status = appointment.value.appointment_info?.status;
+    return {
+        'px-3 py-1 rounded-full text-sm font-semibold': true,
+        'bg-yellow-100 text-yellow-800': status === 0,
+        'bg-green-100 text-green-800': status === 1,
+        'bg-red-100 text-red-800': status === 2
+    };
+});
+
+// Fetch data when component mounts
+onMounted(() => {
+    fetchAppointmentDetail();
 });
 </script>
 
 <template>
-    <div class="card flex flex-col gap-6">
-        <div class="flex items-center gap-2 border-b pb-2">
-            <Button icon="pi pi-arrow-left" class="p-button-text p-button-secondary" @click="$router.back()" />
-            <div class="text-2xl font-bold text-gray-800">Appointment Details</div>
-        </div>
-
-        <div v-if="loading" class="text-gray-500">Loading...</div>
-        
-        <template v-else-if="appointment">
-            <!-- Appointment Code & Status Header -->
-            <div class="bg-gray-50 p-4 rounded-lg">
-                <div class="flex flex-wrap items-center justify-between gap-4">
-                    <div>
-                        <h2 class="text-xl font-bold text-gray-800">
-                            {{ appointment.appointment_info?.appointmentCode || 'N/A' }}
-                        </h2>
-                        <p class="text-gray-600">Appointment ID: {{ appointment.appointment_info?.id }}</p>
+    <div class="flex flex-col md:flex-row gap-8">
+        <!-- LEFT SIDE -->
+        <div class="md:w-2/3 flex flex-col gap-6">
+            <!-- Appointment Header -->
+            <div class="card flex flex-col w-full">
+                <div class="flex items-center justify-between border-b pb-2">
+                    <div class="flex items-center gap-2">
+                        <Button icon="pi pi-arrow-left" class="p-button-text p-button-secondary" @click="$router.back()" />
+                        <div class="text-2xl font-bold text-gray-800">Appointment Details</div>
                     </div>
-                    <div>
-                        <span :class="{
-                            'px-3 py-1 rounded-full text-sm font-semibold': true,
-                            'bg-yellow-100 text-yellow-800': appointment.appointment_info?.status === 0,
-                            'bg-green-100 text-green-800': appointment.appointment_info?.status === 1,
-                            'bg-red-100 text-red-800': appointment.appointment_info?.status === 2
-                        }">
+                    <div class="inline-flex items-center gap-2">
+                        <span :class="appointmentStatusClass">
                             {{ appointment.appointment_info?.status_string || 'Unknown' }}
                         </span>
                     </div>
                 </div>
-            </div>
-
-            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                <!-- Left Column -->
-                <div class="space-y-6">
-                    <!-- 👤 Customer Info -->
-                    <div class="card p-4">
-                        <div class="text-lg font-semibold text-gray-800 border-b pb-2 mb-3">👤 Customer Info</div>
-                        <div class="space-y-2">
-                            <p><strong>Name:</strong> {{ appointment.customer_info?.[0]?.name || 'N/A' }}</p>
-                            <p><strong>Vehicle:</strong> {{ appointment.customer_info?.[0]?.vehicle || 'N/A' }}</p>
-                            <p><strong>Registration No:</strong> {{ appointment.customer_info?.[0]?.regNo || 'N/A' }}</p>
-                            <p><strong>Mobile No:</strong> {{ appointment.customer_info?.[0]?.mobileNo || 'N/A' }}</p>
-                        </div>
-                    </div>
-
-                    <!-- 🏢 Dealer Info -->
-                    <div class="card p-4">
-                        <div class="text-lg font-semibold text-gray-800 border-b pb-2 mb-3">🏢 Dealer Info</div>
-                        <div class="space-y-2">
-                            <p><strong>Customer Account:</strong> {{ appointment.dealer_info?.[0]?.custAccountNo || 'N/A' }}</p>
-                            <p><strong>Company Name:</strong> {{ appointment.dealer_info?.[0]?.companyName1 || 'N/A' }}</p>
-                            <p><strong>Phone Number:</strong> {{ appointment.dealer_info?.[0]?.phoneNumber || 'N/A' }}</p>
-                            <p><strong>Email Address:</strong> {{ appointment.dealer_info?.[0]?.emailAddress || 'N/A' }}</p>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Right Column -->
-                <div class="space-y-6">
-                    <!-- 🛞 Tire Info -->
-                    <div class="card p-4">
-                        <div class="text-lg font-semibold text-gray-800 border-b pb-2 mb-3">🛞 Tire Info</div>
-                        <div class="space-y-2">
-                            <p><strong>Pattern:</strong> {{ appointment.tire_info?.[0]?.pattern || 'N/A' }}</p>
-                            <p><strong>Size:</strong> {{ appointment.tire_info?.[0]?.tyresize || 'N/A' }}</p>
-                            <p><strong>Description:</strong> {{ appointment.tire_info?.[0]?.desc || 'N/A' }}</p>
-                            <p><strong>Manufacturer Code:</strong> {{ appointment.tire_info?.[0]?.mfgcode || 'N/A' }}</p>
-                            <p><strong>Week Code:</strong> {{ appointment.tire_info?.[0]?.weekcode || 'N/A' }}</p>
-                        </div>
-                    </div>
-
-                    <!-- 📅 Appointment Info -->
-                    <div class="card p-4">
-                        <div class="text-lg font-semibold text-gray-800 border-b pb-2 mb-3">📅 Appointment Info</div>
-                        <div class="space-y-2">
-                            <p><strong>Request Date:</strong> {{ appointment.appointment_info?.appointmentRequestDate || 'N/A' }}</p>
-                            <p><strong>Request Session:</strong> {{ appointment.appointment_info?.appointmentRequestSession || 'N/A' }}</p>
-                            <p><strong>Appointment Date:</strong> {{ appointment.appointment_info?.appointmentDate || 'Not Scheduled' }}</p>
-                            <p><strong>Appointment Time:</strong> {{ appointment.appointment_info?.appointmentTime || 'Not Scheduled' }}</p>
-                            <p><strong>Problem:</strong> {{ appointment.appointment_info?.problem || 'N/A' }}</p>
-                            <p><strong>Created:</strong> {{ appointment.appointment_info?.created || 'N/A' }}</p>
-                            <p v-if="appointment.appointment_info?.rejectReason" class="text-red-600">
-                                <strong>Reject Reason:</strong> {{ appointment.appointment_info.rejectReason }}
-                            </p>
-                        </div>
+                
+                <!-- Appointment Code -->
+                <div class="mt-4 mb-2">
+                    <div>
+                        <span class="block text-sm font-bold text-black-800">Appointment Code</span>
+                        <span class="text-lg font-medium">{{ appointment.appointment_info?.appointmentCode || 'N/A' }}</span>
                     </div>
                 </div>
             </div>
 
-            <!-- 📸 Submitted Photos -->
-            <div class="card p-4" v-if="appointment.submitted_photos">
-                <div class="text-lg font-semibold text-gray-800 border-b pb-2 mb-3">📸 Submitted Photos</div>
+            <!-- Customer Information -->
+            <div class="card flex flex-col w-full">
+                <div class="flex items-center justify-between border-b pb-2 mb-4">
+                    <div class="text-2xl font-bold text-gray-800">👤 Customer Information</div>
+                </div>
+
+                <div class="grid grid-cols-2 md:grid-cols-2 gap-4">
+                    <div>
+                        <span class="block text-sm font-bold text-black-800">Name</span>
+                        <p class="text-lg font-medium">{{ appointment.customer_info?.[0]?.name || 'N/A' }}</p>
+                    </div>
+                    <div>
+                        <span class="block text-sm font-bold text-black-800">Vehicle</span>
+                        <p class="text-lg font-medium">{{ appointment.customer_info?.[0]?.vehicle || 'N/A' }}</p>
+                    </div>
+                    <div>
+                        <span class="block text-sm font-bold text-black-800">Registration No</span>
+                        <p class="text-lg font-medium">{{ appointment.customer_info?.[0]?.regNo || 'N/A' }}</p>
+                    </div>
+                    <div>
+                        <span class="block text-sm font-bold text-black-800">Mobile Number</span>
+                        <p class="text-lg font-medium">{{ appointment.customer_info?.[0]?.mobileNo || 'N/A' }}</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Tire Information -->
+            <div class="card flex flex-col w-full">
+                <div class="flex items-center justify-between border-b pb-2 mb-4">
+                    <div class="text-2xl font-bold text-gray-800">🛞 Tire Information</div>
+                </div>
+
+                <div class="grid grid-cols-2 md:grid-cols-2 gap-4">
+                    <div>
+                        <span class="block text-sm font-bold text-black-800">Pattern</span>
+                        <p class="text-lg font-medium">{{ appointment.tire_info?.[0]?.pattern || 'N/A' }}</p>
+                    </div>
+                    <div>
+                        <span class="block text-sm font-bold text-black-800">Size</span>
+                        <p class="text-lg font-medium">{{ appointment.tire_info?.[0]?.tyresize || 'N/A' }}</p>
+                    </div>
+                    <div>
+                        <span class="block text-sm font-bold text-black-800">Description</span>
+                        <p class="text-lg font-medium">{{ appointment.tire_info?.[0]?.desc || 'N/A' }}</p>
+                    </div>
+                    <div>
+                        <span class="block text-sm font-bold text-black-800">Manufacturer Code</span>
+                        <p class="text-lg font-medium">{{ appointment.tire_info?.[0]?.mfgcode || 'N/A' }}</p>
+                    </div>
+                    <div>
+                        <span class="block text-sm font-bold text-black-800">Week Code</span>
+                        <p class="text-lg font-medium">{{ appointment.tire_info?.[0]?.weekcode || 'N/A' }}</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Submitted Photos -->
+            <div class="card flex flex-col w-full" v-if="hasSubmittedPhotos">
+                <div class="flex items-center justify-between border-b pb-2 mb-4">
+                    <div class="text-2xl font-bold text-gray-800">📸 Submitted Photos</div>
+                </div>
+
                 <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
                     <div v-if="appointment.submitted_photos.mileageFileURL">
-                        <p class="font-medium mb-2">Mileage</p>
-                        <img :src="appointment.submitted_photos.mileageFileURL" alt="Mileage" class="w-full h-32 object-cover rounded border" />
+                        <span class="block text-sm font-bold text-black-800 mb-2">Mileage</span>
+                        <img :src="appointment.submitted_photos.mileageFileURL" alt="Mileage" class="w-full h-32 object-cover rounded-lg border shadow-sm" />
                     </div>
                     <div v-if="appointment.submitted_photos.serialNoFileURL">
-                        <p class="font-medium mb-2">Serial No</p>
-                        <img :src="appointment.submitted_photos.serialNoFileURL" alt="Serial No" class="w-full h-32 object-cover rounded border" />
+                        <span class="block text-sm font-bold text-black-800 mb-2">Serial No</span>
+                        <img :src="appointment.submitted_photos.serialNoFileURL" alt="Serial No" class="w-full h-32 object-cover rounded-lg border shadow-sm" />
                     </div>
                     <div v-if="appointment.submitted_photos.tireSizeFileURL">
-                        <p class="font-medium mb-2">Tire Size</p>
-                        <img :src="appointment.submitted_photos.tireSizeFileURL" alt="Tire Size" class="w-full h-32 object-cover rounded border" />
+                        <span class="block text-sm font-bold text-black-800 mb-2">Tire Size</span>
+                        <img :src="appointment.submitted_photos.tireSizeFileURL" alt="Tire Size" class="w-full h-32 object-cover rounded-lg border shadow-sm" />
                     </div>
                     <div v-if="appointment.submitted_photos.defectAreaFileURL">
-                        <p class="font-medium mb-2">Defect Area</p>
-                        <img :src="appointment.submitted_photos.defectAreaFileURL" alt="Defect Area" class="w-full h-32 object-cover rounded border" />
+                        <span class="block text-sm font-bold text-black-800 mb-2">Defect Area</span>
+                        <img :src="appointment.submitted_photos.defectAreaFileURL" alt="Defect Area" class="w-full h-32 object-cover rounded-lg border shadow-sm" />
                     </div>
                 </div>
             </div>
-        </template>
-
-        <div v-else class="text-center py-8 text-gray-500">
-            No appointment data found.
         </div>
+
+        <!-- RIGHT SIDE -->
+        <div class="md:w-1/3 flex flex-col gap-6">
+            <!-- Dealer Information -->
+            <div class="card w-full">
+                <div class="flex items-center justify-between border-b pb-2 mb-4">
+                    <div class="text-2xl font-bold text-gray-800">🏢 Dealer Information</div>
+                </div>
+
+                <div class="grid grid-cols-1 gap-4 text-sm text-gray-800">
+                    <div>
+                        <span class="font-bold">Customer Account</span>
+                        <p class="text-lg font-medium">{{ appointment.dealer_info?.[0]?.custAccountNo || 'N/A' }}</p>
+                    </div>
+                    <div>
+                        <span class="font-bold">Company Name</span>
+                        <p class="text-lg font-medium">{{ appointment.dealer_info?.[0]?.companyName1 || 'N/A' }}</p>
+                    </div>
+                    <div>
+                        <span class="font-bold">Phone Number</span>
+                        <p class="text-lg font-medium">{{ appointment.dealer_info?.[0]?.phoneNumber || 'N/A' }}</p>
+                    </div>
+                    <div>
+                        <span class="font-bold">Email Address</span>
+                        <p class="text-lg font-medium">{{ appointment.dealer_info?.[0]?.emailAddress || 'N/A' }}</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Appointment Information -->
+            <div class="card w-full">
+                <div class="flex items-center justify-between border-b pb-2 mb-4">
+                    <div class="text-2xl font-bold text-gray-800">📅 Appointment Information</div>
+                </div>
+
+                <div class="grid grid-cols-1 gap-3 text-sm text-gray-800">
+                    <div>
+                        <span class="font-bold">Request Date</span>
+                        <p class="text-base font-medium">{{ appointment.appointment_info?.appointmentRequestDate || 'N/A' }}</p>
+                    </div>
+                    <div>
+                        <span class="font-bold">Request Session</span>
+                        <p class="text-base font-medium">{{ appointment.appointment_info?.appointmentRequestSession || 'N/A' }}</p>
+                    </div>
+                    <div>
+                        <span class="font-bold">Appointment Date</span>
+                        <p class="text-base font-medium">{{ appointment.appointment_info?.appointmentDate || 'Not Scheduled' }}</p>
+                    </div>
+                    <div>
+                        <span class="font-bold">Appointment Time</span>
+                        <p class="text-base font-medium">{{ appointment.appointment_info?.appointmentTime || 'Not Scheduled' }}</p>
+                    </div>
+                    <div>
+                        <span class="font-bold">Problem Description</span>
+                        <p class="text-base font-medium">{{ appointment.appointment_info?.problem || 'N/A' }}</p>
+                    </div>
+                    <div>
+                        <span class="font-bold">Created Date</span>
+                        <p class="text-base font-medium">{{ appointment.appointment_info?.created || 'N/A' }}</p>
+                    </div>
+                    
+                    <!-- Reject Reason (only show if exists) -->
+                    <div v-if="appointment.appointment_info?.rejectReason" class="mt-2 p-3 bg-red-50 rounded-lg border border-red-200">
+                        <span class="font-bold text-red-800">Reject Reason</span>
+                        <p class="text-base font-medium text-red-700 mt-1">{{ appointment.appointment_info.rejectReason }}</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Loading State -->
+    <div v-if="loading" class="text-center py-8 text-gray-500">
+        Loading appointment details...
+    </div>
+
+    <!-- Empty State -->
+    <div v-else-if="!appointment || Object.keys(appointment).length === 0" class="text-center py-8 text-gray-500">
+        No appointment data found.
     </div>
 </template>
