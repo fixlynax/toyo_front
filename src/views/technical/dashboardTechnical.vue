@@ -22,42 +22,20 @@
         </div>
     </div>
 
-    <!-- LIST WARRANTY -->
+    <!-- LIST CLAIM -->
     <div class="card mt-8">
         <div class="flex items-center justify-between border-b pb-3 mb-3">
-            <div class="text-xl font-bold text-gray-800">Warranty Claims</div>
+            <div class="text-xl font-bold text-gray-800">List Claim</div>
         </div>
 
         <DataTable :value="listData" :paginator="true" :rows="10" dataKey="id" :rowHover="true" :loading="loading" class="p-datatable-sm" :filters="filters1" filterDisplay="menu">
-            <!-- HEADER -->
-            <template #header>
-                <div class="flex flex-wrap gap-3 items-center justify-between w-full">
-                    <!-- Search -->
-                    <div class="flex items-center gap-2 w-full max-w-md">
-                        <IconField class="flex-1">
-                            <InputIcon>
-                                <i class="pi pi-search" />
-                            </InputIcon>
-                            <!-- ✅ FIXED: bind v-model to global filter -->
-                            <InputText v-model="filters1.global.value" placeholder="Search warranty..." class="w-full" />
-                        </IconField>
-                        <Button type="button" icon="pi pi-cog" class="p-button" />
-                    </div>
-
-                    <!-- Actions -->
-                    <div class="flex items-center gap-2">
-                        <Button type="button" label="Export" icon="pi pi-file-export" class="p-button-success p-button-sm" />
-                        <Button type="button" label="Template" icon="pi pi-download" class="p-button-danger p-button-sm" />
-                    </div>
-                </div>
-            </template>
-
+            
             <!-- STATES -->
             <template #empty>
-                <div class="py-6 text-gray-500 text-center">No warranty claims found.</div>
+                <div class="py-6 text-gray-500 text-center">No claims found.</div>
             </template>
             <template #loading>
-                <div class="py-6 text-gray-500 text-center">Loading warranty claims...</div>
+                <div class="py-6 text-gray-500 text-center">Loading claims...</div>
             </template>
 
             <!-- COLUMNS -->
