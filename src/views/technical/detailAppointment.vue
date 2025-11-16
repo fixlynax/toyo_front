@@ -10,6 +10,7 @@ const appointment = ref({});
 const loading = ref(true);
 const activeImage = ref(null);
 const activeImageType = ref('');
+const submittedPhotos = ref([]);
 
 // Fetch appointment details
 const fetchAppointmentDetail = async () => {
@@ -23,7 +24,12 @@ const fetchAppointmentDetail = async () => {
             console.log('Customer Info:', appointment.value.customer_info);
             console.log('Dealer Info:', appointment.value.dealer_info);
             console.log('Tire Info:', appointment.value.tire_info);
-            console.log('Submitted Photos:', appointment.value.submitted_photos);
+            console.log('Submitted Photos URLs:', appointment.value.submitted_photos);
+            
+            // Load all submitted photos
+            if (appointment.value.submitted_photos) {
+                await loadSubmittedPhotos();
+            }
         } else {
             console.warn('Unexpected API response structure:', response.data);
         }
@@ -34,14 +40,87 @@ const fetchAppointmentDetail = async () => {
     }
 };
 
+// Load submitted photos using the same method as reference code
+const loadSubmittedPhotos = async () => {
+    const photos = [];
+    const photoTypes = [
+        { key: 'mileageFileURL', label: 'Mileage' },
+        { key: 'serialNoFileURL', label: 'Serial Number' },
+        { key: 'tireSizeFileURL', label: 'Tire Size' },
+        { key: 'defectAreaFileURL', label: 'Defect Area' }
+    ];
+
+    for (const photoType of photoTypes) {
+        const url = appointment.value.submitted_photos[photoType.key];
+        if (url && url !== 'null' && url !== null) {
+            try {
+                console.log(`Loading ${photoType.label} photo from:`, url);
+                const imageSrc = await api.getPrivateFile(url);
+                
+                photos.push({
+                    type: photoType.key,
+                    label: photoType.label,
+                    url: url,
+                    imageSrc: imageSrc,
+                    alt: `${photoType.label} Photo`
+                });
+                
+                console.log(`✅ Successfully loaded ${photoType.label} photo`);
+            } catch (error) {
+                console.error(`❌ Error loading ${photoType.label} photo:`, error);
+                // Create fallback image
+                photos.push({
+                    type: photoType.key,
+                    label: photoType.label,
+                    url: url,
+                    imageSrc: createFallbackImage(photoType.label),
+                    alt: `${photoType.label} Photo - Failed to load`
+                });
+            }
+        }
+    }
+
+    submittedPhotos.value = photos;
+    console.log('Loaded submitted photos:', submittedPhotos.value);
+};
+
+// Create a blank image data URL for fallback
+const createFallbackImage = (text) => {
+    const canvas = document.createElement('canvas');
+    canvas.width = 300;
+    canvas.height = 200;
+    const ctx = canvas.getContext('2d');
+    
+    // Background
+    ctx.fillStyle = '#f3f4f6';
+    ctx.fillRect(0, 0, 300, 200);
+    
+    // Border
+    ctx.strokeStyle = '#d1d5db';
+    ctx.lineWidth = 2;
+    ctx.strokeRect(0, 0, 300, 200);
+    
+    // Text
+    ctx.fillStyle = '#6b7280';
+    ctx.font = 'bold 16px Arial';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    
+    // Split text into multiple lines if needed
+    const lines = text.split(' ');
+    const lineHeight = 20;
+    const startY = 100 - (lines.length - 1) * lineHeight / 2;
+    
+    lines.forEach((line, index) => {
+        ctx.fillText(line, 150, startY + index * lineHeight);
+    });
+    
+    return canvas.toDataURL();
+};
+
 // Computed properties for conditional checks
 const hasSubmittedPhotos = computed(() => {
-    return appointment.value.submitted_photos && (
-        appointment.value.submitted_photos.mileageFileURL ||
-        appointment.value.submitted_photos.serialNoFileURL ||
-        appointment.value.submitted_photos.tireSizeFileURL ||
-        appointment.value.submitted_photos.defectAreaFileURL
-    );
+    return submittedPhotos.value.length > 0;
 });
 
 const hasTireInfo = computed(() => {
@@ -67,8 +146,8 @@ const appointmentStatusClass = computed(() => {
 });
 
 // Image modal functions
-const openImageModal = (imageUrl, imageType) => {
-    activeImage.value = imageUrl;
+const openImageModal = (imageSrc, imageType) => {
+    activeImage.value = imageSrc;
     activeImageType.value = imageType;
 };
 
@@ -77,56 +156,9 @@ const closeImageModal = () => {
     activeImageType.value = '';
 };
 
-// Copy URL to clipboard
-const copyToClipboard = async (text) => {
-    try {
-        await navigator.clipboard.writeText(text);
-        // You can add a toast notification here if needed
-        console.log('URL copied to clipboard');
-    } catch (err) {
-        console.error('Failed to copy text: ', err);
-    }
-};
-
-// Create a blank image data URL for fallback
-const createFallbackImage = (text) => {
-    const canvas = document.createElement('canvas');
-    canvas.width = 300;
-    canvas.height = 200;
-    const ctx = canvas.getContext('2d');
-    
-    // Background
-    ctx.fillStyle = '#f3f4f6';
-    ctx.fillRect(0, 0, 300, 200);
-    
-    // Border
-    ctx.strokeStyle = '#d1d5db';
-    ctx.lineWidth = 2;
-    ctx.strokeRect(0, 0, 300, 200);
-    
-    // Text
-    ctx.fillStyle = '#6b7280';
-    ctx.font = '16px Arial';
-    ctx.textAlign = 'center';
-    ctx.fillText(text, 150, 100);
-    
-    return canvas.toDataURL();
-};
-
-// Pre-create fallback images
-const fallbackImages = {
-    mileage: createFallbackImage('Mileage Image Not Available'),
-    serialNo: createFallbackImage('Serial No Image Not Available'),
-    tireSize: createFallbackImage('Tire Size Image Not Available'),
-    defectArea: createFallbackImage('Defect Area Image Not Available'),
-    general: createFallbackImage('Image Not Available')
-};
-
-// Handle image errors
-const handleImageError = (event, imageType = 'general') => {
-    console.log(`Image error for ${imageType}, using fallback`);
-    event.target.src = fallbackImages[imageType] || fallbackImages.general;
-    event.target.onerror = null; // Prevent infinite loop
+// Get photo by type
+const getPhotoByType = (type) => {
+    return submittedPhotos.value.find(photo => photo.type === type);
 };
 
 // Fetch data when component mounts
@@ -188,204 +220,67 @@ onMounted(() => {
                 </div>
             </div>
 
-            <!-- Tire Information -->
+            <!-- Tire Information - Side by side like customer info -->
             <div class="card flex flex-col w-full" v-if="hasTireInfo">
                 <div class="flex items-center justify-between border-b pb-2 mb-4">
                     <div class="text-2xl font-bold text-gray-800">🛞 Tire Information</div>
                 </div>
 
-                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                    <div v-for="(tire, index) in appointment.tire_info" :key="index" class="border border-gray-200 rounded-lg p-4 bg-gray-50">
+                <div class="grid grid-cols-2 gap-4">
+                    <div v-for="(tire, index) in appointment.tire_info" :key="index">
                         <div class="text-lg font-semibold mb-3 text-gray-800">Tire {{ index + 1 }}</div>
-                        <div class="grid grid-cols-2 gap-3">
-                            <div class="col-span-2">
+                        <div class="grid grid-cols-2 gap-4">
+                            <div>
                                 <span class="block text-sm font-bold text-black-800">Pattern</span>
-                                <p class="text-base font-medium">{{ tire.pattern || 'N/A' }}</p>
+                                <p class="text-lg font-medium">{{ tire.pattern || 'N/A' }}</p>
                             </div>
-                            <div class="col-span-2">
+                            <div>
                                 <span class="block text-sm font-bold text-black-800">Size</span>
-                                <p class="text-base font-medium">{{ tire.tyresize || 'N/A' }}</p>
+                                <p class="text-lg font-medium">{{ tire.tyresize || 'N/A' }}</p>
                             </div>
-                            <div class="col-span-2">
+                            <div>
                                 <span class="block text-sm font-bold text-black-800">Description</span>
-                                <p class="text-base font-medium text-sm">{{ tire.desc || 'N/A' }}</p>
+                                <p class="text-lg font-medium">{{ tire.desc || 'N/A' }}</p>
                             </div>
                             <div>
                                 <span class="block text-sm font-bold text-black-800">MFG Code</span>
-                                <p class="text-base font-medium">{{ tire.mfgcode || 'N/A' }}</p>
+                                <p class="text-lg font-medium">{{ tire.mfgcode || 'N/A' }}</p>
                             </div>
                             <div>
                                 <span class="block text-sm font-bold text-black-800">Week Code</span>
-                                <p class="text-base font-medium">{{ tire.weekcode || 'N/A' }}</p>
+                                <p class="text-lg font-medium">{{ tire.weekcode || 'N/A' }}</p>
                             </div>
                         </div>
                     </div>
                 </div>
             </div>
 
-            <!-- Submitted Photos -->
+            <!-- Submitted Photos Section -->
             <div class="card flex flex-col w-full" v-if="hasSubmittedPhotos">
                 <div class="flex items-center justify-between border-b pb-2 mb-4">
                     <div class="text-2xl font-bold text-gray-800">📸 Submitted Photos</div>
                 </div>
 
                 <!-- Photo Grid -->
-                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-6">
-                    <!-- Mileage Photo -->
-                    <div v-if="appointment.submitted_photos.mileageFileURL" class="text-center">
-                        <span class="block text-sm font-bold text-black-800 mb-3">Mileage</span>
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                    <div v-for="photo in submittedPhotos" :key="photo.type" class="text-center">
+                        <span class="block text-sm font-bold text-black-800 mb-3">{{ photo.label }}</span>
                         <div 
-                            class="cursor-pointer border-2 border-gray-300 rounded-lg overflow-hidden hover:border-primary-500 transition-all duration-200"
-                            @click="openImageModal(appointment.submitted_photos.mileageFileURL, 'Mileage')"
+                            class="cursor-pointer border-2 border-gray-300 rounded-lg overflow-hidden hover:border-primary-500 transition-all duration-200 bg-gray-100"
+                            @click="openImageModal(photo.imageSrc, photo.label)"
                         >
                             <img 
-                                :src="appointment.submitted_photos.mileageFileURL" 
-                                alt="Mileage" 
+                                :src="photo.imageSrc" 
+                                :alt="photo.alt" 
                                 class="w-full h-32 object-cover"
-                                @error="(e) => handleImageError(e, 'mileage')"
                             />
                         </div>
-                        <Button 
-                            label="View Full Size" 
-                            icon="pi pi-external-link" 
-                            class="p-button-text p-button-sm mt-2"
-                            @click="openImageModal(appointment.submitted_photos.mileageFileURL, 'Mileage')"
-                        />
-                    </div>
-
-                    <!-- Serial Number Photo -->
-                    <div v-if="appointment.submitted_photos.serialNoFileURL" class="text-center">
-                        <span class="block text-sm font-bold text-black-800 mb-3">Serial No</span>
-                        <div 
-                            class="cursor-pointer border-2 border-gray-300 rounded-lg overflow-hidden hover:border-primary-500 transition-all duration-200"
-                            @click="openImageModal(appointment.submitted_photos.serialNoFileURL, 'Serial Number')"
-                        >
-                            <img 
-                                :src="appointment.submitted_photos.serialNoFileURL" 
-                                alt="Serial No" 
-                                class="w-full h-32 object-cover"
-                                @error="(e) => handleImageError(e, 'serialNo')"
-                            />
-                        </div>
-                        <Button 
-                            label="View Full Size" 
-                            icon="pi pi-external-link" 
-                            class="p-button-text p-button-sm mt-2"
-                            @click="openImageModal(appointment.submitted_photos.serialNoFileURL, 'Serial Number')"
-                        />
-                    </div>
-
-                    <!-- Tire Size Photo -->
-                    <div v-if="appointment.submitted_photos.tireSizeFileURL" class="text-center">
-                        <span class="block text-sm font-bold text-black-800 mb-3">Tire Size</span>
-                        <div 
-                            class="cursor-pointer border-2 border-gray-300 rounded-lg overflow-hidden hover:border-primary-500 transition-all duration-200"
-                            @click="openImageModal(appointment.submitted_photos.tireSizeFileURL, 'Tire Size')"
-                        >
-                            <img 
-                                :src="appointment.submitted_photos.tireSizeFileURL" 
-                                alt="Tire Size" 
-                                class="w-full h-32 object-cover"
-                                @error="(e) => handleImageError(e, 'tireSize')"
-                            />
-                        </div>
-                        <Button 
-                            label="View Full Size" 
-                            icon="pi pi-external-link" 
-                            class="p-button-text p-button-sm mt-2"
-                            @click="openImageModal(appointment.submitted_photos.tireSizeFileURL, 'Tire Size')"
-                        />
-                    </div>
-
-                    <!-- Defect Area Photo -->
-                    <div v-if="appointment.submitted_photos.defectAreaFileURL" class="text-center">
-                        <span class="block text-sm font-bold text-black-800 mb-3">Defect Area</span>
-                        <div 
-                            class="cursor-pointer border-2 border-gray-300 rounded-lg overflow-hidden hover:border-primary-500 transition-all duration-200"
-                            @click="openImageModal(appointment.submitted_photos.defectAreaFileURL, 'Defect Area')"
-                        >
-                            <img 
-                                :src="appointment.submitted_photos.defectAreaFileURL" 
-                                alt="Defect Area" 
-                                class="w-full h-32 object-cover"
-                                @error="(e) => handleImageError(e, 'defectArea')"
-                            />
-                        </div>
-                        <Button 
-                            label="View Full Size" 
-                            icon="pi pi-external-link" 
-                            class="p-button-text p-button-sm mt-2"
-                            @click="openImageModal(appointment.submitted_photos.defectAreaFileURL, 'Defect Area')"
-                        />
-                    </div>
-                </div>
-
-                <!-- File URLs Section -->
-                <div class="border-t pt-4">
-                    <div class="text-lg font-semibold text-gray-800 mb-3">File URLs</div>
-                    <div class="space-y-2">
-                        <div v-if="appointment.submitted_photos.mileageFileURL" class="flex items-center gap-2 p-2 bg-gray-50 rounded">
-                            <span class="font-medium text-sm min-w-20">Mileage:</span>
-                            <a 
-                                :href="appointment.submitted_photos.mileageFileURL" 
-                                target="_blank" 
-                                class="text-primary-600 hover:text-primary-700 text-sm break-all flex-1"
-                            >
-                                {{ appointment.submitted_photos.mileageFileURL }}
-                            </a>
+                        <div class="mt-2 flex justify-center">
                             <Button 
-                                icon="pi pi-copy" 
+                                label="View Full Size" 
+                                icon="pi pi-eye" 
                                 class="p-button-text p-button-sm"
-                                @click="copyToClipboard(appointment.submitted_photos.mileageFileURL)"
-                                v-tooltip="'Copy URL'"
-                            />
-                        </div>
-                        <div v-if="appointment.submitted_photos.serialNoFileURL" class="flex items-center gap-2 p-2 bg-gray-50 rounded">
-                            <span class="font-medium text-sm min-w-20">Serial No:</span>
-                            <a 
-                                :href="appointment.submitted_photos.serialNoFileURL" 
-                                target="_blank" 
-                                class="text-primary-600 hover:text-primary-700 text-sm break-all flex-1"
-                            >
-                                {{ appointment.submitted_photos.serialNoFileURL }}
-                            </a>
-                            <Button 
-                                icon="pi pi-copy" 
-                                class="p-button-text p-button-sm"
-                                @click="copyToClipboard(appointment.submitted_photos.serialNoFileURL)"
-                                v-tooltip="'Copy URL'"
-                            />
-                        </div>
-                        <div v-if="appointment.submitted_photos.tireSizeFileURL" class="flex items-center gap-2 p-2 bg-gray-50 rounded">
-                            <span class="font-medium text-sm min-w-20">Tire Size:</span>
-                            <a 
-                                :href="appointment.submitted_photos.tireSizeFileURL" 
-                                target="_blank" 
-                                class="text-primary-600 hover:text-primary-700 text-sm break-all flex-1"
-                            >
-                                {{ appointment.submitted_photos.tireSizeFileURL }}
-                            </a>
-                            <Button 
-                                icon="pi pi-copy" 
-                                class="p-button-text p-button-sm"
-                                @click="copyToClipboard(appointment.submitted_photos.tireSizeFileURL)"
-                                v-tooltip="'Copy URL'"
-                            />
-                        </div>
-                        <div v-if="appointment.submitted_photos.defectAreaFileURL" class="flex items-center gap-2 p-2 bg-gray-50 rounded">
-                            <span class="font-medium text-sm min-w-20">Defect Area:</span>
-                            <a 
-                                :href="appointment.submitted_photos.defectAreaFileURL" 
-                                target="_blank" 
-                                class="text-primary-600 hover:text-primary-700 text-sm break-all flex-1"
-                            >
-                                {{ appointment.submitted_photos.defectAreaFileURL }}
-                            </a>
-                            <Button 
-                                icon="pi pi-copy" 
-                                class="p-button-text p-button-sm"
-                                @click="copyToClipboard(appointment.submitted_photos.defectAreaFileURL)"
-                                v-tooltip="'Copy URL'"
+                                @click="openImageModal(photo.imageSrc, photo.label)"
                             />
                         </div>
                     </div>
@@ -395,18 +290,18 @@ onMounted(() => {
 
         <!-- RIGHT SIDE -->
         <div class="md:w-1/3 flex flex-col gap-6">
-            <!-- Dealer Information -->
+            <!-- Dealer Information - Side by side like customer info -->
             <div class="card w-full" v-if="hasDealerInfo">
                 <div class="flex items-center justify-between border-b pb-2 mb-4">
                     <div class="text-2xl font-bold text-gray-800">🏢 Dealer Information</div>
                 </div>
 
                 <div class="grid grid-cols-2 gap-4">
-                    <div class="col-span-2">
+                    <div>
                         <span class="block text-sm font-bold text-black-800">Customer Account</span>
                         <p class="text-lg font-medium">{{ appointment.dealer_info[0]?.custAccountNo || 'N/A' }}</p>
                     </div>
-                    <div class="col-span-2">
+                    <div>
                         <span class="block text-sm font-bold text-black-800">Company Name</span>
                         <p class="text-lg font-medium">{{ appointment.dealer_info[0]?.companyName1 || 'N/A' }}</p>
                     </div>
@@ -482,15 +377,10 @@ onMounted(() => {
                 :src="activeImage" 
                 alt="Preview" 
                 class="max-w-full max-h-96 object-contain"
-                @error="(e) => handleImageError(e, 'general')"
             />
         </div>
         <template #footer>
             <div class="flex justify-between items-center w-full">
-                <a :href="activeImage" target="_blank" class="text-primary-600 hover:text-primary-700 flex items-center gap-2">
-                    <i class="pi pi-external-link"></i>
-                    Open in new tab
-                </a>
                 <Button label="Close" icon="pi pi-times" @click="closeImageModal" class="p-button-text" />
             </div>
         </template>
@@ -522,5 +412,11 @@ onMounted(() => {
 
 :deep(.p-dialog .p-dialog-content) {
     padding: 1.5rem;
+}
+
+/* Ensure images display properly */
+img {
+    display: block;
+    background-color: #f9fafb;
 }
 </style>
