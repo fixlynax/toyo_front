@@ -274,7 +274,7 @@ const processPrivateImages = async (programData) => {
 
     // If it's a file path that needs API processing
     try {
-        console.log('Processing private image:', imageUrl);
+        // console.log('Processing private image:', imageUrl);
         const blobUrl = await api.getPrivateFile(imageUrl);
         if (blobUrl) {
             programData.imageUrl = blobUrl;

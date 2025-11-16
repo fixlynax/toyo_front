@@ -5,7 +5,10 @@
                 <!-- Tyre Specifications -->
                 <div class="card flex flex-col gap-6 w-full">
                     <div class="flex items-center justify-between border-b pb-2">
+                        <div class="flex items-center gap-3">
+                        <Button icon="pi pi-arrow-left" class="p-button-text p-button-secondary" @click="$router.back()" />
                         <h2 class="text-2xl font-bold text-gray-800">Pattern Details</h2>
+                        </div>
                          <div class="inline-flex items-center gap-2">
                             <Button label="Edit" class="p-button-info" size="small" @click="editPattern" />
                             <Button label="Delete" class="p-button-danger" size="small" @click="confirmDelete" />

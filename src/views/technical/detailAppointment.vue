@@ -197,7 +197,7 @@ onMounted(() => {
             <!-- Customer Information -->
             <div class="card flex flex-col w-full" v-if="hasCustomerInfo">
                 <div class="flex items-center justify-between border-b pb-2 mb-4">
-                    <div class="text-2xl font-bold text-gray-800">👤 Customer Information</div>
+                    <div class="text-2xl font-bold text-gray-800">Consumer Information</div>
                 </div>
 
                 <div class="grid grid-cols-2 gap-4">
@@ -223,7 +223,7 @@ onMounted(() => {
             <!-- Tire Information - Side by side like customer info -->
             <div class="card flex flex-col w-full" v-if="hasTireInfo">
                 <div class="flex items-center justify-between border-b pb-2 mb-4">
-                    <div class="text-2xl font-bold text-gray-800">🛞 Tire Information</div>
+                    <div class="text-2xl font-bold text-gray-800">Tire Information</div>
                 </div>
 
                 <div class="grid grid-cols-2 gap-4">
@@ -258,7 +258,7 @@ onMounted(() => {
             <!-- Submitted Photos Section -->
             <div class="card flex flex-col w-full" v-if="hasSubmittedPhotos">
                 <div class="flex items-center justify-between border-b pb-2 mb-4">
-                    <div class="text-2xl font-bold text-gray-800">📸 Submitted Photos</div>
+                    <div class="text-2xl font-bold text-gray-800">Submitted Photos</div>
                 </div>
 
                 <!-- Photo Grid -->
@@ -293,7 +293,7 @@ onMounted(() => {
             <!-- Dealer Information - Side by side like customer info -->
             <div class="card w-full" v-if="hasDealerInfo">
                 <div class="flex items-center justify-between border-b pb-2 mb-4">
-                    <div class="text-2xl font-bold text-gray-800">🏢 Dealer Information</div>
+                    <div class="text-2xl font-bold text-gray-800">Customer Information</div>
                 </div>
 
                 <div class="grid grid-cols-2 gap-4">
@@ -319,7 +319,7 @@ onMounted(() => {
             <!-- Appointment Information -->
             <div class="card w-full">
                 <div class="flex items-center justify-between border-b pb-2 mb-4">
-                    <div class="text-2xl font-bold text-gray-800">📅 Appointment Information</div>
+                    <div class="text-2xl font-bold text-gray-800">Appointment Information</div>
                 </div>
 
                 <div class="grid grid-cols-1 gap-3">
