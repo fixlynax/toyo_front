@@ -264,7 +264,7 @@
                 </div>
 
                 <!-- Scrap Images Gallery -->
-                <div v-if="scrapImages > 0" class="mb-6">
+                <div v-if="scrapImages.length > 0" class="mb-6">
                     <Galleria
                         :value="scrapImages"
                         :responsiveOptions="galleriaResponsiveOptions"
@@ -1110,7 +1110,7 @@ const loadScrapImages = async () => {
     const images = [];
     const imageUrls = [warantyDetail.value.scrapPhotos.scrapImage1URL, warantyDetail.value.scrapPhotos.scrapImage2URL, warantyDetail.value.scrapPhotos.scrapImage3URL].filter((url) => url && url !== 'null' && url !== null);
 
-    // console.log('Found scrap images:', imageUrls);
+    
 
     for (const [index, url] of imageUrls.entries()) {
         try {
@@ -1131,6 +1131,7 @@ const loadScrapImages = async () => {
     }
 
     scrapImages.value = images;
+    console.log('Found scrap images:', scrapImages);
 };
 
 // Initialize workflow states

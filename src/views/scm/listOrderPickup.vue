@@ -15,7 +15,7 @@
                 :loading="loading"
                 :filters="filters"
                 filterDisplay="menu"
-                :globalFilterFields="['order_no', 'custAccountNo', 'companyName1', 'orderDesc', 'phoneNumber', 'orderstatus']"
+                :globalFilterFields="['order_no', 'custAccountNo', 'companyName1', 'deliveryType', 'orderstatus']"
             >
                 <template #header>
                     <div class="flex items-center justify-between gap-4 w-full flex-wrap">
@@ -68,9 +68,6 @@
                             </div>
                         </div>
 
-                        <div class="flex justify-end gap-2">
-                            <Button type="button" label="Bulk Update" icon="pi pi-upload" />
-                        </div>
                     </div>
                 </template>
 
@@ -103,37 +100,35 @@
                     </template>
                 </Column>
 
-                <Column field="addressLine1" header="Collection Address" style="min-width: 12rem">
+                <Column field="" header="Collector" style="min-width: 12rem">
                     <template #body="{ data }">
-                         {{` ${data.eten_user.addressLine1} ${data.eten_user.addressLine2} ${data.eten_user.addressLine3} ${data.eten_user.addressLine4}, ${data.eten_user.city} ${data.eten_user.postcode} ${data.eten_user.state} ` }}
+                        <div v-if="data.driverInformation">
+                            <div class="flex flex-col leading-relaxed text-sm text-gray-700">
+                                <div class="flex">
+                                    <span>{{ data.driverInformation.driverName }}</span>
+                                </div>
+                                <div class="flex">
+                                    <span>{{ data.driverInformation.driverPhoneNumber }}</span>
+                                </div>
+                                <div class="flex">
+                                    <span>{{ data.driverInformation.driverTruckPlate }}</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div v-else>Not Assigned</div>
                     </template>
                 </Column>
 
-                <Column field="orderDesc" header="Order Type" style="min-width: 10rem">
+                <Column field="deliveryType" header="Pickup Type" style="min-width: 10rem">
                     <template #body="{ data }">
-                        {{ data.orderDesc }}
+                        {{ data.deliveryType }}
                     </template>
                 </Column>
-
-                <Column field="phoneNumber" header="Contact" style="min-width: 8rem">
+                <Column field="pickup_datetime" header="Pickup Date" style="min-width: 10rem">
                     <template #body="{ data }">
-                        {{ data.eten_user.phoneNumber || '-' }}
+                        {{ data.driverInformation?.pickup_datetime? formatDateFull(data.driverInformation.pickup_datetime): 'Not Assigned' }}
                     </template>
                 </Column>
-
-
-                <Column field="pickupDatetime" header="Pickup Date" style="min-width: 10rem">
-                    <template #body="{ data }">
-                        {{ data.pickupDatetime }}
-                    </template>
-                </Column>
-
-                <Column field="collectedDatetime" header="Delivery Date" style="min-width: 10rem">
-                    <template #body="{ data }">
-                        {{ data.collectedDatetime }}
-                    </template>
-                </Column>
-
                 <Column field="orderstatus" header="Status" style="min-width: 8rem">
                     <template #body="{ data }">
                         <Tag :value="getStatusLabel(data.orderstatus)" :severity="getStatusSeverity(data.orderstatus)" />
