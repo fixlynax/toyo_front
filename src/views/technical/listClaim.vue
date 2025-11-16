@@ -18,26 +18,36 @@ const tabs = [
     { label: 'Reject', value: 'Reject' }
 ];
 
+// Define status categories based on your requirements
+const statusCategories = {
+    'Processing': ['Pending Dealer', 'Pending CTC', 'Processing'],
+    'In Progress': ['In Progress', 'Pending Scrap', 'Pending Manager Approve', 'Pending Invoice', 'Pending Invoice Approve'],
+    'Completed': ['Completed', 'Admin Approved', 'Dealer Approved', 'Settled'],
+    'Reject': ['Reject', 'Admin Rejected', 'Dealer Rejected']
+};
+
 const getOverallStatusSeverity = (status) => {
     switch (status) {
         case 'Pending Dealer':
+        case 'Pending CTC':
+        case 'Pending Scrap':
+        case 'Pending Manager Approve':
+        case 'Pending Invoice':
+        case 'Pending Invoice Approve':
             return 'warn';
         case 'Dealer Approved':
+        case 'Admin Approved':
+        case 'Completed':
+        case 'Settled':
             return 'success';
         case 'Dealer Rejected':
+        case 'Admin Rejected':
+        case 'Reject':
             return 'danger';
         case 'Processing':
             return 'info';
         case 'In Progress':
             return 'warning';
-        case 'Admin Approved':
-            return 'success';
-        case 'Admin Rejected':
-            return 'danger';
-        case 'Completed':
-            return 'success';
-        case 'Reject':
-            return 'danger';
         default:
             return 'secondary';
     }
@@ -48,12 +58,15 @@ const filters = ref({
 });
 
 const filteredList = computed(() => {
-    const status = tabs[activeTab.value].value;
-    if (status === 'All') {
-    // Return everything if "All" tab selected
-    return listData.value;
-  }
-    return listData.value.filter(item => item.status === status);
+    const tabValue = tabs[activeTab.value].value;
+    
+    if (tabValue === 'All') {
+        return listData.value;
+    }
+    
+    // Filter based on status categories
+    const statusesInCategory = statusCategories[tabValue] || [tabValue];
+    return listData.value.filter(item => statusesInCategory.includes(item.status));
 });
 
 const fetchClaims = async () => {
@@ -65,18 +78,31 @@ const fetchClaims = async () => {
                 id: item.claim_id,
                 refNo: item.claimRefNo,
                 dealerName: item.dealer,
-                claimType: item.warrantyType,
-                claimDate: item.claim_date,
+                claimType: item.warrantyType || '-',
+                claimDate: item.claim_date || '-',
+                submissionDate: item.submit_date || '-',
+                warrantyRegCertNo: item.warrantyRegCertNo || '-',
                 status: item.status
             }));
         } else {
             listData.value = [];
         }
     } catch (error) {
+        console.error('Error fetching claims:', error);
         listData.value = [];
     } finally {
         loading.value = false;
     }
+};
+
+// Get count for each tab
+const getTabCount = (tabValue) => {
+    if (tabValue === 'All') {
+        return listData.value.length;
+    }
+    
+    const statusesInCategory = statusCategories[tabValue] || [tabValue];
+    return listData.value.filter(item => statusesInCategory.includes(item.status)).length;
 };
 
 // Export functionality
@@ -84,14 +110,21 @@ const exportToCSV = () => {
     exportLoading.value = true;
     
     try {
-        // Prepare data for export
-        const exportData = listData.value.map(item => ({
+        // Use filtered data for export
+        const exportData = filteredList.value.map(item => ({
             'Ref No': item.refNo,
             'Dealer Name': item.dealerName,
             'Claim Type': item.claimType,
-            'Claim Date': item.claimDate,
+            'Submission Date': item.submissionDate,
+            'Warranty Cert No': item.warrantyRegCertNo,
             'Status': item.status
         }));
+
+        if (exportData.length === 0) {
+            alert('No data to export for the current filter.');
+            exportLoading.value = false;
+            return;
+        }
 
         // Create CSV content
         const headers = Object.keys(exportData[0]).join(',');
@@ -118,25 +151,32 @@ const exportToCSV = () => {
         
     } catch (error) {
         console.error('Export error:', error);
-        // You can add a toast notification here if needed
         alert('Error exporting data. Please try again.');
     } finally {
         exportLoading.value = false;
     }
 };
 
-// Alternative export function using JSON (uncomment if needed)
+// Alternative export function using JSON
 const exportToJSON = () => {
     exportLoading.value = true;
     
     try {
-        const exportData = listData.value.map(item => ({
+        const exportData = filteredList.value.map(item => ({
             refNo: item.refNo,
             dealerName: item.dealerName,
             claimType: item.claimType,
-            submissionDate: item.submission_date,
+            claimDate: item.claimDate,
+            submissionDate: item.submissionDate,
+            warrantyRegCertNo: item.warrantyRegCertNo,
             status: item.status
         }));
+
+        if (exportData.length === 0) {
+            alert('No data to export for the current filter.');
+            exportLoading.value = false;
+            return;
+        }
 
         const dataStr = JSON.stringify(exportData, null, 2);
         const blob = new Blob([dataStr], { type: 'application/json' });
@@ -159,49 +199,44 @@ const exportToJSON = () => {
     }
 };
 
-// Export to Excel (if you have xlsx library)
-const exportToExcel = async () => {
-    exportLoading.value = true;
-    
-    try {
-        // Check if xlsx is available
-        if (typeof XLSX === 'undefined') {
-            // If xlsx is not available, fall back to CSV
-            console.warn('XLSX library not found. Falling back to CSV export.');
-            exportToCSV();
-            return;
-        }
-
-        const exportData = listData.value.map(item => ({
-            'Ref No': item.refNo,
-            'Dealer Name': item.dealerName,
-            'Claim Type': item.claimType,
-            'Claim Date': item.claimDate,
-            'Status': item.status
-        }));
-
-        const worksheet = XLSX.utils.json_to_sheet(exportData);
-        const workbook = XLSX.utils.book_new();
-        XLSX.utils.book_append_sheet(workbook, worksheet, 'Warranty Claims');
-        
-        XLSX.writeFile(workbook, `warranty_claims_${new Date().toISOString().split('T')[0]}.xlsx`);
-        
-    } catch (error) {
-        console.error('Excel export error:', error);
-        // Fallback to CSV
-        exportToCSV();
-    } finally {
-        exportLoading.value = false;
-    }
-};
-
 onMounted(fetchClaims);
 </script>
 
 <template>
     <div class="card">
         <div class="text-2xl font-bold text-gray-800 border-b pb-2">List Claim</div>
-        <TabMenu :model="tabs" v-model:activeIndex="activeTab" class="mb-4" />
+        
+        <!-- Custom Tabs with Counts -->
+        <div class="border-b border-gray-200 mb-4">
+            <div class="flex space-x-8">
+                <button
+                    v-for="(tab, index) in tabs"
+                    :key="tab.value"
+                    @click="activeTab = index"
+                    class="px-1 py-3 text-sm font-medium relative transition-colors duration-200"
+                    :class="[
+                        activeTab === index
+                            ? 'text-blue-600 border-b-2 border-blue-600'
+                            : 'text-gray-500 hover:text-gray-700'
+                    ]"
+                >
+                    <div class="flex items-center gap-2">
+                        <span>{{ tab.label }}</span>
+                        <span 
+                            class="inline-flex items-center justify-center min-w-6 h-6 px-2 text-xs font-semibold rounded-full"
+                            :class="[
+                                activeTab === index
+                                    ? 'bg-blue-100 text-blue-600'
+                                    : 'bg-gray-100 text-gray-600'
+                            ]"
+                        >
+                            {{ getTabCount(tab.value) }}
+                        </span>
+                    </div>
+                </button>
+            </div>
+        </div>
+
         <LoadingPage v-if="loading" message="Loading Warranty Claim List..." />
 
         <div v-else>
@@ -213,7 +248,7 @@ onMounted(fetchClaims);
                 :rowHover="true"
                 :filters="filters"
                 filterDisplay="menu"
-                :globalFilterFields="['refNo', 'dealerName', 'claimType', 'claimDate', 'status']"
+                :globalFilterFields="['refNo', 'dealerName', 'claimType', 'claimDate', 'status', 'warrantyRegCertNo']"
             >
                 <template #header>
                     <div class="flex items-center justify-between gap-4 w-full flex-wrap">
@@ -230,12 +265,21 @@ onMounted(fetchClaims);
                         <div class="flex items-center gap-2 ml-auto">
                             <Button 
                                 type="button" 
-                                label="Export" 
+                                label="Export CSV" 
                                 icon="pi pi-download" 
                                 class="p-button-success" 
                                 @click="exportToCSV"
                                 :loading="exportLoading"
-                                :disabled="listData.length === 0"
+                                :disabled="filteredList.length === 0"
+                            />
+                            <Button 
+                                type="button" 
+                                label="Export JSON" 
+                                icon="pi pi-download" 
+                                class="p-button-help" 
+                                @click="exportToJSON"
+                                :loading="exportLoading"
+                                :disabled="filteredList.length === 0"
                             />
                         </div>
                     </div>
@@ -245,34 +289,32 @@ onMounted(fetchClaims);
 
                 <Column field="refNo" header="Ref No" style="min-width: 8rem">
                     <template #body="{ data }">
-                        <RouterLink :to="`/technical/detailWarantyClaim/${data.id}`" class="hover:underline font-bold">
+                        <RouterLink :to="`/technical/detailWarantyClaim/${data.id}`" class="hover:underline font-bold text-blue-600">
                             {{ data.refNo }}
                         </RouterLink>
                     </template>
                 </Column>
 
-                <Column field="submissionDate" header="Submission date" style="min-width: 6rem">
-                    <template #body="{ data }">{{ data.submission_date }}</template>
+                <Column field="submissionDate" header="Submission Date" style="min-width: 8rem">
+                    <template #body="{ data }">{{ data.submissionDate }}</template>
                 </Column>
 
-                 <Column header="Dealer Name" style="min-width: 14rem">
+                <Column header="Dealer Name" style="min-width: 14rem">
                     <template #body="{ data }">
                         <div class="flex flex-col">
                             <!-- Top -->
                             <div class="font-semibold">{{ data.dealerName }}</div>
-
                             <!-- Bottom -->
-                            <div class="text-gray-600 text-sm">{{ data.dealerCustAccountNo }}</div>
+                            <div class="text-gray-600 text-sm">{{ data.warrantyRegCertNo }}</div>
                         </div>
                     </template>
                 </Column>
 
-                <Column field="claimType" header="Claim Type" style="min-width: 6rem">
+                <Column field="claimType" header="Claim Type" style="min-width: 8rem">
                     <template #body="{ data }">{{ data.claimType }}</template>
                 </Column>
 
-
-                <Column header="Status" style="min-width: 6rem">
+                <Column header="Status" style="min-width: 10rem">
                     <template #body="{ data }">
                         <Tag :value="data.status" :severity="getOverallStatusSeverity(data.status)" />
                     </template>
@@ -281,3 +323,26 @@ onMounted(fetchClaims);
         </div>
     </div>
 </template>
+
+<style scoped>
+:deep(.p-datatable .p-datatable-thead > tr > th) {
+    background-color: #f9fafb;
+    border-color: #e5e7eb;
+    padding: 12px 16px;
+    font-weight: 600;
+    color: #374151;
+}
+
+:deep(.p-datatable .p-datatable-tbody > tr > td) {
+    padding: 12px 16px;
+    border-color: #e5e7eb;
+}
+
+:deep(.p-datatable .p-datatable-tbody > tr) {
+    transition: background-color 0.2s;
+}
+
+:deep(.p-datatable .p-datatable-tbody > tr:hover) {
+    background-color: #f3f4f6;
+}
+</style>
