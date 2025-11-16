@@ -220,12 +220,12 @@ onMounted(() => {
 
 <style scoped>
 .layout-topbar {
-    background:  #fdfdfd;
+    background:  #ffffff;
     padding: 0.75rem 1.5rem;
     display: flex;
     align-items: center;
     justify-content: space-between;
-    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 2px 2px rgba(0, 0, 0, 0.1);
     border-bottom: 1px solid rgba(255, 255, 255, 0.05);
     transition: all 0.3s ease;
 }
@@ -238,7 +238,7 @@ onMounted(() => {
 
 .layout-menu-button {
     background: rgba(255, 255, 255, 0.1);
-    border: 1px solid rgba(255, 255, 255, 0.2);
+    border: 1px solid rgba(161, 13, 13, 0.2);
     color: rgb(0, 0, 0);
     border-radius: 8px;
     width: 2.5rem;

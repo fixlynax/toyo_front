@@ -340,8 +340,8 @@ const fetchOrderDetail = async () => {
         const orderNo = route.params.orderNo;
         const response = await api.get(`order/detail-order/${orderNo}`);
 
-        if (response.data.status === 1 && response.data.eten_data.length > 0) {
-            const data = response.data.eten_data[0];
+        if (response.data.status === 1 && response.data.admin_data.length > 0) {
+            const data = response.data.admin_data[0];
             orderData.value = data;
 
             // ✅ Use fullfill_order_array for order items display
@@ -447,7 +447,7 @@ const submitReturnOrder = async () => {
             toast.add({
                 severity: 'success',
                 summary: 'Success',
-                detail: `Return order created: ${response.data.eten_data}`,
+                detail: `Return order created: ${response.data.admin_data}`,
                 life: 3000
             });
             showReturnOrderDialog.value = false;

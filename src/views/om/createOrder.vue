@@ -181,6 +181,11 @@
                 </Column>
                 <Column field="price" header="Price (RM)" style="min-width: 8rem">
                     <template #body="{ data }">
+                        {{ data.itemcategory }}
+                    </template>
+                </Column>
+                <Column field="price" header="Price (RM)" style="min-width: 8rem">
+                    <template #body="{ data }">
                         {{ data.price ? data.price.toFixed(2) : '0.00' }}
                     </template>
                 </Column>
@@ -769,7 +774,7 @@ const fetchMaterials = async (custAccountNo) => {
                         price: price,
                         stockBalance: stockBalance,
                         quantity: 1,
-                        itemcategory: material.materialtype || 'ZFP2',
+                        itemcategory: material.itemcategory || '??',
                         plant: 'TSM'
                     };
                 });
@@ -853,7 +858,7 @@ const addToCartAPI = async (cartRefNo = null) => {
     const orderArray = selectedTyres.value.map((item, index) => ({
         materialid: item.materialid,
         itemno: String(index + 1).padStart(5, '0'),
-        itemcategory: item.itemcategory || 'ZFP2',
+        itemcategory: item.itemcategory || '??',
         plant: item.plant || 'TSM',
         qty: item.quantity.toString(),
         price: item.price.toString(),
@@ -940,7 +945,7 @@ const placeOrder = async () => {
         const orderArray = selectedTyres.value.map((item, index) => ({
             materialid: item.materialid,
             itemno: String(index + 1).padStart(5, '0'),
-            itemcategory: item.itemcategory || 'ZFP2',
+            itemcategory: item.itemcategory || '??',
             plant: item.plant || 'TSM',
             qty: item.quantity.toString(),
             price: item.price.toString(),
@@ -1072,7 +1077,7 @@ const proceedWithBackOrder = async () => {
                 backOrderArray.push({
                     materialid: item.materialid,
                     itemno: '00010',
-                    itemcategory: item.itemcategory || 'ZFP2',
+                    itemcategory: item.itemcategory || '??',
                     plant: item.plant || 'TSM',
                     qty: unfulfilledItem.backorder_qty.toString(),
                     price: item.price.toString(),
@@ -1084,7 +1089,7 @@ const proceedWithBackOrder = async () => {
                     fulfilledArray.push({
                         materialid: item.materialid,
                         itemno: '00010',
-                        itemcategory: item.itemcategory || 'ZFP2',
+                        itemcategory: item.itemcategory || '??',
                         plant: item.plant || 'TSM',
                         qty: unfulfilledItem.accepted_qty.toString(),
                         price: item.price.toString(),
@@ -1096,7 +1101,7 @@ const proceedWithBackOrder = async () => {
                 fulfilledArray.push({
                     materialid: item.materialid,
                     itemno: '00010',
-                    itemcategory: item.itemcategory || 'ZFP2',
+                    itemcategory: item.itemcategory || '??',
                     plant: item.plant || 'TSM',
                     qty: item.quantity.toString(),
                     price: item.price.toString(),
@@ -1164,7 +1169,7 @@ const proceedWithoutBackOrder = async () => {
                     orderArray.push({
                         materialid: item.materialid,
                         itemno: '00010',
-                        itemcategory: item.itemcategory || 'ZFP2',
+                        itemcategory: item.itemcategory || '??',
                         plant: item.plant || 'TSM',
                         qty: quantity.toString(),
                         price: item.price.toString(),
