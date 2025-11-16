@@ -149,7 +149,7 @@ import Dropdown from 'primevue/dropdown';
 import { useToast } from 'primevue/usetoast';
 import api from '@/service/api';
 
-const passwordDialogVisible = ref(true);
+const passwordDialogVisible = ref(false);
 const generatedPassword = ref('');
 const toast = useToast();
 const router = useRouter();

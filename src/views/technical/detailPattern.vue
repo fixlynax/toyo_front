@@ -67,7 +67,7 @@
                     </div>
                     <div>
                         <label class="block font-bold text-gray-700 mb-1">Pattern Code *</label>
-                            <InputText v-model="formHolder.pattern_code" class="w-full" placeholder="Insert Pattern Code" />
+                            <InputText v-model="formHolder.pattern_code" class="w-full" placeholder="Insert Pattern Code" maxlength="3"/>
                         <small v-if="errors.code" class="text-red-500">{{ errors.code }}</small>
                     </div>
                 </div>
@@ -141,18 +141,24 @@ const errors = ref({
 
 const validateForm = () => {
     let isValid = true;
-    errors.value = { name: '', image: '' };
+    errors.value = { name: '', code: '', image: '' };
 
-    if (!formHolder.value.pattern_name) {
+    // Validate Pattern Name
+    if (!formHolder.value.pattern_name || formHolder.value.pattern_name.trim() === '') {
         errors.value.name = 'Pattern name is required';
         isValid = false;
     }
-    if (!formHolder.value.pattern_code) {
-        errors.value.name = 'Pattern code is required';
+
+    // Validate Pattern Code
+    if (!formHolder.value.pattern_code || formHolder.value.pattern_code.trim() === '') {
+        errors.value.code = 'Pattern code is required';
         isValid = false;
     }
-    if (!formHolder.value.image_url && (formHolder.value.imageURL != patterns.value.processedImageURL)) {
-        errors.value.image = 'Pattern image is required';
+
+    // Validate Image
+    // Require image if no existing URL or if the image has changed
+    if (!formHolder.value.image_url && (!formHolder.value.imageURL || formHolder.value.imageURL !== patterns.value.processedImageURL)) {
+        errors.value.image = 'Please upload an image';
         isValid = false;
     }
 
@@ -216,20 +222,24 @@ const savePatternEdit = async () => {
         const id = route.params.id;
         const formData = new FormData();
         formData.append('pattern_name', formHolder.value.pattern_name);
-        formData.append('image_url', formHolder.value.image_url);
         formData.append('pattern_code', formHolder.value.pattern_code);
+                // Only append new image if user selected a file
+        if (formHolder.value.image_url instanceof File) {
+            formData.append('image', formHolder.value.image_url); // <-- use formData, not payload
+        }
+
         const response = await api.postExtra(`patternUpdate/${id}`, formData, {
             headers: {
                 'Content-Type': 'multipart/form-data'
             },
         });
 
-        if (response.data.status === 1) {
-            toast.add({ severity: 'success', summary: 'Successfull', detail: 'Pattern has been updated', life: 3000 });
-            editPatternDialog.value = false;
-        setTimeout(() => {
-        router.go(0);
-      }, 1000);
+            if (response.data.status === 1) {
+                toast.add({ severity: 'success', summary: 'Successfull', detail: 'Pattern has been updated', life: 3000 });
+                editPatternDialog.value = false;
+            setTimeout(() => {
+            router.go(0);
+        }, 1000);
         } else {
             toast.add({ severity: 'error', summary: 'Error', detail: response.data.message || 'Failed to update pattern', life: 3000 });
         }
