@@ -134,7 +134,7 @@ const exportToJSON = () => {
             refNo: item.refNo,
             dealerName: item.dealerName,
             claimType: item.claimType,
-            claimDate: item.claimDate,
+            submissionDate: item.submission_date,
             status: item.status
         }));
 
@@ -251,17 +251,26 @@ onMounted(fetchClaims);
                     </template>
                 </Column>
 
-                <Column field="dealerName" header="Dealer Name" style="min-width: 6rem">
-                    <template #body="{ data }">{{ data.dealerName }}</template>
+                <Column field="submissionDate" header="Submission date" style="min-width: 6rem">
+                    <template #body="{ data }">{{ data.submission_date }}</template>
+                </Column>
+
+                 <Column header="Dealer Name" style="min-width: 14rem">
+                    <template #body="{ data }">
+                        <div class="flex flex-col">
+                            <!-- Top -->
+                            <div class="font-semibold">{{ data.dealerName }}</div>
+
+                            <!-- Bottom -->
+                            <div class="text-gray-600 text-sm">{{ data.dealerCustAccountNo }}</div>
+                        </div>
+                    </template>
                 </Column>
 
                 <Column field="claimType" header="Claim Type" style="min-width: 6rem">
                     <template #body="{ data }">{{ data.claimType }}</template>
                 </Column>
 
-                <Column field="claimDate" header="Claim Date" style="min-width: 6rem">
-                    <template #body="{ data }">{{ data.claimDate }}</template>
-                </Column>
 
                 <Column header="Status" style="min-width: 6rem">
                     <template #body="{ data }">

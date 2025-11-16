@@ -465,9 +465,10 @@ const router = createRouter({
                     component: () => import('@/views/technical/listAppoitment.vue')
                 },
                 {
-                    path: 'technical/detailAppointment',
+                    path: 'technical/detailAppointment/:id',
                     name: 'Detail-Appointment',
-                    component: () => import('@/views/technical/detailAppointment.vue')
+                    component: () => import('@/views/technical/detailAppointment.vue'),
+                    props: true
                 },
 
                 // Warranty Claims
