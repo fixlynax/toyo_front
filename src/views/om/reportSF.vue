@@ -135,7 +135,7 @@
                             </template>
                         </Column>
 
-                        <Column field="Dealer" header="Dealer" style="min-width: 200px" :sortable="true">
+                        <Column field="Dealer" header="Customer " style="min-width: 200px" :sortable="true">
                             <template #body="{ data }">
                                 <div class="font-semibold">{{ data.Dealer }}</div>
                             </template>
