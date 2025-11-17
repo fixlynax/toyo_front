@@ -126,13 +126,13 @@
 
                 <Column field="pickupDatetime" header="ETA Date" style="min-width: 10rem">
                     <template #body="{ data }">
-                        {{ data.scm_deliver_detail?.scheduled_delivery_time ? formatDate(data.scm_deliver_detail.scheduled_delivery_time) : 'Not Assigned' }}
+                        {{ data.scm_deliver_detail?.scheduled_delivery_time ? formatDateFull(data.scm_deliver_detail.scheduled_delivery_time) : 'Not Assigned' }}
                     </template>
                 </Column>
 
                 <Column field="collectedDatetime" header="Delivered Date" style="min-width: 10rem">
                     <template #body="{ data }">
-                          {{ data.scm_deliver_detail?.delivered_datetime? formatDate(data.scm_deliver_detail.delivered_datetime): 'Not Assigned' }}
+                          {{ data.scm_deliver_detail?.delivered_datetime? formatDateFull(data.scm_deliver_detail.delivered_datetime): 'Not Assigned' }}
                     </template>
                 </Column>
 

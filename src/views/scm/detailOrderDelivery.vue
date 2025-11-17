@@ -153,11 +153,11 @@
                                 </tr>
                                 <tr class="border-b">
                                     <td class="px-4 py-2 font-medium">ETA Date</td>
-                                    <td class="px-4 py-2 text-right">{{ orderDelList?.scm_deliver_detail?.scheduled_delivery_time? formatDate(orderDelList.scm_deliver_detail.scheduled_delivery_time): 'Not Assigned'}}</td>
+                                    <td class="px-4 py-2 text-right">{{ orderDelList?.scm_deliver_detail?.scheduled_delivery_time? formatDateFull(orderDelList.scm_deliver_detail.scheduled_delivery_time): 'Not Assigned'}}</td>
                                 </tr>
                                 <tr class="border-b">
                                     <td class="px-4 py-2 font-medium">Delivered Date</td>
-                                    <td class="px-4 py-2 text-right">{{ orderDelList?.scm_deliver_detail?.delivered_datetime? formatDate(orderDelList.scm_deliver_detail.delivered_datetime): 'Not Assigned'}}</td>
+                                    <td class="px-4 py-2 text-right">{{ orderDelList?.scm_deliver_detail?.delivered_datetime? formatDateFull(orderDelList.scm_deliver_detail.delivered_datetime): 'Not Assigned'}}</td>
                                 </tr>
                                 <tr>
                                     <td class="px-4 py-2 font-medium">Created</td>
@@ -166,17 +166,90 @@
                             </tbody>
                         </table>
                     </div>
-
-                    <!-- Action Buttons -->
-                    <div class="flex justify-end mt-4 gap-2" v-if="orderDelList.orderstatus === 0">
-                        <Button label="Reject" severity="danger" size="small" @click="onRejectReturnOrder" :loading="loadingAction === 'reject'" />
-                        <Button label="Approve" severity="success" size="small" @click="onApproveReturnOrder" :loading="loadingAction === 'approve'" />
+                    <div v-if="!loading && orderDelList && !orderDelList?.scm_deliver_detail?.scheduled_delivery_time && !orderDelList?.scm_deliver_detail?.delivered_datetime" class="flex justify-end mt-3">
+                        <Button  
+                            style="width: auto !important"
+                            label="Update Schedule Date"
+                            icon="pi pi-calendar"
+                            class="p-button-sm p-button-warning"
+                            @click="openDialog = true"
+                        />
+                    </div>
+                    <div v-if="!loading && orderDelList && orderDelList?.scm_deliver_detail?.scheduled_delivery_time && !orderDelList?.scm_deliver_detail?.delivered_datetime" class="flex justify-end mt-3">
+                        <Button  
+                            style="width: auto !important"
+                            label="Update Delivery Date"
+                            icon="pi pi-calendar"
+                            class="p-button-sm p-button-warning"
+                            @click="openDialog2  = true"
+                        />
                     </div>
 
                 </div>
             </div>
         </div>
     </Fluid>
+
+    <Dialog
+      header="Update Schedule Delivery"
+      v-model:visible="openDialog"
+      modal
+      :style="{ width: '400px' }"
+    >
+      <div class="flex flex-col gap-3">
+        <!-- Schedule Date -->
+        <Calendar
+          v-model="form.scheduleDate"
+          dateFormat="yy-mm-dd"
+          placeholder="Select Schedule Date"
+        />
+
+        <!-- Schedule Time -->
+        <Calendar
+          v-model="form.scheduleTime"
+          showTime
+          hourFormat="24"
+          timeOnly
+          placeholder="Select Schedule Time"
+        />
+
+        <!-- Actions -->
+        <div class="flex justify-end gap-2 mt-3">
+          <Button label="Cancel" class="p-button-text" @click="openDialog = false" />
+          <Button label="Save" class="p-button-success" :loading="loadingUpdate" @click="saveSchedule" />
+        </div>
+      </div>
+    </Dialog>
+
+    <Dialog
+      header="Update Schedule Delivery"
+      v-model:visible="openDialog2"
+      modal
+      :style="{ width: '400px' }"
+    >
+      <div class="flex flex-col gap-3">
+
+        <Calendar
+          v-model="form2.delivereddate"
+          dateFormat="yy-mm-dd"
+          placeholder="Select Schedule Date"
+        />
+
+
+        <Calendar
+          v-model="form2.deliverytime"
+          showTime
+          hourFormat="24"
+          timeOnly
+          placeholder="Select Schedule Time"
+        />
+
+        <div class="flex justify-end gap-2 mt-3">
+          <Button label="Cancel" class="p-button-text" @click="openDialog2 = false" />
+          <Button label="Save" class="p-button-success" :loading="loadingUpdate2" @click="saveDelivered" />
+        </div>
+      </div>
+    </Dialog>
 </template>
 
 <script setup>
@@ -184,7 +257,13 @@ import api from '@/service/api';
 import { useToast } from 'primevue/usetoast';
 import { onMounted, ref, computed } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
-
+defineProps({
+  id: {
+    type: [String, Number],
+    required: true
+  }
+});
+const toast = useToast();
 const route = useRoute();
 const router = useRouter();
 const orderDelList = ref({});
@@ -271,6 +350,90 @@ const getOrderStatusSeverity2 = (status) => {
     };
     return severityMap[status] || 'secondary';
 };
+// Dialog state
+const openDialog = ref(false);
+const openDialog2 = ref(false);
+const loadingUpdate = ref(false);
+const loadingUpdate2 = ref(false);
+
+// Form
+const form = ref({
+  orderno: null, 
+  scheduleDate: null,      
+  scheduleTime: null      
+});
+
+const form2 = ref({
+  orderno: null, 
+  delivereddate: null,      
+  deliverytime: null      
+});
+
+// Save function
+const saveSchedule = async () => {
+  if (!form.value.scheduleDate || !form.value.scheduleTime) {
+    toast.add({ severity: 'warn', summary: 'Warning', detail: 'Please select date & time', life: 3000 });
+    return;
+  }
+
+
+  try {
+    const payload = {
+      orderno: form.value.orderno,
+      scheduledate: formatDateApi(form.value.scheduleDate),
+      scheduletime: formatTimeApi(form.value.scheduleTime)
+    };
+    const res = await api.post('update-schedule-order', payload);
+    if (res.data?.status === 1) {
+        toast.add({ severity: 'success', summary: 'Updated', detail: 'Schedule date updated successfully', life: 3000 });
+        InitfetchData(); // refresh table
+    } else {
+        toast.add({ severity: 'error', summary: 'Error', detail: res.data?.message || 'Failed', life: 3000 });
+    }
+    } catch (err) {
+    console.error(err);
+    toast.add({ severity: 'error', summary: 'Error', detail: 'API error', life: 3000 });
+    }
+
+};
+
+// Save function
+const saveDelivered = async () => {
+  if (!form2.value.delivereddate || !form2.value.deliverytime) {
+    toast.add({ severity: 'warn', summary: 'Warning', detail: 'Please select date & time', life: 3000 });
+    return;
+  }
+
+  try {
+    const payload = {
+      orderno: form2.value.orderno,
+      delivereddate: formatDateApi(form2.value.delivereddate),
+      deliveredtime: formatTimeApi(form2.value.deliverytime)
+    };
+    const res = await api.post('update-delivered-order', payload);
+    if (res.data?.status === 1) {
+        toast.add({ severity: 'success', summary: 'Updated', detail: 'Delivered date updated successfully', life: 3000 });
+        InitfetchData(); // refresh table
+    } else {
+        toast.add({ severity: 'error', summary: 'Error', detail: res.data?.message || 'Failed', life: 3000 });
+    }
+    } catch (err) {
+    console.error(err);
+    toast.add({ severity: 'error', summary: 'Error', detail: 'API error', life: 3000 });
+    }
+
+};
+
+// Helpers
+const formatDateApi = (date) => {
+  const d = new Date(date);
+  return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+};
+
+const formatTimeApi = (date) => {
+  const d = new Date(date);
+  return `${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`;
+};
 
 const InitfetchData = async () => {
     try {
@@ -278,8 +441,9 @@ const InitfetchData = async () => {
         const id = route.params.id;
         const response = await api.get(`order-delivery/detail/${id}`);
         if ( (response.data.admin_data)) {
-            // response.data.status === 1 &&
             orderDelList.value = response.data.admin_data;
+            form.value.orderno =orderDelList.value.order_no;
+            form2.value.orderno =orderDelList.value.order_no;
         } else {
             console.error('API returned error or invalid data:', response.data);
             toast.add({ severity: 'error', summary: 'Error', detail: 'Failed to load data', life: 3000 });
