@@ -99,9 +99,50 @@
                         </tbody>
                     </table>
                 </div>
+                <div v-if="listData.status === 0" class="flex justify-end mt-3">
+                    <Button 
+                        label="Update Date" 
+                        icon="pi pi-pencil"
+                        class="p-button-warning p-button-sm"
+                        @click="showUpdateModal = true"
+                    />
+                </div>
             </div>
         </div>
     </div>
+    <Dialog 
+        header="Update CTC Collection Details" 
+        v-model:visible="showUpdateModal" 
+        modal 
+        :style="{ width: '400px' }"
+    >
+        <div class="flex flex-col gap-4">
+            
+            <div  >
+                <label class="font-medium">Collect Date & Time</label>
+                <InputText 
+                    type="datetime-local" 
+                    v-model="form.collectDatetime"
+                    class="w-full mt-1"
+                />
+            </div>
+
+            <div>
+                <label class="font-medium">Reach WH Date & Time</label>
+                <InputText 
+                    type="datetime-local" 
+                    v-model="form.reachWHDatetime"
+                    class="w-full mt-1"
+                />
+            </div>
+
+            <div class="flex justify-end gap-2 mt-4">
+                <Button label="Cancel" class="p-button-text" @click="showUpdateModal = false" />
+                <Button label="Save" class="p-button-success" @click="updateCTCDetails" :loading="loadingUpdate" />
+            </div>
+
+        </div>
+    </Dialog>
 </template>
 
 <script setup>
@@ -112,6 +153,56 @@ import { useRoute, useRouter } from 'vue-router';
 const route = useRoute();
 const listData = ref([]);
 const loading = ref(true);
+const toast = useToast();
+const showUpdateModal = ref(false);
+const loadingUpdate = ref(false);
+
+const form = ref({
+    collectDatetime: '',
+    reachWHDatetime: ''
+});
+
+function toLocalDateTimeString(dt) {
+    if (!dt) return null;
+    const d = new Date(dt);
+
+    const year = d.getFullYear();
+    const month = String(d.getMonth() + 1).padStart(2, '0');
+    const day = String(d.getDate()).padStart(2, '0');
+    const hour = String(d.getHours()).padStart(2, '0');
+    const minute = String(d.getMinutes()).padStart(2, '0');
+    const second = String(d.getSeconds()).padStart(2, '0');
+
+    return `${year}-${month}-${day} ${hour}:${minute}:${second}`;
+}
+
+const updateCTCDetails = async () => {
+    loadingUpdate.value = true;
+    const id = route.params.id
+    try {
+        const payload = new FormData();
+        payload.append('ctcID', id);
+        payload.append('collectDatetime',form.value.collectDatetime ? toLocalDateTimeString(form.value.collectDatetime): null);
+        payload.append('reachWHDatetime', form.value.reachWHDatetime? toLocalDateTimeString(form.value.reachWHDatetime): null);
+
+        const res = await api.post('collection/updateCTC', payload);
+
+        if (res.data?.status === 1) {
+            toast.add({ severity: 'success', summary: 'Updated', detail: 'CTC details updated', life: 3000 });
+            showUpdateModal.value = false;
+
+            // optionally reload data
+            await fetchData();
+        } else {
+            toast.add({ severity: 'error', summary: 'Error', detail: res.data?.message || 'Failed', life: 3000 });
+        }
+    } catch (err) {
+        console.error(err);
+        toast.add({ severity: 'error', summary: 'Error', detail: 'API error', life: 3000 });
+    } finally {
+        loadingUpdate.value = false;
+    }
+};
 
 const fetchData = async () => {
     try {

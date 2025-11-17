@@ -98,12 +98,12 @@ const sortItems = ref([
     {
         label: 'Sort by Ref No (A-Z)',
         icon: 'pi pi-sort-alpha-down',
-        command: () => sortBy('claimRefNo', 'asc')
+        command: () => sortBy('claimRefno', 'asc')
     },
     {
         label: 'Sort by Ref No (Z-A)',
         icon: 'pi pi-sort-alpha-up',
-        command: () => sortBy('claimRefNo', 'desc')
+        command: () => sortBy('claimRefno', 'desc')
     }
 ]);
 const selectedRows = ref([]);
@@ -380,7 +380,7 @@ onMounted(async () => {
             :loading="loading"
             :filters="filters"
             filterDisplay="menu"
-            :globalFilterFields="['claimRefNo', 'companyName1', 'city', 'collectDate', 'collectTime', 'status']"
+            :globalFilterFields="['claimRefno', 'created', 'city', 'collectDate', 'collectTime', 'status']"
         >
             <template #header>
                 <div class="flex items-center justify-between gap-4 w-full flex-wrap">
@@ -463,7 +463,7 @@ onMounted(async () => {
             </Column>
             <Column field="returnDate" header="Receive Date" style="min-width: 10rem">
                 <template #body="{ data }">
-                    {{ data.reachWH ? formatDate(data.reachWH) : 'Not Assigned' }}
+                    {{ data.reachWH ? formatDateFull(data.reachWH) : 'Not Assigned' }}
                 </template>
             </Column>
 

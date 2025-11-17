@@ -90,18 +90,89 @@
                         <tbody>
                             <tr class="border-b">
                                 <td class="px-4 py-2 font-medium">Delivery Date</td>
-                                <td class="px-4 py-2 text-right">{{ listData.deliveryDate && listData.deliveryTime ? formatDate(listData.deliveryDate) + ' ' + formatTime(listData.deliveryTime): 'Not Assigned'}}</td>
+                                <td class="px-4 py-2 text-right">{{ listData.scheduleDeliveryDate ? formatDateFull(listData.scheduleDeliveryDate) : 'Not Assigned' }}</td>
                             </tr>
                             <tr class="border-b">
                                 <td class="px-4 py-2 font-medium">Delivered  Date</td>
-                                <td class="px-4 py-2 text-right">{{ listData.scheduleDeliveryDate ? formatDateFull(listData.scheduleDeliveryDate) : 'Not Assigned' }}</td>
+                                <td class="px-4 py-2 text-right">{{ listData.deliveryDate && listData.deliveryTime ? formatDate(listData.deliveryDate) + ' ' + formatTime(listData.deliveryTime): 'Not Assigned'}}</td>
                             </tr>
                         </tbody>
                     </table>
                 </div>
+                <div  class="flex justify-end mt-3">
+                <Button v-if="listData.status === 0"
+                    label="Update Delivery"
+                    icon="pi pi-calendar"
+                    class="p-button-sm p-button-warning"
+                    @click="showScheduleModal = true"
+                />
+                <Button v-if="listData.status === 1"
+                    label="Update Delivered"
+                    icon="pi pi-truck"
+                    class="p-button-sm p-button-info"
+                    @click="showDeliveredModal = true"
+                />
+            </div>
             </div>
         </div>
     </div>
+    <Dialog
+        header="Update Schedule Warranty Return"
+        v-model:visible="showScheduleModal"
+        modal
+        :style="{ width: '400px' }"
+    >
+        <div class="flex flex-col gap-4">
+            <input type="hidden" v-model="form2.warrantyno" />
+            <div>
+                <label class="font-medium">Schedule Date</label>
+                <InputText
+                    type="date"
+                    v-model="form.scheduledata"
+                    class="w-full mt-1"
+                />
+            </div>
+
+            <div class="flex justify-end gap-2 mt-4">
+                <Button label="Cancel" class="p-button-text" @click="showScheduleModal = false" />
+                <Button label="Save" class="p-button-success" :loading="loadingSchedule" @click="updateSchedule" />
+            </div>
+
+        </div>
+    </Dialog>
+    <Dialog
+        header="Update Delivered Warranty Return"
+        v-model:visible="showDeliveredModal"
+        modal
+        :style="{ width: '400px' }"
+    >
+        <div class="flex flex-col gap-4">
+            <input type="hidden" v-model="form2.warrantyno" />
+            <div>
+                <label class="font-medium">Delivered Date</label>
+                <InputText
+                    type="date"
+                    v-model="form2.delivereddate"
+                    class="w-full mt-1"
+                />
+            </div>
+
+            <div>
+                <label class="font-medium">Delivered Time</label>
+                <InputText
+                    type="time"
+                    v-model="form2.deliveredtime"
+                    class="w-full mt-1"
+                />
+            </div>
+
+            <div class="flex justify-end gap-2 mt-4">
+                <Button label="Cancel" class="p-button-text" @click="showDeliveredModal = false" />
+                <Button label="Save" class="p-button-success" :loading="loadingDelivered" @click="updateDelivered" />
+            </div>
+
+        </div>
+    </Dialog>
 </template>
 
 <script setup>
@@ -112,6 +183,84 @@ import { useRoute, useRouter } from 'vue-router';
 const route = useRoute();
 const listData = ref([]);
 const loading = ref(true);
+const toast =useToast();
+const showScheduleModal = ref(false);
+const loadingSchedule = ref(false);
+
+const form = ref({
+    warrantyno: '',
+    scheduledata: '' // user selects date
+});
+
+const updateSchedule = async () => {
+    if (!form.value.scheduledata) {
+        toast.add({ severity: 'warn', summary: 'Warning', detail: 'Please select a date', life: 3000 });
+        return;
+    }
+    loadingSchedule.value = true;
+
+    try {
+        const payload = new FormData();
+        payload.append('warrantyno', form.value.warrantyno);
+        payload.append('scheduledata', form.value.scheduledata);
+        const res = await api.post('update-schedule-warranty', payload);
+
+        if (res.data?.status === 1) {
+            toast.add({ severity: 'success', summary: 'Updated', detail: 'Schedule updated successfully', life: 3000 });
+            showScheduleModal.value = false;
+            // optionally reload details
+            await fetchData();
+        } else {
+            toast.add({ severity: 'error', summary: 'Error', detail: res.data?.message || 'Failed', life: 3000 });
+        }
+    } catch (err) {
+        console.error(err);
+        toast.add({ severity: 'error', summary: 'Error', detail: 'API error', life: 3000 });
+    } finally {
+        loadingSchedule.value = false;
+    }
+};
+
+const showDeliveredModal = ref(false);
+const loadingDelivered = ref(false);
+
+const form2 = ref({
+    warrantyno: '', // prefill from your data
+    delivereddate: '',
+    deliveredtime: ''
+});
+
+const updateDelivered = async () => {
+    if (!form2.value.delivereddate || !form2.value.deliveredtime) {
+        toast.add({ severity: 'warn', summary: 'Warning', detail: 'Please select date and time', life: 3000 });
+        return;
+    }
+
+    loadingDelivered.value = true;
+
+    try {
+        const payload = new FormData();
+        payload.append('warrantyno', form2.value.warrantyno);
+        payload.append('delivereddate', form2.value.delivereddate);
+        payload.append('deliveredtime', form2.value.deliveredtime);
+
+        const res = await api.post('update-delivered-warranty', payload);
+
+        if (res.data?.status === 1) {
+            toast.add({ severity: 'success', summary: 'Updated', detail: 'Delivered info updated', life: 3000 });
+            showDeliveredModal.value = false;
+            // optionally reload details
+            await fetchData();
+        } else {
+            toast.add({ severity: 'error', summary: 'Error', detail: res.data?.message || 'Failed', life: 3000 });
+        }
+    } catch (err) {
+        console.error(err);
+        toast.add({ severity: 'error', summary: 'Error', detail: 'API error', life: 3000 });
+    } finally {
+        loadingDelivered.value = false;
+    }
+};
 
 const fetchData = async () => {
     try {
@@ -119,6 +268,8 @@ const fetchData = async () => {
         const response = await api.get(`return/detail/${id}`);
         if ( (response.data.admin_data)) {
             listData.value = response.data.admin_data;
+            form.value.warrantyno = listData.value.claim?.claim_ref_no || '';
+            form2.value.warrantyno = listData.value.claim?.claim_ref_no || '';
         } else {
             console.error('API returned error or invalid data:', response.data);
             toast.add({ severity: 'error', summary: 'Error', detail: 'Failed to load data', life: 3000 });
