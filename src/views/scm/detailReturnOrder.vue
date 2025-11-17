@@ -148,7 +148,7 @@
                             </tbody>
                         </table>
                     </div>
-                    <div v-if="!loading && returnList && !returnList.delivery_information?.pickup_datetime && !returnList.delivery_information?.receive_datetime" class="flex justify-end mt-3">
+                    <!-- <div v-if="!loading && returnList && !returnList.delivery_information?.pickup_datetime && !returnList.delivery_information?.receive_datetime" class="flex justify-end mt-3">
                         <Button  
                             style="width: auto !important"
                             label="Update Date"
@@ -156,7 +156,7 @@
                             class="p-button-sm p-button-warning"
                             @click="updateDialog = true"
                         />
-                    </div>
+                    </div> -->
                 </div>
                 <div class="card flex flex-col w-full">
                     <div class="flex items-center justify-between border-b pb-3 mb-4">
