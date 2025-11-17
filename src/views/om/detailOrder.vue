@@ -21,7 +21,7 @@
 
                     <div class="flex flex-col md:flex-row gap-4">
                         <div class="w-full">
-                            <span class="text-sm font-bold text-gray-700">Dealer Name</span>
+                            <span class="text-sm font-bold text-gray-700">Customer Name</span>
                             <p class="text-lg font-medium">{{ customerInfo.dealerName || '-' }}</p>
                         </div>
                         <div class="w-full">
@@ -172,6 +172,12 @@
                                     </td>
                                 </tr>
                                 <tr class="border-b even:bg-gray-50">
+                                    <td class="px-4 py-2 font-medium">Company Account No.</td>
+                                    <td class="px-4 py-2 text-right font-semibold">
+                                        {{ shippingDetail?.custAccountNo || '-' }}
+                                    </td>
+                                </tr>
+                                <tr class="border-b even:bg-gray-50">
                                     <td class="px-4 py-2 font-medium">Address</td>
                                     <td class="px-4 py-2 text-right font-semibold">
                                         {{
@@ -244,7 +250,7 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted, watch } from 'vue'; 
+import { ref, computed, onMounted, watch } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { useToast } from 'primevue/usetoast';
 import api from '@/service/api';

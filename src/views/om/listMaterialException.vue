@@ -15,6 +15,7 @@
                     dataKey="id"
                     :rowHover="true"
                     :filters="filters"
+                    :globalFilterFields="['materialCode', 'exceptionType']"
                     responsiveLayout="scroll"
                     class="rounded-table"
                     v-model:expandedRows="expandedRows"
@@ -101,10 +102,7 @@
                     <template #expansion="{ data }">
                         <div class="p-4 bg-gray-50 border-t border-gray-200 rounded-b-lg">
                             <DataTable :value="data.dealers" :rows="5" :paginator="data.dealers && data.dealers.length > 5" responsiveLayout="scroll" size="small" class="rounded-table">
-                                <h4 class="font-semibold text-gray-700 p-3 ml-2">
-                                    Dealers for <span class="font-bold text-primary-400">{{ data.materialCode }}</span>
-                                </h4>
-                                <Column field="label" header="Dealer Name" style="min-width: 12rem" />
+                                <Column field="label" header="Customer Name" style="min-width: 3rem" />
                                 <Column field="group" header="State" style="min-width: 10rem" />
                             </DataTable>
                         </div>

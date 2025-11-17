@@ -17,7 +17,7 @@
             :rowHover="true"
             :filters="filters"
             filterDisplay="menu"
-            :globalFilterFields="['custAccountNo', 'customerName', 'deliveryDate', 'expiry', 'orderStatus']"
+            :globalFilterFields="['custAccountNo', 'orderNo', 'customerName', 'deliveryDate', 'expiry', 'orderStatus']"
             responsiveLayout="scroll"
             stripedRows
             sortField="created"
@@ -45,7 +45,7 @@
                     {{ formatDate(data.created) }}
                 </template>
             </Column>
-            <Column field="orderNo" header="Order No." style="min-width: 10rem">
+            <Column field="orderNo" header="Order No." style="min-width: 15rem">
                 <template #body="{ data }">
                     <RouterLink :to="`/om/detailBackOrder/${data.orderNo}`" class="hover:underline font-bold text-primary-400">
                         {{ data.orderNo }}
@@ -53,8 +53,8 @@
                 </template>
             </Column>
 
-            <Column field="custAccountNo" header="Dealer Acc No" style="min-width: 10rem" />
-            <Column field="customerName" header="Dealer Name" style="min-width: 10rem" />
+            <Column field="custAccountNo" header="Customer Account No." style="min-width: 8rem" />
+            <Column field="customerName" header="Customer Name" style="min-width: 10rem" />
             <Column field="deliveryType" header="Delivery" style="min-width: 10rem" />
 
             <Column field="orderDate" header="Order Date" style="min-width: 8rem">
@@ -108,8 +108,8 @@ const filters = ref({
 const statusTabs = [
     { label: 'Pending', status: 0, type: 'PENDING' },
     { label: 'Completed', status: 1, type: 'COMPLETED' },
-    { label: 'Cancelled', status: 2, type: 'CANCELLED' },
-    { label: 'Expired', status: 3, type: 'EXPIRED' }
+    { label: 'Cancelled', status: 9, type: 'CANCELLED' },
+    { label: 'Expired', status: '', type: 'EXPIRED' }
 ];
 const fetchBackOrders = async () => {
     try {
@@ -223,7 +223,7 @@ const getStatusLabel = (status) => {
         case 1:
             return 'Completed';
         default:
-            return 'Unknown';
+            return 'Cancelled';
     }
 };
 
@@ -234,7 +234,7 @@ const getStatusSeverity = (status) => {
         case 1:
             return 'success';
         default:
-            return 'contrast';
+            return 'danger';
     }
 };
 </script>

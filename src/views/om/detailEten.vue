@@ -12,10 +12,6 @@
                                 </RouterLink>
                                 <div class="text-2xl font-bold text-gray-800">Customer Information</div>
                             </div>
-
-                            <RouterLink :to="`/om/editEten/${$route.params.custAccNo}`">
-                                <Button type="button" label="Edit Profile" />
-                            </RouterLink>
                         </div>
                         <div class="text-xl font-semibold pb-2">🏢 Company Details</div>
 

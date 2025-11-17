@@ -9,9 +9,6 @@
                             <Button icon="pi pi-arrow-left font-bold" class="p-button-text p-button-secondary text-xl" size="big" v-tooltip="'Back'" />
                         </RouterLink>
                         <div class="text-2xl font-bold text-gray-800">Back Order Detail</div>
-                        <div class="flex-grow flex justify-end">
-                            <Button label="Export" style="width: fit-content" icon="pi pi-file-export" class="p-button" />
-                        </div>
                     </div>
 
                     <div class="font-semibold text-xl border-b pb-2 mt-2">🏬 Customer Information</div>
@@ -189,15 +186,11 @@
                                 </tr>
                                 <tr class="border-b">
                                     <td class="px-4 py-2 font-medium">SAP Order Type</td>
-                                    <td class="px-4 py-2 text-right">{{ order.sapordertype }}</td>
+                                    <td class="px-4 py-2 text-right">{{ order.sapordertype || '-' }}</td>
                                 </tr>
                                 <tr class="border-b">
-                                    <td class="px-4 py-2 font-medium">SO No.</td>
-                                    <td class="px-4 py-2 text-right">{{ getFirstSoNo() || '-' }}</td>
-                                </tr>
-                                <tr class="border-b">
-                                    <td class="px-4 py-2 font-medium">DO No.</td>
-                                    <td class="px-4 py-2 text-right">{{ getFirstDoNo() || '-' }}</td>
+                                    <td class="px-4 py-2 font-medium">Storaage Location</td>
+                                    <td class="px-4 py-2 text-right">{{ order.storagelocation || '-' }}</td>
                                 </tr>
                                 <tr class="border-b">
                                     <td class="px-4 py-2 font-medium">Created</td>
@@ -259,6 +252,12 @@
                                         <td class="px-4 py-2 font-medium">Company Name</td>
                                         <td class="px-4 py-2 text-right font-semibold">
                                             {{ formatCompanyName(shippingDetail) }}
+                                        </td>
+                                    </tr>
+                                    <tr class="border-b even:bg-gray-50">
+                                        <td class="px-4 py-2 font-medium">Company Account No.</td>
+                                        <td class="px-4 py-2 text-right font-semibold">
+                                            {{ shippingDetail?.custAccountNo || '-' }}
                                         </td>
                                     </tr>
                                     <tr class="border-b even:bg-gray-50">

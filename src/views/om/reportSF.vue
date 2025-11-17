@@ -602,7 +602,7 @@ const exportExcel = async () => {
             month: filters.month
         };
 
-        const response = await api.post('report/excel-sales-forecast', exportFilters, {
+        const response = await api.postExtra('report/excel-sales-forecast', exportFilters, {
             responseType: 'blob'
         });
 

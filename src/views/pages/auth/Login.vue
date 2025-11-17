@@ -2,8 +2,10 @@
 import { ref } from 'vue';
 import { useRouter } from 'vue-router';
 import api from '@/service/api';
+import { useToast } from 'primevue/usetoast';
 
 const router = useRouter();
+const toast = useToast();
 const email = ref('');
 const password = ref('');
 const checked = ref(false);
@@ -27,14 +29,37 @@ const handleLogin = async () => {
       localStorage.setItem('token_expires_at', tokenData.expires_at);
       localStorage.setItem('token_type', tokenData.token_type);
 
-      router.push('/');
+      // Success toast
+      toast.add({
+        severity: 'success',
+        summary: 'Login Successful',
+        detail: 'Welcome back! Redirecting...',
+        life: 3000
+      });
+
+      // Small delay to show the success message before redirect
+      setTimeout(() => {
+        router.push('/');
+      }, 1000);
     } else {
       console.error('Login failed:', response.data);
-      // Optionally show error to user
+      // Error toast for login failure
+      toast.add({
+        severity: 'error',
+        summary: 'Login Failed',
+        detail: response.data.message || 'Invalid email or password',
+        life: 5000
+      });
     }
   } catch (error) {
     console.error('Login error:', error);
-    // Optionally show error to user
+    // Error toast for network/API errors
+    toast.add({
+      severity: 'error',
+      summary: 'Login Error',
+      detail: error.response?.data?.message || 'An error occurred during login',
+      life: 5000
+    });
   } finally {
     loading.value = false;
   }
@@ -43,6 +68,9 @@ const handleLogin = async () => {
 
 <template>
   <div class="flex min-h-screen">
+    <!-- Toast component -->
+    <Toast position="top-right" />
+
     <!-- Left Side: Logo / Image -->
     <div class="hidden md:flex w-1/2 bg-gradient-to-b from-blue-300 to-blue-400 items-center justify-center">
       <div class="text-center px-8">
@@ -91,15 +119,6 @@ const handleLogin = async () => {
               input-class="w-full px-4 py-3 rounded-lg focus:border-primary focus:ring-1 focus:ring-primary transition"
             />
           </div>
-
-          <!-- Remember me & Forgot password NEED API -->
-          <!-- <div class="flex items-center justify-between text-gray-600 dark:text-gray-300"> 
-            <div class="flex items-center gap-2">
-              <Checkbox v-model="checked" id="rememberme1" binary />
-              <label for="rememberme1">Remember me</label>
-            </div>
-            <span class="text-primary font-medium cursor-pointer hover:underline">Forgot password?</span>
-          </div> -->
 
           <!-- Login Button -->
           <Button

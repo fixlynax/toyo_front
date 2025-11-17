@@ -189,16 +189,10 @@ const refreshData = async () => {
                 </template>
             </Column>
 
-            <Column field="dealerName" header="Dealer Name" style="min-width: 10rem">
+            <Column field="dealerName" header="Customer Name" style="min-width: 10rem">
                 <template #body="{ data }">
                     <span v-if="data.dealerName">{{ data.dealerName }}</span>
                     <span v-else class="text-gray-400">-</span>
-                </template>
-            </Column>
-
-                        <Column field="company" header="Company" style="min-width: 10rem">
-                <template #body="{ data }">
-                    <Chip :label="data.company" class="bg-blue-100 text-blue-800" />
                 </template>
             </Column>
 

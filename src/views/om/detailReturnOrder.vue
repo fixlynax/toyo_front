@@ -13,7 +13,7 @@
                     <div class="font-semibold text-xl border-b pb-2 mt-2">🏬 Customer Details</div>
                     <div class="grid grid-cols-2 gap-4">
                         <div>
-                            <span class="text-sm text-gray-500">Dealer Name</span>
+                            <span class="text-sm text-gray-500">Customer Name</span>
                             <p class="text-lg font-medium">{{ dealerShop.companyName1 || '-' }} {{ dealerShop.companyName2 }} {{ dealerShop.companyName3 }} {{ dealerShop.companyName4 }}</p>
                         </div>
                         <div>
