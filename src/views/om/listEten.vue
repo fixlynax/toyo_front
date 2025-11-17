@@ -34,7 +34,7 @@
                         <Button type="button" icon="pi pi-cog" class="p-button" />
                     </div>
                     <div class="flex gap-2">
-                        <Button type="button" label="Bulk Update" @click="fetchData" />
+                        <!-- <Button type="button" label="Bulk Update" @click="fetchData" /> -->
                         <!-- Right: Create Customer Button -->
                         <RouterLink to="/om/createEten">
                             <Button type="button" label="Create" icon="pi pi-plus" />
