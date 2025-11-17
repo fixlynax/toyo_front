@@ -221,6 +221,10 @@
                             <tbody>
                                 <!-- Terms -->
                                 <tr class="border-b">
+                                    <td class="px-4 py-2 font-medium">eTEN No.</td>
+                                    <td class="px-4 py-2 font-bold text-right">{{ form.memberCode }}</td>
+                                </tr>
+                                <tr class="border-b">
                                     <td class="px-4 py-2 font-medium">Account No.</td>
                                     <td class="px-4 py-2 font-bold text-right">{{ form.custAccountNo }}</td>
                                 </tr>
