@@ -562,9 +562,9 @@ function validateForm(formData) {
         'companyName1',
         'firstname',
         'email',
-        'phoneno',
-        'password',
-        'confirmpassword'
+        'phoneno'
+        // 'password',
+        // 'confirmpassword'
     ];
 
     const missingFields = requiredFields.filter(field => !formData[field]);

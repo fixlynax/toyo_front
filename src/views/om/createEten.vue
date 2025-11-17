@@ -295,7 +295,7 @@ function isSapShipToField(shipToAccountNo: string, fieldName: string): boolean {
 function handleSubmit() {
     try {
         // Validate required fields
-        if (!form.value.firstname || !form.value.lastname || !form.value.email || !form.value.phoneno || !form.value.password) {
+        if (!form.value.firstname || !form.value.lastname || !form.value.email || !form.value.phoneno) {
             toast.add({
                 severity: 'warn',
                 summary: 'Incomplete Form',
