@@ -748,6 +748,11 @@ const router = createRouter({
                     name: 'Create-Messaging',
                     component: () => import('@/views/billing/createMessaging.vue')
                 },
+                {
+                    path: 'billing/BCP',
+                    name: 'Create-Messaging',
+                    component: () => import('@/views/billing/BCP.vue')
+                },
 
                 // ===============================
                 // SCM (Supply Chain Management)
