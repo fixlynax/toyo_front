@@ -173,7 +173,7 @@
                                 </tr>
                                 <tr class="border-b">
                                     <td class="px-4 py-2 font-medium">Pickup</td>
-                                    <td class="px-4 py-2 text-right">{{ orderDelList.driverInformation?.getOrderStatusText2? formatDateFull(orderDelList.driverInformation.pickup_datetime): 'Not Assigned' }}</td>
+                                    <td class="px-4 py-2 text-right">{{ orderDelList.driverInformation?.pickup_datetime? formatDateFull(orderDelList.driverInformation.pickup_datetime): 'Not Assigned' }}</td>
                                 </tr>
                                 <tr>
                                     <td class="px-4 py-2 font-medium">Created</td>
