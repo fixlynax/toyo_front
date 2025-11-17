@@ -53,7 +53,7 @@
                     <div class="grid grid-cols-1 gap-4 mt-4 mb-2">
                         <div>
                             <span class="text-sm text-gray-500">Back Order No</span>
-                            <p class="text-lg font-semibold">{{ order.bo_orderno || '-'}}</p>
+                            <p class="text-lg font-semibold">{{ order.bo_orderno || '-' }}</p>
                         </div>
                     </div>
 
@@ -105,11 +105,17 @@
                     <div class="font-semibold text-xl border-b pb-2">🚛 Fulfillment Orders</div>
 
                     <div v-for="fulfillOrder in order.list_order" :key="fulfillOrder.id" class="border rounded-lg p-4 mb-4 bg-gray-50">
-                        <div class="flex justify-between items-center mb-3">
+                        <div class="flex justify-between items-start mb-3">
+                            <!-- Left: Order -->
                             <div>
                                 <span class="font-bold text-lg text-blue-700">Order: {{ fulfillOrder.order_no }}</span>
                             </div>
-                            <div class="text-xm font-bold text-black-500">SO No: {{ fulfillOrder.so_no }}</div>
+
+                            <!-- Right: SO + DO stacked -->
+                            <div class="flex flex-col text-right">
+                                <div class="text-sm font-bold text-black-500">SO No: {{ fulfillOrder.so_no }}</div>
+                                <div class="text-sm font-bold text-black-500">DO No: {{ fulfillOrder.do_no }}</div>
+                            </div>
                         </div>
 
                         <DataTable :value="getFulfillmentItems(fulfillOrder)" class="text-sm rounded-table" stripedRows>
@@ -221,8 +227,6 @@
                 <!-- FULFILLMENT SUMMARY -->
                 <div class="card flex flex-col w-full" v-if="fulfillmentSummary.length > 0">
                     <div class="text-2xl font-bold text-gray-800 border-b pb-2 mb-3">📊 Fulfillment Summary</div>
-                    
-                    
 
                     <div v-for="item in fulfillmentSummary" :key="item.materialid" class="mb-3 p-3 border rounded">
                         <div class="flex justify-between items-center mb-2">
@@ -239,45 +243,45 @@
                     </div>
                 </div>
 
-                                    <!-- SHIPPING INFO -->
-                    <div class="card flex flex-col w-full mb-4">
-                        <div class="flex items-center justify-between border-b pb-3 mb-4">
-                            <div class="text-2xl font-bold text-gray-800">Shipping Info</div>
-                        </div>
-
-                        <div class="overflow-x-auto">
-                            <table class="w-full text-sm text-left text-gray-700">
-                                <tbody>
-                                    <tr class="border-b even:bg-gray-50">
-                                        <td class="px-4 py-2 font-medium">Company Name</td>
-                                        <td class="px-4 py-2 text-right font-semibold">
-                                            {{ formatCompanyName(shippingDetail) }}
-                                        </td>
-                                    </tr>
-                                    <tr class="border-b even:bg-gray-50">
-                                        <td class="px-4 py-2 font-medium">Company Account No.</td>
-                                        <td class="px-4 py-2 text-right font-semibold">
-                                            {{ shippingDetail?.custAccountNo || '-' }}
-                                        </td>
-                                    </tr>
-                                    <tr class="border-b even:bg-gray-50">
-                                        <td class="px-4 py-2 font-medium">Address</td>
-                                        <td class="px-4 py-2 text-right font-semibold">
-                                            {{ formatAddress(shippingDetail) }}
-                                        </td>
-                                    </tr>
-                                    <tr class="border-b even:bg-gray-50">
-                                        <td class="px-4 py-2 font-medium">Phone No</td>
-                                        <td class="px-4 py-2 text-right font-semibold">{{ shippingDetail?.phoneNumber || '-' }}</td>
-                                    </tr>
-                                    <tr class="border-b even:bg-gray-50">
-                                        <td class="px-4 py-2 font-medium">Email</td>
-                                        <td class="px-4 py-2 text-right font-semibold">{{ shippingDetail?.emailAddress || '-' }}</td>
-                                    </tr>
-                                </tbody>
-                            </table>
-                        </div>
+                <!-- SHIPPING INFO -->
+                <div class="card flex flex-col w-full mb-4">
+                    <div class="flex items-center justify-between border-b pb-3 mb-4">
+                        <div class="text-2xl font-bold text-gray-800">Shipping Info</div>
                     </div>
+
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-sm text-left text-gray-700">
+                            <tbody>
+                                <tr class="border-b even:bg-gray-50">
+                                    <td class="px-4 py-2 font-medium">Company Name</td>
+                                    <td class="px-4 py-2 text-right font-semibold">
+                                        {{ formatCompanyName(shippingDetail) }}
+                                    </td>
+                                </tr>
+                                <tr class="border-b even:bg-gray-50">
+                                    <td class="px-4 py-2 font-medium">Company Account No.</td>
+                                    <td class="px-4 py-2 text-right font-semibold">
+                                        {{ shippingDetail?.custAccountNo || '-' }}
+                                    </td>
+                                </tr>
+                                <tr class="border-b even:bg-gray-50">
+                                    <td class="px-4 py-2 font-medium">Address</td>
+                                    <td class="px-4 py-2 text-right font-semibold">
+                                        {{ formatAddress(shippingDetail) }}
+                                    </td>
+                                </tr>
+                                <tr class="border-b even:bg-gray-50">
+                                    <td class="px-4 py-2 font-medium">Phone No</td>
+                                    <td class="px-4 py-2 text-right font-semibold">{{ shippingDetail?.phoneNumber || '-' }}</td>
+                                </tr>
+                                <tr class="border-b even:bg-gray-50">
+                                    <td class="px-4 py-2 font-medium">Email</td>
+                                    <td class="px-4 py-2 text-right font-semibold">{{ shippingDetail?.emailAddress || '-' }}</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
             </div>
         </div>
     </Fluid>
