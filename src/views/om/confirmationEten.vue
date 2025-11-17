@@ -398,7 +398,7 @@
                         <span class="text-sm text-gray-500">Phone No.</span>
                         <p class="text-lg font-medium">{{ form.phoneno || '-' }}</p>
                     </div>
-                    <div>
+                    <!-- <div>
                         <div class="w-full">
                             <span class="text-sm text-gray-500">Password</span>
                             <div class="flex items-center">
@@ -411,8 +411,8 @@
                                 </button>
                             </div>
                         </div>
-                    </div>
-                    <div>
+                    </div> -->
+                    <!-- <div>
                         <div class="w-full">
                             <span class="text-sm text-gray-500">Confirm Password</span>
                             <div class="flex items-center">
@@ -425,7 +425,7 @@
                                 </button>
                             </div>
                         </div>
-                    </div>
+                    </div> -->
                 </div>
 
                 <div class="flex flex-col md:flex-row justify-end gap-2 mt-6">
