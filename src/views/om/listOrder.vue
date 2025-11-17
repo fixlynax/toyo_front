@@ -161,11 +161,11 @@ const formatDate = (dateString) => {
                     </template>
                 </Column>
 
-                <Column field="custAccountNo" header="Dealer Acc No" style="min-width: 6rem">
+                <Column field="custAccountNo" header="Customer Acc No" style="min-width: 6rem">
                     <template #body="{ data }">{{ data.custAccountNo || '-' }}</template>
                 </Column>
 
-                <Column field="companyName" header="Dealer Name" style="min-width: 10rem">
+                <Column field="companyName" header="Customer Name" style="min-width: 10rem">
                     <template #body="{ data }">{{ data.companyName || '-' }}</template>
                 </Column>
 
