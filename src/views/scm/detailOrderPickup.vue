@@ -133,7 +133,7 @@
                 </div>
             </div>
 
-                        <div class="md:w-1/3 flex flex-col">
+            <div class="md:w-1/3 flex flex-col">
                 <div class="card flex flex-col w-full">
                     <div class="flex items-center justify-between border-b pb-3 mb-4">
                         <div class="text-2xl font-bold text-gray-800">Advance Info</div>
@@ -182,13 +182,15 @@
                             </tbody>
                         </table>
                     </div>
-
-                    <!-- Action Buttons -->
-                    <div class="flex justify-end mt-4 gap-2" v-if="orderDelList.orderstatus === 0">
-                        <Button label="Reject" severity="danger" size="small" @click="onRejectReturnOrder" :loading="loadingAction === 'reject'" />
-                        <Button label="Approve" severity="success" size="small" @click="onApproveReturnOrder" :loading="loadingAction === 'approve'" />
+                    <div v-if="!orderDelList?.driverInformation?.pickup_datetime" class="flex justify-end mt-3">
+                        <Button  
+                            style="width: auto !important"
+                            label="Update Pickup Date"
+                            icon="pi pi-calendar"
+                            class="p-button-sm p-button-warning"
+                            @click="confirmUpdatePickup(orderDelList)"
+                        />
                     </div>
-
                 </div>
             </div>
         </div>
@@ -200,11 +202,45 @@ import api from '@/service/api';
 import { useToast } from 'primevue/usetoast';
 import { onMounted, ref, computed } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
-
+import { useConfirm } from 'primevue';
 const route = useRoute();
 const router = useRouter();
 const orderDelList = ref({});
 const loading = ref(false);
+
+const toast = useToast();
+const confirmation = useConfirm();
+
+const confirmUpdatePickup = (data) => {
+  confirmation.require({
+    message: `Do you want to update the pickup for order ${data.order_no} ?`,
+    header: 'Update Pickup Date',
+    icon: 'pi pi-exclamation-triangle',
+    acceptLabel: 'Yes',
+    rejectLabel: 'No',
+    accept: async () => {
+      try {
+        const payload = new FormData();
+        payload.append('orderno', data.order_no);
+
+        const res = await api.post('update-collect-time', payload);
+
+        if (res.data?.status === 1) {
+          toast.add({ severity: 'success', summary: 'Updated', detail: 'Pickup date set to now', life: 3000 });
+          InitfetchData(); // refresh table
+        } else {
+          toast.add({ severity: 'error', summary: 'Error', detail: res.data?.message || 'Failed', life: 3000 });
+        }
+      } catch (err) {
+        console.error(err);
+        toast.add({ severity: 'error', summary: 'Error', detail: 'API error', life: 3000 });
+      }
+    },
+    reject: () => {
+      // optional action on cancel
+    }
+  });
+};
 
 const formatItemNo = (itemNo) => {
     if (!itemNo) return '-';

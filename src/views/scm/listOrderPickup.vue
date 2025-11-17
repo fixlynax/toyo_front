@@ -91,12 +91,28 @@
                 </Column>
                 <Column field="pickup_datetime" header="Pickup Date" style="min-width: 10rem">
                     <template #body="{ data }">
-                        {{ data.driverInformation?.pickup_datetime? formatDateFull(data.driverInformation.pickup_datetime): 'Not Assigned' }}
+                        {{ data.driverInformation?.pickup_datetime ? formatDateFull(data.driverInformation.pickup_datetime) : 'Not Assigned' }}
                     </template>
                 </Column>
                 <Column field="orderstatus" header="Status" style="min-width: 8rem">
                     <template #body="{ data }">
                         <Tag :value="getStatusLabel2(data.status)" :severity="getStatusSeverity2(data.status)" />
+                    </template>
+                </Column>
+                <Column 
+                    v-if="showPickupColumn"
+                    field="pickup_datetime" 
+                    header="Action" 
+                    style="min-width: 10rem">
+                    <template #body="{ data }">
+                        <div class="flex justify-center">
+                            <Button 
+                                v-if="!data.driverInformation?.pickup_datetime"
+                                icon="pi pi-pencil" 
+                                class="p-button-sm p-button-text p-button-warning" 
+                                @click="confirmUpdatePickup(data)"
+                            />
+                        </div>
                     </template>
                 </Column>
             </DataTable>
@@ -110,6 +126,8 @@ import { FilterMatchMode } from '@primevue/core/api';
 import { RouterLink } from 'vue-router';
 import api from '@/service/api';
 import LoadingPage from '@/components/LoadingPage.vue';
+import { useToast } from 'primevue/usetoast';
+import { useConfirm } from 'primevue';
 
 const listData = ref([]);
 const loading = ref(true);
@@ -122,6 +140,11 @@ const activeTabIndex = ref(0);
 const filters = ref({
     global: { value: null, matchMode: FilterMatchMode.CONTAINS }
 });
+
+const showPickupColumn = computed(() => {
+    return filteredList.value.some(item => !item.driverInformation?.pickup_datetime);
+});
+
 const statusTabs = [
     { label: 'Pending', status: 0  ,code:"PENDING"},
     { label: 'Completed', status: 1 ,code:"COMPLETED" },
@@ -143,6 +166,41 @@ const filterByTab = () => {
 onMounted(async () => {
     fetchData();
 });
+
+const toast = useToast();
+const confirmation = useConfirm();
+
+const confirmUpdatePickup = (data) => {
+  confirmation.require({
+    message: `Do you want to update the pickup for order ${data.order_no} ?`,
+    header: 'Update Pickup Date',
+    icon: 'pi pi-exclamation-triangle',
+    acceptLabel: 'Yes',
+    rejectLabel: 'No',
+    accept: async () => {
+      try {
+        const payload = new FormData();
+        payload.append('orderno', data.order_no);
+
+        const res = await api.post('update-collect-time', payload);
+
+        if (res.data?.status === 1) {
+          toast.add({ severity: 'success', summary: 'Updated', detail: 'Pickup date set to now', life: 3000 });
+          fetchData(); // refresh table
+        } else {
+          toast.add({ severity: 'error', summary: 'Error', detail: res.data?.message || 'Failed', life: 3000 });
+        }
+      } catch (err) {
+        console.error(err);
+        toast.add({ severity: 'error', summary: 'Error', detail: 'API error', life: 3000 });
+      }
+    },
+    reject: () => {
+      // optional action on cancel
+    }
+  });
+};
+
 
 function formatDate(dateString) {
     if (!dateString) return '';
