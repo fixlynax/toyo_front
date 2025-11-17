@@ -148,6 +148,15 @@
                             </tbody>
                         </table>
                     </div>
+                    <div v-if="!loading && returnList && !returnList.delivery_information?.pickup_datetime && !returnList.delivery_information?.receive_datetime" class="flex justify-end mt-3">
+                        <Button  
+                            style="width: auto !important"
+                            label="Update Date"
+                            icon="pi pi-calendar"
+                            class="p-button-sm p-button-warning"
+                            @click="updateDialog = true"
+                        />
+                    </div>
                 </div>
                 <div class="card flex flex-col w-full">
                     <div class="flex items-center justify-between border-b pb-3 mb-4">
@@ -192,6 +201,33 @@
             </div>
         </div>
     </Fluid>
+    <Dialog
+        header="Update Return Date Details"
+        v-model:visible="updateDialog"
+        modal
+        :style="{ width: '500px' }"
+    >
+        <input type="hidden" v-model="form.returnID" />
+        <div class="flex flex-col gap-4">
+            <Calendar
+                v-model="form.scheduleDate"
+                dateFormat="yy-mm-dd"
+                placeholder="Select Schedule Date"
+            />
+
+            <Calendar
+                v-model="form.deliveryDatetime"
+                showTime
+                hourFormat="24"
+                placeholder="Select Delivery Datetime"
+            />
+
+            <div class="flex justify-end gap-2 mt-4">
+                <Button label="Cancel" class="p-button-text" @click="updateDialog = false" />
+                <Button label="Save" class="p-button-success" :loading="loadingUpdate" @click="saveReturnUpdate" />
+            </div>
+        </div>
+    </Dialog>
 </template>
 
 <script setup>
@@ -201,6 +237,12 @@ import { useToast } from 'primevue/usetoast';
 import { onMounted, ref, computed } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 
+defineProps({
+  id: {
+    type: [String, Number],
+    required: true
+  }
+});
 const toast = useToast();
 const exportLoading = ref(false);
 const importLoading = ref(false);
@@ -233,6 +275,64 @@ const subtotal = computed(() => {
     const arr = returnList.value.return_order_array || [];
     return arr.reduce((sum, item) => sum + (Number(item.unitprice) * Number(item.qty)), 0);
 });
+
+const updateDialog = ref(false);
+const loadingUpdate = ref(false);
+
+const form = ref({
+    returnID: 0,
+    scheduleDate: '',
+    deliveryDatetime: ''
+});
+
+const saveReturnUpdate = async () => {
+    if (!form.value.scheduleDate && !form.value.deliveryDatetime) {
+        toast.add({ severity: 'warn', summary: 'Warning', detail: 'Please select a date', life: 3000 });
+        return;
+    }
+    loadingUpdate.value = true;
+
+    try {
+        const payload = new FormData();
+        payload.append('returnID', form.value.returnID);
+        payload.append('scheduleDate', formatDateSubmit(form.value.scheduleDate));
+        payload.append('deliveryDatetime', formatDatetimeSubmit(form.value.deliveryDatetime));
+
+        const res = await api.post('return/updateReturn', payload);
+
+        if (res.data?.status === 1) {
+            toast.add({ severity: 'success', summary: 'Updated', detail: 'Return Details updated successfully', life: 3000 });
+            updateDialog.value = false;
+            // optionally reload details
+            await InitfetchData();
+        } else {
+            toast.add({ severity: 'error', summary: 'Error', detail: res.data?.message || 'Failed', life: 3000 });
+        }
+    } catch (err) {
+        console.error(err);
+        toast.add({ severity: 'error', summary: 'Error', detail: 'API error', life: 3000 });
+    } finally {
+        loadingUpdate.value = false;
+    }
+};
+const formatDateSubmit = (date) => {
+  if (!date) return '';
+  const y = date.getFullYear();
+  const m = String(date.getMonth() + 1).padStart(2, '0'); // month is 0-based
+  const d = String(date.getDate()).padStart(2, '0');
+  return `${y}-${m}-${d}`;
+};
+
+const formatDatetimeSubmit = (date) => {
+  if (!date) return '';
+  const y = date.getFullYear();
+  const m = String(date.getMonth() + 1).padStart(2, '0');
+  const d = String(date.getDate()).padStart(2, '0');
+  const h = String(date.getHours()).padStart(2, '0');
+  const min = String(date.getMinutes()).padStart(2, '0');
+  const s = String(date.getSeconds()).padStart(2, '0');
+  return `${y}-${m}-${d} ${h}:${min}:${s}`;
+};
 const InitfetchData = async () => {
     try {
         loading.value = true;
@@ -241,7 +341,7 @@ const InitfetchData = async () => {
         if ( (response.data.admin_data)) {
             // response.data.status === 1 &&
             returnList.value = response.data.admin_data[0];
-            console.log('API Response:', returnList.value.return_orderNo_ref);
+            form.value.returnID =returnList.value.id;
         } else {
             console.error('API returned error or invalid data:', response.data);
             toast.add({ severity: 'error', summary: 'Error', detail: 'Failed to load data', life: 3000 });
