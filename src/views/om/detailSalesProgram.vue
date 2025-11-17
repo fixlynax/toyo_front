@@ -33,10 +33,18 @@
                         </div>
 
                         <!-- Content -->
-                        <!-- In your template, update the image section -->
                         <div v-else class="grid grid-cols-1 gap-4 mt-4">
-                            <img :src="salesProgram.imageUrl" :alt="salesProgram.title" class="rounded-xl shadow-sm object-cover w-full h-80" @error="handleImageError" v-if="salesProgram.imageUrl" />
-                            <div v-else class="rounded-xl shadow-sm w-full h-80 bg-gray-200 flex items-center justify-center">
+                            <img 
+                                :src="salesProgram.imageUrl" 
+                                :alt="salesProgram.title" 
+                                class="rounded-xl shadow-sm object-cover w-full h-80" 
+                                @error="handleImageError" 
+                                v-if="salesProgram.imageUrl && !imageLoading" 
+                            />
+                            <div v-if="imageLoading" class="rounded-xl shadow-sm w-full h-80 bg-gray-200 flex items-center justify-center">
+                                <i class="pi pi-spin pi-spinner text-4xl text-gray-400"></i>
+                            </div>
+                            <div v-else-if="!salesProgram.imageUrl" class="rounded-xl shadow-sm w-full h-80 bg-gray-200 flex items-center justify-center">
                                 <i class="pi pi-image text-4xl text-gray-400"></i>
                             </div>
                         </div>
@@ -101,9 +109,6 @@
             <div v-if="!loading && !error && salesProgram.type === 'FOC'" class="card flex flex-col w-full">
                 <div class="flex items-center justify-between border-b pb-4 mb-6">
                     <div class="flex items-center gap-3">
-                        <!-- <div class="w-10 h-10 bg-gradient-to-r from-blue-500 to-purple-600 rounded-lg flex items-center justify-center shadow-md">
-                            <i class="pi pi-tags text-white text-lg"></i>
-                        </div> -->
                         <div>
                             <div class="text-2xl font-bold text-black-800">🎯 FOC Promotion Criteria</div>
                             <div class="text-sm text-black-600 mt-1">Total {{ criteriaList.length }} criteria patterns</div>
@@ -116,8 +121,6 @@
                         </div>
                     </div>
                 </div>
-
-                <!-- Promotion Summary Card -->
 
                 <!-- Free Material Information -->
                 <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
@@ -250,31 +253,28 @@ const toast = useToast();
 const programId = ref(route.params.id);
 const loading = ref(false);
 const error = ref(false);
+const imageLoading = ref(false);
 const salesProgram = ref({});
 const criteriaList = ref([]);
 
-// Fixed image processing function
+// Fixed image processing function - using getPrivateFile
 const processPrivateImages = async (programData) => {
-    if (!programData || !programData.imageUrl) {
+    if (!programData || !programData.image) {
         return programData;
     }
 
-    const imageUrl = programData.imageUrl;
+    const imageUrl = programData.image;
 
-    // If it's already a valid full URL or data URL, return as is
-    if (imageUrl.startsWith('http') || imageUrl.startsWith('data:') || imageUrl.startsWith('blob:')) {
+    // If it's already a blob URL or data URL, return as is
+    if (imageUrl.startsWith('blob:') || imageUrl.startsWith('data:')) {
+        programData.imageUrl = imageUrl;
         return programData;
     }
 
-    // If it's a relative path starting with /, construct full URL
-    if (imageUrl.startsWith('/')) {
-        programData.imageUrl = `${window.location.origin}${imageUrl}`;
-        return programData;
-    }
-
-    // If it's a file path that needs API processing
+    // Use getPrivateFile to load the image
     try {
-        // console.log('Processing private image:', imageUrl);
+        imageLoading.value = true;
+        console.log('Processing private image:', imageUrl);
         const blobUrl = await api.getPrivateFile(imageUrl);
         if (blobUrl) {
             programData.imageUrl = blobUrl;
@@ -291,6 +291,8 @@ const processPrivateImages = async (programData) => {
         } else {
             programData.imageUrl = 'https://via.placeholder.com/800x400?text=Image+Not+Found';
         }
+    } finally {
+        imageLoading.value = false;
     }
 
     return programData;

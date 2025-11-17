@@ -87,12 +87,28 @@
                                     :chooseLabel="imageFile ? 'Change Image' : 'Upload Program Image'"
                                     class="w-full"
                                 />
-                                <div v-if="salesProgram.imageUrl || imagePreview" class="mt-2">
-                                    <img :src="imagePreview || salesProgram.imageUrl" alt="Preview" class="rounded-lg shadow-md object-cover w-full h-80" @error="handleImageError" />
-                                    <p v-if="currentFileSize" class="text-xs text-gray-500 mt-1 text-center">File size: {{ formatFileSize(currentFileSize) }}</p>
-                                </div>
-                                <div v-else class="mt-2 rounded-lg shadow-md w-full h-80 bg-gray-200 flex items-center justify-center">
-                                    <i class="pi pi-image text-4xl text-gray-400"></i>
+                                <div class="mt-2">
+                                    <!-- Show loading when image is being processed -->
+                                    <div v-if="imageLoading" class="rounded-lg shadow-md w-full h-80 bg-gray-200 flex items-center justify-center">
+                                        <i class="pi pi-spin pi-spinner text-4xl text-gray-400"></i>
+                                        <span class="ml-2 text-gray-600">Loading image...</span>
+                                    </div>
+                                    <!-- Show image preview or existing image -->
+                                    <div v-else-if="imagePreview || salesProgram.imageUrl">
+                                        <img 
+                                            :src="imagePreview || salesProgram.imageUrl" 
+                                            alt="Program Image" 
+                                            class="rounded-lg shadow-md object-cover w-full h-80" 
+                                            @error="handleImageError"
+                                            @load="handleImageLoad"
+                                        />
+                                        <p v-if="currentFileSize" class="text-xs text-gray-500 mt-1 text-center">File size: {{ formatFileSize(currentFileSize) }}</p>
+                                        <p v-else-if="salesProgram.imageUrl && !imageFile" class="text-xs text-gray-500 mt-1 text-center">Existing image</p>
+                                    </div>
+                                    <!-- Show placeholder when no image -->
+                                    <div v-else class="rounded-lg shadow-md w-full h-80 bg-gray-200 flex items-center justify-center">
+                                        <i class="pi pi-image text-4xl text-gray-400"></i>
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -323,7 +339,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue';
+import { ref, onMounted, onUnmounted } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { useToast } from 'primevue/usetoast';
 import api from '@/service/api';
@@ -340,8 +356,9 @@ const programId = ref(route.params.id);
 const loading = ref(false);
 const error = ref(false);
 const submitting = ref(false);
+const imageLoading = ref(false);
 
-// Sales Program Data - using create component structure
+// Sales Program Data
 const salesProgram = ref({
     programID: '',
     pricegroup: '06',
@@ -351,7 +368,7 @@ const salesProgram = ref({
     startdate: '',
     enddate: '',
     status: 1,
-    imageUrl: ''
+    imageUrl: '' // This will hold the processed image URL
 });
 
 const imageFile = ref(null);
@@ -365,7 +382,7 @@ const currentSelection = ref({
     availableRims: []
 });
 
-// Single program item (matching create structure)
+// Single program item
 const programItem = ref({
     buyQty: 1,
     freeQty: 1,
@@ -422,35 +439,40 @@ const showInfo = (message) => {
 
 // Process private images using the API method
 const processPrivateImages = async (programData) => {
-    if (!programData || !programData.imageUrl) {
+    if (!programData || !programData.image) {
         return programData;
     }
 
-    const imageUrl = programData.imageUrl;
+    const imageUrl = programData.image;
 
-    // If it's already a valid full URL or data URL, return as is
-    if (imageUrl.startsWith('http') || imageUrl.startsWith('data:') || imageUrl.startsWith('blob:')) {
+    // If it's already a blob URL or data URL, return as is
+    if (imageUrl.startsWith('blob:') || imageUrl.startsWith('data:')) {
+        programData.imageUrl = imageUrl;
         return programData;
     }
 
-    // If it's a relative path starting with /, construct full URL
-    if (imageUrl.startsWith('/')) {
-        programData.imageUrl = `${window.location.origin}${imageUrl}`;
-        return programData;
-    }
-
-    // If it's a file path that needs API processing
+    // Use getPrivateFile to load the image
     try {
-        // console.log('Processing private image:', imageUrl);
+        imageLoading.value = true;
+        console.log('Processing private image for edit:', imageUrl);
         const blobUrl = await api.getPrivateFile(imageUrl);
         if (blobUrl) {
             programData.imageUrl = blobUrl;
+            console.log('Image processed successfully');
         } else {
+            console.warn('getPrivateFile returned null/undefined');
             programData.imageUrl = '';
         }
     } catch (error) {
-        console.error('Error loading private image:', error);
-        programData.imageUrl = '';
+        console.error('Error loading private image in edit:', error);
+        // Fallback strategies
+        if (imageUrl.includes('salesprogramphotos')) {
+            programData.imageUrl = `${window.location.origin}/${imageUrl}`;
+        } else {
+            programData.imageUrl = '';
+        }
+    } finally {
+        imageLoading.value = false;
     }
 
     return programData;
@@ -467,20 +489,20 @@ const fetchSalesProgram = async () => {
         if (response.data.status === 1 && response.data.admin_data.length > 0) {
             let programData = response.data.admin_data[0];
 
-            // Process image first
+            // Process image first using getPrivateFile
             programData = await processPrivateImages(programData);
 
-            // Map API data to form structure (using create component field names)
+            // Map API data to form structure
             salesProgram.value = {
                 programID: programData.programid,
                 pricegroup: programData.pricegroup,
                 type: programData.type,
-                programName: programData.title, // Map title to programName
+                programName: programData.title,
                 desc: programData.desc,
                 startdate: new Date(programData.startDate),
                 enddate: new Date(programData.endDate),
                 status: programData.status,
-                imageUrl: programData.imageUrl
+                imageUrl: programData.imageUrl // Use the processed image URL
             };
 
             // Load FOC criteria data
@@ -532,6 +554,49 @@ const loadProgramCriteria = async (programData) => {
             size: foc.size,
             status: foc.status
         }));
+    }
+};
+
+// Image handling functions
+const onImageSelect = (event) => {
+    const file = event.files[0];
+    if (file) {
+        const validation = validateImageFile(file);
+        if (!validation.valid) {
+            showError(validation.message);
+            return;
+        }
+
+        imageFile.value = file;
+        currentFileSize.value = file.size;
+
+        const reader = new FileReader();
+        reader.onload = (e) => {
+            imagePreview.value = e.target.result;
+            // Clear the existing image URL when new file is selected
+            salesProgram.value.imageUrl = '';
+        };
+        reader.readAsDataURL(file);
+
+        showSuccess(`Image selected successfully (${formatFileSize(file.size)})`);
+    }
+};
+
+const handleImageError = (event) => {
+    console.warn('Image failed to load:', event.target.src);
+    event.target.src = '';
+    salesProgram.value.imageUrl = '';
+};
+
+const handleImageLoad = () => {
+    console.log('Image loaded successfully');
+};
+
+const onUploadError = (event) => {
+    if (event.xhr && event.xhr.status) {
+        showError(`Upload failed: ${event.xhr.statusText}`);
+    } else {
+        showError('File upload failed. Please check the file size and try again.');
     }
 };
 
@@ -637,40 +702,6 @@ const validateImageFile = (file) => {
     }
 
     return { valid: true };
-};
-
-const onImageSelect = (event) => {
-    const file = event.files[0];
-    if (file) {
-        const validation = validateImageFile(file);
-        if (!validation.valid) {
-            showError(validation.message);
-            return;
-        }
-
-        imageFile.value = file;
-        currentFileSize.value = file.size;
-
-        const reader = new FileReader();
-        reader.onload = (e) => {
-            imagePreview.value = e.target.result;
-        };
-        reader.readAsDataURL(file);
-
-        showSuccess(`Image selected successfully (${formatFileSize(file.size)})`);
-    }
-};
-
-const onUploadError = (event) => {
-    if (event.xhr && event.xhr.status) {
-        showError(`Upload failed: ${event.xhr.statusText}`);
-    } else {
-        showError('File upload failed. Please check the file size and try again.');
-    }
-};
-
-const handleImageError = (event) => {
-    event.target.src = '';
 };
 
 // API Functions
@@ -879,6 +910,13 @@ const formatDate = (date) => {
     const day = String(d.getDate()).padStart(2, '0');
     return `${year}-${month}-${day}`;
 };
+
+// Clean up blob URLs when component unmounts
+onUnmounted(() => {
+    if (salesProgram.value.imageUrl && salesProgram.value.imageUrl.startsWith('blob:')) {
+        URL.revokeObjectURL(salesProgram.value.imageUrl);
+    }
+});
 
 // Load initial data
 onMounted(() => {
