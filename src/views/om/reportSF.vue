@@ -129,13 +129,13 @@
                             </template>
                         </Column>
 
-                        <Column field="Sold-to Party" header="Sold-to Party" style="min-width: 120px" :sortable="true">
+                        <Column field="Sold-to Party" header="Customer Acc No." style="min-width: 120px" :sortable="true">
                             <template #body="{ data }">
                                 <div class="font-medium">{{ data['Sold-to Party'] }}</div>
                             </template>
                         </Column>
 
-                        <Column field="Dealer" header="Dealer" style="min-width: 200px" :sortable="true">
+                        <Column field="Dealer" header="Customer " style="min-width: 200px" :sortable="true">
                             <template #body="{ data }">
                                 <div class="font-semibold">{{ data.Dealer }}</div>
                             </template>
