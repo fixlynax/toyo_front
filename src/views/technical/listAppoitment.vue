@@ -68,34 +68,127 @@ const fetchAppointments = async () => {
     }
 };
 
-const fetchExport = async () => {
+// 🟢 Frontend-only Export Function
+const exportToExcel = () => {
     try {
-        loading.value = true;
         exportLoading.value = true;
-        const response = await api.getDownload('appointment/export', {
-        responseType: 'arraybuffer',
+        
+        // Get data to export (filtered appointments based on active tab)
+        const dataToExport = filteredAppointments.value;
+        
+        if (dataToExport.length === 0) {
+            alert('No data to export');
+            exportLoading.value = false;
+            return;
+        }
+
+        // Define headers
+        const headers = [
+            'Appointment Code',
+            'Dealer Shop',
+            'Dealer Account No',
+            'Customer Name',
+            'Customer Phone',
+            'Request Date',
+            'Request Session',
+            'Appointment Date',
+            'Appointment Time',
+            'Status'
+        ];
+
+        // Prepare CSV content
+        let csvContent = headers.join(',') + '\n';
+        
+        // Add rows
+        dataToExport.forEach(appointment => {
+            const row = [
+                `"${appointment.appointmentCode || ''}"`,
+                `"${appointment.dealerShop || ''}"`,
+                `"${appointment.dealerCustAccountNo || ''}"`,
+                `"${appointment.customerName || ''}"`,
+                `"${appointment.customerPhone || ''}"`,
+                `"${appointment.requestDate || ''}"`,
+                `"${appointment.requestSession || ''}"`,
+                `"${appointment.appointmentDate || ''}"`,
+                `"${appointment.appointmentTime || ''}"`,
+                `"${appointment.statusString || ''}"`
+            ];
+            csvContent += row.join(',') + '\n';
         });
 
-        const blob = new Blob([response.data], { 
-        type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' 
-        });
-
-        const url = window.URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = 'Appointment_Download.xlsx';
-        document.body.appendChild(a);
-        a.click();
-        document.body.removeChild(a);
-        window.URL.revokeObjectURL(url);
-
-    } catch (err) {
-        console.error('rror fetching OE Tire export:', err);
+        // Create and download file
+        const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+        const link = document.createElement('a');
+        const url = URL.createObjectURL(blob);
+        
+        link.setAttribute('href', url);
+        link.setAttribute('download', `appointments_${getCurrentDateTime()}.csv`);
+        link.style.visibility = 'hidden';
+        
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        
+        URL.revokeObjectURL(url);
+        
+    } catch (error) {
+        console.error('Error exporting data:', error);
+        alert('Error occurred while exporting data');
     } finally {
-        loading.value = false;
         exportLoading.value = false;
     }
 };
+
+// 🟢 Helper function to get current date time for filename
+const getCurrentDateTime = () => {
+    const now = new Date();
+    return now.toISOString().slice(0, 19).replace(/:/g, '-').replace('T', '_');
+};
+
+// 🟢 Alternative: Export to Excel using xlsx library (if you have it installed)
+/*
+const exportToExcelAdvanced = () => {
+    try {
+        exportLoading.value = true;
+        
+        const dataToExport = filteredAppointments.value;
+        
+        if (dataToExport.length === 0) {
+            alert('No data to export');
+            exportLoading.value = false;
+            return;
+        }
+
+        // Prepare data for Excel
+        const excelData = dataToExport.map(appointment => ({
+            'Appointment Code': appointment.appointmentCode,
+            'Dealer Shop': appointment.dealerShop,
+            'Dealer Account No': appointment.dealerCustAccountNo,
+            'Customer Name': appointment.customerName,
+            'Customer Phone': appointment.customerPhone,
+            'Request Date': appointment.requestDate,
+            'Request Session': appointment.requestSession,
+            'Appointment Date': appointment.appointmentDate,
+            'Appointment Time': appointment.appointmentTime,
+            'Status': appointment.statusString
+        }));
+
+        // Create worksheet and workbook
+        const worksheet = XLSX.utils.json_to_sheet(excelData);
+        const workbook = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(workbook, worksheet, 'Appointments');
+        
+        // Generate and download file
+        XLSX.writeFile(workbook, `appointments_${getCurrentDateTime()}.xlsx`);
+        
+    } catch (error) {
+        console.error('Error exporting to Excel:', error);
+        alert('Error occurred while exporting data');
+    } finally {
+        exportLoading.value = false;
+    }
+};
+*/
 
 // 🟢 Initial data load
 onBeforeMount(() => {
@@ -156,7 +249,7 @@ const getStatusColor = (status) => {
                                 icon="pi pi-download" 
                                 class="p-button" 
                                 :loading="exportLoading" 
-                                @click="fetchExport" 
+                                @click="exportToExcel" 
                             />
                         </div>
                     </div>

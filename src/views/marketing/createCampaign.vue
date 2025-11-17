@@ -324,7 +324,7 @@ const processCatalogueImages = async (catalogueItems) => {
     for (const item of catalogueItems) {
         if (item.imageURL && typeof item.imageURL === 'string') {
             try {
-                console.log('Processing private image:', item.imageURL);
+                // console.log('Processing private image:', item.imageURL);
                 const blobUrl = await api.getPrivateFile(item.imageURL);
                 if (blobUrl) {
                     processedItems.push({

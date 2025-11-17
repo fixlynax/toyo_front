@@ -117,7 +117,7 @@
                 <div class="card flex flex-col w-full">
                     <div class="flex items-center justify-between border-b pb-3 mb-4">
                         <div class="text-2xl font-bold text-gray-800">Advance Info</div>
-                        <Tag :value="getOrderStatusText(orderDelList.orderstatus)" :severity="getOrderStatusSeverity(orderDelList.orderstatus)" />
+                        <Tag :value="getOrderStatusText2(orderDelList.status)" :severity="getOrderStatusSeverity2(orderDelList.status)" />
                     </div>
 
                     <div class="overflow-x-auto">
@@ -152,12 +152,12 @@
                                     <td class="px-4 py-2 text-right">{{ orderDelList.division || '-' }}</td>
                                 </tr>
                                 <tr class="border-b">
-                                    <td class="px-4 py-2 font-medium">Pickup</td>
-                                    <td class="px-4 py-2 text-right">{{ orderDelList.pickup_datetime || '-' }}</td>
+                                    <td class="px-4 py-2 font-medium">ETA Date</td>
+                                    <td class="px-4 py-2 text-right">{{ orderDelList?.scm_deliver_detail?.scheduled_delivery_time? formatDate(orderDelList.scm_deliver_detail.scheduled_delivery_time): 'Not Assigned'}}</td>
                                 </tr>
                                 <tr class="border-b">
-                                    <td class="px-4 py-2 font-medium">Receive</td>
-                                    <td class="px-4 py-2 text-right">{{ orderDelList.receive_datetime || '-' }}</td>
+                                    <td class="px-4 py-2 font-medium">Delivered Date</td>
+                                    <td class="px-4 py-2 text-right">{{ orderDelList?.scm_deliver_detail?.delivered_datetime? formatDate(orderDelList.scm_deliver_detail.delivered_datetime): 'Not Assigned'}}</td>
                                 </tr>
                                 <tr>
                                     <td class="px-4 py-2 font-medium">Created</td>
@@ -173,10 +173,6 @@
                         <Button label="Approve" severity="success" size="small" @click="onApproveReturnOrder" :loading="loadingAction === 'approve'" />
                     </div>
 
-                    <!-- Status Labels after action -->
-                    <div class="flex justify-end mt-4" v-else>
-                        <Tag :value="getOrderStatusText(orderDelList.orderstatus)" :severity="getOrderStatusSeverity(orderDelList.orderstatus)" />
-                    </div>
                 </div>
             </div>
         </div>
@@ -255,6 +251,23 @@ const getOrderStatusSeverity = (status) => {
         66: 'info',
         77: 'warn',
         9: 'success'
+    };
+    return severityMap[status] || 'secondary';
+};
+
+const getOrderStatusText2 = (status) => {
+    const statusMap = {
+        "NEW": 'Pending',
+        "PENDING": 'Delivery',
+        "COMPLETED": 'Completed',
+    };
+    return statusMap[status] || `Status: ${status}`;
+};
+const getOrderStatusSeverity2 = (status) => {
+    const severityMap = {
+        "NEW": 'info',
+        "PENDING": 'warn',
+        "COMPLETED": 'success',
     };
     return severityMap[status] || 'secondary';
 };

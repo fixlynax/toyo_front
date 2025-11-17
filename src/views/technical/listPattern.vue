@@ -52,7 +52,6 @@
 
             <Column field="processedImageURL" header="Image" style="min-width: 8rem; text-align: center">
                 <template #body="{ data }">
-                     <RouterLink :to="`/technical/detailPattern/${data.pattern_id}`">
                     <img 
                         v-if="data.processedImageURL" 
                         :src="getImagePath(data.processedImageURL)" 
@@ -63,19 +62,20 @@
                     <div v-else class="w-16 h-16 flex items-center justify-center bg-gray-100 rounded-md border border-gray-200 text-gray-400 text-xs">
                         No Image
                     </div>
-                    </RouterLink>
                 </template>
             </Column>
 
             <Column field="pattern_code" header="Pattern Code" style="min-width: 8rem">
                 <template #body="{ data }">
+                     <RouterLink :to="`/technical/detailPattern/${data.pattern_id}`" class="hover:underline font-bold text-primary-400">
                     <span class="font-semibold ml-1">{{ data.pattern_code }}</span>
+                    </RouterLink>
                 </template>
             </Column>
 
             <Column field="pattern_name" header="Pattern Name" style="min-width: 8rem">
                 <template #body="{ data }">
-                    <span class="font-semibold ml-1">{{ data.pattern_name || 'N/A' }}</span>
+                    <span class="font-semibold ml-1">{{ data.pattern_name || '-' }}</span>
                 </template>
             </Column>
 
@@ -177,7 +177,7 @@ const getImagePath = (path) => {
 };
 
 const formatDate = (dateString) => {
-    if (!dateString) return 'N/A';
+    if (!dateString) return '-';
     try {
         const date = new Date(dateString);
         return date.toLocaleDateString('en-US', {
@@ -204,7 +204,7 @@ const exportToCSV = () => {
         // Prepare data rows
         const csvData = patterns.value.map(pattern => [
             `"${pattern.pattern_code || ''}"`,
-            `"${pattern.pattern_name || 'N/A'}"`,
+            `"${pattern.pattern_name || '-'}"`,
             `"${formatDate(pattern.created)}"`,
             `"${pattern.imageURL || ''}"`
         ]);
@@ -249,7 +249,7 @@ const exportToExcel = () => {
             ['Pattern Code', 'Pattern Name', 'Created Date', 'Image URL'],
             ...patterns.value.map(pattern => [
                 pattern.pattern_code || '',
-                pattern.pattern_name || 'N/A',
+                pattern.pattern_name || '-',
                 formatDate(pattern.created),
                 pattern.imageURL || ''
             ])
@@ -287,7 +287,7 @@ const processCatalogueImages = async (catalogueItems) => {
     for (const item of catalogueItems) {
         if (item.imageURL && typeof item.imageURL === 'string') {
             try {
-                console.log('Processing private image:', item.imageURL);
+                // console.log('Processing private image:', item.imageURL);
                 const blobUrl = await api.getPrivateFile(item.imageURL);
                 if (blobUrl) {
                     processedItems.push({

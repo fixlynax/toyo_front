@@ -8,7 +8,7 @@
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
                         <label class="block font-bold text-gray-700 mb-2">Username</label>
-                        <InputText v-model="form.username" type="text" placeholder="Enter Username" class="w-full" />
+                        <InputText v-model="form.username" type="text" placeholder="Enter Username" class="w-full" @keydown.space.prevent/>
                     </div>
                     <div>
                         <label class="block font-bold text-gray-700 mb-2">Email Address</label>
@@ -16,7 +16,7 @@
                     </div>
                     <div>
                         <label class="block font-bold text-gray-700 mb-2">Contact No</label>
-                        <InputText v-model="form.phoneno" type="text" placeholder="Enter Contact No" class="w-full" @keypress="allowOnlyNumbers"/>
+                        <InputText v-model="form.phoneno" type="text" placeholder="Enter Contact No" class="w-full"/>
                     </div>
                 </div>
                 <!-- Logistic Form -->
@@ -112,26 +112,33 @@
         </div>
     </Fluid>
     <Dialog
-        v-model:visible="passwordDialogVisible"
-        modal
-        header="3PL Account Created"
-        :closable="false"
-        style="width: 400px">
-        <div class="text-center">
-            <p class="text-gray-700 mb-4">
-                Temporary Password :
-            </p>
-            <div class="font-mono text-lg font-bold bg-gray-100 p-3 rounded-md mb-4">
-                {{ generatedPassword }}
-            </div>
+    v-model:visible="passwordDialogVisible"
+    modal
+    header="3PL Account Created"
+    :closable="false"
+    style="width: 400px"
+>
+    <div class="text-center">
+        <p class="text-gray-700 mb-2">
+            Temporary Password :
+        </p>
+        <div class="relative bg-gray-100 p-3 rounded-md mb-4 font-mono text-lg font-bold flex justify-center items-center">
+            <span class="truncate text-center w-full">{{ generatedPassword }}</span>
             <Button 
-                label="OK" 
-                icon="pi pi-check" 
-                class="w-full" 
-                @click="handleDialogClose()" 
+                icon="pi pi-copy" 
+                class="p-button-text p-button-secondary p-button-sm absolute right-2"
+                @click="copyPassword"
+                v-tooltip="'Copy to clipboard'"
             />
         </div>
-    </Dialog>
+        <Button 
+            label="OK" 
+            icon="pi pi-check" 
+            class="w-full" 
+            @click="handleDialogClose()" 
+        />
+    </div>
+</Dialog>
 </template>
 
 <script setup>
@@ -240,6 +247,18 @@ const handleCancel = () => {
 const handleDialogClose = () => {
     passwordDialogVisible.value = false;
     router.push('/scm/listLogistic');
+};
+
+const copyPassword = () => {
+  if (!generatedPassword.value) return;
+  
+  navigator.clipboard.writeText(generatedPassword.value)
+    .then(() => {
+      alert('Password copied to clipboard!');
+    })
+    .catch(err => {
+      console.error('Failed to copy:', err);
+    });
 };
 
 const submitForm  = async () => {

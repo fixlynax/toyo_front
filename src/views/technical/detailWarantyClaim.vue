@@ -40,7 +40,7 @@
                 <div class="grid grid-cols-2 md:grid-cols-2 gap-4">
                     <div>
                         <span class="block text-sm font-bold text-black-800">Serial Number</span>
-                        <p class="text-lg font-medium">{{ warantyDetail.plateSerial || 'N/A' }}</p>
+                        <p class="text-lg font-medium">{{ warantyDetail.plateSerial || '-' }}</p>
                     </div>
                     <div>
                         <span class="block text-sm font-bold text-black-800">Pattern</span>
@@ -52,22 +52,58 @@
                     </div>
                     <div>
                         <span class="block text-sm font-bold text-black-800">Tire Specification</span>
-                        <p class="text-lg font-medium">{{ warantyDetail.tire_details?.tyrespec || 'N/A' }}</p>
+                        <p class="text-lg font-medium">{{ warantyDetail.tire_details?.tyrespec || '-' }}</p>
                     </div>
                     <div>
                         <span class="block text-sm font-bold text-black-800">Manufacturing Code</span>
-                        <p class="text-lg font-medium">{{ warantyDetail.tire_details?.mfgcode || 'N/A' }}</p>
+                        <p class="text-lg font-medium">{{ warantyDetail.tire_details?.mfgcode || '-' }}</p>
                     </div>
                     <div>
                         <span class="block text-sm font-bold text-black-800">Week Code</span>
-                        <p class="text-lg font-medium">{{ warantyDetail.tire_details?.weekcode || 'N/A' }}</p>
+                        <p class="text-lg font-medium">{{ warantyDetail.tire_details?.weekcode || '-' }}</p>
+                    </div>
+                </div>
+            </div>
+            <div class="card flex flex-col w-full">
+                <div class="border-b pb-2 mb-2 text-2xl font-bold text-gray-800">Customer Information</div>
+                <div class="grid grid-cols-2 md:grid-cols-2 gap-4">
+                    <div>
+                        <span class="block text-sm font-bold text-black-800">Dealer Acc No</span>
+                        <p class="text-lg font-medium">{{ warantyDetail.dealer_details?.custAccountNo }}</p>
+                    </div>
+                    <div>
+                        <span class="block text-sm font-bold text-black-800">Dealer Name</span>
+                        <p class="text-lg font-medium">{{ warantyDetail.dealer_details?.companyName1 }}</p>
+                    </div>
+                    <div>
+                        <span class="block text-sm font-bold text-black-800">Contact Number</span>
+                        <p class="text-lg font-medium">{{ warantyDetail.dealer_details?.phoneNumber }}</p>
+                    </div>
+                    <div>
+                        <span class="text-sm font-bold text-black-800 ">Email</span>
+                        <p class="text-lg font-medium">{{ warantyDetail.dealer_details?.emailAddress }}</p>
                     </div>
                 </div>
             </div>
             <!-- Tire Detail -->
-            <div v-if="warantyDetail.threadDepthPhotos > 0" class="card flex flex-col w-full">
+            <div class="card flex flex-col w-full">
                 <div class="flex items-center justify-between border-b pb-2 mb-4">
                     <div class="text-2xl font-bold text-gray-800">Tire Depth Image</div>
+                </div>
+                <div v-if="TireDepthImages.length > 0" class="mb-6">
+                    <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+                        <div v-for="(img, index) in TireDepthImages" :key="index" class="rounded-xl overflow-hidden shadow-sm bg-gray-100">
+                            <img
+                                :src="img.itemImageSrc"
+                                :alt="`Tire Depth ${index + 1}`"
+                                class="w-full h-64 object-cover"
+                            />
+                        </div>
+                    </div>
+                </div>
+                <div v-else class="text-center py-8 bg-gray-50 rounded-lg mb-6">
+                    <i class="pi pi-image text-4xl text-gray-400 mb-3"></i>
+                    <p class="text-gray-500 font-medium">No tire depth images available</p>
                 </div>
             </div>
 
@@ -79,11 +115,11 @@
                     <div class="grid grid-cols-2 md:grid-cols-2 gap-4">
                         <div>
                             <span class="block text-sm font-bold text-black-800">Name</span>
-                            <p class="text-lg font-medium">{{ warantyDetail.firstName }} {{ warantyDetail.lastName }}</p>
+                            <p class="text-lg font-medium">{{ warantyDetail.name }}</p>
                         </div>
                         <div>
                             <span class="block text-sm font-bold text-black-800">Vehicle</span>
-                            <p class="text-lg font-medium">{{ warantyDetail.vehicleBrand }} {{ warantyDetail.vehicleModel }}</p>
+                            <p class="text-lg font-medium">{{ warantyDetail.vehicle }}</p>
                         </div>
                         <div>
                             <span class="block text-sm font-bold text-black-800">Registration No.</span>
@@ -97,27 +133,7 @@
                 </div>
 
                 <!-- Dealer -->
-                <div class="md:w-1/2 card">
-                    <div class="border-b pb-2 mb-2 text-2xl font-bold text-gray-800">Customer Information</div>
-                    <div class="grid grid-cols-2 md:grid-cols-2 gap-4">
-                        <div>
-                            <span class="block text-sm font-bold text-black-800">Dealer Acc No</span>
-                            <p class="text-lg font-medium">{{ warantyDetail.dealer_details?.custAccountNo }}</p>
-                        </div>
-                        <div>
-                            <span class="block text-sm font-bold text-black-800">Dealer Name</span>
-                            <p class="text-lg font-medium">{{ warantyDetail.dealer_details?.companyName1 }}</p>
-                        </div>
-                        <div>
-                            <span class="block text-sm font-bold text-black-800">Contact Number</span>
-                            <p class="text-lg font-medium">{{ warantyDetail.dealer_details?.phoneNumber }}</p>
-                        </div>
-                        <div>
-                            <span class="block text-sm font-bold text-black-800">Email</span>
-                            <p class="text-lg font-medium">{{ warantyDetail.dealer_details?.emailAddress }}</p>
-                        </div>
-                    </div>
-                </div>
+
                 
             </div>
         </div>
@@ -130,7 +146,7 @@
                     <div class="text-2xl font-bold text-gray-800">CTC Detail</div>
                     <!-- Show Request button only if no CTC data exists -->
                     <!-- <Button v-if="!hasCTCData && !ctcSkipped" label="Request CTC" class="p-button-info" size="small" @click="showCTCConfirmationDialog = true" :loading="loadingCTC" /> -->
-                    <Button v-if="warantyDetail.isCTC === 0 " label="Request CTC" class="p-button-info" size="small" @click="confirmCTCRequest" :loading="loadingCTC" />
+                    <Button v-if="warantyDetail.isCTC === 0 && !claimFinalStatus" label="Request CTC" class="p-button-info" size="small" @click="confirmCTCRequest" :loading="loadingCTC" />
                     <div v-else class="text-right mt-3 text-sm font-bold text-green-600 ">
                         <i class="pi pi-check-circle mr-2 "></i>
                         CTC Requested
@@ -179,15 +195,15 @@
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div>
                             <span class="font-bold text-gray-700">Damage Code</span>
-                            <p class="text-lg font-semibold text-black mt-1">{{ warantyDetail.damageCode || 'N/A' }}</p>
+                            <p class="text-lg font-semibold text-black mt-1">{{ warantyDetail.damageCode || '-' }}</p>
                         </div>
                         <div>
                             <span class="font-bold text-gray-700">Problem Description</span>
-                            <p class="text-lg font-semibold text-black mt-1">{{ warantyDetail.problem || 'N/A' }}</p>
+                            <p class="text-lg font-semibold text-black mt-1">{{ warantyDetail.problem || '-' }}</p>
                         </div>
                         <div>
                             <span class="font-bold text-gray-700">Status</span>
-                            <p class="text-lg font-semibold text-black mt-1">{{ warantyDetail.status_string || 'N/A' }}</p>
+                            <p class="text-lg font-semibold text-black mt-1">{{ warantyDetail.status_string || '-' }}</p>
                         </div>
                     </div>
 
@@ -235,15 +251,15 @@
                     <div class="grid grid-cols-2 gap-2 text-sm text-gray-800">
                         <div>
                             <span class="font-bold">Part</span>
-                            <p>{{ rejectReasonDesc.part }}</p>
+                            <p>{{ warantyDetail.rejectReason?.part }}</p>
                         </div>
                         <div>
                             <span class="font-bold">Code</span>
-                            <p>{{ rejectReasonDesc.code }}</p>
+                            <p>{{ warantyDetail.rejectReason?.code }}</p>
                         </div>
                         <div>
                             <span class="font-bold">Description</span>
-                            <p>{{ rejectReasonDesc.damageMode }}</p>
+                            <p>{{ warantyDetail.rejectReason?.damageMode }}</p>
                         </div>
                     </div>
                     
@@ -256,7 +272,7 @@
             <div v-if="warantyDetailChecking.claim_detail && claimFinalStatus != 'rejected'" class="card w-full mb-4">
                 <div class="flex items-center justify-between border-b pb-2 mb-4">
                     <div class="text-2xl font-bold text-gray-800">Scrap Detail</div>
-                    <Button v-if="warantyDetailChecking.claim_detail && warantyDetail.isScrap === 0" label="Request Scrap" class="p-button-info" size="small" @click="requestScrap" :loading="loadingScrap" />
+                    <Button v-if="warantyDetailChecking.claim_detail && warantyDetail.isScrap === 0 && !claimFinalStatus" label="Request Scrap" class="p-button-info" size="small" @click="requestScrap" :loading="loadingScrap" />
                     <div v-else class="text-right mt-3 text-sm font-bold text-green-600 ">
                         <i class="pi pi-check-circle mr-2 "></i>
                         Scrap Requested
@@ -264,7 +280,7 @@
                 </div>
 
                 <!-- Scrap Images Gallery -->
-                <div v-if="scrapImages > 0" class="mb-6">
+                <div v-if="scrapImages.length > 0" class="mb-6">
                     <Galleria
                         :value="scrapImages"
                         :responsiveOptions="galleriaResponsiveOptions"
@@ -274,7 +290,7 @@
                         :showItemNavigators="true"
                         :showThumbnails="true"
                         :showIndicators="true"
-                        :showThumbnailNavigators="true"
+                        :showThumbnailNavigators="false"
                         thumbnailsPosition="bottom"
                     >
                         <template #item="slotProps">
@@ -621,6 +637,7 @@ const reimbursementSubmitted = ref(false);
 const props = defineProps(['id']);
 // Images
 const scrapImages = ref([]);
+const TireDepthImages = ref([]);
 const listMaterial = ref([]);
 const selectedMaterial = ref(null);
 
@@ -651,7 +668,7 @@ const loadingScrap = ref(false);
 
 const rejectReasonDesc = computed(() => {
     if (!rejectReasons.value?.length || !warantyDetail.value?.rejectReasonID) {
-        return 'N/A';
+        return '-';
     }
     return rejectReasons.value.find((r) => r.id == warantyDetail.value.rejectReasonID) || null;
 });
@@ -780,14 +797,22 @@ const fetchMaterial = async () => {
                 material: item // convert string → object
             }));
         }
-    } catch (error) {
-        console.error('Error fetching material:', error);
-        toast.add({
+        else{
+            toast.add({
             severity: 'error',
             summary: 'Error',
-            detail: 'Failed to load materials',
+            detail: 'No Material Found',
             life: 3000
         });
+        }
+    } catch (error) {
+        console.error('Error fetching material:', error);
+        // toast.add({
+        //     severity: 'error',
+        //     summary: 'Error',
+        //     detail: 'Failed to load materials',
+        //     life: 3000
+        // });
     }
 };
 
@@ -851,7 +876,7 @@ const skipCTCProcess = async () => {
 
 // Helper functions
 const formatDateTime = (dateString) => {
-    if (!dateString) return 'N/A';
+    if (!dateString) return '-';
     const date = new Date(dateString);
     return date.toLocaleString('en-MY', {
         year: 'numeric',
@@ -1047,12 +1072,10 @@ const fetchWarrantyClaim = async () => {
                 isDeliveredReplacement: apiData.claim_info?.isDeliveredReplacement,
                 isReimbursement: apiData.claim_info?.isReimbursement,
                 isScrap: apiData.claim_info?.isScrap,
-
+                rejectReason: apiData.claim_info?.rejectReason,
                 // Customer Info
-                firstName: apiData.customer_info?.[0]?.name?.split(' ')[0] || '',
-                lastName: apiData.customer_info?.[0]?.name?.split(' ').slice(1).join(' ') || '',
-                vehicleBrand: apiData.customer_info?.[0]?.vehicle?.split(' ')[0] || '',
-                vehicleModel: apiData.customer_info?.[0]?.vehicle?.split(' ').slice(1).join(' ') || '',
+                name: apiData.customer_info?.[0]?.name|| '-',
+                vehicle: apiData.customer_info?.[0]?.vehicle || '-',
                 vehicleRegNo: apiData.customer_info?.[0]?.regNo,
                 mobileNumber: apiData.warantyDetail?.[0]?.mobileNo,
 
@@ -1082,6 +1105,7 @@ const fetchWarrantyClaim = async () => {
             };
             // console.log(warantyDetail);
             await loadScrapImages();
+            await loadTireDeptImages();
             initializeWorkflowStates();
         } else {
             error.value = 'Warranty claim not found.';
@@ -1110,8 +1134,6 @@ const loadScrapImages = async () => {
     const images = [];
     const imageUrls = [warantyDetail.value.scrapPhotos.scrapImage1URL, warantyDetail.value.scrapPhotos.scrapImage2URL, warantyDetail.value.scrapPhotos.scrapImage3URL].filter((url) => url && url !== 'null' && url !== null);
 
-    // console.log('Found scrap images:', imageUrls);
-
     for (const [index, url] of imageUrls.entries()) {
         try {
             const imageSrc = await api.getPrivateFile(url);
@@ -1131,6 +1153,40 @@ const loadScrapImages = async () => {
     }
 
     scrapImages.value = images;
+};
+
+const loadTireDeptImages = async () => {
+    const photos = warantyDetail.value.threadDepthPhotos;
+    const images = [];
+
+    const imageUrls = [
+        photos.threadDepthImage1URL,
+        photos.threadDepthImage2URL,
+        photos.threadDepthImage3URL,
+        photos.threadDepthImage4URL,
+        photos.threadDepthImage5URL,
+        photos.threadDepthImage6URL,
+    ].filter(url => url && url !== 'null' && url !== null);
+
+    for (const [index, url] of imageUrls.entries()) {
+        try {
+            const imageSrc = await api.getPrivateFile(url);
+            images.push({
+                itemImageSrc: imageSrc,
+                thumbnailImageSrc: imageSrc,
+                alt: `Tire Depth ${index + 1}`
+            });
+        } catch (err) {
+            console.error("Error loading tire depth image:", err);
+            images.push({
+                itemImageSrc: "/placeholder-image.jpg",
+                thumbnailImageSrc: "/placeholder-image.jpg",
+                alt: `Tire Depth ${index + 1} - Failed to load`
+            });
+        }
+    }
+
+    TireDepthImages.value = images;
 };
 
 // Initialize workflow states

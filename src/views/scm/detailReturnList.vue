@@ -21,15 +21,23 @@
                             </div>
                             <div>
                                 <span class="block text-sm font-bold text-gray-800">Description</span>
-                                <p class="font-medium text-lg">{{ listData.claim?.description }}</p>
+                                <p class="font-medium text-lg">{{ listData.claim?.tire?.description }}</p>
                             </div>
                             <div>
                                 <span class="block text-sm font-bold text-gray-800">Pattern</span>
-                                <p class="font-medium text-lg">{{ listData.claim?.pattern }}</p>
+                                <p class="font-medium text-lg">{{ listData.claim?.tire?.pattern }}</p>
                             </div>
                             <div>
                                 <span class="block text-sm font-bold text-gray-800">Plate Serial</span>
-                                <p class="font-medium text-lg">{{ listData.claim?.plateSerial }}</p>
+                                <p class="font-medium text-lg">{{ listData.claim?.tire?.plateSerial }}</p>
+                            </div>
+                            <div>
+                                <span class="block text-sm font-bold text-gray-800">Tire Size</span>
+                                <p class="font-medium text-lg">{{ listData.claim?.tire?.tyresize }}</p>
+                            </div>
+                            <div>
+                                <span class="block text-sm font-bold text-gray-800">Code</span>
+                                <p class="font-medium text-lg">{{ listData.claim?.tire?.weekcode || '-' }}</p>
                             </div>
                         </div>
                     </div>
@@ -81,12 +89,12 @@
                     <table class="w-full text-sm text-left text-gray-700">
                         <tbody>
                             <tr class="border-b">
-                                <td class="px-4 py-2 font-medium">Collect Date</td>
-                                <td class="px-4 py-2 text-right">{{ listData.collectDate && listData.collectTime ? formatDate(listData.collectDate) + ' ' + formatTime(listData.collectTime): 'Not Assigned'}}</td>
+                                <td class="px-4 py-2 font-medium">Delivery Date</td>
+                                <td class="px-4 py-2 text-right">{{ listData.deliveryDate && listData.deliveryTime ? formatDate(listData.deliveryDate) + ' ' + formatTime(listData.deliveryTime): 'Not Assigned'}}</td>
                             </tr>
                             <tr class="border-b">
-                                <td class="px-4 py-2 font-medium">Receive Date</td>
-                                <td class="px-4 py-2 text-right">{{ listData.reachWH ? formatDate(listData.reachWH) : 'Not Assigned' }}</td>
+                                <td class="px-4 py-2 font-medium">Delivered  Date</td>
+                                <td class="px-4 py-2 text-right">{{ listData.scheduleDeliveryDate ? formatDateFull(listData.scheduleDeliveryDate) : 'Not Assigned' }}</td>
                             </tr>
                         </tbody>
                     </table>
@@ -143,6 +151,40 @@ function getStatusText(status) {
         2: 'Completed'
     };
     return statusMap[status] || 'Unknown';
+}
+function formatDate(dateString) {
+  if (!dateString) return '';
+  const date = new Date(dateString);
+  return date.toLocaleString('en-MY', {
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+  });
+}
+function formatTime(timeString) {
+  if (!timeString) return '';
+  const [hours, minutes, seconds] = timeString.split(':');
+  const date = new Date();
+  date.setHours(hours, minutes, seconds);
+  return date.toLocaleTimeString('en-MY', {
+    hour: '2-digit',
+    minute: '2-digit',
+    second: '2-digit',
+    hour12: true,
+  });
+}
+function formatDateFull(dateString) {
+  if (!dateString) return '';
+  const date = new Date(dateString);
+  return date.toLocaleString('en-MY', {
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+    hour: '2-digit',
+    minute: '2-digit',
+    second: '2-digit',
+    hour12: true
+  });
 }
 </script>
 

@@ -4,10 +4,10 @@
             <div class="md:w-2/3 flex flex-col">
                 <div class="card flex flex-col gap-6 w-full">
                     <div class="flex items-center gap-2 border-b">
-                        <RouterLink to="/scm/listOrderDelivery">
+                        <RouterLink to="/scm/listOrderPickup">
                             <Button icon="pi pi-arrow-left font-bold" class="p-button-text p-button-secondary text-xl" size="big" v-tooltip="'Back'" />
                         </RouterLink>
-                        <div class="text-2xl font-bold text-gray-800">Order Delivery Details</div>
+                        <div class="text-2xl font-bold text-gray-800">Order Pickup Details</div>
                     </div>
 
                     <div class="font-semibold text-xl border-b pb-2 mt-2">Customer Details</div>
@@ -41,13 +41,33 @@
                     </div>
                 </div>
 
+                <div class="card flex flex-col gap-6 w-full">
+                    <div class="flex items-center gap-2 border-b">
+                        <div class="text-2xl font-bold text-gray-800">Collector Details</div>
+                    </div>
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <span class="text-sm text-gray-500">Driver</span>
+                            <p lass="text-lg font-medium">{{ orderDelList.driverInformation?.driverName ? orderDelList.driverInformation.driverName: 'Not Assigned' }}</p>
+                        </div>
+                        <div>
+                            <span class="text-sm text-gray-500">Contact No</span>
+                            <p lass="text-lg font-medium">{{ orderDelList.driverInformation?.driverPhoneNumber ? orderDelList.driverInformation.driverPhoneNumber: 'Not Assigned' }}</p>
+                        </div>
+                        <div>
+                            <span class="text-sm text-gray-500">Truck Plate</span>
+                            <p lass="text-lg font-medium">{{ orderDelList.driverInformation?.driverTruckPlate ? orderDelList.driverInformation.driverTruckPlate: 'Not Assigned' }}</p>
+                        </div>
+                    </div>
+                </div>
+
                 <div class="card flex flex-col w-full bg-white shadow-sm rounded-2xl border border-gray-100">
                     <!-- Header -->
                     <div class="font-semibold text-xl border-b pb-2 mt-2">Order Item</div>
                     <div class="grid grid-cols-1 gap-4 mt-4">
                         <div>
-                            <span class="text-sm text-gray-500">Order Type</span>
-                            <p class="text-lg font-semibold">{{ orderDelList.orderDesc || '-' }}</p>
+                            <span class="text-sm text-gray-500">Pickup Type</span>
+                            <p class="text-lg font-semibold">{{ orderDelList.deliveryType || '-' }}</p>
                         </div>
                     </div>
                     <div class="grid grid-cols-2 gap-4 mt-4">
@@ -113,11 +133,11 @@
                 </div>
             </div>
 
-            <div class="md:w-1/3 flex flex-col">
+                        <div class="md:w-1/3 flex flex-col">
                 <div class="card flex flex-col w-full">
                     <div class="flex items-center justify-between border-b pb-3 mb-4">
                         <div class="text-2xl font-bold text-gray-800">Advance Info</div>
-                        <Tag :value="getOrderStatusText(orderDelList.orderstatus)" :severity="getOrderStatusSeverity(orderDelList.orderstatus)" />
+                        <Tag :value="getOrderStatusText2(orderDelList.status)" :severity="getOrderStatusSeverity2(orderDelList.status)" />
                     </div>
 
                     <div class="overflow-x-auto">
@@ -153,15 +173,11 @@
                                 </tr>
                                 <tr class="border-b">
                                     <td class="px-4 py-2 font-medium">Pickup</td>
-                                    <td class="px-4 py-2 text-right">{{ orderDelList.pickup_datetime || '-' }}</td>
-                                </tr>
-                                <tr class="border-b">
-                                    <td class="px-4 py-2 font-medium">Receive</td>
-                                    <td class="px-4 py-2 text-right">{{ orderDelList.receive_datetime || '-' }}</td>
+                                    <td class="px-4 py-2 text-right">{{ orderDelList.driverInformation?.pickup_datetime? formatDateFull(orderDelList.driverInformation.pickup_datetime): 'Not Assigned' }}</td>
                                 </tr>
                                 <tr>
                                     <td class="px-4 py-2 font-medium">Created</td>
-                                    <td class="px-4 py-2 text-right">{{ orderDelList.created || '-' }}</td>
+                                    <td class="px-4 py-2 text-right">{{ formatDateFull(orderDelList.created) || '-' }}</td>
                                 </tr>
                             </tbody>
                         </table>
@@ -173,10 +189,6 @@
                         <Button label="Approve" severity="success" size="small" @click="onApproveReturnOrder" :loading="loadingAction === 'approve'" />
                     </div>
 
-                    <!-- Status Labels after action -->
-                    <div class="flex justify-end mt-4" v-else>
-                        <Tag :value="getOrderStatusText(orderDelList.orderstatus)" :severity="getOrderStatusSeverity(orderDelList.orderstatus)" />
-                    </div>
                 </div>
             </div>
         </div>
@@ -255,6 +267,22 @@ const getOrderStatusSeverity = (status) => {
         66: 'info',
         77: 'warn',
         9: 'success'
+    };
+    return severityMap[status] || 'secondary';
+};
+const getOrderStatusText2 = (status) => {
+    const statusMap = {
+        "PENDING": 'Pending',
+        // "PENDING": 'Delivery',
+        "COMPLETED": 'Completed',
+    };
+    return statusMap[status] || `Status: ${status}`;
+};
+const getOrderStatusSeverity2 = (status) => {
+    const severityMap = {
+        "PENDING": 'info',
+        // "PENDING": 'warn',
+        "COMPLETED": 'success',
     };
     return severityMap[status] || 'secondary';
 };
