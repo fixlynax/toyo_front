@@ -272,16 +272,16 @@ const getOrderStatusSeverity = (status) => {
 };
 const getOrderStatusText2 = (status) => {
     const statusMap = {
-        "NEW": 'Pending',
-        "PENDING": 'Delivery',
+        "PENDING": 'Pending',
+        // "PENDING": 'Delivery',
         "COMPLETED": 'Completed',
     };
     return statusMap[status] || `Status: ${status}`;
 };
 const getOrderStatusSeverity2 = (status) => {
     const severityMap = {
-        "NEW": 'info',
-        "PENDING": 'warn',
+        "PENDING": 'info',
+        // "PENDING": 'warn',
         "COMPLETED": 'success',
     };
     return severityMap[status] || 'secondary';

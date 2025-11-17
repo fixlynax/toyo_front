@@ -123,7 +123,7 @@ const filters = ref({
     global: { value: null, matchMode: FilterMatchMode.CONTAINS }
 });
 const statusTabs = [
-    { label: 'Pending', status: 0  ,code:"NEW"},
+    { label: 'Pending', status: 0  ,code:"PENDING"},
     { label: 'Completed', status: 1 ,code:"COMPLETED" },
 ];
 
@@ -227,16 +227,16 @@ function getStatusSeverity(status) {
 }
 const getStatusLabel2 = (status) => {
     const statusMap = {
-        "NEW": 'Pending',
-        "PENDING": 'Delivery',
+        "PENDING": 'Pending',
+        // "PENDING": 'Delivery',
         "COMPLETED": 'Completed',
     };
     return statusMap[status] || `Status: ${status}`;
 };
 const getStatusSeverity2 = (status) => {
     const severityMap = {
-        "NEW": 'info',
-        "PENDING": 'warn',
+        "PENDING": 'info',
+        // "PENDING": 'warn',
         "COMPLETED": 'success',
     };
     return severityMap[status] || 'secondary';

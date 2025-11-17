@@ -256,13 +256,13 @@ onMounted(() => {
             </div>
 
             <!-- Submitted Photos Section -->
-            <div class="card flex flex-col w-full" v-if="hasSubmittedPhotos">
+            <div class="card flex flex-col w-full" >
                 <div class="flex items-center justify-between border-b pb-2 mb-4">
-                    <div class="text-2xl font-bold text-gray-800">Submitted Photos</div>
+                    <div class="text-2xl font-bold text-gray-800">Submitted Images</div>
                 </div>
 
                 <!-- Photo Grid -->
-                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                <div v-if="hasSubmittedPhotos" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
                     <div v-for="photo in submittedPhotos" :key="photo.type" class="text-center">
                         <span class="block text-sm font-bold text-black-800 mb-3">{{ photo.label }}</span>
                         <div 
@@ -284,6 +284,10 @@ onMounted(() => {
                             />
                         </div>
                     </div>
+                </div>
+                <div v-else class="text-center py-8 bg-gray-50 rounded-lg mb-6">
+                    <i class="pi pi-image text-4xl text-gray-400 mb-3"></i>
+                    <p class="text-gray-500 font-medium">No submitted images available</p>
                 </div>
             </div>
         </div>
