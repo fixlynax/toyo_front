@@ -74,12 +74,12 @@
                         </div>
                         <div class="flex">
                             <span class="w-40 text-gray-800 font-semibold">Tire Size:</span>
-                        </div>
                             <span>{{ data.tyre_size }}</span>
+                        </div>
                         <div class="flex">
                             <span class="w-40 text-gray-800 font-semibold">Rim Diameter:</span>
                             <span>{{ data.rim_diameter }}"</span>
-                        </div>
+                        </div class="flex">
                         <div class="flex">
                             <span class="w-40 text-gray-800 font-semibold">Load Index:</span>
                             <span>{{ data.load_index }}</span>
@@ -87,11 +87,11 @@
                     </div>
                 </template>
             </Column>
-            <Column field="origin" header="Origin" style="min-width: 8rem">
+            <!-- <Column field="origin" header="Origin" style="min-width: 8rem">
                 <template #body="{ data }">
                     {{ data.construction }}
                 </template>
-            </Column>
+            </Column> -->
         </DataTable>
     </div>
 </template>
