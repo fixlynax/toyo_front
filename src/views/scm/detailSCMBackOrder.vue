@@ -136,25 +136,6 @@
                                     <span>{{ formatQuantity(data.qty) }}</span>
                                 </template>
                             </Column>
-                            <Column field="unitprice" header="Unit Price" style="min-width: 6rem">
-                                <template #body="{ data }">
-                                    <span class="font-semibold text-green-600">RM {{ data.unitprice }}</span>
-                                </template>
-
-                                <!-- ✅ Footer for label -->
-                                <template #footer>
-                                    <div class="flex justify-start pr-2 font-bold text-gray-700">Grand Total</div>
-                                </template>
-                            </Column>
-                            <Column field="totalamt" header="Total" style="min-width: 6rem">
-                                <template #body="{ data }">
-                                    <span class="font-bold text-green-700">RM {{ data.totalamt }}</span>
-                                </template>
-
-                                <template #footer>
-                                    <div class="flex justify-start pr-2 font-bold text-gray-700">RM {{ fulfillOrder.total }}</div>
-                                </template>
-                            </Column>
                         </DataTable>
 
                         <div class="flex justify-between items-center mt-3 pt-3 border-t">

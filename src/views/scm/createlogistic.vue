@@ -16,7 +16,7 @@
                     </div>
                     <div>
                         <label class="block font-bold text-gray-700 mb-2">Contact No</label>
-                        <InputText v-model="form.phoneno" type="text" placeholder="Enter Contact No" class="w-full"/>
+                        <InputText v-model="form.phoneno" type="text" placeholder="Enter Contact No" class="w-full" maxlength="15" @keypress="allowOnlyNumbers"/>
                     </div>
                 </div>
                 <!-- Logistic Form -->
@@ -32,8 +32,12 @@
                             <InputText v-model="form.contactperson" type="text" placeholder="Enter Contact Name" class="w-full" />
                         </div>
                         <div>
-                            <label class="block font-bold text-gray-700 mb-2">Contact No</label>
-                            <InputText v-model="form.mobileno" type="text" placeholder="Enter Contact No" class="w-full" @keypress="allowOnlyNumbers"/>
+                            <label class="block font-bold text-gray-700 mb-2">Mobile No</label>
+                            <InputText v-model="form.mobileno" type="text" placeholder="Enter Contact No" class="w-full" maxlength="15" @keypress="allowOnlyNumbers"/>
+                        </div>
+                        <div>
+                            <label class="block font-bold text-gray-700 mb-2">Status</label>
+                            <Dropdown v-model="form.status":options="statusCode" optionLabel="label"optionValue="value"placeholder="Select State" class="w-full"/>
                         </div>
                     </div>
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -55,7 +59,7 @@
                         </div>
                         <div>
                             <label class="block font-bold text-gray-700 mb-2">Postcode</label>
-                            <InputText v-model="form.postcode" type="text" placeholder="Enter Postcode" class="w-full" />
+                            <InputText v-model="form.postcode" type="text" placeholder="Enter Postcode" class="w-full" maxlength="5" />
                         </div>
                     </div>
 
@@ -172,11 +176,16 @@ const form = reactive({
 });
 
 const allowOnlyNumbers = (event) => {
-  // Allow only digits (0-9)
-  const char = String.fromCharCode(event.charCode);
-  if (!/[0-9]/.test(char)) {
-    event.preventDefault();
-  }
+  const key = event.key;
+
+  // allow digits
+  if (/[0-9]/.test(key)) return;
+
+  // allow "-"
+  if (key === '-') return;
+
+  // block everything else
+  event.preventDefault();
 };
 
 // Storage locations data - TMJB, TMSA, RETP, RER, TMSB, TMSK
@@ -215,7 +224,10 @@ const storageLocations = ref([
 
 // list of states
 const states = ['Johor', 'Kedah', 'Kelantan', 'Melaka', 'Negeri Sembilan', 'Pahang', 'Penang', 'Perak', 'Perlis', 'Sabah', 'Sarawak', 'Selangor', 'Terengganu', 'Kuala Lumpur', 'Putrajaya', 'Labuan'];
-
+const statusCode = [
+  { label: 'Active', value: 1 },
+  { label: 'Inactive', value: 0 }
+];
 
 // form validation
 const isFormValid = computed(() => {
