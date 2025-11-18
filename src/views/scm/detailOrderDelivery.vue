@@ -13,7 +13,7 @@
                     <div class="font-semibold text-xl border-b pb-2 mt-2">Customer Details</div>
                     <div class="grid grid-cols-2 gap-4">
                         <div>
-                            <span class="text-sm text-gray-500">Dealer Name</span>
+                            <span class="text-sm text-gray-500">Customer Name</span>
                             <p class="text-lg font-medium">{{ orderDelList.eten_user?.companyName1 || '-' }} {{ orderDelList.eten_user?.companyName2 }} {{ orderDelList.eten_user?.companyName3 }} {{ orderDelList.eten_user?.companyName4 }}</p>
                         </div>
                         <div>
@@ -153,15 +153,19 @@
                                 </tr>
                                 <tr class="border-b">
                                     <td class="px-4 py-2 font-medium">ETA Date</td>
-                                    <td class="px-4 py-2 text-right">{{ orderDelList?.scm_deliver_detail?.scheduled_delivery_time? formatDateFull(orderDelList.scm_deliver_detail.scheduled_delivery_time): 'Not Assigned'}}</td>
+                                    <td class="px-4 py-2 text-right">{{ orderDelList.deliveryDate ? formatDate(orderDelList.deliveryDate) : 'Not Assigned' }}</td>
+                                </tr>
+                                <tr class="border-b">
+                                    <td class="px-4 py-2 font-medium">Delivery Date</td>
+                                    <td class="px-4 py-2 text-right">{{ orderDelList?.scm_deliver_detail?.scheduled_delivery_time? formatDate(orderDelList.scm_deliver_detail.scheduled_delivery_time): 'Not Assigned'}}</td>
                                 </tr>
                                 <tr class="border-b">
                                     <td class="px-4 py-2 font-medium">Delivered Date</td>
-                                    <td class="px-4 py-2 text-right">{{ orderDelList?.scm_deliver_detail?.delivered_datetime? formatDateFull(orderDelList.scm_deliver_detail.delivered_datetime): 'Not Assigned'}}</td>
+                                    <td class="px-4 py-2 text-right">{{ orderDelList?.scm_deliver_detail?.delivered_datetime? formatDate(orderDelList.scm_deliver_detail.delivered_datetime): 'Not Assigned'}}</td>
                                 </tr>
                                 <tr>
                                     <td class="px-4 py-2 font-medium">Created</td>
-                                    <td class="px-4 py-2 text-right">{{ orderDelList.created || '-' }}</td>
+                                    <td class="px-4 py-2 text-right">{{ formatDate(orderDelList.created)}}</td>
                                 </tr>
                             </tbody>
                         </table>
@@ -169,7 +173,7 @@
                     <div v-if="!loading && orderDelList && !orderDelList?.scm_deliver_detail?.scheduled_delivery_time && !orderDelList?.scm_deliver_detail?.delivered_datetime" class="flex justify-end mt-3">
                         <Button  
                             style="width: auto !important"
-                            label="Update Schedule Date"
+                            label="Update Delivery Date"
                             icon="pi pi-calendar"
                             class="p-button-sm p-button-warning"
                             @click="openDialog = true"
@@ -178,7 +182,7 @@
                     <div v-if="!loading && orderDelList && orderDelList?.scm_deliver_detail?.scheduled_delivery_time && !orderDelList?.scm_deliver_detail?.delivered_datetime" class="flex justify-end mt-3">
                         <Button  
                             style="width: auto !important"
-                            label="Update Delivery Date"
+                            label="Update Delivered Date"
                             icon="pi pi-calendar"
                             class="p-button-sm p-button-warning"
                             @click="openDialog2  = true"

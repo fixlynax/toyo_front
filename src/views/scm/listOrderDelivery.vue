@@ -15,7 +15,7 @@
                 :loading="loading"
                 :filters="filters"
                 filterDisplay="menu"
-                :globalFilterFields="['order_no', 'custAccountNo', 'companyName1', 'orderDesc', 'phoneNumber', 'orderstatus']"
+                :globalFilterFields="['do_no', 'custAccountNo', 'companyName1', 'orderDesc', 'phoneNumber', 'orderstatus']"
             >
                 <template #header>
                     <div class="flex items-center justify-between gap-4 w-full flex-wrap">
@@ -85,29 +85,24 @@
                     </template>
                 </Column>
 
-                <Column field="order_no" header="Order No" style="min-width: 8rem">
+                <Column field="order_no" header="SAP DO No" style="min-width: 8rem">
                     <template #body="{ data }">
                         <RouterLink :to="`/scm/detailOrderDelivery/${data.id}`" class="hover:underline font-bold text-primary">
-                            {{ data.order_no }}
+                            {{ data.do_no }}
                         </RouterLink>
                     </template>
                 </Column>
-
-                <Column field="custAccountNo" header="Customer Acc No." style="min-width: 8rem">
-                    <template #body="{ data }">
-                        {{ data.eten_user.custAccountNo }}
-                    </template>
-                </Column>
-
                 <Column field="companyName1" header="Customer Name" style="min-width: 12rem">
                     <template #body="{ data }">
-                    {{` ${data.eten_user.companyName1} ${data.eten_user.companyName2} ${data.eten_user.companyName3} ${data.eten_user.companyName4} ` }}
+                        <span class="font-bold">{{` ${data.eten_user.companyName1} ${data.eten_user.companyName2} ${data.eten_user.companyName3} ${data.eten_user.companyName4} ` }}</span>
+                    <br>
+                     {{ data.eten_user.custAccountNo }}
                     </template>
                 </Column>
 
-                <Column field="addressLine1" header="Collection Address" style="min-width: 12rem">
+                <Column field="city" header="City" style="min-width: 12rem">
                     <template #body="{ data }">
-                         {{` ${data.eten_user.addressLine1} ${data.eten_user.addressLine2} ${data.eten_user.addressLine3} ${data.eten_user.addressLine4}, ${data.eten_user.city} ${data.eten_user.postcode} ${data.eten_user.state} ` }}
+                         {{`${data.eten_user.city}` }}
                     </template>
                 </Column>
 
@@ -117,22 +112,22 @@
                     </template>
                 </Column>
 
-                <Column field="phoneNumber" header="Contact" style="min-width: 8rem">
+
+                <Column field="deliveryDate" header="ETA Date" style="min-width: 10rem">
                     <template #body="{ data }">
-                        {{ data.eten_user.phoneNumber || '-' }}
+                        {{ data.deliveryDate ? formatDate(data.deliveryDate) : 'Not Assigned' }}
                     </template>
                 </Column>
 
-
-                <Column field="pickupDatetime" header="ETA Date" style="min-width: 10rem">
+                <Column field="scheduled_delivery_time" header="Deliver Date" style="min-width: 10rem">
                     <template #body="{ data }">
-                        {{ data.scm_deliver_detail?.scheduled_delivery_time ? formatDateFull(data.scm_deliver_detail.scheduled_delivery_time) : 'Not Assigned' }}
+                        {{ data.scm_deliver_detail?.scheduled_delivery_time ? formatDate(data.scm_deliver_detail.scheduled_delivery_time) : 'Not Assigned' }}
                     </template>
                 </Column>
 
                 <Column field="collectedDatetime" header="Delivered Date" style="min-width: 10rem">
                     <template #body="{ data }">
-                          {{ data.scm_deliver_detail?.delivered_datetime? formatDateFull(data.scm_deliver_detail.delivered_datetime): 'Not Assigned' }}
+                          {{ data.scm_deliver_detail?.delivered_datetime? formatDate(data.scm_deliver_detail.delivered_datetime): 'Not Assigned' }}
                     </template>
                 </Column>
 

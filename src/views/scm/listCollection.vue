@@ -463,7 +463,7 @@ onMounted(async () => {
             </Column>
             <Column field="returnDate" header="Receive Date" style="min-width: 10rem">
                 <template #body="{ data }">
-                    {{ data.reachWH ? formatDateFull(data.reachWH) : 'Not Assigned' }}
+                    {{ data.reachWH ? formatDate(data.reachWH) : 'Not Assigned' }}
                 </template>
             </Column>
 

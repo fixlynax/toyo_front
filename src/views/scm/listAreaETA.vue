@@ -77,7 +77,9 @@ import { ref, computed, onBeforeMount, onMounted } from 'vue';
 import { FilterMatchMode } from '@primevue/core/api';
 import api from '@/service/api';
 import LoadingPage from '@/components/LoadingPage.vue';
+import { useToast } from 'primevue/usetoast';
 
+const toast = useToast();
 const loading = ref(true);
 const importInput = ref();
 const importLoading = ref(false);
@@ -192,8 +194,11 @@ const fetchExportETA = async () => {
     try {
         loading.value = true;
         exportLoading.value = true;
-        const response = await api.post('excel/export-ETA', {},{
-            responseType: 'blob'
+        const response = await api.postExtra('excel/export-ETA', {}, {
+        responseType: 'arraybuffer',   // crucial for binary
+        headers: {
+            'Content-Type': 'application/json' // still OK for POST body
+        }
         });
 
         const blob = new Blob([response.data], {

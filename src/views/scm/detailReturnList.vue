@@ -90,11 +90,11 @@
                         <tbody>
                             <tr class="border-b">
                                 <td class="px-4 py-2 font-medium">Delivery Date</td>
-                                <td class="px-4 py-2 text-right">{{ listData.scheduleDeliveryDate ? formatDateFull(listData.scheduleDeliveryDate) : 'Not Assigned' }}</td>
+                                <td class="px-4 py-2 text-right">{{ listData.scheduleDeliveryDate ? formatDate(listData.scheduleDeliveryDate) : 'Not Assigned' }}</td>
                             </tr>
                             <tr class="border-b">
                                 <td class="px-4 py-2 font-medium">Delivered  Date</td>
-                                <td class="px-4 py-2 text-right">{{ listData.deliveryDate && listData.deliveryTime ? formatDate(listData.deliveryDate) + ' ' + formatTime(listData.deliveryTime): 'Not Assigned'}}</td>
+                                <td class="px-4 py-2 text-right">{{ listData.deliveryDate ? formatDate(listData.deliveryDate) : 'Not Assigned'}}</td>
                             </tr>
                         </tbody>
                     </table>

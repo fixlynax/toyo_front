@@ -91,7 +91,7 @@
                 </Column>
                 <Column field="pickup_datetime" header="Pickup Date" style="min-width: 10rem">
                     <template #body="{ data }">
-                        {{ data.driverInformation?.pickup_datetime ? formatDateFull(data.driverInformation.pickup_datetime) : 'Not Assigned' }}
+                        {{ data.driverInformation?.pickup_datetime ? formatDate(data.driverInformation.pickup_datetime) : 'Not Assigned' }}
                     </template>
                 </Column>
                 <Column field="orderstatus" header="Status" style="min-width: 8rem">
