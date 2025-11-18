@@ -115,9 +115,7 @@
 
             <Column field="pattern" header="Pattern" style="min-width: 8rem">
                 <template #body="{ data }">
-                    <RouterLink to="/technical/detailProduct" class="block text-gray-800 hover:text-gray-600 transition-colors">
-                        <div class="font-semibold">{{ data.pattern_name }}</div>
-                    </RouterLink>
+                        {{ data.pattern_name }}
                 </template>
             </Column>
 
