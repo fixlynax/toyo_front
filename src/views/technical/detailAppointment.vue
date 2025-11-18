@@ -328,8 +328,6 @@ onMounted(() => {
 
                 <div class="grid grid-cols-1 gap-3">
                     <div>
-                        <span class="block text-sm font-bold text-black-800">Warranty Entry ID</span>
-                        <p class="text-base font-medium">{{ appointment.appointment_info?.warrantyEntryID || 'N/A' }}</p>
                     </div>
                     <div>
                         <span class="block text-sm font-bold text-black-800">Request Date</span>
