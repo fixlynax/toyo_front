@@ -172,6 +172,7 @@ const form = reactive({
     phoneno: '',
     contactperson: '',
     mobileno: '',
+    status: '',
     storage_list: []
 });
 
@@ -243,6 +244,7 @@ const isFormValid = computed(() => {
         form.phoneno.trim() !== '' &&
         form.contactperson.trim() !== '' &&
         form.mobileno.trim() !== '' &&
+        // form.status.trim() !== '' &&
         form.storage_list && form.storage_list.length > 0
     );
 });
@@ -291,6 +293,7 @@ const submitForm  = async () => {
     formData.append('phoneno', form.phoneno);
     formData.append('contactperson', form.contactperson);
     formData.append('mobileno', form.mobileno);
+    formData.append('mobileno', form.status);
     formData.append('storage_list', JSON.stringify(form.storage_list));
 
     try {
@@ -326,6 +329,7 @@ const submitForm  = async () => {
             phoneno: '',
             contactperson: '',
             mobileno: '',
+            status: '',
             storage_list: []
         });
     }

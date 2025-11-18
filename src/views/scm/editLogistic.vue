@@ -192,7 +192,7 @@ const form = reactive({
     phoneno: '',
     contactperson: '',
     mobileno: '',
-    status: 0,
+    status: '',
     storage_list: []  // <-- array for MultiSelect
 });
 
