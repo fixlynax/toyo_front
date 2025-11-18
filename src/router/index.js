@@ -57,7 +57,7 @@ const router = createRouter({
                 // DASHBOARD
                 // ===============================
                 {
-                    path: '',
+                    path: 'dashboard',
                     name: 'dashboard',
                     component: () => import('@/views/Dashboard.vue')
                 },
@@ -1007,7 +1007,9 @@ router.beforeEach( async(to, from, next) => {
   // Redirect if not logged in
   if (authRequired && !loggedIn) return next('/auth/login');
   // Redirect logged-in user away from login page
-  if (relativePath === '/auth/login' && loggedIn) return next('/');
+  if (relativePath === '/auth/login' && loggedIn) return next('/dashboard');
+  // Redirect if login based on role
+  if (to.path === '/' && loggedIn) {return next('/dashboard');}
   // Load menu & permissions if logged in
   if (loggedIn) {
     const menuStore = useMenuStore();
