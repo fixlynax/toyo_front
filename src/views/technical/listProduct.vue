@@ -12,7 +12,7 @@
             :loading="loading"
             :filters="filters"
             filterDisplay="menu"
-            :globalFilterFields="['materialid', 'pattern', 'origin', 'status']"
+            :globalFilterFields="['materialid', 'pattern', 'origin', 'sectionwidth', 'tireseries', 'rimdiameter', 'speedplyrating','status']"
         >
             <template #header>
                 <div class="flex items-center justify-between gap-4 w-full flex-wrap">
@@ -115,7 +115,7 @@
 
             <Column field="pattern" header="Pattern" style="min-width: 8rem">
                 <template #body="{ data }">
-                        {{ data.pattern_name }}
+                        {{ data.pattern }}
                 </template>
             </Column>
 

@@ -87,11 +87,6 @@
                     </div>
                 </template>
             </Column>
-            <Column field="origin" header="Origin" style="min-width: 8rem">
-                <template #body="{ data }">
-                    {{ data.construction }}
-                </template>
-            </Column>
         </DataTable>
     </div>
 </template>
