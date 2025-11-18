@@ -65,11 +65,6 @@
                 </template>
             </Column>
 
-            <Column field="origin" header="Origin" style="min-width: 8rem">
-                <template #body="{ data }">
-                    {{ data.construction }}
-                </template>
-            </Column>
             <Column field="size" header="Size" style="min-width: 12rem">
                 <template #body="{ data }">
                     <div class="flex flex-col leading-relaxed text-sm text-gray-700">
@@ -79,8 +74,8 @@
                         </div>
                         <div class="flex">
                             <span class="w-40 text-gray-800 font-semibold">Tire Size:</span>
-                            <span>{{ data.tyre_size }}</span>
                         </div>
+                            <span>{{ data.tyre_size }}</span>
                         <div class="flex">
                             <span class="w-40 text-gray-800 font-semibold">Rim Diameter:</span>
                             <span>{{ data.rim_diameter }}"</span>
@@ -90,6 +85,11 @@
                             <span>{{ data.load_index }}</span>
                         </div>
                     </div>
+                </template>
+            </Column>
+            <Column field="origin" header="Origin" style="min-width: 8rem">
+                <template #body="{ data }">
+                    {{ data.construction }}
                 </template>
             </Column>
         </DataTable>
