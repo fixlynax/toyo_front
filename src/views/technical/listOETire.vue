@@ -12,7 +12,7 @@
             :loading="loading"
             :filters="filters"
             filterDisplay="menu"
-            :globalFilterFields="['id', 'pattern', 'brand', 'construction']"
+            :globalFilterFields="['id', 'pattern', 'brand', 'model',  'construction']"
         >
             <template #header>
                 <div class="flex items-center justify-between gap-4 w-full flex-wrap">
@@ -53,11 +53,18 @@
                 </template>
             </Column>
 
-            <Column field="origin" header="Brand" style="min-width: 8rem">
+            <Column field="brand" header="Brand" style="min-width: 8rem">
                 <template #body="{ data }">
                     {{ data.brand }}
                 </template>
             </Column>
+
+            <Column field="model" header="Model" style="min-width: 8rem">
+                <template #body="{ data }">
+                    {{ data.model }}
+                </template>
+            </Column>
+
             <Column field="origin" header="Origin" style="min-width: 8rem">
                 <template #body="{ data }">
                     {{ data.construction }}
@@ -229,6 +236,7 @@ const fetchData = async () => {
             tyres.value = response.data.oe_tires.map((product) => ({
                 id: product.tire_id,
                 brand: product.brand,
+                model: product.model,
                 construction: product.construction,
                 created: product.created,
                 load_index: product.load_index,
