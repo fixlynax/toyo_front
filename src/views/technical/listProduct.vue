@@ -108,18 +108,14 @@
             <Column field="materialid" header="Material ID" style="min-width: 6rem">
                 <template #body="{ data }">
                     <div class="flex flex-col items-start gap-1">
-                        <RouterLink :to="`/technical/detailProduct/${data.id}`" class="hover:underline font-bold text-primary-400">
                             {{ data.materialid }}
-                        </RouterLink>
                     </div>
                 </template>
             </Column>
 
             <Column field="pattern" header="Pattern" style="min-width: 8rem">
                 <template #body="{ data }">
-                    <RouterLink to="/technical/detailProduct" class="block text-gray-800 hover:text-gray-600 transition-colors">
-                        <div class="font-semibold">{{ data.pattern_name }}</div>
-                    </RouterLink>
+                        {{ data.pattern_name }}
                 </template>
             </Column>
 
