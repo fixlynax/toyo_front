@@ -179,7 +179,7 @@
                         </div>
                     </template>
                 </Column>
-                <Column field="price" header="Price (RM)" style="min-width: 8rem">
+                <Column header="Ttem Category" style="min-width: 8rem">
                     <template #body="{ data }">
                         {{ data.itemcategory }}
                     </template>
@@ -774,7 +774,7 @@ const fetchMaterials = async (custAccountNo) => {
                         price: price,
                         stockBalance: stockBalance,
                         quantity: 1,
-                        itemcategory: material.itemcategory || '??',
+                        itemcategory: material.itemcategory || 'ZT02', // Ensure itemcategory has default value
                         plant: 'TSM'
                     };
                 });
@@ -858,7 +858,7 @@ const addToCartAPI = async (cartRefNo = null) => {
     const orderArray = selectedTyres.value.map((item, index) => ({
         materialid: item.materialid,
         itemno: String(index + 1).padStart(5, '0'),
-        itemcategory: item.itemcategory || '??',
+        itemcategory: item.itemcategory || 'ZT02', // Default to ZT02 if not available
         plant: item.plant || 'TSM',
         qty: item.quantity.toString(),
         price: item.price.toString(),
@@ -945,7 +945,7 @@ const placeOrder = async () => {
         const orderArray = selectedTyres.value.map((item, index) => ({
             materialid: item.materialid,
             itemno: String(index + 1).padStart(5, '0'),
-            itemcategory: item.itemcategory || '??',
+            itemcategory: item.itemcategory || 'ZT02', // Ensure itemcategory is included
             plant: item.plant || 'TSM',
             qty: item.quantity.toString(),
             price: item.price.toString(),
@@ -982,7 +982,11 @@ const processDirectShipOrder = async (orderArray) => {
 
     if (addToCartResult.status === 1) {
         orderMessage.value = 'Confirming direct shipment order...';
-        const confirmResult = await confirmOrderAPI(currentCartRefNo.value, orderArray);
+
+        // Use the processed order array from addToCartAPI response if available
+        const finalOrderArray = addToCartResult.eten_data?.order_array || orderArray;
+
+        const confirmResult = await confirmOrderAPI(currentCartRefNo.value, finalOrderArray);
         await handleOrderConfirmation(confirmResult, 'DIRECTSHIP');
     } else {
         throw new Error(addToCartResult.message || 'Failed to add items to direct shipment cart');
@@ -997,7 +1001,11 @@ const processNormalOrder = async (orderArray) => {
     if (addToCartResult.status === 1) {
         orderMessage.value = 'Confirming order with SAP...';
         const cartRefNo = addToCartResult.eten_data?.cartRefNo;
-        const confirmResult = await confirmOrderAPI(cartRefNo, orderArray);
+
+        // Use the processed order array from addToCartAPI response if available
+        const finalOrderArray = addToCartResult.eten_data?.order_array || orderArray;
+
+        const confirmResult = await confirmOrderAPI(cartRefNo, finalOrderArray);
         await handleOrderConfirmation(confirmResult, 'NORMAL');
     } else {
         throw new Error(addToCartResult.message || 'Failed to add items to cart');
@@ -1069,15 +1077,15 @@ const proceedWithBackOrder = async () => {
         const fulfilledArray = [];
         const backOrderArray = [];
 
-        selectedTyres.value.forEach((item) => {
+        selectedTyres.value.forEach((item, index) => {
             const unfulfilledItem = unfulfilledItems.value.find((bo) => bo.materialid === item.materialid);
 
             if (unfulfilledItem && unfulfilledItem.backorder_qty > 0) {
                 // Add to back order array with remaining quantity
                 backOrderArray.push({
                     materialid: item.materialid,
-                    itemno: '00010',
-                    itemcategory: item.itemcategory || '??',
+                    itemno: String(index + 1).padStart(5, '0'),
+                    itemcategory: item.itemcategory || 'ZT02', // Ensure itemcategory is included
                     plant: item.plant || 'TSM',
                     qty: unfulfilledItem.backorder_qty.toString(),
                     price: item.price.toString(),
@@ -1088,8 +1096,8 @@ const proceedWithBackOrder = async () => {
                 if (unfulfilledItem.accepted_qty > 0) {
                     fulfilledArray.push({
                         materialid: item.materialid,
-                        itemno: '00010',
-                        itemcategory: item.itemcategory || '??',
+                        itemno: String(index + 1).padStart(5, '0'),
+                        itemcategory: item.itemcategory || 'ZT02', // Ensure itemcategory is included
                         plant: item.plant || 'TSM',
                         qty: unfulfilledItem.accepted_qty.toString(),
                         price: item.price.toString(),
@@ -1100,8 +1108,8 @@ const proceedWithBackOrder = async () => {
                 // Item is fully fulfilled
                 fulfilledArray.push({
                     materialid: item.materialid,
-                    itemno: '00010',
-                    itemcategory: item.itemcategory || '??',
+                    itemno: String(index + 1).padStart(5, '0'),
+                    itemcategory: item.itemcategory || 'ZT02', // Ensure itemcategory is included
                     plant: item.plant || 'TSM',
                     qty: item.quantity.toString(),
                     price: item.price.toString(),
@@ -1159,7 +1167,7 @@ const proceedWithoutBackOrder = async () => {
         // Only process fulfilled items
         const orderArray = [];
 
-        selectedTyres.value.forEach((item) => {
+        selectedTyres.value.forEach((item, index) => {
             const unfulfilledItem = unfulfilledItems.value.find((bo) => bo.materialid === item.materialid);
 
             if (!unfulfilledItem || unfulfilledItem.accepted_qty > 0) {
@@ -1168,8 +1176,8 @@ const proceedWithoutBackOrder = async () => {
                 if (quantity > 0) {
                     orderArray.push({
                         materialid: item.materialid,
-                        itemno: '00010',
-                        itemcategory: item.itemcategory || '??',
+                        itemno: String(index + 1).padStart(5, '0'),
+                        itemcategory: item.itemcategory || 'ZT02', // Ensure itemcategory is included
                         plant: item.plant || 'TSM',
                         qty: quantity.toString(),
                         price: item.price.toString(),
@@ -1301,7 +1309,7 @@ const isInCart = (tyre) => selectedTyres.value.some((t) => t.id === tyre.id);
 
 const viewOrderDetails = () => {
     if (orderDetails.value?.orderRefNo) {
-        router.push(`/om/orders/${orderDetails.value.orderRefNo}`);
+        router.push(`/om/detailOrder/${orderDetails.value.orderRefNo}`);
     }
     closeOrderDialog();
 };

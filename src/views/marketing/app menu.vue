@@ -170,7 +170,7 @@ const model = ref([
                     {
                         label: 'Sales Forecast',
                         icon: 'pi pi-fw pi-chart-line',
-                        to: '/om/reportSalesForecast'
+                        to: '/om/reportSF'
                     },
                     {
                         label: 'Direct Shipment',

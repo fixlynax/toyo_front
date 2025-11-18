@@ -1099,7 +1099,7 @@ const fetchWarrantyClaim = async () => {
                 reimbursement: apiData.reimbursement?.[0] || {},
                 replacement_detail: apiData.replacement_detail,
                 scrapPhotos: apiData.scrapPhotos || {},
-                threadDepthPhotos: apiData.threadDepthPhotos?.[0] || []
+                threadDepthPhotos: apiData.threadDepthPhotos || {}
 
                 // Add other necessary mappings...
             };

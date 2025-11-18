@@ -289,8 +289,11 @@
                                 </tr>
                                 <tr class="border-b">
                                     <td class="px-4 py-2 font-medium">Allow Lalamove</td>
-                                    <td class="px-4 py-2 text-right">{{ form.allowLalamove || '-' }}</td>
+                                    <td class="px-4 py-2 text-right">
+                                        {{ form.allowLalamove == 1 ? 'Yes' : 'No' }}
+                                    </td>
                                 </tr>
+
                                 <tr class="border-b">
                                     <td class="px-4 py-2 font-medium">Signboard Type</td>
                                     <td class="px-4 py-2 text-right">{{ form.signboardType || '-' }}</td>

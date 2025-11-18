@@ -38,6 +38,10 @@
                             <span class="text-sm text-gray-500">Channel</span>
                             <p class="text-lg font-medium">{{ orderData.channel || '-' }}</p>
                         </div>
+                         <div>
+                            <span class="text-sm text-gray-500">SAP Return No.</span>
+                            <p class="text-lg font-bold">{{ order.sapreturnno || '-' }}</p>
+                        </div>
                     </div>
                 </div>
 
@@ -135,10 +139,10 @@
                                     <td class="px-4 py-2 font-medium">Invoice No</td>
                                     <td class="px-4 py-2 text-right">{{ orderData.inv_no || '-' }}</td>
                                 </tr>
-                                <tr class="border-b">
+                                <!-- <tr class="border-b">
                                     <td class="px-4 py-2 font-medium">SAP Return No</td>
                                     <td class="px-4 py-2 text-right">{{ order.sapreturnno || '-' }}</td>
-                                </tr>
+                                </tr> -->
                                 <tr class="border-b">
                                     <td class="px-4 py-2 font-medium">SAP Order Type</td>
                                     <td class="px-4 py-2 text-right">{{ orderData.sapordertype || '-' }}</td>
