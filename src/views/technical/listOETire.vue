@@ -12,7 +12,7 @@
             :loading="loading"
             :filters="filters"
             filterDisplay="menu"
-            :globalFilterFields="['id', 'pattern', 'brand', 'construction']"
+            :globalFilterFields="['id', 'pattern', 'brand', 'model',  'construction']"
         >
             <template #header>
                 <div class="flex items-center justify-between gap-4 w-full flex-wrap">
@@ -53,16 +53,18 @@
                 </template>
             </Column>
 
-            <Column field="origin" header="Brand" style="min-width: 8rem">
+            <Column field="brand" header="Brand" style="min-width: 8rem">
                 <template #body="{ data }">
                     {{ data.brand }}
                 </template>
             </Column>
-            <Column field="origin" header="Origin" style="min-width: 8rem">
+
+            <Column field="model" header="Model" style="min-width: 8rem">
                 <template #body="{ data }">
-                    {{ data.construction }}
+                    {{ data.model }}
                 </template>
             </Column>
+
             <Column field="size" header="Size" style="min-width: 12rem">
                 <template #body="{ data }">
                     <div class="flex flex-col leading-relaxed text-sm text-gray-700">
@@ -72,8 +74,8 @@
                         </div>
                         <div class="flex">
                             <span class="w-40 text-gray-800 font-semibold">Tire Size:</span>
-                            <span>{{ data.tyre_size }}</span>
                         </div>
+                            <span>{{ data.tyre_size }}</span>
                         <div class="flex">
                             <span class="w-40 text-gray-800 font-semibold">Rim Diameter:</span>
                             <span>{{ data.rim_diameter }}"</span>
@@ -83,6 +85,11 @@
                             <span>{{ data.load_index }}</span>
                         </div>
                     </div>
+                </template>
+            </Column>
+            <Column field="origin" header="Origin" style="min-width: 8rem">
+                <template #body="{ data }">
+                    {{ data.construction }}
                 </template>
             </Column>
         </DataTable>
@@ -229,6 +236,7 @@ const fetchData = async () => {
             tyres.value = response.data.oe_tires.map((product) => ({
                 id: product.tire_id,
                 brand: product.brand,
+                model: product.model,
                 construction: product.construction,
                 created: product.created,
                 load_index: product.load_index,

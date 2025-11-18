@@ -297,7 +297,7 @@ onMounted(() => {
             <!-- Dealer Information - Side by side like customer info -->
             <div class="card w-full" v-if="hasDealerInfo">
                 <div class="flex items-center justify-between border-b pb-2 mb-4">
-                    <div class="text-2xl font-bold text-gray-800">Customer Information</div>
+                    <div class="text-2xl font-bold text-gray-800">Dealer Information</div>
                 </div>
 
                 <div class="grid grid-cols-2 gap-4">
@@ -328,8 +328,6 @@ onMounted(() => {
 
                 <div class="grid grid-cols-1 gap-3">
                     <div>
-                        <span class="block text-sm font-bold text-black-800">Warranty Entry ID</span>
-                        <p class="text-base font-medium">{{ appointment.appointment_info?.warrantyEntryID || 'N/A' }}</p>
                     </div>
                     <div>
                         <span class="block text-sm font-bold text-black-800">Request Date</span>

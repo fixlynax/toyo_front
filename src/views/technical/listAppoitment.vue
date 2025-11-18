@@ -10,7 +10,7 @@ const exportLoading = ref(false);
 
 // 🟢 Tab setup
 const statusTabs = [
-    { label: 'Pending', status: 0 },
+    { label: 'Pending', status:  0 },
     { label: 'Accepted', status: 1 },
     { label: 'Rejected', status: 2 }
 ];
@@ -24,11 +24,14 @@ const filters = ref({
 const filteredAppointments = computed(() => {
     const currentTab = statusTabs[activeTabIndex.value]?.status;
     
-    if (!currentTab || currentTab === 'ALL') {
+    if (currentTab === undefined || currentTab === 'ALL') {
         return listData.value;
     }
 
-    return listData.value.filter(appointment => appointment.status === currentTab);
+    // Convert both to numbers for reliable comparison
+    return listData.value.filter(appointment => 
+        Number(appointment.status) === Number(currentTab)
+    );
 });
 
 // Fetch appointment list

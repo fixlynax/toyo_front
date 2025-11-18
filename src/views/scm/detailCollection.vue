@@ -90,11 +90,11 @@
                         <tbody>
                             <tr class="border-b">
                                 <td class="px-4 py-2 font-medium">Collect Date</td>
-                                <td class="px-4 py-2 text-right">{{ listData.collectDate && listData.collectTime ? formatDate(listData.collectDate) + ' ' + formatTime(listData.collectTime): 'Not Assigned'}}</td>
+                                <td class="px-4 py-2 text-right">{{ listData.collectDate ? formatDate(listData.collectDate): 'Not Assigned'}}</td>
                             </tr>
                             <tr class="border-b">
                                 <td class="px-4 py-2 font-medium">Receive Date</td>
-                                <td class="px-4 py-2 text-right">{{ listData.reachWH ? formatDateFull(listData.reachWH) : 'Not Assigned' }}</td>
+                                <td class="px-4 py-2 text-right">{{ listData.reachWH ? formatDate(listData.reachWH) : 'Not Assigned' }}</td>
                             </tr>
                         </tbody>
                     </table>

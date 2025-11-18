@@ -97,7 +97,7 @@
             </Column>
             <Column field="delivery_information.pickup_datetime" header="Delivery Date" style="min-width: 8rem">
                 <template #body="{ data }">
-                     {{ data.scheduleDeliveryDate ? formatDateFull(data.scheduleDeliveryDate) : 'Not Assigned' }}
+                     {{ data.scheduleDeliveryDate ? formatDate(data.scheduleDeliveryDate) : 'Not Assigned' }}
                 </template>
             </Column>
             <Column field="receive_datetime" header="Delivered Date" style="min-width: 8rem">

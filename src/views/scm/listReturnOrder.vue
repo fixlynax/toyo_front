@@ -12,7 +12,7 @@
             :loading="loading"
             :filters="filters"
             filterDisplay="menu"
-            :globalFilterFields="['return_orderNo_ref', 'custAccountNo', 'companyName1' , 'companyName2' , 'companyName3' , 'companyName4', 'created']">
+            :globalFilterFields="['return_orderNo_ref', 'custAccountNo', 'dealerName' , 'delivery_status' , 'created']">
             <template #header>
                 <div class="flex flex-col gap-4 w-full">
                     <!-- Search and Filters Row -->
@@ -87,27 +87,19 @@
                     </RouterLink>
                 </template>
             </Column>
-            <Column field="dealerName" header="Dealer Name" dataType="date" style="min-width: 8rem">
+            <Column field="dealerName" header="Customer Name" dataType="date" style="min-width: 8rem">
                 <template #body="{ data }">
-                    {{ data?.dealerName || '-' }}
+                    <span class="font-bold">{{ data?.dealerName || '-' }}</span>
+                    <br>
+                     {{ data.custAccountNo }}
                 </template>
             </Column>
-            <Column field="custAccountNo" header="Customer Acc No" style="min-width: 10rem">
-                <template #body="{ data }">
-                    {{ data?.custAccountNo || '-' }}
-                </template>
-            </Column>
-            <Column field="companyName1" header="Company Name" dataType="date" style="min-width: 8rem">
-                <template #body="{ data }">
-                    {{ `${data?.companyName1 || ''} ${data?.companyName2 || ''} ${data?.companyName3 || ''} ${data?.companyName4 || ''}` }}
-                </template>
-            </Column>
-            <Column field="created" header="Pickup Date" style="min-width: 10rem">
+            <Column field="pickup_datetime" header="Pickup Date" style="min-width: 10rem">
                 <template #body="{ data }">
                     {{ data.delivery_information?.pickup_datetime ? formatDate(data.delivery_information.pickup_datetime) : 'No date assigned' }}
                 </template>
             </Column>
-            <Column field="created" header="Receiving Date" style="min-width: 10rem">
+            <Column field="receive_datetime" header="Receiving Date" style="min-width: 10rem">
                 <template #body="{ data }">
                     {{ data.delivery_information?.receive_datetime ? formatDate(data.delivery_information.receive_datetime) : 'No date assigned' }}
                 </template>
@@ -117,7 +109,7 @@
                         {{ data.return_order_array?.length || 0 }}
                 </template>
             </Column>
-            <Column header="Status" style="min-width: 8rem">
+            <Column header="delivery_status" style="min-width: 8rem">
                 <template #body="{ data }">
                     <Tag :value="data.delivery_status" :severity="getStatusSeverity(data.delivery_status)" />
                 </template>

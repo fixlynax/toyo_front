@@ -501,8 +501,8 @@
 
     <Dialog v-model:visible="showApproveDialog" header="Select Approval Type:" :modal="true" class="p-fluid" :style="{ width: '40rem' }">
         <div class="grid grid-cols-1 gap-4">
-            <!-- Show Replacement option only if claimPercent >= 90 -->
-            <div v-if="warantyDetail.claimPercent >= 90" class="flex items-center">
+            <!-- Show Replacement option only if claimPercent >= 80 -->
+            <div v-if="warantyDetail.claimPercent >= 80" class="flex items-center">
                 <Button label="Replacement" class="p-button-primary w-full" @click="createReplacement" />
             </div>
             <!-- Always show Reimbursement option -->
