@@ -4,7 +4,7 @@
         <TabMenu :model="statusTabs" v-model:activeIndex="activeTabIndex" class="mb-6" />
 
         <!-- 🟢 Only show LoadingPage during initial load, hide DataTable completely -->
-        <LoadingPage v-if="loading" :sub-message="'Fetching your Back Order list'" class="min-h-[720px]" />
+        <LoadingPage v-if="loading" :sub-message="'Fetching your Back Order list'" />
 
         <!-- 🟢 Only show DataTable when NOT loading -->
         <DataTable
