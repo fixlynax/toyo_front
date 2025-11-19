@@ -564,8 +564,8 @@ async function goNext() {
         } else {
             toast.add({
                 severity: 'warn',
-                summary: 'No Record Found',
-                detail: `No record found for Account No: ${accountNo.value}`,
+                summary: 'Account Already Exist',
+                detail: `Account Already Exist for Account No: ${accountNo.value}`,
                 life: 4000
             });
             resetForm();
