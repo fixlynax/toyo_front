@@ -13,7 +13,7 @@
                     <div class="font-semibold text-xl border-b pb-2 mt-2">Customer Details</div>
                     <div class="grid grid-cols-2 gap-4">
                         <div>
-                            <span class="text-sm text-gray-500">Dealer Name</span>
+                            <span class="text-sm text-gray-500">Customer Name</span>
                             <p class="text-lg font-medium">{{ orderDelList.eten_user?.companyName1 || '-' }} {{ orderDelList.eten_user?.companyName2 }} {{ orderDelList.eten_user?.companyName3 }} {{ orderDelList.eten_user?.companyName4 }}</p>
                         </div>
                         <div>
@@ -103,30 +103,6 @@
                         <Column field="qty" header="Quantity" class="text-right">
                             <template #body="{ data }">
                                 {{ data.qty }}
-                            </template>
-                        </Column>
-
-                        <!-- 🟦 Unit Price Column -->
-                        <Column field="unitprice" header="Unit Price (RM)" class="text-right">
-                            <template #body="{ data }">
-                                {{ data.unitprice }}
-                            </template>
-
-                            <!-- ✅ Footer for label -->
-                            <template #footer>
-                                <div class="flex justify-start pr-2 font-bold text-gray-700">Subtotal</div>
-                            </template>
-                        </Column>
-
-                        <!-- 🟦 Total Amount Column -->
-                        <Column field="totalamt" header="Total Amount (RM)" class="text-right">
-                            <template #body="{ data }">
-                                {{ (Number(data.unitprice) * Number(data.qty)).toFixed(2) }}
-                            </template>
-
-                            <!-- ✅ Footer for total value -->
-                            <template #footer>
-                                <div class="flex justify-start pr-3 font-semibold text-blue-600">{{ subtotal.toFixed(2) }}</div>
                             </template>
                         </Column>
                     </DataTable>
@@ -246,10 +222,6 @@ const formatItemNo = (itemNo) => {
     if (!itemNo) return '-';
     return itemNo.toString().padStart(2, '0');
 };
-const subtotal = computed(() => {
-    const arr = orderDelList.value.fullfill_order_array || [];
-    return arr.reduce((sum, item) => sum + (Number(item.unitprice) * Number(item.qty)), 0);
-});
 function formatDate(dateString) {
     if (!dateString) return '';
     const date = new Date(dateString);

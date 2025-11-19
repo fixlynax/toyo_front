@@ -72,9 +72,10 @@
                     </div>
                 </div>
 
+                <!-- UPDATED: Main Branch display -->
                 <div class="w-full">
-                    <span class="text-sm text-gray-500">Main Branch</span>
-                    <p class="text-lg font-medium">{{ getMainBranchLabel(form.mainBranchDealer) || '-' }}</p>
+                    <span class="text-sm text-gray-500">Main Branch Account</span>
+                    <p class="text-lg font-medium">{{ getMainBranchLabel(form.mainBranchDealer) || (form.accountNo && form.accountNo.endsWith('00') ? 'This is a main branch account' : '-') }}</p>
                 </div>
             </div>
         </div>
@@ -155,9 +156,10 @@
                 <div class="font-semibold text-xl border-b pb-2">👤 Account Details</div>
 
                 <div class="flex flex-col md:flex-row gap-4">
+                    <!-- UPDATED: Account Type display -->
                     <div class="w-full">
                         <span class="text-sm text-gray-500">Account Type</span>
-                        <p class="text-lg font-medium">{{ getDropdownLabel(form.accountType, accountTypeOptions) || '-' }}</p>
+                        <p class="text-lg font-medium">{{ getAccountTypeLabel(form.accountType) || '-' }}</p>
                     </div>
                     <div class="w-full">
                         <span class="text-sm text-gray-500">Payment Terms</span>
@@ -195,9 +197,10 @@
                 <div class="font-semibold text-xl border-b pb-2">💲 Pricing & Sales Info</div>
 
                 <div class="flex flex-col md:flex-row gap-4">
+                    <!-- UPDATED: Price List display -->
                     <div class="w-full">
                         <span class="text-sm text-gray-500">Price List</span>
-                        <p class="text-lg font-medium">{{ getDropdownLabel(form.pricelist, priceListOptions) || '-' }}</p>
+                        <p class="text-lg font-medium">{{ form.pricelist || '-' }}</p>
                     </div>
                     <div class="w-full">
                         <span class="text-sm text-gray-500">Price Group</span>
@@ -226,24 +229,6 @@
             </div>
         </div>
 
-        <!-- 🚚 Shipping & Delivery -->
-        <div class="flex mt-8">
-            <div class="card flex flex-col gap-4 w-full">
-                <div class="font-semibold text-xl border-b pb-2">🚚 Shipping & Delivery</div>
-
-                <div class="flex flex-col md:flex-row gap-4">
-                    <div class="w-full">
-                        <span class="text-sm text-gray-500">Shipping Condition</span>
-                        <p class="text-lg font-medium">{{ getDropdownLabel(form.shippingCond, shippingConditionOptions) || '-' }}</p>
-                    </div>
-                    <div class="w-full">
-                        <span class="text-sm text-gray-500">Allow Lalamove</span>
-                        <p class="text-lg font-medium">{{ form.allowLalamove === '1' ? 'Yes' : 'No' }}</p>
-                    </div>
-                </div>
-            </div>
-        </div>
-
         <!-- 🪧 Signboard / Branding -->
         <div class="flex mt-8">
             <div class="card flex flex-col gap-4 w-full">
@@ -251,12 +236,37 @@
 
                 <div class="flex flex-col md:flex-row gap-4">
                     <div class="w-full">
-                        <span class="text-sm text-gray-500">Signboard Type</span>
-                        <p class="text-lg font-medium">{{ getDropdownLabel(form.signboardType, signboardTypeOptions) || '-' }}</p>
+                        <span class="text-sm text-gray-500">Signboard Brand</span>
+                        <p class="text-lg font-medium">{{ form.signboardType || '-' }}</p>
                     </div>
+
                     <div class="w-full">
                         <span class="text-sm text-gray-500">Signboard Brand</span>
                         <p class="text-lg font-medium">{{ form.signboardBrand || '-' }}</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 🚚 Shipping & Delivery -->
+        <div class="flex mt-8">
+            <div class="card flex flex-col gap-4 w-full">
+                <div class="font-semibold text-xl border-b pb-2">🚚 Shipping & Delivery</div>
+
+                <div class="flex flex-col md:flex-row gap-4">
+                    <!-- UPDATED: Shipping Condition display -->
+                    <div class="w-full">
+                        <span class="text-sm text-gray-500">Shipping Condition</span>
+                        <p class="text-lg font-medium">{{ form.shippingCond || '-' }}</p>
+                    </div>
+                    <div class="w-full">
+                        <span class="text-sm text-gray-500">Allow Lalamove</span>
+                        <p class="text-lg font-medium">{{ form.allowLalamove === '1' ? 'Yes' : 'No' }}</p>
+                    </div>
+                    <!-- NEW: Allow Direct Shipment -->
+                    <div class="w-full">
+                        <span class="text-sm text-gray-500">Allow Direct Shipment</span>
+                        <p class="text-lg font-medium">{{ form.allowDirectShipment === '1' ? 'Yes' : 'No' }}</p>
                     </div>
                 </div>
             </div>
@@ -353,7 +363,7 @@
                         </div>
                         <div>
                             <span class="text-sm text-gray-500">State</span>
-                            <p class="text-lg font-medium">{{ shipTo.state || '-' }}</p>
+                        <p class="text-lg font-medium">{{ shipTo.state || '-' }}</p>
                         </div>
                         <div>
                             <span class="text-sm text-gray-500">Country</span>
@@ -398,34 +408,6 @@
                         <span class="text-sm text-gray-500">Phone No.</span>
                         <p class="text-lg font-medium">{{ form.phoneno || '-' }}</p>
                     </div>
-                    <!-- <div>
-                        <div class="w-full">
-                            <span class="text-sm text-gray-500">Password</span>
-                            <div class="flex items-center">
-                                <p class="text-lg font-medium mr-2 mb-0">
-                                    {{ showPassword ? form.password : '••••••••' }}
-                                </p>
-                                <button type="button" @click="showPassword = !showPassword" class="text-gray-500 hover:text-gray-700">
-                                    <i v-if="showPassword" class="pi pi-eye-slash text-sm"></i>
-                                    <i v-else class="pi pi-eye text-sm"></i>
-                                </button>
-                            </div>
-                        </div>
-                    </div> -->
-                    <!-- <div>
-                        <div class="w-full">
-                            <span class="text-sm text-gray-500">Confirm Password</span>
-                            <div class="flex items-center">
-                                <p class="text-lg font-medium mr-2 mb-0">
-                                    {{ ConfirmationshowPassword ? form.confirmpassword : '••••••••' }}
-                                </p>
-                                <button type="button" @click="ConfirmationshowPassword = !ConfirmationshowPassword" class="text-gray-500 hover:text-gray-700">
-                                    <i v-if="ConfirmationshowPassword" class="pi pi-eye-slash text-sm"></i>
-                                    <i v-else class="pi pi-eye text-sm"></i>
-                                </button>
-                            </div>
-                        </div>
-                    </div> -->
                 </div>
 
                 <div class="flex flex-col md:flex-row justify-end gap-2 mt-6">
@@ -450,46 +432,20 @@ import { useToast } from 'primevue/usetoast';
 const router = useRouter();
 const toast = useToast();
 
-const showPassword = ref(false);
-const ConfirmationshowPassword = ref(false);
 const isSubmitting = ref(false);
 const form = ref({});
 const allDealers = ref([]);
 
-// Dropdown options
+// Account Type options (matching createEten)
 const accountTypeOptions = [
     { name: 'Retailer', code: 'Retailer' },
-    { name: 'Wholesaler', code: 'Wholesaler' },
-    { name: 'DS', code: 'DS' }
-];
-
-const priceListOptions = [
-    { name: 'PM', code: '01' },
-    { name: 'Sabah', code: '02' },
-    { name: 'Sarawak', code: '03' },
-    { name: 'Langkawi', code: '04' },
-    { name: 'Labuan', code: '05' },
-    { name: 'Semananjung', code: '06' }
-];
-
-const signboardTypeOptions = [
-    { name: 'Non', code: 'Non' },
-    { name: 'T10', code: 'T10' },
-    { name: 'TAC', code: 'TAC' },
-    { name: 'TC', code: 'TC' },
-    { name: 'TSS', code: 'TSS' },
-    { name: 'TST', code: 'TST' }
-];
-
-const shippingConditionOptions = [
-    { name: 'RE', code: 'RE' },
-    { name: 'TP', code: 'TP' }
+    { name: 'Wholesaler', code: 'Wholesaler' }
 ];
 
 // Helper functions
-function getDropdownLabel(code, options) {
+function getAccountTypeLabel(code) {
     if (!code) return '-';
-    const option = options.find((opt) => opt.code === code);
+    const option = accountTypeOptions.find((opt) => opt.code === code);
     return option ? option.name : code;
 }
 
@@ -563,8 +519,6 @@ function validateForm(formData) {
         'firstname',
         'email',
         'phoneno'
-        // 'password',
-        // 'confirmpassword'
     ];
 
     const missingFields = requiredFields.filter(field => !formData[field]);
@@ -576,17 +530,10 @@ function validateForm(formData) {
         };
     }
 
-    if (formData.password !== formData.confirmpassword) {
-        return {
-            isValid: false,
-            message: 'Password and Confirm Password do not match'
-        };
-    }
-
     return { isValid: true };
 }
 
-// Map form data for API
+// Map form data for API - UPDATED to match createEten structure
 function mapFormToFormData(formData) {
     const formDataObj = new FormData();
 
@@ -596,9 +543,9 @@ function mapFormToFormData(formData) {
     // Ensure custAccountNo is populated
     const custAccountNo = formData.custAccountNo || formData.accountNo || '';
 
-    // Append data
+    // Append data - matching createEten structure
     formDataObj.append('custAccountNo', custAccountNo);
-    formDataObj.append('eten_userID', formData.eten_userID || '');
+    formDataObj.append('eten_userID', formData.eten_userID || '0'); // Default to 0 for main branch
     formDataObj.append('compName1', formData.companyName1 || '');
     formDataObj.append('compName2', formData.companyName2 || '');
     formDataObj.append('compName3', formData.companyName3 || '');
@@ -630,19 +577,19 @@ function mapFormToFormData(formData) {
     formDataObj.append('riskCategory', formData.riskCategory || '');
     formDataObj.append('creditLimit', formData.creditLimit || '0');
     formDataObj.append('pricelist', formData.pricelist || '');
-    formDataObj.append('signboardType', formData.signboardType || '');
     formDataObj.append('signboardBrand', formData.signboardBrand || '');
+    formDataObj.append('signboardType', formData.signboardType || '');
     formDataObj.append('salesOffice', formData.salesOffice || '');
     formDataObj.append('salesDistrict', formData.salesDistrict || '');
     formDataObj.append('shippingCond', formData.shippingCond || '');
-    formDataObj.append('storageLoc', formData.storageLocation || '');
-    formDataObj.append('accountStatus', 1);
+    formDataObj.append('accountStatus', '1');
     formDataObj.append('accountLastUpdate', formData.accountLastUpdate || '');
     formDataObj.append('accountCreation', formData.accountCreation || new Date().toISOString().split('T')[0]);
     formDataObj.append('showOnList', formData.showOnList || '0');
     formDataObj.append('isFamilyChannel', formData.ifFamilyChannel || '0');
     formDataObj.append('allowLalamove', formData.allowLalamove || '0');
-    formDataObj.append('status', 1);
+    formDataObj.append('allowDirectship', formData.allowDirectShipment || '0'); // Note: API expects 'allowDirectship'
+    formDataObj.append('status', '1');
     formDataObj.append('startingSalesAmt', formData.startingSalesAmt || '0');
 
     // Ship To array
@@ -655,8 +602,6 @@ function mapFormToFormData(formData) {
     formDataObj.append('im_email', formData.email || '');
     formDataObj.append('im_countryCode', countryCode);
     formDataObj.append('im_mobileNum', mobileNumber);
-    formDataObj.append('im_password', formData.password || '');
-    formDataObj.append('im_confirm_password', formData.confirmpassword || '');
 
     return formDataObj;
 }
@@ -683,10 +628,15 @@ function loadFormData() {
 // Fetch dealer list
 async function fetchDealerList() {
     try {
-        const formData = new FormData();
-        formData.append('mainBranch', 1);
-        formData.append('custaccountno', custAccountNo);
-        const response = await api.post('list_dealer', formData);
+        const custAccountNo = form.value.custAccountNo || form.value.accountNo;
+        if (!custAccountNo) return;
+
+        const requestData = {
+            mainBranch: '1',
+            custaccountno: custAccountNo
+        };
+
+        const response = await api.post('list_dealer', requestData);
         if (response.data.status === 1 && response.data.admin_data) {
             const adminData = response.data.admin_data;
             const dealers = [];
@@ -754,17 +704,13 @@ async function handleSubmit() {
             toast.add({
                 severity: 'success',
                 summary: 'Dealer Created',
-                detail: 'Dealer created successfully! An activation email has been sent to the master user.',
+                detail: 'Dealer created successfully! An activation SMS has been sent to the master user.',
                 life: 5000
             });
             localStorage.removeItem('etenFormData');
             
-            if (response.data.custAccountNo) {
-                // router.push('/om/detailEten/' + response.data.custAccountNo);
-                router.push('/om/listEten');
-            } else {
-                router.push('/om/listEten');
-            }
+            // Navigate to list page
+            router.push('/om/listEten');
         } else {
             let errorMsg = 'Duplicate entry or an error occurred.';
             

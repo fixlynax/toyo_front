@@ -15,7 +15,7 @@
                 :loading="loading"
                 :filters="filters"
                 filterDisplay="menu"
-                :globalFilterFields="['do_no', 'custAccountNo', 'companyName1', 'orderDesc', 'phoneNumber', 'orderstatus']"
+                :globalFilterFields="['do_no', 'eten_user.custAccountNo', 'eten_user.companyName1', 'eten_user.companyName2', 'eten_user.companyName3', 'eten_user.companyName4', 'eten_user.city', 'deliveryDate', 'orderstatus']"
             >
                 <template #header>
                     <div class="flex items-center justify-between gap-4 w-full flex-wrap">
@@ -85,10 +85,10 @@
                     </template>
                 </Column>
 
-                <Column field="order_no" header="SAP DO No" style="min-width: 8rem">
+                <Column field="do_no" header="SAP DO No" style="min-width: 8rem">
                     <template #body="{ data }">
                         <RouterLink :to="`/scm/detailOrderDelivery/${data.id}`" class="hover:underline font-bold text-primary">
-                            {{ data.do_no }}
+                            {{ data.do_no ? data.do_no : '-' }}
                         </RouterLink>
                     </template>
                 </Column>
@@ -249,14 +249,14 @@ const sortBy = (field, order) => {
 };
 const sortItems = ref([
     {
-        label: 'Sort by Order No (A-Z)',
+        label: 'Sort by SAP DO No (A-Z)',
         icon: 'pi pi-sort-alpha-down',
-        command: () => sortBy('order_no', 'asc')
+        command: () => sortBy('do_no', 'asc')
     },
     {
-        label: 'Sort by Order No (Z-A)',
+        label: 'Sort by SAP DO No (Z-A)',
         icon: 'pi pi-sort-alpha-up',
-        command: () => sortBy('order_no', 'desc')
+        command: () => sortBy('do_no', 'desc')
     },
     {
         label: 'Sort by Cust Acc No (A-Z)',

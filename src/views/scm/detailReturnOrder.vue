@@ -55,24 +55,6 @@
                                         {{ data.qty }}
                                 </template>
                             </Column>
-                            <Column field="unitprice" header="Unit Price (RM)" style="min-width: 8rem">
-                                <template #body="{ data }">
-                                        {{ data.unitprice }}
-                                </template>
-                                 <!-- ✅ Footer for label -->
-                            <template #footer>
-                                <div class="flex justify-start pr-2 font-bold text-gray-700">Subtotal</div>
-                            </template>
-                            </Column>
-                            <Column field="unitprice" header="Total Price (RM)" style="min-width: 8rem">
-                                <template #body="{ data }">
-                                        {{ (Number(data.unitprice) * Number(data.qty)).toFixed(2) }}
-                                </template>
-                                <!-- ✅ Footer for total value -->
-                            <template #footer>
-                                <div class="flex justify-start pr-3 font-semibold text-blue-600">{{ subtotal.toFixed(2) }}</div>
-                            </template>
-                            </Column>
                         </DataTable>
                     </div>
                 </div>
@@ -132,6 +114,10 @@
                                  <tr class="border-b">
                                     <td class="px-4 py-2 font-medium">SAP Return No</td>
                                     <td class="px-4 py-2 text-right">{{ returnList.delivery_information?.sapreturndeliveryno ?? '-' }}</td>
+                                </tr>
+                                <tr class="border-b">
+                                    <td class="px-4 py-2 font-medium">DO No</td>
+                                    <td class="px-4 py-2 text-right">{{ returnList.order_data?.do_no ?? '-' }}</td>
                                 </tr>
                                 <tr>
                                     <td class="px-4 py-2 font-medium">SAP Created</td>
@@ -271,10 +257,6 @@ function formatDate(dateString) {
     hour12: true
   });
   }
-const subtotal = computed(() => {
-    const arr = returnList.value.return_order_array || [];
-    return arr.reduce((sum, item) => sum + (Number(item.unitprice) * Number(item.qty)), 0);
-});
 
 const updateDialog = ref(false);
 const loadingUpdate = ref(false);

@@ -69,8 +69,8 @@ interface CustomerMaster {
     riskcategory: string;
     creditlimit: string;
     pricelist: string;
-    signboardtype: string;
     signboardbrand: string;
+    signboardtype: string;
     salesoffice: string;
     salesdistrict: string;
     shippingcond: string;
@@ -132,14 +132,13 @@ interface FormData {
 
     // Signboard / Branding
     signboardBrand: string;
+    signboardType: string;
 
     // Master User
     firstname: string;
     lastname: string;
     email: string;
     phoneno: string;
-    password: string;
-    confirmpassword: string;
 
     // Additional fields from SAP
     custAccountNo: string;
@@ -147,6 +146,11 @@ interface FormData {
     accountStatus: string;
     accountLastUpdate: string;
     accountCreation: string;
+
+    // NEW: Fields for dropdown replacements
+    accountType: string;
+    pricelist: string;
+    shippingCond: string;
 }
 
 // UI state
@@ -197,72 +201,51 @@ const form = ref<FormData>({
 
     // Signboard / Branding
     signboardBrand: '',
+    signboardType: '',
 
     // Master User
     firstname: '',
     lastname: '',
     email: '',
     phoneno: '',
-    password: '',
-    confirmpassword: '',
 
     // Additional fields from SAP
     custAccountNo: '',
     mobilePhoneNo: '',
     accountStatus: '',
     accountLastUpdate: '',
-    accountCreation: ''
+    accountCreation: '',
+
+    // NEW: Fields for dropdown replacements
+    accountType: '',
+    pricelist: '',
+    shippingCond: ''
 });
 
 // ShipTo addresses
 const shipToAddresses = ref<ShipToAddress[]>([]);
 const selectedShipTo = ref<ShipToAddress | null>(null);
 
-// Track SAP populated fields - NEW: Track all fields from SAP (including null/empty ones)
+// Track SAP populated fields - All fields from SAP are disabled
 const sapPopulatedFields = ref(new Set<string>());
 const sapPopulatedShipToFields = ref<Map<string, Set<string>>>(new Map());
 
-// Dropdowns (keep existing dropdowns)
+// Dropdowns
 const dropdownYesNoValue = ref<DropdownOption[]>([
     { name: 'Yes', code: '1' },
     { name: 'No', code: '0' }
 ]);
 
-const dropdownShippingConditionValue = ref<DropdownOption[]>([
-    { name: 'RE', code: 'RE' },
-    { name: 'TP', code: 'TP' }
-]);
-
+// NEW: Account Type dropdown (editable, not from SAP)
 const dropdownAccountTypeValue = ref<DropdownOption[]>([
     { name: 'Retailer', code: 'Retailer' },
-    { name: 'Wholesaler', code: 'Wholesaler' },
-    { name: 'DS', code: 'DS' }
-]);
-
-const dropdownPriceListValue = ref<DropdownOption[]>([
-    { name: 'PM', code: '01' },
-    { name: 'Sabah', code: '02' },
-    { name: 'Sarawak', code: '03' },
-    { name: 'Langkawi', code: '04' },
-    { name: 'Labuan', code: '05' },
-    { name: 'Semananjung', code: '06' }
-]);
-
-const dropdownSignboardTypeValue = ref<DropdownOption[]>([
-    { name: 'Non', code: 'Non' },
-    { name: 'T10', code: 'T10' },
-    { name: 'TAC', code: 'TAC' },
-    { name: 'TC', code: 'TC' },
-    { name: 'TSS', code: 'TSS' },
-    { name: 'TST', code: 'TST' }
+    { name: 'Wholesaler', code: 'Wholesaler' }
 ]);
 
 // Dropdown v-model bindings
 const dropdownYesNo = ref<DropdownOption | null>(null);
-const dropdownShippingCondition = ref<DropdownOption | null>(null);
-const dropdownAccountType = ref<DropdownOption | null>(null);
-const dropdownPriceList = ref<DropdownOption | null>(null);
-const dropdownSignboardType = ref<DropdownOption | null>(null);
+const dropdownAccountType = ref<DropdownOption | null>(null); // NEW: Account Type dropdown binding
+const dropdownAllowDirectShipment = ref<DropdownOption | null>(null); // NEW: Allow Direct Shipment dropdown
 
 const allDealers = ref<DealerOption[]>([]);
 const currentException = ref({
@@ -275,7 +258,7 @@ const isMainBranch = ref(false);
 // Watch accountNo to update isMainBranch
 watch(accountNo, (newVal) => {
     isMainBranch.value = newVal.endsWith('00');
-    
+
     // Fetch dealer list when accountNo changes (but only if it has value)
     if (newVal && newVal.trim() !== '') {
         fetchDealerList();
@@ -305,31 +288,29 @@ function handleSubmit() {
             return;
         }
 
-        if (form.value.password !== form.value.confirmpassword) {
-            toast.add({
-                severity: 'error',
-                summary: 'Password Mismatch',
-                detail: 'Password and Confirm Password do not match.',
-                life: 3000
-            });
-            return;
+        // Determine eten_userID based on main branch selection
+        let etenUserID = '0'; // Default to 0 for main branch
+
+        // If main branch is selected and current account is not main branch, set eten_userID to selected main branch ID
+        if (currentException.value.dealers && !isMainBranch.value) {
+            etenUserID = currentException.value.dealers;
         }
 
-        // Combine all dropdown selections and form data
+        // Combine all form data (dropdowns removed)
         const fullForm = {
             ...form.value,
-            accountType: dropdownAccountType.value?.code || '',
-            pricelist: dropdownPriceList.value?.code || '',
-            signboardType: dropdownSignboardType.value?.code || '',
-            shippingCond: dropdownShippingCondition.value?.code || '',
+            accountType: dropdownAccountType.value?.code || '', // NEW: Get value from dropdown
             allowLalamove: dropdownYesNo.value?.code || '0',
+            allowDirectShipment: dropdownAllowDirectShipment.value?.code || '0', // NEW: Add allowDirectShipment
             showOnList: dropdownYesNo.value?.code || '0',
             ifFamilyChannel: dropdownYesNo.value?.code || '0',
             mainBranchDealer: currentException.value.dealers || null,
             accountNo: accountNo.value,
             selectedShipTo: selectedShipTo.value || null,
             // Include all ShipTo addresses in the form data
-            shipToAddresses: shipToAddresses.value
+            shipToAddresses: shipToAddresses.value,
+            // Add eten_userID for branch relationship
+            eten_userID: etenUserID
         };
 
         // Save to localStorage
@@ -348,7 +329,6 @@ function handleSubmit() {
     }
 }
 
-// Fetch main branch dealer list - UPDATED: Always pass mainBranch=1
 // Fetch main branch dealer list - FIXED: Pass both mainBranch=1 and custaccountno
 async function fetchDealerList() {
     try {
@@ -399,7 +379,7 @@ async function fetchDealerDetails(accountNo: string): Promise<ApiResponse> {
     }
 }
 
-// Function to map SAP response to form fields - UPDATED: Mark all SAP fields as populated
+// Function to map SAP response to form fields - UPDATED: Mark all SAP fields as populated and disabled
 function mapSapResponseToForm(sapData: SapResponseItem): FormData {
     const customerMaster = sapData.customermaster;
     sapPopulatedFields.value.clear();
@@ -410,12 +390,12 @@ function mapSapResponseToForm(sapData: SapResponseItem): FormData {
         shipToAddresses.value = customerMaster.ShipTo;
     } else if (customerMaster.ShipTo && typeof customerMaster.ShipTo === 'object') {
         // Handle case where ShipTo is a single object instead of array
-        shipToAddresses.value = [customerMaster.ShipTo]; 
+        shipToAddresses.value = [customerMaster.ShipTo];
     } else {
         shipToAddresses.value = [];
     }
 
-    // NEW: Track ALL fields from SAP (including null/empty ones)
+    // NEW: Track ALL fields from SAP (including null/empty ones) - ALL fields are disabled
     const sapFieldKeys = [
         'companyRegNo',
         'companyName1',
@@ -446,18 +426,22 @@ function mapSapResponseToForm(sapData: SapResponseItem): FormData {
         'salesOffice',
         'salesDistrict',
         'signboardBrand',
+        'signboardType',
         'custAccountNo',
         'mobilePhoneNo',
         'accountStatus',
         'accountLastUpdate',
-        'accountCreation'
+        'accountCreation',
+        // NEW: Add the dropdown replacement fields (except accountType which is now editable)
+        'pricelist',
+        'shippingCond'
     ];
 
     sapFieldKeys.forEach((key) => {
         sapPopulatedFields.value.add(key);
     });
 
-    // Track which ShipTo fields have SAP data (all fields from SAP)
+    // Track which ShipTo fields have SAP data (all fields from SAP are disabled)
     shipToAddresses.value.forEach((shipTo) => {
         const shipToFields = new Set<string>([
             'custaccountno',
@@ -520,14 +504,13 @@ function mapSapResponseToForm(sapData: SapResponseItem): FormData {
 
         // Signboard / Branding
         signboardBrand: customerMaster.signboardbrand || '',
+        signboardType: customerMaster.signboardtype || '',  
 
-        // Master User
+        // Master User (these are NOT from SAP, so they remain editable)
         firstname: '',
         lastname: '',
         email: '',
         phoneno: '',
-        password: '',
-        confirmpassword: '',
 
         // Additional fields from SAP
         custAccountNo: customerMaster.custaccountno || '',
@@ -536,7 +519,12 @@ function mapSapResponseToForm(sapData: SapResponseItem): FormData {
         accountLastUpdate: customerMaster.accountlastupdate || '',
         accountCreation: customerMaster.accountcreation || '',
 
-        // Map fields
+        // NEW: Dropdown replacement fields from SAP (accountType removed since it's now editable)
+        accountType: '', // Reset accountType since it's now editable via dropdown
+        pricelist: customerMaster.pricelist || '',
+        shippingCond: customerMaster.shippingcond || '',
+
+        // Map fields (not from SAP)
         mapLatitude: '',
         mapLongitude: ''
     };
@@ -568,29 +556,16 @@ async function goNext() {
             const sapData = response.admin_data[0];
             form.value = mapSapResponseToForm(sapData);
 
-            // Pre-select dropdowns based on SAP data
-            if (sapData.customermaster.accounttype) {
-                dropdownAccountType.value = dropdownAccountTypeValue.value.find((opt) => opt.code === sapData.customermaster.accounttype) || null;
-            }
-            if (sapData.customermaster.pricelist) {
-                dropdownPriceList.value = dropdownPriceListValue.value.find((opt) => opt.code === sapData.customermaster.pricelist) || null;
-            }
-            if (sapData.customermaster.signboardtype) {
-                dropdownSignboardType.value = dropdownSignboardTypeValue.value.find((opt) => opt.code === sapData.customermaster.signboardtype) || null;
-            }
-            if (sapData.customermaster.shippingcond) {
-                dropdownShippingCondition.value = dropdownShippingConditionValue.value.find((opt) => opt.code === sapData.customermaster.shippingcond) || null;
-            }
-
-            // Set default values for Yes/No dropdowns
+            // Set default values for dropdowns
             dropdownYesNo.value = dropdownYesNoValue.value[0]; // Default to Yes
+            dropdownAllowDirectShipment.value = dropdownYesNoValue.value[0]; // NEW: Default Allow Direct Shipment to Yes
 
             showDetails.value = true;
         } else {
             toast.add({
                 severity: 'warn',
-                summary: 'No Record Found',
-                detail: `No record found for Account No: ${accountNo.value}`,
+                summary: 'Account Already Exist',
+                detail: `Account Already Exist for Account No: ${accountNo.value}`,
                 life: 4000
             });
             resetForm();
@@ -643,25 +618,26 @@ function resetForm() {
         salesDistrict: '',
         startingSalesAmt: '',
         signboardBrand: '',
+        signboardType: '',
         firstname: '',
         lastname: '',
         email: '',
         phoneno: '',
-        password: '',
-        confirmpassword: '',
         custAccountNo: '',
         mobilePhoneNo: '',
         accountStatus: '',
         accountLastUpdate: '',
-        accountCreation: ''
+        accountCreation: '',
+        // NEW: Reset dropdown replacement fields
+        accountType: '',
+        pricelist: '',
+        shippingCond: ''
     };
     sapPopulatedFields.value.clear();
     sapPopulatedShipToFields.value.clear();
-    dropdownAccountType.value = null;
-    dropdownPriceList.value = null;
-    dropdownSignboardType.value = null;
-    dropdownShippingCondition.value = null;
     dropdownYesNo.value = null;
+    dropdownAccountType.value = null; // NEW: Reset account type dropdown
+    dropdownAllowDirectShipment.value = null; // NEW: Reset allow direct shipment dropdown
     currentException.value.dealers = null;
     shipToAddresses.value = [];
     selectedShipTo.value = null;
@@ -709,51 +685,51 @@ onMounted(() => {
                     <div class="flex flex-col md:flex-row gap-4">
                         <div class="w-full">
                             <label for="companyRegNo">Company Registration No</label>
-                            <InputText :disabled="isSapField('companyRegNo')" id="companyRegNo" type="text" v-model="form.companyRegNo" />
+                            <InputText disabled id="companyRegNo" type="text" v-model="form.companyRegNo" />
                         </div>
                     </div>
 
                     <div class="flex flex-col md:flex-row gap-4">
                         <div class="w-full">
                             <label for="companyName1">Company Name 1</label>
-                            <InputText :disabled="isSapField('companyName1')" id="companyName1" type="text" v-model="form.companyName1" />
+                            <InputText disabled id="companyName1" type="text" v-model="form.companyName1" />
                         </div>
                         <div class="w-full">
                             <label for="companyName2">Company Name 2</label>
-                            <InputText :disabled="isSapField('companyName2')" id="companyName2" type="text" v-model="form.companyName2" />
+                            <InputText disabled id="companyName2" type="text" v-model="form.companyName2" />
                         </div>
                     </div>
 
                     <div class="flex flex-col md:flex-row gap-4">
                         <div class="w-full">
                             <label for="companyName3">Company Name 3</label>
-                            <InputText :disabled="isSapField('companyName3')" id="companyName3" type="text" v-model="form.companyName3" />
+                            <InputText disabled id="companyName3" type="text" v-model="form.companyName3" />
                         </div>
                         <div class="w-full">
                             <label for="companyName4">Company Name 4</label>
-                            <InputText :disabled="isSapField('companyName4')" id="companyName4" type="text" v-model="form.companyName4" />
+                            <InputText disabled id="companyName4" type="text" v-model="form.companyName4" />
                         </div>
                     </div>
 
                     <div class="flex flex-col md:flex-row gap-4">
                         <div class="w-full">
                             <label for="salesTaxNo">Sales Tax No</label>
-                            <InputText :disabled="isSapField('salesTaxNo')" id="salesTaxNo" type="text" v-model="form.salesTaxNo" />
+                            <InputText disabled id="salesTaxNo" type="text" v-model="form.salesTaxNo" />
                         </div>
                         <div class="w-full">
                             <label for="serviceTaxNo">Service Tax No</label>
-                            <InputText :disabled="isSapField('serviceTaxNo')" id="serviceTaxNo" type="text" v-model="form.serviceTaxNo" />
+                            <InputText disabled id="serviceTaxNo" type="text" v-model="form.serviceTaxNo" />
                         </div>
                     </div>
 
                     <div class="flex flex-col md:flex-row gap-4">
                         <div class="w-full">
                             <label for="tinNo">TIN No</label>
-                            <InputText :disabled="isSapField('tinNo')" id="tinNo" type="text" v-model="form.tinNo" />
+                            <InputText disabled id="tinNo" type="text" v-model="form.tinNo" />
                         </div>
                         <div class="w-full">
                             <label for="vatNo">VAT No</label>
-                            <InputText :disabled="isSapField('vatNo')" id="vatNo" type="text" v-model="form.vatNo" />
+                            <InputText disabled id="vatNo" type="text" v-model="form.vatNo" />
                         </div>
                     </div>
 
@@ -783,41 +759,41 @@ onMounted(() => {
                     <div class="flex flex-col md:flex-row gap-4">
                         <div class="w-full">
                             <label for="addressLine1">Address Line 1</label>
-                            <InputText :disabled="isSapField('addressLine1')" id="addressLine1" type="text" v-model="form.addressLine1" />
+                            <InputText disabled id="addressLine1" type="text" v-model="form.addressLine1" />
                         </div>
                         <div class="w-full">
                             <label for="addressLine2">Address Line 2</label>
-                            <InputText :disabled="isSapField('addressLine2')" id="addressLine2" type="text" v-model="form.addressLine2" />
+                            <InputText disabled id="addressLine2" type="text" v-model="form.addressLine2" />
                         </div>
                     </div>
 
                     <div class="flex flex-col md:flex-row gap-4">
                         <div class="w-full">
                             <label for="addressLine3">Address Line 3</label>
-                            <InputText :disabled="isSapField('addressLine3')" id="addressLine3" type="text" v-model="form.addressLine3" />
+                            <InputText disabled id="addressLine3" type="text" v-model="form.addressLine3" />
                         </div>
                         <div class="w-full">
                             <label for="addressLine4">Address Line 4</label>
-                            <InputText :disabled="isSapField('addressLine4')" id="addressLine4" type="text" v-model="form.addressLine4" />
+                            <InputText disabled id="addressLine4" type="text" v-model="form.addressLine4" />
                         </div>
                     </div>
 
                     <div class="flex flex-col md:flex-row gap-4">
                         <div class="w-full">
                             <label for="city">City</label>
-                            <InputText :disabled="isSapField('city')" id="city" type="text" v-model="form.city" />
+                            <InputText disabled id="city" type="text" v-model="form.city" />
                         </div>
                         <div class="w-full">
                             <label for="postcode">Postcode</label>
-                            <InputText :disabled="isSapField('postcode')" id="postcode" type="text" v-model="form.postcode" />
+                            <InputText disabled id="postcode" type="text" v-model="form.postcode" />
                         </div>
                         <div class="w-full">
                             <label for="state">State</label>
-                            <InputText :disabled="isSapField('state')" id="state" type="text" v-model="form.state" />
+                            <InputText disabled id="state" type="text" v-model="form.state" />
                         </div>
                         <div class="w-full">
                             <label for="country">Country</label>
-                            <InputText :disabled="isSapField('country')" id="country" type="text" v-model="form.country" />
+                            <InputText disabled id="country" type="text" v-model="form.country" />
                         </div>
                     </div>
 
@@ -835,11 +811,11 @@ onMounted(() => {
                     <div class="flex flex-col md:flex-row gap-4">
                         <div class="w-full">
                             <label for="phoneNumber">Phone No</label>
-                            <InputText :disabled="isSapField('phoneNumber')" id="phoneNumber" type="text" v-model="form.phoneNumber" />
+                            <InputText disabled id="phoneNumber" type="text" v-model="form.phoneNumber" />
                         </div>
                         <div class="w-full">
                             <label for="emailAddress">Email</label>
-                            <InputText :disabled="isSapField('emailAddress')" id="emailAddress" type="text" v-model="form.emailAddress" />
+                            <InputText disabled id="emailAddress" type="text" v-model="form.emailAddress" />
                         </div>
                     </div>
                 </div>
@@ -851,35 +827,36 @@ onMounted(() => {
                     <div class="font-semibold text-xl border-b pb-2">👤 Account Details</div>
 
                     <div class="flex flex-col md:flex-row gap-4">
+                        <!-- CHANGED: Account Type from InputText to Dropdown (editable) -->
                         <div class="w-full">
                             <label for="accountType">Account Type</label>
                             <Dropdown v-model="dropdownAccountType" :options="dropdownAccountTypeValue" optionLabel="name" placeholder="Select Account Type" class="w-full" />
                         </div>
                         <div class="w-full">
                             <label for="paymentTerms">Payment Terms</label>
-                            <InputText :disabled="isSapField('paymentTerms')" id="paymentTerms" type="text" v-model="form.paymentTerms" />
+                            <InputText disabled id="paymentTerms" type="text" v-model="form.paymentTerms" />
                         </div>
                     </div>
 
                     <div class="flex flex-col md:flex-row gap-4">
                         <div class="w-full">
                             <label for="riskCategory">Risk Category</label>
-                            <InputText :disabled="isSapField('riskCategory')" id="riskCategory" type="text" v-model="form.riskCategory" />
+                            <InputText disabled id="riskCategory" type="text" v-model="form.riskCategory" />
                         </div>
                         <div class="w-full">
                             <label for="creditLimit">Credit Limit</label>
-                            <InputText :disabled="isSapField('creditLimit')" id="creditLimit" type="text" v-model="form.creditLimit" />
+                            <InputText disabled id="creditLimit" type="text" v-model="form.creditLimit" />
                         </div>
                     </div>
 
                     <div class="flex flex-col md:flex-row gap-4">
                         <div class="w-full">
                             <label for="customerAccountGroup">Customer Account Group</label>
-                            <InputText :disabled="isSapField('customerAccountGroup')" id="customerAccountGroup" type="text" v-model="form.customerAccountGroup" />
+                            <InputText disabled id="customerAccountGroup" type="text" v-model="form.customerAccountGroup" />
                         </div>
                         <div class="w-full">
                             <label for="customerCondGrp">Customer Condition Group</label>
-                            <InputText :disabled="isSapField('customerCondGrp')" id="customerCondGrp" type="text" v-model="form.customerCondGrp" />
+                            <InputText disabled id="customerCondGrp" type="text" v-model="form.customerCondGrp" />
                         </div>
                     </div>
                 </div>
@@ -891,28 +868,29 @@ onMounted(() => {
                     <div class="font-semibold text-xl border-b pb-2">💲 Pricing & Sales Info</div>
 
                     <div class="flex flex-col md:flex-row gap-4">
+                        <!-- CHANGED: Price List from Dropdown to InputText -->
                         <div class="w-full">
                             <label for="pricelist">Price List</label>
-                            <Dropdown v-model="dropdownPriceList" :options="dropdownPriceListValue" optionLabel="name" placeholder="Select Price List" class="w-full" />
+                            <InputText disabled id="pricelist" type="text" v-model="form.pricelist" />
                         </div>
                         <div class="w-full">
                             <label for="priceGroup">Price Group</label>
-                            <InputText :disabled="isSapField('priceGroup')" id="priceGroup" type="text" v-model="form.priceGroup" />
+                            <InputText disabled id="priceGroup" type="text" v-model="form.priceGroup" />
                         </div>
                         <div class="w-full">
                             <label for="priceProcedure">Price Procedure</label>
-                            <InputText :disabled="isSapField('priceProcedure')" id="priceProcedure" type="text" v-model="form.priceProcedure" />
+                            <InputText disabled id="priceProcedure" type="text" v-model="form.priceProcedure" />
                         </div>
                     </div>
 
                     <div class="flex flex-col md:flex-row gap-4">
                         <div class="w-full">
                             <label for="salesOffice">Sales Office</label>
-                            <InputText :disabled="isSapField('salesOffice')" id="salesOffice" type="text" v-model="form.salesOffice" />
+                            <InputText disabled id="salesOffice" type="text" v-model="form.salesOffice" />
                         </div>
                         <div class="w-full">
                             <label for="salesDistrict">Sales District</label>
-                            <InputText :disabled="isSapField('salesDistrict')" id="salesDistrict" type="text" v-model="form.salesDistrict" />
+                            <InputText disabled id="salesDistrict" type="text" v-model="form.salesDistrict" />
                         </div>
                         <div class="w-full">
                             <label for="startingSalesAmt">Starting Sales Amount</label>
@@ -928,13 +906,14 @@ onMounted(() => {
                     <div class="font-semibold text-xl border-b pb-2">🪧 Signboard / Branding</div>
 
                     <div class="flex flex-col md:flex-row gap-4">
-                        <div class="w-full">
+                        <!-- REMOVED: Signboard Type dropdown -->
+                         <div class="w-full">
                             <label for="signboardType">Signboard Type</label>
-                            <Dropdown v-model="dropdownSignboardType" :options="dropdownSignboardTypeValue" optionLabel="name" placeholder="Select Signboard Type" class="w-full" />
+                            <InputText disabled id="signboardType" type="text" v-model="form.signboardType" />
                         </div>
                         <div class="w-full">
                             <label for="signboardBrand">Signboard Brand</label>
-                            <InputText :disabled="isSapField('signboardBrand')" id="signboardBrand" type="text" v-model="form.signboardBrand" />
+                            <InputText disabled id="signboardBrand" type="text" v-model="form.signboardBrand" />
                         </div>
                     </div>
                 </div>
@@ -946,13 +925,18 @@ onMounted(() => {
                     <div class="font-semibold text-xl border-b pb-2">🚚 Shipping & Delivery</div>
 
                     <div class="flex flex-col md:flex-row gap-4">
+                        <!-- CHANGED: Shipping Condition from Dropdown to InputText -->
                         <div class="w-full">
                             <label for="shippingCond">Shipping Condition</label>
-                            <Dropdown v-model="dropdownShippingCondition" :options="dropdownShippingConditionValue" optionLabel="name" placeholder="Select Shipping Condition" class="w-full" />
+                            <InputText disabled id="shippingCond" type="text" v-model="form.shippingCond" />
                         </div>
                         <div class="w-full">
                             <label for="allowLalamove">Allow Lalamove</label>
                             <Dropdown v-model="dropdownYesNo" :options="dropdownYesNoValue" optionLabel="name" placeholder="Select Option" class="w-full" />
+                        </div>
+                        <div class="w-full">
+                            <label for="allowDirectShipment">Allow Direct Shipment</label>
+                            <Dropdown v-model="dropdownAllowDirectShipment" :options="dropdownYesNoValue" optionLabel="name" placeholder="Select Option" class="w-full" />
                         </div>
                     </div>
                 </div>
@@ -981,7 +965,7 @@ onMounted(() => {
                 <div class="card w-full">
                     <div class="font-semibold text-xl border-b pb-2 mb-4 flex items-center gap-2">
                         📍 Ship To Accounts
-                        <i class="pi pi-info-circle cursor-pointer font-bold" v-tooltip="'All fields from SAP are read-only. You can only edit empty fields.'"></i>
+                        <i class="pi pi-info-circle cursor-pointer font-bold" v-tooltip="'All fields from SAP are read-only.'"></i>
                     </div>
 
                     <!-- Loop through all Ship To addresses -->
@@ -995,23 +979,11 @@ onMounted(() => {
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                             <div>
                                 <label class="font-medium text-gray-600">Ship To Account No</label>
-                                <InputText
-                                    :disabled="isSapShipToField(shipTo.custaccountno, 'custaccountno')"
-                                    v-model="shipTo.custaccountno"
-                                    placeholder="Enter account number"
-                                    class="w-full"
-                                    :class="{ 'bg-gray-100': isSapShipToField(shipTo.custaccountno, 'custaccountno') }"
-                                />
+                                <InputText disabled v-model="shipTo.custaccountno" placeholder="Enter account number" class="w-full bg-gray-100" />
                             </div>
                             <div>
                                 <label class="font-medium text-gray-600">Email</label>
-                                <InputText
-                                    :disabled="isSapShipToField(shipTo.custaccountno, 'emailaddress')"
-                                    v-model="shipTo.emailaddress"
-                                    placeholder="example@email.com"
-                                    class="w-full"
-                                    :class="{ 'bg-gray-100': isSapShipToField(shipTo.custaccountno, 'emailaddress') }"
-                                />
+                                <InputText disabled v-model="shipTo.emailaddress" placeholder="example@email.com" class="w-full bg-gray-100" />
                             </div>
                         </div>
 
@@ -1019,43 +991,19 @@ onMounted(() => {
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
                             <div>
                                 <label class="font-medium text-gray-600">Company Name 1</label>
-                                <InputText
-                                    :disabled="isSapShipToField(shipTo.custaccountno, 'companyname1')"
-                                    v-model="shipTo.companyname1"
-                                    placeholder="Company Name Line 1"
-                                    class="w-full"
-                                    :class="{ 'bg-gray-100': isSapShipToField(shipTo.custaccountno, 'companyname1') }"
-                                />
+                                <InputText disabled v-model="shipTo.companyname1" placeholder="Company Name Line 1" class="w-full bg-gray-100" />
                             </div>
                             <div>
                                 <label class="font-medium text-gray-600">Company Name 2</label>
-                                <InputText
-                                    :disabled="isSapShipToField(shipTo.custaccountno, 'companyname2')"
-                                    v-model="shipTo.companyname2"
-                                    placeholder="Company Name Line 2"
-                                    class="w-full"
-                                    :class="{ 'bg-gray-100': isSapShipToField(shipTo.custaccountno, 'companyname2') }"
-                                />
+                                <InputText disabled v-model="shipTo.companyname2" placeholder="Company Name Line 2" class="w-full bg-gray-100" />
                             </div>
                             <div>
                                 <label class="font-medium text-gray-600">Company Name 3</label>
-                                <InputText
-                                    :disabled="isSapShipToField(shipTo.custaccountno, 'companyname3')"
-                                    v-model="shipTo.companyname3"
-                                    placeholder="Company Name Line 3"
-                                    class="w-full"
-                                    :class="{ 'bg-gray-100': isSapShipToField(shipTo.custaccountno, 'companyname3') }"
-                                />
+                                <InputText disabled v-model="shipTo.companyname3" placeholder="Company Name Line 3" class="w-full bg-gray-100" />
                             </div>
                             <div>
                                 <label class="font-medium text-gray-600">Company Name 4</label>
-                                <InputText
-                                    :disabled="isSapShipToField(shipTo.custaccountno, 'companyname4')"
-                                    v-model="shipTo.companyname4"
-                                    placeholder="Company Name Line 4"
-                                    class="w-full"
-                                    :class="{ 'bg-gray-100': isSapShipToField(shipTo.custaccountno, 'companyname4') }"
-                                />
+                                <InputText disabled v-model="shipTo.companyname4" placeholder="Company Name Line 4" class="w-full bg-gray-100" />
                             </div>
                         </div>
 
@@ -1063,43 +1011,19 @@ onMounted(() => {
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
                             <div>
                                 <label class="font-medium text-gray-600">Address Line 1</label>
-                                <InputText
-                                    :disabled="isSapShipToField(shipTo.custaccountno, 'addressline1')"
-                                    v-model="shipTo.addressline1"
-                                    placeholder="Address Line 1"
-                                    class="w-full"
-                                    :class="{ 'bg-gray-100': isSapShipToField(shipTo.custaccountno, 'addressline1') }"
-                                />
+                                <InputText disabled v-model="shipTo.addressline1" placeholder="Address Line 1" class="w-full bg-gray-100" />
                             </div>
                             <div>
                                 <label class="font-medium text-gray-600">Address Line 2</label>
-                                <InputText
-                                    :disabled="isSapShipToField(shipTo.custaccountno, 'addressline2')"
-                                    v-model="shipTo.addressline2"
-                                    placeholder="Address Line 2"
-                                    class="w-full"
-                                    :class="{ 'bg-gray-100': isSapShipToField(shipTo.custaccountno, 'addressline2') }"
-                                />
+                                <InputText disabled v-model="shipTo.addressline2" placeholder="Address Line 2" class="w-full bg-gray-100" />
                             </div>
                             <div>
                                 <label class="font-medium text-gray-600">Address Line 3</label>
-                                <InputText
-                                    :disabled="isSapShipToField(shipTo.custaccountno, 'addressline3')"
-                                    v-model="shipTo.addressline3"
-                                    placeholder="Address Line 3"
-                                    class="w-full"
-                                    :class="{ 'bg-gray-100': isSapShipToField(shipTo.custaccountno, 'addressline3') }"
-                                />
+                                <InputText disabled v-model="shipTo.addressline3" placeholder="Address Line 3" class="w-full bg-gray-100" />
                             </div>
                             <div>
                                 <label class="font-medium text-gray-600">Address Line 4</label>
-                                <InputText
-                                    :disabled="isSapShipToField(shipTo.custaccountno, 'addressline4')"
-                                    v-model="shipTo.addressline4"
-                                    placeholder="Address Line 4"
-                                    class="w-full"
-                                    :class="{ 'bg-gray-100': isSapShipToField(shipTo.custaccountno, 'addressline4') }"
-                                />
+                                <InputText disabled v-model="shipTo.addressline4" placeholder="Address Line 4" class="w-full bg-gray-100" />
                             </div>
                         </div>
 
@@ -1107,25 +1031,19 @@ onMounted(() => {
                         <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mt-4">
                             <div>
                                 <label class="font-medium text-gray-600">City</label>
-                                <InputText :disabled="isSapShipToField(shipTo.custaccountno, 'city')" v-model="shipTo.city" placeholder="City" class="w-full" :class="{ 'bg-gray-100': isSapShipToField(shipTo.custaccountno, 'city') }" />
+                                <InputText disabled v-model="shipTo.city" placeholder="City" class="w-full bg-gray-100" />
                             </div>
                             <div>
                                 <label class="font-medium text-gray-600">Postcode</label>
-                                <InputText
-                                    :disabled="isSapShipToField(shipTo.custaccountno, 'postcode')"
-                                    v-model="shipTo.postcode"
-                                    placeholder="Postcode"
-                                    class="w-full"
-                                    :class="{ 'bg-gray-100': isSapShipToField(shipTo.custaccountno, 'postcode') }"
-                                />
+                                <InputText disabled v-model="shipTo.postcode" placeholder="Postcode" class="w-full bg-gray-100" />
                             </div>
                             <div>
                                 <label class="font-medium text-gray-600">State</label>
-                                <InputText :disabled="isSapShipToField(shipTo.custaccountno, 'state')" v-model="shipTo.state" placeholder="State" class="w-full" :class="{ 'bg-gray-100': isSapShipToField(shipTo.custaccountno, 'state') }" />
+                                <InputText disabled v-model="shipTo.state" placeholder="State" class="w-full bg-gray-100" />
                             </div>
                             <div>
                                 <label class="font-medium text-gray-600">Country</label>
-                                <InputText :disabled="isSapShipToField(shipTo.custaccountno, 'country')" v-model="shipTo.country" placeholder="Country" class="w-full" :class="{ 'bg-gray-100': isSapShipToField(shipTo.custaccountno, 'country') }" />
+                                <InputText disabled v-model="shipTo.country" placeholder="Country" class="w-full bg-gray-100" />
                             </div>
                         </div>
 
@@ -1133,23 +1051,11 @@ onMounted(() => {
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
                             <div>
                                 <label class="font-medium text-gray-600">Phone No</label>
-                                <InputText
-                                    :disabled="isSapShipToField(shipTo.custaccountno, 'phoneno')"
-                                    v-model="shipTo.phoneno"
-                                    placeholder="e.g. 03-1234567"
-                                    class="w-full"
-                                    :class="{ 'bg-gray-100': isSapShipToField(shipTo.custaccountno, 'phoneno') }"
-                                />
+                                <InputText disabled v-model="shipTo.phoneno" placeholder="e.g. 03-1234567" class="w-full bg-gray-100" />
                             </div>
                             <div>
                                 <label class="font-medium text-gray-600">Mobile No</label>
-                                <InputText
-                                    :disabled="isSapShipToField(shipTo.custaccountno, 'mobilephoneno')"
-                                    v-model="shipTo.mobilephoneno"
-                                    placeholder="e.g. 012-3456789"
-                                    class="w-full"
-                                    :class="{ 'bg-gray-100': isSapShipToField(shipTo.custaccountno, 'mobilephoneno') }"
-                                />
+                                <InputText disabled v-model="shipTo.mobilephoneno" placeholder="e.g. 012-3456789" class="w-full bg-gray-100" />
                             </div>
                         </div>
                     </div>
@@ -1178,14 +1084,6 @@ onMounted(() => {
                             <label for="phoneno" class="required">Phone No</label>
                             <InputText id="phoneno" type="text" v-model="form.phoneno" required />
                         </div>
-                        <!-- <div>
-                            <label for="password" class="required">Password</label>
-                            <Password id="password" v-model="form.password" toggleMask class="w-full" required />
-                        </div>
-                        <div>
-                            <label for="confirmpassword" class="required">Confirm Password</label>
-                            <Password id="confirmpassword" v-model="form.confirmpassword" toggleMask :feedback="false" class="w-full" required />
-                        </div> -->
                     </div>
 
                     <div class="flex flex-col md:flex-row justify-end gap-2 mt-4">

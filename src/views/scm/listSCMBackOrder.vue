@@ -17,7 +17,7 @@
             :rowHover="true"
             :filters="filters"
             filterDisplay="menu"
-            :globalFilterFields="['orderNo', 'expiry', 'custAccountNo', 'customerName', 'deliveryType', 'orderDate', 'expiry']"
+            :globalFilterFields="['orderNo', 'expiry', 'custAccountNo', 'customerName', 'deliveryType', 'orderDate']"
             responsiveLayout="scroll"
             stripedRows
             sortField="created"
@@ -53,8 +53,13 @@
                 </template>
             </Column>
 
-            <Column field="custAccountNo" header="Dealer Acc No" style="min-width: 10rem" />
-            <Column field="customerName" header="Dealer Name" style="min-width: 10rem" />
+            <Column field="customerName" header="Customer Name" style="min-width: 10rem">
+                <template #body="{ data }">
+                   <span class="font-bold">{{ data.customerName }}</span>
+                    <br>
+                     {{ data.custAccountNo }}
+                </template>
+            </Column>
             <Column field="deliveryType" header="Delivery" style="min-width: 10rem" />
 
             <Column field="orderDate" header="Order Date" style="min-width: 8rem">
