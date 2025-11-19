@@ -183,7 +183,7 @@
                                         {{
                                             [shippingDetail.addressLine1, shippingDetail.addressLine2, shippingDetail.addressLine3, shippingDetail.addressLine4, shippingDetail.postcode, shippingDetail.state, shippingDetail.city]
                                                 .filter(Boolean)
-                                                .join(', ')
+                                                .join('')
                                         }}
                                     </td>
                                 </tr>
@@ -315,7 +315,7 @@ const getFullAddress = (shipping) => {
     if (!shipping) return '-';
     const addressParts = [shipping.addressLine1, shipping.addressLine2, shipping.addressLine3, shipping.addressLine4, shipping.city, shipping.state, shipping.postcode].filter((part) => part && part.trim() !== '');
 
-    return addressParts.join(', ') || '-';
+    return addressParts.join('') || '-';
 };
 
 // Item category mapping function
