@@ -1,5 +1,5 @@
 import axios from 'axios';
-
+import { useMenuStore } from '../store/menu';
 // Create axios instance with base configuration
 const apiClient = axios.create({
     baseURL: import.meta.env.VITE_API_BASE_URL,
@@ -33,6 +33,8 @@ export const tokenService = {
 
     logout() {
         this.removeToken();
+        const menuStore = useMenuStore();
+        menuStore.reset();
         // Redirect to login page if needed
         // window.location.href = '/auth/login';
     }
