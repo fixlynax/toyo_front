@@ -65,7 +65,7 @@
                         <!-- Password -->
                         <div class="space-y-2" v-if="showPasswordFields">
                             <label class="block font-semibold text-gray-700">Password</label>
-                            <Password v-model="form.password" :feedback="false" toggleMask class="w-full" placeholder="Enter new password" :class="{ 'p-invalid': errors.password }" :inputClass="'w-full'" />
+                            <Password v-model="form.password" :feedback="false" toggleMask autocomplete="off" class="w-full" placeholder="Enter new password" :class="{ 'p-invalid': errors.password }" :inputClass="'w-full'" />
                             <small class="text-red-500 text-sm" v-if="errors.password"> <i class="pi pi-exclamation-circle mr-1"></i>{{ errors.password }} </small>
                             <small class="text-gray-500 text-sm flex items-center gap-1">
                                 <i class="pi pi-info-circle"></i>
@@ -76,7 +76,7 @@
                         <!-- Confirm Password -->
                         <div class="space-y-2" v-if="showPasswordFields">
                             <label class="block font-semibold text-gray-700">Confirm Password</label>
-                            <Password v-model="form.confirm_password" :feedback="false" toggleMask class="w-full" placeholder="Confirm new password" :class="{ 'p-invalid': errors.confirm_password }" :inputClass="'w-full'" />
+                            <Password v-model="form.confirm_password" :feedback="false" toggleMask autocomplete="off" class="w-full" placeholder="Confirm new password" :class="{ 'p-invalid': errors.confirm_password }" :inputClass="'w-full'" />
                             <small class="text-red-500 text-sm" v-if="errors.confirm_password"> <i class="pi pi-exclamation-circle mr-1"></i>{{ errors.confirm_password }} </small>
                         </div>
 

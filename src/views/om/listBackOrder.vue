@@ -70,9 +70,9 @@
                 </template>
             </Column>
 
-            <Column field="orderStatus" header="Status" style="min-width: 8rem; text-align: center">
+            <Column field="orderStatus" header="Status" style="min-width: 8rem; text-align: left">
                 <template #body="{ data }">
-                    <Tag :value="getStatusLabel(data.orderStatus)" :severity="getStatusSeverity(data.orderStatus)" />
+                    <Tag :value="getStatusLabel(data)" :severity="getStatusSeverity(data)" />
                 </template>
             </Column>
 
@@ -89,7 +89,7 @@
 </template>
 
 <script setup>
-import { onMounted, ref, watch } from 'vue';
+import { onMounted, ref, watch, computed } from 'vue';
 import { FilterMatchMode } from '@primevue/core/api';
 import api from '@/service/api';
 import { RouterLink } from 'vue-router';
@@ -135,7 +135,14 @@ const fetchBackOrders = async () => {
                 created: order.created,
                 orderStatus: order.orderstatus,
                 progress: calculateProgress(order),
-                status: order.status
+                status: order.status,
+                // Add computed property to check if order is expired
+                isExpired: computed(() => {
+                    if (!order.expiry) return false;
+                    const now = new Date();
+                    const expiryDate = new Date(order.expiry);
+                    return expiryDate < now && order.orderstatus !== 1 && order.orderstatus !== 9;
+                })
             }));
 
             filterByTab();
@@ -184,12 +191,8 @@ const filterByTab = () => {
     }
 
     // Normal tabs
-    filteredList.value = listData.value.filter(
-        (item) => item.orderStatus == selected.status
-    );
+    filteredList.value = listData.value.filter((item) => item.orderStatus == selected.status);
 };
-
-
 
 const calculateProgress = (order) => {
     try {
@@ -199,12 +202,8 @@ const calculateProgress = (order) => {
         }
 
         if (order.backorder_array && order.remaining_array) {
-            const backorderItems = Array.isArray(order.backorder_array)
-                ? order.backorder_array
-                : JSON.parse(order.backorder_array);
-            const remainingItems = Array.isArray(order.remaining_array)
-                ? order.remaining_array
-                : JSON.parse(order.remaining_array);
+            const backorderItems = Array.isArray(order.backorder_array) ? order.backorder_array : JSON.parse(order.backorder_array);
+            const remainingItems = Array.isArray(order.remaining_array) ? order.remaining_array : JSON.parse(order.remaining_array);
 
             if (Array.isArray(backorderItems) && Array.isArray(remainingItems)) {
                 const totalOrdered = backorderItems.reduce((sum, item) => sum + parseInt(item.qty || 0), 0);
@@ -241,8 +240,17 @@ const formatDate = (dateString) => {
     }
 };
 
-const getStatusLabel = (status) => {
-    switch (status) {
+const getStatusLabel = (data) => {
+    // Check if order is expired (today >= Back Order Expiry) and not completed/cancelled
+    if (data.expiry) {
+        const now = new Date();
+        const expiryDate = new Date(data.expiry);
+        if (expiryDate < now && data.orderStatus !== 1 && data.orderStatus !== 9) {
+            return 'Expired';
+        }
+    }
+
+    switch (data.orderStatus) {
         case 0:
             return 'Pending';
         case 1:
@@ -252,8 +260,17 @@ const getStatusLabel = (status) => {
     }
 };
 
-const getStatusSeverity = (status) => {
-    switch (status) {
+const getStatusSeverity = (data) => {
+    // Check if order is expired (today >= Back Order Expiry) and not completed/cancelled
+    if (data.expiry) {
+        const now = new Date();
+        const expiryDate = new Date(data.expiry);
+        if (expiryDate < now && data.orderStatus !== 1 && data.orderStatus !== 9) {
+            return 'secondary';
+        }
+    }
+
+    switch (data.orderStatus) {
         case 0:
             return 'info';
         case 1:
@@ -274,7 +291,9 @@ const getStatusSeverity = (status) => {
 
     .p-progressbar-value {
         border-radius: 9999px;
-        transition: width 0.4s ease, background 0.4s ease;
+        transition:
+            width 0.4s ease,
+            background 0.4s ease;
     }
 
     &.progress-low .p-progressbar-value {

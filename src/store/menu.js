@@ -32,7 +32,7 @@ export const useMenuStore = defineStore('menu', {
       this.menu = [];
       this.permissions = [];
       this.adminName = '';
-      this.role = {};
+      this.role = '';
     }
   },
    persist: true 
