@@ -275,9 +275,8 @@ onUnmounted(() => {
 
 .layout-menu-button {
     background: rgba(255, 255, 255, 0.1);
-    border: 1px solid rgba(161, 13, 13, 0.2);
+    border: 1px solid rgba(39, 33, 33, 0.2);
     color: rgb(0, 0, 0);
-    border-radius: 8px;
     width: 2.5rem;
     height: 2.5rem;
     display: flex;
