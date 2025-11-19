@@ -12,7 +12,7 @@
             :loading="loading"
             :filters="filters"
             filterDisplay="menu"
-            :globalFilterFields="['return_orderNo_ref', 'custAccountNo', 'dealerName' , 'delivery_status' , 'created']">
+            :globalFilterFields="['return_orderNo_ref', 'custAccountNo' , 'storageLocation' , 'city', 'dealerName' , 'delivery_status' , 'created']">
             <template #header>
                 <div class="flex flex-col gap-4 w-full">
                     <!-- Search and Filters Row -->
@@ -91,7 +91,17 @@
                 <template #body="{ data }">
                     <span class="font-bold">{{ data?.dealerName || '-' }}</span>
                     <br>
-                     {{ data.custAccountNo }}
+                     {{ data?.custAccountNo ?? '-' }}
+                </template>
+            </Column>
+            <Column field="storageLocation" header="Storage Location" style="min-width: 10rem">
+                <template #body="{ data }">
+                    {{ data?.storageLocation ?? '-' }}
+                </template>
+            </Column>
+            <Column field="city" header="City" style="min-width: 10rem">
+                <template #body="{ data }">
+                    {{ data?.city ?? '-' }}
                 </template>
             </Column>
             <Column field="pickup_datetime" header="Pickup Date" style="min-width: 10rem">

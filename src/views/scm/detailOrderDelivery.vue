@@ -38,6 +38,14 @@
                             <span class="text-sm text-gray-500">Channel</span>
                             <p class="text-lg font-medium">{{ orderDelList.eten_user?.channel || '-' }}</p>
                         </div>
+                        <div>
+                            <span class="text-sm text-gray-500">Storage Location</span>
+                            <p class="text-lg font-medium">{{ orderDelList.storagelocation || '-' }}</p>
+                        </div>
+                        <div>
+                            <span class="text-sm text-gray-500">City</span>
+                            <p class="text-lg font-medium">{{ orderDelList.eten_user?.city }}</p>
+                        </div>
                     </div>
                 </div>
 
@@ -68,9 +76,14 @@
                             </template>
                         </Column>
 
-                        <Column field="materialid" header="Item Category">
+                        <Column field="materialid" header="Material ID">
                             <template #body="{ data }">
                                 {{ data.materialid }}
+                            </template>
+                        </Column>
+                         <Column field="materialdescription" header="Description">
+                            <template #body="{ data }">
+                                {{ data.materialdescription }}
                             </template>
                         </Column>
 

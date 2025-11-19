@@ -40,6 +40,11 @@
                                     {{ data?.materialid || '-' }}
                                 </template>
                             </Column>
+                            <Column field="materialdescription" header="Description" style="min-width: 10rem">
+                                <template #body="{ data }">
+                                    {{ data?.materialdescription || '-' }}
+                                </template>
+                            </Column>
                             <Column field="itemcategory" header="Category" style="min-width: 12rem">
                                 <template #body="{ data }">
                                         {{ data.itemcategory }}
@@ -90,6 +95,10 @@
                         <div>
                             <span class="block text-sm font-bold text-black-700">Storage</span>
                             <p class="font-medium text-lg">{{ returnList.dealer.dealer_shop.storageLocation }}</p>
+                        </div>
+                        <div>
+                            <span class="block text-sm font-bold text-black-700">City</span>
+                            <p class="font-medium text-lg">{{ returnList.dealer.dealer_shop.city }}</p>
                         </div>
                     </div>
                 </div>
