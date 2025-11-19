@@ -10,7 +10,7 @@
                     </RouterLink>
 
                     <!-- Page Title -->
-                    <div class="text-2xl font-bold text-gray-800">Edit eTEN</div>
+                    <div class="text-2xl font-bold text-gray-800">Edit Customer</div>
     
                 </div>
 
