@@ -166,7 +166,8 @@
                         <ProgressBar :value="progressValue" class="mt-1 h-3 rounded-full" showValue="false" />
                         <div class="flex justify-between text-xs text-gray-500 mt-1">
                             <span>{{ progressValue }}% filled</span>
-                            <span>Volume: {{ containerCapacity }} units (Min: {{ minContainerCapacity }} | Max: {{ maxContainerCapacity }})</span>
+                            <!-- <span>Volume: {{ containerCapacity }} units (Min: {{ minContainerCapacity }} | Max: {{ maxContainerCapacity }})</span> -->
+                            <span>Volume: {{ containerCapacity }} units (Min: {{ minContainerCapacity }})</span>
                         </div>
                     </div>
 

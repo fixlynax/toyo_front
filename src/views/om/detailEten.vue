@@ -6,16 +6,22 @@
                 <div class="flex flex-col">
                     <div class="card flex flex-col gap-4 w-full">
                         <div class="flex items-center justify-between border-b pb-2 mb-2">
+                            <!-- LEFT SIDE -->
                             <div class="flex items-center gap-2">
                                 <RouterLink to="/om/listEten">
                                     <Button icon="pi pi-arrow-left font-bold" class="p-button-text p-button-secondary text-xl" size="big" v-tooltip="'Back'" />
                                 </RouterLink>
+
                                 <div class="text-2xl font-bold text-gray-800">Company Information</div>
-                                <Button @click="pullSAPData" :loading="loadingPullSAP" :disabled="loadingPullSAP" icon="pi pi-refresh" class="p-button-info">
+                            </div>
+
+                            <!-- RIGHT SIDE -->
+                            <div class="flex items-center gap-2">
+                                <Button @click="pullSAPData" :loading="loadingPullSAP" :disabled="loadingPullSAP" icon="pi pi-refresh" class="p-button-info" style="width: 70px">
                                     <span v-if="loadingPullSAP">Pulling SAP...</span>
                                     <span v-else>Pull SAP</span>
                                 </Button>
-                                <!-- edit button -->
+
                                 <RouterLink :to="`/om/editEten/${form.custAccountNo}`">
                                     <Button icon="pi pi-pencil" class="p-button-warning" v-tooltip="'Edit'" />
                                 </RouterLink>
