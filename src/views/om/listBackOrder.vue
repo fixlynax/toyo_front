@@ -166,6 +166,7 @@ const filterByTab = () => {
         return;
     }
 
+    // 🔥 Expired tab logic
     if (selected.type === 'EXPIRED') {
         const now = new Date();
 
@@ -174,15 +175,20 @@ const filterByTab = () => {
 
             const isExpired = new Date(item.expiry) < now;
             const notCompleted = item.orderStatus != 1;
+            const notCancelled = item.orderStatus != 9;
 
-            return isExpired && notCompleted;
+            return isExpired && notCompleted && notCancelled;
         });
 
         return;
     }
 
-    filteredList.value = listData.value.filter((item) => item.orderStatus == selected.status);
+    // Normal tabs
+    filteredList.value = listData.value.filter(
+        (item) => item.orderStatus == selected.status
+    );
 };
+
 
 
 const calculateProgress = (order) => {
