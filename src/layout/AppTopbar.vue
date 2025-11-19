@@ -4,13 +4,15 @@ import api from '@/service/api';
 import { useRouter } from 'vue-router';
 import { useConfirm } from 'primevue/useconfirm';
 import { useToast } from 'primevue/usetoast';
-import { ref, onMounted } from 'vue';
+import { ref, onMounted, computed } from 'vue';
+import { useMenuStore } from '../store/menu';
 
+const menuStore = useMenuStore();
+const adminName = computed(() => menuStore.adminName); 
 const { toggleMenu } = useLayout();
 const router = useRouter();
 const confirm = useConfirm();
 const toast = useToast();
-const adminName = ref('');
 const showSettingsMenu = ref(false);
 const showChangePasswordDialog = ref(false);
 const loading = ref(false);
@@ -22,18 +24,7 @@ const passwordForm = ref({
     new_password_confirmation: ''
 });
 
-// Fetch admin name directly
-const fetchAdminName = async () => {
-    try {
-        const response = await api.get('navigation');
-        if (response.data.success) {
-            adminName.value = response.data.data.admin_name;
-        }
-    } catch (error) {
-        console.error('Failed to fetch admin name:', error);
-        adminName.value = 'Admin';
-    }
-};
+
 
 const handleLogout = async () => {
     try {
@@ -124,10 +115,6 @@ const closeSettingsMenu = () => {
     showSettingsMenu.value = false;
 };
 
-// Fetch admin name when component mounts
-onMounted(() => {
-    fetchAdminName();
-});
 </script>
 
 <template>
