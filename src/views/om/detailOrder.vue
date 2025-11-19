@@ -13,7 +13,7 @@
                     <div class="flex flex-col md:flex-row gap-4">
                         <div class="w-full">
                             <span class="text-sm font-bold text-gray-700">Customer Name</span>
-                            <p class="text-lg font-medium">{{ customerInfo.dealerName || '-' }} <br /> ({{ orderData.custaccountno || '-' }})</p>
+                            <p class="text-lg font-medium">{{ customerInfo.dealerName || '-' }} <br /> (<span class="text-primary font-semibold">{{ orderData.custaccountno || '-' }}</span>)</p>
                         </div>
                         <div class="w-full">
                             <span class="text-sm font-bold text-gray-700">Location</span>
@@ -109,43 +109,43 @@
                             <tbody>
                                 <tr class="border-b text-xm">
                                     <td class="px-4 py-2 font-medium">Order No.</td>
-                                    <td class="px-4 py-2 text-right font-bold">{{ orderData.order_no || '-' }}</td>
+                                    <td class="px-4 py-2 text-right font-bold text-primary">{{ orderData.order_no || '-' }}</td>
                                 </tr>
                                 <tr class="border-b">
                                     <td class="px-4 py-2 font-medium">SO No.</td>
-                                    <td class="px-4 py-2 text-right font-semibold">{{ orderData.so_no || '-' }}</td>
+                                    <td class="px-4 py-2 text-right font-medium">{{ orderData.so_no || '-' }}</td>
                                 </tr>
                                 <tr class="border-b">
                                     <td class="px-4 py-2 font-medium">DO No.</td>
-                                    <td class="px-4 py-2 text-right font-semibold">{{ orderData.do_no || '-' }}</td>
+                                    <td class="px-4 py-2 text-right font-medium">{{ orderData.do_no || '-' }}</td>
                                 </tr>
                                 <tr class="border-b">
                                     <td class="px-4 py-2 font-medium">Invoice No</td>
-                                    <td class="px-4 py-2 text-right font-semibold">{{ orderData.inv_no || '-' }}</td>
+                                    <td class="px-4 py-2 text-right font-medium">{{ orderData.inv_no || '-' }}</td>
                                 </tr>
                                 <tr class="border-b">
                                     <td class="px-4 py-2 font-medium">Price Group</td>
-                                    <td class="px-4 py-2 text-right font-semibold">{{ orderData.pricegroup || '-' }}</td>
+                                    <td class="px-4 py-2 text-right font-medium">{{ orderData.pricegroup || '-' }}</td>
                                 </tr>
                                 <tr class="border-b">
                                     <td class="px-4 py-2 font-medium">Customer Group</td>
-                                    <td class="px-4 py-2 text-right font-semibold">{{ orderData.customerCondGrp || '-' }}</td>
+                                    <td class="px-4 py-2 text-right font-medium">{{ orderData.customerCondGrp || '-' }}</td>
                                 </tr>
                                 <tr class="border-b">
                                     <td class="px-4 py-2 font-medium">Storage Location</td>
-                                    <td class="px-4 py-2 text-right font-semibold">{{ orderData.storagelocation || '-' }}</td>
+                                    <td class="px-4 py-2 text-right font-medium">{{ orderData.storagelocation || '-' }}</td>
                                 </tr>
                                 <tr class="border-b">
                                     <td class="px-4 py-2 font-medium">Scheduled Delivery</td>
-                                    <td class="px-4 py-2 text-right font-semibold">{{ formatDateTime(deliveryInfo.scheduled_delivery_time) || '-' }}</td>
+                                    <td class="px-4 py-2 text-right font-medium">{{ formatDateTime(deliveryInfo.scheduled_delivery_time) || '-' }}</td>
                                 </tr>
                                 <tr class="border-b">
                                     <td class="px-4 py-2 font-medium">Delivered Date</td>
-                                    <td class="px-4 py-2 text-right font-semibold">{{ formatDateTime(deliveryInfo.delivered_datetime) || '-' }}</td>
+                                    <td class="px-4 py-2 text-right font-medium">{{ formatDateTime(deliveryInfo.delivered_datetime) || '-' }}</td>
                                 </tr>
                                 <tr class="border-b">
                                     <td class="px-4 py-2 font-medium">Created</td>
-                                    <td class="px-4 py-2 text-right font-semibold">{{ formatDateTime(orderData.created) || '-' }}</td>
+                                    <td class="px-4 py-2 text-right font-medium">{{ formatDateTime(orderData.created) || '-' }}</td>
                                 </tr>
                                 <tr>
                                     <td></td>
