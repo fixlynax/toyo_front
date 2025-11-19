@@ -113,6 +113,30 @@
                     </div>
                 </div>
 
+                <!-- Submitted Photos Section -->
+            <div class="card flex flex-col w-full">
+                <div class="flex items-center justify-between border-b pb-2 mb-4">
+                    <div class="text-2xl font-bold text-gray-800">Submitted Images</div>
+                </div>
+
+                <!-- Photo Grid -->
+                <div  class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                    <div v-for="photo in submittedPhotos" :key="photo.type" class="text-center">
+                        <span class="block text-lg font-bold text-black-800 mb-3">{{ photo.label }}</span>
+                        <div class="cursor-pointer border-2 border-gray-300 rounded-lg overflow-hidden hover:border-primary-500 transition-all duration-200 bg-gray-100" @click="openImageModal(photo.imageSrc, photo.label)">
+                            <img :src="photo.imageSrc" :alt="photo.alt" class="w-full h-32 object-cover" />
+                        </div>
+                        <div class="mt-2 flex justify-center">
+                            <Button label="View Full Size" icon="pi pi-eye" class="p-button-text p-button-sm" @click="openImageModal(photo.imageSrc, photo.label)" />
+                        </div>
+                    </div>
+                </div>
+                <div  class="text-center py-8 bg-gray-50 rounded-lg mb-6">
+                    <i class="pi pi-image text-4xl text-gray-400 mb-3"></i>
+                    <p class="text-gray-500 font-medium">No submitted images available</p>
+                </div>
+            </div>
+
                 <!-- Tire Detail -->
                 <div class="card flex flex-col w-full">
                     <div class="flex items-center justify-between border-b pb-2 mb-4">
@@ -548,7 +572,7 @@
         </template>
     </Dialog>
 
-    <Dialog v-model:visible="showCreateReplacementDialog" header="Submit Replacement" :modal="true" :closable="!loadingAction" class="p-fluid" :style="{ width: '40rem' }">
+    <Dialog v-model:visible="showCreateReplacementDialog" header="Submit Tyre For Replacement" :modal="true" :closable="!loadingAction" class="p-fluid" :style="{ width: '40rem' }">
         <!-- Show success results if replacement was submitted -->
         <div v-if="replacementSubmitted && replacementResult" class="mb-4 p-3 bg-green-50 border border-green-200 rounded">
             <h4 class="font-bold text-green-800">Replacement Approved Successfully!</h4>
@@ -573,7 +597,7 @@
         </template>
     </Dialog>
 
-    <Dialog v-model:visible="showCreateReimbursementDialog" header="Submit Reimbursement" :modal="true" :closable="!loadingAction" class="p-fluid" :style="{ width: '40rem' }">
+    <Dialog v-model:visible="showCreateReimbursementDialog" header="Select Tyre For Reimbursement" :modal="true" :closable="!loadingAction" class="p-fluid" :style="{ width: '40rem' }">
         <!-- Show success results if replacement was submitted -->
 
         <label class="block font-bold text-gray-700 mb-1">Select Material ID</label>
