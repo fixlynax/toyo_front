@@ -4,7 +4,7 @@ import api from '@/service/api';
 import { useRouter } from 'vue-router';
 import { useConfirm } from 'primevue/useconfirm';
 import { useToast } from 'primevue/usetoast';
-import { ref, onMounted, computed } from 'vue';
+import { ref, onMounted,onUnmounted, computed } from 'vue';
 import { useMenuStore } from '../store/menu';
 
 const menuStore = useMenuStore();
