@@ -16,29 +16,40 @@
                             <p class="text-lg font-medium">{{ customerInfo.dealerName || '-' }} <br /> (<span class="text-primary font-semibold">{{ orderData.custaccountno || '-' }}</span>)</p>
                         </div>
                         <div class="w-full">
-                            <span class="text-sm font-bold text-gray-700">Location</span>
+                            <span class="text-sm text-gray-700">Location</span>
                             <p class="text-lg font-medium">{{ getFullAddress(customerInfo) || '-' }}</p>
                         </div>
                     </div>
 
                     <div class="flex flex-col md:flex-row gap-4">
                         <div class="w-full">
-                            <span class="text-sm font-bold text-gray-700">Signboard</span>
+                            <span class="text-sm text-gray-700">Signboard</span>
                             <p class="text-lg font-medium">{{ customerInfo.signboard || '-' }}</p>
                         </div>
                         <div class="w-full">
-                            <span class="text-sm font-bold text-gray-700">Distribution Channel</span>
+                            <span class="text-sm text-gray-700">Distribution Channel</span>
                             <p class="text-lg font-medium">{{ orderData.distributionchannel || '-' }}</p>
                         </div>
                     </div>
 
                     <div class="flex flex-col md:flex-row gap-4">
                         <div class="w-full">
-                            <span class="text-sm font-bold text-gray-700">Contact Person</span>
-                            <p class="text-lg font-medium">{{ customerInfo.contactPerson || '-' }}</p>
+                            <span class="text-sm text-gray-700">Sales Org</span>
+                            <p class="text-lg font-medium">{{ orderData.salesorg || '-' }}</p>
                         </div>
                         <div class="w-full">
-                            <span class="text-sm font-bold text-gray-700">Contact Number</span>
+                            <span class="text-sm text-gray-700">Price Group</span>
+                            <p class="text-lg font-medium">{{ orderData.pricegroup || '-' }}</p>
+                        </div>
+                    </div>
+
+                    <div class="flex flex-col md:flex-row gap-4">
+                        <div class="w-full">
+                            <span class="text-sm text-gray-700">Email Address</span>
+                            <p class="text-lg font-medium">{{ customerInfo.email || '-' }}</p>
+                        </div>
+                        <div class="w-full">
+                            <span class="text-sm text-gray-700">Contact Number</span>
                             <p class="text-lg font-medium">{{ customerInfo.phoneNumber || customerInfo.mobileNumber || '-' }}</p>
                         </div>
                     </div>

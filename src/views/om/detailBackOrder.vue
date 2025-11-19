@@ -138,7 +138,10 @@
                             </Column>
                             <Column field="materialid" header="Material ID" style="min-width: 8rem">
                                 <template #body="{ data }">
-                                    <span class="font-bold">{{ data.materialid }}</span>
+                                    <span class="font-bold"
+                                        >{{ data.materialid }} <br />
+                                        {{ data.materialdescription }}
+                                    </span>
                                 </template>
                             </Column>
                             <Column field="itemcategory" header="Item Category" style="min-width: 8rem">
