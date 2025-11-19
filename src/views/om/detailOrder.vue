@@ -10,15 +10,6 @@
                         <div class="text-2xl font-bold text-gray-800">Customer Information</div>
                     </div>
 
-                    <!-- <div class="flex items-center justify-between w-full">
-                        <div>
-                            <span class="block text-sm font-bold text-gray-700">Customer Account No.</span>
-                            <span class="text-lg font-bold text-primary">{{ orderData.custaccountno || '-' }}</span>
-                        </div>
-                    </div> -->
-
-                    <!-- <div class="font-semibold text-xl border-b pb-2 mt-2">🏬 Customer Details</div> -->
-
                     <div class="flex flex-col md:flex-row gap-4">
                         <div class="w-full">
                             <span class="text-sm font-bold text-gray-700">Customer Name</span>
