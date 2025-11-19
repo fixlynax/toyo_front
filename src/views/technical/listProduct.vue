@@ -70,13 +70,13 @@
                         style="display: none" 
                         @change="handleImport"
                         />
-                        <Button 
+                        <!-- <Button 
                         type="button" 
                         icon="pi pi-refresh" 
                         class="p-button"
                         :loading="refreshLoading"
                         @click="refreshData"
-                        />
+                        /> -->
                     </div>
                 </div>
             </template>
@@ -558,10 +558,10 @@ const handleImport = async (event) => {
 };
 
 // Refresh function
-const refreshData = () => {
-    refreshLoading.value = true;
-    fetchData();
-};
+// const refreshData = () => {
+//     refreshLoading.value = true;
+//     fetchData();
+// };
 
 onMounted(() => {
     fetchData();
