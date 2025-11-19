@@ -15,7 +15,7 @@
                 :loading="loading"
                 :filters="filters"
                 filterDisplay="menu"
-                :globalFilterFields="['do_no', 'eten_user.custAccountNo', 'eten_user.companyName1', 'eten_user.companyName2', 'eten_user.companyName3', 'eten_user.companyName4', 'eten_user.city', 'deliveryDate', 'orderstatus']"
+                :globalFilterFields="['do_no', 'eten_user.custAccountNo', 'storagelocation' ,  'eten_user.companyName1', 'eten_user.companyName2', 'eten_user.companyName3', 'eten_user.companyName4', 'eten_user.city', 'deliveryDate', 'orderstatus']"
             >
                 <template #header>
                     <div class="flex items-center justify-between gap-4 w-full flex-wrap">
@@ -97,6 +97,12 @@
                         <span class="font-bold">{{` ${data.eten_user.companyName1} ${data.eten_user.companyName2} ${data.eten_user.companyName3} ${data.eten_user.companyName4} ` }}</span>
                     <br>
                      {{ data.eten_user.custAccountNo }}
+                    </template>
+                </Column>
+
+                <Column field="storagelocation" header="Storage Location" style="min-width: 12rem">
+                    <template #body="{ data }">
+                         {{`${data.storagelocation}` }}
                     </template>
                 </Column>
 

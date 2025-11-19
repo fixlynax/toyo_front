@@ -54,7 +54,7 @@
                 <!-- Save Button -->
                 <div class="flex justify-end mt-8 gap-4">
                     <div class="w-32">
-                        <Button label="Update" class="w-full p-button-primary" @click="save" />
+                        <Button label="Update" class="w-full p-button-primary" @click="save" :loading="saving" />
                     </div>
                 </div>
             </div>
@@ -66,8 +66,16 @@
 import { ref } from 'vue';
 import { useRouter } from 'vue-router';
 import InputSwitch from 'primevue/inputswitch';
+import DatePicker from 'primevue/datepicker';
+import Textarea from 'primevue/textarea';
+import Button from 'primevue/button';
+import api from '@/service/api';
+import { useToast } from 'primevue/usetoast';
 
-// Dummy default data
+const router = useRouter();
+const toast = useToast();
+const saving = ref(false);
+
 const dummyPeriods = {
     TC: [new Date("2025-02-10T09:00:00"), new Date("2025-02-10T12:00:00")],
     ETEN: [new Date("2025-02-12T14:00:00"), new Date("2025-02-12T16:30:00")],
@@ -79,8 +87,6 @@ const dummyMessages = {
     ETEN: "ETEN will be down for upgrades.",
     BOTH: "Full system maintenance (TC & ETEN) in progress."
 };
-
-const router = useRouter();
 
 const form = ref({
     channels: {
@@ -96,7 +102,6 @@ const channelOptions = [
     { label: 'Both', value: 'BOTH' }
 ];
 
-// Handle toggle logic
 const handleToggle = (channel) => {
     if (channel === 'BOTH' && form.value.channels.BOTH.enabled) {
         form.value.channels.TC.enabled = false;
@@ -106,9 +111,67 @@ const handleToggle = (channel) => {
     }
 };
 
-const save = () => {
-    console.log('Saving maintenance mode config:', form.value);
-    // TODO: API call
-    router.push('/it/maintenanceMode');
+const save = async () => {
+    saving.value = true;
+
+    try {
+        // Determine maintenance type and message
+        let type = '';
+        let maintenanceMsg = '';
+        if (form.value.channels.BOTH.enabled) {
+            type = 'BOTH';
+            maintenanceMsg = form.value.channels.BOTH.message;
+        } else if (form.value.channels.TC.enabled) {
+            type = 'TC';
+            maintenanceMsg = form.value.channels.TC.message;
+        } else if (form.value.channels.ETEN.enabled) {
+            type = 'ETEN';
+            maintenanceMsg = form.value.channels.ETEN.message;
+        } else {
+            type = 'NONE';
+            maintenanceMsg = '';
+        }
+
+        const payload = {
+            type,
+            isMaintainence: type !== 'NONE' ? 1 : 0,
+            maintenanceMsg,
+            adminID: 123, // replace with actual admin ID
+            currentVer: '1.0.0', // optional
+            newVer: '1.0.0',     // optional
+            link: '',            // optional
+            isForce: 0,          // optional
+            reason: ''
+        };
+
+        const res = await api.post('admin/update-version', payload);
+
+        if (res.data.status === 1) {
+            toast.add({
+                severity: 'success',
+                summary: 'Updated',
+                detail: res.data.message || 'Maintenance updated successfully',
+                life: 3000
+            });
+            router.push('/it/maintenanceMode');
+        } else {
+            toast.add({
+                severity: 'error',
+                summary: 'Error',
+                detail: res.data.message || 'Failed to update maintenance',
+                life: 4000
+            });
+        }
+    } catch (err) {
+        console.error(err);
+        toast.add({
+            severity: 'error',
+            summary: 'Error',
+            detail: err.response?.data?.message || 'Something went wrong',
+            life: 4000
+        });
+    } finally {
+        saving.value = false;
+    }
 };
 </script>

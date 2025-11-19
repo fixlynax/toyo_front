@@ -590,6 +590,12 @@ const router = createRouter({
                     meta: { permission: 'Product List', access: 'view' },
                 },
                 {
+                    path: 'om/listProduct',
+                    name: 'List-Product OM',
+                    component: () => import('@/views/technical/listProduct.vue'),
+                    meta: { permission: 'Product List', access: 'view' },
+                },
+                {
                     path: 'technical/listOETire',
                     name: 'List-OE-Tire',
                     component: () => import('@/views/technical/listOETire.vue'),
@@ -1013,8 +1019,7 @@ router.beforeEach( async(to, from, next) => {
   if (authRequired && !loggedIn) return next('/auth/login');
   // Redirect logged-in user away from login page
   if (relativePath === '/auth/login' && loggedIn) return next('/welcome');
-  // Redirect if login based on role
-  if (to.path === '/' && loggedIn) {return next('/welcome');}
+
   // Load menu & permissions if logged in
   if (loggedIn) {
     const menuStore = useMenuStore();
@@ -1031,12 +1036,29 @@ router.beforeEach( async(to, from, next) => {
     }
 
     // Check route permissions
-    const { permission, access } = to.meta;
+    const { permission, access, role } = to.meta;
     if (permission) {
       if (!menuStore.canView(permission)) return next('/unauthorized_test');
       if (access === 'write' && !menuStore.canWrite(permission)) return next('/unauthorized_test');
     }
-  }
+      // Redirect if login based on role
+    if (relativePath === '/auth/login' || to.path === '/'){
+        const userRole = menuStore.role; 
+        if (userRole === 'TECHNICAL') {
+            return next(`/technical/dashboardTechnical`);
+        }
+        if (userRole === 'MARKETING') {
+            return next(`/marketing/memberDashboard`);
+        }
+        if (userRole === 'OM') {
+            return next(`/om/omDashboard`);
+        }
+        if (userRole === 'Superadmin') {
+            return next(`/welcome`);
+        }
+            return next('/welcome');
+    }
+    }
 
   next();
 });

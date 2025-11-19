@@ -33,27 +33,12 @@
                     <!-- Right: Export & Create Buttons -->
                     <div class="flex items-center gap-2 ml-auto">
                         <Button 
-                        type="button" 
-                        label="Export" 
-                        icon="pi pi-file-export" 
-                        class="p-button-success"
-                        :loading="exportLoading"
-                        @click="handleExport"
-                        />
-                        <Button 
-                        type="button" 
-                        label="Import" 
-                        icon="pi pi-file-import" 
-                        class="p-button"
-                        @click="importInput?.click()"
-                        :loading="importLoading"
-                        />
-                        <input 
-                        ref="importInput"
-                        type="file" 
-                        accept=".xlsx,.xls" 
-                        style="display: none" 
-                        @change="handleImport"
+                            type="button" 
+                            label="Export" 
+                            icon="pi pi-file-export" 
+                            class="p-button-success" 
+                            @click="exportToCSV"
+                            :disabled="patterns.length === 0"
                         />
                         <RouterLink to="/technical/createPattern">
                         <Button type="button" label="Create" icon="pi pi-plus" class="p-button" />
@@ -119,13 +104,9 @@ import { FilterMatchMode } from '@primevue/core/api';
 import api from '@/service/api';
 import Dialog from 'primevue/dialog';
 
-
 const patterns = ref([]);
 const loading = ref(true);
 const expandedRows = ref([]);
-const exportLoading = ref(false);
-const importLoading = ref(false);
-const importInput = ref();
 
 // Filters (for Quick Search)
 const filters = ref({
@@ -209,99 +190,50 @@ const formatDate = (dateString) => {
     }
 };
 
-// Import function
-// const handleImport = async (event) => {
-//     const file = event.target.files[0];
-   
+// Export function to CSV
+const exportToCSV = () => {
+    if (patterns.value.length === 0) {
+        console.warn('No data to export');
+        return;
+    }
 
-
-//     if (!file) return;
-
-//     try {
-//         importLoading.value = true;
+    try {
+        // Define CSV headers
+        const headers = ['Pattern Code', 'Pattern Name', 'Created Date'];
         
-//         const formData = new FormData();
-//         formData.append('material_file', file);
-//         const response = await api.postExtra('material/import', formData, {
-//             headers: {
-//                 'Content-Type': 'multipart/form-data'
-//             }
-//             });
+        // Prepare data rows
+        const csvData = patterns.value.map(pattern => [
+            `"${pattern.pattern_code || ''}"`,
+            `"${pattern.pattern_name || '-'}"`,
+            `"${formatDate(pattern.created)}"`
+        ]);
+
+        // Combine headers and data
+        const csvContent = [
+            headers.join(','),
+            ...csvData.map(row => row.join(','))
+        ].join('\n');
+
+        // Create and download the file
+        const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+        const link = document.createElement('a');
+        const url = URL.createObjectURL(blob);
         
-//         if (response.data.status === 1) {
-//             // Refresh data after import
-//             await fetchData();
-
-//             // Reset file input
-//             if (importInput.value) {
-//                 importInput.value.value = '';
-//             }
-
-//             toast.add({
-//                 severity: 'success',
-//                 summary: 'Success',
-//                 detail: 'File imported successfully',
-//                 life: 3000
-//             });
-//             } else {
-//             toast.add({
-//                 severity: 'error',
-//                 summary: 'Import Failed',
-//                 detail: response.data.error || 'Server did not confirm success',
-//                 life: 3000
-//             });
-//         }
-//     } catch (error) {
-//         console.error('Error importing data:', error);
-//         toast.add({ severity: 'error', summary: 'Error', detail: 'Failed to import data', life: 3000 });
-//     } finally {
-//         importLoading.value = false;
-//     }
-// };
-
-// Export function
-// const handleExport = async () => {
-//      const idsArray = Array.from(selectedExportIds.value).map(id => Number(id));
-
-//     if (idsArray.length === 0) {
-//         alert('Please select at least one row.');
-//         return;
-//     }
-//     try {
-//         exportLoading.value = true;
+        link.setAttribute('href', url);
+        link.setAttribute('download', `pattern_list_${new Date().toISOString().split('T')[0]}.csv`);
+        link.style.visibility = 'hidden';
         
-//             const response = await api.postExtra(
-//         'material/export',
-//         { material_id: JSON.stringify(idsArray) }, 
-//         {
-//             responseType: 'blob',
-//             headers: {
-//             'Content-Type': 'application/json',
-//             }
-//         }
-//         );
-//         const blob = new Blob([response.data], { 
-//         type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' 
-//         });
-
-//         const url = window.URL.createObjectURL(blob);
-//         const a = document.createElement('a');
-//         a.href = url;
-//         a.download = 'Material_Download.xlsx';
-//         document.body.appendChild(a);
-//         a.click();
-//         document.body.removeChild(a);
-//         window.URL.revokeObjectURL(url);
-
-//         toast.add({ severity: 'success', summary: 'Success', detail: 'Export completed', life: 3000 });
-//         selectedExportIds.value.clear();
-//     } catch (error) {
-//         console.error('Error exporting data:', error);
-//         toast.add({ severity: 'error', summary: 'Error', detail: 'Failed to export data', life: 3000 });
-//     } finally {
-//         exportLoading.value = false;
-//     }
-// };
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        
+        URL.revokeObjectURL(url);
+        
+        console.log('Export successful');
+    } catch (error) {
+        console.error('Error exporting data:', error);
+    }
+};
 
 // Alternative export function for Excel format (using CSV with .xls extension)
 const exportToExcel = () => {

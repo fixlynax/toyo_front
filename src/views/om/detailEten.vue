@@ -212,7 +212,7 @@
                     <!-- Title -->
                     <div class="flex items-center justify-between border-b pb-3 mb-4">
                         <div class="text-2xl font-bold text-gray-800">Account Info</div>
-                        <span class="inline-flex items-center px-3 py-2 text-xs font-semibold text-green-700 bg-green-100 rounded"> <i class="pi pi-check-circle mr-1"></i> {{ form.accountStatus === 'false' ? 'Inactive' : 'Active' }} </span>
+                        <!-- <span class="inline-flex items-center px-3 py-2 text-xs font-semibold text-green-700 bg-green-100 rounded"> <i class="pi pi-check-circle mr-1"></i> {{ form.accountStatus === 'false' ? 'Inactive' : 'Active' }} </span> -->
                     </div>
 
                     <!-- Table -->

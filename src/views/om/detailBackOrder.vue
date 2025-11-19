@@ -14,7 +14,10 @@
                     <div class="grid grid-cols-2 gap-4">
                         <div>
                             <span class="text-sm text-gray-500">Customer Name </span>
-                            <p class="text-lg font-medium">{{ customerInfo.dealerName || '-' }} (<span class="text-primary font-semibold">{{ order.custaccountno }}</span>)</p>
+                            <p class="text-lg font-medium">
+                                {{ customerInfo.dealerName || '-' }} <br />(<span class="font-semibold text-primary">{{ order.custaccountno }}</span
+                                >)
+                            </p>
                         </div>
                         <div class="w-full">
                             <span class="text-sm text-gray-700">Location</span>
@@ -61,7 +64,7 @@
                     <div class="grid grid-cols-1 gap-4 mt-4 mb-2">
                         <div>
                             <span class="text-sm text-gray-500">Back Order No</span>
-                            <p class="text-lg font-semibold">{{ order.bo_orderno || '-' }}</p>
+                            <p class="text-lg font-semibold text-primary">{{ order.bo_orderno || '-' }}</p>
                         </div>
                     </div>
 
@@ -135,7 +138,10 @@
                             </Column>
                             <Column field="materialid" header="Material ID" style="min-width: 8rem">
                                 <template #body="{ data }">
-                                    <span class="font-bold">{{ data.materialid }}</span>
+                                    <span class="font-bold"
+                                        >{{ data.materialid }} <br />
+                                        {{ data.materialdescription }}
+                                    </span>
                                 </template>
                             </Column>
                             <Column field="itemcategory" header="Item Category" style="min-width: 8rem">
@@ -150,7 +156,7 @@
                             </Column>
                             <Column field="unitprice" header="Unit Price" style="min-width: 6rem">
                                 <template #body="{ data }">
-                                    <span class="font-semibold ">RM {{ parseFloat(data.unitprice || 0).toFixed(2) }}</span>
+                                    <span class="font-semibold">RM {{ parseFloat(data.unitprice || 0).toFixed(2) }}</span>
                                 </template>
 
                                 <!-- ✅ Footer for label -->
@@ -160,11 +166,11 @@
                             </Column>
                             <Column field="totalamt" header="Total" style="min-width: 6rem">
                                 <template #body="{ data }">
-                                    <span class="font-bold text-green-700">RM {{ parseFloat(data.totalamt || 0).toFixed(2) }}</span>
+                                    <span class="font-bold text-green-600">RM {{ parseFloat(data.totalamt || 0).toFixed(2) }}</span>
                                 </template>
 
                                 <template #footer>
-                                    <div class="flex justify-start pr-2 font-bold text-green-500">RM {{ parseFloat(fulfillOrder.total || 0).toFixed(2) }}</div>
+                                    <div class="flex justify-start pr-2 font-bold text-green-700">RM {{ parseFloat(fulfillOrder.total || 0).toFixed(2) }}</div>
                                 </template>
                             </Column>
                         </DataTable>
@@ -243,7 +249,7 @@
                             <Tag :value="`${item.fulfillmentRate}%`" :severity="item.fulfillmentRate === 100 ? 'success' : item.fulfillmentRate > 0 ? 'warning' : 'danger'" />
                         </div>
                         <div class="w-full bg-gray-200 rounded-full h-2">
-                            <div class="bg-green-500 h-2 rounded-full" :style="{ width: `${item.fulfillmentRate}%` }"></div>
+                            <div class="bg-green-500 h-2 rounded-full" :style="{ width: `${Math.min(item.fulfillmentRate, 100)}%` }"></div>
                         </div>
                         <div class="flex justify-between text-xs mt-1">
                             <span>Fulfilled: {{ formatQuantity(item.fulfilled) }}/{{ formatQuantity(item.original) }}</span>
@@ -385,7 +391,7 @@ const formatCompanyName = (shippingDetail) => {
 
     const companyNames = [shippingDetail.companyName1, shippingDetail.companyName2, shippingDetail.companyName3, shippingDetail.companyName4].filter((name) => name && name.trim() !== '');
 
-    return companyNames.length > 0 ? companyNames.join(', ') : '-';
+    return companyNames.length > 0 ? companyNames.join(' ') : '-';
 };
 
 const formatAddress = (shippingDetail) => {

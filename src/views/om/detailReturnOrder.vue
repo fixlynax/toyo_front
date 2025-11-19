@@ -7,40 +7,43 @@
                         <RouterLink to="/om/listReturnOrder">
                             <Button icon="pi pi-arrow-left font-bold" class="p-button-text p-button-secondary text-xl" size="big" v-tooltip="'Back'" />
                         </RouterLink>
-                        <div class="text-2xl font-bold text-gray-800">Return Order Detail</div>
+                        <div class="text-2xl font-bold text-gray-800">Customer Information</div>
                     </div>
 
-                    <div class="font-semibold text-xl border-b pb-2 mt-2">🏬 Customer Details</div>
                     <div class="grid grid-cols-2 gap-4">
                         <div>
                             <span class="text-sm text-gray-500">Customer Name</span>
-                            <p class="text-lg font-medium">{{ dealerShop.companyName1 || '-' }} {{ dealerShop.companyName2 }} {{ dealerShop.companyName3 }} {{ dealerShop.companyName4 }}</p>
-                        </div>
-                        <div>
-                            <span class="text-sm text-gray-500">Account Number</span>
-                            <p class="text-lg font-medium">{{ dealerShop.custAccountNo || '-' }}</p>
-                        </div>
-                        <div>
-                            <span class="text-sm text-gray-500">Member Code</span>
-                            <p class="text-lg font-medium">{{ dealerShop.memberCode || '-' }}</p>
+                            <p class="text-lg font-medium">{{ dealerShop.companyName1 || '-' }} {{ dealerShop.companyName2 || '' }} <br />(<span class="font-semibold text-primarnotdy">{{ dealerShop.custAccountNo || '-' }}</span>)</p>
                         </div>
                         <div>
                             <span class="text-sm text-gray-500">Location</span>
                             <p class="text-lg font-medium">
-                                {{ dealerShop.addressLine1 }} {{ dealerShop.addressLine2 }} {{ dealerShop.addressLine3 }} {{ dealerShop.addressLine4 }}{{ dealerShop.city }}, {{ dealerShop.state }} , {{ dealerShop.postcode }}
+                                {{ formatAddress(dealerShop) }}
                             </p>
-                        </div>
-                        <div>
-                            <span class="text-sm text-gray-500">Contact Person</span>
-                            <p class="text-lg font-medium">{{ dealerShop.phoneNumber || '-' }}</p>
                         </div>
                         <div>
                             <span class="text-sm text-gray-500">Channel</span>
                             <p class="text-lg font-medium">{{ orderData.channel || '-' }}</p>
                         </div>
-                         <div>
-                            <span class="text-sm text-gray-500">SAP Return No.</span>
-                            <p class="text-lg font-bold">{{ order.sapreturnno || '-' }}</p>
+                        <div>
+                            <span class="text-sm text-gray-500">Distribution Channel</span>
+                            <p class="text-lg font-medium">{{ orderData.distributionchannel || '-' }}</p>
+                        </div>
+                        <div class="w-full">
+                            <span class="text-sm text-gray-700">Sales Org</span>
+                            <p class="text-lg font-medium">{{ orderData.salesorg || '-' }}</p>
+                        </div>
+                        <div class="w-full">
+                            <span class="text-sm text-gray-700">Price Group</span>
+                            <p class="text-lg font-medium">{{ orderData.pricegroup || '-' }}</p>
+                        </div>
+                        <div>
+                            <span class="text-sm text-gray-500">Email Address</span>
+                            <p class="text-lg font-medium">{{ dealerShop.emailAddress || '-' }}</p>
+                        </div>
+                        <div>
+                            <span class="text-sm text-gray-500">Contact Number</span>
+                            <p class="text-lg font-medium">{{ dealerShop.phoneNumber || '-' }}</p>
                         </div>
                     </div>
                 </div>
@@ -48,10 +51,14 @@
                 <div class="card flex flex-col w-full bg-white shadow-sm rounded-2xl border border-gray-100">
                     <!-- Header -->
                     <div class="font-semibold text-xl border-b pb-3 px-4 flex items-center gap-2 text-gray-800">📦 <span>Return Item</span></div>
-                    <div class="grid grid-cols-1 gap-4 mt-4">
+                    <div class="grid grid-cols-2 gap-4 mt-4">
                         <div>
-                            <span class="text-sm text-gray-500">Return Order No</span>
-                            <p class="text-lg font-semibold">{{ order.return_orderNo_ref || '-' }}</p>
+                            <span class="text-sm text-gray-500">Return Order No.</span>
+                            <p class="text-lg font-semibold text-primary">{{ order.return_orderNo_ref || '-' }}</p>
+                        </div>
+                        <div>
+                            <span class="text-sm text-gray-500">SAP Return No.</span>
+                            <p class="text-lg font-bold">{{ order.sapreturnno || '-' }}</p>
                         </div>
                     </div>
                     <div class="grid grid-cols-2 gap-4 mt-4">
@@ -71,8 +78,12 @@
                                 {{ formatItemNo(data.salesdoclineitem || data.itemno) }}
                             </template>
                         </Column>
-
-                        <Column field="materialid" header="Material ID"></Column>
+                        <Column header="Material">
+                            <template #body="{ data }">
+                                {{ data.materialid }} <br />
+                                {{ data.materialdescription }}
+                            </template>
+                        </Column>
 
                         <Column field="itemcategory" header="Item Category">
                             <template #body="{ data }">
@@ -125,43 +136,39 @@
                             <tbody>
                                 <tr class="border-b">
                                     <td class="px-4 py-2 font-medium">Order No</td>
-                                    <td class="px-4 py-2 text-right">{{ orderData.order_no || '-' }}</td>
+                                    <td class="px-4 py-2 text-right font-semibold text-primary">{{ orderData.order_no || '-' }}</td>
                                 </tr>
                                 <tr class="border-b">
                                     <td class="px-4 py-2 font-medium">SO No</td>
-                                    <td class="px-4 py-2 text-right">{{ orderData.so_no || '-' }}</td>
+                                    <td class="px-4 py-2 text-right font-semibold">{{ orderData.so_no || '-' }}</td>
                                 </tr>
                                 <tr class="border-b">
                                     <td class="px-4 py-2 font-medium">DO No</td>
-                                    <td class="px-4 py-2 text-right">{{ orderData.do_no || '-' }}</td>
+                                    <td class="px-4 py-2 text-right font-semibold">{{ orderData.do_no || '-' }}</td>
                                 </tr>
                                 <tr class="border-b">
                                     <td class="px-4 py-2 font-medium">Invoice No</td>
-                                    <td class="px-4 py-2 text-right">{{ orderData.inv_no || '-' }}</td>
+                                    <td class="px-4 py-2 text-right font-semibold">{{ orderData.inv_no || '-' }}</td>
                                 </tr>
-                                <!-- <tr class="border-b">
-                                    <td class="px-4 py-2 font-medium">SAP Return No</td>
-                                    <td class="px-4 py-2 text-right">{{ order.sapreturnno || '-' }}</td>
-                                </tr> -->
                                 <tr class="border-b">
                                     <td class="px-4 py-2 font-medium">SAP Order Type</td>
-                                    <td class="px-4 py-2 text-right">{{ orderData.sapordertype || '-' }}</td>
+                                    <td class="px-4 py-2 text-right font-semibold">{{ orderData.sapordertype || '-' }}</td>
                                 </tr>
                                 <tr class="border-b">
                                     <td class="px-4 py-2 font-medium">Division</td>
-                                    <td class="px-4 py-2 text-right">{{ orderData.division || '-' }}</td>
+                                    <td class="px-4 py-2 text-right font-semibold">{{ orderData.division || '-' }}</td>
                                 </tr>
                                 <tr class="border-b">
-                                    <td class="px-4 py-2 font-medium">Pickup</td>
-                                    <td class="px-4 py-2 text-right">{{ orderDelivery.pickup_datetime || '-' }}</td>
+                                    <td class="px-4 py-2 font-medium">Storage Location</td>
+                                    <td class="px-4 py-2 text-right font-semibold">{{ orderData.storagelocation || '-' }}</td>
                                 </tr>
                                 <tr class="border-b">
-                                    <td class="px-4 py-2 font-medium">Receive</td>
-                                    <td class="px-4 py-2 text-right">{{ orderDelivery.receive_datetime || '-' }}</td>
+                                    <td class="px-4 py-2 font-medium">Delivery Status</td>
+                                    <td class="px-4 py-2 text-right font-semibold">{{ getDeliveryStatusText(order.delivery_status) }}</td>
                                 </tr>
                                 <tr>
                                     <td class="px-4 py-2 font-medium">Created</td>
-                                    <td class="px-4 py-2 text-right">{{ orderData.created || '-' }}</td>
+                                    <td class="px-4 py-2 text-right font-semibold">{{ formatDate(order.created) || '-' }}</td>
                                 </tr>
                             </tbody>
                         </table>
@@ -206,7 +213,7 @@ const error = ref(null);
 const subtotal = ref(0);
 
 // ✅ Status mapping functions
-const getdeliveryOrderStatusText = (status) => {
+const getDeliveryStatusText = (status) => {
     const statusMap = {
         PENDING: 'Pending',
         APPROVED: 'Approved',
@@ -215,7 +222,7 @@ const getdeliveryOrderStatusText = (status) => {
         COMPLETED: 'Completed',
         NEW: 'New'
     };
-    return statusMap[status?.toUpperCase()] || ` ${status || '-'}`;
+    return statusMap[status?.toUpperCase()] || status || '-';
 };
 
 const getOrderStatusText = (status) => {
@@ -245,7 +252,8 @@ const getOrderStatusSeverity = (status) => {
 const getActionStatusLabel = (status) => {
     const actionMap = {
         1: 'Approved',
-        2: 'Rejected'
+        2: 'Rejected',
+        9: 'Completed'
     };
     return actionMap[status] || '';
 };
@@ -253,30 +261,41 @@ const getActionStatusLabel = (status) => {
 const getActionStatusSeverity = (status) => {
     const severityMap = {
         1: 'success',
-        2: 'danger'
+        2: 'danger',
+        9: 'success'
     };
     return severityMap[status] || 'secondary';
+};
+
+// Helper methods
+const formatAddress = (dealerShop) => {
+    if (!dealerShop) return '-';
+    const addressParts = [dealerShop.addressLine1, dealerShop.addressLine2, dealerShop.addressLine3, dealerShop.addressLine4, dealerShop.city, dealerShop.state, dealerShop.postcode].filter((part) => part && part.trim() !== '');
+    return addressParts.join(' ') || '-';
+};
+
+const formatDate = (dateString) => {
+    if (!dateString) return '-';
+    return new Date(dateString).toLocaleDateString('en-MY', {
+        year: 'numeric',
+        month: 'short',
+        day: 'numeric'
+    });
 };
 
 // Method to get item price - handle null prices by looking up from original order
 const getItemPrice = (item) => {
     // If unitprice is provided in return item, use it
-    if (item.unitprice !== null && item.unitprice !== undefined) {
+    if (item.unitprice !== null && item.unitprice !== undefined && item.unitprice !== '') {
         return Number(item.unitprice) || 0;
     }
 
-    // Otherwise, try to find price from original order data
-    if (orderData.value.order_array) {
-        try {
-            const orderItems = typeof orderData.value.order_array === 'string' ? JSON.parse(orderData.value.order_array) : orderData.value.order_array;
+    // Otherwise, try to find price from original order data fullfill_order_array
+    if (orderData.value.fullfill_order_array && Array.isArray(orderData.value.fullfill_order_array)) {
+        const originalItem = orderData.value.fullfill_order_array.find((orderItem) => orderItem.materialid === item.materialid && orderItem.itemno === (item.salesdoclineitem || item.itemno));
 
-            const originalItem = orderItems.find((orderItem) => orderItem.materialid === item.materialid && orderItem.itemno === (item.salesdoclineitem || item.itemno));
-
-            if (originalItem && originalItem.price) {
-                return Number(originalItem.price) || 0;
-            }
-        } catch (error) {
-            console.error('Error parsing order array:', error);
+        if (originalItem && originalItem.unitprice) {
+            return Number(originalItem.unitprice) || 0;
         }
     }
 
@@ -293,7 +312,7 @@ const calculateItemTotal = (item) => {
 // Method to format item number
 const formatItemNo = (itemNo) => {
     if (!itemNo) return '-';
-    return itemNo.toString().padStart(2, '0');
+    return itemNo.toString().padStart(6, '0');
 };
 
 // Update subtotal when returnOrderArray changes
@@ -336,12 +355,17 @@ const fetchReturnOrderDetail = async () => {
         error.value = null;
 
         const response = await api.get(`order/detail-return-order/${returnOrderNo}`);
-        if (response.data.status === 0 && response.data.admin_data && response.data.admin_data.length > 0) {
-            order.value = response.data.admin_data[0];
-            dealerShop.value = order.value.dealer?.dealer_shop || {};
-            orderData.value = order.value.order_data || {};
-            orderDelivery.value = order.value.delivery_information || {};
-            returnOrderArray.value = order.value.return_order_array || [];
+
+        if (response.data.status === 1 && response.data.admin_data && response.data.admin_data.length > 0) {
+            const orderDataResponse = response.data.admin_data[0];
+            order.value = orderDataResponse;
+            dealerShop.value = orderDataResponse.dealer?.dealer_shop || {};
+            orderData.value = orderDataResponse.order_data || {};
+            orderDelivery.value = orderDataResponse.delivery_information || {};
+            returnOrderArray.value = orderDataResponse.return_order_array || [];
+
+            console.log('Order Data:', orderData.value);
+            console.log('Return Items:', returnOrderArray.value);
 
             // Initialize subtotal
             updateSubtotal();

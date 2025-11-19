@@ -187,14 +187,14 @@ onBeforeMount(() => {
                 </Column>
 
                 <!-- Account No Column -->
-                <Column field="custAccountNo" header="Acc No." style="min-width: 8rem">
+                <Column field="custAccountNo" header="Customer Acc No." style="min-width: 8rem">
                     <template #body="{ data }">
                         {{ data.custAccountNo }}
                     </template>
                 </Column>
 
                 <!-- Customer Name Column -->
-                <Column field="customerName" header="Requester Name" style="min-width: 8rem">
+                <Column field="customerName" header="Customer Name" style="min-width: 8rem">
                     <template #body="{ data }">
                         {{ data.customerName }}
                     </template>
