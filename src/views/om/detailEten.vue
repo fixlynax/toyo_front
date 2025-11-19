@@ -15,6 +15,10 @@
                                     <span v-if="loadingPullSAP">Pulling SAP...</span>
                                     <span v-else>Pull SAP</span>
                                 </Button>
+                                <!-- edit button -->
+                                <RouterLink :to="`/om/editEten/${form.custAccountNo}`">
+                                    <Button icon="pi pi-pencil" class="p-button-warning" v-tooltip="'Edit'" />
+                                </RouterLink>
                             </div>
                         </div>
 
@@ -437,7 +441,7 @@ const pullSAPData = async () => {
     loadingPullSAP.value = true;
     try {
         const custAccNo = route.params.custAccNo;
-        
+
         // Call the SAP update API
         const response = await api.postExtra('update_customer-SAP', {
             custaccountno: custAccNo
@@ -451,10 +455,9 @@ const pullSAPData = async () => {
                 detail: 'Data successfully pulled from SAP',
                 life: 5000
             });
-            
+
             // Refresh the dealer profile data to show updated information
             await fetchDealerProfile();
-            
         } else {
             // SAP returned error
             const errorMessage = response.data.message || 'Failed to pull data from SAP';
@@ -465,13 +468,12 @@ const pullSAPData = async () => {
                 life: 5000
             });
         }
-        
     } catch (error) {
         console.error('Error pulling SAP data:', error);
-        
+
         // Handle different types of errors
         let errorMessage = 'An unexpected error occurred';
-        
+
         if (error.response) {
             // Server responded with error status
             if (error.response.data && error.response.data.message) {
@@ -483,7 +485,7 @@ const pullSAPData = async () => {
             // Request was made but no response received
             errorMessage = 'No response from server. Please check your connection.';
         }
-        
+
         toast.add({
             severity: 'error',
             summary: 'Error',
