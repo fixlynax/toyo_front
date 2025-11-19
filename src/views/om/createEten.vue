@@ -979,11 +979,11 @@ onMounted(() => {
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                             <div>
                                 <label class="font-medium text-gray-600">Ship To Account No</label>
-                                <InputText disabled v-model="shipTo.custaccountno" placeholder="Enter account number" class="w-full bg-gray-100" />
+                                <InputText disabled v-model="shipTo.custaccountno" class="w-full bg-gray-100" />
                             </div>
                             <div>
                                 <label class="font-medium text-gray-600">Email</label>
-                                <InputText disabled v-model="shipTo.emailaddress" placeholder="example@email.com" class="w-full bg-gray-100" />
+                                <InputText disabled v-model="shipTo.emailaddress" class="w-full bg-gray-100" />
                             </div>
                         </div>
 
@@ -991,19 +991,19 @@ onMounted(() => {
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
                             <div>
                                 <label class="font-medium text-gray-600">Company Name 1</label>
-                                <InputText disabled v-model="shipTo.companyname1" placeholder="Company Name Line 1" class="w-full bg-gray-100" />
+                                <InputText disabled v-model="shipTo.companyname1" class="w-full bg-gray-100" />
                             </div>
                             <div>
                                 <label class="font-medium text-gray-600">Company Name 2</label>
-                                <InputText disabled v-model="shipTo.companyname2" placeholder="Company Name Line 2" class="w-full bg-gray-100" />
+                                <InputText disabled v-model="shipTo.companyname2" class="w-full bg-gray-100" />
                             </div>
                             <div>
                                 <label class="font-medium text-gray-600">Company Name 3</label>
-                                <InputText disabled v-model="shipTo.companyname3" placeholder="Company Name Line 3" class="w-full bg-gray-100" />
+                                <InputText disabled v-model="shipTo.companyname3" class="w-full bg-gray-100" />
                             </div>
                             <div>
                                 <label class="font-medium text-gray-600">Company Name 4</label>
-                                <InputText disabled v-model="shipTo.companyname4" placeholder="Company Name Line 4" class="w-full bg-gray-100" />
+                                <InputText disabled v-model="shipTo.companyname4" class="w-full bg-gray-100" />
                             </div>
                         </div>
 
@@ -1011,19 +1011,19 @@ onMounted(() => {
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
                             <div>
                                 <label class="font-medium text-gray-600">Address Line 1</label>
-                                <InputText disabled v-model="shipTo.addressline1" placeholder="Address Line 1" class="w-full bg-gray-100" />
+                                <InputText disabled v-model="shipTo.addressline1" class="w-full bg-gray-100" />
                             </div>
                             <div>
                                 <label class="font-medium text-gray-600">Address Line 2</label>
-                                <InputText disabled v-model="shipTo.addressline2" placeholder="Address Line 2" class="w-full bg-gray-100" />
+                                <InputText disabled v-model="shipTo.addressline2" class="w-full bg-gray-100" />
                             </div>
                             <div>
                                 <label class="font-medium text-gray-600">Address Line 3</label>
-                                <InputText disabled v-model="shipTo.addressline3" placeholder="Address Line 3" class="w-full bg-gray-100" />
+                                <InputText disabled v-model="shipTo.addressline3" class="w-full bg-gray-100" />
                             </div>
                             <div>
                                 <label class="font-medium text-gray-600">Address Line 4</label>
-                                <InputText disabled v-model="shipTo.addressline4" placeholder="Address Line 4" class="w-full bg-gray-100" />
+                                <InputText disabled v-model="shipTo.addressline4" class="w-full bg-gray-100" />
                             </div>
                         </div>
 
@@ -1031,19 +1031,19 @@ onMounted(() => {
                         <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mt-4">
                             <div>
                                 <label class="font-medium text-gray-600">City</label>
-                                <InputText disabled v-model="shipTo.city" placeholder="City" class="w-full bg-gray-100" />
+                                <InputText disabled v-model="shipTo.city" class="w-full bg-gray-100" />
                             </div>
                             <div>
                                 <label class="font-medium text-gray-600">Postcode</label>
-                                <InputText disabled v-model="shipTo.postcode" placeholder="Postcode" class="w-full bg-gray-100" />
+                                <InputText disabled v-model="shipTo.postcode" class="w-full bg-gray-100" />
                             </div>
                             <div>
                                 <label class="font-medium text-gray-600">State</label>
-                                <InputText disabled v-model="shipTo.state" placeholder="State" class="w-full bg-gray-100" />
+                                <InputText disabled v-model="shipTo.state" class="w-full bg-gray-100" />
                             </div>
                             <div>
                                 <label class="font-medium text-gray-600">Country</label>
-                                <InputText disabled v-model="shipTo.country" placeholder="Country" class="w-full bg-gray-100" />
+                                <InputText disabled v-model="shipTo.country" class="w-full bg-gray-100" />
                             </div>
                         </div>
 
@@ -1051,11 +1051,11 @@ onMounted(() => {
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
                             <div>
                                 <label class="font-medium text-gray-600">Phone No</label>
-                                <InputText disabled v-model="shipTo.phoneno" placeholder="e.g. 03-1234567" class="w-full bg-gray-100" />
+                                <InputText disabled v-model="shipTo.phoneno"  class="w-full bg-gray-100" />
                             </div>
                             <div>
                                 <label class="font-medium text-gray-600">Mobile No</label>
-                                <InputText disabled v-model="shipTo.mobilephoneno" placeholder="e.g. 012-3456789" class="w-full bg-gray-100" />
+                                <InputText disabled v-model="shipTo.mobilephoneno" class="w-full bg-gray-100" />
                             </div>
                         </div>
                     </div>
