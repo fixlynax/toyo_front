@@ -8,22 +8,22 @@
                 <!-- Pattern Form -->
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
-                        <label class="block font-bold text-gray-700 mb-1">Pattern Name *</label>
+                        <label class="block font-bold text-gray-700 mb-1">Pattern Name</label>
                         <InputText v-model="pattern.name" class="w-full" placeholder="Insert Pattern Name" />
                         <small v-if="errors.name" class="text-red-500">{{ errors.name }}</small>
                     </div>
                     
                     <div>
                         <label class="block font-bold text-gray-700 mb-1">Pattern Code</label>
-                        <InputText v-model="pattern.code" class="w-full" placeholder="Insert Pattern Code (Optional)" />
+                        <InputText v-model="pattern.code" class="w-full" placeholder="Insert Pattern Code" maxlength="3"/>
                         <small v-if="errors.code" class="text-red-500">{{ errors.code }}</small>
                     </div>
                 </div>
 
                 <!-- Upload Image Section -->
                 <div>
-                    <label class="block font-bold text-gray-700 mb-2">Upload Pattern Image *</label>
-                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <label class="block font-bold text-gray-700 mb-2">Upload Pattern Image</label>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div>
                             <FileUpload 
                                 mode="basic" 
@@ -40,7 +40,7 @@
                             <small v-if="errors.image" class="text-red-500">{{ errors.image }}</small>
                             
                             <div v-if="pattern.imageURL" class="relative mt-2">
-                                <img :src="pattern.imageURL" alt="Preview" class="rounded-lg shadow-md object-cover w-full h-60" />
+                                <img :src="pattern.imageURL" alt="Preview" class="rounded-lg shadow-md object-cover h-60" />
                                 <Button 
                                     icon="pi pi-times" 
                                     class="p-button-danger p-button-rounded p-button-sm absolute top-2 right-2" 
@@ -55,34 +55,15 @@
                     </div>
                 </div>
 
-                <!-- Loading Indicator -->
-                <div v-if="loading" class="flex justify-center items-center gap-2">
-                    <ProgressSpinner style="width: 30px; height: 30px" />
-                    <span>Creating pattern...</span>
-                </div>
-
-                <!-- Messages -->
-                <Message v-if="successMessage" severity="success" class="w-full" @close="successMessage = ''">
-                    {{ successMessage }}
-                </Message>
-                <Message v-if="errorMessage" severity="error" class="w-full" @close="errorMessage = ''">
-                    {{ errorMessage }}
-                </Message>
-
-                <!-- Debug Info (remove in production) -->
-                <div v-if="debugInfo" class="p-3 bg-yellow-50 border border-yellow-200 rounded">
-                    <h4 class="font-bold text-yellow-800 mb-2">Debug Information:</h4>
-                    <pre class="text-xs text-yellow-700">{{ debugInfo }}</pre>
-                </div>
-
                 <!-- Submit -->
                 <div class="flex justify-end mt-8 gap-4">
                     <RouterLink to="/technical/listPattern">
-                        <Button label="Cancel" class="p-button-secondary" :disabled="loading" />
+                        <Button label="Cancel" class="p-button-danger" :disabled="loading" />
                     </RouterLink>
                     <Button 
                         label="Submit" 
-                        class="p-button-success" 
+                        class="p-button-success w-30"
+                        style="width: min-content!important;" 
                         @click="submitPattern" 
                         :disabled="loading"
                         :loading="loading"
@@ -97,7 +78,8 @@
 import { ref } from 'vue';
 import { useRouter } from 'vue-router';
 import api from '@/service/api';
-
+import { useToast } from 'primevue/usetoast';
+const toast = useToast();
 const router = useRouter();
 
 const pattern = ref({
@@ -110,7 +92,6 @@ const selectedFile = ref(null);
 const loading = ref(false);
 const successMessage = ref('');
 const errorMessage = ref('');
-const debugInfo = ref('');
 const errors = ref({
     code: '',
     name: '',
@@ -125,7 +106,10 @@ const validateForm = () => {
         errors.value.name = 'Pattern name is required';
         isValid = false;
     }
-
+    if (!pattern.value.code.trim()) {
+        errors.value.code = 'Pattern code is required';
+     
+    }
     if (!selectedFile.value) {
         errors.value.image = 'Pattern image is required';
         isValid = false;
@@ -170,7 +154,6 @@ const submitPattern = async () => {
     // Clear previous messages
     successMessage.value = '';
     errorMessage.value = '';
-    debugInfo.value = '';
 
     // Validate form
     if (!validateForm()) {
@@ -193,7 +176,6 @@ const submitPattern = async () => {
             formData.append('pattern_code', pattern.value.code.trim());
         }
 
-
         // Make API request
         const response = await api.postExtra('patternCreate', formData, {
             headers: {
@@ -201,19 +183,18 @@ const submitPattern = async () => {
             },
         });
 
-        if (response.data.status === 1 || response.status === 200) {
-            successMessage.value = 'Pattern created successfully!';
-            
+        if (response.data.status === 1) {
+            toast.add({severity: 'success',summary: 'Success',detail: 'Pattern created successfully',life: 3000});
             // Redirect to list page after success
             setTimeout(() => {
                 router.push('/technical/listPattern');
             }, 1000);
         } else {
-            errorMessage.value = response.data.message || 'Failed to create pattern';
-            debugInfo.value = JSON.stringify(response.data, null, 2);
+            toast.add({ severity: 'error', summary: 'Error', detail: response.data.error || 'Failed to create pattern', life: 3000 });
         }
     } catch (error) {
         console.error('Error creating pattern:', error);
+        toast.add({ severity: 'error', summary: 'Error', detail: error || 'Failed to create pattern', life: 3000 });
     } finally {
         loading.value = false;
     }
