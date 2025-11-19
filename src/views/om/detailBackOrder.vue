@@ -14,7 +14,7 @@
                     <div class="grid grid-cols-2 gap-4">
                         <div>
                             <span class="text-sm text-gray-500">Customer Name </span>
-                            <p class="text-lg font-medium">{{ customerInfo.dealerName || '-' }} ({{ order.custaccountno }})</p>
+                            <p class="text-lg font-medium">{{ customerInfo.dealerName || '-' }} (<span class="text-primary font-semibold">{{ order.custaccountno }}</span>)</p>
                         </div>
                         <div class="w-full">
                             <span class="text-sm text-gray-700">Location</span>
@@ -150,7 +150,7 @@
                             </Column>
                             <Column field="unitprice" header="Unit Price" style="min-width: 6rem">
                                 <template #body="{ data }">
-                                    <span class="font-semibold text-green-600">RM {{ parseFloat(data.unitprice || 0).toFixed(2) }}</span>
+                                    <span class="font-semibold ">RM {{ parseFloat(data.unitprice || 0).toFixed(2) }}</span>
                                 </template>
 
                                 <!-- ✅ Footer for label -->
@@ -164,7 +164,7 @@
                                 </template>
 
                                 <template #footer>
-                                    <div class="flex justify-start pr-2 font-bold text-gray-700">RM {{ parseFloat(fulfillOrder.total || 0).toFixed(2) }}</div>
+                                    <div class="flex justify-start pr-2 font-bold text-green-500">RM {{ parseFloat(fulfillOrder.total || 0).toFixed(2) }}</div>
                                 </template>
                             </Column>
                         </DataTable>
@@ -395,7 +395,7 @@ const formatAddress = (shippingDetail) => {
         (part) => part && part.trim() !== ''
     );
 
-    return addressParts.length > 0 ? addressParts.join(', ') : '-';
+    return addressParts.length > 0 ? addressParts.join(' ') : '-';
 };
 
 const getFullAddress = (customerInfo) => {
@@ -403,7 +403,7 @@ const getFullAddress = (customerInfo) => {
 
     const addressParts = [customerInfo.addressLine1, customerInfo.addressLine2, customerInfo.addressLine3, customerInfo.addressLine4, customerInfo.city, customerInfo.state, customerInfo.postcode].filter((part) => part && part.trim() !== '');
 
-    return addressParts.join(', ') || '-';
+    return addressParts.join(' ') || '-';
 };
 
 const formatItemNo = (itemNo) => {
