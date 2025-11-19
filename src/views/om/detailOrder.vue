@@ -327,7 +327,7 @@ const getFullAddress = (data) => {
     // Handle both customerInfo and shippingDetail structures
     const addressParts = [data.addressLine1, data.addressLine2, data.addressLine3, data.addressLine4, data.city, data.state, data.postcode].filter((part) => part && part.trim() !== '');
 
-    return addressParts.join(', ') || '-';
+    return addressParts.join('') || '-';
 };
 
 // Item category mapping function

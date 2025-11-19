@@ -9,16 +9,12 @@
                 <!-- Contact Details -->
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
-                        <label class="block font-bold text-gray-700 mb-2">Username</label>
-                        <InputText v-model="form.uname" type="text" placeholder="Enter Username" class="w-full" />
-                    </div>
-                    <div>
                         <label class="block font-bold text-gray-700 mb-2">Email Address</label>
                         <InputText v-model="form.emailaddress" type="email" placeholder="Enter email Address" class="w-full" />
                     </div>
                     <div>
                         <label class="block font-bold text-gray-700 mb-2">Contact No</label>
-                        <InputText v-model="form.phoneno" type="text" placeholder="Enter Contact No" class="w-full" @keypress="allowOnlyNumbers"/>
+                        <InputText v-model="form.phoneno" type="text" placeholder="Enter Contact No" class="w-full" maxlength="15" @keypress="allowOnlyNumbers"/>
                     </div>
                 </div>
                 <!-- Logistic Form -->
@@ -34,8 +30,12 @@
                             <InputText v-model="form.contactperson" type="text" placeholder="Enter Contact Name" class="w-full" />
                         </div>
                         <div>
-                            <label class="block font-bold text-gray-700 mb-2">Contact No</label>
-                            <InputText v-model="form.mobileno" type="text" placeholder="Enter Contact No" class="w-full" @keypress="allowOnlyNumbers"/>
+                            <label class="block font-bold text-gray-700 mb-2">Mobile No</label>
+                            <InputText v-model="form.mobileno" type="text" placeholder="Enter Contact No" class="w-full" maxlength="15" @keypress="allowOnlyNumbers"/>
+                        </div>
+                        <div>
+                            <label class="block font-bold text-gray-700 mb-2">Status</label>
+                            <Dropdown v-model="form.status":options="statusCode" optionLabel="label"optionValue="value"placeholder="Select State" class="w-full"/>
                         </div>
                     </div>
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -57,7 +57,7 @@
                         </div>
                         <div>
                             <label class="block font-bold text-gray-700 mb-2">Postcode</label>
-                            <InputText v-model="form.postcode" type="text" placeholder="Enter Postcode" class="w-full" />
+                            <InputText v-model="form.postcode" type="text" placeholder="Enter Postcode" class="w-full" maxlength="5" />
                         </div>
                     </div>
 
@@ -128,11 +128,16 @@ const router = useRouter();
 const loading = ref(true);
 
 const allowOnlyNumbers = (event) => {
-  // Allow only digits (0-9)
-  const char = String.fromCharCode(event.charCode);
-  if (!/[0-9]/.test(char)) {
-    event.preventDefault();
-  }
+  const key = event.key;
+
+  // allow digits
+  if (/[0-9]/.test(key)) return;
+
+  // allow "-"
+  if (key === '-') return;
+
+  // block everything else
+  event.preventDefault();
 };
 
 // Storage locations data - TMJB, TMSA, RETP, RER, TMSB, TMSK
@@ -171,9 +176,12 @@ const storageLocations = ref([
 
 // list of states
 const states = ['Johor', 'Kedah', 'Kelantan', 'Melaka', 'Negeri Sembilan', 'Pahang', 'Penang', 'Perak', 'Perlis', 'Sabah', 'Sarawak', 'Selangor', 'Terengganu', 'Kuala Lumpur', 'Putrajaya', 'Labuan'];
-
+const statusCode = [
+  { label: 'Active', value: 1 },
+  { label: 'Inactive', value: 0 }
+];
 const form = reactive({
-    uname: '',
+
     companyname: '',
     addressline1: '',
     addressline2: '',
@@ -184,13 +192,13 @@ const form = reactive({
     phoneno: '',
     contactperson: '',
     mobileno: '',
+    status: '',
     storage_list: []  // <-- array for MultiSelect
 });
 
 // form validation
 const isFormValid = computed(() => {
     return (
-        form.uname.trim() !== '' &&
         form.companyname.trim() !== '' &&
         form.addressline1.trim() !== '' &&
         form.addressline2.trim() !== '' &&
@@ -201,6 +209,7 @@ const isFormValid = computed(() => {
         form.phoneno.trim() !== '' &&
         form.contactperson.trim() !== '' &&
         form.mobileno.trim() !== '' &&
+        // form.status.trim() !== '' &&
         form.storage_list
     );
 });
@@ -216,7 +225,6 @@ const submitForm  = async () => {
         return;
     }
     const formData = new FormData();
-    formData.append('username', form.uname);
     formData.append('companyname', form.companyname);
     formData.append('addressline1', form.addressline1);
     formData.append('addressline2', form.addressline2);
@@ -227,6 +235,7 @@ const submitForm  = async () => {
     formData.append('phoneno', form.phoneno);
     formData.append('contactperson', form.contactperson);
     formData.append('mobileno', form.mobileno);
+    formData.append('status', form.status);
     formData.append('storage_list', JSON.stringify(form.storage_list));
     console.log('FormData contents:');
     for (const [key, value] of formData.entries()) {

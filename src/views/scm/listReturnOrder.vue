@@ -87,7 +87,7 @@
                     </RouterLink>
                 </template>
             </Column>
-            <Column field="dealerName" header="Customer Name" dataType="date" style="min-width: 8rem">
+            <Column field="dealerName" header="Ship-To" dataType="date" style="min-width: 8rem">
                 <template #body="{ data }">
                     <span class="font-bold">{{ data?.dealerName || '-' }}</span>
                     <br>
@@ -109,7 +109,7 @@
                         {{ data.return_order_array?.length || 0 }}
                 </template>
             </Column>
-            <Column header="delivery_status" style="min-width: 8rem">
+            <Column header="Status" style="min-width: 8rem">
                 <template #body="{ data }">
                     <Tag :value="data.delivery_status" :severity="getStatusSeverity(data.delivery_status)" />
                 </template>

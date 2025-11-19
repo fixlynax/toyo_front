@@ -85,30 +85,6 @@
                                 {{ data.qty }}
                             </template>
                         </Column>
-
-                        <!-- 🟦 Unit Price Column -->
-                        <Column field="unitprice" header="Unit Price (RM)" class="text-right">
-                            <template #body="{ data }">
-                                {{ data.unitprice }}
-                            </template>
-
-                            <!-- ✅ Footer for label -->
-                            <template #footer>
-                                <div class="flex justify-start pr-2 font-bold text-gray-700">Subtotal</div>
-                            </template>
-                        </Column>
-
-                        <!-- 🟦 Total Amount Column -->
-                        <Column field="totalamt" header="Total Amount (RM)" class="text-right">
-                            <template #body="{ data }">
-                                {{ (Number(data.unitprice) * Number(data.qty)).toFixed(2) }}
-                            </template>
-
-                            <!-- ✅ Footer for total value -->
-                            <template #footer>
-                                <div class="flex justify-start pr-3 font-semibold text-blue-600">{{ subtotal.toFixed(2) }}</div>
-                            </template>
-                        </Column>
                     </DataTable>
                 </div>
             </div>
@@ -277,10 +253,6 @@ const formatItemNo = (itemNo) => {
     if (!itemNo) return '-';
     return itemNo.toString().padStart(2, '0');
 };
-const subtotal = computed(() => {
-    const arr = orderDelList.value.fullfill_order_array || [];
-    return arr.reduce((sum, item) => sum + (Number(item.unitprice) * Number(item.qty)), 0);
-});
 function formatDate(dateString) {
     if (!dateString) return '';
     const date = new Date(dateString);
@@ -397,8 +369,9 @@ const saveSchedule = async () => {
     } catch (err) {
     console.error(err);
     toast.add({ severity: 'error', summary: 'Error', detail: 'API error', life: 3000 });
+    }finally{
+        openDialog.value = false;
     }
-
 };
 
 // Save function
@@ -424,6 +397,8 @@ const saveDelivered = async () => {
     } catch (err) {
     console.error(err);
     toast.add({ severity: 'error', summary: 'Error', detail: 'API error', life: 3000 });
+    }finally{
+        openDialog2.value = false;
     }
 
 };

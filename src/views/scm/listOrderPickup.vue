@@ -16,7 +16,7 @@
                 :loading="loading"
                 :filters="filters"
                 filterDisplay="menu"
-                :globalFilterFields="['order_no', 'custAccountNo', 'companyName1', 'deliveryType', 'orderstatus']"
+                :globalFilterFields="['do_no', 'eten_user.custAccountNo', 'eten_user.companyName1', 'eten_user.companyName2', 'eten_user.companyName3', 'eten_user.companyName4', 'eten_user.storageLocation', 'deliveryType', 'orderstatus']"
             >
                 <template #header>
                     <div class="flex items-center justify-between gap-4 w-full flex-wrap">
@@ -28,9 +28,8 @@
                                 <InputText v-model="filters['global'].value" placeholder="Quick Search" class="w-full" />
                             </IconField>
 
-                            <div class="relative">
-                                <Button type="button" icon="pi pi-cog" class="p-button" @click="showFilterMenu = !showFilterMenu" />
-                            </div>
+                            <Button type="button" icon="pi pi-cog" @click="sortMenu.toggle($event)" />
+                            <Menu ref="sortMenu" :model="sortItems" :popup="true" />
                         </div>
 
                     </div>
@@ -45,26 +44,25 @@
                     </template>
                 </Column>
 
-                <Column field="order_no" header="Order No" style="min-width: 8rem">
+                <Column field="do_no" header="SAP DO No" style="min-width: 8rem">
                     <template #body="{ data }">
                         <RouterLink :to="`/scm/detailOrderPickup/${data.id}`" class="hover:underline font-bold text-primary-400">
-                            {{ data.order_no }}
+                            {{ data.do_no ? data.do_no : '-'}}
                         </RouterLink>
                     </template>
                 </Column>
-
-                <Column field="custAccountNo" header="Customer Acc No." style="min-width: 8rem">
-                    <template #body="{ data }">
-                        {{ data.eten_user.custAccountNo }}
-                    </template>
-                </Column>
-
                 <Column field="companyName1" header="Customer Name" style="min-width: 12rem">
                     <template #body="{ data }">
-                    {{` ${data.eten_user.companyName1} ${data.eten_user.companyName2} ${data.eten_user.companyName3} ${data.eten_user.companyName4} ` }}
+                    <span class="font-bold">{{` ${data.eten_user.companyName1} ${data.eten_user.companyName2} ${data.eten_user.companyName3} ${data.eten_user.companyName4} ` }}</span>
+                    <br>
+                     {{ data.eten_user.custAccountNo }}
                     </template>
                 </Column>
-
+                <Column field="storageLocation" header="Storage Location" style="min-width: 10rem">
+                    <template #body="{ data }">
+                        {{  data.eten_user.storageLocation ? data.eten_user.storageLocation : '-'  }}
+                    </template>
+                </Column>
                 <Column field="" header="Collector" style="min-width: 12rem">
                     <template #body="{ data }">
                         <div v-if="data.driverInformation">
@@ -83,7 +81,6 @@
                         <div v-else>Not Assigned</div>
                     </template>
                 </Column>
-
                 <Column field="deliveryType" header="Pickup Type" style="min-width: 10rem">
                     <template #body="{ data }">
                         {{ data.deliveryType }}
@@ -137,10 +134,47 @@ const filterStatus = ref(null);
 const orderDelList = ref([]);
 const filteredList  = ref([]);
 const activeTabIndex = ref(0);
+const sortMenu = ref();
 const filters = ref({
     global: { value: null, matchMode: FilterMatchMode.CONTAINS }
 });
+const sortBy = (field, order) => {
+  filteredList.value = [...filteredList.value].sort((a, b) => {
+    // Helper to get nested value
+    const getField = (obj) => {
+      return field.split('.').reduce((acc, key) => (acc ? acc[key] : ''), obj) ?? '';
+    };
 
+    const aVal = getField(a).toString().toLowerCase();
+    const bVal = getField(b).toString().toLowerCase();
+
+    if (aVal < bVal) return order === 'asc' ? -1 : 1;
+    if (aVal > bVal) return order === 'asc' ? 1 : -1;
+    return 0;
+  });
+};
+const sortItems = ref([
+    {
+        label: 'Sort by SAP DO No (A-Z)',
+        icon: 'pi pi-sort-alpha-down',
+        command: () => sortBy('do_no', 'asc')
+    },
+    {
+        label: 'Sort by SAP DO No (Z-A)',
+        icon: 'pi pi-sort-alpha-up',
+        command: () => sortBy('do_no', 'desc')
+    },
+    {
+        label: 'Sort by Cust Acc No (A-Z)',
+        icon: 'pi pi-tag',
+        command: () => sortBy('eten_user.custAccountNo', 'asc')
+    },
+    {
+        label: 'Sort by Company Name',
+        icon: 'pi pi-globe',
+        command: () => sortBy('eten_user.companyName1', 'asc')
+    },
+]);
 const showPickupColumn = computed(() => {
     return filteredList.value.some(item => !item.driverInformation?.pickup_datetime);
 });
