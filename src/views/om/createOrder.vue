@@ -166,7 +166,7 @@
                         <ProgressBar :value="progressValue" class="mt-1 h-3 rounded-full" showValue="false" />
                         <div class="flex justify-between text-xs text-gray-500 mt-1">
                             <span>{{ progressValue }}% filled</span>
-                            <span>Capacity: {{ containerCapacity }} units (Min: {{ minContainerCapacity }} | Max: {{ maxContainerCapacity }})</span>
+                            <span>Volume: {{ containerCapacity }} units (Min: {{ minContainerCapacity }} | Max: {{ maxContainerCapacity }})</span>
                         </div>
                     </div>
 
@@ -177,11 +177,11 @@
                         </div>
                         <div class="bg-white p-2 rounded border">
                             <div class="text-xs text-gray-500">Total Items</div>
-                            <div class="text-sm font-bold">{{ selectedTyres.length }}</div>
+                            <div class="text-sm font-bold">{{ selectedTyres.length + freeItems.length }}</div>
                         </div>
                         <div class="bg-white p-2 rounded border">
-                            <div class="text-xs text-gray-500">Total Quantity</div>
-                            <div class="text-sm font-bold">{{ cartQuantity }}</div>
+                            <div class="text-xs text-gray-500">Total Volume</div>
+                            <div class="text-sm font-bold">{{ containerCapacity }}</div>
                         </div>
                         <div class="bg-white p-2 rounded border">
                             <div class="text-xs text-gray-500">Free Items</div>
@@ -222,7 +222,7 @@
                 dataKey="id"
                 :rowHover="true"
                 :loading="loading"
-                :globalFilterFields="['materialid', 'material', 'pattern', 'size', 'sectionwidth', 'origin']"
+                :globalFilterFields="['materialid', 'material', 'pattern', 'pattern_name', 'size', 'sectionwidth', 'origin']"
             >
                 <template #empty>
                     <div class="text-center p-4">
@@ -239,14 +239,21 @@
                 </template>
 
                 <Column field="materialid" header="Material ID" style="min-width: 6rem" :sortable="true" />
-                <Column field="material" header="Material Description" style="min-width: 12rem" :sortable="true">
+
+                <Column field="material" header="Material Description" style="min-width: 14rem" :sortable="true">
                     <template #body="{ data }">
                         <div class="flex flex-col">
                             <div class="font-semibold">{{ data.material }}</div>
-                            <div class="text-xs text-gray-500">{{ data.pattern }} | {{ data.origin }}</div>
+                            <div class="text-xs text-gray-500">
+                                {{ data.pattern }}
+                                <span v-if="data.pattern_name">| {{ data.pattern_name }}</span>
+                                | {{ data.origin }}
+                                <span v-if="data.DOM">| DOM: {{ data.DOM }}</span>
+                            </div>
                         </div>
                     </template>
                 </Column>
+
                 <Column field="price" header="Price (RM)" style="min-width: 8rem" :sortable="true">
                     <template #body="{ data }">
                         <div class="font-bold text-blue-700">
@@ -254,17 +261,21 @@
                         </div>
                     </template>
                 </Column>
-                <Column field="stockBalance" header="Stock" style="min-width: 6rem" :sortable="true">
+
+                <Column field="stockBalance" header="Stock" style="min-width: 8rem" :sortable="true">
                     <template #body="{ data }">
-                        <span
-                            :class="{
-                                'text-green-600 font-bold': data.stockBalance > 10,
-                                'text-orange-600 font-semibold': data.stockBalance > 0 && data.stockBalance <= 10,
-                                'text-red-600': data.stockBalance === 0
-                            }"
-                        >
-                            {{ data.stockBalance || 0 }}
-                        </span>
+                        <div class="flex items-center gap-2">
+                            <span
+                                :class="{
+                                    'text-green-600 font-bold': data.stockBalance > 10,
+                                    'text-orange-600 font-semibold': data.stockBalance > 0 && data.stockBalance <= 10,
+                                    'text-red-600': data.stockBalance === 0
+                                }"
+                            >
+                                {{ data.stockBalance || 0 }}
+                            </span>
+                            <div class="w-3 h-3 rounded-full" :style="{ backgroundColor: data.color_code }" :title="data.stockLevel"></div>
+                        </div>
                     </template>
                 </Column>
 
@@ -275,7 +286,7 @@
                             icon="pi pi-shopping-cart"
                             class="p-button-primary p-button-sm"
                             @click="addToCart(data)"
-                            :disabled="isInCart(data) || data.stockBalance === 0 || (selectedOrderType === 'DIRECTSHIP' && cartQuantity >= maxContainerCapacity)"
+                            :disabled="isInCart(data) || data.stockBalance === 0 || (selectedOrderType === 'DIRECTSHIP' && containerCapacity >= maxContainerCapacity)"
                         />
                     </template>
                 </Column>
@@ -296,13 +307,18 @@
                         <Column header="Product" style="min-width: 14rem">
                             <template #body="{ data }">
                                 <div class="font-semibold text-gray-800">{{ data.material }}</div>
-                                <div class="text-xs text-gray-500">{{ data.pattern }} | Stock: {{ data.stockBalance }}</div>
+                                <div class="text-xs text-gray-500">
+                                    {{ data.pattern }}
+                                    <span v-if="data.pattern_name">| {{ data.pattern_name }}</span>
+                                    | Stock: {{ data.stockBalance }}
+                                    <span v-if="data.volume">| Vol: {{ data.volume }}</span>
+                                </div>
                             </template>
                         </Column>
 
                         <Column header="Price" field="price" style="min-width: 7rem; text-align: center">
                             <template #body="{ data }">
-                                <div class="font-medium">RM {{ data.price }}</div>
+                                <div class="font-medium">RM {{ data.price.toFixed(2) }}</div>
                             </template>
                         </Column>
 
@@ -384,6 +400,11 @@
                             <div class="text-sm text-gray-500">Total Amount</div>
                             <div class="text-lg font-bold text-blue-600">RM {{ cartTotal.toFixed(2) }}</div>
                         </div>
+                    </div>
+                    <div v-if="selectedOrderType === 'DIRECTSHIP'" class="mt-3 pt-3 border-t text-center">
+                        <div class="text-sm text-gray-500">Total Container Volume</div>
+                        <div class="text-lg font-bold text-purple-600">{{ containerCapacity }} units</div>
+                        <div class="text-xs text-gray-500 mt-1">(Min: {{ minContainerCapacity }} | Max: {{ maxContainerCapacity }})</div>
                     </div>
                 </div>
             </div>
@@ -526,6 +547,10 @@
                                     <span class="text-gray-600">Container Size:</span>
                                     <span class="font-semibold">{{ selectedContainerSize }}</span>
                                 </div>
+                                <div v-if="selectedOrderType === 'DIRECTSHIP'" class="flex justify-between">
+                                    <span class="text-gray-600">Container Volume:</span>
+                                    <span class="font-semibold">{{ containerCapacity }} units</span>
+                                </div>
                             </div>
                         </div>
 
@@ -537,7 +562,7 @@
                                 <div v-for="item in selectedTyres" :key="item.id" class="flex justify-between items-center">
                                     <div class="flex-1">
                                         <div class="font-medium text-sm">{{ item.material }}</div>
-                                        <div class="text-xs text-gray-500">Qty: {{ item.quantity }} × RM {{ item.price }}</div>
+                                        <div class="text-xs text-gray-500">Qty: {{ item.quantity }} × RM {{ item.price.toFixed(2) }}</div>
                                     </div>
                                     <div class="font-semibold">RM {{ (item.price * item.quantity).toFixed(2) }}</div>
                                 </div>
@@ -775,12 +800,34 @@ const freeItemsCount = computed(() => freeItems.value.reduce((sum, item) => sum 
 
 const freeItemsQuantity = computed(() => freeItems.value.reduce((sum, item) => sum + (parseInt(item.qty) || 0), 0));
 
-const minContainerCapacity = computed(() => (selectedContainerSize.value === '20FT' ? 500 : 1000)); // Example values
-const maxContainerCapacity = computed(() => (selectedContainerSize.value === '20FT' ? 1000 : 2000)); // Example values
+const containerCapacity = computed(() => {
+    if (selectedOrderType.value !== 'DIRECTSHIP') return 0;
+
+    let totalVolume = 0;
+
+    // Calculate volume for regular items
+    selectedTyres.value.forEach((item) => {
+        totalVolume += (item.quantity || 1) * (item.volume || 0);
+    });
+
+    // Calculate volume for free items
+    freeItems.value.forEach((item) => {
+        const freeItem = tyres.value.find((t) => t.materialid === item.materialid);
+        if (freeItem) {
+            totalVolume += (item.qty || 0) * (freeItem.volume || 0);
+        }
+    });
+
+    return Math.round(totalVolume);
+});
+
+const minContainerCapacity = computed(() => (selectedContainerSize.value === '20FT' ? 1 : 500));
+
+const maxContainerCapacity = computed(() => (selectedContainerSize.value === '20FT' ? 1 : 1000));
 
 const progressValue = computed(() => {
-    if (!selectedContainerSize.value || cartQuantity.value === 0) return 0;
-    const progress = Math.min((cartQuantity.value / maxContainerCapacity.value) * 100, 100);
+    if (!selectedContainerSize.value || containerCapacity.value === 0) return 0;
+    const progress = Math.min((containerCapacity.value / maxContainerCapacity.value) * 100, 100);
     return Math.round(progress);
 });
 
@@ -795,7 +842,17 @@ const canProceedToStep2 = computed(() => {
 });
 
 const canProceedToStep3 = computed(() => {
-    return selectedTyres.value.length > 0 && !selectedTyres.value.some((item) => item.quantity > item.stockBalance);
+    const hasItems = selectedTyres.value.length > 0;
+    const stockValid = !selectedTyres.value.some((item) => item.quantity > item.stockBalance);
+    const priceValid = !selectedTyres.value.some((item) => !item.price || item.price <= 0);
+
+    // For DIRECTSHIP, also check container capacity
+    let containerValid = true;
+    if (selectedOrderType.value === 'DIRECTSHIP') {
+        containerValid = containerCapacity.value >= minContainerCapacity.value && containerCapacity.value <= maxContainerCapacity.value;
+    }
+
+    return hasItems && stockValid && priceValid && containerValid;
 });
 
 const canPlaceOrder = computed(() => {
@@ -856,6 +913,7 @@ const filteredTyres = computed(() => {
                 (t.materialid && t.materialid.toLowerCase().includes(searchTerm)) ||
                 (t.material && t.material.toLowerCase().includes(searchTerm)) ||
                 (t.pattern && t.pattern.toLowerCase().includes(searchTerm)) ||
+                (t.pattern_name && t.pattern_name.toLowerCase().includes(searchTerm)) ||
                 (t.size && t.size.toLowerCase().includes(searchTerm)) ||
                 (t.sectionwidth && t.sectionwidth.toString().toLowerCase().includes(searchTerm)) ||
                 (t.origin && t.origin.toLowerCase().includes(searchTerm))
@@ -1019,30 +1077,45 @@ const fetchMaterials = async (custAccountNo) => {
         console.log('Materials API Response:', response.data);
 
         if (response.data.status === 1) {
-            const materials = response.data.admin_data || [];
+            const materials = response.data.admin_data || {};
             console.log('Raw materials data:', materials);
 
-            // Handle different response structures for NORMAL vs DIRECTSHIP
+            // Handle the new API response structure
             let materialList = [];
             if (selectedOrderType.value === 'DIRECTSHIP' && materials.directship) {
                 materialList = materials.directship;
             } else if (materials.normal) {
                 materialList = materials.normal;
-            } else if (Array.isArray(materials)) {
-                materialList = materials;
+            } else {
+                materialList = [];
             }
 
             if (materialList.length > 0) {
                 tyres.value = materialList.map((material, index) => {
                     const size = `${material.sectionwidth || ''}/${material.tireseries || ''} R${material.rimdiameter || ''}`;
                     const price = parseFloat(material.price) || 0;
-                    const stockBalance = material.stockLevel?.stockBalance || material.stockBalance || 0;
+
+                    // Use stock_quantity from API response
+                    const stockBalance = material.stock_quantity || 0;
+
+                    // Determine stock level display
+                    let stockLevel = 'No Stock';
+                    let colorCode = '#C62828'; // red
+
+                    if (stockBalance > 10) {
+                        stockLevel = 'High Stock';
+                        colorCode = '#2E7D32'; // green
+                    } else if (stockBalance > 0 && stockBalance <= 10) {
+                        stockLevel = 'Low Stock';
+                        colorCode = '#EF6C00'; // orange
+                    }
 
                     return {
                         id: material.materialid || `material-${index}`,
                         materialid: material.materialid,
-                        material: material.material || material.pattern || 'N/A',
+                        material: material.material || 'N/A',
                         pattern: material.pattern || 'N/A',
+                        pattern_name: material.pattern_name || null,
                         size: size,
                         sectionwidth: material.sectionwidth,
                         tireseries: material.tireseries,
@@ -1051,24 +1124,51 @@ const fetchMaterials = async (custAccountNo) => {
                         origin: material.origin || 'Unknown',
                         price: price,
                         stockBalance: stockBalance,
+                        stockLevel: stockLevel,
+                        color_code: colorCode,
+                        volume: parseFloat(material.volume) || 0,
+                        materialtype: material.materialtype || 'ZFP2',
+                        storageLocation: material.storageLocation,
+                        DOM: material.DOM,
                         quantity: 1,
-                        itemcategory: material.itemcategory || 'ZT02',
-                        plant: 'TSM'
+                        itemcategory: 'ZT02', // Default for regular items
+                        plant: 'TSM',
+                        salesprogramid: null
                     };
                 });
 
-                toast.add({ severity: 'success', summary: 'Success', detail: `Loaded ${tyres.value.length} products`, life: 3000 });
+                toast.add({
+                    severity: 'success',
+                    summary: 'Success',
+                    detail: `Loaded ${tyres.value.length} products`,
+                    life: 3000
+                });
             } else {
                 tyres.value = [];
-                toast.add({ severity: 'warn', summary: 'Warning', detail: 'No products available for this customer', life: 3000 });
+                toast.add({
+                    severity: 'warn',
+                    summary: 'Warning',
+                    detail: 'No products available for this customer',
+                    life: 3000
+                });
             }
         } else {
             tyres.value = [];
-            toast.add({ severity: 'warn', summary: 'Warning', detail: 'No products available for this customer', life: 3000 });
+            toast.add({
+                severity: 'warn',
+                summary: 'Warning',
+                detail: 'No products available for this customer',
+                life: 3000
+            });
         }
     } catch (error) {
         console.error('Error fetching materials:', error);
-        toast.add({ severity: 'error', summary: 'Error', detail: 'Failed to load products', life: 3000 });
+        toast.add({
+            severity: 'error',
+            summary: 'Error',
+            detail: 'Failed to load products',
+            life: 3000
+        });
         tyres.value = [];
     } finally {
         loading.value = false;
@@ -1081,7 +1181,10 @@ const checkSalesProgram = async () => {
     try {
         const orderArray = selectedTyres.value.map((item) => ({
             materialid: item.materialid,
-            qty: item.quantity
+            qty: item.quantity,
+            pattern: item.pattern,
+            pattern_name: item.pattern_name,
+            rimdiameter: item.rimdiameter
         }));
 
         const response = await api.post('order/check-sales-program', {
@@ -1090,7 +1193,11 @@ const checkSalesProgram = async () => {
         });
 
         if (response.data.status === 1 && response.data.admin_data) {
-            freeItems.value = response.data.admin_data;
+            freeItems.value = response.data.admin_data.map((freeItem) => ({
+                ...freeItem,
+                itemcategory: freeItem.itemcategory || 'ZPRO'
+            }));
+
             if (freeItems.value.length > 0) {
                 toast.add({
                     severity: 'success',
@@ -1280,6 +1387,24 @@ const confirmOrderAPI = async (cartRefNo, orderArray) => {
     } catch (error) {
         console.error('Error confirming order:', error);
         throw new Error('Failed to confirm order');
+    }
+};
+
+// Confirm back order API
+const confirmBackOrderAPI = async (cartRefNo, orderArray, backorderArray) => {
+    try {
+        console.log('Confirming back order with arrays:', { orderArray, backorderArray });
+
+        const response = await api.post(`order/confirm-backorder-admin/${cartRefNo}`, {
+            order_array: JSON.stringify(orderArray),
+            backorder_array: JSON.stringify(backorderArray),
+            order_remark: `Order with back order created via admin interface - ${selectedOrderType.value}`
+        });
+
+        return response.data;
+    } catch (error) {
+        console.error('Error confirming back order:', error);
+        throw new Error('Failed to confirm back order');
     }
 };
 
@@ -1681,30 +1806,63 @@ const clearFilters = () => {
 };
 
 const addToCart = (tyre) => {
+    // Check stock availability
     if (tyre.stockBalance === 0) {
-        toast.add({ severity: 'warn', summary: 'Out of Stock', detail: 'This product is currently out of stock', life: 3000 });
+        toast.add({
+            severity: 'warn',
+            summary: 'Out of Stock',
+            detail: 'This product is currently out of stock',
+            life: 3000
+        });
         return;
     }
 
-    if (selectedOrderType.value === 'DIRECTSHIP' && cartQuantity.value >= maxContainerCapacity.value) {
-        toast.add({ severity: 'warn', summary: 'Container Full', detail: 'Container capacity reached', life: 3000 });
-        return;
+    // Check container capacity for DIRECTSHIP
+    if (selectedOrderType.value === 'DIRECTSHIP') {
+        const itemVolume = tyre.volume || 0;
+        const currentVolume = containerCapacity.value;
+        const maxVolume = maxContainerCapacity.value;
+
+        if (currentVolume + itemVolume > maxVolume) {
+            toast.add({
+                severity: 'warn',
+                summary: 'Container Full',
+                detail: 'Container capacity reached',
+                life: 3000
+            });
+            return;
+        }
     }
 
     const existing = selectedTyres.value.find((t) => t.id === tyre.id);
     if (existing) {
         if (existing.quantity < getMaxQuantity(tyre)) {
             existing.quantity += 1;
-            toast.add({ severity: 'success', summary: 'Success', detail: 'Quantity updated in cart', life: 2000 });
+            toast.add({
+                severity: 'success',
+                summary: 'Success',
+                detail: 'Quantity updated in cart',
+                life: 2000
+            });
         } else {
-            toast.add({ severity: 'warn', summary: 'Stock Limit', detail: 'Cannot exceed available stock', life: 3000 });
+            toast.add({
+                severity: 'warn',
+                summary: 'Stock Limit',
+                detail: 'Cannot exceed available stock',
+                life: 3000
+            });
         }
     } else {
         selectedTyres.value.push({
             ...tyre,
             quantity: 1
         });
-        toast.add({ severity: 'success', summary: 'Success', detail: 'Product added to cart', life: 2000 });
+        toast.add({
+            severity: 'success',
+            summary: 'Success',
+            detail: 'Product added to cart',
+            life: 2000
+        });
     }
 
     // Check for sales program after adding to cart
