@@ -3,10 +3,8 @@
         <div class="text-2xl font-bold text-gray-800 border-b pb-2">📦 List Back Order</div>
         <TabMenu :model="statusTabs" v-model:activeIndex="activeTabIndex" class="mb-6" />
 
-        <!-- 🟢 Only show LoadingPage during initial load, hide DataTable completely -->
         <LoadingPage v-if="loading" :sub-message="'Fetching your Back Order list'" />
 
-        <!-- 🟢 Only show DataTable when NOT loading -->
         <DataTable
             v-if="!loading"
             :value="filteredList"
@@ -39,12 +37,13 @@
             </template>
 
             <template #empty> No back orders found. </template>
-            <!-- Removed #loading template since we're using external LoadingPage -->
+
             <Column field="createdDate" header="Created Date" style="min-width: 8rem">
                 <template #body="{ data }">
                     {{ formatDate(data.created) }}
                 </template>
             </Column>
+
             <Column field="orderNo" header="Order No." style="min-width: 15rem">
                 <template #body="{ data }">
                     <RouterLink :to="`/om/detailBackOrder/${data.orderNo}`" class="hover:underline font-bold text-primary-400">
@@ -111,12 +110,12 @@ const statusTabs = [
     { label: 'Cancelled', status: 9, type: 'CANCELLED' },
     { label: 'Expired', status: '', type: 'EXPIRED' }
 ];
+
 const fetchBackOrders = async () => {
     try {
         const formData = new FormData();
         const selectedType = statusTabs[activeTabIndex.value].type;
 
-        // Append all form fields
         formData.append('type', selectedType);
         loading.value = true;
         const response = await api.post('order/list-back-order', formData);
@@ -139,19 +138,19 @@ const fetchBackOrders = async () => {
                 status: order.status
             }));
 
-            filterByTab(); // Initial filter
+            filterByTab();
         } else {
             listData.value = [];
             filteredList.value = [];
         }
     } catch (error) {
-        console.error('Error fetching back order list:', error);
         listData.value = [];
         filteredList.value = [];
     } finally {
         loading.value = false;
     }
-}
+};
+
 onMounted(async () => {
     fetchBackOrders();
 });
@@ -166,8 +165,31 @@ const filterByTab = () => {
         filteredList.value = listData.value;
         return;
     }
-    filteredList.value = listData.value.filter((item) => item.orderStatus == selected.status);
+
+    // 🔥 Expired tab logic
+    if (selected.type === 'EXPIRED') {
+        const now = new Date();
+
+        filteredList.value = listData.value.filter((item) => {
+            if (!item.expiry) return false;
+
+            const isExpired = new Date(item.expiry) < now;
+            const notCompleted = item.orderStatus != 1;
+            const notCancelled = item.orderStatus != 9;
+
+            return isExpired && notCompleted && notCancelled;
+        });
+
+        return;
+    }
+
+    // Normal tabs
+    filteredList.value = listData.value.filter(
+        (item) => item.orderStatus == selected.status
+    );
 };
+
+
 
 const calculateProgress = (order) => {
     try {
@@ -177,8 +199,12 @@ const calculateProgress = (order) => {
         }
 
         if (order.backorder_array && order.remaining_array) {
-            const backorderItems = Array.isArray(order.backorder_array) ? order.backorder_array : JSON.parse(order.backorder_array);
-            const remainingItems = Array.isArray(order.remaining_array) ? order.remaining_array : JSON.parse(order.remaining_array);
+            const backorderItems = Array.isArray(order.backorder_array)
+                ? order.backorder_array
+                : JSON.parse(order.backorder_array);
+            const remainingItems = Array.isArray(order.remaining_array)
+                ? order.remaining_array
+                : JSON.parse(order.remaining_array);
 
             if (Array.isArray(backorderItems) && Array.isArray(remainingItems)) {
                 const totalOrdered = backorderItems.reduce((sum, item) => sum + parseInt(item.qty || 0), 0);
@@ -194,7 +220,6 @@ const calculateProgress = (order) => {
 
         return 0;
     } catch (error) {
-        console.error('Error calculating progress:', error);
         return 0;
     }
 };
@@ -211,7 +236,7 @@ const formatDate = (dateString) => {
     try {
         const date = new Date(dateString);
         return date.toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' });
-    } catch (error) {
+    } catch {
         return dateString;
     }
 };
@@ -243,47 +268,33 @@ const getStatusSeverity = (status) => {
 :deep(.p-progressbar) {
     height: 0.8rem;
     border-radius: 9999px;
-    background-color: #f3f4f6; // Neutral background
+    background-color: #f3f4f6;
     box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.08);
     overflow: hidden;
 
     .p-progressbar-value {
         border-radius: 9999px;
-        transition:
-            width 0.4s ease,
-            background 0.4s ease;
+        transition: width 0.4s ease, background 0.4s ease;
     }
 
-    // 🔴 Low: 0–40%
-    &.progress-low {
-        .p-progressbar-value {
-            background: linear-gradient(90deg, #f87171);
-            box-shadow: 0 0 6px rgba(239, 68, 68, 0.3);
-        }
+    &.progress-low .p-progressbar-value {
+        background: linear-gradient(90deg, #f87171);
+        box-shadow: 0 0 6px rgba(239, 68, 68, 0.3);
     }
 
-    // 🟠 Fair: 41–60%
-    &.progress-fair {
-        .p-progressbar-value {
-            background: linear-gradient(90deg, #fb923c);
-            box-shadow: 0 0 6px rgba(251, 146, 60, 0.3);
-        }
+    &.progress-fair .p-progressbar-value {
+        background: linear-gradient(90deg, #fb923c);
+        box-shadow: 0 0 6px rgba(251, 146, 60, 0.3);
     }
 
-    // 🟡 Good: 61–99%
-    &.progress-good {
-        .p-progressbar-value {
-            background: linear-gradient(90deg, #fde047);
-            box-shadow: 0 0 6px rgba(250, 204, 21, 0.3);
-        }
+    &.progress-good .p-progressbar-value {
+        background: linear-gradient(90deg, #fde047);
+        box-shadow: 0 0 6px rgba(250, 204, 21, 0.3);
     }
 
-    // 🟢 Excellent: 100%
-    &.progress-excellent {
-        .p-progressbar-value {
-            background: linear-gradient(90deg, #34d399);
-            box-shadow: 0 0 6px rgba(52, 211, 153, 0.4);
-        }
+    &.progress-excellent .p-progressbar-value {
+        background: linear-gradient(90deg, #34d399);
+        box-shadow: 0 0 6px rgba(52, 211, 153, 0.4);
     }
 }
 
@@ -310,22 +321,20 @@ const getStatusSeverity = (status) => {
         border-bottom-right-radius: 12px;
     }
 
-    .p-datatable-thead > tr > th {
-        &:first-child {
-            border-top-left-radius: 12px;
-        }
-        &:last-child {
-            border-top-right-radius: 12px;
-        }
+    .p-datatable-thead > tr > th:first-child {
+        border-top-left-radius: 12px;
     }
 
-    .p-datatable-tbody > tr:last-child > td {
-        &:first-child {
-            border-bottom-left-radius: 0;
-        }
-        &:last-child {
-            border-bottom-right-radius: 0;
-        }
+    .p-datatable-thead > tr > th:last-child {
+        border-top-right-radius: 12px;
+    }
+
+    .p-datatable-tbody > tr:last-child > td:first-child {
+        border-bottom-left-radius: 0;
+    }
+
+    .p-datatable-tbody > tr:last-child > td:last-child {
+        border-bottom-right-radius: 0;
     }
 
     .p-datatable-tbody > tr.p-datatable-emptymessage > td {

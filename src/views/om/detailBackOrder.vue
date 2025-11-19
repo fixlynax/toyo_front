@@ -8,26 +8,26 @@
                         <RouterLink to="/om/listBackOrder">
                             <Button icon="pi pi-arrow-left font-bold" class="p-button-text p-button-secondary text-xl" size="big" v-tooltip="'Back'" />
                         </RouterLink>
-                        <div class="text-2xl font-bold text-gray-800">Back Order Detail</div>
+                        <div class="text-2xl font-bold text-gray-800">Customer Information</div>
                     </div>
 
-                    <div class="font-semibold text-xl border-b pb-2 mt-2">🏬 Customer Information</div>
                     <div class="grid grid-cols-2 gap-4">
                         <div>
-                            <span class="text-sm text-gray-500">Customer Account No</span>
-                            <p class="text-lg font-medium">{{ order.custaccountno }}</p>
+                            <span class="text-sm text-gray-500">Customer Name </span>
+                            <p class="text-lg font-medium">{{ customerInfo.dealerName || '-' }} ({{ order.custaccountno }})</p>
+                        </div>
+                        <div class="w-full">
+                            <span class="text-sm text-gray-700">Location</span>
+                            <p class="text-lg font-medium">{{ getFullAddress(customerInfo) || '-' }}</p>
                         </div>
                         <div>
                             <span class="text-sm text-gray-500">Channel</span>
                             <p class="text-lg font-medium">{{ order.channel }}</p>
                         </div>
+
                         <div>
                             <span class="text-sm text-gray-500">Distribution Channel</span>
                             <p class="text-lg font-medium">{{ order.distributionchannel }}</p>
-                        </div>
-                        <div>
-                            <span class="text-sm text-gray-500">Division</span>
-                            <p class="text-lg font-medium">{{ order.division }}</p>
                         </div>
                         <div>
                             <span class="text-sm text-gray-500">Sales Org</span>
@@ -36,6 +36,14 @@
                         <div>
                             <span class="text-sm text-gray-500">Price Group</span>
                             <p class="text-lg font-medium">{{ order.pricegroup }}</p>
+                        </div>
+                        <div class="w-full">
+                            <span class="text-sm text-gray-700">Email Address</span>
+                            <p class="text-lg font-medium">{{ customerInfo.email || '-' }}</p>
+                        </div>
+                        <div class="w-full">
+                            <span class="text-sm text-gray-700">Contact Number</span>
+                            <p class="text-lg font-medium">{{ customerInfo.phoneNumber || customerInfo.mobileNumber || '-' }}</p>
                         </div>
                     </div>
                 </div>
@@ -57,16 +65,17 @@
                         </div>
                     </div>
 
-                    <DataTable :value="backOrderItems" dataKey="id" responsiveLayout="scroll" class="text-sm rounded-table mt-2" stripedRows>
+                    <DataTable :value="backOrderItems" dataKey="materialid" responsiveLayout="scroll" class="rounded-table mt-2" stripedRows>
                         <Column field="itemno" header="Item No" style="min-width: 6rem; text-align: center">
                             <template #body="{ data }">
-                                <span class="font-bold text-lg">{{ data.itemno }}</span>
+                                <span class="font-bold text-lg">{{ formatItemNo(data.itemno) }}</span>
                             </template>
                         </Column>
 
-                        <Column field="materialid" header="Material ID" style="min-width: 8rem; text-align: left">
+                        <Column header="Material">
                             <template #body="{ data }">
-                                <span class="font-medium text-lg">{{ data.materialid }}</span>
+                                {{ data.materialid }} <br />
+                                {{ data.materialdescription }}
                             </template>
                         </Column>
 
@@ -121,7 +130,7 @@
                         <DataTable :value="getFulfillmentItems(fulfillOrder)" class="text-sm rounded-table" stripedRows>
                             <Column field="itemno" header="Item No" style="min-width: 6rem">
                                 <template #body="{ data }">
-                                    <span class="text-gray-600">{{ data.itemno }}</span>
+                                    <span class="text-gray-600">{{ formatItemNo(data.itemno) }}</span>
                                 </template>
                             </Column>
                             <Column field="materialid" header="Material ID" style="min-width: 8rem">
@@ -141,7 +150,7 @@
                             </Column>
                             <Column field="unitprice" header="Unit Price" style="min-width: 6rem">
                                 <template #body="{ data }">
-                                    <span class="font-semibold text-green-600">RM {{ data.unitprice }}</span>
+                                    <span class="font-semibold text-green-600">RM {{ parseFloat(data.unitprice || 0).toFixed(2) }}</span>
                                 </template>
 
                                 <!-- ✅ Footer for label -->
@@ -151,11 +160,11 @@
                             </Column>
                             <Column field="totalamt" header="Total" style="min-width: 6rem">
                                 <template #body="{ data }">
-                                    <span class="font-bold text-green-700">RM {{ data.totalamt }}</span>
+                                    <span class="font-bold text-green-700">RM {{ parseFloat(data.totalamt || 0).toFixed(2) }}</span>
                                 </template>
 
                                 <template #footer>
-                                    <div class="flex justify-start pr-2 font-bold text-gray-700">RM {{ fulfillOrder.total }}</div>
+                                    <div class="flex justify-start pr-2 font-bold text-gray-700">RM {{ parseFloat(fulfillOrder.total || 0).toFixed(2) }}</div>
                                 </template>
                             </Column>
                         </DataTable>
@@ -164,7 +173,7 @@
                             <div class="text-sm text-gray-600">
                                 <div class="flex gap-8">
                                     <div class="text-sm text-gray-500">Created: {{ formatDate(fulfillOrder.created) }}</div>
-                                    <!-- <div>Delivery: {{ formatDate(fulfillOrder.deliveryDate) }}</div> -->
+                                    <div v-if="fulfillOrder.deliveryDate">Delivery: {{ formatDate(fulfillOrder.deliveryDate) }}</div>
                                 </div>
                             </div>
 
@@ -195,7 +204,7 @@
                                     <td class="px-4 py-2 text-right">{{ order.sapordertype || '-' }}</td>
                                 </tr>
                                 <tr class="border-b">
-                                    <td class="px-4 py-2 font-medium">Storaage Location</td>
+                                    <td class="px-4 py-2 font-medium">Storage Location</td>
                                     <td class="px-4 py-2 text-right">{{ order.storagelocation || '-' }}</td>
                                 </tr>
                                 <tr class="border-b">
@@ -299,6 +308,7 @@ const toast = useToast();
 const confirm = useConfirm();
 
 const order = ref({});
+const customerInfo = ref({});
 const loading = ref(false);
 const processing = ref(false);
 const cancelling = ref(false);
@@ -312,6 +322,40 @@ const fetchBackOrderDetail = async () => {
 
         if (response.data.status === 1 && response.data.admin_data.length > 0) {
             order.value = response.data.admin_data[0];
+
+            // Extract customer info from dealerData in the first fulfillment order
+            if (order.value.list_order && order.value.list_order.length > 0) {
+                const firstOrder = order.value.list_order[0];
+                if (firstOrder.dealerData && firstOrder.dealerData.length > 0) {
+                    const dealer = firstOrder.dealerData[0];
+                    customerInfo.value = {
+                        dealerName: dealer.companyName1 || '-',
+                        contactPerson: dealer.companyName3 || '-',
+                        phoneNumber: dealer.phoneNumber || '-',
+                        mobileNumber: dealer.mobileNumber || '-',
+                        email: dealer.emailAddress || '-',
+                        // Address fields
+                        addressLine1: dealer.addressLine1,
+                        addressLine2: dealer.addressLine2,
+                        addressLine3: dealer.addressLine3,
+                        addressLine4: dealer.addressLine4,
+                        city: dealer.city,
+                        state: dealer.state,
+                        postcode: dealer.postcode,
+                        // Additional dealer info
+                        signboardBrand: dealer.signboardBrand,
+                        accountType: dealer.accountType,
+                        creditLimit: dealer.creditLimit
+                    };
+                }
+            }
+
+            // If no dealerData found, use basic info from order
+            if (!customerInfo.value.dealerName) {
+                customerInfo.value = {
+                    dealerName: order.value.customername || '-'
+                };
+            }
         } else {
             toast.add({ severity: 'error', summary: 'Error', detail: 'Back order not found', life: 3000 });
         }
@@ -354,17 +398,18 @@ const formatAddress = (shippingDetail) => {
     return addressParts.length > 0 ? addressParts.join(', ') : '-';
 };
 
-// Helper methods to get first SO/DO numbers from fulfillment orders
-const getFirstSoNo = () => {
-    if (!order.value.list_order || order.value.list_order.length === 0) return null;
-    const firstOrder = order.value.list_order[0];
-    return firstOrder.so_no;
+const getFullAddress = (customerInfo) => {
+    if (!customerInfo) return '-';
+
+    const addressParts = [customerInfo.addressLine1, customerInfo.addressLine2, customerInfo.addressLine3, customerInfo.addressLine4, customerInfo.city, customerInfo.state, customerInfo.postcode].filter((part) => part && part.trim() !== '');
+
+    return addressParts.join(', ') || '-';
 };
 
-const getFirstDoNo = () => {
-    if (!order.value.list_order || order.value.list_order.length === 0) return null;
-    const firstOrder = order.value.list_order[0];
-    return firstOrder.do_no;
+const formatItemNo = (itemNo) => {
+    if (!itemNo) return '-';
+    // Convert to string and pad with leading zeros to 6 digits
+    return itemNo.toString().padStart(6, '0');
 };
 
 const processBackOrder = async (status) => {
@@ -446,16 +491,6 @@ const fulfillmentPercentage = computed(() => {
     return order.value.fullfill_percentage || 0;
 });
 
-const fulfillmentStatus = computed(() => {
-    if (fulfillmentPercentage.value === 100) {
-        return { text: 'Completed', class: 'text-green-600' };
-    } else if (fulfillmentPercentage.value > 0) {
-        return { text: 'Partially Fulfilled', class: 'text-orange-500' };
-    } else {
-        return { text: 'Pending Fulfillment', class: 'text-red-600' };
-    }
-});
-
 const canProcessBackOrder = computed(() => {
     return order.value.orderstatus === 0 && fulfillmentPercentage.value < 100 && isNotExpired.value;
 });
@@ -531,26 +566,6 @@ const getRemainingClass = (data) => {
 
 const getFulfillmentItems = (fulfillOrder) => {
     return fulfillOrder.fullfill_order_array || [];
-};
-
-const getOrderStatusText = (status) => {
-    const statusMap = {
-        0: 'Processing',
-        1: 'Approved',
-        9: 'Rejected',
-        66: 'Processing in SAP'
-    };
-    return statusMap[status] || 'Unknown';
-};
-
-const getOrderStatusSeverity = (status) => {
-    const severityMap = {
-        0: 'warn',
-        1: 'success',
-        9: 'danger',
-        66: 'info'
-    };
-    return severityMap[status] || 'secondary';
 };
 
 const getBackOrderStatusText = (status) => {
