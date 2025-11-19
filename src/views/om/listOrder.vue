@@ -109,12 +109,13 @@ const formatDate = (dateString) => {
     <div class="card">
         <div class="text-2xl font-bold text-gray-800 border-b pb-2">List Order</div>
 
-        <LoadingPage v-if="loading" :message="'Loading Orders...'" :sub-message="'Fetching your order list'" />
-
-        <div v-else>
+        
+        <div>
             <TabMenu :model="statusTabs" v-model:activeIndex="activeTabIndex" class="mb-6" />
+            <LoadingPage v-if="loading" :message="'Loading Orders...'" :sub-message="'Fetching your order list'" />
 
             <DataTable
+            v-if="!loading"
                 :value="filteredOrders"
                 :paginator="true"
                 :rows="10"
