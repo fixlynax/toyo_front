@@ -3,8 +3,8 @@ import { createRouter, createWebHistory } from 'vue-router';
 import { tokenService } from '@/service/api';
 import { sassTrue } from 'sass';
 import { useMenuStore } from '@/store/menu'; 
-const BASE_PATH  = '/etenadmin/';
-
+const BASE_PATH  = '/';
+// const BASE_PATH  = '/etenadmin/';
 const router = createRouter({
     history: createWebHistory(BASE_PATH ),
     routes: [
