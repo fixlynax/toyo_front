@@ -15,12 +15,13 @@
                         </div>
                     </div>
                     <div class="grid grid-cols-2 gap-4">
-                        <div>
+                        <div class="pb-3">
+                            <p class="text-sm font-bold text-gray-700 mb-2">Pattern Image</p>
                             <img 
                             v-if="patterns && patterns.processedImageURL"
                             :src="getImagePath(patterns.processedImageURL)" 
                             alt="Pattern Image" 
-                            class="w-16 h-16 object-contain rounded-md shadow-sm border border-gray-200 cursor-pointer hover:scale-105 transition-transform" 
+                            class="rounded-lg shadow-md object-cover h-60" 
                             />
                             <div 
                             v-else 
@@ -32,12 +33,12 @@
 
                         <template v-if="patterns">
                             <div>
-                            <span class="text-sm font-bold text-gray-700">Pattern Code</span>
+                            <p class="text-sm font-bold text-gray-700 mb-2">Pattern Code</p>
                             <p class="text-lg font-medium">{{ patterns?.pattern_code || '0'  }}</p>
                             </div>
 
                             <div>
-                            <span class="text-sm font-bold text-gray-700">Pattern Name</span>
+                            <p class="text-sm font-bold text-gray-700 mb-2">Pattern Name</p>
                             <p class="text-lg font-medium">{{ patterns?.pattern_name || 'N/A' }}</p>
                             </div>
                         </template>
@@ -99,7 +100,7 @@
                             <img 
                                 :src="formHolder.imageURL || formHolder.image_url" 
                                 alt="Preview" 
-                                class="rounded-lg shadow-md object-cover w-full h-60" 
+                                class="rounded-lg shadow-md object-cover h-60" 
                             />
                             <Button 
                                 icon="pi pi-times" 
@@ -228,9 +229,11 @@ const savePatternEdit = async () => {
         formData.append('pattern_code', formHolder.value.pattern_code);
                 // Only append new image if user selected a file
         if (formHolder.value.image_url instanceof File) {
-            formData.append('image', formHolder.value.image_url); // <-- use formData, not payload
+            formData.append('image_url', formHolder.value.image_url); // <-- use formData, not payload
         }
-
+        for (let [key, value] of formData.entries()) {
+            console.log(key, value);
+        }
         const response = await api.postExtra(`patternUpdate/${id}`, formData, {
             headers: {
                 'Content-Type': 'multipart/form-data'
