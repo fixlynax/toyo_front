@@ -248,6 +248,34 @@
             </div>
         </div>
 
+        <!-- 📈 Target Sales -->
+        <div class="flex mt-8">
+            <div class="card flex flex-col gap-4 w-full">
+                <div class="font-semibold text-xl border-b pb-2">📈 Target Sales</div>
+
+                <div class="flex flex-col md:flex-row gap-4">
+                    <div class="w-full">
+                        <span class="text-sm text-gray-500">Quarter 1</span>
+                        <p class="text-lg font-medium">{{ formatCurrency(form.quarter1) }}</p>
+                    </div>
+                    <div class="w-full">
+                        <span class="text-sm text-gray-500">Quarter 2</span>
+                        <p class="text-lg font-medium">{{ formatCurrency(form.quarter2) }}</p>
+                    </div>
+                </div>
+                <div class="flex flex-col md:flex-row gap-4">
+                    <div class="w-full">
+                        <span class="text-sm text-gray-500">Quarter 3</span>
+                        <p class="text-lg font-medium">{{ formatCurrency(form.quarter3) }}</p>
+                    </div>
+                    <div class="w-full">
+                        <span class="text-sm text-gray-500">Quarter 4</span>
+                        <p class="text-lg font-medium">{{ formatCurrency(form.quarter4) }}</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
         <!-- 🚚 Shipping & Delivery -->
         <div class="flex mt-8">
             <div class="card flex flex-col gap-4 w-full">
@@ -363,7 +391,7 @@
                         </div>
                         <div>
                             <span class="text-sm text-gray-500">State</span>
-                        <p class="text-lg font-medium">{{ shipTo.state || '-' }}</p>
+                            <p class="text-lg font-medium">{{ shipTo.state || '-' }}</p>
                         </div>
                         <div>
                             <span class="text-sm text-gray-500">Country</span>
@@ -513,15 +541,9 @@ function prepareShipToArray(shipToAddresses) {
 }
 
 function validateForm(formData) {
-    const requiredFields = [
-        'custAccountNo',
-        'companyName1',
-        'firstname',
-        'email',
-        'phoneno'
-    ];
+    const requiredFields = ['custAccountNo', 'companyName1', 'firstname', 'email', 'phoneno'];
 
-    const missingFields = requiredFields.filter(field => !formData[field]);
+    const missingFields = requiredFields.filter((field) => !formData[field]);
 
     if (missingFields.length > 0) {
         return {
@@ -592,6 +614,12 @@ function mapFormToFormData(formData) {
     formDataObj.append('status', '1');
     formDataObj.append('startingSalesAmt', formData.startingSalesAmt || '0');
 
+    // Target Sales Quarter
+    formDataObj.append('targetQ1', formData.quarter1 || '0');
+    formDataObj.append('targetQ2', formData.quarter2 || '0');
+    formDataObj.append('targetQ3', formData.quarter3 || '0');
+    formDataObj.append('targetQ4', formData.quarter4 || '0');
+
     // Ship To array
     const shipToArray = prepareShipToArray(formData.shipToAddresses);
     formDataObj.append('s_array', JSON.stringify(shipToArray));
@@ -616,6 +644,12 @@ function loadFormData() {
             if (!form.value.custAccountNo && form.value.accountNo) {
                 form.value.custAccountNo = form.value.accountNo;
             }
+
+            // Ensure quarter fields exist (backward compatibility)
+            if (!form.value.quarter1) form.value.quarter1 = '';
+            if (!form.value.quarter2) form.value.quarter2 = '';
+            if (!form.value.quarter3) form.value.quarter3 = '';
+            if (!form.value.quarter4) form.value.quarter4 = '';
         } else {
             router.push('/om/createEten');
         }
@@ -662,10 +696,16 @@ function handleEdit() {
     router.push('/om/createEten');
 }
 
+// function formatCurrency(value) {
+//     if (!value || value === '0') return '-';
+//     const num = parseFloat(value);
+//     return isNaN(num) ? value : `RM ${num.toLocaleString('en-MY', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+// }
+
 // Handle submit
 async function handleSubmit() {
     isSubmitting.value = true;
-    
+
     try {
         // Ensure custAccountNo
         if (!form.value.custAccountNo && form.value.accountNo) {
@@ -697,7 +737,7 @@ async function handleSubmit() {
         const response = await api.postExtra('add_dealer', formData, {
             headers: { 'Content-Type': 'multipart/form-data' }
         });
-        
+
         console.log('API Response:', response.data);
 
         if (response.data.status === 1) {
@@ -708,12 +748,12 @@ async function handleSubmit() {
                 life: 5000
             });
             localStorage.removeItem('etenFormData');
-            
+
             // Navigate to list page
             router.push('/om/listEten');
         } else {
             let errorMsg = 'Duplicate entry or an error occurred.';
-            
+
             if (response.data.validation_errors) {
                 // Handle validation errors
                 const errors = Object.values(response.data.validation_errors).flat();
@@ -725,18 +765,18 @@ async function handleSubmit() {
             } else if (response.data.message) {
                 errorMsg = response.data.message;
             }
-            
-            toast.add({ 
-                severity: 'error', 
-                summary: 'Error', 
-                detail: errorMsg, 
-                life: 5000 
+
+            toast.add({
+                severity: 'error',
+                summary: 'Error',
+                detail: errorMsg,
+                life: 5000
             });
         }
     } catch (err) {
         console.error('Submission error:', err);
         let errorMsg = 'An unexpected error occurred.';
-        
+
         if (err.response?.data?.error) {
             errorMsg = err.response.data.error.message || err.response.data.error.description || errorMsg;
         } else if (err.response?.data?.message) {
@@ -744,12 +784,12 @@ async function handleSubmit() {
         } else if (err.message) {
             errorMsg = err.message;
         }
-        
-        toast.add({ 
-            severity: 'error', 
-            summary: 'Error', 
-            detail: errorMsg, 
-            life: 5000 
+
+        toast.add({
+            severity: 'error',
+            summary: 'Error',
+            detail: errorMsg,
+            life: 5000
         });
     } finally {
         isSubmitting.value = false;
