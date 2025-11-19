@@ -58,6 +58,12 @@ const confirmLogout = () => {
     });
 };
 
+const toggleSettingsMenu = (event) => {
+    // Prevent event propagation to avoid immediate closing
+    event?.stopPropagation();
+    showSettingsMenu.value = !showSettingsMenu.value;
+};
+
 const openChangePassword = () => {
     // Reset form
     passwordForm.value = {
@@ -111,10 +117,46 @@ const changePassword = async () => {
 };
 
 // Close settings menu when clicking outside
-const closeSettingsMenu = () => {
-    showSettingsMenu.value = false;
+const closeSettingsMenu = (event) => {
+    const settingsContainer = event.target.closest('.settings-container');
+    if (!settingsContainer) {
+        showSettingsMenu.value = false;
+    }
 };
 
+// Add click outside listener
+const setupClickOutsideListener = () => {
+    document.addEventListener('click', closeSettingsMenu);
+};
+
+// Remove click outside listener
+const removeClickOutsideListener = () => {
+    document.removeEventListener('click', closeSettingsMenu);
+};
+
+// Handle escape key to close menu
+const handleEscapeKey = (event) => {
+    if (event.key === 'Escape' && showSettingsMenu.value) {
+        showSettingsMenu.value = false;
+    }
+};
+
+// Set up event listeners
+onMounted(() => {
+
+    // Use setTimeout to avoid potential extension conflicts during initial load
+    setTimeout(() => {
+        setupClickOutsideListener();
+    }, 100);
+
+    document.addEventListener('keydown', handleEscapeKey);
+});
+
+// Clean up event listeners
+onUnmounted(() => {
+    removeClickOutsideListener();
+    document.removeEventListener('keydown', handleEscapeKey);
+});
 </script>
 
 <template>
@@ -138,37 +180,35 @@ const closeSettingsMenu = () => {
             </div>
 
             <!-- Settings dropdown trigger -->
-            <div class="relative">
-                <button
-                    class="layout-topbar-action p-link settings-button"
-                    @click="showSettingsMenu = !showSettingsMenu"
-                    v-styleclass="{
-                        selector: '@next',
-                        enterFromClass: 'hidden',
-                        enterActiveClass: 'animate-scalein',
-                        leaveToClass: 'hidden',
-                        leaveActiveClass: 'animate-fadeout',
-                        hideOnOutsideClick: true
-                    }"
-                >
+            <div class="relative settings-container">
+                <button class="layout-topbar-action p-link settings-button" @click="toggleSettingsMenu" type="button">
                     <i class="pi pi-cog"></i>
                 </button>
 
                 <!-- Settings dropdown menu -->
-                <div v-if="showSettingsMenu" class="absolute right-0 mt-2 w-56 bg-white rounded-xl shadow-xl py-2 z-50 border-0 settings-menu">
-                    <div class="px-4 py-2 border-b border-gray-100">
-                        <p class="text-xs font-medium text-gray-500">Account Settings</p>
+                <Transition
+                    enter-active-class="transition-all duration-200 ease-out"
+                    enter-from-class="opacity-0 scale-95 transform -translate-y-2"
+                    enter-to-class="opacity-100 scale-100 transform translate-y-0"
+                    leave-active-class="transition-all duration-150 ease-in"
+                    leave-from-class="opacity-100 scale-100 transform translate-y-0"
+                    leave-to-class="opacity-0 scale-95 transform -translate-y-2"
+                >
+                    <div v-if="showSettingsMenu" class="absolute right-0 mt-2 w-56 bg-white rounded-xl shadow-xl py-2 z-50 border border-gray-200 settings-menu">
+                        <div class="px-4 py-2 border-b border-gray-100">
+                            <p class="text-xs font-medium text-gray-500">Account Settings</p>
+                        </div>
+                        <button @click="openChangePassword" class="flex items-center w-full px-4 py-3 text-sm text-gray-700 hover:bg-blue-50 transition-colors duration-200" type="button">
+                            <i class="pi pi-key mr-3 text-blue-500"></i>
+                            <span>Change Password</span>
+                        </button>
+                        <div class="border-t border-gray-100 my-1"></div>
+                        <button @click="confirmLogout" class="flex items-center w-full px-4 py-3 text-sm text-red-600 hover:bg-red-50 transition-colors duration-200" type="button">
+                            <i class="pi pi-sign-out mr-3"></i>
+                            <span>Logout</span>
+                        </button>
                     </div>
-                    <button @click="openChangePassword" class="flex items-center w-full px-4 py-3 text-sm text-gray-700 hover:bg-blue-50 transition-colors duration-200">
-                        <i class="pi pi-key mr-3 text-blue-500"></i>
-                        <span>Change Password</span>
-                    </button>
-                    <div class="border-t border-gray-100 my-1"></div>
-                    <button @click="confirmLogout" class="flex items-center w-full px-4 py-3 text-sm text-red-600 hover:bg-red-50 transition-colors duration-200">
-                        <i class="pi pi-sign-out mr-3"></i>
-                        <span>Logout</span>
-                    </button>
-                </div>
+                </Transition>
             </div>
         </div>
     </div>
@@ -207,7 +247,7 @@ const closeSettingsMenu = () => {
 
 <style scoped>
 .layout-topbar {
-    background:  #ffffff;
+    background: #ffffff;
     padding: 0.75rem 1.5rem;
     display: flex;
     align-items: center;
@@ -225,9 +265,8 @@ const closeSettingsMenu = () => {
 
 .layout-menu-button {
     background: rgba(255, 255, 255, 0.1);
-    border: 1px solid rgba(161, 13, 13, 0.2);
+    border: 1px solid rgba(39, 33, 33, 0.2);
     color: rgb(0, 0, 0);
-    border-radius: 8px;
     width: 2.5rem;
     height: 2.5rem;
     display: flex;
@@ -265,7 +304,7 @@ const closeSettingsMenu = () => {
 .settings-menu {
     box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
     backdrop-filter: blur(10px);
-    background: rgba(255, 255, 255, 0.95);
+    background: rgba(255, 255, 255, 0.98);
 }
 
 :deep(.password-dialog) {
