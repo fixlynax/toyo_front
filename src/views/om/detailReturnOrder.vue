@@ -13,7 +13,7 @@
                     <div class="grid grid-cols-2 gap-4">
                         <div>
                             <span class="text-sm text-gray-500">Customer Name</span>
-                            <p class="text-lg font-medium">{{ dealerShop.companyName1 || '-' }} {{ dealerShop.companyName2 || '' }} <br />({{ dealerShop.custAccountNo || '-' }})</p>
+                            <p class="text-lg font-medium">{{ dealerShop.companyName1 || '-' }} {{ dealerShop.companyName2 || '' }} <br />(<span class="font-semibold text-primary">{{ dealerShop.custAccountNo || '-' }}</span>)</p>
                         </div>
                         <div>
                             <span class="text-sm text-gray-500">Location</span>
@@ -54,7 +54,7 @@
                     <div class="grid grid-cols-2 gap-4 mt-4">
                         <div>
                             <span class="text-sm text-gray-500">Return Order No.</span>
-                            <p class="text-lg font-semibold">{{ order.return_orderNo_ref || '-' }}</p>
+                            <p class="text-lg font-semibold text-primary">{{ order.return_orderNo_ref || '-' }}</p>
                         </div>
                         <div>
                             <span class="text-sm text-gray-500">SAP Return No.</span>
@@ -136,7 +136,7 @@
                             <tbody>
                                 <tr class="border-b">
                                     <td class="px-4 py-2 font-medium">Order No</td>
-                                    <td class="px-4 py-2 text-right font-semibold">{{ orderData.order_no || '-' }}</td>
+                                    <td class="px-4 py-2 text-right font-semibold text-primary">{{ orderData.order_no || '-' }}</td>
                                 </tr>
                                 <tr class="border-b">
                                     <td class="px-4 py-2 font-medium">SO No</td>
