@@ -8,8 +8,8 @@ export default defineConfig({
     optimizeDeps: {
         noDiscovery: true
     },
-    // base: '/etenadmin/',
-    base: '/',
+    base: '/etenadmin/',
+    // base: '/',
     plugins: [
         vue(),
         Components({
