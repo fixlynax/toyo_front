@@ -10,23 +10,23 @@
                         <div class="text-2xl font-bold text-gray-800">Customer Information</div>
                     </div>
 
-                    <div class="flex items-center justify-between w-full">
+                    <!-- <div class="flex items-center justify-between w-full">
                         <div>
                             <span class="block text-sm font-bold text-gray-700">Customer Account No.</span>
                             <span class="text-lg font-bold text-primary">{{ orderData.custaccountno || '-' }}</span>
                         </div>
-                    </div>
+                    </div> -->
 
-                    <div class="font-semibold text-xl border-b pb-2 mt-2">🏬 Customer Details</div>
+                    <!-- <div class="font-semibold text-xl border-b pb-2 mt-2">🏬 Customer Details</div> -->
 
                     <div class="flex flex-col md:flex-row gap-4">
                         <div class="w-full">
                             <span class="text-sm font-bold text-gray-700">Customer Name</span>
-                            <p class="text-lg font-medium">{{ customerInfo.dealerName || '-' }}</p>
+                            <p class="text-lg font-medium">{{ customerInfo.dealerName || '-' }} <br /> ({{ orderData.custaccountno || '-' }})</p>
                         </div>
                         <div class="w-full">
                             <span class="text-sm font-bold text-gray-700">Location</span>
-                            <p class="text-lg font-medium">{{ getFullAddress(shippingDetail) || '-' }}</p>
+                            <p class="text-lg font-medium">{{ getFullAddress(customerInfo) || '-' }}</p>
                         </div>
                     </div>
 
@@ -44,18 +44,18 @@
                     <div class="flex flex-col md:flex-row gap-4">
                         <div class="w-full">
                             <span class="text-sm font-bold text-gray-700">Contact Person</span>
-                            <p class="text-lg font-medium">{{ shippingDetail?.companyName1 || '-' }}</p>
+                            <p class="text-lg font-medium">{{ customerInfo.contactPerson || '-' }}</p>
                         </div>
                         <div class="w-full">
                             <span class="text-sm font-bold text-gray-700">Contact Number</span>
-                            <p class="text-lg font-medium">{{ shippingDetail?.phoneNumber || shippingDetail?.mobileNumber || '-' }}</p>
+                            <p class="text-lg font-medium">{{ customerInfo.phoneNumber || customerInfo.mobileNumber || '-' }}</p>
                         </div>
                     </div>
                 </div>
 
                 <div class="card flex flex-col w-full bg-white shadow-sm rounded-2xl border border-gray-100">
                     <!-- Header -->
-                    <div class="font-semibold text-xl border-b pb-3 px-4 flex items-center gap-2 text-gray-800">📦 <span>Order Item</span></div>
+                    <div class="font-semibold text-xl border-b pb-3 px-4 flex items-center gap-2 text-gray-800">📦 <span>Order Items</span></div>
 
                     <!-- Table -->
                     <DataTable :value="orderItems" dataKey="materialid" class="rounded-table mt-4">
@@ -65,7 +65,12 @@
                             </template>
                         </Column>
 
-                        <Column field="materialid" header="Material ID"></Column>
+                        <Column header="Material">
+                            <template #body="{ data }">
+                                {{ data.materialid }} <br />
+                                {{ data.materialdescription }}
+                            </template>
+                        </Column>
 
                         <Column field="itemcategory" header="Item Category">
                             <template #body="{ data }">
@@ -140,15 +145,23 @@
                                     <td class="px-4 py-2 text-right font-semibold">{{ orderData.storagelocation || '-' }}</td>
                                 </tr>
                                 <tr class="border-b">
+                                    <td class="px-4 py-2 font-medium">Scheduled Delivery</td>
+                                    <td class="px-4 py-2 text-right font-semibold">{{ formatDateTime(deliveryInfo.scheduled_delivery_time) || '-' }}</td>
+                                </tr>
+                                <tr class="border-b">
+                                    <td class="px-4 py-2 font-medium">Delivered Date</td>
+                                    <td class="px-4 py-2 text-right font-semibold">{{ formatDateTime(deliveryInfo.delivered_datetime) || '-' }}</td>
+                                </tr>
+                                <tr class="border-b">
                                     <td class="px-4 py-2 font-medium">Created</td>
-                                    <td class="px-4 py-2 text-right font-semibold">{{ orderData.created || '-' }}</td>
+                                    <td class="px-4 py-2 text-right font-semibold">{{ formatDateTime(orderData.created) || '-' }}</td>
                                 </tr>
                                 <tr>
                                     <td></td>
                                     <td class="px-2 py-2 text-right">
                                         <div class="flex justify-end gap-2">
                                             <Button label="Return Order" class="p-button-danger text-sm !w-fit" @click="showReturnOrderDialog = true" :disabled="orderData.orderstatus !== 1" />
-                                            <Button label="Pull SAP Update" class="text-sm !w-fit" @click="pullSAPUpdate" :loading="loadingSAP" />
+                                            <Button label="Pull SAP Update" class="text-sm !w-fit" @click="pullSAPUpdate" :loading="loadingSAP"  :disabled="orderData.orderstatus === 1"/>
                                         </div>
                                     </td>
                                 </tr>
@@ -180,11 +193,7 @@
                                 <tr class="border-b even:bg-gray-50">
                                     <td class="px-4 py-2 font-medium">Address</td>
                                     <td class="px-4 py-2 text-right font-semibold">
-                                        {{
-                                            [shippingDetail.addressLine1, shippingDetail.addressLine2, shippingDetail.addressLine3, shippingDetail.addressLine4, shippingDetail.postcode, shippingDetail.state, shippingDetail.city]
-                                                .filter(Boolean)
-                                                .join(', ')
-                                        }}
+                                        {{ getFullAddress(shippingDetail) }}
                                     </td>
                                 </tr>
                                 <tr class="border-b even:bg-gray-50">
@@ -263,6 +272,7 @@ const router = useRouter();
 const orderData = ref({});
 const customerInfo = ref({});
 const shippingDetail = ref({});
+const deliveryInfo = ref({});
 const orderItems = ref([]);
 const loadingSAP = ref(false);
 const showReturnOrderDialog = ref(false);
@@ -311,9 +321,11 @@ const statusClass = (status) => {
     return statusMap[status] || 'text-gray-600 font-bold';
 };
 
-const getFullAddress = (shipping) => {
-    if (!shipping) return '-';
-    const addressParts = [shipping.addressLine1, shipping.addressLine2, shipping.addressLine3, shipping.addressLine4, shipping.city, shipping.state, shipping.postcode].filter((part) => part && part.trim() !== '');
+const getFullAddress = (data) => {
+    if (!data) return '-';
+
+    // Handle both customerInfo and shippingDetail structures
+    const addressParts = [data.addressLine1, data.addressLine2, data.addressLine3, data.addressLine4, data.city, data.state, data.postcode].filter((part) => part && part.trim() !== '');
 
     return addressParts.join(', ') || '-';
 };
@@ -354,7 +366,7 @@ const fetchOrderDetail = async () => {
             if (Array.isArray(data.fullfill_order_array)) {
                 orderItems.value = data.fullfill_order_array.map((item) => ({
                     ...item,
-                    qty: parseInt(item.qty) || 0, // Changed to parseInt for whole numbers
+                    qty: parseInt(item.qty) || 0,
                     unitprice: parseFloat(item.unitprice) || 0,
                     totalamt: parseFloat(item.totalamt) || 0
                 }));
@@ -362,25 +374,38 @@ const fetchOrderDetail = async () => {
                 orderItems.value = [];
             }
 
-            // ✅ Shipping Detail
+            // ✅ Customer Details (from etenInformation)
+            const etenInfo = data.etenInformation || {};
+            customerInfo.value = {
+                dealerName: etenInfo.companyName1 || '-',
+                signboard: etenInfo.signboardBrand || '-',
+                contactPerson: etenInfo.companyName3 || '-', // MR. JACKIE CHAN
+                phoneNumber: etenInfo.phoneNumber || '-',
+                mobileNumber: etenInfo.mobileNumber || '-',
+                email: etenInfo.emailAddress || '-',
+                // Address fields for location
+                addressLine1: etenInfo.addressLine1,
+                addressLine2: etenInfo.addressLine2,
+                addressLine3: etenInfo.addressLine3,
+                addressLine4: etenInfo.addressLine4,
+                city: etenInfo.city,
+                state: etenInfo.state,
+                postcode: etenInfo.postcode
+            };
+
+            // ✅ Shipping Info (from shippingDetail array)
             if (Array.isArray(data.shippingDetail) && data.shippingDetail.length > 0) {
                 shippingDetail.value = data.shippingDetail[0];
             } else {
                 shippingDetail.value = {};
             }
 
-            // ✅ Customer Info (from nested `customerInformation`)
-            const customer = data.customerInformation || {};
-            customerInfo.value = {
-                dealerName: customer.companyName1 || '-',
-                signboard: customer.signboardBrand || '-',
-                distributionChannel: data.distributionchannel || '-',
-                phoneNumber: customer.phoneNumber || '-',
-                email: customer.emailAddress || '-'
-            };
-
-            // ✅ Additional consistency for template use
-            orderData.value.accountLastUpdate = customer.accountLastUpdate || '-';
+            // ✅ Delivery Info (from scm_deliver_detail array)
+            if (Array.isArray(data.scm_deliver_detail) && data.scm_deliver_detail.length > 0 && data.scm_deliver_detail[0]) {
+                deliveryInfo.value = data.scm_deliver_detail[0];
+            } else {
+                deliveryInfo.value = {};
+            }
         } else {
             toast.add({ severity: 'error', summary: 'Error', detail: 'Invalid or empty order data', life: 3000 });
         }
