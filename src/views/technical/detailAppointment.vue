@@ -16,15 +16,10 @@ const submittedPhotos = ref([]);
 const fetchAppointmentDetail = async () => {
     try {
         const response = await api.get(`appointment/${route.params.id}`);
-        console.log('API Response:', response.data);
+        
 
         if (response.data.status === 1) {
             appointment.value = response.data.admin_data;
-            console.log('Appointment Info:', appointment.value.appointment_info);
-            console.log('Customer Info:', appointment.value.customer_info);
-            console.log('Dealer Info:', appointment.value.dealer_info);
-            console.log('Tire Info:', appointment.value.tire_info);
-            console.log('Submitted Photos URLs:', appointment.value.submitted_photos);
 
             // Load all submitted photos
             if (appointment.value.submitted_photos) {
@@ -54,7 +49,6 @@ const loadSubmittedPhotos = async () => {
         const url = appointment.value.submitted_photos[photoType.key];
         if (url && url !== 'null' && url !== null) {
             try {
-                console.log(`Loading ${photoType.label} photo from:`, url);
                 const imageSrc = await api.getPrivateFile(url);
 
                 photos.push({
@@ -65,7 +59,6 @@ const loadSubmittedPhotos = async () => {
                     alt: `${photoType.label} Photo`
                 });
 
-                console.log(`✅ Successfully loaded ${photoType.label} photo`);
             } catch (error) {
                 console.error(`❌ Error loading ${photoType.label} photo:`, error);
                 // Create fallback image
@@ -81,7 +74,6 @@ const loadSubmittedPhotos = async () => {
     }
 
     submittedPhotos.value = photos;
-    console.log('Loaded submitted photos:', submittedPhotos.value);
 };
 
 // Create a blank image data URL for fallback
