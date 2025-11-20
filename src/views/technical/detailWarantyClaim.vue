@@ -370,6 +370,7 @@
                     <div v-if="warantyDetail.status_String ==='Pending Approval' && scrapImages" class="flex justify-end gap-2 mt-4 pt-4 border-t">
                         <Button label="Approve Scrap" class="p-button-success" size="small" @click="Approve" icon="pi pi-check" />
                         <Button label="Reject Scrap" class="p-button-danger" size="small" @click="rejectScrap" icon="pi pi-times" />
+                        <Button label="Reject Claim" class="p-button-danger" size="small" @click="showRejectDialog = true" icon="pi pi-times" />
                     </div>
                 </div>
                 <!-- No Images Message -->
@@ -380,7 +381,7 @@
                 </div>
             </div>
 
-            <div v-if="warantyDetail.replacement_detail?.length > 0 && warantyDetail.status !=6" class="card w-full mb-4">
+            <div v-if="warantyDetail.replacement_detail && warantyDetail.status !=6" class="card w-full mb-4">
                 <div class="flex items-center justify-between border-b pb-2 mb-2">
                     <div class="text-2xl font-bold text-gray-800">Replacement Details</div>
                 </div>
@@ -397,12 +398,11 @@
                 </div>
             </div>
 
-            <div v-else-if="warantyDetail.reimbursement?.length > 0 && warantyDetail.status !=6 " class="card w-full mb-4">
+            <div v-if="warantyDetail.reimbursement?.length > 0 && warantyDetail.status !=6 " class="card w-full mb-4">
                 <div class="flex items-center justify-between border-b pb-2 mb-2">
                     <div class="text-2xl font-bold text-gray-800">Reimbursement Detail</div>
                 </div>
-
-                <div class="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
+                <div v-if="!warantyDetail.reimbursement" class="bg-yellow-50 border border-yellow-200 rounded-lg p-4" >
                     <div class="flex items-start gap-3">
                         <i class="pi pi-exclamation-circle text-yellow-600 mt-1"></i>
                         <div>
@@ -971,9 +971,9 @@ const fetchWarrantyClaim = async () => {
                 vehicleRegNo: apiData.customer_info?.[0]?.regNo,
                 mobileNumber: apiData.warantyDetail?.[0]?.mobileNo,
                 // Dealer Info
-                dealer_details: apiData.dealer_info?.[0] || {},
+                dealer_details: apiData.dealer_info?.[0] || null,
                 // Tire Info
-                tire_info: apiData.tire_info || {},
+                tire_info: apiData.tire_info || null,
                 // Claim Detail
                 damageCode: apiData.claim_detail?.damageCode,
                 problem: apiData.claim_detail?.problem,
@@ -983,9 +983,9 @@ const fetchWarrantyClaim = async () => {
                 // CTC Info
                 ctc_details: apiData.ctc_info?.[0] || [],
                 reimbursement: apiData.reimbursement?.[0] || [],
-                replacement_detail: apiData.replacement_detail?.[0] || [],
-                scrapPhotos: apiData.scrapPhotos || {},
-                threadDepthPhotos: apiData.threadDepthPhotos || {}
+                replacement_detail: apiData.replacement_detail ?? null,
+                scrapPhotos: apiData.scrapPhotos || null,
+                threadDepthPhotos: apiData.threadDepthPhotos ||null
                 // Add other necessary mappings...
             };
             // console.log(warantyDetail);
