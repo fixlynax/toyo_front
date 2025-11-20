@@ -9,6 +9,7 @@ import LoadingPage from '@/components/LoadingPage.vue';
 const filters1 = ref({});
 const listData = ref([]);
 const loading = ref(true);
+const dateRange = ref([null, null]); // [startDate, endDate]
 
 // 🟢 Filters
 function initFilters1() {
@@ -20,11 +21,11 @@ function initFilters1() {
 
 // 🟢 Status Map
 const statusMap = {
-    0: { label: 'Pending', severity: 'warning' },
-    66: { label: 'Processing', severity: 'info' },
-    77: { label: 'Delivery', severity: 'secondary' },
+    // 0: { label: 'Pending', severity: 'warning' },
+    66: { label: 'Processing', severity: 'warn' },
+    77: { label: 'Delivery', severity: 'info' },
     1: { label: 'Completed', severity: 'success' },
-    99: { label: 'Return Order', severity: 'danger' }
+    // 99: { label: 'Return Order', severity: 'danger' }
 };
 
 // 🟢 Tabs
@@ -77,6 +78,7 @@ const fetchOrders = async (status = null) => {
 // 🟢 Watch tab change
 watch(activeTabIndex, (newIndex) => {
     const selectedStatus = statusTabs[newIndex]?.status;
+    dateRange.value = [null, null]; // Reset date range when tab changes
     fetchOrders(selectedStatus);
 });
 
@@ -87,10 +89,33 @@ onBeforeMount(async () => {
     await fetchOrders(selectedStatus);
 });
 
-// 🟢 Computed
+// 🟢 Computed - Filter orders by status and date range
 const filteredOrders = computed(() => {
     const selectedStatus = statusTabs[activeTabIndex.value]?.status;
-    return listData.value.filter((order) => order.orderStatus === selectedStatus);
+    let filtered = listData.value.filter((order) => order.orderStatus === selectedStatus);
+    
+    // Apply date range filter only for completed orders (status 1)
+    if (selectedStatus === 1 && (dateRange.value[0] || dateRange.value[1])) {
+        filtered = filtered.filter((order) => {
+            if (!order.created) return false;
+            
+            const orderDate = new Date(order.created);
+            orderDate.setHours(0, 0, 0, 0); // Normalize time to start of day
+            
+            const startDate = dateRange.value[0] ? new Date(dateRange.value[0]) : null;
+            const endDate = dateRange.value[1] ? new Date(dateRange.value[1]) : null;
+            
+            if (startDate) startDate.setHours(0, 0, 0, 0);
+            if (endDate) endDate.setHours(23, 59, 59, 999); // End of day
+            
+            const isAfterStart = !startDate || orderDate >= startDate;
+            const isBeforeEnd = !endDate || orderDate <= endDate;
+            
+            return isAfterStart && isBeforeEnd;
+        });
+    }
+    
+    return filtered;
 });
 
 // 🟢 Format Date
@@ -103,19 +128,23 @@ const formatDate = (dateString) => {
         return dateString;
     }
 };
+
+// 🟢 Clear Date Range
+const clearDateRange = () => {
+    dateRange.value = [null, null];
+};
 </script>
 
 <template>
     <div class="card">
         <div class="text-2xl font-bold text-gray-800 border-b pb-2">List Order</div>
 
-        
         <div>
             <TabMenu :model="statusTabs" v-model:activeIndex="activeTabIndex" class="mb-6" />
             <LoadingPage v-if="loading" :message="'Loading Orders...'" :sub-message="'Fetching your order list'" />
 
             <DataTable
-            v-if="!loading"
+                v-if="!loading"
                 :value="filteredOrders"
                 :paginator="true"
                 :rows="10"
@@ -129,32 +158,75 @@ const formatDate = (dateString) => {
                 :sortOrder="-1"
             >
                 <template #header>
-                    <div class="flex items-center justify-between gap-4 w-full flex-wrap">
-                        <div class="flex items-center gap-2 w-full max-w-md">
-                            <IconField class="flex-1">
-                                <InputIcon><i class="pi pi-search" /></InputIcon>
-                                <InputText v-model="filters1['global'].value" placeholder="Quick Search" class="w-full" />
-                            </IconField>
-                            <Button type="button" icon="pi pi-cog" class="p-button" />
+                    <div class="flex flex-col gap-4 w-full">
+                        <!-- Top Row: Search and Create Button -->
+                        <div class="flex items-center justify-between gap-4 w-full flex-wrap">
+                            <div class="flex items-center gap-2 w-full max-w-md">
+                                <IconField class="flex-1">
+                                    <InputIcon><i class="pi pi-search" /></InputIcon>
+                                    <InputText v-model="filters1['global'].value" placeholder="Quick Search" class="w-full" />
+                                </IconField>
+                                <Button type="button" icon="pi pi-cog" class="p-button" />
+                            </div>
+                            <div>
+                                <RouterLink to="/om/createOrder">
+                                    <Button label="Create" icon="pi pi-plus" class="p-button-primary" />
+                                </RouterLink>
+                            </div>
                         </div>
-                        <div>
-                            <RouterLink to="/om/createOrder">
-                                <Button label="Create" icon="pi pi-plus" class="p-button-primary" />
-                            </RouterLink>
+                        
+                        <!-- Date Range Filter (Only for Completed Orders) -->
+                        <div v-if="activeTabIndex === 2" class="flex items-center gap-4 flex-wrap">
+                            <div class="flex items-center gap-2">
+                                <span class="text-sm font-medium text-gray-700">Date Range:</span>
+                                <div class="flex items-center gap-2">
+                                    <Calendar 
+                                        v-model="dateRange[0]" 
+                                        placeholder="Start Date" 
+                                        dateFormat="yy-mm-dd"
+                                        showIcon
+                                        class="w-40"
+                                    />
+                                    <span class="text-gray-500">to</span>
+                                    <Calendar 
+                                        v-model="dateRange[1]" 
+                                        placeholder="End Date" 
+                                        dateFormat="yy-mm-dd"
+                                        showIcon
+                                        class="w-40"
+                                    />
+                                </div>
+                                <Button 
+                                    v-if="dateRange[0] || dateRange[1]" 
+                                    icon="pi pi-times" 
+                                    class="p-button-text p-button-sm" 
+                                    @click="clearDateRange"
+                                    title="Clear date filter"
+                                />
+                            </div>
+                            <div v-if="dateRange[0] || dateRange[1]" class="text-sm text-gray-600">
+                                Showing {{ filteredOrders.length }} orders
+                            </div>
                         </div>
                     </div>
                 </template>
 
                 <template #empty>
-                    <div class="text-center py-4 text-gray-500">No orders found.</div>
+                    <div class="text-center py-4 text-gray-500">
+                        <template v-if="activeTabIndex === 2 && (dateRange[0] || dateRange[1])">
+                            No completed orders found in the selected date range.
+                        </template>
+                        <template v-else>
+                            No orders found.
+                        </template>
+                    </div>
                 </template>
 
-
-                <Column field="created" header="Created Date" style="min-width: 4rem">
-                    <template #body="{ data }">{{formatDate(data.created) }}</template>
+                <Column field="created" header="Created Date" style="min-width: 6rem">
+                    <template #body="{ data }">{{ formatDate(data.created) }}</template>
                 </Column>
 
-                <Column header="Order No" style="min-width: 6rem">
+                <Column header="Order No" style="min-width: 10rem">
                     <template #body="{ data }">
                         <RouterLink :to="`/om/detailOrder/${data.orderNo}`" class="hover:underline font-bold text-primary-400">
                             {{ data.orderNo || '-' }}
@@ -199,7 +271,8 @@ const formatDate = (dateString) => {
                     <template #body="{ data }">
                         <div class="flex flex-col text-sm">
                             <span v-if="[66, 77, 0].includes(data.orderStatus)">
-                                SO: <strong>{{ data.soNo || '-' }}</strong> | DO: <strong>{{ data.doNo || '-' }}</strong>
+                                SO: <strong>{{ data.soNo || '-' }}</strong> <br />
+                                DO: <strong>{{ data.doNo || '-' }}</strong>
                             </span>
                             <span v-else-if="data.orderStatus === 1">
                                 Invoice: <strong>{{ data.invoiceNo || '-' }}</strong>

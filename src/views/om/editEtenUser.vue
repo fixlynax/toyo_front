@@ -63,9 +63,9 @@
                         </div>
 
                         <!-- Password -->
-                        <div class="space-y-2">
+                        <div class="space-y-2" v-if="showPasswordFields">
                             <label class="block font-semibold text-gray-700">Password</label>
-                            <Password v-model="form.password" :feedback="false" toggleMask class="w-full" placeholder="Enter new password" :class="{ 'p-invalid': errors.password }" :inputClass="'w-full'" />
+                            <Password v-model="form.password" :feedback="false" toggleMask autocomplete="off" class="w-full" placeholder="Enter new password" :class="{ 'p-invalid': errors.password }" :inputClass="'w-full'" />
                             <small class="text-red-500 text-sm" v-if="errors.password"> <i class="pi pi-exclamation-circle mr-1"></i>{{ errors.password }} </small>
                             <small class="text-gray-500 text-sm flex items-center gap-1">
                                 <i class="pi pi-info-circle"></i>
@@ -74,9 +74,9 @@
                         </div>
 
                         <!-- Confirm Password -->
-                        <div class="space-y-2">
+                        <div class="space-y-2" v-if="showPasswordFields">
                             <label class="block font-semibold text-gray-700">Confirm Password</label>
-                            <Password v-model="form.confirm_password" :feedback="false" toggleMask class="w-full" placeholder="Confirm new password" :class="{ 'p-invalid': errors.confirm_password }" :inputClass="'w-full'" />
+                            <Password v-model="form.confirm_password" :feedback="false" toggleMask autocomplete="off" class="w-full" placeholder="Confirm new password" :class="{ 'p-invalid': errors.confirm_password }" :inputClass="'w-full'" />
                             <small class="text-red-500 text-sm" v-if="errors.confirm_password"> <i class="pi pi-exclamation-circle mr-1"></i>{{ errors.confirm_password }} </small>
                         </div>
 
@@ -211,6 +211,16 @@ const memberDetail = ref({});
 const originalData = ref({});
 const originalPassword = ref(''); // Store original password state
 
+// Computed property to check if user is activated (has activation date)
+const isUserActivated = computed(() => {
+    return memberDetail.value.activated !== null && memberDetail.value.activated !== undefined && memberDetail.value.activated !== '';
+});
+
+// Computed property to determine if password fields should be shown
+const showPasswordFields = computed(() => {
+    return isUserActivated.value;
+});
+
 // Computed property to check if form has been modified
 const isFormModified = computed(() => {
     const original = originalData.value;
@@ -292,6 +302,8 @@ const loadUserData = async () => {
             console.log('Loaded user data:', userData);
             console.log('Set modules:', form.value.modules);
             console.log('Dealer Account No:', form.value.dealerAccountNo);
+            console.log('User activated status:', isUserActivated.value);
+            console.log('Show password fields:', showPasswordFields.value);
         } else {
             toast.add({
                 severity: 'error',
@@ -344,8 +356,8 @@ const validateForm = () => {
         errors.value.mobileNum = 'Mobile number is too short';
     }
 
-    // Password validation - only validate if user is changing password
-    const isChangingPassword = form.value.password || form.value.confirm_password;
+    // Password validation - only validate if user is activated and changing password
+    const isChangingPassword = showPasswordFields.value && (form.value.password || form.value.confirm_password);
 
     if (isChangingPassword) {
         if (!form.value.password) {
@@ -396,8 +408,8 @@ const createFormData = () => {
     formData.append('isMaster', form.value.isMaster);
     formData.append('status', form.value.status);
 
-    // Handle password - this is the key fix
-    const isChangingPassword = form.value.password && form.value.confirm_password;
+    // Handle password - only include if user is activated and password is being changed
+    const isChangingPassword = showPasswordFields.value && form.value.password && form.value.confirm_password;
 
     if (isChangingPassword) {
         // User wants to change password
@@ -406,8 +418,6 @@ const createFormData = () => {
     } else {
         // User doesn't want to change password - send dummy values that pass validation
         // The backend will hash these but we'll work around this limitation
-        // We'll send a placeholder that indicates no change, but since backend requires same validation,
-        // we'll send the original password (though this isn't ideal)
         formData.append('password', 'CurrentPassword123'); // Placeholder that meets requirements
         formData.append('confirm_password', 'CurrentPassword123'); // Same placeholder
     }

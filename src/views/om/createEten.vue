@@ -123,6 +123,12 @@ interface FormData {
     customerAccountGroup: string;
     customerCondGrp: string;
 
+    // Target Sales Quarters
+    quarter1: string;
+    quarter2: string;
+    quarter3: string;
+    quarter4: string;
+
     // Pricing & Sales Info
     priceGroup: string;
     priceProcedure: string;
@@ -191,6 +197,12 @@ const form = ref<FormData>({
     creditLimit: '',
     customerAccountGroup: '',
     customerCondGrp: '',
+
+    // Target Sales Quarter
+    quarter1: '',
+    quarter2: '',
+    quarter3: '',
+    quarter4: '',
 
     // Pricing & Sales Info
     priceGroup: '',
@@ -296,22 +308,22 @@ function handleSubmit() {
             etenUserID = currentException.value.dealers;
         }
 
-        // Combine all form data (dropdowns removed)
+        // Combine all form data (includes quarter fields)
         const fullForm = {
-            ...form.value,
-            accountType: dropdownAccountType.value?.code || '', // NEW: Get value from dropdown
+            ...form.value, // This now includes quarter1, quarter2, quarter3, quarter4
+            accountType: dropdownAccountType.value?.code || '',
             allowLalamove: dropdownYesNo.value?.code || '0',
-            allowDirectShipment: dropdownAllowDirectShipment.value?.code || '0', // NEW: Add allowDirectShipment
+            allowDirectShipment: dropdownAllowDirectShipment.value?.code || '0',
             showOnList: dropdownYesNo.value?.code || '0',
             ifFamilyChannel: dropdownYesNo.value?.code || '0',
             mainBranchDealer: currentException.value.dealers || null,
             accountNo: accountNo.value,
             selectedShipTo: selectedShipTo.value || null,
-            // Include all ShipTo addresses in the form data
             shipToAddresses: shipToAddresses.value,
-            // Add eten_userID for branch relationship
             eten_userID: etenUserID
         };
+
+        console.log('Form data to be saved:', fullForm); // For debugging
 
         // Save to localStorage
         localStorage.setItem('etenFormData', JSON.stringify(fullForm));
@@ -502,9 +514,15 @@ function mapSapResponseToForm(sapData: SapResponseItem): FormData {
         salesDistrict: customerMaster.salesdistrict || '',
         startingSalesAmt: '',
 
+        // Target Sales Quarters
+        quarter1: '',
+        quarter2: '',
+        quarter3: '',
+        quarter4: '',
+
         // Signboard / Branding
         signboardBrand: customerMaster.signboardbrand || '',
-        signboardType: customerMaster.signboardtype || '',  
+        signboardType: customerMaster.signboardtype || '',
 
         // Master User (these are NOT from SAP, so they remain editable)
         firstname: '',
@@ -611,6 +629,10 @@ function resetForm() {
         riskCategory: '',
         creditLimit: '',
         customerAccountGroup: '',
+        quarter1: '',
+        quarter2: '',
+        quarter3: '',
+        quarter4: '',
         customerCondGrp: '',
         priceGroup: '',
         priceProcedure: '',
@@ -862,6 +884,34 @@ onMounted(() => {
                 </div>
             </div>
 
+            <!-- 📈 Target Sales -->
+            <div class="flex mt-8">
+                <div class="card flex flex-col gap-4 w-full">
+                    <div class="font-semibold text-xl border-b pb-2">📈 Target Sales</div>
+
+                    <div class="flex flex-col md:flex-row gap-4">
+                        <div class="w-full">
+                            <label for="quarter1">Quarter 1</label>
+                            <InputNumber id="quarter1" type="text" v-model="form.quarter1" placeholder="Enter Q1 target sales" />
+                        </div>
+                        <div class="w-full">
+                            <label for="quarter2">Quarter 2</label>
+                            <InputNumber id="quarter2" type="text" v-model="form.quarter2" placeholder="Enter Q2 target sales" />
+                        </div>
+                    </div>
+                    <div class="flex flex-col md:flex-row gap-4">
+                        <div class="w-full">
+                            <label for="quarter3">Quarter 3</label>
+                            <InputNumber id="quarter3" type="text" v-model="form.quarter3" placeholder="Enter Q3 target sales" />
+                        </div>
+                        <div class="w-full">
+                            <label for="quarter4">Quarter 4</label>
+                            <InputNumber id="quarter4" type="text" v-model="form.quarter4" placeholder="Enter Q4 target sales" />
+                        </div>
+                    </div>
+                </div>
+            </div>
+
             <!-- 💲 Pricing & Sales Info -->
             <div class="flex mt-8">
                 <div class="card flex flex-col gap-4 w-full">
@@ -894,7 +944,7 @@ onMounted(() => {
                         </div>
                         <div class="w-full">
                             <label for="startingSalesAmt">Starting Sales Amount</label>
-                            <InputText id="startingSalesAmt" type="text" v-model="form.startingSalesAmt" />
+                            <InputNumber id="startingSalesAmt" type="text" v-model="form.startingSalesAmt" />
                         </div>
                     </div>
                 </div>
@@ -907,7 +957,7 @@ onMounted(() => {
 
                     <div class="flex flex-col md:flex-row gap-4">
                         <!-- REMOVED: Signboard Type dropdown -->
-                         <div class="w-full">
+                        <div class="w-full">
                             <label for="signboardType">Signboard Type</label>
                             <InputText disabled id="signboardType" type="text" v-model="form.signboardType" />
                         </div>
@@ -979,11 +1029,11 @@ onMounted(() => {
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                             <div>
                                 <label class="font-medium text-gray-600">Ship To Account No</label>
-                                <InputText disabled v-model="shipTo.custaccountno" placeholder="Enter account number" class="w-full bg-gray-100" />
+                                <InputText disabled v-model="shipTo.custaccountno" class="w-full bg-gray-100" />
                             </div>
                             <div>
                                 <label class="font-medium text-gray-600">Email</label>
-                                <InputText disabled v-model="shipTo.emailaddress" placeholder="example@email.com" class="w-full bg-gray-100" />
+                                <InputText disabled v-model="shipTo.emailaddress" class="w-full bg-gray-100" />
                             </div>
                         </div>
 
@@ -991,19 +1041,19 @@ onMounted(() => {
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
                             <div>
                                 <label class="font-medium text-gray-600">Company Name 1</label>
-                                <InputText disabled v-model="shipTo.companyname1" placeholder="Company Name Line 1" class="w-full bg-gray-100" />
+                                <InputText disabled v-model="shipTo.companyname1" class="w-full bg-gray-100" />
                             </div>
                             <div>
                                 <label class="font-medium text-gray-600">Company Name 2</label>
-                                <InputText disabled v-model="shipTo.companyname2" placeholder="Company Name Line 2" class="w-full bg-gray-100" />
+                                <InputText disabled v-model="shipTo.companyname2" class="w-full bg-gray-100" />
                             </div>
                             <div>
                                 <label class="font-medium text-gray-600">Company Name 3</label>
-                                <InputText disabled v-model="shipTo.companyname3" placeholder="Company Name Line 3" class="w-full bg-gray-100" />
+                                <InputText disabled v-model="shipTo.companyname3" class="w-full bg-gray-100" />
                             </div>
                             <div>
                                 <label class="font-medium text-gray-600">Company Name 4</label>
-                                <InputText disabled v-model="shipTo.companyname4" placeholder="Company Name Line 4" class="w-full bg-gray-100" />
+                                <InputText disabled v-model="shipTo.companyname4" class="w-full bg-gray-100" />
                             </div>
                         </div>
 
@@ -1011,19 +1061,19 @@ onMounted(() => {
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
                             <div>
                                 <label class="font-medium text-gray-600">Address Line 1</label>
-                                <InputText disabled v-model="shipTo.addressline1" placeholder="Address Line 1" class="w-full bg-gray-100" />
+                                <InputText disabled v-model="shipTo.addressline1" class="w-full bg-gray-100" />
                             </div>
                             <div>
                                 <label class="font-medium text-gray-600">Address Line 2</label>
-                                <InputText disabled v-model="shipTo.addressline2" placeholder="Address Line 2" class="w-full bg-gray-100" />
+                                <InputText disabled v-model="shipTo.addressline2" class="w-full bg-gray-100" />
                             </div>
                             <div>
                                 <label class="font-medium text-gray-600">Address Line 3</label>
-                                <InputText disabled v-model="shipTo.addressline3" placeholder="Address Line 3" class="w-full bg-gray-100" />
+                                <InputText disabled v-model="shipTo.addressline3" class="w-full bg-gray-100" />
                             </div>
                             <div>
                                 <label class="font-medium text-gray-600">Address Line 4</label>
-                                <InputText disabled v-model="shipTo.addressline4" placeholder="Address Line 4" class="w-full bg-gray-100" />
+                                <InputText disabled v-model="shipTo.addressline4" class="w-full bg-gray-100" />
                             </div>
                         </div>
 
@@ -1031,19 +1081,19 @@ onMounted(() => {
                         <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mt-4">
                             <div>
                                 <label class="font-medium text-gray-600">City</label>
-                                <InputText disabled v-model="shipTo.city" placeholder="City" class="w-full bg-gray-100" />
+                                <InputText disabled v-model="shipTo.city" class="w-full bg-gray-100" />
                             </div>
                             <div>
                                 <label class="font-medium text-gray-600">Postcode</label>
-                                <InputText disabled v-model="shipTo.postcode" placeholder="Postcode" class="w-full bg-gray-100" />
+                                <InputText disabled v-model="shipTo.postcode" class="w-full bg-gray-100" />
                             </div>
                             <div>
                                 <label class="font-medium text-gray-600">State</label>
-                                <InputText disabled v-model="shipTo.state" placeholder="State" class="w-full bg-gray-100" />
+                                <InputText disabled v-model="shipTo.state" class="w-full bg-gray-100" />
                             </div>
                             <div>
                                 <label class="font-medium text-gray-600">Country</label>
-                                <InputText disabled v-model="shipTo.country" placeholder="Country" class="w-full bg-gray-100" />
+                                <InputText disabled v-model="shipTo.country" class="w-full bg-gray-100" />
                             </div>
                         </div>
 
@@ -1051,11 +1101,11 @@ onMounted(() => {
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
                             <div>
                                 <label class="font-medium text-gray-600">Phone No</label>
-                                <InputText disabled v-model="shipTo.phoneno" placeholder="e.g. 03-1234567" class="w-full bg-gray-100" />
+                                <InputText disabled v-model="shipTo.phoneno" class="w-full bg-gray-100" />
                             </div>
                             <div>
                                 <label class="font-medium text-gray-600">Mobile No</label>
-                                <InputText disabled v-model="shipTo.mobilephoneno" placeholder="e.g. 012-3456789" class="w-full bg-gray-100" />
+                                <InputText disabled v-model="shipTo.mobilephoneno" class="w-full bg-gray-100" />
                             </div>
                         </div>
                     </div>

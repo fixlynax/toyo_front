@@ -51,8 +51,32 @@
                         placeholder="Select Delivery Method"
                         class="w-full"
                         :class="{ 'p-invalid': !selectedDeliveryMethod && step1Validated }"
+                        @change="onDeliveryMethodChange"
                     />
                     <small v-if="!selectedDeliveryMethod && step1Validated" class="p-error">Delivery method is required.</small>
+                </div>
+
+                <!-- Driver Information for Pickup Methods -->
+                <div v-if="selectedDeliveryMethod === 'SELFCOLLECT' || selectedDeliveryMethod === 'LALAMOVE'" class="md:col-span-2 border-t pt-4 mt-2">
+                    <div class="font-bold text-gray-700 mb-4">Driver Information</div>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <label class="block font-semibold text-gray-600">Driver Name *</label>
+                            <InputText v-model="driverInfo.name" placeholder="Enter driver name" class="w-full" :class="{ 'p-invalid': !driverInfo.name && step1Validated }" />
+                        </div>
+                        <div>
+                            <label class="block font-semibold text-gray-600">Phone Number *</label>
+                            <InputText v-model="driverInfo.phone" placeholder="Enter phone number" class="w-full" :class="{ 'p-invalid': !driverInfo.phone && step1Validated }" />
+                        </div>
+                        <div>
+                            <label class="block font-semibold text-gray-600">Truck Plate No *</label>
+                            <InputText v-model="driverInfo.plateNo" placeholder="Enter plate number" class="w-full" :class="{ 'p-invalid': !driverInfo.plateNo && step1Validated }" />
+                        </div>
+                        <div>
+                            <label class="block font-semibold text-gray-600">IC Number *</label>
+                            <InputText v-model="driverInfo.icNo" placeholder="Enter IC number" class="w-full" :class="{ 'p-invalid': !driverInfo.icNo && step1Validated }" />
+                        </div>
+                    </div>
                 </div>
 
                 <!-- Container Size for DIRECTSHIP -->
@@ -72,6 +96,7 @@
                             40FT
                         </div>
                     </div>
+                    <div class="text-sm text-gray-600 mt-2">Min: {{ minContainerCapacity }} units | Max: {{ maxContainerCapacity }} units</div>
                 </div>
             </div>
 
@@ -83,17 +108,49 @@
         <!-- Step 2: Product Selection -->
         <div v-if="currentStep === 2" class="card flex flex-col gap-6">
             <div class="flex items-center justify-between border-b pb-2">
-                <div>
-                    <div class="text-2xl font-bold text-gray-800">Step 2: Select Products</div>
-                    <div class="text-sm text-gray-600 mt-1">
-                        Order Type: <span class="font-semibold">{{ selectedOrderType }}</span> | Customer: <span class="font-semibold">{{ selectedCustomer?.display }}</span>
+                <div class="flex flex-col gap-1">
+                    <h2 class="text-xl font-bold text-gray-800">Step 2: Select Products</h2>
+
+                    <div class="flex flex-wrap items-center gap-3 text-sm text-gray-600">
+                        <div>
+                            <span class="text-gray-500">Order Type: </span>
+                            <span class="font-semibold text-gray-800">{{ selectedOrderType }}</span>
+                        </div>
+
+                        <span class="text-gray-400">•</span>
+
+                        <div>
+                            <span class="text-gray-500">Customer: </span>
+                            <span class="font-semibold text-gray-800">{{ selectedCustomer?.display }}</span>
+                        </div>
+
+                        <span class="text-gray-400">•</span>
+
+                        <div>
+                            <span class="text-gray-500">Available Limit: </span>
+                            <span class="font-semibold" :class="creditLimitClass"> RM {{ availableCredit?.toLocaleString() }} </span>
+                        </div>
                     </div>
                 </div>
+
                 <div class="flex gap-2">
                     <Button label="Pattern" icon="pi pi-filter" @click="patternPanel.toggle($event)" />
                     <Button label="Size" icon="pi pi-filter" @click="sizePanel.toggle($event)" />
                     <Button label="Width" icon="pi pi-filter" @click="widthPanel.toggle($event)" />
+                    <!-- Excel Import/Export for DIRECTSHIP -->
+                    <Button v-if="selectedOrderType === 'DIRECTSHIP'" label="Import Excel" icon="pi pi-upload" class="p-button-success" @click="importExcel" />
+                    <Button v-if="selectedOrderType === 'DIRECTSHIP' && selectedTyres.length > 0" label="Export Excel" icon="pi pi-download" class="p-button-help" @click="exportExcel" />
                 </div>
+            </div>
+
+            <!-- Global Search -->
+            <div class="flex items-center gap-3 w-full">
+                <div class="relative flex-1">
+                    <span class="absolute inset-y-0 left-3 flex items-center text-gray-500"></span>
+                    <InputText v-model="globalFilter" placeholder="Search all columns..." class="w-full pl-10 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-primary-400" />
+                </div>
+
+                <Button icon="pi pi-filter-slash" severity="secondary" outlined @click="clearFilters" v-tooltip.top="'Clear filters'" />
             </div>
 
             <!-- DIRECTSHIP Progress Section -->
@@ -109,22 +166,27 @@
                         <ProgressBar :value="progressValue" class="mt-1 h-3 rounded-full" showValue="false" />
                         <div class="flex justify-between text-xs text-gray-500 mt-1">
                             <span>{{ progressValue }}% filled</span>
-                            <span>Capacity: {{ containerCapacity }} units</span>
+                            <!-- <span>Volume: {{ containerCapacity }} units (Min: {{ minContainerCapacity }} | Max: {{ maxContainerCapacity }})</span> -->
+                            <span>Volume: {{ containerCapacity }} units (Min: {{ minContainerCapacity }})</span>
                         </div>
                     </div>
 
-                    <div class="grid grid-cols-3 gap-3 text-center">
+                    <div class="grid grid-cols-4 gap-3 text-center">
                         <div class="bg-white p-2 rounded border">
                             <div class="text-xs text-gray-500">Total Value</div>
                             <div class="text-sm font-bold">RM {{ cartTotal.toFixed(2) }}</div>
                         </div>
                         <div class="bg-white p-2 rounded border">
                             <div class="text-xs text-gray-500">Total Items</div>
-                            <div class="text-sm font-bold">{{ selectedTyres.length }}</div>
+                            <div class="text-sm font-bold">{{ selectedTyres.length + freeItems.length }}</div>
                         </div>
                         <div class="bg-white p-2 rounded border">
-                            <div class="text-xs text-gray-500">Total Quantity</div>
-                            <div class="text-sm font-bold">{{ cartQuantity }}</div>
+                            <div class="text-xs text-gray-500">Total Volume</div>
+                            <div class="text-sm font-bold">{{ containerCapacity }}</div>
+                        </div>
+                        <div class="bg-white p-2 rounded border">
+                            <div class="text-xs text-gray-500">Free Items</div>
+                            <div class="text-sm font-bold text-green-600">{{ freeItemsCount }}</div>
                         </div>
                     </div>
                 </div>
@@ -141,17 +203,28 @@
                 </div>
             </div>
 
-            <!-- Debug Info - Remove in production -->
-            <div v-if="false" class="bg-yellow-50 border border-yellow-200 rounded p-3">
-                <div class="font-semibold text-yellow-800">Debug Info:</div>
-                <div class="text-sm">
-                    <div>Materials loaded: {{ tyres.length }}</div>
-                    <div>Ship-to options: {{ shipToOptions.length }}</div>
-                    <div>Selected customer: {{ selectedCustomer?.code }}</div>
+            <!-- Sales Program Free Items -->
+            <div v-if="freeItems.length > 0" class="bg-green-50 border border-green-200 rounded-lg p-4">
+                <div class="font-semibold text-green-800 mb-2">🎁 Free Items from Sales Program</div>
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+                    <div v-for="freeItem in freeItems" :key="freeItem.materialid" class="bg-white p-3 rounded border border-green-300">
+                        <div class="font-medium text-green-700">{{ freeItem.material }}</div>
+                        <div class="text-sm text-gray-600">Qty: {{ freeItem.qty }} | Category: {{ freeItem.itemcategory }}</div>
+                    </div>
                 </div>
             </div>
 
-            <DataTable :value="filteredTyres" :paginator="true" :rows="10" :rowsPerPageOptions="[5, 10, 20]" class="rounded-table" dataKey="id" :rowHover="true" :loading="loading">
+            <DataTable
+                :value="filteredTyres"
+                :paginator="true"
+                :rows="10"
+                :rowsPerPageOptions="[5, 10, 20, 50]"
+                class="rounded-table"
+                dataKey="id"
+                :rowHover="true"
+                :loading="loading"
+                :globalFilterFields="['materialid', 'material', 'pattern', 'pattern_name', 'size', 'sectionwidth', 'origin']"
+            >
                 <template #empty>
                     <div class="text-center p-4">
                         <div v-if="loading">Loading products...</div>
@@ -166,112 +239,180 @@
                     </div>
                 </template>
 
-                <Column field="materialid" header="Material ID" style="min-width: 6rem" />
-                <Column field="pattern" header="Pattern" style="min-width: 8rem" />
-                <Column field="origin" header="Origin" style="min-width: 8rem" />
-                <Column field="size" header="Size" style="min-width: 12rem">
+                <Column field="materialid" header="Material ID" style="min-width: 6rem" :sortable="true" />
+
+                <Column field="material" header="Material Description" style="min-width: 14rem" :sortable="true">
                     <template #body="{ data }">
-                        <div class="flex flex-col text-sm text-gray-700">
-                            <div class="flex"><span class="w-40 font-semibold">Section Width:</span> {{ data.sectionwidth }}</div>
-                            <div class="flex"><span class="w-40 font-semibold">Tire Series:</span> {{ data.tireseries }}</div>
-                            <div class="flex"><span class="w-40 font-semibold">Rim Diameter:</span> {{ data.rimdiameter }}"</div>
-                            <div class="flex"><span class="w-40 font-semibold">Speed Rating:</span> {{ data.speedplyrating }}</div>
+                        <div class="flex flex-col">
+                            <div class="font-semibold">{{ data.material }}</div>
+                            <div class="text-xs text-gray-500">
+                                {{ data.pattern }}
+                                <span v-if="data.pattern_name">| {{ data.pattern_name }}</span>
+                                | {{ data.origin }}
+                                <span v-if="data.DOM">| DOM: {{ data.DOM }}</span>
+                            </div>
                         </div>
                     </template>
                 </Column>
-                <Column header="Ttem Category" style="min-width: 8rem">
+
+                <Column field="price" header="Price (RM)" style="min-width: 8rem" :sortable="true">
                     <template #body="{ data }">
-                        {{ data.itemcategory }}
-                    </template>
-                </Column>
-                <Column field="price" header="Price (RM)" style="min-width: 8rem">
-                    <template #body="{ data }">
-                        {{ data.price ? data.price.toFixed(2) : '0.00' }}
-                    </template>
-                </Column>
-                <Column field="stockBalance" header="Stock" style="min-width: 6rem">
-                    <template #body="{ data }">
-                        <span :class="{ 'text-green-600 font-semibold': data.stockBalance > 0, 'text-red-600': data.stockBalance === 0 }">
-                            {{ data.stockBalance || 0 }}
-                        </span>
+                        <div class="font-bold text-blue-700">
+                            {{ data.price ? data.price.toFixed(2) : '0.00' }}
+                        </div>
                     </template>
                 </Column>
 
-                <Column header="Action" style="width: 12rem">
+                <Column field="stockBalance" header="Stock" style="min-width: 8rem" :sortable="true">
+                    <template #body="{ data }">
+                        <div class="flex items-center gap-2">
+                            <span
+                                :class="{
+                                    'text-green-600 font-bold': data.stockBalance > 10,
+                                    'text-orange-600 font-semibold': data.stockBalance > 0 && data.stockBalance <= 10,
+                                    'text-red-600': data.stockBalance === 0
+                                }"
+                            >
+                                {{ data.stockBalance || 0 }}
+                            </span>
+                            <div class="w-3 h-3 rounded-full" :style="{ backgroundColor: data.color_code }" :title="data.stockLevel"></div>
+                        </div>
+                    </template>
+                </Column>
+
+                <Column header="Action" style="width: 10rem">
                     <template #body="{ data }">
                         <Button
-                            label="Add to Cart"
+                            label="Add"
                             icon="pi pi-shopping-cart"
                             class="p-button-primary p-button-sm"
                             @click="addToCart(data)"
-                            :disabled="isInCart(data) || data.stockBalance === 0 || (selectedOrderType === 'DIRECTSHIP' && cartQuantity >= containerCapacity)"
+                            :disabled="isInCart(data) || data.stockBalance === 0 || (selectedOrderType === 'DIRECTSHIP' && containerCapacity >= maxContainerCapacity)"
                         />
                     </template>
                 </Column>
             </DataTable>
 
             <!-- Cart Summary -->
-            <div v-if="selectedTyres.length" class="bg-white border rounded-xl shadow-md p-6 mt-6">
+            <div v-if="selectedTyres.length > 0 || freeItems.length > 0" class="bg-white border rounded-xl shadow-md p-6 mt-6">
                 <!-- Header -->
                 <div class="flex items-center justify-between mb-5">
                     <div class="text-xl font-bold text-gray-900">🛒 Selected Products</div>
                     <div class="text-2xl font-extrabold text-indigo-700">Total: RM {{ cartTotal.toFixed(2) }}</div>
                 </div>
 
-                <!-- DataTable Cart -->
-                <DataTable :value="selectedTyres" class="rounded-table" scrollable scrollHeight="250px" stripedRows>
-                    <!-- Pattern + Size -->
-                    <Column header="Product" style="min-width: 14rem">
-                        <template #body="{ data }">
-                            <div class="font-semibold text-gray-800">{{ data.pattern }} - {{ data.size }}</div>
-                            <div class="text-xs text-gray-500">Stock: {{ data.stockBalance }}</div>
-                        </template>
-                    </Column>
+                <!-- Regular Items -->
+                <div v-if="selectedTyres.length > 0">
+                    <div class="font-semibold text-lg mb-3 text-gray-700">Regular Items</div>
+                    <DataTable :value="selectedTyres" class="rounded-table" scrollable scrollHeight="250px" stripedRows>
+                        <Column header="Product" style="min-width: 14rem">
+                            <template #body="{ data }">
+                                <div class="font-semibold text-gray-800">{{ data.material }}</div>
+                                <div class="text-xs text-gray-500">
+                                    {{ data.pattern }}
+                                    <span v-if="data.pattern_name">| {{ data.pattern_name }}</span>
+                                    | Stock: {{ data.stockBalance }}
+                                    <span v-if="data.volume">| Vol: {{ data.volume }}</span>
+                                </div>
+                            </template>
+                        </Column>
 
-                    <!-- Price -->
-                    <Column header="Price" field="price" style="min-width: 7rem; text-align: center">
-                        <template #body="{ data }">
-                            <div class="font-medium">RM {{ data.price }}</div>
-                        </template>
-                    </Column>
+                        <Column header="Price" field="price" style="min-width: 7rem; text-align: center">
+                            <template #body="{ data }">
+                                <div class="font-medium">RM {{ data.price.toFixed(2) }}</div>
+                            </template>
+                        </Column>
 
-                    <!-- Quantity Editor -->
-                    <Column header="Qty" style="min-width: 6rem; text-align: center">
-                        <template #body="{ data }">
-                            <InputNumber
-                                v-model="data.quantity"
-                                :min="1"
-                                :max="getMaxQuantity(data)"
-                                :showButtons="true"
-                                buttonLayout="horizontal"
-                                incrementButtonClass="p-button-text p-button-sm"
-                                decrementButtonClass="p-button-text p-button-sm"
-                                incrementButtonIcon="pi pi-plus"
-                                decrementButtonIcon="pi pi-minus"
-                                class="w-20 mx-auto"
-                            />
-                        </template>
-                    </Column>
+                        <Column header="Qty" style="min-width: 6rem; text-align: center">
+                            <template #body="{ data }">
+                                <InputNumber
+                                    v-model="data.quantity"
+                                    :min="1"
+                                    :max="getMaxQuantity(data)"
+                                    :showButtons="true"
+                                    buttonLayout="horizontal"
+                                    incrementButtonClass="p-button-text p-button-sm"
+                                    decrementButtonClass="p-button-text p-button-sm"
+                                    incrementButtonIcon="pi pi-plus"
+                                    decrementButtonIcon="pi pi-minus"
+                                    class="w-20 mx-auto"
+                                    @update:modelValue="onQuantityChange(data)"
+                                />
+                            </template>
+                        </Column>
 
-                    <!-- Subtotal -->
-                    <Column header="Subtotal" style="min-width: 8rem; text-align: center">
-                        <template #body="{ data }">
-                            <span class="font-bold text-gray-900"> RM {{ (data.price * data.quantity).toFixed(2) }} </span>
-                        </template>
-                    </Column>
+                        <Column header="Subtotal" style="min-width: 8rem; text-align: center">
+                            <template #body="{ data }">
+                                <span class="font-bold text-gray-900"> RM {{ (data.price * data.quantity).toFixed(2) }} </span>
+                            </template>
+                        </Column>
 
-                    <!-- Remove Button -->
-                    <Column header="Action" style="min-width: 5rem; text-align: center">
-                        <template #body="{ data }">
-                            <Button icon="pi pi-trash" class="p-button-danger p-button-text p-button-sm" @click="removeFromCart(data)" />
-                        </template>
-                    </Column>
-                </DataTable>
+                        <Column header="Action" style="min-width: 5rem; text-align: center">
+                            <template #body="{ data }">
+                                <Button icon="pi pi-trash" class="p-button-danger p-button-text p-button-sm" @click="removeFromCart(data)" />
+                            </template>
+                        </Column>
+                    </DataTable>
+                </div>
+
+                <!-- Free Items -->
+                <div v-if="freeItems.length > 0" class="mt-6">
+                    <div class="font-semibold text-lg mb-3 text-green-700">🎁 Free Items (Sales Program)</div>
+                    <DataTable :value="freeItems" class="rounded-table" scrollable scrollHeight="200px">
+                        <Column header="Product" style="min-width: 14rem">
+                            <template #body="{ data }">
+                                <div class="font-semibold text-green-800">{{ data.material }}</div>
+                                <div class="text-xs text-gray-500">Free Item</div>
+                            </template>
+                        </Column>
+
+                        <Column header="Category" field="itemcategory" style="min-width: 8rem; text-align: center" />
+
+                        <Column header="Qty" style="min-width: 6rem; text-align: center">
+                            <template #body="{ data }">
+                                <span class="font-bold text-green-600">{{ data.qty }}</span>
+                            </template>
+                        </Column>
+
+                        <Column header="Price" style="min-width: 7rem; text-align: center">
+                            <template #body="{ data }">
+                                <div class="font-medium text-green-600">FREE</div>
+                            </template>
+                        </Column>
+                    </DataTable>
+                </div>
+
+                <!-- Cart Summary -->
+                <div class="mt-6 p-4 bg-gray-50 rounded-lg">
+                    <div class="grid grid-cols-2 md:grid-cols-4 gap-4 text-center">
+                        <div>
+                            <div class="text-sm text-gray-500">Regular Items</div>
+                            <div class="text-lg font-bold">{{ selectedTyres.length }}</div>
+                        </div>
+                        <div>
+                            <div class="text-sm text-gray-500">Free Items</div>
+                            <div class="text-lg font-bold text-green-600">{{ freeItemsCount }}</div>
+                        </div>
+                        <div>
+                            <div class="text-sm text-gray-500">Total Quantity</div>
+                            <div class="text-lg font-bold">{{ cartQuantity + freeItemsQuantity }}</div>
+                        </div>
+                        <div>
+                            <div class="text-sm text-gray-500">Total Amount</div>
+                            <div class="text-lg font-bold text-blue-600">RM {{ cartTotal.toFixed(2) }}</div>
+                        </div>
+                    </div>
+                    <div v-if="selectedOrderType === 'DIRECTSHIP'" class="mt-3 pt-3 border-t text-center">
+                        <div class="text-sm text-gray-500">Total Container Volume</div>
+                        <div class="text-lg font-bold text-purple-600">{{ containerCapacity }} units</div>
+                        <div class="text-xs text-gray-500 mt-1">(Min: {{ minContainerCapacity }} | Max: {{ maxContainerCapacity }})</div>
+                    </div>
+                </div>
             </div>
 
             <div class="flex justify-between mt-4">
                 <Button label="Back" icon="pi pi-arrow-left" class="p-button-secondary" @click="goToStep(1)" />
-                <Button label="Next: Shipping Details" icon="pi pi-arrow-right" @click="goToStep(3)" :disabled="!canProceedToStep3" />
+                <Button label="Next: Review Order" icon="pi pi-arrow-right" @click="goToStep(3)" :disabled="!canProceedToStep3" />
             </div>
 
             <!-- Overlay Panels -->
@@ -317,85 +458,158 @@
             </OverlayPanel>
         </div>
 
-        <!-- Step 3: Shipping Details -->
+        <!-- Step 3: Order Review & Confirmation -->
         <div v-if="currentStep === 3" class="card">
-            <div class="text-2xl font-bold text-gray-800 border-b pb-2 mb-6">Step 3: Shipping Details</div>
+            <div class="text-2xl font-bold text-gray-800 border-b pb-2 mb-6">Step 3: Review & Confirm Order</div>
 
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-                <div class="md:col-span-2">
-                    <label class="block font-bold text-gray-700">Ship To Account No. *</label>
-                    <Dropdown
-                        v-model="shipToAccount"
-                        :options="shipToOptions"
-                        optionLabel="display"
-                        placeholder="Select Ship To Account"
-                        class="w-full"
-                        :loading="loadingShipTo"
-                        :class="{ 'p-invalid': !shipToAccount && step3Validated }"
-                        @change="onShipToAccountChange"
-                    />
-                    <small v-if="loadingShipTo" class="text-blue-600">Loading ship-to addresses...</small>
-                    <small v-if="!shipToAccount && step3Validated" class="p-error">Ship to account is required.</small>
-                    <small v-if="shipToOptions.length === 0 && !loadingShipTo && selectedCustomer" class="text-gray-500">No ship-to addresses found for this customer</small>
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                <!-- Left Column: Shipping Details -->
+                <div>
+                    <div class="font-bold text-lg text-gray-700 mb-4">Shipping Details</div>
+
+                    <div class="grid grid-cols-1 gap-4 mb-6">
+                        <div>
+                            <label class="block font-bold text-gray-700">Ship To Account No. *</label>
+                            <Dropdown
+                                v-model="shipToAccount"
+                                :options="shipToOptions"
+                                optionLabel="display"
+                                placeholder="Select Ship To Account"
+                                class="w-full"
+                                :loading="loadingShipTo"
+                                :class="{ 'p-invalid': !shipToAccount && step3Validated }"
+                                @change="onShipToAccountChange"
+                            />
+                            <small v-if="loadingShipTo" class="text-blue-600">Loading ship-to addresses...</small>
+                            <small v-if="!shipToAccount && step3Validated" class="p-error">Ship to account is required.</small>
+                            <small v-if="shipToOptions.length === 0 && !loadingShipTo && selectedCustomer" class="text-gray-500">No ship-to addresses found for this customer</small>
+                        </div>
+
+                        <div class="bg-gray-50 p-4 rounded-lg">
+                            <div class="font-semibold text-gray-700 mb-2">Selected Address:</div>
+                            <div class="text-sm text-gray-600">
+                                <div>{{ shipToAddress1 }}</div>
+                                <div v-if="shipToAddress2">{{ shipToAddress2 }}</div>
+                                <div v-if="shipToAddress3">{{ shipToAddress3 }}</div>
+                                <div v-if="shipToAddress4">{{ shipToAddress4 }}</div>
+                                <div>{{ shipToPostcode }} {{ shipToCity }}, {{ shipToState }}</div>
+                                <div>{{ shipToCountry }}</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Driver Information Review -->
+                    <div v-if="selectedDeliveryMethod === 'SELFCOLLECT' || selectedDeliveryMethod === 'LALAMOVE'" class="border-t pt-4">
+                        <div class="font-bold text-lg text-gray-700 mb-4">Driver Information</div>
+                        <div class="bg-blue-50 p-4 rounded-lg">
+                            <div class="grid grid-cols-2 gap-4 text-sm">
+                                <div>
+                                    <div class="font-semibold text-gray-600">Name</div>
+                                    <div>{{ driverInfo.name }}</div>
+                                </div>
+                                <div>
+                                    <div class="font-semibold text-gray-600">Phone</div>
+                                    <div>{{ driverInfo.phone }}</div>
+                                </div>
+                                <div>
+                                    <div class="font-semibold text-gray-600">Plate No</div>
+                                    <div>{{ driverInfo.plateNo }}</div>
+                                </div>
+                                <div>
+                                    <div class="font-semibold text-gray-600">IC Number</div>
+                                    <div>{{ driverInfo.icNo }}</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
 
+                <!-- Right Column: Order Summary -->
                 <div>
-                    <label class="block font-bold text-gray-700">Address Line 1</label>
-                    <InputText v-model="shipToAddress1" placeholder="Address Line 1" class="w-full" readonly />
-                </div>
-                <div>
-                    <label class="block font-bold text-gray-700">Address Line 2</label>
-                    <InputText v-model="shipToAddress2" placeholder="Address Line 2" class="w-full" readonly />
-                </div>
-                <div>
-                    <label class="block font-bold text-gray-700">Address Line 3</label>
-                    <InputText v-model="shipToAddress3" placeholder="Address Line 3" class="w-full" readonly />
-                </div>
-                <div>
-                    <label class="block font-bold text-gray-700">Address Line 4</label>
-                    <InputText v-model="shipToAddress4" placeholder="Address Line 4" class="w-full" readonly />
-                </div>
-                <div>
-                    <label class="block font-bold text-gray-700">City</label>
-                    <InputText v-model="shipToCity" placeholder="City" class="w-full" readonly />
-                </div>
-                <div>
-                    <label class="block font-bold text-gray-700">State</label>
-                    <InputText v-model="shipToState" placeholder="State" class="w-full" readonly />
-                </div>
-                <div>
-                    <label class="block font-bold text-gray-700">Postcode</label>
-                    <InputText v-model="shipToPostcode" placeholder="Postcode" class="w-full" readonly />
-                </div>
-                <div>
-                    <label class="block font-bold text-gray-700">Country</label>
-                    <InputText v-model="shipToCountry" placeholder="Country" class="w-full" readonly />
-                </div>
-            </div>
+                    <div class="font-bold text-lg text-gray-700 mb-4">Order Summary</div>
 
-            <!-- Order Summary -->
-            <div class="bg-gray-50 border rounded-lg p-4 mt-6">
-                <div class="font-semibold text-lg mb-3">Order Summary</div>
-                <div class="space-y-2">
-                    <div class="flex justify-between">
-                        <span>Customer:</span>
-                        <span class="font-semibold">{{ selectedCustomer?.display }}</span>
+                    <div class="bg-white border rounded-lg shadow-sm">
+                        <!-- Order Details -->
+                        <div class="p-4 border-b">
+                            <div class="space-y-2">
+                                <div class="flex justify-between">
+                                    <span class="text-gray-600">Customer:</span>
+                                    <span class="font-semibold">{{ selectedCustomer?.display }}</span>
+                                </div>
+                                <div class="flex justify-between">
+                                    <span class="text-gray-600">Order Type:</span>
+                                    <span class="font-semibold">{{ selectedOrderType }}</span>
+                                </div>
+                                <div class="flex justify-between">
+                                    <span class="text-gray-600">Delivery Method:</span>
+                                    <span class="font-semibold">{{ deliveryMethodLabel }}</span>
+                                </div>
+                                <div v-if="selectedOrderType === 'DIRECTSHIP'" class="flex justify-between">
+                                    <span class="text-gray-600">Container Size:</span>
+                                    <span class="font-semibold">{{ selectedContainerSize }}</span>
+                                </div>
+                                <div v-if="selectedOrderType === 'DIRECTSHIP'" class="flex justify-between">
+                                    <span class="text-gray-600">Container Volume:</span>
+                                    <span class="font-semibold">{{ containerCapacity }} units</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Items Summary -->
+                        <div class="p-4 border-b">
+                            <div class="font-semibold text-gray-700 mb-3">Items Summary</div>
+                            <div class="space-y-3">
+                                <!-- Regular Items -->
+                                <div v-for="item in selectedTyres" :key="item.id" class="flex justify-between items-center">
+                                    <div class="flex-1">
+                                        <div class="font-medium text-sm">{{ item.material }}</div>
+                                        <div class="text-xs text-gray-500">Qty: {{ item.quantity }} × RM {{ item.price.toFixed(2) }}</div>
+                                    </div>
+                                    <div class="font-semibold">RM {{ (item.price * item.quantity).toFixed(2) }}</div>
+                                </div>
+
+                                <!-- Free Items -->
+                                <div v-for="freeItem in freeItems" :key="freeItem.materialid" class="flex justify-between items-center border-t pt-2">
+                                    <div class="flex-1">
+                                        <div class="font-medium text-sm text-green-700">{{ freeItem.material }}</div>
+                                        <div class="text-xs text-gray-500">Free Item × {{ freeItem.qty }}</div>
+                                    </div>
+                                    <div class="font-semibold text-green-600">FREE</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Totals -->
+                        <div class="p-4">
+                            <div class="space-y-2">
+                                <div class="flex justify-between">
+                                    <span>Regular Items:</span>
+                                    <span>{{ selectedTyres.length }} items</span>
+                                </div>
+                                <div v-if="freeItems.length > 0" class="flex justify-between">
+                                    <span>Free Items:</span>
+                                    <span class="text-green-600">{{ freeItemsCount }} items</span>
+                                </div>
+                                <div class="flex justify-between border-t pt-2">
+                                    <span class="font-semibold">Total Quantity:</span>
+                                    <span class="font-semibold">{{ cartQuantity + freeItemsQuantity }}</span>
+                                </div>
+                                <div class="flex justify-between border-t pt-2">
+                                    <span class="font-bold text-lg">Total Amount:</span>
+                                    <span class="font-bold text-lg text-blue-600">RM {{ cartTotal.toFixed(2) }}</span>
+                                </div>
+                            </div>
+                        </div>
                     </div>
-                    <div class="flex justify-between">
-                        <span>Order Type:</span>
-                        <span class="font-semibold">{{ selectedOrderType }}</span>
-                    </div>
-                    <div class="flex justify-between">
-                        <span>Total Items:</span>
-                        <span class="font-semibold">{{ selectedTyres.length }}</span>
-                    </div>
-                    <div class="flex justify-between">
-                        <span>Total Quantity:</span>
-                        <span class="font-semibold">{{ cartQuantity }}</span>
-                    </div>
-                    <div class="flex justify-between border-t pt-2 mt-2">
-                        <span class="font-semibold">Total Amount:</span>
-                        <span class="font-bold text-lg">RM {{ cartTotal.toFixed(2) }}</span>
+
+                    <!-- Credit Limit Check -->
+                    <div class="mt-4 p-4 rounded-lg" :class="creditLimitClass + ' bg-opacity-10'">
+                        <div class="flex justify-between items-center">
+                            <span class="font-semibold">Available Credit:</span>
+                            <span class="font-bold">RM {{ availableCredit?.toLocaleString() }}</span>
+                        </div>
+                        <ProgressBar :value="creditUsagePercent" :class="creditLimitClass.replace('bg-', '')" class="mt-2 h-2" showValue="false" />
+                        <div class="text-xs text-gray-600 mt-1 text-right">{{ creditUsagePercent }}% used</div>
                     </div>
                 </div>
             </div>
@@ -464,6 +678,22 @@
                 <Button label="Proceed Without Back Order" icon="pi pi-check" @click="proceedWithoutBackOrder" class="p-button-primary" />
             </template>
         </Dialog>
+
+        <!-- File Upload Dialog -->
+        <Dialog v-model:visible="showUploadDialog" :style="{ width: '500px' }" header="Import Excel File" :modal="true">
+            <div class="flex flex-col gap-4">
+                <div class="text-gray-600">Upload Excel file for Direct Shipment order. The file should contain Material and Quantity columns.</div>
+
+                <FileUpload mode="basic" name="order_excel" :url="uploadUrl" accept=".xlsx,.xls,.csv" :maxFileSize="1000000" chooseLabel="Select Excel File" @upload="onExcelUpload" @select="onFileSelect" />
+
+                <div v-if="uploadMessage" class="p-3 rounded" :class="uploadMessageClass">
+                    {{ uploadMessage }}
+                </div>
+            </div>
+            <template #footer>
+                <Button label="Cancel" icon="pi pi-times" @click="showUploadDialog = false" class="p-button-text" />
+            </template>
+        </Dialog>
     </Fluid>
 </template>
 
@@ -487,6 +717,14 @@ const selectedOrderType = ref('NORMAL');
 const selectedDeliveryMethod = ref('DELIVER');
 const selectedContainerSize = ref('20FT');
 
+// Driver Information
+const driverInfo = ref({
+    name: '',
+    phone: '',
+    plateNo: '',
+    icNo: ''
+});
+
 // Ship To Details
 const shipToAccount = ref(null);
 const shipToAddress1 = ref('');
@@ -502,12 +740,14 @@ const shipToCountry = ref('');
 const processingOrder = ref(false);
 const showOrderDialog = ref(false);
 const showBackOrderDialog = ref(false);
+const showUploadDialog = ref(false);
 const orderStatus = ref('');
 const orderMessage = ref('');
 const orderDetails = ref(null);
 const orderError = ref('');
 const currentCartRefNo = ref('');
 const unfulfilledItems = ref([]);
+const availableCredit = ref(0);
 
 // Options
 const customerOptions = ref([]);
@@ -515,7 +755,11 @@ const orderTypeOptions = ref([
     { label: 'Normal', value: 'NORMAL' },
     { label: 'Direct Shipment', value: 'DIRECTSHIP' }
 ]);
-const deliveryMethodOptions = [{ label: 'Delivery', value: 'DELIVER' }];
+const deliveryMethodOptions = ref([
+    { label: 'Delivery', value: 'DELIVER' },
+    { label: 'Pickup - Own Collection', value: 'SELFCOLLECT' },
+    { label: 'Pickup - Lalamove', value: 'LALAMOVE' }
+]);
 const shipToOptions = ref([]);
 
 // Loading states
@@ -525,8 +769,10 @@ const loadingShipTo = ref(false);
 
 // Tyre data
 const tyres = ref([]);
+const freeItems = ref([]);
 
 // Filters
+const globalFilter = ref('');
 const filters = ref({
     pattern: { value: '', matchMode: 'contains' },
     size: { value: '', matchMode: 'contains' },
@@ -541,29 +787,93 @@ const patternPanel = ref(null);
 const sizePanel = ref(null);
 const widthPanel = ref(null);
 
+// File Upload
+const uploadUrl = ref('');
+const uploadMessage = ref('');
+const uploadMessageClass = ref('');
+
 // Computed Properties
 const cartTotal = computed(() => selectedTyres.value.reduce((sum, item) => sum + (parseFloat(item.price) || 0) * (item.quantity || 1), 0));
 
 const cartQuantity = computed(() => selectedTyres.value.reduce((sum, item) => sum + (item.quantity || 1), 0));
 
-const containerCapacity = computed(() => (selectedContainerSize.value === '20FT' ? 1000 : 2000));
+const freeItemsCount = computed(() => freeItems.value.reduce((sum, item) => sum + (item.qty || 0), 0));
+
+const freeItemsQuantity = computed(() => freeItems.value.reduce((sum, item) => sum + (parseInt(item.qty) || 0), 0));
+
+const containerCapacity = computed(() => {
+    if (selectedOrderType.value !== 'DIRECTSHIP') return 0;
+
+    let totalVolume = 0;
+
+    // Calculate volume for regular items
+    selectedTyres.value.forEach((item) => {
+        totalVolume += (item.quantity || 1) * (item.volume || 0);
+    });
+
+    // Calculate volume for free items
+    freeItems.value.forEach((item) => {
+        const freeItem = tyres.value.find((t) => t.materialid === item.materialid);
+        if (freeItem) {
+            totalVolume += (item.qty || 0) * (freeItem.volume || 0);
+        }
+    });
+
+    return Math.round(totalVolume);
+});
+
+const minContainerCapacity = computed(() => (selectedContainerSize.value === '20FT' ? 1 : 500));
+
+const maxContainerCapacity = computed(() => (selectedContainerSize.value === '20FT' ? 1 : 1000));
 
 const progressValue = computed(() => {
-    if (!selectedContainerSize.value || cartQuantity.value === 0) return 0;
-    const progress = Math.min((cartQuantity.value / containerCapacity.value) * 100, 100);
+    if (!selectedContainerSize.value || containerCapacity.value === 0) return 0;
+    const progress = Math.min((containerCapacity.value / maxContainerCapacity.value) * 100, 100);
     return Math.round(progress);
 });
 
 const canProceedToStep2 = computed(() => {
-    return selectedCustomer.value && selectedOrderType.value && selectedDeliveryMethod.value;
+    const basicChecks = selectedCustomer.value && selectedOrderType.value && selectedDeliveryMethod.value;
+
+    if (selectedDeliveryMethod.value === 'SELFCOLLECT' || selectedDeliveryMethod.value === 'LALAMOVE') {
+        return basicChecks && driverInfo.value.name && driverInfo.value.phone && driverInfo.value.plateNo && driverInfo.value.icNo;
+    }
+
+    return basicChecks;
 });
 
 const canProceedToStep3 = computed(() => {
-    return selectedTyres.value.length > 0 && !selectedTyres.value.some((item) => item.quantity > item.stockBalance);
+    const hasItems = selectedTyres.value.length > 0;
+    const stockValid = !selectedTyres.value.some((item) => item.quantity > item.stockBalance);
+    const priceValid = !selectedTyres.value.some((item) => !item.price || item.price <= 0);
+
+    // For DIRECTSHIP, also check container capacity
+    let containerValid = true;
+    if (selectedOrderType.value === 'DIRECTSHIP') {
+        containerValid = containerCapacity.value >= minContainerCapacity.value && containerCapacity.value <= maxContainerCapacity.value;
+    }
+
+    return hasItems && stockValid && priceValid && containerValid;
 });
 
 const canPlaceOrder = computed(() => {
     return canProceedToStep3.value && shipToAccount.value;
+});
+
+const deliveryMethodLabel = computed(() => {
+    const method = deliveryMethodOptions.value.find((m) => m.value === selectedDeliveryMethod.value);
+    return method ? method.label : '';
+});
+
+const creditUsagePercent = computed(() => {
+    if (!availableCredit.value || availableCredit.value === 0) return 0;
+    return Math.min(Math.round((cartTotal.value / availableCredit.value) * 100), 100);
+});
+
+const creditLimitClass = computed(() => {
+    if (creditUsagePercent.value >= 90) return 'text-red-700';
+    if (creditUsagePercent.value >= 75) return 'text-orange-700';
+    return 'text-green-700';
 });
 
 // Dropdown options
@@ -583,12 +893,35 @@ const widthOptions = computed(() => {
 });
 
 const filteredTyres = computed(() => {
-    return tyres.value.filter((t) => {
-        const pMatch = !filters.value.pattern.value || t.pattern === filters.value.pattern.value;
-        const sMatch = !filters.value.size.value || t.size === filters.value.size.value;
-        const wMatch = !filters.value.sectionwidth.value || (t.sectionwidth && t.sectionwidth.toString() === filters.value.sectionwidth.value);
-        return pMatch && sMatch && wMatch;
-    });
+    let filtered = tyres.value;
+
+    // Apply column filters
+    if (filters.value.pattern.value) {
+        filtered = filtered.filter((t) => t.pattern === filters.value.pattern.value);
+    }
+    if (filters.value.size.value) {
+        filtered = filtered.filter((t) => t.size === filters.value.size.value);
+    }
+    if (filters.value.sectionwidth.value) {
+        filtered = filtered.filter((t) => t.sectionwidth?.toString() === filters.value.sectionwidth.value);
+    }
+
+    // Apply global filter
+    if (globalFilter.value) {
+        const searchTerm = globalFilter.value.toLowerCase();
+        filtered = filtered.filter(
+            (t) =>
+                (t.materialid && t.materialid.toLowerCase().includes(searchTerm)) ||
+                (t.material && t.material.toLowerCase().includes(searchTerm)) ||
+                (t.pattern && t.pattern.toLowerCase().includes(searchTerm)) ||
+                (t.pattern_name && t.pattern_name.toLowerCase().includes(searchTerm)) ||
+                (t.size && t.size.toLowerCase().includes(searchTerm)) ||
+                (t.sectionwidth && t.sectionwidth.toString().toLowerCase().includes(searchTerm)) ||
+                (t.origin && t.origin.toLowerCase().includes(searchTerm))
+        );
+    }
+
+    return filtered;
 });
 
 // Step Navigation
@@ -626,7 +959,7 @@ const getMaxQuantity = (tyre) => {
     return Math.min(tyre.stockBalance || 0, 999);
 };
 
-// API Calls - OPTIMIZED VERSION
+// API Calls
 const fetchCustomers = async () => {
     loadingCustomers.value = true;
     try {
@@ -675,7 +1008,9 @@ const fetchShipToAddresses = async (custAccountNo) => {
     if (!custAccountNo) return;
 
     loadingShipTo.value = true;
-    shipToOptions.value = []; // Clear previous options
+    shipToOptions.value = [];
+    availableCredit.value = 0;
+
     try {
         console.log('Fetching ship-to addresses for:', custAccountNo);
         const response = await api.post('list_dealer_shipto', {
@@ -688,10 +1023,11 @@ const fetchShipToAddresses = async (custAccountNo) => {
             const dealerData = response.data.admin_data;
             console.log('Dealer ship-to data:', dealerData);
 
+            // Set available credit
+            availableCredit.value = parseFloat(dealerData.credit_available) || 0;
+
             // Add ship-to addresses from shipto_list
             if (dealerData.shipto_list && dealerData.shipto_list.length > 0) {
-                console.log('Found ship-to list:', dealerData.shipto_list);
-
                 dealerData.shipto_list.forEach((shipto) => {
                     shipToOptions.value.push({
                         id: shipto.id,
@@ -707,23 +1043,15 @@ const fetchShipToAddresses = async (custAccountNo) => {
                         country: shipto.country || ''
                     });
                 });
-            } else {
-                console.warn('No shipto_list found in response');
             }
-
-            console.log('Final ship-to options:', shipToOptions.value);
 
             // Set default ship to account
             if (shipToOptions.value.length > 0) {
                 shipToAccount.value = shipToOptions.value[0];
                 updateShipToFields(shipToAccount.value);
-            } else {
-                console.warn('No ship-to options available');
-                toast.add({ severity: 'warn', summary: 'Warning', detail: 'No ship-to addresses found for this customer', life: 3000 });
             }
         } else {
             console.error('Ship-to API returned status 0:', response.data);
-            toast.add({ severity: 'warn', summary: 'Warning', detail: 'No ship-to addresses found', life: 3000 });
         }
     } catch (error) {
         console.error('Error fetching ship to addresses:', error);
@@ -737,7 +1065,9 @@ const fetchMaterials = async (custAccountNo) => {
     if (!custAccountNo) return;
 
     loading.value = true;
-    tyres.value = []; // Clear previous materials
+    tyres.value = [];
+    freeItems.value = [];
+
     try {
         console.log('Fetching materials for:', custAccountNo);
         const response = await api.post('list-material', {
@@ -748,23 +1078,45 @@ const fetchMaterials = async (custAccountNo) => {
         console.log('Materials API Response:', response.data);
 
         if (response.data.status === 1) {
-            const materials = response.data.admin_data || [];
+            const materials = response.data.admin_data || {};
             console.log('Raw materials data:', materials);
 
-            if (Array.isArray(materials) && materials.length > 0) {
-                tyres.value = materials.map((material, index) => {
-                    console.log(`Processing material ${index}:`, material);
+            // Handle the new API response structure
+            let materialList = [];
+            if (selectedOrderType.value === 'DIRECTSHIP' && materials.directship) {
+                materialList = materials.directship;
+            } else if (materials.normal) {
+                materialList = materials.normal;
+            } else {
+                materialList = [];
+            }
 
+            if (materialList.length > 0) {
+                tyres.value = materialList.map((material, index) => {
                     const size = `${material.sectionwidth || ''}/${material.tireseries || ''} R${material.rimdiameter || ''}`;
                     const price = parseFloat(material.price) || 0;
 
-                    // FIXED: Handle stock data properly
-                    const stockBalance = material.stockLevel?.stockBalance || 0;
+                    // Use stock_quantity from API response
+                    const stockBalance = material.stock_quantity || 0;
+
+                    // Determine stock level display
+                    let stockLevel = 'No Stock';
+                    let colorCode = '#C62828'; // red
+
+                    if (stockBalance > 10) {
+                        stockLevel = 'High Stock';
+                        colorCode = '#2E7D32'; // green
+                    } else if (stockBalance > 0 && stockBalance <= 10) {
+                        stockLevel = 'Low Stock';
+                        colorCode = '#EF6C00'; // orange
+                    }
 
                     return {
                         id: material.materialid || `material-${index}`,
                         materialid: material.materialid,
+                        material: material.material || 'N/A',
                         pattern: material.pattern || 'N/A',
+                        pattern_name: material.pattern_name || null,
                         size: size,
                         sectionwidth: material.sectionwidth,
                         tireseries: material.tireseries,
@@ -773,30 +1125,92 @@ const fetchMaterials = async (custAccountNo) => {
                         origin: material.origin || 'Unknown',
                         price: price,
                         stockBalance: stockBalance,
+                        stockLevel: stockLevel,
+                        color_code: colorCode,
+                        volume: parseFloat(material.volume) || 0,
+                        materialtype: material.materialtype || 'ZFP2',
+                        storageLocation: material.storageLocation,
+                        DOM: material.DOM,
                         quantity: 1,
-                        itemcategory: material.itemcategory || 'ZT02', // Ensure itemcategory has default value
-                        plant: 'TSM'
+                        itemcategory: 'ZT02', // Default for regular items
+                        plant: 'TSM',
+                        salesprogramid: null
                     };
                 });
 
-                console.log('Processed tyres:', tyres.value);
-                toast.add({ severity: 'success', summary: 'Success', detail: `Loaded ${tyres.value.length} products`, life: 3000 });
+                toast.add({
+                    severity: 'success',
+                    summary: 'Success',
+                    detail: `Loaded ${tyres.value.length} products`,
+                    life: 3000
+                });
             } else {
-                console.warn('No materials data available');
                 tyres.value = [];
-                toast.add({ severity: 'warn', summary: 'Warning', detail: 'No products available for this customer', life: 3000 });
+                toast.add({
+                    severity: 'warn',
+                    summary: 'Warning',
+                    detail: 'No products available for this customer',
+                    life: 3000
+                });
             }
         } else {
-            console.error('Materials API returned status 0:', response.data);
-            toast.add({ severity: 'warn', summary: 'Warning', detail: 'No products available for this customer', life: 3000 });
             tyres.value = [];
+            toast.add({
+                severity: 'warn',
+                summary: 'Warning',
+                detail: 'No products available for this customer',
+                life: 3000
+            });
         }
     } catch (error) {
         console.error('Error fetching materials:', error);
-        toast.add({ severity: 'error', summary: 'Error', detail: 'Failed to load products', life: 3000 });
+        toast.add({
+            severity: 'error',
+            summary: 'Error',
+            detail: 'Failed to load products',
+            life: 3000
+        });
         tyres.value = [];
     } finally {
         loading.value = false;
+    }
+};
+
+const checkSalesProgram = async () => {
+    if (!selectedCustomer.value || selectedTyres.value.length === 0) return;
+
+    try {
+        const orderArray = selectedTyres.value.map((item) => ({
+            materialid: item.materialid,
+            qty: item.quantity,
+            pattern: item.pattern,
+            pattern_name: item.pattern_name,
+            rimdiameter: item.rimdiameter
+        }));
+
+        const response = await api.post('order/check-sales-program', {
+            custaccountno: selectedCustomer.value.code,
+            order_array: JSON.stringify(orderArray)
+        });
+
+        if (response.data.status === 1 && response.data.admin_data) {
+            freeItems.value = response.data.admin_data.map((freeItem) => ({
+                ...freeItem,
+                itemcategory: freeItem.itemcategory || 'ZPRO'
+            }));
+
+            if (freeItems.value.length > 0) {
+                toast.add({
+                    severity: 'success',
+                    summary: 'Sales Program Applied',
+                    detail: `Found ${freeItems.value.length} free item(s) from sales program`,
+                    life: 5000
+                });
+            }
+        }
+    } catch (error) {
+        console.error('Error checking sales program:', error);
+        // Silently fail, as sales program is optional
     }
 };
 
@@ -837,6 +1251,7 @@ const resetDirectShipCart = async () => {
 
         if (response.data.status === 1) {
             selectedTyres.value = [];
+            freeItems.value = [];
             currentCartRefNo.value = '';
             toast.add({ severity: 'success', summary: 'Success', detail: 'Cart reset successfully', life: 3000 });
         } else {
@@ -845,6 +1260,77 @@ const resetDirectShipCart = async () => {
     } catch (error) {
         console.error('Error resetting cart:', error);
         toast.add({ severity: 'error', summary: 'Error', detail: 'Failed to reset cart', life: 3000 });
+    }
+};
+
+// Excel Import/Export
+const importExcel = () => {
+    if (selectedOrderType.value !== 'DIRECTSHIP') {
+        toast.add({ severity: 'warn', summary: 'Warning', detail: 'Excel import is only available for Direct Shipment orders', life: 3000 });
+        return;
+    }
+    showUploadDialog.value = true;
+    uploadMessage.value = '';
+};
+
+const exportExcel = async () => {
+    if (selectedOrderType.value !== 'DIRECTSHIP') {
+        toast.add({ severity: 'warn', summary: 'Warning', detail: 'Excel export is only available for Direct Shipment orders', life: 3000 });
+        return;
+    }
+
+    if (!currentCartRefNo.value) {
+        toast.add({ severity: 'warn', summary: 'Warning', detail: 'No cart available for export', life: 3000 });
+        return;
+    }
+
+    try {
+        const response = await api.get(`order/download-excel-cart/${currentCartRefNo.value}`, {
+            responseType: 'blob'
+        });
+
+        const url = window.URL.createObjectURL(new Blob([response.data]));
+        const link = document.createElement('a');
+        link.href = url;
+        link.setAttribute('download', `directship_cart_${currentCartRefNo.value}.xlsx`);
+        document.body.appendChild(link);
+        link.click();
+        link.remove();
+        window.URL.revokeObjectURL(url);
+
+        toast.add({ severity: 'success', summary: 'Success', detail: 'Excel file downloaded successfully', life: 3000 });
+    } catch (error) {
+        console.error('Error exporting Excel:', error);
+        toast.add({ severity: 'error', summary: 'Error', detail: 'Failed to export Excel file', life: 3000 });
+    }
+};
+
+const onFileSelect = (event) => {
+    uploadMessage.value = '';
+};
+
+const onExcelUpload = async (event) => {
+    try {
+        const response = JSON.parse(event.xhr.response);
+        if (response.status === 1) {
+            uploadMessage.value = 'Excel file uploaded successfully!';
+            uploadMessageClass.value = 'bg-green-100 text-green-700';
+
+            // Update cart with imported data
+            selectedTyres.value = response.eten_data.order_array || [];
+            currentCartRefNo.value = response.eten_data.cartRefNo;
+
+            setTimeout(() => {
+                showUploadDialog.value = false;
+                toast.add({ severity: 'success', summary: 'Success', detail: 'Excel imported successfully', life: 3000 });
+            }, 2000);
+        } else {
+            uploadMessage.value = response.message || 'Upload failed';
+            uploadMessageClass.value = 'bg-red-100 text-red-700';
+        }
+    } catch (error) {
+        uploadMessage.value = 'Upload failed: ' + error.message;
+        uploadMessageClass.value = 'bg-red-100 text-red-700';
     }
 };
 
@@ -857,8 +1343,8 @@ const addToCartAPI = async (cartRefNo = null) => {
     // Prepare order array according to API requirements
     const orderArray = selectedTyres.value.map((item, index) => ({
         materialid: item.materialid,
-        itemno: String(index + 1).padStart(5, '0'),
-        itemcategory: item.itemcategory || 'ZT02', // Default to ZT02 if not available
+        itemno: String((index + 1) * 10).padStart(5, '0'), // Item numbers in increments of 10
+        itemcategory: item.itemcategory || 'ZT02',
         plant: item.plant || 'TSM',
         qty: item.quantity.toString(),
         price: item.price.toString(),
@@ -906,17 +1392,14 @@ const confirmOrderAPI = async (cartRefNo, orderArray) => {
 };
 
 // Confirm back order API
-const confirmBackOrderAPI = async (cartRefNo, orderArray, backOrderArray) => {
+const confirmBackOrderAPI = async (cartRefNo, orderArray, backorderArray) => {
     try {
-        console.log('Confirming backorder:', {
-            order_array: orderArray,
-            backorder_array: backOrderArray
-        });
+        console.log('Confirming back order with arrays:', { orderArray, backorderArray });
 
         const response = await api.post(`order/confirm-backorder-admin/${cartRefNo}`, {
             order_array: JSON.stringify(orderArray),
-            backorder_array: JSON.stringify(backOrderArray),
-            order_remark: `Order with backorder created via admin interface - ${selectedOrderType.value}`
+            backorder_array: JSON.stringify(backorderArray),
+            order_remark: `Order with back order created via admin interface - ${selectedOrderType.value}`
         });
 
         return response.data;
@@ -926,7 +1409,28 @@ const confirmBackOrderAPI = async (cartRefNo, orderArray, backOrderArray) => {
     }
 };
 
-// Main Order Placement Function - OPTIMIZED
+// Submit driver information for pickup orders
+const submitDriverInformation = async (orderNo) => {
+    if (selectedDeliveryMethod.value !== 'SELFCOLLECT' && selectedDeliveryMethod.value !== 'LALAMOVE') {
+        return true; // No driver info needed
+    }
+
+    try {
+        const response = await api.post(`order/driver-information/${orderNo}`, {
+            driverName: driverInfo.value.name,
+            driverPhoneNum: driverInfo.value.phone,
+            driverPlateNum: driverInfo.value.plateNo,
+            driverIC: driverInfo.value.icNo
+        });
+
+        return response.data.status === 1;
+    } catch (error) {
+        console.error('Error submitting driver information:', error);
+        throw new Error('Failed to submit driver information');
+    }
+};
+
+// Main Order Placement Function
 const placeOrder = async () => {
     if (!canPlaceOrder.value) {
         step3Validated.value = true;
@@ -944,8 +1448,8 @@ const placeOrder = async () => {
         // Prepare order array for both order types
         const orderArray = selectedTyres.value.map((item, index) => ({
             materialid: item.materialid,
-            itemno: String(index + 1).padStart(5, '0'),
-            itemcategory: item.itemcategory || 'ZT02', // Ensure itemcategory is included
+            itemno: String((index + 1) * 10).padStart(5, '0'),
+            itemcategory: item.itemcategory || 'ZT02',
             plant: item.plant || 'TSM',
             qty: item.quantity.toString(),
             price: item.price.toString(),
@@ -974,7 +1478,7 @@ const placeOrder = async () => {
     }
 };
 
-// Process DIRECTSHIP Order - OPTIMIZED
+// Process DIRECTSHIP Order
 const processDirectShipOrder = async (orderArray) => {
     orderMessage.value = 'Adding items to direct shipment...';
 
@@ -993,7 +1497,7 @@ const processDirectShipOrder = async (orderArray) => {
     }
 };
 
-// Process NORMAL Order - OPTIMIZED
+// Process NORMAL Order
 const processNormalOrder = async (orderArray) => {
     orderMessage.value = 'Adding items to cart...';
     const addToCartResult = await addToCartAPI();
@@ -1006,13 +1510,20 @@ const processNormalOrder = async (orderArray) => {
         const finalOrderArray = addToCartResult.eten_data?.order_array || orderArray;
 
         const confirmResult = await confirmOrderAPI(cartRefNo, finalOrderArray);
+
+        // Submit driver information for pickup orders
+        if (confirmResult.status === 1 && (selectedDeliveryMethod.value === 'SELFCOLLECT' || selectedDeliveryMethod.value === 'LALAMOVE')) {
+            orderMessage.value = 'Submitting driver information...';
+            await submitDriverInformation(confirmResult.eten_data.orderRefNo);
+        }
+
         await handleOrderConfirmation(confirmResult, 'NORMAL');
     } else {
         throw new Error(addToCartResult.message || 'Failed to add items to cart');
     }
 };
 
-// Handle Order Confirmation Response - OPTIMIZED
+// Handle Order Confirmation Response
 const handleOrderConfirmation = async (confirmResult, orderType) => {
     console.log('Order confirmation result:', confirmResult);
 
@@ -1026,6 +1537,7 @@ const handleOrderConfirmation = async (confirmResult, orderType) => {
 
         // Clear cart and reset
         selectedTyres.value = [];
+        freeItems.value = [];
         currentCartRefNo.value = '';
         currentStep.value = 1;
 
@@ -1065,7 +1577,7 @@ const handleOrderConfirmation = async (confirmResult, orderType) => {
     }
 };
 
-// Back Order Processing - OPTIMIZED
+// Back Order Processing
 const proceedWithBackOrder = async () => {
     showBackOrderDialog.value = false;
     showOrderDialog.value = true;
@@ -1084,8 +1596,8 @@ const proceedWithBackOrder = async () => {
                 // Add to back order array with remaining quantity
                 backOrderArray.push({
                     materialid: item.materialid,
-                    itemno: String(index + 1).padStart(5, '0'),
-                    itemcategory: item.itemcategory || 'ZT02', // Ensure itemcategory is included
+                    itemno: String((index + 1) * 10).padStart(5, '0'),
+                    itemcategory: item.itemcategory || 'ZT02',
                     plant: item.plant || 'TSM',
                     qty: unfulfilledItem.backorder_qty.toString(),
                     price: item.price.toString(),
@@ -1096,8 +1608,8 @@ const proceedWithBackOrder = async () => {
                 if (unfulfilledItem.accepted_qty > 0) {
                     fulfilledArray.push({
                         materialid: item.materialid,
-                        itemno: String(index + 1).padStart(5, '0'),
-                        itemcategory: item.itemcategory || 'ZT02', // Ensure itemcategory is included
+                        itemno: String((index + 1) * 10).padStart(5, '0'),
+                        itemcategory: item.itemcategory || 'ZT02',
                         plant: item.plant || 'TSM',
                         qty: unfulfilledItem.accepted_qty.toString(),
                         price: item.price.toString(),
@@ -1108,8 +1620,8 @@ const proceedWithBackOrder = async () => {
                 // Item is fully fulfilled
                 fulfilledArray.push({
                     materialid: item.materialid,
-                    itemno: String(index + 1).padStart(5, '0'),
-                    itemcategory: item.itemcategory || 'ZT02', // Ensure itemcategory is included
+                    itemno: String((index + 1) * 10).padStart(5, '0'),
+                    itemcategory: item.itemcategory || 'ZT02',
                     plant: item.plant || 'TSM',
                     qty: item.quantity.toString(),
                     price: item.price.toString(),
@@ -1131,6 +1643,7 @@ const proceedWithBackOrder = async () => {
 
             // Clear cart and reset
             selectedTyres.value = [];
+            freeItems.value = [];
             currentCartRefNo.value = '';
             currentStep.value = 1;
 
@@ -1176,8 +1689,8 @@ const proceedWithoutBackOrder = async () => {
                 if (quantity > 0) {
                     orderArray.push({
                         materialid: item.materialid,
-                        itemno: String(index + 1).padStart(5, '0'),
-                        itemcategory: item.itemcategory || 'ZT02', // Ensure itemcategory is included
+                        itemno: String((index + 1) * 10).padStart(5, '0'),
+                        itemcategory: item.itemcategory || 'ZT02',
                         plant: item.plant || 'TSM',
                         qty: quantity.toString(),
                         price: item.price.toString(),
@@ -1203,6 +1716,7 @@ const proceedWithoutBackOrder = async () => {
 
             // Clear cart and reset
             selectedTyres.value = [];
+            freeItems.value = [];
             currentCartRefNo.value = '';
             currentStep.value = 1;
 
@@ -1236,10 +1750,10 @@ const onCustomerChange = (event) => {
     if (event.value && event.value.code) {
         fetchMaterials(event.value.code);
         fetchShipToAddresses(event.value.code);
-        selectedTyres.value = []; // Clear cart when customer changes
-        currentCartRefNo.value = ''; // Reset cart reference
+        selectedTyres.value = [];
+        freeItems.value = [];
+        currentCartRefNo.value = '';
     } else {
-        console.log('Customer cleared, resetting data');
         resetAllData();
     }
 };
@@ -1249,11 +1763,20 @@ const onOrderTypeChange = (event) => {
 
     // Clear cart when order type changes
     selectedTyres.value = [];
+    freeItems.value = [];
     currentCartRefNo.value = '';
 
-    // Auto-set delivery method for DIRECTSHIP
-    if (event.value === 'DIRECTSHIP') {
-        selectedDeliveryMethod.value = 'DELIVER';
+    // Refresh materials for new order type
+    if (selectedCustomer.value) {
+        fetchMaterials(selectedCustomer.value.code);
+    }
+};
+
+const onDeliveryMethodChange = (event) => {
+    console.log('Delivery method changed to:', event.value);
+    // Reset driver info when delivery method changes
+    if (event.value === 'DELIVER') {
+        driverInfo.value = { name: '', phone: '', plateNo: '', icNo: '' };
     }
 };
 
@@ -1265,36 +1788,86 @@ const onShipToAccountChange = (event) => {
     }
 };
 
+const onQuantityChange = (item) => {
+    // Check sales program when quantity changes
+    if (selectedTyres.value.length > 0) {
+        checkSalesProgram();
+    }
+};
+
 const onColumnFilter = (field, value) => {
     filters.value[field].value = value;
 };
 
+const clearFilters = () => {
+    globalFilter.value = '';
+    filters.value.pattern.value = '';
+    filters.value.size.value = '';
+    filters.value.sectionwidth.value = '';
+};
+
 const addToCart = (tyre) => {
+    // Check stock availability
     if (tyre.stockBalance === 0) {
-        toast.add({ severity: 'warn', summary: 'Out of Stock', detail: 'This product is currently out of stock', life: 3000 });
+        toast.add({
+            severity: 'warn',
+            summary: 'Out of Stock',
+            detail: 'This product is currently out of stock',
+            life: 3000
+        });
         return;
     }
 
-    if (selectedOrderType.value === 'DIRECTSHIP' && cartQuantity.value >= containerCapacity.value) {
-        toast.add({ severity: 'warn', summary: 'Container Full', detail: 'Container capacity reached', life: 3000 });
-        return;
+    // Check container capacity for DIRECTSHIP
+    if (selectedOrderType.value === 'DIRECTSHIP') {
+        const itemVolume = tyre.volume || 0;
+        const currentVolume = containerCapacity.value;
+        const maxVolume = maxContainerCapacity.value;
+
+        if (currentVolume + itemVolume > maxVolume) {
+            toast.add({
+                severity: 'warn',
+                summary: 'Container Full',
+                detail: 'Container capacity reached',
+                life: 3000
+            });
+            return;
+        }
     }
 
     const existing = selectedTyres.value.find((t) => t.id === tyre.id);
     if (existing) {
         if (existing.quantity < getMaxQuantity(tyre)) {
             existing.quantity += 1;
-            toast.add({ severity: 'success', summary: 'Success', detail: 'Quantity updated in cart', life: 2000 });
+            toast.add({
+                severity: 'success',
+                summary: 'Success',
+                detail: 'Quantity updated in cart',
+                life: 2000
+            });
         } else {
-            toast.add({ severity: 'warn', summary: 'Stock Limit', detail: 'Cannot exceed available stock', life: 3000 });
+            toast.add({
+                severity: 'warn',
+                summary: 'Stock Limit',
+                detail: 'Cannot exceed available stock',
+                life: 3000
+            });
         }
     } else {
         selectedTyres.value.push({
             ...tyre,
             quantity: 1
         });
-        toast.add({ severity: 'success', summary: 'Success', detail: 'Product added to cart', life: 2000 });
+        toast.add({
+            severity: 'success',
+            summary: 'Success',
+            detail: 'Product added to cart',
+            life: 2000
+        });
     }
+
+    // Check for sales program after adding to cart
+    checkSalesProgram();
 };
 
 const removeFromCart = (tyre) => {
@@ -1302,6 +1875,9 @@ const removeFromCart = (tyre) => {
     if (index !== -1) {
         selectedTyres.value.splice(index, 1);
         toast.add({ severity: 'info', summary: 'Removed', detail: 'Product removed from cart', life: 2000 });
+
+        // Recheck sales program after removal
+        checkSalesProgram();
     }
 };
 
@@ -1349,14 +1925,17 @@ const resetShipToFields = () => {
 const resetAllData = () => {
     tyres.value = [];
     selectedTyres.value = [];
+    freeItems.value = [];
     shipToOptions.value = [];
     shipToAccount.value = null;
     resetShipToFields();
     resetFilters();
     currentCartRefNo.value = '';
+    availableCredit.value = 0;
 };
 
 const resetFilters = () => {
+    globalFilter.value = '';
     filters.value.pattern.value = '';
     filters.value.size.value = '';
     filters.value.sectionwidth.value = '';
@@ -1375,6 +1954,18 @@ watch(selectedCustomer, (newCustomer) => {
         resetAllData();
     }
 });
+
+watch(
+    selectedTyres,
+    (newCart) => {
+        if (newCart.length > 0) {
+            checkSalesProgram();
+        } else {
+            freeItems.value = [];
+        }
+    },
+    { deep: true }
+);
 
 // Initialize
 onMounted(() => {
@@ -1420,5 +2011,9 @@ onMounted(() => {
         border-bottom-left-radius: 12px;
         border-bottom-right-radius: 12px;
     }
+}
+
+:deep(.p-progressbar .p-progressbar-value) {
+    transition: width 0.3s ease;
 }
 </style>

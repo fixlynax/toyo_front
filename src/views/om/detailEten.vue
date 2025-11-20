@@ -6,14 +6,27 @@
                 <div class="flex flex-col">
                     <div class="card flex flex-col gap-4 w-full">
                         <div class="flex items-center justify-between border-b pb-2 mb-2">
+                            <!-- LEFT SIDE -->
                             <div class="flex items-center gap-2">
                                 <RouterLink to="/om/listEten">
                                     <Button icon="pi pi-arrow-left font-bold" class="p-button-text p-button-secondary text-xl" size="big" v-tooltip="'Back'" />
                                 </RouterLink>
-                                <div class="text-2xl font-bold text-gray-800">Customer Information</div>
+
+                                <div class="text-2xl font-bold text-gray-800">Company Information</div>
+                            </div>
+
+                            <!-- RIGHT SIDE -->
+                            <div class="flex items-center gap-2">
+                                <Button @click="pullSAPData" :loading="loadingPullSAP" :disabled="loadingPullSAP" icon="pi pi-refresh" class="p-button-info" style="width: 70px">
+                                    <span v-if="loadingPullSAP">Pulling SAP...</span>
+                                    <span v-else>Pull SAP</span>
+                                </Button>
+
+                                <RouterLink :to="`/om/editEten/${form.custAccountNo}`">
+                                    <Button icon="pi pi-pencil" class="p-button-warning" v-tooltip="'Edit'" />
+                                </RouterLink>
                             </div>
                         </div>
-                        <div class="text-xl font-semibold pb-2">🏢 Company Details</div>
 
                         <div class="grid md:grid-cols-2 gap-4">
                             <div>
@@ -212,7 +225,7 @@
                     <!-- Title -->
                     <div class="flex items-center justify-between border-b pb-3 mb-4">
                         <div class="text-2xl font-bold text-gray-800">Account Info</div>
-                        <span class="inline-flex items-center px-3 py-2 text-xs font-semibold text-green-700 bg-green-100 rounded"> <i class="pi pi-check-circle mr-1"></i> {{ form.accountStatus === 'false' ? 'Inactive' : 'Active' }} </span>
+                        <!-- <span class="inline-flex items-center px-3 py-2 text-xs font-semibold text-green-700 bg-green-100 rounded"> <i class="pi pi-check-circle mr-1"></i> {{ form.accountStatus === 'false' ? 'Inactive' : 'Active' }} </span> -->
                     </div>
 
                     <!-- Table -->
@@ -222,11 +235,11 @@
                                 <!-- Terms -->
                                 <tr class="border-b">
                                     <td class="px-4 py-2 font-medium">eTEN No.</td>
-                                    <td class="px-4 py-2 font-bold text-right">{{ form.memberCode }}</td>
+                                    <td class="px-4 py-2 font-bold text-right text-primary">{{ form.memberCode }}</td>
                                 </tr>
                                 <tr class="border-b">
                                     <td class="px-4 py-2 font-medium">Account No.</td>
-                                    <td class="px-4 py-2 font-bold text-right">{{ form.custAccountNo }}</td>
+                                    <td class="px-4 py-2 font-bold text-right text-primary">{{ form.custAccountNo }}</td>
                                 </tr>
                                 <tr class="border-b">
                                     <td class="px-4 py-2 font-medium">Account Type</td>
@@ -277,7 +290,23 @@
                                 </tr>
                                 <tr class="border-b">
                                     <td class="px-4 py-2 font-medium">Starting Sales Amount</td>
-                                    <td class="px-4 py-2 text-right">{{ form.startingSalesAmt || '-' }}</td>
+                                    <td class="px-4 py-2 text-right">RM {{ formatCurrency(form.startingSalesAmt) || '-' }}</td>
+                                </tr>
+                                <tr class="border-b">
+                                    <td class="px-4 py-2 font-medium">Quarter 1</td>
+                                    <td class="px-4 py-2 text-right">RM {{ formatCurrency(form.targetQ1) || '-' }}</td>
+                                </tr>
+                                <tr class="border-b">
+                                    <td class="px-4 py-2 font-medium">Quarter 2</td>
+                                    <td class="px-4 py-2 text-right">RM {{ formatCurrency(form.targetQ2) || '-' }}</td>
+                                </tr>
+                                <tr class="border-b">
+                                    <td class="px-4 py-2 font-medium">Quarter 3</td>
+                                    <td class="px-4 py-2 text-right">RM {{ formatCurrency(form.targetQ3) || '-' }}</td>
+                                </tr>
+                                <tr class="border-b">
+                                    <td class="px-4 py-2 font-medium">Quarter 4</td>
+                                    <td class="px-4 py-2 text-right">RM {{ formatCurrency(form.targetQ4) || '-' }}</td>
                                 </tr>
                                 <tr class="border-b">
                                     <td class="px-4 py-2 font-medium">Customer Condition Group</td>
@@ -291,6 +320,13 @@
                                     <td class="px-4 py-2 font-medium">Allow Lalamove</td>
                                     <td class="px-4 py-2 text-right">
                                         {{ form.allowLalamove == 1 ? 'Yes' : 'No' }}
+                                    </td>
+                                </tr>
+
+                                <tr class="border-b">
+                                    <td class="px-4 py-2 font-medium">Allow Direct Shipment</td>
+                                    <td class="px-4 py-2 text-right">
+                                        {{ form.allowDirectship == 1 ? 'Yes' : 'No' }}
                                     </td>
                                 </tr>
 
@@ -400,10 +436,72 @@ const shiptoList = ref([]);
 const salesForecast = ref(null);
 const loading = ref(false);
 const isSuspended = ref(false);
+const loadingPullSAP = ref(false);
 
 // Chart data
 const chartData = ref();
 const chartOptions = ref();
+
+// Pull SAP Data function
+const pullSAPData = async () => {
+    loadingPullSAP.value = true;
+    try {
+        const custAccNo = route.params.custAccNo;
+
+        // Call the SAP update API
+        const response = await api.postExtra('update_customer-SAP', {
+            custaccountno: custAccNo
+        });
+
+        if (response.data.status === 1) {
+            // Success - show success toast and refresh the data
+            toast.add({
+                severity: 'success',
+                summary: 'Success',
+                detail: 'Data successfully pulled from SAP',
+                life: 5000
+            });
+
+            // Refresh the dealer profile data to show updated information
+            await fetchDealerProfile();
+        } else {
+            // SAP returned error
+            const errorMessage = response.data.message || 'Failed to pull data from SAP';
+            toast.add({
+                severity: 'error',
+                summary: 'SAP Error',
+                detail: errorMessage,
+                life: 5000
+            });
+        }
+    } catch (error) {
+        console.error('Error pulling SAP data:', error);
+
+        // Handle different types of errors
+        let errorMessage = 'An unexpected error occurred';
+
+        if (error.response) {
+            // Server responded with error status
+            if (error.response.data && error.response.data.message) {
+                errorMessage = error.response.data.message;
+            } else {
+                errorMessage = `Server error: ${error.response.status}`;
+            }
+        } else if (error.request) {
+            // Request was made but no response received
+            errorMessage = 'No response from server. Please check your connection.';
+        }
+
+        toast.add({
+            severity: 'error',
+            summary: 'Error',
+            detail: errorMessage,
+            life: 5000
+        });
+    } finally {
+        loadingPullSAP.value = false;
+    }
+};
 
 // Fetch dealer profile data
 const fetchDealerProfile = async () => {
