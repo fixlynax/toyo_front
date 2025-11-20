@@ -338,7 +338,7 @@
             </div>
 
             <!-- 3. Scrap Detail -->
-            <div v-if="hasClaimDetails && (warantyDetail.status ==6 || warantyDetail.status ==5)" class="card w-full mb-4">
+            <div v-if="hasClaimDetails" class="card w-full mb-4">
                 <div class="flex items-center justify-between border-b pb-2 mb-4">
                     <div class="text-2xl font-bold text-gray-800">Scrap Details</div>
                     <Button v-if="hasClaimDetails && warantyDetail.isScrap === 0 && (warantyDetail.status !=6 || warantyDetail.status ==5)" label="Request Scrap" class="p-button-info" size="small" @click="requestScrap" :loading="loadingScrap" />
