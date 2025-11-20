@@ -19,9 +19,9 @@
                         <Button icon="pi pi-arrow-left" class="p-button-text p-button-secondary" @click="$router.back()" />
                         <div class="text-2xl font-bold text-gray-800">Warranty Details</div>
                     </div>
-                    <!-- <div class="inline-flex items-center gap-2">
-                             <Button  label="Approve" class="p-button-success" size="small" @click="Approve" />
-                        </div> -->
+                   <div class="inline-flex items-center gap-2">
+                       <Tag :value="getStatusText(warantyDetail.status)" :severity="getStatusSeverity(warantyDetail.status)" />
+                    </div>
                 </div>
                 <div class="grid grid-cols-3 md:grid-cols-3 gap-4">
                     <div>
@@ -46,19 +46,19 @@
                     <div class="grid grid-cols-2 md:grid-cols-2 gap-4">
                         <div>
                             <span class="block text-sm font-bold text-black-800">Brand</span>
-                            <p class="text-lg font-medium">{{ warantyDetail.name || '-' }}</p>
+                            <p class="text-lg font-medium">{{ warantyDetail.customer_info?.vehicleBrand || '-' }}</p>
                         </div>
                         <div>
                             <span class="block text-sm font-bold text-black-800">Registration No</span>
-                            <p class="text-lg font-medium">{{ warantyDetail.vehicleRegNo || '-' }}</p>
+                            <p class="text-lg font-medium">{{ warantyDetail.customer_info?.regNo || '-' }}</p>
                         </div>
                         <div>
                             <span class="block text-sm font-bold text-black-800">Model</span>
-                            <p class="text-lg font-medium">{{ warantyDetail.vehicleRegNo || '-' }}</p>
+                            <p class="text-lg font-medium">{{ warantyDetail.customer_info?.vehicleModel || '-' }}</p>
                         </div>
                         <div>
                             <span class="block text-sm font-bold text-black-800">Vehicle Type</span>
-                            <p class="text-lg font-medium">{{ warantyDetail.vehicle || '-' }}</p>
+                            <p class="text-lg font-medium">{{ warantyDetail.customer_info?.vehicle || '-' }}</p>
                         </div>
                     </div>
                 </div>
@@ -96,15 +96,15 @@
                         </div>
                         <div>
                             <span class="block text-sm font-bold text-black-800">Certificate Number</span>
-                            <p class="text-lg font-medium">{{ warantyDetail.size }}</p>
+                            <p class="text-lg font-medium">{{ warantyDetail.warranty_info?.warrantyCertNo }}</p>
                         </div>
                         <div>
                             <span class="block text-sm font-bold text-black-800">Warranty Type</span>
-                            <p class="text-lg font-medium">{{ warantyDetail.tire_details?.tyrespec || '-' }}</p>
+                            <p class="text-lg font-medium">{{ warantyDetail.warranty_info?.warrantyType || '-' }}</p>
                         </div>
                         <div>
                             <span class="block text-sm font-bold text-black-800">Purchase Date</span>
-                            <p class="text-lg font-medium">{{ warantyDetail.tire_details?.mfgcode || '-' }}</p>
+                            <p class="text-lg font-medium">{{ warantyDetail.warranty_info?.purchaseDate || '-' }}</p>
                         </div>
                         <div>
                             <span class="block text-sm font-bold text-black-800">Problem Description</span>
@@ -198,7 +198,7 @@
                     </div>
                     <div>
                         <span class="font-bold">Mobile Number</span>
-                        <p class="text-lg font-medium">{{ warantyDetail.mobileNumber || '-' }}</p>
+                        <p class="text-lg font-medium">{{ warantyDetail.customer_info?.mobileNo || '-' }}</p>
                     </div>
                 </div>
             </div>
@@ -1028,10 +1028,7 @@ const fetchWarrantyClaim = async () => {
                 isReturn: apiData.claim_info?.isReturn,
                 status: apiData.claim_info?.status,
                 // Customer Info
-                name: apiData.customer_info?.[0]?.name || '-',
-                vehicle: apiData.customer_info?.[0]?.vehicle || '-',
-                vehicleRegNo: apiData.customer_info?.[0]?.regNo,
-                mobileNumber: apiData.warantyDetail?.[0]?.mobileNo,
+                customer_info: apiData.customer_info?.[0] || [],
                 // Dealer Info
                 dealer_details: apiData.dealer_info?.[0] || null,
                 // Tire Info
@@ -1049,8 +1046,9 @@ const fetchWarrantyClaim = async () => {
                 replacement_detail: apiData.replacement_detail ?? null,
                 scrapPhotos: apiData.scrapPhotos || null,
                 submittedphotos: apiData.submittedphotos || null,
-                threadDepthPhotos: apiData.threadDepthPhotos ||null
-                // Add other necessary mappings...
+                threadDepthPhotos: apiData.threadDepthPhotos || null,
+                //waranty_info
+                warranty_info: apiData.warranty_info || null,
             };
             // console.log(warantyDetail);
             await loadScrapImages();
@@ -1520,13 +1518,26 @@ const formatTime = (timeStr) => {
 
 const getStatusText = (status) => {
     const statusMap = {
-        0: 'Pending',
-        1: 'Approved',
-        2: 'Rejected',
-        3: 'Under Review'
+        // 0: 'Pending',
+        // 1: 'Eten Approved',
+        // 2: 'Eten Rejected',
+        3: 'Processing',
+        4:' In Progress',
+        5: 'Completed',
+        6: 'Rejected'  
     };
     return statusMap[status] || 'Unknown';
 };
+function getStatusSeverity(status) {
+    const severityMap = {
+        3: 'info',
+        4: 'primary',
+        5: 'success',
+        6: 'danger'
+
+    };
+    return severityMap[status] || 'secondary';
+}
 
 // Lifecycle
 onMounted(() => {
