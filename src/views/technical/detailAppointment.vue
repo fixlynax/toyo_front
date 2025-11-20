@@ -11,6 +11,7 @@ const loading = ref(true);
 const activeImage = ref(null);
 const activeImageType = ref('');
 const submittedPhotos = ref([]);
+const imageDialogVisible = ref(false);
 
 // Fetch appointment details
 const fetchAppointmentDetail = async () => {
@@ -172,11 +173,14 @@ function formatDateFull(dateString) {
 const openImageModal = (imageSrc, imageType) => {
     activeImage.value = imageSrc;
     activeImageType.value = imageType;
+    imageDialogVisible.value = true;
 };
 
 const closeImageModal = () => {
     activeImage.value = null;
     activeImageType.value = '';
+    imageDialogVisible.value = false;
+
 };
 
 // Get photo by type
@@ -401,7 +405,7 @@ onMounted(() => {
     </div>
 
     <!-- Image Modal -->
-    <Dialog v-model:visible="activeImage" :modal="true" :style="{ width: '90vw', maxWidth: '1200px' }" @hide="closeImageModal">
+    <Dialog v-model:visible="imageDialogVisible" :modal="true" :style="{ width: '90vw', maxWidth: '1200px' }" @hide="closeImageModal">
         <template #header>
             <div class="font-semibold text-lg">{{ activeImageType }} - Image Preview</div>
         </template>
