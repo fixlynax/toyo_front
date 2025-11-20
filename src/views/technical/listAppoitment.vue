@@ -142,6 +142,30 @@ const exportToExcel = () => {
     }
 };
 
+
+function formatDate(dateString) {
+  if (!dateString) return '';
+  const date = new Date(dateString);
+  return date.toLocaleString('en-MY', {
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+  });
+}
+function formatDateFull(dateString) {
+  if (!dateString) return '';
+  const date = new Date(dateString);
+  return date.toLocaleString('en-MY', {
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+    hour: '2-digit',
+    minute: '2-digit',
+    second: '2-digit',
+    hour12: true
+  });
+}
+
 // 🟢 Helper function to get current date time for filename
 const getCurrentDateTime = () => {
     const now = new Date();
@@ -229,7 +253,7 @@ const getStatusColor = (status) => {
                 :rowHover="true" 
                 :filters="filters" 
                 filterDisplay="menu" 
-                :globalFilterFields="['appointmentCode', 'dealerShop', 'dealerCustAccountNo', 'statusString']"
+                :globalFilterFields="['appointmentCode', 'dealerShop', 'dealerCustAccountNo', 'customerName', 'customerPhone', 'requestDate', 'requestSession', 'statusString']"
             >
                 <template #header>
                     <div class="flex items-center justify-between gap-4 w-full flex-wrap">
@@ -273,7 +297,7 @@ const getStatusColor = (status) => {
                     </template>
                 </Column>
 
-                <Column header="Dealer Info" style="min-width: 14rem">
+                <Column header="Customer Info" style="min-width: 14rem">
                     <template #body="{ data }">
                         <div class="flex flex-col">
                             <!-- Top -->
@@ -285,7 +309,7 @@ const getStatusColor = (status) => {
                     </template>
                 </Column>
 
-                <Column header="Customer Info" style="min-width: 14rem">
+                <Column header="Consumer Info" style="min-width: 14rem">
                     <template #body="{ data }">
                         <div class="flex flex-col">
                             <!-- Top -->
@@ -299,19 +323,19 @@ const getStatusColor = (status) => {
 
                 <Column field="requestDate" header="Request Date" style="min-width: 10rem">
                     <template #body="{ data }">
-                        {{ data.requestDate || 'Not specified' }}
+                        {{ formatDate(data.requestDate) || 'Not Request' }}
                     </template>
                 </Column>
 
                 <Column field="requestSession" header="Request Session" style="min-width: 8rem">
                     <template #body="{ data }">
-                        {{ data.requestSession || 'Not specified' }}
+                        {{ data.requestSession || 'Not Request' }}
                     </template>
                 </Column>
 
                 <Column field="bookDateTime" header="Scheduled Date/Time" style="min-width: 12rem">
                     <template #body="{ data }">
-                        {{ data.bookDateTime }}
+                        {{ formatDateFull(data.bookDateTime) || 'Not Scheduled' }}
                     </template>
                 </Column>
 

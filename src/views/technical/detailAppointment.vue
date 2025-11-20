@@ -145,6 +145,29 @@ const appointmentStatusClass = computed(() => {
     };
 });
 
+function formatDate(dateString) {
+  if (!dateString) return '';
+  const date = new Date(dateString);
+  return date.toLocaleString('en-MY', {
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+  });
+}
+function formatDateFull(dateString) {
+  if (!dateString) return '';
+  const date = new Date(dateString);
+  return date.toLocaleString('en-MY', {
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+    hour: '2-digit',
+    minute: '2-digit',
+    second: '2-digit',
+    hour12: true
+  });
+}
+
 // Image modal functions
 const openImageModal = (imageSrc, imageType) => {
     activeImage.value = imageSrc;
@@ -194,13 +217,13 @@ onMounted(() => {
                         </div>
                         <div>
                             <span class="block text-sm font-bold text-black-800">Appointment Date</span>
-                            <p class="text-lg font-medium">{{ appointment.appointment_info?.appointmentDate || 'Not Scheduled' }}</p>
+                            <p class="text-lg font-medium">{{ formatDate(appointment.appointment_info?.appointmentDate)  || 'Not Scheduled' }}</p>
                         </div>
                     </div>
                     <div class="grid grid-cols-2 gap-4">
                         <div>
                             <span class="block text-sm font-bold text-black-800">Request Date</span>
-                            <p class="text-lg font-medium">{{ appointment.appointment_info?.appointmentRequestDate || '-' }}</p>
+                            <p class="text-lg font-medium">{{ formatDate(appointment.appointment_info?.appointmentRequestDate) || 'Not Request' }}</p>
                         </div>
                         <div>
                             <span class="block text-sm font-bold text-black-800">Request Session</span>
@@ -212,7 +235,7 @@ onMounted(() => {
                         </div>
                         <div>
                             <span class="block text-sm font-bold text-black-800">Created Date</span>
-                            <p class="text-lg font-medium">{{ appointment.appointment_info?.created || '-' }}</p>
+                            <p class="text-lg font-medium">{{ formatDateFull(appointment.appointment_info?.created) || 'Not Created' }}</p>
                         </div>
                         
                     <!-- Reject Reason (only show if exists) -->
@@ -291,7 +314,7 @@ onMounted(() => {
                     </div>
                     <div>
                         <span class="block text-sm font-bold text-black-800">Purchase Date</span>
-                        <p class="text-lg font-medium">{{ appointment.warrantyReg.purchaseDate || '-' }}</p>
+                        <p class="text-lg font-medium">{{ formatDate(appointment.warrantyReg.purchaseDate) || '-' }}</p>
                     </div>
                    <div>
                         <span class="block text-sm font-bold text-black-800">Problem Description</span>
