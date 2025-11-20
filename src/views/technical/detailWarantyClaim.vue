@@ -120,7 +120,7 @@
                 </div>
 
                 <!-- Photo Grid -->
-                <div  class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                <div v-if="hasSubmittedPhotos"  class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
                     <div v-for="photo in submittedPhotos" :key="photo.type" class="text-center">
                         <span class="block text-lg font-bold text-black-800 mb-3">{{ photo.label }}</span>
                         <div class="cursor-pointer border-2 border-gray-300 rounded-lg overflow-hidden hover:border-primary-500 transition-all duration-200 bg-gray-100" @click="openImageModal(photo.imageSrc, photo.label)">
@@ -131,7 +131,7 @@
                         </div>
                     </div>
                 </div>
-                <div  class="text-center py-8 bg-gray-50 rounded-lg mb-6">
+                <div v-else class="text-center py-8 bg-gray-50 rounded-lg mb-6">
                     <i class="pi pi-image text-4xl text-gray-400 mb-3"></i>
                     <p class="text-gray-500 font-medium">No submitted images available</p>
                 </div>
@@ -598,6 +598,21 @@
             <Button label="Reject Claim" icon="pi pi-times-circle" class="p-button-danger" @click="confirmRejectWarranty" :loading="rejecting" :disabled="!selectedRejectReason || rejecting" />
         </template>
     </Dialog>
+
+      <!-- Image Modal -->
+    <Dialog v-model:visible="activeImage" :modal="true" :style="{ width: '90vw', maxWidth: '1200px' }" @hide="closeImageModal">
+        <template #header>
+            <div class="font-semibold text-lg">{{ activeImageType }} - Image Preview</div>
+        </template>
+        <div class="flex justify-center">
+            <img :src="activeImage" alt="Preview" class="max-w-full max-h-96 object-contain" />
+        </div>
+        <template #footer>
+            <div class="flex justify-between items-center w-full">
+                <Button label="Close" icon="pi pi-times" @click="closeImageModal" class="p-button-text" />
+            </div>
+        </template>
+    </Dialog>
 </template>
 
 <script setup>
@@ -636,6 +651,8 @@ const newClaimData = ref({
     usablePercent: null,
     wornPercent: null
 });
+const activeImage = ref(null);
+const activeImageType = ref('');
 
 // States
 const scrapStatus = ref('');
@@ -649,6 +666,7 @@ const reimbursementResult = ref({});
 const replacementSubmitted = ref(false);
 const reimbursementSubmitted = ref(false);
 
+
 const props = defineProps(['id']);
 // Images
 const scrapImages = ref([]);
@@ -656,6 +674,7 @@ const submittedPhotos = ref([]);
 const TireDepthImages = ref([]);
 const listMaterial = ref([]);
 const selectedMaterial = ref(null);
+
 
 const galleriaResponsiveOptions = ref([
     {
@@ -718,6 +737,17 @@ const openCreateClaimDialog = () => {
 const closeCreateClaimDialog = () => {
     showCreateClaimDialog.value = false;
     creatingClaim.value = false;
+};
+
+// Computed properties for conditional checks
+const hasSubmittedPhotos = computed(() => {
+    return submittedPhotos.value.length > 0;
+})
+
+
+// Get photo by type
+const getPhotoByType = (type) => {
+    return submittedPhotos.value.find((photo) => photo.type === type);
 };
 
 // Submit Claim Details
@@ -831,6 +861,15 @@ const fetchMaterial = async () => {
     }
 };
 
+const openImageModal = (imageSrc, imageType) => {
+    activeImage.value = imageSrc;
+    activeImageType.value = imageType;
+};
+
+const closeImageModal = () => {
+    activeImage.value = null;
+    activeImageType.value = '';
+};
 // CTC Methods
 const confirmCTCRequest = async () => {
     loadingCTC.value = true;
@@ -985,12 +1024,14 @@ const fetchWarrantyClaim = async () => {
                 reimbursement: apiData.reimbursement?.[0] || [],
                 replacement_detail: apiData.replacement_detail ?? null,
                 scrapPhotos: apiData.scrapPhotos || null,
+                submittedphotos: apiData.submittedphotos || null,
                 threadDepthPhotos: apiData.threadDepthPhotos ||null
                 // Add other necessary mappings...
             };
             // console.log(warantyDetail);
             await loadScrapImages();
             await loadTireDeptImages();
+            await loadSubmittedPhotos();
         } else {
             error.value = 'Warranty claim not found.';
         }
@@ -1066,6 +1107,46 @@ const loadTireDeptImages = async () => {
     }
 
     TireDepthImages.value = images;
+};
+
+const loadSubmittedPhotos = async () => {
+    const photos = [];
+    const photoTypes = [
+        { key: 'mileageFileURL', label: 'Mileage' },
+        { key: 'serialNoFileURL', label: 'Serial Number' },
+        { key: 'tireSizeFileURL', label: 'Tire Size' },
+        { key: 'defectAreaFileURL', label: 'Defect Area' }
+    ];
+
+    for (const photoType of photoTypes) {
+        const url = warantyDetail.value.submittedphotos[photoType.key];
+        if (url && url !== 'null' && url !== null) {
+            try {
+                const imageSrc = await api.getPrivateFile(url);
+
+                photos.push({
+                    type: photoType.key,
+                    label: photoType.label,
+                    url: url,
+                    imageSrc: imageSrc,
+                    alt: `${photoType.label} Photo`
+                });
+
+            } catch (error) {
+                console.error(`❌ Error loading ${photoType.label} photo:`, error);
+                // Create fallback image
+                photos.push({
+                    type: photoType.key,
+                    label: photoType.label,
+                    url: url,
+                    imageSrc: createFallbackImage(photoType.label),
+                    alt: `${photoType.label} Photo - Failed to load`
+                });
+            }
+        }
+    }
+
+    submittedPhotos.value = photos;
 };
 
 
