@@ -124,7 +124,7 @@ const hasSubmittedPhotos = computed(() => {
 });
 
 const hasTireInfo = computed(() => {
-    return appointment.value.tire_info && appointment.value.tire_info.length > 0;
+    return appointment.value.tire_info;
 });
 
 const hasCustomerInfo = computed(() => {
@@ -144,6 +144,29 @@ const appointmentStatusClass = computed(() => {
         'bg-red-100 text-red-800': status === 2
     };
 });
+
+function formatDate(dateString) {
+  if (!dateString) return '';
+  const date = new Date(dateString);
+  return date.toLocaleString('en-MY', {
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+  });
+}
+function formatDateFull(dateString) {
+  if (!dateString) return '';
+  const date = new Date(dateString);
+  return date.toLocaleString('en-MY', {
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+    hour: '2-digit',
+    minute: '2-digit',
+    second: '2-digit',
+    hour12: true
+  });
+}
 
 // Image modal functions
 const openImageModal = (imageSrc, imageType) => {
@@ -194,13 +217,13 @@ onMounted(() => {
                         </div>
                         <div>
                             <span class="block text-sm font-bold text-black-800">Appointment Date</span>
-                            <p class="text-lg font-medium">{{ appointment.appointment_info?.appointmentDate || 'Not Scheduled' }}</p>
+                            <p class="text-lg font-medium">{{ formatDate(appointment.appointment_info?.appointmentDate)  || 'Not Scheduled' }}</p>
                         </div>
                     </div>
                     <div class="grid grid-cols-2 gap-4">
                         <div>
                             <span class="block text-sm font-bold text-black-800">Request Date</span>
-                            <p class="text-lg font-medium">{{ appointment.appointment_info?.appointmentRequestDate || '-' }}</p>
+                            <p class="text-lg font-medium">{{ formatDate(appointment.appointment_info?.appointmentRequestDate) || 'Not Request' }}</p>
                         </div>
                         <div>
                             <span class="block text-sm font-bold text-black-800">Request Session</span>
@@ -208,11 +231,11 @@ onMounted(() => {
                         </div>
                         <div>
                             <span class="block text-sm font-bold text-black-800">Appointment Time</span>
-                            <p class="text-lg font-medium">{{ appointment.appointment_info?.appointmentTime || 'Not Scheduled' }}</p>
+                            <p class="text-lg font-medium">{{ appointment.appointment_info?.appointmentTime || '-' }}</p>
                         </div>
                         <div>
                             <span class="block text-sm font-bold text-black-800">Created Date</span>
-                            <p class="text-lg font-medium">{{ appointment.appointment_info?.created || '-' }}</p>
+                            <p class="text-lg font-medium">{{ formatDateFull(appointment.appointment_info?.created) || 'Not Created' }}</p>
                         </div>
                         
                     <!-- Reject Reason (only show if exists) -->
@@ -233,11 +256,11 @@ onMounted(() => {
                 <div class="grid grid-cols-2 gap-4">
                     <div>
                         <span class="block text-sm font-bold text-black-800">Brand</span>
-                        <p class="text-lg font-medium">{{ appointment.customer_info[0]?.name || '-' }}</p>
+                        <p class="text-lg font-medium">{{ appointment.customer_info[0]?.vehicleBrand || '-' }}</p>
                     </div>
                     <div>
                         <span class="block text-sm font-bold text-black-800">Model</span>
-                        <p class="text-lg font-medium">{{ appointment.customer_info[0]?.vehicle || '-' }}</p>
+                        <p class="text-lg font-medium">{{ appointment.customer_info[0]?.vehicleModel || '-' }}</p>
                     </div>
                     <div>
                         <span class="block text-sm font-bold text-black-800">Registration No</span>
@@ -255,39 +278,43 @@ onMounted(() => {
                 <div class="flex items-center justify-between border-b pb-2 mb-4">
                     <div class="text-2xl font-bold text-gray-800">Tire Information</div>
                 </div>
-
-                <div class="grid grid-cols-2 gap-4"  v-for="(tire, index) in appointment.tire_info" :key="index">
+            <!-- "pattern": "P57",
+            "tyresize": "16",
+            "desc": "185\/55 R16 87H PXR57 TLYKGSS MT1Z",
+            "mfgcode": "WWW",
+            "weekcode": "RRRR" -->
+                <div class="grid grid-cols-2 gap-4" >
                     <div>
                         <span class="block text-sm font-bold text-black-800">Pattern</span>
-                        <p class="text-lg font-medium">{{ tire.pattern || '-' }}</p>
+                        <p class="text-lg font-medium">{{ appointment.tire_info.pattern || '-' }}</p>
                     </div>
                     <div>
                         <span class="block text-sm font-bold text-black-800">Size</span>
-                        <p class="text-lg font-medium">{{ tire.tyresize || '-' }}</p>
+                        <p class="text-lg font-medium">{{  appointment.tire_info.tyresize || '-' }}</p>
                     </div>
                     <div>
                         <span class="block text-sm font-bold text-black-800">Description</span>
-                        <p class="text-lg font-medium">{{ tire.desc || '-' }}</p>
+                        <p class="text-lg font-medium">{{  appointment.tire_info.desc || '-' }}</p>
                     </div>
                     <div>
                         <span class="block text-sm font-bold text-black-800">MFG Code</span>
-                        <p class="text-lg font-medium">{{ appointment.customer_info[0]?.vehicle || '-' }}</p>
+                        <p class="text-lg font-medium">{{ appointment.tire_info.mfgcode || '-' }}</p>
                     </div>
                     <div>
                         <span class="block text-sm font-bold text-black-800">Week Code</span>
-                         <p class="text-lg font-medium">{{ tire.weekcode || '-' }}</p>
+                         <p class="text-lg font-medium">{{  appointment.tire_info.weekcode || '-' }}</p>
                     </div>
                     <div>
                         <span class="block text-sm font-bold text-black-800">Certificate No</span>
-                        <p class="text-lg font-medium">{{ tire.tyresize || '-' }}</p>
+                        <p class="text-lg font-medium">{{  appointment.warrantyReg.warrantyCertNo || '-' }}</p>
                     </div>
                     <div>
                         <span class="block text-sm font-bold text-black-800">Warranty Type</span>
-                        <p class="text-lg font-medium">{{ tire.desc || '-' }}</p>
+                        <p class="text-lg font-medium">{{  appointment.warrantyReg.warrantyType || '-' }}</p>
                     </div>
                     <div>
                         <span class="block text-sm font-bold text-black-800">Purchase Date</span>
-                        <p class="text-lg font-medium">{{ appointment.customer_info[0]?.vehicle || '-' }}</p>
+                        <p class="text-lg font-medium">{{ formatDate(appointment.warrantyReg.purchaseDate) || '-' }}</p>
                     </div>
                    <div>
                         <span class="block text-sm font-bold text-black-800">Problem Description</span>
@@ -295,7 +322,7 @@ onMounted(() => {
                     </div>
                     <div>
                         <span class="block text-sm font-bold text-black-800">Serial Plate</span>
-                        <p class="text-lg font-medium">{{ appointment.customer_info[0]?.vehicle || '-' }}</p>
+                        <p class="text-lg font-medium">{{ appointment.customer_info[0]?.serialPlate || '-' }}</p>
                     </div>
                 </div>
             </div>
@@ -330,7 +357,7 @@ onMounted(() => {
             <!-- Dealer Information - Side by side like customer info -->
             <div class="card w-full" v-if="hasDealerInfo">
                 <div class="flex items-center justify-between border-b pb-2 mb-4">
-                    <div class="text-2xl font-bold text-gray-800">Dealer Information</div>
+                    <div class="text-2xl font-bold text-gray-800">Customer Information</div>
                 </div>
 
                 <div class="grid grid-cols-2 gap-4">
