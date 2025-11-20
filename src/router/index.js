@@ -1029,7 +1029,6 @@ router.beforeEach( async(to, from, next) => {
         await menuStore.loadMenuAndPermissions();
       } catch (err) {
         console.error('Failed to load menu:', err);
-        // Optional: logout user if token invalid
         tokenService.clearToken();
         return next('/auth/login');
       }
@@ -1043,19 +1042,19 @@ router.beforeEach( async(to, from, next) => {
     }
       // Redirect if login based on role
     if (relativePath === '/auth/login' || to.path === '/'){
-        const userRole = menuStore.role; 
-        if (userRole === 'TECHNICAL') {
-            return next(`/technical/dashboardTechnical`);
-        }
-        if (userRole === 'MARKETING') {
-            return next(`/marketing/memberDashboard`);
-        }
-        if (userRole === 'OM') {
-            return next(`/om/omDashboard`);
-        }
-        if (userRole === 'Superadmin') {
-            return next(`/welcome`);
-        }
+        // const userRole = menuStore.role; 
+        // if (userRole === 'TECHNICAL') {
+        //     return next(`/technical/dashboardTechnical`);
+        // }
+        // if (userRole === 'MARKETING') {
+        //     return next(`/marketing/memberDashboard`);
+        // }
+        // if (userRole === 'OM') {
+        //     return next(`/om/omDashboard`);
+        // }
+        // if (userRole === 'Superadmin') {
+        //     return next(`/welcome`);
+        // }
             return next('/welcome');
     }
     }

@@ -24,7 +24,7 @@
                     </div>
                 </template>
 
-                <Column field="userlist" header="List User & Role" style="min-width: 20rem">
+                <Column field="userlist" header="List User & Role" style="min-width: 12rem">
                     <template #body="{ data }">
                         <div class="flex flex-col gap-1">
                             <span class="font-bold text-primary-400">{{ data.userlist }}</span>
@@ -36,26 +36,49 @@
                     </template>
                 </Column>
 
-                <Column field="description" header="Description" style="min-width: 20rem">
+                <Column field="description" header="Description" style="min-width: 12rem">
                     <template #body="{ data }">
                         <span class="">{{ data.description }}</span>
                     </template>
                 </Column>
+                <Column field="department" header="Department" style="min-width: 12rem">
+                    <template #body="{ data }">
+                        {{ data.department || '-' }}
+                    </template>
+                </Column>
 
-                <Column field="modules" header="Module / Function List" style="min-width: 20rem">
+                <Column field="mobile" header="Mobile No" style="min-width: 12rem">
+                    <template #body="{ data }">
+                        {{ data.mobile || '-' }}
+                    </template>
+                </Column>
+
+                <Column field="email" header="Email Address" style="min-width: 12rem">
+                    <template #body="{ data }">
+                        {{ data.email || '-' }}
+                    </template>
+                </Column>
+
+                <Column field="usergroup" header="User Group" style="min-width: 12rem">
+                    <template #body="{ data }">
+                        <span>{{ data.usergroup || '-' }}</span>
+                    </template>
+                </Column>
+
+                <Column field="modules" header="Module / Function List" style="min-width: 12rem">
                     <template #body="{ data }">
                         <Button icon="pi pi-eye" class="p-button-text p-button-sm text-blue-600" @click="openModuleDialog(data.modules)" />
-                        <span class="ml-2">{{ data.modules.length }} Modules</span>
+                        <span class="ml-2">{{ data.modules.length || '-' }} Modules</span>
                     </template>
                 </Column>
 
-                <Column field="created" header="Created" style="min-width: 15rem">
+                <Column field="created" header="Created" style="min-width: 12rem">
                     <template #body="{ data }">
-                        {{ data.created }}
+                        {{ data.created ? new Date(data.created).toLocaleDateString('en-GB') : '-' }}
                     </template>
                 </Column>
 
-                <Column header="Status" style="min-width: 10rem">
+                <Column header="Status" style="min-width: 6rem">
                     <template #body="{ data }">
                         <Tag :severity="data.statusUser === 1 ? 'success' : 'danger'" :value="data.statusUser === 1 ? 'Active' : 'Inactive'" />
                     </template>
@@ -131,33 +154,68 @@ onMounted(async () => {
 const fetchUsers = async () => {
     loading.value = true;
     try {
-        const res = await api.get('admin/list-user-role');
-        const raw = res.data.data;
-
-        listData.value = raw.map((item) => ({
-            id: item.id,
-            userlist: item.name,
-            description: item.description,
-            is_super_admin: item.is_super_admin ? 1 : 0,
-            sales_person: item.is_sales_person ? 1 : 0,
-            created: item.created,
-            modules: item.permissions.map((p) => ({
-                name: p.function_name,
-                write: p.is_write
-            })),
-            statusUser: item.status ? 1 : 0
-        }));
+        const res = await api.get('getAdminUserProfile');
+        
+        if (res.data.status === 1 && res.data.user_profile) {
+            const userProfile = res.data.user_profile;
+            
+            // Transform the single user profile into array format for the table
+            listData.value = [{
+                id: userProfile.user_id,
+                userlist: userProfile.username,
+                description: userProfile.full_name || userProfile.role_info?.role_description || '-',
+                is_super_admin: userProfile.role_info?.is_super_admin ? 1 : 0,
+                sales_person: false, // This field might not be available in the new response
+                created: userProfile.created_date,
+                modules: extractModulesFromPermissions(userProfile.permissions),
+                statusUser: userProfile.user_status ? 1 : 0,
+                department: '-', // Not available in new response
+                mobile: '-', // Not available in new response
+                email: userProfile.email_address || '-',
+                usergroup: userProfile.role_info?.role_name || '-'
+            }];
+        } else {
+            listData.value = [];
+            toast.add({
+                severity: 'warn',
+                summary: 'No Data',
+                detail: 'No user profile found',
+                life: 3000
+            });
+        }
     } catch (err) {
         listData.value = [];
         toast.add({
             severity: 'error',
             summary: 'Error',
-            detail: 'Failed to fetch users',
+            detail: 'Failed to fetch user profile',
             life: 3000
         });
     } finally {
         loading.value = false;
     }
+};
+
+// Helper function to extract modules from the new permissions structure
+const extractModulesFromPermissions = (permissions) => {
+    if (!permissions || !permissions.function_groups) {
+        return [];
+    }
+
+    const modules = [];
+    
+    permissions.function_groups.forEach(group => {
+        if (group.functions && Array.isArray(group.functions)) {
+            group.functions.forEach(func => {
+                modules.push({
+                    name: func.function_name,
+                    write: func.has_write_access === 1
+                });
+            });
+        }
+    });
+
+    return modules;
 };
 
 const editUser = (user) => {
@@ -168,9 +226,8 @@ const deleteUser = async (user) => {
     if (!confirm(`Are you sure you want to delete "${user.userlist}"?`)) return;
 
     try {
-      
+        // Note: You might need to update the delete endpoint as well
         const res = await api.delete(`admin/delete-user-role/${user.id}`);
-    
 
         if (res.data.status === 1) {
             toast.add({
@@ -198,7 +255,6 @@ const deleteUser = async (user) => {
         });
     }
 };
-
 </script>
 
 <style scoped lang="scss">
