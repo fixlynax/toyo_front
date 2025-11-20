@@ -114,6 +114,7 @@
                             <div class="flex-1">
                                 <div class="font-medium text-gray-800">{{ func.function_name }}</div>
                                 <div class="text-sm text-gray-500">{{ func.function_description }}</div>
+                                   <!-- <div class="text-xs text-gray-400">{{ func.function_code }}</div> -->
                             </div>
                             <div class="flex gap-4 items-center">
                                 <!-- None -->
