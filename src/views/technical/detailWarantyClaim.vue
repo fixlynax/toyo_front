@@ -209,14 +209,14 @@
                     <div class="text-2xl font-bold text-gray-800">CTC Detail</div>
                     <!-- Show Request button only if no CTC data exists -->
                     <!-- <Button v-if="!hasCTCData && !ctcSkipped" label="Request CTC" class="p-button-info" size="small" @click="showCTCConfirmationDialog = true" :loading="loadingCTC" /> -->
-                    <Button v-if="!(warantyDetail.isCTC === 0 || warantyDetail.isScrap === 1 || warantyDetail.status !=6 || warantyDetail.status ==5)" label="Request CTC" class="p-button-info" size="small" @click="confirmCTCRequest" :loading="loadingCTC" />
-                    <div v-else-if="warantyDetail.isCTC === 1 && !warantyDetail.ctc_details.reachWH" class="text-right mt-3 text-sm font-bold text-green-600">
-                        <i class="pi pi-check-circle mr-2"></i>
-                        CTC Requested
-                    </div>
+                    <Button v-if="warantyDetail.isCTC === 0 || !( warantyDetail.isScrap === 1 || warantyDetail.status !=6 || warantyDetail.status ==5)" label="Request CTC" class="p-button-info" size="small" @click="confirmCTCRequest" :loading="loadingCTC" />
                     <div v-else-if="warantyDetail.isReturn === 1 && warantyDetail.ctc_details.reachWH" class="text-right mt-3 text-sm font-bold text-green-600">
                         <i class="pi pi-check-circle mr-2"></i>
                         Return CTC Requested
+                    </div>
+                    <div v-else-if="warantyDetail.isCTC === 1" class="text-right mt-3 text-sm font-bold text-green-600">
+                        <i class="pi pi-check-circle mr-2"></i>
+                        CTC Requested
                     </div>
                 </div>
 
