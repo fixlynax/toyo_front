@@ -598,6 +598,21 @@
             <Button label="Reject Claim" icon="pi pi-times-circle" class="p-button-danger" @click="confirmRejectWarranty" :loading="rejecting" :disabled="!selectedRejectReason || rejecting" />
         </template>
     </Dialog>
+
+      <!-- Image Modal -->
+    <Dialog v-model:visible="activeImage" :modal="true" :style="{ width: '90vw', maxWidth: '1200px' }" @hide="closeImageModal">
+        <template #header>
+            <div class="font-semibold text-lg">{{ activeImageType }} - Image Preview</div>
+        </template>
+        <div class="flex justify-center">
+            <img :src="activeImage" alt="Preview" class="max-w-full max-h-96 object-contain" />
+        </div>
+        <template #footer>
+            <div class="flex justify-between items-center w-full">
+                <Button label="Close" icon="pi pi-times" @click="closeImageModal" class="p-button-text" />
+            </div>
+        </template>
+    </Dialog>
 </template>
 
 <script setup>
@@ -636,6 +651,8 @@ const newClaimData = ref({
     usablePercent: null,
     wornPercent: null
 });
+const activeImage = ref(null);
+const activeImageType = ref('');
 
 // States
 const scrapStatus = ref('');
@@ -844,6 +861,15 @@ const fetchMaterial = async () => {
     }
 };
 
+const openImageModal = (imageSrc, imageType) => {
+    activeImage.value = imageSrc;
+    activeImageType.value = imageType;
+};
+
+const closeImageModal = () => {
+    activeImage.value = null;
+    activeImageType.value = '';
+};
 // CTC Methods
 const confirmCTCRequest = async () => {
     loadingCTC.value = true;
