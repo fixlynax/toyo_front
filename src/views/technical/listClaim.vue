@@ -14,16 +14,16 @@ const tabs = [
     { label: 'Processing', value: 'Processing' },
     { label: 'In Progress', value: 'In Progress' },
     { label: 'Completed', value: 'Completed' },
-    { label: 'Reject', value: 'Reject' }
+    { label: 'Rejected', value: 'Rejected' }
 ];
 
 // Define status categories based on your requirements
-const statusCategories = {
-    Processing: ['Pending Dealer', 'Pending CTC', 'Processing'],
-    'In Progress': ['In Progress', 'Pending Scrap', 'Pending Manager Approve', 'Pending Invoice', 'Pending Invoice Approve'],
-    Completed: ['Completed', 'Admin Approved', 'Dealer Approved', 'Settled'],
-    Reject: ['Reject', 'Admin Rejected', 'Dealer Rejected']
-};
+// const statusCategories = {
+//     Processing: ['Pending Dealer', 'Pending CTC', 'Processing'],
+//     'In Progress': ['In Progress', 'Pending Scrap', 'Pending Manager Approve', 'Pending Invoice', 'Pending Invoice Approve'],
+//     Completed: ['Completed', 'Admin Approved', 'Dealer Approved', 'Settled'],
+//     Reject: ['Reject', 'Admin Rejected', 'Dealer Rejected']
+// };
 
 const getOverallStatusSeverity = (status) => {
     switch (status) {
@@ -41,7 +41,7 @@ const getOverallStatusSeverity = (status) => {
             return 'success';
         case 'Dealer Rejected':
         case 'Admin Rejected':
-        case 'Reject':
+        case 'Rejected':
             return 'danger';
         case 'Processing':
             return 'info';
@@ -59,13 +59,7 @@ const filters = ref({
 const filteredList = computed(() => {
     const tabValue = tabs[activeTab.value].value;
 
-    if (tabValue === 'All') {
-        return listData.value;
-    }
-
-    // Filter based on status categories
-    const statusesInCategory = statusCategories[tabValue] || [tabValue];
-    return listData.value.filter((item) => statusesInCategory.includes(item.status));
+    return listData.value.filter(item => item.status === tabValue);
 });
 
 const fetchClaims = async () => {

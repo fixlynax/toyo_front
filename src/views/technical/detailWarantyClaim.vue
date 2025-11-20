@@ -96,7 +96,7 @@
                         </div>
                         <div>
                             <span class="block text-sm font-bold text-black-800">Certificate Number</span>
-                            <p class="text-lg font-medium">{{ warantyDetail.warranty_info?.warrantyCertNo }}</p>
+                            <p class="text-lg font-medium">{{ warantyDetail.warrantyCertNo || '-' }}</p>
                         </div>
                         <div>
                             <span class="block text-sm font-bold text-black-800">Warranty Type</span>
@@ -108,7 +108,7 @@
                         </div>
                         <div>
                             <span class="block text-sm font-bold text-black-800">Problem Description</span>
-                            <p class="text-lg font-medium">{{ warantyDetail?.problem || '-' }}</p>
+                            <p class="text-lg font-medium">{{ warantyDetail.customer_info?.problem || '-' }}</p>
                         </div>
                     </div>
                 </div>
@@ -209,10 +209,14 @@
                     <div class="text-2xl font-bold text-gray-800">CTC Detail</div>
                     <!-- Show Request button only if no CTC data exists -->
                     <!-- <Button v-if="!hasCTCData && !ctcSkipped" label="Request CTC" class="p-button-info" size="small" @click="showCTCConfirmationDialog = true" :loading="loadingCTC" /> -->
-                    <Button v-if="warantyDetail.isCTC === 0 && warantyDetail.status !=6" label="Request CTC" class="p-button-info" size="small" @click="confirmCTCRequest" :loading="loadingCTC" />
-                    <div v-else class="text-right mt-3 text-sm font-bold text-green-600">
+                    <Button v-if="!(warantyDetail.isCTC === 0 || warantyDetail.isScrap === 1 || warantyDetail.status !=6 || warantyDetail.status ==5)" label="Request CTC" class="p-button-info" size="small" @click="confirmCTCRequest" :loading="loadingCTC" />
+                    <div v-else-if="warantyDetail.isCTC === 1 && !warantyDetail.ctc_details.reachWH" class="text-right mt-3 text-sm font-bold text-green-600">
                         <i class="pi pi-check-circle mr-2"></i>
                         CTC Requested
+                    </div>
+                    <div v-else-if="warantyDetail.isReturn === 1 && warantyDetail.ctc_details.reachWH" class="text-right mt-3 text-sm font-bold text-green-600">
+                        <i class="pi pi-check-circle mr-2"></i>
+                        Return CTC Requested
                     </div>
                 </div>
 
@@ -235,7 +239,7 @@
                         <span class="font-bold">Schedule Date</span>
                         <p>{{ warantyDetail.return_info?.scheduleDeliveryDate ? formatDate(warantyDetail.return_info.scheduleDeliveryDate): 'Not Assigned'}}</p>
                     </div>
-                    <Button v-if="warantyDetail.isReturn === 0 && warantyDetail.ctc_details.reachWH" label="Request CTC Return" class="p-button-info" size="small" @click="confirmCTCRequest" :loading="loadingCTC" />
+                    <Button v-if="warantyDetail.isReturn === 0 && warantyDetail.ctc_details.reachWH" label="Request CTC Return" class="p-button-info" size="small" @click="confirmCTCRequestReturn" :loading="loadingCTC" />
                 </div>
 
                 <!-- Show empty state if no CTC data and not skipped -->
@@ -334,11 +338,11 @@
             </div>
 
             <!-- 3. Scrap Detail -->
-            <div v-if="hasClaimDetails && warantyDetail.status !=6" class="card w-full mb-4">
+            <div v-if="hasClaimDetails && (warantyDetail.status ==6 || warantyDetail.status ==5)" class="card w-full mb-4">
                 <div class="flex items-center justify-between border-b pb-2 mb-4">
                     <div class="text-2xl font-bold text-gray-800">Scrap Details</div>
-                    <Button v-if="hasClaimDetails && warantyDetail.isScrap === 0 && warantyDetail.status !=6" label="Request Scrap" class="p-button-info" size="small" @click="requestScrap" :loading="loadingScrap" />
-                    <div v-else class="text-right mt-3 text-sm font-bold text-green-600">
+                    <Button v-if="hasClaimDetails && warantyDetail.isScrap === 0 && (warantyDetail.status !=6 || warantyDetail.status ==5)" label="Request Scrap" class="p-button-info" size="small" @click="requestScrap" :loading="loadingScrap" />
+                    <div v-if="warantyDetail.isScrap === 1" class="text-right mt-3 text-sm font-bold text-green-600">
                         <i class="pi pi-check-circle mr-2"></i>
                         Scrap Requested
                     </div>
@@ -371,7 +375,7 @@
                         </template>
                     </Galleria>
 
-                    <div v-if="warantyDetail.status_string  =='Pending Scrap Approval' && scrapImages" class="flex justify-end gap-2 mt-4 pt-4 border-t">
+                    <div v-if="warantyDetail.status_string  =='Pending Manager Approval' && scrapImages" class="flex justify-end gap-2 mt-4 pt-4 border-t">
                         <Button label="Approve Scrap" class="p-button-success" size="small" @click="Approve" icon="pi pi-check" />
                         <Button label="Reject Scrap" class="p-button-warn" size="small" @click="rejectScrap" icon="pi pi-times" />
                         <Button label="Reject Claim" class="p-button-danger" size="small" @click="showRejectDialog = true" icon="pi pi-times" />
@@ -385,7 +389,7 @@
                 </div>
             </div>
 
-            <div v-if="warantyDetail.replacement_detail && warantyDetail.status !=6" class="card w-full mb-4">
+            <div v-if="warantyDetail.replacement_detail" class="card w-full mb-4">
                 <div class="flex items-center justify-between border-b pb-2 mb-2">
                     <div class="text-2xl font-bold text-gray-800">Replacement Details</div>
                 </div>
@@ -402,7 +406,7 @@
                 </div>
             </div>
 
-            <div v-if="warantyDetail.reimbursement && warantyDetail.status !=6 " class="card w-full mb-4">
+            <div v-if="warantyDetail.reimbursement || warantyDetail.status_string  =='Pending Customer Invoice'" class="card w-full mb-4">
                 <div class="flex items-center justify-between border-b pb-2 mb-2">
                     <div class="text-2xl font-bold text-gray-800">Reimbursement Detail</div>
                 </div>
@@ -411,11 +415,11 @@
                         <i class="pi pi-exclamation-circle text-yellow-600 mt-1"></i>
                         <div>
                             <p class="font-semibold text-yellow-800">Invoice Upload Required</p>
-                            <p class="text-yellow-700 text-sm mt-1">Invoice will be uploaded by dealer for reimbursement processing.</p>
+                            <p class="text-yellow-700 text-sm mt-1">Invoice will be uploaded by customer for reimbursement processing.</p>
                         </div>
                     </div>
                 </div>
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm text-gray-800">
+                <div v-if="warantyDetail.reimbursement" class="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm text-gray-800">
                     <div>
                         <span class="font-bold">Inv No</span>
                         <p>{{ warantyDetail.reimbursement?.invNo }}</p>
@@ -426,15 +430,15 @@
                     </div>
                     <div>
                         <span class="font-bold">SAP Claim No </span>
-                        <p>RM {{ warantyDetail.reimbursement?.sapClaimNo }}</p>
+                        <p>{{ warantyDetail.reimbursement?.sapClaimNo }}</p>
                     </div>
                 </div>
                 <!-- View Download Invoice function -->
-                <div class="flex justify-end p-1 gap-2 mt-2">
+                <div v-if="warantyDetail.reimbursement" class="flex justify-end p-1 gap-2 mt-2">
                     <Button v-if="warantyDetail.reimbursement.invAttachURL" icon="pi pi-eye" class="p-button-info" size="small" @click="viewInvoice(warantyDetail.reimbursement.invAttachURL)" />
                     <!-- <Button v-if="warantyDetail.reimbursement.invAttachURL" icon="pi pi-download" class="p-button-danger" size="small" @click="downloadInvoice(warantyDetail.invAttachURL)" /> -->
                 </div>
-                <div v-if="warantyDetail.reimbursement" class="flex justify-end gap-2 mt-4">
+                <div v-if="warantyDetail.reimbursement && warantyDetail.status !=5" class="flex justify-end gap-2 mt-4">
                     <Button label="Approve Invoice" class="p-button-success" size="small" @click="approveInvoice" :loading="approvingInvoice" icon="pi pi-check" />
                     <Button label="Reject Invoice" class="p-button-warn" size="small" @click="rejectInvoice" :loading="rejectingInvoice" icon="pi pi-times" />
                     <Button label="Reject Claim" class="p-button-danger" size="small" @click="showRejectDialog = true" icon="pi pi-times" />
@@ -470,7 +474,7 @@
                 </small>
             </div>
             <!-- Percentages -->
-            <div class="grid grid-cols-3 gap-4">
+            <div class="grid grid-cols-2 gap-4">
                 <!-- Claim Percentage -->
                 <div class="field">
                     <label class="block font-bold text-gray-700 mb-2">Claim % *</label>
@@ -756,7 +760,7 @@ const hasCTCData = computed(() => {
 
 const hasClaimDetails = computed(() => {
   const claim = warantyDetail.value.claim_detail;
-  console.log(claim);
+//   console.log(claim);
   return claim && Object.values(claim).some(value => value !== null);
 });
 
@@ -948,6 +952,38 @@ const confirmCTCRequest = async () => {
     }
 };
 
+const confirmCTCRequestReturn = async () => {
+    loadingCTC.value = true;
+    try {
+        const id = route.params.id;
+        const response = await api.put(`warranty_claim/requestReturn/${id}`);
+
+        if (response.data.status === 1) {
+            toast.add({
+                severity: 'success',
+                summary: 'Success',
+                detail: 'CTC Return request submitted successfully',
+                life: 3000
+            });
+            showCTCConfirmationDialog.value = false;
+            await fetchWarrantyClaim(); // Refresh data to show CTC status
+        } else {
+            throw new Error('Return CTC request failed');
+        }
+    } catch (error) {
+        console.error('Error requesting CTC:', error);
+        toast.add({
+            severity: 'error',
+            summary: 'Error',
+            detail: 'Failed to request Return CTC. Please try again.',
+            life: 3000
+        });
+    } finally {
+        loadingCTC.value = false;
+    }
+};
+
+
 // Helper functions
 const formatDateTime = (dateString) => {
     if (!dateString) return '-';
@@ -997,34 +1033,54 @@ const approveScrap = async () => {
         loadingScrapAction.value = false;
     }
 };
+import { useConfirm } from 'primevue';
 
-const rejectScrap = async () => {
-    try {
+const confirmation = useConfirm();
+
+const rejectScrap = () => {
+  confirmation.require({
+    message: 'Are you sure you want to reject this scrap request?',
+    header: 'Reject Scrap',
+    icon: 'pi pi-exclamation-triangle',
+    acceptLabel: 'Yes',
+    rejectLabel: 'No',
+    accept: async () => {
+      try {
         loadingScrapAction.value = true;
+
         const id = route.params.id;
         const response = await api.put(`warranty_claim/rejectScrap/${id}`);
 
         if (response.data.status === 1) {
-            toast.add({
-                severity: 'success',
-                summary: 'Success',
-                detail: 'Scrap rejected successfully',
-                life: 3000
-            });
+          toast.add({
+            severity: 'success',
+            summary: 'Success',
+            detail: 'Scrap rejected successfully',
+            life: 3000
+          });
+
+          await fetchWarrantyClaim();  
         } else {
-            throw new Error('Scrap rejection failed');
-        }
-    } catch (error) {
-        console.error('Error rejecting scrap:', error);
-        toast.add({
+          toast.add({
             severity: 'error',
             summary: 'Error',
-            detail: 'Failed to reject scrap',
+            detail: response.data.error || 'Failed to reject scrap',
             life: 3000
+          });
+        }
+      } catch (error) {
+        console.error('Error rejecting scrap:', error);
+        toast.add({
+          severity: 'error',
+          summary: 'Error',
+          detail: 'Failed to reject scrap',
+          life: 3000
         });
-    } finally {
+      } finally {
         loadingScrapAction.value = false;
+      }
     }
+  });
 };
 
 
@@ -1052,6 +1108,7 @@ const fetchWarrantyClaim = async () => {
                 isReturn: apiData.claim_info?.isReturn,
                 status: apiData.claim_info?.status,
                 claimDate: apiData.claim_info?.claimDate,
+                warrantyCertNo: apiData.claim_info?.warrantyCertNo,
 
                 // Customer Info
                 customer_info: apiData.customer_info?.[0] || [],
@@ -1071,7 +1128,28 @@ const fetchWarrantyClaim = async () => {
                 // CTC Info
                 ctc_details: apiData.ctc_info?.[0] || [],
                 return_info: apiData.return_info?.[0] || null,
-                reimbursement: Array.isArray(apiData.reimbursement) ? (apiData.reimbursement.length > 0 ? apiData.reimbursement : null): apiData.reimbursement || null,
+                // reimbursement: Array.isArray(apiData.reimbursement) ? (apiData.reimbursement.length > 0 ? apiData.reimbursement : null): apiData.reimbursement || null,
+                reimbursement: (() => {
+                    const rm = apiData.reimbursement;
+
+                    // Case 1: Array
+                    if (Array.isArray(rm)) {
+                        return rm.length > 0 ? rm : null;
+                    }
+
+                    // Case 2: Object
+                    if (rm && typeof rm === 'object') {
+                        // Check if object has any meaningful value
+                        const meaningful = Object.values(rm).some(v => {
+                            return v !== null && v !== '' && v !== '0.00' && v !== 0;
+                        });
+
+                        return meaningful ? rm : null;
+                    }
+
+                    // Case 3: Anything else
+                    return null;
+                })(),
                 replacement_detail: apiData.replacement_detail ?? null,
                 scrapPhotos: apiData.scrapPhotos || null,
                 submittedphotos: apiData.submittedphotos || null,
@@ -1221,7 +1299,7 @@ const approveInvoice = async () => {
             toast.add({
                 severity: 'error',
                 summary: 'Error',
-                detail: response.data.message || 'Failed to approve invoice',
+                detail: response.data.error || 'Failed to approve invoice',
                 life: 3000
             });
         }
@@ -1412,7 +1490,7 @@ const submitReplacement = async () => {
             toast.add({
                 severity: 'success',
                 summary: 'Success',
-                detail: replacementResult.data.message || 'Replacement approved',
+                detail: replacementResponse.data.message || 'Replacement approved',
                 life: 3000
             });
 
@@ -1422,7 +1500,7 @@ const submitReplacement = async () => {
             toast.add({
                 severity: 'error',
                 summary: 'Error',
-                detail: replacementResult.data.message || 'Failed to submit replacement',
+                detail: replacementResponse.data.error || 'Failed to submit replacement ',
                 life: 3000
             });
         }
@@ -1479,7 +1557,7 @@ const submitReimbursement = async () => {
             toast.add({
                 severity: 'error',
                 summary: 'Error',
-                detail: reimbursementResponse.data.message || 'Failed to submit reimbursement',
+                detail: reimbursementResponse.data.error || 'Failed to submit reimbursement',
                 life: 7000
             });
         }
