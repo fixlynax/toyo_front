@@ -26,12 +26,6 @@
                             <small class="text-red-500 text-sm" v-if="errors.first_name"> <i class="pi pi-exclamation-circle mr-1"></i>{{ errors.first_name }} </small>
                         </div>
 
-                        <div class="space-y-2 hidden">
-                            <label class="block font-semibold text-gray-700 required">First Name</label>
-                            <InputText v-model="form.first_name" class="w-full" placeholder="Enter first name" :class="{ 'p-invalid': errors.dealerAccountNo }" />
-                            <small class="text-red-500 text-sm" v-if="errors.dealerAccountNo"> <i class="pi pi-exclamation-circle mr-1"></i>{{ errors.dealerAccountNo }} </small>
-                        </div>
-
                         <!-- Last Name -->
                         <div class="space-y-2">
                             <label class="block font-semibold text-gray-700">Last Name</label>
@@ -50,20 +44,20 @@
                             <label class="block font-semibold text-gray-700 required">Mobile Number</label>
                             <div class="flex gap-2">
                                 <div class="w-32">
-                                    <Dropdown v-model="form.countryCode" :options="countryCodes" optionLabel="label" optionValue="value" class="w-full" placeholder="Code" :class="{ 'p-invalid': errors.countryCode }" />
+                                    <InputText disabled v-model="form.countryCode" class="w-full" placeholder="+60" />
                                 </div>
                                 <div class="flex-1">
                                     <InputText v-model="form.mobileNum" class="w-full" placeholder="Enter mobile number" :class="{ 'p-invalid': errors.mobileNum }" />
                                 </div>
                             </div>
-                            <small class="text-red-500 text-sm" v-if="errors.countryCode || errors.mobileNum">
+                            <small class="text-red-500 text-sm" v-if="errors.mobileNum">
                                 <i class="pi pi-exclamation-circle mr-1"></i>
-                                {{ errors.countryCode || errors.mobileNum }}
+                                {{ errors.mobileNum }}
                             </small>
                         </div>
 
-                        <!-- Password -->
-                        <div class="space-y-2" v-if="showPasswordFields">
+                        <!-- Password - Only show for Master users -->
+                        <div class="space-y-2" v-if="form.isMaster === 1 && showPasswordFields">
                             <label class="block font-semibold text-gray-700">Password</label>
                             <Password v-model="form.password" :feedback="false" toggleMask autocomplete="off" class="w-full" placeholder="Enter new password" :class="{ 'p-invalid': errors.password }" :inputClass="'w-full'" />
                             <small class="text-red-500 text-sm" v-if="errors.password"> <i class="pi pi-exclamation-circle mr-1"></i>{{ errors.password }} </small>
@@ -73,15 +67,15 @@
                             </small>
                         </div>
 
-                        <!-- Confirm Password -->
-                        <div class="space-y-2" v-if="showPasswordFields">
+                        <!-- Confirm Password - Only show for Master users -->
+                        <div class="space-y-2" v-if="form.isMaster === 1 && showPasswordFields">
                             <label class="block font-semibold text-gray-700">Confirm Password</label>
                             <Password v-model="form.confirm_password" :feedback="false" toggleMask autocomplete="off" class="w-full" placeholder="Confirm new password" :class="{ 'p-invalid': errors.confirm_password }" :inputClass="'w-full'" />
                             <small class="text-red-500 text-sm" v-if="errors.confirm_password"> <i class="pi pi-exclamation-circle mr-1"></i>{{ errors.confirm_password }} </small>
                         </div>
 
                         <!-- Master User -->
-                        <div class="space-y-2 hidden">
+                        <div class="space-y-2" hidden>
                             <label class="block font-semibold text-gray-700 required">Master User</label>
                             <Dropdown v-model="form.isMaster" :options="masterOptions" optionLabel="label" optionValue="value" class="w-full" placeholder="Select" :class="{ 'p-invalid': errors.isMaster }" />
                             <small class="text-gray-500 text-sm flex items-center gap-1">
@@ -168,10 +162,8 @@ const route = useRoute();
 const loading = ref(false);
 const loadingData = ref(false);
 
-const countryCodes = ref([
-    { label: '( +60 )', value: '60' },
-    { label: '( +65 )', value: '65' }
-]);
+// Fixed country code - only +60
+const countryCode = ref('60');
 
 const masterOptions = ref([
     { label: 'No', value: 0 },
@@ -196,7 +188,7 @@ const form = ref({
     last_name: '',
     email: '',
     mobileNum: '',
-    countryCode: '60',
+    countryCode: '60', // Fixed to +60
     password: '',
     confirm_password: '',
     dealerAccountNo: '',
@@ -209,16 +201,18 @@ const form = ref({
 const errors = ref({});
 const memberDetail = ref({});
 const originalData = ref({});
-const originalPassword = ref(''); // Store original password state
 
 // Computed property to check if user is activated (has activation date)
 const isUserActivated = computed(() => {
-    return memberDetail.value.activated !== null && memberDetail.value.activated !== undefined && memberDetail.value.activated !== '';
+    return memberDetail.value.activated !== null && 
+           memberDetail.value.activated !== undefined && 
+           memberDetail.value.activated !== '';
 });
 
 // Computed property to determine if password fields should be shown
 const showPasswordFields = computed(() => {
-    return isUserActivated.value;
+    // Only show password fields for Master users who are activated
+    return form.value.isMaster === 1 && isUserActivated.value;
 });
 
 // Computed property to check if form has been modified
@@ -230,11 +224,10 @@ const isFormModified = computed(() => {
         current.first_name !== original.firstName ||
         current.last_name !== original.lastName ||
         current.email !== original.emailAddress ||
-        current.countryCode !== original.countryCode ||
         current.mobileNum !== original.mobileNumber ||
         current.isMaster !== original.isMaster ||
         current.status !== original.status ||
-        current.password || // Password is being changed
+        (current.isMaster === 1 && current.password) || // Password is being changed for master user
         JSON.stringify(current.modules) !== JSON.stringify(getOriginalModules(original))
     );
 });
@@ -246,6 +239,9 @@ watch(
         if (newValue === 1) {
             // If master user, select all modules
             form.value.modules = moduleOptions.map((module) => module.value);
+            // Clear password fields when switching to master user
+            form.value.password = '';
+            form.value.confirm_password = '';
         } else {
             // If switching from master to non-master, clear modules
             form.value.modules = [];
@@ -287,7 +283,7 @@ const loadUserData = async () => {
             form.value.first_name = userData.firstName || '';
             form.value.last_name = userData.lastName || '';
             form.value.email = userData.emailAddress || '';
-            form.value.countryCode = userData.countryCode || '60';
+            form.value.countryCode = '60'; // Fixed to +60
             form.value.mobileNum = userData.mobileNumber || '';
             form.value.isMaster = userData.isMaster || 0;
             form.value.status = userData.status || 1;
@@ -295,9 +291,6 @@ const loadUserData = async () => {
 
             // Set modules based on permissions
             form.value.modules = getOriginalModules(userData);
-
-            // Store original password for validation
-            originalPassword.value = userData.password;
 
             console.log('Loaded user data:', userData);
             console.log('Set modules:', form.value.modules);
@@ -342,11 +335,6 @@ const validateForm = () => {
         errors.value.email = 'Please enter a valid email address';
     }
 
-    // Country Code validation
-    if (!form.value.countryCode) {
-        errors.value.countryCode = 'Country code is required';
-    }
-
     // Mobile Number validation
     if (!form.value.mobileNum.trim()) {
         errors.value.mobileNum = 'Mobile number is required';
@@ -356,7 +344,7 @@ const validateForm = () => {
         errors.value.mobileNum = 'Mobile number is too short';
     }
 
-    // Password validation - only validate if user is activated and changing password
+    // Password validation - only validate for Master users who are changing password
     const isChangingPassword = showPasswordFields.value && (form.value.password || form.value.confirm_password);
 
     if (isChangingPassword) {
@@ -401,25 +389,25 @@ const createFormData = () => {
     formData.append('first_name', form.value.first_name.trim());
     formData.append('last_name', form.value.last_name.trim());
     formData.append('email', form.value.email.trim().toLowerCase());
-    formData.append('countryCode', form.value.countryCode);
+    formData.append('countryCode', form.value.countryCode); // Fixed to +60
     formData.append('mobileNum', form.value.mobileNum.replace(/\s/g, ''));
     formData.append('dealerAccountNo', form.value.dealerAccountNo);
     formData.append('shiptoID', form.value.shiptoID || '');
     formData.append('isMaster', form.value.isMaster);
     formData.append('status', form.value.status);
 
-    // Handle password - only include if user is activated and password is being changed
+    // Handle password - only include for Master users who want to change password
     const isChangingPassword = showPasswordFields.value && form.value.password && form.value.confirm_password;
 
     if (isChangingPassword) {
-        // User wants to change password
+        // Master user wants to change password
         formData.append('password', form.value.password);
         formData.append('confirm_password', form.value.confirm_password);
     } else {
-        // User doesn't want to change password - send dummy values that pass validation
-        // The backend will hash these but we'll work around this limitation
-        formData.append('password', 'CurrentPassword123'); // Placeholder that meets requirements
-        formData.append('confirm_password', 'CurrentPassword123'); // Same placeholder
+        // For sub-users or when password is not being changed
+        // Send a placeholder that meets validation requirements
+        formData.append('password', 'CurrentPassword123');
+        formData.append('confirm_password', 'CurrentPassword123');
     }
 
     // Append module permissions

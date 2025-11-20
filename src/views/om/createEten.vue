@@ -267,15 +267,38 @@ const currentException = ref({
 // NEW: Computed property to check if account is main branch
 const isMainBranch = ref(false);
 
-// Watch accountNo to update isMainBranch
+// NEW: Main branch dealer data
+const mainBranchDealer = ref<DealerOption | null>(null);
+
+// Watch accountNo to update isMainBranch and fetch main branch data
 watch(accountNo, (newVal) => {
     isMainBranch.value = newVal.endsWith('00');
 
-    // Fetch dealer list when accountNo changes (but only if it has value)
-    if (newVal && newVal.trim() !== '') {
-        fetchDealerList();
+    // Fetch main branch dealer data when accountNo changes (but only if it has value and is sub-branch)
+    if (newVal && newVal.trim() !== '' && !isMainBranch.value) {
+        fetchMainBranchDealer();
+    } else {
+        // Reset main branch dealer if it's a main branch account
+        mainBranchDealer.value = null;
+        currentException.value.dealers = null;
     }
 });
+
+// NEW: Function to handle account number input with 10 character limit
+function handleAccountNoInput(event: Event) {
+    const input = event.target as HTMLInputElement;
+    let value = input.value;
+    
+    // Remove any non-digit characters
+    value = value.replace(/\D/g, '');
+    
+    // Limit to 10 characters
+    if (value.length > 10) {
+        value = value.substring(0, 10);
+    }
+    
+    accountNo.value = value;
+}
 
 // Helper functions - UPDATED: All SAP fields should be disabled regardless of value
 function isSapField(fieldName: string): boolean {
@@ -341,13 +364,18 @@ function handleSubmit() {
     }
 }
 
-// Fetch main branch dealer list - FIXED: Pass both mainBranch=1 and custaccountno
-async function fetchDealerList() {
+// NEW: Fetch main branch dealer data - Only fetch the main branch for the current account
+async function fetchMainBranchDealer() {
     try {
+        if (!accountNo.value) return;
+        
+        // Extract main branch account number (first 8 digits + '00')
+        const mainBranchAccountNo = accountNo.value.substring(0, 8) + '00';
+        
         // Use JSON object instead of FormData
         const requestData = {
             mainBranch: '1', // Always pass mainBranch=1 as per requirement
-            custaccountno: accountNo.value // Pass current accountNo to exclude self from list
+            custaccountno: mainBranchAccountNo // Pass main branch account number
         };
 
         const response = await api.post('list_dealer', requestData);
@@ -360,20 +388,31 @@ async function fetchDealerList() {
                 if (item.shop) {
                     const shop = item.shop;
                     dealers.push({
-                        label: `${shop.companyName1 || ''} ${shop.companyName2 || ''} ${shop.companyName3 || ''} ${shop.companyName4 || ''}${shop.custAccountNo ? ` - ${shop.custAccountNo}` : ''}`.trim(),
+                        label: `${shop.companyName1 || ''} ${shop.companyName2 || ''} ${shop.companyName3 || ''} ${shop.companyName4 || ''}${shop.custAccountNo ? ` ( ${shop.custAccountNo} )` : ''}`.trim(),
                         value: shop.id,
                         group: shop.state || '-'
                     });
                 }
             });
 
-            allDealers.value = dealers;
+            // Since we're fetching only the main branch, there should be only one dealer
+            if (dealers.length === 1) {
+                mainBranchDealer.value = dealers[0];
+                currentException.value.dealers = dealers[0].value;
+            } else {
+                mainBranchDealer.value = null;
+                currentException.value.dealers = null;
+                console.warn('No main branch dealer found or multiple dealers returned');
+            }
         } else {
-            allDealers.value = [];
-            console.warn('No dealers found or invalid response format');
+            mainBranchDealer.value = null;
+            currentException.value.dealers = null;
+            console.warn('No main branch dealer found or invalid response format');
         }
     } catch (error) {
-        console.error('Error fetching dealer list:', error);
+        console.error('Error fetching main branch dealer:', error);
+        mainBranchDealer.value = null;
+        currentException.value.dealers = null;
     }
 }
 
@@ -562,6 +601,17 @@ async function goNext() {
         return;
     }
 
+    // Validate account number length
+    if (accountNo.value.length !== 10) {
+        toast.add({
+            severity: 'warn',
+            summary: 'Invalid Account No',
+            detail: 'Account No must be exactly 10 characters.',
+            life: 4000
+        });
+        return;
+    }
+
     isLoading.value = true;
     showDetails.value = false;
     shipToAddresses.value = [];
@@ -664,6 +714,7 @@ function resetForm() {
     shipToAddresses.value = [];
     selectedShipTo.value = null;
     isMainBranch.value = false;
+    mainBranchDealer.value = null;
 }
 
 const handleBack = () => {
@@ -671,7 +722,7 @@ const handleBack = () => {
 };
 
 onMounted(() => {
-    // fetchDealerList();
+    // fetchMainBranchDealer();
 });
 </script>
 
@@ -685,9 +736,17 @@ onMounted(() => {
                     <div class="flex-1">
                         <div class="flex items-center gap-2 mb-1">
                             <label for="accountNo" class="font-medium">Account No.</label>
-                            <i class="pi pi-info-circle cursor-pointer font-bold" v-tooltip="'SAP account number for the dealer. Can be main branch (ending with 00) or sub-branch.'"></i>
+                            <i class="pi pi-info-circle cursor-pointer font-bold" v-tooltip="'SAP account number for the dealer. Must be exactly 10 characters. Main branch ends with 00, sub-branch ends with other digits.'"></i>
                         </div>
-                        <InputText v-model="accountNo" id="accountNo" type="text" class="w-full" placeholder="Enter SAP account number" />
+                        <InputText 
+                            v-model="accountNo" 
+                            id="accountNo" 
+                            type="text" 
+                            class="w-full" 
+                            placeholder="Enter 10-digit SAP account number" 
+                            maxlength="10"
+                            @input="handleAccountNoInput"
+                        />
                     </div>
                     <div>
                         <Button label="Next" @click="goNext" :disabled="!accountNo" />
@@ -755,19 +814,31 @@ onMounted(() => {
                         </div>
                     </div>
 
-                    <!-- UPDATED: Main Branch dropdown - disabled only for main branch accounts -->
-                    <div class="flex flex-col md:flex-row gap-4">
+                    <!-- UPDATED: Main Branch dropdown - auto-filled and read-only for sub-branches -->
+                    <div class="flex flex-col md:flex-row gap-4" v-if="!isMainBranch && mainBranchDealer">
                         <div class="w-full">
                             <label for="mainBranch">Main Branch Account</label>
-                            <Dropdown v-model="currentException.dealers" :disabled="isMainBranch" :options="allDealers" optionLabel="label" optionValue="value" filter placeholder="Search or Select Main Branch" class="w-full">
-                                <template #option="slotProps">
-                                    <div class="flex flex-col">
-                                        <div class="font-medium text-gray-800">{{ slotProps.option.label }}</div>
-                                        <small class="text-gray-500">({{ slotProps.option.group }})</small>
-                                    </div>
-                                </template>
-                            </Dropdown>
-                            <small v-if="isMainBranch" class="text-gray-500">This field is disabled for main branch accounts (ending with 00)</small>
+                            <InputText 
+                                disabled 
+                                id="mainBranch" 
+                                type="text" 
+                                :value="mainBranchDealer.label" 
+                                class="w-full bg-gray-100" 
+                            />
+                            <small class="text-gray-500">Auto-filled with main branch data</small>
+                        </div>
+                    </div>
+                    <div class="flex flex-col md:flex-row gap-4" v-else-if="isMainBranch">
+                        <div class="w-full">
+                            <label for="mainBranch">Main Branch Account</label>
+                            <InputText 
+                                disabled 
+                                id="mainBranch" 
+                                type="text" 
+                                value="This is a main branch account" 
+                                class="w-full bg-gray-100" 
+                            />
+                            <small class="text-gray-500">This is a main branch account (ending with 00)</small>
                         </div>
                     </div>
                 </div>

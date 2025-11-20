@@ -152,7 +152,7 @@ const clearDateRange = () => {
                 :rowHover="true"
                 :filters="filters1"
                 filterDisplay="menu"
-                :globalFilterFields="['orderNo', 'custAccountNo', 'companyName', 'shipToAccountNo']"
+                :globalFilterFields="['orderNo', 'custAccountNo', 'companyName', 'shipToAccountNo', 'created', 'orderType', 'deliveryType']"
                 class="rounded-table"
                 sortField="created"
                 :sortOrder="-1"
