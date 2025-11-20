@@ -30,7 +30,7 @@
                     </div>
                     <div>
                         <span class="block text-sm font-bold text-black-800">Claim Date</span>
-                        <span class="text-lg font-medium">{{ warantyDetail.claimRefNo || '-'  }}</span>
+                        <span class="text-lg font-medium">{{ formatDate(warantyDetail.claimDate) || '-'  }}</span>
                     </div>
                     <div>
                         <span class="block text-sm font-bold text-black-800">Stage</span>
@@ -227,13 +227,13 @@
                         <p>{{ `${formatDate(warantyDetail.ctc_details.reachWH)} ${formatTime(warantyDetail.ctc_details.returnDateTime)}` }}</p>
                     </div>
                     
-                        <div v-if="warantyDetail.return_info">
+                    <div v-if="warantyDetail.return_info">
                         <span class="font-bold">ETA Date</span>
-                        <p>{{ warantyDetail.return_info.deliveryDate ? formatDate(warantyDetail.return_info.deliveryDate): 'Not Assigned'}}</p>
-                        </div>
-                    <div>
+                        <p>{{ warantyDetail.return_info?.deliveryDate ? formatDate(warantyDetail.return_info.deliveryDate): 'Not Assigned'}}</p>
+                    </div>
+                    <div v-if="warantyDetail.return_info">
                         <span class="font-bold">Schedule Date</span>
-                        <p>{{ warantyDetail.return_info.scheduleDeliveryDate ? formatDate(warantyDetail.return_info.scheduleDeliveryDate): 'Not Assigned'}}</p>
+                        <p>{{ warantyDetail.return_info?.scheduleDeliveryDate ? formatDate(warantyDetail.return_info.scheduleDeliveryDate): 'Not Assigned'}}</p>
                     </div>
                     <Button v-if="warantyDetail.isReturn === 0 && warantyDetail.ctc_details.reachWH" label="Request CTC Return" class="p-button-info" size="small" @click="confirmCTCRequest" :loading="loadingCTC" />
                 </div>
@@ -246,14 +246,14 @@
             <div class="card w-full mb-4">
                 <div class="flex items-center justify-between border-b pb-2 mb-2">
                     <div class="text-2xl font-bold text-gray-800">Claim Detail</div>
-                    <div class="text-right mt-3 text-sm font-bold text-green-600"  v-if="warantyDetailChecking.claim_detail">
+                    <div class="text-right mt-3 text-sm font-bold text-green-600"  v-if="hasClaimDetails">
                         <i class="pi pi-check-circle mr-2"></i>
                         Claim Created
                     </div>
                 </div>
 
                 <!-- Claim Detail Content - Show if data exists -->
-                <div v-if="warantyDetailChecking.claim_detail" class="grid grid-cols-1 gap-4 text-sm text-gray-800">
+                <div v-if="hasClaimDetails" class="grid grid-cols-1 gap-4 text-sm text-gray-800">
                     <!-- Damage Code & Problem -->
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div>
@@ -264,10 +264,10 @@
                             <span class="font-bold text-gray-700">Problem Description</span>
                             <p class="text-lg font-semibold text-black mt-1">{{ warantyDetail.problem || '-' }}</p>
                         </div>
-                        <div>
+                        <!-- <div>
                             <span class="font-bold text-gray-700">Status</span>
                             <p class="text-lg font-semibold text-black mt-1">{{ warantyDetail.status_string || '-' }}</p>
-                        </div>
+                        </div> -->
                     </div>
 
                     <!-- Percentages -->
@@ -303,8 +303,7 @@
                     <i class="mr-2 pi pi-times-circle"></i>
                     Claim Rejected
                 </div>
-                <div class="flex justify-end gap-2 mt-4 pt-4 border-t" v-if="!warantyDetailChecking.claim_detail">
-                    <!-- v-if="!warantyDetailChecking.claim_detail" -->
+                <div class="flex justify-end gap-2 mt-4 pt-4 border-t" v-if="!hasClaimDetails">
                     <Button label="Create Claim" class="p-button-success" size="small" @click="openCreateClaimDialog" icon="pi pi-check" />
                     <Button label="Reject Claim" class="p-button-danger" size="small" @click="showRejectDialog = true" icon="pi pi-times" />
                 </div>
@@ -335,10 +334,10 @@
             </div>
 
             <!-- 3. Scrap Detail -->
-            <div v-if="warantyDetailChecking.claim_detail && warantyDetail.status !=6" class="card w-full mb-4">
+            <div v-if="hasClaimDetails && warantyDetail.status !=6" class="card w-full mb-4">
                 <div class="flex items-center justify-between border-b pb-2 mb-4">
                     <div class="text-2xl font-bold text-gray-800">Scrap Details</div>
-                    <Button v-if="warantyDetailChecking.claim_detail && warantyDetail.isScrap === 0 && warantyDetail.status !=6" label="Request Scrap" class="p-button-info" size="small" @click="requestScrap" :loading="loadingScrap" />
+                    <Button v-if="hasClaimDetails && warantyDetail.isScrap === 0 && warantyDetail.status !=6" label="Request Scrap" class="p-button-info" size="small" @click="requestScrap" :loading="loadingScrap" />
                     <div v-else class="text-right mt-3 text-sm font-bold text-green-600">
                         <i class="pi pi-check-circle mr-2"></i>
                         Scrap Requested
@@ -447,20 +446,29 @@
     <!-- Create Claim Dialog -->
     <Dialog v-model:visible="showCreateClaimDialog" header="Create Claim Details" :modal="true" class="p-fluid" :style="{ width: '40rem' }">
         <div class="grid grid-cols-1 gap-4">
-            <!-- Damage Code -->
             <div class="field">
-                <label class="block font-bold text-gray-700 mb-2">Damage Code *</label>
-                <InputText v-model="newClaimData.damageCode" placeholder="Enter damage code" class="w-full" :class="{ 'p-invalid': !newClaimData.damageCode && creatingClaim }" />
-                <small v-if="!newClaimData.damageCode && creatingClaim" class="p-error">Damage code is required.</small>
-            </div>
+                <label class="block font-bold text-gray-700 mb-2">Damage Type *</label>
 
-            <!-- Problem Description -->
-            <div class="field">
-                <label class="block font-bold text-gray-700 mb-2">Problem *</label>
-                <Textarea v-model="newClaimData.problem" placeholder="Describe the problem" rows="3" class="w-full" :class="{ 'p-invalid': !newClaimData.problem && creatingClaim }" />
-                <small v-if="!newClaimData.problem && creatingClaim" class="p-error">Problem description is required.</small>
-            </div>
+                <Dropdown 
+                    v-model="selectedDamageType" 
+                    :options="listDamageType" 
+                    optionLabel="name" 
+                    placeholder="Select Damage Type" 
+                    class="w-full" 
+                    :class="{ 'p-invalid': !selectedDamageType && creatingClaim }"
+                    @change="handleDamageSelect"
+                >
+                    <template #option="slotProps">
+                        <div class="flex items-center gap-3">
+                            <div class="font-semibold">{{ slotProps.option.name }}</div>
+                        </div>
+                    </template>
+                </Dropdown>
 
+                <small v-if="!selectedDamageType && creatingClaim" class="p-error">
+                    Damage type is required.
+                </small>
+            </div>
             <!-- Percentages -->
             <div class="grid grid-cols-3 gap-4">
                 <!-- Claim Percentage -->
@@ -671,6 +679,7 @@ const newClaimData = ref({
     usablePercent: null,
     wornPercent: null
 });
+const selectedDamageType = ref(null);
 const activeImage = ref(null);
 const activeImageType = ref('');
 const imageDialogVisible = ref(false);
@@ -696,6 +705,24 @@ const TireDepthImages = ref([]);
 const listMaterial = ref([]);
 const selectedMaterial = ref(null);
 
+const listDamageType = [
+  { id: "D1", name: "TREAD DAMAGE" },
+  { id: "D2", name: "SIDEWALL DAMAGE" },
+  { id: "D3", name: "INNER DAMAGE" },
+  { id: "D4", name: "TYRE BURST / RUNFLAT" },
+  { id: "D5", name: "SIDEWALL / TREAD LEAKING OR PUNCTURE" },
+  { id: "D6", name: "VIBRATION / UNBALANCE" },
+  { id: "D7", name: "UNEVEN WEAR (TYRE NOISE)" },
+  { id: "D8", name: "BEAD DAMAGE" },
+  { id: "D9", name: "DAMAGE DURING SHIPMENT (LOCAL)" },
+];
+
+const handleDamageSelect = () => {
+    if (selectedDamageType.value) {
+        newClaimData.value.damageCode = selectedDamageType.value.id;
+        newClaimData.value.problem = selectedDamageType.value.name;
+    }
+};
 
 const galleriaResponsiveOptions = ref([
     {
@@ -722,21 +749,16 @@ const rejecting = ref(false);
 const loadingCTC = ref(false);
 const loadingScrap = ref(false);
 
-const rejectReasonDesc = computed(() => {
-    if (!rejectReasons.value?.length || !warantyDetail.value?.rejectReasonID) {
-        return '-';
-    }
-    return rejectReasons.value.find((r) => r.id == warantyDetail.value.rejectReasonID) || null;
-});
-
 // Computed properties
 const hasCTCData = computed(() => {
     return warantyDetail.value.ctc_details;
 });
 
-const hasScrapData = computed(() => {
-    return warantyDetail.value.scrapImage1URL || warantyDetail.value.scrapImage2URL || warantyDetail.value.scrapImage3URL;
+const hasClaimDetails = computed(() => {
+  const claim = warantyDetail.value.claim_detail;
+  return claim && Object.values(claim).some(value => value !== null);
 });
+
 
 // Add these methods to the methods section
 
@@ -1027,6 +1049,8 @@ const fetchWarrantyClaim = async () => {
                 rejectReason: apiData.claim_info?.rejectReason,
                 isReturn: apiData.claim_info?.isReturn,
                 status: apiData.claim_info?.status,
+                claimDate: apiData.claim_info?.claimDate,
+
                 // Customer Info
                 customer_info: apiData.customer_info?.[0] || [],
                 // Dealer Info
@@ -1042,7 +1066,7 @@ const fetchWarrantyClaim = async () => {
                 // CTC Info
                 ctc_details: apiData.ctc_info?.[0] || [],
                 return_info: apiData.return_info?.[0] || null,
-                reimbursement: apiData.reimbursement || null,
+                reimbursement: Array.isArray(apiData.reimbursement) ? (apiData.reimbursement.length > 0 ? apiData.reimbursement : null): apiData.reimbursement || null,
                 replacement_detail: apiData.replacement_detail ?? null,
                 scrapPhotos: apiData.scrapPhotos || null,
                 submittedphotos: apiData.submittedphotos || null,
