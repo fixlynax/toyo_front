@@ -98,7 +98,7 @@ const router = createRouter({
                     props: true
                 },
                 {
-                    path: 'om/editEtenUser/:custAccNo',
+                    path: 'om/editEtenUser/:id',
                     name: 'Edit-Eten-User',
                     component: () => import('@/views/om/editEtenUser.vue'),
                     meta: { permission: 'Customer', access: 'write' },
