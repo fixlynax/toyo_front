@@ -231,7 +231,7 @@ onMounted(() => {
                         </div>
                         <div>
                             <span class="block text-sm font-bold text-black-800">Appointment Time</span>
-                            <p class="text-lg font-medium">{{ appointment.appointment_info?.appointmentTime || 'Not Scheduled' }}</p>
+                            <p class="text-lg font-medium">{{ appointment.appointment_info?.appointmentTime || '-' }}</p>
                         </div>
                         <div>
                             <span class="block text-sm font-bold text-black-800">Created Date</span>
