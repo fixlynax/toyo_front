@@ -154,33 +154,68 @@ onMounted(async () => {
 const fetchUsers = async () => {
     loading.value = true;
     try {
-        const res = await api.get('admin/list-user-role');
-        const raw = res.data.data;
-
-        listData.value = raw.map((item) => ({
-            id: item.id,
-            userlist: item.name,
-            description: item.description,
-            is_super_admin: item.is_super_admin ? 1 : 0,
-            sales_person: item.is_sales_person ? 1 : 0,
-            created: item.created,
-            modules: item.permissions.map((p) => ({
-                name: p.function_name,
-                write: p.is_write
-            })),
-            statusUser: item.status ? 1 : 0
-        }));
+        const res = await api.get('getAdminUserProfile');
+        
+        if (res.data.status === 1 && res.data.user_profile) {
+            const userProfile = res.data.user_profile;
+            
+            // Transform the single user profile into array format for the table
+            listData.value = [{
+                id: userProfile.user_id,
+                userlist: userProfile.username,
+                description: userProfile.full_name || userProfile.role_info?.role_description || '-',
+                is_super_admin: userProfile.role_info?.is_super_admin ? 1 : 0,
+                sales_person: false, // This field might not be available in the new response
+                created: userProfile.created_date,
+                modules: extractModulesFromPermissions(userProfile.permissions),
+                statusUser: userProfile.user_status ? 1 : 0,
+                department: '-', // Not available in new response
+                mobile: '-', // Not available in new response
+                email: userProfile.email_address || '-',
+                usergroup: userProfile.role_info?.role_name || '-'
+            }];
+        } else {
+            listData.value = [];
+            toast.add({
+                severity: 'warn',
+                summary: 'No Data',
+                detail: 'No user profile found',
+                life: 3000
+            });
+        }
     } catch (err) {
         listData.value = [];
         toast.add({
             severity: 'error',
             summary: 'Error',
-            detail: 'Failed to fetch users',
+            detail: 'Failed to fetch user profile',
             life: 3000
         });
     } finally {
         loading.value = false;
     }
+};
+
+// Helper function to extract modules from the new permissions structure
+const extractModulesFromPermissions = (permissions) => {
+    if (!permissions || !permissions.function_groups) {
+        return [];
+    }
+
+    const modules = [];
+    
+    permissions.function_groups.forEach(group => {
+        if (group.functions && Array.isArray(group.functions)) {
+            group.functions.forEach(func => {
+                modules.push({
+                    name: func.function_name,
+                    write: func.has_write_access === 1
+                });
+            });
+        }
+    });
+
+    return modules;
 };
 
 const editUser = (user) => {
@@ -191,6 +226,7 @@ const deleteUser = async (user) => {
     if (!confirm(`Are you sure you want to delete "${user.userlist}"?`)) return;
 
     try {
+        // Note: You might need to update the delete endpoint as well
         const res = await api.delete(`admin/delete-user-role/${user.id}`);
 
         if (res.data.status === 1) {
