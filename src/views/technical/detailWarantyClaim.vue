@@ -72,27 +72,27 @@
                     <div class="grid grid-cols-2 md:grid-cols-2 gap-4">
                         <div>
                             <span class="block text-sm font-bold text-black-800">Serial Plate</span>
-                            <p class="text-lg font-medium">{{ warantyDetail.plateSerial || '-' }}</p>
+                            <p class="text-lg font-medium">{{ warantyDetail.tire_info.plateSerial || '-' }}</p>
                         </div>
                         <div>
                             <span class="block text-sm font-bold text-black-800">Pattern</span>
-                            <p class="text-lg font-medium">{{ warantyDetail.pattern || '-' }}</p>
+                            <p class="text-lg font-medium">{{ warantyDetail.tire_info.pattern || '-' }}</p>
                         </div>
                         <div>
                             <span class="block text-sm font-bold text-black-800">Size</span>
-                            <p class="text-lg font-medium">{{ warantyDetail.size  || '-' }}</p>
+                            <p class="text-lg font-medium">{{ warantyDetail.tire_info.tyresize  || '-' }}</p>
                         </div>
                         <div>
                             <span class="block text-sm font-bold text-black-800">Description</span>
-                            <p class="text-lg font-medium">{{ warantyDetail.tire_details?.tyrespec || '-' }}</p>
+                            <p class="text-lg font-medium">{{ warantyDetail.tire_info.desc || '-' }}</p>
                         </div>
                         <div>
                             <span class="block text-sm font-bold text-black-800">MFG code</span>
-                            <p class="text-lg font-medium">{{ warantyDetail.tire_details?.mfgcode || '-' }}</p>
+                            <p class="text-lg font-medium">{{ warantyDetail.tire_info.mfgcode || '-' }}</p>
                         </div>
                         <div>
                             <span class="block text-sm font-bold text-black-800">Week Code</span>
-                            <p class="text-lg font-medium">{{ warantyDetail.tire_details?.weekcode || '-' }}</p>
+                            <p class="text-lg font-medium">{{ warantyDetail.tire_info.weekcode || '-' }}</p>
                         </div>
                         <div>
                             <span class="block text-sm font-bold text-black-800">Certificate Number</span>
@@ -108,7 +108,7 @@
                         </div>
                         <div>
                             <span class="block text-sm font-bold text-black-800">Problem Description</span>
-                            <p class="text-lg font-medium">{{ warantyDetail.tire_details?.weekcode || '-' }}</p>
+                            <p class="text-lg font-medium">{{ warantyDetail?.problem || '-' }}</p>
                         </div>
                     </div>
                 </div>
@@ -194,7 +194,7 @@
                 <div class="grid grid-cols-2 md:grid-cols-2 gap-4 text-sm text-gray-800">
                     <div>
                         <span class="font-bold">Name</span>
-                        <p class="text-lg font-medium">{{ warantyDetail.name || '-' }}</p>
+                        <p class="text-lg font-medium">{{ warantyDetail.customer_info?.name || '-' }}</p>
                     </div>
                     <div>
                         <span class="font-bold">Mobile Number</span>
