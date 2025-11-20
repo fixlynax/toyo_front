@@ -258,11 +258,11 @@
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div>
                             <span class="font-bold text-gray-700">Damage Code</span>
-                            <p class="text-lg font-semibold text-black mt-1">{{ warantyDetail.damageCode || '-' }}</p>
+                            <p class="text-lg font-semibold text-black mt-1">{{ warantyDetail.problemCodeAdmin || '-' }}</p>
                         </div>
                         <div>
                             <span class="font-bold text-gray-700">Problem Description</span>
-                            <p class="text-lg font-semibold text-black mt-1">{{ warantyDetail.problem || '-' }}</p>
+                            <p class="text-lg font-semibold text-black mt-1">{{ warantyDetail.problemAdmin || '-' }}</p>
                         </div>
                         <!-- <div>
                             <span class="font-bold text-gray-700">Status</span>
@@ -756,6 +756,7 @@ const hasCTCData = computed(() => {
 
 const hasClaimDetails = computed(() => {
   const claim = warantyDetail.value.claim_detail;
+  console.log(claim);
   return claim && Object.values(claim).some(value => value !== null);
 });
 
@@ -811,7 +812,7 @@ const submitClaimDetails = async () => {
 
         const id = route.params.id;
         const response = await api.post(`warranty_claim/adminApprove/${id}`, {
-            damage_code: newClaimData.value.damageCode,
+            problemCode: newClaimData.value.damageCode,
             problem: newClaimData.value.problem,
             claim_percent: newClaimData.value.claimPercent,
             usable_percent: newClaimData.value.usablePercent,
@@ -1026,6 +1027,7 @@ const rejectScrap = async () => {
     }
 };
 
+
 // Methods
 const fetchWarrantyClaim = async () => {
     try {
@@ -1058,8 +1060,11 @@ const fetchWarrantyClaim = async () => {
                 // Tire Info
                 tire_info: apiData.tire_info || null,
                 // Claim Detail
-                damageCode: apiData.claim_detail?.damageCode,
-                problem: apiData.claim_detail?.problem,
+                // damageCode: apiData.claim_detail?.damageCode,
+                // problem: apiData.claim_detail?.problem,
+                claim_detail : apiData.claim_detail|| null,
+                problemAdmin: apiData.claim_detail?.problemAdmin,
+                problemCodeAdmin: apiData.claim_detail?.problemCodeAdmin,
                 claimPercent: apiData.claim_detail?.claimPercent,
                 usablePercent: apiData.claim_detail?.usablePercent,
                 wornPercent: apiData.claim_detail?.wornPercent,
