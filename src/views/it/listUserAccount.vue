@@ -24,7 +24,7 @@
                     </div>
                 </template>
 
-                <Column field="userlist" header="List User & Role" style="min-width: 20rem">
+                <Column field="userlist" header="List User & Role" style="min-width: 12rem">
                     <template #body="{ data }">
                         <div class="flex flex-col gap-1">
                             <span class="font-bold text-primary-400">{{ data.userlist }}</span>
@@ -36,26 +36,49 @@
                     </template>
                 </Column>
 
-                <Column field="description" header="Description" style="min-width: 20rem">
+                <Column field="description" header="Description" style="min-width: 12rem">
                     <template #body="{ data }">
                         <span class="">{{ data.description }}</span>
                     </template>
                 </Column>
+                <Column field="department" header="Department" style="min-width: 12rem">
+                    <template #body="{ data }">
+                        {{ data.department || '-' }}
+                    </template>
+                </Column>
 
-                <Column field="modules" header="Module / Function List" style="min-width: 20rem">
+                <Column field="mobile" header="Mobile No" style="min-width: 12rem">
+                    <template #body="{ data }">
+                        {{ data.mobile || '-' }}
+                    </template>
+                </Column>
+
+                <Column field="email" header="Email Address" style="min-width: 12rem">
+                    <template #body="{ data }">
+                        {{ data.email || '-' }}
+                    </template>
+                </Column>
+
+                <Column field="usergroup" header="User Group" style="min-width: 12rem">
+                    <template #body="{ data }">
+                        <span>{{ data.usergroup || '-' }}</span>
+                    </template>
+                </Column>
+
+                <Column field="modules" header="Module / Function List" style="min-width: 12rem">
                     <template #body="{ data }">
                         <Button icon="pi pi-eye" class="p-button-text p-button-sm text-blue-600" @click="openModuleDialog(data.modules)" />
-                        <span class="ml-2">{{ data.modules.length }} Modules</span>
+                        <span class="ml-2">{{ data.modules.length || '-' }} Modules</span>
                     </template>
                 </Column>
 
-                <Column field="created" header="Created" style="min-width: 15rem">
+                <Column field="created" header="Created" style="min-width: 12rem">
                     <template #body="{ data }">
-                        {{ data.created }}
+                        {{ data.created ? new Date(data.created).toLocaleDateString('en-GB') : '-' }}
                     </template>
                 </Column>
 
-                <Column header="Status" style="min-width: 10rem">
+                <Column header="Status" style="min-width: 6rem">
                     <template #body="{ data }">
                         <Tag :severity="data.statusUser === 1 ? 'success' : 'danger'" :value="data.statusUser === 1 ? 'Active' : 'Inactive'" />
                     </template>
@@ -168,9 +191,7 @@ const deleteUser = async (user) => {
     if (!confirm(`Are you sure you want to delete "${user.userlist}"?`)) return;
 
     try {
-      
         const res = await api.delete(`admin/delete-user-role/${user.id}`);
-    
 
         if (res.data.status === 1) {
             toast.add({
@@ -198,7 +219,6 @@ const deleteUser = async (user) => {
         });
     }
 };
-
 </script>
 
 <style scoped lang="scss">
