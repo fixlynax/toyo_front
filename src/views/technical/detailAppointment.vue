@@ -11,20 +11,16 @@ const loading = ref(true);
 const activeImage = ref(null);
 const activeImageType = ref('');
 const submittedPhotos = ref([]);
+const imageDialogVisible = ref(false);
 
 // Fetch appointment details
 const fetchAppointmentDetail = async () => {
     try {
         const response = await api.get(`appointment/${route.params.id}`);
-        console.log('API Response:', response.data);
+        
 
         if (response.data.status === 1) {
             appointment.value = response.data.admin_data;
-            console.log('Appointment Info:', appointment.value.appointment_info);
-            console.log('Customer Info:', appointment.value.customer_info);
-            console.log('Dealer Info:', appointment.value.dealer_info);
-            console.log('Tire Info:', appointment.value.tire_info);
-            console.log('Submitted Photos URLs:', appointment.value.submitted_photos);
 
             // Load all submitted photos
             if (appointment.value.submitted_photos) {
@@ -54,7 +50,6 @@ const loadSubmittedPhotos = async () => {
         const url = appointment.value.submitted_photos[photoType.key];
         if (url && url !== 'null' && url !== null) {
             try {
-                console.log(`Loading ${photoType.label} photo from:`, url);
                 const imageSrc = await api.getPrivateFile(url);
 
                 photos.push({
@@ -65,7 +60,6 @@ const loadSubmittedPhotos = async () => {
                     alt: `${photoType.label} Photo`
                 });
 
-                console.log(`✅ Successfully loaded ${photoType.label} photo`);
             } catch (error) {
                 console.error(`❌ Error loading ${photoType.label} photo:`, error);
                 // Create fallback image
@@ -81,7 +75,6 @@ const loadSubmittedPhotos = async () => {
     }
 
     submittedPhotos.value = photos;
-    console.log('Loaded submitted photos:', submittedPhotos.value);
 };
 
 // Create a blank image data URL for fallback
@@ -124,7 +117,7 @@ const hasSubmittedPhotos = computed(() => {
 });
 
 const hasTireInfo = computed(() => {
-    return appointment.value.tire_info && appointment.value.tire_info.length > 0;
+    return appointment.value.tire_info;
 });
 
 const hasCustomerInfo = computed(() => {
@@ -145,15 +138,41 @@ const appointmentStatusClass = computed(() => {
     };
 });
 
+function formatDate(dateString) {
+  if (!dateString) return '';
+  const date = new Date(dateString);
+  return date.toLocaleString('en-MY', {
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+  });
+}
+function formatDateFull(dateString) {
+  if (!dateString) return '';
+  const date = new Date(dateString);
+  return date.toLocaleString('en-MY', {
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+    hour: '2-digit',
+    minute: '2-digit',
+    second: '2-digit',
+    hour12: true
+  });
+}
+
 // Image modal functions
 const openImageModal = (imageSrc, imageType) => {
     activeImage.value = imageSrc;
     activeImageType.value = imageType;
+    imageDialogVisible.value = true;
 };
 
 const closeImageModal = () => {
     activeImage.value = null;
     activeImageType.value = '';
+    imageDialogVisible.value = false;
+
 };
 
 // Get photo by type
@@ -194,13 +213,13 @@ onMounted(() => {
                         </div>
                         <div>
                             <span class="block text-sm font-bold text-black-800">Appointment Date</span>
-                            <p class="text-lg font-medium">{{ appointment.appointment_info?.appointmentDate || 'Not Scheduled' }}</p>
+                            <p class="text-lg font-medium">{{ formatDate(appointment.appointment_info?.appointmentDate)  || 'Not Scheduled' }}</p>
                         </div>
                     </div>
                     <div class="grid grid-cols-2 gap-4">
                         <div>
                             <span class="block text-sm font-bold text-black-800">Request Date</span>
-                            <p class="text-lg font-medium">{{ appointment.appointment_info?.appointmentRequestDate || '-' }}</p>
+                            <p class="text-lg font-medium">{{ formatDate(appointment.appointment_info?.appointmentRequestDate) || 'Not Request' }}</p>
                         </div>
                         <div>
                             <span class="block text-sm font-bold text-black-800">Request Session</span>
@@ -208,11 +227,11 @@ onMounted(() => {
                         </div>
                         <div>
                             <span class="block text-sm font-bold text-black-800">Appointment Time</span>
-                            <p class="text-lg font-medium">{{ appointment.appointment_info?.appointmentTime || 'Not Scheduled' }}</p>
+                            <p class="text-lg font-medium">{{ appointment.appointment_info?.appointmentTime || '-' }}</p>
                         </div>
                         <div>
                             <span class="block text-sm font-bold text-black-800">Created Date</span>
-                            <p class="text-lg font-medium">{{ appointment.appointment_info?.created || '-' }}</p>
+                            <p class="text-lg font-medium">{{ formatDateFull(appointment.appointment_info?.created) || 'Not Created' }}</p>
                         </div>
                         
                     <!-- Reject Reason (only show if exists) -->
@@ -233,11 +252,11 @@ onMounted(() => {
                 <div class="grid grid-cols-2 gap-4">
                     <div>
                         <span class="block text-sm font-bold text-black-800">Brand</span>
-                        <p class="text-lg font-medium">{{ appointment.customer_info[0]?.name || '-' }}</p>
+                        <p class="text-lg font-medium">{{ appointment.customer_info[0]?.vehicleBrand || '-' }}</p>
                     </div>
                     <div>
                         <span class="block text-sm font-bold text-black-800">Model</span>
-                        <p class="text-lg font-medium">{{ appointment.customer_info[0]?.vehicle || '-' }}</p>
+                        <p class="text-lg font-medium">{{ appointment.customer_info[0]?.vehicleModel || '-' }}</p>
                     </div>
                     <div>
                         <span class="block text-sm font-bold text-black-800">Registration No</span>
@@ -255,39 +274,43 @@ onMounted(() => {
                 <div class="flex items-center justify-between border-b pb-2 mb-4">
                     <div class="text-2xl font-bold text-gray-800">Tire Information</div>
                 </div>
-
-                <div class="grid grid-cols-2 gap-4"  v-for="(tire, index) in appointment.tire_info" :key="index">
+            <!-- "pattern": "P57",
+            "tyresize": "16",
+            "desc": "185\/55 R16 87H PXR57 TLYKGSS MT1Z",
+            "mfgcode": "WWW",
+            "weekcode": "RRRR" -->
+                <div class="grid grid-cols-2 gap-4" >
                     <div>
                         <span class="block text-sm font-bold text-black-800">Pattern</span>
-                        <p class="text-lg font-medium">{{ tire.pattern || '-' }}</p>
+                        <p class="text-lg font-medium">{{ appointment.tire_info.pattern || '-' }}</p>
                     </div>
                     <div>
                         <span class="block text-sm font-bold text-black-800">Size</span>
-                        <p class="text-lg font-medium">{{ tire.tyresize || '-' }}</p>
+                        <p class="text-lg font-medium">{{  appointment.tire_info.tyresize || '-' }}</p>
                     </div>
                     <div>
                         <span class="block text-sm font-bold text-black-800">Description</span>
-                        <p class="text-lg font-medium">{{ tire.desc || '-' }}</p>
+                        <p class="text-lg font-medium">{{  appointment.tire_info.desc || '-' }}</p>
                     </div>
                     <div>
                         <span class="block text-sm font-bold text-black-800">MFG Code</span>
-                        <p class="text-lg font-medium">{{ appointment.customer_info[0]?.vehicle || '-' }}</p>
+                        <p class="text-lg font-medium">{{ appointment.tire_info.mfgcode || '-' }}</p>
                     </div>
                     <div>
                         <span class="block text-sm font-bold text-black-800">Week Code</span>
-                         <p class="text-lg font-medium">{{ tire.weekcode || '-' }}</p>
+                         <p class="text-lg font-medium">{{  appointment.tire_info.weekcode || '-' }}</p>
                     </div>
                     <div>
                         <span class="block text-sm font-bold text-black-800">Certificate No</span>
-                        <p class="text-lg font-medium">{{ tire.tyresize || '-' }}</p>
+                        <p class="text-lg font-medium">{{  appointment.warrantyReg.warrantyCertNo || '-' }}</p>
                     </div>
                     <div>
                         <span class="block text-sm font-bold text-black-800">Warranty Type</span>
-                        <p class="text-lg font-medium">{{ tire.desc || '-' }}</p>
+                        <p class="text-lg font-medium">{{  appointment.warrantyReg.warrantyType || '-' }}</p>
                     </div>
                     <div>
                         <span class="block text-sm font-bold text-black-800">Purchase Date</span>
-                        <p class="text-lg font-medium">{{ appointment.customer_info[0]?.vehicle || '-' }}</p>
+                        <p class="text-lg font-medium">{{ formatDate(appointment.warrantyReg.purchaseDate) || '-' }}</p>
                     </div>
                    <div>
                         <span class="block text-sm font-bold text-black-800">Problem Description</span>
@@ -295,7 +318,7 @@ onMounted(() => {
                     </div>
                     <div>
                         <span class="block text-sm font-bold text-black-800">Serial Plate</span>
-                        <p class="text-lg font-medium">{{ appointment.customer_info[0]?.vehicle || '-' }}</p>
+                        <p class="text-lg font-medium">{{ appointment.customer_info[0]?.serialPlate || '-' }}</p>
                     </div>
                 </div>
             </div>
@@ -330,7 +353,7 @@ onMounted(() => {
             <!-- Dealer Information - Side by side like customer info -->
             <div class="card w-full" v-if="hasDealerInfo">
                 <div class="flex items-center justify-between border-b pb-2 mb-4">
-                    <div class="text-2xl font-bold text-gray-800">Dealer Information</div>
+                    <div class="text-2xl font-bold text-gray-800">Customer Information</div>
                 </div>
 
                 <div class="grid grid-cols-2 gap-4">
@@ -374,7 +397,7 @@ onMounted(() => {
     </div>
 
     <!-- Image Modal -->
-    <Dialog v-model:visible="activeImage" :modal="true" :style="{ width: '90vw', maxWidth: '1200px' }" @hide="closeImageModal">
+    <Dialog v-model:visible="imageDialogVisible" :modal="true" :style="{ width: '90vw', maxWidth: '1200px' }" @hide="closeImageModal">
         <template #header>
             <div class="font-semibold text-lg">{{ activeImageType }} - Image Preview</div>
         </template>

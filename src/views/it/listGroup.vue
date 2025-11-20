@@ -1,18 +1,7 @@
 <template>
     <div class="card">
         <div class="text-2xl font-bold text-gray-800 border-b pb-2">List Group</div>
-        <DataTable 
-            :value="listData" 
-            :paginator="true" 
-            :rows="10" 
-            :rowsPerPageOptions="[5, 10, 20]" 
-            dataKey="id" 
-            :rowHover="true" 
-            :loading="loading" 
-            :filters="filters" 
-            filterDisplay="menu" 
-            :globalFilterFields="['usergroup', 'modules', 'statusUser']"
-        >
+        <DataTable :value="listData" :paginator="true" :rows="10" :rowsPerPageOptions="[5, 10, 20]" dataKey="id" :rowHover="true" :loading="loading" :filters="filters" filterDisplay="menu" :globalFilterFields="['usergroup', 'modules', 'statusUser']">
             <!-- ========================= -->
             <!-- Header Section -->
             <!-- ========================= -->
@@ -53,7 +42,9 @@
 
             <Column field="modules" header="Module / Function List" style="min-width: 25rem">
                 <template #body="{ data }">
-                    <span>{{ data.modules }}</span>
+                    <span :class="{ 'text-red-600': !data.modules }">
+                        {{ data.modules || '- No Permissions' }}
+                    </span>
                 </template>
             </Column>
 
@@ -103,7 +94,7 @@ const filters = ref({
 onMounted(async () => {
     loading.value = true;
     try {
-        const res = await api.get('admin/list-function-group'); 
+        const res = await api.get('admin/list-function-group');
         const raw = res.data; // <-- fixed
 
         listData.value = raw.map((group) => ({
@@ -111,7 +102,7 @@ onMounted(async () => {
             usergroup: group.name,
             description: group.description,
             statusUser: group.status ? 1 : 0,
-            modules: group.functions.map(f => f.name).join(', ')
+            modules: group.functions.map((f) => f.name).join(', ')
         }));
     } catch (err) {
         console.error('Error fetching groups:', err);
@@ -120,7 +111,6 @@ onMounted(async () => {
         loading.value = false;
     }
 });
-
 
 // Actions
 const editGroup = (group) => {

@@ -2,17 +2,14 @@
     <Fluid>
         <div class="flex flex-col md:flex-row gap-8">
             <div class="card flex flex-col gap-6 w-full">
-                <!-- Header -->
-                <div class="text-2xl font-bold text-gray-800 border-b pb-2">Maintenance Mode</div>
+                <div class="text-2xl font-bold text-gray-800 border-b pb-2">Maintenance Mode </div>
 
-                <!-- Channel Toggles -->
                 <div class="flex flex-col gap-6">
                     <div 
                         v-for="channel in channelOptions" 
                         :key="channel.value" 
                         class="border rounded-lg p-4 flex flex-col gap-4"
                     >
-                        <!-- Toggle Row -->
                         <div class="flex items-center justify-between">
                             <span class="font-medium text-gray-800">{{ channel.label }}</span>
                             <InputSwitch 
@@ -21,9 +18,7 @@
                             />
                         </div>
 
-                        <!-- Show Period & Message only if ON -->
                         <div v-if="form.channels[channel.value].enabled" class="grid grid-cols-1 gap-4">
-                            <!-- Period -->
                             <div>
                                 <label class="block text-sm font-bold text-gray-700 mb-2">Period (Date/Time)</label>
                                 <DatePicker 
@@ -37,7 +32,6 @@
                                 />
                             </div>
 
-                            <!-- Message -->
                             <div>
                                 <label class="block text-sm font-bold text-gray-700 mb-2">Message</label>
                                 <Textarea 
@@ -51,7 +45,6 @@
                     </div>
                 </div>
 
-                <!-- Save Button -->
                 <div class="flex justify-end mt-8 gap-4">
                     <div class="w-32">
                         <Button label="Update" class="w-full p-button-primary" @click="save" :loading="saving" />
@@ -76,23 +69,11 @@ const router = useRouter();
 const toast = useToast();
 const saving = ref(false);
 
-const dummyPeriods = {
-    TC: [new Date("2025-02-10T09:00:00"), new Date("2025-02-10T12:00:00")],
-    ETEN: [new Date("2025-02-12T14:00:00"), new Date("2025-02-12T16:30:00")],
-    BOTH: [new Date("2025-02-15T08:30:00"), new Date("2025-02-15T11:00:00")]
-};
-
-const dummyMessages = {
-    TC: "Toyocares system under maintenance. Please try again later.",
-    ETEN: "ETEN will be down for upgrades.",
-    BOTH: "Full system maintenance (TC & ETEN) in progress."
-};
-
 const form = ref({
     channels: {
-        TC: { enabled: false, period: dummyPeriods.TC, message: dummyMessages.TC },
-        ETEN: { enabled: false, period: dummyPeriods.ETEN, message: dummyMessages.ETEN },
-        BOTH: { enabled: false, period: dummyPeriods.BOTH, message: dummyMessages.BOTH }
+        TC: { enabled: false, period: null, message: '' },
+        ETEN: { enabled: false, period: null, message: '' },
+        BOTH: { enabled: false, period: null, message: '' }
     }
 });
 
@@ -111,59 +92,71 @@ const handleToggle = (channel) => {
     }
 };
 
+const TYPE_MAP = {
+    TC: ['ios-care', 'android-care'],
+    ETEN: ['ios-eten', 'android-eten'],
+    BOTH: ['ios-care', 'android-care', 'ios-eten', 'android-eten']
+};
+
 const save = async () => {
     saving.value = true;
 
     try {
-        // Determine maintenance type and message
-        let type = '';
-        let maintenanceMsg = '';
-        if (form.value.channels.BOTH.enabled) {
-            type = 'BOTH';
-            maintenanceMsg = form.value.channels.BOTH.message;
-        } else if (form.value.channels.TC.enabled) {
-            type = 'TC';
-            maintenanceMsg = form.value.channels.TC.message;
-        } else if (form.value.channels.ETEN.enabled) {
-            type = 'ETEN';
-            maintenanceMsg = form.value.channels.ETEN.message;
+        let activeChannel = '';
+
+        if (form.value.channels.BOTH.enabled) activeChannel = 'BOTH';
+        else if (form.value.channels.TC.enabled) activeChannel = 'TC';
+        else if (form.value.channels.ETEN.enabled) activeChannel = 'ETEN';
+        else activeChannel = 'NONE';
+
+        let typesToUpdate = [];
+        let message = '';
+        let isMaintainence = 0;
+        let currentVer = '';
+        let newVer = '';
+
+        if (activeChannel !== 'NONE') {
+            typesToUpdate = TYPE_MAP[activeChannel];
+            message = form.value.channels[activeChannel].message;
+            isMaintainence = 1;
+
+            if (form.value.channels[activeChannel].period && form.value.channels[activeChannel].period.length === 2) {
+                const [start, end] = form.value.channels[activeChannel].period;
+                currentVer = start ? new Date(start).toISOString() : '';
+                newVer = end ? new Date(end).toISOString() : '';
+            }
         } else {
-            type = 'NONE';
-            maintenanceMsg = '';
+            typesToUpdate = [
+                'ios-care',
+                'android-care',
+                'ios-eten',
+                'android-eten'
+            ];
         }
 
-        const payload = {
-            type,
-            isMaintainence: type !== 'NONE' ? 1 : 0,
-            maintenanceMsg,
-            adminID: 123, // replace with actual admin ID
-            currentVer: '1.0.0', // optional
-            newVer: '1.0.0',     // optional
-            link: '',            // optional
-            isForce: 0,          // optional
-            reason: ''
-        };
-
-        const res = await api.post('admin/update-version', payload);
-
-        if (res.data.status === 1) {
-            toast.add({
-                severity: 'success',
-                summary: 'Updated',
-                detail: res.data.message || 'Maintenance updated successfully',
-                life: 3000
-            });
-            router.push('/it/maintenanceMode');
-        } else {
-            toast.add({
-                severity: 'error',
-                summary: 'Error',
-                detail: res.data.message || 'Failed to update maintenance',
-                life: 4000
+        for (const t of typesToUpdate) {
+            await api.post('admin/update-version', {
+                type: t,
+                adminID: 1,
+                reason: activeChannel === 'NONE' ? 'Disable maintenance' : 'Maintenance update',
+                currentVer,
+                newVer,
+                link: '',
+                isForce: 0,
+                isMaintainence,
+                maintenanceMsg: message
             });
         }
+
+        toast.add({
+            severity: 'success',
+            summary: 'Updated',
+            detail: activeChannel === 'NONE' ? 'Maintenance disabled' : 'Maintenance updated successfully',
+            life: 3000
+        });
+
+        router.push('/it/maintenanceMode');
     } catch (err) {
-        console.error(err);
         toast.add({
             severity: 'error',
             summary: 'Error',
