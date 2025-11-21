@@ -71,7 +71,7 @@
             <Column field="companyName1" header="Company Name" style="min-width: 8rem" />
 
             <Column field="location" header="Location" style="min-width: 8rem">
-                <template #body="{ data }"> {{ data.city }}, {{ data.state }} </template>
+                <template #body="{ data }"> {{ data.city }}{{ data.state }} </template>
             </Column>
 
             <Column field="phoneNumber" header="Phone No" style="min-width: 8rem" />
