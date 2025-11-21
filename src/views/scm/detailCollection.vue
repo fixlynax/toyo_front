@@ -99,7 +99,7 @@
                         </tbody>
                     </table>
                 </div>
-                <div v-if="listData.status === 0 && canUpdate" class="flex justify-end mt-3">
+                <div v-if="(listData.status === 0 || listData.status === 1) && canUpdate" class="flex justify-end mt-3">
                     <Button 
                         label="Update Date" 
                         icon="pi pi-pencil"
@@ -118,19 +118,19 @@
     >
         <div class="flex flex-col gap-4">
             
-            <div  >
+            <div v-if="listData.status === 0"  >
                 <label class="font-medium">Collect Date & Time</label>
                 <InputText 
-                    type="datetime-local" 
+                    type="date" 
                     v-model="form.collectDatetime"
                     class="w-full mt-1"
                 />
             </div>
 
-            <div>
+            <div v-if="listData.status === 1"  >
                 <label class="font-medium">Reach WH Date & Time</label>
                 <InputText 
-                    type="datetime-local" 
+                    type="date" 
                     v-model="form.reachWHDatetime"
                     class="w-full mt-1"
                 />
@@ -173,21 +173,22 @@ function toLocalDateTimeString(dt) {
     const year = d.getFullYear();
     const month = String(d.getMonth() + 1).padStart(2, '0');
     const day = String(d.getDate()).padStart(2, '0');
-    const hour = String(d.getHours()).padStart(2, '0');
-    const minute = String(d.getMinutes()).padStart(2, '0');
-    const second = String(d.getSeconds()).padStart(2, '0');
 
-    return `${year}-${month}-${day} ${hour}:${minute}:${second}`;
+    return `${year}-${month}-${day}`;
 }
 
 const updateCTCDetails = async () => {
+    if (!form.value.collectDatetime || !form.value.reachWHDatetime) {
+    toast.add({ severity: 'warn', summary: 'Warning', detail: 'Please select date', life: 3000 });
+    return;
+  }
     loadingUpdate.value = true;
     const id = route.params.id
     try {
         const payload = new FormData();
         payload.append('ctcID', id);
-        payload.append('collectDatetime',form.value.collectDatetime ? toLocalDateTimeString(form.value.collectDatetime): null);
-        payload.append('reachWHDatetime', form.value.reachWHDatetime? toLocalDateTimeString(form.value.reachWHDatetime): null);
+        payload.append('collectDatetime',form.value.collectDatetime ? toLocalDateTimeString(form.value.collectDatetime): '');
+        payload.append('reachWHDatetime', form.value.reachWHDatetime? toLocalDateTimeString(form.value.reachWHDatetime): '');
 
         const res = await api.post('collection/updateCTC', payload);
 
