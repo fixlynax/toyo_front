@@ -97,14 +97,13 @@
                     </template>
                 </Column>
                 <Column 
-                    v-if="showPickupColumn"
+                    v-if="showPickupColumn && canUpdate"
                     field="pickup_datetime" 
                     header="Action" 
                     style="min-width: 10rem">
                     <template #body="{ data }">
                         <div class="flex justify-center">
                             <Button 
-                                v-if="!data.driverInformation?.pickup_datetime"
                                 icon="pi pi-pencil" 
                                 class="p-button-sm p-button-text p-button-warning" 
                                 @click="confirmUpdatePickup(data)"
@@ -125,12 +124,13 @@ import api from '@/service/api';
 import LoadingPage from '@/components/LoadingPage.vue';
 import { useToast } from 'primevue/usetoast';
 import { useConfirm } from 'primevue';
+import { useMenuStore } from '@/store/menu';
 
-const listData = ref([]);
+const menuStore = useMenuStore();
+const canUpdate = computed(() => menuStore.canWrite('Order Delivery'));
+const denyAccess = computed(() => menuStore.canTest('Order Delivery'));
+
 const loading = ref(true);
-const selectedRows = ref([]);
-const showFilterMenu = ref(false);
-const filterStatus = ref(null);
 const orderDelList = ref([]);
 const filteredList  = ref([]);
 const activeTabIndex = ref(0);

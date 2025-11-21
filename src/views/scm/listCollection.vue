@@ -3,10 +3,14 @@ import { ref, onBeforeMount, onMounted, watch ,computed} from 'vue';
 import api from '@/service/api';
 import { FilterMatchMode } from '@primevue/core/api';
 import { useToast } from 'primevue/usetoast';
+import { useMenuStore } from '@/store/menu';
+
+const menuStore = useMenuStore();
+const canUpdate = computed(() => menuStore.canWrite('CTC Collection'));
+const denyAccess = computed(() => menuStore.canTest('CTC Collection'));
+
 const listData = ref([]);
 const loading = ref(true);
-const importLoading = ref(false);
-const importInput = ref();
 
 
 const toast = useToast();
@@ -395,7 +399,7 @@ onMounted(async () => {
                         <Menu ref="sortMenu" :model="sortItems" :popup="true" />
                     </div>
 
-                    <div class="flex justify-end gap-2"  v-if="statusTabs[activeTabIndex]?.label === 'New'">
+                    <div class="flex justify-end gap-2"  v-if="statusTabs[activeTabIndex]?.label === 'New' && canUpdate">
                         <Button type="button" label="Export" icon="pi pi-file-export" class="p-button-success" :loading="exportLoading1" @click="handleExport1"/>
                         <Button type="button" label="Bulk Update" icon="pi pi-file-import" @click="importInput1?.click()":loading="importLoading1" />
                         <input 
@@ -406,7 +410,7 @@ onMounted(async () => {
                         @change="handleImport1"
                         />
                     </div>
-                    <div class="flex justify-end gap-2"  v-if="statusTabs[activeTabIndex]?.label === 'Pending'">
+                    <div class="flex justify-end gap-2"  v-if="statusTabs[activeTabIndex]?.label === 'Pending' && canUpdate">
                         <Button type="button" label="Export" icon="pi pi-file-export" class="p-button-success" :loading="exportLoading2" @click="handleExport2"/>
                         <Button type="button" label="Bulk Update" icon="pi pi-file-import" @click="importInput2?.click()":loading="importLoading2" />
                         <input 
@@ -422,7 +426,7 @@ onMounted(async () => {
 
             <template #empty> No Collection found. </template>
             <template #loading> Loading Collection data. Please wait. </template>
-            <Column header="Export All" style="min-width: 8rem">
+            <Column v-if="canUpdate" header="Export All" style="min-width: 8rem">
                 <template #header>
                     <div class="flex justify-center">
                     <Checkbox

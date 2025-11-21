@@ -290,23 +290,15 @@
                                 </tr>
                                 <tr class="border-b">
                                     <td class="px-4 py-2 font-medium">Starting Sales Amount</td>
-                                    <td class="px-4 py-2 text-right">RM {{ formatCurrency(form.startingSalesAmt) || '-' }}</td>
+                                    <td class="px-4 py-2 text-right">{{ formatCurrency(form.startingSalesAmt) || '-' }}</td>
                                 </tr>
                                 <tr class="border-b">
-                                    <td class="px-4 py-2 font-medium">Quarter 1</td>
-                                    <td class="px-4 py-2 text-right">RM {{ formatCurrency(form.targetQ1) || '-' }}</td>
+                                    <td class="px-4 py-2 font-medium">Revenue</td>
+                                    <td class="px-4 py-2 text-right">{{ formatCurrency(form.revenue) || '-' }}</td>
                                 </tr>
                                 <tr class="border-b">
-                                    <td class="px-4 py-2 font-medium">Quarter 2</td>
-                                    <td class="px-4 py-2 text-right">RM {{ formatCurrency(form.targetQ2) || '-' }}</td>
-                                </tr>
-                                <tr class="border-b">
-                                    <td class="px-4 py-2 font-medium">Quarter 3</td>
-                                    <td class="px-4 py-2 text-right">RM {{ formatCurrency(form.targetQ3) || '-' }}</td>
-                                </tr>
-                                <tr class="border-b">
-                                    <td class="px-4 py-2 font-medium">Quarter 4</td>
-                                    <td class="px-4 py-2 text-right">RM {{ formatCurrency(form.targetQ4) || '-' }}</td>
+                                    <td class="px-4 py-2 font-medium">Total Quantity</td>
+                                    <td class="px-4 py-2 text-right">{{ formatCurrency(form.targetQty) || '-' }}</td>
                                 </tr>
                                 <tr class="border-b">
                                     <td class="px-4 py-2 font-medium">Customer Condition Group</td>
@@ -532,16 +524,17 @@ const fetchDealerProfile = async () => {
     }
 };
 
-// Format currency
 const formatCurrency = (value) => {
-    if (!value) return '-';
+    if (value === null || value === undefined || value === '') return '-';
+
     return new Intl.NumberFormat('en-MY', {
         style: 'currency',
         currency: 'MYR',
-        minimumFractionDigits: 0,
-        maximumFractionDigits: 0
-    }).format(value);
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2
+    }).format(Number(value));
 };
+
 
 // Format date
 const formatDate = (dateString) => {
