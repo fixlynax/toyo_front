@@ -329,27 +329,27 @@ const router = createRouter({
                     path: 'marketing/listEvent',
                     name: 'List-Event',
                     component: () => import('@/views/marketing/listEvent.vue'),
-                    meta: { permission: 'Events Management', access: 'view' },
+                    // meta: { permission: 'Events Management', access: 'view' },
                 },
                 {
                     path: 'marketing/createEvent',
                     name: 'Create-Event',
                     component: () => import('@/views/marketing/createEvent.vue'),
-                    meta: { permission: 'Events Management', access: 'create' },
+                    // meta: { permission: 'Events Management', access: 'create' },
 
                 },
                 {
                     path: 'marketing/detailEvent/:id',
                     name: 'Detail-Event',
                     component: () => import('@/views/marketing/detailEvent.vue'),
-                    meta: { permission: 'Events Management', access: 'view' },
+                    // meta: { permission: 'Events Management', access: 'view' },
                     props: true
                 },
                 {
                     path: 'marketing/editEvent/:id',
                     name: 'Edit-Event',
                     component: () => import('@/views/marketing/editEvent.vue'),
-                    meta: { permission: 'Events Management', access: 'create' },
+                    // meta: { permission: 'Events Management', access: 'create' },
                      props: true
                 },
 
@@ -358,38 +358,38 @@ const router = createRouter({
                     path: 'marketing/listCampaign',
                     name: 'List-Campaign',
                     component: () => import('@/views/marketing/listCampaign.vue'),
-                    meta: { permission: 'Campaign Management', access: 'view' },
+                    // meta: { permission: 'Campaign Management', access: 'view' },
                 },
                 {
                     path: 'marketing/detailCampaign/:id',
                     name: 'Detail-Campaign',
                     component: () => import('@/views/marketing/detailCampaign.vue'),
-                    meta: { permission: 'Campaign Management', access: 'create' },
+                    // meta: { permission: 'Campaign Management', access: 'create' },
                     props: true
                 },
                 {
                     path: 'marketing/createCampaign',
                     name: 'Create-Campaign',
                     component: () => import('@/views/marketing/createCampaign.vue'),
-                    meta: { permission: 'Campaign Management', access: 'create' },
+                    // meta: { permission: 'Campaign Management', access: 'create' },
                 },
                 {
                     path: 'marketing/editCampaign',
                     name: 'Edit-Campaign',
                     component: () => import('@/views/marketing/editCampaign.vue'),
-                    meta: { permission: 'Campaign Management', access: 'create' },
+                    // meta: { permission: 'Campaign Management', access: 'create' },
                 },
                 {
                     path: 'marketing/inviteDealer',
                     name: 'Invite-Dealer',
                     component: () => import('@/views/marketing/inviteDealer.vue'),
-                    meta: { permission: 'Campaign Management', access: 'create' },
+                    // meta: { permission: 'Campaign Management', access: 'create' },
                 },
                 {
                     path: 'marketing/detailParticipant',
                     name: 'Detail-Participant',
                     component: () => import('@/views/marketing/detailParticipant.vue'),
-                    meta: { permission: 'Campaign Management', access: 'create' },
+                    // meta: { permission: 'Campaign Management', access: 'create' },
                 },
 
                 // Games
