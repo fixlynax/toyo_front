@@ -28,6 +28,9 @@ export const useMenuStore = defineStore('menu', {
       const perm = this.permissions.find(p => p.function_name === funcName);
       return perm?.has_write_permission || false; // true → write, false or missing → cannot write
     },
+    canTest(funcName) {
+      return false;
+    },
     reset() {
       this.menu = [];
       this.permissions = [];

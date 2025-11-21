@@ -11,7 +11,7 @@
                 <Button icon="pi pi-arrow-left" class="p-button-text p-button-secondary" @click="$router.back()" />
                 <div class="text-2xl font-bold text-gray-800">Logistic Details</div>
             </div>
-           <RouterLink :to="`/scm/editLogistic/${logisticList.id}`">
+           <RouterLink v-if="canUpdate" :to="`/scm/editLogistic/${logisticList.id}`">
                 <Button type="button" label="Edit" />
             </RouterLink>
           </div>
@@ -84,6 +84,11 @@ import api from '@/service/api';
 import { useToast } from 'primevue/usetoast';
 import { onMounted, ref, computed } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
+import { useMenuStore } from '@/store/menu';
+
+const menuStore = useMenuStore();
+const canUpdate = computed(() => menuStore.canWrite('3PL Account'));
+const denyAccess = computed(() => menuStore.canTest('3PL Account'));
 
 const route = useRoute();
 const router = useRouter();

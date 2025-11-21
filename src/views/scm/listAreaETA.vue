@@ -32,7 +32,7 @@
                             </div>
                         </div>
                         <!-- Right: Export & Batch Buttons -->
-                        <div class="flex items-center gap-2 ml-auto">
+                        <div class="flex items-center gap-2 ml-auto" v-if="canUpdate">
                             <Button type="button" label="Export" icon="pi pi-file-export" class="p-button" @click="fetchExportETA" :loading="exportLoading"/>
                             <Button type="button" label="Import" icon="pi pi-file-import" class="p-button" @click="importInput?.click()" :loading="importLoading" />
                             <input ref="importInput" type="file" accept=".xlsx,.xls" style="display: none" @change="handleImport" />
@@ -78,7 +78,11 @@ import { FilterMatchMode } from '@primevue/core/api';
 import api from '@/service/api';
 import LoadingPage from '@/components/LoadingPage.vue';
 import { useToast } from 'primevue/usetoast';
+import { useMenuStore } from '@/store/menu';
 
+const menuStore = useMenuStore();
+const canUpdate = computed(() => menuStore.canWrite('Area ETA'));
+const denyAccess = computed(() => menuStore.canTest('Area ETA'));
 const toast = useToast();
 const loading = ref(true);
 const importInput = ref();

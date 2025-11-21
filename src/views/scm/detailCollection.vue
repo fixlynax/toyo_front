@@ -99,7 +99,7 @@
                         </tbody>
                     </table>
                 </div>
-                <div v-if="listData.status === 0" class="flex justify-end mt-3">
+                <div v-if="listData.status === 0 && canUpdate" class="flex justify-end mt-3">
                     <Button 
                         label="Update Date" 
                         icon="pi pi-pencil"
@@ -150,6 +150,10 @@ import { ref, computed, onMounted, onBeforeUnmount } from 'vue';
 import api from '@/service/api';
 import { useToast } from 'primevue/usetoast';
 import { useRoute, useRouter } from 'vue-router';
+import { useMenuStore } from '@/store/menu';
+const menuStore = useMenuStore();
+const canUpdate = computed(() => menuStore.canWrite('CTC Collection'));
+
 const route = useRoute();
 const listData = ref([]);
 const loading = ref(true);

@@ -100,13 +100,13 @@
                     </table>
                 </div>
                 <div  class="flex justify-end mt-3">
-                <Button v-if="listData.status === 0"
+                <Button v-if="listData.status === 0 && canUpdate"
                     label="Update Delivery"
                     icon="pi pi-calendar"
                     class="p-button-sm p-button-warning"
                     @click="showScheduleModal = true"
                 />
-                <Button v-if="listData.status === 1"
+                <Button v-if="listData.status === 1 && canUpdate"
                     label="Update Delivered"
                     icon="pi pi-truck"
                     class="p-button-sm p-button-info"
@@ -180,6 +180,11 @@ import { ref, computed, onMounted, onBeforeUnmount } from 'vue';
 import api from '@/service/api';
 import { useToast } from 'primevue/usetoast';
 import { useRoute, useRouter } from 'vue-router';
+import { useMenuStore } from '@/store/menu';
+
+const menuStore = useMenuStore();
+const canUpdate = computed(() => menuStore.canWrite('CTC Return'));
+const denyAccess = computed(() => menuStore.canTest('CTC Return'));
 const route = useRoute();
 const listData = ref([]);
 const loading = ref(true);

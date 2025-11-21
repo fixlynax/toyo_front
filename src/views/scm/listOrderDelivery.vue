@@ -30,7 +30,7 @@
                             <Menu ref="sortMenu" :model="sortItems" :popup="true" />
                         </div>
 
-                        <div class="flex justify-end gap-2"  v-if="statusTabs[activeTabIndex]?.label === 'Pending'">
+                        <div class="flex justify-end gap-2"  v-if="statusTabs[activeTabIndex]?.label === 'Pending' && canUpdate">
                             <Button type="button" label="Export" icon="pi pi-file-export" class="p-button-success" :loading="exportLoading1" @click="handleExport1"/>
                             <Button type="button" label="Bulk Update" icon="pi pi-file-import" @click="importInput1?.click()":loading="importLoading1" />
                             <input 
@@ -41,7 +41,7 @@
                             @change="handleImport1"
                             />
                         </div>
-                        <div class="flex justify-end gap-2"  v-if="statusTabs[activeTabIndex]?.label === 'Delivery'">
+                        <div class="flex justify-end gap-2"  v-if="statusTabs[activeTabIndex]?.label === 'Delivery' && canUpdate">
                             <Button type="button" label="Export" icon="pi pi-file-export" class="p-button-success" :loading="exportLoading2" @click="handleExport2"/>
                             <Button type="button" label="Bulk Update" icon="pi pi-file-import" @click="importInput2?.click()":loading="importLoading2" />
                             <input 
@@ -57,7 +57,7 @@
 
                 <template #empty> No Order Delivery found. </template>
                 <template #loading> Loading Order Delivery data. Please wait. </template>
-                <Column header="Export All" style="min-width: 8rem">
+                <Column v-if="canUpdate" header="Export All" style="min-width: 8rem">
                     <template #header>
                         <div class="flex justify-center">
                         <Checkbox
@@ -154,13 +154,16 @@ import { RouterLink } from 'vue-router';
 import api from '@/service/api';
 import LoadingPage from '@/components/LoadingPage.vue';
 import { useToast } from 'primevue/usetoast';
+import { useMenuStore } from '@/store/menu';
 
+const menuStore = useMenuStore();
+const canUpdate = computed(() => menuStore.canWrite('Order Delivery'));
+const denyAccess = computed(() => menuStore.canTest('Order Delivery'));
 const toast = useToast();
 const exportLoading1 = ref(false);
 const importLoading1 = ref(false);
 const exportLoading2 = ref(false);
 const importLoading2 = ref(false);
-const returnList = ref([]);
 const importInput1 = ref();
 const importInput2 = ref();
 
