@@ -221,22 +221,12 @@
 
                     <div class="flex flex-col md:flex-row gap-4">
                         <div class="w-full">
-                            <label for="targetQ1">Quarter 1</label>
-                            <InputNumber id="targetQ1" v-model="form.targetQ1" mode="decimal" :min="0" :maxFractionDigits="0" placeholder="Enter Q1 target sales" class="w-full" />
+                            <label for="targetQ1">Revenue</label>
+                            <InputNumber disabled id="revenue" v-model="form.revenue" mode="decimal" :min="0" :maxFractionDigits="0" placeholder="Enter Revenue" class="w-full" />
                         </div>
                         <div class="w-full">
-                            <label for="targetQ2">Quarter 2</label>
-                            <InputNumber id="targetQ2" v-model="form.targetQ2" mode="decimal" :min="0" :maxFractionDigits="0" placeholder="Enter Q2 target sales" class="w-full" />
-                        </div>
-                    </div>
-                    <div class="flex flex-col md:flex-row gap-4">
-                        <div class="w-full">
-                            <label for="targetQ3">Quarter 3</label>
-                            <InputNumber id="targetQ3" v-model="form.targetQ3" mode="decimal" :min="0" :maxFractionDigits="0" placeholder="Enter Q3 target sales" class="w-full" />
-                        </div>
-                        <div class="w-full">
-                            <label for="targetQ4">Quarter 4</label>
-                            <InputNumber id="targetQ4" v-model="form.targetQ4" mode="decimal" :min="0" :maxFractionDigits="0" placeholder="Enter Q4 target sales" class="w-full" />
+                            <label for="targetQ2">TargetQty</label>
+                            <InputNumber disabled id="targetQty" v-model="form.targetQty" mode="decimal" :min="0" :maxFractionDigits="0" placeholder="Enter Target Quantity" class="w-full" />
                         </div>
                     </div>
                 </div>
@@ -532,10 +522,8 @@ interface FormData {
     customerCondGrp: string;
 
     // Target Sales Quarters
-    targetQ1: string;
-    targetQ2: string;
-    targetQ3: string;
-    targetQ4: string;
+    revenue: string;
+    targetQty: string;
 
     // Pricing & Sales Info
     priceGroup: string;
@@ -593,10 +581,8 @@ const form = ref<FormData>({
     creditLimit: '',
     customerAccountGroup: '',
     customerCondGrp: '',
-    targetQ1: '',
-    targetQ2: '',
-    targetQ3: '',
-    targetQ4: '',
+    revenue: '',
+    targetQty: '',
     priceGroup: '',
     priceProcedure: '',
     salesOffice: '',
@@ -684,10 +670,8 @@ const fetchDealerProfile = async () => {
                 creditLimit: dealerData.creditLimit || '',
                 customerAccountGroup: dealerData.customerAccountGroup || '',
                 customerCondGrp: dealerData.customerCondGrp || '',
-                targetQ1: dealerData.targetQ1 || '',
-                targetQ2: dealerData.targetQ2 || '',
-                targetQ3: dealerData.targetQ3 || '',
-                targetQ4: dealerData.targetQ4 || '',
+                revenue: dealerData.revenue || '',
+                targetQty: dealerData.targetQty || '',
                 priceGroup: dealerData.priceGroup || '',
                 priceProcedure: dealerData.priceProcedure || '',
                 salesOffice: dealerData.salesOffice || '',
@@ -836,10 +820,8 @@ const handleUpdate = async () => {
             allowLalamove: dropdownAllowLalamove.value?.code || '0',
             allowDirectship: dropdownAllowDirectShipment.value?.code || '0',
             startingSalesAmt: form.value.startingSalesAmt,
-            targetQ1: form.value.targetQ1,
-            targetQ2: form.value.targetQ2,
-            targetQ3: form.value.targetQ3,
-            targetQ4: form.value.targetQ4,
+            revenue: form.value.revenue,
+            targetQty: form.value.targetQty,
             s_array: JSON.stringify(shipToAddresses.value) // ShipTo data (read-only from SAP)
         };
 

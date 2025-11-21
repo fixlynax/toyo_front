@@ -124,10 +124,8 @@ interface FormData {
     customerCondGrp: string;
 
     // Target Sales Quarters
-    quarter1: string;
-    quarter2: string;
-    quarter3: string;
-    quarter4: string;
+    revenue: string;
+    quantity: string;
 
     // Pricing & Sales Info
     priceGroup: string;
@@ -199,10 +197,8 @@ const form = ref<FormData>({
     customerCondGrp: '',
 
     // Target Sales Quarter
-    quarter1: '',
-    quarter2: '',
-    quarter3: '',
-    quarter4: '',
+    revenue: '',
+    quantity: '',
 
     // Pricing & Sales Info
     priceGroup: '',
@@ -333,7 +329,7 @@ function handleSubmit() {
 
         // Combine all form data (includes quarter fields)
         const fullForm = {
-            ...form.value, // This now includes quarter1, quarter2, quarter3, quarter4
+            ...form.value, // This now includes quantity, revenue
             accountType: dropdownAccountType.value?.code || '',
             allowLalamove: dropdownYesNo.value?.code || '0',
             allowDirectShipment: dropdownAllowDirectShipment.value?.code || '0',
@@ -554,10 +550,8 @@ function mapSapResponseToForm(sapData: SapResponseItem): FormData {
         startingSalesAmt: '',
 
         // Target Sales Quarters
-        quarter1: '',
-        quarter2: '',
-        quarter3: '',
-        quarter4: '',
+        revenue: '',
+        quantity: '',
 
         // Signboard / Branding
         signboardBrand: customerMaster.signboardbrand || '',
@@ -679,10 +673,8 @@ function resetForm() {
         riskCategory: '',
         creditLimit: '',
         customerAccountGroup: '',
-        quarter1: '',
-        quarter2: '',
-        quarter3: '',
-        quarter4: '',
+        revenue: '',
+        quantity: '',
         customerCondGrp: '',
         priceGroup: '',
         priceProcedure: '',
@@ -962,22 +954,12 @@ onMounted(() => {
 
                     <div class="flex flex-col md:flex-row gap-4">
                         <div class="w-full">
-                            <label for="quarter1">Quarter 1</label>
-                            <InputNumber id="quarter1" type="text" v-model="form.quarter1" placeholder="Enter Q1 target sales" />
+                            <label for="revenue">Revenue</label>
+                            <InputNumber id="revenue" type="text" v-model="form.revenue" placeholder="Enter Revenue" />
                         </div>
                         <div class="w-full">
-                            <label for="quarter2">Quarter 2</label>
-                            <InputNumber id="quarter2" type="text" v-model="form.quarter2" placeholder="Enter Q2 target sales" />
-                        </div>
-                    </div>
-                    <div class="flex flex-col md:flex-row gap-4">
-                        <div class="w-full">
-                            <label for="quarter3">Quarter 3</label>
-                            <InputNumber id="quarter3" type="text" v-model="form.quarter3" placeholder="Enter Q3 target sales" />
-                        </div>
-                        <div class="w-full">
-                            <label for="quarter4">Quarter 4</label>
-                            <InputNumber id="quarter4" type="text" v-model="form.quarter4" placeholder="Enter Q4 target sales" />
+                            <label for="quantity">Quantity</label>
+                            <InputNumber id="quantity" type="text" v-model="form.quantity" placeholder="Enter Total Quantity" />
                         </div>
                     </div>
                 </div>

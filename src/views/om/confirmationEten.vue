@@ -255,22 +255,12 @@
 
                 <div class="flex flex-col md:flex-row gap-4">
                     <div class="w-full">
-                        <span class="text-sm text-gray-500">Quarter 1</span>
-                        <p class="text-lg font-medium">{{ formatCurrency(form.quarter1) }}</p>
+                        <span class="text-sm text-gray-500">Revenue</span>
+                        <p class="text-lg font-medium">{{ formatCurrency(form.revenue) }}</p>
                     </div>
                     <div class="w-full">
-                        <span class="text-sm text-gray-500">Quarter 2</span>
-                        <p class="text-lg font-medium">{{ formatCurrency(form.quarter2) }}</p>
-                    </div>
-                </div>
-                <div class="flex flex-col md:flex-row gap-4">
-                    <div class="w-full">
-                        <span class="text-sm text-gray-500">Quarter 3</span>
-                        <p class="text-lg font-medium">{{ formatCurrency(form.quarter3) }}</p>
-                    </div>
-                    <div class="w-full">
-                        <span class="text-sm text-gray-500">Quarter 4</span>
-                        <p class="text-lg font-medium">{{ formatCurrency(form.quarter4) }}</p>
+                        <span class="text-sm text-gray-500">Quantity</span>
+                        <p class="text-lg font-medium">{{ formatCurrency(form.quantity) }}</p>
                     </div>
                 </div>
             </div>
@@ -615,10 +605,8 @@ function mapFormToFormData(formData) {
     formDataObj.append('startingSalesAmt', formData.startingSalesAmt || '0');
 
     // Target Sales Quarter
-    formDataObj.append('targetQ1', formData.quarter1 || '0');
-    formDataObj.append('targetQ2', formData.quarter2 || '0');
-    formDataObj.append('targetQ3', formData.quarter3 || '0');
-    formDataObj.append('targetQ4', formData.quarter4 || '0');
+    formDataObj.append('revenue', formData.revenue || '0');
+    formDataObj.append('targetQty', formData.quantity || '0');
 
     // Ship To array
     const shipToArray = prepareShipToArray(formData.shipToAddresses);
@@ -646,10 +634,9 @@ function loadFormData() {
             }
 
             // Ensure quarter fields exist (backward compatibility)
-            if (!form.value.quarter1) form.value.quarter1 = '';
-            if (!form.value.quarter2) form.value.quarter2 = '';
-            if (!form.value.quarter3) form.value.quarter3 = '';
-            if (!form.value.quarter4) form.value.quarter4 = '';
+            if (!form.value.revenue) form.value.revenue = '';
+            if (!form.value.quantity) form.value.quantity = '';
+
         } else {
             router.push('/om/createEten');
         }

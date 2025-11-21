@@ -45,7 +45,7 @@
 
             <template #empty> No customers found. </template>
 
-            <Column field="memberCode" header="eTEN Code" style="min-width: 6rem">
+            <Column field="memberCode" header="Customer Code" style="min-width: 6rem">
                 <template #body="{ data }">
                     <RouterLink :to="`/om/detailEten/${data.custAccountNo}`" class="hover:underline font-bold text-primary-400">
                         {{ data.memberCode }}
@@ -54,7 +54,8 @@
             </Column>
 
             <Column field="created" header="CreatedTime" class="hidden" />
-            <Column field="custAccountNo" header="Account No" style="min-width: 6rem">
+            
+            <Column field="custAccountNo" header="Customer Account No" style="min-width: 6rem">
                 <template #body="{ data }">
                     {{ data.custAccountNo }}
                     <div class="flex flex-wrap gap-1 mt-1">
@@ -79,7 +80,7 @@
 
             <Column field="status" header="Status" style="min-width: 6rem">
                 <template #body="{ data }">
-                    <Tag :value="data.status === 1 ? 'Active' : 'Inactive'" :severity="getOverallStatusSeverity(data.status)" />
+                    <Tag :value="data.masterStatus === 1 ? 'Active' : 'Inactive'" :severity="getOverallStatusSeverity(data.masterStatus)" />
                 </template>
             </Column>
         </DataTable>
@@ -118,6 +119,12 @@ onMounted(async () => {
                 const customer = adminData[key];
                 const shop = customer.shop;
 
+                // Find the master user (where isMaster = 1)
+                const masterUser = customer.user_list?.find((user) => user.isMaster === 1);
+
+                // Use master user status if available, otherwise fallback to shop status
+                const masterStatus = masterUser ? masterUser.status : shop.status;
+
                 return {
                     id: shop.id,
                     memberCode: shop.memberCode || 'Untitled',
@@ -127,7 +134,8 @@ onMounted(async () => {
                     state: shop.state,
                     phoneNumber: shop.phoneNumber || '-',
                     signboardType: shop.signboardType || '-',
-                    status: shop.status,
+                    status: shop.status, // Keep original shop status
+                    masterStatus: masterStatus, // New field for master user status
                     user_list: customer.user_list,
                     created: shop.created
                 };
