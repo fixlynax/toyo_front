@@ -32,7 +32,7 @@
                     </div>
 
                     <!-- Right: Create Logistic Button -->
-                    <RouterLink to="/scm/createlogistic">
+                    <RouterLink v-if="canUpdate" to="/scm/createlogistic">
                         <Button label="Create" type="button" />
                     </RouterLink>
                 </div>
@@ -89,9 +89,14 @@
 <script setup>
 import { onMounted, ref, computed, watch } from 'vue';
 import { FilterMatchMode } from '@primevue/core/api';
-import { ListLogisticService } from '@/service/listLogistic';
 import api from '@/service/api';
 import { useToast } from 'primevue/usetoast';
+import { useMenuStore } from '@/store/menu';
+
+const menuStore = useMenuStore();
+const canUpdate = computed(() => menuStore.canWrite('3PL Account'));
+const denyAccess = computed(() => menuStore.canTest('3PL Account'));
+
 // Data variables
 const logisticList = ref([]);
 const loading = ref(true);

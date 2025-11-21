@@ -282,6 +282,7 @@ const InitfetchData = async () => {
                 phoneno: logisticList.value.phoneno || '',
                 contactperson: logisticList.value.contactperson || '',
                 mobileno: logisticList.value.mobileno || '',
+                status: logisticList.value.status || '',
                 storage_list: logisticList.value.storageLocationList
                     ? logisticList.value.storageLocationList.split(',')
                     : []
