@@ -69,13 +69,11 @@
                 </Column>
 
                 <Column field="publishDate" header="Publish Date" style="min-width: 6rem">
-                    <template #body="{ data }">
-                        {{ data.publishDate }}
-                    </template>
+                    <template #body="{ data }">{{ data?.publishDate ? formatDate(data.publishDate) : 'Not Assigned' }}</template>
                 </Column>
 
                 <Column field="period" header="Period" style="min-width: 8rem">
-                    <template #body="{ data }"> {{ data.startDate }} - {{ data.endDate }} </template>
+                    <template #body="{ data }"> {{ formatDate(data.startDate) }} - {{formatDate(data.endDate) }} </template>
                 </Column>
 
                 <Column field="totalSub" header="Total Sub" style="min-width: 6rem">
@@ -143,6 +141,23 @@ onMounted(async () => {
     }
 });
 
+function formatDate(dateString) {
+    if (!dateString) return '';
+
+    // API format: YYYY-MM-DD
+    const [year, month, day] = dateString.split('-');
+    const date = new Date(`${year}-${month}-${day}`);
+
+    if (isNaN(date)) return '';
+
+    return date.toLocaleDateString('en-MY', {
+        year: 'numeric',
+        month: '2-digit',
+        day: '2-digit'
+    });
+}
+
+
 const getOverallStatusSeverity = (status) => {
     return status === 1 ? 'success' : 'danger';
 };
@@ -162,17 +177,17 @@ const getOverallStatusSeverity = (status) => {
     border-radius: 12px;
     overflow: hidden;
     border: 1px solid #e5e7eb;
-    
+
     .p-datatable-header {
         border-top-left-radius: 12px;
         border-top-right-radius: 12px;
     }
-    
+
     .p-paginator-bottom {
         border-bottom-left-radius: 12px;
         border-bottom-right-radius: 12px;
     }
-    
+
     .p-datatable-thead > tr > th {
         &:first-child {
             border-top-left-radius: 12px;
@@ -181,7 +196,7 @@ const getOverallStatusSeverity = (status) => {
             border-top-right-radius: 12px;
         }
     }
-    
+
     // For the last row in the table body
     .p-datatable-tbody > tr:last-child > td {
         &:first-child {
@@ -191,7 +206,7 @@ const getOverallStatusSeverity = (status) => {
             border-bottom-right-radius: 0;
         }
     }
-    
+
     // When table is empty
     .p-datatable-tbody > tr.p-datatable-emptymessage > td {
         border-bottom-left-radius: 12px;

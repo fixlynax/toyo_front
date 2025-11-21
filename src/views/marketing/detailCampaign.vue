@@ -6,45 +6,58 @@
                 <!-- Detail Event -->
                 <div class="card flex flex-col w-full">
                     <div class="flex items-center justify-between border-b pb-2">
-                        <div class="text-2xl font-bold text-gray-800">Campaign Details</div>
+                        <div class="flex items-center gap-3">
+                            <RouterLink to="/marketing/listCampaign">
+                                <Button icon="pi pi-arrow-left" class="p-button-text p-button-secondary text-xl" size="big" v-tooltip="'Back'" />
+                            </RouterLink>
+                            <div class="text-2xl font-bold text-gray-800">Campaign Details</div>
+                        </div>
                         <div class="inline-flex items-center gap-2">
                             <!-- Edit Event -->
-                            <RouterLink to="/marketing/editCampaign">
+                            <RouterLink :to="`/marketing/editCampaign/${campaignId}`">
                                 <Button label="Edit" class="p-button-info" size="small" />
                             </RouterLink>
 
                             <!-- Delete Event -->
-                            <Button label="Delete" class="p-button-danger" size="small" />
+                            <Button label="Delete" class="p-button-danger" size="small" @click="confirmDelete" />
                         </div>
                     </div>
 
-                    <!-- Event Images -->
-                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mt-4">
-                        <img :src="campaign.image1Path" alt="Event Image 1" class="rounded-xl shadow-sm object-cover w-full h-80" />
-                        <img :src="campaign.image2Path" alt="Event Image 2" class="rounded-xl shadow-sm object-cover w-full h-80" />
-                        <img :src="campaign.image3Path" alt="Event Image 3" class="rounded-xl shadow-sm object-cover w-full h-80" />
+                    <!-- Loading State -->
+                    <div v-if="loading" class="flex justify-center items-center py-8">
+                        <ProgressSpinner />
                     </div>
 
-                    <!-- Event Info -->
-                    <div class="mt-6">
-                        <h1 class="text-2xl font-bold text-gray-800">{{ campaign.title }}</h1>
-                        <p class="text-lg font-medium">{{ campaign.description }}</p>
-
-                        <div class="flex flex-col md:flex-row gap-4 mt-3">
-                            <div class="w-full">
-                                <span class="block text-xm font-bold text-black-700">Term Condition</span>
-                                <p class="text-lg font-medium">{{ campaign.termCondition }}</p>
-                            </div>
+                    <!-- Campaign Content -->
+                    <div v-else>
+                        <!-- Event Images -->
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mt-4">
+                            <img v-if="campaign.image1Path" :src="campaign.image1Path" alt="Event Image 1" class="rounded-xl shadow-sm object-cover w-full h-80" />
+                            <img v-if="campaign.image2Path" :src="campaign.image2Path" alt="Event Image 2" class="rounded-xl shadow-sm object-cover w-full h-80" />
+                            <img v-if="campaign.image3Path" :src="campaign.image3Path" alt="Event Image 3" class="rounded-xl shadow-sm object-cover w-full h-80" />
                         </div>
 
-                        <div class="flex flex-col md:flex-row gap-4 mt-3">
-                            <div class="w-full">
-                                <span class="block text-xm font-bold text-black-700">Start Date</span>
-                                <p class="text-lg font-medium">{{ campaign.startDate }}</p>
+                        <!-- Event Info -->
+                        <div class="mt-6">
+                            <h1 class="text-2xl font-bold text-gray-800">{{ campaign.title }}</h1>
+                            <p class="text-lg font-medium">{{ campaign.description }}</p>
+
+                            <div class="flex flex-col md:flex-row gap-4 mt-3">
+                                <div class="w-full">
+                                    <span class="block text-xm font-bold text-black-700">Term Condition</span>
+                                    <p class="text-lg font-medium whitespace-pre-line">{{ campaign.termCondition }}</p>
+                                </div>
                             </div>
-                            <div class="w-full">
-                                <span class="block text-xm font-bold text-black-700">End Date</span>
-                                <p class="text-lg font-medium">{{ campaign.endDate }}</p>
+
+                            <div class="flex flex-col md:flex-row gap-4 mt-3">
+                                <div class="w-full">
+                                    <span class="block text-xm font-bold text-black-700">Start Date</span>
+                                    <p class="text-lg font-medium">{{ campaign.startDate }}</p>
+                                </div>
+                                <div class="w-full">
+                                    <span class="block text-xm font-bold text-black-700">End Date</span>
+                                    <p class="text-lg font-medium">{{ campaign.endDate }}</p>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -55,12 +68,20 @@
                         <div class="text-2xl font-bold text-gray-800">🎁 Prize Info</div>
                     </div>
 
-                    <DataTable :value="listPrize" :paginator="true" :rows="7" dataKey="id" :rowHover="true" responsiveLayout="scroll" class="text-sm">
+                    <DataTable :value="listPrize" :paginator="true" :rows="7" dataKey="id" :rowHover="true" responsiveLayout="scroll" class="text-sm" :loading="tableLoading">
+                        <template #empty>
+                            <div class="text-center py-8 text-gray-500">No prizes found for this campaign.</div>
+                        </template>
+                        
                         <!-- Prize Column -->
                         <Column header="Prize" style="min-width: 10rem">
                             <template #body="{ data }">
                                 <div class="flex items-center gap-3 relative group" @mouseenter="hoverPrize = data.id" @mouseleave="hoverPrize = null">
-                                    <img :src="data.imageURL" alt="Prize" class="w-36 h-24 rounded-lg object-cover border" />
+                                    <img 
+                                        :src="data.imageURL" 
+                                        alt="Prize" 
+                                        class="w-36 h-24 rounded-lg object-cover border" 
+                                    />
                                     <div class="flex flex-col">
                                         <span class="font-bold text-gray-800">{{ data.prizeName }}</span>
                                         <span class="text-gray-600 text-xs">{{ data.prizeType }}</span>
@@ -70,9 +91,9 @@
                                     <div v-if="data.prizeType === 'Point' && hoverPrize === data.id" class="absolute top-0 left-20 bg-white border rounded-lg shadow-lg p-3 text-xm w-60 z-10">
                                         <div class="font-semibold text-xl text-gray-700 mb-2">🏅 Point Reward</div>
                                         <ul class="list-disc list-inside text-gray-700 space-y-1 ml-5">
-                                            <li><b>Silver :</b> 80 pts</li>
-                                            <li><b>Gold :</b> 90 pts</li>
-                                            <li><b>Platinum :</b> 100 pts</li>
+                                            <li><b>Silver :</b> {{ campaign.point1 }} pts</li>
+                                            <li><b>Gold :</b> {{ campaign.point2 }} pts</li>
+                                            <li><b>Platinum :</b> {{ campaign.point3 }} pts</li>
                                         </ul>
                                     </div>
                                 </div>
@@ -142,6 +163,14 @@
                                     <td class="px-4 py-2 font-medium">Published</td>
                                     <td class="px-4 py-2 text-right">{{ campaign.publishDate }}</td>
                                 </tr>
+                                <tr>
+                                    <td class="px-4 py-2 font-medium"></td>
+                                    <td class="py-4 text-right">
+                                        <div class="flex justify-end">
+                                           <ToggleButton v-model="eventStatus" @change="toggleEventStatus" onLabel="Inactive" offLabel="Active" onIcon="pi pi-times" offIcon="pi pi-check" class="w-30" />
+                                        </div>
+                                    </td>
+                                </tr>
                             </tbody>
                         </table>
                     </div>
@@ -153,6 +182,10 @@
                         <Button icon="pi pi-file-export" label="Export" style="width: fit-content" class="p-button-danger p-button-sm" />
                     </div>
                     <DataTable :value="participants" :paginator="true" :rows="5" dataKey="id" :rowHover="true" responsiveLayout="scroll" class="text-sm">
+                        <template #empty>
+                            <div class="text-center py-8 text-gray-500">No participants found.</div>
+                        </template>
+                        
                         <!-- User Column -->
                         <Column header="User" style="min-width: 6rem">
                             <template #body="{ data }">
@@ -169,7 +202,6 @@
                         <!-- Prize Type -->
                         <Column field="prizeName" header="Prize" style="min-width: 8rem"></Column>
 
-                        <!-- Action Approve & Reject -->
                         <!-- Action Approve & Reject -->
                         <Column header="Action" style="min-width: 8rem">
                             <template #body="{ data }">
@@ -192,18 +224,22 @@
                     <!-- Header with Invite Button -->
                     <div class="flex items-center justify-between border-b pb-2 mb-2">
                         <div class="text-2xl font-bold text-gray-800">🚩 Dealer list</div>
-                        <RouterLink to="/marketing/inviteDealer">
+                        <RouterLink :to="`/marketing/inviteDealer/${campaignId}`">
                             <Button label="Invite Dealer" icon="pi pi-user-plus" style="width: fit-content" class="p-button-sm p-button-success" />
                         </RouterLink>
                     </div>
 
                     <DataTable :value="dealerList" :paginator="true" :rows="3" dataKey="id" :rowHover="true" responsiveLayout="scroll" class="text-sm">
+                        <template #empty>
+                            <div class="text-center py-8 text-gray-500">No dealers invited yet.</div>
+                        </template>
+                        
                         <!-- Title + ID -->
                         <Column header="Name" style="min-width: 8rem">
                             <template #body="{ data }">
                                 <div class="flex flex-col">
-                                    <span class="font-bold text-gray-800">{{ data.name }}</span>
-                                    <span class="text-gray-600 text-xm mt-2">🔧 {{ data.id }}</span>
+                                    <span class="font-bold text-gray-800">{{ data.companyName }}</span>
+                                    <span class="text-gray-600 text-xm mt-2">🔧 {{ data.memberCode || data.custAccountNo }}</span>
                                 </div>
                             </template>
                         </Column>
@@ -233,6 +269,10 @@
                     </div>
 
                     <DataTable :value="criteria" :paginator="true" :rows="3" dataKey="id" :rowHover="true" responsiveLayout="scroll" class="text-sm">
+                        <template #empty>
+                            <div class="text-center py-8 text-gray-500">No criteria set for this campaign.</div>
+                        </template>
+                        
                         <!-- Title + Type in one column -->
                         <Column header="Name" style="min-width: 8rem">
                             <template #body="{ data }">
@@ -269,296 +309,313 @@
 </template>
 
 <script setup>
-import { ref } from 'vue';
+import { ref, onMounted, computed } from 'vue';
+import { useRoute, useRouter } from 'vue-router';
+import { useToast } from 'primevue/usetoast';
+import { useConfirm } from 'primevue/useconfirm';
+import api from '@/service/api';
 
+const route = useRoute();
+const router = useRouter();
+const toast = useToast();
+const confirm = useConfirm();
+
+const campaignId = route.params.id;
+const loading = ref(true);
+const tableLoading = ref(false);
+
+// Reactive data
 const hoverPrize = ref(null);
 const editDialogVisible = ref(false);
 const selectedPrize = ref(null);
 
+// Main data structures
 const campaign = ref({
-    id: 1,
-    campaignNo: 'CTY001',
-    eten_userID_list: 'E010001,E010002,E010003',
-    isGamification: 1,
-    title: 'Toyo Tires Safety Awareness Campaign',
-    description: 'Promoting road safety and awareness with Toyo Tires during festive season.',
-    image1Path: '/demo/images/event-toyo-1.jpg',
-    image2Path: '/demo/images/event-toyo-2.jpg',
-    image3Path: '/demo/images/event-toyo-3.jpg',
-    termCondition: 'Valid for participants within Malaysia only. One entry per user.',
-    publishDate: '2025-01-05',
-    startDate: '2025-01-10',
-    endDate: '2025-02-10',
-    quota: 1000,
+    id: 0,
+    campaignNo: '',
+    isGamification: 0,
+    title: '',
+    description: '',
+    image1Path: '',
+    image2Path: null,
+    image3Path: null,
+    termCondition: '',
+    publishDate: '',
+    startDate: '',
+    endDate: '',
+    quota: 0,
     maxPerUser: 1,
-    point1: 10,
-    point2: 20,
-    point3: 30,
-    status: 1,
-    created: '2025-01-05',
-    deleted: null,
-    totalSub: 650 // Current total submissions
+    point1: 0,
+    point2: 0,
+    point3: 0,
+    status: 0
 });
 
-const participants = ref([
-    {
-        id: 1,
-        fullName: 'Ahmad Faiz',
-        memberLevel: 'Gold',
-        date: '2025-09-01',
-        point: 90,
-        prizeName: 'Bonus Point Toyo',
-        prizeType: 'Point',
-        prize: 100,
-        status: 'Approved'
-    },
-    {
-        id: 2,
-        fullName: 'Nur Aisyah',
-        memberLevel: 'Silver',
-        date: '2025-09-02',
-        point: 85,
-        prizeName: 'E-Wallet RM 50',
-        prizeType: 'E-Wallet',
-        prize: 'MYR 50',
-        status: 'Approved'
-    },
-    {
-        id: 3,
-        fullName: 'Hafiz Din',
-        memberLevel: 'Platinum',
-        date: '2025-09-02',
-        point: 95,
-        prizeName: 'Shoppe RM 20',
-        prizeType: 'E-Voucher',
-        prize: 'Amazon $20',
-        status: 'Rejected'
-    },
-    {
-        id: 4,
-        fullName: 'Lim Wei Jian',
-        memberLevel: 'Gold',
-        date: '2025-09-03',
-        point: 90,
-        prizeName: 'Smartwatch',
-        prizeType: 'Item',
-        prize: 'Smartwatch',
-        status: ''
-    },
-    {
-        id: 5,
-        fullName: 'Siti Mariam',
-        memberLevel: 'Silver',
-        date: '2025-09-03',
-        point: 85,
-        prizeName: 'Bonus Point Toyo',
-        prizeType: 'Point',
-        prize: 50,
-        status: ''
-    },
-    {
-        id: 6,
-        fullName: 'Arjun Kumar',
-        memberLevel: 'Gold',
-        date: '2025-09-04',
-        point: 90,
-        prizeName: 'E-Wallet RM 100',
-        prizeType: 'E-Wallet',
-        prize: 'MYR 100',
-        status: ''
-    },
-    {
-        id: 7,
-        fullName: 'Tan Li Ying',
-        memberLevel: 'Platinum',
-        date: '2025-09-04',
-        point: 95,
-        prizeName: 'E-Voucher Shoppe RM 50',
-        prizeType: 'E-Voucher',
-        prize: 'Amazon $50',
-        status: ''
-    },
-    {
-        id: 8,
-        fullName: 'Mohd Amir',
-        memberLevel: 'Silver',
-        date: '2025-09-05',
-        point: 85,
-        prizeName: 'Bluetooth Headphones',
-        prizeType: 'Item',
-        prize: 'Bluetooth Headphones',
-        status: ''
-    },
-    {
-        id: 9,
-        fullName: 'Farah Nadiah',
-        memberLevel: 'Gold',
-        date: '2025-09-05',
-        point: 90,
-        prizeName: 'Bonus Point Toyo',
-        prizeType: 'Point',
-        prize: 75,
-        status: ''
-    },
-    {
-        id: 10,
-        fullName: 'Jason Lee',
-        memberLevel: 'Platinum',
-        date: '2025-09-06',
-        point: 95,
-        prizeName: 'E-Wallet RM 200',
-        prizeType: 'E-Wallet',
-        prize: 'MYR 200',
-        status: ''
-    },
-    {
-        id: 11,
-        fullName: 'Hazrul Izhar',
-        memberLevel: 'Classic',
-        date: '2025-09-06',
-        point: 95,
-        prizeName: 'Umbrella',
-        prizeType: 'Item',
-        prize: 'Smartphone',
-        status: ''
+const participants = ref([]);
+const criteria = ref([]);
+const dealerList = ref([]);
+const listPrize = ref([]);
+
+// Computed property for toggle button
+const campaignStatus = computed({
+    get: () => campaign.value.status === 1,
+    set: (newValue) => {
+        // This will be handled by the API call
     }
-]);
+});
 
-const criteria = [
-    {
-        id: 1,
-        title: 'Pattern A Small',
-        type: 'Tire',
-        pattern: 'Pattern A',
-        size: '15 inch',
-        minQty: 2
-    },
-    {
-        id: 2,
-        title: 'Pattern A Medium',
-        type: 'Tire',
-        pattern: 'Pattern A',
-        size: '16 inch',
-        minQty: 4
-    },
-    {
-        id: 3,
-        title: 'Pattern B Small',
-        type: 'Tire',
-        pattern: 'Pattern B',
-        size: '15 inch',
-        minQty: 2
-    },
-    {
-        id: 4,
-        title: 'Pattern B Large',
-        type: 'Tire',
-        pattern: 'Pattern B',
-        size: '18 inch',
-        minQty: 4
-    },
-    {
-        id: 5,
-        title: 'Pattern C Economy',
-        type: 'Tire',
-        pattern: 'Pattern C',
-        size: '14 inch',
-        minQty: 2
-    },
-    {
-        id: 6,
-        title: 'Pattern C Premium',
-        type: 'Tire',
-        pattern: 'Pattern C',
-        size: '17 inch',
-        minQty: 4
-    },
-    {
-        id: 7,
-        title: 'Pattern D Standard',
-        type: 'Tire',
-        pattern: 'Pattern D',
-        size: '16 inch',
-        minQty: 2
-    },
-    {
-        id: 8,
-        title: 'Pattern D Wide',
-        type: 'Tire',
-        pattern: 'Pattern D',
-        size: '19 inch',
-        minQty: 4
-    },
-    {
-        id: 9,
-        title: 'Pattern E Compact',
-        type: 'Tire',
-        pattern: 'Pattern E',
-        size: '13 inch',
-        minQty: 2
-    },
-    {
-        id: 10,
-        title: 'Pattern E Sport',
-        type: 'Tire',
-        pattern: 'Pattern E',
-        size: '20 inch',
-        minQty: 4
+// Toggle event status
+const toggleEventStatus = async () => {
+    try {
+        const response = await api.put(`campaign/toggleInactive/${campaign.value.id}`);
+
+        if (response.data.status === 1) {
+            // Update local event status
+            campaign.value.status = campaign.value.status === 1 ? 0 : 1;
+
+            toast.add({
+                severity: 'success',
+                summary: 'Success',
+                detail: `campaign ${campaign.value.status === 1 ? 'activated' : 'deactivated'} successfully`,
+                life: 3000
+            });
+        } else {
+            toast.add({
+                severity: 'error',
+                summary: 'Error',
+                detail: 'Failed to update campaign status',
+                life: 3000
+            });
+        }
+    } catch (error) {
+        console.error('Error updating campaign status:', error);
+        toast.add({
+            severity: 'error',
+            summary: 'Error',
+            detail: 'Failed to update campaign status',
+            life: 3000
+        });
     }
-];
+};
 
-const dealerList = ref([
-    {
-        id: 'E010001',
-        name: 'Tau Lim Tires Service',
-        signboardType: 'T10',
-        state: 'Johor'
-    },
-    {
-        id: 'E010002',
-        name: 'Toyo Tires Center',
-        signboardType: 'TAC',
-        state: 'Kuala Lumpur'
-    },
-    {
-        id: 'E010003',
-        name: 'Auto Wheels Malaysia',
-        signboardType: 'TSS',
-        state: 'Selangor'
-    },
-    {
-        id: 'E010004',
-        name: 'Speedy Tire Shop',
-        signboardType: 'TST',
-        state: 'Penang'
-    },
-    {
-        id: 'E010005',
-        name: 'Premium Auto Tires',
-        signboardType: 'TPC',
-        state: 'Perak'
-    },
-    {
-        id: 'E010006',
-        name: 'Star Tires & Service',
-        signboardType: 'Non',
-        state: 'Sabah'
-    },
-    {
-        id: 'E010007',
-        name: 'AutoMax Tire Service',
-        signboardType: 'T10',
-        state: 'Johor'
+// Toggle campaign status
+const toggleCampaignStatus = async () => {
+    try {
+        const response = await api.put(`campaign/toggleInactive/${campaignId}`);
+
+        if (response.data.status === 1) {
+            // Update local campaign status
+            campaign.value.status = campaign.value.status === 1 ? 0 : 1;
+
+            toast.add({
+                severity: 'success',
+                summary: 'Success',
+                detail: `Campaign ${campaign.value.status === 1 ? 'activated' : 'deactivated'} successfully`,
+                life: 3000
+            });
+        } else {
+            toast.add({
+                severity: 'error',
+                summary: 'Error',
+                detail: 'Failed to update campaign status',
+                life: 3000
+            });
+        }
+    } catch (error) {
+        console.error('Error updating campaign status:', error);
+        toast.add({
+            severity: 'error',
+            summary: 'Error',
+            detail: 'Failed to update campaign status',
+            life: 3000
+        });
     }
-]);
+};
 
-const listPrize = ref([
-    { id: 1, prizeType: 'Point', imageURL: '/demo/images/bonus-point.png', prizeName: 'Bonus Point Toyo', prizeQuota: 50, prizeRemain: 20 },
-    { id: 2, prizeType: 'E-Wallet', imageURL: 'https://assets.bharian.com.my/images/articles/tng13jan_BHfield_image_socialmedia.var_1610544082.jpg', prizeName: 'MYR 50 E-Wallet', prizeQuota: 100, prizeRemain: 40 },
-    { id: 3, prizeType: 'E-Voucher', imageURL: 'https://assets.offgamers.com/img/offer/kr_fdf75033-56ee-4ce6-929c-1f9c93a4c642_1b1c60fc-e950-4c62-8ee7-471d42484619.webp', prizeName: 'Shopee E-Voucher', prizeQuota: 30, prizeRemain: 10 },
-    { id: 4, prizeType: 'Item', imageURL: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRdSHDEYMxmOB1Z63V0UB1ohMHGZ5cs5DG4zg&s', prizeName: 'Toyo Tumbler', prizeQuota: 15, prizeRemain: 5 }
-]);
+// Confirm before delete
+const confirmDelete = () => {
+    confirm.require({
+        message: 'Are you sure you want to delete this campaign?',
+        header: 'Confirm Delete',
+        icon: 'pi pi-exclamation-triangle',
+        acceptLabel: 'Yes, Delete',
+        rejectLabel: 'Cancel',
+        acceptClass: 'p-button-danger',
+        accept: async () => {
+            try {
+                // Replace with your actual delete API endpoint
+                const response = await api.put(`campaign/delete/${campaign.value.id}`);
+                
+                if (response.data.status === 1) {
+                    toast.add({
+                        severity: 'success',
+                        summary: 'Deleted',
+                        detail: 'Campaign deleted successfully.',
+                        life: 3000
+                    });
+                    router.push('/marketing/listCampaign');
+                } else {
+                    toast.add({
+                        severity: 'error',
+                        summary: 'Error',
+                        detail: 'Failed to delete campaign.',
+                        life: 3000
+                    });
+                }
+            } catch (error) {
+                console.error('Delete failed:', error);
+                toast.add({
+                    severity: 'error',
+                    summary: 'Error',
+                    detail: 'Failed to delete campaign.',
+                    life: 3000
+                });
+            }
+        },
+        reject: () => {
+            toast.add({
+                severity: 'info',
+                summary: 'Cancelled',
+                detail: 'Deletion cancelled.',
+                life: 2000
+            });
+        }
+    });
+};
 
+// API Functions
+const fetchCampaignDetails = async () => {
+    try {
+        loading.value = true;
+        tableLoading.value = true;
+
+        const response = await api.get(`campaign/details/${campaignId}`);
+        console.log('API Response:', response.data);
+
+        if (response.data.status === 1 && response.data.admin_data) {
+            const data = response.data.admin_data;
+            
+            // Set campaign details
+            if (data.campaign_details) {
+                campaign.value = {
+                    ...campaign.value,
+                    ...data.campaign_details
+                };
+
+                // Process private images for campaign photos
+                await processCampaignImages();
+            }
+
+            // Set criteria
+            if (Array.isArray(data.criteria)) {
+                criteria.value = data.criteria.map(item => ({
+                    ...item,
+                    type: 'Tire' // Default type as per your structure
+                }));
+            }
+
+            // Set dealer list
+            if (Array.isArray(data.participate_dealer)) {
+                dealerList.value = data.participate_dealer.map(dealer => ({
+                    id: dealer.id,
+                    companyName: dealer.companyName,
+                    memberCode: dealer.memberCode,
+                    custAccountNo: dealer.custAccountNo,
+                    state: 'Unknown', // You might need to get this from another API
+                    signboardType: 'N/A' // Default value
+                }));
+            }
+
+            // Set prize list from reward_option
+            if (Array.isArray(data.reward_option)) {
+                listPrize.value = data.reward_option.map(reward => {
+                    const catalog = reward.catalog;
+                    return {
+                        id: reward.id,
+                        prizeType: mapPrizeType(catalog.type),
+                        imageURL: catalog.imageURL,
+                        prizeName: catalog.title,
+                        prizeQuota: reward.total_qty,
+                        prizeRemain: reward.total_qty - reward.won_qty,
+                        catalogData: catalog
+                    };
+                });
+
+                // Process private images for prize photos
+                await processPrizeImages();
+            }
+
+        } else {
+            console.error('API returned error or invalid data:', response.data);
+            toast.add({
+                severity: 'error',
+                summary: 'Error',
+                detail: 'Failed to load campaign details',
+                life: 3000
+            });
+        }
+    } catch (error) {
+        console.error('Error fetching campaign details:', error);
+        toast.add({
+            severity: 'error',
+            summary: 'Error',
+            detail: 'Failed to load campaign details',
+            life: 3000
+        });
+    } finally {
+        loading.value = false;
+        tableLoading.value = false;
+    }
+};
+
+// Process private images for campaign photos
+const processCampaignImages = async () => {
+    const imageFields = ['image1Path', 'image2Path', 'image3Path'];
+
+    for (const field of imageFields) {
+        if (campaign.value[field] && typeof campaign.value[field] === 'string') {
+            try {
+                const blobUrl = await api.getPrivateFile(campaign.value[field]);
+                if (blobUrl) {
+                    campaign.value[field] = blobUrl;
+                }
+            } catch (error) {
+                console.error(`Error loading campaign image ${field}:`, error);
+                // Keep the original URL if private file loading fails
+            }
+        }
+    }
+};
+
+// Process private images for prize photos
+const processPrizeImages = async () => {
+    for (const prize of listPrize.value) {
+        if (prize.imageURL && typeof prize.imageURL === 'string') {
+            try {
+                const blobUrl = await api.getPrivateFile(prize.imageURL);
+                if (blobUrl) {
+                    prize.imageURL = blobUrl;
+                }
+            } catch (error) {
+                console.error(`Error loading prize image for ${prize.prizeName}:`, error);
+                // Keep the original URL if private file loading fails
+            }
+        }
+    }
+};
+
+// Helper functions
+const mapPrizeType = (apiType) => {
+    const typeMap = {
+        'EWALLET': 'E-Wallet',
+        'EVOUCHER': 'E-Voucher',
+        'ITEM': 'Item',
+        'POINT': 'Point'
+    };
+    return typeMap[apiType] || apiType;
+};
+
+// Existing functions (keep them as they are)
 const removeDealer = (dealer) => {
     dealerList.value = dealerList.value.filter((d) => d.id !== dealer.id);
 };
@@ -589,4 +646,9 @@ function rejectParticipant(participant) {
         target.status = 'Rejected';
     }
 }
+
+// Lifecycle
+onMounted(() => {
+    fetchCampaignDetails();
+});
 </script>
