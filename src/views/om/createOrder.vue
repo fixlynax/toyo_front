@@ -1733,6 +1733,7 @@ const proceedWithoutBackOrder = async () => {
         orderStatus.value = 'error';
         orderMessage.value = 'Failed to create order';
         orderError.value = error.message;
+        
 
         toast.add({
             severity: 'error',

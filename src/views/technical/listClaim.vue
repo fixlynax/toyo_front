@@ -184,7 +184,7 @@ onMounted(fetchClaims);
         <LoadingPage v-if="loading" message="Loading Warranty Claim List..." />
 
         <div v-else>
-            <DataTable :value="filteredList" :paginator="true" :rows="10" dataKey="id" :rowHover="true" :filters="filters" filterDisplay="menu" :globalFilterFields="['refNo', 'dealerName', 'claimType', 'claimDate', 'status', 'warrantyRegCertNo']">
+            <DataTable :value="filteredList" :paginator="true" :rows="10" dataKey="id" :rowHover="true" :filters="filters" filterDisplay="menu" :globalFilterFields="['refNo', 'dealerName', 'claimType', 'claimDate', 'status', 'stage', 'warrantyRegCertNo']">
                 <template #header>
                     <div class="flex items-center justify-between gap-4 w-full flex-wrap">
                         <div class="flex items-center gap-2 w-full max-w-md">
