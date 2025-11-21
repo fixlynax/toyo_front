@@ -119,9 +119,14 @@
 
 <script>
 import api from '@/service/api';
+import { useToast } from 'primevue/usetoast';
 
 export default {
     name: 'MailSettingList',
+    setup() {
+        const toast = useToast();
+        return { toast };
+    },
     data() {
         return {
             listData: [],
@@ -138,7 +143,6 @@ export default {
             try {
                 this.loading = true;
                 const res = await api.get('emailSettings');
-
                 if (res.data.status === 1) {
                     this.listData = res.data.email_settings.map(item => ({
                         id: item.email_setting_id,
@@ -153,7 +157,11 @@ export default {
                     const allEmails = new Set();
                     this.listData.forEach(i => i.emails.forEach(e => allEmails.add(e)));
                     this.emailOptions = Array.from(allEmails).map(e => ({ label: e, value: e }));
+
+                    this.toast.add({ severity: 'success', summary: 'Loaded', detail: 'Mail settings loaded', life: 2000 });
                 }
+            } catch (err) {
+                this.toast.add({ severity: 'error', summary: 'Error', detail: 'Failed to load data', life: 2500 });
             } finally {
                 this.loading = false;
             }
@@ -169,23 +177,29 @@ export default {
             this.form.emails = [...setting.emails];
             this.form.shippingPoint = setting.shippingPoint;
             this.expandedRows = { [setting.id]: true };
+            this.toast.add({ severity: 'info', summary: 'Editing', detail: 'Edit mode enabled', life: 2000 });
         },
 
         async saveSetting(row) {
-            const payload = {
-                email_addresses: this.form.emails.join(','),
-                storage_location: this.form.shippingPoint
-            };
+            try {
+                const payload = {
+                    email_addresses: this.form.emails.join(','),
+                    storage_location: this.form.shippingPoint
+                };
 
-            await api.post(`emailSetting/update/${row.id}`, payload);
+                await api.post(`emailSetting/update/${row.id}`, payload);
 
-            const index = this.listData.findIndex(i => i.id === row.id);
-            if (index !== -1) {
-                this.listData[index].emails = [...this.form.emails];
-                this.listData[index].shippingPoint = this.form.shippingPoint;
+                const index = this.listData.findIndex(i => i.id === row.id);
+                if (index !== -1) {
+                    this.listData[index].emails = [...this.form.emails];
+                    this.listData[index].shippingPoint = this.form.shippingPoint;
+                }
+
+                this.toast.add({ severity: 'success', summary: 'Saved', detail: 'Mail setting updated successfully', life: 2000 });
+                this.cancelEdit();
+            } catch (err) {
+                this.toast.add({ severity: 'error', summary: 'Error', detail: 'Failed to save', life: 2500 });
             }
-
-            this.cancelEdit();
         },
 
         cancelEdit() {
@@ -193,10 +207,14 @@ export default {
             this.form.emails = [];
             this.form.shippingPoint = '';
             this.expandedRows = {};
+            
         },
 
         onRowToggle(event) {
-            if (this.editingId && !event.data) this.cancelEdit();
+            if (this.editingId && !event.data) {
+                this.cancelEdit();
+                this.toast.add({ severity: 'info', summary: 'Closed', detail: 'Row collapsed while editing', life: 2000 });
+            }
         },
 
         formatDate(dateStr) {
@@ -216,6 +234,7 @@ export default {
     }
 };
 </script>
+
 
 <style scoped lang="scss">
 :deep(.p-row-expanded) { background-color: #f9fafb !important; }
