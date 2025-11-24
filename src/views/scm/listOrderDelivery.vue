@@ -125,7 +125,7 @@
                     </template>
                 </Column>
 
-                <Column field="scheduled_delivery_time" header="Deliver Date" style="min-width: 10rem">
+                <Column field="scheduled_delivery_time" header="Planend Date" style="min-width: 10rem">
                     <template #body="{ data }">
                         {{ data.scm_deliver_detail?.scheduled_delivery_time ? formatDate(data.scm_deliver_detail.scheduled_delivery_time) : 'Not Assigned' }}
                     </template>
@@ -346,7 +346,7 @@ const handleExport1 = async () => {
         const url = window.URL.createObjectURL(blob);
         const a = document.createElement('a');
         a.href = url;
-        a.download = 'BulkDeliverySchedule_Download.xlsx';
+        a.download = 'BulkPlannedDate_Download.xlsx';
         document.body.appendChild(a);
         a.click();
         document.body.removeChild(a);
@@ -390,7 +390,7 @@ const handleExport2 = async () => {
         const url = window.URL.createObjectURL(blob);
         const a = document.createElement('a');
         a.href = url;
-        a.download = 'BulkDeliveryReceive_Download.xlsx';
+        a.download = 'BulkDeliveredDate_Download.xlsx';
         document.body.appendChild(a);
         a.click();
         document.body.removeChild(a);
