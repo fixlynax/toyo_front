@@ -145,7 +145,7 @@
                                     <td class="px-4 py-2 text-right">{{ orderDelList.deliveryDate ? formatDate(orderDelList.deliveryDate) : 'Not Assigned' }}</td>
                                 </tr>
                                 <tr class="border-b">
-                                    <td class="px-4 py-2 font-medium">Delivery Date</td>
+                                    <td class="px-4 py-2 font-medium">Planned Date</td>
                                     <td class="px-4 py-2 text-right">{{ orderDelList?.scm_deliver_detail?.scheduled_delivery_time? formatDate(orderDelList.scm_deliver_detail.scheduled_delivery_time): 'Not Assigned'}}</td>
                                 </tr>
                                 <tr class="border-b">
@@ -159,16 +159,16 @@
                             </tbody>
                         </table>
                     </div>
-                    <div v-if="!loading && orderDelList && !orderDelList?.scm_deliver_detail?.scheduled_delivery_time && !orderDelList?.scm_deliver_detail?.delivered_datetime" class="flex justify-end mt-3">
+                    <div v-if="!loading && orderDelList && !orderDelList?.scm_deliver_detail?.scheduled_delivery_time && !orderDelList?.scm_deliver_detail?.delivered_datetime && canUpdate" class="flex justify-end mt-3">
                         <Button  
                             style="width: auto !important"
-                            label="Update Delivery Date"
+                            label="Update Planned Date"
                             icon="pi pi-calendar"
                             class="p-button-sm p-button-warning"
                             @click="openDialog = true"
                         />
                     </div>
-                    <div v-if="!loading && orderDelList && orderDelList?.scm_deliver_detail?.scheduled_delivery_time && !orderDelList?.scm_deliver_detail?.delivered_datetime" class="flex justify-end mt-3">
+                    <div v-if="!loading && orderDelList && orderDelList?.scm_deliver_detail?.scheduled_delivery_time && !orderDelList?.scm_deliver_detail?.delivered_datetime && canUpdate" class="flex justify-end mt-3">
                         <Button  
                             style="width: auto !important"
                             label="Update Delivered Date"
@@ -184,7 +184,7 @@
     </Fluid>
 
     <Dialog
-      header="Update Schedule Delivery"
+      header="Update Planned Date"
       v-model:visible="openDialog"
       modal
       :style="{ width: '400px' }"
@@ -194,17 +194,17 @@
         <Calendar
           v-model="form.scheduleDate"
           dateFormat="yy-mm-dd"
-          placeholder="Select Schedule Date"
+          placeholder="Select Planned Date"
         />
 
         <!-- Schedule Time -->
-        <Calendar
+        <!-- <Calendar
           v-model="form.scheduleTime"
           showTime
           hourFormat="24"
           timeOnly
           placeholder="Select Schedule Time"
-        />
+        /> -->
 
         <!-- Actions -->
         <div class="flex justify-end gap-2 mt-3">
@@ -215,7 +215,7 @@
     </Dialog>
 
     <Dialog
-      header="Update Schedule Delivery"
+      header="Update Delivered Date"
       v-model:visible="openDialog2"
       modal
       :style="{ width: '400px' }"
@@ -225,17 +225,17 @@
         <Calendar
           v-model="form2.delivereddate"
           dateFormat="yy-mm-dd"
-          placeholder="Select Schedule Date"
+          placeholder="Select Delivered Date"
         />
 
 
-        <Calendar
+        <!-- <Calendar
           v-model="form2.deliverytime"
           showTime
           hourFormat="24"
           timeOnly
           placeholder="Select Schedule Time"
-        />
+        /> -->
 
         <div class="flex justify-end gap-2 mt-3">
           <Button label="Cancel" class="p-button-text" @click="openDialog2 = false" />
@@ -250,6 +250,12 @@ import api from '@/service/api';
 import { useToast } from 'primevue/usetoast';
 import { onMounted, ref, computed } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
+import { useMenuStore } from '@/store/menu';
+
+const menuStore = useMenuStore();
+const canUpdate = computed(() => menuStore.canWrite('Order Delivery'));
+const denyAccess = computed(() => menuStore.canTest('Order Delivery'));
+
 defineProps({
   id: {
     type: [String, Number],
@@ -349,19 +355,19 @@ const loadingUpdate2 = ref(false);
 const form = ref({
   orderno: null, 
   scheduleDate: null,      
-  scheduleTime: null      
+//   scheduleTime: null      
 });
 
 const form2 = ref({
   orderno: null, 
   delivereddate: null,      
-  deliverytime: null      
+//   deliverytime: null      
 });
 
 // Save function
 const saveSchedule = async () => {
-  if (!form.value.scheduleDate || !form.value.scheduleTime) {
-    toast.add({ severity: 'warn', summary: 'Warning', detail: 'Please select date & time', life: 3000 });
+  if (!form.value.scheduleDate) {
+    toast.add({ severity: 'warn', summary: 'Warning', detail: 'Please select date', life: 3000 });
     return;
   }
 
@@ -370,11 +376,11 @@ const saveSchedule = async () => {
     const payload = {
       orderno: form.value.orderno,
       scheduledate: formatDateApi(form.value.scheduleDate),
-      scheduletime: formatTimeApi(form.value.scheduleTime)
+    //   scheduletime: formatTimeApi(form.value.scheduleTime)
     };
     const res = await api.post('update-schedule-order', payload);
     if (res.data?.status === 1) {
-        toast.add({ severity: 'success', summary: 'Updated', detail: 'Schedule date updated successfully', life: 3000 });
+        toast.add({ severity: 'success', summary: 'Updated', detail: 'Planned date updated successfully', life: 3000 });
         InitfetchData(); // refresh table
     } else {
         toast.add({ severity: 'error', summary: 'Error', detail: res.data?.message || 'Failed', life: 3000 });
@@ -389,8 +395,8 @@ const saveSchedule = async () => {
 
 // Save function
 const saveDelivered = async () => {
-  if (!form2.value.delivereddate || !form2.value.deliverytime) {
-    toast.add({ severity: 'warn', summary: 'Warning', detail: 'Please select date & time', life: 3000 });
+  if (!form2.value.delivereddate) {
+    toast.add({ severity: 'warn', summary: 'Warning', detail: 'Please select date', life: 3000 });
     return;
   }
 
@@ -398,7 +404,7 @@ const saveDelivered = async () => {
     const payload = {
       orderno: form2.value.orderno,
       delivereddate: formatDateApi(form2.value.delivereddate),
-      deliveredtime: formatTimeApi(form2.value.deliverytime)
+    //   deliveredtime: formatTimeApi(form2.value.deliverytime)
     };
     const res = await api.post('update-delivered-order', payload);
     if (res.data?.status === 1) {

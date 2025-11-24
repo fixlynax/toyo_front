@@ -10,30 +10,36 @@
                     <div class="md:col-span-2">
                         <label class="block font-bold text-gray-700">Title</label>
                         <InputText v-model="campaign.title" class="w-full" />
+                        <small v-if="errors.title" class="text-red-500">{{ errors.title }}</small>
                     </div>
 
                     <div class="md:col-span-2">
                         <label class="block font-bold text-gray-700">Description</label>
                         <Textarea v-model="campaign.description" rows="3" class="w-full" />
+                        <small v-if="errors.description" class="text-red-500">{{ errors.description }}</small>
                     </div>
 
                     <div class="md:col-span-2">
                         <label class="block font-bold text-gray-700">Term & Condition</label>
                         <Textarea v-model="campaign.termCondition" rows="3" class="w-full" />
+                        <small v-if="errors.termCondition" class="text-red-500">{{ errors.termCondition }}</small>
                     </div>
 
                     <div class="grid grid-cols-1 md:grid-cols-3 gap-4 md:col-span-2">
                         <div>
                             <label class="block font-bold text-gray-700">Quota</label>
                             <InputNumber v-model="campaign.quota" class="w-full" />
+                            <small v-if="errors.quota" class="text-red-500">{{ errors.quota }}</small>
                         </div>
                         <div>
                             <label class="block font-bold text-gray-700">Max Per User</label>
                             <InputNumber v-model="campaign.maxPerUser" class="w-full" />
+                            <small v-if="errors.maxPerUser" class="text-red-500">{{ errors.maxPerUser }}</small>
                         </div>
                         <div>
                             <label class="block font-bold text-gray-700">Gamification</label>
                             <Dropdown v-model="campaign.isGamification" :options="gamificationOnOff" optionLabel="label" optionValue="value" class="w-full" />
+                            <small v-if="errors.isGamification" class="text-red-500">{{ errors.isGamification }}</small>
                         </div>
                     </div>
 
@@ -41,14 +47,17 @@
                         <div>
                             <label class="block font-bold text-gray-700">Publish Date</label>
                             <Calendar v-model="campaign.publishDate" showIcon dateFormat="dd-mm-yy" class="w-full" />
+                            <small v-if="errors.publishDate" class="text-red-500">{{ errors.publishDate }}</small>
                         </div>
                         <div>
                             <label class="block font-bold text-gray-700">Start Date</label>
                             <Calendar v-model="campaign.startDate" showIcon dateFormat="dd-mm-yy" class="w-full" />
+                            <small v-if="errors.startDate" class="text-red-500">{{ errors.startDate }}</small>
                         </div>
                         <div>
                             <label class="block font-bold text-gray-700">End Date</label>
                             <Calendar v-model="campaign.endDate" showIcon dateFormat="dd-mm-yy" class="w-full" />
+                            <small v-if="errors.endDate" class="text-red-500">{{ errors.endDate }}</small>
                         </div>
                     </div>
                 </div>
@@ -60,6 +69,7 @@
                         <div v-for="(field, idx) in ['image1', 'image2', 'image3']" :key="idx">
                             <FileUpload mode="basic" :name="field" accept="image/*" customUpload @select="onImageSelect($event, field)" :chooseLabel="`Upload Image ${idx + 1}`" class="w-full" />
                             <img v-if="campaign[field]" :src="campaign[field]" :alt="`Preview ${idx + 1}`" class="mt-2 rounded-lg shadow-md object-cover w-full h-60" />
+                            <small v-if="errors[`image${idx + 1}`]" class="text-red-500">{{ errors[`image${idx + 1}`] }}</small>
                         </div>
                     </div>
                 </div>
@@ -76,14 +86,17 @@
                 <div>
                     <label class="block font-bold text-gray-700">Silver Points</label>
                     <InputNumber v-model="campaign.point1" class="w-full" />
+                    <small v-if="errors.point1" class="text-red-500">{{ errors.point1 }}</small>
                 </div>
                 <div>
                     <label class="block font-bold text-gray-700">Gold Points</label>
                     <InputNumber v-model="campaign.point2" class="w-full" />
+                    <small v-if="errors.point2" class="text-red-500">{{ errors.point2 }}</small>
                 </div>
                 <div>
                     <label class="block font-bold text-gray-700">Platinum Points</label>
                     <InputNumber v-model="campaign.point3" class="w-full" />
+                    <small v-if="errors.point3" class="text-red-500">{{ errors.point3 }}</small>
                 </div>
             </div>
         </div>
@@ -114,9 +127,11 @@
                                     </div>
                                 </template>
                             </Dropdown>
+                            <small v-if="errors[`criteria_${index}`]" class="text-red-500">{{ errors[`criteria_${index}`] }}</small>
                             <div v-if="criteria.selected">
                                 <label class="block font-bold text-gray-700 mb-1">Min. Qty</label>
                                 <InputNumber v-model="criteria.minQty" class="w-full mt-2" placeholder="Minimum Quantity" :min="1" />
+                                <small v-if="errors[`minQty_${index}`]" class="text-red-500">{{ errors[`minQty_${index}`] }}</small>
                             </div>
                         </div>
                     </div>
@@ -160,6 +175,7 @@
                                     </div>
                                 </template>
                             </Dropdown>
+                            <small v-if="errors[`reward_${index}`]" class="text-red-500">{{ errors[`reward_${index}`] }}</small>
                         </div>
 
                         <div class="w-full">
@@ -167,6 +183,7 @@
                                 <InputNumber id="qty" v-model="reward.qty" :min="1" class="w-full" />
                                 <label for="qty">Quantity</label>
                             </FloatLabel>
+                            <small v-if="errors[`qty_${index}`]" class="text-red-500">{{ errors[`qty_${index}`] }}</small>
                         </div>
                     </div>
                 </div>
@@ -183,7 +200,7 @@
                     <Button label="Cancel" class="p-button-secondary w-full mr-2" @click="$router.back()" />
                 </div>
                 <div class="w-40">
-                    <Button label="Submit" class="w-full" @click="submitEvent" :loading="isSubmitting" />
+                    <Button label="Submit" class="w-full" @click="submitCampaign" :loading="loading" />
                 </div>
             </div>
         </div>
@@ -193,34 +210,44 @@
 <script setup>
 import { ref, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
+import { useToast } from 'primevue/usetoast';
 import api from '@/service/api';
 
 const router = useRouter();
+const toast = useToast();
+const loading = ref(false);
 
 // Campaign data
 const campaign = ref({
-    title: 'TEST OFF',
-    description: 'TEST OFF',
-    termCondition: 'TEST OFF',
+    title: '',
+    description: '',
+    termCondition: '',
     image1: '',
     image2: '',
     image3: '',
     publishDate: '',
     startDate: '',
     endDate: '',
-    isGamification: 'off', // Changed to string to match dropdown
-    quota: 1,
-    maxPerUser: 1,
-    point1: 1,
-    point2: 1,
-    point3: 1,
-    status: 1
+    isGamification: 'off',
+    quota: 0,
+    maxPerUser: null,
+    point1: 0,
+    point2: 0,
+    point3: 0,
+    status: 0
+});
+
+// Image files storage
+const imageFiles = ref({
+    image1: null,
+    image2: null,
+    image3: null
 });
 
 // UI state
-const isSubmitting = ref(false);
+const errors = ref({});
 
-// Gamification toggle - using strings 'on'/'off' as per API requirement
+// Gamification toggle
 const gamificationOnOff = [
     { label: 'ON', value: 'on' },
     { label: 'OFF', value: 'off' }
@@ -243,32 +270,92 @@ const fetchMaterials = async () => {
         }
     } catch (error) {
         console.error('Error fetching materials:', error);
+        toast.add({
+            severity: 'error',
+            summary: 'Error',
+            detail: 'Failed to load materials',
+            life: 5000
+        });
     }
 };
 
 const fetchCatalog = async () => {
     try {
         const response = await api.get('campaign/catalogs');
+        
+
         if (response.data.status === 1) {
-            listPrize.value = response.data.admin_data || [];
+            // Transform API data to match frontend expectations
+            const transformedItems = (response.data.admin_data || []).map((item) => ({
+                id: item.id,
+                imageURL: item.imageURL,
+                title: item.title,
+                type: item.type,
+                purpose: item.purpose,
+                totalqty: item.totalqty,
+                availableqty: item.availableqty,
+                processedImageURL: null
+            }));
+
+            // Process private images
+            const processedItems = await processCatalogueImages(transformedItems);
+            listPrize.value = processedItems;
+
+        } else {
+            console.error('API returned status 0:', response.data);
+            toast.add({
+                severity: 'error',
+                summary: 'Error',
+                detail: 'Failed to load prize catalog',
+                life: 5000
+            });
         }
-        // Transform API data to match frontend expectations
-        const transformedItems = (response.data.admin_data || []).map((item) => ({
-            imageURL: item.imageURL,
-            title: item.title,
-            type: item.type,
-            purpose: item.purpose,
-            processedImageURL: null // Will be populated by processCatalogueImages
-        }));
-
-        console.log('Transformed items before processing:', transformedItems);
-
-        // Process private images
-        const processedItems = await processCatalogueImages(transformedItems);
-        listPrize.value = processedItems;
     } catch (error) {
         console.error('Error fetching catalog:', error);
+        toast.add({
+            severity: 'error',
+            summary: 'Error',
+            detail: 'Failed to load prize catalog',
+            life: 5000
+        });
     }
+};
+
+// Process private images using the API method
+const processCatalogueImages = async (catalogueItems) => {
+    const processedItems = [];
+
+    for (const item of catalogueItems) {
+        if (item.imageURL && typeof item.imageURL === 'string') {
+            try {
+                const blobUrl = await api.getPrivateFile(item.imageURL);
+                if (blobUrl) {
+                    processedItems.push({
+                        ...item,
+                        processedImageURL: blobUrl
+                    });
+                } else {
+                    processedItems.push({
+                        ...item,
+                        processedImageURL: item.imageURL
+                    });
+                }
+            } catch (error) {
+                console.error(`Error loading catalogue image for ${item.title}:`, error);
+                processedItems.push({
+                    ...item,
+                    processedImageURL: item.imageURL
+                });
+            }
+        } else {
+            processedItems.push({
+                ...item,
+                processedImageURL: 'https://via.placeholder.com/150x100?text=No+Image'
+            });
+        }
+    }
+
+    return processedItems;
 };
 
 // Criteria management
@@ -291,73 +378,18 @@ const removeReward = (index) => rewards.value.splice(index, 1);
 
 // Image upload
 const onImageSelect = (event, field) => {
-    // PrimeVue emits wrapper objects sometimes — extract the real File
-    let file = event.files?.[0];
+    const file = event.files[0];
+    if (file) {
+        // Store the file for upload
+        imageFiles.value[field] = file;
 
-    // 🔍 Safety check: convert to real File if needed
-    if (file && !(file instanceof File) && file instanceof Blob) {
-        // Some PrimeVue versions wrap Blob; fix that
-        file = new File([file], file.name || 'upload.jpg', { type: file.type });
-    }
-
-    if (file instanceof File) {
-        // console.log('✅ Real file selected:', file);
-
-        // Store File object for upload
-        campaign.value[`${field}File`] = file;
-
-        // Create Base64 preview for UI
+        // Create preview URL
         const reader = new FileReader();
         reader.onload = (e) => {
             campaign.value[field] = e.target.result;
         };
         reader.readAsDataURL(file);
-    } else {
-        console.warn('⚠️ Not a real File object:', file);
     }
-};
-
-// Process private images using the API method
-const processCatalogueImages = async (catalogueItems) => {
-    const processedItems = [];
-
-    for (const item of catalogueItems) {
-        if (item.imageURL && typeof item.imageURL === 'string') {
-            try {
-                // console.log('Processing private image:', item.imageURL);
-                const blobUrl = await api.getPrivateFile(item.imageURL);
-                if (blobUrl) {
-                    processedItems.push({
-                        ...item,
-                        processedImageURL: blobUrl
-                    });
-                    console.log('Successfully processed image:', item.prizeName, blobUrl);
-                } else {
-                    // Fallback to original URL if private file loading fails
-                    processedItems.push({
-                        ...item,
-                        processedImageURL: item.imageURL
-                    });
-                    console.warn('Failed to process private image, using original:', item.imageURL);
-                }
-            } catch (error) {
-                console.error(`Error loading catalogue image for ${item.prizeName}:`, error);
-                // Fallback to original URL
-                processedItems.push({
-                    ...item,
-                    processedImageURL: item.imageURL
-                });
-            }
-        } else {
-            // No image URL, use placeholder
-            processedItems.push({
-                ...item,
-                processedImageURL: 'https://via.placeholder.com/150x100?text=No+Image'
-            });
-        }
-    }
-
-    return processedItems;
 };
 
 // Format date to dd-mm-yyyy
@@ -371,55 +403,95 @@ const formatDate = (date) => {
 };
 
 // Validation
-const validateForm = () => {
-    if (!campaign.value.title || !campaign.value.description || !campaign.value.termCondition) {
-        alert('Please fill in all required fields: Title, Description, and Terms & Conditions');
-        return false;
-    }
+const validateFields = () => {
+    errors.value = {};
 
-    if (!campaign.value.publishDate || !campaign.value.startDate || !campaign.value.endDate) {
-        alert('Please select all dates: Publish Date, Start Date, and End Date');
-        return false;
-    }
+    // Basic field validation
+    if (!campaign.value.title.trim()) errors.value.title = 'Title is required';
+    if (!campaign.value.description.trim()) errors.value.description = 'Description is required';
+    if (!campaign.value.termCondition.trim()) errors.value.termCondition = 'Terms & Conditions are required';
+    if (!campaign.value.publishDate) errors.value.publishDate = 'Publish date is required';
+    if (!campaign.value.startDate) errors.value.startDate = 'Start date is required';
+    if (!campaign.value.endDate) errors.value.endDate = 'End date is required';
+    if (!campaign.value.quota || campaign.value.quota <= 0) errors.value.quota = 'Valid quota is required';
+    if (!campaign.value.maxPerUser || campaign.value.maxPerUser <= 0) errors.value.maxPerUser = 'Valid max per user is required';
+    if (!campaign.value.isGamification) errors.value.isGamification = 'Gamification setting is required';
 
-    // Fixed: Check for string 'on' instead of number 1
+    // Points validation
+    if (campaign.value.point1 === null || campaign.value.point1 < 0) errors.value.point1 = 'Valid silver points are required';
+    if (campaign.value.point2 === null || campaign.value.point2 < 0) errors.value.point2 = 'Valid gold points are required';
+    if (campaign.value.point3 === null || campaign.value.point3 < 0) errors.value.point3 = 'Valid platinum points are required';
 
-    if (criterias.value.length === 0) {
-        alert('Please add at least one criteria for gamification campaign');
-        return false;
-    }
+    // Image validation
+    if (!imageFiles.value.image1) errors.value.image1 = 'Image 1 is required';
+    if (!imageFiles.value.image2) errors.value.image2 = 'Image 2 is required';
+    if (!imageFiles.value.image3) errors.value.image3 = 'Image 3 is required';
 
-    // Validate criteria
-    for (let i = 0; i < criterias.value.length; i++) {
-        const criteria = criterias.value[i];
-        if (!criteria.selected || !criteria.minQty) {
-            alert(`Please complete all fields for Criteria ${i + 1}`);
-            return false;
+    // Criteria validation
+    criterias.value.forEach((criteria, index) => {
+        if (!criteria.selected) {
+            errors.value[`criteria_${index}`] = 'Criteria selection is required';
+        }
+        if (!criteria.minQty || criteria.minQty <= 0) {
+            errors.value[`minQty_${index}`] = 'Valid minimum quantity is required';
+        }
+    });
+
+    // Reward validation
+    rewards.value.forEach((reward, index) => {
+        if (!reward.selected) {
+            errors.value[`reward_${index}`] = 'Reward selection is required';
+        }
+        if (!reward.qty || reward.qty <= 0) {
+            errors.value[`qty_${index}`] = 'Valid quantity is required';
+        } else if (reward.selected && reward.qty > reward.selected.availableqty) {
+            errors.value[`qty_${index}`] = `Quantity exceeds available stock (${reward.selected.availableqty} available)`;
+        }
+    });
+
+    // Date validation
+    if (campaign.value.startDate && campaign.value.endDate) {
+        const start = new Date(campaign.value.startDate);
+        const end = new Date(campaign.value.endDate);
+        if (end < start) {
+            errors.value.endDate = 'End date cannot be before start date';
         }
     }
 
-    if (rewards.value.length === 0) {
-        alert('Please add at least one reward for gamification campaign');
-        return false;
-    }
-
-    // Validate rewards
-    for (let i = 0; i < rewards.value.length; i++) {
-        const reward = rewards.value[i];
-        if (!reward.selected || !reward.qty) {
-            alert(`Please complete all fields for Reward ${i + 1}`);
-            return false;
+    if (campaign.value.publishDate && campaign.value.startDate) {
+        const publish = new Date(campaign.value.publishDate);
+        const start = new Date(campaign.value.startDate);
+        if (start < publish) {
+            errors.value.startDate = 'Start date cannot be before publish date';
         }
     }
 
-    return true;
+    // Gamification specific validations
+    if (campaign.value.isGamification === 'on') {
+        if (criterias.value.length === 0) {
+            errors.value.criteria = 'At least one criteria is required for gamification campaign';
+        }
+        if (rewards.value.length === 0) {
+            errors.value.rewards = 'At least one reward is required for gamification campaign';
+        }
+    }
+
+    return Object.keys(errors.value).length === 0;
 };
 
-// Submit event - FIXED VERSION
-const submitEvent = async () => {
-    if (!validateForm()) return;
+// Submit campaign
+const submitCampaign = async () => {
+    if (!validateFields()) {
+        toast.add({
+            severity: 'error',
+            summary: 'Validation Error',
+            detail: 'Please fix all validation errors',
+            life: 5000
+        });
+        return;
+    }
 
-    isSubmitting.value = true;
+    loading.value = true;
 
     try {
         const formData = new FormData();
@@ -433,29 +505,21 @@ const submitEvent = async () => {
         formData.append('endDate', formatDate(campaign.value.endDate));
         formData.append('quota', campaign.value.quota.toString());
         formData.append('maxPerUser', campaign.value.maxPerUser.toString());
-        formData.append('isGamification', campaign.value.isGamification); // Already string 'on'/'off'
+        formData.append('isGamification', campaign.value.isGamification);
         formData.append('point1', campaign.value.point1.toString());
         formData.append('point2', campaign.value.point2.toString());
         formData.append('point3', campaign.value.point3.toString());
 
-        // Handle images
-        // Handle formData submission
-        if (campaign.value.image1File) {
-            formData.append('image1', campaign.value.image1File);
+        // Append image files
+        for (let i = 1; i <= 3; i++) {
+            const fieldName = `image${i}`;
+            if (imageFiles.value[fieldName]) {
+                formData.append(fieldName, imageFiles.value[fieldName]);
+            }
         }
-        if (campaign.value.image2File) {
-            formData.append('image2', campaign.value.image2File);
-        }
-        if (campaign.value.image3File) {
-            formData.append('image3', campaign.value.image3File);
-        }
-
-        // FIXED: Always send criteria and reward_option, even if empty
-        let criteriaArray = [];
-        let rewardOptions = [];
 
         // Prepare criteria array
-        criteriaArray = criterias.value.map((criteria) => ({
+        const criteriaArray = criterias.value.map((criteria) => ({
             title: criteria.selected.material,
             type: criteria.selected.materialtype,
             pattern: criteria.selected.pattern,
@@ -464,23 +528,22 @@ const submitEvent = async () => {
         }));
 
         // Prepare reward options array
-        rewardOptions = rewards.value.map((reward) => ({
+        const rewardOptions = rewards.value.map((reward) => ({
             catalogID: reward.selected.id.toString(),
             quantity: reward.qty.toString()
         }));
 
-        // FIXED: Always append these fields, even if empty
+        // Append criteria and reward_option
         formData.append('criteria', JSON.stringify(criteriaArray));
         formData.append('reward_option', JSON.stringify(rewardOptions));
 
-        // ✅ Log all FormData contents
+        // Log form data for debugging
         for (const [key, value] of formData.entries()) {
             if (value instanceof File) {
-                // console.log(`${key}:`, value.name, value.type, value.size, value);
             } else {
-                // console.log(`${key}:`, value);
             }
         }
+
         const response = await api.customRequest({
             method: 'POST',
             url: '/api/campaign/create',
@@ -491,21 +554,42 @@ const submitEvent = async () => {
         });
 
         if (response.data.status === 1) {
-            alert('Campaign created successfully!');
-            router.back();
+            toast.add({
+                severity: 'success',
+                summary: 'Success',
+                detail: 'Campaign created successfully!',
+                life: 3000
+            });
+            router.push('/marketing/listCampaign');
         } else {
-            alert('Failed to create campaign: ' + (response.data.message || 'Unknown error'));
+            console.error('Backend error:', response.data);
+            toast.add({
+                severity: 'error',
+                summary: 'Error',
+                detail: response.data.messages ? Object.values(response.data.messages).flat().join(', ') : 'Failed to create campaign',
+                life: 5000
+            });
         }
     } catch (error) {
-        console.error('Error creating campaign:', error);
+        console.error('API Error:', error);
         if (error.response?.data) {
-            console.error('API Error response:', error.response.data);
-            alert('Error creating campaign: ' + (error.response.data.error?.messageEnglish || 'Validation error'));
+            console.error('Error response:', error.response.data);
+            toast.add({
+                severity: 'error',
+                summary: 'Error',
+                detail: error.response.data.messages ? Object.values(error.response.data.messages).flat().join(', ') : 'Something went wrong',
+                life: 5000
+            });
         } else {
-            alert('Error creating campaign. Please try again.');
+            toast.add({
+                severity: 'error',
+                summary: 'Error',
+                detail: 'Network error or server unavailable',
+                life: 3000
+            });
         }
     } finally {
-        isSubmitting.value = false;
+        loading.value = false;
     }
 };
 

@@ -590,7 +590,6 @@ const generatePreview = () => {
         previewStats.totalRewards = previewData.value.reduce((sum, item) => sum + item.rewardPoints, 0);
         
         loading.value = false;
-        console.log('Preview generated with filters:', filters);
     }, 1000);
 };
 
@@ -608,7 +607,6 @@ const exportReport = () => {
         state: filters.state
     };
 
-    console.log('Exporting report:', exportData);
 
     // Simulate export process
     loading.value = true;
@@ -630,13 +628,11 @@ const exportReport = () => {
 };
 
 const downloadExport = (exportId) => {
-    console.log('Downloading export:', exportId);
     alert(`Download functionality for export ${exportId} would be implemented here`);
 };
 
 // Initialize
 onMounted(() => {
-    console.log('Referral Report component mounted');
 });
 </script>
 

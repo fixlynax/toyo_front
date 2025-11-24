@@ -152,7 +152,6 @@ const fetchUsers = async () => {
         tableLoading.value = true;
 
         const response = await api.get('cares/userList');
-        console.log('API Response:', response.data);
         
         if (response.data.status === 1 && response.data.admin_data) {
             const allUsers = [
@@ -174,7 +173,6 @@ const fetchUsers = async () => {
                 status: user.status === 1 ? 1 : 0 // Normalize status: 1 for active, 0 for inactive
             }));
             
-            console.log('Processed users:', listData.value);
         } else {
             console.error('API returned error or invalid data:', response.data);
             listData.value = [];
@@ -203,19 +201,48 @@ const formatGender = (gender) => {
     return gender;
 };
 
-const formatDate = (dateString) => {
-    if (!dateString || dateString === '-') return '-';
-    return dateString;
-};
+function formatDate(dateString) {
+    if (!dateString) return '';
 
-const formatDateTime = (dateTimeString) => {
-    if (!dateTimeString || dateTimeString === '-') return '-';
-    return dateTimeString;
-};
+    // DD-MM-YYYY
+    const [day, month, year] = dateString.split('-');
+    const date = new Date(`${year}-${month}-${day}`);
+
+    if (isNaN(date.getTime())) return '';
+
+    return date.toLocaleDateString('en-MY', {
+        year: 'numeric',
+        month: '2-digit',
+        day: '2-digit'
+    });
+}
+
+
+function formatDateTime(dateTimeString) {
+    if (!dateTimeString) return '';
+
+    const [datePart, timePart] = dateTimeString.split(' ');
+    if (!datePart) return '';
+
+    // DD-MM-YYYY
+    const [day, month, year] = datePart.split('-');
+    const date = new Date(`${year}-${month}-${day}T${timePart}`);
+
+    if (isNaN(date.getTime())) return '';
+
+    return date.toLocaleString('en-MY', {
+        year: 'numeric',
+        month: '2-digit',
+        day: '2-digit',
+        hour: '2-digit',
+        minute: '2-digit',
+        second: '2-digit'
+    });
+}
+
 
 const exportUsers = () => {
     // Implement export functionality here
-    console.log('Export users:', filteredUsers.value);
     // You can implement CSV/Excel export logic here
     alert('Export functionality to be implemented');
 };

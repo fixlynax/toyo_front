@@ -293,7 +293,7 @@ const submitForm  = async () => {
     formData.append('phoneno', form.phoneno);
     formData.append('contactperson', form.contactperson);
     formData.append('mobileno', form.mobileno);
-    formData.append('mobileno', form.status);
+    formData.append('status', form.status);
     formData.append('storage_list', JSON.stringify(form.storage_list));
 
     try {

@@ -229,14 +229,12 @@ const processCatalogueImages = async (catalogueItems) => {
     for (const item of catalogueItems) {
         if (item.imageURL && typeof item.imageURL === 'string') {
             try {
-                // console.log('Processing private image:', item.imageURL);
                 const blobUrl = await api.getPrivateFile(item.imageURL);
                 if (blobUrl) {
                     processedItems.push({
                         ...item,
                         processedImageURL: blobUrl
                     });
-                    console.log('Successfully processed image:', item.prizeName, blobUrl);
                 } else {
                     // Fallback to original URL if private file loading fails
                     processedItems.push({
@@ -267,7 +265,6 @@ const processCatalogueImages = async (catalogueItems) => {
 
 // Image event handlers
 const onImageLoad = (event) => {
-    console.log('Image loaded successfully:', event.target.src);
     event.target.style.opacity = '1';
 };
 
@@ -280,9 +277,7 @@ const onImageError = (event) => {
 
 const fetchCatalog = async () => {
     try {
-        console.log('Fetching catalog...');
         const response = await api.get('game/catalogs');
-        console.log('Catalog API response:', response.data);
 
         if (response.data.status === 1) {
             // Transform API data to match frontend expectations
@@ -299,13 +294,10 @@ const fetchCatalog = async () => {
                 processedImageURL: null // Will be populated by processCatalogueImages
             }));
 
-            console.log('Transformed items before processing:', transformedItems);
-
             // Process private images
             const processedItems = await processCatalogueImages(transformedItems);
             listPrize.value = processedItems;
 
-            console.log('Final processed prize list:', listPrize.value);
         } else {
             console.error('API returned status 0:', response.data);
             toast.add({

@@ -244,10 +244,8 @@ const memberDetail = ref({
 const fetchMemberDetail = async () => {
     try {
         loading.value = true;
-        console.log('Fetching member details for ID:', memberId.value);
 
         const response = await api.get(`cares/user/${memberId.value}`);
-        console.log('API Response:', response.data);
 
         if (response.data.status === 1 && response.data.admin_data) {
             const userData = response.data.admin_data;
@@ -272,7 +270,6 @@ const fetchMemberDetail = async () => {
                 password: '' // Don't prefill password for security
             };
 
-            console.log('Processed member data for edit:', memberDetail.value);
         } else {
             console.error('API returned error or invalid data:', response.data);
             showToast('error', 'Error', 'Failed to load user details');
@@ -345,7 +342,6 @@ const updateUser = async () => {
             formData.append('password', memberDetail.value.password);
         }
 
-        console.log('Updating user with data:', Object.fromEntries(formData));
 
         const response = await api.post(`cares/edit/${memberId.value}`, formData, {
             headers: {
@@ -353,7 +349,6 @@ const updateUser = async () => {
             }
         });
 
-        console.log('Update response:', response.data);
 
         if (response.data.status === 1) {
             showToast('success', 'Success', 'User updated successfully');

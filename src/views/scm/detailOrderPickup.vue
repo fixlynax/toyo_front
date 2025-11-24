@@ -158,7 +158,7 @@
                             </tbody>
                         </table>
                     </div>
-                    <div v-if="!orderDelList?.driverInformation?.pickup_datetime" class="flex justify-end mt-3">
+                    <div v-if="!orderDelList?.driverInformation?.pickup_datetime && canUpdate" class="flex justify-end mt-3">
                         <Button  
                             style="width: auto !important"
                             label="Update Pickup Date"
@@ -179,6 +179,11 @@ import { useToast } from 'primevue/usetoast';
 import { onMounted, ref, computed } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { useConfirm } from 'primevue';
+import { useMenuStore } from '@/store/menu';
+
+const menuStore = useMenuStore();
+const canUpdate = computed(() => menuStore.canWrite('Order Pickup'));
+const denyAccess = computed(() => menuStore.canTest('Order Pickup'));
 const route = useRoute();
 const router = useRouter();
 const orderDelList = ref({});

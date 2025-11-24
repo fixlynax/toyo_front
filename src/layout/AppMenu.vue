@@ -15,7 +15,7 @@ const model = ref([
             {
                 label: 'Dashboard',
                 icon: 'pi pi-fw pi-home',
-                to: '/'
+                to: '/marketing/marketingDashboard'
             },
             {
                 label: 'News Management',
@@ -288,7 +288,12 @@ const model = ref([
                 label: 'Back Order',
                 icon: 'pi pi-fw pi-history',
                 to: '/scm/listSCMBackOrder'
-            }
+            },
+            {
+                label: 'TEST',
+                icon: 'pi pi-fw pi-list',
+                to: '/scm/testpagination'
+            },
         ]
     },
     {
