@@ -209,7 +209,7 @@
                     <div class="text-2xl font-bold text-gray-800">CTC Detail</div>
                     <!-- Show Request button only if no CTC data exists -->
                     <!-- <Button v-if="!hasCTCData && !ctcSkipped" label="Request CTC" class="p-button-info" size="small" @click="showCTCConfirmationDialog = true" :loading="loadingCTC" /> -->
-                    <Button v-if="warantyDetail.isCTC === 0 || !( warantyDetail.isScrap === 1 || warantyDetail.status !=6 || warantyDetail.status ==5)" label="Request CTC" class="p-button-info" size="small" @click="confirmCTCRequest" :loading="loadingCTC" />
+                    <Button v-if="warantyDetail.isCTC === 0 && (warantyDetail.isDeliveredReplacement !== 1 && warantyDetail.isReimbursement !== 1)" label="Request CTC" class="p-button-info" size="small" @click="confirmCTCRequest" :loading="loadingCTC" />
                     <div v-else-if="warantyDetail.isReturn === 1 && warantyDetail.ctc_details.reachWH" class="text-right mt-3 text-sm font-bold text-green-600">
                         <i class="pi pi-check-circle mr-2"></i>
                         Return CTC Requested
@@ -262,16 +262,20 @@
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div>
                             <span class="font-bold text-gray-700">Damage Code</span>
-                            <p class="text-lg font-semibold text-black mt-1">{{ warantyDetail.problemCodeAdmin || '-' }}</p>
+                            <p>{{ warantyDetail.problemCodeAdmin || '-' }}</p>
                         </div>
                         <div>
                             <span class="font-bold text-gray-700">Problem Description</span>
-                            <p class="text-lg font-semibold text-black mt-1">{{ warantyDetail.problemAdmin || '-' }}</p>
+                            <p>{{ warantyDetail.problemAdmin || '-' }}</p>
                         </div>
-                        <!-- <div>
-                            <span class="font-bold text-gray-700">Status</span>
-                            <p class="text-lg font-semibold text-black mt-1">{{ warantyDetail.status_string || '-' }}</p>
-                        </div> -->
+                        <div>
+                            <span class="font-bold text-gray-700">Approved By</span>
+                            <p>{{ warantyDetail.approvedByClaim || '-' }}</p>
+                        </div>
+                        <div>
+                             <span class="font-bold text-gray-700">Approved Date</span>
+                            <p>{{ formatDate(warantyDetail.approvedOnClaim) || '-' }}</p>
+                        </div>
                     </div>
 
                     <!-- Percentages -->
@@ -307,6 +311,10 @@
                     <i class="mr-2 pi pi-times-circle"></i>
                     Claim Rejected
                 </div>
+                <div v-if="warantyDetail.status === 5" class="text-right mt-3 text-sm font-bold text-green-600">
+                    <i class="pi pi-check-circle mr-2"></i>
+                    Claim Approved
+                </div>
                 <div class="flex justify-end gap-2 mt-4 pt-4 border-t" v-if="!hasClaimDetails">
                     <Button label="Create Claim" class="p-button-success" size="small" @click="openCreateClaimDialog" icon="pi pi-check" />
                     <Button label="Reject Claim" class="p-button-danger" size="small" @click="showRejectDialog = true" icon="pi pi-times" />
@@ -322,12 +330,24 @@
                 <div class="mb-4">
                     <div class="grid grid-cols-2 gap-2 text-sm text-gray-800">
                         <div>
-                            <span class="font-bold">Part</span>
-                            <p>{{ warantyDetail.rejectReason?.part }}</p>
+                            <span class="font-bold">Rejected By</span>
+                            <p>{{ warantyDetail.rejectReason?.rejectedBy }}</p>
+                        </div>
+                        <div>
+                            <span class="font-bold">Rejected Date</span>
+                            <p>{{ warantyDetail.rejectReason?.rejectedOn }}</p>
+                        </div>
+                        <div>
+                            <span class="font-bold">Type</span>
+                            <p>{{ warantyDetail.rejectReason?.type }}</p>
                         </div>
                         <div>
                             <span class="font-bold">Code</span>
                             <p>{{ warantyDetail.rejectReason?.code }}</p>
+                        </div>
+                        <div>
+                            <span class="font-bold">Part</span>
+                            <p>{{ warantyDetail.rejectReason?.part }}</p>
                         </div>
                         <div>
                             <span class="font-bold">Description</span>
@@ -349,7 +369,7 @@
                 </div>
 
                 <!-- Scrap Images Gallery -->
-                <div v-if="scrapImages.length > 0" class="mb-6">
+                <div v-if="(warantyDetail.status_string  !== 'Pending Scrap') &&(warantyDetail.status_string  !== 'Pending Scrap Photo') && scrapImages.length > 0" class="mb-6">
                     <Galleria
                         :value="scrapImages"
                         :responsiveOptions="galleriaResponsiveOptions"
@@ -419,18 +439,18 @@
                         </div>
                     </div>
                 </div>
-                <div v-if="warantyDetail.reimbursement" class="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm text-gray-800">
-                    <div>
-                        <span class="font-bold">Inv No</span>
-                        <p>{{ warantyDetail.reimbursement?.invNo }}</p>
-                    </div>
+                <div v-if="warantyDetail.reimbursement" class="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm text-gray-800">
                     <div>
                         <span class="font-bold">Invoice Amount </span>
                         <p>RM {{ warantyDetail.reimbursement?.invAmount }}</p>
                     </div>
                     <div>
+                        <span class="font-bold">Inv No</span>
+                        <p>{{ warantyDetail.reimbursement?.invNo ? warantyDetail.reimbursement.invNo : 'Pending Invoice' }}</p>
+                    </div>
+                    <div>
                         <span class="font-bold">SAP Claim No </span>
-                        <p>{{ warantyDetail.reimbursement?.sapClaimNo }}</p>
+                        <p>{{ warantyDetail.reimbursement?.sapClaimNo ? warantyDetail.reimbursement.sapClaimNo : 'Pending Invoice' }}</p>
                     </div>
                 </div>
                 <!-- View Download Invoice function -->
@@ -438,10 +458,10 @@
                     <Button v-if="warantyDetail.reimbursement.invAttachURL" icon="pi pi-eye" class="p-button-info" size="small" @click="viewInvoice(warantyDetail.reimbursement.invAttachURL)" />
                     <!-- <Button v-if="warantyDetail.reimbursement.invAttachURL" icon="pi pi-download" class="p-button-danger" size="small" @click="downloadInvoice(warantyDetail.invAttachURL)" /> -->
                 </div>
-                <div v-if="warantyDetail.reimbursement && warantyDetail.status !=5" class="flex justify-end gap-2 mt-4">
+                <div v-if="(warantyDetail.status_string  !== 'Pending Customer Invoice') && warantyDetail.reimbursement && warantyDetail.status !=5" class="flex justify-end gap-2 mt-4">
                     <Button label="Approve Invoice" class="p-button-success" size="small" @click="approveInvoice" :loading="approvingInvoice" icon="pi pi-check" />
                     <Button label="Reject Invoice" class="p-button-warn" size="small" @click="rejectInvoice" :loading="rejectingInvoice" icon="pi pi-times" />
-                    <Button label="Reject Claim" class="p-button-danger" size="small" @click="showRejectDialog = true" icon="pi pi-times" />
+                    <!-- <Button label="Reject Claim" class="p-button-danger" size="small" @click="showRejectDialog = true" icon="pi pi-times" /> -->
                 </div>
             </div>
         </div>
@@ -655,6 +675,7 @@ import Galleria from 'primevue/galleria';
 import { useToast } from 'primevue/usetoast';
 import { computed, onMounted, ref } from 'vue';
 import { useRoute } from 'vue-router';
+import { useConfirm } from 'primevue';
 
 const route = useRoute();
 const toast = useToast();
@@ -689,8 +710,6 @@ const activeImageType = ref('');
 const imageDialogVisible = ref(false);
 
 // States
-const scrapStatus = ref('');
-const invoiceStatus = ref('');
 const approvingInvoice = ref(false);
 const rejectingInvoice = ref(false);
 
@@ -1033,7 +1052,6 @@ const approveScrap = async () => {
         loadingScrapAction.value = false;
     }
 };
-import { useConfirm } from 'primevue';
 
 const confirmation = useConfirm();
 
@@ -1121,6 +1139,8 @@ const fetchWarrantyClaim = async () => {
                 // problem: apiData.claim_detail?.problem,
                 claim_detail : apiData.claim_detail|| null,
                 problemAdmin: apiData.claim_detail?.problemAdmin,
+                approvedByClaim: apiData.claim_detail?.approvedBy,
+                approvedOnClaim: apiData.claim_detail?.approvedOn,
                 problemCodeAdmin: apiData.claim_detail?.problemCodeAdmin,
                 claimPercent: apiData.claim_detail?.claimPercent,
                 usablePercent: apiData.claim_detail?.usablePercent,
@@ -1281,13 +1301,19 @@ const loadSubmittedPhotos = async () => {
 
 // Approve Invoice
 const approveInvoice = async () => {
+    confirmation.require({
+    message: 'Are you sure you want to approve this invoice request?',
+    header: 'Approve Invoice',
+    icon: 'pi pi-exclamation-triangle',
+    acceptLabel: 'Yes',
+    rejectLabel: 'No',
+    accept: async () => {
     try {
         approvingInvoice.value = true;
         const id = route.params.id;
         const response = await api.put(`warranty_claim/approveInvoice/${id}`);
 
         if (response.data.status === 1) {
-            invoiceStatus.value = 'approved';
             toast.add({
                 severity: 'success',
                 summary: 'Success',
@@ -1314,15 +1340,24 @@ const approveInvoice = async () => {
     } finally {
         approvingInvoice.value = false;
     }
+    }
+  });
+
 };
 
 // Reject Invoice
 const rejectInvoice = async () => {
+    confirmation.require({
+    message: 'Are you sure you want to reject this invoice request?',
+    header: 'Reject Invoice',
+    icon: 'pi pi-exclamation-triangle',
+    acceptLabel: 'Yes',
+    rejectLabel: 'No',
+    accept: async () => {
     try {
         rejectingInvoice.value = true;
-        const response = await api.put(`warranty_claim/approveInvoice/${warantyDetail.value.id}`);
+        const response = await api.put(`warranty_claim/rejectReimbursement/${warantyDetail.value.id}`);
         if (response.data.status === 1) {
-            invoiceStatus.value = 'rejected';
             toast.add({
                 severity: 'success',
                 summary: 'Success',
@@ -1344,6 +1379,8 @@ const rejectInvoice = async () => {
     } finally {
         rejectingInvoice.value = false;
     }
+    }
+  });
 };
 
 const openRejectDialog = () => {
