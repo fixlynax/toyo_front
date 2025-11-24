@@ -1629,7 +1629,6 @@ const downloadInvoice = async (url, filename = 'invoice.pdf') => {
             console.warn("Invalid blobUrl");
             return;
         }
-        console.log(blobUrl);
         const a = document.createElement('a');
         a.href = blobUrl;
         a.download = filename;

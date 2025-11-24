@@ -230,7 +230,6 @@ const fetchData = async () => {
 
         const response = await api.get('oeTireList');
 
-        // console.log('API Response:', response.data);
 
         if (response.data.status === 1 && Array.isArray(response.data.oe_tires)) {
             tyres.value = response.data.oe_tires.map((product) => ({

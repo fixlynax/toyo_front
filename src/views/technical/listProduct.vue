@@ -269,7 +269,6 @@ const fetchData = async () => {
         loading.value = true;
         const response = await api.get('material');
 
-        console.log('API Response:', response.data);
 
         if (response.data.status === 1 && Array.isArray(response.data.admin_data)) {
             tyres.value = response.data.admin_data.map((product) => ({
@@ -391,7 +390,6 @@ const handleToggleExport = (id) => {
   } else {
     selectedExportIds.value.add(id);
   }
-//   console.log(selectedExportIds.value);
 };
 
 // Check all
@@ -410,7 +408,6 @@ const handleToggleTWP = async (data) => {
     try {
         data.updatingTWP = true;
         const newStatus = data.twp ? 1 : 0;
-        console.log('TWP new status:', data);
         await api.put(`material/toggleTWP/${data.id}`, {
 
         });

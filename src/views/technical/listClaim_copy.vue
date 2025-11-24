@@ -40,7 +40,6 @@ const fetchClaims = async () => {
     loading.value = true;
     try {
         const response = await api.get('warranty_claim');
-        console.log(response.data);
 
         if (response.data.status === 1) {
             listData.value = response.data.admin_data.map((item) => ({
