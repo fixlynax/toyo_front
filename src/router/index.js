@@ -299,6 +299,12 @@ const router = createRouter({
                 // ===============================
                 // News
                 {
+                    path: 'marketing/marketingDashboard',
+                    name: 'Marketing-Dashboard',
+                    component: () => import('@/views/marketing/marketingDashboard.vue'),
+                    meta: { permission: 'Marketing Dashboard', access: 'view' }
+                },
+                {
                     path: 'marketing/listNews',
                     name: 'List-News',
                     component: () => import('@/views/marketing/listNews.vue'),
