@@ -473,7 +473,6 @@ const confirmDelete = () => {
 async function exportParticipants() {
     try {
         // Implement export functionality
-        console.log('Exporting participants...');
         toast.add({
             severity: 'info',
             summary: 'Info',

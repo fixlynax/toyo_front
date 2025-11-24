@@ -182,8 +182,8 @@ import { useConfirm } from 'primevue';
 import { useMenuStore } from '@/store/menu';
 
 const menuStore = useMenuStore();
-const canUpdate = computed(() => menuStore.canWrite('Order Delivery'));
-const denyAccess = computed(() => menuStore.canTest('Order Delivery'));
+const canUpdate = computed(() => menuStore.canWrite('Order Pickup'));
+const denyAccess = computed(() => menuStore.canTest('Order Pickup'));
 const route = useRoute();
 const router = useRouter();
 const orderDelList = ref({});

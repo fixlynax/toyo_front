@@ -145,7 +145,7 @@
                                     <td class="px-4 py-2 text-right">{{ orderDelList.deliveryDate ? formatDate(orderDelList.deliveryDate) : 'Not Assigned' }}</td>
                                 </tr>
                                 <tr class="border-b">
-                                    <td class="px-4 py-2 font-medium">Delivery Date</td>
+                                    <td class="px-4 py-2 font-medium">Planned Date</td>
                                     <td class="px-4 py-2 text-right">{{ orderDelList?.scm_deliver_detail?.scheduled_delivery_time? formatDate(orderDelList.scm_deliver_detail.scheduled_delivery_time): 'Not Assigned'}}</td>
                                 </tr>
                                 <tr class="border-b">
@@ -162,7 +162,7 @@
                     <div v-if="!loading && orderDelList && !orderDelList?.scm_deliver_detail?.scheduled_delivery_time && !orderDelList?.scm_deliver_detail?.delivered_datetime && canUpdate" class="flex justify-end mt-3">
                         <Button  
                             style="width: auto !important"
-                            label="Update Delivery Date"
+                            label="Update Planned Date"
                             icon="pi pi-calendar"
                             class="p-button-sm p-button-warning"
                             @click="openDialog = true"
@@ -184,7 +184,7 @@
     </Fluid>
 
     <Dialog
-      header="Update Schedule Delivery"
+      header="Update Planned Date"
       v-model:visible="openDialog"
       modal
       :style="{ width: '400px' }"
@@ -194,7 +194,7 @@
         <Calendar
           v-model="form.scheduleDate"
           dateFormat="yy-mm-dd"
-          placeholder="Select Schedule Date"
+          placeholder="Select Planned Date"
         />
 
         <!-- Schedule Time -->
@@ -215,7 +215,7 @@
     </Dialog>
 
     <Dialog
-      header="Update Schedule Delivery"
+      header="Update Delivered Date"
       v-model:visible="openDialog2"
       modal
       :style="{ width: '400px' }"
@@ -225,7 +225,7 @@
         <Calendar
           v-model="form2.delivereddate"
           dateFormat="yy-mm-dd"
-          placeholder="Select Schedule Date"
+          placeholder="Select Delivered Date"
         />
 
 
@@ -380,7 +380,7 @@ const saveSchedule = async () => {
     };
     const res = await api.post('update-schedule-order', payload);
     if (res.data?.status === 1) {
-        toast.add({ severity: 'success', summary: 'Updated', detail: 'Schedule date updated successfully', life: 3000 });
+        toast.add({ severity: 'success', summary: 'Updated', detail: 'Planned date updated successfully', life: 3000 });
         InitfetchData(); // refresh table
     } else {
         toast.add({ severity: 'error', summary: 'Error', detail: res.data?.message || 'Failed', life: 3000 });

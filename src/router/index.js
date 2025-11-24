@@ -290,13 +290,20 @@ const router = createRouter({
                 {
                     path: 'om/listContainer',
                     name: 'Container-List',
-                    component: () => import('@/views/om/listContainer.vue')
+                    component: () => import('@/views/om/listContainer.vue'),
+                    meta: { permission: 'Maintenance Mode', access: 'view' },
                 },
 
                 // ===============================
                 // MARKETING
                 // ===============================
                 // News
+                {
+                    path: 'marketing/marketingDashboard',
+                    name: 'Marketing-Dashboard',
+                    component: () => import('@/views/marketing/marketingDashboard.vue'),
+                    meta: { permission: 'Marketing Dashboard', access: 'view' }
+                },
                 {
                     path: 'marketing/listNews',
                     name: 'List-News',
@@ -526,7 +533,7 @@ const router = createRouter({
                     path: 'technical/dashboardTechnical',
                     name: 'Dashboard-Technical',
                     component: () => import('@/views/technical/dashboardTechnical.vue'),
-                    meta: { permission: 'Dashboard', access: 'view' },
+                    meta: { permission: 'Technical Dashboard', access: 'view' },
                 },
                 {
                     path: 'technical/listAppoitment',
@@ -815,14 +822,14 @@ const router = createRouter({
                     path: 'scm/listOrderPickup',
                     name: 'List-Order-Pickup',
                     component: () => import('@/views/scm/listOrderPickup.vue'),
-                    meta: { permission: 'Order Delivery', access: 'view' },
+                    meta: { permission: 'Order Pickup', access: 'view' },
 
                 },
                 {
                     path: 'scm/detailOrderPickup/:id',
                     name: 'Detail-Order-Pickup',
                     component: () => import('@/views/scm/detailOrderPickup.vue'),
-                    meta: { permission: 'Order Delivery', access: 'view' },
+                    meta: { permission: 'Order Pickup', access: 'view' },
                     props: true
                 },
 
@@ -890,6 +897,11 @@ const router = createRouter({
                     component: () => import('@/views/scm/detailSCMBackOrder.vue'),
                     meta: { permission: 'Back Order', access: 'view' },
                     props: true
+                },
+                {
+                    path: 'scm/testpagination',
+                    name: 'List-SCM-BackOrder',
+                    component: () => import('@/views/scm/testpagination.vue'),
                 },
 
                 // ===============================
