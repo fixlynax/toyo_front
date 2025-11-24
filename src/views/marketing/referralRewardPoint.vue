@@ -518,14 +518,12 @@ const updateSettings = () => {
         Object.assign(currentSettings.eten, form.eten);
         Object.assign(currentSettings.toyoCare, form.toyoCare);
 
-        console.log('Settings updated:', currentSettings);
         alert('Referral reward points updated successfully!');
     }
 };
 
 // Initialize
 onMounted(() => {
-    // Load current settings (in real app, this would be an API call)
-    console.log('Referral reward points component mounted');
+    // Load current settings (in real app, this would be an API call
 });
 </script>
