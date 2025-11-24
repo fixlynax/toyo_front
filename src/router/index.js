@@ -556,37 +556,11 @@ const router = createRouter({
                     meta: { permission: 'Warranty Claim', access: 'view' },
                 },
                 {
-                    path: 'technical/listClaim_copy',
-                    name: 'Backup-List-Claim',
-                    component: () => import('@/views/technical/listClaim_copy.vue'),
-                    meta: { permission: 'Warranty Claim', access: 'view' },
-                },
-                {
                     path: 'technical/detailWarantyClaim/:id',
                     name: 'Detail-Waranty-Claim',
                     component: () => import('@/views/technical/detailWarantyClaim.vue'),
                     meta: { permission: 'Warranty Claim', access: 'view' },
                     props: true
-                },
-                                {
-                    path: 'technical/detailWarantyClaim_copy/:id',
-                    name: 'Hardcode-Waranty-Claim',
-                    component: () => import('@/views/technical/detailWarantyClaim_copy.vue'),
-                    meta: { permission: 'Warranty Claim', access: 'view' },
-                    props: true
-                },
-                {
-                    path: 'technical/createOrder',
-                    name: 'Create-Order',
-                    component: () => import('@/views/technical/createOrder.vue'),
-                    meta: { permission: 'Warranty Claim', access: 'create' },
-
-                },
-                {
-                    path: 'technical/confirmationOrder',
-                    name: 'Confirmation-Order',
-                    component: () => import('@/views/technical/confirmationOrder.vue'),
-                    meta: { permission: 'Warranty Claim', access: 'create' },
                 },
 
                 // Products
@@ -621,16 +595,6 @@ const router = createRouter({
                     meta: { permission: 'Pattern List', access: 'view' },
                     props: true
                 },
-                // {
-                //     path: 'technical/bulkUpdate',
-                //     name: 'Bulk-Update',
-                //     component: () => import('@/views/technical/bulkUpdate.vue')
-                // },
-                // {
-                //     path: 'technical/detailProduct',
-                //     name: 'Detail-Product',
-                //     component: () => import('@/views/technical/detailProduct.vue')
-                // },
                 {
                     path: 'technical/createPattern',
                     name: 'Create-Pattern',

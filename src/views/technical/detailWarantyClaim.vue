@@ -209,8 +209,8 @@
                     <div class="text-2xl font-bold text-gray-800">CTC Detail</div>
                     <!-- Show Request button only if no CTC data exists -->
                     <!-- <Button v-if="!hasCTCData && !ctcSkipped" label="Request CTC" class="p-button-info" size="small" @click="showCTCConfirmationDialog = true" :loading="loadingCTC" /> -->
-                    <Button v-if="warantyDetail.isCTC === 0 && (warantyDetail.isDeliveredReplacement !== 1 && warantyDetail.isReimbursement !== 1)" label="Request CTC" class="p-button-info" size="small" @click="confirmCTCRequest" :loading="loadingCTC" />
-                    <div v-else-if="warantyDetail.isReturn === 1 && warantyDetail.ctc_details.reachWH" class="text-right mt-3 text-sm font-bold text-green-600">
+                    <Button v-if="warantyDetail.isCTC === 0 && !hasClaimDetails && canUpdate" label="Request CTC" class="p-button-info" size="small" @click="confirmCTCRequest" :loading="loadingCTC" />
+                    <div v-else-if="warantyDetail.isReturn === 1 && warantyDetail.ctc_details.reachWH && canUpdate" class="text-right mt-3 text-sm font-bold text-green-600">
                         <i class="pi pi-check-circle mr-2"></i>
                         Return CTC Requested
                     </div>
@@ -239,7 +239,7 @@
                         <span class="font-bold">Schedule Date</span>
                         <p>{{ warantyDetail.return_info?.scheduleDeliveryDate ? formatDate(warantyDetail.return_info.scheduleDeliveryDate): 'Not Assigned'}}</p>
                     </div>
-                    <Button v-if="warantyDetail.isReturn === 0 && warantyDetail.ctc_details.reachWH" label="Request CTC Return" class="p-button-info" size="small" @click="confirmCTCRequestReturn" :loading="loadingCTC" />
+                    <Button v-if="warantyDetail.isReturn === 0 && warantyDetail.ctc_details.reachWH && canUpdate" label="Request CTC Return" class="p-button-info" size="small" @click="confirmCTCRequestReturn" :loading="loadingCTC" />
                 </div>
 
                 <!-- Show empty state if no CTC data and not skipped -->
@@ -315,7 +315,7 @@
                     <i class="pi pi-check-circle mr-2"></i>
                     Claim Approved
                 </div>
-                <div class="flex justify-end gap-2 mt-4 pt-4 border-t" v-if="!hasClaimDetails">
+                <div class="flex justify-end gap-2 mt-4 pt-4 border-t" v-if="!hasClaimDetails && canUpdate">
                     <Button label="Create Claim" class="p-button-success" size="small" @click="openCreateClaimDialog" icon="pi pi-check" />
                     <Button label="Reject Claim" class="p-button-danger" size="small" @click="showRejectDialog = true" icon="pi pi-times" />
                 </div>
@@ -361,7 +361,7 @@
             <div v-if="hasClaimDetails" class="card w-full mb-4">
                 <div class="flex items-center justify-between border-b pb-2 mb-4">
                     <div class="text-2xl font-bold text-gray-800">Scrap Details</div>
-                    <Button v-if="hasClaimDetails && warantyDetail.isScrap === 0 && (warantyDetail.status !=6 || warantyDetail.status ==5)" label="Request Scrap" class="p-button-info" size="small" @click="requestScrap" :loading="loadingScrap" />
+                    <Button v-if="hasClaimDetails && warantyDetail.isScrap === 0 && (warantyDetail.status !=6 || warantyDetail.status ==5) && canUpdate" label="Request Scrap" class="p-button-info" size="small" @click="requestScrap" :loading="loadingScrap" />
                     <div v-if="warantyDetail.isScrap === 1" class="text-right mt-3 text-sm font-bold text-green-600">
                         <i class="pi pi-check-circle mr-2"></i>
                         Scrap Requested
@@ -395,7 +395,7 @@
                         </template>
                     </Galleria>
 
-                    <div v-if="warantyDetail.status_string  =='Pending Manager Approval' && scrapImages" class="flex justify-end gap-2 mt-4 pt-4 border-t">
+                    <div v-if="warantyDetail.status_string  =='Pending Manager Approval' && scrapImages && canUpdate" class="flex justify-end gap-2 mt-4 pt-4 border-t">
                         <Button label="Approve Scrap" class="p-button-success" size="small" @click="Approve" icon="pi pi-check" />
                         <Button label="Reject Scrap" class="p-button-warn" size="small" @click="rejectScrap" icon="pi pi-times" />
                         <Button label="Reject Claim" class="p-button-danger" size="small" @click="showRejectDialog = true" icon="pi pi-times" />
@@ -458,7 +458,7 @@
                     <Button v-if="warantyDetail.reimbursement.invAttachURL" icon="pi pi-eye" class="p-button-info" size="small" @click="viewInvoice(warantyDetail.reimbursement.invAttachURL)" />
                     <!-- <Button v-if="warantyDetail.reimbursement.invAttachURL" icon="pi pi-download" class="p-button-danger" size="small" @click="downloadInvoice(warantyDetail.invAttachURL)" /> -->
                 </div>
-                <div v-if="(warantyDetail.status_string  !== 'Pending Customer Invoice') && warantyDetail.reimbursement && warantyDetail.status !=5" class="flex justify-end gap-2 mt-4">
+                <div v-if="(warantyDetail.status_string  !== 'Pending Customer Invoice') && warantyDetail.reimbursement && warantyDetail.status !=5 && canUpdate" class="flex justify-end gap-2 mt-4">
                     <Button label="Approve Invoice" class="p-button-success" size="small" @click="approveInvoice" :loading="approvingInvoice" icon="pi pi-check" />
                     <Button label="Reject Invoice" class="p-button-warn" size="small" @click="rejectInvoice" :loading="rejectingInvoice" icon="pi pi-times" />
                     <!-- <Button label="Reject Claim" class="p-button-danger" size="small" @click="showRejectDialog = true" icon="pi pi-times" /> -->
@@ -670,12 +670,15 @@
 <script setup>
 import LoadingPage from '@/components/LoadingPage.vue';
 import api from '@/service/api';
-import Button from 'primevue/button';
-import Galleria from 'primevue/galleria';
 import { useToast } from 'primevue/usetoast';
 import { computed, onMounted, ref } from 'vue';
 import { useRoute } from 'vue-router';
 import { useConfirm } from 'primevue';
+import { useMenuStore } from '@/store/menu';
+
+const menuStore = useMenuStore();
+const canUpdate = computed(() => menuStore.canWrite('Warranty Claim'));
+const denyAccess = computed(() => menuStore.canTest('Warranty Claim'));
 
 const route = useRoute();
 const toast = useToast();

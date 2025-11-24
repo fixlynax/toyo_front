@@ -40,7 +40,7 @@
                             @click="exportToCSV"
                             :disabled="patterns.length === 0"
                         />
-                        <RouterLink to="/technical/createPattern">
+                        <RouterLink to="/technical/createPattern" v-if="canUpdate">
                         <Button type="button" label="Create" icon="pi pi-plus" class="p-button" />
                         </RouterLink>
                     </div>
@@ -99,11 +99,14 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue';
+import { ref, onMounted , computed } from 'vue';
 import { FilterMatchMode } from '@primevue/core/api';
 import api from '@/service/api';
-import Dialog from 'primevue/dialog';
+import { useMenuStore } from '@/store/menu';
 
+const menuStore = useMenuStore();
+const canUpdate = computed(() => menuStore.canWrite('Pattern List'));
+const denyAccess = computed(() => menuStore.canTest('Pattern List'));
 const patterns = ref([]);
 const loading = ref(true);
 const expandedRows = ref([]);
