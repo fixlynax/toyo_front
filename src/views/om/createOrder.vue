@@ -320,7 +320,7 @@
                             <template #body="{ data }">
                                 <InputNumber
                                     v-model="data.quantity"
-                                    :min="1"
+                                    :min="getMinQuantity()"
                                     :max="getMaxQuantity(data)"
                                     :showButtons="true"
                                     buttonLayout="horizontal"
@@ -785,8 +785,8 @@ const selectedContainerSize = ref('20FT');
 // Container capacity settings from API
 const containerSettings = ref({
     max_container_twenty: 1,
-    min_container_twenty: 1,
     max_container_forty: 1000,
+    min_container_twenty: 1,
     min_container_forty: 500
 });
 
@@ -1050,17 +1050,20 @@ const formatCurrency = (amount) => {
 // Helper function for unique sorted values
 const uniqueSorted = (arr) => [...new Set(arr)].sort((a, b) => (a > b ? 1 : -1));
 
-// Helper function to get maximum quantity based on stock - Updated with min 1 and max 50
+// NEW: Get minimum quantity (1 for all order types)
+const getMinQuantity = () => {
+    return 1;
+};
+
+// UPDATED: Helper function to get maximum quantity based on stock and order type
 const getMaxQuantity = (tyre) => {
-    const maxQty = 50; // Maximum quantity per item
-
-    // For NORMAL orders with 0 stock, allow up to maxQty (back order scenario)
-    if (selectedOrderType.value === 'NORMAL' && tyre.stockBalance === 0) {
-        return maxQty;
+    if (selectedOrderType.value === 'NORMAL') {
+        // For NORMAL orders, maximum is 50 regardless of stock
+        return 50;
+    } else {
+        // For DIRECTSHIP or other order types, use stock balance as limit
+        return Math.min(tyre.stockBalance || 0, 999);
     }
-
-    // For DIRECTSHIP or items with stock, use the minimum between stock balance and maxQty
-    return Math.min(tyre.stockBalance || 0, maxQty);
 };
 
 // Helper to get material names for display
@@ -1236,7 +1239,8 @@ const fetchCustomers = async () => {
     }
 };
 
-const fetchEligibleOrder = async (custAccountNo) => {
+// NEW: Fetch eligible order settings including container capacities
+const fetchEligibleOrderSettings = async (custAccountNo) => {
     if (!custAccountNo) return;
 
     try {
@@ -1248,22 +1252,28 @@ const fetchEligibleOrder = async (custAccountNo) => {
         console.log('Eligible order API Response:', response.data);
 
         if (response.data.status === 1) {
-            const data = response.data.admin_data;
+            const settings = response.data.admin_data;
+            console.log('Container settings:', settings);
+
+            // Update container settings from API
             containerSettings.value = {
-                max_container_twenty: data.max_container_twenty || 1,
-                min_container_twenty: data.min_container_twenty || 1,
-                max_container_forty: data.max_container_forty || 1000,
-                min_container_forty: data.min_container_forty || 500
+                max_container_twenty: settings.max_container_twenty || 1,
+                max_container_forty: settings.max_container_forty || 1000,
+                min_container_twenty: settings.min_container_twenty || 1,
+                min_container_forty: settings.min_container_forty || 500
             };
-            console.log('Container settings updated:', containerSettings.value);
+
+            console.log('Updated container settings:', containerSettings.value);
+        } else {
+            console.error('Eligible order API returned status 0:', response.data);
         }
     } catch (error) {
         console.error('Error fetching eligible order settings:', error);
         // Use default values if API fails
         containerSettings.value = {
             max_container_twenty: 1,
-            min_container_twenty: 1,
             max_container_forty: 1000,
+            min_container_twenty: 1,
             min_container_forty: 500
         };
     }
@@ -2062,7 +2072,7 @@ const onCustomerChange = (event) => {
     if (event.value && event.value.code) {
         fetchMaterials(event.value.code);
         fetchShipToAddresses(event.value.code);
-        fetchEligibleOrder(event.value.code); // Fetch container settings
+        fetchEligibleOrderSettings(event.value.code); // NEW: Fetch container settings
         selectedTyres.value = [];
         freeItems.value = [];
         currentCartRefNo.value = '';
@@ -2238,6 +2248,3 @@ onMounted(() => {
     transition: width 0.3s ease;
 }
 </style>
-
-<!-- can you make the  limit qty = 50 is for the normal order and for qty direct ship not have limit -->
-<!-- back order normal -->
