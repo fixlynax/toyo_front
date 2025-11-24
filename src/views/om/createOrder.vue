@@ -320,7 +320,7 @@
                             <template #body="{ data }">
                                 <InputNumber
                                     v-model="data.quantity"
-                                    :min="1"
+                                    :min="getMinQuantity()"
                                     :max="getMaxQuantity(data)"
                                     :showButtons="true"
                                     buttonLayout="horizontal"
@@ -616,7 +616,7 @@
         </div>
 
         <!-- Order Processing Dialog -->
-        <Dialog v-model:visible="showOrderDialog" :style="{ width: '500px' }" header="Order Processing" :modal="true" :closable="false">
+        <Dialog v-model:visible="showOrderDialog" :style="{ width: '500px' }" header="Order Processing" :modal="true" :closable="true">
             <div class="flex flex-col items-center gap-4">
                 <ProgressSpinner v-if="orderStatus === 'processing'" style="width: 50px; height: 50px" strokeWidth="4" />
                 <i v-else-if="orderStatus === 'success'" class="pi pi-check-circle text-green-500 text-5xl"></i>
@@ -714,7 +714,7 @@
                     </div>
                 </div>
 
-                <!-- Unfulfilled Items -->
+                <!-- Unfulfilled Items -->D
                 <div v-if="unfulfilledItems.length > 0" class="bg-orange-50 p-4 rounded-lg border border-orange-200">
                     <div class="font-semibold text-orange-700 mb-2">⚠️ Unfulfilled Items (Require Back Order)</div>
                     <div class="space-y-2 max-h-40 overflow-y-auto">
@@ -781,6 +781,14 @@ const selectedCustomer = ref(null);
 const selectedOrderType = ref('NORMAL');
 const selectedDeliveryMethod = ref('DELIVER');
 const selectedContainerSize = ref('20FT');
+
+// Container capacity settings from API
+const containerSettings = ref({
+    max_container_twenty: 1,
+    max_container_forty: 1000,
+    min_container_twenty: 1,
+    min_container_forty: 500
+});
 
 // Driver Information (now collected after order success)
 const driverInfo = ref({
@@ -861,9 +869,22 @@ const uploadUrl = computed(() => `${import.meta.env.VITE_API_URL}/order/upload-e
 const uploadMessage = ref('');
 const uploadMessageClass = ref('');
 
-// Container Capacity Settings
-const minContainerCapacity = computed(() => (selectedContainerSize.value === '20FT' ? 1 : 500));
-const maxContainerCapacity = computed(() => (selectedContainerSize.value === '20FT' ? 1 : 1000));
+// Container Capacity Settings - Updated to use API values
+const minContainerCapacity = computed(() => {
+    if (selectedContainerSize.value === '20FT') {
+        return containerSettings.value.min_container_twenty;
+    } else {
+        return containerSettings.value.min_container_forty;
+    }
+});
+
+const maxContainerCapacity = computed(() => {
+    if (selectedContainerSize.value === '20FT') {
+        return containerSettings.value.max_container_twenty;
+    } else {
+        return containerSettings.value.max_container_forty;
+    }
+});
 
 // Computed Properties
 const cartTotal = computed(() => selectedTyres.value.reduce((sum, item) => sum + (parseFloat(item.price) || 0) * (item.quantity || 1), 0));
@@ -1029,15 +1050,20 @@ const formatCurrency = (amount) => {
 // Helper function for unique sorted values
 const uniqueSorted = (arr) => [...new Set(arr)].sort((a, b) => (a > b ? 1 : -1));
 
-// Helper function to get maximum quantity based on stock
-const getMaxQuantity = (tyre) => {
-    // For NORMAL orders with 0 stock, allow any quantity (back order scenario)
-    if (selectedOrderType.value === 'NORMAL' && tyre.stockBalance === 0) {
-        return 999; // Allow reasonable quantity for back orders
-    }
+// NEW: Get minimum quantity (1 for all order types)
+const getMinQuantity = () => {
+    return 1;
+};
 
-    // For DIRECTSHIP or items with stock, use stock balance as limit
-    return Math.min(tyre.stockBalance || 0, 999);
+// UPDATED: Helper function to get maximum quantity based on stock and order type
+const getMaxQuantity = (tyre) => {
+    if (selectedOrderType.value === 'NORMAL') {
+        // For NORMAL orders, maximum is 50 regardless of stock
+        return 50;
+    } else {
+        // For DIRECTSHIP or other order types, use stock balance as limit
+        return Math.min(tyre.stockBalance || 0, 999);
+    }
 };
 
 // Helper to get material names for display
@@ -1210,6 +1236,46 @@ const fetchCustomers = async () => {
         toast.add({ severity: 'error', summary: 'Error', detail: 'Failed to load customers', life: 3000 });
     } finally {
         loadingCustomers.value = false;
+    }
+};
+
+// NEW: Fetch eligible order settings including container capacities
+const fetchEligibleOrderSettings = async (custAccountNo) => {
+    if (!custAccountNo) return;
+
+    try {
+        console.log('Fetching eligible order settings for:', custAccountNo);
+        const response = await api.post('order/eligibleorder', {
+            custacccountno: custAccountNo
+        });
+
+        console.log('Eligible order API Response:', response.data);
+
+        if (response.data.status === 1) {
+            const settings = response.data.admin_data;
+            console.log('Container settings:', settings);
+
+            // Update container settings from API
+            containerSettings.value = {
+                max_container_twenty: settings.max_container_twenty || 1,
+                max_container_forty: settings.max_container_forty || 1000,
+                min_container_twenty: settings.min_container_twenty || 1,
+                min_container_forty: settings.min_container_forty || 500
+            };
+
+            console.log('Updated container settings:', containerSettings.value);
+        } else {
+            console.error('Eligible order API returned status 0:', response.data);
+        }
+    } catch (error) {
+        console.error('Error fetching eligible order settings:', error);
+        // Use default values if API fails
+        containerSettings.value = {
+            max_container_twenty: 1,
+            max_container_forty: 1000,
+            min_container_twenty: 1,
+            min_container_forty: 500
+        };
     }
 };
 
@@ -2006,6 +2072,7 @@ const onCustomerChange = (event) => {
     if (event.value && event.value.code) {
         fetchMaterials(event.value.code);
         fetchShipToAddresses(event.value.code);
+        fetchEligibleOrderSettings(event.value.code); // NEW: Fetch container settings
         selectedTyres.value = [];
         freeItems.value = [];
         currentCartRefNo.value = '';

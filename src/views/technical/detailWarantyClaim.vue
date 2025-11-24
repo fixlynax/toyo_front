@@ -68,24 +68,7 @@
                     <div class="flex items-center justify-between border-b pb-2 mb-4">
                         <div class="text-2xl font-bold text-gray-800">Tire Detail</div>
                     </div>
-
-                    <div class="grid grid-cols-2 md:grid-cols-2 gap-4">
-                        <div>
-                            <span class="block text-sm font-bold text-black-800">Serial Plate</span>
-                            <p class="text-lg font-medium">{{ warantyDetail.tire_info.plateSerial || '-' }}</p>
-                        </div>
-                        <div>
-                            <span class="block text-sm font-bold text-black-800">Pattern</span>
-                            <p class="text-lg font-medium">{{ warantyDetail.tire_info.pattern || '-' }}</p>
-                        </div>
-                        <div>
-                            <span class="block text-sm font-bold text-black-800">Size</span>
-                            <p class="text-lg font-medium">{{ warantyDetail.tire_info.tyresize  || '-' }}</p>
-                        </div>
-                        <div>
-                            <span class="block text-sm font-bold text-black-800">Description</span>
-                            <p class="text-lg font-medium">{{ warantyDetail.tire_info.desc || '-' }}</p>
-                        </div>
+                    <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
                         <div>
                             <span class="block text-sm font-bold text-black-800">MFG code</span>
                             <p class="text-lg font-medium">{{ warantyDetail.tire_info.mfgcode || '-' }}</p>
@@ -94,6 +77,31 @@
                             <span class="block text-sm font-bold text-black-800">Week Code</span>
                             <p class="text-lg font-medium">{{ warantyDetail.tire_info.weekcode || '-' }}</p>
                         </div>
+                        <div>
+                            <span class="block text-sm font-bold text-black-800">Spec</span>
+                            <p class="text-lg font-medium">{{  '-' }}</p>
+                        </div>
+                        <div>
+                            <span class="block text-sm font-bold text-black-800">Size</span>
+                            <p class="text-lg font-medium">{{ warantyDetail.tire_info.tyresize  || '-' }}</p>
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-2 md:grid-cols-2 gap-4">
+                        <!-- <div>
+                            <span class="block text-sm font-bold text-black-800">Serial Plate</span>
+                            <p class="text-lg font-medium">{{ warantyDetail.tire_info.plateSerial || '-' }}</p>
+                        </div> -->
+                        <div>
+                            <span class="block text-sm font-bold text-black-800">Pattern</span>
+                            <p class="text-lg font-medium">{{ warantyDetail.tire_info.pattern || '-' }}</p>
+                        </div>
+
+                        <div>
+                            <span class="block text-sm font-bold text-black-800">Description</span>
+                            <p class="text-lg font-medium">{{ warantyDetail.tire_info.desc || '-' }}</p>
+                        </div>
+
                         <div>
                             <span class="block text-sm font-bold text-black-800">Certificate Number</span>
                             <p class="text-lg font-medium">{{ warantyDetail.warrantyCertNo || '-' }}</p>
@@ -121,15 +129,20 @@
 
                 <!-- Photo Grid -->
                 <div v-if="hasSubmittedPhotos"  class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-                    <div v-for="photo in submittedPhotos" :key="photo.type" class="text-center">
-                        <span class="block text-lg font-bold text-black-800 mb-3">{{ photo.label }}</span>
-                        <div class="cursor-pointer border-2 border-gray-300 rounded-lg overflow-hidden hover:border-primary-500 transition-all duration-200 bg-gray-100" @click="openImageModal(photo.imageSrc, photo.label)">
-                            <img :src="photo.imageSrc" :alt="photo.alt" class="w-full h-32 object-cover" />
-                        </div>
-                        <div class="mt-2 flex justify-center">
-                            <Button label="View Full Size" icon="pi pi-eye" class="p-button-text p-button-sm" @click="openImageModal(photo.imageSrc, photo.label)" />
-                        </div>
+                    <div
+                        v-for="photo in submittedPhotos"
+                        :key="photo"
+                        class="rounded-xl overflow-hidden shadow-sm bg-gray-100">
+                        <span class="block text-lg font-bold text-black-800 mb-3 text-center">{{ photo.label }}</span>
+                        <a :href="photo.imageSrc" target="_blank" rel="noopener noreferrer">
+                            <img
+                                :src="photo.imageSrc"
+                                :alt="`Submitted Photo ${index + 1}`"
+                                class="w-full h-64 object-cover hover:scale-105 transition-transform duration-300 cursor-pointer"
+                            />
+                        </a>
                     </div>
+
                 </div>
                 <div v-else class="text-center py-8 bg-gray-50 rounded-lg mb-6">
                     <i class="pi pi-image text-4xl text-gray-400 mb-3"></i>
@@ -144,8 +157,18 @@
                     </div>
                     <div v-if="TireDepthImages.length > 0" class="mb-6">
                         <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
-                            <div v-for="(img, index) in TireDepthImages" :key="index" class="rounded-xl overflow-hidden shadow-sm bg-gray-100">
-                                <img :src="img.itemImageSrc" :alt="`Tire Depth ${index + 1}`" class="w-full h-64 object-cover" />
+                            <div
+                                v-for="(img, index) in TireDepthImages"
+                                :key="index"
+                                class="rounded-xl overflow-hidden shadow-sm bg-gray-100"
+                            >
+                                <a :href="img.itemImageSrc" target="_blank" rel="noopener noreferrer">
+                                    <img
+                                        :src="img.itemImageSrc"
+                                        :alt="`Tire Depth ${index + 1}`"
+                                        class="w-full h-64 object-cover hover:scale-105 transition-transform duration-300 cursor-pointer"
+                                    />
+                                </a>
                             </div>
                         </div>
                     </div>
@@ -279,20 +302,24 @@
                     </div>
 
                     <!-- Percentages -->
-                    <div class="bg-gray-50 rounded-lg p-4">
+                    <div class="bg-gray-50 rounded-lg">
                         <span class="font-bold text-gray-700 block mb-3">Claim Percentages</span>
-                        <div class="flex justify-between items-center">
+                        <div class="grid grid-cols-2 gap-4">
                             <div class="text-center">
                                 <span class="block font-bold text--600">Claim %</span>
                                 <p class="text-xl font-bold text-black">{{ warantyDetail.claimPercent || '0' }}%</p>
                             </div>
                             <div class="text-center">
-                                <span class="block font-bold text--600">Usable %</span>
-                                <p class="text-xl font-bold text-black">{{ warantyDetail.usablePercent || '0' }}%</p>
+                                <span class="block font-bold text--600">Thread Depth Dealer</span>
+                                <p class="text-xl font-bold text-black"> {{ warantyDetail.threadDepthMeasurementEten? Number(warantyDetail.threadDepthMeasurementEten).toFixed(2): '0.00'}}</p>
                             </div>
                             <div class="text-center">
                                 <span class="block font-bold text--600">Worn %</span>
                                 <p class="text-xl font-bold text-black">{{ warantyDetail.wornPercent || '0' }}%</p>
+                            </div>
+                            <div class="text-center">
+                                <span class="block font-bold text--600">Thread Depth Admin</span>
+                                <p class="text-xl font-bold text-black">{{ warantyDetail.threadDepthMeasurementAdmin? Number(warantyDetail.threadDepthMeasurementAdmin).toFixed(2): '0.00'}}</p>
                             </div>
                         </div>
                     </div>
@@ -370,30 +397,20 @@
 
                 <!-- Scrap Images Gallery -->
                 <div v-if="(warantyDetail.status_string  !== 'Pending Scrap') &&(warantyDetail.status_string  !== 'Pending Scrap Photo') && scrapImages.length > 0" class="mb-6">
-                    <Galleria
-                        :value="scrapImages"
-                        :responsiveOptions="galleriaResponsiveOptions"
-                        :numVisible="5"
-                        containerStyle="max-width: 100%; margin: 0 auto"
-                        :circular="true"
-                        :showItemNavigators="true"
-                        :showThumbnails="true"
-                        :showIndicators="true"
-                        :showThumbnailNavigators="false"
-                        thumbnailsPosition="bottom"
-                    >
-                        <template #item="slotProps">
-                            <img :src="slotProps.item.itemImageSrc" :alt="`Scrap image ${slotProps.index + 1}`" class="rounded-xl object-contain w-full h-80 shadow-sm bg-gray-100" />
-                        </template>
-                        <template #thumbnail="slotProps">
-                            <img
-                                :src="slotProps.item.thumbnailImageSrc"
-                                :alt="`Scrap thumbnail ${slotProps.index + 1}`"
-                                class="rounded-md h-16 w-16 object-cover border-2 border-transparent hover:border-primary transition-all"
-                                :class="{ 'border-primary': slotProps.index === slotProps.activeIndex }"
-                            />
-                        </template>
-                    </Galleria>
+                        <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+                            <div
+                                v-for="(item, index) in scrapImages"
+                                :key="index"
+                                class="rounded-xl overflow-hidden shadow-sm bg-gray-100">
+                                <a :href="item.itemImageSrc" target="_blank" rel="noopener noreferrer">
+                                    <img
+                                        :src="item.itemImageSrc"
+                                        :alt="`Scrap image ${index + 1}`"
+                                        class="w-full h-64 object-cover hover:scale-105 transition-transform duration-300 cursor-pointer"
+                                    />
+                                </a>
+                            </div>
+                        </div>
 
                     <div v-if="warantyDetail.status_string  =='Pending Manager Approval' && scrapImages && canUpdate" class="flex justify-end gap-2 mt-4 pt-4 border-t">
                         <Button label="Approve Scrap" class="p-button-success" size="small" @click="Approve" icon="pi pi-check" />
@@ -414,7 +431,15 @@
                     <div class="text-2xl font-bold text-gray-800">Replacement Details</div>
                 </div>
 
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm text-gray-800">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm text-gray-800">
+                    <div>
+                        <span class="font-bold">Order No</span>
+                        <p>{{ warantyDetail.replacement_detail?.order_no }}</p>
+                    </div>
+                    <div>
+                        <span class="font-bold">Order Date</span>
+                        <p>{{ formatDate(warantyDetail.replacement_detail?.order_date) }}</p>
+                    </div>
                     <div>
                         <span class="font-bold">Do No</span>
                         <p>{{ warantyDetail.replacement_detail?.do_no }}</p>
@@ -440,6 +465,14 @@
                     </div>
                 </div>
                 <div v-if="warantyDetail.reimbursement" class="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm text-gray-800">
+                    <div>
+                        <span class="font-bold">Invoice Request Date </span>
+                        <p>{{ formatDateString(warantyDetail.reimbursement?.requestReimbursementDate) || '-' }}</p>
+                    </div>
+                    <div>
+                        <span class="font-bold">Invoice Submitted Date </span>
+                        <p>{{ formatDateString(warantyDetail.reimbursement?.invSubmitDate) || '-' }}</p>
+                    </div>
                     <div>
                         <span class="font-bold">Invoice Amount </span>
                         <p>RM {{ warantyDetail.reimbursement?.invAmount }}</p>
@@ -511,24 +544,21 @@
                     />
                     <small v-if="(newClaimData.claimPercent === null || newClaimData.claimPercent === undefined) && creatingClaim" class="p-error">Claim percentage is required.</small>
                 </div>
-
-                <!-- Usable Percentage -->
                 <div class="field">
-                    <label class="block font-bold text-gray-700 mb-2">Usable % *</label>
+                    <label class="block font-bold text-gray-700 mb-2">Thread Depth Dealer</label>
                     <InputNumber
-                        v-model="newClaimData.usablePercent"
+                        v-model="warantyDetail.threadDepthMeasurementEten"
                         mode="decimal"
                         :min="0"
                         :max="100"
                         :minFractionDigits="0"
                         :maxFractionDigits="2"
                         placeholder="0-100"
+                        disabled=""
                         class="w-full"
-                        :class="{ 'p-invalid': (newClaimData.usablePercent === null || newClaimData.usablePercent === undefined) && creatingClaim }"
+                      
                     />
-                    <small v-if="(newClaimData.usablePercent === null || newClaimData.usablePercent === undefined) && creatingClaim" class="p-error">Usable percentage is required.</small>
                 </div>
-
                 <!-- Worn Percentage -->
                 <div class="field">
                     <label class="block font-bold text-gray-700 mb-2">Worn % *</label>
@@ -544,6 +574,21 @@
                         :class="{ 'p-invalid': (newClaimData.wornPercent === null || newClaimData.wornPercent === undefined) && creatingClaim }"
                     />
                     <small v-if="(newClaimData.wornPercent === null || newClaimData.wornPercent === undefined) && creatingClaim" class="p-error">Worn percentage is required.</small>
+                </div>
+                <!-- Thread Depth -->
+                <div class="field">
+                    <label class="block font-bold text-gray-700 mb-2">Thread Depth Admin *</label>
+                    <InputNumber
+                        v-model="newClaimData.threadDepth"
+                        mode="decimal"
+                        :min="0"
+                        :minFractionDigits="2"
+                        :maxFractionDigits="2"
+                        placeholder="0.00"
+                        class="w-full"
+                        :class="{ 'p-invalid': (newClaimData.threadDepth === null || newClaimData.threadDepth === undefined) && creatingClaim }"
+                    />
+                    <small v-if="(newClaimData.threadDepth === null || newClaimData.threadDepth === undefined) && creatingClaim" class="p-error">Thread Depth is required.</small>
                 </div>
             </div>
         </div>
@@ -587,11 +632,11 @@
 
     <Dialog v-model:visible="showCreateReplacementDialog" header="Submit Tyre For Replacement" :modal="true" :closable="!loadingAction" class="p-fluid" :style="{ width: '40rem' }">
         <!-- Show success results if replacement was submitted -->
-        <div v-if="replacementSubmitted && replacementResult" class="mb-4 p-3 bg-green-50 border border-green-200 rounded">
+        <!-- <div v-if="replacementSubmitted && replacementResult" class="mb-4 p-3 bg-green-50 border border-green-200 rounded">
             <h4 class="font-bold text-green-800">Replacement Approved Successfully!</h4>
             <p class="text-sm text-green-700">SAP SO: {{ replacementResult.sap_sono }}</p>
             <p class="text-sm text-green-700">SAP DO: {{ replacementResult.sap_dono }}</p>
-        </div>
+        </div> -->
 
         <label class="block font-bold text-gray-700 mb-1">Select Material ID</label>
         <Dropdown v-model="selectedMaterial" :options="listMaterial" optionLabel="material" placeholder="Select material" class="w-full mb-4">
@@ -671,7 +716,7 @@
 import LoadingPage from '@/components/LoadingPage.vue';
 import api from '@/service/api';
 import { useToast } from 'primevue/usetoast';
-import { computed, onMounted, ref } from 'vue';
+import { computed, onMounted, ref, watch, reactive } from 'vue';
 import { useRoute } from 'vue-router';
 import { useConfirm } from 'primevue';
 import { useMenuStore } from '@/store/menu';
@@ -700,11 +745,11 @@ const loadingScrapAction = ref(false);
 const stockCheckResult = ref(null);
 const showCreateClaimDialog = ref(false);
 const creatingClaim = ref(false);
-const newClaimData = ref({
+const newClaimData = reactive({
     damageCode: '',
     problem: '',
     claimPercent: null,
-    usablePercent: null,
+    threadDepth: null,
     wornPercent: null
 });
 const selectedDamageType = ref(null);
@@ -745,8 +790,8 @@ const listDamageType = [
 
 const handleDamageSelect = () => {
     if (selectedDamageType.value) {
-        newClaimData.value.damageCode = selectedDamageType.value.id;
-        newClaimData.value.problem = selectedDamageType.value.name;
+        newClaimData.damageCode = selectedDamageType.value.id;
+        newClaimData.problem = selectedDamageType.value.name;
     }
 };
 
@@ -782,24 +827,49 @@ const hasCTCData = computed(() => {
 
 const hasClaimDetails = computed(() => {
   const claim = warantyDetail.value.claim_detail;
-//   console.log(claim);
-  return claim && Object.values(claim).some(value => value !== null);
+  if (!claim) return false;
+
+  return Object.entries(claim)
+    .filter(([key]) => key !== 'threadDepthMeasurementEten') // ignore this field
+    .some(([, value]) => value !== null);
 });
 
 
-// Add these methods to the methods section
+/// Watch Claim % to auto-update Worn %
+let updating = false;
+
+watch(
+  () => newClaimData.claimPercent,
+  (val) => {
+    if (updating) return;
+    updating = true;
+    newClaimData.claimPercent = Math.min(Math.max(Number(val) || 0, 0), 100);
+    newClaimData.wornPercent = 100 - newClaimData.claimPercent;
+    updating = false;
+  }
+);
+
+// Watch Worn % to auto-update Claim %
+watch(
+  () => newClaimData.wornPercent,
+  (val) => {
+    if (updating) return;
+    updating = true;
+    newClaimData.wornPercent = Math.min(Math.max(Number(val) || 0, 0), 100);
+    newClaimData.claimPercent = 100 - newClaimData.wornPercent;
+    updating = false;
+  }
+);
 
 // Open Create Claim Dialog
 const openCreateClaimDialog = () => {
     showCreateClaimDialog.value = true;
     // Reset form data
-    newClaimData.value = {
-        damageCode: '',
-        problem: '',
-        claimPercent: null,
-        usablePercent: null,
-        wornPercent: null
-    };
+    newClaimData.damageCode = '';
+    newClaimData.problem = '';
+    newClaimData.claimPercent = null;
+    newClaimData.threadDepth = null;
+    newClaimData.wornPercent = null;
     creatingClaim.value = false;
 };
 
@@ -823,7 +893,7 @@ const getPhotoByType = (type) => {
 // Submit Claim Details
 const submitClaimDetails = async () => {
     // Validate required fields
-    if (!newClaimData.value.damageCode || !newClaimData.value.problem || newClaimData.value.claimPercent === null || newClaimData.value.usablePercent === null || newClaimData.value.wornPercent === null) {
+    if (!newClaimData.damageCode || !newClaimData.problem || newClaimData.claimPercent === null || newClaimData.threadDepth === null || newClaimData.wornPercent === null) {
         toast.add({
             severity: 'error',
             summary: 'Error',
@@ -838,11 +908,11 @@ const submitClaimDetails = async () => {
 
         const id = route.params.id;
         const response = await api.post(`warranty_claim/adminApprove/${id}`, {
-            problemCode: newClaimData.value.damageCode,
-            problem: newClaimData.value.problem,
-            claim_percent: newClaimData.value.claimPercent,
-            usable_percent: newClaimData.value.usablePercent,
-            worn_percent: newClaimData.value.wornPercent
+            problemCode: newClaimData.damageCode,
+            problem: newClaimData.problem,
+            claim_percent: newClaimData.claimPercent,
+            threadDepth: newClaimData.threadDepth,
+            worn_percent: newClaimData.wornPercent
         });
 
         if (response.data.status === 1) {
@@ -909,9 +979,7 @@ const fetchMaterial = async () => {
 
         // console.log(response.data);
         if (response.data.status === 1) {
-            listMaterial.value = (response.data.admin_data || []).map((item) => ({
-                material: item // convert string → object
-            }));
+            listMaterial.value = response.data.admin_data;
         } else {
             toast.add({
                 severity: 'error',
@@ -1005,7 +1073,11 @@ const confirmCTCRequestReturn = async () => {
     }
 };
 
-
+// Helper functions
+const formatDateString = (dateString) => {
+    if (!dateString) return '-';
+    return new Date(dateString).toLocaleDateString('en-MY');
+};
 // Helper functions
 const formatDateTime = (dateString) => {
     if (!dateString) return '-';
@@ -1147,6 +1219,8 @@ const fetchWarrantyClaim = async () => {
                 problemCodeAdmin: apiData.claim_detail?.problemCodeAdmin,
                 claimPercent: apiData.claim_detail?.claimPercent,
                 usablePercent: apiData.claim_detail?.usablePercent,
+                threadDepthMeasurementAdmin: apiData.claim_detail?.threadDepthMeasurementAdmin,
+                threadDepthMeasurementEten: apiData.claim_detail?.threadDepthMeasurementEten,
                 wornPercent: apiData.claim_detail?.wornPercent,
                 // CTC Info
                 ctc_details: apiData.ctc_info?.[0] || [],
@@ -1519,7 +1593,7 @@ const submitReplacement = async () => {
         // 1. Call Replacement API
         const replacementResponse = await api.post('warranty_claim/approveReplacement', {
             claim_id: warantyDetail.value.id,
-            materialid: selectedMaterial.value.material
+            materialid: selectedMaterial.value.materialid
         });
 
         if (replacementResponse.data.status === 1) {
@@ -1575,7 +1649,7 @@ const submitReimbursement = async () => {
         // 1. Call Reimbursement API
         const reimbursementResponse = await api.post('warranty_claim/approveReimbursement', {
             claim_id: warantyDetail.value.id,
-            materialid: selectedMaterial.value.material
+            materialid: selectedMaterial.value.materialid
         });
 
         if (reimbursementResponse.data.status === 1) {
