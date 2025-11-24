@@ -56,29 +56,6 @@
                     <small v-if="!selectedDeliveryMethod && step1Validated" class="p-error">Delivery method is required.</small>
                 </div>
 
-                <!-- Driver Information for Pickup Methods -->
-                <div v-if="selectedDeliveryMethod === 'SELFCOLLECT' || selectedDeliveryMethod === 'LALAMOVE'" class="md:col-span-2 border-t pt-4 mt-2">
-                    <div class="font-bold text-gray-700 mb-4">Driver Information</div>
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <div>
-                            <label class="block font-semibold text-gray-600">Driver Name *</label>
-                            <InputText v-model="driverInfo.name" placeholder="Enter driver name" class="w-full" :class="{ 'p-invalid': !driverInfo.name && step1Validated }" />
-                        </div>
-                        <div>
-                            <label class="block font-semibold text-gray-600">Phone Number *</label>
-                            <InputText v-model="driverInfo.phone" placeholder="Enter phone number" class="w-full" :class="{ 'p-invalid': !driverInfo.phone && step1Validated }" />
-                        </div>
-                        <div>
-                            <label class="block font-semibold text-gray-600">Truck Plate No *</label>
-                            <InputText v-model="driverInfo.plateNo" placeholder="Enter plate number" class="w-full" :class="{ 'p-invalid': !driverInfo.plateNo && step1Validated }" />
-                        </div>
-                        <div>
-                            <label class="block font-semibold text-gray-600">IC Number *</label>
-                            <InputText v-model="driverInfo.icNo" placeholder="Enter IC number" class="w-full" :class="{ 'p-invalid': !driverInfo.icNo && step1Validated }" />
-                        </div>
-                    </div>
-                </div>
-
                 <!-- Container Size for DIRECTSHIP -->
                 <div v-if="selectedOrderType === 'DIRECTSHIP'" class="md:col-span-2">
                     <label class="block font-bold text-gray-700">Container Size *</label>
@@ -502,28 +479,15 @@
                         </div>
                     </div>
 
-                    <!-- Driver Information Review -->
+                    <!-- Driver Information Notice for Pickup Methods -->
                     <div v-if="selectedDeliveryMethod === 'SELFCOLLECT' || selectedDeliveryMethod === 'LALAMOVE'" class="border-t pt-4">
                         <div class="font-bold text-lg text-gray-700 mb-4">Driver Information</div>
-                        <div class="bg-blue-50 p-4 rounded-lg">
-                            <div class="grid grid-cols-2 gap-4 text-sm">
-                                <div>
-                                    <div class="font-semibold text-gray-600">Name</div>
-                                    <div>{{ driverInfo.name }}</div>
-                                </div>
-                                <div>
-                                    <div class="font-semibold text-gray-600">Phone</div>
-                                    <div>{{ driverInfo.phone }}</div>
-                                </div>
-                                <div>
-                                    <div class="font-semibold text-gray-600">Plate No</div>
-                                    <div>{{ driverInfo.plateNo }}</div>
-                                </div>
-                                <div>
-                                    <div class="font-semibold text-gray-600">IC Number</div>
-                                    <div>{{ driverInfo.icNo }}</div>
-                                </div>
+                        <div class="bg-blue-50 p-4 rounded-lg border border-blue-200">
+                            <div class="flex items-center gap-3 mb-3">
+                                <i class="pi pi-info-circle text-blue-500 text-xl"></i>
+                                <div class="font-semibold text-blue-700">Driver Information Required</div>
                             </div>
+                            <div class="text-sm text-blue-600">Driver information will be collected after order confirmation for security purposes. You'll be prompted to enter driver details once the order is successfully placed.</div>
                         </div>
                     </div>
                 </div>
@@ -657,9 +621,52 @@
                 </div>
             </div>
             <template #footer>
-                <Button v-if="orderStatus === 'success'" label="View Order" icon="pi pi-eye" @click="viewOrderDetails" class="p-button-primary mr-2" />
-                <Button v-if="orderStatus === 'success' || orderStatus === 'error'" label="Close" icon="pi pi-check" @click="closeOrderDialog" class="p-button-primary" />
+                <Button v-if="orderStatus === 'success' && !showDriverForm" label="View Order" icon="pi pi-eye" @click="viewOrderDetails" class="p-button-primary mr-2" />
+                <Button v-if="orderStatus === 'success' && !showDriverForm" label="Close" icon="pi pi-check" @click="closeOrderDialog" class="p-button-primary" />
+                <Button v-if="orderStatus === 'success' && showDriverForm" label="Submit Driver Info" icon="pi pi-check" @click="submitDriverInfoAfterOrder" class="p-button-primary" :loading="submittingDriverInfo" />
             </template>
+        </Dialog>
+
+        <!-- Driver Information Dialog (After Order Success) -->
+        <Dialog v-model:visible="showDriverForm" :style="{ width: '600px' }" header="Driver Information Required" :modal="true" :closable="false">
+            <div class="flex flex-col gap-6">
+                <div class="bg-blue-50 p-4 rounded-lg border border-blue-200">
+                    <div class="flex items-center gap-3">
+                        <i class="pi pi-info-circle text-blue-500 text-xl"></i>
+                        <div class="font-semibold text-blue-700">Order Placed Successfully!</div>
+                    </div>
+                    <div class="text-sm text-blue-600 mt-1">
+                        Your order <strong>{{ orderDetails?.orderRefNo }}</strong> has been created. Please provide driver information for pickup.
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                        <label class="block font-semibold text-gray-600">Driver Name *</label>
+                        <InputText v-model="driverInfo.name" placeholder="Enter driver name" class="w-full" :class="{ 'p-invalid': !driverInfo.name && driverFormValidated }" />
+                        <small v-if="!driverInfo.name && driverFormValidated" class="p-error">Driver name is required.</small>
+                    </div>
+                    <div>
+                        <label class="block font-semibold text-gray-600">Phone Number *</label>
+                        <InputText v-model="driverInfo.phone" placeholder="Enter phone number" class="w-full" :class="{ 'p-invalid': !driverInfo.phone && driverFormValidated }" />
+                        <small v-if="!driverInfo.phone && driverFormValidated" class="p-error">Phone number is required.</small>
+                    </div>
+                    <div>
+                        <label class="block font-semibold text-gray-600">Truck Plate No *</label>
+                        <InputText v-model="driverInfo.plateNo" placeholder="Enter plate number" class="w-full" :class="{ 'p-invalid': !driverInfo.plateNo && driverFormValidated }" />
+                        <small v-if="!driverInfo.plateNo && driverFormValidated" class="p-error">Plate number is required.</small>
+                    </div>
+                    <div>
+                        <label class="block font-semibold text-gray-600">IC Number *</label>
+                        <InputText v-model="driverInfo.icNo" placeholder="Enter IC number" class="w-full" :class="{ 'p-invalid': !driverInfo.icNo && driverFormValidated }" />
+                        <small v-if="!driverInfo.icNo && driverFormValidated" class="p-error">IC number is required.</small>
+                    </div>
+                </div>
+
+                <div class="bg-yellow-50 p-3 rounded border border-yellow-200">
+                    <div class="text-sm text-yellow-700"><strong>Note:</strong> This information is required for security and tracking purposes. The driver must present matching identification during pickup.</div>
+                </div>
+            </div>
         </Dialog>
 
         <!-- Back Order Confirmation Dialog -->
@@ -733,13 +740,16 @@ const selectedOrderType = ref('NORMAL');
 const selectedDeliveryMethod = ref('DELIVER');
 const selectedContainerSize = ref('20FT');
 
-// Driver Information
+// Driver Information (now collected after order success)
 const driverInfo = ref({
     name: '',
     phone: '',
     plateNo: '',
     icNo: ''
 });
+const showDriverForm = ref(false);
+const driverFormValidated = ref(false);
+const submittingDriverInfo = ref(false);
 
 // Ship To Details
 const shipToAccount = ref(null);
@@ -848,14 +858,9 @@ const progressValue = computed(() => {
     return Math.round(progress);
 });
 
+// MODIFIED: Remove driver info validation from step 2
 const canProceedToStep2 = computed(() => {
-    const basicChecks = selectedCustomer.value && selectedOrderType.value && selectedDeliveryMethod.value;
-
-    if (selectedDeliveryMethod.value === 'SELFCOLLECT' || selectedDeliveryMethod.value === 'LALAMOVE') {
-        return basicChecks && driverInfo.value.name && driverInfo.value.phone && driverInfo.value.plateNo && driverInfo.value.icNo;
-    }
-
-    return basicChecks;
+    return selectedCustomer.value && selectedOrderType.value && selectedDeliveryMethod.value;
 });
 
 const canProceedToStep3 = computed(() => {
@@ -1564,6 +1569,7 @@ const confirmBackOrderAPI = async (cartRefNo, orderArray, backorderArray) => {
     }
 };
 
+// MODIFIED: Submit driver information after order success
 const submitDriverInformation = async (orderNo) => {
     if (selectedDeliveryMethod.value !== 'SELFCOLLECT' && selectedDeliveryMethod.value !== 'LALAMOVE') {
         return true; // No driver info needed
@@ -1581,6 +1587,41 @@ const submitDriverInformation = async (orderNo) => {
     } catch (error) {
         console.error('Error submitting driver information:', error);
         throw new Error('Failed to submit driver information');
+    }
+};
+
+// NEW: Submit driver info after order success
+const submitDriverInfoAfterOrder = async () => {
+    if (!driverInfo.value.name || !driverInfo.value.phone || !driverInfo.value.plateNo || !driverInfo.value.icNo) {
+        driverFormValidated.value = true;
+        toast.add({ severity: 'error', summary: 'Error', detail: 'Please fill in all driver information fields', life: 3000 });
+        return;
+    }
+
+    submittingDriverInfo.value = true;
+
+    try {
+        const success = await submitDriverInformation(orderDetails.value.orderRefNo);
+
+        if (success) {
+            toast.add({ severity: 'success', summary: 'Success', detail: 'Driver information submitted successfully', life: 3000 });
+            showDriverForm.value = false;
+            closeOrderDialog();
+
+            // Reset driver info for next order
+            driverInfo.value = { name: '', phone: '', plateNo: '', icNo: '' };
+            driverFormValidated.value = false;
+
+            // Clear cart and reset
+            clearCartAndReset();
+        } else {
+            throw new Error('Failed to submit driver information');
+        }
+    } catch (error) {
+        console.error('Error submitting driver info:', error);
+        toast.add({ severity: 'error', summary: 'Error', detail: 'Failed to submit driver information', life: 3000 });
+    } finally {
+        submittingDriverInfo.value = false;
     }
 };
 
@@ -1664,20 +1705,13 @@ const processNormalOrder = async (orderArray) => {
         const finalOrderArray = addToCartResult.eten_data?.order_array || orderArray;
 
         const confirmResult = await confirmOrderAPI(cartRefNo, finalOrderArray);
-
-        // Submit driver information for pickup orders
-        if (confirmResult.status === 1 && (selectedDeliveryMethod.value === 'SELFCOLLECT' || selectedDeliveryMethod.value === 'LALAMOVE')) {
-            orderMessage.value = 'Submitting driver information...';
-            await submitDriverInformation(confirmResult.eten_data.orderRefNo);
-        }
-
         await handleOrderConfirmation(confirmResult, 'NORMAL');
     } else {
         throw new Error(addToCartResult.message || 'Failed to add items to cart');
     }
 };
 
-// Handle Order Confirmation Response
+// MODIFIED: Handle Order Confirmation Response - Show driver form for pickup methods
 const handleOrderConfirmation = async (confirmResult, orderType) => {
     console.log('Order confirmation result:', confirmResult);
 
@@ -1689,18 +1723,21 @@ const handleOrderConfirmation = async (confirmResult, orderType) => {
             orderRefNo: confirmResult.eten_data.orderRefNo
         };
 
-        // Clear cart and reset
-        selectedTyres.value = [];
-        freeItems.value = [];
-        currentCartRefNo.value = '';
-        currentStep.value = 1;
-
-        toast.add({
-            severity: 'success',
-            summary: 'Success',
-            detail: `${orderType} order ${confirmResult.eten_data.orderRefNo} created successfully`,
-            life: 5000
-        });
+        // Check if driver information is needed (pickup methods)
+        if (selectedDeliveryMethod.value === 'SELFCOLLECT' || selectedDeliveryMethod.value === 'LALAMOVE') {
+            // Show driver information form instead of closing
+            showDriverForm.value = true;
+            orderMessage.value = `${orderType} order created! Please provide driver information.`;
+        } else {
+            // For delivery methods, clear cart and show success
+            clearCartAndReset();
+            toast.add({
+                severity: 'success',
+                summary: 'Success',
+                detail: `${orderType} order ${confirmResult.eten_data.orderRefNo} created successfully`,
+                life: 5000
+            });
+        }
     } else if (confirmResult.status === 0 && confirmResult.eten_data) {
         // Handle backorder scenario
         const backOrderData = Array.isArray(confirmResult.eten_data) ? confirmResult.eten_data[0] : confirmResult.eten_data;
@@ -1795,18 +1832,21 @@ const proceedWithBackOrder = async () => {
                 backOrderRefNo: result.eten_data.backOrderRefNo
             };
 
-            // Clear cart and reset
-            selectedTyres.value = [];
-            freeItems.value = [];
-            currentCartRefNo.value = '';
-            currentStep.value = 1;
-
-            toast.add({
-                severity: 'success',
-                summary: 'Success',
-                detail: `Order ${result.eten_data.orderRefNo} created with back order ${result.eten_data.backOrderRefNo}`,
-                life: 5000
-            });
+            // Check if driver information is needed (pickup methods)
+            if (selectedDeliveryMethod.value === 'SELFCOLLECT' || selectedDeliveryMethod.value === 'LALAMOVE') {
+                // Show driver information form instead of closing
+                showDriverForm.value = true;
+                orderMessage.value = 'Order created with back order! Please provide driver information.';
+            } else {
+                // For delivery methods, clear cart and show success
+                clearCartAndReset();
+                toast.add({
+                    severity: 'success',
+                    summary: 'Success',
+                    detail: `Order ${result.eten_data.orderRefNo} created with back order ${result.eten_data.backOrderRefNo}`,
+                    life: 5000
+                });
+            }
         } else {
             throw new Error(result.message || 'Back order creation failed');
         }
@@ -1868,18 +1908,21 @@ const proceedWithoutBackOrder = async () => {
                 orderRefNo: result.eten_data.orderRefNo
             };
 
-            // Clear cart and reset
-            selectedTyres.value = [];
-            freeItems.value = [];
-            currentCartRefNo.value = '';
-            currentStep.value = 1;
-
-            toast.add({
-                severity: 'success',
-                summary: 'Success',
-                detail: `Order ${result.eten_data.orderRefNo} created successfully`,
-                life: 5000
-            });
+            // Check if driver information is needed (pickup methods)
+            if (selectedDeliveryMethod.value === 'SELFCOLLECT' || selectedDeliveryMethod.value === 'LALAMOVE') {
+                // Show driver information form instead of closing
+                showDriverForm.value = true;
+                orderMessage.value = 'Order created! Please provide driver information.';
+            } else {
+                // For delivery methods, clear cart and show success
+                clearCartAndReset();
+                toast.add({
+                    severity: 'success',
+                    summary: 'Success',
+                    detail: `Order ${result.eten_data.orderRefNo} created successfully`,
+                    life: 5000
+                });
+            }
         } else {
             throw new Error(result.message || 'Order creation failed');
         }
@@ -1895,6 +1938,14 @@ const proceedWithoutBackOrder = async () => {
             life: 5000
         });
     }
+};
+
+// NEW: Helper function to clear cart and reset
+const clearCartAndReset = () => {
+    selectedTyres.value = [];
+    freeItems.value = [];
+    currentCartRefNo.value = '';
+    currentStep.value = 1;
 };
 
 // Event Handlers
@@ -1929,9 +1980,7 @@ const onOrderTypeChange = (event) => {
 const onDeliveryMethodChange = (event) => {
     console.log('Delivery method changed to:', event.value);
     // Reset driver info when delivery method changes
-    if (event.value === 'DELIVER') {
-        driverInfo.value = { name: '', phone: '', plateNo: '', icNo: '' };
-    }
+    driverInfo.value = { name: '', phone: '', plateNo: '', icNo: '' };
 };
 
 const onShipToAccountChange = (event) => {
@@ -1956,6 +2005,9 @@ const closeOrderDialog = () => {
     orderDetails.value = null;
     orderError.value = '';
     unfulfilledItems.value = [];
+    showDriverForm.value = false;
+    driverFormValidated.value = false;
+    submittingDriverInfo.value = false;
 };
 
 // Helper Functions
@@ -1991,6 +2043,7 @@ const resetAllData = () => {
     resetFilters();
     currentCartRefNo.value = '';
     availableCredit.value = 0;
+    driverInfo.value = { name: '', phone: '', plateNo: '', icNo: '' };
 };
 
 const resetFilters = () => {
