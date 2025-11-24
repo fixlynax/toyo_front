@@ -55,7 +55,7 @@
                         :loading="exportLoading"
                         @click="handleExport"
                         />
-                        <Button 
+                        <Button v-if="canUpdate"
                         type="button" 
                         label="Import" 
                         icon="pi pi-file-import" 
@@ -149,7 +149,7 @@
             </Column>
 
             <!-- Sell Column with Checkbox -->
-            <Column field="sell" header="Sell" style="min-width: 6rem">
+            <Column field="sell" header="Sell" style="min-width: 6rem" v-if="canUpdate">
                 <template #body="{ data }">
                     <div class="flex justify-center">
                         <Checkbox 
@@ -166,7 +166,7 @@
             
             
             <!-- Warranty Column with Checkbox -->
-            <Column field="warranty" header="Warranty" style="min-width: 8rem">
+            <Column field="warranty" header="Warranty" style="min-width: 8rem" v-if="canUpdate">
                 <template #body="{ data }">
                     <div class="flex justify-center">
                         <Checkbox 
@@ -182,7 +182,7 @@
             </Column>
             
             <!-- TWP Column with Checkbox -->
-            <Column field="twp" header="TWP" style="min-width: 8rem">
+            <Column field="twp" header="TWP" style="min-width: 8rem" v-if="canUpdate">
                 <template #body="{ data }">
                     <div class="flex justify-center">
                         <Checkbox 
@@ -206,6 +206,11 @@ import { FilterMatchMode } from '@primevue/core/api';
 import api from '@/service/api';
 import { useToast } from 'primevue/usetoast';
 import LoadingPage from '@/components/LoadingPage.vue';
+import { useMenuStore } from '@/store/menu';
+
+const menuStore = useMenuStore();
+const canUpdate = computed(() => menuStore.canWrite('Product List'));
+const denyAccess = computed(() => menuStore.canTest('Product List'));
 
 const toast = useToast();
 
@@ -269,7 +274,6 @@ const fetchData = async () => {
         loading.value = true;
         const response = await api.get('material');
 
-        console.log('API Response:', response.data);
 
         if (response.data.status === 1 && Array.isArray(response.data.admin_data)) {
             tyres.value = response.data.admin_data.map((product) => ({
@@ -391,7 +395,6 @@ const handleToggleExport = (id) => {
   } else {
     selectedExportIds.value.add(id);
   }
-//   console.log(selectedExportIds.value);
 };
 
 // Check all
@@ -410,7 +413,6 @@ const handleToggleTWP = async (data) => {
     try {
         data.updatingTWP = true;
         const newStatus = data.twp ? 1 : 0;
-        console.log('TWP new status:', data);
         await api.put(`material/toggleTWP/${data.id}`, {
 
         });

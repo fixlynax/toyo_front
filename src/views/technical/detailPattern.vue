@@ -231,9 +231,6 @@ const savePatternEdit = async () => {
         if (formHolder.value.image_url instanceof File) {
             formData.append('image_url', formHolder.value.image_url); // <-- use formData, not payload
         }
-        for (let [key, value] of formData.entries()) {
-            console.log(key, value);
-        }
         const response = await api.postExtra(`patternUpdate/${id}`, formData, {
             headers: {
                 'Content-Type': 'multipart/form-data'
