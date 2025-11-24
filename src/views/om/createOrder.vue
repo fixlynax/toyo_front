@@ -24,6 +24,21 @@
                     <small v-if="customerOptions.length === 0 && !loadingCustomers" class="text-gray-500">No customers available</small>
                 </div>
 
+                <!-- Risk Category Warning -->
+                <div v-if="selectedCustomer && !canProceedWithRiskA" class="md:col-span-2">
+                    <div class="bg-red-50 border border-red-200 rounded-lg p-4">
+                        <div class="flex items-center gap-3">
+                            <i class="pi pi-exclamation-triangle text-red-500 text-xl"></i>
+                            <div>
+                                <div class="font-semibold text-red-700">Order Restricted</div>
+                                <div class="text-sm text-red-600">
+                                    This customer's risk category does not allow order placement. Only customers with risk category 'A' can place orders. Current risk category: {{ selectedCustomer.shopData?.riskCategory || 'Not specified' }}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
                 <!-- Order Type -->
                 <div class="md:col-span-2">
                     <label class="block font-bold text-gray-700">Order Type *</label>
@@ -667,34 +682,61 @@
                     <div class="text-sm text-yellow-700"><strong>Note:</strong> This information is required for security and tracking purposes. The driver must present matching identification during pickup.</div>
                 </div>
             </div>
+            <template #footer>
+                <Button label="Submit Driver Info" icon="pi pi-check" @click="submitDriverInfoAfterOrder" class="p-button-primary" :loading="submittingDriverInfo" />
+            </template>
         </Dialog>
 
-        <!-- Back Order Confirmation Dialog -->
-        <Dialog v-model:visible="showBackOrderDialog" :style="{ width: '600px' }" header="Back Order Required" :modal="true">
+        <!-- Enhanced Back Order Confirmation Dialog -->
+        <Dialog v-model:visible="showBackOrderDialog" :style="{ width: '700px' }" header="Back Order Required" :modal="true" :closable="false">
             <div class="flex flex-col gap-4">
                 <div class="flex items-center gap-3">
                     <i class="pi pi-exclamation-triangle text-yellow-500 text-2xl"></i>
                     <div>
-                        <div class="font-bold text-lg">Some items cannot be fully fulfilled</div>
+                        <div class="font-bold text-lg">Partial Order Fulfillment</div>
                         <div class="text-gray-600">SAP has accepted partial quantities for some items.</div>
                     </div>
                 </div>
 
-                <div class="bg-gray-50 p-4 rounded-lg">
-                    <div class="font-semibold mb-2">Unfulfilled Items:</div>
-                    <div v-for="item in unfulfilledItems" :key="item.materialid" class="flex justify-between items-center py-2 border-b">
-                        <div>
-                            <div class="font-medium">{{ item.materialid }}</div>
-                            <div class="text-sm text-gray-600">Requested: {{ item.requested_qty }}</div>
-                        </div>
-                        <div class="text-right">
-                            <div class="text-green-600 font-semibold">Accepted: {{ item.accepted_qty }}</div>
-                            <div class="text-orange-600">Back Order: {{ item.backorder_qty }}</div>
+                <!-- Fulfilled Items -->
+                <div v-if="fulfilledItems.length > 0" class="bg-green-50 p-4 rounded-lg border border-green-200">
+                    <div class="font-semibold text-green-700 mb-2">✅ Fulfilled Items (Will be shipped now)</div>
+                    <div class="space-y-2 max-h-40 overflow-y-auto">
+                        <div v-for="item in fulfilledItems" :key="item.materialid" class="flex justify-between items-center py-2 border-b border-green-100 last:border-b-0">
+                            <div class="flex-1">
+                                <div class="font-medium text-sm">{{ getMaterialName(item.materialid) }}</div>
+                                <div class="text-xs text-gray-600">{{ item.materialid }}</div>
+                            </div>
+                            <div class="text-right">
+                                <div class="text-green-600 font-semibold">Qty: {{ item.accepted_qty }}</div>
+                            </div>
                         </div>
                     </div>
                 </div>
 
-                <div class="text-sm text-gray-600">Would you like to create a back order for the unfulfilled quantities?</div>
+                <!-- Unfulfilled Items -->
+                <div v-if="unfulfilledItems.length > 0" class="bg-orange-50 p-4 rounded-lg border border-orange-200">
+                    <div class="font-semibold text-orange-700 mb-2">⚠️ Unfulfilled Items (Require Back Order)</div>
+                    <div class="space-y-2 max-h-40 overflow-y-auto">
+                        <div v-for="item in unfulfilledItems" :key="item.materialid" class="flex justify-between items-center py-2 border-b border-orange-100 last:border-b-0">
+                            <div class="flex-1">
+                                <div class="font-medium text-sm">{{ getMaterialName(item.materialid) }}</div>
+                                <div class="text-xs text-gray-600">{{ item.materialid }}</div>
+                            </div>
+                            <div class="text-right">
+                                <div class="text-sm">
+                                    <span class="text-gray-600">Requested: {{ item.requested_qty }}</span> | <span class="text-green-600">Accepted: {{ item.accepted_qty }}</span> |
+                                    <span class="text-orange-600">Back Order: {{ item.backorder_qty }}</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="text-sm text-gray-600 bg-blue-50 p-3 rounded border border-blue-200">
+                    <strong>Option 1:</strong> Create back order for unfulfilled items (recommended)<br />
+                    <strong>Option 2:</strong> Proceed with only fulfilled items
+                </div>
             </div>
             <template #footer>
                 <Button label="Create Back Order" icon="pi pi-shopping-cart" @click="proceedWithBackOrder" class="p-button-warning" />
@@ -703,7 +745,7 @@
         </Dialog>
 
         <!-- File Upload Dialog -->
-        <Dialog v-model:visible="showUploadDialog" :style="{ width: '500px' }" header="Import Excel File" :modal="true">
+        <Dialog v-model:visible="showUploadDialog" :style="{ width: '500px' }" header="Import Excel File" :modal="true" :closable="false">
             <div class="flex flex-col gap-4">
                 <div class="text-gray-600">Upload Excel file for Direct Shipment order. The file should contain Material and Quantity columns.</div>
 
@@ -773,6 +815,7 @@ const orderDetails = ref(null);
 const orderError = ref('');
 const currentCartRefNo = ref('');
 const unfulfilledItems = ref([]);
+const fulfilledItems = ref([]);
 const availableCredit = ref(0);
 
 // Options
@@ -858,9 +901,20 @@ const progressValue = computed(() => {
     return Math.round(progress);
 });
 
-// MODIFIED: Remove driver info validation from step 2
+// Risk Category Validation
+const canProceedWithRiskA = computed(() => {
+    if (!selectedCustomer.value) return false;
+
+    const riskCategory = selectedCustomer.value.shopData?.riskCategory;
+    console.log('Risk Category:', riskCategory);
+
+    // Allow order if risk category is 'A' or if no risk category is set (for backward compatibility)
+    return riskCategory === 'A' || !riskCategory;
+});
+
 const canProceedToStep2 = computed(() => {
-    return selectedCustomer.value && selectedOrderType.value && selectedDeliveryMethod.value;
+    const basicChecks = selectedCustomer.value && selectedOrderType.value && selectedDeliveryMethod.value;
+    return basicChecks && canProceedWithRiskA.value;
 });
 
 const canProceedToStep3 = computed(() => {
@@ -972,11 +1026,49 @@ const formatCurrency = (amount) => {
     });
 };
 
+// Helper function for unique sorted values
+const uniqueSorted = (arr) => [...new Set(arr)].sort((a, b) => (a > b ? 1 : -1));
+
+// Helper function to get maximum quantity based on stock
+const getMaxQuantity = (tyre) => {
+    // For NORMAL orders with 0 stock, allow any quantity (back order scenario)
+    if (selectedOrderType.value === 'NORMAL' && tyre.stockBalance === 0) {
+        return 999; // Allow reasonable quantity for back orders
+    }
+
+    // For DIRECTSHIP or items with stock, use stock balance as limit
+    return Math.min(tyre.stockBalance || 0, 999);
+};
+
+// Helper to get material names for display
+const getMaterialName = (materialid) => {
+    const material = tyres.value.find((t) => t.materialid === materialid) || selectedTyres.value.find((t) => t.materialid === materialid);
+    return material ? material.material : materialid;
+};
+
+// Helper to get material price
+const getMaterialPrice = (materialid) => {
+    const material = tyres.value.find((t) => t.materialid === materialid) || selectedTyres.value.find((t) => t.materialid === materialid);
+    return material ? material.price : 0;
+};
+
 // Step Navigation
 const goToStep = async (step) => {
-    if (step === 2 && !canProceedToStep2.value) {
-        step1Validated.value = true;
-        return;
+    if (step === 2) {
+        if (!canProceedToStep2.value) {
+            step1Validated.value = true;
+
+            // Show specific error for risk category
+            if (selectedCustomer.value && !canProceedWithRiskA.value) {
+                toast.add({
+                    severity: 'error',
+                    summary: 'Order Restricted',
+                    detail: 'This customer cannot place orders due to risk category restrictions',
+                    life: 5000
+                });
+            }
+            return;
+        }
     }
 
     if (step === 3 && !canProceedToStep3.value) {
@@ -997,20 +1089,6 @@ const goToStep = async (step) => {
     currentStep.value = step;
     step1Validated.value = false;
     step3Validated.value = false;
-};
-
-// Helper function for unique sorted values
-const uniqueSorted = (arr) => [...new Set(arr)].sort((a, b) => (a > b ? 1 : -1));
-
-// Helper function to get maximum quantity based on stock
-const getMaxQuantity = (tyre) => {
-    // For NORMAL orders with 0 stock, allow any quantity (back order scenario)
-    if (selectedOrderType.value === 'NORMAL' && tyre.stockBalance === 0) {
-        return 999; // Allow reasonable quantity for back orders
-    }
-
-    // For DIRECTSHIP or items with stock, use stock balance as limit
-    return Math.min(tyre.stockBalance || 0, 999);
 };
 
 // Add to Cart function with 0 stock support for NORMAL orders
@@ -1569,7 +1647,7 @@ const confirmBackOrderAPI = async (cartRefNo, orderArray, backorderArray) => {
     }
 };
 
-// MODIFIED: Submit driver information after order success
+// Submit driver information after order success
 const submitDriverInformation = async (orderNo) => {
     if (selectedDeliveryMethod.value !== 'SELFCOLLECT' && selectedDeliveryMethod.value !== 'LALAMOVE') {
         return true; // No driver info needed
@@ -1590,7 +1668,7 @@ const submitDriverInformation = async (orderNo) => {
     }
 };
 
-// NEW: Submit driver info after order success
+// Submit driver info after order success
 const submitDriverInfoAfterOrder = async () => {
     if (!driverInfo.value.name || !driverInfo.value.phone || !driverInfo.value.plateNo || !driverInfo.value.icNo) {
         driverFormValidated.value = true;
@@ -1711,7 +1789,7 @@ const processNormalOrder = async (orderArray) => {
     }
 };
 
-// MODIFIED: Handle Order Confirmation Response - Show driver form for pickup methods
+// Enhanced handleOrderConfirmation with better back order handling
 const handleOrderConfirmation = async (confirmResult, orderType) => {
     console.log('Order confirmation result:', confirmResult);
 
@@ -1725,11 +1803,9 @@ const handleOrderConfirmation = async (confirmResult, orderType) => {
 
         // Check if driver information is needed (pickup methods)
         if (selectedDeliveryMethod.value === 'SELFCOLLECT' || selectedDeliveryMethod.value === 'LALAMOVE') {
-            // Show driver information form instead of closing
             showDriverForm.value = true;
             orderMessage.value = `${orderType} order created! Please provide driver information.`;
         } else {
-            // For delivery methods, clear cart and show success
             clearCartAndReset();
             toast.add({
                 severity: 'success',
@@ -1739,36 +1815,51 @@ const handleOrderConfirmation = async (confirmResult, orderType) => {
             });
         }
     } else if (confirmResult.status === 0 && confirmResult.eten_data) {
-        // Handle backorder scenario
+        // Enhanced backorder scenario handling
         const backOrderData = Array.isArray(confirmResult.eten_data) ? confirmResult.eten_data[0] : confirmResult.eten_data;
+        const fulfilled = backOrderData?.fulfilled_items || [];
         const unfulfilled = backOrderData?.unfulfilled_items || [];
 
-        console.log('Unfulfilled items:', unfulfilled);
+        console.log('Back order data:', { fulfilled, unfulfilled });
 
-        // Check if there are actual unfulfilled items
-        const hasUnfulfilledItems = unfulfilled.some((item) => item.materialid && item.materialid.trim() !== '' && item.backorder_qty > 0);
+        // Process fulfilled and unfulfilled items
+        const processedFulfilled = fulfilled.filter((item) => item.materialid && item.materialid.trim() !== '' && item.accepted_qty > 0);
+        const processedUnfulfilled = unfulfilled.filter((item) => item.materialid && item.materialid.trim() !== '' && item.backorder_qty > 0);
+
+        fulfilledItems.value = processedFulfilled;
+        unfulfilledItems.value = processedUnfulfilled;
+
+        const hasFulfilledItems = processedFulfilled.length > 0;
+        const hasUnfulfilledItems = processedUnfulfilled.length > 0;
 
         if (hasUnfulfilledItems) {
-            // Show back order dialog
-            unfulfilledItems.value = unfulfilled.map((item) => ({
-                materialid: item.materialid,
-                requested_qty: item.requested_qty || 0,
-                accepted_qty: item.accepted_qty || 0,
-                backorder_qty: item.backorder_qty || 0
-            }));
-
+            // Show back order dialog with both fulfilled and unfulfilled items
             showBackOrderDialog.value = true;
             showOrderDialog.value = false;
+            orderMessage.value = 'Processing partial fulfillment...';
+        } else if (hasFulfilledItems) {
+            // All items fulfilled despite SAP status 0
+            orderStatus.value = 'success';
+            orderMessage.value = 'Order created successfully!';
+            orderDetails.value = {
+                orderRefNo: backOrderData.orderno || `ORD-${Date.now()}`
+            };
+
+            if (selectedDeliveryMethod.value === 'SELFCOLLECT' || selectedDeliveryMethod.value === 'LALAMOVE') {
+                showDriverForm.value = true;
+            } else {
+                clearCartAndReset();
+            }
         } else {
-            // SAP error without specific unfulfilled items
-            throw new Error(confirmResult.message || `${orderType} order confirmation failed`);
+            // No items could be fulfilled
+            throw new Error(confirmResult.message || 'No items could be fulfilled');
         }
     } else {
         throw new Error(confirmResult.message || `${orderType} order confirmation failed`);
     }
 };
 
-// Back Order Processing
+// Enhanced back order processing
 const proceedWithBackOrder = async () => {
     showBackOrderDialog.value = false;
     showOrderDialog.value = true;
@@ -1776,50 +1867,26 @@ const proceedWithBackOrder = async () => {
     orderMessage.value = 'Creating order with back order...';
 
     try {
-        // Prepare arrays for back order
-        const fulfilledArray = [];
-        const backOrderArray = [];
+        // Prepare arrays based on SAP response
+        const fulfilledArray = fulfilledItems.value.map((item, index) => ({
+            materialid: item.materialid,
+            itemno: String((index + 1) * 10).padStart(5, '0'),
+            itemcategory: 'ZT02',
+            plant: 'TSM',
+            qty: item.accepted_qty.toString(),
+            price: getMaterialPrice(item.materialid).toString(),
+            salesprogramid: null
+        }));
 
-        selectedTyres.value.forEach((item, index) => {
-            const unfulfilledItem = unfulfilledItems.value.find((bo) => bo.materialid === item.materialid);
-
-            if (unfulfilledItem && unfulfilledItem.backorder_qty > 0) {
-                // Add to back order array with remaining quantity
-                backOrderArray.push({
-                    materialid: item.materialid,
-                    itemno: String((index + 1) * 10).padStart(5, '0'),
-                    itemcategory: item.itemcategory || 'ZT02',
-                    plant: item.plant || 'TSM',
-                    qty: unfulfilledItem.backorder_qty.toString(),
-                    price: item.price.toString(),
-                    salesprogramid: null
-                });
-
-                // If there's any accepted quantity, add to fulfilled array
-                if (unfulfilledItem.accepted_qty > 0) {
-                    fulfilledArray.push({
-                        materialid: item.materialid,
-                        itemno: String((index + 1) * 10).padStart(5, '0'),
-                        itemcategory: item.itemcategory || 'ZT02',
-                        plant: item.plant || 'TSM',
-                        qty: unfulfilledItem.accepted_qty.toString(),
-                        price: item.price.toString(),
-                        salesprogramid: null
-                    });
-                }
-            } else {
-                // Item is fully fulfilled
-                fulfilledArray.push({
-                    materialid: item.materialid,
-                    itemno: String((index + 1) * 10).padStart(5, '0'),
-                    itemcategory: item.itemcategory || 'ZT02',
-                    plant: item.plant || 'TSM',
-                    qty: item.quantity.toString(),
-                    price: item.price.toString(),
-                    salesprogramid: null
-                });
-            }
-        });
+        const backOrderArray = unfulfilledItems.value.map((item, index) => ({
+            materialid: item.materialid,
+            itemno: String((fulfilledArray.length + index + 1) * 10).padStart(5, '0'),
+            itemcategory: 'ZT02',
+            plant: 'TSM',
+            qty: item.backorder_qty.toString(),
+            price: getMaterialPrice(item.materialid).toString(),
+            salesprogramid: null
+        }));
 
         const cartRefNo = currentCartRefNo.value || `TEMP-${Date.now()}`;
         const result = await confirmBackOrderAPI(cartRefNo, fulfilledArray, backOrderArray);
@@ -1832,13 +1899,10 @@ const proceedWithBackOrder = async () => {
                 backOrderRefNo: result.eten_data.backOrderRefNo
             };
 
-            // Check if driver information is needed (pickup methods)
             if (selectedDeliveryMethod.value === 'SELFCOLLECT' || selectedDeliveryMethod.value === 'LALAMOVE') {
-                // Show driver information form instead of closing
                 showDriverForm.value = true;
                 orderMessage.value = 'Order created with back order! Please provide driver information.';
             } else {
-                // For delivery methods, clear cart and show success
                 clearCartAndReset();
                 toast.add({
                     severity: 'success',
@@ -1854,7 +1918,6 @@ const proceedWithBackOrder = async () => {
         orderStatus.value = 'error';
         orderMessage.value = 'Failed to create back order';
         orderError.value = error.message;
-
         toast.add({
             severity: 'error',
             summary: 'Error',
@@ -1872,27 +1935,15 @@ const proceedWithoutBackOrder = async () => {
 
     try {
         // Only process fulfilled items
-        const orderArray = [];
-
-        selectedTyres.value.forEach((item, index) => {
-            const unfulfilledItem = unfulfilledItems.value.find((bo) => bo.materialid === item.materialid);
-
-            if (!unfulfilledItem || unfulfilledItem.accepted_qty > 0) {
-                const quantity = unfulfilledItem ? unfulfilledItem.accepted_qty : item.quantity;
-
-                if (quantity > 0) {
-                    orderArray.push({
-                        materialid: item.materialid,
-                        itemno: String((index + 1) * 10).padStart(5, '0'),
-                        itemcategory: item.itemcategory || 'ZT02',
-                        plant: item.plant || 'TSM',
-                        qty: quantity.toString(),
-                        price: item.price.toString(),
-                        salesprogramid: null
-                    });
-                }
-            }
-        });
+        const orderArray = fulfilledItems.value.map((item, index) => ({
+            materialid: item.materialid,
+            itemno: String((index + 1) * 10).padStart(5, '0'),
+            itemcategory: 'ZT02',
+            plant: 'TSM',
+            qty: item.accepted_qty.toString(),
+            price: getMaterialPrice(item.materialid).toString(),
+            salesprogramid: null
+        }));
 
         if (orderArray.length === 0) {
             throw new Error('No items available for order');
@@ -1940,7 +1991,7 @@ const proceedWithoutBackOrder = async () => {
     }
 };
 
-// NEW: Helper function to clear cart and reset
+// Helper function to clear cart and reset
 const clearCartAndReset = () => {
     selectedTyres.value = [];
     freeItems.value = [];
@@ -2005,6 +2056,7 @@ const closeOrderDialog = () => {
     orderDetails.value = null;
     orderError.value = '';
     unfulfilledItems.value = [];
+    fulfilledItems.value = [];
     showDriverForm.value = false;
     driverFormValidated.value = false;
     submittingDriverInfo.value = false;
