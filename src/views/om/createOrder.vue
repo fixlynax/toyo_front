@@ -616,7 +616,7 @@
         </div>
 
         <!-- Order Processing Dialog -->
-        <Dialog v-model:visible="showOrderDialog" :style="{ width: '500px' }" header="Order Processing" :modal="true" :closable="false">
+        <Dialog v-model:visible="showOrderDialog" :style="{ width: '500px' }" header="Order Processing" :modal="true" :closable="true">
             <div class="flex flex-col items-center gap-4">
                 <ProgressSpinner v-if="orderStatus === 'processing'" style="width: 50px; height: 50px" strokeWidth="4" />
                 <i v-else-if="orderStatus === 'success'" class="pi pi-check-circle text-green-500 text-5xl"></i>
@@ -714,7 +714,7 @@
                     </div>
                 </div>
 
-                <!-- Unfulfilled Items -->
+                <!-- Unfulfilled Items -->D
                 <div v-if="unfulfilledItems.length > 0" class="bg-orange-50 p-4 rounded-lg border border-orange-200">
                     <div class="font-semibold text-orange-700 mb-2">⚠️ Unfulfilled Items (Require Back Order)</div>
                     <div class="space-y-2 max-h-40 overflow-y-auto">
