@@ -161,10 +161,35 @@ const getStatusSeverity = (status) => {
     return severityMap[status] || 'secondary';
 };
 
-const formatDate = (dateString) => {
-    if (!dateString || dateString === 'N/A') return 'N/A';
-    return dateString;
-};
+function formatDate(dateString) {
+    if (!dateString) return '';
+
+    let day, month, year;
+
+    // Detect YYYY-MM-DD
+    if (/^\d{4}-\d{2}-\d{2}$/.test(dateString)) {
+        [year, month, day] = dateString.split('-');
+    }
+    // Detect DD-MM-YYYY
+    else if (/^\d{2}-\d{2}-\d{4}$/.test(dateString)) {
+        [day, month, year] = dateString.split('-');
+    }
+    else {
+        return ''; // unsupported format
+    }
+
+    const date = new Date(`${year}-${month}-${day}`);
+
+    if (isNaN(date.getTime())) return '';
+
+    return date.toLocaleDateString('en-MY', {
+        year: 'numeric',
+        month: '2-digit',
+        day: '2-digit'
+    });
+}
+
+
 </script>
 
 <style scoped>

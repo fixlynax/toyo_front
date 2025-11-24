@@ -68,12 +68,12 @@
 
                 <Column field="publishDate" header="Publish Date" style="min-width: 6rem">
                     <template #body="{ data }">
-                        {{ data.publishDate }}
+                        {{ formatDate(data.publishDate) }}
                     </template>
                 </Column>
 
                 <Column field="period" header="Period" style="min-width: 8rem">
-                    <template #body="{ data }"> {{ data.startDate }} - {{ data.endDate }} </template>
+                    <template #body="{ data }"> {{formatDate(data.startDate) }} - {{ formatDate(data.endDate) }} </template>
                 </Column>
 
                 <Column field="isSurvey" header="Survey" style="min-width: 6rem">
@@ -141,6 +141,22 @@ onMounted(async () => {
         tableLoading.value = false;
     }
 });
+
+function formatDate(dateString) {
+    if (!dateString) return '';
+
+    // DD-MM-YYYY
+    const [day, month, year] = dateString.split('-');
+    const date = new Date(`${year}-${month}-${day}`);
+
+    if (isNaN(date.getTime())) return '';
+
+    return date.toLocaleDateString('en-MY', {
+        year: 'numeric',
+        month: '2-digit',
+        day: '2-digit'
+    });
+}
 
 const getOverallStatusSeverity = (status) => {
     return status === 1 ? 'success' : 'danger';

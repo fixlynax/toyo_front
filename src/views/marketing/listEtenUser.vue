@@ -203,15 +203,45 @@ const formatGender = (gender) => {
     return gender;
 };
 
-const formatDate = (dateString) => {
-    if (!dateString || dateString === '-') return '-';
-    return dateString;
-};
+function formatDate(dateString) {
+    if (!dateString) return '';
 
-const formatDateTime = (dateTimeString) => {
-    if (!dateTimeString || dateTimeString === '-') return '-';
-    return dateTimeString;
-};
+    // DD-MM-YYYY
+    const [day, month, year] = dateString.split('-');
+    const date = new Date(`${year}-${month}-${day}`);
+
+    if (isNaN(date.getTime())) return '';
+
+    return date.toLocaleDateString('en-MY', {
+        year: 'numeric',
+        month: '2-digit',
+        day: '2-digit'
+    });
+}
+
+
+function formatDateTime(dateTimeString) {
+    if (!dateTimeString) return '';
+
+    const [datePart, timePart] = dateTimeString.split(' ');
+    if (!datePart) return '';
+
+    // DD-MM-YYYY
+    const [day, month, year] = datePart.split('-');
+    const date = new Date(`${year}-${month}-${day}T${timePart}`);
+
+    if (isNaN(date.getTime())) return '';
+
+    return date.toLocaleString('en-MY', {
+        year: 'numeric',
+        month: '2-digit',
+        day: '2-digit',
+        hour: '2-digit',
+        minute: '2-digit',
+        second: '2-digit'
+    });
+}
+
 
 const exportUsers = () => {
     // Implement export functionality here

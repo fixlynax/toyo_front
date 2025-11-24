@@ -73,14 +73,14 @@
 
                 <Column field="game Duration" header="Duration" style="min-width: 6rem">
                     <template #body="{ data }">
-                        {{ data.startDate }}
+                        {{formatDate(data.startDate) }}
                         <span class="font-semibold"> - </span>
-                        {{ data.endDate }}
+                        {{ formatDate(data.endDate) }}
                     </template>
                 </Column>
                 <Column field="publishDate" header="Publish Date" style="min-width: 6rem">
                     <template #body="{ data }">
-                        {{ data.publishDate }}
+                        {{formatDate(data.publishDate) }}
                     </template>
                 </Column>
                 <Column field="Total Participant" header="Total Participant" style="min-width: 6rem">
@@ -152,6 +152,23 @@ onMounted(async () => {
 const getOverallStatusSeverity = (status) => {
     return status === 1 ? 'success' : 'danger';
 };
+
+
+function formatDate(dateString) {
+    if (!dateString) return '';
+
+    // API format: YYYY-MM-DD
+    const [year, month, day] = dateString.split('-');
+    const date = new Date(`${year}-${month}-${day}`);
+
+    if (isNaN(date)) return '';
+
+    return date.toLocaleDateString('en-MY', {
+        year: 'numeric',
+        month: '2-digit',
+        day: '2-digit'
+    });
+}
 </script>
 
 <style scoped lang="scss">
@@ -204,4 +221,5 @@ const getOverallStatusSeverity = (status) => {
         border-bottom-right-radius: 12px;
     }
 }
+
 </style>
