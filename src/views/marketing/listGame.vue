@@ -122,7 +122,6 @@ onMounted(async () => {
 
         const response = await api.get('game/gameList');
 
-        console.log('API Response:', response.data);
 
         if (response.data.status === 1 && Array.isArray(response.data.admin_data)) {
             listData.value = response.data.admin_data.map((game) => ({

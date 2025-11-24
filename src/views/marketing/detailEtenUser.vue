@@ -270,10 +270,8 @@ const memberDetail = ref({
 const fetchMemberDetail = async () => {
     try {
         loading.value = true;
-        console.log('Fetching member details for ID:', memberId.value);
 
         const response = await api.get(`cares/user/${memberId.value}`);
-        console.log('API Response:', response.data);
 
         if (response.data.status === 1 && response.data.admin_data) {
             const userData = response.data.admin_data;
@@ -309,7 +307,6 @@ const fetchMemberDetail = async () => {
                 mobile_number: userData.mobile_number || '-'
             };
 
-            console.log('Processed member data:', memberDetail.value);
         } else {
             console.error('API returned error or invalid data:', response.data);
             showToast('error', 'Error', 'Failed to load user details');
@@ -374,12 +371,10 @@ const toggleStatus = async () => {
     try {
         loadingAction.value = true;
 
-        console.log('Toggling status for user:', memberId.value);
 
         // Call the API to toggle status
         const response = await api.put(`cares/toggleInactive/${memberId.value}`);
 
-        console.log('Status toggle response:', response.data);
 
         if (response.data.status === 1) {
             // Toggle the local status (1 = active, 0 = inactive)
@@ -390,7 +385,6 @@ const toggleStatus = async () => {
             const action = newStatus === 1 ? 'activated' : 'deactivated';
             showToast('success', 'Success', `User ${action} successfully`);
 
-            console.log(`User ${action} successfully`);
         } else {
             console.warn('Status toggle failed:', response.data);
             showToast('error', 'Error', 'Failed to update user status');

@@ -167,7 +167,7 @@
                                     <td class="px-4 py-2 font-medium"></td>
                                     <td class="py-4 text-right">
                                         <div class="flex justify-end">
-                                           <ToggleButton v-model="eventStatus" @change="toggleEventStatus" onLabel="Inactive" offLabel="Active" onIcon="pi pi-times" offIcon="pi pi-check" class="w-30" />
+                                           <ToggleButton v-model="campaignStatus" @change="toggleCampaignStatus" onLabel="Inactive" offLabel="Active" onIcon="pi pi-times" offIcon="pi pi-check" class="w-30" />
                                         </div>
                                     </td>
                                 </tr>
@@ -224,9 +224,13 @@
                     <!-- Header with Invite Button -->
                     <div class="flex items-center justify-between border-b pb-2 mb-2">
                         <div class="text-2xl font-bold text-gray-800">🚩 Dealer list</div>
-                        <RouterLink :to="`/marketing/inviteDealer/${campaignId}`">
-                            <Button label="Invite Dealer" icon="pi pi-user-plus" style="width: fit-content" class="p-button-sm p-button-success" />
-                        </RouterLink>
+                        <Button 
+                            label="Invite Dealer" 
+                            icon="pi pi-user-plus" 
+                            style="width: fit-content" 
+                            class="p-button-sm p-button-success" 
+                            @click="openInviteDealerDialog"
+                        />
                     </div>
 
                     <DataTable :value="dealerList" :paginator="true" :rows="3" dataKey="id" :rowHover="true" responsiveLayout="scroll" class="text-sm">
@@ -305,6 +309,50 @@
                 </div>
             </div>
         </Dialog>
+
+        <!-- Invite Dealer Dialog -->
+        <Dialog v-model:visible="inviteDealerDialogVisible" modal header="Invite Dealers" :style="{ width: '500px' }">
+            <div class="flex flex-col gap-4">
+                <div class="text-gray-700">
+                    Select dealers to invite to this campaign. Note: Previously invited dealers will also need to be included.
+                </div>
+                
+                <!-- Dealer Selection -->
+                <div class="flex flex-col gap-2">
+                    <label class="font-medium text-gray-700">Available Dealers:</label>
+                    <div class="max-h-60 overflow-y-auto border rounded p-2">
+                        <div v-for="dealer in availableDealers" :key="dealer.id" class="flex items-center gap-3 p-2 hover:bg-gray-50 rounded">
+                            <Checkbox 
+                                v-model="selectedDealers" 
+                                :value="dealer.id" 
+                                :inputId="`dealer-${dealer.id}`" 
+                            />
+                            <label :for="`dealer-${dealer.id}`" class="cursor-pointer flex-1">
+                                <div class="font-medium">{{ dealer.companyName }}</div>
+                                <div class="text-sm text-gray-500">{{ dealer.memberCode || dealer.custAccountNo }}</div>
+                            </label>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="flex justify-between items-center mt-4">
+                    <div class="text-sm text-gray-600">
+                        Selected: {{ selectedDealers.length }} dealers
+                    </div>
+                    <div class="flex gap-2">
+                        <Button label="Cancel" class="p-button-text" @click="closeInviteDealerDialog" />
+                        <Button 
+                            label="Invite" 
+                            icon="pi pi-user-plus" 
+                            class="p-button-success" 
+                            @click="inviteDealers" 
+                            :loading="inviteLoading"
+                            :disabled="selectedDealers.length === 0"
+                        />
+                    </div>
+                </div>
+            </div>
+        </Dialog>
     </Fluid>
 </template>
 
@@ -323,11 +371,15 @@ const confirm = useConfirm();
 const campaignId = route.params.id;
 const loading = ref(true);
 const tableLoading = ref(false);
+const inviteLoading = ref(false);
 
 // Reactive data
 const hoverPrize = ref(null);
 const editDialogVisible = ref(false);
 const selectedPrize = ref(null);
+const inviteDealerDialogVisible = ref(false);
+const selectedDealers = ref([]);
+const availableDealers = ref([]);
 
 // Main data structures
 const campaign = ref({
@@ -364,40 +416,6 @@ const campaignStatus = computed({
     }
 });
 
-// Toggle event status
-const toggleEventStatus = async () => {
-    try {
-        const response = await api.put(`campaign/toggleInactive/${campaign.value.id}`);
-
-        if (response.data.status === 1) {
-            // Update local event status
-            campaign.value.status = campaign.value.status === 1 ? 0 : 1;
-
-            toast.add({
-                severity: 'success',
-                summary: 'Success',
-                detail: `campaign ${campaign.value.status === 1 ? 'activated' : 'deactivated'} successfully`,
-                life: 3000
-            });
-        } else {
-            toast.add({
-                severity: 'error',
-                summary: 'Error',
-                detail: 'Failed to update campaign status',
-                life: 3000
-            });
-        }
-    } catch (error) {
-        console.error('Error updating campaign status:', error);
-        toast.add({
-            severity: 'error',
-            summary: 'Error',
-            detail: 'Failed to update campaign status',
-            life: 3000
-        });
-    }
-};
-
 // Toggle campaign status
 const toggleCampaignStatus = async () => {
     try {
@@ -429,6 +447,90 @@ const toggleCampaignStatus = async () => {
             detail: 'Failed to update campaign status',
             life: 3000
         });
+    }
+};
+
+// Invite Dealer Functions
+const openInviteDealerDialog = async () => {
+    try {
+        // Load available dealers (you might need to fetch this from an API)
+        await loadAvailableDealers();
+        
+        // Pre-select already invited dealers
+        selectedDealers.value = dealerList.value.map(dealer => dealer.id);
+        
+        inviteDealerDialogVisible.value = true;
+    } catch (error) {
+        console.error('Error opening invite dealer dialog:', error);
+        toast.add({
+            severity: 'error',
+            summary: 'Error',
+            detail: 'Failed to load dealer data',
+            life: 3000
+        });
+    }
+};
+
+const closeInviteDealerDialog = () => {
+    inviteDealerDialogVisible.value = false;
+    selectedDealers.value = [];
+};
+
+const loadAvailableDealers = async () => {
+    // This should be replaced with your actual API call to get available dealers
+    // For now, using mock data
+    availableDealers.value = [
+        { id: 1, companyName: 'Dealer One', memberCode: 'DLR001', custAccountNo: 'ACC001' },
+        { id: 2, companyName: 'Dealer Two', memberCode: 'DLR002', custAccountNo: 'ACC002' },
+        { id: 7, companyName: 'SINWUFU ENTERPRISE SDN. BHD.', memberCode: null, custAccountNo: '6080100900' },
+        { id: 11, companyName: 'MATANG SDN BHD', memberCode: null, custAccountNo: '6027002600' },
+        { id: 3, companyName: 'Dealer Three', memberCode: 'DLR003', custAccountNo: 'ACC003' },
+        { id: 4, companyName: 'Dealer Four', memberCode: 'DLR004', custAccountNo: 'ACC004' },
+    ];
+};
+
+const inviteDealers = async () => {
+    try {
+        inviteLoading.value = true;
+
+        const formData = new FormData();
+        formData.append('dealer_list', JSON.stringify(selectedDealers.value));
+
+        const response = await api.post(`campaign/inviteDealer/${campaignId}`, formData, {
+            headers: {
+                'Content-Type': 'multipart/form-data'
+            }
+        });
+
+        if (response.data.status === 1) {
+            toast.add({
+                severity: 'success',
+                summary: 'Success',
+                detail: 'Dealers invited successfully',
+                life: 3000
+            });
+            
+            // Refresh the dealer list
+            await fetchCampaignDetails();
+            closeInviteDealerDialog();
+        } else {
+            toast.add({
+                severity: 'error',
+                summary: 'Error',
+                detail: 'Failed to invite dealers',
+                life: 3000
+            });
+        }
+    } catch (error) {
+        console.error('Error inviting dealers:', error);
+        toast.add({
+            severity: 'error',
+            summary: 'Error',
+            detail: 'Failed to invite dealers',
+            life: 3000
+        });
+    } finally {
+        inviteLoading.value = false;
     }
 };
 
@@ -490,7 +592,6 @@ const fetchCampaignDetails = async () => {
         tableLoading.value = true;
 
         const response = await api.get(`campaign/details/${campaignId}`);
-        console.log('API Response:', response.data);
 
         if (response.data.status === 1 && response.data.admin_data) {
             const data = response.data.admin_data;

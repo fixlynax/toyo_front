@@ -297,11 +297,9 @@ const customerInfo = ref({
 
 // Invoice file functions
 const viewInvoice = () => {
-    console.log('Viewing invoice:', invoiceFileName.value);
 };
 
 const downloadInvoice = () => {
-    console.log('Downloading invoice:', invoiceFileName.value);
 };
 
 // Format file size

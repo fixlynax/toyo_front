@@ -306,8 +306,5 @@ const removeImage = (field) => (campaign.value[field] = '');
 
 // 🚀 Submit
 const submitForm = () => {
-    console.log('Updated Campaign:', campaign.value);
-    console.log('Rewards:', rewards.value);
-    console.log('Criterias:', criterias.value);
 };
 </script>

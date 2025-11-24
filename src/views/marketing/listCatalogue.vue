@@ -119,7 +119,6 @@ const fetchCatalogueItems = async () => {
 
     try {
         const response = await api.get('catalog/catalogList');
-        console.log('API Response:', response.data);
 
         if (response.data.status === 1 && Array.isArray(response.data.admin_data)) {
             catalogueItems.value = response.data.admin_data.map((item) => ({
@@ -267,7 +266,6 @@ const handleImageError = (event) => {
 // Watch for tab changes to update the filtered items
 watch(activeTabIndex, () => {
     // The computed property filteredItems will automatically update
-    console.log(`Tab changed to: ${purposeTabs[activeTabIndex.value].label}`);
 });
 </script>
 <style scoped>

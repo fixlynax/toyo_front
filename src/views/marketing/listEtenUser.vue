@@ -152,7 +152,6 @@ const fetchUsers = async () => {
         tableLoading.value = true;
 
         const response = await api.get('cares/userList');
-        console.log('API Response:', response.data);
         
         if (response.data.status === 1 && response.data.admin_data) {
             const allUsers = [
@@ -174,7 +173,6 @@ const fetchUsers = async () => {
                 status: user.status === 1 ? 1 : 0 // Normalize status: 1 for active, 0 for inactive
             }));
             
-            console.log('Processed users:', listData.value);
         } else {
             console.error('API returned error or invalid data:', response.data);
             listData.value = [];
@@ -245,7 +243,6 @@ function formatDateTime(dateTimeString) {
 
 const exportUsers = () => {
     // Implement export functionality here
-    console.log('Export users:', filteredUsers.value);
     // You can implement CSV/Excel export logic here
     alert('Export functionality to be implemented');
 };
