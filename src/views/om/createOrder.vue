@@ -782,6 +782,14 @@ const selectedOrderType = ref('NORMAL');
 const selectedDeliveryMethod = ref('DELIVER');
 const selectedContainerSize = ref('20FT');
 
+// Container capacity settings from API
+const containerSettings = ref({
+    max_container_twenty: 1,
+    min_container_twenty: 1,
+    max_container_forty: 1000,
+    min_container_forty: 500
+});
+
 // Driver Information (now collected after order success)
 const driverInfo = ref({
     name: '',
@@ -861,9 +869,22 @@ const uploadUrl = computed(() => `${import.meta.env.VITE_API_URL}/order/upload-e
 const uploadMessage = ref('');
 const uploadMessageClass = ref('');
 
-// Container Capacity Settings
-const minContainerCapacity = computed(() => (selectedContainerSize.value === '20FT' ? 1 : 500));
-const maxContainerCapacity = computed(() => (selectedContainerSize.value === '20FT' ? 1 : 1000));
+// Container Capacity Settings - Updated to use API values
+const minContainerCapacity = computed(() => {
+    if (selectedContainerSize.value === '20FT') {
+        return containerSettings.value.min_container_twenty;
+    } else {
+        return containerSettings.value.min_container_forty;
+    }
+});
+
+const maxContainerCapacity = computed(() => {
+    if (selectedContainerSize.value === '20FT') {
+        return containerSettings.value.max_container_twenty;
+    } else {
+        return containerSettings.value.max_container_forty;
+    }
+});
 
 // Computed Properties
 const cartTotal = computed(() => selectedTyres.value.reduce((sum, item) => sum + (parseFloat(item.price) || 0) * (item.quantity || 1), 0));
@@ -1029,15 +1050,17 @@ const formatCurrency = (amount) => {
 // Helper function for unique sorted values
 const uniqueSorted = (arr) => [...new Set(arr)].sort((a, b) => (a > b ? 1 : -1));
 
-// Helper function to get maximum quantity based on stock
+// Helper function to get maximum quantity based on stock - Updated with min 1 and max 50
 const getMaxQuantity = (tyre) => {
-    // For NORMAL orders with 0 stock, allow any quantity (back order scenario)
+    const maxQty = 50; // Maximum quantity per item
+
+    // For NORMAL orders with 0 stock, allow up to maxQty (back order scenario)
     if (selectedOrderType.value === 'NORMAL' && tyre.stockBalance === 0) {
-        return 999; // Allow reasonable quantity for back orders
+        return maxQty;
     }
 
-    // For DIRECTSHIP or items with stock, use stock balance as limit
-    return Math.min(tyre.stockBalance || 0, 999);
+    // For DIRECTSHIP or items with stock, use the minimum between stock balance and maxQty
+    return Math.min(tyre.stockBalance || 0, maxQty);
 };
 
 // Helper to get material names for display
@@ -1210,6 +1233,39 @@ const fetchCustomers = async () => {
         toast.add({ severity: 'error', summary: 'Error', detail: 'Failed to load customers', life: 3000 });
     } finally {
         loadingCustomers.value = false;
+    }
+};
+
+const fetchEligibleOrder = async (custAccountNo) => {
+    if (!custAccountNo) return;
+
+    try {
+        console.log('Fetching eligible order settings for:', custAccountNo);
+        const response = await api.post('order/eligibleorder', {
+            custacccountno: custAccountNo
+        });
+
+        console.log('Eligible order API Response:', response.data);
+
+        if (response.data.status === 1) {
+            const data = response.data.admin_data;
+            containerSettings.value = {
+                max_container_twenty: data.max_container_twenty || 1,
+                min_container_twenty: data.min_container_twenty || 1,
+                max_container_forty: data.max_container_forty || 1000,
+                min_container_forty: data.min_container_forty || 500
+            };
+            console.log('Container settings updated:', containerSettings.value);
+        }
+    } catch (error) {
+        console.error('Error fetching eligible order settings:', error);
+        // Use default values if API fails
+        containerSettings.value = {
+            max_container_twenty: 1,
+            min_container_twenty: 1,
+            max_container_forty: 1000,
+            min_container_forty: 500
+        };
     }
 };
 
@@ -2006,6 +2062,7 @@ const onCustomerChange = (event) => {
     if (event.value && event.value.code) {
         fetchMaterials(event.value.code);
         fetchShipToAddresses(event.value.code);
+        fetchEligibleOrder(event.value.code); // Fetch container settings
         selectedTyres.value = [];
         freeItems.value = [];
         currentCartRefNo.value = '';
@@ -2181,3 +2238,6 @@ onMounted(() => {
     transition: width 0.3s ease;
 }
 </style>
+
+<!-- can you make the  limit qty = 50 is for the normal order and for qty direct ship not have limit -->
+<!-- back order normal -->
