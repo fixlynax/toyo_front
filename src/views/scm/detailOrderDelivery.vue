@@ -165,7 +165,7 @@
                             label="Update Planned Date"
                             icon="pi pi-calendar"
                             class="p-button-sm p-button-warning"
-                            @click="openDialog = true"
+                            @click="openDialogFn()"
                         />
                     </div>
                     <div v-if="!loading && orderDelList && orderDelList?.scm_deliver_detail?.scheduled_delivery_time && !orderDelList?.scm_deliver_detail?.delivered_datetime && canUpdate" class="flex justify-end mt-3">
@@ -195,6 +195,7 @@
           v-model="form.scheduleDate"
           dateFormat="yy-mm-dd"
           placeholder="Select Planned Date"
+          :minDate="new Date()"
         />
 
         <!-- Schedule Time -->
@@ -226,6 +227,7 @@
           v-model="form2.delivereddate"
           dateFormat="yy-mm-dd"
           placeholder="Select Delivered Date"
+          :maxDate="new Date()"
         />
 
 
@@ -351,6 +353,16 @@ const openDialog2 = ref(false);
 const loadingUpdate = ref(false);
 const loadingUpdate2 = ref(false);
 
+const openDialogFn = () => {
+  if (orderDelList.value.deliveryDate) {
+    form.value.scheduleDate = new Date(orderDelList.value.deliveryDate)
+  } else {
+    form.value.scheduleDate = new Date() // default to today
+  }
+
+  openDialog.value = true
+}
+
 // Form
 const form = ref({
   orderno: null, 
@@ -383,7 +395,7 @@ const saveSchedule = async () => {
         toast.add({ severity: 'success', summary: 'Updated', detail: 'Planned date updated successfully', life: 3000 });
         InitfetchData(); // refresh table
     } else {
-        toast.add({ severity: 'error', summary: 'Error', detail: res.data?.message || 'Failed', life: 3000 });
+        toast.add({ severity: 'error', summary: 'Error', detail: res.data?.error || 'Failed', life: 3000 });
     }
     } catch (err) {
     console.error(err);
@@ -411,7 +423,7 @@ const saveDelivered = async () => {
         toast.add({ severity: 'success', summary: 'Updated', detail: 'Delivered date updated successfully', life: 3000 });
         InitfetchData(); // refresh table
     } else {
-        toast.add({ severity: 'error', summary: 'Error', detail: res.data?.message || 'Failed', life: 3000 });
+        toast.add({ severity: 'error', summary: 'Error', detail: res.data?.error || 'Failed', life: 3000 });
     }
     } catch (err) {
     console.error(err);

@@ -424,7 +424,7 @@ const handleImport = async (event) => {
             toast.add({
                 severity: 'error',
                 summary: 'Import Failed',
-                detail: response.data.admin_data.error_message || 'Server did not confirm success',
+                detail: response.data.message || 'Server did not confirm success',
                 life: 5000
             });
         }

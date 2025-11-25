@@ -599,7 +599,7 @@ const submitReturnOrder = async () => {
             resetReturnForm();
             await fetchOrderDetail();
         } else {
-            const errorMessage = response.data.error?.message || response.data.message || 'Failed to create return order';
+            const errorMessage = response.data.error?.messageEnglish || response.data.messageEnglish || 'Failed to create return order';
             toast.add({
                 severity: 'error',
                 summary: 'Error',

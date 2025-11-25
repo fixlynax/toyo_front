@@ -46,17 +46,17 @@
                     <div class="grid grid-cols-1 md:grid-cols-3 gap-4 md:col-span-2">
                         <div>
                             <label class="block font-bold text-gray-700">Publish Date</label>
-                            <Calendar v-model="campaign.publishDate" showIcon dateFormat="dd-mm-yy" class="w-full" />
+                            <Calendar v-model="campaign.publishDate" showIcon dateFormat="dd-mm-yy" class="w-full" :minDate="today" />
                             <small v-if="errors.publishDate" class="text-red-500">{{ errors.publishDate }}</small>
                         </div>
                         <div>
                             <label class="block font-bold text-gray-700">Start Date</label>
-                            <Calendar v-model="campaign.startDate" showIcon dateFormat="dd-mm-yy" class="w-full" />
+                            <Calendar v-model="campaign.startDate" showIcon dateFormat="dd-mm-yy" class="w-full" :minDate="today" @date-select="onStartDateSelect"/>
                             <small v-if="errors.startDate" class="text-red-500">{{ errors.startDate }}</small>
                         </div>
                         <div>
                             <label class="block font-bold text-gray-700">End Date</label>
-                            <Calendar v-model="campaign.endDate" showIcon dateFormat="dd-mm-yy" class="w-full" />
+                            <Calendar v-model="campaign.endDate" showIcon dateFormat="dd-mm-yy" class="w-full" :minDate="minEndDate"/>
                             <small v-if="errors.endDate" class="text-red-500">{{ errors.endDate }}</small>
                         </div>
                     </div>
@@ -243,6 +243,19 @@ const imageFiles = ref({
     image2: null,
     image3: null
 });
+
+// When start date changes, reset end date if invalid
+const onStartDateSelect = () => {
+    if (news.value.endDate && news.value.endDate <= news.value.startDate) {
+        news.value.endDate = '';
+        toast.add({
+            severity: 'warn',
+            summary: 'Invalid Date',
+            detail: 'End date must be after start date.',
+            life: 3000
+        });
+    }
+};
 
 // UI state
 const errors = ref({});

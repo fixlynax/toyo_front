@@ -26,7 +26,7 @@
 
                         <div>
                             <label class="block font-bold text-gray-700">Publish Date</label>
-                            <Calendar v-model="event.publishDate" dateFormat="dd-mm-yy" showIcon class="w-full" />
+                            <Calendar v-model="event.publishDate" dateFormat="dd-mm-yy" showIcon class="w-full" :minDate="today"/>
                         </div>
 
                         <div>
