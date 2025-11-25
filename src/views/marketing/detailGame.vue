@@ -391,15 +391,15 @@ const toggleGameStatus = async () => {
         const response = await api.put(`game/toggleInactive/${gameId}`);
 
         if (response.data.status === 1) {
-            // Update local game status
-            game.value.status = game.value.status === 1 ? 0 : 1;
+
 
             toast.add({
                 severity: 'success',
                 summary: 'Success',
-                detail: `Game ${game.value.status === 1 ? 'activated' : 'deactivated'} successfully`,
+                detail: `Game status updated successfully`,
                 life: 3000
             });
+            
         } else {
             toast.add({
                 severity: 'error',
@@ -416,6 +416,9 @@ const toggleGameStatus = async () => {
             detail: 'Failed to update game status',
             life: 3000
         });
+    }
+    finally {
+        fetchGameDetails();
     }
 };
 

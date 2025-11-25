@@ -24,21 +24,22 @@
                             <InputText v-model="event.location" class="w-full" />
                         </div>
 
-                        <div>
-                            <label class="block font-bold text-gray-700">Publish Date</label>
-                            <Calendar v-model="event.publishDate" dateFormat="dd-mm-yy" showIcon class="w-full" :minDate="today"/>
-                        </div>
-
+                        
                         <div>
                             <label class="block font-bold text-gray-700">Start Date</label>
                             <Calendar v-model="event.startDate" :minDate="today" dateFormat="dd-mm-yy" showIcon class="w-full" @date-select="onStartDateSelect" />
                         </div>
-
+                        
                         <div>
                             <label class="block font-bold text-gray-700">End Date</label>
                             <Calendar v-model="event.endDate" :minDate="minEndDate" dateFormat="dd-mm-yy" showIcon class="w-full" />
                         </div>
-
+                        
+                        <div>
+                            <label class="block font-bold text-gray-700">Publish Date</label>
+                            <Calendar v-model="event.publishDate" dateFormat="dd-mm-yy" showIcon class="w-full" :minDate="event.startDate"  :maxDate="event.endDate"  :disabled="!event.startDate || !event.endDate"/>
+                        </div>
+                        
                         <div>
                             <label class="block font-bold text-gray-700">Audience</label>
                             <Dropdown v-model="event.audience" :options="audienceOptions" optionLabel="label" optionValue="value" class="w-full" />
