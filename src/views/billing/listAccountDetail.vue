@@ -108,6 +108,17 @@ onBeforeMount(async () => {
     }
 });
 
+const formatCurrency = (value) => {
+    if (value === null || value === undefined || value === '') return '-';
+
+    return new Intl.NumberFormat('en-MY', {
+        style: 'currency',
+        currency: 'MYR',
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2
+    }).format(Number(value));
+};
+
 // Optional: Refresh function
 const refreshData = async () => {
     loading.value = true;
@@ -152,7 +163,9 @@ const refreshData = async () => {
             class="rounded-table"
             :rowHover="true"
             :filters="filters1"
-            :rowsPerPageOptions="[5, 10, 20, 50]"
+            :rowsPerPageOptions="[5, 10, 20, 50, 100]"
+            sortField="docsDate"
+            :sortOrder="-1"
             paginatorTemplate="FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink RowsPerPageDropdown"
             currentPageReportTemplate="Showing {first} to {last} of {totalRecords} entries"
         >
@@ -203,14 +216,14 @@ const refreshData = async () => {
             </Column>
 
             <!-- Amount Due -->
-            <Column field="amtdue" header="Amount Due (RM)" style="min-width: 10rem; text-align: right">
+            <Column field="amtdue" header="Amount Due" style="min-width: 10rem; text-align: right">
                 <template #body="{ data }">
                     <div class="flex justify-start items-center w-full">
                         <span 
-                            class="font-semibold text-lg" 
+                            class="font-medium text-lg" 
                             :class="data.amtdue < 0 ? 'text-red-500' : 'text-gray-800'"
                         >
-                            RM {{ data.amtdue.toFixed(2) }}
+                            {{formatCurrency(data.amtdue) }}
                         </span>
                     </div>
                 </template>

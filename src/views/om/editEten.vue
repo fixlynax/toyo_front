@@ -222,11 +222,11 @@
                     <div class="flex flex-col md:flex-row gap-4">
                         <div class="w-full">
                             <label for="targetQ1">Revenue</label>
-                            <InputNumber disabled id="revenue" v-model="form.revenue" mode="decimal" :min="0" :maxFractionDigits="0" placeholder="Enter Revenue" class="w-full" />
+                            <InputNumber id="revenue" v-model="form.revenue" mode="decimal" :min="0" :maxFractionDigits="0" placeholder="Enter Revenue" class="w-full" />
                         </div>
                         <div class="w-full">
                             <label for="targetQ2">TargetQty</label>
-                            <InputNumber disabled id="targetQty" v-model="form.targetQty" mode="decimal" :min="0" :maxFractionDigits="0" placeholder="Enter Target Quantity" class="w-full" />
+                            <InputNumber id="targetQty" v-model="form.targetQty" mode="decimal" :min="0" :maxFractionDigits="0" placeholder="Enter Target Quantity" class="w-full" />
                         </div>
                     </div>
                 </div>
