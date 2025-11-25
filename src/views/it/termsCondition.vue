@@ -41,9 +41,7 @@
         <!-- Log History Modal for Toyocares -->
         <Dialog header="Toyocares T&C Log History" v-model:visible="showLog.tcTnc" :modal="true" :closable="true" :style="{ width: '600px' }">
             <div class="flex flex-col gap-3">
-                <div v-if="logHistory.tcTnc.length === 0" class="p-3 text-center text-gray-500">
-                    No log history available
-                </div>
+                <div v-if="logHistory.tcTnc.length === 0" class="p-3 text-center text-gray-500">No log history available</div>
                 <div v-for="(log, index) in logHistory.tcTnc" :key="index" class="p-3 border rounded-md bg-gray-50">
                     <div class="text-sm text-gray-600">Updated On: {{ formatDate(log.last_updated) }}</div>
                     <div class="text-sm text-gray-700 whitespace-pre-wrap">{{ log.content_text }}</div>
@@ -54,9 +52,7 @@
         <!-- Log History Modal for ETEN -->
         <Dialog header="ETEN T&C Log History" v-model:visible="showLog.etenTnc" :modal="true" :closable="true" :style="{ width: '600px' }">
             <div class="flex flex-col gap-3">
-                <div v-if="logHistory.etenTnc.length === 0" class="p-3 text-center text-gray-500">
-                    No log history available
-                </div>
+                <div v-if="logHistory.etenTnc.length === 0" class="p-3 text-center text-gray-500">No log history available</div>
                 <div v-for="(log, index) in logHistory.etenTnc" :key="index" class="p-3 border rounded-md bg-gray-50">
                     <div class="text-sm text-gray-600">Updated On: {{ formatDate(log.last_updated) }}</div>
                     <div class="text-sm text-gray-700 whitespace-pre-wrap">{{ log.content_text }}</div>
@@ -94,7 +90,6 @@ const logHistory = ref({
     etenTnc: []
 });
 
-// Format date for display
 const formatDate = (dateString) => {
     if (!dateString) return 'N/A';
     return new Date(dateString).toLocaleString('en-GB', {
@@ -106,63 +101,56 @@ const formatDate = (dateString) => {
     });
 };
 
-// Fetch T&C data on component mount
 onMounted(async () => {
+    toast.add({ severity: 'info', summary: 'Loading', detail: 'Fetching latest T&C...', life: 2000 });
     await fetchTncData();
 });
 
 const fetchTncData = async () => {
     loading.value = true;
     try {
-        // Fetch ETEN TNC - this endpoint works
         const etenResponse = await api.get('getetenTnc');
         if (etenResponse.data.status === 1 && etenResponse.data.eten_tnc) {
             form.value.etenTnc = etenResponse.data.eten_tnc.content_text;
-            // Add current version to log history
             logHistory.value.etenTnc = [etenResponse.data.eten_tnc];
         }
 
-        // For TC TNC, we need to find the correct view endpoint
-        // Since the update endpoint doesn't work for GET, let's try some alternatives
         try {
-            // Try common view endpoints
             const tcResponse1 = await api.get('tcTnc');
             if (tcResponse1.data.status === 1 && tcResponse1.data.tc_tnc) {
                 form.value.tcTnc = tcResponse1.data.tc_tnc.content_text;
                 logHistory.value.tcTnc = [tcResponse1.data.tc_tnc];
             }
         } catch (tcError) {
-            console.log('First TC TNC endpoint failed, trying alternatives...');
-            
             try {
-                // Try another common pattern
                 const tcResponse2 = await api.get('getTcTnc');
                 if (tcResponse2.data.status === 1 && tcResponse2.data.tc_tnc) {
                     form.value.tcTnc = tcResponse2.data.tc_tnc.content_text;
                     logHistory.value.tcTnc = [tcResponse2.data.tc_tnc];
                 }
-            } catch (tcError2) {
-                console.log('All TC TNC view endpoints failed');
-                // TC TNC will remain empty, user can enter new content
-            }
+            } catch (tcError2) {}
         }
 
-        // If we still don't have TC TNC data, show info message
         if (!form.value.tcTnc) {
             toast.add({
                 severity: 'info',
                 summary: 'Info',
-                detail: 'Enter Toyocares T&C content and click Update to save',
-                life: 4000
+                detail: 'Enter Toyocares T&C and click Update',
+                life: 3000
             });
         }
 
+        toast.add({
+            severity: 'success',
+            summary: 'Loaded',
+            detail: 'T&C data loaded successfully',
+            life: 2000
+        });
     } catch (error) {
-        console.error('Error fetching T&C data:', error);
         toast.add({
             severity: 'error',
             summary: 'Error',
-            detail: 'Failed to load Terms & Conditions data',
+            detail: 'Failed to load Terms & Conditions',
             life: 3000
         });
     } finally {
@@ -171,6 +159,12 @@ const fetchTncData = async () => {
 };
 
 const cancel = () => {
+    toast.add({
+        severity: 'warn',
+        summary: 'Cancelled',
+        detail: 'No changes were saved',
+        life: 2000
+    });
     router.push('/it/dashboard');
 };
 
@@ -178,21 +172,26 @@ const submitForm = async () => {
     if (!form.value.tcTnc.trim() || !form.value.etenTnc.trim()) {
         toast.add({
             severity: 'warn',
-            summary: 'Warning',
-            detail: 'Both Toyocares and ETEN T&C are required',
+            summary: 'Required',
+            detail: 'Both Toyocares and ETEN T&C must be filled',
             life: 3000
         });
         return;
     }
 
     loading.value = true;
+    toast.add({
+        severity: 'info',
+        summary: 'Saving',
+        detail: 'Updating Terms & Conditions...',
+        life: 2000
+    });
+
     try {
-        // Update TC TNC
         const tcResponse = await api.post('tcTnc/update', {
             tc_tnc_text: form.value.tcTnc
         });
 
-        // Update ETEN TNC
         const etenResponse = await api.post('etenTnc/update', {
             eten_tnc_text: form.value.etenTnc
         });
@@ -200,12 +199,11 @@ const submitForm = async () => {
         if (tcResponse.data.status === 1 && etenResponse.data.status === 1) {
             toast.add({
                 severity: 'success',
-                summary: 'Success',
+                summary: 'Updated',
                 detail: 'Terms & Conditions updated successfully',
-                life: 3000
+                life: 7000
             });
 
-            // Update log history with new data from responses
             if (tcResponse.data.tc_tnc) {
                 logHistory.value.tcTnc.unshift(tcResponse.data.tc_tnc);
             }
@@ -213,18 +211,15 @@ const submitForm = async () => {
                 logHistory.value.etenTnc.unshift(etenResponse.data.eten_tnc);
             }
 
-            // Refresh the data to show updated content
             await fetchTncData();
-            
         } else {
-            throw new Error('Failed to update one or more T&C');
+            throw new Error('Update failed');
         }
     } catch (error) {
-        console.error('Error updating T&C:', error);
         toast.add({
             severity: 'error',
             summary: 'Error',
-            detail: error.response?.data?.message || 'Failed to update Terms & Conditions',
+            detail: error.response?.data?.message || 'Failed to update T&C',
             life: 3000
         });
     } finally {
