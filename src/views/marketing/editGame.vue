@@ -258,7 +258,6 @@ const processCatalogueImages = async (catalogueItems) => {
     for (const item of catalogueItems) {
         if (item.imageURL && typeof item.imageURL === 'string') {
             try {
-                // console.log('Processing private image:', item.imageURL);
                 const blobUrl = await api.getPrivateFile(item.imageURL);
                 if (blobUrl) {
                     processedItems.push({
@@ -302,9 +301,7 @@ const onImageError = (event) => {
 
 const fetchCatalog = async () => {
     try {
-        console.log('Fetching catalog...');
         const response = await api.get('game/catalogs');
-        console.log('Catalog API response:', response.data);
 
         if (response.data.status === 1) {
             const transformedItems = (response.data.admin_data || []).map((item) => ({

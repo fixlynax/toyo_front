@@ -32,7 +32,7 @@
                     <!-- Right: Export & Batch Buttons -->
                     <div class="flex items-center gap-2 ml-auto">
                         <Button type="button" label="Export" icon="pi pi-file-export" class="p-button" @click="fetchExportOE" />
-                        <Button type="button" label="Import" icon="pi pi-file-import" class="p-button" @click="importInput?.click()" :loading="importLoading" />
+                        <Button v-if="canUpdate" type="button" label="Import" icon="pi pi-file-import" class="p-button" @click="importInput?.click()" :loading="importLoading" />
                         <input ref="importInput" type="file" accept=".xlsx,.xls" style="display: none" @change="handleImport" />
                     </div>
                 </div>
@@ -40,12 +40,6 @@
 
             <template #empty> No data found. </template>
             <template #loading> Loading data. Please wait... </template>
-
-            <!-- <Column field="materialid" header="ID" style="min-width: 6rem">
-                <template #body="{ data }">
-                    {{ data.id }}
-                </template>
-            </Column> -->
 
             <Column field="pattern" header="Pattern" style="min-width: 8rem">
                 <template #body="{ data }">
@@ -97,11 +91,17 @@
 </template>
 
 <script setup>
-import { onMounted, ref } from 'vue';
+import { onMounted, ref ,computed} from 'vue';
 import { FilterMatchMode } from '@primevue/core/api';
 import api from '@/service/api';
 import { useRouter } from 'vue-router';
 import { useToast } from 'primevue/usetoast';
+import { useMenuStore } from '@/store/menu';
+
+const menuStore = useMenuStore();
+const canUpdate = computed(() => menuStore.canWrite('OE Tire LIst'));
+const denyAccess = computed(() => menuStore.canTest('OE Tire LIst'));
+
 const toast = useToast();
 
 const importInput = ref();
@@ -230,7 +230,6 @@ const fetchData = async () => {
 
         const response = await api.get('oeTireList');
 
-        // console.log('API Response:', response.data);
 
         if (response.data.status === 1 && Array.isArray(response.data.oe_tires)) {
             tyres.value = response.data.oe_tires.map((product) => ({

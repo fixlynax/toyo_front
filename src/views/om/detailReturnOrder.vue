@@ -13,7 +13,10 @@
                     <div class="grid grid-cols-2 gap-4">
                         <div>
                             <span class="text-sm text-gray-500">Customer Name</span>
-                            <p class="text-lg font-medium">{{ dealerShop.companyName1 || '-' }} {{ dealerShop.companyName2 || '' }} <br />(<span class="font-semibold text-primarnotdy">{{ dealerShop.custAccountNo || '-' }}</span>)</p>
+                            <p class="text-lg font-medium">
+                                {{ dealerShop.companyName1 || '-' }} {{ dealerShop.companyName2 || '' }} <br />(<span class="font-semibold text-primarnotdy">{{ dealerShop.custAccountNo || '-' }}</span
+                                >)
+                            </p>
                         </div>
                         <div>
                             <span class="text-sm text-gray-500">Location</span>
@@ -193,7 +196,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted, watch } from 'vue';
+import { ref, onMounted, watch, computed } from 'vue';
 import { useRoute } from 'vue-router';
 import { useToast } from 'primevue/usetoast';
 import api from '@/service/api';
@@ -210,7 +213,52 @@ const returnOrderArray = ref([]);
 const loading = ref(true);
 const loadingAction = ref(null);
 const error = ref(null);
-const subtotal = ref(0);
+
+// ✅ Enhanced price mapping functions
+const getItemPrice = (item) => {
+    const materialId = item.materialid;
+    const itemNo = item.salesdoclineitem || item.itemno;
+
+    // First, try to find the item in fullfill_order_array with exact match
+    if (orderData.value.fullfill_order_array && Array.isArray(orderData.value.fullfill_order_array)) {
+        const originalItem = orderData.value.fullfill_order_array.find((orderItem) => orderItem.materialid === materialId && orderItem.itemno === formatItemNoForComparison(itemNo));
+
+        if (originalItem && originalItem.unitprice !== undefined && originalItem.unitprice !== null) {
+            return Number(originalItem.unitprice) || 0;
+        }
+    }
+
+    // If not found, try to find by material ID only (fallback)
+    if (orderData.value.fullfill_order_array && Array.isArray(orderData.value.fullfill_order_array)) {
+        const fallbackItem = orderData.value.fullfill_order_array.find((orderItem) => orderItem.materialid === materialId);
+
+        if (fallbackItem && fallbackItem.unitprice !== undefined && fallbackItem.unitprice !== null) {
+            return Number(fallbackItem.unitprice) || 0;
+        }
+    }
+
+    return 0;
+};
+
+// Helper to format item number for comparison (remove leading zeros)
+const formatItemNoForComparison = (itemNo) => {
+    if (!itemNo) return '';
+    return itemNo.toString().replace(/^0+/, '');
+};
+
+// Method to calculate item total
+const calculateItemTotal = (item) => {
+    const qty = parseInt(item.qty) || 0;
+    const price = getItemPrice(item);
+    return qty * price;
+};
+
+// Computed property for subtotal
+const subtotal = computed(() => {
+    return returnOrderArray.value.reduce((sum, item) => {
+        return sum + calculateItemTotal(item);
+    }, 0);
+});
 
 // ✅ Status mapping functions
 const getDeliveryStatusText = (status) => {
@@ -230,7 +278,6 @@ const getOrderStatusText = (status) => {
         0: 'Pending',
         1: 'Approved',
         2: 'Rejected',
-        66: 'Processing',
         77: 'Pending Collection',
         9: 'Completed'
     };
@@ -242,7 +289,6 @@ const getOrderStatusSeverity = (status) => {
         0: 'warn',
         1: 'success',
         2: 'danger',
-        66: 'info',
         77: 'warn',
         9: 'success'
     };
@@ -283,60 +329,11 @@ const formatDate = (dateString) => {
     });
 };
 
-// Method to get item price - handle null prices by looking up from original order
-const getItemPrice = (item) => {
-    // If unitprice is provided in return item, use it
-    if (item.unitprice !== null && item.unitprice !== undefined && item.unitprice !== '') {
-        return Number(item.unitprice) || 0;
-    }
-
-    // Otherwise, try to find price from original order data fullfill_order_array
-    if (orderData.value.fullfill_order_array && Array.isArray(orderData.value.fullfill_order_array)) {
-        const originalItem = orderData.value.fullfill_order_array.find((orderItem) => orderItem.materialid === item.materialid && orderItem.itemno === (item.salesdoclineitem || item.itemno));
-
-        if (originalItem && originalItem.unitprice) {
-            return Number(originalItem.unitprice) || 0;
-        }
-    }
-
-    return 0;
-};
-
-// Method to calculate item total
-const calculateItemTotal = (item) => {
-    const qty = parseInt(item.qty) || 0;
-    const price = getItemPrice(item);
-    return qty * price;
-};
-
-// Method to format item number
+// Method to format item number for display
 const formatItemNo = (itemNo) => {
     if (!itemNo) return '-';
     return itemNo.toString().padStart(6, '0');
 };
-
-// Update subtotal when returnOrderArray changes
-const updateSubtotal = () => {
-    subtotal.value = returnOrderArray.value.reduce((sum, item) => {
-        return sum + calculateItemTotal(item);
-    }, 0);
-};
-
-// Watch for changes in returnOrderArray and update subtotal
-watch(
-    returnOrderArray,
-    () => {
-        updateSubtotal();
-    },
-    { deep: true }
-);
-
-// Also update when order data is loaded
-watch(orderData, () => {
-    if (returnOrderArray.value.length > 0) {
-        updateSubtotal();
-    }
-});
 
 // Toast helper
 const showToast = (severity, summary, detail) => {
@@ -366,9 +363,15 @@ const fetchReturnOrderDetail = async () => {
 
             console.log('Order Data:', orderData.value);
             console.log('Return Items:', returnOrderArray.value);
+            console.log('Fullfill Order Array:', orderData.value.fullfill_order_array);
 
-            // Initialize subtotal
-            updateSubtotal();
+            // Log price mapping for debugging
+            returnOrderArray.value.forEach((item) => {
+                const price = getItemPrice(item);
+                const total = calculateItemTotal(item);
+                console.log(`Item ${item.materialid}: Qty=${item.qty}, Price=${price}, Total=${total}`);
+            });
+            console.log('Subtotal:', subtotal.value);
         } else {
             error.value = 'No data found for this return order';
             showToast('error', 'Error', error.value);
@@ -381,55 +384,119 @@ const fetchReturnOrderDetail = async () => {
     }
 };
 
-// ✅ Approve return order
+// ✅ Fixed Approve return order
 const onApproveReturnOrder = async () => {
     try {
         loadingAction.value = 'approve';
-        const formData = new FormData();
-        formData.append('status', '1'); // 1 = Approved
 
-        const response = await api.post(`order/update-return-order/${returnOrderNo}`, formData, {
-            headers: { 'Content-Type': 'multipart/form-data' }
+        // Use URLSearchParams instead of FormData for application/x-www-form-urlencoded
+        const payload = new URLSearchParams();
+        payload.append('status', '1'); // 1 = Approved
+
+        console.log('Approving return order:', returnOrderNo);
+        console.log('Payload:', { status: '1' });
+
+        const response = await api.postExtra(`order/update-return-order/${returnOrderNo}`, payload, {
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded',
+                Accept: 'application/json'
+            }
         });
+
+        console.log('Approve response:', response.data);
 
         if (response.data.status === 1) {
             showToast('success', 'Success', 'Return order approved successfully!');
             // ✅ Instantly update local status (no need to refetch)
             order.value.orderstatus = 1;
+            // Also update the order object with response data if available
+            if (response.data.admin_data) {
+                Object.assign(order.value, response.data.admin_data);
+            }
         } else {
-            const msg = response.data.error?.message || 'Failed to approve return order';
-            showToast('error', 'Error', msg);
+            const errorData = response.data.error;
+            let errorMessage = 'Failed to approve return order';
+
+            if (errorData) {
+                errorMessage = errorData.message || errorData.code || errorMessage;
+            } else if (response.data.message) {
+                errorMessage = response.data.message;
+            }
+
+            showToast('error', 'Error', errorMessage);
         }
     } catch (err) {
-        console.error(err);
-        showToast('error', 'Error', 'Failed to approve return order');
+        console.error('Approve error:', err);
+        let errorMessage = 'Failed to approve return order';
+
+        if (err.response?.data?.error?.message) {
+            errorMessage = err.response.data.error.message;
+        } else if (err.response?.data?.message) {
+            errorMessage = err.response.data.message;
+        } else if (err.message) {
+            errorMessage = err.message;
+        }
+
+        showToast('error', 'Error', errorMessage);
     } finally {
         loadingAction.value = null;
     }
 };
 
-// ✅ Reject return order
+// ✅ Fixed Reject return order
 const onRejectReturnOrder = async () => {
     try {
         loadingAction.value = 'reject';
-        const formData = new FormData();
-        formData.append('status', '2'); // ✅ 2 = Rejected
 
-        const response = await api.post(`order/update-return-order/${returnOrderNo}`, formData, {
-            headers: { 'Content-Type': 'multipart/form-data' }
+        // Use URLSearchParams instead of FormData for application/x-www-form-urlencoded
+        const payload = new URLSearchParams();
+        payload.append('status', '2'); // 2 = Rejected
+
+        console.log('Rejecting return order:', returnOrderNo);
+        console.log('Payload:', { status: '2' });
+
+        const response = await api.postExtra(`order/update-return-order/${returnOrderNo}`, payload, {
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded',
+                Accept: 'application/json'
+            }
         });
+
+        console.log('Reject response:', response.data);
 
         if (response.data.status === 1) {
             showToast('success', 'Success', 'Return order rejected successfully!');
             // ✅ Instantly update local status
             order.value.orderstatus = 2;
+            // Also update the order object with response data if available
+            if (response.data.admin_data) {
+                Object.assign(order.value, response.data.admin_data);
+            }
         } else {
-            const msg = response.data.error?.message || 'Failed to reject return order';
-            showToast('error', 'Error', msg);
+            const errorData = response.data.error;
+            let errorMessage = 'Failed to reject return order';
+
+            if (errorData) {
+                errorMessage = errorData.message || errorData.code || errorMessage;
+            } else if (response.data.message) {
+                errorMessage = response.data.message;
+            }
+
+            showToast('error', 'Error', errorMessage);
         }
     } catch (err) {
-        console.error(err);
-        showToast('error', 'Error', 'Failed to reject return order');
+        console.error('Reject error:', err);
+        let errorMessage = 'Failed to reject return order';
+
+        if (err.response?.data?.error?.message) {
+            errorMessage = err.response.data.error.message;
+        } else if (err.response?.data?.message) {
+            errorMessage = err.response.data.message;
+        } else if (err.message) {
+            errorMessage = err.message;
+        }
+
+        showToast('error', 'Error', errorMessage);
     } finally {
         loadingAction.value = null;
     }

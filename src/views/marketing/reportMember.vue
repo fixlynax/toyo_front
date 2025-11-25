@@ -432,12 +432,10 @@ const generateReport = () => {
     // Simulate API call
     setTimeout(() => {
         loading.value = false;
-        console.log('Report generated with filters:', filters);
     }, 1000);
 };
 
 const exportToCSV = () => {
-    console.log('Exporting to CSV...');
     // In real implementation, this would generate and download CSV
     alert('CSV export functionality would be implemented here');
 };
@@ -447,13 +445,11 @@ const printReport = () => {
 };
 
 const notifyExpiry = (month) => {
-    console.log(`Notifying members about points expiring in ${month}`);
     alert(`Notification would be sent for ${month} expiry`);
 };
 
 // Initialize charts
 onMounted(() => {
-    console.log('Member Report component mounted');
 });
 </script>
 

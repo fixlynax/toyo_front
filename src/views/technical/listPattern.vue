@@ -40,7 +40,7 @@
                             @click="exportToCSV"
                             :disabled="patterns.length === 0"
                         />
-                        <RouterLink to="/technical/createPattern">
+                        <RouterLink to="/technical/createPattern" v-if="canUpdate">
                         <Button type="button" label="Create" icon="pi pi-plus" class="p-button" />
                         </RouterLink>
                     </div>
@@ -99,11 +99,14 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue';
+import { ref, onMounted , computed } from 'vue';
 import { FilterMatchMode } from '@primevue/core/api';
 import api from '@/service/api';
-import Dialog from 'primevue/dialog';
+import { useMenuStore } from '@/store/menu';
 
+const menuStore = useMenuStore();
+const canUpdate = computed(() => menuStore.canWrite('Pattern List'));
+const denyAccess = computed(() => menuStore.canTest('Pattern List'));
 const patterns = ref([]);
 const loading = ref(true);
 const expandedRows = ref([]);
@@ -229,7 +232,6 @@ const exportToCSV = () => {
         
         URL.revokeObjectURL(url);
         
-        console.log('Export successful');
     } catch (error) {
         console.error('Error exporting data:', error);
     }
@@ -274,7 +276,6 @@ const exportToExcel = () => {
         
         URL.revokeObjectURL(url);
         
-        console.log('Excel export successful');
     } catch (error) {
         console.error('Error exporting to Excel:', error);
     }
@@ -286,14 +287,12 @@ const processCatalogueImages = async (catalogueItems) => {
     for (const item of catalogueItems) {
         if (item.imageURL && typeof item.imageURL === 'string') {
             try {
-                // console.log('Processing private image:', item.imageURL);
                 const blobUrl = await api.getPrivateFile(item.imageURL);
                 if (blobUrl) {
                     processedItems.push({
                         ...item,
                         processedImageURL: blobUrl
                     });
-                    console.log('Successfully processed image:', item.prizeName, blobUrl);
                 } else {
                     // Fallback to original URL if private file loading fails
                     processedItems.push({
@@ -327,8 +326,6 @@ onMounted(async () => {
         loading.value = true;
 
         const response = await api.get('patternList');
-
-        console.log('API Response:', response.data);
 
         if (response.data.status === 1 && Array.isArray(response.data.material_patterns)) {
             const transformedItems = response.data.material_patterns.map((pattern) => ({
