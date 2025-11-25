@@ -15,7 +15,7 @@
                 :loading="loading"
                 :filters="filters"
                 filterDisplay="menu"
-                :globalFilterFields="['do_no', 'eten_user.custAccountNo', 'storagelocation' ,  'eten_user.companyName1', 'eten_user.companyName2', 'eten_user.companyName3', 'eten_user.companyName4', 'eten_user.city', 'deliveryDate', 'orderstatus']"
+                :globalFilterFields="['do_no', 'eten_user.custAccountNo', 'storagelocation' ,  'eten_user.companyName1', 'eten_user.companyName2', 'eten_user.companyName3', 'eten_user.companyName4', 'eten_user.city', 'eten_user.state', 'deliveryDate', 'orderstatus']"
             >
                 <template #header>
                     <div class="flex items-center justify-between gap-4 w-full flex-wrap">
@@ -109,6 +109,11 @@
                 <Column field="city" header="City" style="min-width: 12rem">
                     <template #body="{ data }">
                          {{`${data.eten_user.city}` }}
+                    </template>
+                </Column>
+                <Column field="state" header="State" style="min-width: 12rem">
+                    <template #body="{ data }">
+                         {{`${data.eten_user.state}` }}
                     </template>
                 </Column>
 
@@ -437,7 +442,7 @@ const handleImport1 = async (event) => {
             toast.add({
                 severity: 'error',
                 summary: 'Import Failed',
-                detail: response.data.error || 'Server did not confirm success',
+                detail: response.data.message || 'Server did not confirm success',
                 life: 3000
             });
         }
@@ -483,7 +488,7 @@ const handleImport2 = async (event) => {
             toast.add({
                 severity: 'error',
                 summary: 'Import Failed',
-                detail: response.data.error || 'Server did not confirm success',
+                detail: response.data.message || 'Server did not confirm success',
                 life: 3000
             });
         }

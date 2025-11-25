@@ -37,7 +37,6 @@ const fetchAppointments = async () => {
     try {
         loading.value = true;
         const response = await api.get('appointment');
-        console.log('API Response:', response.data);
 
         if (response.data.status === 1 && Array.isArray(response.data.admin_data)) {
             listData.value = response.data.admin_data.map((item) => ({

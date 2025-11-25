@@ -356,7 +356,7 @@ const processBackOrder = async (status) => {
             toast.add({ severity: 'success', summary: 'Success', detail: 'Back order processed successfully', life: 3000 });
             await fetchBackOrderDetail();
         } else {
-            toast.add({ severity: 'error', summary: 'Error', detail: response.data.error?.message || 'Failed to process back order', life: 3000 });
+            toast.add({ severity: 'error', summary: 'Error', detail: response.data.message || 'Failed to process back order', life: 3000 });
         }
     } catch (error) {
         console.error('Error processing back order:', error);
@@ -378,7 +378,7 @@ const cancelBackOrder = async () => {
             toast.add({ severity: 'success', summary: 'Success', detail: 'Back order cancelled successfully', life: 3000 });
             await fetchBackOrderDetail();
         } else {
-            toast.add({ severity: 'error', summary: 'Error', detail: response.data.error?.message || 'Failed to cancel back order', life: 3000 });
+            toast.add({ severity: 'error', summary: 'Error', detail: response.data.message || 'Failed to cancel back order', life: 3000 });
         }
     } catch (error) {
         console.error('Error cancelling back order:', error);

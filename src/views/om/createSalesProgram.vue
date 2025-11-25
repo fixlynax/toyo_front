@@ -90,7 +90,7 @@
                                 <div>
                                     <label class="block text-sm font-medium text-green-700 mb-1">Free Quantity</label>
                                     <div class="flex items-center gap-2">
-                                        <InputNumber v-model="programItem.freeQty" class="w-full" :min="1" showButtons />
+                                        <InputNumber v-model="programItem.freeQty" disabled class="w-full" :min="1" />
                                         <span class="text-sm text-green-600 font-medium">items</span>
                                     </div>
                                     <p class="text-xs text-green-600 mt-1">Number of free items customer will receive</p>

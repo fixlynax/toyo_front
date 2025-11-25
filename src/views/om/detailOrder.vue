@@ -232,10 +232,15 @@
                     <small v-if="!returnReason && returnFormSubmitted" class="p-error">Return reason is required.</small>
                 </div>
 
-                <div class="font-semibold">Select Items to Return</div>
-                <div class="text-sm text-gray-600 mb-2">💡 <strong>Note:</strong> When you select a ZT02 item, any related ZT3F items with the same sales program will be automatically included.</div>
+                <div class="p-fluid">
+                    <label for="remarks" class="font-semibold">Remarks</label>
+                    <Textarea id="remarks" v-model="remarks" rows="3" placeholder="Enter any additional remarks" class="w-full" />
+                </div>
 
-                <DataTable :value="orderItems" selectionMode="multiple" v-model:selection="selectedReturnItems" dataKey="materialid" class="rounded-table" @selection-change="onSelectionChange">
+                <div class="font-semibold">Select ZT02 Items to Return</div>
+                <div class="text-sm text-gray-600 mb-2">💡 <strong>Note:</strong> When you select a ZT02 item, any related ZT3F items with the same sales program will be automatically handled by the system.</div>
+
+                <DataTable :value="zt02Items" selectionMode="multiple" v-model:selection="selectedReturnItems" dataKey="materialid" class="rounded-table" @selection-change="onSelectionChange">
                     <Column selectionMode="multiple" headerStyle="width: 3rem"></Column>
                     <Column field="itemno" header="Item No">
                         <template #body="{ data }">{{ formatItemNo(data.itemno) }}</template>
@@ -302,6 +307,7 @@ const loadingSAP = ref(false);
 const loadingReturn = ref(false);
 const showReturnOrderDialog = ref(false);
 const returnReason = ref('');
+const remarks = ref('');
 const selectedReturnItems = ref([]);
 const returnQuantities = ref({});
 const returnFormSubmitted = ref(false);
@@ -328,6 +334,11 @@ const orderStatusSeverity = computed(() => {
 
 const canReturnOrder = computed(() => {
     return orderData.value.orderstatus === 1 && orderData.value.inv_no;
+});
+
+// Filter only ZT02 items for return selection
+const zt02Items = computed(() => {
+    return orderItems.value.filter((item) => item.itemcategory === 'ZT02');
 });
 
 // Formatting methods
@@ -381,31 +392,7 @@ const hasQuantityError = (materialId) => {
 
 const onSelectionChange = (event) => {
     const newlySelectedItems = event.value;
-
-    // Handle auto-selection of related items
-    const allSelectedItems = [...newlySelectedItems];
-
-    // Find and add related items
-    newlySelectedItems.forEach((item) => {
-        if (item.itemcategory === 'ZT02' && item.salesProgram_programID) {
-            const relatedZT3FItems = orderItems.value.filter((orderItem) => orderItem.itemcategory === 'ZT3F' && orderItem.salesProgram_programID === item.salesProgram_programID);
-            relatedZT3FItems.forEach((relatedItem) => {
-                if (!allSelectedItems.some((selected) => selected.materialid === relatedItem.materialid)) {
-                    allSelectedItems.push(relatedItem);
-                }
-            });
-        } else if (item.itemcategory === 'ZT3F' && item.salesProgram_programID) {
-            const relatedZT02Items = orderItems.value.filter((orderItem) => orderItem.itemcategory === 'ZT02' && orderItem.salesProgram_programID === item.salesProgram_programID);
-            relatedZT02Items.forEach((relatedItem) => {
-                if (!allSelectedItems.some((selected) => selected.materialid === relatedItem.materialid)) {
-                    allSelectedItems.push(relatedItem);
-                }
-            });
-        }
-    });
-
-    // Update selection
-    selectedReturnItems.value = allSelectedItems;
+    selectedReturnItems.value = newlySelectedItems;
 };
 
 // Watch for selection changes
@@ -433,7 +420,9 @@ watch(
 const fetchOrderDetail = async () => {
     try {
         const orderNo = route.params.orderNo;
+        console.log('Fetching order details for:', orderNo);
         const response = await api.get(`order/detail-order/${orderNo}`);
+        console.log('Order detail response:', response.data);
 
         if (response.data.status === 1 && response.data.admin_data.length > 0) {
             const data = response.data.admin_data[0];
@@ -505,7 +494,9 @@ const pullSAPUpdate = async () => {
     try {
         loadingSAP.value = true;
         const orderNo = route.params.orderNo;
+        console.log('Pulling SAP update for order:', orderNo);
         const response = await api.get(`order/order-update/${orderNo}`);
+        console.log('SAP update response:', response.data);
 
         if (response.data.status === 1) {
             toast.add({ severity: 'success', summary: 'Success', detail: 'SAP data updated successfully', life: 3000 });
@@ -576,9 +567,17 @@ const submitReturnOrder = async () => {
 
         const payload = new URLSearchParams();
         payload.append('returnReason', returnReason.value);
+        payload.append('remarks', remarks.value);
         payload.append('order_array', JSON.stringify(returnItems));
 
         const orderNo = route.params.orderNo;
+        console.log('Submitting return order for:', orderNo);
+        console.log('Return payload:', {
+            returnReason: returnReason.value,
+            remarks: remarks.value,
+            order_array: returnItems
+        });
+
         const response = await api.postExtra(`order/create-return-order/${orderNo}`, payload, {
             headers: {
                 'Content-Type': 'application/x-www-form-urlencoded',
@@ -586,18 +585,21 @@ const submitReturnOrder = async () => {
             }
         });
 
+        console.log('Return order response:', response.data);
+
         if (response.data.status === 1) {
+            const returnOrderNo = response.data.eten_data;
             toast.add({
                 severity: 'success',
                 summary: 'Success',
-                detail: `Return order created: ${response.data.admin_data}`,
+                detail: `Return order created: ${returnOrderNo}`,
                 life: 5000
             });
             showReturnOrderDialog.value = false;
             resetReturnForm();
             await fetchOrderDetail();
         } else {
-            const errorMessage = response.data.error?.message || response.data.message || 'Failed to create return order';
+            const errorMessage = response.data.error?.messageEnglish || response.data.messageEnglish || 'Failed to create return order';
             toast.add({
                 severity: 'error',
                 summary: 'Error',
@@ -635,6 +637,7 @@ const cancelReturnOrder = () => {
 
 const resetReturnForm = () => {
     returnReason.value = '';
+    remarks.value = '';
     selectedReturnItems.value = [];
     returnQuantities.value = {};
     returnFormSubmitted.value = false;

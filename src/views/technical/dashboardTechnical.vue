@@ -35,10 +35,8 @@
             </div>
         </div>
 
-        <DataTable :value="filteredPendingClaims" :paginator="true" :rows="10" dataKey="id" :rowHover="true" :loading="loading" class="p-datatable-sm" :filters="filters1" filterDisplay="menu">
+        <!-- <DataTable :value="filteredPendingClaims" :paginator="true" :rows="10" dataKey="id" :rowHover="true" :loading="loading" class="p-datatable-sm" :filters="filters1" filterDisplay="menu">
     
-
-            <!-- STATES -->
             <template #empty>
                 <div class="py-6 text-gray-500 text-center">No pending claims found.</div>
             </template>
@@ -46,7 +44,7 @@
                 <div class="py-6 text-gray-500 text-center">Loading pending claims...</div>
             </template>
 
-            <!-- COLUMNS -->
+
             <Column field="refNo" header="Ref No" style="min-width: 12rem">
                 <template #body="{ data }">
                     <div class="flex flex-col">
@@ -83,7 +81,7 @@
                 </template>
             </Column>
 
-            <!-- Additional columns for pending details -->
+
             <Column header="Pending Items" style="min-width: 12rem">
                 <template #body="{ data }">
                     <div class="flex flex-wrap gap-1">
@@ -94,7 +92,7 @@
                     </div>
                 </template>
             </Column>
-        </DataTable>
+        </DataTable> -->
     </div>
 </template>
 
@@ -351,7 +349,9 @@ const fetchClaims = async () => {
     }
 };
 
-onMounted(fetchClaims);
+onMounted(
+    // fetchClaims
+    );
 </script>
 
 <style scoped>
