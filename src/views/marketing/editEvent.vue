@@ -23,19 +23,20 @@
                             <InputText v-model="event.location" class="w-full" />
                         </div>
 
-                        <div>
-                            <label class="block font-bold text-gray-700">Publish Date</label>
-                            <Calendar v-model="event.publishDate" dateFormat="dd-mm-yy" showIcon class="w-full" />
-                        </div>
-
+                        
                         <div>
                             <label class="block font-bold text-gray-700">Start Date</label>
-                            <Calendar v-model="event.startDate" dateFormat="dd-mm-yy" showIcon class="w-full" />
+                            <Calendar v-model="event.startDate" dateFormat="dd-mm-yy" showIcon class="w-full" :minDate="minDate" />
                         </div>
-
+                        
                         <div>
                             <label class="block font-bold text-gray-700">End Date</label>
-                            <Calendar v-model="event.endDate" dateFormat="dd-mm-yy" showIcon class="w-full" />
+                            <Calendar v-model="event.endDate" dateFormat="dd-mm-yy" showIcon class="w-full":minDate="minDate" />
+                        </div>
+                        
+                        <div>
+                            <label class="block font-bold text-gray-700">Publish Date</label>
+                            <Calendar v-model="event.publishDate" dateFormat="dd-mm-yy" showIcon class="w-full" :minDate="event.startDate"  :maxDate="event.endDate"  :disabled="!event.startDate || !event.endDate"/>
                         </div>
 
                         <div>
@@ -160,6 +161,7 @@ const route = useRoute();
 const router = useRouter();
 const toast = useToast();
 const loading = ref(false);
+const minDate = ref(new Date());
 
 const eventId = route.params.id;
 
@@ -218,7 +220,11 @@ const formatDate = (date) => {
     const year = d.getFullYear();
     return `${day}-${month}-${year}`;
 };
-
+const parseDMY = (str) => {
+    if (!str) return null;
+    const [day, month, year] = str.split('-').map(Number); 
+    return new Date(year, month - 1, day);
+};
 // Fetch event details
 const fetchEventDetails = async () => {
     try {

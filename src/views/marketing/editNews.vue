@@ -35,7 +35,7 @@
 
                     <div>
                         <label class="block font-bold text-gray-700">Publish Date</label>
-                        <Calendar v-model="news.publishDate" dateFormat="yy-mm-dd" class="w-full" :minDate="minDate" />
+                        <Calendar v-model="news.publishDate" dateFormat="yy-mm-dd" class="w-full" :minDate="news.startDate"  :maxDate="news.endDate"  :disabled="!news.startDate || !news.endDate"/>
                     </div>
 
                     <div>
@@ -130,6 +130,11 @@ const previewImages = ref({
     image2URL: null,
     image3URL: null
 });
+const parseDMY = (str) => {
+    if (!str) return null;
+    const [day, month, year] = str.split('-').map(Number); 
+    return new Date(year, month - 1, day);
+};
 
 const fetchNewsDetails = async () => {
     try {
@@ -139,9 +144,9 @@ const fetchNewsDetails = async () => {
             const data = response.data.admin_data;
             news.value = {
                 ...data,
-                publishDate: data.publishDate,
-                startDate: data.startDate,
-                endDate: data.endDate
+                publishDate: data.publishDate ? parseDMY(data.publishDate) : null,
+                startDate: data.startDate ? parseDMY(data.startDate) : null,
+                endDate: data.endDate ? parseDMY(data.endDate) : null
             };
 
             if (data.image1URL) {
@@ -256,9 +261,9 @@ const updateNews = async () => {
         formData.append('title', news.value.title);
         formData.append('description', news.value.description);
         formData.append('audience', news.value.audience);
-        formData.append('publishDate', news.value.publishDate);
-        formData.append('startDate', news.value.startDate);
-        formData.append('endDate', news.value.endDate);
+        formData.append('publishDate',formatDate(news.value.publishDate));
+        formData.append('startDate', formatDate(news.value.startDate));
+        formData.append('endDate', formatDate(news.value.endDate));
         formData.append('isPublish', news.value.status ?? 0);
                                                                                                                                                                                                         
         ['image1URL', 'image2URL', 'image3URL'].forEach((field, index) => {
@@ -274,14 +279,13 @@ const updateNews = async () => {
                 }
             }
         });
-
-        const response = await api.customRequest({
-            method: 'post',
-            url: `/api/news/edit/${id}`,
-            data: formData,
-            headers: { 'Content-Type': 'multipart/form-data' }
-        });
-
+        
+            const response = await api.postExtra(`news/edit/${id}`, formData, {
+            headers: {
+                'Content-Type': 'multipart/form-data'
+            }
+            });
+       
         if (response.data.status === 1) {
             toast.add({
                 severity: 'success',
@@ -299,6 +303,16 @@ const updateNews = async () => {
     } finally {
         saving.value = false;
     }
+};
+
+// Format date (d-m-Y)
+const formatDate = (date) => {
+    if (!date) return '';
+    const d = new Date(date);
+    const day = String(d.getDate()).padStart(2, '0');
+    const month = String(d.getMonth() + 1).padStart(2, '0');
+    const year = d.getFullYear();
+    return `${day}-${month}-${year}`;
 };
 
 onMounted(fetchNewsDetails);
