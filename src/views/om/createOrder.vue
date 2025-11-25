@@ -615,8 +615,8 @@
             </div>
         </div>
 
-        <!-- Order Processing Dialog -->
-        <Dialog v-model:visible="showOrderDialog" :style="{ width: '500px' }" header="Order Processing" :modal="true" :closable="true">
+        <!-- Enhanced Order Processing Dialog -->
+        <Dialog v-model:visible="showOrderDialog" :style="{ width: '500px' }" header="Order Processing" :modal="true" :closable="false">
             <div class="flex flex-col items-center gap-4">
                 <ProgressSpinner v-if="orderStatus === 'processing'" style="width: 50px; height: 50px" strokeWidth="4" />
                 <i v-else-if="orderStatus === 'success'" class="pi pi-check-circle text-green-500 text-5xl"></i>
@@ -633,12 +633,19 @@
                     <div v-if="orderError" class="text-sm text-red-600 mt-2">
                         {{ orderError }}
                     </div>
+
+                    <!-- Show back order option when there's an error related to fulfillment -->
+                    <div v-if="orderStatus === 'error' && (orderError.includes('not fulfilled') || orderError.includes('back order') || orderError.includes('partial'))" class="mt-4 p-3 bg-yellow-50 border border-yellow-200 rounded-lg">
+                        <div class="text-sm text-yellow-700 mb-2">Some items cannot be fully fulfilled. You can proceed with back order for unavailable items.</div>
+                        <Button label="Proceed with Back Order" icon="pi pi-shopping-cart" @click="triggerManualBackOrder" class="p-button-warning p-button-sm" />
+                    </div>
                 </div>
             </div>
             <template #footer>
                 <Button v-if="orderStatus === 'success' && !showDriverForm" label="View Order" icon="pi pi-eye" @click="viewOrderDetails" class="p-button-primary mr-2" />
                 <Button v-if="orderStatus === 'success' && !showDriverForm" label="Close" icon="pi pi-check" @click="closeOrderDialog" class="p-button-primary" />
                 <Button v-if="orderStatus === 'success' && showDriverForm" label="Submit Driver Info" icon="pi pi-check" @click="submitDriverInfoAfterOrder" class="p-button-primary" :loading="submittingDriverInfo" />
+                <Button v-if="orderStatus === 'error' && !orderError.includes('not fulfilled') && !orderError.includes('back order')" label="Close" icon="pi pi-times" @click="closeOrderDialog" class="p-button-secondary" />
             </template>
         </Dialog>
 
@@ -714,7 +721,7 @@
                     </div>
                 </div>
 
-                <!-- Unfulfilled Items -->D
+                <!-- Unfulfilled Items -->
                 <div v-if="unfulfilledItems.length > 0" class="bg-orange-50 p-4 rounded-lg border border-orange-200">
                     <div class="font-semibold text-orange-700 mb-2">⚠️ Unfulfilled Items (Require Back Order)</div>
                     <div class="space-y-2 max-h-40 overflow-y-auto">
@@ -1409,7 +1416,7 @@ const fetchMaterials = async (custAccountNo) => {
                         quantity: 1,
                         itemcategory: 'ZT02', // Default for regular items
                         plant: 'TSM',
-                        salesprogramid: null
+                        salesprogramid: material.salesprogramid || null // ADDED: salesprogramid
                     };
                 });
 
@@ -1640,13 +1647,68 @@ const clearFilters = () => {
     filters.value.sectionwidth.value = '';
 };
 
-// Order Processing Functions
+// UPDATED: Enhanced confirmBackOrderAPI function with salesprogramid
+const confirmBackOrderAPI = async (cartRefNo, orderArray, backorderArray) => {
+    try {
+        console.log('Confirming back order with arrays:', { orderArray, backorderArray });
+
+        // Prepare the payload exactly as shown in your API example
+        const payload = {
+            order_array: JSON.stringify(orderArray),
+            backorder_array: JSON.stringify(backorderArray),
+            order_remark: `Order with back order created via admin interface - ${selectedOrderType.value}`
+        };
+
+        console.log('Back order payload:', payload);
+
+        // Use the exact API endpoint from your example
+        const response = await api.post(`order/confirm-backorder-admin/${cartRefNo}`, payload);
+
+        console.log('Back order API response:', response.data);
+        return response.data;
+    } catch (error) {
+        console.error('Error confirming back order:', error);
+
+        // Enhanced error handling
+        if (error.response?.data?.error?.includes('cart') || error.message.includes('cart')) {
+            console.log('Cart not found, trying to create new cart...');
+
+            try {
+                // Create a new cart specifically for back order
+                const newCartResponse = await api.post('order/createEmptyDsCart-admin', {
+                    custaccountno: selectedCustomer.value.code
+                });
+
+                if (newCartResponse.data.status === 1) {
+                    const newCartRefNo = newCartResponse.data.eten_data.cartRefNo;
+
+                    // Retry with new cart reference
+                    const payload = {
+                        order_array: JSON.stringify(orderArray),
+                        backorder_array: JSON.stringify(backorderArray),
+                        order_remark: `Back order created via admin interface - ${selectedOrderType.value}`
+                    };
+
+                    const retryResponse = await api.post(`order/confirm-backorder-admin/${newCartRefNo}`, payload);
+                    return retryResponse.data;
+                }
+            } catch (secondError) {
+                console.error('Second attempt failed:', secondError);
+                throw new Error('Failed to create back order after cart creation: ' + (secondError.message || 'Unknown error'));
+            }
+        }
+
+        throw new Error('Failed to confirm back order: ' + (error.response?.data?.message || error.message || 'Unknown error'));
+    }
+};
+
+// UPDATED: addToCartAPI with salesprogramid
 const addToCartAPI = async (cartRefNo = null) => {
     if (!selectedCustomer.value || !shipToAccount.value || selectedTyres.value.length === 0) {
         throw new Error('Missing required data for checkout');
     }
 
-    // Prepare order array according to API requirements
+    // Prepare order array according to API requirements with salesprogramid
     const orderArray = selectedTyres.value.map((item, index) => ({
         materialid: item.materialid,
         itemno: String((index + 1) * 10).padStart(5, '0'), // Item numbers in increments of 10
@@ -1654,7 +1716,7 @@ const addToCartAPI = async (cartRefNo = null) => {
         plant: item.plant || 'TSM',
         qty: item.quantity.toString(),
         price: item.price.toString(),
-        salesprogramid: null
+        salesprogramid: item.salesprogramid || null // Include salesprogramid
     }));
 
     // Prepare request payload
@@ -1693,23 +1755,6 @@ const confirmOrderAPI = async (cartRefNo, orderArray) => {
     } catch (error) {
         console.error('Error confirming order:', error);
         throw new Error('Failed to confirm order');
-    }
-};
-
-const confirmBackOrderAPI = async (cartRefNo, orderArray, backorderArray) => {
-    try {
-        console.log('Confirming back order with arrays:', { orderArray, backorderArray });
-
-        const response = await api.post(`order/confirm-backorder-admin/${cartRefNo}`, {
-            order_array: JSON.stringify(orderArray),
-            backorder_array: JSON.stringify(backorderArray),
-            order_remark: `Order with back order created via admin interface - ${selectedOrderType.value}`
-        });
-
-        return response.data;
-    } catch (error) {
-        console.error('Error confirming back order:', error);
-        throw new Error('Failed to confirm back order');
     }
 };
 
@@ -1769,93 +1814,77 @@ const submitDriverInfoAfterOrder = async () => {
     }
 };
 
-// Main Order Placement Function
-const placeOrder = async () => {
-    if (!canPlaceOrder.value) {
-        step3Validated.value = true;
-        return;
-    }
+// Method to trigger manual back order from error dialog
+const triggerManualBackOrder = () => {
+    showOrderDialog.value = false;
+    showManualBackOrderOption();
+};
 
-    processingOrder.value = true;
-    showOrderDialog.value = true;
-    orderStatus.value = 'processing';
-    orderMessage.value = 'Processing your order...';
-    orderError.value = '';
-    orderDetails.value = null;
+// UPDATED: Enhanced manual back order detection
+const showManualBackOrderOption = () => {
+    // Create manual back order analysis based on stock levels
+    const manualFulfilled = [];
+    const manualUnfulfilled = [];
 
-    try {
-        // Prepare order array for both order types
-        const orderArray = selectedTyres.value.map((item, index) => ({
-            materialid: item.materialid,
-            itemno: String((index + 1) * 10).padStart(5, '0'),
-            itemcategory: item.itemcategory || 'ZT02',
-            plant: item.plant || 'TSM',
-            qty: item.quantity.toString(),
-            price: item.price.toString(),
-            salesprogramid: null
-        }));
-
-        if (selectedOrderType.value === 'DIRECTSHIP') {
-            await processDirectShipOrder(orderArray);
+    selectedTyres.value.forEach((item) => {
+        if (item.stockBalance >= item.quantity) {
+            // Item can be fulfilled
+            manualFulfilled.push({
+                materialid: item.materialid,
+                material: item.material,
+                accepted_qty: item.quantity,
+                requested_qty: item.quantity
+            });
+        } else if (item.stockBalance > 0) {
+            // Partial fulfillment
+            manualFulfilled.push({
+                materialid: item.materialid,
+                material: item.material,
+                accepted_qty: item.stockBalance,
+                requested_qty: item.quantity
+            });
+            manualUnfulfilled.push({
+                materialid: item.materialid,
+                material: item.material,
+                requested_qty: item.quantity,
+                accepted_qty: item.stockBalance,
+                backorder_qty: item.quantity - item.stockBalance
+            });
         } else {
-            await processNormalOrder(orderArray);
+            // Complete back order
+            manualUnfulfilled.push({
+                materialid: item.materialid,
+                material: item.material,
+                requested_qty: item.quantity,
+                accepted_qty: 0,
+                backorder_qty: item.quantity
+            });
         }
-    } catch (error) {
-        console.error('Order placement error:', error);
-        orderStatus.value = 'error';
-        orderMessage.value = 'Failed to process order';
-        orderError.value = error.message || 'Unknown error occurred';
+    });
+
+    fulfilledItems.value = manualFulfilled;
+    unfulfilledItems.value = manualUnfulfilled;
+
+    if (manualUnfulfilled.length > 0) {
+        showBackOrderDialog.value = true;
+        showOrderDialog.value = false;
+        orderMessage.value = 'Processing partial fulfillment...';
 
         toast.add({
-            severity: 'error',
-            summary: 'Error',
-            detail: error.message || 'Failed to process order',
+            severity: 'info',
+            summary: 'Manual Back Order Detection',
+            detail: 'Based on stock analysis, some items require back order.',
             life: 5000
         });
-    } finally {
-        processingOrder.value = false;
-    }
-};
-
-// Process DIRECTSHIP Order
-const processDirectShipOrder = async (orderArray) => {
-    orderMessage.value = 'Adding items to direct shipment...';
-
-    const addToCartResult = await addToCartAPI(currentCartRefNo.value);
-
-    if (addToCartResult.status === 1) {
-        orderMessage.value = 'Confirming direct shipment order...';
-
-        // Use the processed order array from addToCartAPI response if available
-        const finalOrderArray = addToCartResult.eten_data?.order_array || orderArray;
-
-        const confirmResult = await confirmOrderAPI(currentCartRefNo.value, finalOrderArray);
-        await handleOrderConfirmation(confirmResult, 'DIRECTSHIP');
     } else {
-        throw new Error(addToCartResult.message || 'Failed to add items to direct shipment cart');
+        // If no back order needed but we're here due to error, show different message
+        orderStatus.value = 'error';
+        orderMessage.value = 'Order processing failed';
+        orderError.value = 'Unable to determine fulfillment status. Please try again.';
     }
 };
 
-// Process NORMAL Order
-const processNormalOrder = async (orderArray) => {
-    orderMessage.value = 'Adding items to cart...';
-    const addToCartResult = await addToCartAPI();
-
-    if (addToCartResult.status === 1) {
-        orderMessage.value = 'Confirming order with SAP...';
-        const cartRefNo = addToCartResult.eten_data?.cartRefNo;
-
-        // Use the processed order array from addToCartAPI response if available
-        const finalOrderArray = addToCartResult.eten_data?.order_array || orderArray;
-
-        const confirmResult = await confirmOrderAPI(cartRefNo, finalOrderArray);
-        await handleOrderConfirmation(confirmResult, 'NORMAL');
-    } else {
-        throw new Error(addToCartResult.message || 'Failed to add items to cart');
-    }
-};
-
-// Enhanced handleOrderConfirmation with better back order handling
+// UPDATED: Enhanced handleOrderConfirmation with better back order detection
 const handleOrderConfirmation = async (confirmResult, orderType) => {
     console.log('Order confirmation result:', confirmResult);
 
@@ -1864,7 +1893,7 @@ const handleOrderConfirmation = async (confirmResult, orderType) => {
         orderStatus.value = 'success';
         orderMessage.value = `${orderType} order created successfully!`;
         orderDetails.value = {
-            orderRefNo: confirmResult.eten_data.orderRefNo
+            orderRefNo: confirmResult.eten_data.orderRefNo || confirmResult.eten_data.orderno
         };
 
         // Check if driver information is needed (pickup methods)
@@ -1876,21 +1905,50 @@ const handleOrderConfirmation = async (confirmResult, orderType) => {
             toast.add({
                 severity: 'success',
                 summary: 'Success',
-                detail: `${orderType} order ${confirmResult.eten_data.orderRefNo} created successfully`,
+                detail: `${orderType} order ${orderDetails.value.orderRefNo} created successfully`,
                 life: 5000
             });
         }
     } else if (confirmResult.status === 0 && confirmResult.eten_data) {
         // Enhanced backorder scenario handling
+        console.log('Back order scenario detected:', confirmResult.eten_data);
+
+        // Handle different response structures
         const backOrderData = Array.isArray(confirmResult.eten_data) ? confirmResult.eten_data[0] : confirmResult.eten_data;
-        const fulfilled = backOrderData?.fulfilled_items || [];
-        const unfulfilled = backOrderData?.unfulfilled_items || [];
 
-        console.log('Back order data:', { fulfilled, unfulfilled });
+        // Extract fulfilled and unfulfilled items - handle different field names
+        const fulfilled = backOrderData?.fulfilled_items || backOrderData?.fulfilled || [];
+        const unfulfilled = backOrderData?.unfulfilled_items || backOrderData?.unfulfilled || backOrderData?.backorder_items || [];
 
-        // Process fulfilled and unfulfilled items
-        const processedFulfilled = fulfilled.filter((item) => item.materialid && item.materialid.trim() !== '' && item.accepted_qty > 0);
-        const processedUnfulfilled = unfulfilled.filter((item) => item.materialid && item.materialid.trim() !== '' && item.backorder_qty > 0);
+        console.log('Processed back order data:', { fulfilled, unfulfilled });
+
+        // Process fulfilled items
+        const processedFulfilled = fulfilled
+            .filter((item) => item.materialid && item.materialid.trim() !== '')
+            .map((item) => ({
+                materialid: item.materialid.trim(),
+                accepted_qty: parseFloat(item.qty || item.accepted_qty || 0),
+                requested_qty: parseFloat(item.requested_qty || item.qty || 0),
+                material: getMaterialName(item.materialid)
+            }));
+
+        // Process unfulfilled items
+        const processedUnfulfilled = unfulfilled
+            .filter((item) => item.materialid && item.materialid.trim() !== '')
+            .map((item) => {
+                const originalItem = selectedTyres.value.find((t) => t.materialid === item.materialid);
+                const requestedQty = originalItem ? originalItem.quantity : parseFloat(item.requested_qty || item.qty || 0);
+                const acceptedQty = processedFulfilled.find((f) => f.materialid === item.materialid)?.accepted_qty || 0;
+                const backorderQty = parseFloat(item.backorder_qty || item.qty || requestedQty - acceptedQty);
+
+                return {
+                    materialid: item.materialid.trim(),
+                    requested_qty: requestedQty,
+                    accepted_qty: acceptedQty,
+                    backorder_qty: backorderQty,
+                    material: getMaterialName(item.materialid)
+                };
+            });
 
         fulfilledItems.value = processedFulfilled;
         unfulfilledItems.value = processedUnfulfilled;
@@ -1898,17 +1956,31 @@ const handleOrderConfirmation = async (confirmResult, orderType) => {
         const hasFulfilledItems = processedFulfilled.length > 0;
         const hasUnfulfilledItems = processedUnfulfilled.length > 0;
 
+        console.log('Back order analysis:', {
+            hasFulfilledItems,
+            hasUnfulfilledItems,
+            fulfilledItems: fulfilledItems.value,
+            unfulfilledItems: unfulfilledItems.value
+        });
+
         if (hasUnfulfilledItems) {
             // Show back order dialog with both fulfilled and unfulfilled items
             showBackOrderDialog.value = true;
             showOrderDialog.value = false;
             orderMessage.value = 'Processing partial fulfillment...';
+
+            toast.add({
+                severity: 'warn',
+                summary: 'Partial Fulfillment',
+                detail: 'Some items require back order. Please review the options.',
+                life: 5000
+            });
         } else if (hasFulfilledItems) {
             // All items fulfilled despite SAP status 0
             orderStatus.value = 'success';
             orderMessage.value = 'Order created successfully!';
             orderDetails.value = {
-                orderRefNo: backOrderData.orderno || `ORD-${Date.now()}`
+                orderRefNo: backOrderData.orderno || backOrderData.orderRefNo || `ORD-${Date.now()}`
             };
 
             if (selectedDeliveryMethod.value === 'SELFCOLLECT' || selectedDeliveryMethod.value === 'LALAMOVE') {
@@ -1917,15 +1989,33 @@ const handleOrderConfirmation = async (confirmResult, orderType) => {
                 clearCartAndReset();
             }
         } else {
-            // No items could be fulfilled
-            throw new Error(confirmResult.message || 'No items could be fulfilled');
+            // No items could be fulfilled - show error with retry option
+            orderStatus.value = 'error';
+            orderMessage.value = 'No items could be fulfilled';
+            orderError.value = confirmResult.message || 'Please check your order and try again.';
+
+            // Show manual back order option
+            setTimeout(() => {
+                showManualBackOrderOption();
+            }, 1000);
         }
     } else {
-        throw new Error(confirmResult.message || `${orderType} order confirmation failed`);
+        // General error case
+        const errorMessage = confirmResult.message || `${orderType} order confirmation failed`;
+        orderStatus.value = 'error';
+        orderMessage.value = 'Failed to process order';
+        orderError.value = errorMessage;
+
+        // Check if this might be a back order scenario
+        if (errorMessage.includes('not fulfilled') || errorMessage.includes('back order') || errorMessage.includes('partial')) {
+            setTimeout(() => {
+                showManualBackOrderOption();
+            }, 1000);
+        }
     }
 };
 
-// Enhanced back order processing
+// UPDATED: Enhanced proceedWithBackOrder function with proper salesprogramid handling
 const proceedWithBackOrder = async () => {
     showBackOrderDialog.value = false;
     showOrderDialog.value = true;
@@ -1933,38 +2023,83 @@ const proceedWithBackOrder = async () => {
     orderMessage.value = 'Creating order with back order...';
 
     try {
-        // Prepare arrays based on SAP response
-        const fulfilledArray = fulfilledItems.value.map((item, index) => ({
-            materialid: item.materialid,
-            itemno: String((index + 1) * 10).padStart(5, '0'),
-            itemcategory: 'ZT02',
-            plant: 'TSM',
-            qty: item.accepted_qty.toString(),
-            price: getMaterialPrice(item.materialid).toString(),
-            salesprogramid: null
-        }));
+        // Prepare arrays according to your API example structure with salesprogramid
+        const orderArray = fulfilledItems.value.map((item, index) => {
+            const originalItem = selectedTyres.value.find((t) => t.materialid === item.materialid);
+            return {
+                materialid: item.materialid,
+                itemno: (index + 1) * 10, // 10, 20, 30, etc.
+                itemcategory: originalItem?.itemcategory || 'ZT02', // Use original item category
+                plant: originalItem?.plant || 'TSM',
+                qty: item.accepted_qty.toString(),
+                price: getMaterialPrice(item.materialid).toString(),
+                salesprogramid: originalItem?.salesprogramid || null // Include salesprogramid
+            };
+        });
 
-        const backOrderArray = unfulfilledItems.value.map((item, index) => ({
-            materialid: item.materialid,
-            itemno: String((fulfilledArray.length + index + 1) * 10).padStart(5, '0'),
-            itemcategory: 'ZT02',
-            plant: 'TSM',
-            qty: item.backorder_qty.toString(),
-            price: getMaterialPrice(item.materialid).toString(),
-            salesprogramid: null
-        }));
+        const backorderArray = unfulfilledItems.value.map((item, index) => {
+            const originalItem = selectedTyres.value.find((t) => t.materialid === item.materialid);
 
-        const cartRefNo = currentCartRefNo.value || `TEMP-${Date.now()}`;
-        const result = await confirmBackOrderAPI(cartRefNo, fulfilledArray, backOrderArray);
+            // FIX: Ensure we get the salesprogramid from the original item
+            let salesprogramid = null;
+            if (originalItem) {
+                salesprogramid = originalItem.salesprogramid;
+            } else {
+                // Fallback: try to find in tyres list
+                const tyreFromList = tyres.value.find((t) => t.materialid === item.materialid);
+                salesprogramid = tyreFromList?.salesprogramid || null;
+            }
+
+            return {
+                materialid: item.materialid,
+                itemno: (orderArray.length + index + 1) * 10, // Continue numbering
+                itemcategory: originalItem?.itemcategory || 'ZT02', // Use original item category
+                plant: originalItem?.plant || 'TSM',
+                qty: item.backorder_qty.toString(),
+                price: getMaterialPrice(item.materialid).toString(),
+                salesprogramid: salesprogramid // FIX: Include salesprogramid properly
+            };
+        });
+
+        console.log('Back order final payload:', {
+            order_array: orderArray,
+            backorder_array: backorderArray
+        });
+
+        // Use current cart reference or create a new one
+        let cartRefNo = currentCartRefNo.value;
+        if (!cartRefNo || cartRefNo.includes('TEMP') || cartRefNo.includes('BACKORDER')) {
+            try {
+                const newCartResponse = await api.post('order/createEmptyDsCart-admin', {
+                    custaccountno: selectedCustomer.value.code
+                });
+
+                if (newCartResponse.data.status === 1) {
+                    cartRefNo = newCartResponse.data.eten_data.cartRefNo;
+                } else {
+                    cartRefNo = `BACKORDER-${Date.now()}`;
+                }
+            } catch (cartError) {
+                console.log('Failed to create cart, using temporary reference');
+                cartRefNo = `BACKORDER-${Date.now()}`;
+            }
+        }
+
+        const result = await confirmBackOrderAPI(cartRefNo, orderArray, backorderArray);
 
         if (result.status === 1) {
             orderStatus.value = 'success';
             orderMessage.value = 'Order created with back order!';
+
+            // Handle different response structures
+            const etenData = result.eten_data;
             orderDetails.value = {
-                orderRefNo: result.eten_data.orderRefNo,
-                backOrderRefNo: result.eten_data.backOrderRefNo
+                orderRefNo: etenData.orderRefNo || etenData.orderno,
+                backOrderRefNo: etenData.backOrderRefNo || etenData.backorderno,
+                cartRefNo: cartRefNo
             };
 
+            // Show appropriate success message
             if (selectedDeliveryMethod.value === 'SELFCOLLECT' || selectedDeliveryMethod.value === 'LALAMOVE') {
                 showDriverForm.value = true;
                 orderMessage.value = 'Order created with back order! Please provide driver information.';
@@ -1973,7 +2108,7 @@ const proceedWithBackOrder = async () => {
                 toast.add({
                     severity: 'success',
                     summary: 'Success',
-                    detail: `Order ${result.eten_data.orderRefNo} created with back order ${result.eten_data.backOrderRefNo}`,
+                    detail: `Order ${orderDetails.value.orderRefNo} created with back order ${orderDetails.value.backOrderRefNo}`,
                     life: 5000
                 });
             }
@@ -1981,9 +2116,11 @@ const proceedWithBackOrder = async () => {
             throw new Error(result.message || 'Back order creation failed');
         }
     } catch (error) {
+        console.error('Back order creation error:', error);
         orderStatus.value = 'error';
         orderMessage.value = 'Failed to create back order';
         orderError.value = error.message;
+
         toast.add({
             severity: 'error',
             summary: 'Error',
@@ -1993,6 +2130,7 @@ const proceedWithBackOrder = async () => {
     }
 };
 
+// UPDATED: proceedWithoutBackOrder with better salesprogramid handling
 const proceedWithoutBackOrder = async () => {
     showBackOrderDialog.value = false;
     showOrderDialog.value = true;
@@ -2000,22 +2138,46 @@ const proceedWithoutBackOrder = async () => {
     orderMessage.value = 'Creating order without back order...';
 
     try {
-        // Only process fulfilled items
-        const orderArray = fulfilledItems.value.map((item, index) => ({
-            materialid: item.materialid,
-            itemno: String((index + 1) * 10).padStart(5, '0'),
-            itemcategory: 'ZT02',
-            plant: 'TSM',
-            qty: item.accepted_qty.toString(),
-            price: getMaterialPrice(item.materialid).toString(),
-            salesprogramid: null
-        }));
+        // Only process fulfilled items with salesprogramid
+        const orderArray = fulfilledItems.value.map((item, index) => {
+            const originalItem = selectedTyres.value.find((t) => t.materialid === item.materialid);
+
+            // FIX: Ensure we get the salesprogramid properly
+            let salesprogramid = null;
+            if (originalItem) {
+                salesprogramid = originalItem.salesprogramid;
+            } else {
+                // Fallback: try to find in tyres list
+                const tyreFromList = tyres.value.find((t) => t.materialid === item.materialid);
+                salesprogramid = tyreFromList?.salesprogramid || null;
+            }
+
+            return {
+                materialid: item.materialid,
+                itemno: String((index + 1) * 10).padStart(5, '0'),
+                itemcategory: originalItem?.itemcategory || 'ZT02',
+                plant: originalItem?.plant || 'TSM',
+                qty: item.accepted_qty.toString(),
+                price: getMaterialPrice(item.materialid).toString(),
+                salesprogramid: salesprogramid // FIX: Include salesprogramid properly
+            };
+        });
 
         if (orderArray.length === 0) {
             throw new Error('No items available for order');
         }
 
-        const cartRefNo = currentCartRefNo.value || `TEMP-${Date.now()}`;
+        // Use current cart reference or create a new one if needed
+        let cartRefNo = currentCartRefNo.value;
+        if (!cartRefNo || cartRefNo.includes('TEMP')) {
+            try {
+                cartRefNo = await createDirectShipCart();
+            } catch (cartError) {
+                console.log('Failed to create cart, using temporary reference');
+                cartRefNo = `ORDER-${Date.now()}`;
+            }
+        }
+
         const result = await confirmOrderAPI(cartRefNo, orderArray);
 
         if (result.status === 1) {
@@ -2054,6 +2216,92 @@ const proceedWithoutBackOrder = async () => {
             detail: error.message || 'Failed to create order',
             life: 5000
         });
+    }
+};
+
+// UPDATED: Main Order Placement Function with salesprogramid
+const placeOrder = async () => {
+    if (!canPlaceOrder.value) {
+        step3Validated.value = true;
+        return;
+    }
+
+    processingOrder.value = true;
+    showOrderDialog.value = true;
+    orderStatus.value = 'processing';
+    orderMessage.value = 'Processing your order...';
+    orderError.value = '';
+    orderDetails.value = null;
+
+    try {
+        // Prepare order array for both order types with salesprogramid
+        const orderArray = selectedTyres.value.map((item, index) => ({
+            materialid: item.materialid,
+            itemno: String((index + 1) * 10).padStart(5, '0'),
+            itemcategory: item.itemcategory || 'ZT02',
+            plant: item.plant || 'TSM',
+            qty: item.quantity.toString(),
+            price: item.price.toString(),
+            salesprogramid: item.salesprogramid || null // Include salesprogramid
+        }));
+
+        if (selectedOrderType.value === 'DIRECTSHIP') {
+            await processDirectShipOrder(orderArray);
+        } else {
+            await processNormalOrder(orderArray);
+        }
+    } catch (error) {
+        console.error('Order placement error:', error);
+        orderStatus.value = 'error';
+        orderMessage.value = 'Failed to process order';
+        orderError.value = error.message || 'Unknown error occurred';
+
+        toast.add({
+            severity: 'error',
+            summary: 'Error',
+            detail: error.message || 'Failed to process order',
+            life: 5000
+        });
+    } finally {
+        processingOrder.value = false;
+    }
+};
+
+// UPDATED: Process DIRECTSHIP Order with salesprogramid
+const processDirectShipOrder = async (orderArray) => {
+    orderMessage.value = 'Adding items to direct shipment...';
+
+    const addToCartResult = await addToCartAPI(currentCartRefNo.value);
+
+    if (addToCartResult.status === 1) {
+        orderMessage.value = 'Confirming direct shipment order...';
+
+        // Use the processed order array from addToCartAPI response if available
+        const finalOrderArray = addToCartResult.eten_data?.order_array || orderArray;
+
+        const confirmResult = await confirmOrderAPI(currentCartRefNo.value, finalOrderArray);
+        await handleOrderConfirmation(confirmResult, 'DIRECTSHIP');
+    } else {
+        throw new Error(addToCartResult.message || 'Failed to add items to direct shipment cart');
+    }
+};
+
+// UPDATED: Process NORMAL Order with salesprogramid
+const processNormalOrder = async (orderArray) => {
+    orderMessage.value = 'Adding items to cart...';
+    const addToCartResult = await addToCartAPI();
+
+    if (addToCartResult.status === 1) {
+        orderMessage.value = 'Confirming order with SAP...';
+        const cartRefNo = addToCartResult.eten_data?.cartRefNo;
+
+        // Use the processed order array from addToCartAPI response if available
+        const finalOrderArray = addToCartResult.eten_data?.order_array || orderArray;
+
+        const confirmResult = await confirmOrderAPI(cartRefNo, finalOrderArray);
+        await handleOrderConfirmation(confirmResult, 'NORMAL');
+    } else {
+        throw new Error(addToCartResult.message || 'Failed to add items to cart');
     }
 };
 
