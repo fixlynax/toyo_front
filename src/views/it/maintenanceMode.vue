@@ -90,6 +90,13 @@ const handleToggle = (channel) => {
     } else if ((channel === 'TC' || channel === 'ETEN') && form.value.channels[channel].enabled) {
         form.value.channels.BOTH.enabled = false;
     }
+
+    toast.add({
+        severity: 'info',
+        summary: 'Selection Updated',
+        detail: `${channel} toggle changed`,
+        life: 2000
+    });
 };
 
 const TYPE_MAP = {
@@ -98,8 +105,22 @@ const TYPE_MAP = {
     BOTH: ['ios-care', 'android-care', 'ios-eten', 'android-eten']
 };
 
+toast.add({
+    severity: 'info',
+    summary: 'Maintenance Mode',
+    detail: 'Configure the channels below.',
+    life: 2000
+});
+
 const save = async () => {
     saving.value = true;
+
+    toast.add({
+        severity: 'info',
+        summary: 'Saving',
+        detail: 'Updating maintenance mode...',
+        life: 2000
+    });
 
     try {
         let activeChannel = '';
@@ -150,7 +171,7 @@ const save = async () => {
 
         toast.add({
             severity: 'success',
-            summary: 'Updated',
+            summary: 'Success',
             detail: activeChannel === 'NONE' ? 'Maintenance disabled' : 'Maintenance updated successfully',
             life: 3000
         });
@@ -168,3 +189,4 @@ const save = async () => {
     }
 };
 </script>
+

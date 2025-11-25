@@ -285,7 +285,7 @@ const handleImport1 = async (event) => {
             toast.add({
                 severity: 'error',
                 summary: 'Import Failed',
-                detail: response.data.error || 'Server did not confirm success',
+                detail: response.data.message || 'Server did not confirm success',
                 life: 3000
             });
         }
@@ -331,7 +331,7 @@ const handleImport2 = async (event) => {
             toast.add({
                 severity: 'error',
                 summary: 'Import Failed',
-                detail: response.data.error || 'Server did not confirm success',
+                detail: response.data.message || 'Server did not confirm success',
                 life: 3000
             });
         }

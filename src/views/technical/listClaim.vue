@@ -72,6 +72,7 @@ const fetchClaims = async () => {
                 refNo: item.claimRefNo,
                 dealerName: item.dealer,
                 claimType: item.warrantyType || '-',
+                dealer_sales_office: item.dealer_sales_office || '-',
                 claimDate: item.claim_date || '-',
                 submissionDate: item.submit_date || '-',
                 warrantyRegCertNo: item.warrantyRegCertNo || '-',
@@ -227,7 +228,9 @@ onMounted(fetchClaims);
                         </div>
                     </template>
                 </Column>
-
+                <Column field="dealer_sales_office" header="Dealer Sales Office" style="min-width: 15rem">
+                    <template #body="{ data }">{{ data.dealer_sales_office }}</template>
+                </Column>
                 <Column field="claimType" header="Claim Type" style="min-width: 15rem">
                     <template #body="{ data }">{{ data.claimType }}</template>
                 </Column>
