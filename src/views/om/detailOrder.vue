@@ -333,12 +333,16 @@ const orderStatusSeverity = computed(() => {
 });
 
 const canReturnOrder = computed(() => {
-    return orderData.value.orderstatus === 1 && orderData.value.inv_no;
+    const hasRemainingItems = orderData.value.remaining_return_items && orderData.value.remaining_return_items.length > 0;
+    return orderData.value.orderstatus === 1 && orderData.value.inv_no && hasRemainingItems;
 });
 
-// Filter only ZT02 items for return selection
+// Filter only ZT02 items for return selection from remaining_return_items
 const zt02Items = computed(() => {
-    return orderItems.value.filter((item) => item.itemcategory === 'ZT02');
+    if (!orderData.value.remaining_return_items || orderData.value.remaining_return_items.length === 0) {
+        return [];
+    }
+    return orderData.value.remaining_return_items.filter((item) => item.itemcategory === 'ZT02');
 });
 
 // Formatting methods
@@ -532,11 +536,14 @@ const submitReturnOrder = async () => {
             })
             .map((item) => {
                 const quantity = returnQuantities.value[item.materialid] || 0;
+                // Find the original item from remaining_return_items to get accurate data
+                const originalItem = orderData.value.remaining_return_items.find((remainingItem) => remainingItem.materialid === item.materialid);
+
                 return {
                     materialid: item.materialid.trim(),
                     itemcategory: mapItemCategory(item.itemcategory),
                     qty: quantity.toString(),
-                    salesdoclineitem: item.itemno ? item.itemno.toString() : '',
+                    salesdoclineitem: originalItem?.itemno ? originalItem.itemno.toString().replace('0000', '') : '',
                     plant: 'TSM',
                     materialdescription: item.materialdescription || '',
                     salesProgram_programID: item.salesProgram_programID || '',
@@ -550,9 +557,9 @@ const submitReturnOrder = async () => {
             return;
         }
 
-        // Validate that quantities don't exceed available quantities
+        // Validate that quantities don't exceed available quantities from remaining_return_items
         for (const returnItem of returnItems) {
-            const originalItem = orderItems.value.find((item) => item.materialid === returnItem.materialid);
+            const originalItem = orderData.value.remaining_return_items.find((item) => item.materialid === returnItem.materialid);
             if (originalItem && parseFloat(returnItem.qty) > parseFloat(originalItem.qty)) {
                 toast.add({
                     severity: 'error',
