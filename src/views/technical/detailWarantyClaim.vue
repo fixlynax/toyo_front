@@ -68,22 +68,22 @@
                     <div class="flex items-center justify-between border-b pb-2 mb-4">
                         <div class="text-2xl font-bold text-gray-800">Tire Detail</div>
                     </div>
-                    <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                    <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-2">
                         <div>
                             <span class="block text-sm font-bold text-black-800">MFG code</span>
-                            <p class="text-lg font-medium">{{ warantyDetail.tire_info.mfgcode || '-' }}</p>
+                            <p class="text-lg font-medium">{{ warantyDetail.tire_info.platePart1 || '-' }}</p>
+                        </div>
+                        <div>
+                            <span class="block text-sm font-bold text-black-800">Size Code</span>
+                            <p class="text-lg font-medium">{{ warantyDetail.tire_info.platePart2 || '-' }}</p>
+                        </div>
+                        <div>
+                            <span class="block text-sm font-bold text-black-800">Tyre Spec</span>
+                            <p class="text-lg font-medium">{{ warantyDetail.tire_info.platePart3  || '-' }}</p>
                         </div>
                         <div>
                             <span class="block text-sm font-bold text-black-800">Week Code</span>
-                            <p class="text-lg font-medium">{{ warantyDetail.tire_info.weekcode || '-' }}</p>
-                        </div>
-                        <div>
-                            <span class="block text-sm font-bold text-black-800">Spec</span>
-                            <p class="text-lg font-medium">{{  '-' }}</p>
-                        </div>
-                        <div>
-                            <span class="block text-sm font-bold text-black-800">Size</span>
-                            <p class="text-lg font-medium">{{ warantyDetail.tire_info.tyresize  || '-' }}</p>
+                            <p class="text-lg font-medium">{{ warantyDetail.tire_info.platePart4  || '-' }}</p>
                         </div>
                     </div>
 
@@ -310,7 +310,7 @@
                                 <p class="text-xl font-bold text-black">{{ warantyDetail.claimPercent || '0' }}%</p>
                             </div>
                             <div class="text-center">
-                                <span class="block font-bold text--600">Thread Depth Dealer</span>
+                                <span class="block font-bold text--600">Tread Depth Dealer</span>
                                 <p class="text-xl font-bold text-black"> {{ warantyDetail.threadDepthMeasurementEten? Number(warantyDetail.threadDepthMeasurementEten).toFixed(2): '0.00'}}</p>
                             </div>
                             <div class="text-center">
@@ -318,7 +318,7 @@
                                 <p class="text-xl font-bold text-black">{{ warantyDetail.wornPercent || '0' }}%</p>
                             </div>
                             <div class="text-center">
-                                <span class="block font-bold text--600">Thread Depth Admin</span>
+                                <span class="block font-bold text--600">Tread Depth Admin</span>
                                 <p class="text-xl font-bold text-black">{{ warantyDetail.threadDepthMeasurementAdmin? Number(warantyDetail.threadDepthMeasurementAdmin).toFixed(2): '0.00'}}</p>
                             </div>
                         </div>
@@ -479,17 +479,27 @@
                     </div>
                     <div>
                         <span class="font-bold">Inv No</span>
-                        <p>{{ warantyDetail.reimbursement?.invNo ? warantyDetail.reimbursement.invNo : 'Pending Invoice' }}</p>
+                        <!-- View Invoice function -->
+                        <p>
+                            <span 
+                                v-if="warantyDetail.reimbursement?.invNo && warantyDetail.reimbursement.invAttachURL"
+                                class="text-blue-600 cursor-pointer"
+                                @click="viewInvoice(warantyDetail.reimbursement.invAttachURL)"
+                            >
+                                {{ warantyDetail.reimbursement.invNo }}
+                            </span>
+                            <span v-else-if="warantyDetail.reimbursement?.invNo">
+                                {{ warantyDetail.reimbursement.invNo }}
+                            </span>
+                            <span v-else>
+                                Pending Invoice
+                            </span>
+                        </p>
                     </div>
                     <div>
                         <span class="font-bold">SAP Claim No </span>
                         <p>{{ warantyDetail.reimbursement?.sapClaimNo ? warantyDetail.reimbursement.sapClaimNo : 'Pending Invoice' }}</p>
                     </div>
-                </div>
-                <!-- View Download Invoice function -->
-                <div v-if="warantyDetail.reimbursement" class="flex justify-end p-1 gap-2 mt-2">
-                    <Button v-if="warantyDetail.reimbursement.invAttachURL" icon="pi pi-eye" class="p-button-info" size="small" @click="viewInvoice(warantyDetail.reimbursement.invAttachURL)" />
-                    <!-- <Button v-if="warantyDetail.reimbursement.invAttachURL" icon="pi pi-download" class="p-button-danger" size="small" @click="downloadInvoice(warantyDetail.invAttachURL)" /> -->
                 </div>
                 <div v-if="(warantyDetail.status_string  !== 'Pending Customer Invoice') && warantyDetail.reimbursement && warantyDetail.status !=5 && canUpdate" class="flex justify-end gap-2 mt-4">
                     <Button label="Approve Invoice" class="p-button-success" size="small" @click="approveInvoice" :loading="approvingInvoice" icon="pi pi-check" />
@@ -508,16 +518,20 @@
 
                 <Dropdown 
                     v-model="selectedDamageType" 
-                    :options="listDamageType" 
-                    optionLabel="name" 
+                    :options="rejectReasons" 
+                    optionLabel="damageMode" 
                     placeholder="Select Damage Type" 
                     class="w-full" 
                     :class="{ 'p-invalid': !selectedDamageType && creatingClaim }"
                     @change="handleDamageSelect"
+                    filter
+                    filterBy="damageMode,code,grouping"
                 >
                     <template #option="slotProps">
-                        <div class="flex items-center gap-3">
-                            <div class="font-semibold">{{ slotProps.option.name }}</div>
+                        <div class="flex flex-col gap-1 py-2">
+                            <div class="font-semibold text-gray-800">{{ slotProps.option.damageMode }}</div>
+                            <div class="text-sm text-gray-600"><span class="font-medium">Code:</span> {{ slotProps.option.code }} | <span class="font-medium">Part:</span> {{ slotProps.option.part }}</div>
+                            <div class="text-xs text-gray-500">{{ slotProps.option.grouping }}</div>
                         </div>
                     </template>
                 </Dropdown>
@@ -545,7 +559,7 @@
                     <small v-if="(newClaimData.claimPercent === null || newClaimData.claimPercent === undefined) && creatingClaim" class="p-error">Claim percentage is required.</small>
                 </div>
                 <div class="field">
-                    <label class="block font-bold text-gray-700 mb-2">Thread Depth Dealer</label>
+                    <label class="block font-bold text-gray-700 mb-2">Tread Depth Dealer</label>
                     <InputNumber
                         v-model="warantyDetail.threadDepthMeasurementEten"
                         mode="decimal"
@@ -577,7 +591,7 @@
                 </div>
                 <!-- Thread Depth -->
                 <div class="field">
-                    <label class="block font-bold text-gray-700 mb-2">Thread Depth Admin *</label>
+                    <label class="block font-bold text-gray-700 mb-2">Tread Depth Admin *</label>
                     <InputNumber
                         v-model="newClaimData.threadDepth"
                         mode="decimal"
@@ -588,7 +602,7 @@
                         class="w-full"
                         :class="{ 'p-invalid': (newClaimData.threadDepth === null || newClaimData.threadDepth === undefined) && creatingClaim }"
                     />
-                    <small v-if="(newClaimData.threadDepth === null || newClaimData.threadDepth === undefined) && creatingClaim" class="p-error">Thread Depth is required.</small>
+                    <small v-if="(newClaimData.threadDepth === null || newClaimData.threadDepth === undefined) && creatingClaim" class="p-error">Tread Depth is required.</small>
                 </div>
             </div>
         </div>
@@ -678,7 +692,7 @@
     <Dialog v-model:visible="showRejectDialog" header="Reject Warranty Claim" :modal="true" class="p-fluid" :style="{ width: '40rem' }">
         <div class="field">
             <label class="block font-bold text-gray-700 mb-1">Select Rejection Reason *</label>
-            <Dropdown v-model="selectedRejectReason" :options="rejectReasons" optionLabel="damageMode" optionValue="id" placeholder="Select rejection reason" class="w-full mb-4" :class="{ 'p-invalid': !selectedRejectReason && rejecting }">
+            <Dropdown v-model="selectedRejectReason" :options="rejectReasonsTypeB"filter filterBy="damageMode,code,grouping" optionLabel="damageMode" optionValue="id" placeholder="Select rejection reason" class="w-full mb-4" :class="{ 'p-invalid': !selectedRejectReason && rejecting }">
                 <template #option="slotProps">
                     <div class="flex flex-col gap-1 py-2">
                         <div class="font-semibold text-gray-800">{{ slotProps.option.damageMode }}</div>
@@ -736,7 +750,7 @@ const showCreateReplacementDialog = ref(false);
 const showApproveDialog = ref(false);
 const loadingAction = ref(false);
 const warantyDetail = ref({});
-const warantyDetailChecking = ref({});
+// const warantyDetailChecking = ref({});
 const loading = ref(true);
 const error = ref(null);
 const saving = ref(false);
@@ -789,9 +803,10 @@ const listDamageType = [
 ];
 
 const handleDamageSelect = () => {
+    console.log(selectedDamageType.value)
     if (selectedDamageType.value) {
-        newClaimData.damageCode = selectedDamageType.value.id;
-        newClaimData.problem = selectedDamageType.value.name;
+        newClaimData.damageCode = selectedDamageType.value.code;
+        newClaimData.problem = selectedDamageType.value.damageMode;
     }
 };
 
@@ -813,6 +828,7 @@ const galleriaResponsiveOptions = ref([
 // Reject
 const showRejectDialog = ref(false);
 const rejectReasons = ref([]);
+const rejectReasonsTypeB = ref([]);
 const selectedRejectReason = ref(null);
 const rejecting = ref(false);
 
@@ -892,6 +908,7 @@ const getPhotoByType = (type) => {
 
 // Submit Claim Details
 const submitClaimDetails = async () => {
+        console.log(newClaimData);
     // Validate required fields
     if (!newClaimData.damageCode || !newClaimData.problem || newClaimData.claimPercent === null || newClaimData.threadDepth === null || newClaimData.wornPercent === null) {
         toast.add({
@@ -1187,7 +1204,23 @@ const fetchWarrantyClaim = async () => {
         if (response.data.status === 1) {
             // Map the API response structure to your component data
             const apiData = response.data.admin_data;
-            warantyDetailChecking.value = response.data.admin_data;
+            // warantyDetailChecking.value = response.data.admin_data;
+            // Prepare tire info parts
+            const tireInfo = apiData.tire_info || null;
+            let platePart1 = "-";
+            let platePart2 = "-";
+            let platePart3 = "-";
+            let platePart4 = "-";
+
+            if (tireInfo?.plateSerial) {
+                if (tireInfo.plateSerial.includes('-')) {
+                    const parts = tireInfo.plateSerial.split('-');
+                    platePart1 = parts[0] || "-";
+                    platePart2 = parts[1] || "-";
+                    platePart3 = parts[2] || "-";
+                    platePart4 = parts[3] || "-";
+                }
+            }
             warantyDetail.value = {
                 // Claim Info
                 id: apiData.claim_info?.id,
@@ -1208,7 +1241,13 @@ const fetchWarrantyClaim = async () => {
                 // Dealer Info
                 dealer_details: apiData.dealer_info?.[0] || null,
                 // Tire Info
-                tire_info: apiData.tire_info || null,
+                tire_info: {
+                    ...tireInfo,
+                    platePart1,
+                    platePart2,
+                    platePart3,
+                    platePart4
+                },
                 // Claim Detail
                 // damageCode: apiData.claim_detail?.damageCode,
                 // problem: apiData.claim_detail?.problem,
@@ -1275,6 +1314,7 @@ const fetchRejectReasons = async () => {
         const response = await api.get('rejectReasonList');
         if (response.data.status === 1) {
             rejectReasons.value = response.data.admin_data;
+            rejectReasonsTypeB.value = response.data.admin_data.filter(item => item.type === "B");
         }
     } catch (error) {
         console.error('Error fetching reject reasons:', error);
