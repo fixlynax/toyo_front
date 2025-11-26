@@ -25,9 +25,7 @@
                                 </InputIcon>
                                 <InputText v-model="filters['global'].value" placeholder="Quick Search" class="w-full" />
                             </IconField>
-                            
-                            <Button type="button" icon="pi pi-cog" @click="sortMenu.toggle($event)" />
-                            <Menu ref="sortMenu" :model="sortItems" :popup="true" />
+
                         </div>
                         <div class="flex justify-end gap-2"  v-if="statusTabs[activeTabIndex]?.label === 'New' && canUpdate">
                             <Button type="button" label="Export" icon="pi pi-file-export" class="p-button-success" :loading="exportLoading1" @click="handleExport1"/>
@@ -58,7 +56,7 @@
             <template #empty> No return orders found. </template>
             <template #loading> Loading return orders data. Please wait. </template>
 
-            <Column v-if="canUpdate" header="Export All" style="min-width: 8rem">
+            <Column v-if="canUpdate" header="Export All" style="min-width: 8rem" sortable>
                 <template #header>
                     <div class="flex justify-center">
                     <Checkbox
@@ -80,46 +78,46 @@
                     </div>
                 </template>
             </Column>
-             <Column field="return_orderNo_ref" header="Ref No" dataType="date" style="min-width: 8rem">
+             <Column field="return_orderNo_ref" header="Ref No" dataType="date" style="min-width: 8rem" sortable>
                 <template #body="{ data }">
                     <RouterLink :to="`/scm/detailReturnOrder/${data.id}`" class="hover:underline font-bold text-primary-400">
                     {{ data.return_orderNo_ref }}
                     </RouterLink>
                 </template>
             </Column>
-            <Column field="dealerName" header="Ship-To" dataType="date" style="min-width: 8rem">
+            <Column field="dealerName" header="Ship-To" dataType="date" style="min-width: 8rem" sortable>
                 <template #body="{ data }">
                     <span class="font-bold">{{ data?.dealerName || '-' }}</span>
                     <br>
                      {{ data?.custAccountNo ?? '-' }}
                 </template>
             </Column>
-            <Column field="storageLocation" header="Storage Location" style="min-width: 10rem">
+            <Column field="storageLocation" header="Storage Location" style="min-width: 10rem" sortable>
                 <template #body="{ data }">
                     {{ data?.storageLocation ?? '-' }}
                 </template>
             </Column>
-            <Column field="city" header="City" style="min-width: 10rem">
+            <Column field="city" header="City" style="min-width: 10rem"sortable>
                 <template #body="{ data }">
                     {{ data?.city ?? '-' }}
                 </template>
             </Column>
-            <Column field="pickup_datetime" header="Pickup Date" style="min-width: 10rem">
+            <Column field="pickup_datetime" header="Pickup Date" style="min-width: 10rem" sortable>
                 <template #body="{ data }">
                     {{ data.delivery_information?.pickup_datetime ? formatDate(data.delivery_information.pickup_datetime) : 'No date assigned' }}
                 </template>
             </Column>
-            <Column field="receive_datetime" header="Receiving Date" style="min-width: 10rem">
+            <Column field="receive_datetime" header="Receiving Date" style="min-width: 10rem" sortable>
                 <template #body="{ data }">
                     {{ data.delivery_information?.receive_datetime ? formatDate(data.delivery_information.receive_datetime) : 'No date assigned' }}
                 </template>
             </Column>
-            <Column field="length" header="Return Items" style="min-width: 12rem">
+            <Column field="return_order_array.length" header="Return Items" style="min-width: 12rem" sortable>
                 <template #body="{ data }">
                         {{ data.return_order_array?.length || 0 }}
                 </template>
             </Column>
-            <Column header="Status" style="min-width: 8rem">
+            <Column field="delivery_status" header="Status" style="min-width: 8rem" >
                 <template #body="{ data }">
                     <Tag :value="data.delivery_status" :severity="getStatusSeverity(data.delivery_status)" />
                 </template>
@@ -155,42 +153,6 @@ const activeTabIndex = ref(0);
 const filters = ref({
     global: { value: null, matchMode: FilterMatchMode.CONTAINS }
 });
-
-const sortMenu = ref();
-const sortBy = (field, order) => {
-    filteredList.value.sort((a, b) => {
-        if (a[field] < b[field]) return order === 'asc' ? -1 : 1;
-        if (a[field] > b[field]) return order === 'asc' ? 1 : -1;
-        return 0;
-    });
-};
-const sortItems = ref([
-    {
-        label: 'Sort by Ref No (A-Z)',
-        icon: 'pi pi-sort-alpha-down',
-        command: () => sortBy('return_orderNo_ref', 'asc')
-    },
-    {
-        label: 'Sort by Ref No (Z-A)',
-        icon: 'pi pi-sort-alpha-up',
-        command: () => sortBy('return_orderNo_ref', 'desc')
-    },
-    {
-        label: 'Sort by Cust Acc No (A-Z)',
-        icon: 'pi pi-tag',
-        command: () => sortBy('custAccountNo', 'asc')
-    },
-    {
-        label: 'Sort by Company Name',
-        icon: 'pi pi-globe',
-        command: () => sortBy('companyName1', 'asc')
-    },
-    {
-        label: 'Sort by Status',
-        icon: 'pi pi-check-circle',
-        command: () => sortBy('orderstatus', 'asc')
-    }
-]);
 
 // const statusOptions = [
 //     { label: 'Pending', value: 0 },

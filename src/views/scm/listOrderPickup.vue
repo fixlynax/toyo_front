@@ -28,8 +28,6 @@
                                 <InputText v-model="filters['global'].value" placeholder="Quick Search" class="w-full" />
                             </IconField>
 
-                            <Button type="button" icon="pi pi-cog" @click="sortMenu.toggle($event)" />
-                            <Menu ref="sortMenu" :model="sortItems" :popup="true" />
                         </div>
 
                     </div>
@@ -38,32 +36,32 @@
                 <template #empty> No Order Pickup found. </template>
                 <template #loading> Loading Order Pickup data. Please wait. </template>
 
-                <Column field="created" header="Create Date" style="min-width: 8rem">
+                <Column field="created" header="Create Date" style="min-width: 8rem" sortable>
                     <template #body="{ data }">
                         {{ formatDate(data.created) }}
                     </template>
                 </Column>
 
-                <Column field="do_no" header="SAP DO No" style="min-width: 8rem">
+                <Column field="do_no" header="SAP DO No" style="min-width: 8rem" sortable>
                     <template #body="{ data }">
                         <RouterLink :to="`/scm/detailOrderPickup/${data.id}`" class="hover:underline font-bold text-primary-400">
                             {{ data.do_no ? data.do_no : '-'}}
                         </RouterLink>
                     </template>
                 </Column>
-                <Column field="companyName1" header="Customer Name" style="min-width: 12rem">
+                <Column field="eten_user.companyName1" header="Customer Name" style="min-width: 12rem" sortable>
                     <template #body="{ data }">
                     <span class="font-bold">{{` ${data.eten_user.companyName1} ${data.eten_user.companyName2} ${data.eten_user.companyName3} ${data.eten_user.companyName4} ` }}</span>
                     <br>
                      {{ data.eten_user.custAccountNo }}
                     </template>
                 </Column>
-                <Column field="storageLocation" header="Storage Location" style="min-width: 10rem">
+                <Column field="eten_user.storageLocation" header="Storage Location" style="min-width: 10rem" sortable>
                     <template #body="{ data }">
                         {{  data.eten_user.storageLocation ? data.eten_user.storageLocation : '-'  }}
                     </template>
                 </Column>
-                <Column field="" header="Collector" style="min-width: 12rem">
+                <Column field="driverInformation.driverName" header="Collector" style="min-width: 12rem" sortable>
                     <template #body="{ data }">
                         <div v-if="data.driverInformation">
                             <div class="flex flex-col leading-relaxed text-sm text-gray-700">
@@ -81,12 +79,12 @@
                         <div v-else>Not Assigned</div>
                     </template>
                 </Column>
-                <Column field="deliveryType" header="Pickup Type" style="min-width: 10rem">
+                <Column field="deliveryType" header="Pickup Type" style="min-width: 10rem" sortable>
                     <template #body="{ data }">
                         {{ data.deliveryType }}
                     </template>
                 </Column>
-                <Column field="pickup_datetime" header="Pickup Date" style="min-width: 10rem">
+                <Column field="driverInformation.pickup_datetime" header="Pickup Date" style="min-width: 10rem" sortable>
                     <template #body="{ data }">
                         {{ data.driverInformation?.pickup_datetime ? formatDate(data.driverInformation.pickup_datetime) : 'Not Assigned' }}
                     </template>
@@ -98,7 +96,7 @@
                 </Column>
                 <Column 
                     v-if="showPickupColumn && canUpdate"
-                    field="pickup_datetime" 
+                    field="" 
                     header="Action" 
                     style="min-width: 10rem">
                     <template #body="{ data }">
@@ -138,43 +136,7 @@ const sortMenu = ref();
 const filters = ref({
     global: { value: null, matchMode: FilterMatchMode.CONTAINS }
 });
-const sortBy = (field, order) => {
-  filteredList.value = [...filteredList.value].sort((a, b) => {
-    // Helper to get nested value
-    const getField = (obj) => {
-      return field.split('.').reduce((acc, key) => (acc ? acc[key] : ''), obj) ?? '';
-    };
 
-    const aVal = getField(a).toString().toLowerCase();
-    const bVal = getField(b).toString().toLowerCase();
-
-    if (aVal < bVal) return order === 'asc' ? -1 : 1;
-    if (aVal > bVal) return order === 'asc' ? 1 : -1;
-    return 0;
-  });
-};
-const sortItems = ref([
-    {
-        label: 'Sort by SAP DO No (A-Z)',
-        icon: 'pi pi-sort-alpha-down',
-        command: () => sortBy('do_no', 'asc')
-    },
-    {
-        label: 'Sort by SAP DO No (Z-A)',
-        icon: 'pi pi-sort-alpha-up',
-        command: () => sortBy('do_no', 'desc')
-    },
-    {
-        label: 'Sort by Cust Acc No (A-Z)',
-        icon: 'pi pi-tag',
-        command: () => sortBy('eten_user.custAccountNo', 'asc')
-    },
-    {
-        label: 'Sort by Company Name',
-        icon: 'pi pi-globe',
-        command: () => sortBy('eten_user.companyName1', 'asc')
-    },
-]);
 const showPickupColumn = computed(() => {
     return filteredList.value.some(item => !item.driverInformation?.pickup_datetime);
 });

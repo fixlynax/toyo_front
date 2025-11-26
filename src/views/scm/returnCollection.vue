@@ -29,8 +29,6 @@
                             </InputIcon>
                             <InputText v-model="filters['global'].value" placeholder="Quick Search" class="w-full" />
                         </IconField>
-                        <Button type="button" icon="pi pi-cog" @click="sortMenu.toggle($event)" />
-                        <Menu ref="sortMenu" :model="sortItems" :popup="true" />
                     </div>
 
                     <div class="flex justify-end gap-2"  v-if="statusTabs[activeTabIndex]?.label === 'New' && canUpdate">
@@ -82,25 +80,25 @@
                     </div>
                 </template>
             </Column>
-            <Column field="created" header="Create Date" style="min-width: 8rem">
+            <Column field="created" header="Create Date" style="min-width: 8rem" sortable>
                 <template #body="{ data }">
                     {{ formatDate(data?.created) ?? '-' }}
                 </template>
             </Column>
 
-            <Column field="claimRefNo" header="Ref No" style="min-width: 8rem">
+            <Column field="claimRefNo" header="Ref No" style="min-width: 8rem" sortable>
                 <template #body="{ data }">
                     <RouterLink :to="`/scm/detailReturnList/${data?.id}`" class="hover:underline font-bold text-primary">
                         {{ data?.claimRefno ?? '-' }}
                     </RouterLink>
                 </template>
             </Column>
-            <Column field="delivery_information.pickup_datetime" header="Delivery Date" style="min-width: 8rem">
+            <Column field="scheduleDeliveryDate" header="Delivery Date" style="min-width: 8rem" sortable>
                 <template #body="{ data }">
                      {{ data.scheduleDeliveryDate ? formatDate(data.scheduleDeliveryDate) : 'Not Assigned' }}
                 </template>
             </Column>
-            <Column field="receive_datetime" header="Delivered Date" style="min-width: 8rem">
+            <Column field="deliveryDate" header="Delivered Date" style="min-width: 8rem" sortable>
                 <template #body="{ data }">
                     {{ data.deliveryDate && data.deliveryTime ? formatDate(data.deliveryDate) + ' ' + formatTime(data.deliveryTime): 'Not Assigned'}}
                 </template>
@@ -148,7 +146,6 @@ const importInput2 = ref();
 // Data variables
 const loading = ref(false);
 const collectionList = ref([]);
-const sortMenu = ref();
 
 const activeTabIndex = ref(0);
 const selectedExportIds = ref(new Set());
@@ -206,33 +203,6 @@ const toggleSelectAll = () => {
   }
 };
 
-const sortBy = (field, order) => {
-  collectionList.value = [...collectionList.value].sort((a, b) => {
-    // Helper to get nested value
-    const getField = (obj) => {
-      return field.split('.').reduce((acc, key) => (acc ? acc[key] : ''), obj) ?? '';
-    };
-
-    const aVal = getField(a).toString().toLowerCase();
-    const bVal = getField(b).toString().toLowerCase();
-
-    if (aVal < bVal) return order === 'asc' ? -1 : 1;
-    if (aVal > bVal) return order === 'asc' ? 1 : -1;
-    return 0;
-  });
-};
-const sortItems = ref([
-    {
-        label: 'Sort by Ref No (A-Z)',
-        icon: 'pi pi-sort-alpha-down',
-        command: () => sortBy('claimRefNo', 'asc')
-    },
-    {
-        label: 'Sort by Ref No (Z-A)',
-        icon: 'pi pi-sort-alpha-up',
-        command: () => sortBy('claimRefNo', 'desc')
-    }
-]);
 // =========================
 // Fetch data on mount
 // =========================
