@@ -123,7 +123,7 @@ const refreshData = async () => {
 <template>
     <div class="card">
         <div class="flex justify-between items-center mb-4">
-            <div class="text-2xl font-bold text-gray-800">List Other</div>
+            <div class="text-2xl font-bold text-black">List Other</div>
             <div class="flex gap-2">
                 <Button icon="pi pi-refresh" class="p-button-outlined p-button-sm" @click="refreshData" :disabled="loading" v-tooltip="'Refresh data'" />
                 <Button type="button" icon="pi pi-upload" label="Upload" class="p-button-outlined p-button-sm" />
@@ -149,12 +149,15 @@ const refreshData = async () => {
             :paginator="true"
             :rows="10"
             dataKey="id"
-            class="rounded-table"
+            class="rounded-table text-sm"
             :rowHover="true"
             :filters="filters1"
-            :rowsPerPageOptions="[5, 10, 20, 50]"
-            paginatorTemplate="FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink RowsPerPageDropdown"
+            :rowsPerPageOptions="[10, 20, 50, 100]"
+            removableSort
+            sortField="docsDate"
+            :sortOrder="1"
             currentPageReportTemplate="Showing {first} to {last} of {totalRecords} entries"
+            paginatorTemplate="CurrentPageReport FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink RowsPerPageDropdown"
         >
             <template #header>
                 <div class="flex items-center justify-between gap-4 w-full flex-wrap">
@@ -171,43 +174,43 @@ const refreshData = async () => {
             </template>
 
             <template #empty>
-                <div class="text-center py-8 text-gray-500">
+                <div class="text-center py-8 text-black">
                     <i class="pi pi-file-excel text-4xl mb-2"></i>
                     <div>No other files records found.</div>
                 </div>
             </template>
 
-            <Column field="docsDate" header="Document Date" style="min-width: 8rem">
+            <Column field="docsDate" header="Document Date" style="min-width: 8rem" sortable>
                 <template #body="{ data }">
                     <span class="font-medium">{{ data.docsDate }}</span>
                 </template>
             </Column>
 
-            <Column field="docsNo" header="Document No" style="min-width: 10rem">
+            <Column field="docsNo" header="Document No" style="min-width: 10rem" sortable>
                 <template #body="{ data }">
-                    <span class="font-mono text-sm">{{ data.docsNo }}</span>
+                    <span class="font-medium">{{ data.docsNo }}</span>
                 </template>
             </Column>
 
-            <Column field="dealerId" header="Customer Acc No" style="min-width: 10rem">
+            <Column field="dealerId" header="Customer Acc No" style="min-width: 10rem" sortable>
                 <template #body="{ data }">
-                    <span v-if="data.dealerId" class="font-mono">{{ data.dealerId }}</span>
-                    <span v-else class="text-gray-400">-</span>
+                    <span v-if="data.dealerId" class="font-medium">{{ data.dealerId }}</span>
+                    <span v-else class="text-black">-</span>
                 </template>
             </Column>
 
             <Column field="dealerName" header="Customer Name" style="min-width: 10rem">
                 <template #body="{ data }">
                     <span v-if="data.dealerName">{{ data.dealerName }}</span>
-                    <span v-else class="text-gray-400">-</span>
+                    <span v-else class="text-black">-</span>
                 </template>
             </Column>
 
-            <Column header="Download" style="min-width: 6rem; text-align: center">
+            <Column header="Action" style="min-width: 6rem; text-align: left" sortable>
                 <template #body="{ data }">
                     <Button
                         icon="pi pi-download"
-                        class="p-button-sm"
+                        class="p-button-xm"
                         :severity="data.download ? 'success' : 'secondary'"
                         :disabled="!data.download || downloadLoading === data.id"
                         :loading="downloadLoading === data.id"
@@ -225,17 +228,17 @@ const refreshData = async () => {
     border-radius: 12px;
     overflow: hidden;
     border: 1px solid #e5e7eb;
-    
+
     .p-datatable-header {
         border-top-left-radius: 12px;
         border-top-right-radius: 12px;
     }
-    
+
     .p-paginator-bottom {
         border-bottom-left-radius: 12px;
         border-bottom-right-radius: 12px;
     }
-    
+
     .p-datatable-thead > tr > th {
         &:first-child {
             border-top-left-radius: 12px;
@@ -244,16 +247,16 @@ const refreshData = async () => {
             border-top-right-radius: 12px;
         }
     }
-    
+
     .p-datatable-tbody > tr:last-child > td {
         &:first-child {
             border-bottom-left-radius: 0;
         }
         &:last-child {
-            border-bottom-right-radius:0;
+            border-bottom-right-radius: 0;
         }
     }
-    
+
     .p-datatable-tbody > tr.p-datatable-emptymessage > td {
         border-bottom-left-radius: 12px;
         border-bottom-right-radius: 12px;
