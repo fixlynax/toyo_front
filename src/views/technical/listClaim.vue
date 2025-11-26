@@ -195,7 +195,6 @@ onMounted(fetchClaims);
                                 </InputIcon>
                                 <InputText v-model="filters['global'].value" placeholder="Quick Search" class="w-full" />
                             </IconField>
-                            <Button type="button" icon="pi pi-cog" class="p-button" />
                         </div>
 
                         <div class="flex items-center gap-2 ml-auto">
@@ -206,7 +205,7 @@ onMounted(fetchClaims);
 
                 <template #empty>No warranty claims found.</template>
 
-                <Column field="refNo" header="Ref No" style="min-width: 15rem">
+                <Column field="refNo" header="Ref No" style="min-width: 15rem" sortable>
                     <template #body="{ data }">
                         <RouterLink :to="`/technical/detailWarantyClaim/${data.id}`" class="hover:underline font-bold text-blue-600">
                             {{ data.refNo }}
@@ -214,11 +213,11 @@ onMounted(fetchClaims);
                     </template>
                 </Column>
 
-                <Column field="submissionDate" header="Submission Date" style="min-width: 15rem">
+                <Column field="submissionDate" header="Submission Date" style="min-width: 15rem" sortable>
                     <template #body="{ data }">{{ data?.submissionDate ? formatDate(data.submissionDate) : 'Not Assigned' }}</template>
                 </Column>
 
-                <Column header="Dealer Name" style="min-width: 12rem">
+                <Column field="dealerName" header="Dealer Name" style="min-width: 12rem" sortable>
                     <template #body="{ data }">
                         <div class="flex flex-col">
                             <!-- Top -->
@@ -228,10 +227,10 @@ onMounted(fetchClaims);
                         </div>
                     </template>
                 </Column>
-                <Column field="dealer_sales_office" header="Dealer Sales Office" style="min-width: 15rem">
+                <Column field="dealer_sales_office" header="Dealer Sales Office" style="min-width: 15rem" sortable>
                     <template #body="{ data }">{{ data.dealer_sales_office }}</template>
                 </Column>
-                <Column field="claimType" header="Claim Type" style="min-width: 15rem">
+                <Column field="claimType" header="Claim Type" style="min-width: 15rem" sortable>
                     <template #body="{ data }">{{ data.claimType }}</template>
                 </Column>
 
@@ -241,7 +240,7 @@ onMounted(fetchClaims);
                     </template>
                 </Column>
 
-                <Column field="stage" header="Stage" style="min-width: 10rem">
+                <Column field="stage" header="Stage" style="min-width: 10rem" sortable>
                     <template #body="{ data }">
                         {{ data.stage }}
                     </template>

@@ -24,9 +24,6 @@
                             </InputIcon>
                             <InputText v-model="filters['global'].value" placeholder="Quick Search" class="w-full" />
                         </IconField>
-
-                        <Button type="button" icon="pi pi-cog" @click="sortMenu.toggle($event)" />
-                        <Menu ref="sortMenu" :model="sortItems" :popup="true" />
                     </div>
 
                     <!-- Right: Export & Batch Buttons -->
@@ -41,25 +38,25 @@
             <template #empty> No data found. </template>
             <template #loading> Loading data. Please wait... </template>
 
-            <Column field="pattern" header="Pattern" style="min-width: 8rem">
+            <Column field="pattern" header="Pattern" style="min-width: 8rem" sortable>
                 <template #body="{ data }">
                     {{ data.pattern }}
                 </template>
             </Column>
 
-            <Column field="brand" header="Brand" style="min-width: 8rem">
+            <Column field="brand" header="Brand" style="min-width: 8rem" sortable>
                 <template #body="{ data }">
                     {{ data.brand }}
                 </template>
             </Column>
 
-            <Column field="model" header="Model" style="min-width: 8rem">
+            <Column field="model" header="Model" style="min-width: 8rem" sortable>
                 <template #body="{ data }">
                     {{ data.model }}
                 </template>
             </Column>
 
-            <Column field="size" header="Size" style="min-width: 12rem">
+            <Column field="section_width" header="Size" style="min-width: 12rem" sortable>
                 <template #body="{ data }">
                     <div class="flex flex-col leading-relaxed text-sm text-gray-700">
                         <div class="flex">
@@ -117,38 +114,6 @@ const filters = ref({
     global: { value: null, matchMode: FilterMatchMode.CONTAINS }
 });
 
-const sortMenu = ref();
-const sortItems = ref([
-    {
-        label: 'Sort by ID (A-Z)',
-        icon: 'pi pi-sort-alpha-down',
-        command: () => sortBy('id', 'asc')
-    },
-    {
-        label: 'Sort by ID (Z-A)',
-        icon: 'pi pi-sort-alpha-up',
-        command: () => sortBy('id', 'desc')
-    },
-    {
-        label: 'Sort by Pattern (A-Z)',
-        icon: 'pi pi-tag',
-        command: () => sortBy('pattern', 'asc')
-    },
-    {
-        label: 'Sort by Origin',
-        icon: 'pi pi-globe',
-        command: () => sortBy('construction', 'asc')
-    }
-]);
-
-// Sorting helper function
-const sortBy = (field, order) => {
-    tyres.value.sort((a, b) => {
-        if (a[field] < b[field]) return order === 'asc' ? -1 : 1;
-        if (a[field] > b[field]) return order === 'asc' ? 1 : -1;
-        return 0;
-    });
-};
 const fetchExportOE = async () => {
     try {
         loading.value = true;

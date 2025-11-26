@@ -253,7 +253,6 @@ const getStatusColor = (status) => {
                                 </InputIcon>
                                 <InputText v-model="filters['global'].value" placeholder="Quick Search" class="w-full" />
                             </IconField>
-                            <Button type="button" icon="pi pi-cog" class="p-button" />
                         </div>
 
                         <!-- Right: Export & Template -->
@@ -268,7 +267,7 @@ const getStatusColor = (status) => {
                 </template>
 
                 <!-- Columns -->
-                <Column field="appointmentCode" header="Appointment Code" style="min-width: 12rem">
+                <Column field="appointmentCode" header="Appointment Code" style="min-width: 12rem" sortable>
                     <template #body="{ data }">
                         <RouterLink :to="`/technical/detailAppointment/${data.id}`" class="hover:underline font-bold text-primary-400">
                             {{ data.appointmentCode }}
@@ -276,7 +275,7 @@ const getStatusColor = (status) => {
                     </template>
                 </Column>
 
-                <Column header="Customer Info" style="min-width: 14rem">
+                <Column field="dealerShop" header="Customer Info" style="min-width: 14rem" sortable>
                     <template #body="{ data }">
                         <div class="flex flex-col">
                             <!-- Top -->
@@ -288,7 +287,7 @@ const getStatusColor = (status) => {
                     </template>
                 </Column>
 
-                <Column header="Consumer Info" style="min-width: 14rem">
+                <Column field="customerName" header="Consumer Info" style="min-width: 14rem" sortable>
                     <template #body="{ data }">
                         <div class="flex flex-col">
                             <!-- Top -->
@@ -300,19 +299,19 @@ const getStatusColor = (status) => {
                     </template>
                 </Column>
 
-                <Column field="requestDate" header="Request Date" style="min-width: 10rem">
+                <Column field="requestDate" header="Request Date" style="min-width: 10rem" sortable>
                     <template #body="{ data }">
                         {{ formatDate(data.requestDate) || 'Not Request' }}
                     </template>
                 </Column>
 
-                <Column field="requestSession" header="Request Session" style="min-width: 8rem">
+                <Column field="requestSession" header="Request Session" style="min-width: 8rem" sortable>
                     <template #body="{ data }">
                         {{ data.requestSession || 'Not Request' }}
                     </template>
                 </Column>
 
-                <Column field="bookDateTime" header="Scheduled Date/Time" style="min-width: 12rem">
+                <Column field="appointmentDate" header="Scheduled Date/Time" style="min-width: 12rem" sortable>
                     <template #body="{ data }">
                         {{ formatDateFull(data?.appointmentDate && data?.appointmentTime ? `${data.appointmentDate} ${data.appointmentTime}` : null) || 'Not Scheduled' }}
                     </template>

@@ -24,10 +24,6 @@
                             </InputIcon>
                             <InputText v-model="filters['global'].value" placeholder="Quick Search" class="w-full" />
                         </IconField>
-
-                        <!-- Sort Menu -->
-                        <Button type="button" icon="pi pi-cog" @click="sortMenu.toggle($event)" />
-                        <Menu ref="sortMenu" :model="sortItems" :popup="true" />
                     </div>
 
                     <!-- Right: Export & Create Buttons -->
@@ -65,25 +61,25 @@
                 </template>
             </Column>
 
-            <Column field="pattern_code" header="Pattern Code" style="min-width: 8rem">
+            <Column field="pattern_code" header="Pattern Code" style="min-width: 8rem" sortable>
                 <template #body="{ data }">
                      <RouterLink :to="`/technical/detailPattern/${data.pattern_id}`" class="hover:underline font-bold text-primary-400">
                     <span class="font-semibold ml-1">{{ data.pattern_code }}</span>
                     </RouterLink>
                 </template>
             </Column>
-            <Column field="mfg_code" header="MFG Code" style="min-width: 8rem">
+            <Column field="mfg_code" header="MFG Code" style="min-width: 8rem" sortable>
                 <template #body="{ data }">
                     <span class="font-semibold ml-1">{{ data.mfg_code || '-' }}</span>
                 </template>
             </Column>
-            <Column field="pattern_name" header="Pattern Name" style="min-width: 8rem">
+            <Column field="pattern_name" header="Pattern Name" style="min-width: 8rem" sortable>
                 <template #body="{ data }">
                     <span class="font-semibold ml-1">{{ data.pattern_name || '-' }}</span>
                 </template>
             </Column>
 
-            <Column field="created" header="Created Date" style="min-width: 10rem">
+            <Column field="created" header="Created Date" style="min-width: 10rem" sortable>
                 <template #body="{ data }">
                     <span class="text-gray-600">{{ formatDate(data.created) }}</span>
                 </template>
@@ -120,55 +116,6 @@ const filters = ref({
     global: { value: null, matchMode: FilterMatchMode.CONTAINS }
 });
 
-const sortMenu = ref();
-const sortItems = ref([
-    {
-        label: 'Sort by Pattern Code (A-Z)',
-        icon: 'pi pi-sort-alpha-down',
-        command: () => sortBy('pattern_code', 'asc')
-    },
-    {
-        label: 'Sort by Pattern Code (Z-A)',
-        icon: 'pi pi-sort-alpha-up',
-        command: () => sortBy('pattern_code', 'desc')
-    },
-    {
-        label: 'Sort by Pattern Name (A-Z)',
-        icon: 'pi pi-tag',
-        command: () => sortBy('pattern_name', 'asc')
-    },
-    {
-        label: 'Sort by Pattern Name (Z-A)',
-        icon: 'pi pi-tag',
-        command: () => sortBy('pattern_name', 'desc')
-    },
-    {
-        label: 'Sort by Created Date (Newest)',
-        icon: 'pi pi-calendar',
-        command: () => sortBy('created', 'desc')
-    },
-    {
-        label: 'Sort by Created Date (Oldest)',
-        icon: 'pi pi-calendar',
-        command: () => sortBy('created', 'asc')
-    }
-]);
-
-const sortBy = (field, order) => {
-    patterns.value.sort((a, b) => {
-        let aValue = a[field];
-        let bValue = b[field];
-        
-        // Handle null values
-        if (aValue === null) aValue = '';
-        if (bValue === null) bValue = '';
-        
-        if (aValue < bValue) return order === 'asc' ? -1 : 1;
-        if (aValue > bValue) return order === 'asc' ? 1 : -1;
-        return 0;
-    });
-};
-
 const showImageDialog = ref(false);
 const selectedImage = ref(null);
 
@@ -183,19 +130,15 @@ const getImagePath = (path) => {
     return path.replace(/^public\//, '/');
 };
 
-const formatDate = (dateString) => {
-    if (!dateString) return '-';
-    try {
-        const date = new Date(dateString);
-        return date.toLocaleDateString('en-US', {
-            year: 'numeric',
-            month: 'short',
-            day: 'numeric'
-        });
-    } catch (error) {
-        return 'Invalid Date';
+function formatDate(dateString) {
+    if (!dateString) return '';
+    const date = new Date(dateString);
+    return date.toLocaleString('en-MY', {
+        year: 'numeric',
+        month: '2-digit',
+        day: '2-digit',
+    });
     }
-};
 
 // Export function to CSV
 const exportToCSV = () => {
