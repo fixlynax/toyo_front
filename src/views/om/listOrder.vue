@@ -178,11 +178,14 @@ const clearDateRange = () => {
                 dataKey="id"
                 :rowHover="true"
                 :filters="filters1"
+                :rowsPerPageOptions="[10, 20, 50, 100]"
                 filterDisplay="menu"
                 :globalFilterFields="['orderNo', 'custAccountNo', 'companyName', 'shipToAccountNo', 'created', 'orderType', 'deliveryType']"
                 class="rounded-table"
                 sortField="created"
                 :sortOrder="-1"
+                currentPageReportTemplate="Showing {first} to {last} of {totalRecords} entries"
+                paginatorTemplate="CurrentPageReport FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink RowsPerPageDropdown"
             >
                 <template #header>
                     <div class="flex flex-col gap-4 w-full">

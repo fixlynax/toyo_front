@@ -15,6 +15,8 @@ const listData = ref([]);
 const loading = ref(true);
 const downloadLoading = ref(null);
 const error = ref(null);
+const uploadLoading = ref(false);
+const fileInputRef = ref(null);
 
 // API service functions for Other Files
 const OtherService = {
@@ -71,6 +73,28 @@ const OtherService = {
             console.error('Error downloading file:', error);
             throw error;
         }
+    },
+
+    async uploadFile(file) {
+        try {
+            const formData = new FormData();
+            formData.append('file', file);
+
+            const response = await api.postExtra('credit/upload', formData, {
+                headers: {
+                    'Content-Type': 'multipart/form-data'
+                }
+            });
+
+            if (response.data.status === 1) {
+                return response.data;
+            } else {
+                throw new Error(response.data.message || 'Upload failed');
+            }
+        } catch (error) {
+            console.error('Error uploading file:', error);
+            throw error;
+        }
     }
 };
 
@@ -88,6 +112,48 @@ const handleDownload = async (data) => {
         // You can add a toast notification here
     } finally {
         downloadLoading.value = null;
+    }
+};
+
+const handleUploadClick = () => {
+    fileInputRef.value?.click();
+};
+
+const handleFileUpload = async (event) => {
+    const file = event.target.files[0];
+    if (!file) return;
+
+    // Validate file size (5MB)
+    if (file.size > 5 * 1024 * 1024) {
+        alert('File size must be less than 5MB');
+        return;
+    }
+
+    // Validate file type (optional - you can customize allowed types)
+    const allowedTypes = ['application/pdf', 'image/jpeg', 'image/png', 'application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'];
+    if (!allowedTypes.includes(file.type)) {
+        alert('Please select a valid file type (PDF, JPEG, PNG, DOC, DOCX)');
+        return;
+    }
+
+    uploadLoading.value = true;
+    try {
+        const result = await OtherService.uploadFile(file);
+        console.log('Upload successful:', result);
+
+        // Refresh the list after successful upload
+        await refreshData();
+
+        // Show success message (you can replace with toast notification)
+        alert('File uploaded successfully!');
+
+        // Reset file input
+        event.target.value = '';
+    } catch (error) {
+        console.error('Upload failed:', error);
+        alert(`Upload failed: ${error.message}`);
+    } finally {
+        uploadLoading.value = false;
     }
 };
 
@@ -126,7 +192,8 @@ const refreshData = async () => {
             <div class="text-2xl font-bold text-black">List Other</div>
             <div class="flex gap-2">
                 <Button icon="pi pi-refresh" class="p-button-outlined p-button-sm" @click="refreshData" :disabled="loading" v-tooltip="'Refresh data'" />
-                <Button type="button" icon="pi pi-upload" label="Upload" class="p-button-outlined p-button-sm" />
+                <Button type="button" icon="pi pi-upload" label="Upload" class="p-button-outlined p-button-sm" @click="handleUploadClick" :loading="uploadLoading" :disabled="uploadLoading" />
+                <input type="file" ref="fileInputRef" @change="handleFileUpload" accept=".pdf,.jpg,.jpeg,.png,.doc,.docx" style="display: none" />
             </div>
         </div>
 

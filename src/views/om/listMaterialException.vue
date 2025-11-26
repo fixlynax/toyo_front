@@ -19,6 +19,8 @@
                     responsiveLayout="scroll"
                     class="rounded-table"
                     v-model:expandedRows="expandedRows"
+                    currentPageReportTemplate="Showing {first} to {last} of {totalRecords} entries"
+                    paginatorTemplate="CurrentPageReport FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink RowsPerPageDropdown"
                 >
                     <template #header>
                         <div class="flex items-center justify-between gap-4 w-full flex-wrap">

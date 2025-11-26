@@ -141,7 +141,7 @@ onBeforeMount(() => {
                 :value="listData"
                 :paginator="true"
                 :rows="10"
-                :rowsPerPageOptions="[5, 10, 20]"
+                :rowsPerPageOptions="[10, 25, 50, 100]"
                 dataKey="id"
                 :rowHover="true"
                 :filters="filters"
@@ -150,6 +150,8 @@ onBeforeMount(() => {
                 :sortOrder="-1"
                 :globalFilterFields="['returnRequestNo', 'custAccountNo', 'customerName', 'reasonCode', 'orderStatus']"
                 class="rounded-table"
+                currentPageReportTemplate="Showing {first} to {last} of {totalRecords} entries"
+            paginatorTemplate="CurrentPageReport FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink RowsPerPageDropdown"
             >
                 <!-- Header -->
                 <template #header>

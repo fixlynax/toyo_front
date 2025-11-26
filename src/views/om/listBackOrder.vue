@@ -10,7 +10,7 @@
             :value="filteredList"
             :paginator="true"
             :rows="10"
-            :rowsPerPageOptions="[5, 10, 20]"
+            :rowsPerPageOptions="[10, 25, 50, 100]"
             dataKey="id"
             :rowHover="true"
             :filters="filters"
@@ -20,6 +20,8 @@
             stripedRows
             sortField="created"
             :sortOrder="-1"
+            currentPageReportTemplate="Showing {first} to {last} of {totalRecords} entries"
+            paginatorTemplate="CurrentPageReport FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink RowsPerPageDropdown"
             class="rounded-table"
         >
             <template #header>
