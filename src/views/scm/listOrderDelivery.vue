@@ -15,7 +15,7 @@
                 :loading="loading"
                 :filters="filters"
                 filterDisplay="menu"
-                :globalFilterFields="['do_no', 'eten_user.custAccountNo', 'storagelocation' ,  'eten_user.companyName1', 'eten_user.companyName2', 'eten_user.companyName3', 'eten_user.companyName4', 'eten_user.city', 'eten_user.state', 'deliveryDate', 'orderstatus']"
+                :globalFilterFields="['do_no', 'eten_user.custAccountNo', 'storagelocation' ,  'eten_user.companyName1', 'eten_user.companyName2', 'eten_user.companyName3', 'eten_user.companyName4', 'eten_user.city', 'eten_user.state', 'deliveryDate',, 'scm_deliver_detail.scheduled_delivery_time', 'scm_deliver_detail.delivered_datetime', 'orderstatus']"
             >
                 <template #header>
                     <div class="flex items-center justify-between gap-4 w-full flex-wrap">
@@ -26,8 +26,6 @@
                                 </InputIcon>
                                 <InputText v-model="filters['global'].value" placeholder="Quick Search" class="w-full" />
                             </IconField>
-                            <Button type="button" icon="pi pi-cog" @click="sortMenu.toggle($event)" />
-                            <Menu ref="sortMenu" :model="sortItems" :popup="true" />
                         </div>
 
                         <div class="flex justify-end gap-2"  v-if="statusTabs[activeTabIndex]?.label === 'Pending' && canUpdate">
@@ -57,7 +55,7 @@
 
                 <template #empty> No Order Delivery found. </template>
                 <template #loading> Loading Order Delivery data. Please wait. </template>
-                <Column v-if="canUpdate" header="Export All" style="min-width: 8rem">
+                <Column v-if="canUpdate" header="Export All" style="min-width: 8rem" >
                     <template #header>
                         <div class="flex justify-center">
                         <Checkbox
@@ -79,20 +77,20 @@
                         </div>
                     </template>
                 </Column>
-                <Column field="created" header="Create Date" style="min-width: 8rem">
+                <Column field="created" header="Create Date" style="min-width: 8rem" sortable>
                     <template #body="{ data }">
                         {{ formatDate(data.created) }}
                     </template>
                 </Column>
 
-                <Column field="do_no" header="SAP DO No" style="min-width: 8rem">
+                <Column field="do_no" header="SAP DO No" style="min-width: 8rem" sortable>
                     <template #body="{ data }">
                         <RouterLink :to="`/scm/detailOrderDelivery/${data.id}`" class="hover:underline font-bold text-primary">
                             {{ data.do_no ? data.do_no : '-' }}
                         </RouterLink>
                     </template>
                 </Column>
-                <Column field="companyName1" header="Customer Name" style="min-width: 12rem">
+                <Column field="eten_user.companyName1" header="Customer Name" style="min-width: 12rem" sortable>
                     <template #body="{ data }">
                         <span class="font-bold">{{` ${data.eten_user.companyName1} ${data.eten_user.companyName2} ${data.eten_user.companyName3} ${data.eten_user.companyName4} ` }}</span>
                     <br>
@@ -100,49 +98,49 @@
                     </template>
                 </Column>
 
-                <Column field="storagelocation" header="Storage Location" style="min-width: 12rem">
+                <Column field="storagelocation" header="Storage Location" style="min-width: 12rem" sortable>
                     <template #body="{ data }">
                          {{`${data.storagelocation}` }}
                     </template>
                 </Column>
 
-                <Column field="city" header="City" style="min-width: 12rem">
+                <Column field="eten_user.city" header="City" style="min-width: 12rem" sortable>
                     <template #body="{ data }">
                          {{`${data.eten_user.city}` }}
                     </template>
                 </Column>
-                <Column field="state" header="State" style="min-width: 12rem">
+                <Column field="eten_user.state" header="State" style="min-width: 12rem" sortable>
                     <template #body="{ data }">
                          {{`${data.eten_user.state}` }}
                     </template>
                 </Column>
 
-                <Column field="orderDesc" header="Order Type" style="min-width: 10rem">
+                <Column field="orderDesc" header="Order Type" style="min-width: 10rem" sortable>
                     <template #body="{ data }">
                         {{ data.orderDesc }}
                     </template>
                 </Column>
 
 
-                <Column field="deliveryDate" header="ETA Date" style="min-width: 10rem">
+                <Column field="deliveryDate" header="ETA Date" style="min-width: 10rem" sortable>
                     <template #body="{ data }">
                         {{ data.deliveryDate ? formatDate(data.deliveryDate) : 'Not Assigned' }}
                     </template>
                 </Column>
 
-                <Column field="scheduled_delivery_time" header="Planend Date" style="min-width: 10rem">
+                <Column field="scm_deliver_detail.scheduled_delivery_time" header="Planend Date" style="min-width: 10rem" sortable>
                     <template #body="{ data }">
                         {{ data.scm_deliver_detail?.scheduled_delivery_time ? formatDate(data.scm_deliver_detail.scheduled_delivery_time) : 'Not Assigned' }}
                     </template>
                 </Column>
 
-                <Column field="collectedDatetime" header="Delivered Date" style="min-width: 10rem">
+                <Column field="scm_deliver_detail.delivered_datetime" header="Delivered Date" style="min-width: 10rem" sortable>
                     <template #body="{ data }">
                           {{ data.scm_deliver_detail?.delivered_datetime? formatDate(data.scm_deliver_detail.delivered_datetime): 'Not Assigned' }}
                     </template>
                 </Column>
 
-                <Column field="orderstatus" header="Status" style="min-width: 8rem">
+                <Column field="status" header="Status" style="min-width: 8rem">
                     <template #body="{ data }">
                         <Tag :value="getStatusLabel2(data.status)" :severity="getStatusSeverity2(data.status)" />
                     </template>
@@ -173,7 +171,6 @@ const importInput1 = ref();
 const importInput2 = ref();
 
 // Data variables
-const sortMenu = ref();
 const activeTabIndex = ref(0);
 const selectedExportIds = ref(new Set());
 
@@ -246,43 +243,6 @@ const toggleSelectAll = () => {
   }
 };
 
-const sortBy = (field, order) => {
-  filteredList.value = [...filteredList.value].sort((a, b) => {
-    // Helper to get nested value
-    const getField = (obj) => {
-      return field.split('.').reduce((acc, key) => (acc ? acc[key] : ''), obj) ?? '';
-    };
-
-    const aVal = getField(a).toString().toLowerCase();
-    const bVal = getField(b).toString().toLowerCase();
-
-    if (aVal < bVal) return order === 'asc' ? -1 : 1;
-    if (aVal > bVal) return order === 'asc' ? 1 : -1;
-    return 0;
-  });
-};
-const sortItems = ref([
-    {
-        label: 'Sort by SAP DO No (A-Z)',
-        icon: 'pi pi-sort-alpha-down',
-        command: () => sortBy('do_no', 'asc')
-    },
-    {
-        label: 'Sort by SAP DO No (Z-A)',
-        icon: 'pi pi-sort-alpha-up',
-        command: () => sortBy('do_no', 'desc')
-    },
-    {
-        label: 'Sort by Cust Acc No (A-Z)',
-        icon: 'pi pi-tag',
-        command: () => sortBy('eten_user.custAccountNo', 'asc')
-    },
-    {
-        label: 'Sort by Company Name',
-        icon: 'pi pi-globe',
-        command: () => sortBy('eten_user.companyName1', 'asc')
-    }
-]);
 
 onMounted(async () => {
     fetchData();

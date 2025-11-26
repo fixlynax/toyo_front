@@ -83,33 +83,6 @@ const toggleSelectAll = () => {
   }
 };
 
-const sortBy = (field, order) => {
-  filteredList.value = [...filteredList.value].sort((a, b) => {
-    // Helper to get nested value
-    const getField = (obj) => {
-      return field.split('.').reduce((acc, key) => (acc ? acc[key] : ''), obj) ?? '';
-    };
-
-    const aVal = getField(a).toString().toLowerCase();
-    const bVal = getField(b).toString().toLowerCase();
-
-    if (aVal < bVal) return order === 'asc' ? -1 : 1;
-    if (aVal > bVal) return order === 'asc' ? 1 : -1;
-    return 0;
-  });
-};
-const sortItems = ref([
-    {
-        label: 'Sort by Ref No (A-Z)',
-        icon: 'pi pi-sort-alpha-down',
-        command: () => sortBy('claimRefno', 'asc')
-    },
-    {
-        label: 'Sort by Ref No (Z-A)',
-        icon: 'pi pi-sort-alpha-up',
-        command: () => sortBy('claimRefno', 'desc')
-    }
-]);
 const selectedRows = ref([]);
 const filterStatus = ref(null);
 const showFilterMenu = ref(false);
@@ -371,6 +344,14 @@ const fetchReport = async (id) => {
         if (response.data.status === 1) {
             generateReport(response.data.report_data);
         }
+        else{
+        toast.add({
+            severity: 'error',
+            summary: 'Failed',
+            detail: response.data.message || 'Failed to fetch report',
+            life: 3000
+        });
+        }
     } catch (error) {
         console.error('Error fetching report:', error);
     } finally {
@@ -399,6 +380,7 @@ const generateReport = (report) => {
                 .sub-header {
                     font-size: 14px;
                     margin-top: -5px;
+                    font-weight:bold;
                 }
                 .title-box {
                     border: 2px solid #000;
@@ -623,8 +605,6 @@ onMounted(async () => {
                             </InputIcon>
                             <InputText v-model="filters['global'].value" placeholder="Quick Search" class="w-full" />
                         </IconField>
-                        <Button type="button" icon="pi pi-cog" @click="sortMenu.toggle($event)" />
-                        <Menu ref="sortMenu" :model="sortItems" :popup="true" />
                     </div>
 
                     <div class="flex justify-end gap-2"  v-if="statusTabs[activeTabIndex]?.label === 'New' && canUpdate">
@@ -676,24 +656,24 @@ onMounted(async () => {
                     </div>
                 </template>
             </Column>
-            <Column field="createDate" header="Create Date" style="min-width: 8rem">
+            <Column field="created" header="Create Date" style="min-width: 8rem" sortable>
                 <template #body="{ data }">
                     {{ formatDate(data.created) }}
                 </template>
             </Column>
-            <Column field="collectRef" header="Ref No" style="min-width: 8rem">
+            <Column field="claimRefno" header="Ref No" style="min-width: 8rem" sortable>
                 <template #body="{ data }">
                     <RouterLink :to="`/scm/detailCollection/${data.id}`" class="hover:underline font-bold text-primary">
                         {{ data.claimRefno }}
                     </RouterLink>
                 </template>
             </Column>
-            <Column field="collectedDatetime" header="Collect Date" style="min-width: 10rem">
+            <Column field="collectDate" header="Collect Date" style="min-width: 10rem" sortable>
                 <template #body="{ data }">
                     {{ data.collectDate && data.collectTime ? formatDate(data.collectDate) + ' ' + formatTime(data.collectTime): 'Not Assigned'}}
                 </template>
             </Column>
-            <Column field="returnDate" header="Receive Date" style="min-width: 10rem">
+            <Column field="reachWH" header="Receive Date" style="min-width: 10rem" sortable>
                 <template #body="{ data }">
                     {{ data.reachWH ? formatDate(data.reachWH) : 'Not Assigned' }}
                 </template>

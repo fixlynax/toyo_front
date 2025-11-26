@@ -25,8 +25,6 @@
                             <InputText v-model="filters['global'].value" placeholder="Quick Search" class="w-full" />
                         </IconField>
                         
-                        <Button type="button" icon="pi pi-cog" @click="sortMenu.toggle($event)" />
-                        <Menu ref="sortMenu" :model="sortItems" :popup="true" />
                     </div>
                     
                     <!-- Right: Export & Batch Buttons -->
@@ -105,7 +103,7 @@
                     </div>
                 </template>
             </Column>
-            <Column field="materialid" header="Material ID" style="min-width: 6rem">
+            <Column field="materialid" header="Material ID" style="min-width: 6rem" sortable>
                 <template #body="{ data }">
                     <div class="flex flex-col items-start gap-1">
                             {{ data.materialid }}
@@ -113,19 +111,19 @@
                 </template>
             </Column>
 
-            <Column field="pattern" header="Pattern" style="min-width: 8rem">
+            <Column field="pattern" header="Pattern" style="min-width: 8rem" sortable>
                 <template #body="{ data }">
                         {{ data.pattern }}
                 </template>
             </Column>
 
-            <Column field="origin" header="Origin" style="min-width: 8rem">
+            <Column field="origin" header="Origin" style="min-width: 8rem" sortable>
                 <template #body="{ data }">
                     {{ data.origin }}
                 </template>
             </Column>
 
-            <Column field="size" header="Size" style="min-width: 12rem">
+            <Column field="sectionwidth" header="Size" style="min-width: 12rem" sortable>
                 <template #body="{ data }">
                     <div class="flex flex-col leading-relaxed text-sm text-gray-700">
                         <div class="flex">
@@ -230,43 +228,6 @@ const filters = ref({
     global: { value: null, matchMode: FilterMatchMode.CONTAINS }
 });
 
-const sortMenu = ref();
-const sortItems = ref([
-    {
-        label: 'Sort by Material ID (A-Z)',
-        icon: 'pi pi-sort-alpha-down',
-        command: () => sortBy('materialid', 'asc')
-    },
-    {
-        label: 'Sort by Material ID (Z-A)',
-        icon: 'pi pi-sort-alpha-up',
-        command: () => sortBy('materialid', 'desc')
-    },
-    {
-        label: 'Sort by Pattern (A-Z)',
-        icon: 'pi pi-tag',
-        command: () => sortBy('pattern_name', 'asc')
-    },
-    {
-        label: 'Sort by Origin',
-        icon: 'pi pi-globe',
-        command: () => sortBy('origin', 'asc')
-    },
-    {
-        label: 'Sort by Status',
-        icon: 'pi pi-check-circle',
-        command: () => sortBy('isSell', 'asc')
-    }
-]);
-
-// Sorting helper function
-const sortBy = (field, order) => {
-    tyres.value.sort((a, b) => {
-        if (a[field] < b[field]) return order === 'asc' ? -1 : 1;
-        if (a[field] > b[field]) return order === 'asc' ? 1 : -1;
-        return 0;
-    });
-};
 
 // Fetch data function
 const fetchData = async () => {
