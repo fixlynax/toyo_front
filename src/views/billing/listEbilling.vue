@@ -125,7 +125,7 @@ const refreshData = async () => {
 <template>
     <div class="card">
         <div class="flex justify-between items-center mb-4">
-            <div class="text-2xl font-bold text-gray-800">List E-Billing</div>
+            <div class="text-2xl font-bold text-black">List E-Billing</div>
             <Button icon="pi pi-refresh" class="p-button-outlined p-button-sm" @click="refreshData" :disabled="loading" v-tooltip="'Refresh data'" />
         </div>
 
@@ -148,12 +148,15 @@ const refreshData = async () => {
             :paginator="true"
             :rows="10"
             dataKey="id"
-            class="rounded-table"
+            class="rounded-table text-sm"
             :rowHover="true"
             :filters="filters1"
-            :rowsPerPageOptions="[5, 10, 20, 50]"
-            paginatorTemplate="FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink RowsPerPageDropdown"
+            :rowsPerPageOptions="[10, 20, 50, 100]"
+            removableSort
+            sortField="docsDate"
+            :sortOrder="1"
             currentPageReportTemplate="Showing {first} to {last} of {totalRecords} entries"
+            paginatorTemplate="CurrentPageReport FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink RowsPerPageDropdown"
         >
             <template #header>
                 <div class="flex items-center justify-between gap-4 w-full flex-wrap">
@@ -164,61 +167,60 @@ const refreshData = async () => {
                             </InputIcon>
                             <InputText v-model="filters1['global'].value" placeholder="Quick Search..." class="w-full" />
                         </IconField>
-                        <Button type="button" icon="pi pi-cog" class="p-button-outlined" v-tooltip="'Table settings'" />
                     </div>
                 </div>
             </template>
 
             <template #empty>
-                <div class="text-center py-8 text-gray-500">
+                <div class="text-center py-8 text-black">
                     <i class="pi pi-file-excel text-4xl mb-2"></i>
                     <div>No e-billing records found.</div>
                 </div>
             </template>
 
-            <Column field="docsDate" header="Document Date" style="min-width: 8rem">
+            <Column field="docsDate" header="Document Date" style="min-width: 8rem" sortable>
                 <template #body="{ data }">
                     <span class="font-medium">{{ data.docsDate }}</span>
                 </template>
             </Column>
 
-            <Column field="docsNo" header="Document No" style="min-width: 10rem">
+            <Column field="docsNo" header="Document No" style="min-width: 10rem" sortable>
                 <template #body="{ data }">
-                    <span class="font-mono text-sm">{{ data.docsNo }}</span>
+                    <span class="font-medium">{{ data.docsNo }}</span>
                 </template>
             </Column>
 
-            <Column sortable field="docsType" header="Type" style="min-width: 8rem">
+            <Column field="docsType" header="Document Type" style="min-width: 8rem" sortable>
                 <template #body="{ data }">
                     <Tag :value="data.docsType" :severity="data.docsType === 'Invoice' ? 'success' : data.docsType === 'Credit Note' ? 'warning' : 'info'" />
                 </template>
             </Column>
 
-            <Column field="referenceDocsNo" header="Reference Doc" style="min-width: 8rem">
+            <Column field="referenceDocsNo" header="Reference Doc No" style="min-width: 8rem" sortable>
                 <template #body="{ data }">
                     <span v-if="data.referenceDocsNo" class="font-mono text-sm">{{ data.referenceDocsNo }}</span>
-                    <span v-else class="text-gray-400">-</span>
+                    <span v-else class="text-black">-</span>
                 </template>
             </Column>
 
-            <Column field="dealerId" header="Customer Acc No" style="min-width: 10rem">
+            <Column field="dealerId" header="Customer Acc No" style="min-width: 10rem" sortable>
                 <template #body="{ data }">
-                    <span class="font-mono">{{ data.dealerId }}</span>
+                    <span class="font-medium">{{ data.dealerId }}</span>
                 </template>
             </Column>
 
-            <Column field="dealerName" header="Customer Name" style="min-width: 10rem">
+            <Column field="dealerName" header="Customer Name" style="min-width: 10rem" sortable>
                 <template #body="{ data }">
                     <span v-if="data.dealerName">{{ data.dealerName }}</span>
-                    <span v-else class="text-gray-400">-</span>
+                    <span v-else class="text-black">-</span>
                 </template>
             </Column>
 
-            <Column header="Download" style="min-width: 6rem; text-align: center">
+            <Column header="Action" style="min-width: 6rem; text-align: left">
                 <template #body="{ data }">
                     <Button
                         icon="pi pi-download"
-                        class="p-button-sm"
+                        class="p-button-xm"
                         :severity="data.download ? 'success' : 'secondary'"
                         :disabled="!data.download || downloadLoading === data.id"
                         :loading="downloadLoading === data.id"
