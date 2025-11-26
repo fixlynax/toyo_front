@@ -23,7 +23,7 @@
                             </div>
                         </div>
 
-                        <LoadingPage v-if="loading" :message="'Loading News...'" :sub-message="'Fetching list announcements'" />
+                        <LoadingPage v-if="loading" :message="'Loading Sales Program...'" :sub-message="'Fetching program details'" />
 
                         <!-- Error State -->
                         <div v-else-if="error" class="text-center py-12 text-red-600">
@@ -34,13 +34,7 @@
 
                         <!-- Content -->
                         <div v-else class="grid grid-cols-1 gap-4 mt-4">
-                            <img 
-                                :src="salesProgram.imageUrl" 
-                                :alt="salesProgram.title" 
-                                class="rounded-xl shadow-sm object-cover w-full h-80" 
-                                @error="handleImageError" 
-                                v-if="salesProgram.imageUrl && !imageLoading" 
-                            />
+                            <img :src="salesProgram.imageUrl" :alt="salesProgram.title" class="rounded-xl shadow-sm object-cover w-full h-80" @error="handleImageError" v-if="salesProgram.imageUrl && !imageLoading" />
                             <div v-if="imageLoading" class="rounded-xl shadow-sm w-full h-80 bg-gray-200 flex items-center justify-center">
                                 <i class="pi pi-spin pi-spinner text-4xl text-gray-400"></i>
                             </div>
@@ -111,15 +105,13 @@
                     <div class="flex items-center gap-3">
                         <div>
                             <div class="text-2xl font-bold text-black-800">🎯 FOC Promotion Criteria</div>
-                            <div class="text-sm text-black-600 mt-1">Total {{ criteriaList.length }} criteria patterns</div>
                         </div>
                     </div>
-                    <div class="flex items-center gap-3">
+                    <!-- <div class="flex items-center gap-3">
                         <div class="text-right">
-                            <div class="text-sm font-medium text-black-600">Program Status</div>
                             <Tag :value="salesProgram.status === 1 ? 'Active' : 'Inactive'" :severity="salesProgram.status === 1 ? 'success' : 'danger'" class="font-semibold" />
                         </div>
-                    </div>
+                    </div> -->
                 </div>
 
                 <!-- Free Material Information -->
@@ -182,56 +174,39 @@
                 </div>
 
                 <!-- Criteria Patterns List -->
-                <div class="border-t pt-6">
+                <div class="border border-black-200 rounded-xl p-5 pt-6">
                     <div class="flex items-center justify-between mb-6">
                         <div>
-                            <h3 class="text-xl font-bold text-black-800">🎨 Eligible Patterns</h3>
-                            <p class="text-sm text-black-600 mt-1">Tire patterns that qualify for this promotion</p>
+                            <h3 class="text-xl font-bold text-black-800">🎨 Eligible Materials</h3>
+                            <p class="text-sm text-black-600 mt-1">Materials that qualify for this promotion</p>
                         </div>
-                        <Badge :value="`${criteriaList.length} patterns`" severity="info" />
+                        <Tag :value="`${criteriaList.length} materials`" severity="info" />
                     </div>
 
-                    <div v-if="criteriaList.length" class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+                    <div v-if="criteriaList.length" class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
                         <div v-for="(criteria, criteriaIndex) in criteriaList" :key="criteria.id" class="border border-black-200 rounded-xl p-5 bg-white shadow-sm hover:shadow-md transition-all duration-300 hover:border-blue-300">
-                            <div class="flex items-start justify-between mb-4">
-                                <div class="flex items-center gap-3">
+                            <div class="flex items-start justify-between">
+                                <div class="flex items-center gap-4">
                                     <div>
-                                        <h4 class="font-bold text-black-800">Pattern {{ criteriaIndex + 1 }}</h4>
+                                        <h4 class="font-bold text-primary">{{ criteria.materialid }}</h4>
                                     </div>
-                                </div>
-                                <div class="flex flex-col items-end gap-1">
-                                    <Tag :value="criteria.status === 1 ? 'Active' : 'Inactive'" :severity="criteria.status === 1 ? 'success' : 'danger'" class="text-xs" />
                                 </div>
                             </div>
 
                             <div class="space-y-3">
                                 <div class="flex items-center justify-between text-xm">
-                                    <span class="text-black-600">Pattern Code:</span>
-                                    <span class="font-mono font-semibold text-black-800">{{ criteria.pattern }}</span>
+                                    <span class="text-black-600">Material Description:</span>
+                                    <span class="font-mono font-semibold text-black-800">{{ criteria.materialdesc }}</span>
                                 </div>
-                                <div class="flex items-center justify-between text-xm">
-                                    <span class="text-black-600">Pattern Name:</span>
-                                    <span class="font-semibold text-black-800">{{ criteria.pattern_name }}</span>
-                                </div>
-                                <div class="flex items-center justify-between text-xm">
-                                    <span class="text-black-600">Rim Size:</span>
-                                    <span class="font-semibold text-blue-600">{{ criteria.size }}"</span>
-                                </div>
-                            </div>
-
-                            <div class="mt-4 pt-3 border-t border-black-100 text-xm text-black-500">
-                                <div class="flex justify-between">
-                                    <span>Created:</span>
-                                    <span>{{ formatDateTime(criteria.created) }}</span>
-                                </div>
+                                <!-- You can add more material details here if available from API -->
                             </div>
                         </div>
                     </div>
 
                     <div v-else class="text-center py-12 border-2 border-dashed border-black-300 rounded-xl bg-black-50">
                         <i class="pi pi-inbox text-5xl text-black-300 mb-4"></i>
-                        <p class="text-lg font-medium text-black-500 mb-2">No Criteria Patterns</p>
-                        <p class="text-sm text-black-400 max-w-md mx-auto">No tire patterns have been added to this promotion yet. Add patterns to define which tires qualify for this FOC offer.</p>
+                        <p class="text-lg font-medium text-black-500 mb-2">No Criteria Materials</p>
+                        <p class="text-sm text-black-400 max-w-md mx-auto">No materials have been added to this promotion yet. Add materials to define which items qualify for this FOC offer.</p>
                     </div>
                 </div>
             </div>
@@ -257,9 +232,11 @@ const imageLoading = ref(false);
 const salesProgram = ref({});
 const criteriaList = ref([]);
 
-// Fixed image processing function - using getPrivateFile
+// Enhanced image processing function
 const processPrivateImages = async (programData) => {
+    // If no image or image is null, set placeholder and return
     if (!programData || !programData.image) {
+        programData.imageUrl = 'https://via.placeholder.com/800x400?text=No+Image+Available';
         return programData;
     }
 
@@ -279,18 +256,11 @@ const processPrivateImages = async (programData) => {
         if (blobUrl) {
             programData.imageUrl = blobUrl;
         } else {
-            // Fallback to placeholder if API returns null/undefined
             programData.imageUrl = 'https://via.placeholder.com/800x400?text=Image+Not+Found';
         }
     } catch (error) {
         console.error('Error loading private image:', error);
-        // Fallback strategies
-        if (imageUrl.includes('salesprogramphotos')) {
-            // Try to construct URL for sales program photos
-            programData.imageUrl = `${window.location.origin}/${imageUrl}`;
-        } else {
-            programData.imageUrl = 'https://via.placeholder.com/800x400?text=Image+Not+Found';
-        }
+        programData.imageUrl = 'https://via.placeholder.com/800x400?text=Image+Not+Found';
     } finally {
         imageLoading.value = false;
     }
@@ -302,8 +272,6 @@ const processPrivateImages = async (programData) => {
 const handleImageError = (event) => {
     console.warn('Image failed to load:', event.target.src);
     event.target.src = 'https://via.placeholder.com/800x400?text=Image+Not+Found';
-
-    // Update the salesProgram data as well
     salesProgram.value.imageUrl = 'https://via.placeholder.com/800x400?text=Image+Not+Found';
 };
 
@@ -326,7 +294,12 @@ const fetchSalesProgram = async () => {
 
         // Now set the reactive data
         salesProgram.value = programData;
+
+        // Map the criteria list to match frontend expectations
         criteriaList.value = programData.salesProgramFOC || [];
+
+        console.log('Loaded sales program:', programData);
+        console.log('Criteria list:', criteriaList.value);
 
         showToast('success', 'Success', 'Sales program data loaded successfully');
     } catch (err) {
