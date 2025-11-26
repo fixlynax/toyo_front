@@ -18,6 +18,13 @@
                     <div class="flex items-center gap-3">
                         <Button icon="pi pi-arrow-left" class="p-button-text p-button-secondary" @click="$router.back()" />
                         <div class="text-2xl font-bold text-gray-800">Warranty Details</div>
+                        <Button v-if="(warantyDetail.status ==6 || warantyDetail.status ==5)"
+                        label="Download Report"
+                        icon="pi pi-print" 
+                        class="p-button-text p-button-sm" 
+                        @click="fetchReport(warantyDetail.id)" 
+                        tooltip="Print Report"
+                        />
                     </div>
                    <div class="inline-flex items-center gap-2">
                        <Tag :value="getStatusText(warantyDetail.status)" :severity="getStatusSeverity(warantyDetail.status)" />
@@ -1798,7 +1805,260 @@ function getStatusSeverity(status) {
     };
     return severityMap[status] || 'secondary';
 }
+const fetchReport = async (id) => {
+    try {
+        loading.value = true;
+        const response = await api.get(`warrantyReport/claim/${id}`);
+        if (response.data.status === 1) {
+            console.log(response.data)
+            generateReport(response.data.admin_data);
+        }else{
+            toast.add({
+            severity: 'error',
+            summary: 'Failed',
+            detail: response.data.message || 'Failed to fetch report',
+            life: 3000
+        });
+        }
+    } catch (error) {
+        console.error('Error fetching report:', error);
+    } finally {
+        loading.value = false;
+    }
+}
 
+const generateReport = (report) => {
+    const printWindow = window.open('', '_blank');
+    printWindow.document.write(`
+        <html>
+        <head>
+            <title>Warranty Claim Form</title>
+            <style>
+                body { 
+                    font-family: Arial, 
+                    sans-serif; font-size: 13px; 
+                    padding: 20px; color: #000; 
+                }
+
+                .top-header {                     
+                    font-size: 32px;
+                    font-weight: 900;
+                    color: #d69c00;
+                    margin-bottom: 5px; 
+                }
+                .company-info { 
+                    font-size: 14px;
+                    margin-top: 5px;
+                    margin-bottom: 5px;
+                    font-weight:bold;
+                }
+                .sub-company-info { 
+                    font-size: 10px;
+                    margin-top: 5px;
+                    margin-bottom: 5px;
+                }
+
+                table { 
+                    width: 100%;
+                    border-collapse: collapse; 
+                    font-size: 12px; 
+                }
+                th, td { 
+                    border: 1px solid #000; 
+                    padding: 6px; 
+                }
+                .small-table td { 
+                    padding: 4px;
+                }
+                .small-table td table td {
+                    padding: 2px;
+                }
+                .item-table td { 
+                 text-align: center;
+                }
+                .section-title { 
+                    margin-top: 20px; 
+                    font-weight: bold; 
+                }
+                .note-wrapper {
+                    padding-top: 20px; 
+                }
+                .note-box {
+                    page-break-inside: avoid;
+                    break-inside: avoid;
+                    border: 1px solid #000;
+                    padding: 10px;
+                    font-size: 12px;
+                    text-align: justify;
+                    line-height: 1.4;
+                }
+                .signature-section {
+                    page-break-inside: avoid;
+                    break-inside: avoid;
+                    // margin-top: 20px;
+                    display: flex;
+                    padding-top: 20px;
+                    justify-content: space-between;
+                }
+                .signature-box {
+                    page-break-inside: avoid;
+                    break-inside: avoid;
+                    height: 180px;
+                    width: 30%;
+                    border: 1px solid #000;
+                    padding: 10px;
+                    font-size: 12px;
+                    display: flex;
+                    flex-direction: column;   /* stack items vertically */
+                }
+                .signature-line {
+                    margin-top: auto;         /* pushes signature to bottom */
+                    border-top: 1px solid #000;
+                    width: 100%;
+                    padding-top: 5px;
+                    text-align: center;
+                }
+            </style>
+        </head>
+        <body>
+
+            <div class="top-header">TOYO TIRES</div>
+            <div class="company-info">
+                Toyo Tyre Sales And Marketing Malaysia Sdn Bhd<br>
+            </div>
+            <hr style="border-width: 3px ;color: black;">
+            <div class="sub-company-info">
+                Level 2, Wisma Comcor, No.37, Jalan Pulas UH6, Section U1, Temasya Industrial Park, 40150 Shah Alam, Selangor Darul Ehsan, Malaysia
+            </div>
+            <div class="sub-company-info">
+                Tel: +603-5569 3788 &nbsp; | &nbsp; Fax: +603-5569 3809
+            </div>
+
+            <table class="small-table">
+                <tr>
+                    <td><strong>CUSTOMER :</strong> ${report.customer.companyName}</td>
+                    <td><strong>BRANCH :</strong> ${report.branch.companyName}</td>
+                    <td><strong>WARRANTY CLAIM FORM</strong></td>
+                </tr>
+                <tr>
+                    <td>
+                        <strong>PAY TO :</strong><br>
+                        ${[
+                            report.customer.companyAddress1,
+                            report.customer.companyAddress2,
+                            report.customer.companyAddress3,
+                            report.customer.companyAddress4
+                        ].filter(x => x && x.trim() !== "").join("<br>")}
+                    </td>
+
+                    <td>
+                        <strong>SHIP TO :</strong><br>
+                        ${[
+                            report.branch.companyAddress1,
+                            report.branch.companyAddress2,
+                            report.branch.companyAddress3,
+                            report.branch.companyAddress4
+                        ].filter(x => x && x.trim() !== "").join("<br>")}
+                    </td>
+
+                    <td>
+                        <table style="border:0;">
+                            <tr>
+                                <td style="border:0;width: 100px;">WCF NO</td>
+                                <td style="border:0; width:10px;">:</td>
+                                <td style="border:0;">${report.claim_ref_no}</td>
+                            </tr>
+                            <tr>
+                                <td style="border:0;">CLAIM STATUS</td>
+                                <td style="border:0;">:</td>
+                                <td style="border:0;">COMPLETED</td>
+                            </tr>
+                            <tr>
+                                <td style="border:0;">CLAIM DATE</td>
+                                <td style="border:0;">:</td>
+                                <td style="border:0;">${report.claim_date}</td>
+                            </tr>
+                        </table>
+                    </td>
+                </tr>
+            </table>
+
+            <br>
+
+            <table class="item-table">
+                <tr>
+                    <th>No</th>
+                    <th>Material Code</th>
+                    <th>Material Description</th>
+                    <th>Warranty Code</th>
+                    <th>Worn %</th>
+                    <th>Claim %</th>
+                    <th>Claim Qty</th>
+                    <th>Serial No</th>
+                    <th>Reject Reason</th>
+                    <th>Remarks</th>
+                </tr>
+
+                <tr>
+                    <td>1</td>
+                    <td>${report.material?.materialid || '-'}</td>
+                    <td>${report.material?.materialDesc || '-'}</td>
+                    <td>${report.warranty_code || '-'}</td>
+                    <td>${report.worn_percent || '-'}</td>
+                    <td>${report.claim_percent || '-'}</td>
+                    <td>${report.claim_qty || '-'}</td>
+                    <td>${report.serial_no || '-'}</td>
+                    <td>${report.reject_reason || '-'}</td>
+                    <td>${report.remarks || ''}</td>
+                </tr>
+            </table>
+            <div class="note-wrapper">
+                <div class="note-box">
+                    <strong>NOTE</strong><br>
+                    WE HAVE EXAMINED THE ABOVE ITEMS AND THE ABOVE CONCESSIONS HAS/HAVE BEEN GRANTED.
+                    CHEQUE WILL BE SENT TO YOU IN DUE COURSE. N.A. MEANS “NO ALLOWANCE”, BECAUSE TYRE/TUBE IS EITHER OVERAGE,
+                    ACCIDENTALLY DAMAGED OR DEEMED NON-DEFECTIVE. IN SUCH INSTANCE, THESE TYRES/TUBES ARE RETURNED TO YOU.
+                    WHEN AN ALLOWANCE IS GRANTED, THESE TYRES/TUBES BECOME THE PROPERTY OF TOYO TYRE.
+                </div>
+            </div>
+
+            <div class="signature-section">
+
+                <div class="signature-box">
+                    <strong>ADJUSTED BY</strong><br>
+                    ${report.adjustor.role}<br><br>
+                    <div>NAME : ${report.adjustor.fullName}</div><br>
+                    <div>DATE :${report.adjustor.approve_on}</div><br>
+                    <div class="signature-line">Signature</div>
+                </div>
+
+                <div class="signature-box">
+                    <strong>APPROVED BY</strong><br>
+                    ${report.approver.role}<br><br>
+                    <div>NAME :  ${report.approver.fullName}</div><br>
+                    <div>DATE : ${report.approver.approve_on}</div><br>
+                    <div class="signature-line">Signature</div>
+                </div>
+                            
+                <div class="signature-box">
+                    <strong>DEALER RECEIVED BY</strong><br>
+                    NAME : <br>
+                    <div class="signature-line">Signature</div>
+                </div>
+
+            </div>
+
+        </body>
+        </html>
+    `);
+
+    printWindow.document.close();
+
+    printWindow.onload = () => {
+        // printWindow.print();
+        // printWindow.close();
+    };
+};
 // Lifecycle
 onMounted(() => {
     fetchWarrantyClaim();

@@ -371,6 +371,14 @@ const fetchReport = async (id) => {
         if (response.data.status === 1) {
             generateReport(response.data.report_data);
         }
+        else{
+        toast.add({
+            severity: 'error',
+            summary: 'Failed',
+            detail: response.data.message || 'Failed to fetch report',
+            life: 3000
+        });
+        }
     } catch (error) {
         console.error('Error fetching report:', error);
     } finally {
@@ -399,6 +407,7 @@ const generateReport = (report) => {
                 .sub-header {
                     font-size: 14px;
                     margin-top: -5px;
+                    font-weight:bold;
                 }
                 .title-box {
                     border: 2px solid #000;
