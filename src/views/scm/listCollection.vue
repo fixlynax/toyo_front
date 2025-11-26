@@ -83,33 +83,6 @@ const toggleSelectAll = () => {
   }
 };
 
-const sortBy = (field, order) => {
-  filteredList.value = [...filteredList.value].sort((a, b) => {
-    // Helper to get nested value
-    const getField = (obj) => {
-      return field.split('.').reduce((acc, key) => (acc ? acc[key] : ''), obj) ?? '';
-    };
-
-    const aVal = getField(a).toString().toLowerCase();
-    const bVal = getField(b).toString().toLowerCase();
-
-    if (aVal < bVal) return order === 'asc' ? -1 : 1;
-    if (aVal > bVal) return order === 'asc' ? 1 : -1;
-    return 0;
-  });
-};
-const sortItems = ref([
-    {
-        label: 'Sort by Ref No (A-Z)',
-        icon: 'pi pi-sort-alpha-down',
-        command: () => sortBy('claimRefno', 'asc')
-    },
-    {
-        label: 'Sort by Ref No (Z-A)',
-        icon: 'pi pi-sort-alpha-up',
-        command: () => sortBy('claimRefno', 'desc')
-    }
-]);
 const selectedRows = ref([]);
 const filterStatus = ref(null);
 const showFilterMenu = ref(false);
@@ -364,6 +337,243 @@ const fetchData = async () => {
         loading.value = false;
     }
 }
+const fetchReport = async (id) => {
+    try {
+        loading.value = true;
+        const response = await api.get(`warrantyReport/ctc/${id}`);
+        if (response.data.status === 1) {
+            generateReport(response.data.report_data);
+        }
+        else{
+        toast.add({
+            severity: 'error',
+            summary: 'Failed',
+            detail: response.data.message || 'Failed to fetch report',
+            life: 3000
+        });
+        }
+    } catch (error) {
+        console.error('Error fetching report:', error);
+    } finally {
+        loading.value = false;
+    }
+}
+const generateReport = (report) => {
+    const printWindow = window.open('', '_blank');
+
+    printWindow.document.write(`
+        <html>
+        <head>
+            <title>CTC Collection - ${report.claim_no}</title>
+            <style>
+                body {
+                    font-family: Arial, sans-serif;
+                    padding: 20px;
+                    color: #000;
+                }
+                .header-logo {
+                    font-size: 32px;
+                    font-weight: 900;
+                    color: #d69c00;
+                    margin-bottom: 5px;
+                }
+                .sub-header {
+                    font-size: 14px;
+                    margin-top: -5px;
+                    font-weight:bold;
+                }
+                .title-box {
+                    border: 2px solid #000;
+                    padding: 8px;
+                    text-align: center;
+                    font-size: 18px;
+                    font-weight: bold;
+                    margin-top: 10px;
+                }
+                .flex-box {
+                    display: flex;
+                    border: 1px solid #000;
+                    margin-top: 20px;
+                    min-height: 160px;
+                }
+                .left-box {
+                    flex: 2;
+                    padding: 10px;
+                    font-size: 13px;
+                    border-right: 1px solid #000;
+                }
+                .right-box {
+                    flex: 1;
+                    padding: 10px;
+                    font-size: 13px;
+                }
+                .signature-line {
+                    margin-top: 80px;
+                    border-top: 1px solid #000;
+                    width: 250px;
+                    font-size: 12px;
+                }
+                .dealer-line {
+                    margin-top: 5px;
+                }
+                table {
+                    width: 100%;
+                    border-collapse: collapse;
+                    margin-top: 20px;
+                    font-size: 13px;
+                }
+                th {
+                    background-color: #f4c842;
+                    border: 1px solid #000;
+                    text-align: center;
+                    padding: 6px;
+                    font-weight: bold;
+                }
+                td {
+                    border: 1px solid #000;
+                    text-align: center;
+                    padding: 6px;
+                }
+                .store-use-container {
+                    border: 1px solid #000;
+                    margin-top: 30px;
+                }
+                .store-use-header {
+                    border-bottom: 1px solid #000;
+                    padding: 6px;
+                    text-align: center;
+                    font-weight: bold;
+                }
+                .store-use-content {
+                    display: flex;
+                    min-height: 160px;
+                }
+                .store-left {
+                    flex: 1;
+                    padding: 10px;
+                    border-right: 1px solid #000;
+                    font-size: 13px;
+                    line-height: 1.45;
+                    text-align: justify;
+                }
+                .store-right {
+                    flex: 1;
+                }
+                .store-top {
+                    padding: 10px;
+                    font-size: 13px;
+                }
+
+                .store-bottom {
+                    padding: 10px;
+                    font-size: 13px;
+                }
+                .line-input {
+                    display: inline-block;
+                    border-bottom: 1px solid #000;
+                    width: 180px;
+                    height: 12px;
+                }
+                .separator {
+                    border: none;
+                    border-top: 1px solid #000;
+                }
+            </style>
+        </head>
+        <body>
+
+            <div class="header-logo">TOYO TIRES</div>
+            <div class="sub-header">Toyo Tyre Sales And Marketing Malaysia Sdn Bhd</div>
+
+            <div class="title-box">CLAIM TIRE COLLECTION</div>
+
+            <div class="flex-box">
+                <div class="left-box">
+                    I hereby certify that the below tyre(s) has / have Not been claimed earlier and authorized TSM
+                    (Toyo Sales & Marketing Sdn Bhd) the Right to cut Or do manners it deem fit in order to examine the
+                    below tyre(s)
+                    
+                    <div class="signature-line"><div class="dealer-line">Dealer Authorised Signature</div></div>
+                </div>
+
+                <div class="right-box">
+                    <strong>CTC No:</strong> ${report.claim_no}<br><br>
+                    <strong>Dealer Name & Address:</strong><br>
+                    ${report.dealerName}<br>
+                    ${report.dealerAddress.replace(/\n/g, "<br>")}
+                </div>
+            </div>
+
+            <table>
+                <tr>
+                    <th>ITEM NO</th>
+                    <th>TIRE SIZE</th>
+                    <th>SERIAL NUMBER</th>
+                    <th>WC NUMBER</th>
+                    <th>REMARKS</th>
+                </tr>
+                <tr>
+                    <td>1</td>
+                    <td>${report.material_desc || "-"}</td>
+                    <td>${report.serial_no}</td>
+                    <td>${report.claim_no}</td>
+                    <td>${report.remarks || "-"}</td>
+                </tr>
+            </table>
+            <!-- FOR STORE USE SECTION -->
+            <div class="store-use-container">
+                
+                <div class="store-use-header">FOR STORE USE</div>
+
+                <div class="store-use-content">
+
+                    <!-- LEFT SIDE -->
+                    <div class="store-left">
+                        <strong>ACKNOWLEDGMENT OF RECEIPT</strong><br>
+                        This is to acknowledge receipt of the above item for claim. As soon as 
+                        these have been examined, you will be informed of our findings. Please note 
+                        that in order that a proper examination may be carried out, it is necessary 
+                        to cut the tyre and it is understood that we have your permission to do and 
+                        that no further claim will be made on us should the item/s be rejected by 
+                        the TYRE ADJUSTMENT COMMITTEE.
+                    </div>
+
+                    <!-- RIGHT SIDE -->
+                    <div class="store-right">
+    
+                        <!-- TOP BLOCK -->
+                        <div class="store-top">
+                            <strong>Branch Asst / Storehand</strong><br><br>
+                            <div>Name: </div> <br>
+                            <div>Date: </div> <br>
+                        </div>
+
+                        <div class="separator"></div>
+
+                        <!-- BOTTOM BLOCK -->
+                        <div class="store-bottom">
+                            <strong>Lorry :</strong> <br><br>
+                            <div>Driver Name: </div> <br>
+                            <div>Date: </div> <br>
+                            <div>IC No: </div> <br>
+                        </div>
+
+                    </div>
+
+                </div>
+            </div>
+
+        </body>
+        </html>
+    `);
+
+    printWindow.document.close();
+
+    printWindow.onload = () => {
+        printWindow.print();
+        printWindow.close();
+    };
+};
 onMounted(async () => {
     fetchData();
 });
@@ -395,8 +605,6 @@ onMounted(async () => {
                             </InputIcon>
                             <InputText v-model="filters['global'].value" placeholder="Quick Search" class="w-full" />
                         </IconField>
-                        <Button type="button" icon="pi pi-cog" @click="sortMenu.toggle($event)" />
-                        <Menu ref="sortMenu" :model="sortItems" :popup="true" />
                     </div>
 
                     <div class="flex justify-end gap-2"  v-if="statusTabs[activeTabIndex]?.label === 'New' && canUpdate">
@@ -448,24 +656,24 @@ onMounted(async () => {
                     </div>
                 </template>
             </Column>
-            <Column field="createDate" header="Create Date" style="min-width: 8rem">
+            <Column field="created" header="Create Date" style="min-width: 8rem" sortable>
                 <template #body="{ data }">
                     {{ formatDate(data.created) }}
                 </template>
             </Column>
-            <Column field="collectRef" header="Ref No" style="min-width: 8rem">
+            <Column field="claimRefno" header="Ref No" style="min-width: 8rem" sortable>
                 <template #body="{ data }">
                     <RouterLink :to="`/scm/detailCollection/${data.id}`" class="hover:underline font-bold text-primary">
                         {{ data.claimRefno }}
                     </RouterLink>
                 </template>
             </Column>
-            <Column field="collectedDatetime" header="Collect Date" style="min-width: 10rem">
+            <Column field="collectDate" header="Collect Date" style="min-width: 10rem" sortable>
                 <template #body="{ data }">
                     {{ data.collectDate && data.collectTime ? formatDate(data.collectDate) + ' ' + formatTime(data.collectTime): 'Not Assigned'}}
                 </template>
             </Column>
-            <Column field="returnDate" header="Receive Date" style="min-width: 10rem">
+            <Column field="reachWH" header="Receive Date" style="min-width: 10rem" sortable>
                 <template #body="{ data }">
                     {{ data.reachWH ? formatDate(data.reachWH) : 'Not Assigned' }}
                 </template>
@@ -474,6 +682,16 @@ onMounted(async () => {
             <Column field="status" header="Status" style="min-width: 8rem">
                 <template #body="{ data }">
                     <Tag :value="getStatusText(data.status)" :severity="getStatusSeverity(data.status)" />
+                </template>
+            </Column>
+            <Column field="report" header="Report" style="min-width: 8rem">
+                <template #body="{ data }">
+                    <Button 
+                        icon="pi pi-print" 
+                        class="p-button-text p-button-sm" 
+                        @click="fetchReport(data.warrantyEntryID)" 
+                        tooltip="Print Report"
+                        />
                 </template>
             </Column>
         </DataTable>

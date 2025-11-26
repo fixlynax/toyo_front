@@ -25,10 +25,9 @@ const AccountDetailService = {
                 // Transform the API data to match your table structure
                 return response.data.admin_data.map((item) => ({
                     id: item.file_path, // Using file_path as unique ID
-                    docsDate: item.datetime.split(' ')[0], // Extract date part from datetime
+                    docsDate: item.datetime, // Extract date part from datetime
                     dealerId: item.account_no,
                     dealerName: item.custName,
-                    dateRange: item.datetime, // Using full datetime as date range
                     amtdue: parseFloat(item.amount), // Convert to number for formatting
                     company: item.company,
                     filePath: item.file_path,
@@ -108,6 +107,17 @@ onBeforeMount(async () => {
     }
 });
 
+const formatCurrency = (value) => {
+    if (value === null || value === undefined || value === '') return '-';
+
+    return new Intl.NumberFormat('en-MY', {
+        style: 'currency',
+        currency: 'MYR',
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2
+    }).format(Number(value));
+};
+
 // Optional: Refresh function
 const refreshData = async () => {
     loading.value = true;
@@ -126,7 +136,7 @@ const refreshData = async () => {
 <template>
     <div class="card">
         <div class="flex justify-between items-center mb-4">
-            <div class="text-2xl font-bold text-gray-800">Account Detail</div>
+            <div class="text-2xl font-bold text-black">Account Detail</div>
             <Button icon="pi pi-refresh" class="p-button-outlined p-button-sm" @click="refreshData" :disabled="loading" v-tooltip="'Refresh data'" />
         </div>
 
@@ -149,74 +159,66 @@ const refreshData = async () => {
             :paginator="true"
             :rows="10"
             dataKey="id"
-            class="rounded-table"
+            class="rounded-table text-sm"
             :rowHover="true"
             :filters="filters1"
-            :rowsPerPageOptions="[5, 10, 20, 50]"
-            paginatorTemplate="FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink RowsPerPageDropdown"
+            :rowsPerPageOptions="[10, 20, 50, 100]"
+            removableSort
+            sortField="docsDate"
+            :sortOrder="1"
             currentPageReportTemplate="Showing {first} to {last} of {totalRecords} entries"
+            paginatorTemplate="CurrentPageReport FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink RowsPerPageDropdown"
         >
+            <!-- Rest of your header and columns -->
             <template #header>
                 <div class="flex items-center justify-between gap-4 w-full flex-wrap">
                     <div class="flex items-center gap-2 w-full max-w-md">
                         <IconField class="flex-1">
-                            <InputIcon>
-                                <i class="pi pi-search" />
-                            </InputIcon>
+                            <InputIcon><i class="pi pi-search" /></InputIcon>
                             <InputText v-model="filters1['global'].value" placeholder="Quick Search..." class="w-full" />
                         </IconField>
-                        <Button type="button" icon="pi pi-cog" class="p-button-outlined" v-tooltip="'Table settings'" />
                     </div>
                 </div>
             </template>
 
             <template #empty>
-                <div class="text-center py-8 text-gray-500">
+                <div class="text-center py-8 text-black">
                     <i class="pi pi-file-excel text-4xl mb-2"></i>
                     <div>No account detail records found.</div>
                 </div>
             </template>
 
-            <Column field="docsDate" header="Document Date" style="min-width: 8rem">
+            <Column field="docsDate" header="Document Date" style="min-width: 8rem" sortable>
                 <template #body="{ data }">
                     <span class="font-medium">{{ data.docsDate }}</span>
                 </template>
             </Column>
 
-            <Column field="dealerId" header="Customer Acc No." style="min-width: 10rem">
+            <Column field="dealerId" header="Customer Acc No." style="min-width: 10rem" sortable>
                 <template #body="{ data }">
-                    <span class="font-mono">{{ data.dealerId }}</span>
+                    <span class="font-medium">{{ data.dealerId }}</span>
                 </template>
             </Column>
 
-            <Column field="dealerName" header="Customer Name" style="min-width: 10rem">
+            <Column field="dealerName" header="Customer Name" style="min-width: 10rem" sortable>
                 <template #body="{ data }">
                     <span v-if="data.dealerName">{{ data.dealerName }}</span>
-                    <span v-else class="text-gray-400">-</span>
-                </template>
-            </Column>
-
-            <Column field="dateRange" header="Date Time" style="min-width: 10rem">
-                <template #body="{ data }">
-                    <span class="font-mono text-sm">{{ data.dateRange }}</span>
+                    <span v-else class="text-black">-</span>
                 </template>
             </Column>
 
             <!-- Amount Due -->
-            <Column field="amtdue" header="Amount Due (RM)" style="min-width: 10rem; text-align: right">
+            <Column field="amtdue" header="Amount Due" style="min-width: 10rem; text-align: right" sortable>
                 <template #body="{ data }">
                     <div class="flex justify-start items-center w-full">
-                        <span 
-                            class="font-semibold text-lg" 
-                            :class="data.amtdue < 0 ? 'text-red-500' : 'text-gray-800'"
-                        >
-                            RM {{ data.amtdue.toFixed(2) }}
+                        <span class="font-bold" :class="data.amtdue < 0 ? 'text-red-500' : 'text-black'">
+                            {{ formatCurrency(data.amtdue) }}
                         </span>
                     </div>
                 </template>
             </Column>
 
-            <Column header="Download" style="min-width: 6rem; text-align: center">
+            <Column header="Download" style="min-width: 6rem; text-align: left">
                 <template #body="{ data }">
                     <Button
                         icon="pi pi-download"
@@ -238,17 +240,22 @@ const refreshData = async () => {
     border-radius: 12px;
     overflow: hidden;
     border: 1px solid #e5e7eb;
-    
+
     .p-datatable-header {
         border-top-left-radius: 12px;
         border-top-right-radius: 12px;
     }
-    
+
     .p-paginator-bottom {
         border-bottom-left-radius: 12px;
         border-bottom-right-radius: 12px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 1rem;
     }
-    
+
     .p-datatable-thead > tr > th {
         &:first-child {
             border-top-left-radius: 12px;
@@ -257,19 +264,25 @@ const refreshData = async () => {
             border-top-right-radius: 12px;
         }
     }
-    
+
     .p-datatable-tbody > tr:last-child > td {
         &:first-child {
             border-bottom-left-radius: 0;
         }
         &:last-child {
-            border-bottom-right-radius:0;
+            border-bottom-right-radius: 0;
         }
     }
-    
+
     .p-datatable-tbody > tr.p-datatable-emptymessage > td {
         border-bottom-left-radius: 12px;
         border-bottom-right-radius: 12px;
+    }
+
+    /* Ensure the current page report stays on the left */
+    :deep(.p-paginator-current) {
+        margin-right: auto;
+        order: -1;
     }
 }
 </style>

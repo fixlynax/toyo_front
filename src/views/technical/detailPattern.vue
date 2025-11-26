@@ -33,13 +33,16 @@
 
                         <template v-if="patterns">
                             <div>
-                            <p class="text-sm font-bold text-gray-700 mb-2">Pattern Code</p>
-                            <p class="text-lg font-medium">{{ patterns?.pattern_code || '0'  }}</p>
+                                <p class="text-sm font-bold text-gray-700 mb-2">Pattern Code</p>
+                                <p class="text-lg font-medium">{{ patterns?.pattern_code || '-'  }}</p>
                             </div>
-
+                            <div>
+                                <p class="text-sm font-bold text-gray-700 mb-2">MFG Code</p>
+                                <p class="text-lg font-medium">{{ patterns?.mfg_code || '-'  }}</p>
+                            </div>
                             <div>
                             <p class="text-sm font-bold text-gray-700 mb-2">Pattern Name</p>
-                            <p class="text-lg font-medium">{{ patterns?.pattern_name || 'N/A' }}</p>
+                            <p class="text-lg font-medium">{{ patterns?.pattern_name || '-' }}</p>
                             </div>
                         </template>
                     </div>
@@ -61,7 +64,7 @@
             <Button label="Yes" icon="pi pi-check" @click="deletePattern" />
         </template>
     </Dialog>
-    <Dialog v-model:visible="editPatternDialog" modal header="Edit Pattern Deatails" :style="{ width: '700px' }">
+    <Dialog v-model:visible="editPatternDialog" modal header="Edit Pattern Details" :style="{ width: '700px' }">
         <div class="flex flex-col gap-3">
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
@@ -73,6 +76,11 @@
                         <label class="block font-bold text-gray-700 mb-1">Pattern Code *</label>
                             <InputText v-model="formHolder.pattern_code" class="w-full" placeholder="Insert Pattern Code" maxlength="3"/>
                         <small v-if="errors.code" class="text-red-500">{{ errors.code }}</small>
+                    </div>
+                    <div>
+                        <label class="block font-bold text-gray-700 mb-1">MFG Code *</label>
+                            <InputText v-model="formHolder.mfg_code" class="w-full" placeholder="Insert Pattern Code" maxlength="3"/>
+                        <small v-if="errors.mfg" class="text-red-500">{{ errors.mfg }}</small>
                     </div>
                 </div>
 
@@ -135,17 +143,20 @@ const editPatternDialog = ref(false);
 const formHolder = ref({
   pattern_name: '',
   pattern_code: '',
+  mfg_code: '',
   image_url: '',
   imageURL: '',
 });
 const errors = ref({
     name: '',
+    code: '',
+    mfg: '',
     image: ''
 });
 
 const validateForm = () => {
     let isValid = true;
-    errors.value = { name: '', code: '', image: '' };
+    errors.value = { name: '', code: '', mfg: '', image: '' };
 
     // Validate Pattern Name
     if (!formHolder.value.pattern_name || formHolder.value.pattern_name.trim() === '') {
@@ -156,6 +167,10 @@ const validateForm = () => {
     // Validate Pattern Code
     if (!formHolder.value.pattern_code || formHolder.value.pattern_code.trim() === '') {
         errors.value.code = 'Pattern code is required';
+        isValid = false;
+    }
+    if (!formHolder.value.mfg_code || formHolder.value.mfg_code.trim() === '') {
+        errors.value.mfg = 'MFG code is required';
         isValid = false;
     }
 
@@ -207,7 +222,8 @@ function editPattern() {
         formHolder.value.pattern_code = patterns.value.pattern_code;
         formHolder.value.image_url = patterns.value.image_url;
         formHolder.value.pattern_name = patterns.value.pattern_name;
-        errors.value = { name: '', image: '' };
+        formHolder.value.mfg_code = patterns.value.mfg_code;
+        errors.value = { name: '', code: '', mfg: '', image: '' };
     }
     editPatternDialog.value = true;
 }
@@ -227,6 +243,7 @@ const savePatternEdit = async () => {
         const formData = new FormData();
         formData.append('pattern_name', formHolder.value.pattern_name);
         formData.append('pattern_code', formHolder.value.pattern_code);
+        formData.append('mfg_code', formHolder.value.mfg_code);
                 // Only append new image if user selected a file
         if (formHolder.value.image_url instanceof File) {
             formData.append('image_url', formHolder.value.image_url); // <-- use formData, not payload

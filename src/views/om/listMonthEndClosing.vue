@@ -5,38 +5,31 @@
                 <!-- Header with Create Button -->
                 <div class="flex justify-between items-center border-b pb-2 mb-4">
                     <div class="text-2xl font-bold text-gray-800">Month End Closing Calendar</div>
-                    <Button 
-                        label="Create" 
-                        icon="pi pi-plus" 
-                        class="p-button-primary" 
-                        @click="openCreateDialog" 
-                        style="width: fit-content"
-                    />
+                    <Button label="Create" icon="pi pi-plus" class="p-button-primary" @click="openCreateDialog" style="width: fit-content" />
                 </div>
 
                 <!-- 🟢 Only show LoadingPage during initial load, hide DataTable completely -->
-                <LoadingPage 
-                    v-if="loading" 
-                    :message="'Loading Month End Closing...'" 
-                    :sub-message="'Fetching your Month End Closing list'" 
-                />
+                <LoadingPage v-if="loading" :message="'Loading Month End Closing...'" :sub-message="'Fetching your Month End Closing list'" />
 
                 <!-- Closing Dates Table -->
-                <DataTable 
-                    v-else 
-                    :value="sortedClosingDates" 
-                    :paginator="true" 
-                    :rows="12" 
-                    :rowsPerPageOptions="[12, 24, 36, 48, 60]" 
-                    dataKey="id" 
-                    :rowHover="true"  
-                    sortField="closingDateTime" 
-                    :sortOrder="-1" 
-                    responsiveLayout="scroll" 
+                <DataTable
+                    v-else
+                    :value="sortedClosingDates"
+                    :paginator="true"
+                    :rows="12"
+                    :rowsPerPageOptions="[12, 24, 36, 48, 60]"
+                    dataKey="id"
+                    :rowHover="true"
+                    sortField="closingDateTime"
+                    :sortOrder="-1"
+                    removableSort
+                    responsiveLayout="scroll"
                     :filters="filters"
                     filterDisplay="menu"
                     :globalFilterFields="['monthYear', 'closingDateFormatted', 'closingTime', 'status']"
                     class="rounded-table"
+                    currentPageReportTemplate="Showing {first} to {last} of {totalRecords} entries"
+                    paginatorTemplate="CurrentPageReport FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink RowsPerPageDropdown"
                 >
                     <template #header>
                         <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 w-full">
@@ -46,13 +39,9 @@
                                     <InputIcon>
                                         <i class="pi pi-search" />
                                     </InputIcon>
-                                    <InputText 
-                                        v-model="filters['global'].value" 
-                                        placeholder="Quick Search (Month, Date, Status)" 
-                                        class="w-full" 
-                                    />
+                                    <InputText v-model="filters['global'].value" placeholder="Quick Search (Month, Date, Status)" class="w-full" />
                                 </IconField>
-                                 <Button type="button" icon="pi pi-cog" class="p-button" />
+                                <Button type="button" icon="pi pi-cog" class="p-button" />
                             </div>
                         </div>
                     </template>
@@ -61,12 +50,7 @@
                         <div class="text-center text-gray-500 py-8">
                             <i class="pi pi-calendar-times text-4xl mb-2"></i>
                             <div>No closing dates configured.</div>
-                            <Button 
-                                label="Create First Closing Date" 
-                                icon="pi pi-plus" 
-                                class="p-button-outlined mt-4" 
-                                @click="openCreateDialog" 
-                            />
+                            <Button label="Create First Closing Date" icon="pi pi-plus" class="p-button-outlined mt-4" @click="openCreateDialog" />
                         </div>
                     </template>
 
@@ -85,7 +69,7 @@
                         </template>
                     </Column>
 
-                    <Column field="closingDateFormatted" header="Closing Date" style="min-width: 15rem" >
+                    <Column field="closingDateFormatted" header="Closing Date" style="min-width: 15rem">
                         <template #body="{ data }">
                             <div class="text-sm">
                                 <div class="font-semibold text-gray-800">
@@ -95,7 +79,7 @@
                         </template>
                     </Column>
 
-                    <Column field="closingTime" header="Closing Time" style="min-width: 15rem" >
+                    <Column field="closingTime" header="Closing Time" style="min-width: 15rem">
                         <template #body="{ data }">
                             <div class="text-sm">
                                 <div class="font-semibold text-gray-800">
@@ -128,53 +112,22 @@
                 <!-- Month Selection -->
                 <div>
                     <label class="block font-bold text-gray-700 mb-2">Month and Year *</label>
-                    <Calendar 
-                        v-model="newDate.monthYear" 
-                        view="month" 
-                        dateFormat="mm/yy" 
-                        placeholder="Select Month and Year" 
-                        class="w-full" 
-                        :showIcon="true"
-                        :minDate="minMonthYear"
-                        :maxDate="maxMonthYear"
-                        :disabledDates="disabledMonths"
-                    />
-                    <small class="text-gray-500 mt-1 block">
-                        Note: Months that already have closing dates are disabled
-                    </small>
+                    <Calendar v-model="newDate.monthYear" view="month" dateFormat="mm/yy" placeholder="Select Month and Year" class="w-full" :showIcon="true" :minDate="minMonthYear" :maxDate="maxMonthYear" :disabledDates="disabledMonths" />
+                    <small class="text-gray-500 mt-1 block"> Note: Months that already have closing dates are disabled </small>
                 </div>
 
                 <!-- Closing Date -->
                 <div>
                     <label class="block font-bold text-gray-700 mb-2">Closing Date *</label>
-                    <Calendar 
-                        v-model="newDate.closingDate" 
-                        :minDate="minClosingDate" 
-                        :maxDate="maxClosingDate" 
-                        dateFormat="dd" 
-                        placeholder="Select Day" 
-                        class="w-full" 
-                        :showIcon="true"
-                        :disabled="!newDate.monthYear"
-                    />
-                    <small class="text-gray-500 mt-1 block">
-                        Default: 26th of the month
-                    </small>
+                    <Calendar v-model="newDate.closingDate" :minDate="minClosingDate" :maxDate="maxClosingDate" dateFormat="dd" placeholder="Select Day" class="w-full" :showIcon="true" :disabled="!newDate.monthYear" />
+                    <small class="text-gray-500 mt-1 block"> Default: 26th of the month </small>
                 </div>
 
                 <!-- Closing Time -->
                 <div>
                     <label class="block font-bold text-gray-700 mb-2">Closing Time *</label>
-                    <Calendar 
-                        v-model="newDate.closingTime" 
-                        timeOnly 
-                        hourFormat="24" 
-                        placeholder="Select Time" 
-                        class="w-full"
-                    />
-                    <small class="text-gray-500 mt-1 block">
-                        Default: 17:00
-                    </small>
+                    <Calendar v-model="newDate.closingTime" timeOnly hourFormat="24" placeholder="Select Time" class="w-full" />
+                    <small class="text-gray-500 mt-1 block"> Default: 17:00 </small>
                 </div>
 
                 <!-- Status -->
@@ -236,27 +189,13 @@
                 <!-- Closing Date -->
                 <div>
                     <label class="block font-bold text-gray-700 mb-2">Closing Date *</label>
-                    <Calendar 
-                        v-model="currentDate.closingDate" 
-                        :minDate="minDate" 
-                        :maxDate="maxDate" 
-                        dateFormat="dd" 
-                        placeholder="Select Day" 
-                        class="w-full" 
-                        :showIcon="true"
-                    />
+                    <Calendar v-model="currentDate.closingDate" :minDate="minDate" :maxDate="maxDate" dateFormat="dd" placeholder="Select Day" class="w-full" :showIcon="true" />
                 </div>
 
                 <!-- Closing Time -->
                 <div>
                     <label class="block font-bold text-gray-700 mb-2">Closing Time *</label>
-                    <Calendar 
-                        v-model="currentDate.closingTime" 
-                        timeOnly 
-                        hourFormat="24" 
-                        placeholder="Select Time" 
-                        class="w-full"
-                    />
+                    <Calendar v-model="currentDate.closingTime" timeOnly hourFormat="24" placeholder="Select Time" class="w-full" />
                 </div>
 
                 <!-- Status -->
@@ -355,7 +294,7 @@ const sortedClosingDates = computed(() => {
 
 // Get existing months for disabling in calendar
 const existingMonths = computed(() => {
-    return closingDates.value.map(date => {
+    return closingDates.value.map((date) => {
         const d = new Date(date.monthYear);
         return {
             year: d.getFullYear(),
@@ -366,7 +305,7 @@ const existingMonths = computed(() => {
 
 // Disabled months for calendar (months that already exist in the list)
 const disabledMonths = computed(() => {
-    return existingMonths.value.map(existing => {
+    return existingMonths.value.map((existing) => {
         const disabledDate = new Date(existing.year, existing.month, 1);
         return disabledDate;
     });
@@ -418,10 +357,7 @@ const maxDate = computed(() => {
 
 // Computed properties
 const isCreateFormValid = computed(() => {
-    return newDate.monthYear !== null && 
-           newDate.closingDate !== null && 
-           newDate.closingTime !== null && 
-           newDate.status !== null;
+    return newDate.monthYear !== null && newDate.closingDate !== null && newDate.closingTime !== null && newDate.status !== null;
 });
 
 const isDialogFormValid = computed(() => {
@@ -429,19 +365,22 @@ const isDialogFormValid = computed(() => {
 });
 
 // Watch for monthYear changes to set default closing date and time
-watch(() => newDate.monthYear, (newMonthYear) => {
-    if (newMonthYear) {
-        // Set default closing date to 26th of the selected month
-        const defaultDate = new Date(newMonthYear);
-        defaultDate.setDate(26);
-        newDate.closingDate = defaultDate;
+watch(
+    () => newDate.monthYear,
+    (newMonthYear) => {
+        if (newMonthYear) {
+            // Set default closing date to 26th of the selected month
+            const defaultDate = new Date(newMonthYear);
+            defaultDate.setDate(26);
+            newDate.closingDate = defaultDate;
 
-        // Set default closing time to 17:00
-        const defaultTime = new Date();
-        defaultTime.setHours(17, 0, 0, 0);
-        newDate.closingTime = defaultTime;
+            // Set default closing time to 17:00
+            const defaultTime = new Date();
+            defaultTime.setHours(17, 0, 0, 0);
+            newDate.closingTime = defaultTime;
+        }
     }
-});
+);
 
 // Methods
 const formatMonth = (date) => {
@@ -511,7 +450,7 @@ const closeCreateDialog = () => {
 const createDate = async () => {
     try {
         loading.value = true;
-        
+
         // Prepare data for API creation
         const createData = {
             closingMonth: new Date(newDate.monthYear).toLocaleDateString('en-MY', { month: 'long' }),
@@ -523,7 +462,7 @@ const createDate = async () => {
 
         // Call API to create the closing date
         const response = await api.post('maintenance/create-monthly-end', createData);
-        
+
         if (response.data.status === 1) {
             // Add new date to local data
             const transformedData = transformApiData([response.data.admin_data]);
@@ -541,7 +480,7 @@ const createDate = async () => {
             if (response.data.error === 'Month and year already exist') {
                 errorMessage = 'A closing date for this month and year already exists.';
             }
-            
+
             toast.add({
                 severity: 'warn',
                 summary: 'Failed',
@@ -565,16 +504,16 @@ const createDate = async () => {
 // Edit methods
 const editDate = (date) => {
     editMode.value = true;
-    
+
     // Create closing date from monthYear and closingDate
     const closingDate = new Date(date.monthYear);
     closingDate.setDate(date.closingDate);
-    
+
     // Create closing time from closingTime string
     const [hours, minutes] = date.closingTime.split(':');
     const closingTime = new Date();
     closingTime.setHours(parseInt(hours), parseInt(minutes), 0, 0);
-    
+
     Object.assign(currentDate, {
         id: date.id,
         monthYear: new Date(date.monthYear),
@@ -588,7 +527,7 @@ const editDate = (date) => {
 const saveDate = async () => {
     try {
         loading.value = true;
-        
+
         // Prepare data for API update
         const updateData = {
             date: new Date(currentDate.closingDate).getDate(), // Only the day number
@@ -598,7 +537,7 @@ const saveDate = async () => {
 
         // Call API to update the closing date
         const response = await api.post(`maintenance/update-monthly-end/${currentDate.id}`, updateData);
-        
+
         if (response.data.status === 1) {
             // Update local data
             const index = closingDates.value.findIndex((date) => date.id === currentDate.id);
@@ -655,10 +594,10 @@ const closeDialog = () => {
 
 // Helper function to convert API data to component format
 const transformApiData = (apiData) => {
-    return apiData.map(item => {
+    return apiData.map((item) => {
         // Create monthYear from closing month and year (first day of the month)
         const monthYear = new Date(item.closingYear, getMonthNumber(item.closingMonth) - 1, 1);
-        
+
         return {
             id: item.id,
             monthYear: monthYear,
@@ -674,8 +613,18 @@ const transformApiData = (apiData) => {
 // Helper function to convert month name to number (0-indexed for JavaScript Date)
 const getMonthNumber = (monthName) => {
     const months = {
-        'January': 1, 'February': 2, 'March': 3, 'April': 4, 'May': 5, 'June': 6,
-        'July': 7, 'August': 8, 'September': 9, 'October': 10, 'November': 11, 'December': 12
+        January: 1,
+        February: 2,
+        March: 3,
+        April: 4,
+        May: 5,
+        June: 6,
+        July: 7,
+        August: 8,
+        September: 9,
+        October: 10,
+        November: 11,
+        December: 12
     };
     return months[monthName] || 0;
 };
@@ -710,17 +659,17 @@ onMounted(async () => {
     border-radius: 12px;
     overflow: hidden;
     border: 1px solid #e5e7eb;
-    
+
     .p-datatable-header {
         border-top-left-radius: 12px;
         border-top-right-radius: 12px;
     }
-    
+
     .p-paginator-bottom {
         border-bottom-left-radius: 12px;
         border-bottom-right-radius: 12px;
     }
-    
+
     .p-datatable-thead > tr > th {
         &:first-child {
             border-top-left-radius: 12px;
@@ -729,7 +678,7 @@ onMounted(async () => {
             border-top-right-radius: 12px;
         }
     }
-    
+
     .p-datatable-tbody > tr:last-child > td {
         &:first-child {
             border-bottom-left-radius: 0;
@@ -738,7 +687,7 @@ onMounted(async () => {
             border-bottom-right-radius: 0;
         }
     }
-    
+
     .p-datatable-tbody > tr.p-datatable-emptymessage > td {
         border-bottom-left-radius: 12px;
         border-bottom-right-radius: 12px;

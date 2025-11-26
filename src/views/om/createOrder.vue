@@ -502,7 +502,11 @@
                                 <i class="pi pi-info-circle text-blue-500 text-xl"></i>
                                 <div class="font-semibold text-blue-700">Driver Information Required</div>
                             </div>
-                            <div class="text-sm text-blue-600">Driver information will be collected after order confirmation for security purposes. You'll be prompted to enter driver details once the order is successfully placed.</div>
+                            <div class="text-sm text-blue-600">
+                                Driver information will be collected after order confirmation for security purposes. You'll be prompted to enter driver details once the order is successfully placed.
+                                <span v-if="selectedDeliveryMethod === 'LALAMOVE'" class="font-semibold block mt-1">Note: IC Number is optional for Lalamove pickup.</span>
+                                <span v-else class="font-semibold block mt-1">Note: IC Number is required for Self Collection.</span>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -615,8 +619,8 @@
             </div>
         </div>
 
-        <!-- Order Processing Dialog -->
-        <Dialog v-model:visible="showOrderDialog" :style="{ width: '500px' }" header="Order Processing" :modal="true" :closable="true">
+        <!-- Enhanced Order Processing Dialog -->
+        <Dialog v-model:visible="showOrderDialog" :style="{ width: '500px' }" header="Order Processing" :modal="true" :closable="false">
             <div class="flex flex-col items-center gap-4">
                 <ProgressSpinner v-if="orderStatus === 'processing'" style="width: 50px; height: 50px" strokeWidth="4" />
                 <i v-else-if="orderStatus === 'success'" class="pi pi-check-circle text-green-500 text-5xl"></i>
@@ -633,12 +637,19 @@
                     <div v-if="orderError" class="text-sm text-red-600 mt-2">
                         {{ orderError }}
                     </div>
+
+                    <!-- Show back order option when there's an error related to fulfillment -->
+                    <div v-if="orderStatus === 'error' && (orderError.includes('not fulfilled') || orderError.includes('back order') || orderError.includes('partial'))" class="mt-4 p-3 bg-yellow-50 border border-yellow-200 rounded-lg">
+                        <div class="text-sm text-yellow-700 mb-2">Some items cannot be fully fulfilled. You can proceed with back order for unavailable items.</div>
+                        <Button label="Proceed with Back Order" icon="pi pi-shopping-cart" @click="triggerManualBackOrder" class="p-button-warning p-button-sm" />
+                    </div>
                 </div>
             </div>
             <template #footer>
                 <Button v-if="orderStatus === 'success' && !showDriverForm" label="View Order" icon="pi pi-eye" @click="viewOrderDetails" class="p-button-primary mr-2" />
                 <Button v-if="orderStatus === 'success' && !showDriverForm" label="Close" icon="pi pi-check" @click="closeOrderDialog" class="p-button-primary" />
                 <Button v-if="orderStatus === 'success' && showDriverForm" label="Submit Driver Info" icon="pi pi-check" @click="submitDriverInfoAfterOrder" class="p-button-primary" :loading="submittingDriverInfo" />
+                <Button v-if="orderStatus === 'error' && !orderError.includes('not fulfilled') && !orderError.includes('back order')" label="Close" icon="pi pi-times" @click="closeOrderDialog" class="p-button-secondary" />
             </template>
         </Dialog>
 
@@ -672,14 +683,17 @@
                         <small v-if="!driverInfo.plateNo && driverFormValidated" class="p-error">Plate number is required.</small>
                     </div>
                     <div>
-                        <label class="block font-semibold text-gray-600">IC Number *</label>
-                        <InputText v-model="driverInfo.icNo" placeholder="Enter IC number" class="w-full" :class="{ 'p-invalid': !driverInfo.icNo && driverFormValidated }" />
-                        <small v-if="!driverInfo.icNo && driverFormValidated" class="p-error">IC number is required.</small>
+                        <label class="block font-semibold text-gray-600">IC Number <span v-if="selectedDeliveryMethod === 'SELFCOLLECT'" class="text-red-500">*</span><span v-else class="text-gray-500">(Optional)</span></label>
+                        <InputText v-model="driverInfo.icNo" placeholder="Enter IC number" class="w-full" :class="{ 'p-invalid': selectedDeliveryMethod === 'SELFCOLLECT' && !driverInfo.icNo && driverFormValidated }" />
+                        <small v-if="selectedDeliveryMethod === 'SELFCOLLECT' && !driverInfo.icNo && driverFormValidated" class="p-error">IC number is required for self collection.</small>
                     </div>
                 </div>
 
                 <div class="bg-yellow-50 p-3 rounded border border-yellow-200">
-                    <div class="text-sm text-yellow-700"><strong>Note:</strong> This information is required for security and tracking purposes. The driver must present matching identification during pickup.</div>
+                    <div class="text-sm text-yellow-700">
+                        <strong>Note:</strong> This information is required for security and tracking purposes. The driver must present matching identification during pickup.
+                        <span v-if="selectedDeliveryMethod === 'LALAMOVE'" class="block mt-1 font-semibold">IC Number is optional for Lalamove pickup.</span>
+                    </div>
                 </div>
             </div>
             <template #footer>
@@ -694,7 +708,6 @@
                     <i class="pi pi-exclamation-triangle text-yellow-500 text-2xl"></i>
                     <div>
                         <div class="font-bold text-lg">Partial Order Fulfillment</div>
-                        <div class="text-gray-600">SAP has accepted partial quantities for some items.</div>
                     </div>
                 </div>
 
@@ -714,7 +727,7 @@
                     </div>
                 </div>
 
-                <!-- Unfulfilled Items -->D
+                <!-- Unfulfilled Items -->
                 <div v-if="unfulfilledItems.length > 0" class="bg-orange-50 p-4 rounded-lg border border-orange-200">
                     <div class="font-semibold text-orange-700 mb-2">⚠️ Unfulfilled Items (Require Back Order)</div>
                     <div class="space-y-2 max-h-40 overflow-y-auto">
@@ -739,7 +752,7 @@
                 </div>
             </div>
             <template #footer>
-                <Button label="Create Back Order" icon="pi pi-shopping-cart" @click="proceedWithBackOrder" class="p-button-warning" />
+                <Button label="Proceed With Back Order" icon="pi pi-shopping-cart" @click="proceedWithBackOrder" class="p-button-warning" />
                 <Button label="Proceed Without Back Order" icon="pi pi-check" @click="proceedWithoutBackOrder" class="p-button-primary" />
             </template>
         </Dialog>
@@ -787,7 +800,9 @@ const containerSettings = ref({
     max_container_twenty: 1,
     max_container_forty: 1000,
     min_container_twenty: 1,
-    min_container_forty: 500
+    min_container_forty: 500,
+    isNotMonthClosing: 0,
+    allowLalamove: 0
 });
 
 // Driver Information (now collected after order success)
@@ -832,11 +847,24 @@ const orderTypeOptions = ref([
     { label: 'Normal', value: 'NORMAL' },
     { label: 'Direct Shipment', value: 'DIRECTSHIP' }
 ]);
-const deliveryMethodOptions = ref([
-    { label: 'Delivery', value: 'DELIVER' },
-    { label: 'Pickup - Own Collection', value: 'SELFCOLLECT' },
-    { label: 'Pickup - Lalamove', value: 'LALAMOVE' }
-]);
+
+// Delivery Method Options - Computed based on API settings
+const deliveryMethodOptions = computed(() => {
+    const baseOptions = [{ label: 'Delivery', value: 'DELIVER' }];
+
+    // Add LALAMOVE only if allowed
+    if (containerSettings.value.allowLalamove === 1 && containerSettings.value.isNotMonthClosing === 1) {
+        baseOptions.push({ label: 'Pickup - Lalamove', value: 'LALAMOVE' });
+    }
+
+    // Add SELFCOLLECT only if not month end closing
+    if (containerSettings.value.isNotMonthClosing === 1) {
+        baseOptions.push({ label: 'Pickup - Own Collection', value: 'SELFCOLLECT' });
+    }
+
+    return baseOptions;
+});
+
 const shipToOptions = ref([]);
 
 // Loading states
@@ -1058,7 +1086,7 @@ const getMinQuantity = () => {
 // UPDATED: Helper function to get maximum quantity based on stock and order type
 const getMaxQuantity = (tyre) => {
     if (selectedOrderType.value === 'NORMAL') {
-        // For NORMAL orders, maximum is 50 regardless of stock
+        // For NORMAL orders, maximum is 50 regardless of stock (for back orders)
         return 50;
     } else {
         // For DIRECTSHIP or other order types, use stock balance as limit
@@ -1076,6 +1104,39 @@ const getMaterialName = (materialid) => {
 const getMaterialPrice = (materialid) => {
     const material = tyres.value.find((t) => t.materialid === materialid) || selectedTyres.value.find((t) => t.materialid === materialid);
     return material ? material.price : 0;
+};
+
+// Helper function to extract SAP message
+const extractSAPMessage = (confirmResult) => {
+    if (confirmResult.eten_data && Array.isArray(confirmResult.eten_data)) {
+        const firstItem = confirmResult.eten_data[0];
+        if (firstItem.sap_message) {
+            return firstItem.sap_message;
+        }
+    }
+
+    if (confirmResult.message) {
+        return confirmResult.message;
+    }
+
+    if (confirmResult.error) {
+        return typeof confirmResult.error === 'string' ? confirmResult.error : 'Unknown SAP error';
+    }
+
+    return 'Order processing failed. Please try again.';
+};
+
+// Helper function to detect back order scenario
+const isBackOrderScenario = (confirmResult) => {
+    if (!confirmResult.eten_data) return false;
+
+    const backOrderData = Array.isArray(confirmResult.eten_data) ? confirmResult.eten_data[0] : confirmResult.eten_data;
+
+    const hasUnfulfilled = backOrderData?.unfulfilled_items && backOrderData.unfulfilled_items.length > 0 && backOrderData.unfulfilled_items[0].materialid && backOrderData.unfulfilled_items[0].materialid.trim() !== '';
+
+    const hasFulfilled = backOrderData?.fulfilled_items && backOrderData.fulfilled_items.length > 0 && backOrderData.fulfilled_items[0].materialid && backOrderData.fulfilled_items[0].materialid.trim() !== '';
+
+    return hasUnfulfilled || hasFulfilled;
 };
 
 // Step Navigation
@@ -1119,7 +1180,7 @@ const goToStep = async (step) => {
 
 // Add to Cart function with 0 stock support for NORMAL orders
 const addToCart = (tyre) => {
-    // For DIRECTSHIP orders, still prevent adding 0 stock items
+    // For DIRECTSHIP orders, prevent adding 0 stock items but allow insufficient stock
     if (selectedOrderType.value === 'DIRECTSHIP' && tyre.stockBalance === 0) {
         toast.add({
             severity: 'warn',
@@ -1149,23 +1210,14 @@ const addToCart = (tyre) => {
 
     const existing = selectedTyres.value.find((t) => t.id === tyre.id);
     if (existing) {
-        // Allow increasing quantity even for 0 stock items in NORMAL orders
-        if (selectedOrderType.value === 'NORMAL' || existing.quantity < getMaxQuantity(tyre)) {
-            existing.quantity += 1;
-            toast.add({
-                severity: 'success',
-                summary: 'Success',
-                detail: 'Quantity updated in cart',
-                life: 2000
-            });
-        } else {
-            toast.add({
-                severity: 'warn',
-                summary: 'Stock Limit',
-                detail: 'Cannot exceed available stock',
-                life: 3000
-            });
-        }
+        // Allow increasing quantity even if exceeds stock (for back order scenarios)
+        existing.quantity += 1;
+        toast.add({
+            severity: 'success',
+            summary: 'Success',
+            detail: 'Quantity updated in cart',
+            life: 2000
+        });
     } else {
         selectedTyres.value.push({
             ...tyre,
@@ -1180,7 +1232,14 @@ const addToCart = (tyre) => {
                 detail: 'Item added - will be processed as back order',
                 life: 3000
             });
-        } else {
+        } else if (tyre.stockBalance > 0 && selectedOrderType.value === 'NORMAL') {
+            toast.add({
+                severity: 'success',
+                summary: 'Success',
+                detail: 'Product added to cart',
+                life: 2000
+            });
+        } else if (selectedOrderType.value === 'DIRECTSHIP' && tyre.stockBalance > 0) {
             toast.add({
                 severity: 'success',
                 summary: 'Success',
@@ -1253,14 +1312,16 @@ const fetchEligibleOrderSettings = async (custAccountNo) => {
 
         if (response.data.status === 1) {
             const settings = response.data.admin_data;
-            console.log('Container settings:', settings);
+            console.log('Eligible settings:', settings);
 
             // Update container settings from API
             containerSettings.value = {
                 max_container_twenty: settings.max_container_twenty || 1,
                 max_container_forty: settings.max_container_forty || 1000,
                 min_container_twenty: settings.min_container_twenty || 1,
-                min_container_forty: settings.min_container_forty || 500
+                min_container_forty: settings.min_container_forty || 500,
+                isNotMonthClosing: settings.isNotMonthClosing || 0,
+                allowLalamove: settings.isAllowLalamove || 0
             };
 
             console.log('Updated container settings:', containerSettings.value);
@@ -1274,7 +1335,9 @@ const fetchEligibleOrderSettings = async (custAccountNo) => {
             max_container_twenty: 1,
             max_container_forty: 1000,
             min_container_twenty: 1,
-            min_container_forty: 500
+            min_container_forty: 500,
+            isNotMonthClosing: 0,
+            allowLalamove: 0
         };
     }
 };
@@ -1409,7 +1472,7 @@ const fetchMaterials = async (custAccountNo) => {
                         quantity: 1,
                         itemcategory: 'ZT02', // Default for regular items
                         plant: 'TSM',
-                        salesprogramid: null
+                        salesprogramid: material.salesprogramid || '' // ADDED: salesprogramid
                     };
                 });
 
@@ -1640,13 +1703,68 @@ const clearFilters = () => {
     filters.value.sectionwidth.value = '';
 };
 
-// Order Processing Functions
+// UPDATED: Enhanced confirmBackOrderAPI function with salesprogramid
+const confirmBackOrderAPI = async (cartRefNo, orderArray, backorderArray) => {
+    try {
+        console.log('Confirming back order with arrays:', { orderArray, backorderArray });
+
+        // Prepare the payload exactly as shown in your API example
+        const payload = {
+            order_array: JSON.stringify(orderArray),
+            backorder_array: JSON.stringify(backorderArray),
+            order_remark: `Order with back order created via admin interface - ${selectedOrderType.value}`
+        };
+
+        console.log('Back order payload:', payload);
+
+        // Use the exact API endpoint from your example
+        const response = await api.post(`order/confirm-backorder-admin/${cartRefNo}`, payload);
+
+        console.log('Back order API response:', response.data);
+        return response.data;
+    } catch (error) {
+        console.error('Error confirming back order:', error);
+
+        // Enhanced error handling
+        if (error.response?.data?.error?.includes('cart') || error.message.includes('cart')) {
+            console.log('Cart not found, trying to create new cart...');
+
+            try {
+                // Create a new cart specifically for back order
+                const newCartResponse = await api.post('order/createEmptyDsCart-admin', {
+                    custaccountno: selectedCustomer.value.code
+                });
+
+                if (newCartResponse.data.status === 1) {
+                    const newCartRefNo = newCartResponse.data.eten_data.cartRefNo;
+
+                    // Retry with new cart reference
+                    const payload = {
+                        order_array: JSON.stringify(orderArray),
+                        backorder_array: JSON.stringify(backorderArray),
+                        order_remark: `Back order created via admin interface - ${selectedOrderType.value}`
+                    };
+
+                    const retryResponse = await api.post(`order/confirm-backorder-admin/${newCartRefNo}`, payload);
+                    return retryResponse.data;
+                }
+            } catch (secondError) {
+                console.error('Second attempt failed:', secondError);
+                throw new Error('Failed to create back order after cart creation: ' + (secondError.message || 'Unknown error'));
+            }
+        }
+
+        throw new Error('Failed to confirm back order: ' + (error.response?.data?.message || error.message || 'Unknown error'));
+    }
+};
+
+// UPDATED: addToCartAPI with salesprogramid
 const addToCartAPI = async (cartRefNo = null) => {
     if (!selectedCustomer.value || !shipToAccount.value || selectedTyres.value.length === 0) {
         throw new Error('Missing required data for checkout');
     }
 
-    // Prepare order array according to API requirements
+    // Prepare order array according to API requirements with salesprogramid
     const orderArray = selectedTyres.value.map((item, index) => ({
         materialid: item.materialid,
         itemno: String((index + 1) * 10).padStart(5, '0'), // Item numbers in increments of 10
@@ -1654,7 +1772,7 @@ const addToCartAPI = async (cartRefNo = null) => {
         plant: item.plant || 'TSM',
         qty: item.quantity.toString(),
         price: item.price.toString(),
-        salesprogramid: null
+        salesprogramid: item.salesprogramid || null // Include salesprogramid
     }));
 
     // Prepare request payload
@@ -1696,23 +1814,6 @@ const confirmOrderAPI = async (cartRefNo, orderArray) => {
     }
 };
 
-const confirmBackOrderAPI = async (cartRefNo, orderArray, backorderArray) => {
-    try {
-        console.log('Confirming back order with arrays:', { orderArray, backorderArray });
-
-        const response = await api.post(`order/confirm-backorder-admin/${cartRefNo}`, {
-            order_array: JSON.stringify(orderArray),
-            backorder_array: JSON.stringify(backorderArray),
-            order_remark: `Order with back order created via admin interface - ${selectedOrderType.value}`
-        });
-
-        return response.data;
-    } catch (error) {
-        console.error('Error confirming back order:', error);
-        throw new Error('Failed to confirm back order');
-    }
-};
-
 // Submit driver information after order success
 const submitDriverInformation = async (orderNo) => {
     if (selectedDeliveryMethod.value !== 'SELFCOLLECT' && selectedDeliveryMethod.value !== 'LALAMOVE') {
@@ -1736,9 +1837,27 @@ const submitDriverInformation = async (orderNo) => {
 
 // Submit driver info after order success
 const submitDriverInfoAfterOrder = async () => {
-    if (!driverInfo.value.name || !driverInfo.value.phone || !driverInfo.value.plateNo || !driverInfo.value.icNo) {
+    // Basic validation
+    if (!driverInfo.value.name || !driverInfo.value.phone || !driverInfo.value.plateNo) {
         driverFormValidated.value = true;
-        toast.add({ severity: 'error', summary: 'Error', detail: 'Please fill in all driver information fields', life: 3000 });
+        toast.add({
+            severity: 'error',
+            summary: 'Error',
+            detail: 'Please fill in all required driver information fields',
+            life: 3000
+        });
+        return;
+    }
+
+    // IC is optional for LALAMOVE, required for SELFCOLLECT
+    if (selectedDeliveryMethod.value === 'SELFCOLLECT' && !driverInfo.value.icNo) {
+        driverFormValidated.value = true;
+        toast.add({
+            severity: 'error',
+            summary: 'Error',
+            detail: 'IC number is required for self collection',
+            life: 3000
+        });
         return;
     }
 
@@ -1748,7 +1867,12 @@ const submitDriverInfoAfterOrder = async () => {
         const success = await submitDriverInformation(orderDetails.value.orderRefNo);
 
         if (success) {
-            toast.add({ severity: 'success', summary: 'Success', detail: 'Driver information submitted successfully', life: 3000 });
+            toast.add({
+                severity: 'success',
+                summary: 'Success',
+                detail: 'Driver information submitted successfully',
+                life: 3000
+            });
             showDriverForm.value = false;
             closeOrderDialog();
 
@@ -1763,99 +1887,162 @@ const submitDriverInfoAfterOrder = async () => {
         }
     } catch (error) {
         console.error('Error submitting driver info:', error);
-        toast.add({ severity: 'error', summary: 'Error', detail: 'Failed to submit driver information', life: 3000 });
+        toast.add({
+            severity: 'error',
+            summary: 'Error',
+            detail: 'Failed to submit driver information',
+            life: 3000
+        });
     } finally {
         submittingDriverInfo.value = false;
     }
 };
 
-// Main Order Placement Function
-const placeOrder = async () => {
-    if (!canPlaceOrder.value) {
-        step3Validated.value = true;
-        return;
-    }
+// Method to trigger manual back order from error dialog
+const triggerManualBackOrder = () => {
+    showOrderDialog.value = false;
+    showManualBackOrderOption();
+};
 
-    processingOrder.value = true;
-    showOrderDialog.value = true;
-    orderStatus.value = 'processing';
-    orderMessage.value = 'Processing your order...';
-    orderError.value = '';
-    orderDetails.value = null;
+// UPDATED: Enhanced manual back order detection
+const showManualBackOrderOption = () => {
+    // Create manual back order analysis based on stock levels
+    const manualFulfilled = [];
+    const manualUnfulfilled = [];
 
-    try {
-        // Prepare order array for both order types
-        const orderArray = selectedTyres.value.map((item, index) => ({
-            materialid: item.materialid,
-            itemno: String((index + 1) * 10).padStart(5, '0'),
-            itemcategory: item.itemcategory || 'ZT02',
-            plant: item.plant || 'TSM',
-            qty: item.quantity.toString(),
-            price: item.price.toString(),
-            salesprogramid: null
-        }));
-
-        if (selectedOrderType.value === 'DIRECTSHIP') {
-            await processDirectShipOrder(orderArray);
+    selectedTyres.value.forEach((item) => {
+        if (item.stockBalance >= item.quantity) {
+            // Item can be fulfilled
+            manualFulfilled.push({
+                materialid: item.materialid,
+                material: item.material,
+                accepted_qty: item.quantity,
+                requested_qty: item.quantity
+            });
+        } else if (item.stockBalance > 0) {
+            // Partial fulfillment
+            manualFulfilled.push({
+                materialid: item.materialid,
+                material: item.material,
+                accepted_qty: item.stockBalance,
+                requested_qty: item.quantity
+            });
+            manualUnfulfilled.push({
+                materialid: item.materialid,
+                material: item.material,
+                requested_qty: item.quantity,
+                accepted_qty: item.stockBalance,
+                backorder_qty: item.quantity - item.stockBalance
+            });
         } else {
-            await processNormalOrder(orderArray);
+            // Complete back order
+            manualUnfulfilled.push({
+                materialid: item.materialid,
+                material: item.material,
+                requested_qty: item.quantity,
+                accepted_qty: 0,
+                backorder_qty: item.quantity
+            });
         }
-    } catch (error) {
-        console.error('Order placement error:', error);
-        orderStatus.value = 'error';
-        orderMessage.value = 'Failed to process order';
-        orderError.value = error.message || 'Unknown error occurred';
+    });
+
+    fulfilledItems.value = manualFulfilled;
+    unfulfilledItems.value = manualUnfulfilled;
+
+    if (manualUnfulfilled.length > 0) {
+        showBackOrderDialog.value = true;
+        showOrderDialog.value = false;
+        orderMessage.value = 'Processing partial fulfillment...';
 
         toast.add({
-            severity: 'error',
-            summary: 'Error',
-            detail: error.message || 'Failed to process order',
+            severity: 'info',
+            summary: 'Manual Back Order Detection',
+            detail: 'Based on stock analysis, some items require back order.',
             life: 5000
         });
-    } finally {
-        processingOrder.value = false;
-    }
-};
-
-// Process DIRECTSHIP Order
-const processDirectShipOrder = async (orderArray) => {
-    orderMessage.value = 'Adding items to direct shipment...';
-
-    const addToCartResult = await addToCartAPI(currentCartRefNo.value);
-
-    if (addToCartResult.status === 1) {
-        orderMessage.value = 'Confirming direct shipment order...';
-
-        // Use the processed order array from addToCartAPI response if available
-        const finalOrderArray = addToCartResult.eten_data?.order_array || orderArray;
-
-        const confirmResult = await confirmOrderAPI(currentCartRefNo.value, finalOrderArray);
-        await handleOrderConfirmation(confirmResult, 'DIRECTSHIP');
     } else {
-        throw new Error(addToCartResult.message || 'Failed to add items to direct shipment cart');
+        // If no back order needed but we're here due to error, show different message
+        orderStatus.value = 'error';
+        orderMessage.value = 'Order processing failed';
+        orderError.value = 'Unable to determine fulfillment status. Please try again.';
     }
 };
 
-// Process NORMAL Order
-const processNormalOrder = async (orderArray) => {
-    orderMessage.value = 'Adding items to cart...';
-    const addToCartResult = await addToCartAPI();
+// Enhanced back order scenario handling
+const handleBackOrderScenario = async (confirmResult, orderType) => {
+    console.log('Handling back order scenario:', confirmResult);
 
-    if (addToCartResult.status === 1) {
-        orderMessage.value = 'Confirming order with SAP...';
-        const cartRefNo = addToCartResult.eten_data?.cartRefNo;
+    const backOrderData = Array.isArray(confirmResult.eten_data) ? confirmResult.eten_data[0] : confirmResult.eten_data;
 
-        // Use the processed order array from addToCartAPI response if available
-        const finalOrderArray = addToCartResult.eten_data?.order_array || orderArray;
+    // Process fulfilled and unfulfilled items
+    const processedFulfilled = (backOrderData?.fulfilled_items || [])
+        .filter((item) => item.materialid && item.materialid.trim() !== '')
+        .map((item) => ({
+            materialid: item.materialid.trim(),
+            accepted_qty: parseFloat(item.qty || item.accepted_qty || 0),
+            requested_qty: parseFloat(item.requested_qty || item.qty || 0),
+            material: getMaterialName(item.materialid)
+        }));
 
-        const confirmResult = await confirmOrderAPI(cartRefNo, finalOrderArray);
-        await handleOrderConfirmation(confirmResult, 'NORMAL');
+    const processedUnfulfilled = (backOrderData?.unfulfilled_items || [])
+        .filter((item) => item.materialid && item.materialid.trim() !== '')
+        .map((item) => {
+            const originalItem = selectedTyres.value.find((t) => t.materialid === item.materialid);
+            const requestedQty = originalItem ? originalItem.quantity : parseFloat(item.requested_qty || item.qty || 0);
+            const acceptedQty = processedFulfilled.find((f) => f.materialid === item.materialid)?.accepted_qty || 0;
+            const backorderQty = parseFloat(item.backorder_qty || item.qty || requestedQty - acceptedQty);
+
+            return {
+                materialid: item.materialid.trim(),
+                requested_qty: requestedQty,
+                accepted_qty: acceptedQty,
+                backorder_qty: backorderQty,
+                material: getMaterialName(item.materialid)
+            };
+        });
+
+    fulfilledItems.value = processedFulfilled;
+    unfulfilledItems.value = processedUnfulfilled;
+
+    console.log('Processed back order items:', {
+        fulfilled: fulfilledItems.value,
+        unfulfilled: unfulfilledItems.value
+    });
+
+    // Show back order dialog if we have any unfulfilled items
+    if (processedUnfulfilled.length > 0) {
+        showBackOrderDialog.value = true;
+        showOrderDialog.value = false;
+        orderMessage.value = 'Processing partial fulfillment...';
+
+        toast.add({
+            severity: 'warn',
+            summary: 'Partial Fulfillment',
+            detail: 'Some items require back order. Please review the options.',
+            life: 5000
+        });
+    } else if (processedFulfilled.length > 0) {
+        // All items fulfilled
+        orderStatus.value = 'success';
+        orderMessage.value = 'Order created successfully!';
+        orderDetails.value = {
+            orderRefNo: backOrderData.orderno || backOrderData.orderRefNo || `ORD-${Date.now()}`
+        };
+
+        if (selectedDeliveryMethod.value === 'SELFCOLLECT' || selectedDeliveryMethod.value === 'LALAMOVE') {
+            showDriverForm.value = true;
+        } else {
+            clearCartAndReset();
+        }
     } else {
-        throw new Error(addToCartResult.message || 'Failed to add items to cart');
+        // No items could be processed
+        orderStatus.value = 'error';
+        orderMessage.value = 'No items could be processed';
+        orderError.value = extractSAPMessage(confirmResult);
     }
 };
 
-// Enhanced handleOrderConfirmation with better back order handling
+// UPDATED: Enhanced handleOrderConfirmation with better SAP message handling
 const handleOrderConfirmation = async (confirmResult, orderType) => {
     console.log('Order confirmation result:', confirmResult);
 
@@ -1864,7 +2051,7 @@ const handleOrderConfirmation = async (confirmResult, orderType) => {
         orderStatus.value = 'success';
         orderMessage.value = `${orderType} order created successfully!`;
         orderDetails.value = {
-            orderRefNo: confirmResult.eten_data.orderRefNo
+            orderRefNo: confirmResult.eten_data.orderRefNo || confirmResult.eten_data.orderno
         };
 
         // Check if driver information is needed (pickup methods)
@@ -1876,56 +2063,47 @@ const handleOrderConfirmation = async (confirmResult, orderType) => {
             toast.add({
                 severity: 'success',
                 summary: 'Success',
-                detail: `${orderType} order ${confirmResult.eten_data.orderRefNo} created successfully`,
+                detail: `${orderType} order ${orderDetails.value.orderRefNo} created successfully`,
                 life: 5000
             });
         }
-    } else if (confirmResult.status === 0 && confirmResult.eten_data) {
-        // Enhanced backorder scenario handling
-        const backOrderData = Array.isArray(confirmResult.eten_data) ? confirmResult.eten_data[0] : confirmResult.eten_data;
-        const fulfilled = backOrderData?.fulfilled_items || [];
-        const unfulfilled = backOrderData?.unfulfilled_items || [];
+    } else if (confirmResult.status === 0) {
+        // Enhanced error handling with SAP messages
+        const errorMessage = extractSAPMessage(confirmResult);
 
-        console.log('Back order data:', { fulfilled, unfulfilled });
-
-        // Process fulfilled and unfulfilled items
-        const processedFulfilled = fulfilled.filter((item) => item.materialid && item.materialid.trim() !== '' && item.accepted_qty > 0);
-        const processedUnfulfilled = unfulfilled.filter((item) => item.materialid && item.materialid.trim() !== '' && item.backorder_qty > 0);
-
-        fulfilledItems.value = processedFulfilled;
-        unfulfilledItems.value = processedUnfulfilled;
-
-        const hasFulfilledItems = processedFulfilled.length > 0;
-        const hasUnfulfilledItems = processedUnfulfilled.length > 0;
-
-        if (hasUnfulfilledItems) {
-            // Show back order dialog with both fulfilled and unfulfilled items
-            showBackOrderDialog.value = true;
-            showOrderDialog.value = false;
-            orderMessage.value = 'Processing partial fulfillment...';
-        } else if (hasFulfilledItems) {
-            // All items fulfilled despite SAP status 0
-            orderStatus.value = 'success';
-            orderMessage.value = 'Order created successfully!';
-            orderDetails.value = {
-                orderRefNo: backOrderData.orderno || `ORD-${Date.now()}`
-            };
-
-            if (selectedDeliveryMethod.value === 'SELFCOLLECT' || selectedDeliveryMethod.value === 'LALAMOVE') {
-                showDriverForm.value = true;
-            } else {
-                clearCartAndReset();
-            }
+        // Check if this is a back order scenario
+        if (isBackOrderScenario(confirmResult)) {
+            await handleBackOrderScenario(confirmResult, orderType);
         } else {
-            // No items could be fulfilled
-            throw new Error(confirmResult.message || 'No items could be fulfilled');
+            // General error case with SAP message
+            orderStatus.value = 'error';
+            orderMessage.value = 'Failed to process order';
+            orderError.value = errorMessage;
+
+            toast.add({
+                severity: 'error',
+                summary: 'Order Failed',
+                detail: errorMessage,
+                life: 5000
+            });
         }
     } else {
-        throw new Error(confirmResult.message || `${orderType} order confirmation failed`);
+        // General error case
+        const errorMessage = confirmResult.message || `${orderType} order confirmation failed`;
+        orderStatus.value = 'error';
+        orderMessage.value = 'Failed to process order';
+        orderError.value = errorMessage;
+
+        toast.add({
+            severity: 'error',
+            summary: 'Error',
+            detail: errorMessage,
+            life: 5000
+        });
     }
 };
 
-// Enhanced back order processing
+// UPDATED: Enhanced proceedWithBackOrder to handle mixed scenarios
 const proceedWithBackOrder = async () => {
     showBackOrderDialog.value = false;
     showOrderDialog.value = true;
@@ -1933,36 +2111,72 @@ const proceedWithBackOrder = async () => {
     orderMessage.value = 'Creating order with back order...';
 
     try {
-        // Prepare arrays based on SAP response
-        const fulfilledArray = fulfilledItems.value.map((item, index) => ({
-            materialid: item.materialid,
-            itemno: String((index + 1) * 10).padStart(5, '0'),
-            itemcategory: 'ZT02',
-            plant: 'TSM',
-            qty: item.accepted_qty.toString(),
-            price: getMaterialPrice(item.materialid).toString(),
-            salesprogramid: null
-        }));
+        // Combine both fulfilled and unfulfilled items for back order processing
+        const allItems = [...fulfilledItems.value, ...unfulfilledItems.value];
 
-        const backOrderArray = unfulfilledItems.value.map((item, index) => ({
-            materialid: item.materialid,
-            itemno: String((fulfilledArray.length + index + 1) * 10).padStart(5, '0'),
-            itemcategory: 'ZT02',
-            plant: 'TSM',
-            qty: item.backorder_qty.toString(),
-            price: getMaterialPrice(item.materialid).toString(),
-            salesprogramid: null
-        }));
+        const orderArray = fulfilledItems.value.map((item, index) => {
+            const originalItem = selectedTyres.value.find((t) => t.materialid === item.materialid);
+            return {
+                materialid: item.materialid,
+                itemno: (index + 1) * 10,
+                itemcategory: originalItem?.itemcategory || 'ZT02',
+                plant: originalItem?.plant || 'TSM',
+                qty: item.accepted_qty.toString(),
+                price: getMaterialPrice(item.materialid).toString(),
+                salesprogramid: originalItem?.salesprogramid || null
+            };
+        });
 
-        const cartRefNo = currentCartRefNo.value || `TEMP-${Date.now()}`;
-        const result = await confirmBackOrderAPI(cartRefNo, fulfilledArray, backOrderArray);
+        const backorderArray = unfulfilledItems.value.map((item, index) => {
+            const originalItem = selectedTyres.value.find((t) => t.materialid === item.materialid);
+            const tyreFromList = tyres.value.find((t) => t.materialid === item.materialid);
+
+            return {
+                materialid: item.materialid,
+                itemno: (orderArray.length + index + 1) * 10,
+                itemcategory: originalItem?.itemcategory || 'ZT02',
+                plant: originalItem?.plant || 'TSM',
+                qty: item.backorder_qty.toString(),
+                price: getMaterialPrice(item.materialid).toString(),
+                salesprogramid: originalItem?.salesprogramid || tyreFromList?.salesprogramid || null
+            };
+        });
+
+        console.log('Back order final payload:', {
+            order_array: orderArray,
+            backorder_array: backorderArray
+        });
+
+        // Use current cart reference or create a new one
+        let cartRefNo = currentCartRefNo.value;
+        if (!cartRefNo || cartRefNo.includes('TEMP') || cartRefNo.includes('BACKORDER')) {
+            try {
+                const newCartResponse = await api.post('order/createEmptyDsCart-admin', {
+                    custaccountno: selectedCustomer.value.code
+                });
+
+                if (newCartResponse.data.status === 1) {
+                    cartRefNo = newCartResponse.data.eten_data.cartRefNo;
+                } else {
+                    cartRefNo = `BACKORDER-${Date.now()}`;
+                }
+            } catch (cartError) {
+                console.log('Failed to create cart, using temporary reference');
+                cartRefNo = `BACKORDER-${Date.now()}`;
+            }
+        }
+
+        const result = await confirmBackOrderAPI(cartRefNo, orderArray, backorderArray);
 
         if (result.status === 1) {
             orderStatus.value = 'success';
             orderMessage.value = 'Order created with back order!';
+
+            const etenData = result.eten_data;
             orderDetails.value = {
-                orderRefNo: result.eten_data.orderRefNo,
-                backOrderRefNo: result.eten_data.backOrderRefNo
+                orderRefNo: etenData.orderRefNo || etenData.orderno,
+                backOrderRefNo: etenData.backOrderRefNo || etenData.backorderno,
+                cartRefNo: cartRefNo
             };
 
             if (selectedDeliveryMethod.value === 'SELFCOLLECT' || selectedDeliveryMethod.value === 'LALAMOVE') {
@@ -1973,26 +2187,31 @@ const proceedWithBackOrder = async () => {
                 toast.add({
                     severity: 'success',
                     summary: 'Success',
-                    detail: `Order ${result.eten_data.orderRefNo} created with back order ${result.eten_data.backOrderRefNo}`,
+                    detail: `Order ${orderDetails.value.orderRefNo} created with back order ${orderDetails.value.backOrderRefNo}`,
                     life: 5000
                 });
             }
         } else {
-            throw new Error(result.message || 'Back order creation failed');
+            // Use SAP message for error
+            const errorMessage = extractSAPMessage(result);
+            throw new Error(errorMessage);
         }
     } catch (error) {
+        console.error('Back order creation error:', error);
         orderStatus.value = 'error';
         orderMessage.value = 'Failed to create back order';
         orderError.value = error.message;
+
         toast.add({
             severity: 'error',
             summary: 'Error',
-            detail: error.message || 'Failed to create back order',
+            detail: error.message,
             life: 5000
         });
     }
 };
 
+// UPDATED: proceedWithoutBackOrder with better salesprogramid handling
 const proceedWithoutBackOrder = async () => {
     showBackOrderDialog.value = false;
     showOrderDialog.value = true;
@@ -2000,22 +2219,46 @@ const proceedWithoutBackOrder = async () => {
     orderMessage.value = 'Creating order without back order...';
 
     try {
-        // Only process fulfilled items
-        const orderArray = fulfilledItems.value.map((item, index) => ({
-            materialid: item.materialid,
-            itemno: String((index + 1) * 10).padStart(5, '0'),
-            itemcategory: 'ZT02',
-            plant: 'TSM',
-            qty: item.accepted_qty.toString(),
-            price: getMaterialPrice(item.materialid).toString(),
-            salesprogramid: null
-        }));
+        // Only process fulfilled items with salesprogramid
+        const orderArray = fulfilledItems.value.map((item, index) => {
+            const originalItem = selectedTyres.value.find((t) => t.materialid === item.materialid);
+
+            // FIX: Ensure we get the salesprogramid properly
+            let salesprogramid = null;
+            if (originalItem) {
+                salesprogramid = originalItem.salesprogramid;
+            } else {
+                // Fallback: try to find in tyres list
+                const tyreFromList = tyres.value.find((t) => t.materialid === item.materialid);
+                salesprogramid = tyreFromList?.salesprogramid || null;
+            }
+
+            return {
+                materialid: item.materialid,
+                itemno: String((index + 1) * 10).padStart(5, '0'),
+                itemcategory: originalItem?.itemcategory || 'ZT02',
+                plant: originalItem?.plant || 'TSM',
+                qty: item.accepted_qty.toString(),
+                price: getMaterialPrice(item.materialid).toString(),
+                salesprogramid: salesprogramid // FIX: Include salesprogramid properly
+            };
+        });
 
         if (orderArray.length === 0) {
             throw new Error('No items available for order');
         }
 
-        const cartRefNo = currentCartRefNo.value || `TEMP-${Date.now()}`;
+        // Use current cart reference or create a new one if needed
+        let cartRefNo = currentCartRefNo.value;
+        if (!cartRefNo || cartRefNo.includes('TEMP')) {
+            try {
+                cartRefNo = await createDirectShipCart();
+            } catch (cartError) {
+                console.log('Failed to create cart, using temporary reference');
+                cartRefNo = `ORDER-${Date.now()}`;
+            }
+        }
+
         const result = await confirmOrderAPI(cartRefNo, orderArray);
 
         if (result.status === 1) {
@@ -2054,6 +2297,102 @@ const proceedWithoutBackOrder = async () => {
             detail: error.message || 'Failed to create order',
             life: 5000
         });
+    }
+};
+
+// UPDATED: Process DIRECTSHIP Order with salesprogramid
+const processDirectShipOrder = async (orderArray) => {
+    orderMessage.value = 'Setting up direct shipment cart...';
+
+    // Ensure we have a cart reference for DIRECTSHIP
+    if (!currentCartRefNo.value) {
+        try {
+            currentCartRefNo.value = await createDirectShipCart();
+        } catch (error) {
+            throw new Error('Failed to create direct shipment cart: ' + error.message);
+        }
+    }
+
+    orderMessage.value = 'Adding items to direct shipment...';
+    const addToCartResult = await addToCartAPI(currentCartRefNo.value);
+
+    if (addToCartResult.status === 1) {
+        orderMessage.value = 'Confirming direct shipment order...';
+
+        // Use the processed order array from addToCartAPI response if available
+        const finalOrderArray = addToCartResult.eten_data?.order_array || orderArray;
+
+        const confirmResult = await confirmOrderAPI(currentCartRefNo.value, finalOrderArray);
+        await handleOrderConfirmation(confirmResult, 'DIRECTSHIP');
+    } else {
+        throw new Error(addToCartResult.message || 'Failed to add items to direct shipment cart');
+    }
+};
+
+// UPDATED: Process NORMAL Order with salesprogramid
+const processNormalOrder = async (orderArray) => {
+    orderMessage.value = 'Adding items to cart...';
+    const addToCartResult = await addToCartAPI();
+
+    if (addToCartResult.status === 1) {
+        orderMessage.value = 'Confirming order with SAP...';
+        const cartRefNo = addToCartResult.eten_data?.cartRefNo;
+
+        // Use the processed order array from addToCartAPI response if available
+        const finalOrderArray = addToCartResult.eten_data?.order_array || orderArray;
+
+        const confirmResult = await confirmOrderAPI(cartRefNo, finalOrderArray);
+        await handleOrderConfirmation(confirmResult, 'NORMAL');
+    } else {
+        throw new Error(addToCartResult.message || 'Failed to add items to cart');
+    }
+};
+
+// UPDATED: Main Order Placement Function with salesprogramid
+const placeOrder = async () => {
+    if (!canPlaceOrder.value) {
+        step3Validated.value = true;
+        return;
+    }
+
+    processingOrder.value = true;
+    showOrderDialog.value = true;
+    orderStatus.value = 'processing';
+    orderMessage.value = 'Processing your order...';
+    orderError.value = '';
+    orderDetails.value = null;
+
+    try {
+        // Prepare order array for both order types with salesprogramid
+        const orderArray = selectedTyres.value.map((item, index) => ({
+            materialid: item.materialid,
+            itemno: String((index + 1) * 10).padStart(5, '0'),
+            itemcategory: item.itemcategory || 'ZT02',
+            plant: item.plant || 'TSM',
+            qty: item.quantity.toString(),
+            price: item.price.toString(),
+            salesprogramid: item.salesprogramid || null // Include salesprogramid
+        }));
+
+        if (selectedOrderType.value === 'DIRECTSHIP') {
+            await processDirectShipOrder(orderArray);
+        } else {
+            await processNormalOrder(orderArray);
+        }
+    } catch (error) {
+        console.error('Order placement error:', error);
+        orderStatus.value = 'error';
+        orderMessage.value = 'Failed to process order';
+        orderError.value = error.message || 'Unknown error occurred';
+
+        toast.add({
+            severity: 'error',
+            summary: 'Error',
+            detail: error.message || 'Failed to process order',
+            life: 5000
+        });
+    } finally {
+        processingOrder.value = false;
     }
 };
 

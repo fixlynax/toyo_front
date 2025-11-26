@@ -3,6 +3,7 @@
         <div class="flex flex-col md:flex-row gap-8">
             <!-- LEFT SIDE -->
             <div class="md:w-2/3 flex flex-col gap-2">
+                <!-- CUSTOMER INFORMATION -->
                 <div class="card flex flex-col gap-6 w-full">
                     <div class="flex items-center gap-2 border-b pb-2">
                         <RouterLink to="/om/listBackOrder">
@@ -15,7 +16,7 @@
                         <div>
                             <span class="text-sm text-gray-500">Customer Name </span>
                             <p class="text-lg font-medium">
-                                {{ customerInfo.dealerName || '-' }} <br />(<span class="font-semibold text-primary">{{ order.custaccountno }}</span
+                                {{ customerInfo.companyName1 || '-' }} <br />(<span class="font-semibold text-primary">{{ order.custaccountno }}</span
                                 >)
                             </p>
                         </div>
@@ -42,7 +43,7 @@
                         </div>
                         <div class="w-full">
                             <span class="text-sm text-gray-700">Email Address</span>
-                            <p class="text-lg font-medium">{{ customerInfo.email || '-' }}</p>
+                            <p class="text-lg font-medium">{{ customerInfo.emailAddress || '-' }}</p>
                         </div>
                         <div class="w-full">
                             <span class="text-sm text-gray-700">Contact Number</span>
@@ -57,7 +58,6 @@
                         <div class="font-semibold text-xl">📦 Back Order Items</div>
                         <div class="flex items-center gap-2">
                             <Tag :value="`${fulfillmentPercentage}% Fulfilled`" :severity="fulfillmentPercentage === 100 ? 'success' : fulfillmentPercentage > 0 ? 'warning' : 'danger'" />
-                            <!-- <Button v-if="canProcessBackOrder" label="Process Available Stock" icon="pi pi-play" severity="success" size="small" @click="processBackOrder(1)" :loading="processing" class="!w-fit" /> -->
                         </div>
                     </div>
 
@@ -182,8 +182,6 @@
                                     <div v-if="fulfillOrder.deliveryDate">Delivery: {{ formatDate(fulfillOrder.deliveryDate) }}</div>
                                 </div>
                             </div>
-
-                            <!-- <div class="text-lg font-bold text-blue-800">Total: RM {{ fulfillOrder.total }}</div> -->
                         </div>
                     </div>
                 </div>
@@ -315,6 +313,7 @@ const confirm = useConfirm();
 
 const order = ref({});
 const customerInfo = ref({});
+const etenInformation = ref(null);
 const loading = ref(false);
 const processing = ref(false);
 const cancelling = ref(false);
@@ -329,39 +328,19 @@ const fetchBackOrderDetail = async () => {
         if (response.data.status === 1 && response.data.admin_data.length > 0) {
             order.value = response.data.admin_data[0];
 
-            // Extract customer info from dealerData in the first fulfillment order
-            if (order.value.list_order && order.value.list_order.length > 0) {
-                const firstOrder = order.value.list_order[0];
-                if (firstOrder.dealerData && firstOrder.dealerData.length > 0) {
-                    const dealer = firstOrder.dealerData[0];
-                    customerInfo.value = {
-                        dealerName: dealer.companyName1 || '-',
-                        contactPerson: dealer.companyName3 || '-',
-                        phoneNumber: dealer.phoneNumber || '-',
-                        mobileNumber: dealer.mobileNumber || '-',
-                        email: dealer.emailAddress || '-',
-                        // Address fields
-                        addressLine1: dealer.addressLine1,
-                        addressLine2: dealer.addressLine2,
-                        addressLine3: dealer.addressLine3,
-                        addressLine4: dealer.addressLine4,
-                        city: dealer.city,
-                        state: dealer.state,
-                        postcode: dealer.postcode,
-                        // Additional dealer info
-                        signboardBrand: dealer.signboardBrand,
-                        accountType: dealer.accountType,
-                        creditLimit: dealer.creditLimit
-                    };
-                }
+            // Set customer info from shippingDetail
+            if (order.value.shippingDetail && order.value.shippingDetail.length > 0) {
+                customerInfo.value = order.value.shippingDetail[0];
             }
 
-            // If no dealerData found, use basic info from order
-            if (!customerInfo.value.dealerName) {
-                customerInfo.value = {
-                    dealerName: order.value.customername || '-'
-                };
+            // Set ETEN information
+            if (order.value.etenInformation) {
+                etenInformation.value = order.value.etenInformation;
             }
+
+            console.log('Fetched order data:', order.value);
+            console.log('Customer info:', customerInfo.value);
+            console.log('ETEN info:', etenInformation.value);
         } else {
             toast.add({ severity: 'error', summary: 'Error', detail: 'Back order not found', life: 3000 });
         }
@@ -373,16 +352,12 @@ const fetchBackOrderDetail = async () => {
     }
 };
 
-// Computed property to get shipping details from the first fulfillment order
+// Computed property to get shipping details
 const shippingDetail = computed(() => {
-    if (!order.value.list_order || order.value.list_order.length === 0) {
+    if (!order.value.shippingDetail || order.value.shippingDetail.length === 0) {
         return null;
     }
-
-    // Get the first fulfillment order that has shipping details
-    const firstOrderWithShipping = order.value.list_order.find((order) => order.shippingDetail && order.shippingDetail.length > 0);
-
-    return firstOrderWithShipping?.shippingDetail?.[0] || null;
+    return order.value.shippingDetail[0];
 });
 
 // Helper methods to format shipping information
@@ -410,6 +385,13 @@ const getFullAddress = (customerInfo) => {
     const addressParts = [customerInfo.addressLine1, customerInfo.addressLine2, customerInfo.addressLine3, customerInfo.addressLine4, customerInfo.city, customerInfo.state, customerInfo.postcode].filter((part) => part && part.trim() !== '');
 
     return addressParts.join(' ') || '-';
+};
+
+const formatCurrency = (amount) => {
+    if (!amount) return '0.00';
+    const num = parseFloat(amount);
+    if (isNaN(num)) return '0.00';
+    return num.toLocaleString('en-MY', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 };
 
 const formatItemNo = (itemNo) => {

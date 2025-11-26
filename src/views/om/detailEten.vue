@@ -298,7 +298,7 @@
                                 </tr>
                                 <tr class="border-b">
                                     <td class="px-4 py-2 font-medium">Total Quantity</td>
-                                    <td class="px-4 py-2 text-right">{{ formatCurrency(form.targetQty) || '-' }}</td>
+                                    <td class="px-4 py-2 text-right">{{ form.targetQty || '-' }}</td>
                                 </tr>
                                 <tr class="border-b">
                                     <td class="px-4 py-2 font-medium">Customer Condition Group</td>

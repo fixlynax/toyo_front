@@ -59,7 +59,20 @@ onBeforeMount(async () => {
         <!-- 🟢 Use LoadingPage for initial load, hide everything else -->
         <LoadingPage v-if="loading" :message="'Loading your Sales Progtame...'" :sub-message="'Fetching your Sales Progtame'" />
 
-        <DataTable v-else :value="listData" :paginator="true" :rows="10" dataKey="programId" :rowHover="true" :filters="filters1" filterDisplay="menu " class="rounded-table">
+        <DataTable
+            v-else
+            :value="listData"
+            :paginator="true"
+            :rows="10"
+            dataKey="programId"
+            :rowHover="true"
+            :filters="filters1"
+            filterDisplay="menu "
+            class="rounded-table"
+            :rowsPerPageOptions="[10, 20, 50, 100]"
+            currentPageReportTemplate="Showing {first} to {last} of {totalRecords} entries"
+            paginatorTemplate="CurrentPageReport FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink RowsPerPageDropdown"
+        >
             <!-- Header -->
             <template #header>
                 <div class="flex items-center justify-between gap-4 w-full flex-wrap">

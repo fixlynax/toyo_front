@@ -151,6 +151,12 @@ import api from '@/service/api';
 import { useToast } from 'primevue/usetoast';
 import { useRoute, useRouter } from 'vue-router';
 import { useMenuStore } from '@/store/menu';
+defineProps({
+  id: {
+    type: [String, Number],
+    required: false
+  }
+});
 const menuStore = useMenuStore();
 const canUpdate = computed(() => menuStore.canWrite('CTC Collection'));
 
@@ -178,7 +184,7 @@ function toLocalDateTimeString(dt) {
 }
 
 const updateCTCDetails = async () => {
-    if (!form.value.collectDatetime || !form.value.reachWHDatetime) {
+    if (!form.value.collectDatetime && !form.value.reachWHDatetime) {
     toast.add({ severity: 'warn', summary: 'Warning', detail: 'Please select date', life: 3000 });
     return;
   }
