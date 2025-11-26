@@ -71,6 +71,8 @@ const fetchClaims = async () => {
                 id: item.claim_id,
                 refNo: item.claimRefNo,
                 dealerName: item.dealer,
+                isTWP : item.isTWP,
+                claimTypeDisplay: item.isTWP == 1 ? 'TWP' : 'Technical Claim',
                 claimType: item.warrantyType || '-',
                 dealer_sales_office: item.dealer_sales_office || '-',
                 claimDate: item.claim_date || '-',
@@ -185,7 +187,7 @@ onMounted(fetchClaims);
         <LoadingPage v-if="loading" message="Loading Warranty Claim List..." />
 
         <div v-else>
-            <DataTable :value="filteredList" :paginator="true" :rows="10" dataKey="id" :rowHover="true" :filters="filters" filterDisplay="menu" :globalFilterFields="['refNo', 'dealerName', 'claimType', 'claimDate', 'status', 'stage', 'warrantyRegCertNo']">
+            <DataTable :value="filteredList" :paginator="true" :rows="10" dataKey="id" :rowHover="true" :filters="filters" filterDisplay="menu" :globalFilterFields="['refNo', 'dealerName', 'claimTypeDisplay', 'claimDate', 'status', 'stage', 'warrantyRegCertNo']">
                 <template #header>
                     <div class="flex items-center justify-between gap-4 w-full flex-wrap">
                         <div class="flex items-center gap-2 w-full max-w-md">
@@ -230,8 +232,10 @@ onMounted(fetchClaims);
                 <Column field="dealer_sales_office" header="Dealer Sales Office" style="min-width: 15rem" sortable>
                     <template #body="{ data }">{{ data.dealer_sales_office }}</template>
                 </Column>
-                <Column field="claimType" header="Claim Type" style="min-width: 15rem" sortable>
-                    <template #body="{ data }">{{ data.claimType }}</template>
+                <Column field="claimTypeDisplay" header="Claim Type" style="min-width: 15rem" sortable>
+                    <template #body="{ data }">
+                        {{ data.claimTypeDisplay}}
+                    </template>
                 </Column>
 
                 <Column field="status" header="Status" style="min-width: 10rem">

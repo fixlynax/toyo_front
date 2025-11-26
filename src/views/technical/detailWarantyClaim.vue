@@ -115,7 +115,7 @@
                         </div>
                         <div>
                             <span class="block text-sm font-bold text-black-800">Warranty Type</span>
-                            <p class="text-lg font-medium">{{ warantyDetail.warranty_info?.warrantyType || '-' }}</p>
+                            <p class="text-lg font-medium">{{ warantyDetail.claimTypeDisplay || '-' }}</p>
                         </div>
                         <div>
                             <span class="block text-sm font-bold text-black-800">Purchase Date</span>
@@ -1242,6 +1242,8 @@ const fetchWarrantyClaim = async () => {
                 status: apiData.claim_info?.status,
                 claimDate: apiData.claim_info?.claimDate,
                 warrantyCertNo: apiData.claim_info?.warrantyCertNo,
+                isTWP : apiData.claim_info?.isTWP,
+                claimTypeDisplay: apiData.claim_info?.isTWP == 1 ? 'TWP' : 'Technical Claim',
 
                 // Customer Info
                 customer_info: apiData.customer_info?.[0] || [],
@@ -1936,29 +1938,34 @@ const generateReport = (report) => {
 
             <table class="small-table">
                 <tr>
-                    <td><strong>CUSTOMER :</strong> ${report.customer.companyName}</td>
-                    <td><strong>BRANCH :</strong> ${report.branch.companyName}</td>
+                    <td><strong>CUSTOMER :</strong> ${report.customer.custAccountNo}</td>
+                    <td><strong>BRANCH :</strong> ${report.branch.phoneNo}</td>
                     <td><strong>WARRANTY CLAIM FORM</strong></td>
                 </tr>
                 <tr>
                     <td>
                         <strong>PAY TO :</strong><br>
+                        ${report.customer.companyName}<br>
                         ${[
                             report.customer.companyAddress1,
                             report.customer.companyAddress2,
                             report.customer.companyAddress3,
                             report.customer.companyAddress4
-                        ].filter(x => x && x.trim() !== "").join("<br>")}
+                        ].filter(x => x && x.trim() !== "").join("<br>")}<br>
+                        ${report.customer.phoneNo}<br>
+
                     </td>
 
                     <td>
                         <strong>SHIP TO :</strong><br>
+                        ${report.branch.companyName}<br>
                         ${[
                             report.branch.companyAddress1,
                             report.branch.companyAddress2,
                             report.branch.companyAddress3,
                             report.branch.companyAddress4
-                        ].filter(x => x && x.trim() !== "").join("<br>")}
+                        ].filter(x => x && x.trim() !== "").join("<br>")}<br>
+                        ${report.branch.phoneNo}<br>
                     </td>
 
                     <td>
