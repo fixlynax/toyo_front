@@ -40,9 +40,9 @@
                             @click="exportToCSV"
                             :disabled="patterns.length === 0"
                         />
-                        <RouterLink to="/technical/createPattern" v-if="canUpdate">
+                        <!-- <RouterLink to="/technical/createPattern" v-if="canUpdate">
                         <Button type="button" label="Create" icon="pi pi-plus" class="p-button" />
-                        </RouterLink>
+                        </RouterLink> -->
                     </div>
                 </div>
             </template>
@@ -72,7 +72,11 @@
                     </RouterLink>
                 </template>
             </Column>
-
+            <Column field="mfg_code" header="MFG Code" style="min-width: 8rem">
+                <template #body="{ data }">
+                    <span class="font-semibold ml-1">{{ data.mfg_code || '-' }}</span>
+                </template>
+            </Column>
             <Column field="pattern_name" header="Pattern Name" style="min-width: 8rem">
                 <template #body="{ data }">
                     <span class="font-semibold ml-1">{{ data.pattern_name || '-' }}</span>
