@@ -7,7 +7,6 @@
                 <LoadingPage v-if="loading" :message="'Loading Container Sizes...'" :sub-message="'Fetching container size limits'" />
 
                 <div v-else class="container-grid">
-                    <!-- 20ft Container Card -->
                     <div class="container-card">
                         <div class="container-header">
                             <i class="pi pi-box text-blue-500 text-xl"></i>
@@ -46,29 +45,14 @@
 
                 <!-- Action Buttons -->
                 <div class="flex justify-end mt-4">
-                    <Button 
-                        label="Edit Container Sizes" 
-                        icon="pi pi-pencil" 
-                        class="p-button-primary" 
-                        @click="openEditModal"
-                        :disabled="loading"
-                    />
+                    <Button label="Edit Container Sizes" icon="pi pi-pencil" class="p-button-primary" @click="openEditModal" :disabled="loading" />
                 </div>
             </div>
         </div>
 
         <!-- Edit Dialog -->
-        <Dialog 
-            v-model:visible="showEditModal" 
-            header="Edit Container Size Limits" 
-            :modal="true" 
-            class="p-fluid" 
-            :style="{ width: '50rem' }" 
-            :closable="!updating"
-        >
-            <div v-if="dialogLoading" class="text-center py-8">
-                <i class="pi pi-spinner pi-spin text-2xl mr-2"></i> Loading container data...
-            </div>
+        <Dialog v-model:visible="showEditModal" header="Edit Container Size Limits" :modal="true" class="p-fluid" :style="{ width: '50rem' }" :closable="!updating">
+            <div v-if="dialogLoading" class="text-center py-8"><i class="pi pi-spinner pi-spin text-2xl mr-2"></i> Loading container data...</div>
 
             <div v-else class="grid grid-cols-1 gap-6">
                 <!-- 20ft Container Section -->
@@ -80,25 +64,11 @@
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div class="field">
                             <label for="min_container_twenty" class="field-label">Minimum Limit *</label>
-                            <InputNumber 
-                                id="min_container_twenty"
-                                v-model="editForm.min_container_twenty" 
-                                mode="decimal" 
-                                :min="0"
-                                class="w-full"
-                                placeholder="Enter minimum value"
-                            />
+                            <InputNumber id="min_container_twenty" v-model="editForm.min_container_twenty" mode="decimal" :min="0" class="w-full" placeholder="Enter minimum value" />
                         </div>
                         <div class="field">
                             <label for="max_container_twenty" class="field-label">Maximum Limit *</label>
-                            <InputNumber 
-                                id="max_container_twenty"
-                                v-model="editForm.max_container_twenty" 
-                                mode="decimal" 
-                                :min="0"
-                                class="w-full"
-                                placeholder="Enter maximum value"
-                            />
+                            <InputNumber id="max_container_twenty" v-model="editForm.max_container_twenty" mode="decimal" :min="0" class="w-full" placeholder="Enter maximum value" />
                         </div>
                     </div>
                 </div>
@@ -112,25 +82,11 @@
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div class="field">
                             <label for="min_container_forty" class="field-label">Minimum Limit *</label>
-                            <InputNumber 
-                                id="min_container_forty"
-                                v-model="editForm.min_container_forty" 
-                                mode="decimal" 
-                                :min="0"
-                                class="w-full"
-                                placeholder="Enter minimum value"
-                            />
+                            <InputNumber id="min_container_forty" v-model="editForm.min_container_forty" mode="decimal" :min="0" class="w-full" placeholder="Enter minimum value" />
                         </div>
                         <div class="field">
                             <label for="max_container_forty" class="field-label">Maximum Limit *</label>
-                            <InputNumber 
-                                id="max_container_forty"
-                                v-model="editForm.max_container_forty" 
-                                mode="decimal" 
-                                :min="0"
-                                class="w-full"
-                                placeholder="Enter maximum value"
-                            />
+                            <InputNumber id="max_container_forty" v-model="editForm.max_container_forty" mode="decimal" :min="0" class="w-full" placeholder="Enter maximum value" />
                         </div>
                     </div>
                 </div>
@@ -148,20 +104,8 @@
             </div>
 
             <template #footer>
-                <Button 
-                    label="Cancel" 
-                    icon="pi pi-times" 
-                    class="p-button-text" 
-                    @click="closeEditModal" 
-                    :disabled="updating" 
-                />
-                <Button 
-                    :label="updating ? 'Updating...' : 'Update Limits'" 
-                    icon="pi pi-check" 
-                    class="p-button-primary" 
-                    :disabled="!isFormValid || updating" 
-                    @click="updateContainerSizes" 
-                />
+                <Button label="Cancel" icon="pi pi-times" class="p-button-text" @click="closeEditModal" :disabled="updating" />
+                <Button :label="updating ? 'Updating...' : 'Update Limits'" icon="pi pi-check" class="p-button-primary" :disabled="!isFormValid || updating" @click="updateContainerSizes" />
             </template>
         </Dialog>
 
@@ -186,26 +130,28 @@ const adminData = reactive({
     max_container_twenty: 0,
     max_container_forty: 0,
     min_container_twenty: 0,
-    min_container_forty: 0,
+    min_container_forty: 0
 });
 
 const editForm = reactive({
     max_container_twenty: null,
     max_container_forty: null,
     min_container_twenty: null,
-    min_container_forty: null,
+    min_container_forty: null
 });
 
 // Computed Properties
 const isFormValid = computed(() => {
-    return editForm.min_container_twenty !== null &&
-           editForm.max_container_twenty !== null &&
-           editForm.min_container_forty !== null &&
-           editForm.max_container_forty !== null &&
-           editForm.min_container_twenty >= 0 &&
-           editForm.max_container_twenty >= 0 &&
-           editForm.min_container_forty >= 0 &&
-           editForm.max_container_forty >= 0;
+    return (
+        editForm.min_container_twenty !== null &&
+        editForm.max_container_twenty !== null &&
+        editForm.min_container_forty !== null &&
+        editForm.max_container_forty !== null &&
+        editForm.min_container_twenty >= 0 &&
+        editForm.max_container_twenty >= 0 &&
+        editForm.min_container_forty >= 0 &&
+        editForm.max_container_forty >= 0
+    );
 });
 
 const validationErrors = computed(() => {
@@ -214,16 +160,12 @@ const validationErrors = computed(() => {
     if (editForm.max_container_twenty === null) errors.push('20ft maximum limit is required');
     if (editForm.min_container_forty === null) errors.push('40ft minimum limit is required');
     if (editForm.max_container_forty === null) errors.push('40ft maximum limit is required');
-    
-    if (editForm.min_container_twenty !== null && editForm.min_container_twenty < 0) 
-        errors.push('20ft minimum limit cannot be negative');
-    if (editForm.max_container_twenty !== null && editForm.max_container_twenty < 0) 
-        errors.push('20ft maximum limit cannot be negative');
-    if (editForm.min_container_forty !== null && editForm.min_container_forty < 0) 
-        errors.push('40ft minimum limit cannot be negative');
-    if (editForm.max_container_forty !== null && editForm.max_container_forty < 0) 
-        errors.push('40ft maximum limit cannot be negative');
-    
+
+    if (editForm.min_container_twenty !== null && editForm.min_container_twenty < 0) errors.push('20ft minimum limit cannot be negative');
+    if (editForm.max_container_twenty !== null && editForm.max_container_twenty < 0) errors.push('20ft maximum limit cannot be negative');
+    if (editForm.min_container_forty !== null && editForm.min_container_forty < 0) errors.push('40ft minimum limit cannot be negative');
+    if (editForm.max_container_forty !== null && editForm.max_container_forty < 0) errors.push('40ft maximum limit cannot be negative');
+
     return errors;
 });
 
@@ -232,7 +174,7 @@ const fetchContainerSizes = async () => {
     loading.value = true;
     try {
         const response = await api.get('maintenance/list-container-size');
-        
+
         if (response.data.status === 1) {
             Object.assign(adminData, response.data.admin_data);
         } else {
@@ -259,15 +201,15 @@ const fetchContainerSizes = async () => {
 const openEditModal = () => {
     showEditModal.value = true;
     dialogLoading.value = true;
-    
+
     // Copy current values to edit form
     Object.assign(editForm, {
         max_container_twenty: adminData.max_container_twenty,
         max_container_forty: adminData.max_container_forty,
         min_container_twenty: adminData.min_container_twenty,
-        min_container_forty: adminData.min_container_forty,
+        min_container_forty: adminData.min_container_forty
     });
-    
+
     dialogLoading.value = false;
 };
 
@@ -279,17 +221,17 @@ const closeEditModal = () => {
             max_container_twenty: null,
             max_container_forty: null,
             min_container_twenty: null,
-            min_container_forty: null,
+            min_container_forty: null
         });
     }
 };
 
 const updateContainerSizes = async () => {
     updating.value = true;
-    
+
     try {
         const formData = new FormData();
-        
+
         // Only include fields that have values (nullable handling)
         if (editForm.max_container_twenty !== null) {
             formData.append('max_container_twenty', editForm.max_container_twenty);
@@ -303,13 +245,13 @@ const updateContainerSizes = async () => {
         if (editForm.min_container_forty !== null) {
             formData.append('min_container_forty', editForm.min_container_forty);
         }
-        
+
         const response = await api.post('maintenance/update-container-size', formData, {
             headers: {
-                'Content-Type': 'multipart/form-data',
-            },
+                'Content-Type': 'multipart/form-data'
+            }
         });
-        
+
         if (response.data.status === 1) {
             toast.add({
                 severity: 'success',
