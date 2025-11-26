@@ -74,7 +74,7 @@
                 <div class="card flex flex-col w-full">
                     <div class="flex items-center justify-between border-b pb-2 mb-4">
                         <div class="text-2xl font-bold text-gray-800">Tire Detail</div>
-                        <Button label="Update Tire Details" class="p-button-info" size="small" @click="openEditTier" v-if="warantyDetail.status !== 6 && warantyDetail.status !== 5 && warantyDetail.status_string !== 'Pending Customer Invoice' && warantyDetail.status_string !== 'Admin Approved'"/>
+                        <Button label="Update Tire Details" class="p-button-info" size="small" @click="openEditTier" v-if="warantyDetail.status !== 6 && warantyDetail.status !== 5 && warantyDetail.status_string !== 'Pending Customer Invoice'"/>
                     </div>
                     <div :class="['grid',  'gap-4', 'mb-2', warantyDetail.tire_info?.plateSerialAdmin ? 'grid-cols-2 md:grid-cols-5' : 'grid-cols-2 md:grid-cols-4']">
                         <div>
@@ -477,7 +477,7 @@
                 <div class="flex items-center justify-between border-b pb-2 mb-2">
                     <div class="text-2xl font-bold text-gray-800">Reimbursement Detail</div>
                 </div>
-                <div v-if="!warantyDetail.reimbursement" class="bg-yellow-50 border border-yellow-200 rounded-lg p-4" >
+                <div v-if="warantyDetail.status_string  == 'Pending Customer Invoice'" class="bg-yellow-50 border border-yellow-200 rounded-lg p-4" >
                     <div class="flex items-start gap-3">
                         <i class="pi pi-exclamation-circle text-yellow-600 mt-1"></i>
                         <div>
@@ -486,7 +486,7 @@
                         </div>
                     </div>
                 </div>
-                <div v-if="warantyDetail.reimbursement" class="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm text-gray-800">
+                <div v-else class="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm text-gray-800">
                     <div>
                         <span class="font-bold">Invoice Request Date </span>
                         <p>{{ formatDateString(warantyDetail.reimbursement?.requestReimbursementDate) || '-' }}</p>
@@ -520,7 +520,7 @@
                     </div>
                     <div>
                         <span class="font-bold">SAP Claim No </span>
-                        <p>{{ warantyDetail.reimbursement?.sapClaimNo ? warantyDetail.reimbursement.sapClaimNo : 'Pending Invoice' }}</p>
+                        <p>{{ warantyDetail.reimbursement?.sapClaimNo ? warantyDetail.reimbursement.sapClaimNo : 'Pending Invoice Approval' }}</p>
                     </div>
                 </div>
                 <div v-if="(warantyDetail.status_string  !== 'Pending Customer Invoice') && warantyDetail.reimbursement && warantyDetail.status !=5 && canUpdate" class="flex justify-end gap-2 mt-4">
