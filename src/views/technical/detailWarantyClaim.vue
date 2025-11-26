@@ -74,23 +74,38 @@
                 <div class="card flex flex-col w-full">
                     <div class="flex items-center justify-between border-b pb-2 mb-4">
                         <div class="text-2xl font-bold text-gray-800">Tire Detail</div>
+                        <Button label="Update Tire Details" class="p-button-info" size="small" @click="openEditTier" v-if="warantyDetail.status !== 6 && warantyDetail.status !== 5 && warantyDetail.status_string !== 'Pending Customer Invoice' && warantyDetail.status_string !== 'Admin Approved'"/>
                     </div>
-                    <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-2">
+                    <div :class="['grid',  'gap-4', 'mb-2', warantyDetail.tire_info?.plateSerialAdmin ? 'grid-cols-2 md:grid-cols-5' : 'grid-cols-2 md:grid-cols-4']">
                         <div>
-                            <span class="block text-sm font-bold text-black-800">MFG code</span>
-                            <p class="text-lg font-medium">{{ warantyDetail.tire_info.platePart1 || '-' }}</p>
+                            <span class="block text-sm font-bold text-black-800">MFG Code</span>
+
+                            <!-- OLD (User) -->
+                            <p class="text-lg font-medium mb-2">{{ warantyDetail.tire_info.platePart1 || '-' }}</p>
+                            <!-- NEW (Admin) -->
+                            <p  v-if="warantyDetail.tire_info?.plateSerialAdmin"  class="text-lg font-medium"> {{ warantyDetail.tire_info.AdminplatePart1 }}</p>
                         </div>
                         <div>
                             <span class="block text-sm font-bold text-black-800">Size Code</span>
-                            <p class="text-lg font-medium">{{ warantyDetail.tire_info.platePart2 || '-' }}</p>
+                            <p class="text-lg font-medium mb-2">{{ warantyDetail.tire_info.platePart2 || '-' }}</p>
+                            <p  v-if="warantyDetail.tire_info?.plateSerialAdmin"  class="text-lg font-medium"> {{ warantyDetail.tire_info.AdminplatePart2 }}</p>
+
                         </div>
                         <div>
                             <span class="block text-sm font-bold text-black-800">Tyre Spec</span>
-                            <p class="text-lg font-medium">{{ warantyDetail.tire_info.platePart3  || '-' }}</p>
+                            <p class="text-lg font-medium mb-2">{{ warantyDetail.tire_info.platePart3  || '-' }}</p>
+                            <p  v-if="warantyDetail.tire_info?.plateSerialAdmin"  class="text-lg font-medium"> {{ warantyDetail.tire_info.AdminplatePart3 }}</p>
+
                         </div>
                         <div>
                             <span class="block text-sm font-bold text-black-800">Week Code</span>
-                            <p class="text-lg font-medium">{{ warantyDetail.tire_info.platePart4  || '-' }}</p>
+                            <p class="text-lg font-medium mb-2">{{ warantyDetail.tire_info.platePart4  || '-' }}</p>
+                            <p  v-if="warantyDetail.tire_info?.plateSerialAdmin"  class="text-lg font-medium"> {{ warantyDetail.tire_info.AdminplatePart4 }}</p>
+                        </div>
+                        <div  v-if="warantyDetail.tire_info?.plateSerialAdmin" >
+                            <span class="block text-sm font-bold text-black-800">Submitted</span>
+                            <p><span class="text-xs bg-red-500 text-white px-1 rounded ml-1"> Old </span></p>
+                            <p> <span class="text-xs bg-green-600 text-white px-1 rounded ml-1">New</span></p>
                         </div>
                     </div>
 
@@ -516,7 +531,39 @@
             </div>
         </div>
     </div>
+<Dialog v-model:visible="showEditTireDialog" header="Update Tire Details" :modal="true" class="p-fluid" :style="{ width: '40rem' }">
+        <div class="grid grid-cols-1 gap-4">
+            <!-- Percentages -->
+            <div class="grid grid-cols-2 gap-4">
+                <!-- Claim Percentage -->
+                <div class="field">
+                    <label class="block font-bold text-gray-700 mb-2">MFG Code *</label>
+                     <InputText v-model="editTireData.mfgcode" class="w-full" />
+                    <small v-if="(!editTireData.mfgcode) && editValidationTire" class="text-red-600">MFG Code is required.</small>
+                </div>
+                <div class="field">
+                    <label class="block font-bold text-gray-700 mb-2">Size Code *</label>
+                     <InputText v-model="editTireData.sizecode" class="w-full" />
+                    <small v-if="(!editTireData.sizecode) && editValidationTire" class="text-red-600">Size Code is required.</small>
+                </div>
+                <div class="field">
+                    <label class="block font-bold text-gray-700 mb-2">Tyre Spec *</label>
+                     <InputText v-model="editTireData.tyrespec" class="w-full" />
+                    <small v-if="(!editTireData.tyrespec) && editValidationTire" class="text-red-600">Tyre Spec is required.</small>
+                </div>
+                <div class="field">
+                    <label class="block font-bold text-gray-700 mb-2">Week Code *</label>
+                     <InputText v-model="editTireData.weekcode" class="w-full" />
+                    <small v-if="(!editTireData.weekcode) && editValidationTire" class="text-red-600">Week Code is required.</small>
+                </div>
+            </div>
+        </div>
 
+        <template #footer>
+            <Button label="Cancel" icon="pi pi-times" class="p-button-text" @click="closeEditTire" :disabled="editTire" />
+            <Button label="Update Tire" icon="pi pi-check" class="p-button-primary" @click="submitEditTire" :loading="editTire" />
+        </template>
+    </Dialog>
     <!-- Create Claim Dialog -->
     <Dialog v-model:visible="showCreateClaimDialog" header="Create Claim Details" :modal="true" class="p-fluid" :style="{ width: '40rem' }">
         <div class="grid grid-cols-1 gap-4">
@@ -543,7 +590,7 @@
                     </template>
                 </Dropdown>
 
-                <small v-if="!selectedDamageType && creatingClaim" class="p-error">
+                <small v-if="!selectedDamageType && creatingClaim" class="text-red-600">
                     Damage type is required.
                 </small>
             </div>
@@ -563,7 +610,7 @@
                         class="w-full"
                         :class="{ 'p-invalid': (newClaimData.claimPercent === null || newClaimData.claimPercent === undefined) && creatingClaim }"
                     />
-                    <small v-if="(newClaimData.claimPercent === null || newClaimData.claimPercent === undefined) && creatingClaim" class="p-error">Claim percentage is required.</small>
+                    <small v-if="(newClaimData.claimPercent === null || newClaimData.claimPercent === undefined) && creatingClaim" class="text-red-600">Claim percentage is required.</small>
                 </div>
                 <div class="field">
                     <label class="block font-bold text-gray-700 mb-2">Tread Depth Dealer</label>
@@ -594,7 +641,7 @@
                         class="w-full"
                         :class="{ 'p-invalid': (newClaimData.wornPercent === null || newClaimData.wornPercent === undefined) && creatingClaim }"
                     />
-                    <small v-if="(newClaimData.wornPercent === null || newClaimData.wornPercent === undefined) && creatingClaim" class="p-error">Worn percentage is required.</small>
+                    <small v-if="(newClaimData.wornPercent === null || newClaimData.wornPercent === undefined) && creatingClaim" class="text-red-600">Worn percentage is required.</small>
                 </div>
                 <!-- Thread Depth -->
                 <div class="field">
@@ -609,7 +656,7 @@
                         class="w-full"
                         :class="{ 'p-invalid': (newClaimData.threadDepth === null || newClaimData.threadDepth === undefined) && creatingClaim }"
                     />
-                    <small v-if="(newClaimData.threadDepth === null || newClaimData.threadDepth === undefined) && creatingClaim" class="p-error">Tread Depth is required.</small>
+                    <small v-if="(newClaimData.threadDepth === null || newClaimData.threadDepth === undefined) && creatingClaim" class="text-red-600">Tread Depth is required.</small>
                 </div>
             </div>
         </div>
@@ -708,7 +755,7 @@
                     </div>
                 </template>
             </Dropdown>
-            <small v-if="!selectedRejectReason && rejecting" class="p-error">Please select a rejection reason.</small>
+            <small v-if="!selectedRejectReason && rejecting" class="text-red-600">Please select a rejection reason.</small>
         </div>
 
         <template #footer>
@@ -766,6 +813,17 @@ const loadingScrapAction = ref(false);
 const stockCheckResult = ref(null);
 const showCreateClaimDialog = ref(false);
 const creatingClaim = ref(false);
+
+const showEditTireDialog = ref(false);
+const editTire = ref(false);
+const editValidationTire = ref(false);
+
+const editTireData = reactive({
+    mfgcode: '',
+    sizecode: '',
+    tyrespec: '',
+    weekcode: ''
+});
 const newClaimData = reactive({
     damageCode: '',
     problem: '',
@@ -810,7 +868,6 @@ const listDamageType = [
 ];
 
 const handleDamageSelect = () => {
-    console.log(selectedDamageType.value)
     if (selectedDamageType.value) {
         newClaimData.damageCode = selectedDamageType.value.code;
         newClaimData.problem = selectedDamageType.value.damageMode;
@@ -902,20 +959,82 @@ const closeCreateClaimDialog = () => {
     creatingClaim.value = false;
 };
 
+const openEditTier = () => {
+    showEditTireDialog.value = true;
+    // Reset form data
+    editTireData.mfgcode = '';
+    editTireData.sizecode = '';
+    editTireData.tyrespec = '';
+    editTireData.weekcode = '';
+    editTire.value = false;
+    editValidationTire.value = false;
+};
+
+const closeEditTire = () => {
+    showEditTireDialog.value = false;
+    editTire.value = false;
+    editValidationTire.value = false;
+};
+
 // Computed properties for conditional checks
 const hasSubmittedPhotos = computed(() => {
     return submittedPhotos.value.length > 0;
 })
 
+// Submit Claim Details
+const submitEditTire = async () => {
+    editValidationTire.value = true;
+    // Validate required fields
+    if (!editTireData.mfgcode || !editTireData.mfgcode || editTireData.tyrespec === null || editTireData.weekcode === null) {
+        toast.add({
+            severity: 'error',
+            summary: 'Error',
+            detail: 'Validation Error.',
+            life: 4000
+        });
+        return;
+    }
+    try {
+        editTire.value = true;
+        const plateSerialValue = `${editTireData.mfgcode}-${editTireData.sizecode}-${editTireData.tyrespec}-${editTireData.weekcode}`;
+        const formData = new FormData();
+        formData.append('plateSerial', plateSerialValue);
+        
+        const id = route.params.id;
+        const response = await api.post(`warranty_claim/updatePlateSerial/${id}`,formData);
 
-// Get photo by type
-const getPhotoByType = (type) => {
-    return submittedPhotos.value.find((photo) => photo.type === type);
+        if (response.data.status === 1) {
+            toast.add({
+                severity: 'success',
+                summary: 'Success',
+                detail: 'Tire details updated successfully',
+                life: 3000
+            });
+        } else {
+            toast.add({
+                severity: 'error',
+                summary: 'Error',
+                detail: response.data.message || 'Failed to Update Tire details',
+                life: 3000
+            });
+        }
+    } catch (error) {
+        console.error('Error Update Tire details:', error);
+        toast.add({
+            severity: 'error',
+            summary: 'Error',
+            detail: error.response?.data?.message || 'Failed to Update Tire details',
+            life: 3000
+        });
+    } finally {
+        // Close dialog and refresh data
+        closeEditTire();
+        await fetchWarrantyClaim();
+    }
 };
 
 // Submit Claim Details
 const submitClaimDetails = async () => {
-        console.log(newClaimData);
     // Validate required fields
     if (!newClaimData.damageCode || !newClaimData.problem || newClaimData.claimPercent === null || newClaimData.threadDepth === null || newClaimData.wornPercent === null) {
         toast.add({
@@ -1218,6 +1337,10 @@ const fetchWarrantyClaim = async () => {
             let platePart2 = "-";
             let platePart3 = "-";
             let platePart4 = "-";
+            let AdminplatePart1 = "-";
+            let AdminplatePart2 = "-";
+            let AdminplatePart3 = "-";
+            let AdminplatePart4 = "-";
 
             if (tireInfo?.plateSerial) {
                 if (tireInfo.plateSerial.includes('-')) {
@@ -1226,6 +1349,15 @@ const fetchWarrantyClaim = async () => {
                     platePart2 = parts[1] || "-";
                     platePart3 = parts[2] || "-";
                     platePart4 = parts[3] || "-";
+                }
+            }
+            if (tireInfo?.plateSerialAdmin) {
+                if (tireInfo.plateSerialAdmin.includes('-')) {
+                    const parts = tireInfo.plateSerialAdmin.split('-');
+                    AdminplatePart1 = parts[0] || "-";
+                    AdminplatePart2 = parts[1] || "-";
+                    AdminplatePart3 = parts[2] || "-";
+                    AdminplatePart4 = parts[3] || "-";
                 }
             }
             warantyDetail.value = {
@@ -1255,7 +1387,11 @@ const fetchWarrantyClaim = async () => {
                     platePart1,
                     platePart2,
                     platePart3,
-                    platePart4
+                    platePart4,
+                    AdminplatePart1,
+                    AdminplatePart2,
+                    AdminplatePart3,
+                    AdminplatePart4,
                 },
                 // Claim Detail
                 // damageCode: apiData.claim_detail?.damageCode,
@@ -1812,7 +1948,6 @@ const fetchReport = async (id) => {
         loading.value = true;
         const response = await api.get(`warrantyReport/claim/${id}`);
         if (response.data.status === 1) {
-            console.log(response.data)
             generateReport(response.data.admin_data);
         }else{
             toast.add({
