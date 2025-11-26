@@ -3,12 +3,15 @@ import { onBeforeMount, ref, reactive } from 'vue';
 import api from '@/service/api';
 import { FilterMatchMode, FilterOperator } from '@primevue/core/api';
 import LoadingPage from '@/components/LoadingPage.vue';
+import { useToast } from 'primevue/usetoast';
+
+const toast = useToast();
 
 // Reactive filters
 const filters1 = reactive({
     global: { value: null, matchMode: FilterMatchMode.CONTAINS },
     dealerName: { operator: FilterOperator.AND, constraints: [{ value: null, matchMode: FilterMatchMode.STARTS_WITH }] },
-    docsNo: { operator: FilterOperator.AND, constraints: [{ value: null, matchMode: FilterMatchMode.STARTS_WITH }] }
+    docType: { operator: FilterOperator.AND, constraints: [{ value: null, matchMode: FilterMatchMode.STARTS_WITH }] }
 });
 
 const listData = ref([]);
@@ -28,7 +31,7 @@ const OtherService = {
                 return response.data.admin_data.map((item) => ({
                     id: item.file_path, // Using file_path as unique ID
                     docsDate: item.date,
-                    docsNo: item.docno,
+                    docType: item.docType,
                     dealerId: item.account_no,
                     dealerName: item.custName,
                     company: item.company,
@@ -105,11 +108,25 @@ const handleDownload = async (data) => {
     try {
         // Sanitize filename to remove invalid characters
         const sanitizeFileName = (name) => (name ? name.replace(/[/\\?%*:|"<>]/g, '-') : 'Unknown');
-        const fileName = `Other_${sanitizeFileName(data.dealerName)}_${data.docsNo}.pdf`;
+        const fileName = `Other_${sanitizeFileName(data.dealerName)}_${data.docType}.pdf`;
         await OtherService.downloadFile(data.filePath, fileName);
+
+        // Show success toast
+        toast.add({
+            severity: 'success',
+            summary: 'Download Successful',
+            detail: 'File has been downloaded successfully',
+            life: 3000
+        });
     } catch (error) {
         console.error('Download failed:', error);
-        // You can add a toast notification here
+        // Show error toast
+        toast.add({
+            severity: 'error',
+            summary: 'Download Failed',
+            detail: 'Failed to download file. Please try again.',
+            life: 5000
+        });
     } finally {
         downloadLoading.value = null;
     }
@@ -125,14 +142,24 @@ const handleFileUpload = async (event) => {
 
     // Validate file size (5MB)
     if (file.size > 5 * 1024 * 1024) {
-        alert('File size must be less than 5MB');
+        toast.add({
+            severity: 'warn',
+            summary: 'File Too Large',
+            detail: 'File size must be less than 5MB',
+            life: 5000
+        });
         return;
     }
 
     // Validate file type (optional - you can customize allowed types)
     const allowedTypes = ['application/pdf', 'image/jpeg', 'image/png', 'application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'];
     if (!allowedTypes.includes(file.type)) {
-        alert('Please select a valid file type (PDF, JPEG, PNG, DOC, DOCX)');
+        toast.add({
+            severity: 'warn',
+            summary: 'Invalid File Type',
+            detail: 'Please select a valid file type (PDF, JPEG, PNG, DOC, DOCX)',
+            life: 5000
+        });
         return;
     }
 
@@ -144,14 +171,25 @@ const handleFileUpload = async (event) => {
         // Refresh the list after successful upload
         await refreshData();
 
-        // Show success message (you can replace with toast notification)
-        alert('File uploaded successfully!');
+        // Show success toast
+        toast.add({
+            severity: 'success',
+            summary: 'Upload Successful',
+            detail: 'File has been uploaded successfully',
+            life: 3000
+        });
 
         // Reset file input
         event.target.value = '';
     } catch (error) {
         console.error('Upload failed:', error);
-        alert(`Upload failed: ${error.message}`);
+        // Show error toast
+        toast.add({
+            severity: 'error',
+            summary: 'Upload Failed',
+            detail: error.message || 'Failed to upload file. Please try again.',
+            life: 5000
+        });
     } finally {
         uploadLoading.value = false;
     }
@@ -166,6 +204,14 @@ onBeforeMount(async () => {
         error.value = err.message;
         // Optional: You can set listData to empty array on error
         listData.value = [];
+
+        // Show error toast for initial load failure
+        toast.add({
+            severity: 'error',
+            summary: 'Load Failed',
+            detail: 'Failed to load other files data',
+            life: 5000
+        });
     } finally {
         loading.value = false;
     }
@@ -177,9 +223,25 @@ const refreshData = async () => {
     error.value = null;
     try {
         listData.value = await OtherService.getOtherList();
+
+        // Show success toast for refresh
+        toast.add({
+            severity: 'success',
+            summary: 'Data Refreshed',
+            detail: 'Other files data has been refreshed',
+            life: 3000
+        });
     } catch (err) {
         console.error('Failed to refresh other files data:', err);
         error.value = err.message;
+
+        // Show error toast for refresh failure
+        toast.add({
+            severity: 'error',
+            summary: 'Refresh Failed',
+            detail: 'Failed to refresh other files data',
+            life: 5000
+        });
     } finally {
         loading.value = false;
     }
@@ -188,6 +250,8 @@ const refreshData = async () => {
 
 <template>
     <div class="card">
+        <Toast />
+
         <div class="flex justify-between items-center mb-4">
             <div class="text-2xl font-bold text-black">List Other</div>
             <div class="flex gap-2">
@@ -247,26 +311,26 @@ const refreshData = async () => {
                 </div>
             </template>
 
-            <Column field="docsDate" header="Document Date" style="min-width: 8rem" sortable>
+            <Column header="Document Date" style="min-width: 8rem" sortable>
                 <template #body="{ data }">
                     <span class="font-medium">{{ data.docsDate }}</span>
                 </template>
             </Column>
 
-            <Column field="docsNo" header="Document No" style="min-width: 10rem" sortable>
+            <Column header="Document Type" style="min-width: 10rem" sortable>
                 <template #body="{ data }">
-                    <span class="font-medium">{{ data.docsNo }}</span>
+                    <span class="font-medium">{{ data.docType }}</span>
                 </template>
             </Column>
 
-            <Column field="dealerId" header="Customer Acc No" style="min-width: 10rem" sortable>
+            <Column header="Customer Acc No" style="min-width: 10rem" sortable>
                 <template #body="{ data }">
                     <span v-if="data.dealerId" class="font-medium">{{ data.dealerId }}</span>
                     <span v-else class="text-black">-</span>
                 </template>
             </Column>
 
-            <Column field="dealerName" header="Customer Name" style="min-width: 10rem">
+            <Column header="Customer Name" style="min-width: 10rem">
                 <template #body="{ data }">
                     <span v-if="data.dealerName">{{ data.dealerName }}</span>
                     <span v-else class="text-black">-</span>

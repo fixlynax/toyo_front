@@ -5,17 +5,6 @@ import { onBeforeMount, ref, computed, watch } from 'vue';
 import { RouterLink } from 'vue-router';
 import LoadingPage from '@/components/LoadingPage.vue';
 
-// 🟢 PrimeVue Components (Add missing imports)
-import TabMenu from 'primevue/tabmenu';
-import DataTable from 'primevue/datatable';
-import Column from 'primevue/column';
-import Tag from 'primevue/tag';
-import Button from 'primevue/button';
-import InputText from 'primevue/inputtext';
-import IconField from 'primevue/iconfield';
-import InputIcon from 'primevue/inputicon';
-import Calendar from 'primevue/calendar';
-
 // 🟢 State
 const filters1 = ref({});
 const listData = ref([]);
@@ -228,7 +217,7 @@ const clearDateRange = () => {
                     </div>
                 </template>
 
-                <Column field="created" header="Created Date" style="min-width: 6rem">
+                <Column field="created" header="Created Date" style="min-width: 8rem">
                     <template #body="{ data }">{{ formatDate(data.created) }}</template>
                 </Column>
 
@@ -240,12 +229,8 @@ const clearDateRange = () => {
                     </template>
                 </Column>
 
-                <Column field="custAccountNo" header="Customer Acc No" style="min-width: 6rem">
-                    <template #body="{ data }">{{ data.custAccountNo || '-' }}</template>
-                </Column>
-
                 <Column field="companyName" header="Customer Name" style="min-width: 10rem">
-                    <template #body="{ data }">{{ data.companyName || '-' }}</template>
+                    <template #body="{ data }">{{ data.companyName || '-' }}<br />{{ data.custAccountNo || '-' }}</template>
                 </Column>
 
                 <Column field="orderType" header="Order Type" style="min-width: 7rem">
@@ -257,7 +242,7 @@ const clearDateRange = () => {
                     </template>
                 </Column>
 
-                <Column field="deliveryType" header="Delivery" style="min-width: 7rem">
+                <Column field="deliveryType" header="Delivery" style="min-width: 6rem">
                     <template #body="{ data }">
                         <span v-if="data.deliveryType === 'DELIVER'">Deliver</span>
                         <span v-else-if="data.deliveryType === 'PICKUP'">Pickup</span>
@@ -267,12 +252,12 @@ const clearDateRange = () => {
                     </template>
                 </Column>
 
-                <Column field="shipToAccountNo" header="Ship To Acc No" style="min-width: 8rem">
+                <Column field="shipToAccountNo" header="Ship To Acc No" style="min-width: 7rem">
                     <template #body="{ data }">{{ data.shipToAccountNo || data.custAccountNo || '-' }}</template>
                 </Column>
 
                 <!-- Modified Delivery Info Column - Horizontal Layout -->
-                <Column style="min-width: 18rem">
+                <Column style="min-width: 20rem">
                     <!-- Custom Header -->
                     <template #header>
                         <div class="flex flex-col w-full">
@@ -291,15 +276,15 @@ const clearDateRange = () => {
                     <!-- Body -->
                     <template #body="{ data }">
                         <div class="flex">
-                            <div class="w-1/3 py-2 text-center text-xs">
+                            <div class="w-1/3 py-2 text-center text-sm">
                                 <strong>{{ formatDeliveryDate(data.deliveryDate) || '-' }}</strong>
                             </div>
 
-                            <div class="w-1/3 py-2 text-center text-xs border-l border-gray-200">
+                            <div class="w-1/3 py-2 text-center text-sm border-l border-gray-200">
                                 <strong>{{ data.scmDeliverInfo ? formatDeliveryDate(data.scmDeliverInfo.scheduled_delivery_time) : '-' }}</strong>
                             </div>
 
-                            <div class="w-1/3 py-2 text-center text-xs border-l border-gray-200">
+                            <div class="w-1/3 py-2 text-center text-sm border-l border-gray-200">
                                 <template v-if="data.scmDeliverInfo?.delivered_datetime">
                                     <strong>{{ formatDeliveryDate(data.scmDeliverInfo.delivered_datetime) }}</strong>
                                 </template>
@@ -312,46 +297,31 @@ const clearDateRange = () => {
                     </template>
                 </Column>
 
-                <!-- SAP Ref Column - Fixed version -->
-                <Column style="min-width: 15rem">
-                    <!-- Dynamic Header based on active tab -->
-                    <template #header>
-                        <div class="flex flex-col w-full">
-                            <!-- Title -->
-                            <div class="text-center font-bold text-gray-800 mb-1">SAP Ref</div>
-
-                            <!-- Invoice only for Completed tab -->
-                            <div v-if="activeTabIndex === 2" class="flex text-xs text-black font-semibold">
-                                <div class="w-full py-1 text-center">Invoice</div>
-                            </div>
-
-                            <!-- SO & DO for other tabs -->
-                            <div v-else class="flex text-xs text-black font-semibold">
-                                <div class="w-1/2 py-1 text-center">SO</div>
-                                <div class="w-1/2 py-1 text-center border-l border-gray-200">DO</div>
-                            </div>
-                        </div>
-                    </template>
-
-                    <!-- Body - This part stays the same -->
+                <Column header="SAP Ref" style="min-width: 12rem">
                     <template #body="{ data }">
-                        <div class="flex text-xs">
-                            <!-- Completed → show Invoice only -->
-                            <template v-if="data.orderStatus === 1 && data.invoiceNo">
-                                <div class="w-full py-2 text-center">
-                                    <strong>{{ data.invoiceNo }}</strong>
-                                </div>
-                            </template>
-
-                            <!-- Else → show SO & DO -->
-                            <template v-else>
-                                <div class="w-1/2 py-2 text-center">
-                                    <strong>{{ data.soNo || '-' }}</strong>
-                                </div>
-                                <div class="w-1/2 py-2 text-center border-l border-gray-200">
-                                    <strong>{{ data.doNo || '-' }}</strong>
-                                </div>
-                            </template>
+                        <div class="flex flex-col space-y-1 text-sm">
+                            <!-- SO -->
+                            <div class="flex justify-between items-center">
+                                <span class="font-semibold text-gray-600">SO:</span>
+                                <span class="font-medium">{{ data.soNo || '-' }}</span>
+                            </div>
+                            
+                            <!-- DO -->
+                            <div class="flex justify-between items-center">
+                                <span class="font-semibold text-gray-600">DO:</span>
+                                <span class="font-medium">{{ data.doNo || '-' }}</span>
+                            </div>
+                            
+                            <!-- Invoice (only show if exists) -->
+                            <div v-if="data.invoiceNo" class="flex justify-between items-center">
+                                <span class="font-semibold text-gray-600">Inv No:</span>
+                                <span class="font-medium">{{ data.invoiceNo }}</span>
+                            </div>
+                            
+                            <!-- Show message if no SAP ref data -->
+                            <div v-if="!data.soNo && !data.doNo && !data.invoiceNo" class="text-center text-gray-400 py-1">
+                                -
+                            </div>
                         </div>
                     </template>
                 </Column>
@@ -404,6 +374,13 @@ const clearDateRange = () => {
             font-size: 0.75rem;
             line-height: 1.25;
         }
+    }
+}
+
+/* Custom styling for SAP Ref vertical layout */
+:deep(.p-datatable-tbody > tr > td) {
+    .sap-ref-vertical {
+        padding: 0.25rem 0;
     }
 }
 </style>

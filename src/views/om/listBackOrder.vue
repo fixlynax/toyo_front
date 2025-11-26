@@ -54,11 +54,12 @@
                 </template>
             </Column>
 
-            <Column field="custAccountNo" header="Customer Account No." style="min-width: 8rem" />
-            <Column field="customerName" header="Customer Name" style="min-width: 10rem" />
-            <Column field="deliveryType" header="Delivery" style="min-width: 10rem" />
+            <Column field="companyName" header="Customer Name" style="min-width: 10rem">
+                <template #body="{ data }">{{ data.customerName || '-' }}<br />{{ data.custAccountNo || '-' }}</template>
+            </Column>
+            <Column field="deliveryType" header="Delivery" style="min-width: 8rem" />
 
-            <Column field="orderDate" header="Order Date" style="min-width: 8rem">
+            <Column field="orderDate" header="Order Date" style="min-width: 10rem">
                 <template #body="{ data }">
                     {{ formatDate(data.orderDate) }}
                 </template>
