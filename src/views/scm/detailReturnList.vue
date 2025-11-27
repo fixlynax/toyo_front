@@ -157,14 +157,14 @@
                 />
             </div>
 
-            <div>
+            <!-- <div>
                 <label class="font-medium">Delivered Time</label>
                 <InputText
                     type="time"
                     v-model="form2.deliveredtime"
                     class="w-full mt-1"
                 />
-            </div>
+            </div> -->
 
             <div class="flex justify-end gap-2 mt-4">
                 <Button label="Cancel" class="p-button-text" @click="showDeliveredModal = false" />
@@ -207,7 +207,7 @@ const updateSchedule = async () => {
     try {
         const payload = new FormData();
         payload.append('warrantyno', form.value.warrantyno);
-        payload.append('scheduledata', form.value.scheduledata);
+        payload.append('scheduledate', form.value.scheduledata);
         const res = await api.post('update-schedule-warranty', payload);
 
         if (res.data?.status === 1) {
@@ -232,12 +232,12 @@ const loadingDelivered = ref(false);
 const form2 = ref({
     warrantyno: '', // prefill from your data
     delivereddate: '',
-    deliveredtime: ''
+    // deliveredtime: ''
 });
 
 const updateDelivered = async () => {
-    if (!form2.value.delivereddate || !form2.value.deliveredtime) {
-        toast.add({ severity: 'warn', summary: 'Warning', detail: 'Please select date and time', life: 3000 });
+    if (!form2.value.delivereddate) {
+        toast.add({ severity: 'warn', summary: 'Warning', detail: 'Please select date', life: 3000 });
         return;
     }
 
@@ -247,7 +247,6 @@ const updateDelivered = async () => {
         const payload = new FormData();
         payload.append('warrantyno', form2.value.warrantyno);
         payload.append('delivereddate', form2.value.delivereddate);
-        payload.append('deliveredtime', form2.value.deliveredtime);
 
         const res = await api.post('update-delivered-warranty', payload);
 
