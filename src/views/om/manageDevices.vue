@@ -34,15 +34,14 @@
                                             <td class="px-4 py-3">
                                                 <div class="flex items-center gap-2 text-gray-800 font-bold">
                                                     <i :class="device.is_blocked ? 'pi pi-ban text-red-500' : 'pi pi-tablet text-blue-500'"></i>
-                                                    {{ device.device_model }}
+                                                    {{ device.device_model || 'Unknown Device' }}
                                                 </div>
                                                 <div class="ml-6 text-gray-500 text-xs mt-2">
                                                     <div>ID: {{ device.device_id }}</div>
-                                                    <div>Platform: {{ device.device_platform }}</div>
+                                                    <div>Platform: {{ device.device_platform || 'N/A' }}</div>
                                                     <div>Last Active: {{ formatDate(device.last_used_at) }}</div>
                                                     <div v-if="device.is_blocked" class="text-red-500 font-semibold">Status: Blocked</div>
-                                                    <div v-else-if="device.is_active" class="text-green-500 font-semibold">Status: Active</div>
-                                                    <div v-else class="text-gray-500 font-semibold">Status: Inactive</div>
+                                                    <div v-else class="text-green-500 font-semibold">Status: Active</div>
                                                 </div>
                                             </td>
                                             <td class="px-4 py-3 text-right align-top">
@@ -65,11 +64,11 @@
                                             <td class="px-4 py-3">
                                                 <div class="flex items-center gap-2 text-gray-800 font-bold">
                                                     <i class="pi pi-tablet text-blue-500"></i>
-                                                    {{ device.device_model }}
+                                                    {{ device.device_model || 'Unknown Device' }}
                                                 </div>
                                                 <div class="ml-6 text-gray-500 text-xs mt-2">
                                                     <div>ID: {{ device.device_id }}</div>
-                                                    <div>Platform: {{ device.device_platform }}</div>
+                                                    <div>Platform: {{ device.device_platform || 'N/A' }}</div>
                                                     <div>Last Active: {{ formatDate(device.last_used_at) }}</div>
                                                 </div>
                                             </td>
@@ -93,11 +92,11 @@
                                             <td class="px-4 py-3">
                                                 <div class="flex items-center gap-2 text-gray-800 font-bold">
                                                     <i class="pi pi-ban text-red-500"></i>
-                                                    {{ device.device_model }}
+                                                    {{ device.device_model || 'Unknown Device' }}
                                                 </div>
                                                 <div class="ml-6 text-gray-500 text-xs mt-2">
                                                     <div>ID: {{ device.device_id }}</div>
-                                                    <div>Platform: {{ device.device_platform }}</div>
+                                                    <div>Platform: {{ device.device_platform || 'N/A' }}</div>
                                                     <div>Last Active: {{ formatDate(device.last_used_at) }}</div>
                                                     <div class="text-red-500 font-semibold">Status: Blocked</div>
                                                 </div>
@@ -123,13 +122,13 @@
                     <div class="font-semibold text-lg mb-2">Device Information</div>
                     <div class="grid grid-cols-2 gap-2 text-sm">
                         <div class="text-gray-600">Model:</div>
-                        <div class="font-medium">{{ blockModal.device?.device_model }}</div>
+                        <div class="font-medium">{{ blockModal.device?.device_model || 'Unknown Device' }}</div>
 
                         <div class="text-gray-600">Device ID:</div>
                         <div class="font-medium">{{ blockModal.device?.device_id }}</div>
 
                         <div class="text-gray-600">Platform:</div>
-                        <div class="font-medium">{{ blockModal.device?.device_platform }}</div>
+                        <div class="font-medium">{{ blockModal.device?.device_platform || 'N/A' }}</div>
 
                         <div class="text-gray-600">Last Active:</div>
                         <div class="font-medium">{{ formatDate(blockModal.device?.last_used_at) }}</div>
@@ -232,7 +231,7 @@ async function fetchDeviceList() {
 
         if (response.data.status === 1) {
             devices.value = response.data.admin_data.map((device) => ({
-                device_model: device.device_model || 'Unknown Device',
+                device_model: device.device_model,
                 device_id: device.device_id,
                 device_platform: device.device_platform,
                 last_used_at: device.last_used_at,
@@ -279,9 +278,9 @@ async function confirmBlockAction() {
 
         // Prepare request data according to API
         const requestData = {
-            eten_userListID: etenUserId.value,
+            eten_userListID: parseInt(etenUserId.value),
             deviceUUID: device.device_id,
-            device_model: device.device_model,
+            device_model: device.device_model || 'Unknown Device',
             status: isBlocking ? 'blocked' : 'unblocked'
         };
 
@@ -311,6 +310,8 @@ async function confirmBlockAction() {
             });
 
             closeBlockModal();
+            // Refresh the device list to ensure data consistency
+            fetchDeviceList();
         } else {
             toast.add({
                 severity: 'warn',
@@ -334,27 +335,42 @@ async function confirmBlockAction() {
 const filterDevices = (list) => {
     if (!searchQuery.value.trim()) return list;
     const q = searchQuery.value.toLowerCase();
-    return list.filter((d) => 
-        d.device_model.toLowerCase().includes(q) || 
-        d.device_id.toLowerCase().includes(q) || 
-        d.device_platform.toLowerCase().includes(q)
-    );
+    return list.filter((d) => {
+        const deviceModel = (d.device_model || '').toLowerCase();
+        const deviceId = (d.device_id || '').toLowerCase();
+        const devicePlatform = (d.device_platform || '').toLowerCase();
+
+        return deviceModel.includes(q) || deviceId.includes(q) || devicePlatform.includes(q);
+    });
 };
 
 const filteredAllDevices = computed(() => filterDevices(devices.value));
 const filteredActiveDevices = computed(() => filterDevices(devices.value.filter((d) => !d.is_blocked)));
 const filteredBlockedDevices = computed(() => filterDevices(devices.value.filter((d) => d.is_blocked)));
 
-// ✅ Format date
-function formatDate(date) {
-    if (!date) return '-';
-    return new Date(date).toLocaleString('en-MY', {
-        year: 'numeric',
-        month: 'short',
-        day: 'numeric',
-        hour: '2-digit',
-        minute: '2-digit'
-    });
+// ✅ Format date - handle the specific date format from API (DD-MM-YYYY HH:mm:ss)
+function formatDate(dateString) {
+    if (!dateString) return '-';
+
+    try {
+        // Handle the format "26-11-2025 19:45:10" from API
+        const [datePart, timePart] = dateString.split(' ');
+        const [day, month, year] = datePart.split('-');
+
+        // Create a proper Date object (months are 0-indexed in JavaScript)
+        const date = new Date(year, month - 1, day, ...timePart.split(':'));
+
+        return date.toLocaleString('en-MY', {
+            year: 'numeric',
+            month: 'short',
+            day: 'numeric',
+            hour: '2-digit',
+            minute: '2-digit'
+        });
+    } catch (error) {
+        console.error('Error formatting date:', error);
+        return dateString; // Return original string if parsing fails
+    }
 }
 
 // ✅ Load on mount
