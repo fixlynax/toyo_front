@@ -257,7 +257,7 @@
                         <template #body="{ data }">{{ data.salesProgram_programID || '-' }}</template>
                     </Column>
                     <Column field="qty" header="Available Qty">
-                        <template #body="{ data }">{{ parseInt(data.qty) }}</template>
+                        <template #body="{ data }">{{ parseInt(data.remainingQty) }}</template>
                     </Column>
                     <Column header="Return Qty">
                         <template #body="{ data }">
