@@ -18,45 +18,47 @@ const exportLoading1 = ref(false);
 const importLoading1 = ref(false);
 const exportLoading2 = ref(false);
 const importLoading2 = ref(false);
-const filteredList = ref([]);
 const importInput1 = ref();
 const importInput2 = ref();
 
 // Data variables
-const sortMenu = ref();
 const activeTabIndex = ref(0);
+const dateRange = ref(null);
+
+const formatDateDMY = (date) => {
+  const d = new Date(date);
+  const day = String(d.getDate()).padStart(2, "0");
+  const month = String(d.getMonth() + 1).padStart(2, "0");
+  const year = d.getFullYear();
+  return `${day}/${month}/${year}`;
+};
 const selectedExportIds = ref(new Set());
 
 const filters = ref({
     global: { value: null, matchMode: FilterMatchMode.CONTAINS }
 });
 
-        // 3: 'Processing',
-        // 4: 'Schedule',
-        // 5: 'Collected',
 
 const statusTabs = [
-    { label: 'New', status: 0 ,code: 3},
-    { label: 'Pending', status: 1 ,code: 4},
-    { label: 'Completed', status: 2 ,code: 5}
+    { label: 'New',submitLabel: 'NEW'},
+    { label: 'Pending',submitLabel: 'PENDING'},
+    { label: 'Completed',submitLabel: 'COMPLETED'}
 ];
 
 watch(activeTabIndex, () => {
-    filterByTab();
+    const tab = statusTabs[activeTabIndex.value];
+    if (tab.submitLabel === 'COMPLETED') {
+        selectedExportIds.value.clear();
+        listData.value = [];
+        return;
+    }
+    fetchData();
     selectedExportIds.value.clear();
 });
 
-const filterByTab = () => {
-    const selected = statusTabs[activeTabIndex.value];
-    if (!selected) {
-        filteredList.value = listData.value;
-        return;
-    }
-    filteredList.value = listData.value.filter((item) => (item.status) === selected.status);
-};
 const allSelected = computed(() => {
-  return filteredList.value.length > 0 &&
-         filteredList.value.every(item => selectedExportIds.value.has(item.id));
+  return listData.value.length > 0 &&
+         listData.value.every(item => selectedExportIds.value.has(item.id));
 });
 
 const handleToggleExport = (id) => {
@@ -65,27 +67,23 @@ const handleToggleExport = (id) => {
   } else {
     selectedExportIds.value.add(id);
   }
-//   console.log(selectedExportIds.value);
 };
 
 // Check all
 const toggleSelectAll = () => {
   if (allSelected.value) {
     // Unselect all for this tab
-    filteredList.value.forEach(item => {
+    listData.value.forEach(item => {
       selectedExportIds.value.delete(item.id);
     });
   } else {
     // Select all for this tab
-    filteredList.value.forEach(item => {
+    listData.value.forEach(item => {
       selectedExportIds.value.add(item.id);
     });
   }
 };
 
-const selectedRows = ref([]);
-const filterStatus = ref(null);
-const showFilterMenu = ref(false);
 
 function getStatusSeverity(status) {
     const severityMap = {
@@ -319,16 +317,45 @@ const handleImport2 = async (event) => {
             }
     }
 };
-const fetchData = async () => {
+const applyFilter = () => {
+    const tab = statusTabs[activeTabIndex.value];
+    if (tab.submitLabel === 'COMPLETED') {
+
+    // Must have BOTH start & end date
+    if (!dateRange.value?.[0] || !dateRange.value?.[1]) {
+      // Show message (toast, alert, etc.)
+      toast.add({
+        severity: 'warn',
+        summary: 'Date Range Required',
+        detail: 'Please select a full date range for Completed records.',
+        life: 3000
+      });
+      return; // STOP here, do NOT call API
+    }
+  }
+  const dateRangeStr = dateRange.value?.[0] && dateRange.value?.[1]? `${formatDateDMY(dateRange.value[0])} - ${formatDateDMY(dateRange.value[1])}`: null// returns "dd/mm/yyyy - dd/mm/yyyy" or null
+  const body = {
+    tab: tab.submitLabel,
+    date_range: dateRangeStr
+  };
+
+  fetchData(body);
+};
+const clearDate = () => {
+  dateRange.value = null; // or []
+};
+const fetchData = async (body = null) => {
     try {
         loading.value = true;
-        const response = await api.get('collection/list');
+        const payload = body || {
+        tab: statusTabs[activeTabIndex.value].submitLabel
+        };
+        const response = await api.postExtra('collection/list',payload);
         if (response.data.status === 1) {
             
         listData.value = response.data.admin_data.sort((a, b) => {
                 return new Date(b.created) - new Date(a.created);
             }); // sort by raw Date
-            filterByTab();
         } else listData.value = [];
     } catch (error) {
         console.error('Error fetching collection list:', error);
@@ -583,9 +610,24 @@ onMounted(async () => {
 <template>
     <div class="card">
         <div class="text-2xl font-bold text-gray-800 border-b pb-2"> CTC List Collection</div>
-        <TabMenu :model="statusTabs" v-model:activeIndex="activeTabIndex" class="mb-6" />
+        <TabMenu :model="statusTabs" v-model:activeIndex="activeTabIndex" class="mb-4" />
+        <div class="flex items-center gap-3 mb-4 ml-4">
+            <!-- LEFT SIDE -->
+
+                <Calendar
+                    v-model="dateRange"
+                    selectionMode="range"
+                    dateFormat="dd/mm/yy"
+                    placeholder="Select date range"
+                    style="width: 390px;"
+                />
+                <Button label="Clear" class="p-button-sm p-button-danger" @click="clearDate" />
+                <Button label="Filter" class="p-button-sm" @click="applyFilter" />
+
+        </div>
+
         <DataTable
-            :value="filteredList"
+            :value="listData"
             :paginator="true"
             :rows="10"
             :rowsPerPageOptions="[5, 10, 20]"
@@ -638,7 +680,7 @@ onMounted(async () => {
                 <template #header>
                     <div class="flex justify-center">
                     <Checkbox
-                        :key="filteredList.length" 
+                        :key="listData.length" 
                         :binary="true"
                         :model-value="allSelected"  
                         @change="() => toggleSelectAll()"  
