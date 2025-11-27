@@ -299,7 +299,6 @@ const refreshData = async () => {
                             </InputIcon>
                             <InputText v-model="filters1['global'].value" placeholder="Quick Search..." class="w-full" />
                         </IconField>
-                        <Button type="button" icon="pi pi-cog" class="p-button-outlined" v-tooltip="'Table settings'" />
                     </div>
                 </div>
             </template>
@@ -330,14 +329,14 @@ const refreshData = async () => {
                 </template>
             </Column>
 
-            <Column header="Customer Name" style="min-width: 10rem">
+            <Column header="Customer Name" style="min-width: 10rem" sortable>
                 <template #body="{ data }">
                     <span v-if="data.dealerName">{{ data.dealerName }}</span>
                     <span v-else class="text-black">-</span>
                 </template>
             </Column>
 
-            <Column header="Action" style="min-width: 6rem; text-align: left" sortable>
+            <Column header="Action" style="min-width: 6rem; text-align: left">
                 <template #body="{ data }">
                     <Button
                         icon="pi pi-download"
