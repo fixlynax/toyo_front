@@ -4,9 +4,23 @@
 
         <LoadingPage v-if="loading" message="Loading Order Delivery Details..." />
         <div v-else>
-            <TabMenu :model="statusTabs" v-model:activeIndex="activeTabIndex" class="mb-6" />
+            <TabMenu :model="statusTabs" v-model:activeIndex="activeTabIndex" class="mb-4" />
+            <div class="flex items-center gap-3 mb-4 ml-4">
+                <!-- LEFT SIDE -->
+
+                    <Calendar
+                        v-model="dateRange"
+                        selectionMode="range"
+                        dateFormat="dd/mm/yy"
+                        placeholder="Select date range"
+                        style="width: 390px;"
+                    />
+                    <Button label="Clear" class="p-button-sm p-button-danger" @click="clearDate" />
+                    <Button label="Filter" class="p-button-sm" @click="applyFilter" />
+
+            </div>
             <DataTable
-                :value="filteredList"
+                :value="orderDelList"
                 :paginator="true"
                 :rows="10"
                 :rowsPerPageOptions="[5, 10, 20]"
@@ -55,11 +69,11 @@
 
                 <template #empty> No Order Delivery found. </template>
                 <template #loading> Loading Order Delivery data. Please wait. </template>
-                <Column v-if="canUpdate" header="Export All" style="min-width: 8rem" >
+                <Column v-if="statusTabs[activeTabIndex]?.label !== 'Completed' && canUpdate" header="Export All" style="min-width: 8rem" >
                     <template #header>
                         <div class="flex justify-center">
                         <Checkbox
-                            :key="filteredList.length" 
+                            :key="orderDelList.length" 
                             :binary="true"
                             :model-value="allSelected"  
                             @change="() => toggleSelectAll()"  
@@ -106,7 +120,7 @@
 
                 <Column field="eten_user.city" header="City" style="min-width: 12rem" sortable>
                     <template #body="{ data }">
-                         {{`${data.eten_user.city}` }}
+                         {{ data.eten_user.city?.replace(/,$/, '') }}
                     </template>
                 </Column>
                 <Column field="eten_user.state" header="State" style="min-width: 12rem" sortable>
@@ -176,47 +190,40 @@ const selectedExportIds = ref(new Set());
 
 const loading = ref(true);
 const orderDelList = ref([]);
-const filteredList  = ref([]);
+const dateRange = ref(null);
+
+const formatDateDMY = (date) => {
+  const d = new Date(date);
+  const day = String(d.getDate()).padStart(2, "0");
+  const month = String(d.getMonth() + 1).padStart(2, "0");
+  const year = d.getFullYear();
+  return `${day}/${month}/${year}`;
+};
 const filters = ref({
     global: { value: null, matchMode: FilterMatchMode.CONTAINS }
 });
 
-        // 0: 'Pending',
-        // 1: 'Completed',
-        // 66: 'Processing',
-        // 77: 'Delivery'
-
 const statusTabs = [
-    { label: 'Pending', status: 0 },
-    { label: 'Delivery', status: 1 },
-    { label: 'Completed', status: 2}
+    { label: 'Pending',submitLabel: 'PENDING' },
+    { label: 'Delivery', submitLabel: 'DELIVERY' },
+    { label: 'Completed', submitLabel: 'COMPLETED'}
 ];
 
 watch(activeTabIndex, () => {
-    filterByTab();
-    selectedExportIds.value.clear();
-});
-const getOrderStatus = (data) => {
-    const detail = data.scm_deliver_detail;
-
-    if (!detail) return 0;                     // Pending / New
-    if (detail.delivered_datetime) return 2;    // Completed
-    if (detail.scheduled_delivery_time) return 1; // Delivery
-    return 0; // fallback to Pending
-};
-
-const filterByTab = () => {
-    const selected = statusTabs[activeTabIndex.value];
-    if (!selected) {
-        filteredList.value = orderDelList.value;
+    const tab = statusTabs[activeTabIndex.value];
+    if (tab.submitLabel === 'COMPLETED') {
+        selectedExportIds.value.clear();
+        orderDelList.value = [];
         return;
     }
-    filteredList.value = orderDelList.value.filter(item => getOrderStatus(item) === selected.status);
-};
+    fetchData();
+    selectedExportIds.value.clear();
+});
+
 // Computed boolean: are all rows selected?
 const allSelected = computed(() => {
-  return filteredList.value.length > 0 &&
-         filteredList.value.every(item => selectedExportIds.value.has(item.id));
+  return orderDelList.value.length > 0 &&
+         orderDelList.value.every(item => selectedExportIds.value.has(item.id));
 });
 
 const handleToggleExport = (id) => {
@@ -232,12 +239,12 @@ const handleToggleExport = (id) => {
 const toggleSelectAll = () => {
   if (allSelected.value) {
     // Unselect all for this tab
-    filteredList.value.forEach(item => {
+    orderDelList.value.forEach(item => {
       selectedExportIds.value.delete(item.id);
     });
   } else {
     // Select all for this tab
-    filteredList.value.forEach(item => {
+    orderDelList.value.forEach(item => {
       selectedExportIds.value.add(item.id);
     });
   }
@@ -463,26 +470,52 @@ const handleImport2 = async (event) => {
             }
     }
 };
-const fetchData = async () => {
+const applyFilter = () => {
+    const tab = statusTabs[activeTabIndex.value];
+    if (tab.submitLabel === 'COMPLETED') {
+
+    // Must have BOTH start & end date
+    if (!dateRange.value?.[0] || !dateRange.value?.[1]) {
+      // Show message (toast, alert, etc.)
+      toast.add({
+        severity: 'warn',
+        summary: 'Date Range Required',
+        detail: 'Please select a full date range for Completed records.',
+        life: 3000
+      });
+      return; // STOP here, do NOT call API
+    }
+  }
+  const dateRangeStr = dateRange.value?.[0] && dateRange.value?.[1]? `${formatDateDMY(dateRange.value[0])} - ${formatDateDMY(dateRange.value[1])}`: null// returns "dd/mm/yyyy - dd/mm/yyyy" or null
+  const body = {
+    tab: tab.submitLabel,
+    date_range: dateRangeStr
+  };
+
+  fetchData(body);
+};
+const clearDate = () => {
+  dateRange.value = null; // or []
+};
+const fetchData = async (body = null) => {
     try {
         loading.value = true;
-        const response = await api.get('order-delivery/list');
-        console.log('API Response:', response.data);
+        const payload = body || {
+        tab: statusTabs[activeTabIndex.value].submitLabel
+        };
+        const response = await api.postExtra('order-delivery/list',payload);
         if (response.data.status === 1 && Array.isArray(response.data.admin_data)) {
                     orderDelList.value = response.data.admin_data.sort((a, b) => {
                 return new Date(b.created) - new Date(a.created);
             });
-            filterByTab();
         } else {
             console.error('API returned error or invalid data:', response.data);
             orderDelList.value = [];
-            filteredList.value = [];
             toast.add({ severity: 'error', summary: 'Error', detail: 'Failed to load data', life: 3000 });
         }
     } catch (error) {
         console.error('Error fetching product list:', error);
         orderDelList.value = [];
-        filteredList.value = [];
         toast.add({ severity: 'error', summary: 'Error', detail: 'Failed to load data', life: 3000 });
     } finally {
         loading.value = false;
