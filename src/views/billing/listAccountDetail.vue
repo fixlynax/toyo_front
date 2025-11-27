@@ -136,7 +136,7 @@ const refreshData = async () => {
 <template>
     <div class="card">
         <div class="flex justify-between items-center mb-4">
-            <div class="text-2xl font-bold text-black">Account Detail</div>
+            <div class="text-2xl font-bold text-black">Account Details</div>
             <Button icon="pi pi-refresh" class="p-button-outlined p-button-sm" @click="refreshData" :disabled="loading" v-tooltip="'Refresh data'" />
         </div>
 
@@ -188,7 +188,7 @@ const refreshData = async () => {
                 </div>
             </template>
 
-            <Column field="docsDate" header="Document Date" style="min-width: 8rem" sortable>
+            <Column field="docsDate" header="Document Date Time" style="min-width: 8rem" sortable>
                 <template #body="{ data }">
                     <span class="font-medium">{{ data.docsDate }}</span>
                 </template>
