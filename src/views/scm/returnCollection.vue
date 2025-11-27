@@ -3,136 +3,139 @@
         <div class="flex items-center justify-between mb-4">
             <div class="text-2xl font-bold text-gray-800">CTC Return List</div>
         </div>
-        <TabMenu :model="statusTabs" v-model:activeIndex="activeTabIndex" class="mb-4" />
-        <div class="flex items-center gap-3 mb-4 ml-4">
-            <!-- LEFT SIDE -->
+        <LoadingPage v-if="loading" message="Loading Return CTC Collection Details..." />
+        <div v-else>
+            <TabMenu :model="statusTabs" v-model:activeIndex="activeTabIndex" class="mb-4" />
+            <div class="flex items-center gap-3 mb-4 ml-4">
+                <!-- LEFT SIDE -->
 
-                <Calendar
-                    v-model="dateRange"
-                    selectionMode="range"
-                    dateFormat="dd/mm/yy"
-                    placeholder="Select date range"
-                    style="width: 390px;"
-                />
-                <Button label="Clear" class="p-button-sm p-button-danger" @click="clearDate" />
-                <Button label="Filter" class="p-button-sm" @click="applyFilter" />
+                    <Calendar
+                        v-model="dateRange"
+                        selectionMode="range"
+                        dateFormat="dd/mm/yy"
+                        placeholder="Select date range"
+                        style="width: 390px;"
+                    />
+                    <Button label="Clear" class="p-button-sm p-button-danger" @click="clearDate" />
+                    <Button label="Filter" class="p-button-sm" @click="applyFilter" />
 
-        </div>
-        <DataTable
-            :value="collectionList"
-            :paginator="true"
-            :rows="10"
-            :rowsPerPageOptions="[5, 10, 20]"
-            dataKey="id"
-            :rowHover="true"
-            :loading="loading"
-            :filters="filters"
-            filterDisplay="menu"
-            :globalFilterFields="['claimRefno', 'created', 'deliveryDate', 'scheduleDeliveryDate', 'status', 'deliveryDate']"
-        >
-            <!-- ========================= -->
-            <!-- Header Section -->
-            <!-- ========================= -->
-            <template #header>
-                <div class="flex items-center justify-between gap-4 w-full flex-wrap">
-                    <!-- Left: Search Field + Cog Button -->
-                    <div class="flex items-center gap-2 w-full max-w-md">
-                        <IconField class="flex-1">
-                            <InputIcon>
-                                <i class="pi pi-search" />
-                            </InputIcon>
-                            <InputText v-model="filters['global'].value" placeholder="Quick Search" class="w-full" />
-                        </IconField>
-                    </div>
-
-                    <div class="flex justify-end gap-2"  v-if="statusTabs[activeTabIndex]?.label === 'New' && canUpdate">
-                        <Button type="button" label="Export" icon="pi pi-file-export" class="p-button-success" :loading="exportLoading1" @click="handleExport1"/>
-                        <Button type="button" label="Import" icon="pi pi-file-import" @click="importInput1?.click()":loading="importLoading1" />
-                        <input 
-                        ref="importInput1"
-                        type="file" 
-                        accept=".xlsx,.xls" 
-                        style="display: none" 
-                        @change="handleImport1"
-                        />
-                    </div>
-                    <div class="flex justify-end gap-2"  v-if="statusTabs[activeTabIndex]?.label === 'Pending' && canUpdate">
-                        <Button type="button" label="Export" icon="pi pi-file-export" class="p-button-success" :loading="exportLoading2" @click="handleExport2"/>
-                        <Button type="button" label="Import" icon="pi pi-file-import" @click="importInput2?.click()":loading="importLoading2" />
-                        <input 
-                        ref="importInput2"
-                        type="file" 
-                        accept=".xlsx,.xls" 
-                        style="display: none" 
-                        @change="handleImport2"
-                        />
-                    </div>
-                </div>
-            </template>
-            
-            <template #empty> No return records found. </template>
-            <template #loading> Loading return data. Please wait. </template>
-            <Column v-if="statusTabs[activeTabIndex]?.label !== 'Completed' && canUpdate" header="Export All" style="min-width: 8rem">
+            </div>
+            <DataTable
+                :value="collectionList"
+                :paginator="true"
+                :rows="10"
+                :rowsPerPageOptions="[5, 10, 20]"
+                dataKey="id"
+                :rowHover="true"
+                :loading="loading"
+                :filters="filters"
+                filterDisplay="menu"
+                :globalFilterFields="['claimRefno', 'created', 'deliveryDate', 'scheduleDeliveryDate', 'status', 'deliveryDate']"
+            >
+                <!-- ========================= -->
+                <!-- Header Section -->
+                <!-- ========================= -->
                 <template #header>
-                    <div class="flex justify-center">
-                    <Checkbox
-                        :key="collectionList.length" 
-                        :binary="true"
-                        :model-value="allSelected"  
-                        @change="() => toggleSelectAll()"  
-                    />
+                    <div class="flex items-center justify-between gap-4 w-full flex-wrap">
+                        <!-- Left: Search Field + Cog Button -->
+                        <div class="flex items-center gap-2 w-full max-w-md">
+                            <IconField class="flex-1">
+                                <InputIcon>
+                                    <i class="pi pi-search" />
+                                </InputIcon>
+                                <InputText v-model="filters['global'].value" placeholder="Quick Search" class="w-full" />
+                            </IconField>
+                        </div>
+
+                        <div class="flex justify-end gap-2"  v-if="statusTabs[activeTabIndex]?.label === 'New' && canUpdate">
+                            <Button type="button" label="Export" icon="pi pi-file-export" class="p-button-success" :loading="exportLoading1" @click="handleExport1"/>
+                            <Button type="button" label="Import" icon="pi pi-file-import" @click="importInput1?.click()":loading="importLoading1" />
+                            <input 
+                            ref="importInput1"
+                            type="file" 
+                            accept=".xlsx,.xls" 
+                            style="display: none" 
+                            @change="handleImport1"
+                            />
+                        </div>
+                        <div class="flex justify-end gap-2"  v-if="statusTabs[activeTabIndex]?.label === 'Pending' && canUpdate">
+                            <Button type="button" label="Export" icon="pi pi-file-export" class="p-button-success" :loading="exportLoading2" @click="handleExport2"/>
+                            <Button type="button" label="Import" icon="pi pi-file-import" @click="importInput2?.click()":loading="importLoading2" />
+                            <input 
+                            ref="importInput2"
+                            type="file" 
+                            accept=".xlsx,.xls" 
+                            style="display: none" 
+                            @change="handleImport2"
+                            />
+                        </div>
                     </div>
                 </template>
-
-                <template #body="{ data }">
-                    <div class="flex justify-center">
-                    <Checkbox
-                        :binary="true"
-                        :model-value="selectedExportIds.has(data?.claimID)"
-                        @change="() => handleToggleExport(data?.claimID)"
-                    />
-                    </div>
-                </template>
-            </Column>
-            <Column field="created" header="Create Date" style="min-width: 8rem" sortable>
-                <template #body="{ data }">
-                    {{ formatDate(data?.created) ?? '-' }}
-                </template>
-            </Column>
-
-            <Column field="claimRefNo" header="Ref No" style="min-width: 8rem" sortable>
-                <template #body="{ data }">
-                    <RouterLink :to="`/scm/detailReturnList/${data?.id}`" class="hover:underline font-bold text-primary">
-                        {{ data?.claimRefno ?? '-' }}
-                    </RouterLink>
-                </template>
-            </Column>
-            <Column field="scheduleDeliveryDate" header="Delivery Date" style="min-width: 8rem" sortable>
-                <template #body="{ data }">
-                     {{ data.scheduleDeliveryDate ? formatDate(data.scheduleDeliveryDate) : 'Not Assigned' }}
-                </template>
-            </Column>
-            <Column field="deliveryDate" header="Delivered Date" style="min-width: 8rem" sortable>
-                <template #body="{ data }">
-                    {{ data.deliveryDate && data.deliveryTime ? formatDate(data.deliveryDate) + ' ' + formatTime(data.deliveryTime): 'Not Assigned'}}
-                </template>
-            </Column>
-            <Column field="action" header="Status" style="min-width: 6rem">
-                <template #body="{ data }">
-                    <Tag :value="getStatusText(data.status)" :severity="getStatusSeverity(data.status)" />
-                </template>
-            </Column>
-            <Column field="report" header="Report" style="min-width: 8rem">
-                <template #body="{ data }">
-                    <Button 
-                        icon="pi pi-print" 
-                        class="p-button-text p-button-sm" 
-                        @click="fetchReport(data.warrantyEntryID)" 
-                        tooltip="Print Report"
+                
+                <template #empty> No return records found. </template>
+                <template #loading> Loading return data. Please wait. </template>
+                <Column v-if="statusTabs[activeTabIndex]?.label !== 'Completed' && canUpdate" header="Export All" style="min-width: 8rem">
+                    <template #header>
+                        <div class="flex justify-center">
+                        <Checkbox
+                            :key="collectionList.length" 
+                            :binary="true"
+                            :model-value="allSelected"  
+                            @change="() => toggleSelectAll()"  
                         />
-                </template>
-            </Column>
-        </DataTable>
+                        </div>
+                    </template>
+
+                    <template #body="{ data }">
+                        <div class="flex justify-center">
+                        <Checkbox
+                            :binary="true"
+                            :model-value="selectedExportIds.has(data?.claimID)"
+                            @change="() => handleToggleExport(data?.claimID)"
+                        />
+                        </div>
+                    </template>
+                </Column>
+                <Column field="created" header="Create Date" style="min-width: 8rem" sortable>
+                    <template #body="{ data }">
+                        {{ formatDate(data?.created) ?? '-' }}
+                    </template>
+                </Column>
+
+                <Column field="claimRefNo" header="Ref No" style="min-width: 8rem" sortable>
+                    <template #body="{ data }">
+                        <RouterLink :to="`/scm/detailReturnList/${data?.id}`" class="hover:underline font-bold text-primary">
+                            {{ data?.claimRefno ?? '-' }}
+                        </RouterLink>
+                    </template>
+                </Column>
+                <Column field="scheduleDeliveryDate" header="Delivery Date" style="min-width: 8rem" sortable>
+                    <template #body="{ data }">
+                        {{ data.scheduleDeliveryDate ? formatDate(data.scheduleDeliveryDate) : 'Not Assigned' }}
+                    </template>
+                </Column>
+                <Column field="deliveryDate" header="Delivered Date" style="min-width: 8rem" sortable>
+                    <template #body="{ data }">
+                        {{ data.deliveryDate && data.deliveryTime ? formatDate(data.deliveryDate) + ' ' + formatTime(data.deliveryTime): 'Not Assigned'}}
+                    </template>
+                </Column>
+                <Column field="action" header="Status" style="min-width: 6rem">
+                    <template #body="{ data }">
+                        <Tag :value="getStatusText(data.status)" :severity="getStatusSeverity(data.status)" />
+                    </template>
+                </Column>
+                <Column field="report" header="Report" style="min-width: 8rem">
+                    <template #body="{ data }">
+                        <Button 
+                            icon="pi pi-print" 
+                            class="p-button-text p-button-sm" 
+                            @click="fetchReport(data.warrantyEntryID)" 
+                            tooltip="Print Report"
+                            />
+                    </template>
+                </Column>
+            </DataTable>
+        </div>
     </div>
 </template>
 
@@ -207,7 +210,6 @@ const handleToggleExport = (id) => {
   } else {
     selectedExportIds.value.add(id);
   }
-//   console.log(selectedExportIds.value);
 };
 
 // Check all
@@ -274,7 +276,6 @@ const handleExport1 = async () => {
         alert('Please select at least one row.');
         return;
     }
-    // console.log("export 1",idsArray);
     try {
         exportLoading1.value = true;
         
@@ -318,7 +319,6 @@ const handleExport2 = async () => {
         alert('Please select at least one row.');
         return;
     }
-    // console.log("export 2",idsArray);
     try {
         exportLoading2.value = true;
         
@@ -359,7 +359,6 @@ const handleExport2 = async () => {
 const handleImport1 = async (event) => {
     const file = event.target.files[0];
     if (!file) return;
-    // console.log("import 1",file);
     try {
         importLoading1.value = true;
         
@@ -405,7 +404,6 @@ const handleImport1 = async (event) => {
 const handleImport2 = async (event) => {
     const file = event.target.files[0];
     if (!file) return;
-    // console.log("import 2",file);
     try {
         importLoading2.value = true;
         
@@ -481,7 +479,6 @@ const fetchData = async (body = null) => {
             tab: statusTabs[activeTabIndex.value].submitLabel
         };
         const response = await api.postExtra('return/list',payload);
-        // console.log('API Response:', response.data);
         if (response.data.status === 1 && Array.isArray(response.data.admin_data)) {
                     collectionList.value = response.data.admin_data.sort((a, b) => {
                 return new Date(b.created) - new Date(a.created);
