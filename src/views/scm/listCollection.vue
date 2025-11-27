@@ -676,7 +676,7 @@ onMounted(async () => {
 
             <template #empty> No Collection found. </template>
             <template #loading> Loading Collection data. Please wait. </template>
-            <Column v-if="canUpdate" header="Export All" style="min-width: 8rem">
+            <Column v-if="statusTabs[activeTabIndex]?.label !== 'Completed' && canUpdate" header="Export All" style="min-width: 8rem" >
                 <template #header>
                     <div class="flex justify-center">
                     <Checkbox
@@ -692,8 +692,8 @@ onMounted(async () => {
                     <div class="flex justify-center">
                     <Checkbox
                         :binary="true"
-                        :model-value="selectedExportIds.has(data.id)"
-                        @change="() => handleToggleExport(data.id)"
+                        :model-value="selectedExportIds.has(data.claimID)"
+                        @change="() => handleToggleExport(data.claimID)"
                     />
                     </div>
                 </template>
@@ -712,7 +712,7 @@ onMounted(async () => {
             </Column>
             <Column field="collectDate" header="Collect Date" style="min-width: 10rem" sortable>
                 <template #body="{ data }">
-                    {{ data.collectDate && data.collectTime ? formatDate(data.collectDate) + ' ' + formatTime(data.collectTime): 'Not Assigned'}}
+                    {{ data.collectDate ? formatDate(data.collectDate) : 'Not Assigned'}}
                 </template>
             </Column>
             <Column field="reachWH" header="Receive Date" style="min-width: 10rem" sortable>

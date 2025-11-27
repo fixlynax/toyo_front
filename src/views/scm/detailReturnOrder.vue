@@ -130,7 +130,7 @@
                                 </tr>
                                 <tr>
                                     <td class="px-4 py-2 font-medium">SAP Created</td>
-                                    <td class="px-4 py-2 text-right">{{ formatDate(returnList.sap_timestamp) }}</td>
+                                    <td class="px-4 py-2 text-right">{{ formatDateTime(returnList.sap_timestamp) }}</td>
                                 </tr>
                                 <tr class="border-b">
                                     <td class="px-4 py-2 font-medium">Pickup Date</td>
@@ -185,10 +185,10 @@
                                     <td class="px-4 py-2 font-medium">SO No</td>
                                     <td class="px-4 py-2 text-right">{{ returnList.order_data.so_no || '-' }}</td>
                                 </tr>
-                                <tr class="border-b">
+                                <!-- <tr class="border-b">
                                     <td class="px-4 py-2 font-medium">Subtotal</td>
                                     <td class="px-4 py-2 text-right">{{` RM ${returnList.order_data.subtotal || '-'} `}}</td>
-                                </tr>
+                                </tr> -->
                             </tbody>
                         </table>
                     </div>
@@ -253,7 +253,7 @@ const returnList = ref({
   order_data: {},
 });
 const loading = ref(true);
-function formatDate(dateString) {
+function formatDateTime(dateString) {
   if (!dateString) return '';
   const date = new Date(dateString);
   return date.toLocaleString('en-MY', {
@@ -265,7 +265,16 @@ function formatDate(dateString) {
     second: '2-digit',
     hour12: true
   });
-  }
+}
+function formatDate(dateString) {
+  if (!dateString) return '';
+  const date = new Date(dateString);
+  return date.toLocaleString('en-MY', {
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+  });
+}
 
 const updateDialog = ref(false);
 const loadingUpdate = ref(false);
