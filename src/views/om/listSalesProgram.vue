@@ -36,7 +36,8 @@ onBeforeMount(async () => {
                 startDate: sales.startDate,
                 endDate: sales.endDate,
                 freeQuota: sales.freeQuota || '-',
-                status: sales.status
+                status: sales.status,
+                created: sales.created
             }));
 
             console.log('Transformed data:', listData.value);
@@ -69,7 +70,9 @@ onBeforeMount(async () => {
             :filters="filters1"
             filterDisplay="menu "
             class="rounded-table"
-            :rowsPerPageOptions="[10, 20, 50, 100]"
+            :rowsPerPageOptions="[10, 25, 50, 100]"
+            sortField="created"
+            :sortOrder="-1"
             currentPageReportTemplate="Showing {first} to {last} of {totalRecords} entries"
             paginatorTemplate="CurrentPageReport FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink RowsPerPageDropdown"
         >
@@ -89,7 +92,7 @@ onBeforeMount(async () => {
 
                     <!-- Create Button -->
                     <RouterLink to="/om/createSalesProgram">
-                        <Button type="button" label="Add New" icon="pi pi-plus" class="p-button" />
+                        <Button type="button" label="Create" icon="pi pi-plus" class="p-button" />
                     </RouterLink>
                 </div>
             </template>
@@ -107,6 +110,8 @@ onBeforeMount(async () => {
 
             <!-- Program Name -->
             <Column field="title" header="Program Name" style="min-width: 12rem" />
+
+            <Column field="created" header="Created Data" style="min-width: 12rem" hidden/>
 
             <!-- Period -->
             <Column header="Period" style="min-width: 12rem">
