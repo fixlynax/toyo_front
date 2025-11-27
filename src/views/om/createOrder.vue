@@ -304,7 +304,11 @@
                                     {{ data.pattern }}
                                     <span v-if="data.pattern_name">| {{ data.pattern_name }}</span>
                                     | Stock: {{ data.stockBalance }}
+                                    <!-- Enhanced back order indicators -->
                                     <span v-if="selectedOrderType === 'NORMAL' && data.stockBalance === 0" class="text-orange-600 font-semibold">(Back Order)</span>
+                                    <span v-else-if="selectedOrderType === 'NORMAL' && data.quantity > data.stockBalance" class="text-orange-600 font-semibold">
+                                        ({{ data.stockBalance }} available, {{ data.quantity - data.stockBalance }} back order)
+                                    </span>
                                     <span v-if="data.volume">| Vol: {{ data.volume }}</span>
                                 </div>
                             </template>
@@ -400,8 +404,11 @@
                         <div class="text-lg font-bold text-purple-600">{{ containerCapacity }} units</div>
                         <div class="text-xs text-gray-500 mt-1">(Min: {{ minContainerCapacity }} | Max: {{ maxContainerCapacity }})</div>
                     </div>
+                    <!-- Enhanced back order notice -->
                     <div v-if="selectedOrderType === 'NORMAL' && hasBackOrderItems" class="mt-3 pt-3 border-t text-center">
-                        <div class="text-sm text-orange-600 font-semibold">⚠️ Some items will be processed as back orders</div>
+                        <div class="text-sm text-orange-600 font-semibold">
+                            ⚠️ Some items will be processed as back orders
+                        </div>
                     </div>
                 </div>
             </div>
@@ -552,7 +559,11 @@
                                         <div class="font-medium text-sm">{{ item.material }}</div>
                                         <div class="text-xs text-gray-500">
                                             Qty: {{ item.quantity }} × RM {{ formatCurrency(item.price.toFixed(2)) }}
+                                            <!-- Enhanced back order indicators in review -->
                                             <span v-if="selectedOrderType === 'NORMAL' && item.stockBalance === 0" class="text-orange-600 font-semibold ml-2">(Back Order)</span>
+                                            <span v-else-if="selectedOrderType === 'NORMAL' && item.quantity > item.stockBalance" class="text-orange-600 font-semibold ml-2">
+                                                ({{ item.stockBalance }} available, {{ item.quantity - item.stockBalance }} back order)
+                                            </span>
                                         </div>
                                     </div>
                                     <div class="font-semibold">RM {{ formatCurrency((item.price * item.quantity).toFixed(2)) }}</div>
@@ -602,13 +613,22 @@
                         <div class="text-xs text-gray-600 mt-1 text-right">{{ creditUsagePercent }}% used</div>
                     </div>
 
-                    <!-- Back Order Notice -->
+                    <!-- Enhanced Back Order Notice -->
                     <div v-if="selectedOrderType === 'NORMAL' && hasBackOrderItems" class="mt-4 p-4 bg-orange-50 border border-orange-200 rounded-lg">
                         <div class="flex items-center gap-2">
                             <i class="pi pi-info-circle text-orange-500"></i>
                             <span class="font-semibold text-orange-700">Back Order Notice</span>
                         </div>
-                        <div class="text-sm text-orange-600 mt-1">Some items in your order are out of stock and will be processed as back orders. These items will be fulfilled when stock becomes available.</div>
+                        <div class="text-sm text-orange-600 mt-1">
+                            Some items in your order will be processed as back orders:
+                            <ul class="mt-1 list-disc list-inside">
+                                <li v-for="item in selectedTyres.filter((t) => t.stockBalance === 0 || t.quantity > t.stockBalance)" :key="item.id">
+                                    {{ item.material }}:
+                                    <span v-if="item.stockBalance === 0">Complete back order ({{ item.quantity }} units)</span>
+                                    <span v-else>Partial back order ({{ item.stockBalance }} available, {{ item.quantity - item.stockBalance }} back ordered)</span>
+                                </li>
+                            </ul>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -961,11 +981,13 @@ const canProceedWithRiskA = computed(() => {
     return riskCategory === 'A' || !riskCategory;
 });
 
+// UPDATED: Enhanced canProceedToStep2 with better validation
 const canProceedToStep2 = computed(() => {
     const basicChecks = selectedCustomer.value && selectedOrderType.value && selectedDeliveryMethod.value;
     return basicChecks && canProceedWithRiskA.value;
 });
 
+// UPDATED: Enhanced canProceedToStep3 with back order support for NORMAL orders
 const canProceedToStep3 = computed(() => {
     const hasItems = selectedTyres.value.length > 0;
     const priceValid = !selectedTyres.value.some((item) => !item.price || item.price <= 0);
@@ -976,9 +998,9 @@ const canProceedToStep3 = computed(() => {
         // DIRECTSHIP requires all items to have stock
         stockValid = !selectedTyres.value.some((item) => item.quantity > item.stockBalance);
     } else {
-        // NORMAL orders allow 0 stock items (back orders)
-        // Only validate stock for items that actually have stock
-        stockValid = !selectedTyres.value.some((item) => item.stockBalance > 0 && item.quantity > item.stockBalance);
+        // NORMAL orders allow any quantity (0 stock or exceeding stock for back orders)
+        // No stock validation needed for NORMAL orders as back orders are always allowed
+        stockValid = true;
     }
 
     // For DIRECTSHIP, also check container capacity
@@ -1010,9 +1032,15 @@ const creditLimitClass = computed(() => {
     return 'text-green-700';
 });
 
-// Check if there are back order items
+// UPDATED: Enhanced back order detection for NORMAL orders
 const hasBackOrderItems = computed(() => {
-    return selectedOrderType.value === 'NORMAL' && selectedTyres.value.some((item) => item.stockBalance === 0);
+    if (selectedOrderType.value !== 'NORMAL') return false;
+
+    return selectedTyres.value.some(
+        (item) =>
+            item.stockBalance === 0 || // No stock at all
+            item.quantity > item.stockBalance // Order quantity exceeds available stock
+    );
 });
 
 // Dropdown options
