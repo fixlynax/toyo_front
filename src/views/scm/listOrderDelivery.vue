@@ -142,7 +142,7 @@
                     </template>
                 </Column>
 
-                <Column field="scm_deliver_detail.scheduled_delivery_time" header="Planend Date" style="min-width: 10rem" sortable>
+                <Column field="scm_deliver_detail.scheduled_delivery_time" header="Planned Date" style="min-width: 10rem" sortable>
                     <template #body="{ data }">
                         {{ data.scm_deliver_detail?.scheduled_delivery_time ? formatDate(data.scm_deliver_detail.scheduled_delivery_time) : 'Not Assigned' }}
                     </template>
