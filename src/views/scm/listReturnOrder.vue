@@ -355,7 +355,7 @@ const handleImport2 = async (event) => {
         const formData = new FormData();
         formData.append('return_order_excel', file);
         
-        const response = await api.postExtra('import-scm-receivereturn-order-list', formData, {
+        const response = await api.postExtra('excel/import-scm-receivereturn-order-list', formData, {
             headers: {
                 'Content-Type': 'multipart/form-data'
             }

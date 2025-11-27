@@ -99,7 +99,7 @@
 
                         <Column field="qty" header="Quantity" class="text-right">
                             <template #body="{ data }">
-                                {{ data.qty }}
+                                {{ parseFloat(data.qty) }}
                             </template>
                         </Column>
                     </DataTable>
