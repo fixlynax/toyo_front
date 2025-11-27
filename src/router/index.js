@@ -249,12 +249,6 @@ const router = createRouter({
                     meta: { permission: 'Sales Program', access: 'create' },
                 },
                 {
-                    path: 'om/createSalesProgramVersion2',
-                    name: 'Create-Sales-Program-version2',
-                    component: () => import('@/views/om/createSalesProgramVersion2.vue'),
-                    meta: { permission: 'Sales Program', access: 'view' },
-                },
-                {
                     path: 'om/editSalesProgram/:id',
                     name: 'Edit-Sales-Program',
                     component: () => import('@/views/om/editSalesProgram.vue'),
