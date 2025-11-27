@@ -90,7 +90,7 @@
                                 <div>
                                     <label class="block text-sm font-medium text-green-700 mb-1">Free Quantity</label>
                                     <div class="flex items-center gap-2">
-                                        <InputNumber v-model="programItem.freeQty" class="w-full" :min="1" showButtons />
+                                        <InputNumber v-model="programItem.freeQty" class="w-full" :min="1" disabled />
                                         <span class="text-sm text-green-600 font-medium">items</span>
                                     </div>
                                     <p class="text-xs text-green-600 mt-1">Number of free items customer will receive</p>
@@ -110,7 +110,7 @@
                                 </div>
                                 <div class="flex gap-2">
                                     <Button v-if="programItem.buyMaterials.length > 0" icon="pi pi-times" label="Clear All" style="width: fit-content" class="p-button-text p-button-sm p-button-danger" @click="clearAllBuySelections" />
-                                    <Button icon="pi pi-plus" label="Add Materials" style="width: fit-content" class="p-button-primary p-button-sm" @click="openMaterialPopup" />
+                                    <Button icon="pi pi-plus" label="Add Materials" style="width: fit-content" class="p-button-primary p-button-sm" @click="openMaterialPopup" :loading="loadingMaterials" :disabled="loadingMaterials" />
                                 </div>
                             </div>
 
@@ -313,8 +313,17 @@
                             </div>
                         </div>
 
+                        <!-- Search Bar -->
+                        <div class="mb-4">
+                            <div class="p-inputgroup">
+                                <span class="p-inputgroup-addon"> </span>
+                                <InputText v-model="materialSearch" placeholder="Search materials by ID, description, pattern..." class="w-full" @input="onMaterialSearch" />
+                                <Button v-if="materialSearch" icon="pi pi-times" class="p-button-text" @click="clearMaterialSearch" />
+                            </div>
+                        </div>
+
                         <div v-if="filteredMaterials.length > 0" class="max-h-96 overflow-y-auto border border-gray-200 rounded-lg">
-                            <DataTable :value="filteredMaterials" v-model:selection="selectedMaterials" selectionMode="multiple" dataKey="materialid" class="p-datatable-sm" :scrollable="true" scrollHeight="flex">
+                            <DataTable :value="filteredMaterials" v-model:selection="selectedMaterials" removableSort selectionMode="multiple" dataKey="materialid" class="p-datatable-sm" :scrollable="true" scrollHeight="flex" :loading="loadingMaterials">
                                 <Column selectionMode="multiple" headerStyle="width: 3rem"></Column>
                                 <Column field="materialid" header="Material ID" sortable>
                                     <template #body="{ data }">
@@ -341,10 +350,23 @@
                                         <span class="text-gray-600 text-sm">{{ data.sectionwidth }}</span>
                                     </template>
                                 </Column>
+                                <template #empty>
+                                    <div class="text-center py-8">
+                                        <i class="pi pi-search text-3xl text-gray-300 mb-2"></i>
+                                        <p class="text-gray-500">No materials found</p>
+                                        <p class="text-gray-400 text-sm mt-1">Try adjusting your search or filters</p>
+                                    </div>
+                                </template>
+                                <template #loading>
+                                    <div class="text-center py-8">
+                                        <i class="pi pi-spinner pi-spin text-2xl text-blue-500 mb-2"></i>
+                                        <p class="text-gray-500">Loading materials...</p>
+                                    </div>
+                                </template>
                             </DataTable>
                         </div>
 
-                        <div v-else class="text-center py-12 border-2 border-dashed border-gray-300 rounded-lg">
+                        <div v-else-if="!loadingMaterials" class="text-center py-12 border-2 border-dashed border-gray-300 rounded-lg">
                             <i class="pi pi-inbox text-4xl text-gray-300 mb-3"></i>
                             <p class="text-gray-500">No materials found</p>
                             <p class="text-gray-400 text-sm mt-1">Try adjusting your filters</p>
@@ -358,7 +380,7 @@
                     <div class="text-sm text-gray-600">{{ selectedMaterialsCount }} material(s) selected</div>
                     <div class="flex gap-2">
                         <Button label="Cancel" icon="pi pi-times" class="p-button-text" @click="closeMaterialPopup" />
-                        <Button label="Add Selected" icon="pi pi-check" class="p-button-primary" @click="addSelectedMaterials" :disabled="selectedMaterialsCount === 0" />
+                        <Button label="Add Selected" icon="pi pi-check" class="p-button-primary" @click="addSelectedMaterials" :disabled="selectedMaterialsCount === 0 || loadingMaterials" :loading="loadingMaterials" />
                     </div>
                 </div>
             </template>
@@ -392,6 +414,7 @@ const imageFile = ref(null);
 const imagePreview = ref('');
 const currentFileSize = ref(0);
 const submitting = ref(false);
+const loadingMaterials = ref(false);
 
 // Single program item
 const programItem = ref({
@@ -410,13 +433,14 @@ const freeMaterialOptions = ref([]);
 const loadingBuyPatterns = ref(false);
 const loadingFreeMaterials = ref(false);
 
-// Store all materials data for filtering
-const allMaterialsData = ref([]);
+// Store all materials data for filtering (for buy materials)
+const allBuyMaterialsData = ref([]);
 
 // Material Popup
 const materialPopupVisible = ref(false);
 const selectedMaterials = ref([]);
 const filteredMaterials = ref([]);
+const materialSearch = ref('');
 
 // Material Filter
 const materialFilter = ref({
@@ -465,23 +489,49 @@ const showInfo = (message) => {
     });
 };
 
+// Material Search Function
+const onMaterialSearch = () => {
+    applyMaterialFilter();
+};
+
+const clearMaterialSearch = () => {
+    materialSearch.value = '';
+    applyMaterialFilter();
+};
+
 // Material Popup Functions
-const openMaterialPopup = () => {
+const openMaterialPopup = async () => {
     materialPopupVisible.value = true;
     // Reset selection when opening popup
     selectedMaterials.value = [];
-    // Show all materials initially
-    filteredMaterials.value = [...allMaterialsData.value];
+    materialSearch.value = '';
+
+    // Show loading state
+    loadingMaterials.value = true;
+
+    try {
+        // Load buy materials data for filtering
+        await loadBuyMaterialsData();
+        // Show all materials initially
+        filteredMaterials.value = [...allBuyMaterialsData.value];
+    } catch (error) {
+        console.error('Error loading materials:', error);
+        showError('Failed to load materials');
+    } finally {
+        loadingMaterials.value = false;
+    }
 };
 
 const closeMaterialPopup = () => {
     materialPopupVisible.value = false;
     selectedMaterials.value = [];
+    materialSearch.value = '';
     materialFilter.value = {
         selectedPattern: null,
         selectedRim: null,
         availableRims: []
     };
+    loadingMaterials.value = false;
 };
 
 const onPatternFilterChange = () => {
@@ -502,14 +552,29 @@ const onPatternFilterChange = () => {
 };
 
 const applyMaterialFilter = () => {
-    let filtered = [...allMaterialsData.value];
+    let filtered = [...allBuyMaterialsData.value];
 
+    // Apply pattern filter
     if (materialFilter.value.selectedPattern) {
         filtered = filtered.filter((material) => material.pattern === materialFilter.value.selectedPattern);
     }
 
+    // Apply rim diameter filter
     if (materialFilter.value.selectedRim) {
         filtered = filtered.filter((material) => material.rimdiameter.toString() === materialFilter.value.selectedRim);
+    }
+
+    // Apply search filter
+    if (materialSearch.value) {
+        const searchTerm = materialSearch.value.toLowerCase();
+        filtered = filtered.filter(
+            (material) =>
+                material.materialid.toLowerCase().includes(searchTerm) ||
+                material.material.toLowerCase().includes(searchTerm) ||
+                material.pattern.toLowerCase().includes(searchTerm) ||
+                material.rimdiameter.toString().includes(searchTerm) ||
+                (material.sectionwidth && material.sectionwidth.toString().includes(searchTerm))
+        );
     }
 
     filteredMaterials.value = filtered;
@@ -522,7 +587,8 @@ const clearMaterialFilter = () => {
         selectedRim: null,
         availableRims: []
     };
-    filteredMaterials.value = [...allMaterialsData.value];
+    materialSearch.value = '';
+    filteredMaterials.value = [...allBuyMaterialsData.value];
     selectedMaterials.value = [];
 };
 
@@ -534,35 +600,44 @@ const clearSelectionInPopup = () => {
     selectedMaterials.value = [];
 };
 
-const addSelectedMaterials = () => {
+const addSelectedMaterials = async () => {
     if (selectedMaterials.value.length === 0) {
         showWarning('Please select at least one material');
         return;
     }
 
-    // Add only new materials (check by materialid)
-    let addedCount = 0;
-    selectedMaterials.value.forEach((material) => {
-        const exists = programItem.value.buyMaterials.some((existing) => existing.materialid === material.materialid);
-        if (!exists) {
-            programItem.value.buyMaterials.push({
-                materialid: material.materialid,
-                material: material.material,
-                pattern: material.pattern,
-                rimdiameter: material.rimdiameter,
-                status: 1
-            });
-            addedCount++;
+    loadingMaterials.value = true;
+
+    try {
+        // Add only new materials (check by materialid)
+        let addedCount = 0;
+        selectedMaterials.value.forEach((material) => {
+            const exists = programItem.value.buyMaterials.some((existing) => existing.materialid === material.materialid);
+            if (!exists) {
+                programItem.value.buyMaterials.push({
+                    materialid: material.materialid,
+                    material: material.material,
+                    pattern: material.pattern,
+                    rimdiameter: material.rimdiameter,
+                    status: 1
+                });
+                addedCount++;
+            }
+        });
+
+        if (addedCount > 0) {
+            showSuccess(`Added ${addedCount} material(s) to buy materials`);
+        } else {
+            showInfo('All selected materials are already added');
         }
-    });
 
-    if (addedCount > 0) {
-        showSuccess(`Added ${addedCount} material(s) to buy materials`);
-    } else {
-        showInfo('All selected materials are already added');
+        closeMaterialPopup();
+    } catch (error) {
+        console.error('Error adding materials:', error);
+        showError('Failed to add materials');
+    } finally {
+        loadingMaterials.value = false;
     }
-
-    closeMaterialPopup();
 };
 
 // Existing helper functions
@@ -656,7 +731,7 @@ const onUploadError = (event) => {
     }
 };
 
-// API Functions
+// API Functions for Buy Materials (using criteria-selection API)
 const loadBuyPatterns = async () => {
     try {
         loadingBuyPatterns.value = true;
@@ -697,9 +772,6 @@ const loadBuyPatterns = async () => {
             });
 
             buyPatternOptions.value = patterns;
-
-            // Also load all materials data for filtering
-            await loadAllMaterialsData();
         }
     } catch (error) {
         console.error('Error loading buy patterns:', error);
@@ -709,21 +781,48 @@ const loadBuyPatterns = async () => {
     }
 };
 
-const loadAllMaterialsData = async () => {
+// Load buy materials data from criteria-selection API
+const loadBuyMaterialsData = async () => {
     try {
-        const response = await api.post('list-material', {
-            type: 'SALESPROGRAM'
-        });
+        const response = await api.get('criteria-selection');
 
         if (response.data.status === 1) {
-            allMaterialsData.value = response.data.admin_data;
+            const patternsData = response.data.admin_data;
+            const materials = [];
+
+            // Convert the nested structure to a flat array of materials
+            for (const [patternCode, rimData] of Object.entries(patternsData)) {
+                for (const [rimDiameter, materialDescriptions] of Object.entries(rimData)) {
+                    materialDescriptions.forEach((materialDesc) => {
+                        const [materialid, material] = materialDesc.split('|').map((item) => item.trim());
+
+                        materials.push({
+                            materialid: materialid,
+                            material: material,
+                            pattern: patternCode,
+                            rimdiameter: parseFloat(rimDiameter),
+                            sectionwidth: extractSectionWidth(material)
+                        });
+                    });
+                }
+            }
+
+            allBuyMaterialsData.value = materials;
         }
     } catch (error) {
-        console.error('Error loading materials data:', error);
-        showError('Failed to load materials data');
+        console.error('Error loading buy materials data:', error);
+        showError('Failed to load buy materials data');
+        throw error;
     }
 };
 
+// Helper function to extract section width from material description
+const extractSectionWidth = (materialDesc) => {
+    const match = materialDesc.match(/(\d+)\/\d+\s+R/);
+    return match ? parseInt(match[1]) : null;
+};
+
+// API Functions for Free Materials (using list-material API with SALESPROGRAM type)
 const loadFreeMaterials = async () => {
     try {
         loadingFreeMaterials.value = true;
