@@ -73,8 +73,7 @@
             <Column header="Status" style="min-width: 8rem">
                 <template #body="{ data }">
                     <div class="flex justify-start">
-                        <Tag v-if="getStatus(data) !== '-'" :value="getStatus(data)" :severity="getStatusSeverity(data)" />
-                        <span v-else class="font-bold text-sl text-black-700">-</span>
+                        <Tag :value="getStatus(data)" :severity="getStatusSeverity(data)" />
                     </div>
                 </template>
             </Column>
@@ -381,27 +380,14 @@ export default {
         },
 
         getStatus(order) {
-            if (!order.startPeriod || !order.endPeriod) return '-';
-            const now = new Date();
-            const start = new Date(order.startPeriod);
-            const end = new Date(order.endPeriod);
-            if (now < start) return 'Scheduled';
-            if (now <= end) return 'Active';
-            return 'Inactive';
+            // Use the status field directly from API
+            // status = 1: Active, status = 0: Inactive
+            return order.status === 1 ? 'Active' : 'Inactive';
         },
 
         getStatusSeverity(order) {
-            const status = this.getStatus(order);
-            switch (status) {
-                case 'Scheduled':
-                    return 'warning';
-                case 'Active':
-                    return 'success';
-                case 'Inactive':
-                    return 'danger';
-                default:
-                    return null;
-            }
+            // Use the status field directly from API
+            return order.status === 1 ? 'success' : 'danger';
         },
 
         // 🟨🟧⚪ Order Type Helpers

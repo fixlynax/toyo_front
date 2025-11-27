@@ -18,45 +18,47 @@ const exportLoading1 = ref(false);
 const importLoading1 = ref(false);
 const exportLoading2 = ref(false);
 const importLoading2 = ref(false);
-const filteredList = ref([]);
 const importInput1 = ref();
 const importInput2 = ref();
 
 // Data variables
-const sortMenu = ref();
 const activeTabIndex = ref(0);
+const dateRange = ref(null);
+
+const formatDateDMY = (date) => {
+  const d = new Date(date);
+  const day = String(d.getDate()).padStart(2, "0");
+  const month = String(d.getMonth() + 1).padStart(2, "0");
+  const year = d.getFullYear();
+  return `${day}/${month}/${year}`;
+};
 const selectedExportIds = ref(new Set());
 
 const filters = ref({
     global: { value: null, matchMode: FilterMatchMode.CONTAINS }
 });
 
-        // 3: 'Processing',
-        // 4: 'Schedule',
-        // 5: 'Collected',
 
 const statusTabs = [
-    { label: 'New', status: 0 ,code: 3},
-    { label: 'Pending', status: 1 ,code: 4},
-    { label: 'Completed', status: 2 ,code: 5}
+    { label: 'New',submitLabel: 'NEW'},
+    { label: 'Pending',submitLabel: 'PENDING'},
+    { label: 'Completed',submitLabel: 'COMPLETED'}
 ];
 
 watch(activeTabIndex, () => {
-    filterByTab();
+    const tab = statusTabs[activeTabIndex.value];
+    if (tab.submitLabel === 'COMPLETED') {
+        selectedExportIds.value.clear();
+        listData.value = [];
+        return;
+    }
+    fetchData();
     selectedExportIds.value.clear();
 });
 
-const filterByTab = () => {
-    const selected = statusTabs[activeTabIndex.value];
-    if (!selected) {
-        filteredList.value = listData.value;
-        return;
-    }
-    filteredList.value = listData.value.filter((item) => (item.status) === selected.status);
-};
 const allSelected = computed(() => {
-  return filteredList.value.length > 0 &&
-         filteredList.value.every(item => selectedExportIds.value.has(item.id));
+  return listData.value.length > 0 &&
+         listData.value.every(item => selectedExportIds.value.has(item.id));
 });
 
 const handleToggleExport = (id) => {
@@ -65,27 +67,23 @@ const handleToggleExport = (id) => {
   } else {
     selectedExportIds.value.add(id);
   }
-//   console.log(selectedExportIds.value);
 };
 
 // Check all
 const toggleSelectAll = () => {
   if (allSelected.value) {
     // Unselect all for this tab
-    filteredList.value.forEach(item => {
+    listData.value.forEach(item => {
       selectedExportIds.value.delete(item.id);
     });
   } else {
     // Select all for this tab
-    filteredList.value.forEach(item => {
+    listData.value.forEach(item => {
       selectedExportIds.value.add(item.id);
     });
   }
 };
 
-const selectedRows = ref([]);
-const filterStatus = ref(null);
-const showFilterMenu = ref(false);
 
 function getStatusSeverity(status) {
     const severityMap = {
@@ -146,7 +144,6 @@ const handleExport1 = async () => {
         alert('Please select at least one row.');
         return;
     }
-    // console.log("export 1",idsArray);
     try {
         exportLoading1.value = true;
         
@@ -190,7 +187,6 @@ const handleExport2 = async () => {
         alert('Please select at least one row.');
         return;
     }
-    // console.log("export 2",idsArray);
     try {
         exportLoading2.value = true;
         
@@ -231,7 +227,6 @@ const handleExport2 = async () => {
 const handleImport1 = async (event) => {
     const file = event.target.files[0];
     if (!file) return;
-    // console.log("import 1",file);
     try {
         importLoading1.value = true;
         
@@ -277,7 +272,6 @@ const handleImport1 = async (event) => {
 const handleImport2 = async (event) => {
     const file = event.target.files[0];
     if (!file) return;
-    // console.log("import 2",file);
     try {
         importLoading2.value = true;
         
@@ -319,16 +313,45 @@ const handleImport2 = async (event) => {
             }
     }
 };
-const fetchData = async () => {
+const applyFilter = () => {
+    const tab = statusTabs[activeTabIndex.value];
+    if (tab.submitLabel === 'COMPLETED') {
+
+    // Must have BOTH start & end date
+    if (!dateRange.value?.[0] || !dateRange.value?.[1]) {
+      // Show message (toast, alert, etc.)
+      toast.add({
+        severity: 'warn',
+        summary: 'Date Range Required',
+        detail: 'Please select a full date range for Completed records.',
+        life: 3000
+      });
+      return; // STOP here, do NOT call API
+    }
+  }
+  const dateRangeStr = dateRange.value?.[0] && dateRange.value?.[1]? `${formatDateDMY(dateRange.value[0])} - ${formatDateDMY(dateRange.value[1])}`: null// returns "dd/mm/yyyy - dd/mm/yyyy" or null
+  const body = {
+    tab: tab.submitLabel,
+    date_range: dateRangeStr
+  };
+
+  fetchData(body);
+};
+const clearDate = () => {
+  dateRange.value = null; // or []
+};
+const fetchData = async (body = null) => {
     try {
         loading.value = true;
-        const response = await api.get('collection/list');
+        const payload = body || {
+        tab: statusTabs[activeTabIndex.value].submitLabel
+        };
+        const response = await api.postExtra('collection/list',payload);
         if (response.data.status === 1) {
             
         listData.value = response.data.admin_data.sort((a, b) => {
                 return new Date(b.created) - new Date(a.created);
             }); // sort by raw Date
-            filterByTab();
         } else listData.value = [];
     } catch (error) {
         console.error('Error fetching collection list:', error);
@@ -583,117 +606,135 @@ onMounted(async () => {
 <template>
     <div class="card">
         <div class="text-2xl font-bold text-gray-800 border-b pb-2"> CTC List Collection</div>
-        <TabMenu :model="statusTabs" v-model:activeIndex="activeTabIndex" class="mb-6" />
-        <DataTable
-            :value="filteredList"
-            :paginator="true"
-            :rows="10"
-            :rowsPerPageOptions="[5, 10, 20]"
-            dataKey="id"
-            :rowHover="true"
-            :loading="loading"
-            :filters="filters"
-            filterDisplay="menu"
-            :globalFilterFields="['claimRefno', 'created', 'city', 'collectDate', 'collectTime', 'status']"
-        >
-            <template #header>
-                <div class="flex items-center justify-between gap-4 w-full flex-wrap">
-                    <div class="flex items-center gap-2 w-full max-w-md">
-                        <IconField class="flex-1">
-                            <InputIcon>
-                                <i class="pi pi-search" />
-                            </InputIcon>
-                            <InputText v-model="filters['global'].value" placeholder="Quick Search" class="w-full" />
-                        </IconField>
-                    </div>
+        <LoadingPage v-if="loading" message="Loading CTC Collection Details..." />
+        <div v-else>
+            <TabMenu :model="statusTabs" v-model:activeIndex="activeTabIndex" class="mb-4" />
+            <div class="flex items-center gap-3 mb-4 ml-4">
+                <!-- LEFT SIDE -->
 
-                    <div class="flex justify-end gap-2"  v-if="statusTabs[activeTabIndex]?.label === 'New' && canUpdate">
-                        <Button type="button" label="Export" icon="pi pi-file-export" class="p-button-success" :loading="exportLoading1" @click="handleExport1"/>
-                        <Button type="button" label="Bulk Update" icon="pi pi-file-import" @click="importInput1?.click()":loading="importLoading1" />
-                        <input 
-                        ref="importInput1"
-                        type="file" 
-                        accept=".xlsx,.xls" 
-                        style="display: none" 
-                        @change="handleImport1"
-                        />
-                    </div>
-                    <div class="flex justify-end gap-2"  v-if="statusTabs[activeTabIndex]?.label === 'Pending' && canUpdate">
-                        <Button type="button" label="Export" icon="pi pi-file-export" class="p-button-success" :loading="exportLoading2" @click="handleExport2"/>
-                        <Button type="button" label="Bulk Update" icon="pi pi-file-import" @click="importInput2?.click()":loading="importLoading2" />
-                        <input 
-                        ref="importInput2"
-                        type="file" 
-                        accept=".xlsx,.xls" 
-                        style="display: none" 
-                        @change="handleImport2"
-                        />
-                    </div>
-                </div>
-            </template>
+                    <Calendar
+                        v-model="dateRange"
+                        selectionMode="range"
+                        dateFormat="dd/mm/yy"
+                        placeholder="Select date range"
+                        style="width: 390px;"
+                    />
+                    <Button label="Clear" class="p-button-sm p-button-danger" @click="clearDate" />
+                    <Button label="Filter" class="p-button-sm" @click="applyFilter" />
 
-            <template #empty> No Collection found. </template>
-            <template #loading> Loading Collection data. Please wait. </template>
-            <Column v-if="canUpdate" header="Export All" style="min-width: 8rem">
+            </div>
+
+            <DataTable
+                :value="listData"
+                :paginator="true"
+                :rows="10"
+                :rowsPerPageOptions="[5, 10, 20]"
+                dataKey="id"
+                :rowHover="true"
+                :loading="loading"
+                :filters="filters"
+                filterDisplay="menu"
+                :globalFilterFields="['claimRefno', 'created', 'city', 'collectDate', 'collectTime', 'status']"
+            >
                 <template #header>
-                    <div class="flex justify-center">
-                    <Checkbox
-                        :key="filteredList.length" 
-                        :binary="true"
-                        :model-value="allSelected"  
-                        @change="() => toggleSelectAll()"  
-                    />
+                    <div class="flex items-center justify-between gap-4 w-full flex-wrap">
+                        <div class="flex items-center gap-2 w-full max-w-md">
+                            <IconField class="flex-1">
+                                <InputIcon>
+                                    <i class="pi pi-search" />
+                                </InputIcon>
+                                <InputText v-model="filters['global'].value" placeholder="Quick Search" class="w-full" />
+                            </IconField>
+                        </div>
+
+                        <div class="flex justify-end gap-2"  v-if="statusTabs[activeTabIndex]?.label === 'New' && canUpdate">
+                            <Button type="button" label="Export" icon="pi pi-file-export" class="p-button-success" :loading="exportLoading1" @click="handleExport1"/>
+                            <Button type="button" label="Bulk Update" icon="pi pi-file-import" @click="importInput1?.click()":loading="importLoading1" />
+                            <input 
+                            ref="importInput1"
+                            type="file" 
+                            accept=".xlsx,.xls" 
+                            style="display: none" 
+                            @change="handleImport1"
+                            />
+                        </div>
+                        <div class="flex justify-end gap-2"  v-if="statusTabs[activeTabIndex]?.label === 'Pending' && canUpdate">
+                            <Button type="button" label="Export" icon="pi pi-file-export" class="p-button-success" :loading="exportLoading2" @click="handleExport2"/>
+                            <Button type="button" label="Bulk Update" icon="pi pi-file-import" @click="importInput2?.click()":loading="importLoading2" />
+                            <input 
+                            ref="importInput2"
+                            type="file" 
+                            accept=".xlsx,.xls" 
+                            style="display: none" 
+                            @change="handleImport2"
+                            />
+                        </div>
                     </div>
                 </template>
 
-                <template #body="{ data }">
-                    <div class="flex justify-center">
-                    <Checkbox
-                        :binary="true"
-                        :model-value="selectedExportIds.has(data.id)"
-                        @change="() => handleToggleExport(data.id)"
-                    />
-                    </div>
-                </template>
-            </Column>
-            <Column field="created" header="Create Date" style="min-width: 8rem" sortable>
-                <template #body="{ data }">
-                    {{ formatDate(data.created) }}
-                </template>
-            </Column>
-            <Column field="claimRefno" header="Ref No" style="min-width: 8rem" sortable>
-                <template #body="{ data }">
-                    <RouterLink :to="`/scm/detailCollection/${data.id}`" class="hover:underline font-bold text-primary">
-                        {{ data.claimRefno }}
-                    </RouterLink>
-                </template>
-            </Column>
-            <Column field="collectDate" header="Collect Date" style="min-width: 10rem" sortable>
-                <template #body="{ data }">
-                    {{ data.collectDate && data.collectTime ? formatDate(data.collectDate) + ' ' + formatTime(data.collectTime): 'Not Assigned'}}
-                </template>
-            </Column>
-            <Column field="reachWH" header="Receive Date" style="min-width: 10rem" sortable>
-                <template #body="{ data }">
-                    {{ data.reachWH ? formatDate(data.reachWH) : 'Not Assigned' }}
-                </template>
-            </Column>
-
-            <Column field="status" header="Status" style="min-width: 8rem">
-                <template #body="{ data }">
-                    <Tag :value="getStatusText(data.status)" :severity="getStatusSeverity(data.status)" />
-                </template>
-            </Column>
-            <Column field="report" header="Report" style="min-width: 8rem">
-                <template #body="{ data }">
-                    <Button 
-                        icon="pi pi-print" 
-                        class="p-button-text p-button-sm" 
-                        @click="fetchReport(data.warrantyEntryID)" 
-                        tooltip="Print Report"
+                <template #empty> No Collection found. </template>
+                <template #loading> Loading Collection data. Please wait. </template>
+                <Column v-if="statusTabs[activeTabIndex]?.label !== 'Completed' && canUpdate" header="Export All" style="min-width: 8rem" >
+                    <template #header>
+                        <div class="flex justify-center">
+                        <Checkbox
+                            :key="listData.length" 
+                            :binary="true"
+                            :model-value="allSelected"  
+                            @change="() => toggleSelectAll()"  
                         />
-                </template>
-            </Column>
-        </DataTable>
+                        </div>
+                    </template>
+
+                    <template #body="{ data }">
+                        <div class="flex justify-center">
+                        <Checkbox
+                            :binary="true"
+                            :model-value="selectedExportIds.has(data.claimID)"
+                            @change="() => handleToggleExport(data.claimID)"
+                        />
+                        </div>
+                    </template>
+                </Column>
+                <Column field="created" header="Create Date" style="min-width: 8rem" sortable>
+                    <template #body="{ data }">
+                        {{ formatDate(data.created) }}
+                    </template>
+                </Column>
+                <Column field="claimRefno" header="Ref No" style="min-width: 8rem" sortable>
+                    <template #body="{ data }">
+                        <RouterLink :to="`/scm/detailCollection/${data.id}`" class="hover:underline font-bold text-primary">
+                            {{ data.claimRefno }}
+                        </RouterLink>
+                    </template>
+                </Column>
+                <Column field="collectDate" header="Collect Date" style="min-width: 10rem" sortable>
+                    <template #body="{ data }">
+                        {{ data.collectDate ? formatDate(data.collectDate) : 'Not Assigned'}}
+                    </template>
+                </Column>
+                <Column field="reachWH" header="Receive Date" style="min-width: 10rem" sortable>
+                    <template #body="{ data }">
+                        {{ data.reachWH ? formatDate(data.reachWH) : 'Not Assigned' }}
+                    </template>
+                </Column>
+
+                <Column field="status" header="Status" style="min-width: 8rem">
+                    <template #body="{ data }">
+                        <Tag :value="getStatusText(data.status)" :severity="getStatusSeverity(data.status)" />
+                    </template>
+                </Column>
+                <Column field="report" header="Report" style="min-width: 8rem">
+                    <template #body="{ data }">
+                        <Button 
+                            icon="pi pi-print" 
+                            class="p-button-text p-button-sm" 
+                            @click="fetchReport(data.warrantyEntryID)" 
+                            tooltip="Print Report"
+                            />
+                    </template>
+                </Column>
+            </DataTable>
+        </div>
     </div>
 </template>

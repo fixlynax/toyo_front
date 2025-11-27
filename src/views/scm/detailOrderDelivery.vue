@@ -99,7 +99,7 @@
 
                         <Column field="qty" header="Quantity" class="text-right">
                             <template #body="{ data }">
-                                {{ data.qty }}
+                                {{ parseFloat(data.qty) }}
                             </template>
                         </Column>
                     </DataTable>
@@ -444,10 +444,6 @@ const formatDateApi = (date) => {
   return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
 };
 
-const formatTimeApi = (date) => {
-  const d = new Date(date);
-  return `${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`;
-};
 
 const InitfetchData = async () => {
     try {

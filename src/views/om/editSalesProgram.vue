@@ -57,14 +57,21 @@
                             </div>
                         </div>
 
-                        <div>
-                            <label class="block font-bold text-gray-700">Program Type</label>
-                            <InputText v-model="salesProgram.type" class="w-full" disabled />
-                        </div>
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 md:col-span-2">
+                            <div>
+                                <label class="block font-bold text-gray-700">Program Type</label>
+                                <InputText v-model="salesProgram.type" class="w-full" disabled />
+                            </div>
 
-                        <div>
-                            <label class="block font-bold text-gray-700">Sales Program ID</label>
-                            <InputText v-model="salesProgram.programID" class="w-full" disabled />
+                            <div>
+                                <label class="block font-bold text-gray-700">Sales Program ID</label>
+                                <InputText v-model="salesProgram.programID" class="w-full" disabled />
+                            </div>
+
+                            <div>
+                                <label class="block font-bold text-gray-700">Show Sales Program</label>
+                                <Dropdown v-model="salesProgram.showSP" :options="showOptions" optionLabel="label" optionValue="value" class="w-full" placeholder="Select Availability " />
+                            </div>
                         </div>
                     </div>
 
@@ -166,18 +173,18 @@
                                         <Badge :value="`${programItem.buyMaterials.length} materials`" severity="info" />
                                     </div>
 
-                                    <div class="grid grid-cols-1 md:grid-cols-2 gap-3 max-h-60 overflow-y-auto p-2 border border-blue-200 rounded-lg bg-white">
+                                    <div class="grid grid-cols-1 md:grid-cols-3 gap-3 max-h-60 overflow-y-auto p-2 border border-blue-200 rounded-lg bg-white">
                                         <div
                                             v-for="(material, index) in programItem.buyMaterials"
                                             :key="material.materialid + '_' + index"
                                             class="flex items-center gap-3 p-3 bg-blue-50 border border-blue-200 rounded-lg hover:bg-blue-100 transition-colors"
                                         >
                                             <div class="flex-1 min-w-0">
-                                                <div class="text-sm font-medium text-blue-800 truncate">{{ material.material }}</div>
+                                                <div class="text-sm font-medium text-blue-800 truncate">{{ material.materialid }}</div>
                                                 <div class="flex flex-wrap items-center gap-2 mt-1">
-                                                    <span class="text-xs bg-white px-2 py-0.5 rounded text-blue-700 border border-blue-200">Pattern: {{ material.pattern }}</span>
+                                                    <span class="text-xs bg-white px-2 py-0.5 rounded text-blue-700 border border-blue-200">{{ material.patternDisplay }}</span>
                                                     <span class="text-xs bg-white px-2 py-0.5 rounded text-blue-700 border border-blue-200">Rim: {{ material.rimdiameter }}"</span>
-                                                    <span class="text-xs bg-white px-2 py-0.5 rounded text-blue-700 border border-blue-200">ID: {{ material.materialid }}</span>
+                                                    <span class="text-xs bg-white px-2 py-0.5 rounded text-blue-700 border border-blue-200">Desc: {{ material.material }}</span>
                                                 </div>
                                             </div>
                                             <Button icon="pi pi-times" class="p-button-danger p-button-text p-button-sm" @click="removeBuyMaterial(index)" />
@@ -304,24 +311,46 @@
                             Filter Materials
                         </h5>
 
-                        <!-- Pattern Filter -->
+                        <!-- Pattern Filter - MultiSelect -->
                         <div class="mb-4">
                             <label class="block text-sm font-medium text-gray-700 mb-2">Pattern</label>
-                            <Dropdown v-model="materialFilter.selectedPattern" :options="buyPatternOptions" optionLabel="label" optionValue="value" placeholder="Select Pattern" class="w-full" :filter="true" @change="onPatternFilterChange" />
+                            <MultiSelect
+                                v-model="materialFilter.selectedPatterns"
+                                :options="buyPatternOptions"
+                                optionLabel="label"
+                                optionValue="value"
+                                placeholder="Select Patterns"
+                                class="w-full"
+                                :filter="true"
+                                display="chip"
+                                @change="onPatternFilterChange"
+                            >
+                                <template #value="slotProps">
+                                    <div v-if="slotProps.value && slotProps.value.length > 0" class="flex flex-wrap gap-1">
+                                        <span v-for="pattern in getSelectedPatternLabels(slotProps.value)" :key="pattern.value" class="bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded">
+                                            {{ pattern.label }}
+                                        </span>
+                                    </div>
+                                    <span v-else>
+                                        {{ slotProps.placeholder }}
+                                    </span>
+                                </template>
+                            </MultiSelect>
                         </div>
 
-                        <!-- Rim Diameter Filter -->
+                        <!-- Rim Diameter Filter - MultiSelect -->
                         <div class="mb-4">
                             <label class="block text-sm font-medium text-gray-700 mb-2">Rim Diameter</label>
-                            <Dropdown
-                                v-model="materialFilter.selectedRim"
+                            <MultiSelect
+                                v-model="materialFilter.selectedRims"
                                 :options="materialFilter.availableRims"
                                 optionLabel="label"
                                 optionValue="value"
-                                placeholder="Select Rim Diameter"
+                                placeholder="Select Rim Diameters"
                                 class="w-full"
                                 :filter="true"
-                                :disabled="!materialFilter.selectedPattern"
+                                display="chip"
+                                :disabled="!materialFilter.selectedPatterns || materialFilter.selectedPatterns.length === 0"
                             />
                         </div>
 
@@ -343,6 +372,14 @@
                             <div class="flex justify-between">
                                 <span class="text-sm text-green-600">Filtered:</span>
                                 <Badge :value="filteredMaterials.length" severity="info" />
+                            </div>
+                            <div class="flex justify-between">
+                                <span class="text-sm text-green-600">Patterns:</span>
+                                <Badge :value="materialFilter.selectedPatterns?.length || 0" severity="warning" />
+                            </div>
+                            <div class="flex justify-between">
+                                <span class="text-sm text-green-600">Rims:</span>
+                                <Badge :value="materialFilter.selectedRims?.length || 0" severity="warning" />
                             </div>
                             <div class="flex justify-between">
                                 <span class="text-sm text-green-600">Existing:</span>
@@ -379,22 +416,15 @@
                             <DataTable
                                 :value="filteredMaterials"
                                 v-model:selection="selectedMaterials"
-                                selectionMode="multiple"
                                 removableSort
+                                selectionMode="multiple"
                                 dataKey="materialid"
                                 class="p-datatable-sm"
                                 :scrollable="true"
                                 scrollHeight="flex"
                                 :loading="loadingMaterials"
                             >
-                                <Column selectionMode="multiple" headerStyle="width: 3rem">
-                                    <template #header>
-                                        <div class="flex items-center gap-2">
-                                            <Checkbox v-model="selectAll" :binary="true" @change="onSelectAllChange" />
-                                            <span>All</span>
-                                        </div>
-                                    </template>
-                                </Column>
+                                <Column selectionMode="multiple" headerStyle="width: 3rem"></Column>
                                 <Column field="materialid" header="Material ID" sortable>
                                     <template #body="{ data }">
                                         <span class="font-mono text-sm">{{ data.materialid }}</span>
@@ -407,7 +437,7 @@
                                 </Column>
                                 <Column field="pattern" header="Pattern" sortable>
                                     <template #body="{ data }">
-                                        <span class="bg-blue-100 text-blue-800 px-2 py-1 rounded text-xs">{{ data.pattern }}</span>
+                                        <span class="bg-blue-100 text-blue-800 px-2 py-1 rounded text-xs">{{ data.patternDisplay }}</span>
                                     </template>
                                 </Column>
                                 <Column field="rimdiameter" header="Rim" sortable>
@@ -485,6 +515,7 @@ const loadingMaterials = ref(false);
 // Sales Program Data
 const salesProgram = ref({
     programID: '',
+    showSP: 1,
     pricegroup: '06',
     type: 'FOC',
     programName: '',
@@ -510,6 +541,11 @@ const programItem = ref({
     status: 1
 });
 
+const showOptions = ref([
+    { label: 'Yes', value: 1 },
+    { label: 'No', value: 0 }
+]);
+
 // API Data
 const buyPatternOptions = ref([]);
 const freeMaterialOptions = ref([]);
@@ -524,36 +560,30 @@ const materialPopupVisible = ref(false);
 const selectedMaterials = ref([]);
 const filteredMaterials = ref([]);
 const materialSearch = ref('');
-const selectAll = ref(false);
 
 // Store original selection for restore functionality
 const originalSelection = ref([]);
 
-// Material Filter
+// Material Filter - Updated for multi-select
 const materialFilter = ref({
-    selectedPattern: null,
-    selectedRim: null,
+    selectedPatterns: [], // Changed from selectedPattern to selectedPatterns (array)
+    selectedRims: [], // Changed from selectedRim to selectedRims (array)
     availableRims: []
 });
 
 // Computed
 const selectedMaterialsCount = computed(() => selectedMaterials.value.length);
 
-// Watch for selection changes to update selectAll checkbox
-watch(
-    selectedMaterials,
-    (newSelection) => {
-        if (filteredMaterials.value.length === 0) {
-            selectAll.value = false;
-            return;
-        }
-
-        // Check if all filtered items are selected
-        const allFilteredSelected = filteredMaterials.value.every((item) => newSelection.some((selected) => selected.materialid === item.materialid));
-        selectAll.value = allFilteredSelected;
-    },
-    { deep: true }
-);
+// Helper function to get selected pattern labels
+const getSelectedPatternLabels = (selectedPatternValues) => {
+    return selectedPatternValues.map((patternValue) => {
+        const pattern = buyPatternOptions.value.find((p) => p.value === patternValue);
+        return {
+            value: patternValue,
+            label: pattern ? pattern.label : patternValue
+        };
+    });
+};
 
 // Toast notification functions
 const showSuccess = (message) => {
@@ -660,6 +690,7 @@ const fetchSalesProgram = async () => {
             // Map API data to form structure
             salesProgram.value = {
                 programID: programData.programid,
+                showSP: programData.showSP,
                 pricegroup: programData.pricegroup,
                 type: programData.type,
                 programName: programData.title,
@@ -728,6 +759,7 @@ const loadProgramCriteria = async (programData) => {
                     materialid: foc.materialid,
                     material: materialDetail?.material || foc.materialdesc || foc.materialid,
                     pattern: materialDetail?.pattern || 'N/A',
+                    patternDisplay: materialDetail?.patternDisplay || `${materialDetail?.pattern || 'N/A'} - ${materialDetail?.patternName || 'Unknown'}`,
                     rimdiameter: materialDetail?.rimdiameter || 'N/A',
                     status: foc.status
                 };
@@ -784,42 +816,51 @@ const closeMaterialPopup = () => {
     selectedMaterials.value = [];
     materialSearch.value = '';
     materialFilter.value = {
-        selectedPattern: null,
-        selectedRim: null,
+        selectedPatterns: [],
+        selectedRims: [],
         availableRims: []
     };
-    selectAll.value = false;
     loadingMaterials.value = false;
 };
 
+// Updated pattern filter change handler
 const onPatternFilterChange = () => {
-    materialFilter.value.selectedRim = null;
+    materialFilter.value.selectedRims = [];
     materialFilter.value.availableRims = [];
 
-    if (materialFilter.value.selectedPattern) {
-        const patternData = buyPatternOptions.value.find((p) => p.value === materialFilter.value.selectedPattern);
-        if (patternData && patternData.rimSizes) {
-            materialFilter.value.availableRims = patternData.rimSizes
-                .map((rim) => ({
-                    label: `${rim}"`,
-                    value: rim.toString()
-                }))
-                .sort((a, b) => parseFloat(a.value) - parseFloat(b.value));
-        }
+    if (materialFilter.value.selectedPatterns && materialFilter.value.selectedPatterns.length > 0) {
+        const allRims = new Set();
+
+        materialFilter.value.selectedPatterns.forEach((patternValue) => {
+            const patternData = buyPatternOptions.value.find((p) => p.value === patternValue);
+            if (patternData && patternData.rimSizes) {
+                patternData.rimSizes.forEach((rim) => {
+                    allRims.add(rim);
+                });
+            }
+        });
+
+        materialFilter.value.availableRims = Array.from(allRims)
+            .sort((a, b) => parseFloat(a) - parseFloat(b))
+            .map((rim) => ({
+                label: `${rim}"`,
+                value: rim.toString()
+            }));
     }
 };
 
+// Updated apply material filter function
 const applyMaterialFilter = () => {
     let filtered = [...allBuyMaterialsData.value];
 
-    // Apply pattern filter
-    if (materialFilter.value.selectedPattern) {
-        filtered = filtered.filter((material) => material.pattern === materialFilter.value.selectedPattern);
+    // Apply pattern filter (multiple patterns)
+    if (materialFilter.value.selectedPatterns && materialFilter.value.selectedPatterns.length > 0) {
+        filtered = filtered.filter((material) => materialFilter.value.selectedPatterns.includes(material.pattern));
     }
 
-    // Apply rim diameter filter
-    if (materialFilter.value.selectedRim) {
-        filtered = filtered.filter((material) => material.rimdiameter.toString() === materialFilter.value.selectedRim);
+    // Apply rim diameter filter (multiple rims)
+    if (materialFilter.value.selectedRims && materialFilter.value.selectedRims.length > 0) {
+        filtered = filtered.filter((material) => materialFilter.value.selectedRims.includes(material.rimdiameter.toString()));
     }
 
     // Apply search filter
@@ -844,8 +885,8 @@ const applyMaterialFilter = () => {
 
 const clearMaterialFilter = () => {
     materialFilter.value = {
-        selectedPattern: null,
-        selectedRim: null,
+        selectedPatterns: [],
+        selectedRims: [],
         availableRims: []
     };
     materialSearch.value = '';
@@ -868,14 +909,6 @@ const restorePreviousSelection = () => {
     showInfo('Previous selection restored');
 };
 
-const onSelectAllChange = (event) => {
-    if (event.checked) {
-        selectAllFiltered();
-    } else {
-        clearSelectionInPopup();
-    }
-};
-
 const addSelectedMaterials = async () => {
     if (selectedMaterials.value.length === 0) {
         showWarning('Please select at least one material');
@@ -887,9 +920,11 @@ const addSelectedMaterials = async () => {
     try {
         // Replace all existing buy materials with the new selection
         programItem.value.buyMaterials = selectedMaterials.value.map((material) => ({
+            id: material.id || null, // Keep existing ID if available
             materialid: material.materialid,
             material: material.material,
             pattern: material.pattern,
+            patternDisplay: material.patternDisplay,
             rimdiameter: material.rimdiameter,
             status: 1
         }));
@@ -1008,7 +1043,7 @@ const onUploadError = (event) => {
     }
 };
 
-// API Functions for Buy Materials (using criteria-selection API)
+// Updated loadBuyPatterns function to show "code - pattern name" format
 const loadBuyPatterns = async () => {
     try {
         loadingBuyPatterns.value = true;
@@ -1018,37 +1053,28 @@ const loadBuyPatterns = async () => {
             const patternsData = response.data.admin_data;
             const patterns = [];
 
-            for (const [patternCode, rimData] of Object.entries(patternsData)) {
-                for (const [rimDiameter, materialDescriptions] of Object.entries(rimData)) {
-                    // Extract pattern name from first material description if available
-                    const firstDesc = materialDescriptions[0] || '';
-                    const patternName = firstDesc.split('|')[1]?.trim() || patternCode;
+            for (const [patternCode, patternNamesData] of Object.entries(patternsData)) {
+                for (const [patternName, rimData] of Object.entries(patternNamesData)) {
+                    const rimSizes = Object.keys(rimData)
+                        .map((rim) => parseFloat(rim))
+                        .sort((a, b) => a - b);
 
-                    // Check if pattern already exists
-                    const existingPattern = patterns.find((p) => p.value === patternCode);
+                    // Create label in "code - pattern name" format
+                    const label = `${patternCode} - ${patternName}`;
 
-                    if (existingPattern) {
-                        // Add rim size if not already present
-                        if (!existingPattern.rimSizes.includes(parseFloat(rimDiameter))) {
-                            existingPattern.rimSizes.push(parseFloat(rimDiameter));
-                        }
-                    } else {
-                        patterns.push({
-                            label: `${patternCode} - ${patternName}`,
-                            value: patternCode,
-                            patternName: patternName,
-                            rimSizes: [parseFloat(rimDiameter)]
-                        });
-                    }
+                    patterns.push({
+                        label: label,
+                        value: patternCode,
+                        patternName: patternName,
+                        rimSizes: rimSizes
+                    });
                 }
             }
 
-            // Sort rim sizes for each pattern
-            patterns.forEach((pattern) => {
-                pattern.rimSizes.sort((a, b) => a - b);
-            });
+            // Remove duplicates by pattern code (keep first occurrence)
+            const uniquePatterns = patterns.filter((pattern, index, self) => index === self.findIndex((p) => p.value === pattern.value));
 
-            buyPatternOptions.value = patterns;
+            buyPatternOptions.value = uniquePatterns;
         }
     } catch (error) {
         console.error('Error loading buy patterns:', error);
@@ -1058,7 +1084,7 @@ const loadBuyPatterns = async () => {
     }
 };
 
-// Load buy materials data from criteria-selection API
+// Updated loadBuyMaterialsData function to include patternDisplay
 const loadBuyMaterialsData = async () => {
     try {
         const response = await api.get('criteria-selection');
@@ -1068,19 +1094,22 @@ const loadBuyMaterialsData = async () => {
             const materials = [];
 
             // Convert the nested structure to a flat array of materials
-            for (const [patternCode, rimData] of Object.entries(patternsData)) {
-                for (const [rimDiameter, materialDescriptions] of Object.entries(rimData)) {
-                    materialDescriptions.forEach((materialDesc) => {
-                        const [materialid, material] = materialDesc.split('|').map((item) => item.trim());
+            for (const [patternCode, patternNamesData] of Object.entries(patternsData)) {
+                for (const [patternName, rimData] of Object.entries(patternNamesData)) {
+                    for (const [rimDiameter, materialDescriptions] of Object.entries(rimData)) {
+                        materialDescriptions.forEach((materialDesc) => {
+                            const [materialid, material] = materialDesc.split('|').map((item) => item.trim());
 
-                        materials.push({
-                            materialid: materialid,
-                            material: material,
-                            pattern: patternCode,
-                            rimdiameter: parseFloat(rimDiameter),
-                            sectionwidth: extractSectionWidth(material)
+                            materials.push({
+                                materialid: materialid,
+                                material: material,
+                                pattern: patternCode,
+                                patternDisplay: `${patternCode} - ${patternName}`, // Add display format
+                                rimdiameter: parseFloat(rimDiameter),
+                                sectionwidth: extractSectionWidth(material)
+                            });
                         });
-                    });
+                    }
                 }
             }
 
@@ -1191,8 +1220,8 @@ const submitForm = async () => {
         // Prepare FormData
         const formData = new FormData();
 
-        formData.append('programID', salesProgram.value.programID);
         formData.append('pricegroup', salesProgram.value.pricegroup);
+        formData.append('showSP', salesProgram.value.showSP);
         formData.append('type', salesProgram.value.type);
         formData.append('programName', salesProgram.value.programName);
         formData.append('desc', salesProgram.value.desc);
