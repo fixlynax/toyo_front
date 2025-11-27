@@ -536,7 +536,7 @@ function getStatusLabel(status) {
 
 function getStatusSeverity(status) {
     const map = {
-        0: 'warn',
+        0: 'warning',
         1: 'success',
         66: 'info',
         77: 'primary'
@@ -554,7 +554,7 @@ const getStatusLabel2 = (status) => {
 const getStatusSeverity2 = (status) => {
     const severityMap = {
         "NEW": 'info',
-        "PENDING": 'warn',
+        "PENDING": 'warning',
         "COMPLETED": 'success',
     };
     return severityMap[status] || 'secondary';

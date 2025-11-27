@@ -162,7 +162,7 @@
                             </tbody>
                         </table>
                     </div>
-                    <div v-if="!orderDelList?.driverInformation?.pickup_datetime && canUpdate" class="flex justify-end mt-3">
+                    <div v-if="orderDelList.driverInformation && !orderDelList?.driverInformation?.pickup_datetime && canUpdate" class="flex justify-end mt-3">
                         <Button  
                             style="width: auto !important"
                             label="Update Pickup Date"
