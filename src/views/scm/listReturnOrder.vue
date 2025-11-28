@@ -72,7 +72,7 @@
                 <template #empty> No return orders found. </template>
                 <template #loading> Loading return orders data. Please wait. </template>
 
-                <Column v-if="canUpdate" header="Export All" style="min-width: 8rem" sortable>
+                <Column v-if="statusTabs[activeTabIndex]?.label !== 'Completed' && canUpdate" header="Export All" style="min-width: 8rem" sortable>
                     <template #header>
                         <div class="flex justify-center">
                         <Checkbox

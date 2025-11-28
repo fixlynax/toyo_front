@@ -58,7 +58,7 @@ watch(activeTabIndex, () => {
 
 const allSelected = computed(() => {
   return listData.value.length > 0 &&
-         listData.value.every(item => selectedExportIds.value.has(item.id));
+         listData.value.every(item => selectedExportIds.value.has(item.claimID));
 });
 
 const handleToggleExport = (id) => {
@@ -74,12 +74,12 @@ const toggleSelectAll = () => {
   if (allSelected.value) {
     // Unselect all for this tab
     listData.value.forEach(item => {
-      selectedExportIds.value.delete(item.id);
+      selectedExportIds.value.delete(item.claimID);
     });
   } else {
     // Select all for this tab
     listData.value.forEach(item => {
-      selectedExportIds.value.add(item.id);
+      selectedExportIds.value.add(item.claimID);
     });
   }
 };
