@@ -30,7 +30,7 @@
                 :loading="loading"
                 :filters="filters"
                 filterDisplay="menu"
-                :globalFilterFields="['do_no', 'eten_user.custAccountNo', 'eten_user.companyName1', 'eten_user.companyName2', 'eten_user.companyName3', 'eten_user.companyName4', 'eten_user.storageLocation', 'deliveryType', 'orderstatus']"
+                :globalFilterFields="['do_no', 'eten_user.custAccountNo', 'eten_user.companyName1', 'eten_user.companyName2', 'eten_user.companyName3', 'eten_user.companyName4', 'eten_user.storageLocation', 'eten_user.city', 'eten_user.state', 'deliveryType', 'orderstatus']"
                 paginatorTemplate="CurrentPageReport FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink RowsPerPageDropdown"
                 currentPageReportTemplate="Showing {first} to {last} of {totalRecords} entries"
                 >
@@ -72,9 +72,19 @@
                      {{ data.eten_user.custAccountNo }}
                     </template>
                 </Column>
-                <Column field="eten_user.storageLocation" header="Storage Location" style="min-width: 10rem" sortable>
+                <Column field="eten_user.storageLocation" header="Storage Location" style="min-width: 8rem" sortable>
                     <template #body="{ data }">
                         {{  data.eten_user.storageLocation ? data.eten_user.storageLocation : '-'  }}
+                    </template>
+                </Column>
+                <Column field="eten_user.city" header="City" style="min-width: 8rem" sortable>
+                    <template #body="{ data }">
+                        {{  data.eten_user.city?.replace(/,$/, '') }}
+                    </template>
+                </Column>
+                <Column field="eten_user.state" header="State" style="min-width: 8rem" sortable>
+                    <template #body="{ data }">
+                        {{  data.eten_user.state ? data.eten_user.state : '-'  }}
                     </template>
                 </Column>
                 <Column field="driverInformation.driverName" header="Collector" style="min-width: 12rem" sortable>
