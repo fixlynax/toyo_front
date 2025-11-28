@@ -23,14 +23,16 @@
                 :value="orderDelList"
                 :paginator="true"
                 :rows="10"
-                :rowsPerPageOptions="[5, 10, 20]"
+                :rowsPerPageOptions="[10, 20, 50, 100]"
                 dataKey="id"
                 :rowHover="true"
                 :loading="loading"
                 :filters="filters"
                 filterDisplay="menu"
-                :globalFilterFields="['do_no', 'eten_user.custAccountNo', 'storagelocation' ,  'eten_user.companyName1', 'eten_user.companyName2', 'eten_user.companyName3', 'eten_user.companyName4', 'eten_user.city', 'eten_user.state', 'deliveryDate',, 'scm_deliver_detail.scheduled_delivery_time', 'scm_deliver_detail.delivered_datetime', 'orderstatus']"
-            >
+                :globalFilterFields="['do_no', 'shipto_data.custAccountNo', 'storagelocation' ,  'shipto_data.companyName1', 'shipto_data.companyName2', 'shipto_data.city', 'shipto_data.state', 'deliveryDate',, 'scm_deliver_detail.scheduled_delivery_time', 'scm_deliver_detail.delivered_datetime', 'orderstatus']"
+                paginatorTemplate="CurrentPageReport FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink RowsPerPageDropdown"
+                currentPageReportTemplate="Showing {first} to {last} of {totalRecords} entries"
+                >
                 <template #header>
                     <div class="flex items-center justify-between gap-4 w-full flex-wrap">
                         <div class="flex items-center gap-2 w-full max-w-md">
@@ -104,28 +106,28 @@
                         </RouterLink>
                     </template>
                 </Column>
-                <Column field="eten_user.companyName1" header="Customer Name" style="min-width: 12rem" sortable>
+                <Column field="shipto_data.companyName1" header="Customer Name" style="min-width: 12rem" sortable>
                     <template #body="{ data }">
-                        <span class="font-bold">{{` ${data.eten_user.companyName1} ${data.eten_user.companyName2} ${data.eten_user.companyName3} ${data.eten_user.companyName4} ` }}</span>
+                        <span class="font-bold">{{` ${data.shipto_data.companyName1} ${data.shipto_data.companyName2} ` }}</span>
                     <br>
-                     {{ data.eten_user.custAccountNo }}
+                     {{ data.shipto_data.custAccountNo }}
                     </template>
                 </Column>
 
-                <Column field="storagelocation" header="Storage Location" style="min-width: 12rem" sortable>
+                <Column field="storagelocation" header="Storage Location" style="min-width: 8rem" sortable>
                     <template #body="{ data }">
                          {{`${data.storagelocation}` }}
                     </template>
                 </Column>
 
-                <Column field="eten_user.city" header="City" style="min-width: 12rem" sortable>
+                <Column field="shipto_data.city" header="City" style="min-width: 8rem" sortable>
                     <template #body="{ data }">
-                         {{ data.eten_user.city?.replace(/,$/, '') }}
+                         {{ data.shipto_data.city?.replace(/,$/, '') }}
                     </template>
                 </Column>
-                <Column field="eten_user.state" header="State" style="min-width: 12rem" sortable>
+                <Column field="shipto_data.state" header="State" style="min-width: 8rem" sortable>
                     <template #body="{ data }">
-                         {{`${data.eten_user.state}` }}
+                         {{`${data.shipto_data.state}` }}
                     </template>
                 </Column>
 
@@ -212,12 +214,16 @@ const statusTabs = [
 watch(activeTabIndex, () => {
     const tab = statusTabs[activeTabIndex.value];
     if (tab.submitLabel === 'COMPLETED') {
-        selectedExportIds.value.clear();
-        orderDelList.value = [];
-        return;
+        // Set default date range: last 7 days until today
+        const today = new Date();
+        const lastWeek = new Date();
+        lastWeek.setDate(today.getDate() - 7);
+        dateRange.value = [lastWeek, today];
+    }else{
+        dateRange.value = null;
     }
-    fetchData();
-    selectedExportIds.value.clear();
+        selectedExportIds.value.clear();
+        fetchData();
 });
 
 // Computed boolean: are all rows selected?

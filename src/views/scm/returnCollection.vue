@@ -1,8 +1,6 @@
 <template>
     <div class="card">
-        <div class="flex items-center justify-between mb-4">
             <div class="text-2xl font-bold text-gray-800">CTC Return List</div>
-        </div>
         <LoadingPage v-if="loading" message="Loading Return CTC Collection Details..." />
         <div v-else>
             <TabMenu :model="statusTabs" v-model:activeIndex="activeTabIndex" class="mb-4" />
@@ -24,13 +22,15 @@
                 :value="collectionList"
                 :paginator="true"
                 :rows="10"
-                :rowsPerPageOptions="[5, 10, 20]"
+                :rowsPerPageOptions="[5, 10, 20, 50, 100]"
                 dataKey="id"
                 :rowHover="true"
                 :loading="loading"
                 :filters="filters"
                 filterDisplay="menu"
                 :globalFilterFields="['claimRefno', 'created', 'deliveryDate', 'scheduleDeliveryDate', 'status', 'deliveryDate']"
+                paginatorTemplate="CurrentPageReport FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink RowsPerPageDropdown"
+                currentPageReportTemplate="Showing {first} to {last} of {totalRecords} entries"
             >
                 <!-- ========================= -->
                 <!-- Header Section -->
@@ -145,6 +145,7 @@ import { FilterMatchMode } from '@primevue/core/api';
 import api from '@/service/api';
 import { useToast } from 'primevue/usetoast';
 import { useMenuStore } from '@/store/menu';
+import LoadingPage from '@/components/LoadingPage.vue';
 
 const menuStore = useMenuStore();
 const canUpdate = computed(() => menuStore.canWrite('CTC Return'));
@@ -155,13 +156,13 @@ const exportLoading1 = ref(false);
 const importLoading1 = ref(false);
 const exportLoading2 = ref(false);
 const importLoading2 = ref(false);
-const returnList = ref([]);
-const filteredList = ref([]);
 const importInput1 = ref();
 const importInput2 = ref();
 
 // Data variables
-const loading = ref(false);
+const loading = ref(true);
+const reportloading = ref(false);
+
 const collectionList = ref([]);
 
 const activeTabIndex = ref(0);
@@ -190,18 +191,23 @@ const statusTabs = [
 watch(activeTabIndex, () => {
     const tab = statusTabs[activeTabIndex.value];
     if (tab.submitLabel === 'COMPLETED') {
-        selectedExportIds.value.clear();
-        collectionList.value = [];
-        return;
+        // Set default date range: last 7 days until today
+        const today = new Date();
+        const lastWeek = new Date();
+        lastWeek.setDate(today.getDate() - 7);
+
+        dateRange.value = [lastWeek, today];
+    }else{
+        dateRange.value = null;   
     }
-    fetchData();
     selectedExportIds.value.clear();
+    fetchData();
 });
 
 // Computed boolean: are all rows selected?
 const allSelected = computed(() => {
   return collectionList.value.length > 0 &&
-         collectionList.value.every(item => selectedExportIds.value.has(item.id));
+         collectionList.value.every(item => selectedExportIds.value.has(item.claimID));
 });
 
 const handleToggleExport = (id) => {
@@ -217,22 +223,16 @@ const toggleSelectAll = () => {
   if (allSelected.value) {
     // Unselect all for this tab
     collectionList.value.forEach(item => {
-      selectedExportIds.value.delete(item.id);
+      selectedExportIds.value.delete(item.claimID);
     });
   } else {
     // Select all for this tab
     collectionList.value.forEach(item => {
-      selectedExportIds.value.add(item.id);
+      selectedExportIds.value.add(item.claimID);
     });
   }
 };
 
-// =========================
-// Fetch data on mount
-// =========================
-    onMounted(async () => {
-        fetchData();
-    });
 
 function formatDate(dateString) {
     if (!dateString) return '';
@@ -498,7 +498,7 @@ const fetchData = async (body = null) => {
 };
 const fetchReport = async (id) => {
     try {
-        loading.value = true;
+        reportloading.value = true;
         const response = await api.get(`warrantyReport/ctc/${id}`);
         if (response.data.status === 1) {
             generateReport(response.data.report_data);
@@ -513,7 +513,7 @@ const fetchReport = async (id) => {
     } catch (error) {
         console.error('Error fetching report:', error);
     } finally {
-        loading.value = false;
+        reportloading.value = false;
     }
 }
 const generateReport = (report) => {
@@ -754,4 +754,7 @@ function getStatusText(status) {
     };
     return statusMap[status] || 'Unknown';
 }
+    onMounted(async () => {
+        fetchData();
+    });
 </script>

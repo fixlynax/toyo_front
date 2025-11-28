@@ -8,13 +8,15 @@
                 :value="ETAList"
                 :paginator="true"
                 :rows="10"
-                :rowsPerPageOptions="[5, 10, 20]"
+                :rowsPerPageOptions="[5, 10, 20, 50, 100]"
                 dataKey="id"
                 :rowHover="true"
                 :loading="loading"
                 :filters="filters"
                 filterDisplay="menu"
                 :globalFilterFields="['storageLocation', 'state', 'postcode', 'city', 'eta']"
+                paginatorTemplate="CurrentPageReport FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink RowsPerPageDropdown"
+                currentPageReportTemplate="Showing {first} to {last} of {totalRecords} entries"
             >
                 <template #header>
                     <div class="flex items-center justify-between gap-4 w-full flex-wrap">

@@ -4,6 +4,7 @@ import api from '@/service/api';
 import { FilterMatchMode } from '@primevue/core/api';
 import { useToast } from 'primevue/usetoast';
 import { useMenuStore } from '@/store/menu';
+import LoadingPage from '@/components/LoadingPage.vue';
 
 const menuStore = useMenuStore();
 const canUpdate = computed(() => menuStore.canWrite('CTC Collection'));
@@ -48,17 +49,21 @@ const statusTabs = [
 watch(activeTabIndex, () => {
     const tab = statusTabs[activeTabIndex.value];
     if (tab.submitLabel === 'COMPLETED') {
-        selectedExportIds.value.clear();
-        listData.value = [];
-        return;
+        // Set default date range: last 7 days until today
+        const today = new Date();
+        const lastWeek = new Date();
+        lastWeek.setDate(today.getDate() - 7);
+        dateRange.value = [lastWeek, today];
+    }else{
+        dateRange.value = null;
     }
-    fetchData();
     selectedExportIds.value.clear();
+    fetchData();
 });
 
 const allSelected = computed(() => {
   return listData.value.length > 0 &&
-         listData.value.every(item => selectedExportIds.value.has(item.id));
+         listData.value.every(item => selectedExportIds.value.has(item.claimID));
 });
 
 const handleToggleExport = (id) => {
@@ -74,12 +79,12 @@ const toggleSelectAll = () => {
   if (allSelected.value) {
     // Unselect all for this tab
     listData.value.forEach(item => {
-      selectedExportIds.value.delete(item.id);
+      selectedExportIds.value.delete(item.claimID);
     });
   } else {
     // Select all for this tab
     listData.value.forEach(item => {
-      selectedExportIds.value.add(item.id);
+      selectedExportIds.value.add(item.claimID);
     });
   }
 };
@@ -628,13 +633,15 @@ onMounted(async () => {
                 :value="listData"
                 :paginator="true"
                 :rows="10"
-                :rowsPerPageOptions="[5, 10, 20]"
+                :rowsPerPageOptions="[5, 10, 20, 50, 100]"
                 dataKey="id"
                 :rowHover="true"
                 :loading="loading"
                 :filters="filters"
                 filterDisplay="menu"
                 :globalFilterFields="['claimRefno', 'created', 'city', 'collectDate', 'collectTime', 'status']"
+                paginatorTemplate="CurrentPageReport FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink RowsPerPageDropdown"
+                currentPageReportTemplate="Showing {first} to {last} of {totalRecords} entries"
             >
                 <template #header>
                     <div class="flex items-center justify-between gap-4 w-full flex-wrap">
