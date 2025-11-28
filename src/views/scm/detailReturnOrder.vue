@@ -130,28 +130,37 @@
                                 </tr>
                                 <tr>
                                     <td class="px-4 py-2 font-medium">SAP Created</td>
-                                    <td class="px-4 py-2 text-right">{{ formatDate(returnList.sap_timestamp) }}</td>
+                                    <td class="px-4 py-2 text-right">{{ formatDateTime(returnList.sap_timestamp) }}</td>
                                 </tr>
                                 <tr class="border-b">
                                     <td class="px-4 py-2 font-medium">Pickup Date</td>
                                     <td class="px-4 py-2 text-right">{{ returnList.delivery_information?.pickup_datetime ? formatDate(returnList.delivery_information?.pickup_datetime) : 'No date assigned' }}</td>
                                 </tr>
                                 <tr class="border-b">
-                                    <td class="px-4 py-2 font-medium">Delivery Date</td>
+                                    <td class="px-4 py-2 font-medium">Recieve Date</td>
                                     <td class="px-4 py-2 text-right">{{ returnList.delivery_information?.receive_datetime ? formatDate(returnList.delivery_information?.receive_datetime) : 'No date assigned' }}</td>
                                 </tr>
                             </tbody>
                         </table>
-                    </div>
-                    <!-- <div v-if="!loading && returnList && !returnList.delivery_information?.pickup_datetime && !returnList.delivery_information?.receive_datetime" class="flex justify-end mt-3">
+                        <div v-if="(returnList.delivery_status == 'NEW') && canUpdate" class="flex justify-end mt-3">
+                        <Button 
+                        style="width: auto !important"
+                            label="Update Pickup Date" 
+                            icon="pi pi-calendar"
+                            class="p-button-warning p-button-sm"
+                            @click="openDialog = true"
+                        />
+                        </div>
+                        <div v-if="(returnList.delivery_status == 'PENDING') && canUpdate" class="flex justify-end mt-3">
                         <Button  
                             style="width: auto !important"
-                            label="Update Date"
+                            label="Update Recieve Date"
                             icon="pi pi-calendar"
                             class="p-button-sm p-button-warning"
-                            @click="updateDialog = true"
+                            @click="openDialog2  = true"
                         />
-                    </div> -->
+                        </div>
+                    </div>
                 </div>
                 <div class="card flex flex-col w-full">
                     <div class="flex items-center justify-between border-b pb-3 mb-4">
@@ -185,10 +194,10 @@
                                     <td class="px-4 py-2 font-medium">SO No</td>
                                     <td class="px-4 py-2 text-right">{{ returnList.order_data.so_no || '-' }}</td>
                                 </tr>
-                                <tr class="border-b">
+                                <!-- <tr class="border-b">
                                     <td class="px-4 py-2 font-medium">Subtotal</td>
                                     <td class="px-4 py-2 text-right">{{` RM ${returnList.order_data.subtotal || '-'} `}}</td>
-                                </tr>
+                                </tr> -->
                             </tbody>
                         </table>
                     </div>
@@ -197,31 +206,48 @@
         </div>
     </Fluid>
     <Dialog
-        header="Update Return Date Details"
-        v-model:visible="updateDialog"
-        modal
-        :style="{ width: '500px' }"
+      header="Update Pickup Date"
+      v-model:visible="openDialog"
+      modal
+      :style="{ width: '400px' }"
     >
-        <input type="hidden" v-model="form.returnID" />
-        <div class="flex flex-col gap-4">
-            <Calendar
-                v-model="form.scheduleDate"
-                dateFormat="yy-mm-dd"
-                placeholder="Select Schedule Date"
-            />
+      <div class="flex flex-col gap-3">
+        <!-- Schedule Date -->
+        <Calendar
+          v-model="form.pickupdate"
+          dateFormat="yy-mm-dd"
+          placeholder="Select Pickup Date"
+          :minDate="new Date()"
+        />
 
-            <Calendar
-                v-model="form.deliveryDatetime"
-                showTime
-                hourFormat="24"
-                placeholder="Select Delivery Datetime"
-            />
-
-            <div class="flex justify-end gap-2 mt-4">
-                <Button label="Cancel" class="p-button-text" @click="updateDialog = false" />
-                <Button label="Save" class="p-button-success" :loading="loadingUpdate" @click="saveReturnUpdate" />
-            </div>
+        <!-- Actions -->
+        <div class="flex justify-end gap-2 mt-3">
+          <Button label="Cancel" class="p-button-text" @click="openDialog = false" />
+          <Button label="Save" class="p-button-success" :loading="loadingUpdate" @click="savePickup" />
         </div>
+      </div>
+    </Dialog>
+
+    <Dialog
+      header="Update Recieve Date"
+      v-model:visible="openDialog2"
+      modal
+      :style="{ width: '400px' }"
+    >
+      <div class="flex flex-col gap-3">
+
+        <Calendar
+          v-model="form2.receivedate"
+          dateFormat="yy-mm-dd"
+          placeholder="Select Recieve Date"
+          :maxDate="new Date()"
+        />
+
+        <div class="flex justify-end gap-2 mt-3">
+          <Button label="Cancel" class="p-button-text" @click="openDialog2 = false" />
+          <Button label="Save" class="p-button-success" :loading="loadingUpdate2" @click="saveRecieve" />
+        </div>
+      </div>
     </Dialog>
 </template>
 
@@ -231,6 +257,15 @@ import Button from 'primevue/button';
 import { useToast } from 'primevue/usetoast';
 import { onMounted, ref, computed } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
+import { useMenuStore } from '@/store/menu';
+
+const menuStore = useMenuStore();
+const canUpdate = computed(() => menuStore.canWrite('Return Order Collection'));
+const denyAccess = computed(() => menuStore.canTest('Return Order Collection'));
+const openDialog = ref(false);
+const openDialog2 = ref(false);
+const loadingUpdate = ref(false);
+const loadingUpdate2 = ref(false);
 
 defineProps({
   id: {
@@ -253,7 +288,7 @@ const returnList = ref({
   order_data: {},
 });
 const loading = ref(true);
-function formatDate(dateString) {
+function formatDateTime(dateString) {
   if (!dateString) return '';
   const date = new Date(dateString);
   return date.toLocaleString('en-MY', {
@@ -265,64 +300,92 @@ function formatDate(dateString) {
     second: '2-digit',
     hour12: true
   });
-  }
+}
+function formatDate(dateString) {
+  if (!dateString) return '';
+  const date = new Date(dateString);
+  return date.toLocaleString('en-MY', {
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+  });
+}
 
-const updateDialog = ref(false);
-const loadingUpdate = ref(false);
 
+// Form
 const form = ref({
-    returnID: 0,
-    scheduleDate: '',
-    deliveryDatetime: ''
+  returnorderno: null, 
+  pickupdate: null,      
+//   scheduleTime: null      
 });
 
-const saveReturnUpdate = async () => {
-    if (!form.value.scheduleDate && !form.value.deliveryDatetime) {
-        toast.add({ severity: 'warn', summary: 'Warning', detail: 'Please select a date', life: 3000 });
-        return;
+const form2 = ref({
+  returnorderno: null, 
+  receivedate: null,      
+//   deliverytime: null      
+});
+
+// Save function
+const savePickup = async () => {
+  if (!form.value.pickupdate) {
+    toast.add({ severity: 'warn', summary: 'Warning', detail: 'Please select date', life: 3000 });
+    return;
+  }
+
+
+  try {
+    const payload = {
+      returnorderno: form.value.returnorderno,
+      pickupdate: formatDateApi(form.value.pickupdate),
+    //   scheduletime: formatTimeApi(form.value.scheduleTime)
+    };
+    const res = await api.post('update-pickup-return-order', payload);
+    if (res.data?.status === 1) {
+        toast.add({ severity: 'success', summary: 'Updated', detail: 'Pickup date updated successfully', life: 3000 });
+        InitfetchData(); // refresh table
+    } else {
+        toast.add({ severity: 'error', summary: 'Error', detail: res.data?.error || 'Failed', life: 3000 });
     }
-    loadingUpdate.value = true;
-
-    try {
-        const payload = new FormData();
-        payload.append('returnID', form.value.returnID);
-        payload.append('scheduleDate', formatDateSubmit(form.value.scheduleDate));
-        payload.append('deliveryDatetime', formatDatetimeSubmit(form.value.deliveryDatetime));
-
-        const res = await api.post('return/updateReturn', payload);
-
-        if (res.data?.status === 1) {
-            toast.add({ severity: 'success', summary: 'Updated', detail: 'Return Details updated successfully', life: 3000 });
-            updateDialog.value = false;
-            // optionally reload details
-            await InitfetchData();
-        } else {
-            toast.add({ severity: 'error', summary: 'Error', detail: res.data?.message || 'Failed', life: 3000 });
-        }
     } catch (err) {
-        console.error(err);
-        toast.add({ severity: 'error', summary: 'Error', detail: 'API error', life: 3000 });
-    } finally {
-        loadingUpdate.value = false;
+    console.error(err);
+    toast.add({ severity: 'error', summary: 'Error', detail: 'API error', life: 3000 });
+    }finally{
+        openDialog.value = false;
     }
 };
-const formatDateSubmit = (date) => {
-  if (!date) return '';
-  const y = date.getFullYear();
-  const m = String(date.getMonth() + 1).padStart(2, '0'); // month is 0-based
-  const d = String(date.getDate()).padStart(2, '0');
-  return `${y}-${m}-${d}`;
-};
 
-const formatDatetimeSubmit = (date) => {
-  if (!date) return '';
-  const y = date.getFullYear();
-  const m = String(date.getMonth() + 1).padStart(2, '0');
-  const d = String(date.getDate()).padStart(2, '0');
-  const h = String(date.getHours()).padStart(2, '0');
-  const min = String(date.getMinutes()).padStart(2, '0');
-  const s = String(date.getSeconds()).padStart(2, '0');
-  return `${y}-${m}-${d} ${h}:${min}:${s}`;
+// Save function
+const saveRecieve = async () => {
+  if (!form2.value.receivedate) {
+    toast.add({ severity: 'warn', summary: 'Warning', detail: 'Please select date', life: 3000 });
+    return;
+  }
+
+  try {
+    const payload = {
+      returnorderno: form2.value.returnorderno,
+      receivedate: formatDateApi(form2.value.receivedate),
+    //   deliveredtime: formatTimeApi(form2.value.deliverytime)
+    };
+    const res = await api.post('update-delivered-order', payload);
+    if (res.data?.status === 1) {
+        toast.add({ severity: 'success', summary: 'Updated', detail: 'Recieve date updated successfully', life: 3000 });
+        InitfetchData(); // refresh table
+    } else {
+        toast.add({ severity: 'error', summary: 'Error', detail: res.data?.error || 'Failed', life: 3000 });
+    }
+    } catch (err) {
+    console.error(err);
+    toast.add({ severity: 'error', summary: 'Error', detail: 'API error', life: 3000 });
+    }finally{
+        openDialog2.value = false;
+    }
+
+};
+// Helpers
+const formatDateApi = (date) => {
+  const d = new Date(date);
+  return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
 };
 const InitfetchData = async () => {
     try {
@@ -332,7 +395,8 @@ const InitfetchData = async () => {
         if ( (response.data.admin_data)) {
             // response.data.status === 1 &&
             returnList.value = response.data.admin_data[0];
-            form.value.returnID =returnList.value.id;
+            form.value.returnorderno =returnList.value.return_orderNo_ref;
+            form2.value.returnorderno =returnList.value.return_orderNo_ref;
         } else {
             console.error('API returned error or invalid data:', response.data);
             toast.add({ severity: 'error', summary: 'Error', detail: 'Failed to load data', life: 3000 });

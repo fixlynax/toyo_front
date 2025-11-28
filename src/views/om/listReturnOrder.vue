@@ -141,7 +141,7 @@ onBeforeMount(() => {
                 :value="listData"
                 :paginator="true"
                 :rows="10"
-                :rowsPerPageOptions="[5, 10, 20]"
+                :rowsPerPageOptions="[10, 25, 50, 100]"
                 dataKey="id"
                 :rowHover="true"
                 :filters="filters"
@@ -150,6 +150,8 @@ onBeforeMount(() => {
                 :sortOrder="-1"
                 :globalFilterFields="['returnRequestNo', 'custAccountNo', 'customerName', 'reasonCode', 'orderStatus']"
                 class="rounded-table"
+                currentPageReportTemplate="Showing {first} to {last} of {totalRecords} entries"
+                paginatorTemplate="CurrentPageReport FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink RowsPerPageDropdown"
             >
                 <!-- Header -->
                 <template #header>
@@ -171,14 +173,14 @@ onBeforeMount(() => {
                 </template>
 
                 <!-- Created Date Column -->
-                <Column field="createdDate" header="Created Date" style="min-width: 8rem">
+                <Column header="Created Date" style="min-width: 8rem">
                     <template #body="{ data }">
                         {{ formatDate(data.createdDate) }}
                     </template>
                 </Column>
 
                 <!-- Return Request No Column -->
-                <Column field="returnRequestNo" header="Return Req No." style="min-width: 8rem">
+                <Column header="Return Req No." style="min-width: 8rem">
                     <template #body="{ data }">
                         <RouterLink :to="`/om/detailReturnOrder/${data.returnRequestNo}`" class="hover:underline font-bold text-primary-400">
                             {{ data.returnRequestNo }}
@@ -187,28 +189,19 @@ onBeforeMount(() => {
                 </Column>
 
                 <!-- Account No Column -->
-                <Column field="custAccountNo" header="Customer Acc No." style="min-width: 8rem">
-                    <template #body="{ data }">
-                        {{ data.custAccountNo }}
-                    </template>
-                </Column>
-
-                <!-- Customer Name Column -->
-                <Column field="customerName" header="Customer Name" style="min-width: 8rem">
-                    <template #body="{ data }">
-                        {{ data.customerName }}
-                    </template>
-                </Column>
+                <Column header="Customer Name" style="min-width: 10rem">
+                <template #body="{ data }">{{ data.customerName || '-' }}<br />{{ data.custAccountNo || '-' }}</template>
+            </Column>
 
                 <!-- Reason Code Column -->
-                <Column field="reasonCode" header="Reason Code" style="min-width: 8rem">
+                <Column header="Reason Code" style="min-width: 8rem">
                     <template #body="{ data }">
                         {{ data.reasonCode || '-' }}
                     </template>
                 </Column>
 
                 <!-- Reason Message Column -->
-                <Column field="reasonMessage" header="Reason Message" style="min-width: 10rem">
+                <Column header="Reason Message" style="min-width: 10rem">
                     <template #body="{ data }">
                         {{ data.reasonMessage || '-' }}
                     </template>

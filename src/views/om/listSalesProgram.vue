@@ -36,7 +36,8 @@ onBeforeMount(async () => {
                 startDate: sales.startDate,
                 endDate: sales.endDate,
                 freeQuota: sales.freeQuota || '-',
-                status: sales.status
+                status: sales.status,
+                created: sales.created
             }));
 
             console.log('Transformed data:', listData.value);
@@ -59,7 +60,22 @@ onBeforeMount(async () => {
         <!-- 🟢 Use LoadingPage for initial load, hide everything else -->
         <LoadingPage v-if="loading" :message="'Loading your Sales Progtame...'" :sub-message="'Fetching your Sales Progtame'" />
 
-        <DataTable v-else :value="listData" :paginator="true" :rows="10" dataKey="programId" :rowHover="true" :filters="filters1" filterDisplay="menu " class="rounded-table">
+        <DataTable
+            v-else
+            :value="listData"
+            :paginator="true"
+            :rows="10"
+            dataKey="programId"
+            :rowHover="true"
+            :filters="filters1"
+            filterDisplay="menu "
+            class="rounded-table"
+            :rowsPerPageOptions="[10, 25, 50, 100]"
+            sortField="created"
+            :sortOrder="-1"
+            currentPageReportTemplate="Showing {first} to {last} of {totalRecords} entries"
+            paginatorTemplate="CurrentPageReport FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink RowsPerPageDropdown"
+        >
             <!-- Header -->
             <template #header>
                 <div class="flex items-center justify-between gap-4 w-full flex-wrap">
@@ -76,7 +92,7 @@ onBeforeMount(async () => {
 
                     <!-- Create Button -->
                     <RouterLink to="/om/createSalesProgram">
-                        <Button type="button" label="Add New" icon="pi pi-plus" class="p-button" />
+                        <Button type="button" label="Create" icon="pi pi-plus" class="p-button" />
                     </RouterLink>
                 </div>
             </template>
@@ -94,6 +110,8 @@ onBeforeMount(async () => {
 
             <!-- Program Name -->
             <Column field="title" header="Program Name" style="min-width: 12rem" />
+
+            <Column field="created" header="Created Data" style="min-width: 12rem" hidden/>
 
             <!-- Period -->
             <Column header="Period" style="min-width: 12rem">

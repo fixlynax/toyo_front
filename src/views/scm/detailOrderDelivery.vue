@@ -52,10 +52,14 @@
                 <div class="card flex flex-col w-full bg-white shadow-sm rounded-2xl border border-gray-100">
                     <!-- Header -->
                     <div class="font-semibold text-xl border-b pb-2 mt-2">Order Item</div>
-                    <div class="grid grid-cols-1 gap-4 mt-4">
+                    <div class="grid grid-cols-2 gap-4 mt-4">
                         <div>
                             <span class="text-sm text-gray-500">Order Type</span>
                             <p class="text-lg font-semibold">{{ orderDelList.orderDesc || '-' }}</p>
+                        </div>
+                        <div>
+                            <span class="text-sm text-gray-500">Order Remarks</span>
+                            <p class="text-lg font-semibold">{{ orderDelList.order_remarks || '-' }}</p>
                         </div>
                     </div>
                     <div class="grid grid-cols-2 gap-4 mt-4">
@@ -95,7 +99,7 @@
 
                         <Column field="qty" header="Quantity" class="text-right">
                             <template #body="{ data }">
-                                {{ data.qty }}
+                                {{ parseFloat(data.qty) }}
                             </template>
                         </Column>
                     </DataTable>
@@ -440,10 +444,6 @@ const formatDateApi = (date) => {
   return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
 };
 
-const formatTimeApi = (date) => {
-  const d = new Date(date);
-  return `${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`;
-};
 
 const InitfetchData = async () => {
     try {

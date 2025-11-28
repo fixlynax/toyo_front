@@ -4,9 +4,23 @@
 
         <LoadingPage v-if="loading" message="Loading Order Delivery Details..." />
         <div v-else>
-            <TabMenu :model="statusTabs" v-model:activeIndex="activeTabIndex" class="mb-6" />
+            <TabMenu :model="statusTabs" v-model:activeIndex="activeTabIndex" class="mb-4" />
+            <div class="flex items-center gap-3 mb-4 ml-4">
+                <!-- LEFT SIDE -->
+
+                    <Calendar
+                        v-model="dateRange"
+                        selectionMode="range"
+                        dateFormat="dd/mm/yy"
+                        placeholder="Select date range"
+                        style="width: 390px;"
+                    />
+                    <Button label="Clear" class="p-button-sm p-button-danger" @click="clearDate" />
+                    <Button label="Filter" class="p-button-sm" @click="applyFilter" />
+
+            </div>
             <DataTable
-                :value="filteredList"
+                :value="orderDelList"
                 :paginator="true"
                 :rows="10"
                 :rowsPerPageOptions="[5, 10, 20]"
@@ -15,7 +29,7 @@
                 :loading="loading"
                 :filters="filters"
                 filterDisplay="menu"
-                :globalFilterFields="['do_no', 'eten_user.custAccountNo', 'storagelocation' ,  'eten_user.companyName1', 'eten_user.companyName2', 'eten_user.companyName3', 'eten_user.companyName4', 'eten_user.city', 'eten_user.state', 'deliveryDate', 'orderstatus']"
+                :globalFilterFields="['do_no', 'eten_user.custAccountNo', 'storagelocation' ,  'eten_user.companyName1', 'eten_user.companyName2', 'eten_user.companyName3', 'eten_user.companyName4', 'eten_user.city', 'eten_user.state', 'deliveryDate',, 'scm_deliver_detail.scheduled_delivery_time', 'scm_deliver_detail.delivered_datetime', 'orderstatus']"
             >
                 <template #header>
                     <div class="flex items-center justify-between gap-4 w-full flex-wrap">
@@ -26,8 +40,6 @@
                                 </InputIcon>
                                 <InputText v-model="filters['global'].value" placeholder="Quick Search" class="w-full" />
                             </IconField>
-                            <Button type="button" icon="pi pi-cog" @click="sortMenu.toggle($event)" />
-                            <Menu ref="sortMenu" :model="sortItems" :popup="true" />
                         </div>
 
                         <div class="flex justify-end gap-2"  v-if="statusTabs[activeTabIndex]?.label === 'Pending' && canUpdate">
@@ -57,11 +69,11 @@
 
                 <template #empty> No Order Delivery found. </template>
                 <template #loading> Loading Order Delivery data. Please wait. </template>
-                <Column v-if="canUpdate" header="Export All" style="min-width: 8rem">
+                <Column v-if="statusTabs[activeTabIndex]?.label !== 'Completed' && canUpdate" header="Export All" style="min-width: 8rem" >
                     <template #header>
                         <div class="flex justify-center">
                         <Checkbox
-                            :key="filteredList.length" 
+                            :key="orderDelList.length" 
                             :binary="true"
                             :model-value="allSelected"  
                             @change="() => toggleSelectAll()"  
@@ -79,20 +91,20 @@
                         </div>
                     </template>
                 </Column>
-                <Column field="created" header="Create Date" style="min-width: 8rem">
+                <Column field="created" header="Create Date" style="min-width: 8rem" sortable>
                     <template #body="{ data }">
                         {{ formatDate(data.created) }}
                     </template>
                 </Column>
 
-                <Column field="do_no" header="SAP DO No" style="min-width: 8rem">
+                <Column field="do_no" header="SAP DO No" style="min-width: 8rem" sortable>
                     <template #body="{ data }">
                         <RouterLink :to="`/scm/detailOrderDelivery/${data.id}`" class="hover:underline font-bold text-primary">
                             {{ data.do_no ? data.do_no : '-' }}
                         </RouterLink>
                     </template>
                 </Column>
-                <Column field="companyName1" header="Customer Name" style="min-width: 12rem">
+                <Column field="eten_user.companyName1" header="Customer Name" style="min-width: 12rem" sortable>
                     <template #body="{ data }">
                         <span class="font-bold">{{` ${data.eten_user.companyName1} ${data.eten_user.companyName2} ${data.eten_user.companyName3} ${data.eten_user.companyName4} ` }}</span>
                     <br>
@@ -100,49 +112,49 @@
                     </template>
                 </Column>
 
-                <Column field="storagelocation" header="Storage Location" style="min-width: 12rem">
+                <Column field="storagelocation" header="Storage Location" style="min-width: 12rem" sortable>
                     <template #body="{ data }">
                          {{`${data.storagelocation}` }}
                     </template>
                 </Column>
 
-                <Column field="city" header="City" style="min-width: 12rem">
+                <Column field="eten_user.city" header="City" style="min-width: 12rem" sortable>
                     <template #body="{ data }">
-                         {{`${data.eten_user.city}` }}
+                         {{ data.eten_user.city?.replace(/,$/, '') }}
                     </template>
                 </Column>
-                <Column field="state" header="State" style="min-width: 12rem">
+                <Column field="eten_user.state" header="State" style="min-width: 12rem" sortable>
                     <template #body="{ data }">
                          {{`${data.eten_user.state}` }}
                     </template>
                 </Column>
 
-                <Column field="orderDesc" header="Order Type" style="min-width: 10rem">
+                <Column field="orderDesc" header="Order Type" style="min-width: 10rem" sortable>
                     <template #body="{ data }">
                         {{ data.orderDesc }}
                     </template>
                 </Column>
 
 
-                <Column field="deliveryDate" header="ETA Date" style="min-width: 10rem">
+                <Column field="deliveryDate" header="ETA Date" style="min-width: 10rem" sortable>
                     <template #body="{ data }">
                         {{ data.deliveryDate ? formatDate(data.deliveryDate) : 'Not Assigned' }}
                     </template>
                 </Column>
 
-                <Column field="scheduled_delivery_time" header="Planend Date" style="min-width: 10rem">
+                <Column field="scm_deliver_detail.scheduled_delivery_time" header="Planned Date" style="min-width: 10rem" sortable>
                     <template #body="{ data }">
                         {{ data.scm_deliver_detail?.scheduled_delivery_time ? formatDate(data.scm_deliver_detail.scheduled_delivery_time) : 'Not Assigned' }}
                     </template>
                 </Column>
 
-                <Column field="collectedDatetime" header="Delivered Date" style="min-width: 10rem">
+                <Column field="scm_deliver_detail.delivered_datetime" header="Delivered Date" style="min-width: 10rem" sortable>
                     <template #body="{ data }">
                           {{ data.scm_deliver_detail?.delivered_datetime? formatDate(data.scm_deliver_detail.delivered_datetime): 'Not Assigned' }}
                     </template>
                 </Column>
 
-                <Column field="orderstatus" header="Status" style="min-width: 8rem">
+                <Column field="status" header="Status" style="min-width: 8rem">
                     <template #body="{ data }">
                         <Tag :value="getStatusLabel2(data.status)" :severity="getStatusSeverity2(data.status)" />
                     </template>
@@ -173,53 +185,45 @@ const importInput1 = ref();
 const importInput2 = ref();
 
 // Data variables
-const sortMenu = ref();
 const activeTabIndex = ref(0);
 const selectedExportIds = ref(new Set());
 
 const loading = ref(true);
 const orderDelList = ref([]);
-const filteredList  = ref([]);
+const dateRange = ref(null);
+
+const formatDateDMY = (date) => {
+  const d = new Date(date);
+  const day = String(d.getDate()).padStart(2, "0");
+  const month = String(d.getMonth() + 1).padStart(2, "0");
+  const year = d.getFullYear();
+  return `${day}/${month}/${year}`;
+};
 const filters = ref({
     global: { value: null, matchMode: FilterMatchMode.CONTAINS }
 });
 
-        // 0: 'Pending',
-        // 1: 'Completed',
-        // 66: 'Processing',
-        // 77: 'Delivery'
-
 const statusTabs = [
-    { label: 'Pending', status: 0 },
-    { label: 'Delivery', status: 1 },
-    { label: 'Completed', status: 2}
+    { label: 'Pending',submitLabel: 'PENDING' },
+    { label: 'Delivery', submitLabel: 'DELIVERY' },
+    { label: 'Completed', submitLabel: 'COMPLETED'}
 ];
 
 watch(activeTabIndex, () => {
-    filterByTab();
-    selectedExportIds.value.clear();
-});
-const getOrderStatus = (data) => {
-    const detail = data.scm_deliver_detail;
-
-    if (!detail) return 0;                     // Pending / New
-    if (detail.delivered_datetime) return 2;    // Completed
-    if (detail.scheduled_delivery_time) return 1; // Delivery
-    return 0; // fallback to Pending
-};
-
-const filterByTab = () => {
-    const selected = statusTabs[activeTabIndex.value];
-    if (!selected) {
-        filteredList.value = orderDelList.value;
+    const tab = statusTabs[activeTabIndex.value];
+    if (tab.submitLabel === 'COMPLETED') {
+        selectedExportIds.value.clear();
+        orderDelList.value = [];
         return;
     }
-    filteredList.value = orderDelList.value.filter(item => getOrderStatus(item) === selected.status);
-};
+    fetchData();
+    selectedExportIds.value.clear();
+});
+
 // Computed boolean: are all rows selected?
 const allSelected = computed(() => {
-  return filteredList.value.length > 0 &&
-         filteredList.value.every(item => selectedExportIds.value.has(item.id));
+  return orderDelList.value.length > 0 &&
+         orderDelList.value.every(item => selectedExportIds.value.has(item.id));
 });
 
 const handleToggleExport = (id) => {
@@ -235,54 +239,17 @@ const handleToggleExport = (id) => {
 const toggleSelectAll = () => {
   if (allSelected.value) {
     // Unselect all for this tab
-    filteredList.value.forEach(item => {
+    orderDelList.value.forEach(item => {
       selectedExportIds.value.delete(item.id);
     });
   } else {
     // Select all for this tab
-    filteredList.value.forEach(item => {
+    orderDelList.value.forEach(item => {
       selectedExportIds.value.add(item.id);
     });
   }
 };
 
-const sortBy = (field, order) => {
-  filteredList.value = [...filteredList.value].sort((a, b) => {
-    // Helper to get nested value
-    const getField = (obj) => {
-      return field.split('.').reduce((acc, key) => (acc ? acc[key] : ''), obj) ?? '';
-    };
-
-    const aVal = getField(a).toString().toLowerCase();
-    const bVal = getField(b).toString().toLowerCase();
-
-    if (aVal < bVal) return order === 'asc' ? -1 : 1;
-    if (aVal > bVal) return order === 'asc' ? 1 : -1;
-    return 0;
-  });
-};
-const sortItems = ref([
-    {
-        label: 'Sort by SAP DO No (A-Z)',
-        icon: 'pi pi-sort-alpha-down',
-        command: () => sortBy('do_no', 'asc')
-    },
-    {
-        label: 'Sort by SAP DO No (Z-A)',
-        icon: 'pi pi-sort-alpha-up',
-        command: () => sortBy('do_no', 'desc')
-    },
-    {
-        label: 'Sort by Cust Acc No (A-Z)',
-        icon: 'pi pi-tag',
-        command: () => sortBy('eten_user.custAccountNo', 'asc')
-    },
-    {
-        label: 'Sort by Company Name',
-        icon: 'pi pi-globe',
-        command: () => sortBy('eten_user.companyName1', 'asc')
-    }
-]);
 
 onMounted(async () => {
     fetchData();
@@ -503,26 +470,52 @@ const handleImport2 = async (event) => {
             }
     }
 };
-const fetchData = async () => {
+const applyFilter = () => {
+    const tab = statusTabs[activeTabIndex.value];
+    if (tab.submitLabel === 'COMPLETED') {
+
+    // Must have BOTH start & end date
+    if (!dateRange.value?.[0] || !dateRange.value?.[1]) {
+      // Show message (toast, alert, etc.)
+      toast.add({
+        severity: 'warn',
+        summary: 'Date Range Required',
+        detail: 'Please select a full date range for Completed records.',
+        life: 3000
+      });
+      return; // STOP here, do NOT call API
+    }
+  }
+  const dateRangeStr = dateRange.value?.[0] && dateRange.value?.[1]? `${formatDateDMY(dateRange.value[0])} - ${formatDateDMY(dateRange.value[1])}`: null// returns "dd/mm/yyyy - dd/mm/yyyy" or null
+  const body = {
+    tab: tab.submitLabel,
+    date_range: dateRangeStr
+  };
+
+  fetchData(body);
+};
+const clearDate = () => {
+  dateRange.value = null; // or []
+};
+const fetchData = async (body = null) => {
     try {
         loading.value = true;
-        const response = await api.get('order-delivery/list');
-        console.log('API Response:', response.data);
+        const payload = body || {
+        tab: statusTabs[activeTabIndex.value].submitLabel
+        };
+        const response = await api.postExtra('order-delivery/list',payload);
         if (response.data.status === 1 && Array.isArray(response.data.admin_data)) {
                     orderDelList.value = response.data.admin_data.sort((a, b) => {
                 return new Date(b.created) - new Date(a.created);
             });
-            filterByTab();
         } else {
             console.error('API returned error or invalid data:', response.data);
             orderDelList.value = [];
-            filteredList.value = [];
             toast.add({ severity: 'error', summary: 'Error', detail: 'Failed to load data', life: 3000 });
         }
     } catch (error) {
         console.error('Error fetching product list:', error);
         orderDelList.value = [];
-        filteredList.value = [];
         toast.add({ severity: 'error', summary: 'Error', detail: 'Failed to load data', life: 3000 });
     } finally {
         loading.value = false;
@@ -543,7 +536,7 @@ function getStatusLabel(status) {
 
 function getStatusSeverity(status) {
     const map = {
-        0: 'warn',
+        0: 'warning',
         1: 'success',
         66: 'info',
         77: 'primary'
@@ -561,7 +554,7 @@ const getStatusLabel2 = (status) => {
 const getStatusSeverity2 = (status) => {
     const severityMap = {
         "NEW": 'info',
-        "PENDING": 'warn',
+        "PENDING": 'warning',
         "COMPLETED": 'success',
     };
     return severityMap[status] || 'secondary';
