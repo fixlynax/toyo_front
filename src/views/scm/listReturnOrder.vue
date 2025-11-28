@@ -3,7 +3,7 @@
         <div class="text-2xl font-bold text-gray-800 border-b pb-2">List Return Order</div>
         <LoadingPage v-if="loading" message="Loading Return Order Details..." />
         <div v-else>
-            <TabMenu :model="statusTabs" v-model:activeIndex="activeTabIndex" class="mb-4" />
+            <TabMenu  :model="statusTabs" v-model:activeIndex="activeTabIndex" class="mb-4" />
                 <div class="flex items-center gap-3 mb-4 ml-4">
                     <!-- LEFT SIDE -->
 
@@ -22,13 +22,16 @@
                 :value="returnList"
                 :paginator="true"
                 :rows="10"
-                :rowsPerPageOptions="[5, 10, 20]"
+                :rowsPerPageOptions="[5, 10, 20, 50, 100]"
                 dataKey="materialid"
                 :rowHover="true"
                 :loading="loading"
                 :filters="filters"
                 filterDisplay="menu"
-                :globalFilterFields="['return_orderNo_ref', 'custAccountNo' , 'storageLocation' , 'city', 'dealerName' , 'delivery_status' , 'created']">
+                :globalFilterFields="['return_orderNo_ref', 'custAccountNo' , 'storageLocation' , 'city', 'dealerName' , 'delivery_status' , 'created']"
+                paginatorTemplate="CurrentPageReport FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink RowsPerPageDropdown"
+                currentPageReportTemplate="Showing {first} to {last} of {totalRecords} entries"
+                >
                 <template #header>
                     <div class="flex flex-col gap-4 w-full">
                         <!-- Search and Filters Row -->
@@ -108,14 +111,19 @@
                         {{ data?.custAccountNo ?? '-' }}
                     </template>
                 </Column>
-                <Column field="storageLocation" header="Storage Location" style="min-width: 10rem" sortable>
+                <Column field="storageLocation" header="Storage Location" style="max-width: 8rem" sortable>
                     <template #body="{ data }">
                         {{ data?.storageLocation ?? '-' }}
                     </template>
                 </Column>
-                <Column field="city" header="City" style="min-width: 10rem"sortable>
+                <Column field="city" header="City" style="max-width: 8rem"sortable>
                     <template #body="{ data }">
                         {{ data?.city ?? '-' }}
+                    </template>
+                </Column>
+                <Column field="state" header="State" style="max-width: 8rem"sortable>
+                    <template #body="{ data }">
+                        {{ data?.state ?? '-' }}
                     </template>
                 </Column>
                 <Column field="pickup_datetime" header="Pickup Date" style="min-width: 10rem" sortable>
@@ -128,7 +136,7 @@
                         {{ data.delivery_information?.receive_datetime ? formatDate(data.delivery_information.receive_datetime) : 'No date assigned' }}
                     </template>
                 </Column>
-                <Column field="return_order_array.length" header="Return Items" style="min-width: 12rem" sortable>
+                <Column field="return_order_array.length" header="Return Items" style="min-width: 8rem;text-align: center;" sortable>
                     <template #body="{ data }">
                             {{ data.return_order_array?.length || 0 }}
                     </template>
@@ -149,6 +157,7 @@ import { FilterMatchMode } from '@primevue/core/api';
 import api from '@/service/api';
 import { useToast } from 'primevue/usetoast';
 import { useMenuStore } from '@/store/menu';
+import LoadingPage from '@/components/LoadingPage.vue';
 
 const menuStore = useMenuStore();
 const canUpdate = computed(() => menuStore.canWrite('Return Order Collection'));
@@ -188,8 +197,15 @@ const statusTabs = [
 watch(activeTabIndex, () => {
     const tab = statusTabs[activeTabIndex.value];
     if (tab.submitLabel === 'COMPLETED') {
-        returnList.value = [];
-        return;
+        // Set default date range: last 7 days until today
+        const today = new Date();
+        const lastWeek = new Date();
+        lastWeek.setDate(today.getDate() - 7);
+
+        dateRange.value = [lastWeek, today];
+    }else{
+        dateRange.value = null;
+
     }
     fetchData();
 });
