@@ -38,6 +38,14 @@
                             <span class="text-sm text-gray-500">Channel</span>
                             <p class="text-lg font-medium">{{ orderDelList.eten_user?.channel || '-' }}</p>
                         </div>
+                        <div>
+                            <span class="text-sm text-gray-500">Storage Location</span>
+                            <p class="text-lg font-medium">{{ orderDelList.eten_user?.storageLocation || '-' }}</p>
+                        </div>
+                        <div>
+                            <span class="text-sm text-gray-500">City</span>
+                            <p class="text-lg font-medium">{{ orderDelList.eten_user?.city || '-' }}</p>
+                        </div>
                     </div>
                 </div>
 
@@ -53,6 +61,10 @@
                         <div>
                             <span class="text-sm text-gray-500">Contact No</span>
                             <p lass="text-lg font-medium">{{ orderDelList.driverInformation?.driverPhoneNumber ? orderDelList.driverInformation.driverPhoneNumber: 'Not Assigned' }}</p>
+                        </div>
+                        <div>
+                            <span class="text-sm text-gray-500">IC No</span>
+                            <p lass="text-lg font-medium">{{ orderDelList.driverInformation?.driverIC ? orderDelList.driverInformation.driverIC: 'Not Assigned' }}</p>
                         </div>
                         <div>
                             <span class="text-sm text-gray-500">Truck Plate</span>
@@ -73,8 +85,6 @@
                             <span class="text-sm text-gray-500">Order Remarks</span>
                             <p class="text-lg font-semibold">{{ orderDelList.order_remarks || '-' }}</p>
                         </div>
-                    </div>
-                    <div class="grid grid-cols-2 gap-4 mt-4">
                         <div>
                             <span class="text-sm text-gray-500">Ship To</span>
                             <p class="text-lg font-semibold">{{ orderDelList.shipto || '-' }}</p>

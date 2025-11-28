@@ -24,14 +24,16 @@
                 :value="orderDelList"
                 :paginator="true"
                 :rows="10"
-                :rowsPerPageOptions="[5, 10, 20]"
+                :rowsPerPageOptions="[10, 20, 50, 100]"
                 dataKey="id"
                 :rowHover="true"
                 :loading="loading"
                 :filters="filters"
                 filterDisplay="menu"
-                :globalFilterFields="['do_no', 'eten_user.custAccountNo', 'eten_user.companyName1', 'eten_user.companyName2', 'eten_user.companyName3', 'eten_user.companyName4', 'eten_user.storageLocation', 'deliveryType', 'orderstatus']"
-            >
+                :globalFilterFields="['do_no', 'eten_user.custAccountNo', 'eten_user.companyName1', 'eten_user.companyName2', 'eten_user.companyName3', 'eten_user.companyName4', 'eten_user.storageLocation', 'eten_user.city', 'eten_user.state', 'deliveryType', 'orderstatus']"
+                paginatorTemplate="CurrentPageReport FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink RowsPerPageDropdown"
+                currentPageReportTemplate="Showing {first} to {last} of {totalRecords} entries"
+                >
                 <template #header>
                     <div class="flex items-center justify-between gap-4 w-full flex-wrap">
                         <div class="flex items-center gap-2 w-full max-w-md">
@@ -70,9 +72,19 @@
                      {{ data.eten_user.custAccountNo }}
                     </template>
                 </Column>
-                <Column field="eten_user.storageLocation" header="Storage Location" style="min-width: 10rem" sortable>
+                <Column field="eten_user.storageLocation" header="Storage Location" style="min-width: 8rem" sortable>
                     <template #body="{ data }">
                         {{  data.eten_user.storageLocation ? data.eten_user.storageLocation : '-'  }}
+                    </template>
+                </Column>
+                <Column field="eten_user.city" header="City" style="min-width: 8rem" sortable>
+                    <template #body="{ data }">
+                        {{  data.eten_user.city?.replace(/,$/, '') }}
+                    </template>
+                </Column>
+                <Column field="eten_user.state" header="State" style="min-width: 8rem" sortable>
+                    <template #body="{ data }">
+                        {{  data.eten_user.state ? data.eten_user.state : '-'  }}
                     </template>
                 </Column>
                 <Column field="driverInformation.driverName" header="Collector" style="min-width: 12rem" sortable>
@@ -171,8 +183,14 @@ const statusTabs = [
 watch(activeTabIndex, () => {
     const tab = statusTabs[activeTabIndex.value];
     if (tab.submitLabel === 'COMPLETED') {
-        orderDelList.value = [];
-        return;
+        // Set default date range: last 7 days until today
+        const today = new Date();
+        const lastWeek = new Date();
+        lastWeek.setDate(today.getDate() - 7);
+
+        dateRange.value = [lastWeek, today];
+    }else{
+        dateRange.value = null;
     }
     fetchData();
 });

@@ -1,18 +1,21 @@
 <template>
     <div class="card">
         <div class="text-2xl font-bold text-gray-800 border-b pb-2 mb-3">List Logistic</div>
-
+        <LoadingPage v-if="loading" message="Loading 3PL Details..." />
+        <div v-else>
         <DataTable
             :value="logisticList"
             :paginator="true"
             :rows="10"
-            :rowsPerPageOptions="[5, 10, 20]"
+            :rowsPerPageOptions="[5, 10, 20, 50, 100]"
             dataKey="id"
             :rowHover="true"
             :loading="loading"
             :filters="filters"
             filterDisplay="menu"
             :globalFilterFields="['companyname', 'storageLocationList', 'contactperson', 'phoneno']"
+            paginatorTemplate="CurrentPageReport FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink RowsPerPageDropdown"
+                currentPageReportTemplate="Showing {first} to {last} of {totalRecords} entries"
         >
             <!-- ========================= -->
             <!-- Header Section -->
@@ -81,6 +84,7 @@
                 </template>
             </Column>
         </DataTable>
+        </div>
     </div>
 </template>
 
@@ -88,6 +92,8 @@
 import { onMounted, ref, computed, watch } from 'vue';
 import { FilterMatchMode } from '@primevue/core/api';
 import api from '@/service/api';
+import LoadingPage from '@/components/LoadingPage.vue';
+
 import { useToast } from 'primevue/usetoast';
 import { useMenuStore } from '@/store/menu';
 
