@@ -130,6 +130,7 @@ onMounted(async () => {
                     memberCode: shop.memberCode || 'Untitled',
                     custAccountNo: shop.custAccountNo,
                     companyName1: shop.companyName1,
+                    companyName2: shop.companyName2,
                     city: shop.city,
                     state: shop.state,
                     phoneNumber: shop.phoneNumber || '-',
