@@ -104,6 +104,10 @@
                                     <td class="px-4 py-2 text-right font-bold text-primary">{{ orderData.order_no || '-' }}</td>
                                 </tr>
                                 <tr class="border-b">
+                                    <td class="px-4 py-2 font-medium">Order Remark</td>
+                                    <td class="px-4 py-2 text-right font-bold text-primary">{{ orderData.order_remarks || '-' }}</td>
+                                </tr>
+                                <tr class="border-b">
                                     <td class="px-4 py-2 font-medium">SO No.</td>
                                     <td class="px-4 py-2 text-right font-medium">{{ orderData.so_no || '-' }}</td>
                                 </tr>
