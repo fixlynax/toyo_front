@@ -13,37 +13,37 @@
                     <div class="font-semibold text-xl border-b pb-2 mt-2">Customer Details</div>
                     <div class="grid grid-cols-2 gap-4">
                         <div>
-                            <span class="text-sm text-gray-500">Customer Name</span>
+                            <span class="text-sm font-bold text-black-700">Customer Name</span>
                             <p class="text-lg font-medium">{{ orderDelList.eten_user?.companyName1 || '-' }} {{ orderDelList.eten_user?.companyName2 }} {{ orderDelList.eten_user?.companyName3 }} {{ orderDelList.eten_user?.companyName4 }}</p>
                         </div>
                         <div>
-                            <span class="text-sm text-gray-500">Account Number</span>
+                            <span class="text-sm font-bold text-black-700">Account Number</span>
                             <p class="text-lg font-medium">{{ orderDelList.eten_user?.custAccountNo || '-' }}</p>
                         </div>
                         <div>
-                            <span class="text-sm text-gray-500">Member Code</span>
+                            <span class="text-sm font-bold text-black-700">Member Code</span>
                             <p class="text-lg font-medium">{{ orderDelList.eten_user?.memberCode || '-' }}</p>
                         </div>
                         <div>
-                            <span class="text-sm text-gray-500">Location</span>
+                            <span class="text-sm font-bold text-black-700">Location</span>
                             <p class="text-lg font-medium">
                                 {{ orderDelList.eten_user?.addressLine1 }} {{ orderDelList.eten_user?.addressLine2 }} {{ orderDelList.eten_user?.addressLine3 }} {{ orderDelList.eten_user?.addressLine4 }}, {{ orderDelList.eten_user?.postcode }} {{ orderDelList.eten_user?.city }} {{ orderDelList.eten_user?.state }} 
                             </p>
                         </div>
                         <div>
-                            <span class="text-sm text-gray-500">Contact Person</span>
+                            <span class="text-sm font-bold text-black-700">Contact Person</span>
                             <p class="text-lg font-medium">{{ orderDelList.eten_user?.phoneNumber || '-' }}</p>
                         </div>
                         <div>
-                            <span class="text-sm text-gray-500">Channel</span>
+                            <span class="text-sm font-bold text-black-700">Channel</span>
                             <p class="text-lg font-medium">{{ orderDelList.eten_user?.channel || '-' }}</p>
                         </div>
                         <div>
-                            <span class="text-sm text-gray-500">Storage Location</span>
+                            <span class="text-sm font-bold text-black-700">Storage Location</span>
                             <p class="text-lg font-medium">{{ orderDelList.eten_user?.storageLocation || '-' }}</p>
                         </div>
                         <div>
-                            <span class="text-sm text-gray-500">City</span>
+                            <span class="text-sm font-bold text-black-700">City</span>
                             <p class="text-lg font-medium">{{ orderDelList.eten_user?.city || '-' }}</p>
                         </div>
                     </div>
@@ -55,19 +55,19 @@
                     </div>
                     <div class="grid grid-cols-2 gap-4">
                         <div>
-                            <span class="text-sm text-gray-500">Driver</span>
+                            <span class="text-sm font-bold text-black-700">Driver</span>
                             <p lass="text-lg font-medium">{{ orderDelList.driverInformation?.driverName ? orderDelList.driverInformation.driverName: 'Not Assigned' }}</p>
                         </div>
                         <div>
-                            <span class="text-sm text-gray-500">Contact No</span>
+                            <span class="text-sm font-bold text-black-700">Contact No</span>
                             <p lass="text-lg font-medium">{{ orderDelList.driverInformation?.driverPhoneNumber ? orderDelList.driverInformation.driverPhoneNumber: 'Not Assigned' }}</p>
                         </div>
                         <div>
-                            <span class="text-sm text-gray-500">IC No</span>
+                            <span class="text-sm font-bold text-black-700">IC No</span>
                             <p lass="text-lg font-medium">{{ orderDelList.driverInformation?.driverIC ? orderDelList.driverInformation.driverIC: 'Not Assigned' }}</p>
                         </div>
                         <div>
-                            <span class="text-sm text-gray-500">Truck Plate</span>
+                            <span class="text-sm font-bold text-black-700">Truck Plate</span>
                             <p lass="text-lg font-medium">{{ orderDelList.driverInformation?.driverTruckPlate ? orderDelList.driverInformation.driverTruckPlate: 'Not Assigned' }}</p>
                         </div>
                     </div>
@@ -78,19 +78,19 @@
                     <div class="font-semibold text-xl border-b pb-2 mt-2">Order Item</div>
                     <div class="grid grid-cols-2 gap-4 mt-4">
                         <div>
-                            <span class="text-sm text-gray-500">Pickup Type</span>
-                            <p class="text-lg font-semibold">{{ orderDelList.deliveryType || '-' }}</p>
+                            <span class="text-sm font-bold text-black-700">Pickup Type</span>
+                            <p class="text-lg font-medium">{{ orderDelList.deliveryType || '-' }}</p>
                         </div>
                         <div>
-                            <span class="text-sm text-gray-500">Order Remarks</span>
-                            <p class="text-lg font-semibold">{{ orderDelList.order_remarks || '-' }}</p>
+                            <span class="text-sm font-bold text-black-700">Order Remarks</span>
+                            <p class="text-lg font-medium">{{ orderDelList.order_remarks || '-' }}</p>
                         </div>
                         <div>
-                            <span class="text-sm text-gray-500">Ship To</span>
-                            <p class="text-lg font-semibold">{{ orderDelList.shipto || '-' }}</p>
+                            <span class="text-sm font-bold text-black-700">Ship To</span>
+                            <p class="text-lg font-medium">{{ orderDelList.shipto || '-' }}</p>
                         </div>
                         <div>
-                            <span class="text-sm text-gray-500">Inv No</span>
+                            <span class="text-sm font-bold text-black-700">Inv No</span>
                             <p class="text-lg font-medium">{{ orderDelList.inv_no || '-' }}</p>
                         </div>
                     </div>
@@ -134,39 +134,39 @@
                         <table class="w-full text-sm text-left text-gray-700">
                             <tbody>
                                 <tr class="border-b">
-                                    <td class="px-4 py-2 font-medium">Order No</td>
+                                    <td class="px-4 py-2 font-bold">Order No</td>
                                     <td class="px-4 py-2 text-right">{{ orderDelList.order_no || '-' }}</td>
                                 </tr>
                                 <tr class="border-b">
-                                    <td class="px-4 py-2 font-medium">SO No</td>
+                                    <td class="px-4 py-2 font-bold">SO No</td>
                                     <td class="px-4 py-2 text-right">{{ orderDelList.so_no || '-' }}</td>
                                 </tr>
                                 <tr class="border-b">
-                                    <td class="px-4 py-2 font-medium">DO No</td>
+                                    <td class="px-4 py-2 font-bold">DO No</td>
                                     <td class="px-4 py-2 text-right">{{ orderDelList.do_no || '-' }}</td>
                                 </tr>
                                 <tr class="border-b">
-                                    <td class="px-4 py-2 font-medium">Invoice No</td>
+                                    <td class="px-4 py-2 font-bold">Invoice No</td>
                                     <td class="px-4 py-2 text-right">{{ orderDelList.inv_no || '-' }}</td>
                                 </tr>
                                 <tr class="border-b">
-                                    <td class="px-4 py-2 font-medium">SAP Return No</td>
+                                    <td class="px-4 py-2 font-bold">SAP Return No</td>
                                     <td class="px-4 py-2 text-right">{{ orderDelList.sapreturnno || '-' }}</td>
                                 </tr>
                                 <tr class="border-b">
-                                    <td class="px-4 py-2 font-medium">SAP Order Type</td>
+                                    <td class="px-4 py-2 font-bold">SAP Order Type</td>
                                     <td class="px-4 py-2 text-right">{{ orderDelList.sapordertype || '-' }}</td>
                                 </tr>
                                 <tr class="border-b">
-                                    <td class="px-4 py-2 font-medium">Division</td>
+                                    <td class="px-4 py-2 font-bold">Division</td>
                                     <td class="px-4 py-2 text-right">{{ orderDelList.division || '-' }}</td>
                                 </tr>
                                 <tr class="border-b">
-                                    <td class="px-4 py-2 font-medium">Pickup</td>
+                                    <td class="px-4 py-2 font-bold">Pickup</td>
                                     <td class="px-4 py-2 text-right">{{ orderDelList.driverInformation?.pickup_datetime? formatDate(orderDelList.driverInformation.pickup_datetime): 'Not Assigned' }}</td>
                                 </tr>
                                 <tr>
-                                    <td class="px-4 py-2 font-medium">Created</td>
+                                    <td class="px-4 py-2 font-bold">Created</td>
                                     <td class="px-4 py-2 text-right">{{ formatDate(orderDelList.created) || '-' }}</td>
                                 </tr>
                             </tbody>
