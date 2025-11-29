@@ -191,7 +191,7 @@
       header="Update Planned Date"
       v-model:visible="openDialog"
       modal
-      :style="{ width: '400px' }"
+      :style="{ width: '50rem' }"
     >
       <div class="flex flex-col gap-3">
         <!-- Schedule Date -->
@@ -201,15 +201,26 @@
           placeholder="Select Planned Date"
           :minDate="new Date()"
         />
-
-        <!-- Schedule Time -->
-        <!-- <Calendar
-          v-model="form.scheduleTime"
-          showTime
-          hourFormat="24"
-          timeOnly
-          placeholder="Select Schedule Time"
-        /> -->
+        <div class="grid md:grid-cols-2 gap-4">
+            <div>
+                <label class="block mb-2 font-medium w-full">Driver IC Number</label>
+                <InputText v-model="form.driveric" placeholder="Enter IC No" maxlength="12" class="w-full" @keypress="handleIcInput" />
+            </div>
+            <div>
+                <label class="block mb-2 font-medium w-full">Driver Name</label>
+                <InputText v-model="form.drivername" placeholder="Enter Driver Name" class="w-full"  />
+            </div>
+        </div>
+        <div class="grid md:grid-cols-2 mb-2 gap-4">
+            <div>
+                <label class="block mb-2 font-medium w-full">Driver Contact Number</label>
+                <InputText v-model="form.drivercontactnum" placeholder="Enter Contact Number" maxlength="15" class="w-full" @keypress="allowOnlyNumbers" />
+            </div>
+            <div>
+                <label class="block mb-2 font-medium w-full">Driver Plate No</label>
+                <InputText v-model="form.drivervehicleplate" placeholder="Enter Plate No" maxlength="8" class="w-full"  />
+            </div>
+        </div>
 
         <!-- Actions -->
         <div class="flex justify-end gap-2 mt-3">
@@ -363,14 +374,40 @@ const openDialogFn = () => {
   } else {
     form.value.scheduleDate = new Date() // default to today
   }
-
-  openDialog.value = true
+  form.value.drivername = '';
+  form.value.drivercontactnum = '';
+  form.value.drivervehicleplate = '';
+  form.value.driveric = '';
+  openDialog.value = true;
 }
+
+const handleIcInput = (e) => {
+  if (!/[0-9]/.test(e.key)) {
+    e.preventDefault(); // ⛔ block non-digits
+  }
+};
+
+const allowOnlyNumbers = (event) => {
+  const key = event.key;
+
+  // allow digits
+  if (/[0-9]/.test(key)) return;
+
+  // allow "-"
+  if (key === '-') return;
+
+  // block everything else
+  event.preventDefault();
+};
 
 // Form
 const form = ref({
-  orderno: null, 
-  scheduleDate: null,      
+  orderno: '', 
+  scheduleDate: null,  
+  drivername: '', 
+  drivercontactnum: '',   
+  drivervehicleplate: '', 
+  driveric: '',       
 //   scheduleTime: null      
 });
 
@@ -386,12 +423,20 @@ const saveSchedule = async () => {
     toast.add({ severity: 'warn', summary: 'Warning', detail: 'Please select date', life: 3000 });
     return;
   }
+  if (!form.value.drivername || !form.value.drivercontactnum || !form.value.drivervehicleplate || !form.value.driveric) {
+    toast.add({ severity: 'warn', summary: 'Warning', detail: 'Please fullfill driver information', life: 3000 });
+    return;
+  }
 
 
   try {
     const payload = {
       orderno: form.value.orderno,
       scheduledate: formatDateApi(form.value.scheduleDate),
+      drivername: form.value.drivername,
+      drivercontactnum: form.value.drivercontactnum,
+      drivervehicleplate: form.value.drivervehicleplate,
+      driveric: form.value.driveric,
     //   scheduletime: formatTimeApi(form.value.scheduleTime)
     };
     const res = await api.post('update-schedule-order', payload);
@@ -405,6 +450,11 @@ const saveSchedule = async () => {
     console.error(err);
     toast.add({ severity: 'error', summary: 'Error', detail: 'API error', life: 3000 });
     }finally{
+        form.value.scheduleDate = null;  
+        form.value.drivername = ''; 
+        form.value.drivercontactnum = '';  
+        form.value.drivervehicleplate = '';
+        form.value.driveric = '';  
         openDialog.value = false;
     }
 };
@@ -452,8 +502,8 @@ const InitfetchData = async () => {
         const response = await api.get(`order-delivery/detail/${id}`);
         if ( (response.data.admin_data)) {
             orderDelList.value = response.data.admin_data;
-            form.value.orderno =orderDelList.value.order_no;
-            form2.value.orderno =orderDelList.value.order_no;
+            form.value.orderno = orderDelList.value.order_no;
+            form2.value.orderno = orderDelList.value.order_no;
         } else {
             console.error('API returned error or invalid data:', response.data);
             toast.add({ severity: 'error', summary: 'Error', detail: 'Failed to load data', life: 3000 });
