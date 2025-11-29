@@ -8,13 +8,15 @@
                 :value="ETAList"
                 :paginator="true"
                 :rows="10"
-                :rowsPerPageOptions="[5, 10, 20]"
+                :rowsPerPageOptions="[5, 10, 20, 50, 100]"
                 dataKey="id"
                 :rowHover="true"
                 :loading="loading"
                 :filters="filters"
                 filterDisplay="menu"
                 :globalFilterFields="['storageLocation', 'state', 'postcode', 'city', 'eta']"
+                paginatorTemplate="CurrentPageReport FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink RowsPerPageDropdown"
+                currentPageReportTemplate="Showing {first} to {last} of {totalRecords} entries"
             >
                 <template #header>
                     <div class="flex items-center justify-between gap-4 w-full flex-wrap">
@@ -26,10 +28,6 @@
                                 <InputText v-model="filters['global'].value" placeholder="Quick Search" class="w-full" />
                             </IconField>
 
-                            <div class="relative">
-                                <Button type="button" icon="pi pi-cog" @click="sortMenu.toggle($event)" />
-                                <Menu ref="sortMenu" :model="sortItems" :popup="true" />
-                            </div>
                         </div>
                         <!-- Right: Export & Batch Buttons -->
                         <div class="flex items-center gap-2 ml-auto" v-if="canUpdate">
@@ -60,13 +58,13 @@
                         </div>
                     </template>
                 </Column> -->
-                <Column field="storageLocation" header="Storage Location" style="min-width: 10rem"/>
-                <Column field="state" header="State" style="min-width: 8rem"/>
-                <Column field="postcode" header="Postcode" style="min-width: 8rem"/>
-                <Column field="city" header="City" style="min-width: 10rem"/>
-                <Column field="dailyCutOffTime" header="Cut-off Time" style="min-width: 10rem"/>
-                <Column field="deliveryLeadTime" header="Lead Time" style="min-width: 8rem"/>
-                <Column field="eta" header="ETA" style="min-width: 8rem"/>
+                <Column field="storageLocation" header="Storage Location" style="min-width: 10rem" sortable/>
+                <Column field="state" header="State" style="min-width: 8rem" sortable/>
+                <Column field="postcode" header="Postcode" style="min-width: 8rem" sortable/>
+                <Column field="city" header="City" style="min-width: 10rem" sortable/>
+                <Column field="dailyCutOffTime" header="Cut-off Time" style="min-width: 10rem" sortable/>
+                <Column field="deliveryLeadTime" header="Lead Time" style="min-width: 8rem" sortable/>
+                <Column field="eta" header="ETA" style="min-width: 8rem" sortable/>
             </DataTable>
         </div>
     </div>
@@ -94,44 +92,7 @@ const filteredList  = ref([]);
 const filters = ref({
     global: { value: null, matchMode: FilterMatchMode.CONTAINS }
 });
-const sortMenu = ref();
-const sortItems = ref([
-    {
-        label: 'Sort by Location (A-Z)',
-        icon: 'pi pi-sort-alpha-down',
-        command: () => sortBy('storageLocation', 'asc')
-    },
-    {
-        label: 'Sort by Location (Z-A)',
-        icon: 'pi pi-sort-alpha-up',
-        command: () => sortBy('storageLocation', 'desc')
-    },
-    {
-        label: 'Sort by State (A-Z)',
-        icon: 'pi pi-tag',
-        command: () => sortBy('state', 'asc')
-    },
-    {
-        label: 'Sort by State (Z-A)',
-        icon: 'pi pi-tag',
-        command: () => sortBy('state', 'desc')
-    },
-]);
 
-const sortBy = (field, order) => {
-    ETAList.value.sort((a, b) => {
-        let aValue = a[field];
-        let bValue = b[field];
-        
-        // Handle null values
-        if (aValue === null) aValue = '';
-        if (bValue === null) bValue = '';
-        
-        if (aValue < bValue) return order === 'asc' ? -1 : 1;
-        if (aValue > bValue) return order === 'asc' ? 1 : -1;
-        return 0;
-    });
-};
 onMounted(async () => {
     fetchData();
 });

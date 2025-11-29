@@ -38,6 +38,14 @@
                             <span class="text-sm text-gray-500">Channel</span>
                             <p class="text-lg font-medium">{{ orderDelList.eten_user?.channel || '-' }}</p>
                         </div>
+                        <div>
+                            <span class="text-sm text-gray-500">Storage Location</span>
+                            <p class="text-lg font-medium">{{ orderDelList.eten_user?.storageLocation || '-' }}</p>
+                        </div>
+                        <div>
+                            <span class="text-sm text-gray-500">City</span>
+                            <p class="text-lg font-medium">{{ orderDelList.eten_user?.city || '-' }}</p>
+                        </div>
                     </div>
                 </div>
 
@@ -55,6 +63,10 @@
                             <p lass="text-lg font-medium">{{ orderDelList.driverInformation?.driverPhoneNumber ? orderDelList.driverInformation.driverPhoneNumber: 'Not Assigned' }}</p>
                         </div>
                         <div>
+                            <span class="text-sm text-gray-500">IC No</span>
+                            <p lass="text-lg font-medium">{{ orderDelList.driverInformation?.driverIC ? orderDelList.driverInformation.driverIC: 'Not Assigned' }}</p>
+                        </div>
+                        <div>
                             <span class="text-sm text-gray-500">Truck Plate</span>
                             <p lass="text-lg font-medium">{{ orderDelList.driverInformation?.driverTruckPlate ? orderDelList.driverInformation.driverTruckPlate: 'Not Assigned' }}</p>
                         </div>
@@ -64,13 +76,15 @@
                 <div class="card flex flex-col w-full bg-white shadow-sm rounded-2xl border border-gray-100">
                     <!-- Header -->
                     <div class="font-semibold text-xl border-b pb-2 mt-2">Order Item</div>
-                    <div class="grid grid-cols-1 gap-4 mt-4">
+                    <div class="grid grid-cols-2 gap-4 mt-4">
                         <div>
                             <span class="text-sm text-gray-500">Pickup Type</span>
                             <p class="text-lg font-semibold">{{ orderDelList.deliveryType || '-' }}</p>
                         </div>
-                    </div>
-                    <div class="grid grid-cols-2 gap-4 mt-4">
+                        <div>
+                            <span class="text-sm text-gray-500">Order Remarks</span>
+                            <p class="text-lg font-semibold">{{ orderDelList.order_remarks || '-' }}</p>
+                        </div>
                         <div>
                             <span class="text-sm text-gray-500">Ship To</span>
                             <p class="text-lg font-semibold">{{ orderDelList.shipto || '-' }}</p>
@@ -158,7 +172,7 @@
                             </tbody>
                         </table>
                     </div>
-                    <div v-if="!orderDelList?.driverInformation?.pickup_datetime && canUpdate" class="flex justify-end mt-3">
+                    <div v-if="orderDelList.driverInformation && !orderDelList?.driverInformation?.pickup_datetime && canUpdate" class="flex justify-end mt-3">
                         <Button  
                             style="width: auto !important"
                             label="Update Pickup Date"

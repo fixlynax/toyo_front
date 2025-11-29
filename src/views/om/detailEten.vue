@@ -140,7 +140,7 @@
                                     <span v-if="data.addressLine2">{{ data.addressLine2 }}<br /></span>
                                     <span v-if="data.addressLine3">{{ data.addressLine3 }}<br /></span>
                                     <span v-if="data.addressLine4">{{ data.addressLine4 }}<br /></span>
-                                    {{ data.city }}, {{ data.state }} {{ data.postcode }}<br />
+                                    {{ data.city }} {{ data.state }} {{ data.postcode }}<br />
                                     {{ data.country }}
                                 </template>
                                 <template #filterapply="slotProps"></template>
@@ -298,7 +298,7 @@
                                 </tr>
                                 <tr class="border-b">
                                     <td class="px-4 py-2 font-medium">Total Quantity</td>
-                                    <td class="px-4 py-2 text-right">{{ formatCurrency(form.targetQty) || '-' }}</td>
+                                    <td class="px-4 py-2 text-right">{{ form.targetQty || '-' }}</td>
                                 </tr>
                                 <tr class="border-b">
                                     <td class="px-4 py-2 font-medium">Customer Condition Group</td>
@@ -357,7 +357,7 @@
                                 <i class="pi pi-folder text-green-500"></i>
                                 <span>Account Details</span>
                             </div>
-                            <RouterLink to="/billing/listEbilling">
+                            <RouterLink to="/billing/listAccountDetail">
                                 <Button label="Go" size="small" />
                             </RouterLink>
                         </div>
@@ -368,7 +368,7 @@
                                 <i class="pi pi-folder text-blue-500"></i>
                                 <span>Billing</span>
                             </div>
-                            <RouterLink to="/billing/listAccountDetail">
+                            <RouterLink to="/billing/listBilling">
                                 <Button label="Go" size="small" />
                             </RouterLink>
                         </div>
@@ -534,7 +534,6 @@ const formatCurrency = (value) => {
         maximumFractionDigits: 2
     }).format(Number(value));
 };
-
 
 // Format date
 const formatDate = (dateString) => {

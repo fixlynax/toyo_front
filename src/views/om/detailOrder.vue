@@ -63,6 +63,7 @@
                             <template #body="{ data }">
                                 {{ data.materialid }}<br />
                                 {{ data.materialdescription }}
+                                <span class="block text-xs text-gray-500">SP: {{ data.salesprogramid || '-' }} </span>
                             </template>
                         </Column>
                         <Column field="itemcategory" header="Item Category">
@@ -101,6 +102,10 @@
                                 <tr class="border-b">
                                     <td class="px-4 py-2 font-medium">Order No.</td>
                                     <td class="px-4 py-2 text-right font-bold text-primary">{{ orderData.order_no || '-' }}</td>
+                                </tr>
+                                <tr class="border-b">
+                                    <td class="px-4 py-2 font-medium">Order Remark</td>
+                                    <td class="px-4 py-2 text-right font-bold text-primary">{{ orderData.order_remarks || '-' }}</td>
                                 </tr>
                                 <tr class="border-b">
                                     <td class="px-4 py-2 font-medium">SO No.</td>
@@ -146,7 +151,7 @@
                                     <td colspan="2" class="px-2 py-2 text-right">
                                         <div class="flex justify-end gap-2">
                                             <Button label="Return Order" class="p-button-danger text-sm !w-fit" @click="showReturnOrderDialog = true" :disabled="!canReturnOrder" />
-                                            <Button label="Pull SAP Update" class="text-sm !w-fit" @click="pullSAPUpdate" :loading="loadingSAP" :disabled="orderData.orderstatus === 1" />
+                                            <Button label="Pull SAP Update" class="text-sm !w-fit" @click="pullSAPUpdate" :loading="loadingSAP" />
                                         </div>
                                     </td>
                                 </tr>
@@ -256,7 +261,7 @@
                         <template #body="{ data }">{{ data.salesProgram_programID || '-' }}</template>
                     </Column>
                     <Column field="qty" header="Available Qty">
-                        <template #body="{ data }">{{ parseInt(data.qty) }}</template>
+                        <template #body="{ data }">{{ parseInt(data.remainingQty) }}</template>
                     </Column>
                     <Column header="Return Qty">
                         <template #body="{ data }">
@@ -316,7 +321,7 @@ const returnFormSubmitted = ref(false);
 const returnReasons = ref([
     { code: 'Wrong DOM', name: 'Wrong DOM' },
     { code: 'Receive Wrong Item', name: 'Receive Wrong Item' },
-    { code: 'Delivered Wrong Address', name: 'Delivered Wrong Address' }
+    { code: 'Delivered to wrong address', name: 'Delivered to wrong address' }
 ]);
 
 // Computed properties

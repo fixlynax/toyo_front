@@ -1,18 +1,21 @@
 <template>
     <div class="card">
         <div class="text-2xl font-bold text-gray-800 border-b pb-2 mb-3">List Logistic</div>
-
+        <LoadingPage v-if="loading" message="Loading 3PL Details..." />
+        <div v-else>
         <DataTable
             :value="logisticList"
             :paginator="true"
             :rows="10"
-            :rowsPerPageOptions="[5, 10, 20]"
+            :rowsPerPageOptions="[5, 10, 20, 50, 100]"
             dataKey="id"
             :rowHover="true"
             :loading="loading"
             :filters="filters"
             filterDisplay="menu"
             :globalFilterFields="['companyname', 'storageLocationList', 'contactperson', 'phoneno']"
+            paginatorTemplate="CurrentPageReport FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink RowsPerPageDropdown"
+                currentPageReportTemplate="Showing {first} to {last} of {totalRecords} entries"
         >
             <!-- ========================= -->
             <!-- Header Section -->
@@ -27,8 +30,6 @@
                             </InputIcon>
                             <InputText v-model="filters['global'].value" placeholder="Quick Search" class="w-full" />
                         </IconField>
-                        <Button type="button" icon="pi pi-cog" @click="sortMenu.toggle($event)" />
-                        <Menu ref="sortMenu" :model="sortItems" :popup="true" />
                     </div>
 
                     <!-- Right: Create Logistic Button -->
@@ -47,7 +48,7 @@
             <!-- ========================= -->
             <!-- Data Columns -->
             <!-- ========================= -->
-            <Column field="companyname" header="Company Name" style="min-width: 6rem">
+            <Column field="companyname" header="Company Name" style="min-width: 6rem" sortable>
                 <template #body="{ data }">
                     <RouterLink :to="`/scm/detailLogistic/${data.id}`" class="hover:underline font-bold text-primary-400">
                         {{ data.companyname }}
@@ -59,22 +60,22 @@
                     {{ data.uname }}
                 </template>
             </Column> -->
-            <Column field="storageLocationList" header="Storage Location" style="min-width: 6rem">
+            <Column field="storageLocationList" header="Storage Location" style="min-width: 6rem" sortable>
                 <template #body="{ data }">
                     {{ data.storageLocationList }}
                 </template>
             </Column>
-            <Column field="contactperson" header="Contact Person" style="min-width: 6rem">
+            <Column field="contactperson" header="Contact Person" style="min-width: 6rem" sortable>
                 <template #body="{ data }">
                     {{ data.contactperson }}
                 </template>
             </Column>
-            <Column field="mobileno" header="Mobile No" style="min-width: 6rem">
+            <Column field="mobileno" header="Mobile No" style="min-width: 6rem" sortable>
                 <template #body="{ data }">
                     {{ data.mobileno }}
                 </template>
             </Column>
-            <Column field="status" header="Status" style="min-width: 6rem">
+            <Column field="status" header="Status" style="min-width: 6rem" sortable>
                 <template #body="{ data }">
                     <Tag 
                         :value="data.status === 1 ? 'Active' : 'Inactive'" 
@@ -83,6 +84,7 @@
                 </template>
             </Column>
         </DataTable>
+        </div>
     </div>
 </template>
 
@@ -90,6 +92,8 @@
 import { onMounted, ref, computed, watch } from 'vue';
 import { FilterMatchMode } from '@primevue/core/api';
 import api from '@/service/api';
+import LoadingPage from '@/components/LoadingPage.vue';
+
 import { useToast } from 'primevue/usetoast';
 import { useMenuStore } from '@/store/menu';
 
@@ -106,36 +110,6 @@ const filters = ref({
     global: { value: null, matchMode: FilterMatchMode.CONTAINS }
 });
 
-const sortMenu = ref();
-const sortBy = (field, order) => {
-    logisticList.value.sort((a, b) => {
-        if (a[field] < b[field]) return order === 'asc' ? -1 : 1;
-        if (a[field] > b[field]) return order === 'asc' ? 1 : -1;
-        return 0;
-    });
-};
-const sortItems = ref([
-    {
-        label: 'Sort by Company Name (A-Z)',
-        icon: 'pi pi-sort-alpha-down',
-        command: () => sortBy('companyname', 'asc')
-    },
-    {
-        label: 'Sort by Company Name (Z-A)',
-        icon: 'pi pi-sort-alpha-up',
-        command: () => sortBy('companyname', 'desc')
-    },
-    {
-        label: 'Sort by Storage Location (A-Z)',
-        icon: 'pi pi-tag',
-        command: () => sortBy('storageLocationList', 'asc')
-    },
-    {
-        label: 'Sort by Status',
-        icon: 'pi pi-check-circle',
-        command: () => sortBy('status', 'asc')
-    }
-]);
 // =========================
 // Helper functions for status display
 // =========================

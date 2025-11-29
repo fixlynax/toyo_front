@@ -28,8 +28,11 @@
       :rowHover="true"
       lazy
       paginator
-      :rows="perPage"
+      :rows="pagination.perPage"
       :totalRecords="pagination.total"
+      :first="pagination.first"
+      paginatorTemplate="FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink CurrentPageReport RowsPerPageDropdown"
+      currentPageReportTemplate="Showing {first} to {last} of {totalRecords} entries"
       @page="onPage"
     >
       <Column field="refNo" header="Ref No" style="min-width: 15rem">
@@ -70,11 +73,12 @@ const tabs = [
     { label: 'Rejected', value: 'Rejected' }
 ];
 
-const currentPage = ref(1);
-const perPage = ref(10);
 
 const pagination = ref({
   total: 0,
+  perPage: 10,
+  first: 0,       // <-- PRIMEVUE NEEDS THIS TO UPDATE PAGE
+  current_page: 1
 });
 
 const loading = ref(false);
@@ -104,13 +108,15 @@ const fetchClaims = async (page = 1) => {
     );
 
     if (response.data.status === 1) {
-      listData.value = mapBackendData(response.data.admin_data);
+    listData.value = mapBackendData(response.data.admin_data);
 
-      pagination.value = {
-        total: response.data.pagination.total,
-      };
+    // Update pagination
+    pagination.value.total = response.data.pagination.total;
+    pagination.value.perPage = response.data.pagination.per_page;
+    pagination.value.current_page = response.data.pagination.current_page;
 
-      currentPage.value = page;
+    // *** IMPORTANT: Map API page → PrimeVue first index ***
+    pagination.value.first = (pagination.value.current_page - 1) * pagination.value.perPage;
     } else {
       listData.value = [];
     }
@@ -175,8 +181,13 @@ const exportToCSV = () => {
 };
 // PrimeVue pagination event
 const onPage = (event) => {
-  const newPage = event.page + 1; // PrimeVue is 0-based
-  fetchClaims(newPage);
+    // Update UI immediately
+    pagination.value.first = event.first;
+
+    // PrimeVue event.page = 0-based → API is 1-based
+    const newPage = event.page + 1;
+
+    fetchClaims(newPage);
 };
 const changeTab = (index) => {
   activeTab.value = index;

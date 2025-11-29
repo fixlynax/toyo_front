@@ -19,6 +19,8 @@
                     responsiveLayout="scroll"
                     class="rounded-table"
                     v-model:expandedRows="expandedRows"
+                    currentPageReportTemplate="Showing {first} to {last} of {totalRecords} entries"
+                    paginatorTemplate="CurrentPageReport FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink RowsPerPageDropdown"
                 >
                     <template #header>
                         <div class="flex items-center justify-between gap-4 w-full flex-wrap">
@@ -102,8 +104,21 @@
                     <template #expansion="{ data }">
                         <div class="p-4 bg-gray-50 border-t border-gray-200 rounded-b-lg">
                             <DataTable :value="data.dealers" :rows="5" :paginator="data.dealers && data.dealers.length > 5" responsiveLayout="scroll" size="small" class="rounded-table">
-                                <Column field="label" header="Customer Name" style="min-width: 3rem" />
-                                <Column field="group" header="State" style="min-width: 10rem" />
+                                <Column header="Customer Name" style="min-width: 15rem">
+                                    <template #body="{ data: dealer }">
+                                        <div class="font-medium text-gray-800">{{ dealer.label }}</div>
+                                    </template>
+                                </Column>
+                                <Column header="Customer Account No" style="min-width: 10rem">
+                                    <template #body="{ data: dealer }">
+                                        {{ dealer.custAccountNo }}
+                                    </template>
+                                </Column>
+                                <Column header="Address" style="min-width: 20rem">
+                                    <template #body="{ data: dealer }">
+                                        <div class="text-sm text-gray-600">{{ dealer.address }}</div>
+                                    </template>
+                                </Column>
                             </DataTable>
                         </div>
                     </template>
@@ -227,7 +242,7 @@ const getTypeSeverity = (type) => (type === 'INCLUDE' ? 'success' : 'warning');
 const onMaterialChange = () => {
     const selected = materialOptions.value.find((m) => m.materialid === currentException.materialCode);
     if (selected) {
-        currentException.materialDescription = selected.material || `Material ${selected.materialid}`;
+        currentException.materialDescription = selected.material;
     }
 };
 
@@ -331,44 +346,63 @@ const fetchDealers = async () => {
 
 const fetchMaterialExceptions = async () => {
     loading.value = true;
-    const response = await api.get('maintenance/list-material-exception');
-    const adminData = response.data.admin_data || [];
-    materialExceptions.value = adminData.map((item) => {
-        const includeIds =
-            item.i_eten_userID
-                ?.split(',')
-                .map((id) => parseInt(id))
-                .filter(Boolean) || [];
-        const excludeIds =
-            item.e_eten_userID
-                ?.split(',')
-                .map((id) => parseInt(id))
-                .filter(Boolean) || [];
-        const exceptionType = includeIds.length ? 'INCLUDE' : excludeIds.length ? 'EXCLUDE' : 'Unknown';
-        const dealerDetails = Array.isArray(item.etenUserList)
-            ? item.etenUserList.map((d) => ({
-                  id: d.id,
-                  label: d.companyName1,
-                  group: d.state || 'Unknown'
-              }))
-            : [];
-        return {
-            id: item.id,
-            materialCode: item.materialid,
-            materialDescription: `Material ${item.materialid}`,
-            exceptionType,
-            dealers: dealerDetails,
-            dealerCount: dealerDetails.length,
-            status: item.status === 1,
-            created: item.created
-        };
-    });
-    await fetchMaterials();
-    materialExceptions.value = materialExceptions.value.map((ex) => {
-        const match = materialOptions.value.find((m) => m.materialid === ex.materialCode);
-        return { ...ex, materialDescription: match ? match.material : ex.materialDescription };
-    });
-    loading.value = false;
+
+    try {
+        // Fetch materials first to get descriptions
+        await fetchMaterials();
+
+        // Then fetch material exceptions
+        const response = await api.get('maintenance/list-material-exception');
+        const adminData = response.data.admin_data || [];
+
+        // Create a map for quick material description lookup
+        const materialMap = new Map();
+        materialOptions.value.forEach((material) => {
+            materialMap.set(material.materialid, material.material);
+        });
+
+        materialExceptions.value = adminData.map((item) => {
+            const includeIds =
+                item.i_eten_userID
+                    ?.split(',')
+                    .map((id) => parseInt(id))
+                    .filter(Boolean) || [];
+            const excludeIds =
+                item.e_eten_userID
+                    ?.split(',')
+                    .map((id) => parseInt(id))
+                    .filter(Boolean) || [];
+            const exceptionType = includeIds.length ? 'INCLUDE' : excludeIds.length ? 'EXCLUDE' : 'Unknown';
+            const dealerDetails = Array.isArray(item.etenUserList)
+                ? item.etenUserList.map((d) => ({
+                      id: d.id,
+                      label: `${d.companyName1} ${d.companyName2 || ''}`.trim(),
+                      custAccountNo: d.custAccountNo || '',
+                      address: `${d.addressLine1 || ''} ${d.addressLine2 || ''} ${d.addressLine3 || ''} ${d.addressLine4 || ''}`.trim(),
+                      group: d.state || 'Unknown'
+                  }))
+                : [];
+
+            // Get material description from the map
+            const materialDescription = materialMap.get(item.materialid) || item.materialid;
+
+            return {
+                id: item.id,
+                materialCode: item.materialid,
+                materialDescription: materialDescription,
+                exceptionType,
+                dealers: dealerDetails,
+                dealerCount: dealerDetails.length,
+                status: item.status === 1,
+                created: item.created
+            };
+        });
+    } catch (error) {
+        console.error('Error fetching material exceptions:', error);
+        toast.add({ severity: 'error', summary: 'Error', detail: 'Failed to load material exceptions', life: 3000 });
+    } finally {
+        loading.value = false;
+    }
 };
 
 onMounted(fetchMaterialExceptions);

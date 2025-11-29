@@ -11,6 +11,11 @@
             :loading="loading" 
             :filters="filters1" 
             filterDisplay="menu"
+            removableSort
+            sortField="messageDate"
+            :sortOrder="1"
+            currentPageReportTemplate="Showing {first} to {last} of {totalRecords} entries"
+            paginatorTemplate="CurrentPageReport FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink RowsPerPageDropdown"
         >
             <!-- Header -->
             <template #header>
@@ -37,7 +42,7 @@
             <template #loading> Loading messages data. Please wait. </template>
 
             <!-- Message Date (Clickable) -->
-            <Column field="messageDate" header="Message DateTime" style="min-width: 10rem">
+            <Column field="messageDate" header="Message DateTime" style="min-width: 10rem" sortable>
                 <template #body="{ data }">
                     <div class="font-semibold text-gray-800 cursor-pointer hover:text-blue-600 transition-colors" 
                          @click="goToDetail(data.messageId)">
