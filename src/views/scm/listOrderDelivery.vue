@@ -66,6 +66,9 @@
                             @change="handleImport2"
                             />
                         </div>
+                        <div class="flex justify-end gap-2"  v-if="statusTabs[activeTabIndex]?.label === 'Completed'">
+                            <Button type="button" label="Export" icon="pi pi-file-export" class="p-button-success" @click="exportToExcel"/>
+                        </div>
                     </div>
                 </template>
 
@@ -108,26 +111,26 @@
                 </Column>
                 <Column field="shipto_data.companyName1" header="Customer Name" style="min-width: 12rem" sortable>
                     <template #body="{ data }">
-                        <span class="font-bold">{{` ${data.shipto_data.companyName1} ${data.shipto_data.companyName2} ` }}</span>
+                        <span class="font-bold">{{` ${data.shipto_data?.companyName1 || ''} ${data.shipto_data?.companyName2 || ''} ` }}</span>
                     <br>
-                     {{ data.shipto_data.custAccountNo }}
+                     {{ data.shipto_data?.custAccountNo || '-' }}
                     </template>
                 </Column>
 
                 <Column field="storagelocation" header="Storage Location" style="min-width: 8rem" sortable>
                     <template #body="{ data }">
-                         {{`${data.storagelocation}` }}
+                         {{ data.storagelocation }}
                     </template>
                 </Column>
 
                 <Column field="shipto_data.city" header="City" style="min-width: 8rem" sortable>
                     <template #body="{ data }">
-                         {{ data.shipto_data.city?.replace(/,$/, '') }}
+                         {{ data.shipto_data?.city?.replace(/,$/, '') }}
                     </template>
                 </Column>
                 <Column field="shipto_data.state" header="State" style="min-width: 8rem" sortable>
                     <template #body="{ data }">
-                         {{`${data.shipto_data.state}` }}
+                         {{ data.shipto_data?.state || '-' }}
                     </template>
                 </Column>
 
@@ -528,7 +531,57 @@ const fetchData = async (body = null) => {
     }
 };
 
+const exportToExcel = () => {
+    if (orderDelList.value.length === 0) {
+        toast.add({ severity: 'warn', summary: 'Warning', detail: 'No data to export', life: 3000 });
+        return;
+    }
 
+    try {
+        // Create worksheet data
+        const headers = ['Created', 'SAP DO No', 'Customer Name', 'Customer Acc No', 'Storage Location', 'City', 'State', 'Order Type', 'Eta Date', 'Planned Date', 'Delivered Date', 'Status'];
+        
+        // Prepare data rows
+        const csvData = orderDelList.value.map(data => [
+            `"${formatDate(data.created)}"`,
+            `"${data.do_no || '-'}"`,
+            `"${data.shipto_data?.companyName1 || ''} ${data.shipto_data?.companyName2 || ''} "`,
+            `"${data.shipto_data?.custAccountNo || '-'}"`,
+            `"${data.storagelocation || '-'}"`,
+            `"${data.shipto_data?.city || '-'}"`,
+            `"${data.shipto_data?.state || '-'}"`,
+            `"${data.orderDesc || '-'}"`,
+            `"${formatDate(data.deliveryDate)}"`,
+            `"${data.scm_deliver_detail?.scheduled_delivery_time ? formatDate(data.scm_deliver_detail?.scheduled_delivery_time) : 'No date assigned'}"`,
+            `"${data.scm_deliver_detail?.delivered_datetime ? formatDate(data.scm_deliver_detail?.delivered_datetime) : 'No date assigned'}"`,
+            `"${getStatusLabel2(data.status) || '-'}"`,
+        ]);
+
+        // Combine headers and data
+        const csvContent = [
+            headers.join(','),
+            ...csvData.map(row => row.join(','))
+        ].join('\n');
+
+        // Create and download the file
+        const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+        const link = document.createElement('a');
+        const url = URL.createObjectURL(blob);
+        
+        link.setAttribute('href', url);
+        link.setAttribute('download', `order_delivery_list_${new Date().toISOString().split('T')[0]}.csv`);
+        link.style.visibility = 'hidden';
+        
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        
+        URL.revokeObjectURL(url);
+        
+    } catch (error) {
+        console.error('Error exporting to Excel:', error);
+    }
+};
 // Status Label and Severity
 function getStatusLabel(status) {
     const map = {

@@ -45,7 +45,9 @@
                             </IconField>
 
                         </div>
-
+                        <div class="flex justify-end gap-2"  v-if="statusTabs[activeTabIndex]?.label === 'Completed'">
+                            <Button type="button" label="Export" icon="pi pi-file-export" class="p-button-success" @click="exportToExcel"/>
+                        </div>
                     </div>
                 </template>
 
@@ -67,24 +69,24 @@
                 </Column>
                 <Column field="eten_user.companyName1" header="Customer Name" style="min-width: 12rem" sortable>
                     <template #body="{ data }">
-                    <span class="font-bold">{{` ${data.eten_user.companyName1} ${data.eten_user.companyName2} ${data.eten_user.companyName3} ${data.eten_user.companyName4} ` }}</span>
+                    <span class="font-bold">{{` ${data.eten_user?.companyName1} ${data.eten_user?.companyName2} ${data.eten_user?.companyName3} ${data.eten_user?.companyName4} ` }}</span>
                     <br>
-                     {{ data.eten_user.custAccountNo }}
+                     {{ data.eten_user?.custAccountNo }}
                     </template>
                 </Column>
                 <Column field="eten_user.storageLocation" header="Storage Location" style="min-width: 8rem" sortable>
                     <template #body="{ data }">
-                        {{  data.eten_user.storageLocation ? data.eten_user.storageLocation : '-'  }}
+                        {{  data.eten_user?.storageLocation ? data.eten_user.storageLocation : '-'  }}
                     </template>
                 </Column>
                 <Column field="eten_user.city" header="City" style="min-width: 8rem" sortable>
                     <template #body="{ data }">
-                        {{  data.eten_user.city?.replace(/,$/, '') }}
+                        {{  data.eten_user?.city?.replace(/,$/, '') ?? '-' }}
                     </template>
                 </Column>
                 <Column field="eten_user.state" header="State" style="min-width: 8rem" sortable>
                     <template #body="{ data }">
-                        {{  data.eten_user.state ? data.eten_user.state : '-'  }}
+                        {{  data.eten_user?.state ? data.eten_user.state : '-'  }}
                     </template>
                 </Column>
                 <Column field="driverInformation.driverName" header="Collector" style="min-width: 12rem" sortable>
@@ -92,13 +94,16 @@
                         <div v-if="data.driverInformation">
                             <div class="flex flex-col leading-relaxed text-sm text-gray-700">
                                 <div class="flex">
-                                    <span>{{ data.driverInformation.driverName }}</span>
+                                    <span>{{ data.driverInformation?.driverName || '-' }}</span>
                                 </div>
                                 <div class="flex">
-                                    <span>{{ data.driverInformation.driverPhoneNumber }}</span>
+                                    <span>{{ data.driverInformation?.driverIC || '-' }}</span>
                                 </div>
                                 <div class="flex">
-                                    <span>{{ data.driverInformation.driverTruckPlate }}</span>
+                                    <span>{{ data.driverInformation?.driverPhoneNumber || '-' }}</span>
+                                </div>
+                                <div class="flex">
+                                    <span>{{ data.driverInformation?.driverTruckPlate || '-' }}</span>
                                 </div>
                             </div>
                         </div>
@@ -320,6 +325,59 @@ const fetchData = async (body = null) => {
     }
 };
 
+const exportToExcel = () => {
+    if (orderDelList.value.length === 0) {
+        toast.add({ severity: 'warn', summary: 'Warning', detail: 'No data to export', life: 3000 });
+        return;
+    }
+
+    try {
+        // Create worksheet data
+        const headers = ['Created', 'SAP DO No', 'Customer Name', 'Customer Acc No', 'Storage Location', 'City', 'State', 'Collecter Name', 'Collecter IC', 'Collecter Contact No', 'Collecter Truck Plate', 'Type', 'Pickup Date', 'Status'];
+        
+        // Prepare data rows
+        const csvData = orderDelList.value.map(data => [
+            `"${formatDate(data.created)}"`,
+            `"${data.do_no || '-'}"`,
+            `"${data.eten_user?.companyName1} ${data.eten_user?.companyName2} ${data.eten_user?.companyName3} ${data.eten_user?.companyName4}"`,
+            `"${data.eten_user?.custAccountNo || '-'}"`,
+            `"${data.eten_user?.storageLocation || '-'}"`,
+            `"${data.eten_user?.city || '-'}"`,
+            `"${data.eten_user?.state || '-'}"`,
+            `"${data.driverInformation?.driverName || '-'}"`,
+            `"${data.driverInformation?.driverIC || '-'}"`,
+            `"${data.driverInformation?.driverPhoneNumber || '-'}"`,
+            `"${data.driverInformation?.driverTruckPlate || '-'}"`,
+            `"${data.deliveryType || '-'}"`,
+            `"${data.driverInformation?.pickup_datetime ? formatDate(data.driverInformation?.pickup_datetime) : 'No date assigned'}"`,
+            `"${getStatusLabel2(data.status) || '-'}"`,
+        ]);
+
+        // Combine headers and data
+        const csvContent = [
+            headers.join(','),
+            ...csvData.map(row => row.join(','))
+        ].join('\n');
+
+        // Create and download the file
+        const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+        const link = document.createElement('a');
+        const url = URL.createObjectURL(blob);
+        
+        link.setAttribute('href', url);
+        link.setAttribute('download', `order_pickup_list_${new Date().toISOString().split('T')[0]}.csv`);
+        link.style.visibility = 'hidden';
+        
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        
+        URL.revokeObjectURL(url);
+        
+    } catch (error) {
+        console.error('Error exporting to Excel:', error);
+    }
+};
 
 // Status Label and Severity
 function getStatusLabel(status) {
