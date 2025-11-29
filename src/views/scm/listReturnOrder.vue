@@ -28,7 +28,7 @@
                 :loading="loading"
                 :filters="filters"
                 filterDisplay="menu"
-                :globalFilterFields="['return_orderNo_ref', 'custAccountNo' , 'storageLocation' , 'city', 'dealerName' , 'delivery_status' , 'created']"
+                :globalFilterFields="['return_orderNo_ref', 'custaccountno' , 'storageLocation' , 'city', 'dealerName' , 'delivery_status' , 'created']"
                 paginatorTemplate="CurrentPageReport FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink RowsPerPageDropdown"
                 currentPageReportTemplate="Showing {first} to {last} of {totalRecords} entries"
                 >
@@ -111,7 +111,7 @@
                     <template #body="{ data }">
                         <span class="font-bold">{{ data?.dealerName || '-' }}</span>
                         <br>
-                        {{ data?.custAccountNo ?? '-' }}
+                        {{ data?.custaccountno ?? '-' }}
                     </template>
                 </Column>
                 <Column field="storageLocation" header="Storage Location" style="max-width: 8rem" sortable>
@@ -491,7 +491,7 @@ const exportToExcel = () => {
         const csvData = returnList.value.map(data => [
             `"${data.return_orderNo_ref || '-'}"`,
             `"${data.dealerName || '-'}"`,
-            `"${data.custAccountNo || '-'}"`,
+            `"${data.custaccountno || '-'}"`,
             `"${data.storageLocation || '-'}"`,
             `"${data.city || '-'}"`,
             `"${data.state || '-'}"`,
