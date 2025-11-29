@@ -183,43 +183,43 @@
             </DataTable>
         </div>
     </div>
-<Dialog 
-        v-model:visible="showIcDialog" 
-        header="Update Collector Information" 
-        modal 
-        :style="{ width: '50rem' }"
->
-    <div class="flex flex-col gap-3 w-full">
-        <div class="font-semibold">
-            SAP DO No: {{ selectedData?.do_no }}
+    <Dialog 
+            v-model:visible="showIcDialog" 
+            header="Update Collector Information" 
+            modal 
+            :style="{ width: '50rem' }"
+    >
+        <div class="flex flex-col gap-3 w-full">
+            <div class="font-semibold">
+                SAP DO No: {{ selectedData?.do_no }}
+            </div>
+            <div class="grid md:grid-cols-2 gap-4">
+                <div>
+                    <label class="block mb-2 font-medium w-full">Collector IC Number</label>
+                    <InputText v-model="form.driverIC" placeholder="Enter IC No" maxlength="12" class="w-full" @keypress="handleIcInput" />
+                </div>
+                <div>
+                    <label class="block mb-2 font-medium w-full">Collector Driver Name</label>
+                    <InputText v-model="form.driverName" placeholder="Enter Driver Name" class="w-full"  />
+                </div>
+            </div>
+            <div class="grid md:grid-cols-2 mb-2 gap-4">
+                <div >
+                    <label class="block mb-2 font-medium w-full">Collector Contact Number</label>
+                    <InputText v-model="form.driverPhoneNum" placeholder="Enter Contact Number" maxlength="15" class="w-full" @keypress="allowOnlyNumbers" />
+                </div>
+                <div>
+                    <label class="block mb-2 font-medium w-full">Collector Plate No</label>
+                    <InputText v-model="form.driverPlateNum" placeholder="Enter Plate No" maxlength="8" class="w-full"  />
+                </div>
+            </div>
         </div>
-        <div class="grid md:grid-cols-2 gap-4">
-            <div>
-                <label class="block mb-2 font-medium w-full">Collector IC Number</label>
-                <InputText v-model="form.driverIC" placeholder="Enter IC No" maxlength="12" class="w-full" @keypress="handleIcInput" />
-            </div>
-            <div v-if="!selectedData.driverInformation">
-                <label class="block mb-2 font-medium w-full">Collector Driver Name</label>
-                <InputText v-model="form.driverName" placeholder="Enter Driver Name" class="w-full"  />
-            </div>
-        </div>
-        <div class="grid md:grid-cols-2 mb-2 gap-4">
-            <div v-if="!selectedData.driverInformation">
-                <label class="block mb-2 font-medium w-full">Collector Contact Number</label>
-                <InputText v-model="form.driverPhoneNum" placeholder="Enter Contact Number" maxlength="15" class="w-full" @keypress="allowOnlyNumbers" />
-            </div>
-            <div v-if="!selectedData.driverInformation">
-                <label class="block mb-2 font-medium w-full">Collector Plate No</label>
-                <InputText v-model="form.driverPlateNum" placeholder="Enter Plate No" maxlength="8" class="w-full"  />
-            </div>
-        </div>
-    </div>
 
-    <template #footer>
-        <Button label="Cancel" severity="secondary" @click="handleCloseDialog" />
-        <Button label="Confirm" @click="submitPickupUpdate" />
-    </template>
-</Dialog>
+        <template #footer>
+            <Button label="Cancel" severity="secondary" @click="handleCloseDialog" />
+            <Button label="Confirm" @click="submitPickupUpdate" />
+        </template>
+    </Dialog>
     <Dialog 
                 v-model:visible="showIcDialog2" 
                 header="Update Pickup Date" 
