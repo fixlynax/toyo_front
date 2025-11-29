@@ -131,13 +131,21 @@
                     header="Action" 
                     style="min-width: 10rem">
                     <template #body="{ data }">
-                        <div class="flex justify-center">
+                    <div v-if="!data.driverInformation" class="flex justify-center">
                             <Button 
-                                icon="pi pi-pencil" 
-                                class="p-button-sm p-button-text p-button-warning" 
-                                @click="confirmUpdatePickup(data)"
-                            />
-                        </div>
+                            icon="pi pi-pencil" 
+                            class="p-button-sm p-button-text p-button-warning" 
+                            @click="confirmUpdatePickup(data)"
+                        />
+                    </div>
+                    <div v-else class="flex justify-center">
+                        <Button 
+                            icon="pi pi-calendar" 
+                            class="p-button-sm p-button-text p-button-warning" 
+                            @click="confirmUpdatePickup2(data)"
+                        />
+                    </div>
+
                     </template>
                 </Column>
             </DataTable>
@@ -145,7 +153,7 @@
     </div>
 <Dialog 
         v-model:visible="showIcDialog" 
-        header="Update Pickup Date" 
+        header="Update Collector Information" 
         modal 
         :style="{ width: '50rem' }"
 >
@@ -180,6 +188,28 @@
         <Button label="Confirm" @click="submitPickupUpdate" />
     </template>
 </Dialog>
+    <Dialog 
+                v-model:visible="showIcDialog2" 
+                header="Update Pickup Date" 
+                modal 
+                :style="{ width: '30rem' }"
+        >
+        <div class="flex flex-col gap-3 w-full">
+            <div class="font-semibold">
+                SAP DO No: {{ selectedData?.do_no }}
+            </div>
+
+            <div>
+                <label class="block mb-4 font-medium w-full">Collector IC Number</label>
+                <InputText v-model="icNo" placeholder="Enter IC No" maxlength="12" class="w-full" @keypress="handleIcInput"  />
+            </div>
+        </div>
+
+        <template #footer>
+            <Button label="Cancel" severity="secondary" @click="handleCloseDialog2" />
+            <Button label="Confirm" @click="submitPickupUpdate2" />
+        </template>
+    </Dialog>
 </template>
 
 <script setup>
@@ -197,6 +227,8 @@ const canUpdate = computed(() => menuStore.canWrite('Order Pickup'));
 const denyAccess = computed(() => menuStore.canTest('Order Pickup'));
 
 const showIcDialog = ref(false);
+const showIcDialog2 = ref(false);
+const icNo = ref('');
 const form = ref({
   driverIC: '', 
   driverName: '',      
@@ -311,7 +343,7 @@ const submitPickupUpdate = async () => {
         const res = await api.post(`order/driver-information-scm/${selectedData.order_no}`, payload);
 
         if (res.data?.status === 1) {
-          toast.add({ severity: 'success', summary: 'Updated', detail: 'Pickup date collecter updated', life: 3000 });
+          toast.add({ severity: 'success', summary: 'Updated', detail: 'Pickup date collecter information updated', life: 3000 });
           fetchData(); // refresh table
         } else {
           toast.add({ severity: 'error', summary: 'Error', detail: res.data?.message || 'Failed', life: 3000 });
@@ -325,6 +357,49 @@ const submitPickupUpdate = async () => {
 };
 
 
+const confirmUpdatePickup2 = (data) => {
+    selectedData = data;
+    icNo.value = '';
+    showIcDialog2.value = true;
+};
+
+const handleCloseDialog2 = () => {
+  icNo.value = '';
+  selectedData = null;
+   showIcDialog2.value = false;
+};
+
+const submitPickupUpdate2 = async () => {
+        if (!icNo.value || icNo.value.length !== 12) {
+            toast.add({
+            severity: 'warn',
+            summary: 'Invalid IC No',
+            detail: 'IC Number must be exactly 12 digits.',
+            life: 3000
+            });
+            return;
+        }
+      try {
+        const payload = new FormData();
+        payload.append('orderno', selectedData.order_no);
+        payload.append('collectoric', icNo.value);
+
+        const res = await api.post('update-collect-time', payload);
+
+        if (res.data?.status === 1) {
+          toast.add({ severity: 'success', summary: 'Updated', detail: 'Pickup date set to now', life: 3000 });
+          fetchData(); // refresh table
+        } else {
+          toast.add({ severity: 'error', summary: 'Error', detail: res.data?.message || 'Failed', life: 3000 });
+        }
+      } catch (err) {
+        console.error(err);
+        toast.add({ severity: 'error', summary: 'Error', detail: 'API error', life: 3000 });
+      }finally{
+        handleCloseDialog2();
+      }
+
+};
 function formatDate(dateString) {
     if (!dateString) return '';
     const date = new Date(dateString);

@@ -172,56 +172,87 @@
                             </tbody>
                         </table>
                     </div>
+                    <div v-if="!orderDelList.driverInformation && canUpdate" class="flex justify-end mt-3">
+                        <Button  
+                            style="width: auto !important"
+                            label="Update Collector Information"
+                            icon="pi pi-pencil"
+                            class="p-button-sm p-button-warning"
+                            @click="confirmUpdatePickup(orderDelList)"
+                        />
+                    </div>
                     <div v-if="orderDelList.driverInformation && !orderDelList?.driverInformation?.pickup_datetime && canUpdate" class="flex justify-end mt-3">
                         <Button  
                             style="width: auto !important"
                             label="Update Pickup Date"
                             icon="pi pi-calendar"
                             class="p-button-sm p-button-warning"
-                            @click="confirmUpdatePickup(orderDelList)"
+                            @click="confirmUpdatePickup2(orderDelList)"
                         />
                     </div>
                 </div>
             </div>
         </div>
     </Fluid>
-<Dialog 
-        v-model:visible="showIcDialog" 
-        header="Update Pickup Date" 
-        modal 
-        :style="{ width: '50rem' }"
->
-    <div class="flex flex-col gap-3 w-full">
-        <div class="font-semibold">
-            SAP DO No: {{ selectedData?.do_no }}
+    <Dialog 
+            v-model:visible="showIcDialog" 
+            header="Update Collector information" 
+            modal 
+            :style="{ width: '50rem' }"
+    >
+        <div class="flex flex-col gap-3 w-full">
+            <div class="font-semibold">
+                SAP DO No: {{ selectedData?.do_no }}
+            </div>
+            <div class="grid md:grid-cols-2 gap-4">
+                <div>
+                    <label class="block mb-2 font-medium w-full">Collector IC Number</label>
+                    <InputText v-model="form.driverIC" placeholder="Enter IC No" maxlength="12" class="w-full" @keypress="handleIcInput" />
+                </div>
+                <div v-if="!selectedData.driverInformation">
+                    <label class="block mb-2 font-medium w-full">Collector Driver Name</label>
+                    <InputText v-model="form.driverName" placeholder="Enter Driver Name" class="w-full"  />
+                </div>
+            </div>
+            <div class="grid md:grid-cols-2 mb-2 gap-4">
+                <div v-if="!selectedData.driverInformation">
+                    <label class="block mb-2 font-medium w-full">Collector Contact Number</label>
+                    <InputText v-model="form.driverPhoneNum" placeholder="Enter Contact Number" maxlength="15" class="w-full" @keypress="allowOnlyNumbers" />
+                </div>
+                <div v-if="!selectedData.driverInformation">
+                    <label class="block mb-2 font-medium w-full">Collector Plate No</label>
+                    <InputText v-model="form.driverPlateNum" placeholder="Enter Plate No" maxlength="8" class="w-full"  />
+                </div>
+            </div>
         </div>
-        <div class="grid md:grid-cols-2 gap-4">
-            <div>
-                <label class="block mb-2 font-medium w-full">Collector IC Number</label>
-                <InputText v-model="form.driverIC" placeholder="Enter IC No" maxlength="12" class="w-full" @keypress="handleIcInput" />
-            </div>
-            <div v-if="!selectedData.driverInformation">
-                <label class="block mb-2 font-medium w-full">Collector Driver Name</label>
-                <InputText v-model="form.driverName" placeholder="Enter Driver Name" class="w-full"  />
-            </div>
-        </div>
-        <div class="grid md:grid-cols-2 mb-2 gap-4">
-            <div v-if="!selectedData.driverInformation">
-                <label class="block mb-2 font-medium w-full">Collector Contact Number</label>
-                <InputText v-model="form.driverPhoneNum" placeholder="Enter Contact Number" maxlength="15" class="w-full" @keypress="allowOnlyNumbers" />
-            </div>
-            <div v-if="!selectedData.driverInformation">
-                <label class="block mb-2 font-medium w-full">Collector Plate No</label>
-                <InputText v-model="form.driverPlateNum" placeholder="Enter Plate No" maxlength="8" class="w-full"  />
-            </div>
-        </div>
-    </div>
 
-    <template #footer>
-        <Button label="Cancel" severity="secondary" @click="handleCloseDialog" />
-        <Button label="Confirm" @click="submitPickupUpdate" />
-    </template>
-</Dialog>
+        <template #footer>
+            <Button label="Cancel" severity="secondary" @click="handleCloseDialog" />
+            <Button label="Confirm" @click="submitPickupUpdate" />
+        </template>
+    </Dialog>
+    <Dialog 
+            v-model:visible="showIcDialog2" 
+            header="Update Pickup Date" 
+            modal 
+            :style="{ width: '30rem' }"
+    >
+        <div class="flex flex-col gap-3 w-full">
+            <div class="font-semibold">
+                SAP DO No: {{ selectedData?.do_no }}
+            </div>
+
+            <div>
+                <label class="block mb-4 font-medium w-full">Collector IC Number</label>
+                <InputText v-model="icNo" placeholder="Enter IC No" maxlength="12" class="w-full" @keypress="handleIcInput"  />
+            </div>
+        </div>
+
+        <template #footer>
+            <Button label="Cancel" severity="secondary" @click="handleCloseDialog2" />
+            <Button label="Confirm" @click="submitPickupUpdate2" />
+        </template>
+    </Dialog>
 </template>
 
 <script setup>
@@ -251,12 +282,14 @@ const toast = useToast();
 // const confirmation = useConfirm();
 
 const showIcDialog = ref(false);
+const showIcDialog2 = ref(false);
 const form = ref({
   driverIC: '', 
   driverName: '',      
   driverPhoneNum: '',      
   driverPlateNum: '',      
 });
+const icNo = ref('');
 let selectedData = null;
 
 const handleIcInput = (e) => {
@@ -315,8 +348,8 @@ const submitPickupUpdate = async () => {
         const res = await api.post(`order/driver-information-scm/${selectedData.order_no}`, payload);
 
         if (res.data?.status === 1) {
-          toast.add({ severity: 'success', summary: 'Updated', detail: 'Pickup date collecter updated', life: 3000 });
-          fetchData(); // refresh table
+          toast.add({ severity: 'success', summary: 'Updated', detail: 'Pickup date collecter information updated', life: 3000 });
+          InitfetchData(); // refresh table
         } else {
           toast.add({ severity: 'error', summary: 'Error', detail: res.data?.message || 'Failed', life: 3000 });
         }
@@ -326,6 +359,50 @@ const submitPickupUpdate = async () => {
       }finally{
         handleCloseDialog();
       }
+};
+
+const confirmUpdatePickup2 = (data) => {
+    selectedData = data;
+    icNo.value = '';
+    showIcDialog2.value = true;
+};
+
+const handleCloseDialog2 = () => {
+  icNo.value = '';
+  selectedData = null;
+   showIcDialog2.value = false;
+};
+
+const submitPickupUpdate2 = async () => {
+        if (!icNo.value || icNo.value.length !== 12) {
+            toast.add({
+            severity: 'warn',
+            summary: 'Invalid IC No',
+            detail: 'IC Number must be exactly 12 digits.',
+            life: 3000
+            });
+            return;
+        }
+      try {
+        const payload = new FormData();
+        payload.append('orderno', selectedData.order_no);
+        payload.append('collectoric', icNo.value);
+
+        const res = await api.post('update-collect-time', payload);
+
+        if (res.data?.status === 1) {
+          toast.add({ severity: 'success', summary: 'Updated', detail: 'Pickup date set to now', life: 3000 });
+          InitfetchData(); // refresh table
+        } else {
+          toast.add({ severity: 'error', summary: 'Error', detail: res.data?.message || 'Failed', life: 3000 });
+        }
+      } catch (err) {
+        console.error(err);
+        toast.add({ severity: 'error', summary: 'Error', detail: 'API error', life: 3000 });
+      }finally{
+        handleCloseDialog2();
+      }
+
 };
 
 const formatItemNo = (itemNo) => {
