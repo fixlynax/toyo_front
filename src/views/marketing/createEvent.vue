@@ -37,7 +37,7 @@
                         
                         <div>
                             <label class="block font-bold text-gray-700">Publish Date</label>
-                            <Calendar v-model="event.publishDate" dateFormat="dd-mm-yy" showIcon class="w-full" :minDate="event.startDate"  :maxDate="event.endDate"  :disabled="!event.startDate || !event.endDate"/>
+                            <Calendar v-model="event.publishDate" dateFormat="dd-mm-yy" showIcon class="w-full"   :maxDate="event.endDate"  :disabled="!event.startDate || !event.endDate"/>
                         </div>
                         
                         <div>
