@@ -143,6 +143,43 @@
             </DataTable>
         </div>
     </div>
+<Dialog 
+        v-model:visible="showIcDialog" 
+        header="Update Pickup Date" 
+        modal 
+        :style="{ width: '50rem' }"
+>
+    <div class="flex flex-col gap-3 w-full">
+        <div class="font-semibold">
+            SAP DO No: {{ selectedData?.do_no }}
+        </div>
+        <div class="grid md:grid-cols-2 gap-4">
+            <div>
+                <label class="block mb-2 font-medium w-full">Collector IC Number</label>
+                <InputText v-model="form.driverIC" placeholder="Enter IC No" maxlength="12" class="w-full" @keypress="handleIcInput" />
+            </div>
+            <div v-if="!selectedData.driverInformation">
+                <label class="block mb-2 font-medium w-full">Collector Driver Name</label>
+                <InputText v-model="form.driverName" placeholder="Enter Driver Name" class="w-full"  />
+            </div>
+        </div>
+        <div class="grid md:grid-cols-2 mb-2 gap-4">
+            <div v-if="!selectedData.driverInformation">
+                <label class="block mb-2 font-medium w-full">Collector Contact Number</label>
+                <InputText v-model="form.driverPhoneNum" placeholder="Enter Contact Number" maxlength="15" class="w-full" @keypress="allowOnlyNumbers" />
+            </div>
+            <div v-if="!selectedData.driverInformation">
+                <label class="block mb-2 font-medium w-full">Collector Plate No</label>
+                <InputText v-model="form.driverPlateNum" placeholder="Enter Plate No" maxlength="8" class="w-full"  />
+            </div>
+        </div>
+    </div>
+
+    <template #footer>
+        <Button label="Cancel" severity="secondary" @click="handleCloseDialog" />
+        <Button label="Confirm" @click="submitPickupUpdate" />
+    </template>
+</Dialog>
 </template>
 
 <script setup>
@@ -152,12 +189,21 @@ import { RouterLink } from 'vue-router';
 import api from '@/service/api';
 import LoadingPage from '@/components/LoadingPage.vue';
 import { useToast } from 'primevue/usetoast';
-import { useConfirm } from 'primevue';
+// import { useConfirm } from 'primevue';
 import { useMenuStore } from '@/store/menu';
 
 const menuStore = useMenuStore();
 const canUpdate = computed(() => menuStore.canWrite('Order Pickup'));
 const denyAccess = computed(() => menuStore.canTest('Order Pickup'));
+
+const showIcDialog = ref(false);
+const form = ref({
+  driverIC: '', 
+  driverName: '',      
+  driverPhoneNum: '',      
+  driverPlateNum: '',      
+});
+let selectedData = null;
 
 const loading = ref(true);
 const orderDelList = ref([]);
@@ -205,24 +251,67 @@ onMounted(async () => {
 });
 
 const toast = useToast();
-const confirmation = useConfirm();
+// const confirmation = useConfirm();
+
+const handleIcInput = (e) => {
+  if (!/[0-9]/.test(e.key)) {
+    e.preventDefault(); // ⛔ block non-digits
+  }
+};
+
+const allowOnlyNumbers = (event) => {
+  const key = event.key;
+
+  // allow digits
+  if (/[0-9]/.test(key)) return;
+
+  // allow "-"
+  if (key === '-') return;
+
+  // block everything else
+  event.preventDefault();
+};
 
 const confirmUpdatePickup = (data) => {
-  confirmation.require({
-    message: `Do you want to update the pickup for order ${data.order_no} ?`,
-    header: 'Update Pickup Date',
-    icon: 'pi pi-exclamation-triangle',
-    acceptLabel: 'Yes',
-    rejectLabel: 'No',
-    accept: async () => {
+    selectedData = data;
+    form.value.driverIC = '';
+    form.value.driverName = '';
+    form.value.driverPhoneNum = '';
+    form.value.driverPlateNum = '';
+    showIcDialog.value = true;
+};
+
+const handleCloseDialog = () => {
+    form.value.driverIC = '';
+    form.value.driverName = '';
+    form.value.driverPhoneNum = '';
+    form.value.driverPlateNum = '';
+    selectedData = null;
+    showIcDialog.value = false;
+};
+
+const submitPickupUpdate = async () => {
+        if (!form.value.driverIC || form.value.driverIC.length !== 12) {
+            toast.add({
+            severity: 'warn',
+            summary: 'Invalid IC No',
+            detail: 'IC Number must be exactly 12 digits.',
+            life: 3000
+            });
+            return;
+        }
       try {
         const payload = new FormData();
-        payload.append('orderno', data.order_no);
-
-        const res = await api.post('update-collect-time', payload);
+        // payload.append('orderno', selectedData.order_no);
+        payload.append('driverIC', form.value.driverIC);
+        payload.append('driverName', form.value.driverName);
+        payload.append('driverPhoneNum', form.value.driverPhoneNum);
+        payload.append('driverPlateNum', form.value.driverPlateNum);
+        // return;
+        const res = await api.post(`order/driver-information-scm/${selectedData.order_no}`, payload);
 
         if (res.data?.status === 1) {
-          toast.add({ severity: 'success', summary: 'Updated', detail: 'Pickup date set to now', life: 3000 });
+          toast.add({ severity: 'success', summary: 'Updated', detail: 'Pickup date collecter updated', life: 3000 });
           fetchData(); // refresh table
         } else {
           toast.add({ severity: 'error', summary: 'Error', detail: res.data?.message || 'Failed', life: 3000 });
@@ -230,12 +319,9 @@ const confirmUpdatePickup = (data) => {
       } catch (err) {
         console.error(err);
         toast.add({ severity: 'error', summary: 'Error', detail: 'API error', life: 3000 });
+      }finally{
+        handleCloseDialog();
       }
-    },
-    reject: () => {
-      // optional action on cancel
-    }
-  });
 };
 
 
