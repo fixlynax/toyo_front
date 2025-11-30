@@ -62,7 +62,7 @@
                         </div>
                     </div>
 
-                    <div v-if="event.isSurvey === 'no'" class="flex justify-end mt-8 gap-2">
+                    <div v-if="event.isSurvey === 'No'" class="flex justify-end mt-8 gap-2">
                         <div class="w-40">
                             <Button label="Cancel" class="p-button-secondary w-full mr-2" @click="$router.back()" />
                         </div>
@@ -73,7 +73,7 @@
                 </div>
 
                 <!-- Survey Questions -->
-                <div v-if="event.isSurvey === 'yes'" class="card flex flex-col gap-6 w-full">
+                <div v-if="event.isSurvey === 'Yes'" class="card flex flex-col gap-6 w-full">
                     <div class="text-2xl font-bold text-gray-800 border-b pb-2">📝 Survey Configuration</div>
                     <div class="mt-8 text-xl font-bold text-gray-800 border-b pb-2">🏆 Point Setting</div>
                     <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -152,8 +152,8 @@ const audienceOptions = [
 ];
 
 const surveyOptions = [
-    { label: 'Yes', value: 'yes' },
-    { label: 'No', value: 'no' }
+    { label: 'Yes', value: 'Yes' },
+    { label: 'No', value: 'No' }
 ];
 
 const correctAnswerOptions = [
@@ -165,7 +165,7 @@ const correctAnswerOptions = [
 // event object
 const event = ref({
     audience: 'ALL',
-    isSurvey: 'no',
+    isSurvey: 'No',
     point1: '0',
     point2: '0',
     point3: '0',
@@ -235,7 +235,7 @@ const validateFields = () => {
     }
 
     // Survey-specific validation
-    if (event.value.isSurvey === 'yes') {
+    if (event.value.isSurvey === 'Yes') {
         if (!event.value.point1 || !event.value.point2 || !event.value.point3) {
             toast.add({ severity: 'warn', summary: 'Validation', detail: 'Please fill all point fields.', life: 3000 });
             return false;
@@ -277,7 +277,7 @@ const submitEvent = async () => {
         formData.append('isSurvey', event.value.isSurvey);
 
         // Append points only if survey is yes
-        if (event.value.isSurvey === 'yes') {
+        if (event.value.isSurvey === 'Yes') {
             formData.append('point1', event.value.point1.toString());
             formData.append('point2', event.value.point2.toString());
             formData.append('point3', event.value.point3.toString());
