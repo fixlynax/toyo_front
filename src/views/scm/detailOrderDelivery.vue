@@ -13,38 +13,38 @@
                     <div class="font-semibold text-xl border-b pb-2 mt-2">Customer Details</div>
                     <div class="grid grid-cols-2 gap-4">
                         <div>
-                            <span class="text-sm text-gray-500">Customer Name</span>
+                            <span class="text-sm font-bold text-black-700">Customer Name</span>
                             <p class="text-lg font-medium">{{ orderDelList.eten_user?.companyName1 || '-' }} {{ orderDelList.eten_user?.companyName2 }} {{ orderDelList.eten_user?.companyName3 }} {{ orderDelList.eten_user?.companyName4 }}</p>
                         </div>
                         <div>
-                            <span class="text-sm text-gray-500">Account Number</span>
+                            <span class="text-sm font-bold text-black-700">Account Number</span>
                             <p class="text-lg font-medium">{{ orderDelList.eten_user?.custAccountNo || '-' }}</p>
                         </div>
                         <div>
-                            <span class="text-sm text-gray-500">Member Code</span>
+                            <span class="text-sm font-bold text-black-700">Member Code</span>
                             <p class="text-lg font-medium">{{ orderDelList.eten_user?.memberCode || '-' }}</p>
                         </div>
                         <div>
-                            <span class="text-sm text-gray-500">Location</span>
+                            <span class="text-sm font-bold text-black-700">Location</span>
                             <p class="text-lg font-medium">
                                 {{ orderDelList.eten_user?.addressLine1 }} {{ orderDelList.eten_user?.addressLine2 }} {{ orderDelList.eten_user?.addressLine3 }} {{ orderDelList.eten_user?.addressLine4 }}, {{ orderDelList.eten_user?.postcode }} {{ orderDelList.eten_user?.city }} {{ orderDelList.eten_user?.state }} 
                             </p>
                         </div>
                         <div>
-                            <span class="text-sm text-gray-500">Contact Person</span>
+                            <span class="text-sm font-bold text-black-700">Contact Person</span>
                             <p class="text-lg font-medium">{{ orderDelList.eten_user?.phoneNumber || '-' }}</p>
                         </div>
                         <div>
-                            <span class="text-sm text-gray-500">Channel</span>
+                            <span class="text-sm font-bold text-black-700">Channel</span>
                             <p class="text-lg font-medium">{{ orderDelList.eten_user?.channel || '-' }}</p>
                         </div>
                         <div>
-                            <span class="text-sm text-gray-500">Storage Location</span>
+                            <span class="text-sm font-bold text-black-700">Storage Location</span>
                             <p class="text-lg font-medium">{{ orderDelList.storagelocation || '-' }}</p>
                         </div>
                         <div>
-                            <span class="text-sm text-gray-500">City</span>
-                            <p class="text-lg font-medium">{{ orderDelList.eten_user?.city }}</p>
+                            <span class="text-sm font-bold text-black-700">City</span>
+                            <p class="text-lg font-medium">{{ orderDelList.eten_user?.city || '-' }}</p>
                         </div>
                     </div>
                 </div>
@@ -54,21 +54,21 @@
                     <div class="font-semibold text-xl border-b pb-2 mt-2">Order Item</div>
                     <div class="grid grid-cols-2 gap-4 mt-4">
                         <div>
-                            <span class="text-sm text-gray-500">Order Type</span>
-                            <p class="text-lg font-semibold">{{ orderDelList.orderDesc || '-' }}</p>
+                            <span class="text-sm font-bold text-black-700">Order Type</span>
+                            <p class="text-lg font-medium">{{ orderDelList.orderDesc || '-' }}</p>
                         </div>
                         <div>
-                            <span class="text-sm text-gray-500">Order Remarks</span>
-                            <p class="text-lg font-semibold">{{ orderDelList.order_remarks || '-' }}</p>
+                            <span class="text-sm font-bold text-black-700">Order Remarks</span>
+                            <p class="text-lg font-medium">{{ orderDelList.order_remarks || '-' }}</p>
                         </div>
                     </div>
                     <div class="grid grid-cols-2 gap-4 mt-4">
                         <div>
-                            <span class="text-sm text-gray-500">Ship To</span>
-                            <p class="text-lg font-semibold">{{ orderDelList.shipto || '-' }}</p>
+                            <span class="text-sm font-bold text-black-700">Ship To</span>
+                            <p class="text-lg font-medium">{{ orderDelList.shipto || '-' }}</p>
                         </div>
                         <div>
-                            <span class="text-sm text-gray-500">Inv No</span>
+                            <span class="text-sm font-bold text-black-700">Inv No</span>
                             <p class="text-lg font-medium">{{ orderDelList.inv_no || '-' }}</p>
                         </div>
                     </div>
@@ -117,47 +117,47 @@
                         <table class="w-full text-sm text-left text-gray-700">
                             <tbody>
                                 <tr class="border-b">
-                                    <td class="px-4 py-2 font-medium">Order No</td>
+                                    <td class="px-4 py-2 font-bold">Order No</td>
                                     <td class="px-4 py-2 text-right">{{ orderDelList.order_no || '-' }}</td>
                                 </tr>
                                 <tr class="border-b">
-                                    <td class="px-4 py-2 font-medium">SO No</td>
+                                    <td class="px-4 py-2 font-bold">SO No</td>
                                     <td class="px-4 py-2 text-right">{{ orderDelList.so_no || '-' }}</td>
                                 </tr>
                                 <tr class="border-b">
-                                    <td class="px-4 py-2 font-medium">DO No</td>
+                                    <td class="px-4 py-2 font-bold">DO No</td>
                                     <td class="px-4 py-2 text-right">{{ orderDelList.do_no || '-' }}</td>
                                 </tr>
                                 <tr class="border-b">
-                                    <td class="px-4 py-2 font-medium">Invoice No</td>
+                                    <td class="px-4 py-2 font-bold">Invoice No</td>
                                     <td class="px-4 py-2 text-right">{{ orderDelList.inv_no || '-' }}</td>
                                 </tr>
                                 <tr class="border-b">
-                                    <td class="px-4 py-2 font-medium">SAP Return No</td>
+                                    <td class="px-4 py-2 font-bold">SAP Return No</td>
                                     <td class="px-4 py-2 text-right">{{ orderDelList.sapreturnno || '-' }}</td>
                                 </tr>
                                 <tr class="border-b">
-                                    <td class="px-4 py-2 font-medium">SAP Order Type</td>
+                                    <td class="px-4 py-2 font-bold">SAP Order Type</td>
                                     <td class="px-4 py-2 text-right">{{ orderDelList.sapordertype || '-' }}</td>
                                 </tr>
                                 <tr class="border-b">
-                                    <td class="px-4 py-2 font-medium">Division</td>
+                                    <td class="px-4 py-2 font-bold">Division</td>
                                     <td class="px-4 py-2 text-right">{{ orderDelList.division || '-' }}</td>
                                 </tr>
                                 <tr class="border-b">
-                                    <td class="px-4 py-2 font-medium">ETA Date</td>
+                                    <td class="px-4 py-2 font-bold">ETA Date</td>
                                     <td class="px-4 py-2 text-right">{{ orderDelList.deliveryDate ? formatDate(orderDelList.deliveryDate) : 'Not Assigned' }}</td>
                                 </tr>
                                 <tr class="border-b">
-                                    <td class="px-4 py-2 font-medium">Planned Date</td>
+                                    <td class="px-4 py-2 font-bold">Planned Date</td>
                                     <td class="px-4 py-2 text-right">{{ orderDelList?.scm_deliver_detail?.scheduled_delivery_time? formatDate(orderDelList.scm_deliver_detail.scheduled_delivery_time): 'Not Assigned'}}</td>
                                 </tr>
                                 <tr class="border-b">
-                                    <td class="px-4 py-2 font-medium">Delivered Date</td>
+                                    <td class="px-4 py-2 font-bold">Delivered Date</td>
                                     <td class="px-4 py-2 text-right">{{ orderDelList?.scm_deliver_detail?.delivered_datetime? formatDate(orderDelList.scm_deliver_detail.delivered_datetime): 'Not Assigned'}}</td>
                                 </tr>
                                 <tr>
-                                    <td class="px-4 py-2 font-medium">Created</td>
+                                    <td class="px-4 py-2 font-bold">Created</td>
                                     <td class="px-4 py-2 text-right">{{ formatDate(orderDelList.created)}}</td>
                                 </tr>
                             </tbody>
@@ -191,7 +191,7 @@
       header="Update Planned Date"
       v-model:visible="openDialog"
       modal
-      :style="{ width: '400px' }"
+      :style="{ width: '50rem' }"
     >
       <div class="flex flex-col gap-3">
         <!-- Schedule Date -->
@@ -201,15 +201,26 @@
           placeholder="Select Planned Date"
           :minDate="new Date()"
         />
-
-        <!-- Schedule Time -->
-        <!-- <Calendar
-          v-model="form.scheduleTime"
-          showTime
-          hourFormat="24"
-          timeOnly
-          placeholder="Select Schedule Time"
-        /> -->
+        <div class="grid md:grid-cols-2 gap-4">
+            <div>
+                <label class="block mb-2 font-medium w-full">Driver IC Number</label>
+                <InputText v-model="form.driveric" placeholder="Enter IC No" maxlength="12" class="w-full" @keypress="handleIcInput" />
+            </div>
+            <div>
+                <label class="block mb-2 font-medium w-full">Driver Name</label>
+                <InputText v-model="form.drivername" placeholder="Enter Driver Name" class="w-full"  />
+            </div>
+        </div>
+        <div class="grid md:grid-cols-2 mb-2 gap-4">
+            <div>
+                <label class="block mb-2 font-medium w-full">Driver Contact Number</label>
+                <InputText v-model="form.drivercontactnum" placeholder="Enter Contact Number" maxlength="15" class="w-full" @keypress="allowOnlyNumbers" />
+            </div>
+            <div>
+                <label class="block mb-2 font-medium w-full">Driver Plate No</label>
+                <InputText v-model="form.drivervehicleplate" placeholder="Enter Plate No" maxlength="8" class="w-full"  />
+            </div>
+        </div>
 
         <!-- Actions -->
         <div class="flex justify-end gap-2 mt-3">
@@ -363,14 +374,40 @@ const openDialogFn = () => {
   } else {
     form.value.scheduleDate = new Date() // default to today
   }
-
-  openDialog.value = true
+  form.value.drivername = '';
+  form.value.drivercontactnum = '';
+  form.value.drivervehicleplate = '';
+  form.value.driveric = '';
+  openDialog.value = true;
 }
+
+const handleIcInput = (e) => {
+  if (!/[0-9]/.test(e.key)) {
+    e.preventDefault(); // ⛔ block non-digits
+  }
+};
+
+const allowOnlyNumbers = (event) => {
+  const key = event.key;
+
+  // allow digits
+  if (/[0-9]/.test(key)) return;
+
+  // allow "-"
+  if (key === '-') return;
+
+  // block everything else
+  event.preventDefault();
+};
 
 // Form
 const form = ref({
-  orderno: null, 
-  scheduleDate: null,      
+  orderno: '', 
+  scheduleDate: null,  
+  drivername: '', 
+  drivercontactnum: '',   
+  drivervehicleplate: '', 
+  driveric: '',       
 //   scheduleTime: null      
 });
 
@@ -386,12 +423,20 @@ const saveSchedule = async () => {
     toast.add({ severity: 'warn', summary: 'Warning', detail: 'Please select date', life: 3000 });
     return;
   }
+  if (!form.value.drivername || !form.value.drivercontactnum || !form.value.drivervehicleplate || !form.value.driveric) {
+    toast.add({ severity: 'warn', summary: 'Warning', detail: 'Please fullfill driver information', life: 3000 });
+    return;
+  }
 
 
   try {
     const payload = {
       orderno: form.value.orderno,
       scheduledate: formatDateApi(form.value.scheduleDate),
+      drivername: form.value.drivername,
+      drivercontactnum: form.value.drivercontactnum,
+      drivervehicleplate: form.value.drivervehicleplate,
+      driveric: form.value.driveric,
     //   scheduletime: formatTimeApi(form.value.scheduleTime)
     };
     const res = await api.post('update-schedule-order', payload);
@@ -405,6 +450,11 @@ const saveSchedule = async () => {
     console.error(err);
     toast.add({ severity: 'error', summary: 'Error', detail: 'API error', life: 3000 });
     }finally{
+        form.value.scheduleDate = null;  
+        form.value.drivername = ''; 
+        form.value.drivercontactnum = '';  
+        form.value.drivervehicleplate = '';
+        form.value.driveric = '';  
         openDialog.value = false;
     }
 };
@@ -452,8 +502,8 @@ const InitfetchData = async () => {
         const response = await api.get(`order-delivery/detail/${id}`);
         if ( (response.data.admin_data)) {
             orderDelList.value = response.data.admin_data;
-            form.value.orderno =orderDelList.value.order_no;
-            form2.value.orderno =orderDelList.value.order_no;
+            form.value.orderno = orderDelList.value.order_no;
+            form2.value.orderno = orderDelList.value.order_no;
         } else {
             console.error('API returned error or invalid data:', response.data);
             toast.add({ severity: 'error', summary: 'Error', detail: 'Failed to load data', life: 3000 });

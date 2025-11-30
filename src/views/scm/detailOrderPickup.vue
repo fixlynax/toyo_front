@@ -13,37 +13,37 @@
                     <div class="font-semibold text-xl border-b pb-2 mt-2">Customer Details</div>
                     <div class="grid grid-cols-2 gap-4">
                         <div>
-                            <span class="text-sm text-gray-500">Customer Name</span>
+                            <span class="text-sm font-bold text-black-700">Customer Name</span>
                             <p class="text-lg font-medium">{{ orderDelList.eten_user?.companyName1 || '-' }} {{ orderDelList.eten_user?.companyName2 }} {{ orderDelList.eten_user?.companyName3 }} {{ orderDelList.eten_user?.companyName4 }}</p>
                         </div>
                         <div>
-                            <span class="text-sm text-gray-500">Account Number</span>
+                            <span class="text-sm font-bold text-black-700">Account Number</span>
                             <p class="text-lg font-medium">{{ orderDelList.eten_user?.custAccountNo || '-' }}</p>
                         </div>
                         <div>
-                            <span class="text-sm text-gray-500">Member Code</span>
+                            <span class="text-sm font-bold text-black-700">Member Code</span>
                             <p class="text-lg font-medium">{{ orderDelList.eten_user?.memberCode || '-' }}</p>
                         </div>
                         <div>
-                            <span class="text-sm text-gray-500">Location</span>
+                            <span class="text-sm font-bold text-black-700">Location</span>
                             <p class="text-lg font-medium">
                                 {{ orderDelList.eten_user?.addressLine1 }} {{ orderDelList.eten_user?.addressLine2 }} {{ orderDelList.eten_user?.addressLine3 }} {{ orderDelList.eten_user?.addressLine4 }}, {{ orderDelList.eten_user?.postcode }} {{ orderDelList.eten_user?.city }} {{ orderDelList.eten_user?.state }} 
                             </p>
                         </div>
                         <div>
-                            <span class="text-sm text-gray-500">Contact Person</span>
+                            <span class="text-sm font-bold text-black-700">Contact Person</span>
                             <p class="text-lg font-medium">{{ orderDelList.eten_user?.phoneNumber || '-' }}</p>
                         </div>
                         <div>
-                            <span class="text-sm text-gray-500">Channel</span>
+                            <span class="text-sm font-bold text-black-700">Channel</span>
                             <p class="text-lg font-medium">{{ orderDelList.eten_user?.channel || '-' }}</p>
                         </div>
                         <div>
-                            <span class="text-sm text-gray-500">Storage Location</span>
+                            <span class="text-sm font-bold text-black-700">Storage Location</span>
                             <p class="text-lg font-medium">{{ orderDelList.eten_user?.storageLocation || '-' }}</p>
                         </div>
                         <div>
-                            <span class="text-sm text-gray-500">City</span>
+                            <span class="text-sm font-bold text-black-700">City</span>
                             <p class="text-lg font-medium">{{ orderDelList.eten_user?.city || '-' }}</p>
                         </div>
                     </div>
@@ -55,19 +55,19 @@
                     </div>
                     <div class="grid grid-cols-2 gap-4">
                         <div>
-                            <span class="text-sm text-gray-500">Driver</span>
+                            <span class="text-sm font-bold text-black-700">Driver</span>
                             <p lass="text-lg font-medium">{{ orderDelList.driverInformation?.driverName ? orderDelList.driverInformation.driverName: 'Not Assigned' }}</p>
                         </div>
                         <div>
-                            <span class="text-sm text-gray-500">Contact No</span>
+                            <span class="text-sm font-bold text-black-700">Contact No</span>
                             <p lass="text-lg font-medium">{{ orderDelList.driverInformation?.driverPhoneNumber ? orderDelList.driverInformation.driverPhoneNumber: 'Not Assigned' }}</p>
                         </div>
                         <div>
-                            <span class="text-sm text-gray-500">IC No</span>
+                            <span class="text-sm font-bold text-black-700">IC No</span>
                             <p lass="text-lg font-medium">{{ orderDelList.driverInformation?.driverIC ? orderDelList.driverInformation.driverIC: 'Not Assigned' }}</p>
                         </div>
                         <div>
-                            <span class="text-sm text-gray-500">Truck Plate</span>
+                            <span class="text-sm font-bold text-black-700">Truck Plate</span>
                             <p lass="text-lg font-medium">{{ orderDelList.driverInformation?.driverTruckPlate ? orderDelList.driverInformation.driverTruckPlate: 'Not Assigned' }}</p>
                         </div>
                     </div>
@@ -78,19 +78,19 @@
                     <div class="font-semibold text-xl border-b pb-2 mt-2">Order Item</div>
                     <div class="grid grid-cols-2 gap-4 mt-4">
                         <div>
-                            <span class="text-sm text-gray-500">Pickup Type</span>
-                            <p class="text-lg font-semibold">{{ orderDelList.deliveryType || '-' }}</p>
+                            <span class="text-sm font-bold text-black-700">Pickup Type</span>
+                            <p class="text-lg font-medium">{{ orderDelList.deliveryType || '-' }}</p>
                         </div>
                         <div>
-                            <span class="text-sm text-gray-500">Order Remarks</span>
-                            <p class="text-lg font-semibold">{{ orderDelList.order_remarks || '-' }}</p>
+                            <span class="text-sm font-bold text-black-700">Order Remarks</span>
+                            <p class="text-lg font-medium">{{ orderDelList.order_remarks || '-' }}</p>
                         </div>
                         <div>
-                            <span class="text-sm text-gray-500">Ship To</span>
-                            <p class="text-lg font-semibold">{{ orderDelList.shipto || '-' }}</p>
+                            <span class="text-sm font-bold text-black-700">Ship To</span>
+                            <p class="text-lg font-medium">{{ orderDelList.shipto || '-' }}</p>
                         </div>
                         <div>
-                            <span class="text-sm text-gray-500">Inv No</span>
+                            <span class="text-sm font-bold text-black-700">Inv No</span>
                             <p class="text-lg font-medium">{{ orderDelList.inv_no || '-' }}</p>
                         </div>
                     </div>
@@ -134,43 +134,52 @@
                         <table class="w-full text-sm text-left text-gray-700">
                             <tbody>
                                 <tr class="border-b">
-                                    <td class="px-4 py-2 font-medium">Order No</td>
+                                    <td class="px-4 py-2 font-bold">Order No</td>
                                     <td class="px-4 py-2 text-right">{{ orderDelList.order_no || '-' }}</td>
                                 </tr>
                                 <tr class="border-b">
-                                    <td class="px-4 py-2 font-medium">SO No</td>
+                                    <td class="px-4 py-2 font-bold">SO No</td>
                                     <td class="px-4 py-2 text-right">{{ orderDelList.so_no || '-' }}</td>
                                 </tr>
                                 <tr class="border-b">
-                                    <td class="px-4 py-2 font-medium">DO No</td>
+                                    <td class="px-4 py-2 font-bold">DO No</td>
                                     <td class="px-4 py-2 text-right">{{ orderDelList.do_no || '-' }}</td>
                                 </tr>
                                 <tr class="border-b">
-                                    <td class="px-4 py-2 font-medium">Invoice No</td>
+                                    <td class="px-4 py-2 font-bold">Invoice No</td>
                                     <td class="px-4 py-2 text-right">{{ orderDelList.inv_no || '-' }}</td>
                                 </tr>
                                 <tr class="border-b">
-                                    <td class="px-4 py-2 font-medium">SAP Return No</td>
+                                    <td class="px-4 py-2 font-bold">SAP Return No</td>
                                     <td class="px-4 py-2 text-right">{{ orderDelList.sapreturnno || '-' }}</td>
                                 </tr>
                                 <tr class="border-b">
-                                    <td class="px-4 py-2 font-medium">SAP Order Type</td>
+                                    <td class="px-4 py-2 font-bold">SAP Order Type</td>
                                     <td class="px-4 py-2 text-right">{{ orderDelList.sapordertype || '-' }}</td>
                                 </tr>
                                 <tr class="border-b">
-                                    <td class="px-4 py-2 font-medium">Division</td>
+                                    <td class="px-4 py-2 font-bold">Division</td>
                                     <td class="px-4 py-2 text-right">{{ orderDelList.division || '-' }}</td>
                                 </tr>
                                 <tr class="border-b">
-                                    <td class="px-4 py-2 font-medium">Pickup</td>
+                                    <td class="px-4 py-2 font-bold">Pickup</td>
                                     <td class="px-4 py-2 text-right">{{ orderDelList.driverInformation?.pickup_datetime? formatDate(orderDelList.driverInformation.pickup_datetime): 'Not Assigned' }}</td>
                                 </tr>
                                 <tr>
-                                    <td class="px-4 py-2 font-medium">Created</td>
+                                    <td class="px-4 py-2 font-bold">Created</td>
                                     <td class="px-4 py-2 text-right">{{ formatDate(orderDelList.created) || '-' }}</td>
                                 </tr>
                             </tbody>
                         </table>
+                    </div>
+                    <div v-if="!orderDelList.driverInformation && canUpdate" class="flex justify-end mt-3">
+                        <Button  
+                            style="width: auto !important"
+                            label="Update Collector Information"
+                            icon="pi pi-pencil"
+                            class="p-button-sm p-button-warning"
+                            @click="confirmUpdatePickup(orderDelList)"
+                        />
                     </div>
                     <div v-if="orderDelList.driverInformation && !orderDelList?.driverInformation?.pickup_datetime && canUpdate" class="flex justify-end mt-3">
                         <Button  
@@ -178,13 +187,72 @@
                             label="Update Pickup Date"
                             icon="pi pi-calendar"
                             class="p-button-sm p-button-warning"
-                            @click="confirmUpdatePickup(orderDelList)"
+                            @click="confirmUpdatePickup2(orderDelList)"
                         />
                     </div>
                 </div>
             </div>
         </div>
     </Fluid>
+    <Dialog 
+            v-model:visible="showIcDialog" 
+            header="Update Collector information" 
+            modal 
+            :style="{ width: '50rem' }"
+    >
+        <div class="flex flex-col gap-3 w-full">
+            <div class="font-semibold">
+                SAP DO No: {{ selectedData?.do_no }}
+            </div>
+            <div class="grid md:grid-cols-2 gap-4">
+                <div>
+                    <label class="block mb-2 font-medium w-full">Collector IC Number</label>
+                    <InputText v-model="form.driverIC" placeholder="Enter IC No" maxlength="12" class="w-full" @keypress="handleIcInput" />
+                </div>
+                <div>
+                    <label class="block mb-2 font-medium w-full">Collector Driver Name</label>
+                    <InputText v-model="form.driverName" placeholder="Enter Driver Name" class="w-full"  />
+                </div>
+            </div>
+            <div class="grid md:grid-cols-2 mb-2 gap-4">
+                <div>
+                    <label class="block mb-2 font-medium w-full">Collector Contact Number</label>
+                    <InputText v-model="form.driverPhoneNum" placeholder="Enter Contact Number" maxlength="15" class="w-full" @keypress="allowOnlyNumbers" />
+                </div>
+                <div>
+                    <label class="block mb-2 font-medium w-full">Collector Plate No</label>
+                    <InputText v-model="form.driverPlateNum" placeholder="Enter Plate No" maxlength="8" class="w-full"  />
+                </div>
+            </div>
+        </div>
+
+        <template #footer>
+            <Button label="Cancel" severity="secondary" @click="handleCloseDialog" />
+            <Button label="Confirm" @click="submitPickupUpdate" />
+        </template>
+    </Dialog>
+    <Dialog 
+            v-model:visible="showIcDialog2" 
+            header="Update Pickup Date" 
+            modal 
+            :style="{ width: '30rem' }"
+    >
+        <div class="flex flex-col gap-3 w-full">
+            <div class="font-semibold">
+                SAP DO No: {{ selectedData?.do_no }}
+            </div>
+
+            <div>
+                <label class="block mb-4 font-medium w-full">Collector IC Number</label>
+                <InputText v-model="icNo" placeholder="Enter IC No" maxlength="12" class="w-full" @keypress="handleIcInput"  />
+            </div>
+        </div>
+
+        <template #footer>
+            <Button label="Cancel" severity="secondary" @click="handleCloseDialog2" />
+            <Button label="Confirm" @click="submitPickupUpdate2" />
+        </template>
+    </Dialog>
 </template>
 
 <script setup>
@@ -195,6 +263,13 @@ import { useRoute, useRouter } from 'vue-router';
 import { useConfirm } from 'primevue';
 import { useMenuStore } from '@/store/menu';
 
+defineProps({
+  id: {
+    type: [String, Number],
+    required: false
+  }
+});
+
 const menuStore = useMenuStore();
 const canUpdate = computed(() => menuStore.canWrite('Order Pickup'));
 const denyAccess = computed(() => menuStore.canTest('Order Pickup'));
@@ -204,19 +279,114 @@ const orderDelList = ref({});
 const loading = ref(false);
 
 const toast = useToast();
-const confirmation = useConfirm();
+// const confirmation = useConfirm();
 
+const showIcDialog = ref(false);
+const showIcDialog2 = ref(false);
+const form = ref({
+  driverIC: '', 
+  driverName: '',      
+  driverPhoneNum: '',      
+  driverPlateNum: '',      
+});
+const icNo = ref('');
+let selectedData = null;
+
+const handleIcInput = (e) => {
+  if (!/[0-9]/.test(e.key)) {
+    e.preventDefault(); // ⛔ block non-digits
+  }
+};
+const allowOnlyNumbers = (event) => {
+  const key = event.key;
+
+  // allow digits
+  if (/[0-9]/.test(key)) return;
+
+  // allow "-"
+  if (key === '-') return;
+
+  // block everything else
+  event.preventDefault();
+};
 const confirmUpdatePickup = (data) => {
-  confirmation.require({
-    message: `Do you want to update the pickup for order ${data.order_no} ?`,
-    header: 'Update Pickup Date',
-    icon: 'pi pi-exclamation-triangle',
-    acceptLabel: 'Yes',
-    rejectLabel: 'No',
-    accept: async () => {
+    selectedData = data;
+    form.value.driverIC = '';
+    form.value.driverName = '';
+    form.value.driverPhoneNum = '';
+    form.value.driverPlateNum = '';
+    showIcDialog.value = true;
+};
+
+const handleCloseDialog = () => {
+    form.value.driverIC = '';
+    form.value.driverName = '';
+    form.value.driverPhoneNum = '';
+    form.value.driverPlateNum = '';
+    selectedData = null;
+    showIcDialog.value = false;
+};
+
+const submitPickupUpdate = async () => {
+        if (!form.value.driverIC || form.value.driverIC.length !== 12) {
+            toast.add({
+            severity: 'warn',
+            summary: 'Invalid IC No',
+            detail: 'IC Number must be exactly 12 digits.',
+            life: 3000
+            });
+            return;
+        }
       try {
         const payload = new FormData();
-        payload.append('orderno', data.order_no);
+        // payload.append('orderno', selectedData.order_no);
+        payload.append('driverIC', form.value.driverIC);
+        payload.append('driverName', form.value.driverName);
+        payload.append('driverPhoneNum', form.value.driverPhoneNum);
+        payload.append('driverPlateNum', form.value.driverPlateNum);
+        // return;
+        const res = await api.post(`order/driver-information-scm/${selectedData.order_no}`, payload);
+
+        if (res.data?.status === 1) {
+          toast.add({ severity: 'success', summary: 'Updated', detail: 'Pickup date collecter information updated', life: 3000 });
+          InitfetchData(); // refresh table
+        } else {
+          toast.add({ severity: 'error', summary: 'Error', detail: res.data?.message || 'Failed', life: 3000 });
+        }
+      } catch (err) {
+        console.error(err);
+        toast.add({ severity: 'error', summary: 'Error', detail: 'API error', life: 3000 });
+      }finally{
+        handleCloseDialog();
+      }
+};
+
+const confirmUpdatePickup2 = (data) => {
+    selectedData = data;
+    icNo.value = '';
+    showIcDialog2.value = true;
+};
+
+const handleCloseDialog2 = () => {
+  icNo.value = '';
+  selectedData = null;
+   showIcDialog2.value = false;
+};
+
+const submitPickupUpdate2 = async () => {
+        if (!icNo.value || icNo.value.length !== 12) {
+            toast.add({
+            severity: 'warn',
+            summary: 'Invalid IC No',
+            detail: 'IC Number must be exactly 12 digits.',
+            life: 3000
+            });
+            return;
+        }
+      try {
+        const payload = new FormData();
+        payload.append('orderno', selectedData.order_no);
+        payload.append('collectoric', icNo.value);
 
         const res = await api.post('update-collect-time', payload);
 
@@ -229,12 +399,10 @@ const confirmUpdatePickup = (data) => {
       } catch (err) {
         console.error(err);
         toast.add({ severity: 'error', summary: 'Error', detail: 'API error', life: 3000 });
+      }finally{
+        handleCloseDialog2();
       }
-    },
-    reject: () => {
-      // optional action on cancel
-    }
-  });
+
 };
 
 const formatItemNo = (itemNo) => {

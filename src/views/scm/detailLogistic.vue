@@ -17,23 +17,23 @@
           </div>
           <div class="grid grid-cols-2 gap-4">
               <div>
-                  <span class="text-sm text-gray-500">Logistic Name</span>
+                  <span class="text-sm font-bold text-black-700">Logistic Name</span>
                   <p class="text-lg font-medium">{{ logisticList.companyname }}</p>
               </div>
               <div>
-                  <span class="text-sm text-gray-500">Storage Location</span>
+                  <span class="text-sm font-bold text-black-700">Storage Location</span>
                   <p class="text-lg font-medium">{{ logisticList.storageLocationList }}</p>
               </div>
               <div>
-                  <span class="text-sm text-gray-500">Address</span>
+                  <span class="text-sm font-bold text-black-700">Address</span>
                   <p class="text-lg font-medium">{{ `${logisticList.addressline1} ${logisticList.addressline2} ${logisticList.city} ${logisticList.postcode} ${logisticList.state}`}}</p>
               </div>
               <div>
-                  <span class="text-sm text-gray-500">Contact Person</span>
+                  <span class="text-sm font-bold text-black-700">Contact Person</span>
                   <p class="text-lg font-medium">{{ logisticList.contactperson || '-' }}</p>
               </div>
               <div>
-                  <span class="text-sm text-gray-500">Mobile No</span>
+                  <span class="text-sm font-bold text-black-700">Mobile No</span>
                   <p class="text-lg font-medium">{{ logisticList.mobileno }}</p>
               </div>
           </div>
@@ -58,15 +58,15 @@
             <table class="w-full text-sm text-left text-gray-700">
               <tbody>
                 <tr class="border-b">
-                  <td class="px-4 py-2 font-medium">Username</td>
+                  <td class="px-4 py-2 font-bold">Username</td>
                   <td class="px-4 py-2 text-right">{{ logisticList.uname }}</td>
                 </tr>
                 <tr class="border-b">
-                  <td class="px-4 py-2 font-medium">Created Date</td>
+                  <td class="px-4 py-2 font-bold">Created Date</td>
                   <td class="px-4 py-2 text-right">{{ formatDate(logisticList.created) }}</td>
                 </tr>
                 <tr class="border-b">
-                  <td class="px-4 py-2 font-medium">Last Login Date</td>
+                  <td class="px-4 py-2 font-bold">Last Login Date</td>
                   <td class="px-4 py-2 text-right">{{ logisticList.lastLogin ? formatDate(logisticList.lastLogin) : 'Never' }}</td>
                 </tr>
               </tbody>
