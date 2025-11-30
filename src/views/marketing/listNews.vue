@@ -73,11 +73,11 @@
                     </template>
                 </Column>
 
-                <Column field="audience" header="Audience" sortable style="min-width: 6rem">
+                <!-- <Column field="audience" header="Audience" sortable style="min-width: 6rem">
                     <template #body="{ data }">
                         {{ data.audience }}
                     </template>
-                </Column>
+                </Column> -->
 
                 <Column field="viewer" header="Viewer" sortable style="min-width: 6rem">
                     <template #body="{ data }">

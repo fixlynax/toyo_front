@@ -39,10 +39,10 @@
                             <Calendar v-model="event.publishDate" dateFormat="dd-mm-yy" showIcon class="w-full" :minDate="event.startDate"  :maxDate="event.endDate"  :disabled="!event.startDate || !event.endDate"/>
                         </div>
 
-                        <div>
+                        <!-- <div>
                             <label class="block font-bold text-gray-700">Audience</label>
                             <Dropdown v-model="event.audience" :options="audienceOptions" optionLabel="label" optionValue="value" class="w-full" />
-                        </div>
+                        </div> -->
 
                         <div>
                             <label class="block font-bold text-gray-700">Survey</label>

@@ -40,10 +40,10 @@
                             <Calendar v-model="event.publishDate" dateFormat="dd-mm-yy" showIcon class="w-full"   :maxDate="event.endDate"  :disabled="!event.startDate || !event.endDate"/>
                         </div>
                         
-                        <div>
+                        <!-- <div>
                             <label class="block font-bold text-gray-700">Audience</label>
                             <Dropdown v-model="event.audience" :options="audienceOptions" optionLabel="label" optionValue="value" class="w-full" />
-                        </div>
+                        </div> -->
 
                         <div>
                             <label class="block font-bold text-gray-700">Survey</label>
@@ -108,10 +108,10 @@
                                 </FloatLabel>
                             </div>
 
-                            <div class="mt-4">
+                            <!-- <div class="mt-4">
                                 <label class="block font-semibold text-gray-700 mb-2">Correct Answer</label>
                                 <Dropdown v-model="q.correctAnswer" :options="correctAnswerOptions" optionLabel="label" optionValue="value" placeholder="Select correct answer" class="w-full" />
-                            </div>
+                            </div> -->
                         </div>
                     </div>
 
@@ -166,9 +166,9 @@ const correctAnswerOptions = [
 const event = ref({
     audience: 'ALL',
     isSurvey: 'no',
-    point1: '',
-    point2: '',
-    point3: '',
+    point1: '0',
+    point2: '0',
+    point3: '0',
     title: '',
     desc: '',
     location: '',
@@ -245,11 +245,11 @@ const validateFields = () => {
             return false;
         }
         for (let q of questions.value) {
-            if (!q.question || !q.answers[0] || !q.answers[1] || !q.answers[2] || !q.correctAnswer) {
+            if (!q.question || !q.answers[0] || !q.answers[1] || !q.answers[2] ) {
                 toast.add({
                     severity: 'warn',
                     summary: 'Validation',
-                    detail: 'All questions, answers, and correct answers are required.',
+                    detail: 'All questions and answers are required.',
                     life: 3000
                 });
                 return false;
