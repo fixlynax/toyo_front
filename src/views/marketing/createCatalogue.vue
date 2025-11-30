@@ -51,6 +51,21 @@
                         <small v-if="errors.valueAmount" class="text-red-500">{{ errors.valueAmount }}</small>
                     </div>
 
+                    <!-- Download Template Button for EWALLET -->
+                    <div v-if="catalogue.type === 'EWALLET'" class="md:col-span-2">
+                        <div class="flex items-center gap-4 mb-2">
+                            <label class="block font-bold text-gray-700">Download Empty Template</label>
+                            <Button 
+                                label="Download Excel Template" 
+                                icon="pi pi-download" 
+                                class="p-button-outlined p-button-sm"
+                                @click="downloadEmptyTemplate"
+                                :loading="downloadingTemplate"
+                            />
+                        </div>
+                        <small class="text-gray-500">Download the template file and fill in the required columns before uploading</small>
+                    </div>
+
                     <!-- E-Wallet File Upload -->
                     <div v-if="catalogue.type === 'EWALLET'" class="md:col-span-2">
                         <label class="block font-bold text-gray-700 mb-1">E-Wallet PIN File *</label>
@@ -177,6 +192,7 @@ import api from '@/service/api';
 const toast = useToast();
 const router = useRouter();
 const loading = ref(false);
+const downloadingTemplate = ref(false);
 const errors = ref({});
 
 // Dropdown options
@@ -213,10 +229,10 @@ const catalogue = ref({
   terms: '',
   instruction: '',
   expiry: null,
-  quantity: '',
+  quantity: null,
   provider: '',
   valueType: '',
-  valueAmount: '',
+  valueAmount: null,
   point1: 0,
   point2: 0,
   point3: 0,
@@ -242,6 +258,57 @@ const onEwalletFileSelect = (event) => {
   if (file) ewalletFile.value = file;
 };
 
+/* Download Empty Template */
+const downloadEmptyTemplate = async () => {
+  downloadingTemplate.value = true;
+  try {
+    const response = await api.customRequest({
+      method: 'GET',
+      url: '/api/catalog/emptyPinTemplate',
+      responseType: 'blob' // Important for file downloads
+    });
+
+    // Create a blob from the response data
+    const blob = new Blob([response.data], { 
+      type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' 
+    });
+    
+    // Create a temporary URL for the blob
+    const url = window.URL.createObjectURL(blob);
+    
+    // Create a temporary link element to trigger the download
+    const link = document.createElement('a');
+    link.href = url;
+    link.setAttribute('download', 'ewallet-pin-template.xlsx');
+    
+    // Append to body, click, and remove
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    
+    // Clean up the URL object
+    window.URL.revokeObjectURL(url);
+    
+    toast.add({ 
+      severity: 'success', 
+      summary: 'Success', 
+      detail: 'Template downloaded successfully', 
+      life: 3000 
+    });
+  } catch (error) {
+    console.error('Download Error:', error);
+    const message = error.response?.data?.message || 'Failed to download template';
+    toast.add({ 
+      severity: 'error', 
+      summary: 'Error', 
+      detail: message, 
+      life: 4000 
+    });
+  } finally {
+    downloadingTemplate.value = false;
+  }
+};
+
 /* Format Date -> backend expects d-m-Y */
 const formatDate = (date) => {
   if (!date) return '';
@@ -254,24 +321,34 @@ const validateFields = () => {
   errors.value = {};
   const c = catalogue.value;
 
+  // Required fields for all types
   if (!c.type) errors.value.type = 'Type is required';
   if (!c.isBirthday) errors.value.isBirthday = 'Is Birthday is required';
   if (!c.title) errors.value.title = 'Title is required';
   if (!c.description) errors.value.description = 'Description is required';
   if (!c.expiry) errors.value.expiry = 'Expiry date is required';
-  if (c.point1 === '' || c.point1 === null) errors.value.point1 = 'Silver point is required';
-  if (c.point2 === '' || c.point2 === null) errors.value.point2 = 'Gold point is required';
-  if (c.point3 === '' || c.point3 === null) errors.value.point3 = 'Platinum point is required';
+  
+  // Point validation
+  if (c.point1 === '' || c.point1 === null || c.point1 < 0) errors.value.point1 = 'Silver point is required and must be numeric';
+  if (c.point2 === '' || c.point2 === null || c.point2 < 0) errors.value.point2 = 'Gold point is required and must be numeric';
+  if (c.point3 === '' || c.point3 === null || c.point3 < 0) errors.value.point3 = 'Platinum point is required and must be numeric';
 
-  if (c.type === 'ITEM' && !c.sku) errors.value.sku = 'SKU is required';
-  if ((c.type === 'EVOUCHER' || c.type === 'ITEM') && (!c.quantity || c.quantity <= 0))
-    errors.value.quantity = 'Quantity is required';
-  if ((c.type === 'EVOUCHER' || c.type === 'EWALLET') && !c.valueType)
-    errors.value.valueType = 'Value Type is required';
-  if (c.type === 'EVOUCHER' && (!c.valueAmount || c.valueAmount <= 0))
-    errors.value.valueAmount = 'Value Amount is required';
-  if (c.type === 'EWALLET' && !ewalletFile.value)
-    errors.value.ewallet_pin_file = 'E-Wallet PIN file is required';
+  // Conditional validations based on type
+  if (c.type === 'ITEM') {
+    if (!c.sku) errors.value.sku = 'SKU is required for ITEM type';
+    if (!c.quantity || c.quantity <= 0) errors.value.quantity = 'Quantity is required for ITEM type';
+  }
+
+  if (c.type === 'EVOUCHER') {
+    if (!c.quantity || c.quantity <= 0) errors.value.quantity = 'Quantity is required for EVOUCHER type';
+    if (!c.valueType) errors.value.valueType = 'Value Type is required for EVOUCHER type';
+    if (!c.valueAmount || c.valueAmount <= 0) errors.value.valueAmount = 'Value Amount is required for EVOUCHER type';
+  }
+
+  if (c.type === 'EWALLET') {
+    if (!c.valueType) errors.value.valueType = 'Value Type is required for EWALLET type';
+    if (!ewalletFile.value) errors.value.ewallet_pin_file = 'E-Wallet PIN file is required for EWALLET type';
+  }
 
   return Object.keys(errors.value).length === 0;
 };
@@ -288,10 +365,9 @@ const submitCatalogue = async () => {
     const c = catalogue.value;
     const formData = new FormData();
 
-    // Required fields
-    formData.append('type', c.type.toUpperCase());
-    formData.append('isBirthday', c.isBirthday.toUpperCase());
-    if (c.purpose) formData.append('purpose', c.purpose.toUpperCase());
+    // Required fields for all types
+    formData.append('type', c.type);
+    formData.append('isBirthday', c.isBirthday);
     formData.append('title', c.title);
     formData.append('description', c.description);
     formData.append('expiry', formatDate(c.expiry));
@@ -299,18 +375,23 @@ const submitCatalogue = async () => {
     formData.append('point2', c.point2);
     formData.append('point3', c.point3);
 
-    // Optional or conditional fields
+    // Optional fields
+    if (c.purpose) formData.append('purpose', c.purpose);
     if (c.terms) formData.append('terms', c.terms);
     if (c.instruction) formData.append('instruction', c.instruction);
-    if (c.sku) formData.append('sku', c.sku);
-    if (c.quantity) formData.append('quantity', c.quantity);
-    if (c.provider) formData.append('provider', c.provider);
-    if (c.valueType) formData.append('valueType', c.valueType.toUpperCase());
-    if (c.valueAmount) formData.append('valueAmount', c.valueAmount);
 
+    // Conditional fields
+    if (c.type === 'ITEM' && c.sku) formData.append('sku', c.sku);
+    if ((c.type === 'EVOUCHER' || c.type === 'ITEM') && c.quantity) formData.append('quantity', c.quantity);
+    if (c.type === 'EVOUCHER' && c.provider) formData.append('provider', c.provider);
+    if ((c.type === 'EVOUCHER' || c.type === 'EWALLET') && c.valueType) formData.append('valueType', c.valueType);
+    if (c.type === 'EVOUCHER' && c.valueAmount) formData.append('valueAmount', c.valueAmount);
+
+    // File uploads
     if (imageFiles.value.image1) formData.append('image1', imageFiles.value.image1);
-    if (c.type === 'EWALLET' && ewalletFile.value)
+    if (c.type === 'EWALLET' && ewalletFile.value) {
       formData.append('ewallet_pin_file', ewalletFile.value);
+    }
 
     const response = await api.customRequest({
       method: 'POST',

@@ -538,22 +538,22 @@
                 <!-- Claim Percentage -->
                 <div class="field">
                     <label class="block font-bold text-gray-700 mb-2">MFG Code *</label>
-                     <InputText v-model="editTireData.mfgcode" class="w-full" />
+                     <InputText v-model="editTireData.mfgcode" class="w-full" maxlength="5" />
                     <small v-if="(!editTireData.mfgcode) && editValidationTire" class="text-red-600">MFG Code is required.</small>
                 </div>
                 <div class="field">
                     <label class="block font-bold text-gray-700 mb-2">Size Code *</label>
-                     <InputText v-model="editTireData.sizecode" class="w-full" />
+                     <InputText v-model="editTireData.sizecode" class="w-full" maxlength="5"/>
                     <small v-if="(!editTireData.sizecode) && editValidationTire" class="text-red-600">Size Code is required.</small>
                 </div>
                 <div class="field">
                     <label class="block font-bold text-gray-700 mb-2">Tyre Spec *</label>
-                     <InputText v-model="editTireData.tyrespec" class="w-full" />
+                     <InputText v-model="editTireData.tyrespec" class="w-full" maxlength="5" />
                     <small v-if="(!editTireData.tyrespec) && editValidationTire" class="text-red-600">Tyre Spec is required.</small>
                 </div>
                 <div class="field">
                     <label class="block font-bold text-gray-700 mb-2">Week Code *</label>
-                     <InputText v-model="editTireData.weekcode" class="w-full" />
+                     <InputText v-model="editTireData.weekcode" class="w-full" maxlength="5"/>
                     <small v-if="(!editTireData.weekcode) && editValidationTire" class="text-red-600">Week Code is required.</small>
                 </div>
             </div>

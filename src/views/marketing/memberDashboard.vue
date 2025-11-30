@@ -4,13 +4,13 @@
 
         <div class="col-span-12 xl:col-span-6"></div>
     </div>
-    <div class="card flex justify-center">
+    <!-- <div class="card flex justify-center">
         <div class="grid grid-cols-12 gap-8">
             <div class="col-span-12 xl:col-span-auto">
                 <Chart type="pie" :data="chartData" :options="chartOptions" class="w-full md:w-[30rem]" />
             </div>
         </div>
-    </div>
+    </div> -->
 </template>
 
 <script setup>

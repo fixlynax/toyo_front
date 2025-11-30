@@ -169,7 +169,7 @@ const clearDateRange = () => {
                 :filters="filters1"
                 :rowsPerPageOptions="[10, 20, 50, 100]"
                 filterDisplay="menu"
-                :globalFilterFields="['orderNo', 'custAccountNo', 'companyName', 'shipToAccountNo', 'created', 'orderType', 'deliveryType']"
+                :globalFilterFields="['orderNo', 'custAccountNo', 'companyName', 'shipToAccountNo', 'created', 'orderType', 'deliveryType', 'invoiceNo', 'doNo', 'soNo']"
                 class="rounded-table"
                 sortField="created"
                 :sortOrder="-1"
@@ -256,43 +256,38 @@ const clearDateRange = () => {
                     <template #body="{ data }">{{ data.shipToAccountNo || data.custAccountNo || '-' }}</template>
                 </Column>
 
-                <!-- Modified Delivery Info Column - Horizontal Layout -->
-                <Column style="min-width: 20rem">
-                    <!-- Custom Header -->
-                    <template #header>
-                        <div class="flex flex-col w-full">
-                            <!-- Title -->
-                            <div class="text-center font-bold text-gray-800 mb-1">Delivery Info</div>
-
-                            <!-- Sub-headers -->
-                            <div class="flex text-xs text-black font-semibold">
-                                <div class="w-1/3 py-1 text-center">ETA</div>
-                                <div class="w-1/3 py-1 text-center border-l border-gray-200">Planned</div>
-                                <div class="w-1/3 py-1 text-center border-l border-gray-200">Delivered</div>
-                            </div>
-                        </div>
-                    </template>
-
-                    <!-- Body -->
+                <!-- Modified Delivery Info Column - Vertical Layout -->
+                <Column header="Delivery Info" style="min-width: 12rem">
                     <template #body="{ data }">
-                        <div class="flex">
-                            <div class="w-1/3 py-2 text-center text-sm">
-                                <strong>{{ formatDeliveryDate(data.deliveryDate) || '-' }}</strong>
+                        <div class="flex flex-col space-y-1 text-sm">
+                            <!-- ETA -->
+                            <div class="flex justify-between items-center">
+                                <span class="font-semibold text-gray-600">ETA:</span>
+                                <span class="font-medium">{{ formatDeliveryDate(data.deliveryDate) || '-' }}</span>
                             </div>
 
-                            <div class="w-1/3 py-2 text-center text-sm border-l border-gray-200">
-                                <strong>{{ data.scmDeliverInfo ? formatDeliveryDate(data.scmDeliverInfo.scheduled_delivery_time) : '-' }}</strong>
+                            <!-- Planned -->
+                            <div class="flex justify-between items-center">
+                                <span class="font-semibold text-gray-600">Planned:</span>
+                                <span class="font-medium">{{ data.scmDeliverInfo ? formatDeliveryDate(data.scmDeliverInfo.scheduled_delivery_time) : '-' }}</span>
                             </div>
 
-                            <div class="w-1/3 py-2 text-center text-sm border-l border-gray-200">
-                                <template v-if="data.scmDeliverInfo?.delivered_datetime">
-                                    <strong>{{ formatDeliveryDate(data.scmDeliverInfo.delivered_datetime) }}</strong>
-                                </template>
-                                <template v-else-if="data.scmPickupInfo?.pickup_datetime">
-                                    <strong>{{ formatDeliveryDate(data.scmPickupInfo.pickup_datetime) }}</strong>
-                                </template>
-                                <template v-else><strong>-</strong></template>
+                            <!-- Delivered -->
+                            <div class="flex justify-between items-center">
+                                <span class="font-semibold text-gray-600">Delivered:</span>
+                                <span class="font-medium">
+                                    <template v-if="data.scmDeliverInfo?.delivered_datetime">
+                                        {{ formatDeliveryDate(data.scmDeliverInfo.delivered_datetime) }}
+                                    </template>
+                                    <template v-else-if="data.scmPickupInfo?.pickup_datetime">
+                                        {{ formatDeliveryDate(data.scmPickupInfo.pickup_datetime) }}
+                                    </template>
+                                    <template v-else>-</template>
+                                </span>
                             </div>
+
+                            <!-- Show message if no delivery info data -->
+                            <div v-if="!data.deliveryDate && !data.scmDeliverInfo && !data.scmPickupInfo" class="text-center text-gray-400 py-1">-</div>
                         </div>
                     </template>
                 </Column>
@@ -305,23 +300,21 @@ const clearDateRange = () => {
                                 <span class="font-semibold text-gray-600">SO:</span>
                                 <span class="font-medium">{{ data.soNo || '-' }}</span>
                             </div>
-                            
+
                             <!-- DO -->
                             <div class="flex justify-between items-center">
                                 <span class="font-semibold text-gray-600">DO:</span>
                                 <span class="font-medium">{{ data.doNo || '-' }}</span>
                             </div>
-                            
+
                             <!-- Invoice (only show if exists) -->
                             <div v-if="data.invoiceNo" class="flex justify-between items-center">
                                 <span class="font-semibold text-gray-600">Inv No:</span>
                                 <span class="font-medium">{{ data.invoiceNo }}</span>
                             </div>
-                            
+
                             <!-- Show message if no SAP ref data -->
-                            <div v-if="!data.soNo && !data.doNo && !data.invoiceNo" class="text-center text-gray-400 py-1">
-                                -
-                            </div>
+                            <div v-if="!data.soNo && !data.doNo && !data.invoiceNo" class="text-center text-gray-400 py-1">-</div>
                         </div>
                     </template>
                 </Column>
