@@ -51,6 +51,21 @@
                         <small v-if="errors.valueAmount" class="text-red-500">{{ errors.valueAmount }}</small>
                     </div>
 
+                    <!-- Download Template Button for EWALLET -->
+                    <div v-if="catalogue.type === 'EWALLET'" class="md:col-span-2">
+                        <div class="flex items-center gap-4 mb-2">
+                            <label class="block font-bold text-gray-700">Download Empty Template</label>
+                            <Button 
+                                label="Download Excel Template" 
+                                icon="pi pi-download" 
+                                class="p-button-outlined p-button-sm"
+                                @click="downloadEmptyTemplate"
+                                :loading="downloadingTemplate"
+                            />
+                        </div>
+                        <small class="text-gray-500">Download the template file and fill in the required columns before uploading</small>
+                    </div>
+
                     <!-- E-Wallet File Upload -->
                     <div v-if="catalogue.type === 'EWALLET'" class="md:col-span-2">
                         <label class="block font-bold text-gray-700 mb-1">E-Wallet PIN File *</label>
@@ -177,6 +192,7 @@ import api from '@/service/api';
 const toast = useToast();
 const router = useRouter();
 const loading = ref(false);
+const downloadingTemplate = ref(false);
 const errors = ref({});
 
 // Dropdown options
@@ -240,6 +256,57 @@ const onImageSelect = (event) => {
 const onEwalletFileSelect = (event) => {
   const file = event.files[0];
   if (file) ewalletFile.value = file;
+};
+
+/* Download Empty Template */
+const downloadEmptyTemplate = async () => {
+  downloadingTemplate.value = true;
+  try {
+    const response = await api.customRequest({
+      method: 'GET',
+      url: '/api/catalog/emptyPinTemplate',
+      responseType: 'blob' // Important for file downloads
+    });
+
+    // Create a blob from the response data
+    const blob = new Blob([response.data], { 
+      type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' 
+    });
+    
+    // Create a temporary URL for the blob
+    const url = window.URL.createObjectURL(blob);
+    
+    // Create a temporary link element to trigger the download
+    const link = document.createElement('a');
+    link.href = url;
+    link.setAttribute('download', 'ewallet-pin-template.xlsx');
+    
+    // Append to body, click, and remove
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    
+    // Clean up the URL object
+    window.URL.revokeObjectURL(url);
+    
+    toast.add({ 
+      severity: 'success', 
+      summary: 'Success', 
+      detail: 'Template downloaded successfully', 
+      life: 3000 
+    });
+  } catch (error) {
+    console.error('Download Error:', error);
+    const message = error.response?.data?.message || 'Failed to download template';
+    toast.add({ 
+      severity: 'error', 
+      summary: 'Error', 
+      detail: message, 
+      life: 4000 
+    });
+  } finally {
+    downloadingTemplate.value = false;
+  }
 };
 
 /* Format Date -> backend expects d-m-Y */
