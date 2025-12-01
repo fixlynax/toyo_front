@@ -65,7 +65,7 @@
                     </div>
 
                     <!-- Actions for non-survey events -->
-                    <div v-if="event.isSurvey === 'no'" class="flex justify-end mt-8 gap-2">
+                    <div v-if="event.isSurvey === 'No'" class="flex justify-end mt-8 gap-2">
                         <div class="w-40">
                             <Button label="Cancel" class="p-button-secondary w-full mr-2" @click="$router.back()" />
                         </div>
@@ -76,7 +76,7 @@
                 </div>
 
                 <!-- Survey Configuration -->
-                <div v-if="event.isSurvey === 'yes'" class="card flex flex-col gap-6 w-full">
+                <div v-if="event.isSurvey === 'Yes'" class="card flex flex-col gap-6 w-full">
                     <div class="text-2xl font-bold text-gray-800 border-b pb-2">📝 Survey Configuration</div>
 
                     <!-- Point Setting -->
@@ -173,15 +173,15 @@ const audienceOptions = [
 ];
 
 const surveyOptions = [
-    { label: 'Yes', value: 'yes' },
-    { label: 'No', value: 'no' }
+    { label: 'Yes', value: 'Yes' },
+    { label: 'No', value: 'No' }
 ];
 
 // Event data
 const event = ref({
     id: null,
     audience: 'ALL',
-    isSurvey: 'no',
+    isSurvey: 'No',
     point1: 0,
     point2: 0,
     point3: 0,
@@ -238,7 +238,7 @@ const fetchEventDetails = async () => {
             event.value = {
                 id: eventData.id,
                 audience: eventData.audience,
-                isSurvey: eventData.isSurvey === 1 ? 'yes' : 'no',
+                isSurvey: eventData.isSurvey ,
                 point1: eventData.point1 || 0,
                 point2: eventData.point2 || 0,
                 point3: eventData.point3 || 0,
@@ -255,11 +255,17 @@ const fetchEventDetails = async () => {
             };
 
             // Handle survey questions
-            if (eventData.survey_questions && eventData.survey_questions.length > 0) {
-                questions.value = eventData.survey_questions.map(q => ({
-                    question: q.question,
-                    answers: [q.answer1, q.answer2, q.answer3],
-                    correctAnswer: q.correctAnswer
+            if (eventData.survey_questions && eventData.survey_questions.length) {
+                const rawQuestions = eventData.survey_questions[0]; // <-- FIX
+
+                questions.value = rawQuestions.map(q => ({
+                    question: q.question || '',
+                    answers: [
+                        q.answer1 || '',
+                        q.answer2 || '',
+                        q.answer3 || ''
+                    ],
+                    // correctAnswer: q.correctAnswer || ''
                 }));
             }
 
@@ -311,7 +317,7 @@ const addQuestion = () => {
         questions.value.push({
             question: '',
             answers: ['', '', ''],
-            correctAnswer: ''
+            // correctAnswer: ''
         });
     }
 };
@@ -361,7 +367,7 @@ const validateFields = () => {
     }
 
     // Survey-specific validation
-    if (event.value.isSurvey === 'yes') {
+    if (event.value.isSurvey === 'Yes') {
         if (!event.value.point1 || !event.value.point2 || !event.value.point3) {
             toast.add({ severity: 'warn', summary: 'Validation', detail: 'Please fill all point fields.', life: 3000 });
             return false;
@@ -410,7 +416,7 @@ const submitEvent = async () => {
         formData.append('endDate', formatDate(event.value.endDate));
 
         // Append points
-        if (event.value.isSurvey === 'yes') {
+        if (event.value.isSurvey === 'Yes') {
             formData.append('point1', event.value.point1.toString());
             formData.append('point2', event.value.point2.toString());
             formData.append('point3', event.value.point3.toString());
@@ -421,7 +427,7 @@ const submitEvent = async () => {
                 answer1: q.answers[0],
                 answer2: q.answers[1],
                 answer3: q.answers[2],
-                correctAnswer: q.correctAnswer
+                // correctAnswer: q.correctAnswer
             }));
             formData.append('survey_questions', JSON.stringify(surveyQuestions));
         } else {
