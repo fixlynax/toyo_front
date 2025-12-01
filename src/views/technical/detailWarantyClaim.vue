@@ -736,10 +736,26 @@
                 </div>
             </template>
         </Dropdown>
+        <div class="grid grid-cols-2 gap-4" v-if="checkingPriceResultFlag">
+            <!-- Claim Percentage -->
+            <div class="field">
+                <label class="block font-bold text-gray-700 mb-2">Claim Amount (RM) *</label>
+                <InputNumber
+                    v-model="checkingPriceResult.price"
+                    mode="decimal"
+                    :min="0"
+                    :minFractionDigits="0"
+                    :maxFractionDigits="2"
+                    placeholder="100.00"
+                    class="w-full"
+                />
+            </div>
+        </div>
 
         <template #footer>
             <Button label="Cancel" icon="pi pi-times" class="p-button-text" :disabled="loadingAction" @click="closeReimbursementDialog" />
-            <Button label="Create" icon="pi pi-check" class="p-button-primary" :loading="loadingAction" @click="submitReimbursement" />
+            <Button label="Check Price" icon="pi pi-pen" class="p-button-success" :loading="loadingAction" @click="checkPrice" />
+            <Button label="Create" icon="pi pi-check" class="p-button-primary" :loading="loadingAction" @click="submitReimbursement" v-if="checkingPriceResultFlag"/>
         </template>
     </Dialog>
 
@@ -843,6 +859,10 @@ const rejectingInvoice = ref(false);
 // Results
 const replacementResult = ref({});
 const reimbursementResult = ref({});
+const checkingPriceResult = ref({
+    price: 0
+});
+const checkingPriceResultFlag = ref(false);
 const replacementSubmitted = ref(false);
 const reimbursementSubmitted = ref(false);
 
@@ -1120,7 +1140,6 @@ const fetchMaterial = async () => {
         const id = route.params.id; // Use actual claim ID
         const response = await api.get(`warranty_claim/getClaimMaterial/${id}`);
 
-        // console.log(response.data);
         if (response.data.status === 1) {
             listMaterial.value = response.data.admin_data;
         } else {
@@ -1438,7 +1457,6 @@ const fetchWarrantyClaim = async () => {
                 //waranty_info
                 warranty_info: apiData.warranty_info || null,
             };
-            // console.log(warantyDetail);
             await loadScrapImages();
             await loadTireDeptImages();
             await loadSubmittedPhotos();
@@ -1732,6 +1750,7 @@ const closeReplacementDialog = () => {
 const closeReimbursementDialog = () => {
     showCreateReimbursementDialog.value = false;
     showApproveDialog.value = true;
+    checkingPriceResultFlag.value = false;
 };
 
 const saveCTC = async () => {
@@ -1816,7 +1835,63 @@ const submitReplacement = async () => {
         showCreateReplacementDialog.value = false;
     }
 };
+const checkPrice = async () => {
 
+    if (!selectedMaterial.value) {
+        toast.add({
+            severity: 'error',
+            summary: 'Error',
+            detail: 'Please select Material ID',
+            life: 3000
+        });
+        return;
+    }
+
+    try {
+        // checkingPriceResult.value.price
+        loadingAction.value = true;
+        const id = warantyDetail.value.id;
+        // 1. Call Reimbursement API
+        const checkingResponse = await api.post(`warranty_claim/getInvoiceAmount/${id}`, {
+            materialid: selectedMaterial.value.materialid
+        });
+
+        if (checkingResponse.data.status === 1) {
+            // 2. Automatically Request Scrap
+            const data = checkingResponse.data.admin_data;
+
+            checkingPriceResult.value = {
+                ...data,
+                price: parseInt(data.price) || 0  // force integer
+            };
+            toast.add({
+                severity: 'success',
+                summary: 'Success',
+                detail: 'Price Checking successfully',
+                life: 3000
+            });
+            
+        } else {
+            toast.add({
+                severity: 'error',
+                summary: 'Error',
+                detail: checkingResponse.data.error || 'Failed to checking price for reimbursement',
+                life: 7000
+            });
+        }
+    } catch (err) {
+        console.error('Error checking price for reimbursement:', err);
+        toast.add({
+            severity: 'error',
+            summary: 'Error',
+            detail: err.response?.data?.message || 'Failed to checking price for reimbursement',
+            life: 3000
+        });
+    } finally {
+        loadingAction.value = false;
+        checkingPriceResultFlag.value = true;
+    }
+};
 const submitReimbursement = async () => {
     if (!selectedMaterial.value) {
         toast.add({
@@ -1834,7 +1909,8 @@ const submitReimbursement = async () => {
         // 1. Call Reimbursement API
         const reimbursementResponse = await api.post('warranty_claim/approveReimbursement', {
             claim_id: warantyDetail.value.id,
-            materialid: selectedMaterial.value.materialid
+            materialid: selectedMaterial.value.materialid,
+            inv_amount: checkingPriceResult.value.price
         });
 
         if (reimbursementResponse.data.status === 1) {
@@ -1871,6 +1947,7 @@ const submitReimbursement = async () => {
     } finally {
         loadingAction.value = false;
         showCreateReimbursementDialog.value = false;
+        checkingPriceResultFlag.value = false;
     }
 };
 
