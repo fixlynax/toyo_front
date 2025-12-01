@@ -379,6 +379,7 @@ const router = createRouter({
                     name: 'Edit-Campaign',
                     component: () => import('@/views/marketing/editCampaign.vue'),
                     meta: { permission: 'Campaign Management', access: 'create' },
+                    props: true
                 },
                 {
                     path: 'marketing/inviteDealer',
