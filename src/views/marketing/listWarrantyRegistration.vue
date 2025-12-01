@@ -17,7 +17,7 @@
                 :loading="tableLoading"
                 :filters="filters"
                 filterDisplay="menu"
-                :globalFilterFields="['warranty_cert_no', 'invoice_no', 'member_code', 'full_name', 'mfgcode', 'tyresize', 'tyrespec']"
+                :globalFilterFields="['warranty_cert_no', 'invoice_no', 'member_code', 'full_name', 'mfgcode', 'tyresize', 'tyrespec', 'registered_on']"
                 class="rounded-table"
             >
             

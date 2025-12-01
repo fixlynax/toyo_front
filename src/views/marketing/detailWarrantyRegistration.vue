@@ -14,11 +14,16 @@
                         </div>
                         <div class="inline-flex items-center gap-2"></div>
                     </div>
-                    <div class="mt-4">
+                        <div class="grid grid-cols-2 md:grid-cols-2 gap-4">
+
                         <!-- Warranty Info -->
                         <div class="mt-6">
                             <span class="block text-lg font-bold text-black-700">Warranty Cert No</span>
-                            <p class="text-lg font-medium">{{ Warranty.desc }}</p>
+                            <p class="text-lg font-medium">{{ Warranty.warranty_info?.warranty_cert_no  || '-'   }}</p>
+                        </div>
+                        <div class="mt-6">
+                            <span class="block text-lg font-bold text-black-700">Registered Date</span>
+                            <p class="text-lg font-medium">{{ Warranty.warranty_info?.date_registered || '-'  }}</p>
                         </div>
                     </div>
                 </div>
@@ -33,27 +38,27 @@
                     <div class="grid grid-cols-2 md:grid-cols-2 gap-4">
                         <div class="w-full">
                             <span class="block text-xm font-bold text-black-700">Vehicle Plate No</span>
-                            <p class="text-lg font-medium">{{ Warranty.startDate }}</p>
+                            <p class="text-lg font-medium">{{ Warranty.vehicle_info?.vehicle_reg_no || '-' }}</p>
                         </div>
                         <div class="w-full">
                             <span class="block text-xm font-bold text-black-700">Vehicle Type</span>
-                            <p class="text-lg font-medium">{{ Warranty.endDate }}</p>
+                            <p class="text-lg font-medium">{{ Warranty.vehicle_info?.vehicle_type || '-' }}</p>
                         </div>
                         <div class="w-full">
                             <span class="block text-xm font-bold text-black-700">Vehicle Brand</span>
-                            <p class="text-lg font-medium">{{ Warranty.startDate }}</p>
+                            <p class="text-lg font-medium">{{ Warranty.vehicle_info?.vehicle_brand || '-' }}</p>
                         </div>
                         <div class="w-full">
                             <span class="block text-xm font-bold text-black-700">Vehicle Model</span>
-                            <p class="text-lg font-medium">{{ Warranty.endDate }}</p>
+                            <p class="text-lg font-medium">{{ Warranty.vehicle_info?.vehicle_model || '-'}}</p>
                         </div>
                         <div class="w-full">
-                            <span class="block text-xm font-bold text-black-700">Mileage Photo</span>
-                            <p class="text-lg font-medium">{{ Warranty.startDate }}</p>
+                            <span class="block text-xm font-bold text-black-700">Mileage </span>
+                            <p class="text-lg font-medium">{{ Warranty.vehicle_info?.mileage || '-'}}</p>
                         </div>
                         <div class="w-full">
                             <span class="block text-xm font-bold text-black-700">Purchase Date</span>
-                            <p class="text-lg font-medium">{{ Warranty.endDate }}</p>
+                            <p class="text-lg font-medium">{{ Warranty.invoice_info?.purchase_date || '-'}}</p>
                         </div>
                     </div>
                 </div>
@@ -64,26 +69,43 @@
                         </div>
                         <div class="inline-flex items-center gap-2"></div>
                     </div>
+                    <div :class="['grid', 'gap-4', 'mb-2', 'grid-cols-2 md:grid-cols-4']">
+                        <div>
+                            <span class="block text-sm font-bold text-black-800">MFG Code</span>
+
+                            <!-- OLD (User) -->
+                            <p class="text-lg font-medium mb-2">{{ Warranty.tire_info?.mfgCode || '-' }}</p>
+                        </div>
+                        <div>
+                            <span class="block text-sm font-bold text-black-800">Size Code</span>
+                             <p class="text-lg font-medium mb-2">{{ Warranty.tire_info?.tyreSize || '-' }}</p>
+                        </div>
+                        <div>
+                            <span class="block text-sm font-bold text-black-800">Tyre Spec</span>
+                            <p class="text-lg font-medium mb-2">{{ Warranty.tire_info?.tyreSpec || '-' }}</p>
+                        </div>
+                        <div>
+                            <span class="block text-sm font-bold text-black-800">Week Code</span>
+                            <p class="text-lg font-medium mb-2">{{ Warranty.tire_info?.weekcode || '-'  }}</p>
+                        </div>
+                        <div class="inline-flex items-center gap-2"></div>
+                    </div>
                     <div class="grid grid-cols-2 md:grid-cols-2 gap-4">
                         <div class="w-full">
-                            <span class="block text-xm font-bold text-black-700">Tyre List</span>
-                            <p class="text-lg font-medium">{{ Warranty.startDate }}</p>
-                        </div>
-                        <div class="w-full">
                             <span class="block text-xm font-bold text-black-700">Tyre Pattern</span>
-                            <p class="text-lg font-medium">{{ Warranty.endDate }}</p>
+                            <p class="text-lg font-medium">{{ Warranty.tire_info?.tire_pattern || '-'  }}</p>
                         </div>
                         <div class="w-full">
                             <span class="block text-xm font-bold text-black-700">Tyre Size</span>
-                            <p class="text-lg font-medium">{{ Warranty.startDate }}</p>
+                            <p class="text-lg font-medium">{{ Warranty.tire_info?.tire_size || '-'  }}</p>
                         </div>
                         <div class="w-full">
                             <span class="block text-xm font-bold text-black-700">Tyre Description</span>
-                            <p class="text-lg font-medium">{{ Warranty.endDate }}</p>
+                            <p class="text-lg font-medium">{{ Warranty.tire_info?.tire_desc || '-'  }}</p>
                         </div>
                         <div class="w-full">
                             <span class="block text-xm font-bold text-black-700">Serial Plate No</span>
-                            <p class="text-lg font-medium">{{ Warranty.startDate }}</p>
+                            <p class="text-lg font-medium">{{ Warranty.tire_info?.mfgCode || '-'  }}</p>
                         </div>
                     </div>
                 </div>
@@ -103,7 +125,7 @@
                             <tbody>
                                 <tr class="border-b">
                                     <td class="px-4 py-2 font-medium">TC member no</td>
-                                    <td class="px-4 py-2 text-right">{{ Warranty.publishDate }}</td>
+                                    <td class="px-4 py-2 text-right">{{ Warranty.consumer_info?.membercode || '-' }}</td>
                                 </tr>
                                 <!-- <tr class="border-b">
                                     <td class="px-4 py-2 font-medium">Audience</td>
@@ -111,15 +133,15 @@
                                 </tr> -->
                                 <tr class="border-b">
                                     <td class="px-4 py-2 font-medium">Member Name</td>
-                                    <td class="px-4 py-2 text-right">{{ Warranty.view }}</td>
+                                    <td class="px-4 py-2 text-right">{{ Warranty.consumer_info?.fullname || '-'}}</td>
                                 </tr>
                                 <tr class="border-b">
                                     <td class="px-4 py-2 font-medium">Member Phone Number</td>
-                                    <td class="px-4 py-2 text-right">{{ Warranty.isSurvey }}</td>
+                                    <td class="px-4 py-2 text-right">{{ Warranty.consumer_info?.phoneNumber || '-' }}</td>
                                 </tr>
-                                <tr v-if="Warranty.isSurvey === 'Yes'" class="border-b">
+                                <tr  class="border-b">
                                     <td class="px-4 py-2 font-medium">Member email</td>
-                                    <td class="px-4 py-2 text-right">{{ Warranty.point1 }}</td>
+                                    <td class="px-4 py-2 text-right">{{ Warranty.consumer_info?.email || '-' }}</td>
                                 </tr>
                             </tbody>
                         </table>
@@ -136,29 +158,15 @@
                             <tbody>
                                 <tr class="border-b">
                                     <td class="px-4 py-3 font-medium text-gray-600">Tyre Purchase Date</td>
-                                    <td class="px-4 py-3 text-right font-semibold text-gray-800">{{ Warranty.publishDate }}</td>
+                                    <td class="px-4 py-3 text-right font-semibold text-gray-800">{{ Warranty.invoice_info?.purchase_date || '-' }}</td>
                                 </tr>
                                 <tr class="border-b">
                                     <td class="px-4 py-3 font-medium text-gray-600">Invoice Number</td>
-                                    <td class="px-4 py-3 text-right font-semibold text-gray-800">{{ Warranty.view }}</td>
+                                    <td class="px-4 py-3 text-right font-semibold text-gray-800"><span  class="text-blue-600 cursor-pointer" @click="viewInvoice(Warranty.invoice_info?.invoice_file)">{{ Warranty.invoice_info?.invoice_no || '-' }}</span></td>
                                 </tr>
                                 <tr class="border-b">
                                     <td class="px-4 py-3 font-medium text-gray-600">Amount</td>
-                                    <td class="px-4 py-3 text-right font-semibold text-gray-800">{{ Warranty.isSurvey }}</td>
-                                </tr>
-                                <tr v-if="Warranty.point1">
-                                    <td class="px-4 py-3 font-medium text-gray-600 align-top">Invoice Photo</td>
-                                    <td class="px-4 py-3 text-right">
-                                        <!-- Display image if Warranty.point1 contains image URL/path -->
-                                        <div class="flex justify-end">
-                                            <div class="max-w-xs border border-gray-200 rounded-lg overflow-hidden shadow-sm bg-white">
-                                                <img :src="Warranty.point1" alt="Invoice Photo" class="w-full h-auto object-contain max-h-64" @error="handleImageError" />
-                                                <div class="px-3 py-2 bg-gray-50 border-t border-gray-100 text-xs text-gray-500 text-center">
-                                                    <a :href="Warranty.point1" target="_blank" class="text-blue-600 hover:text-blue-800 hover:underline font-medium"> View Full Size </a>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </td>
+                                    <td class="px-4 py-3 text-right font-semibold text-gray-800">{{ Warranty.invoice_info?.invoice_amount || '-' }}</td>
                                 </tr>
                             </tbody>
                         </table>
@@ -180,31 +188,13 @@ const route = useRoute();
 const router = useRouter();
 const toast = useToast();
 const confirm = useConfirm(); // Added
+const Warranty = ref([]);
 
 const WarrantyId = route.params.id;
 const loading = ref(true);
 // Removed: const deleteDialog = ref(false);
 
 // Warranty data
-const Warranty = ref({
-    id: null,
-    audience: '',
-    isSurvey: 'No',
-    point1: 0,
-    point2: 0,
-    point3: 0,
-    title: '',
-    image1URL: '',
-    image2URL: '',
-    image3URL: '',
-    desc: '',
-    location: '',
-    publishDate: '',
-    startDate: '',
-    endDate: '',
-    view: 0,
-    status: 0
-});
 
 const surveyQuestions = ref([]);
 const participants = ref([]);
@@ -213,26 +203,12 @@ const participants = ref([]);
 const fetchWarrantyDetails = async () => {
     try {
         loading.value = true;
-        const response = await api.get(`warranty_registration/normal`);
+        const id = route.params.id; // e.g. 1
+
+        const response = await api.get(`warranty_registration/normal/${id}`);
 
         if (response.data.status === 1) {
-            const WarrantyData = response.data.admin_data;
-
-            // Update Warranty data
-            Warranty.value = {
-                ...Warranty.value,
-                ...WarrantyData
-            };
-
-            // Handle survey questions
-            if (WarrantyData.survey_questions && WarrantyData.survey_questions.length > 0) {
-                surveyQuestions.value = WarrantyData.survey_questions[0] || [];
-            }
-
-            // Handle participants
-            if (WarrantyData.participants) {
-                participants.value = WarrantyData.participants;
-            }
+            Warranty.value = response.data.admin_data;
 
             // Process private images
             await processPrivateImages();
@@ -256,7 +232,15 @@ const fetchWarrantyDetails = async () => {
         loading.value = false;
     }
 };
-
+const viewInvoice = async (url) => {
+    try {
+        const blobUrl = await api.getPrivateFile(url);
+        if (!blobUrl) return;
+        window.open(blobUrl, '_blank'); // opens preview in new tab
+    } catch (error) {
+        console.error('Failed to preview file:', error);
+    }
+};
 // Process private images using the API method
 const processPrivateImages = async () => {
     const imageFields = ['image1URL', 'image2URL', 'image3URL'];
