@@ -1,8 +1,6 @@
 <template>
     <div class="card">
-        <div class="flex items-center justify-between mb-4">
             <div class="text-2xl font-bold text-gray-800">CTC Return List</div>
-        </div>
         <LoadingPage v-if="loading" message="Loading Return CTC Collection Details..." />
         <div v-else>
             <TabMenu :model="statusTabs" v-model:activeIndex="activeTabIndex" class="mb-4" />
@@ -24,13 +22,15 @@
                 :value="collectionList"
                 :paginator="true"
                 :rows="10"
-                :rowsPerPageOptions="[5, 10, 20]"
+                :rowsPerPageOptions="[5, 10, 20, 50, 100]"
                 dataKey="id"
                 :rowHover="true"
                 :loading="loading"
                 :filters="filters"
                 filterDisplay="menu"
                 :globalFilterFields="['claimRefno', 'created', 'deliveryDate', 'scheduleDeliveryDate', 'status', 'deliveryDate']"
+                paginatorTemplate="CurrentPageReport FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink RowsPerPageDropdown"
+                currentPageReportTemplate="Showing {first} to {last} of {totalRecords} entries"
             >
                 <!-- ========================= -->
                 <!-- Header Section -->
@@ -68,6 +68,9 @@
                             style="display: none" 
                             @change="handleImport2"
                             />
+                        </div>
+                        <div class="flex justify-end gap-2"  v-if="statusTabs[activeTabIndex]?.label === 'Completed'">
+                            <Button type="button" label="Export" icon="pi pi-file-export" class="p-button-success" @click="exportToExcel"/>
                         </div>
                     </div>
                 </template>
@@ -116,7 +119,7 @@
                 </Column>
                 <Column field="deliveryDate" header="Delivered Date" style="min-width: 8rem" sortable>
                     <template #body="{ data }">
-                        {{ data.deliveryDate && data.deliveryTime ? formatDate(data.deliveryDate) + ' ' + formatTime(data.deliveryTime): 'Not Assigned'}}
+                        {{ data.deliveryDate ? formatDate(data.deliveryDate) : 'Not Assigned'}}
                     </template>
                 </Column>
                 <Column field="action" header="Status" style="min-width: 6rem">
@@ -145,6 +148,7 @@ import { FilterMatchMode } from '@primevue/core/api';
 import api from '@/service/api';
 import { useToast } from 'primevue/usetoast';
 import { useMenuStore } from '@/store/menu';
+import LoadingPage from '@/components/LoadingPage.vue';
 
 const menuStore = useMenuStore();
 const canUpdate = computed(() => menuStore.canWrite('CTC Return'));
@@ -155,13 +159,13 @@ const exportLoading1 = ref(false);
 const importLoading1 = ref(false);
 const exportLoading2 = ref(false);
 const importLoading2 = ref(false);
-const returnList = ref([]);
-const filteredList = ref([]);
 const importInput1 = ref();
 const importInput2 = ref();
 
 // Data variables
-const loading = ref(false);
+const loading = ref(true);
+const reportloading = ref(false);
+
 const collectionList = ref([]);
 
 const activeTabIndex = ref(0);
@@ -190,11 +194,27 @@ const statusTabs = [
 watch(activeTabIndex, () => {
     const tab = statusTabs[activeTabIndex.value];
     if (tab.submitLabel === 'COMPLETED') {
-        selectedExportIds.value.clear();
-        collectionList.value = [];
-        return;
+        // Set default date range: last 7 days until today
+        const today = new Date();
+        const lastWeek = new Date();
+        lastWeek.setDate(today.getDate() - 7);
+
+        dateRange.value = [lastWeek, today];
+        const dateRangeStr =
+            dateRange.value?.[0] && dateRange.value?.[1]
+                ? `${formatDateDMY(dateRange.value[0])} - ${formatDateDMY(dateRange.value[1])}`
+                : null;
+
+        // Prepare request body
+        const body = {
+            tab: tab.submitLabel,
+            date_range: dateRangeStr
+        };
+        fetchData(body);
+    }else{
+        dateRange.value = null;   
+        fetchData();
     }
-    fetchData();
     selectedExportIds.value.clear();
 });
 
@@ -227,12 +247,6 @@ const toggleSelectAll = () => {
   }
 };
 
-// =========================
-// Fetch data on mount
-// =========================
-    onMounted(async () => {
-        fetchData();
-    });
 
 function formatDate(dateString) {
     if (!dateString) return '';
@@ -498,7 +512,7 @@ const fetchData = async (body = null) => {
 };
 const fetchReport = async (id) => {
     try {
-        loading.value = true;
+        reportloading.value = true;
         const response = await api.get(`warrantyReport/ctc/${id}`);
         if (response.data.status === 1) {
             generateReport(response.data.report_data);
@@ -513,7 +527,7 @@ const fetchReport = async (id) => {
     } catch (error) {
         console.error('Error fetching report:', error);
     } finally {
-        loading.value = false;
+        reportloading.value = false;
     }
 }
 const generateReport = (report) => {
@@ -735,6 +749,50 @@ const generateReport = (report) => {
         printWindow.close();
     };
 };
+const exportToExcel = () => {
+    if (collectionList.value.length === 0) {
+        console.warn('No data to export');
+        return;
+    }
+
+    try {
+        // Create worksheet data
+        const headers = ['Date', 'Ref No', 'Delivery Date', 'Delivered Date', 'Status'];
+        
+        // Prepare data rows
+        const csvData = collectionList.value.map(data => [
+            `"${formatDate(data.created)}"`,
+            `"${data.claimRefno || '-'}"`,
+            `"${data.scheduleDeliveryDate ? formatDate(data.scheduleDeliveryDate) : 'Not Assigned'}"`,
+            `"${data.deliveryDate ? formatDate(data.deliveryDate) : 'Not Assigned'}"`,
+            `"${getStatusText(data.status) || '-'}"`,
+        ]);
+
+        // Combine headers and data
+        const csvContent = [
+            headers.join(','),
+            ...csvData.map(row => row.join(','))
+        ].join('\n');
+
+        // Create and download the file
+        const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+        const link = document.createElement('a');
+        const url = URL.createObjectURL(blob);
+        
+        link.setAttribute('href', url);
+        link.setAttribute('download', `ctc_return_collection_list_${new Date().toISOString().split('T')[0]}.csv`);
+        link.style.visibility = 'hidden';
+        
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        
+        URL.revokeObjectURL(url);
+        
+    } catch (error) {
+        console.error('Error exporting to Excel:', error);
+    }
+};
 // =========================
 // Helper functions for status display
 // =========================
@@ -754,4 +812,7 @@ function getStatusText(status) {
     };
     return statusMap[status] || 'Unknown';
 }
+    onMounted(async () => {
+        fetchData();
+    });
 </script>

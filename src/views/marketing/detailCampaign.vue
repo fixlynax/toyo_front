@@ -176,7 +176,7 @@
                     </div>
                 </div>
 
-                <div class="card flex flex-col w-full">
+                <!-- <div class="card flex flex-col w-full">
                     <div class="flex items-center justify-between border-b pb-3 mb-4">
                         <div class="text-2xl font-bold text-gray-800">👨🏻‍💻 Participant List</div>
                         <Button icon="pi pi-file-export" label="Export" style="width: fit-content" class="p-button-danger p-button-sm" />
@@ -184,10 +184,10 @@
                     <DataTable :value="participants" :paginator="true" :rows="5" dataKey="id" :rowHover="true" responsiveLayout="scroll" class="text-sm">
                         <template #empty>
                             <div class="text-center py-8 text-gray-500">No participants found.</div>
-                        </template>
+                        </template> -->
                         
                         <!-- User Column -->
-                        <Column header="User" style="min-width: 6rem">
+                        <!-- <Column header="User" style="min-width: 6rem">
                             <template #body="{ data }">
                                 <div class="flex flex-col">
                                     <RouterLink to="/marketing/detailParticipant" class="hover:underline">
@@ -197,28 +197,28 @@
                                     <span class="text-gray-600 text-xs mt-2">📅 {{ data.date }}</span>
                                 </div>
                             </template>
-                        </Column>
+                        </Column> -->
 
                         <!-- Prize Type -->
-                        <Column field="prizeName" header="Prize" style="min-width: 8rem"></Column>
+                        <!-- <Column field="prizeName" header="Prize" style="min-width: 8rem"></Column> -->
 
                         <!-- Action Approve & Reject -->
-                        <Column header="Action" style="min-width: 8rem">
+                        <!-- <Column header="Action" style="min-width: 8rem">
                             <template #body="{ data }">
-                                <div class="flex gap-2 items-center">
+                                <div class="flex gap-2 items-center"> -->
                                     <!-- Approve Button -->
-                                    <Button v-if="!data.status" icon="pi pi-check" size="small" class="p-button-success p-button-sm" @click="approveParticipant(data)" />
+                                    <!-- <Button v-if="!data.status" icon="pi pi-check" size="small" class="p-button-success p-button-sm" @click="approveParticipant(data)" /> -->
 
                                     <!-- Reject Button -->
-                                    <Button v-if="!data.status" icon="pi pi-times" size="small" class="p-button-danger p-button-sm" @click="rejectParticipant(data)" />
+                                    <!-- <Button v-if="!data.status" icon="pi pi-times" size="small" class="p-button-danger p-button-sm" @click="rejectParticipant(data)" /> -->
 
                                     <!-- Status Tag -->
-                                    <Tag v-if="data.status" :value="data.status" :severity="data.status === 'Approved' ? 'success' : data.status === 'Rejected' ? 'danger' : 'info'" class="ml-2" />
+                                    <!-- <Tag v-if="data.status" :value="data.status" :severity="data.status === 'Approved' ? 'success' : data.status === 'Rejected' ? 'danger' : 'info'" class="ml-2" />
                                 </div>
                             </template>
-                        </Column>
-                    </DataTable>
-                </div>
+                        </Column> -->
+                    <!-- </DataTable>
+                </div> -->
 
                 <div class="card flex flex-col w-full">
                     <!-- Header with Invite Button -->

@@ -357,7 +357,7 @@
                                 <i class="pi pi-folder text-green-500"></i>
                                 <span>Account Details</span>
                             </div>
-                            <RouterLink to="/billing/listEbilling">
+                            <RouterLink to="/billing/listAccountDetail">
                                 <Button label="Go" size="small" />
                             </RouterLink>
                         </div>
@@ -368,7 +368,7 @@
                                 <i class="pi pi-folder text-blue-500"></i>
                                 <span>Billing</span>
                             </div>
-                            <RouterLink to="/billing/listAccountDetail">
+                            <RouterLink to="/billing/listBilling">
                                 <Button label="Go" size="small" />
                             </RouterLink>
                         </div>

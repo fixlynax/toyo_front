@@ -23,14 +23,16 @@
                 :value="orderDelList"
                 :paginator="true"
                 :rows="10"
-                :rowsPerPageOptions="[5, 10, 20]"
+                :rowsPerPageOptions="[10, 20, 50, 100]"
                 dataKey="id"
                 :rowHover="true"
                 :loading="loading"
                 :filters="filters"
                 filterDisplay="menu"
-                :globalFilterFields="['do_no', 'eten_user.custAccountNo', 'storagelocation' ,  'eten_user.companyName1', 'eten_user.companyName2', 'eten_user.companyName3', 'eten_user.companyName4', 'eten_user.city', 'eten_user.state', 'deliveryDate',, 'scm_deliver_detail.scheduled_delivery_time', 'scm_deliver_detail.delivered_datetime', 'orderstatus']"
-            >
+                :globalFilterFields="['do_no', 'shipto_data.custAccountNo', 'storagelocation' ,  'shipto_data.companyName1', 'shipto_data.companyName2', 'shipto_data.city', 'shipto_data.state', 'deliveryDate',, 'scm_deliver_detail.scheduled_delivery_time', 'scm_deliver_detail.delivered_datetime', 'orderstatus']"
+                paginatorTemplate="CurrentPageReport FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink RowsPerPageDropdown"
+                currentPageReportTemplate="Showing {first} to {last} of {totalRecords} entries"
+                >
                 <template #header>
                     <div class="flex items-center justify-between gap-4 w-full flex-wrap">
                         <div class="flex items-center gap-2 w-full max-w-md">
@@ -63,6 +65,9 @@
                             style="display: none" 
                             @change="handleImport2"
                             />
+                        </div>
+                        <div class="flex justify-end gap-2"  v-if="statusTabs[activeTabIndex]?.label === 'Completed'">
+                            <Button type="button" label="Export" icon="pi pi-file-export" class="p-button-success" @click="exportToExcel"/>
                         </div>
                     </div>
                 </template>
@@ -104,28 +109,28 @@
                         </RouterLink>
                     </template>
                 </Column>
-                <Column field="eten_user.companyName1" header="Customer Name" style="min-width: 12rem" sortable>
+                <Column field="shipto_data.companyName1" header="Customer Name" style="min-width: 12rem" sortable>
                     <template #body="{ data }">
-                        <span class="font-bold">{{` ${data.eten_user.companyName1} ${data.eten_user.companyName2} ${data.eten_user.companyName3} ${data.eten_user.companyName4} ` }}</span>
+                        <span class="font-bold">{{` ${data.shipto_data?.companyName1 || ''} ${data.shipto_data?.companyName2 || ''} ` }}</span>
                     <br>
-                     {{ data.eten_user.custAccountNo }}
+                     {{ data.shipto_data?.custAccountNo || '-' }}
                     </template>
                 </Column>
 
-                <Column field="storagelocation" header="Storage Location" style="min-width: 12rem" sortable>
+                <Column field="storagelocation" header="Storage Location" style="min-width: 8rem" sortable>
                     <template #body="{ data }">
-                         {{`${data.storagelocation}` }}
+                         {{ data.storagelocation }}
                     </template>
                 </Column>
 
-                <Column field="eten_user.city" header="City" style="min-width: 12rem" sortable>
+                <Column field="shipto_data.city" header="City" style="min-width: 8rem" sortable>
                     <template #body="{ data }">
-                         {{ data.eten_user.city?.replace(/,$/, '') }}
+                         {{ data.shipto_data?.city?.replace(/,$/, '') }}
                     </template>
                 </Column>
-                <Column field="eten_user.state" header="State" style="min-width: 12rem" sortable>
+                <Column field="shipto_data.state" header="State" style="min-width: 8rem" sortable>
                     <template #body="{ data }">
-                         {{`${data.eten_user.state}` }}
+                         {{ data.shipto_data?.state || '-' }}
                     </template>
                 </Column>
 
@@ -212,11 +217,26 @@ const statusTabs = [
 watch(activeTabIndex, () => {
     const tab = statusTabs[activeTabIndex.value];
     if (tab.submitLabel === 'COMPLETED') {
-        selectedExportIds.value.clear();
-        orderDelList.value = [];
-        return;
+        // Set default date range: last 7 days until today
+        const today = new Date();
+        const lastWeek = new Date();
+        lastWeek.setDate(today.getDate() - 7);
+        dateRange.value = [lastWeek, today];
+        const dateRangeStr =
+            dateRange.value?.[0] && dateRange.value?.[1]
+                ? `${formatDateDMY(dateRange.value[0])} - ${formatDateDMY(dateRange.value[1])}`
+                : null;
+
+        // Prepare request body
+        const body = {
+            tab: tab.submitLabel,
+            date_range: dateRangeStr
+        };
+        fetchData(body); 
+    }else{
+        dateRange.value = null;
+        fetchData();
     }
-    fetchData();
     selectedExportIds.value.clear();
 });
 
@@ -522,7 +542,57 @@ const fetchData = async (body = null) => {
     }
 };
 
+const exportToExcel = () => {
+    if (orderDelList.value.length === 0) {
+        toast.add({ severity: 'warn', summary: 'Warning', detail: 'No data to export', life: 3000 });
+        return;
+    }
 
+    try {
+        // Create worksheet data
+        const headers = ['Created', 'SAP DO No', 'Customer Name', 'Customer Acc No', 'Storage Location', 'City', 'State', 'Order Type', 'Eta Date', 'Planned Date', 'Delivered Date', 'Status'];
+        
+        // Prepare data rows
+        const csvData = orderDelList.value.map(data => [
+            `"${formatDate(data.created)}"`,
+            `"${data.do_no || '-'}"`,
+            `"${data.shipto_data?.companyName1 || ''} ${data.shipto_data?.companyName2 || ''} "`,
+            `"${data.shipto_data?.custAccountNo || '-'}"`,
+            `"${data.storagelocation || '-'}"`,
+            `"${data.shipto_data?.city || '-'}"`,
+            `"${data.shipto_data?.state || '-'}"`,
+            `"${data.orderDesc || '-'}"`,
+            `"${formatDate(data.deliveryDate)}"`,
+            `"${data.scm_deliver_detail?.scheduled_delivery_time ? formatDate(data.scm_deliver_detail?.scheduled_delivery_time) : 'No date assigned'}"`,
+            `"${data.scm_deliver_detail?.delivered_datetime ? formatDate(data.scm_deliver_detail?.delivered_datetime) : 'No date assigned'}"`,
+            `"${getStatusLabel2(data.status) || '-'}"`,
+        ]);
+
+        // Combine headers and data
+        const csvContent = [
+            headers.join(','),
+            ...csvData.map(row => row.join(','))
+        ].join('\n');
+
+        // Create and download the file
+        const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+        const link = document.createElement('a');
+        const url = URL.createObjectURL(blob);
+        
+        link.setAttribute('href', url);
+        link.setAttribute('download', `order_delivery_list_${new Date().toISOString().split('T')[0]}.csv`);
+        link.style.visibility = 'hidden';
+        
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        
+        URL.revokeObjectURL(url);
+        
+    } catch (error) {
+        console.error('Error exporting to Excel:', error);
+    }
+};
 // Status Label and Severity
 function getStatusLabel(status) {
     const map = {

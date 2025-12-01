@@ -121,7 +121,7 @@
                         <small v-if="errors.country" class="p-error">{{ errors.country[0] }}</small>
                     </div>
 
-                    <div>
+                    <!-- <div>
                         <label class="block font-bold text-gray-700">Member Level <span class="text-red-500">*</span></label>
                         <Dropdown 
                             v-model="memberDetail.memberLevel" 
@@ -133,7 +133,7 @@
                             placeholder="Select Member Level"
                         />
                         <small v-if="errors.member_level" class="p-error">{{ errors.member_level[0] }}</small>
-                    </div>
+                    </div> -->
 
                     <div>
                         <label class="block font-bold text-gray-700 mb-1">Password</label>

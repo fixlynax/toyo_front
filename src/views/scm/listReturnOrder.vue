@@ -3,7 +3,7 @@
         <div class="text-2xl font-bold text-gray-800 border-b pb-2">List Return Order</div>
         <LoadingPage v-if="loading" message="Loading Return Order Details..." />
         <div v-else>
-            <TabMenu :model="statusTabs" v-model:activeIndex="activeTabIndex" class="mb-4" />
+            <TabMenu  :model="statusTabs" v-model:activeIndex="activeTabIndex" class="mb-4" />
                 <div class="flex items-center gap-3 mb-4 ml-4">
                     <!-- LEFT SIDE -->
 
@@ -22,13 +22,16 @@
                 :value="returnList"
                 :paginator="true"
                 :rows="10"
-                :rowsPerPageOptions="[5, 10, 20]"
+                :rowsPerPageOptions="[5, 10, 20, 50, 100]"
                 dataKey="materialid"
                 :rowHover="true"
                 :loading="loading"
                 :filters="filters"
                 filterDisplay="menu"
-                :globalFilterFields="['return_orderNo_ref', 'custAccountNo' , 'storageLocation' , 'city', 'dealerName' , 'delivery_status' , 'created']">
+                :globalFilterFields="['return_orderNo_ref', 'custaccountno' , 'storageLocation' , 'city', 'dealerName' , 'delivery_status' , 'created']"
+                paginatorTemplate="CurrentPageReport FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink RowsPerPageDropdown"
+                currentPageReportTemplate="Showing {first} to {last} of {totalRecords} entries"
+                >
                 <template #header>
                     <div class="flex flex-col gap-4 w-full">
                         <!-- Search and Filters Row -->
@@ -64,6 +67,9 @@
                                 style="display: none" 
                                 @change="handleImport2"
                                 />
+                            </div>
+                            <div class="flex justify-end gap-2"  v-if="statusTabs[activeTabIndex]?.label === 'Completed'">
+                                <Button type="button" label="Export" icon="pi pi-file-export" class="p-button-success" @click="exportToExcel"/>
                             </div>
                         </div>
                     </div>
@@ -105,17 +111,22 @@
                     <template #body="{ data }">
                         <span class="font-bold">{{ data?.dealerName || '-' }}</span>
                         <br>
-                        {{ data?.custAccountNo ?? '-' }}
+                        {{ data?.custaccountno ?? '-' }}
                     </template>
                 </Column>
-                <Column field="storageLocation" header="Storage Location" style="min-width: 10rem" sortable>
+                <Column field="storageLocation" header="Storage Location" style="max-width: 8rem" sortable>
                     <template #body="{ data }">
                         {{ data?.storageLocation ?? '-' }}
                     </template>
                 </Column>
-                <Column field="city" header="City" style="min-width: 10rem"sortable>
+                <Column field="city" header="City" style="max-width: 8rem"sortable>
                     <template #body="{ data }">
-                        {{ data?.city ?? '-' }}
+                        {{ data?.city.replace(/,$/, '') ?? '-' }}
+                    </template>
+                </Column>
+                <Column field="state" header="State" style="max-width: 8rem"sortable>
+                    <template #body="{ data }">
+                        {{ data?.state ?? '-' }}
                     </template>
                 </Column>
                 <Column field="pickup_datetime" header="Pickup Date" style="min-width: 10rem" sortable>
@@ -128,7 +139,7 @@
                         {{ data.delivery_information?.receive_datetime ? formatDate(data.delivery_information.receive_datetime) : 'No date assigned' }}
                     </template>
                 </Column>
-                <Column field="return_order_array.length" header="Return Items" style="min-width: 12rem" sortable>
+                <Column field="return_order_array.length" header="Return Items" style="min-width: 8rem;text-align: center;" sortable>
                     <template #body="{ data }">
                             {{ data.return_order_array?.length || 0 }}
                     </template>
@@ -149,6 +160,7 @@ import { FilterMatchMode } from '@primevue/core/api';
 import api from '@/service/api';
 import { useToast } from 'primevue/usetoast';
 import { useMenuStore } from '@/store/menu';
+import LoadingPage from '@/components/LoadingPage.vue';
 
 const menuStore = useMenuStore();
 const canUpdate = computed(() => menuStore.canWrite('Return Order Collection'));
@@ -188,10 +200,28 @@ const statusTabs = [
 watch(activeTabIndex, () => {
     const tab = statusTabs[activeTabIndex.value];
     if (tab.submitLabel === 'COMPLETED') {
-        returnList.value = [];
-        return;
+        // Set default date range: last 7 days until today
+        const today = new Date();
+        const lastWeek = new Date();
+        lastWeek.setDate(today.getDate() - 7);
+
+        dateRange.value = [lastWeek, today];
+        const dateRangeStr =
+            dateRange.value?.[0] && dateRange.value?.[1]
+                ? `${formatDateDMY(dateRange.value[0])} - ${formatDateDMY(dateRange.value[1])}`
+                : null;
+
+        // Prepare request body
+        const body = {
+            tab: tab.submitLabel,
+            date_range: dateRangeStr
+        };
+        fetchData(body);
+    }else{
+        dateRange.value = null;
+        fetchData();
     }
-    fetchData();
+    selectedExportIds.value.clear();
 });
 
 
@@ -458,6 +488,55 @@ const fetchData = async (body = null) => {
         loading.value = false;
     }
 };
+const exportToExcel = () => {
+    if (returnList.value.length === 0) {
+        toast.add({ severity: 'warn', summary: 'Warning', detail: 'No data to export', life: 3000 });
+        return;
+    }
+
+    try {
+        // Create worksheet data
+        const headers = ['Ref No', 'Ship-To', 'Ship-To Acc No', 'Storage Location', 'City', 'State', 'Pickup Date', 'Receive Date', 'Return Items', 'Status'];
+        
+        // Prepare data rows
+        const csvData = returnList.value.map(data => [
+            `"${data.return_orderNo_ref || '-'}"`,
+            `"${data.dealerName || '-'}"`,
+            `"${data.custaccountno || '-'}"`,
+            `"${data.storageLocation || '-'}"`,
+            `"${data.city || '-'}"`,
+            `"${data.state || '-'}"`,
+            `"${data.delivery_information?.pickup_datetime ? formatDate(data.delivery_information.pickup_datetime) : 'No date assigned'}"`,
+            `"${data.delivery_information?.receive_datetime ? formatDate(data.delivery_information.receive_datetime) : 'No date assigned'}"`,
+            `"${data.return_order_array?.length || 0}"`,
+            `"${data.delivery_status || '-'}"`,
+        ]);
+
+        // Combine headers and data
+        const csvContent = [
+            headers.join(','),
+            ...csvData.map(row => row.join(','))
+        ].join('\n');
+
+        // Create and download the file
+        const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+        const link = document.createElement('a');
+        const url = URL.createObjectURL(blob);
+        
+        link.setAttribute('href', url);
+        link.setAttribute('download', `return_order_list_${new Date().toISOString().split('T')[0]}.csv`);
+        link.style.visibility = 'hidden';
+        
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        
+        URL.revokeObjectURL(url);
+        
+    } catch (error) {
+        console.error('Error exporting to Excel:', error);
+    }
+};
 onMounted(() => {
     fetchData();
 });
@@ -471,24 +550,6 @@ function formatDate(dateString) {
   });
 }
 
-// function getStatusLabel(status) {
-//     switch (status) {
-//         case 0:
-//             return 'Pending';
-//         case 1:
-//             return 'Approve';
-//         case 2:
-//             return 'Rejected';
-//         case 66:
-//             return 'Processing';
-//         case 77:
-//             return 'Pending Collection';
-//         case 9:
-//             return 'Completed';
-//         default:
-//             return 'Unknown';
-//     }
-// }
 
 function getStatusSeverity(status) {
     switch (status) {
