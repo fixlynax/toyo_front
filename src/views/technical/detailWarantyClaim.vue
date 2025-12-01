@@ -109,21 +109,24 @@
                         </div>
                     </div>
 
-                    <div class="grid grid-cols-2 md:grid-cols-2 gap-4">
+                    <div class="grid grid-cols-2 md:grid-cols-2 gap-4 mb-4">
                         <!-- <div>
                             <span class="block text-sm font-bold text-black-800">Serial Plate</span>
                             <p class="text-lg font-medium">{{ warantyDetail.tire_info.plateSerial || '-' }}</p>
                         </div> -->
                         <div>
                             <span class="block text-sm font-bold text-black-800">Pattern</span>
-                            <p class="text-lg font-medium">{{ warantyDetail.tire_info.pattern || '-' }}</p>
+                            <p class="text-lg font-medium">{{ warantyDetail.tire_info.pattern || '-' }} <span v-if="warantyDetail.tire_info?.patternAdmin" class="text-xs bg-red-500 text-white px-1 rounded ml-1"> Old </span></p>
+                            <p v-if="warantyDetail.tire_info?.patternAdmin" class="text-lg font-medium">{{ warantyDetail.tire_info.patternAdmin || '-' }} <span class="text-xs bg-green-600 text-white px-1 rounded ml-1">New</span></p>
                         </div>
 
                         <div>
                             <span class="block text-sm font-bold text-black-800">Description</span>
-                            <p class="text-lg font-medium">{{ warantyDetail.tire_info.desc || '-' }}</p>
+                            <p class="text-lg font-medium">{{ warantyDetail.tire_info.desc || '-' }} <span v-if="warantyDetail.tire_info?.descriptionAdmin" class="text-xs bg-red-500 text-white px-1 rounded ml-1"> Old </span></p>
+                            <p v-if="warantyDetail.tire_info?.descriptionAdmin" class="text-lg font-medium">{{ warantyDetail.tire_info.descriptionAdmin || '-' }} <span class="text-xs bg-green-600 text-white px-1 rounded ml-1">New</span></p>
                         </div>
-
+                    </div>
+                    <div class="grid grid-cols-2 md:grid-cols-2 gap-4">
                         <div>
                             <span class="block text-sm font-bold text-black-800">Certificate Number</span>
                             <p class="text-lg font-medium">{{ warantyDetail.warrantyCertNo || '-' }}</p>
@@ -557,6 +560,16 @@
                     <small v-if="(!editTireData.weekcode) && editValidationTire" class="text-red-600">Week Code is required.</small>
                 </div>
             </div>
+            <label class="block font-bold text-gray-700 mb-1">Select Material ID</label>
+            <Dropdown v-model="selectedMaterial" :options="listMaterial" optionLabel="material" placeholder="Select material" class="w-full mb-4">
+                <template #option="slotProps">
+                    <div class="flex flex-col gap-1 py-2">
+                        <div class="font-semibold text-gray-800">{{ slotProps.option.material }}</div>
+                        <div class="text-xs text-gray-700">ID : {{ slotProps.option.materialid }}</div>
+                        <div class="text-sm text-gray-600"><span class="font-medium">Pattern : </span> {{ slotProps.option.pattern }} </div>
+                    </div>
+                </template>
+            </Dropdown>
         </div>
 
         <template #footer>
@@ -709,10 +722,10 @@
         <label class="block font-bold text-gray-700 mb-1">Select Material ID</label>
         <Dropdown v-model="selectedMaterial" :options="listMaterial" optionLabel="material" placeholder="Select material" class="w-full mb-4">
             <template #option="slotProps">
-                <div class="flex items-center gap-3">
-                    <div>
-                        <div class="font-semibold">{{ slotProps.option.material }}</div>
-                    </div>
+                <div class="flex flex-col gap-1 py-2">
+                    <div class="font-semibold text-gray-800">{{ slotProps.option.material }}</div>
+                    <div class="text-xs text-gray-700">ID : {{ slotProps.option.materialid }}</div>
+                    <div class="text-sm text-gray-600"><span class="font-medium">Pattern : </span> {{ slotProps.option.pattern }} </div>
                 </div>
             </template>
         </Dropdown>
@@ -729,10 +742,10 @@
         <label class="block font-bold text-gray-700 mb-1">Select Material ID</label>
         <Dropdown v-model="selectedMaterial" :options="listMaterial" optionLabel="material" placeholder="Select material" class="w-full mb-4">
             <template #option="slotProps">
-                <div class="flex items-center gap-3">
-                    <div>
-                        <div class="font-semibold">{{ slotProps.option.material }}</div>
-                    </div>
+                <div class="flex flex-col gap-1 py-2">
+                    <div class="font-semibold text-gray-800">{{ slotProps.option.material }}</div>
+                    <div class="text-xs text-gray-700">ID : {{ slotProps.option.materialid }}</div>
+                    <div class="text-sm text-gray-600"><span class="font-medium">Pattern : </span> {{ slotProps.option.pattern }} </div>
                 </div>
             </template>
         </Dropdown>
@@ -1014,11 +1027,21 @@ const submitEditTire = async () => {
         });
         return;
     }
+    if (!selectedMaterial.value) {
+        toast.add({
+            severity: 'error',
+            summary: 'Error',
+            detail: 'Please select Material ID',
+            life: 3000
+        });
+        return;
+    }
     try {
         editTire.value = true;
         const plateSerialValue = `${editTireData.mfgcode}-${editTireData.sizecode}-${editTireData.tyrespec}-${editTireData.weekcode}`;
         const formData = new FormData();
         formData.append('plateSerial', plateSerialValue);
+        formData.append('materialid', selectedMaterial.value.materialid);
         
         const id = route.params.id;
         const response = await api.post(`warranty_claim/updatePlateSerial/${id}`,formData);
