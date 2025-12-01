@@ -252,6 +252,10 @@
                         <span class="font-bold">Inv No</span>
                         <p><span  class="text-blue-600 cursor-pointer" @click="viewInvoice(warantyDetail.warranty_info.invAttachURL)">{{ warantyDetail.warranty_info?.inv_no || '-' }}</span></p>
                     </div>
+                    <div v-if="warantyDetail.warranty_info.inv_amount">
+                        <span class="font-bold">Invoice Amount</span>
+                        <p class="text-lg font-medium">RM {{ warantyDetail.warranty_info?.inv_amount || '-' }}</p>
+                    </div>
                 </div>
             </div>
 
@@ -483,6 +487,27 @@
             <div v-if="warantyDetail.reimbursement || warantyDetail.status_string  =='Pending Customer Invoice'" class="card w-full mb-4">
                 <div class="flex items-center justify-between border-b pb-2 mb-2">
                     <div class="text-2xl font-bold text-gray-800">Reimbursement Detail</div>
+                </div>
+                <div v-if="warantyDetail.reject_invoice_remarks?.length > 0"
+                    class="bg-red-50 border border-red-300 rounded-lg p-4 mb-4">
+
+                    <div class="flex items-start gap-3">
+                        <i class="pi pi-times-circle text-red-600 mt-1"></i>
+
+                        <div>
+                            <p class="font-semibold text-red-800">Reject Invoice Remarks</p>
+
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm text-gray-800">
+                                <div v-for="(item, index) in warantyDetail.reject_invoice_remarks" :key="item.id"
+                                    class="text-red-700 text-sm">
+                                    <span class="font-semibold">
+                                        {{ index + 1 }}<sup>{{ getOrdinal(index + 1) }}</sup> Rejection:
+                                    </span>
+                                    {{ item.rejectClaimInvoiceRemarks }}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
                 <div v-if="warantyDetail.status_string  == 'Pending Customer Invoice'" class="bg-yellow-50 border border-yellow-200 rounded-lg p-4" >
                     <div class="flex items-start gap-3">
@@ -872,6 +897,11 @@ const editTireData = reactive({
 const rejectInvoiceRemarks = reactive({
     remarks: '',
 });
+const getOrdinal = (n) => {
+    const s = ["th", "st", "nd", "rd"];
+    const v = n % 100;
+    return s[(v - 20) % 10] || s[v] || s[0];
+};
 const newClaimData = reactive({
     damageCode: '',
     problem: '',
@@ -1498,6 +1528,8 @@ const fetchWarrantyClaim = async () => {
                 threadDepthPhotos: apiData.threadDepthPhotos || null,
                 //waranty_info
                 warranty_info: apiData.warranty_info || null,
+                reject_invoice_remarks: apiData.reject_invoice_remarks || [],
+
             };
             await loadScrapImages();
             await loadTireDeptImages();
@@ -1713,6 +1745,7 @@ const rejectInvoice = async () => {
         });
     } finally {
         rejectingInvoice.value = false;
+        closerejectInvoiceDialog();
     }
 };
 
