@@ -588,17 +588,17 @@
                      <InputText v-model="editTireData.weekcode" class="w-full" maxlength="5"/>
                     <small v-if="(!editTireData.weekcode) && editValidationTire" class="text-red-600">Week Code is required.</small>
                 </div>
+                <div class="field">
+                    <label class="block font-bold text-gray-700 mb-2">Pattern Details *</label>
+                     <InputText v-model="editTireData.pattern" class="w-full" maxlength="3" />
+                    <small v-if="(!editTireData.pattern) && editValidationTire" class="text-red-600">Pattern Detail is required.</small>
+                </div>
+                <div class="field">
+                    <label class="block font-bold text-gray-700 mb-2">Pattern Description *</label>
+                     <InputText v-model="editTireData.desc" class="w-full"/>
+                    <small v-if="(!editTireData.desc) && editValidationTire" class="text-red-600">Pattern Description is required.</small>
+                </div>
             </div>
-            <label class="block font-bold text-gray-700 mb-1">Select Material ID</label>
-            <Dropdown v-model="selectedMaterial" :options="listMaterial" optionLabel="material" placeholder="Select material" class="w-full mb-4">
-                <template #option="slotProps">
-                    <div class="flex flex-col gap-1 py-2">
-                        <div class="font-semibold text-gray-800">{{ slotProps.option.material }}</div>
-                        <div class="text-xs text-gray-700">ID : {{ slotProps.option.materialid }}</div>
-                        <div class="text-sm text-gray-600"><span class="font-medium">Pattern : </span> {{ slotProps.option.pattern }} </div>
-                    </div>
-                </template>
-            </Dropdown>
         </div>
 
         <template #footer>
@@ -892,7 +892,9 @@ const editTireData = reactive({
     mfgcode: '',
     sizecode: '',
     tyrespec: '',
-    weekcode: ''
+    weekcode: '',
+    desc:     '',
+    pattern:   ''
 });
 const rejectInvoiceRemarks = reactive({
     remarks: '',
@@ -1048,6 +1050,8 @@ const openEditTier = () => {
     editTireData.sizecode = '';
     editTireData.tyrespec = '';
     editTireData.weekcode = '';
+    editTireData.pattern = '';
+    editTireData.desc = '';
     editTire.value = false;
     editValidationTire.value = false;
 };
@@ -1067,7 +1071,7 @@ const hasSubmittedPhotos = computed(() => {
 const submitEditTire = async () => {
     editValidationTire.value = true;
     // Validate required fields
-    if (!editTireData.mfgcode || !editTireData.mfgcode || editTireData.tyrespec === null || editTireData.weekcode === null) {
+    if (!editTireData.mfgcode || !editTireData.mfgcode || editTireData.tyrespec === null || editTireData.weekcode === null  ||  editTireData.pattern === null || editTireData.desc === null) {
         toast.add({
             severity: 'error',
             summary: 'Error',
@@ -1076,22 +1080,18 @@ const submitEditTire = async () => {
         });
         return;
     }
-    if (!selectedMaterial.value) {
-        toast.add({
-            severity: 'error',
-            summary: 'Error',
-            detail: 'Please select Material ID',
-            life: 3000
-        });
-        return;
-    }
+
     try {
         editTire.value = true;
         const plateSerialValue = `${editTireData.mfgcode}-${editTireData.sizecode}-${editTireData.tyrespec}-${editTireData.weekcode}`;
         const formData = new FormData();
         formData.append('plateSerial', plateSerialValue);
-        formData.append('materialid', selectedMaterial.value.materialid);
-        
+        formData.append('description', editTireData.desc);
+        formData.append('pattern', editTireData.pattern);
+
+        for (let [key, value] of formData.entries()) {
+            console.log(key, value);
+        }
         const id = route.params.id;
         const response = await api.post(`warranty_claim/updatePlateSerial/${id}`,formData);
 
