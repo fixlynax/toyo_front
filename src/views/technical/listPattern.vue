@@ -13,6 +13,8 @@
             :filters="filters"
             filterDisplay="menu"
             :globalFilterFields="['pattern_code', 'pattern_name', 'image_url']"
+            paginatorTemplate="CurrentPageReport FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink RowsPerPageDropdown"
+            currentPageReportTemplate="Showing {first} to {last} of {totalRecords} entries"
             tableStyle="min-width: 60rem"
         >
             <template #header>

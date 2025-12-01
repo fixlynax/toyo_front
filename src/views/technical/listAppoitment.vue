@@ -156,50 +156,6 @@ const getCurrentDateTime = () => {
     return now.toISOString().slice(0, 19).replace(/:/g, '-').replace('T', '_');
 };
 
-// 🟢 Alternative: Export to Excel using xlsx library (if you have it installed)
-/*
-const exportToExcelAdvanced = () => {
-    try {
-        exportLoading.value = true;
-        
-        const dataToExport = filteredAppointments.value;
-        
-        if (dataToExport.length === 0) {
-            alert('No data to export');
-            exportLoading.value = false;
-            return;
-        }
-
-        // Prepare data for Excel
-        const excelData = dataToExport.map(appointment => ({
-            'Appointment Code': appointment.appointmentCode,
-            'Dealer Shop': appointment.dealerShop,
-            'Dealer Account No': appointment.dealerCustAccountNo,
-            'Customer Name': appointment.customerName,
-            'Customer Phone': appointment.customerPhone,
-            'Request Date': appointment.requestDate,
-            'Request Session': appointment.requestSession,
-            'Appointment Date': appointment.appointmentDate,
-            'Appointment Time': appointment.appointmentTime,
-            'Status': appointment.statusString
-        }));
-
-        // Create worksheet and workbook
-        const worksheet = XLSX.utils.json_to_sheet(excelData);
-        const workbook = XLSX.utils.book_new();
-        XLSX.utils.book_append_sheet(workbook, worksheet, 'Appointments');
-        
-        // Generate and download file
-        XLSX.writeFile(workbook, `appointments_${getCurrentDateTime()}.xlsx`);
-        
-    } catch (error) {
-        console.error('Error exporting to Excel:', error);
-        alert('Error occurred while exporting data');
-    } finally {
-        exportLoading.value = false;
-    }
-};
-*/
 
 // 🟢 Initial data load
 onBeforeMount(() => {
@@ -242,6 +198,8 @@ const getStatusColor = (status) => {
                 :filters="filters"
                 filterDisplay="menu"
                 :globalFilterFields="['appointmentCode', 'dealerShop', 'dealerCustAccountNo', 'customerName', 'customerPhone', 'requestDate', 'requestSession', 'appointmentTime', 'appointmentDate', 'statusString']"
+                paginatorTemplate="CurrentPageReport FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink RowsPerPageDropdown"
+                currentPageReportTemplate="Showing {first} to {last} of {totalRecords} entries"
             >
                 <template #header>
                     <div class="flex items-center justify-between gap-4 w-full flex-wrap">
