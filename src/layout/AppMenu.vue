@@ -43,6 +43,16 @@ const model = ref([
                 to: '/marketing/listCatalogue'
             },
             {
+                label: 'Waranty Registration',
+                icon: 'pi pi-fw pi-file',
+                to: '/marketing/listWarrantyRegistration'
+            },
+            {
+                label: 'OE Registration',
+                icon: 'pi pi-fw pi-slack',
+                to: '/marketing/listOERegistration'
+            },
+            {
                 label: 'Redemption Management',
                 icon: 'pi pi-fw pi-wallet',
                 to: '/marketing/listRedemption'

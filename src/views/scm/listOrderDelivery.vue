@@ -8,16 +8,9 @@
             <div class="flex items-center gap-3 mb-4 ml-4">
                 <!-- LEFT SIDE -->
 
-                    <Calendar
-                        v-model="dateRange"
-                        selectionMode="range"
-                        dateFormat="dd/mm/yy"
-                        placeholder="Select date range"
-                        style="width: 390px;"
-                    />
-                    <Button label="Clear" class="p-button-sm p-button-danger" @click="clearDate" />
-                    <Button label="Filter" class="p-button-sm" @click="applyFilter" />
-
+                <Calendar v-model="dateRange" selectionMode="range" dateFormat="dd/mm/yy" placeholder="Select date range" style="width: 390px" />
+                <Button label="Clear" class="p-button-sm p-button-danger" @click="clearDate" />
+                <Button label="Filter" class="p-button-sm" @click="applyFilter" />
             </div>
             <DataTable
                 :value="orderDelList"
@@ -25,14 +18,29 @@
                 :rows="10"
                 :rowsPerPageOptions="[10, 20, 50, 100]"
                 dataKey="id"
+                removableSort
                 :rowHover="true"
                 :loading="loading"
                 :filters="filters"
                 filterDisplay="menu"
-                :globalFilterFields="['do_no', 'shipto_data.custAccountNo', 'storagelocation' ,  'shipto_data.companyName1', 'shipto_data.companyName2', 'shipto_data.city', 'shipto_data.state', 'deliveryDate',, 'scm_deliver_detail.scheduled_delivery_time', 'scm_deliver_detail.delivered_datetime', 'orderstatus']"
+                class="rounded-table"
+                :globalFilterFields="[
+                    'do_no',
+                    'shipto_data.custAccountNo',
+                    'storagelocation',
+                    'shipto_data.companyName1',
+                    'shipto_data.companyName2',
+                    'shipto_data.city',
+                    'shipto_data.state',
+                    'deliveryDate',
+                    ,
+                    'scm_deliver_detail.scheduled_delivery_time',
+                    'scm_deliver_detail.delivered_datetime',
+                    'orderstatus'
+                ]"
                 paginatorTemplate="CurrentPageReport FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink RowsPerPageDropdown"
                 currentPageReportTemplate="Showing {first} to {last} of {totalRecords} entries"
-                >
+            >
                 <template #header>
                     <div class="flex items-center justify-between gap-4 w-full flex-wrap">
                         <div class="flex items-center gap-2 w-full max-w-md">
@@ -44,55 +52,34 @@
                             </IconField>
                         </div>
 
-                        <div class="flex justify-end gap-2"  v-if="statusTabs[activeTabIndex]?.label === 'Pending' && canUpdate">
-                            <Button type="button" label="Export" icon="pi pi-file-export" class="p-button-success" :loading="exportLoading1" @click="handleExport1"/>
-                            <Button type="button" label="Bulk Update" icon="pi pi-file-import" @click="importInput1?.click()":loading="importLoading1" />
-                            <input 
-                            ref="importInput1"
-                            type="file" 
-                            accept=".xlsx,.xls" 
-                            style="display: none" 
-                            @change="handleImport1"
-                            />
+                        <div class="flex justify-end gap-2" v-if="statusTabs[activeTabIndex]?.label === 'Pending' && canUpdate">
+                            <Button type="button" label="Export" icon="pi pi-file-export" class="p-button-success" :loading="exportLoading1" @click="handleExport1" />
+                            <Button type="button" label="Bulk Update" icon="pi pi-file-import" @click="importInput1?.click()" :loading="importLoading1" />
+                            <input ref="importInput1" type="file" accept=".xlsx,.xls" style="display: none" @change="handleImport1" />
                         </div>
-                        <div class="flex justify-end gap-2"  v-if="statusTabs[activeTabIndex]?.label === 'Delivery' && canUpdate">
-                            <Button type="button" label="Export" icon="pi pi-file-export" class="p-button-success" :loading="exportLoading2" @click="handleExport2"/>
-                            <Button type="button" label="Bulk Update" icon="pi pi-file-import" @click="importInput2?.click()":loading="importLoading2" />
-                            <input 
-                            ref="importInput2"
-                            type="file" 
-                            accept=".xlsx,.xls" 
-                            style="display: none" 
-                            @change="handleImport2"
-                            />
+                        <div class="flex justify-end gap-2" v-if="statusTabs[activeTabIndex]?.label === 'Delivery' && canUpdate">
+                            <Button type="button" label="Export" icon="pi pi-file-export" class="p-button-success" :loading="exportLoading2" @click="handleExport2" />
+                            <Button type="button" label="Bulk Update" icon="pi pi-file-import" @click="importInput2?.click()" :loading="importLoading2" />
+                            <input ref="importInput2" type="file" accept=".xlsx,.xls" style="display: none" @change="handleImport2" />
                         </div>
-                        <div class="flex justify-end gap-2"  v-if="statusTabs[activeTabIndex]?.label === 'Completed'">
-                            <Button type="button" label="Export" icon="pi pi-file-export" class="p-button-success" @click="exportToExcel"/>
+                        <div class="flex justify-end gap-2" v-if="statusTabs[activeTabIndex]?.label === 'Completed'">
+                            <Button type="button" label="Export" icon="pi pi-file-export" class="p-button-success" @click="exportToExcel" />
                         </div>
                     </div>
                 </template>
 
                 <template #empty> No Order Delivery found. </template>
                 <template #loading> Loading Order Delivery data. Please wait. </template>
-                <Column v-if="statusTabs[activeTabIndex]?.label !== 'Completed' && canUpdate" header="Export All" style="min-width: 8rem" >
+                <Column v-if="statusTabs[activeTabIndex]?.label !== 'Completed' && canUpdate" header="Export All" style="min-width: 8rem">
                     <template #header>
                         <div class="flex justify-center">
-                        <Checkbox
-                            :key="orderDelList.length" 
-                            :binary="true"
-                            :model-value="allSelected"  
-                            @change="() => toggleSelectAll()"  
-                        />
+                            <Checkbox :key="orderDelList.length" :binary="true" :model-value="allSelected" @change="() => toggleSelectAll()" />
                         </div>
                     </template>
 
                     <template #body="{ data }">
                         <div class="flex justify-center">
-                        <Checkbox
-                            :binary="true"
-                            :model-value="selectedExportIds.has(data.id)"
-                            @change="() => handleToggleExport(data.id)"
-                        />
+                            <Checkbox :binary="true" :model-value="selectedExportIds.has(data.id)" @change="() => handleToggleExport(data.id)" />
                         </div>
                     </template>
                 </Column>
@@ -111,26 +98,26 @@
                 </Column>
                 <Column field="shipto_data.companyName1" header="Customer Name" style="min-width: 12rem" sortable>
                     <template #body="{ data }">
-                        <span class="font-bold">{{` ${data.shipto_data?.companyName1 || ''} ${data.shipto_data?.companyName2 || ''} ` }}</span>
-                    <br>
-                     {{ data.shipto_data?.custAccountNo || '-' }}
+                        <span class="font-bold">{{ ` ${data.shipto_data?.companyName1 || ''} ${data.shipto_data?.companyName2 || ''} ` }}</span>
+                        <br />
+                        {{ data.shipto_data?.custAccountNo || '-' }}
                     </template>
                 </Column>
 
                 <Column field="storagelocation" header="Storage Location" style="min-width: 8rem" sortable>
                     <template #body="{ data }">
-                         {{ data.storagelocation }}
+                        {{ data.storagelocation }}
                     </template>
                 </Column>
 
                 <Column field="shipto_data.city" header="City" style="min-width: 8rem" sortable>
                     <template #body="{ data }">
-                         {{ data.shipto_data?.city?.replace(/,$/, '') }}
+                        {{ data.shipto_data?.city?.replace(/,$/, '') }}
                     </template>
                 </Column>
                 <Column field="shipto_data.state" header="State" style="min-width: 8rem" sortable>
                     <template #body="{ data }">
-                         {{ data.shipto_data?.state || '-' }}
+                        {{ data.shipto_data?.state || '-' }}
                     </template>
                 </Column>
 
@@ -139,7 +126,6 @@
                         {{ data.orderDesc }}
                     </template>
                 </Column>
-
 
                 <Column field="deliveryDate" header="ETA Date" style="min-width: 10rem" sortable>
                     <template #body="{ data }">
@@ -155,7 +141,7 @@
 
                 <Column field="scm_deliver_detail.delivered_datetime" header="Delivered Date" style="min-width: 10rem" sortable>
                     <template #body="{ data }">
-                          {{ data.scm_deliver_detail?.delivered_datetime? formatDate(data.scm_deliver_detail.delivered_datetime): 'Not Assigned' }}
+                        {{ data.scm_deliver_detail?.delivered_datetime ? formatDate(data.scm_deliver_detail.delivered_datetime) : 'Not Assigned' }}
                     </template>
                 </Column>
 
@@ -198,20 +184,20 @@ const orderDelList = ref([]);
 const dateRange = ref(null);
 
 const formatDateDMY = (date) => {
-  const d = new Date(date);
-  const day = String(d.getDate()).padStart(2, "0");
-  const month = String(d.getMonth() + 1).padStart(2, "0");
-  const year = d.getFullYear();
-  return `${day}/${month}/${year}`;
+    const d = new Date(date);
+    const day = String(d.getDate()).padStart(2, '0');
+    const month = String(d.getMonth() + 1).padStart(2, '0');
+    const year = d.getFullYear();
+    return `${day}/${month}/${year}`;
 };
 const filters = ref({
     global: { value: null, matchMode: FilterMatchMode.CONTAINS }
 });
 
 const statusTabs = [
-    { label: 'Pending',submitLabel: 'PENDING' },
+    { label: 'Pending', submitLabel: 'PENDING' },
     { label: 'Delivery', submitLabel: 'DELIVERY' },
-    { label: 'Completed', submitLabel: 'COMPLETED'}
+    { label: 'Completed', submitLabel: 'COMPLETED' }
 ];
 
 watch(activeTabIndex, () => {
@@ -222,43 +208,49 @@ watch(activeTabIndex, () => {
         const lastWeek = new Date();
         lastWeek.setDate(today.getDate() - 7);
         dateRange.value = [lastWeek, today];
-    }else{
+        const dateRangeStr = dateRange.value?.[0] && dateRange.value?.[1] ? `${formatDateDMY(dateRange.value[0])} - ${formatDateDMY(dateRange.value[1])}` : null;
+
+        // Prepare request body
+        const body = {
+            tab: tab.submitLabel,
+            date_range: dateRangeStr
+        };
+        fetchData(body);
+    } else {
         dateRange.value = null;
-    }
-        selectedExportIds.value.clear();
         fetchData();
+    }
+    selectedExportIds.value.clear();
 });
 
 // Computed boolean: are all rows selected?
 const allSelected = computed(() => {
-  return orderDelList.value.length > 0 &&
-         orderDelList.value.every(item => selectedExportIds.value.has(item.id));
+    return orderDelList.value.length > 0 && orderDelList.value.every((item) => selectedExportIds.value.has(item.id));
 });
 
 const handleToggleExport = (id) => {
-  if (selectedExportIds.value.has(id)) {
-    selectedExportIds.value.delete(id);
-  } else {
-    selectedExportIds.value.add(id);
-  }
-//   console.log(selectedExportIds.value);
+    if (selectedExportIds.value.has(id)) {
+        selectedExportIds.value.delete(id);
+    } else {
+        selectedExportIds.value.add(id);
+    }
+    //   console.log(selectedExportIds.value);
 };
 
 // Check all
 const toggleSelectAll = () => {
-  if (allSelected.value) {
-    // Unselect all for this tab
-    orderDelList.value.forEach(item => {
-      selectedExportIds.value.delete(item.id);
-    });
-  } else {
-    // Select all for this tab
-    orderDelList.value.forEach(item => {
-      selectedExportIds.value.add(item.id);
-    });
-  }
+    if (allSelected.value) {
+        // Unselect all for this tab
+        orderDelList.value.forEach((item) => {
+            selectedExportIds.value.delete(item.id);
+        });
+    } else {
+        // Select all for this tab
+        orderDelList.value.forEach((item) => {
+            selectedExportIds.value.add(item.id);
+        });
+    }
 };
-
 
 onMounted(async () => {
     fetchData();
@@ -270,9 +262,9 @@ function formatDate(dateString) {
     return date.toLocaleString('en-MY', {
         year: 'numeric',
         month: '2-digit',
-        day: '2-digit',
+        day: '2-digit'
     });
-    }
+}
 function formatTime(timeString) {
     if (!timeString) return '';
     const [hours, minutes, seconds] = timeString.split(':');
@@ -282,9 +274,9 @@ function formatTime(timeString) {
         hour: '2-digit',
         minute: '2-digit',
         second: '2-digit',
-        hour12: true,
+        hour12: true
     });
-    }
+}
 function formatDateFull(dateString) {
     if (!dateString) return '';
     const date = new Date(dateString);
@@ -297,10 +289,10 @@ function formatDateFull(dateString) {
         second: '2-digit',
         hour12: true
     });
-    }
-    // Export function SCHEDULE ONLY
+}
+// Export function SCHEDULE ONLY
 const handleExport1 = async () => {
-     const idsArray = Array.from(selectedExportIds.value).map(id => ({ id: Number(id) }));
+    const idsArray = Array.from(selectedExportIds.value).map((id) => ({ id: Number(id) }));
 
     if (idsArray.length === 0) {
         alert('Please select at least one row.');
@@ -309,19 +301,19 @@ const handleExport1 = async () => {
     // console.log("export 1",idsArray);
     try {
         exportLoading1.value = true;
-        
-            const response = await api.postExtra(
+
+        const response = await api.postExtra(
             'excel/export-schedule-order',
-        { orderids_array: JSON.stringify(idsArray) },
-        {
-            responseType: 'blob',
-            headers: {
-            'Content-Type': 'application/json',
+            { orderids_array: JSON.stringify(idsArray) },
+            {
+                responseType: 'blob',
+                headers: {
+                    'Content-Type': 'application/json'
+                }
             }
-        }
         );
-        const blob = new Blob([response.data], { 
-        type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' 
+        const blob = new Blob([response.data], {
+            type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
         });
 
         const url = window.URL.createObjectURL(blob);
@@ -344,7 +336,7 @@ const handleExport1 = async () => {
 };
 // Export function RECIEVE ONLY
 const handleExport2 = async () => {
-     const idsArray = Array.from(selectedExportIds.value).map(id => ({ id: Number(id) }));
+    const idsArray = Array.from(selectedExportIds.value).map((id) => ({ id: Number(id) }));
 
     if (idsArray.length === 0) {
         alert('Please select at least one row.');
@@ -353,19 +345,19 @@ const handleExport2 = async () => {
     // console.log("export 2",idsArray);
     try {
         exportLoading2.value = true;
-        
-            const response = await api.postExtra(
+
+        const response = await api.postExtra(
             'excel/export-delivered-order',
-        { orderids_array: JSON.stringify(idsArray) },
-        {
-            responseType: 'blob',
-            headers: {
-            'Content-Type': 'application/json',
+            { orderids_array: JSON.stringify(idsArray) },
+            {
+                responseType: 'blob',
+                headers: {
+                    'Content-Type': 'application/json'
+                }
             }
-        }
         );
-        const blob = new Blob([response.data], { 
-        type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' 
+        const blob = new Blob([response.data], {
+            type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
         });
 
         const url = window.URL.createObjectURL(blob);
@@ -394,16 +386,16 @@ const handleImport1 = async (event) => {
     // console.log("import 1",file);
     try {
         importLoading1.value = true;
-        
+
         const formData = new FormData();
         formData.append('order_schedule_excel', file);
-        
+
         const response = await api.postExtra('excel/import-schedule-order', formData, {
             headers: {
                 'Content-Type': 'multipart/form-data'
             }
-            });
-        
+        });
+
         if (response.data.status === 1) {
             // Refresh data after import
             await fetchData();
@@ -414,7 +406,7 @@ const handleImport1 = async (event) => {
                 detail: 'File imported successfully',
                 life: 3000
             });
-            } else {
+        } else {
             toast.add({
                 severity: 'error',
                 summary: 'Import Failed',
@@ -427,10 +419,10 @@ const handleImport1 = async (event) => {
         toast.add({ severity: 'error', summary: 'Error', detail: 'Failed to import data', life: 3000 });
     } finally {
         importLoading1.value = false;
-                    // Reset file input
-            if (importInput1.value) {
-                importInput1.value.value = '';
-            }
+        // Reset file input
+        if (importInput1.value) {
+            importInput1.value.value = '';
+        }
     }
 };
 // Import function RECIEVE ONLY
@@ -440,16 +432,16 @@ const handleImport2 = async (event) => {
     // console.log("import 2",file);
     try {
         importLoading2.value = true;
-        
+
         const formData = new FormData();
         formData.append('order_schedule_excel', file);
-        
+
         const response = await api.postExtra('excel/import-delivered-order', formData, {
             headers: {
                 'Content-Type': 'multipart/form-data'
             }
-            });
-        
+        });
+
         if (response.data.status === 1) {
             // Refresh data after import
             await fetchData();
@@ -460,7 +452,7 @@ const handleImport2 = async (event) => {
                 detail: 'File imported successfully',
                 life: 3000
             });
-            } else {
+        } else {
             toast.add({
                 severity: 'error',
                 summary: 'Import Failed',
@@ -473,48 +465,47 @@ const handleImport2 = async (event) => {
         toast.add({ severity: 'error', summary: 'Error', detail: 'Failed to import data', life: 3000 });
     } finally {
         importLoading2.value = false;
-                    // Reset file input
-            if (importInput2.value) {
-                importInput2.value.value = '';
-            }
+        // Reset file input
+        if (importInput2.value) {
+            importInput2.value.value = '';
+        }
     }
 };
 const applyFilter = () => {
     const tab = statusTabs[activeTabIndex.value];
     if (tab.submitLabel === 'COMPLETED') {
-
-    // Must have BOTH start & end date
-    if (!dateRange.value?.[0] || !dateRange.value?.[1]) {
-      // Show message (toast, alert, etc.)
-      toast.add({
-        severity: 'warn',
-        summary: 'Date Range Required',
-        detail: 'Please select a full date range for Completed records.',
-        life: 3000
-      });
-      return; // STOP here, do NOT call API
+        // Must have BOTH start & end date
+        if (!dateRange.value?.[0] || !dateRange.value?.[1]) {
+            // Show message (toast, alert, etc.)
+            toast.add({
+                severity: 'warn',
+                summary: 'Date Range Required',
+                detail: 'Please select a full date range for Completed records.',
+                life: 3000
+            });
+            return; // STOP here, do NOT call API
+        }
     }
-  }
-  const dateRangeStr = dateRange.value?.[0] && dateRange.value?.[1]? `${formatDateDMY(dateRange.value[0])} - ${formatDateDMY(dateRange.value[1])}`: null// returns "dd/mm/yyyy - dd/mm/yyyy" or null
-  const body = {
-    tab: tab.submitLabel,
-    date_range: dateRangeStr
-  };
+    const dateRangeStr = dateRange.value?.[0] && dateRange.value?.[1] ? `${formatDateDMY(dateRange.value[0])} - ${formatDateDMY(dateRange.value[1])}` : null; // returns "dd/mm/yyyy - dd/mm/yyyy" or null
+    const body = {
+        tab: tab.submitLabel,
+        date_range: dateRangeStr
+    };
 
-  fetchData(body);
+    fetchData(body);
 };
 const clearDate = () => {
-  dateRange.value = null; // or []
+    dateRange.value = null; // or []
 };
 const fetchData = async (body = null) => {
     try {
         loading.value = true;
         const payload = body || {
-        tab: statusTabs[activeTabIndex.value].submitLabel
+            tab: statusTabs[activeTabIndex.value].submitLabel
         };
-        const response = await api.postExtra('order-delivery/list',payload);
+        const response = await api.postExtra('order-delivery/list', payload);
         if (response.data.status === 1 && Array.isArray(response.data.admin_data)) {
-                    orderDelList.value = response.data.admin_data.sort((a, b) => {
+            orderDelList.value = response.data.admin_data.sort((a, b) => {
                 return new Date(b.created) - new Date(a.created);
             });
         } else {
@@ -540,9 +531,9 @@ const exportToExcel = () => {
     try {
         // Create worksheet data
         const headers = ['Created', 'SAP DO No', 'Customer Name', 'Customer Acc No', 'Storage Location', 'City', 'State', 'Order Type', 'Eta Date', 'Planned Date', 'Delivered Date', 'Status'];
-        
+
         // Prepare data rows
-        const csvData = orderDelList.value.map(data => [
+        const csvData = orderDelList.value.map((data) => [
             `"${formatDate(data.created)}"`,
             `"${data.do_no || '-'}"`,
             `"${data.shipto_data?.companyName1 || ''} ${data.shipto_data?.companyName2 || ''} "`,
@@ -554,30 +545,26 @@ const exportToExcel = () => {
             `"${formatDate(data.deliveryDate)}"`,
             `"${data.scm_deliver_detail?.scheduled_delivery_time ? formatDate(data.scm_deliver_detail?.scheduled_delivery_time) : 'No date assigned'}"`,
             `"${data.scm_deliver_detail?.delivered_datetime ? formatDate(data.scm_deliver_detail?.delivered_datetime) : 'No date assigned'}"`,
-            `"${getStatusLabel2(data.status) || '-'}"`,
+            `"${getStatusLabel2(data.status) || '-'}"`
         ]);
 
         // Combine headers and data
-        const csvContent = [
-            headers.join(','),
-            ...csvData.map(row => row.join(','))
-        ].join('\n');
+        const csvContent = [headers.join(','), ...csvData.map((row) => row.join(','))].join('\n');
 
         // Create and download the file
         const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
         const link = document.createElement('a');
         const url = URL.createObjectURL(blob);
-        
+
         link.setAttribute('href', url);
         link.setAttribute('download', `order_delivery_list_${new Date().toISOString().split('T')[0]}.csv`);
         link.style.visibility = 'hidden';
-        
+
         document.body.appendChild(link);
         link.click();
         document.body.removeChild(link);
-        
+
         URL.revokeObjectURL(url);
-        
     } catch (error) {
         console.error('Error exporting to Excel:', error);
     }
@@ -604,18 +591,59 @@ function getStatusSeverity(status) {
 }
 const getStatusLabel2 = (status) => {
     const statusMap = {
-        "NEW": 'Pending',
-        "PENDING": 'Delivery',
-        "COMPLETED": 'Completed',
+        NEW: 'Pending',
+        PENDING: 'Delivery',
+        COMPLETED: 'Completed'
     };
     return statusMap[status] || `Status: ${status}`;
 };
 const getStatusSeverity2 = (status) => {
     const severityMap = {
-        "NEW": 'info',
-        "PENDING": 'warning',
-        "COMPLETED": 'success',
+        NEW: 'info',
+        PENDING: 'warning',
+        COMPLETED: 'success'
     };
     return severityMap[status] || 'secondary';
 };
 </script>
+
+<style scoped>
+:deep(.rounded-table) {
+    border-radius: 12px;
+    overflow: hidden;
+    border: 1px solid #e5e7eb;
+
+    .p-datatable-header {
+        border-top-left-radius: 12px;
+        border-top-right-radius: 12px;
+    }
+
+    .p-paginator-bottom {
+        border-bottom-left-radius: 12px;
+        border-bottom-right-radius: 12px;
+    }
+
+    .p-datatable-thead > tr > th {
+        &:first-child {
+            border-top-left-radius: 12px;
+        }
+        &:last-child {
+            border-top-right-radius: 12px;
+        }
+    }
+
+    .p-datatable-tbody > tr:last-child > td {
+        &:first-child {
+            border-bottom-left-radius: 0;
+        }
+        &:last-child {
+            border-bottom-right-radius: 0;
+        }
+    }
+
+    .p-datatable-tbody > tr.p-datatable-emptymessage > td {
+        border-bottom-left-radius: 12px;
+        border-bottom-right-radius: 12px;
+    }
+}
+</style>

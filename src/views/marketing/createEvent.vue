@@ -118,7 +118,7 @@
                     <div v-else class="text-gray-500 italic">No questions added yet.</div>
 
                     <div class="flex justify-start">
-                        <Button icon="pi pi-plus" label="Add Question" class="p-button-success p-button-sm p-button-raised" :disabled="questions.length >= 10" @click="addQuestion" />
+                        <Button icon="pi pi-plus" label="Add Question" class="p-button-success p-button-sm p-button-raised" :disabled="questions.length >= 20" @click="addQuestion" />
                     </div>
 
                     <div class="flex justify-end mt-8 gap-2">
@@ -193,7 +193,7 @@ const onStartDateSelect = (date) => {
 // survey questions
 const questions = ref([]);
 const addQuestion = () => {
-    if (questions.value.length < 10) {
+    if (questions.value.length < 20) {
         questions.value.push({
             question: '',
             answers: ['', '', ''],

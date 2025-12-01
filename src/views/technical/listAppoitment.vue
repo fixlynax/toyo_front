@@ -156,50 +156,6 @@ const getCurrentDateTime = () => {
     return now.toISOString().slice(0, 19).replace(/:/g, '-').replace('T', '_');
 };
 
-// 🟢 Alternative: Export to Excel using xlsx library (if you have it installed)
-/*
-const exportToExcelAdvanced = () => {
-    try {
-        exportLoading.value = true;
-        
-        const dataToExport = filteredAppointments.value;
-        
-        if (dataToExport.length === 0) {
-            alert('No data to export');
-            exportLoading.value = false;
-            return;
-        }
-
-        // Prepare data for Excel
-        const excelData = dataToExport.map(appointment => ({
-            'Appointment Code': appointment.appointmentCode,
-            'Dealer Shop': appointment.dealerShop,
-            'Dealer Account No': appointment.dealerCustAccountNo,
-            'Customer Name': appointment.customerName,
-            'Customer Phone': appointment.customerPhone,
-            'Request Date': appointment.requestDate,
-            'Request Session': appointment.requestSession,
-            'Appointment Date': appointment.appointmentDate,
-            'Appointment Time': appointment.appointmentTime,
-            'Status': appointment.statusString
-        }));
-
-        // Create worksheet and workbook
-        const worksheet = XLSX.utils.json_to_sheet(excelData);
-        const workbook = XLSX.utils.book_new();
-        XLSX.utils.book_append_sheet(workbook, worksheet, 'Appointments');
-        
-        // Generate and download file
-        XLSX.writeFile(workbook, `appointments_${getCurrentDateTime()}.xlsx`);
-        
-    } catch (error) {
-        console.error('Error exporting to Excel:', error);
-        alert('Error occurred while exporting data');
-    } finally {
-        exportLoading.value = false;
-    }
-};
-*/
 
 // 🟢 Initial data load
 onBeforeMount(() => {
@@ -223,7 +179,7 @@ const getStatusColor = (status) => {
 
 <template>
     <div class="card">
-        <div class="text-2xl font-bold text-gray-800 border-b pb-2 mb-4">List Appointment</div>
+        <div class="text-2xl font-bold text-gray-800 border-b pb-2">List Appointment</div>
 
         <!-- Show loading only -->
         <LoadingPage v-if="loading" message="Loading Appointments..." />
@@ -231,17 +187,21 @@ const getStatusColor = (status) => {
         <!-- Show table only when not loading -->
         <template v-else>
             <!-- 🟣 Status Tabs -->
-            <TabMenu :model="statusTabs" v-model:activeIndex="activeTabIndex" class="mb-6" />
+            <TabMenu :model="statusTabs" v-model:activeIndex="activeTabIndex" class="mb-4" />
 
             <DataTable
                 :value="filteredAppointments"
                 :paginator="true"
                 :rows="10"
                 dataKey="id"
+                removableSort
+                class="rounded-table"
                 :rowHover="true"
                 :filters="filters"
                 filterDisplay="menu"
                 :globalFilterFields="['appointmentCode', 'dealerShop', 'dealerCustAccountNo', 'customerName', 'customerPhone', 'requestDate', 'requestSession', 'appointmentTime', 'appointmentDate', 'statusString']"
+                paginatorTemplate="CurrentPageReport FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink RowsPerPageDropdown"
+                currentPageReportTemplate="Showing {first} to {last} of {totalRecords} entries"
             >
                 <template #header>
                     <div class="flex items-center justify-between gap-4 w-full flex-wrap">
@@ -332,5 +292,44 @@ const getStatusColor = (status) => {
 <style scoped>
 :deep(.p-tabmenu .p-tabmenu-nav .p-tabmenuitem.p-highlight .p-menuitem-link) {
     border-color: #3b82f6;
+}
+
+:deep(.rounded-table) {
+    border-radius: 12px;
+    overflow: hidden;
+    border: 1px solid #e5e7eb;
+    
+    .p-datatable-header {
+        border-top-left-radius: 12px;
+        border-top-right-radius: 12px;
+    }
+    
+    .p-paginator-bottom {
+        border-bottom-left-radius: 12px;
+        border-bottom-right-radius: 12px;
+    }
+    
+    .p-datatable-thead > tr > th {
+        &:first-child {
+            border-top-left-radius: 12px;
+        }
+        &:last-child {
+            border-top-right-radius: 12px;
+        }
+    }
+    
+    .p-datatable-tbody > tr:last-child > td {
+        &:first-child {
+            border-bottom-left-radius: 0;
+        }
+        &:last-child {
+            border-bottom-right-radius:0;
+        }
+    }
+    
+    .p-datatable-tbody > tr.p-datatable-emptymessage > td {
+        border-bottom-left-radius: 12px;
+        border-bottom-right-radius: 12px;
+    }
 }
 </style>

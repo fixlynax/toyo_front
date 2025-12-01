@@ -59,7 +59,7 @@ const filters = ref({
 const filteredList = computed(() => {
     const tabValue = tabs[activeTab.value].value;
 
-    return listData.value.filter(item => item.status === tabValue);
+    return listData.value.filter((item) => item.status === tabValue);
 });
 
 const fetchClaims = async () => {
@@ -71,7 +71,7 @@ const fetchClaims = async () => {
                 id: item.claim_id,
                 refNo: item.claimRefNo,
                 dealerName: item.dealer,
-                isTWP : item.isTWP,
+                isTWP: item.isTWP,
                 claimTypeDisplay: item.isTWP == 1 ? 'TWP' : 'Technical Claim',
                 claimType: item.warrantyType || '-',
                 dealer_sales_office: item.dealer_sales_office || '-',
@@ -159,7 +159,6 @@ const exportToCSV = () => {
     }
 };
 
-
 onMounted(fetchClaims);
 </script>
 
@@ -168,7 +167,7 @@ onMounted(fetchClaims);
         <div class="text-2xl font-bold text-gray-800 border-b pb-2">List Claim</div>
 
         <!-- Custom Tabs with Counts -->
-        <div class="border-b border-gray-200 mb-4">
+        <div class="border-gray-200 mb-4">
             <div class="flex space-x-8">
                 <button
                     v-for="(tab, index) in tabs"
@@ -187,7 +186,20 @@ onMounted(fetchClaims);
         <LoadingPage v-if="loading" message="Loading Warranty Claim List..." />
 
         <div v-else>
-            <DataTable :value="filteredList" :paginator="true" :rows="10" dataKey="id" :rowHover="true" :filters="filters" filterDisplay="menu" :globalFilterFields="['refNo', 'dealerName', 'claimTypeDisplay', 'claimDate', 'status', 'stage', 'warrantyRegCertNo']">
+            <DataTable
+                :value="filteredList"
+                :paginator="true"
+                :rows="10"
+                dataKey="id"
+                class="rounded-table"
+                removableSort=""
+                :rowHover="true"
+                :filters="filters"
+                filterDisplay="menu"
+                :globalFilterFields="['refNo', 'dealerName', 'claimTypeDisplay', 'claimDate', 'status', 'stage', 'warrantyRegCertNo']"
+                paginatorTemplate="CurrentPageReport FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink RowsPerPageDropdown"
+                currentPageReportTemplate="Showing {first} to {last} of {totalRecords} entries"
+            >
                 <template #header>
                     <div class="flex items-center justify-between gap-4 w-full flex-wrap">
                         <div class="flex items-center gap-2 w-full max-w-md">
@@ -234,7 +246,7 @@ onMounted(fetchClaims);
                 </Column>
                 <Column field="claimTypeDisplay" header="Claim Type" style="min-width: 15rem" sortable>
                     <template #body="{ data }">
-                        {{ data.claimTypeDisplay}}
+                        {{ data.claimTypeDisplay }}
                     </template>
                 </Column>
 
@@ -274,5 +286,44 @@ onMounted(fetchClaims);
 
 :deep(.p-datatable .p-datatable-tbody > tr:hover) {
     background-color: #f3f4f6;
+}
+
+:deep(.rounded-table) {
+    border-radius: 12px;
+    overflow: hidden;
+    border: 1px solid #e5e7eb;
+    
+    .p-datatable-header {
+        border-top-left-radius: 12px;
+        border-top-right-radius: 12px;
+    }
+    
+    .p-paginator-bottom {
+        border-bottom-left-radius: 12px;
+        border-bottom-right-radius: 12px;
+    }
+    
+    .p-datatable-thead > tr > th {
+        &:first-child {
+            border-top-left-radius: 12px;
+        }
+        &:last-child {
+            border-top-right-radius: 12px;
+        }
+    }
+    
+    .p-datatable-tbody > tr:last-child > td {
+        &:first-child {
+            border-bottom-left-radius: 0;
+        }
+        &:last-child {
+            border-bottom-right-radius:0;
+        }
+    }
+    
+    .p-datatable-tbody > tr.p-datatable-emptymessage > td {
+        border-bottom-left-radius: 12px;
+        border-bottom-right-radius: 12px;
+    }
 }
 </style>

@@ -109,21 +109,24 @@
                         </div>
                     </div>
 
-                    <div class="grid grid-cols-2 md:grid-cols-2 gap-4">
+                    <div class="grid grid-cols-2 md:grid-cols-2 gap-4 mb-4">
                         <!-- <div>
                             <span class="block text-sm font-bold text-black-800">Serial Plate</span>
                             <p class="text-lg font-medium">{{ warantyDetail.tire_info.plateSerial || '-' }}</p>
                         </div> -->
                         <div>
                             <span class="block text-sm font-bold text-black-800">Pattern</span>
-                            <p class="text-lg font-medium">{{ warantyDetail.tire_info.pattern || '-' }}</p>
+                            <p class="text-lg font-medium">{{ warantyDetail.tire_info.pattern || '-' }} <span v-if="warantyDetail.tire_info?.patternAdmin" class="text-xs bg-red-500 text-white px-1 rounded ml-1"> Old </span></p>
+                            <p v-if="warantyDetail.tire_info?.patternAdmin" class="text-lg font-medium">{{ warantyDetail.tire_info.patternAdmin || '-' }} <span class="text-xs bg-green-600 text-white px-1 rounded ml-1">New</span></p>
                         </div>
 
                         <div>
                             <span class="block text-sm font-bold text-black-800">Description</span>
-                            <p class="text-lg font-medium">{{ warantyDetail.tire_info.desc || '-' }}</p>
+                            <p class="text-lg font-medium">{{ warantyDetail.tire_info.desc || '-' }} <span v-if="warantyDetail.tire_info?.descriptionAdmin" class="text-xs bg-red-500 text-white px-1 rounded ml-1"> Old </span></p>
+                            <p v-if="warantyDetail.tire_info?.descriptionAdmin" class="text-lg font-medium">{{ warantyDetail.tire_info.descriptionAdmin || '-' }} <span class="text-xs bg-green-600 text-white px-1 rounded ml-1">New</span></p>
                         </div>
-
+                    </div>
+                    <div class="grid grid-cols-2 md:grid-cols-2 gap-4">
                         <div>
                             <span class="block text-sm font-bold text-black-800">Certificate Number</span>
                             <p class="text-lg font-medium">{{ warantyDetail.warrantyCertNo || '-' }}</p>
@@ -244,6 +247,14 @@
                     <div>
                         <span class="font-bold">Mobile Number</span>
                         <p class="text-lg font-medium">{{ warantyDetail.customer_info?.mobileNo || '-' }}</p>
+                    </div>
+                    <div v-if="warantyDetail.warranty_info.invAttachURL">
+                        <span class="font-bold">Inv No</span>
+                        <p><span  class="text-blue-600 cursor-pointer" @click="viewInvoice(warantyDetail.warranty_info.invAttachURL)">{{ warantyDetail.warranty_info?.inv_no || '-' }}</span></p>
+                    </div>
+                    <div v-if="warantyDetail.warranty_info.inv_amount">
+                        <span class="font-bold">Invoice Amount</span>
+                        <p class="text-lg font-medium">RM {{ warantyDetail.warranty_info?.inv_amount || '-' }}</p>
                     </div>
                 </div>
             </div>
@@ -477,6 +488,27 @@
                 <div class="flex items-center justify-between border-b pb-2 mb-2">
                     <div class="text-2xl font-bold text-gray-800">Reimbursement Detail</div>
                 </div>
+                <div v-if="warantyDetail.reject_invoice_remarks?.length > 0"
+                    class="bg-red-50 border border-red-300 rounded-lg p-4 mb-4">
+
+                    <div class="flex items-start gap-3">
+                        <i class="pi pi-times-circle text-red-600 mt-1"></i>
+
+                        <div>
+                            <p class="font-semibold text-red-800">Reject Invoice Remarks</p>
+
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm text-gray-800">
+                                <div v-for="(item, index) in warantyDetail.reject_invoice_remarks" :key="item.id"
+                                    class="text-red-700 text-sm">
+                                    <span class="font-semibold">
+                                        {{ index + 1 }}<sup>{{ getOrdinal(index + 1) }}</sup> Rejection:
+                                    </span>
+                                    {{ item.rejectClaimInvoiceRemarks }}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
                 <div v-if="warantyDetail.status_string  == 'Pending Customer Invoice'" class="bg-yellow-50 border border-yellow-200 rounded-lg p-4" >
                     <div class="flex items-start gap-3">
                         <i class="pi pi-exclamation-circle text-yellow-600 mt-1"></i>
@@ -525,7 +557,7 @@
                 </div>
                 <div v-if="(warantyDetail.status_string  !== 'Pending Customer Invoice') && warantyDetail.reimbursement && warantyDetail.status !=5 && canUpdate" class="flex justify-end gap-2 mt-4">
                     <Button label="Approve Invoice" class="p-button-success" size="small" @click="approveInvoice" :loading="approvingInvoice" icon="pi pi-check" />
-                    <Button label="Reject Invoice" class="p-button-warn" size="small" @click="rejectInvoice" :loading="rejectingInvoice" icon="pi pi-times" />
+                    <Button label="Reject Invoice" class="p-button-warn" size="small" @click="rejectInvoiceDialog" icon="pi pi-times" />
                     <!-- <Button label="Reject Claim" class="p-button-danger" size="small" @click="showRejectDialog = true" icon="pi pi-times" /> -->
                 </div>
             </div>
@@ -557,6 +589,16 @@
                     <small v-if="(!editTireData.weekcode) && editValidationTire" class="text-red-600">Week Code is required.</small>
                 </div>
             </div>
+            <label class="block font-bold text-gray-700 mb-1">Select Material ID</label>
+            <Dropdown v-model="selectedMaterial" :options="listMaterial" optionLabel="material" placeholder="Select material" class="w-full mb-4">
+                <template #option="slotProps">
+                    <div class="flex flex-col gap-1 py-2">
+                        <div class="font-semibold text-gray-800">{{ slotProps.option.material }}</div>
+                        <div class="text-xs text-gray-700">ID : {{ slotProps.option.materialid }}</div>
+                        <div class="text-sm text-gray-600"><span class="font-medium">Pattern : </span> {{ slotProps.option.pattern }} </div>
+                    </div>
+                </template>
+            </Dropdown>
         </div>
 
         <template #footer>
@@ -709,10 +751,10 @@
         <label class="block font-bold text-gray-700 mb-1">Select Material ID</label>
         <Dropdown v-model="selectedMaterial" :options="listMaterial" optionLabel="material" placeholder="Select material" class="w-full mb-4">
             <template #option="slotProps">
-                <div class="flex items-center gap-3">
-                    <div>
-                        <div class="font-semibold">{{ slotProps.option.material }}</div>
-                    </div>
+                <div class="flex flex-col gap-1 py-2">
+                    <div class="font-semibold text-gray-800">{{ slotProps.option.material }}</div>
+                    <div class="text-xs text-gray-700">ID : {{ slotProps.option.materialid }}</div>
+                    <div class="text-sm text-gray-600"><span class="font-medium">Pattern : </span> {{ slotProps.option.pattern }} </div>
                 </div>
             </template>
         </Dropdown>
@@ -729,24 +771,51 @@
         <label class="block font-bold text-gray-700 mb-1">Select Material ID</label>
         <Dropdown v-model="selectedMaterial" :options="listMaterial" optionLabel="material" placeholder="Select material" class="w-full mb-4">
             <template #option="slotProps">
-                <div class="flex items-center gap-3">
-                    <div>
-                        <div class="font-semibold">{{ slotProps.option.material }}</div>
-                    </div>
+                <div class="flex flex-col gap-1 py-2">
+                    <div class="font-semibold text-gray-800">{{ slotProps.option.material }}</div>
+                    <div class="text-xs text-gray-700">ID : {{ slotProps.option.materialid }}</div>
+                    <div class="text-sm text-gray-600"><span class="font-medium">Pattern : </span> {{ slotProps.option.pattern }} </div>
                 </div>
             </template>
         </Dropdown>
+        <div class="grid grid-cols-2 gap-4" v-if="checkingPriceResultFlag">
+            <!-- Claim Percentage -->
+            <div class="field">
+                <label class="block font-bold text-gray-700 mb-2">Claim Amount (RM) *</label>
+                <InputNumber
+                    v-model="checkingPriceResult.price"
+                    mode="decimal"
+                    :min="0"
+                    :minFractionDigits="0"
+                    :maxFractionDigits="2"
+                    placeholder="100.00"
+                    class="w-full"
+                />
+            </div>
+        </div>
 
         <template #footer>
             <Button label="Cancel" icon="pi pi-times" class="p-button-text" :disabled="loadingAction" @click="closeReimbursementDialog" />
-            <Button label="Create" icon="pi pi-check" class="p-button-primary" :loading="loadingAction" @click="submitReimbursement" />
+            <Button label="Check Price" icon="pi pi-pen" class="p-button-success" :loading="loadingAction" @click="checkPrice" />
+            <Button label="Create" icon="pi pi-check" class="p-button-primary" :loading="loadingAction" @click="submitReimbursement" v-if="checkingPriceResultFlag"/>
+        </template>
+    </Dialog>
+
+    <Dialog v-model:visible="showRejectDialogInv" header="Reject Invoice Claim" :modal="true" class="p-fluid" :style="{ width: '40rem' }">
+        <div class="field">
+            <label class="block font-bold text-gray-700 mb-2">Rejection Remarks *</label>
+            <InputText v-model="rejectInvoiceRemarks.remarks" class="w-full"/>
+        </div>
+        <template #footer>
+            <Button label="Cancel" icon="pi pi-times" class="p-button-text" @click="closerejectInvoiceDialog" :disabled="rejectingInvoice" />
+            <Button label="Reject Invoice" icon="pi pi-times-circle" class="p-button-danger" @click="rejectInvoice" :loading="rejectingInvoice" :disabled="rejectingInvoice" />
         </template>
     </Dialog>
 
     <Dialog v-model:visible="showRejectDialog" header="Reject Warranty Claim" :modal="true" class="p-fluid" :style="{ width: '40rem' }">
         <div class="field">
             <label class="block font-bold text-gray-700 mb-1">Select Rejection Reason *</label>
-            <Dropdown v-model="selectedRejectReason" :options="rejectReasonsTypeB"filter filterBy="damageMode,code,grouping" optionLabel="damageMode" optionValue="id" placeholder="Select rejection reason" class="w-full mb-4" :class="{ 'p-invalid': !selectedRejectReason && rejecting }">
+            <Dropdown v-model="selectedRejectReason" :options="rejectReasonsTypeB"  filter:filterFields="['damageMode', 'code', 'part', 'grouping']" optionLabel="damageMode" optionValue="id" placeholder="Select rejection reason" class="w-full mb-4" :class="{ 'p-invalid': !selectedRejectReason && rejecting }">
                 <template #option="slotProps">
                     <div class="flex flex-col gap-1 py-2">
                         <div class="font-semibold text-gray-800">{{ slotProps.option.damageMode }}</div>
@@ -817,6 +886,7 @@ const creatingClaim = ref(false);
 const showEditTireDialog = ref(false);
 const editTire = ref(false);
 const editValidationTire = ref(false);
+const showRejectDialogInv = ref(false);
 
 const editTireData = reactive({
     mfgcode: '',
@@ -824,6 +894,14 @@ const editTireData = reactive({
     tyrespec: '',
     weekcode: ''
 });
+const rejectInvoiceRemarks = reactive({
+    remarks: '',
+});
+const getOrdinal = (n) => {
+    const s = ["th", "st", "nd", "rd"];
+    const v = n % 100;
+    return s[(v - 20) % 10] || s[v] || s[0];
+};
 const newClaimData = reactive({
     damageCode: '',
     problem: '',
@@ -843,6 +921,10 @@ const rejectingInvoice = ref(false);
 // Results
 const replacementResult = ref({});
 const reimbursementResult = ref({});
+const checkingPriceResult = ref({
+    price: 0
+});
+const checkingPriceResultFlag = ref(false);
 const replacementSubmitted = ref(false);
 const reimbursementSubmitted = ref(false);
 
@@ -994,11 +1076,21 @@ const submitEditTire = async () => {
         });
         return;
     }
+    if (!selectedMaterial.value) {
+        toast.add({
+            severity: 'error',
+            summary: 'Error',
+            detail: 'Please select Material ID',
+            life: 3000
+        });
+        return;
+    }
     try {
         editTire.value = true;
         const plateSerialValue = `${editTireData.mfgcode}-${editTireData.sizecode}-${editTireData.tyrespec}-${editTireData.weekcode}`;
         const formData = new FormData();
         formData.append('plateSerial', plateSerialValue);
+        formData.append('materialid', selectedMaterial.value.materialid);
         
         const id = route.params.id;
         const response = await api.post(`warranty_claim/updatePlateSerial/${id}`,formData);
@@ -1120,7 +1212,6 @@ const fetchMaterial = async () => {
         const id = route.params.id; // Use actual claim ID
         const response = await api.get(`warranty_claim/getClaimMaterial/${id}`);
 
-        // console.log(response.data);
         if (response.data.status === 1) {
             listMaterial.value = response.data.admin_data;
         } else {
@@ -1437,8 +1528,9 @@ const fetchWarrantyClaim = async () => {
                 threadDepthPhotos: apiData.threadDepthPhotos || null,
                 //waranty_info
                 warranty_info: apiData.warranty_info || null,
+                reject_invoice_remarks: apiData.reject_invoice_remarks || [],
+
             };
-            // console.log(warantyDetail);
             await loadScrapImages();
             await loadTireDeptImages();
             await loadSubmittedPhotos();
@@ -1606,19 +1698,32 @@ const approveInvoice = async () => {
   });
 
 };
-
+const rejectInvoiceDialog = () => {
+    showRejectDialogInv.value = true;
+    rejectInvoiceRemarks.remarks = '';
+};
+const closerejectInvoiceDialog = () => {
+    showRejectDialogInv.value = false;
+    rejectInvoiceRemarks.remarks = '';
+};
 // Reject Invoice
 const rejectInvoice = async () => {
-    confirmation.require({
-    message: 'Are you sure you want to reject this invoice request?',
-    header: 'Reject Invoice',
-    icon: 'pi pi-exclamation-triangle',
-    acceptLabel: 'Yes',
-    rejectLabel: 'No',
-    accept: async () => {
+        if (!rejectInvoiceRemarks.remarks) {
+        toast.add({
+            severity: 'error',
+            summary: 'Error',
+            detail: 'Rejection Remarks missing',
+            life: 4000
+        });
+        return;
+    }
+    // console.log(rejectInvoiceRemarks.remarks)
+    // return;
     try {
         rejectingInvoice.value = true;
-        const response = await api.put(`warranty_claim/rejectReimbursement/${warantyDetail.value.id}`);
+        const response = await api.post(`warranty_claim/rejectReimbursement/${warantyDetail.value.id}`, {
+            remarks: rejectInvoiceRemarks.remarks,
+        });
         if (response.data.status === 1) {
             toast.add({
                 severity: 'success',
@@ -1640,9 +1745,8 @@ const rejectInvoice = async () => {
         });
     } finally {
         rejectingInvoice.value = false;
+        closerejectInvoiceDialog();
     }
-    }
-  });
 };
 
 const openRejectDialog = () => {
@@ -1732,6 +1836,7 @@ const closeReplacementDialog = () => {
 const closeReimbursementDialog = () => {
     showCreateReimbursementDialog.value = false;
     showApproveDialog.value = true;
+    checkingPriceResultFlag.value = false;
 };
 
 const saveCTC = async () => {
@@ -1816,7 +1921,63 @@ const submitReplacement = async () => {
         showCreateReplacementDialog.value = false;
     }
 };
+const checkPrice = async () => {
 
+    if (!selectedMaterial.value) {
+        toast.add({
+            severity: 'error',
+            summary: 'Error',
+            detail: 'Please select Material ID',
+            life: 3000
+        });
+        return;
+    }
+
+    try {
+        // checkingPriceResult.value.price
+        loadingAction.value = true;
+        const id = warantyDetail.value.id;
+        // 1. Call Reimbursement API
+        const checkingResponse = await api.post(`warranty_claim/getInvoiceAmount/${id}`, {
+            materialid: selectedMaterial.value.materialid
+        });
+
+        if (checkingResponse.data.status === 1) {
+            // 2. Automatically Request Scrap
+            const data = checkingResponse.data.admin_data;
+
+            checkingPriceResult.value = {
+                ...data,
+                price: parseInt(data.price) || 0  // force integer
+            };
+            toast.add({
+                severity: 'success',
+                summary: 'Success',
+                detail: 'Price Checking successfully',
+                life: 3000
+            });
+            
+        } else {
+            toast.add({
+                severity: 'error',
+                summary: 'Error',
+                detail: checkingResponse.data.error || 'Failed to checking price for reimbursement',
+                life: 7000
+            });
+        }
+    } catch (err) {
+        console.error('Error checking price for reimbursement:', err);
+        toast.add({
+            severity: 'error',
+            summary: 'Error',
+            detail: err.response?.data?.message || 'Failed to checking price for reimbursement',
+            life: 3000
+        });
+    } finally {
+        loadingAction.value = false;
+        checkingPriceResultFlag.value = true;
+    }
+};
 const submitReimbursement = async () => {
     if (!selectedMaterial.value) {
         toast.add({
@@ -1834,7 +1995,8 @@ const submitReimbursement = async () => {
         // 1. Call Reimbursement API
         const reimbursementResponse = await api.post('warranty_claim/approveReimbursement', {
             claim_id: warantyDetail.value.id,
-            materialid: selectedMaterial.value.materialid
+            materialid: selectedMaterial.value.materialid,
+            inv_amount: checkingPriceResult.value.price
         });
 
         if (reimbursementResponse.data.status === 1) {
@@ -1871,6 +2033,7 @@ const submitReimbursement = async () => {
     } finally {
         loadingAction.value = false;
         showCreateReimbursementDialog.value = false;
+        checkingPriceResultFlag.value = false;
     }
 };
 

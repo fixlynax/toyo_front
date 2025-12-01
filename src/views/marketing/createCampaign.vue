@@ -45,19 +45,19 @@
 
                     <div class="grid grid-cols-1 md:grid-cols-3 gap-4 md:col-span-2">
                         <div>
-                            <label class="block font-bold text-gray-700">Publish Date</label>
-                            <Calendar v-model="campaign.publishDate" showIcon dateFormat="dd-mm-yy" class="w-full" :minDate="today" />
-                            <small v-if="errors.publishDate" class="text-red-500">{{ errors.publishDate }}</small>
-                        </div>
-                        <div>
                             <label class="block font-bold text-gray-700">Start Date</label>
-                            <Calendar v-model="campaign.startDate" showIcon dateFormat="dd-mm-yy" class="w-full" :minDate="today" @date-select="onStartDateSelect"/>
+                            <Calendar v-model="campaign.startDate" :minDate="today" @date-select="onStartDateSelect" />
                             <small v-if="errors.startDate" class="text-red-500">{{ errors.startDate }}</small>
                         </div>
                         <div>
                             <label class="block font-bold text-gray-700">End Date</label>
-                            <Calendar v-model="campaign.endDate" showIcon dateFormat="dd-mm-yy" class="w-full" :minDate="minEndDate"/>
+                            <Calendar v-model="campaign.endDate" :minDate="minEndDate || null" />
                             <small v-if="errors.endDate" class="text-red-500">{{ errors.endDate }}</small>
+                        </div>
+                        <div>
+                            <label class="block font-bold text-gray-700">Publish Date</label>
+                            <Calendar v-model="campaign.publishDate" :maxDate="campaign.endDate || null" :disabled="!campaign.startDate || !campaign.endDate" />
+                            <small v-if="errors.publishDate" class="text-red-500">{{ errors.publishDate }}</small>
                         </div>
                     </div>
                 </div>
@@ -216,6 +216,8 @@ import api from '@/service/api';
 const router = useRouter();
 const toast = useToast();
 const loading = ref(false);
+const today = new Date();
+const minEndDate = ref(null);
 
 // Campaign data
 const campaign = ref({
@@ -225,9 +227,9 @@ const campaign = ref({
     image1: '',
     image2: '',
     image3: '',
-    publishDate: '',
-    startDate: '',
-    endDate: '',
+    publishDate: null,
+    startDate: null,
+    endDate: null,
     isGamification: 'off',
     quota: 0,
     maxPerUser: null,
@@ -245,16 +247,9 @@ const imageFiles = ref({
 });
 
 // When start date changes, reset end date if invalid
-const onStartDateSelect = () => {
-    if (news.value.endDate && news.value.endDate <= news.value.startDate) {
-        news.value.endDate = '';
-        toast.add({
-            severity: 'warn',
-            summary: 'Invalid Date',
-            detail: 'End date must be after start date.',
-            life: 3000
-        });
-    }
+const onStartDateSelect = (value) => {
+    campaign.value.endDate = null;
+    minEndDate.value = value instanceof Date ? value : null;
 };
 
 // UI state
@@ -295,7 +290,6 @@ const fetchMaterials = async () => {
 const fetchCatalog = async () => {
     try {
         const response = await api.get('campaign/catalogs');
-        
 
         if (response.data.status === 1) {
             // Transform API data to match frontend expectations
@@ -313,7 +307,6 @@ const fetchCatalog = async () => {
             // Process private images
             const processedItems = await processCatalogueImages(transformedItems);
             listPrize.value = processedItems;
-
         } else {
             console.error('API returned status 0:', response.data);
             toast.add({
@@ -436,9 +429,9 @@ const validateFields = () => {
     if (campaign.value.point3 === null || campaign.value.point3 < 0) errors.value.point3 = 'Valid platinum points are required';
 
     // Image validation
-    if (!imageFiles.value.image1) errors.value.image1 = 'Image 1 is required';
-    if (!imageFiles.value.image2) errors.value.image2 = 'Image 2 is required';
-    if (!imageFiles.value.image3) errors.value.image3 = 'Image 3 is required';
+    // if (!imageFiles.value.image1) errors.value.image1 = 'Image 1 is required';
+    // if (!imageFiles.value.image2) errors.value.image2 = 'Image 2 is required';
+    // if (!imageFiles.value.image3) errors.value.image3 = 'Image 3 is required';
 
     // Criteria validation
     criterias.value.forEach((criteria, index) => {
@@ -556,6 +549,9 @@ const submitCampaign = async () => {
             } else {
             }
         }
+for (let pair of formData.entries()) {
+    console.log(pair[0] + ': ', pair[1]);
+}
 
         const response = await api.customRequest({
             method: 'POST',

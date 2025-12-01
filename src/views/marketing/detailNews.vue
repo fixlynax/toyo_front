@@ -42,6 +42,7 @@
                     <!-- News Info -->
                     <div class="mt-6">
                         <h1 class="text-2xl font-bold text-gray-800">{{ news.title }}</h1>
+                        <p class="text-lg font-medium">{{ news.headline }}</p>
                         <p class="text-lg font-medium">{{ news.description }}</p>
                     </div>
                     <div class="flex flex-col md:flex-row gap-4">
@@ -132,6 +133,7 @@ const toast = useToast();
 const news = ref({
     id: null,
     title: '',
+    headline: '',
     description: '',
     image1URL: '',
     image2URL: '',

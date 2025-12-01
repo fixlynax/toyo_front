@@ -1,6 +1,6 @@
 <template>
     <div class="card">
-        <div class="text-2xl font-bold text-gray-800 border-b pb-2">List OE Tire</div>
+        <div class="text-2xl font-bold text-gray-800 border-b pb-2 mb-4">List OE Tire</div>
 
         <DataTable
             :value="tyres"
@@ -8,11 +8,15 @@
             :rows="10"
             :rowsPerPageOptions="[5, 10, 20]"
             dataKey="id"
+            removableSort
+            class="rounded-table"
             :rowHover="true"
             :loading="loading"
             :filters="filters"
             filterDisplay="menu"
             :globalFilterFields="['id', 'pattern', 'brand', 'model',  'construction']"
+            paginatorTemplate="CurrentPageReport FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink RowsPerPageDropdown"
+            currentPageReportTemplate="Showing {first} to {last} of {totalRecords} entries"
         >
             <template #header>
                 <div class="flex items-center justify-between gap-4 w-full flex-wrap">
@@ -226,3 +230,43 @@ onMounted(async () => {
     fetchData();
 });
 </script>
+<style scoped>
+:deep(.rounded-table) {
+    border-radius: 12px;
+    overflow: hidden;
+    border: 1px solid #e5e7eb;
+
+    .p-datatable-header {
+        border-top-left-radius: 12px;
+        border-top-right-radius: 12px;
+    }
+
+    .p-paginator-bottom {
+        border-bottom-left-radius: 12px;
+        border-bottom-right-radius: 12px;
+    }
+
+    .p-datatable-thead > tr > th {
+        &:first-child {
+            border-top-left-radius: 12px;
+        }
+        &:last-child {
+            border-top-right-radius: 12px;
+        }
+    }
+
+    .p-datatable-tbody > tr:last-child > td {
+        &:first-child {
+            border-bottom-left-radius: 0;
+        }
+        &:last-child {
+            border-bottom-right-radius: 0;
+        }
+    }
+
+    .p-datatable-tbody > tr.p-datatable-emptymessage > td {
+        border-bottom-left-radius: 12px;
+        border-bottom-right-radius: 12px;
+    }
+}
+</style>

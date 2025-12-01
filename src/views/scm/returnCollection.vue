@@ -24,6 +24,8 @@
                 :rows="10"
                 :rowsPerPageOptions="[5, 10, 20, 50, 100]"
                 dataKey="id"
+                class="rounded-table"
+                removableSort
                 :rowHover="true"
                 :loading="loading"
                 :filters="filters"
@@ -200,11 +202,22 @@ watch(activeTabIndex, () => {
         lastWeek.setDate(today.getDate() - 7);
 
         dateRange.value = [lastWeek, today];
+        const dateRangeStr =
+            dateRange.value?.[0] && dateRange.value?.[1]
+                ? `${formatDateDMY(dateRange.value[0])} - ${formatDateDMY(dateRange.value[1])}`
+                : null;
+
+        // Prepare request body
+        const body = {
+            tab: tab.submitLabel,
+            date_range: dateRangeStr
+        };
+        fetchData(body);
     }else{
         dateRange.value = null;   
+        fetchData();
     }
     selectedExportIds.value.clear();
-    fetchData();
 });
 
 // Computed boolean: are all rows selected?
@@ -805,3 +818,43 @@ function getStatusText(status) {
         fetchData();
     });
 </script>
+<style scoped>
+:deep(.rounded-table) {
+    border-radius: 12px;
+    overflow: hidden;
+    border: 1px solid #e5e7eb;
+
+    .p-datatable-header {
+        border-top-left-radius: 12px;
+        border-top-right-radius: 12px;
+    }
+
+    .p-paginator-bottom {
+        border-bottom-left-radius: 12px;
+        border-bottom-right-radius: 12px;
+    }
+
+    .p-datatable-thead > tr > th {
+        &:first-child {
+            border-top-left-radius: 12px;
+        }
+        &:last-child {
+            border-top-right-radius: 12px;
+        }
+    }
+
+    .p-datatable-tbody > tr:last-child > td {
+        &:first-child {
+            border-bottom-left-radius: 0;
+        }
+        &:last-child {
+            border-bottom-right-radius: 0;
+        }
+    }
+
+    .p-datatable-tbody > tr.p-datatable-emptymessage > td {
+        border-bottom-left-radius: 12px;
+        border-bottom-right-radius: 12px;
+    }
+}
+</style>

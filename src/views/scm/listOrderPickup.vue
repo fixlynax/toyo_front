@@ -8,32 +8,38 @@
             <div class="flex items-center gap-3 mb-4 ml-4">
                 <!-- LEFT SIDE -->
 
-                    <Calendar
-                        v-model="dateRange"
-                        selectionMode="range"
-                        dateFormat="dd/mm/yy"
-                        placeholder="Select date range"
-                        style="width: 390px;"
-                    />
-                    <Button label="Clear" class="p-button-sm p-button-danger" @click="clearDate" />
-                    <Button label="Filter" class="p-button-sm" @click="applyFilter" />
-
+                <Calendar v-model="dateRange" selectionMode="range" dateFormat="dd/mm/yy" placeholder="Select date range" style="width: 390px" />
+                <Button label="Clear" class="p-button-sm p-button-danger" @click="clearDate" />
+                <Button label="Filter" class="p-button-sm" @click="applyFilter" />
             </div>
             <DataTable
-            
                 :value="orderDelList"
                 :paginator="true"
                 :rows="10"
                 :rowsPerPageOptions="[10, 20, 50, 100]"
                 dataKey="id"
+                removableSort
                 :rowHover="true"
                 :loading="loading"
                 :filters="filters"
                 filterDisplay="menu"
-                :globalFilterFields="['do_no', 'eten_user.custAccountNo', 'eten_user.companyName1', 'eten_user.companyName2', 'eten_user.companyName3', 'eten_user.companyName4', 'eten_user.storageLocation', 'eten_user.city', 'eten_user.state', 'deliveryType', 'orderstatus']"
+                class="rounded-table"
+                :globalFilterFields="[
+                    'do_no',
+                    'eten_user.custAccountNo',
+                    'eten_user.companyName1',
+                    'eten_user.companyName2',
+                    'eten_user.companyName3',
+                    'eten_user.companyName4',
+                    'eten_user.storageLocation',
+                    'eten_user.city',
+                    'eten_user.state',
+                    'deliveryType',
+                    'orderstatus'
+                ]"
                 paginatorTemplate="CurrentPageReport FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink RowsPerPageDropdown"
                 currentPageReportTemplate="Showing {first} to {last} of {totalRecords} entries"
-                >
+            >
                 <template #header>
                     <div class="flex items-center justify-between gap-4 w-full flex-wrap">
                         <div class="flex items-center gap-2 w-full max-w-md">
@@ -43,46 +49,30 @@
                                 </InputIcon>
                                 <InputText v-model="filters['global'].value" placeholder="Quick Search" class="w-full" />
                             </IconField>
-
                         </div>
-                        <div class="flex justify-end gap-2"  v-if="statusTabs[activeTabIndex]?.label === 'Pending' && canUpdate">
-                                <Button type="button" label="Export" icon="pi pi-file-export" class="p-button-success" :loading="exportLoading" @click="handleExport"/>
-                                <Button type="button" label="Bulk Update" icon="pi pi-file-import" @click="importInput?.click()":loading="importLoading" />
-                                <input 
-                                ref="importInput"
-                                type="file" 
-                                accept=".xlsx,.xls" 
-                                style="display: none" 
-                                @change="handleImport"
-                                />
-                            </div>
-                        <div class="flex justify-end gap-2"  v-if="statusTabs[activeTabIndex]?.label === 'Completed'">
-                            <Button type="button" label="Export" icon="pi pi-file-export" class="p-button-success" @click="exportToExcel"/>
+                        <div class="flex justify-end gap-2" v-if="statusTabs[activeTabIndex]?.label === 'Pending' && canUpdate">
+                            <Button type="button" label="Export" icon="pi pi-file-export" class="p-button-success" :loading="exportLoading" @click="handleExport" />
+                            <Button type="button" label="Bulk Update" icon="pi pi-file-import" @click="importInput?.click()" :loading="importLoading" />
+                            <input ref="importInput" type="file" accept=".xlsx,.xls" style="display: none" @change="handleImport" />
+                        </div>
+                        <div class="flex justify-end gap-2" v-if="statusTabs[activeTabIndex]?.label === 'Completed'">
+                            <Button type="button" label="Export" icon="pi pi-file-export" class="p-button-success" @click="exportToExcel" />
                         </div>
                     </div>
                 </template>
 
                 <template #empty> No Order Pickup found. </template>
                 <template #loading> Loading Order Pickup data. Please wait. </template>
-                <Column v-if="statusTabs[activeTabIndex]?.label !== 'Completed' && canUpdate" header="Export All" style="min-width: 8rem" sortable>
+                <Column v-if="statusTabs[activeTabIndex]?.label !== 'Completed' && canUpdate" header="Export All" style="min-width: 8rem">
                     <template #header>
                         <div class="flex justify-center">
-                        <Checkbox
-                            :key="orderDelList.length" 
-                            :binary="true"
-                            :model-value="allSelected"  
-                            @change="() => toggleSelectAll()"  
-                        />
+                            <Checkbox :key="orderDelList.length" :binary="true" :model-value="allSelected" @change="() => toggleSelectAll()" />
                         </div>
                     </template>
 
                     <template #body="{ data }">
                         <div class="flex justify-center">
-                        <Checkbox
-                            :binary="true"
-                            :model-value="selectedExportIds.has(data.id)"
-                            @change="() => handleToggleExport(data.id)"
-                        />
+                            <Checkbox :binary="true" :model-value="selectedExportIds.has(data.id)" @change="() => handleToggleExport(data.id)" />
                         </div>
                     </template>
                 </Column>
@@ -95,30 +85,30 @@
                 <Column field="do_no" header="SAP DO No" style="min-width: 8rem" sortable>
                     <template #body="{ data }">
                         <RouterLink :to="`/scm/detailOrderPickup/${data.id}`" class="hover:underline font-bold text-primary-400">
-                            {{ data.do_no ? data.do_no : '-'}}
+                            {{ data.do_no ? data.do_no : '-' }}
                         </RouterLink>
                     </template>
                 </Column>
                 <Column field="eten_user.companyName1" header="Customer Name" style="min-width: 12rem" sortable>
                     <template #body="{ data }">
-                    <span class="font-bold">{{` ${data.eten_user?.companyName1} ${data.eten_user?.companyName2} ${data.eten_user?.companyName3} ${data.eten_user?.companyName4} ` }}</span>
-                    <br>
-                     {{ data.eten_user?.custAccountNo }}
+                        <span class="font-bold">{{ ` ${data.eten_user?.companyName1} ${data.eten_user?.companyName2} ${data.eten_user?.companyName3} ${data.eten_user?.companyName4} ` }}</span>
+                        <br />
+                        {{ data.eten_user?.custAccountNo }}
                     </template>
                 </Column>
                 <Column field="eten_user.storageLocation" header="Storage Location" style="min-width: 8rem" sortable>
                     <template #body="{ data }">
-                        {{  data.eten_user?.storageLocation ? data.eten_user.storageLocation : '-'  }}
+                        {{ data.eten_user?.storageLocation ? data.eten_user.storageLocation : '-' }}
                     </template>
                 </Column>
                 <Column field="eten_user.city" header="City" style="min-width: 8rem" sortable>
                     <template #body="{ data }">
-                        {{  data.eten_user?.city?.replace(/,$/, '') ?? '-' }}
+                        {{ data.eten_user?.city?.replace(/,$/, '') ?? '-' }}
                     </template>
                 </Column>
                 <Column field="eten_user.state" header="State" style="min-width: 8rem" sortable>
                     <template #body="{ data }">
-                        {{  data.eten_user?.state ? data.eten_user.state : '-'  }}
+                        {{ data.eten_user?.state ? data.eten_user.state : '-' }}
                     </template>
                 </Column>
                 <Column field="driverInformation.driverName" header="Collector" style="min-width: 12rem" sortable>
@@ -157,42 +147,22 @@
                         <Tag :value="getStatusLabel2(data.status)" :severity="getStatusSeverity2(data.status)" />
                     </template>
                 </Column>
-                <Column 
-                    v-if="showPickupColumn && canUpdate"
-                    field="" 
-                    header="Action" 
-                    style="min-width: 10rem">
+                <Column v-if="showPickupColumn && canUpdate" field="" header="Action" style="min-width: 10rem">
                     <template #body="{ data }">
-                    <div v-if="!data.driverInformation" class="flex justify-center">
-                            <Button 
-                            icon="pi pi-pencil" 
-                            class="p-button-sm p-button-text p-button-warning" 
-                            @click="confirmUpdatePickup(data)"
-                        />
-                    </div>
-                    <div v-else class="flex justify-center">
-                        <Button 
-                            icon="pi pi-calendar" 
-                            class="p-button-sm p-button-text p-button-warning" 
-                            @click="confirmUpdatePickup2(data)"
-                        />
-                    </div>
-
+                        <div v-if="!data.driverInformation" class="flex justify-center">
+                            <Button icon="pi pi-pencil" class="p-button-sm p-button-text p-button-warning" @click="confirmUpdatePickup(data)" />
+                        </div>
+                        <div v-else class="flex justify-center">
+                            <Button icon="pi pi-calendar" class="p-button-sm p-button-text p-button-warning" @click="confirmUpdatePickup2(data)" />
+                        </div>
                     </template>
                 </Column>
             </DataTable>
         </div>
     </div>
-    <Dialog 
-            v-model:visible="showIcDialog" 
-            header="Update Collector Information" 
-            modal 
-            :style="{ width: '50rem' }"
-    >
+    <Dialog v-model:visible="showIcDialog" header="Update Collector Information" modal :style="{ width: '50rem' }">
         <div class="flex flex-col gap-3 w-full">
-            <div class="font-semibold">
-                SAP DO No: {{ selectedData?.do_no }}
-            </div>
+            <div class="font-semibold">SAP DO No: {{ selectedData?.do_no }}</div>
             <div class="grid md:grid-cols-2 gap-4">
                 <div>
                     <label class="block mb-2 font-medium w-full">Collector IC Number</label>
@@ -200,17 +170,17 @@
                 </div>
                 <div>
                     <label class="block mb-2 font-medium w-full">Collector Driver Name</label>
-                    <InputText v-model="form.driverName" placeholder="Enter Driver Name" class="w-full"  />
+                    <InputText v-model="form.driverName" placeholder="Enter Driver Name" class="w-full" />
                 </div>
             </div>
             <div class="grid md:grid-cols-2 mb-2 gap-4">
-                <div >
+                <div>
                     <label class="block mb-2 font-medium w-full">Collector Contact Number</label>
                     <InputText v-model="form.driverPhoneNum" placeholder="Enter Contact Number" maxlength="15" class="w-full" @keypress="allowOnlyNumbers" />
                 </div>
                 <div>
                     <label class="block mb-2 font-medium w-full">Collector Plate No</label>
-                    <InputText v-model="form.driverPlateNum" placeholder="Enter Plate No" maxlength="8" class="w-full"  />
+                    <InputText v-model="form.driverPlateNum" placeholder="Enter Plate No" maxlength="8" class="w-full" />
                 </div>
             </div>
         </div>
@@ -220,20 +190,13 @@
             <Button label="Confirm" @click="submitPickupUpdate" />
         </template>
     </Dialog>
-    <Dialog 
-                v-model:visible="showIcDialog2" 
-                header="Update Pickup Date" 
-                modal 
-                :style="{ width: '30rem' }"
-        >
+    <Dialog v-model:visible="showIcDialog2" header="Update Pickup Date" modal :style="{ width: '30rem' }">
         <div class="flex flex-col gap-3 w-full">
-            <div class="font-semibold">
-                SAP DO No: {{ selectedData?.do_no }}
-            </div>
+            <div class="font-semibold">SAP DO No: {{ selectedData?.do_no }}</div>
 
             <div>
                 <label class="block mb-4 font-medium w-full">Collector IC Number</label>
-                <InputText v-model="icNo" placeholder="Enter IC No" maxlength="12" class="w-full" @keypress="handleIcInput"  />
+                <InputText v-model="icNo" placeholder="Enter IC No" maxlength="12" class="w-full" @keypress="handleIcInput" />
             </div>
         </div>
 
@@ -262,10 +225,10 @@ const showIcDialog = ref(false);
 const showIcDialog2 = ref(false);
 const icNo = ref('');
 const form = ref({
-  driverIC: '', 
-  driverName: '',      
-  driverPhoneNum: '',      
-  driverPlateNum: '',      
+    driverIC: '',
+    driverName: '',
+    driverPhoneNum: '',
+    driverPlateNum: ''
 });
 let selectedData = null;
 
@@ -281,11 +244,11 @@ const importInput = ref();
 const selectedExportIds = ref(new Set());
 
 const formatDateDMY = (date) => {
-  const d = new Date(date);
-  const day = String(d.getDate()).padStart(2, "0");
-  const month = String(d.getMonth() + 1).padStart(2, "0");
-  const year = d.getFullYear();
-  return `${day}/${month}/${year}`;
+    const d = new Date(date);
+    const day = String(d.getDate()).padStart(2, '0');
+    const month = String(d.getMonth() + 1).padStart(2, '0');
+    const year = d.getFullYear();
+    return `${day}/${month}/${year}`;
 };
 
 const filters = ref({
@@ -293,45 +256,43 @@ const filters = ref({
 });
 
 const showPickupColumn = computed(() => {
-    return orderDelList.value.some(item => !item.driverInformation?.pickup_datetime);
+    return orderDelList.value.some((item) => !item.driverInformation?.pickup_datetime);
 });
 
 const statusTabs = [
-    { label: 'Pending',submitLabel: 'PENDING' },
-    { label: 'Completed', submitLabel: 'COMPLETED'}
+    { label: 'Pending', submitLabel: 'PENDING' },
+    { label: 'Completed', submitLabel: 'COMPLETED' }
 ];
 // Computed boolean: are all rows selected?
 const allSelected = computed(() => {
-  return orderDelList.value.length > 0 &&
-         orderDelList.value.every(item => selectedExportIds.value.has(item.id));
+    return orderDelList.value.length > 0 && orderDelList.value.every((item) => selectedExportIds.value.has(item.id));
 });
 
 const handleToggleExport = (id) => {
-  if (selectedExportIds.value.has(id)) {
-    selectedExportIds.value.delete(id);
-  } else {
-    selectedExportIds.value.add(id);
-  }
-
+    if (selectedExportIds.value.has(id)) {
+        selectedExportIds.value.delete(id);
+    } else {
+        selectedExportIds.value.add(id);
+    }
 };
 
 // Check all
 const toggleSelectAll = () => {
-  if (allSelected.value) {
-    // Unselect all for this tab
-    returnList.value.forEach(item => {
-      selectedExportIds.value.delete(item.id);
-    });
-  } else {
-    // Select all for this tab
-    returnList.value.forEach(item => {
-      selectedExportIds.value.add(item.id);
-    });
-  }
+    if (allSelected.value) {
+        // Unselect all for this tab
+        returnList.value.forEach((item) => {
+            selectedExportIds.value.delete(item.id);
+        });
+    } else {
+        // Select all for this tab
+        returnList.value.forEach((item) => {
+            selectedExportIds.value.add(item.id);
+        });
+    }
 };
 // Export function PICKUP ONLY
 const handleExport = async () => {
-     const idsArray = Array.from(selectedExportIds.value).map(id => ({ id: Number(id) }));
+    const idsArray = Array.from(selectedExportIds.value).map((id) => ({ id: Number(id) }));
 
     if (idsArray.length === 0) {
         alert('Please select at least one row.');
@@ -339,19 +300,19 @@ const handleExport = async () => {
     }
     try {
         exportLoading.value = true;
-        
-            const response = await api.postExtra(
+
+        const response = await api.postExtra(
             'excel/export-selfpickup',
-        { orderids_array: JSON.stringify(idsArray) },
-        {
-            responseType: 'blob',
-            headers: {
-            'Content-Type': 'application/json',
+            { orderids_array: JSON.stringify(idsArray) },
+            {
+                responseType: 'blob',
+                headers: {
+                    'Content-Type': 'application/json'
+                }
             }
-        }
         );
-        const blob = new Blob([response.data], { 
-        type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' 
+        const blob = new Blob([response.data], {
+            type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
         });
 
         const url = window.URL.createObjectURL(blob);
@@ -379,16 +340,16 @@ const handleImport = async (event) => {
 
     try {
         importLoading.value = true;
-        
+
         const formData = new FormData();
         formData.append('order_collect_excel', file);
-        
+
         const response = await api.postExtra('excel/import-selfpickup', formData, {
             headers: {
                 'Content-Type': 'multipart/form-data'
             }
-            });
-        
+        });
+
         if (response.data.status === 1) {
             // Refresh data after import
             await fetchData();
@@ -399,7 +360,7 @@ const handleImport = async (event) => {
                 detail: 'File imported successfully',
                 life: 3000
             });
-            } else {
+        } else {
             toast.add({
                 severity: 'error',
                 summary: 'Import Failed',
@@ -412,7 +373,7 @@ const handleImport = async (event) => {
         toast.add({ severity: 'error', summary: 'Error', detail: 'Failed to import data', life: 3000 });
     } finally {
         importLoading.value = false;
-                    // Reset file input
+        // Reset file input
         if (importInput.value) {
             importInput.value.value = '';
         }
@@ -428,10 +389,19 @@ watch(activeTabIndex, () => {
         lastWeek.setDate(today.getDate() - 7);
 
         dateRange.value = [lastWeek, today];
-    }else{
+        const dateRangeStr = dateRange.value?.[0] && dateRange.value?.[1] ? `${formatDateDMY(dateRange.value[0])} - ${formatDateDMY(dateRange.value[1])}` : null;
+
+        // Prepare request body
+        const body = {
+            tab: tab.submitLabel,
+            date_range: dateRangeStr
+        };
+        fetchData(body);
+    } else {
         dateRange.value = null;
+        fetchData();
     }
-    fetchData();
+    selectedExportIds.value.clear();
 });
 
 onMounted(async () => {
@@ -442,22 +412,22 @@ const toast = useToast();
 // const confirmation = useConfirm();
 
 const handleIcInput = (e) => {
-  if (!/[0-9]/.test(e.key)) {
-    e.preventDefault(); // ⛔ block non-digits
-  }
+    if (!/[0-9]/.test(e.key)) {
+        e.preventDefault(); // ⛔ block non-digits
+    }
 };
 
 const allowOnlyNumbers = (event) => {
-  const key = event.key;
+    const key = event.key;
 
-  // allow digits
-  if (/[0-9]/.test(key)) return;
+    // allow digits
+    if (/[0-9]/.test(key)) return;
 
-  // allow "-"
-  if (key === '-') return;
+    // allow "-"
+    if (key === '-') return;
 
-  // block everything else
-  event.preventDefault();
+    // block everything else
+    event.preventDefault();
 };
 
 const confirmUpdatePickup = (data) => {
@@ -479,16 +449,16 @@ const handleCloseDialog = () => {
 };
 
 const submitPickupUpdate = async () => {
-        if (!form.value.driverIC || form.value.driverIC.length !== 12) {
-            toast.add({
+    if (!form.value.driverIC || form.value.driverIC.length !== 12) {
+        toast.add({
             severity: 'warn',
             summary: 'Invalid IC No',
             detail: 'IC Number must be exactly 12 digits.',
             life: 3000
-            });
-            return;
-        }
-      try {
+        });
+        return;
+    }
+    try {
         const payload = new FormData();
         // payload.append('orderno', selectedData.order_no);
         payload.append('driverIC', form.value.driverIC);
@@ -499,19 +469,18 @@ const submitPickupUpdate = async () => {
         const res = await api.post(`order/driver-information-scm/${selectedData.order_no}`, payload);
 
         if (res.data?.status === 1) {
-          toast.add({ severity: 'success', summary: 'Updated', detail: 'Pickup date collecter information updated', life: 3000 });
-          fetchData(); // refresh table
+            toast.add({ severity: 'success', summary: 'Updated', detail: 'Pickup date collecter information updated', life: 3000 });
+            fetchData(); // refresh table
         } else {
-          toast.add({ severity: 'error', summary: 'Error', detail: res.data?.message || 'Failed', life: 3000 });
+            toast.add({ severity: 'error', summary: 'Error', detail: res.data?.message || 'Failed', life: 3000 });
         }
-      } catch (err) {
+    } catch (err) {
         console.error(err);
         toast.add({ severity: 'error', summary: 'Error', detail: 'API error', life: 3000 });
-      }finally{
+    } finally {
         handleCloseDialog();
-      }
+    }
 };
-
 
 const confirmUpdatePickup2 = (data) => {
     selectedData = data;
@@ -520,22 +489,22 @@ const confirmUpdatePickup2 = (data) => {
 };
 
 const handleCloseDialog2 = () => {
-  icNo.value = '';
-  selectedData = null;
-   showIcDialog2.value = false;
+    icNo.value = '';
+    selectedData = null;
+    showIcDialog2.value = false;
 };
 
 const submitPickupUpdate2 = async () => {
-        if (!icNo.value || icNo.value.length !== 12) {
-            toast.add({
+    if (!icNo.value || icNo.value.length !== 12) {
+        toast.add({
             severity: 'warn',
             summary: 'Invalid IC No',
             detail: 'IC Number must be exactly 12 digits.',
             life: 3000
-            });
-            return;
-        }
-      try {
+        });
+        return;
+    }
+    try {
         const payload = new FormData();
         payload.append('orderno', selectedData.order_no);
         payload.append('collectoric', icNo.value);
@@ -543,18 +512,17 @@ const submitPickupUpdate2 = async () => {
         const res = await api.post('update-collect-time', payload);
 
         if (res.data?.status === 1) {
-          toast.add({ severity: 'success', summary: 'Updated', detail: 'Pickup date set to now', life: 3000 });
-          fetchData(); // refresh table
+            toast.add({ severity: 'success', summary: 'Updated', detail: 'Pickup date set to now', life: 3000 });
+            fetchData(); // refresh table
         } else {
-          toast.add({ severity: 'error', summary: 'Error', detail: res.data?.message || 'Failed', life: 3000 });
+            toast.add({ severity: 'error', summary: 'Error', detail: res.data?.message || 'Failed', life: 3000 });
         }
-      } catch (err) {
+    } catch (err) {
         console.error(err);
         toast.add({ severity: 'error', summary: 'Error', detail: 'API error', life: 3000 });
-      }finally{
+    } finally {
         handleCloseDialog2();
-      }
-
+    }
 };
 function formatDate(dateString) {
     if (!dateString) return '';
@@ -562,9 +530,9 @@ function formatDate(dateString) {
     return date.toLocaleString('en-MY', {
         year: 'numeric',
         month: '2-digit',
-        day: '2-digit',
+        day: '2-digit'
     });
-    }
+}
 function formatTime(timeString) {
     if (!timeString) return '';
     const [hours, minutes, seconds] = timeString.split(':');
@@ -574,9 +542,9 @@ function formatTime(timeString) {
         hour: '2-digit',
         minute: '2-digit',
         second: '2-digit',
-        hour12: true,
+        hour12: true
     });
-    }
+}
 function formatDateFull(dateString) {
     if (!dateString) return '';
     const date = new Date(dateString);
@@ -593,39 +561,38 @@ function formatDateFull(dateString) {
 const applyFilter = () => {
     const tab = statusTabs[activeTabIndex.value];
     if (tab.submitLabel === 'COMPLETED') {
-
-    // Must have BOTH start & end date
-    if (!dateRange.value?.[0] || !dateRange.value?.[1]) {
-      // Show message (toast, alert, etc.)
-      toast.add({
-        severity: 'warn',
-        summary: 'Date Range Required',
-        detail: 'Please select a full date range for Completed records.',
-        life: 3000
-      });
-      return; // STOP here, do NOT call API
+        // Must have BOTH start & end date
+        if (!dateRange.value?.[0] || !dateRange.value?.[1]) {
+            // Show message (toast, alert, etc.)
+            toast.add({
+                severity: 'warn',
+                summary: 'Date Range Required',
+                detail: 'Please select a full date range for Completed records.',
+                life: 3000
+            });
+            return; // STOP here, do NOT call API
+        }
     }
-  }
-  const dateRangeStr = dateRange.value?.[0] && dateRange.value?.[1]? `${formatDateDMY(dateRange.value[0])} - ${formatDateDMY(dateRange.value[1])}`: null// returns "dd/mm/yyyy - dd/mm/yyyy" or null
-  const body = {
-    tab: tab.submitLabel,
-    date_range: dateRangeStr
-  };
+    const dateRangeStr = dateRange.value?.[0] && dateRange.value?.[1] ? `${formatDateDMY(dateRange.value[0])} - ${formatDateDMY(dateRange.value[1])}` : null; // returns "dd/mm/yyyy - dd/mm/yyyy" or null
+    const body = {
+        tab: tab.submitLabel,
+        date_range: dateRangeStr
+    };
 
-  fetchData(body);
+    fetchData(body);
 };
 const clearDate = () => {
-  dateRange.value = null; // or []
+    dateRange.value = null; // or []
 };
 const fetchData = async (body = null) => {
     try {
         loading.value = true;
-            const payload = body || {
+        const payload = body || {
             tab: statusTabs[activeTabIndex.value].submitLabel
         };
-        const response = await api.postExtra('order-pickup/list',payload);
+        const response = await api.postExtra('order-pickup/list', payload);
         if (response.data.status === 1 && Array.isArray(response.data.admin_data)) {
-                    orderDelList.value = response.data.admin_data.sort((a, b) => {
+            orderDelList.value = response.data.admin_data.sort((a, b) => {
                 return new Date(b.created) - new Date(a.created);
             });
         } else {
@@ -651,9 +618,9 @@ const exportToExcel = () => {
     try {
         // Create worksheet data
         const headers = ['Created', 'SAP DO No', 'Customer Name', 'Customer Acc No', 'Storage Location', 'City', 'State', 'Collecter Name', 'Collecter IC', 'Collecter Contact No', 'Collecter Truck Plate', 'Type', 'Pickup Date', 'Status'];
-        
+
         // Prepare data rows
-        const csvData = orderDelList.value.map(data => [
+        const csvData = orderDelList.value.map((data) => [
             `"${formatDate(data.created)}"`,
             `"${data.do_no || '-'}"`,
             `"${data.eten_user?.companyName1} ${data.eten_user?.companyName2} ${data.eten_user?.companyName3} ${data.eten_user?.companyName4}"`,
@@ -667,30 +634,26 @@ const exportToExcel = () => {
             `"${data.driverInformation?.driverTruckPlate || '-'}"`,
             `"${data.deliveryType || '-'}"`,
             `"${data.driverInformation?.pickup_datetime ? formatDate(data.driverInformation?.pickup_datetime) : 'No date assigned'}"`,
-            `"${getStatusLabel2(data.status) || '-'}"`,
+            `"${getStatusLabel2(data.status) || '-'}"`
         ]);
 
         // Combine headers and data
-        const csvContent = [
-            headers.join(','),
-            ...csvData.map(row => row.join(','))
-        ].join('\n');
+        const csvContent = [headers.join(','), ...csvData.map((row) => row.join(','))].join('\n');
 
         // Create and download the file
         const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
         const link = document.createElement('a');
         const url = URL.createObjectURL(blob);
-        
+
         link.setAttribute('href', url);
         link.setAttribute('download', `order_pickup_list_${new Date().toISOString().split('T')[0]}.csv`);
         link.style.visibility = 'hidden';
-        
+
         document.body.appendChild(link);
         link.click();
         document.body.removeChild(link);
-        
+
         URL.revokeObjectURL(url);
-        
     } catch (error) {
         console.error('Error exporting to Excel:', error);
     }
@@ -718,18 +681,58 @@ function getStatusSeverity(status) {
 }
 const getStatusLabel2 = (status) => {
     const statusMap = {
-        "PENDING": 'Pending',
+        PENDING: 'Pending',
         // "PENDING": 'Delivery',
-        "COMPLETED": 'Completed',
+        COMPLETED: 'Completed'
     };
     return statusMap[status] || `Status: ${status}`;
 };
 const getStatusSeverity2 = (status) => {
     const severityMap = {
-        "PENDING": 'info',
+        PENDING: 'info',
         // "PENDING": 'warn',
-        "COMPLETED": 'success',
+        COMPLETED: 'success'
     };
     return severityMap[status] || 'secondary';
 };
 </script>
+<style scoped>
+:deep(.rounded-table) {
+    border-radius: 12px;
+    overflow: hidden;
+    border: 1px solid #e5e7eb;
+
+    .p-datatable-header {
+        border-top-left-radius: 12px;
+        border-top-right-radius: 12px;
+    }
+
+    .p-paginator-bottom {
+        border-bottom-left-radius: 12px;
+        border-bottom-right-radius: 12px;
+    }
+
+    .p-datatable-thead > tr > th {
+        &:first-child {
+            border-top-left-radius: 12px;
+        }
+        &:last-child {
+            border-top-right-radius: 12px;
+        }
+    }
+
+    .p-datatable-tbody > tr:last-child > td {
+        &:first-child {
+            border-bottom-left-radius: 0;
+        }
+        &:last-child {
+            border-bottom-right-radius: 0;
+        }
+    }
+
+    .p-datatable-tbody > tr.p-datatable-emptymessage > td {
+        border-bottom-left-radius: 12px;
+        border-bottom-right-radius: 12px;
+    }
+}
+</style>

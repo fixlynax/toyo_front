@@ -11,7 +11,6 @@
 
                     <!-- Page Title -->
                     <div class="text-2xl font-bold text-gray-800">Edit Customer</div>
-    
                 </div>
 
                 <div class="flex items-center">
@@ -84,19 +83,16 @@
                         </div>
                     </div>
 
-                    <!-- Main Branch dropdown - disabled only for main branch accounts -->
+                    <!-- Main Branch display showing Account No - Branch Name -->
                     <div class="flex flex-col md:flex-row gap-4">
                         <div class="w-full">
                             <label for="mainBranch">Main Branch Account</label>
-                            <Dropdown v-model="currentException.dealers" :disabled="isMainBranch" :options="allDealers" optionLabel="label" optionValue="value" filter placeholder="Search or Select Main Branch" class="w-full">
-                                <template #option="slotProps">
-                                    <div class="flex flex-col">
-                                        <div class="font-medium text-gray-800">{{ slotProps.option.label }}</div>
-                                        <small class="text-gray-500">({{ slotProps.option.group }})</small>
-                                    </div>
-                                </template>
-                            </Dropdown>
-                            <small v-if="isMainBranch" class="text-gray-500">This field is disabled for main branch accounts (ending with 00)</small>
+                            <div class="p-inputgroup">
+                                <InputText :value="mainBranchDisplay" disabled class="w-full font-medium" />
+                            </div>
+                            <small class="text-gray-500 mt-1 block">
+                                {{ isMainBranch ? 'This is a main branch account (ends with 00)' : currentException.dealers ? 'Linked to main branch' : 'No main branch linked' }}
+                            </small>
                         </div>
                     </div>
                 </div>
@@ -632,6 +628,27 @@ const isMainBranch = computed(() => {
     return form.value.custAccountNo?.endsWith('00');
 });
 
+// Computed property for main branch display text
+const mainBranchDisplay = computed(() => {
+    if (!currentException.value.dealers) {
+        return 'Not linked to any main branch';
+    }
+
+    const dealer = allDealers.value.find((d) => d.value === currentException.value.dealers);
+    if (dealer) {
+        // Extract account number (last digits in the label)
+        const accountMatch = dealer.label.match(/.*?(\d+)$/);
+        const accountNo = accountMatch ? accountMatch[1] : 'N/A';
+
+        // Remove account number from the end for the name
+        const name = dealer.label.replace(/\s*-\s*\d+$/, '').trim();
+
+        return `${accountNo} - ${name}`;
+    }
+
+    return currentException.value.dealers;
+});
+
 // Fetch dealer profile data
 const fetchDealerProfile = async () => {
     isLoading.value = true;
@@ -701,8 +718,8 @@ const fetchDealerProfile = async () => {
 
             dropdownFamilyChannel.value = dropdownYesNoValue.value.find((item) => item.code === form.value.isFamilyChannel?.toString()) || dropdownYesNoValue.value[1]; // Default to No
 
-            // Set ship to addresses
-            shipToAddresses.value = dealerData.shipTo_list || [];
+            // Set ship to addresses - filter out any empty/null entries
+            shipToAddresses.value = (dealerData.shipTo_list || []).filter((shipTo: any) => shipTo.custAccountNo && shipTo.custAccountNo.trim() !== '');
 
             // Set main branch dealer if exists
             if (dealerData.eten_userID && dealerData.eten_userID !== '0') {
@@ -771,10 +788,42 @@ async function fetchDealerList() {
     }
 }
 
+// Prepare ship-to data for API - FIXED: Match backend expected structure
+function prepareShipToArray(shipToAddresses: ShipToAddress[]) {
+    if (!shipToAddresses || shipToAddresses.length === 0) {
+        return [];
+    }
+
+    // Filter out any empty ship-to accounts and map to backend structure
+    return shipToAddresses
+        .filter((shipTo) => shipTo.custAccountNo && shipTo.custAccountNo.trim() !== '')
+        .map((shipTo) => ({
+            s_custAccNo: shipTo.custAccountNo || '',
+            s_compName1: shipTo.companyName1 || '',
+            s_compName2: shipTo.companyName2 || '',
+            s_compName3: shipTo.companyName3 || '',
+            s_compName4: shipTo.companyName4 || '',
+            s_address1: shipTo.addressLine1 || '',
+            s_address2: shipTo.addressLine2 || '',
+            s_address3: shipTo.addressLine3 || '',
+            s_address4: shipTo.addressLine4 || '',
+            s_city: shipTo.city || '',
+            s_state: shipTo.state || '',
+            s_postcode: shipTo.postcode || '',
+            s_country: shipTo.country || '',
+            s_phoneNum: shipTo.phoneNumber || '',
+            s_mobileNum: shipTo.mobileNumber || '',
+            s_email: shipTo.emailAddress || ''
+        }));
+}
+
 // Handle update
 const handleUpdate = async () => {
     loadingUpdate.value = true;
     try {
+        // Prepare ship-to data - FIXED: Use the new function
+        const shipToArray = prepareShipToArray(shipToAddresses.value);
+
         // Prepare data for API
         const updateData = {
             custAccountNo: form.value.custAccountNo,
@@ -822,8 +871,10 @@ const handleUpdate = async () => {
             startingSalesAmt: form.value.startingSalesAmt,
             revenue: form.value.revenue,
             targetQty: form.value.targetQty,
-            s_array: JSON.stringify(shipToAddresses.value) // ShipTo data (read-only from SAP)
+            s_array: JSON.stringify(shipToArray) // FIXED: Use properly formatted ship-to data
         };
+
+        console.log('Update Data:', updateData); // For debugging
 
         const response = await api.post('update_customer', updateData);
 
@@ -834,12 +885,23 @@ const handleUpdate = async () => {
                 detail: 'Dealer updated successfully',
                 life: 4000
             });
-            router.push('/om/listEten');
+
+            const custAccNo = form.value.custAccountNo || route.params.custAccNo;
+
+            if (custAccNo) {
+                router.push(`/om/detailEten/${custAccNo}`);
+            } else {
+                router.push('/om/listEten');
+            }
         } else {
+            let errorMsg = 'Failed to update dealer';
+            if (response.data.error?.message) {
+                errorMsg = response.data.error.message;
+            }
             toast.add({
                 severity: 'error',
                 summary: 'Error',
-                detail: 'Failed to update dealer',
+                detail: errorMsg,
                 life: 4000
             });
         }
@@ -857,7 +919,13 @@ const handleUpdate = async () => {
 };
 
 const handleCancel = () => {
-    router.push('/om/listEten');
+    const custAccNo = form.value.custAccountNo || route.params.custAccNo;
+
+    if (custAccNo) {
+        router.push(`/om/detailEten/${custAccNo}`);
+    } else {
+        router.push('/om/listEten');
+    }
 };
 
 // Lifecycle

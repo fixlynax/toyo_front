@@ -3,35 +3,30 @@
         <div class="text-2xl font-bold text-gray-800 border-b pb-2">List Return Order</div>
         <LoadingPage v-if="loading" message="Loading Return Order Details..." />
         <div v-else>
-            <TabMenu  :model="statusTabs" v-model:activeIndex="activeTabIndex" class="mb-4" />
-                <div class="flex items-center gap-3 mb-4 ml-4">
-                    <!-- LEFT SIDE -->
+            <TabMenu :model="statusTabs" v-model:activeIndex="activeTabIndex" class="mb-4" />
+            <div class="flex items-center gap-3 mb-4 ml-4">
+                <!-- LEFT SIDE -->
 
-                    <Calendar
-                        v-model="dateRange"
-                        selectionMode="range"
-                        dateFormat="dd/mm/yy"
-                        placeholder="Select date range"
-                        style="width: 390px;"
-                    />
-                    <Button label="Clear" class="p-button-sm p-button-danger" @click="clearDate" />
-                    <Button label="Filter" class="p-button-sm" @click="applyFilter" />
-
-                </div>
-            <DataTable 
+                <Calendar v-model="dateRange" selectionMode="range" dateFormat="dd/mm/yy" placeholder="Select date range" style="width: 390px" />
+                <Button label="Clear" class="p-button-sm p-button-danger" @click="clearDate" />
+                <Button label="Filter" class="p-button-sm" @click="applyFilter" />
+            </div>
+            <DataTable
                 :value="returnList"
                 :paginator="true"
                 :rows="10"
                 :rowsPerPageOptions="[5, 10, 20, 50, 100]"
                 dataKey="materialid"
+                removableSort
                 :rowHover="true"
                 :loading="loading"
                 :filters="filters"
+                class="rounded-table"
                 filterDisplay="menu"
-                :globalFilterFields="['return_orderNo_ref', 'custaccountno' , 'storageLocation' , 'city', 'dealerName' , 'delivery_status' , 'created']"
+                :globalFilterFields="['return_orderNo_ref', 'custaccountno', 'storageLocation', 'city', 'dealerName', 'delivery_status', 'created']"
                 paginatorTemplate="CurrentPageReport FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink RowsPerPageDropdown"
                 currentPageReportTemplate="Showing {first} to {last} of {totalRecords} entries"
-                >
+            >
                 <template #header>
                     <div class="flex flex-col gap-4 w-full">
                         <!-- Search and Filters Row -->
@@ -44,32 +39,19 @@
                                     </InputIcon>
                                     <InputText v-model="filters['global'].value" placeholder="Quick Search" class="w-full" />
                                 </IconField>
-
                             </div>
-                            <div class="flex justify-end gap-2"  v-if="statusTabs[activeTabIndex]?.label === 'New' && canUpdate">
-                                <Button type="button" label="Export" icon="pi pi-file-export" class="p-button-success" :loading="exportLoading1" @click="handleExport1"/>
-                                <Button type="button" label="Bulk Update" icon="pi pi-file-import" @click="importInput1?.click()":loading="importLoading1" />
-                                <input 
-                                ref="importInput1"
-                                type="file" 
-                                accept=".xlsx,.xls" 
-                                style="display: none" 
-                                @change="handleImport1"
-                                />
+                            <div class="flex justify-end gap-2" v-if="statusTabs[activeTabIndex]?.label === 'New' && canUpdate">
+                                <Button type="button" label="Export" icon="pi pi-file-export" class="p-button-success" :loading="exportLoading1" @click="handleExport1" />
+                                <Button type="button" label="Bulk Update" icon="pi pi-file-import" @click="importInput1?.click()" :loading="importLoading1" />
+                                <input ref="importInput1" type="file" accept=".xlsx,.xls" style="display: none" @change="handleImport1" />
                             </div>
-                            <div class="flex justify-end gap-2"  v-if="statusTabs[activeTabIndex]?.label === 'Pending' && canUpdate">
-                                <Button type="button" label="Export" icon="pi pi-file-export" class="p-button-success" :loading="exportLoading2" @click="handleExport2"/>
-                                <Button type="button" label="Bulk Update" icon="pi pi-file-import" @click="importInput2?.click()":loading="importLoading2" />
-                                <input 
-                                ref="importInput2"
-                                type="file" 
-                                accept=".xlsx,.xls" 
-                                style="display: none" 
-                                @change="handleImport2"
-                                />
+                            <div class="flex justify-end gap-2" v-if="statusTabs[activeTabIndex]?.label === 'Pending' && canUpdate">
+                                <Button type="button" label="Export" icon="pi pi-file-export" class="p-button-success" :loading="exportLoading2" @click="handleExport2" />
+                                <Button type="button" label="Bulk Update" icon="pi pi-file-import" @click="importInput2?.click()" :loading="importLoading2" />
+                                <input ref="importInput2" type="file" accept=".xlsx,.xls" style="display: none" @change="handleImport2" />
                             </div>
-                            <div class="flex justify-end gap-2"  v-if="statusTabs[activeTabIndex]?.label === 'Completed'">
-                                <Button type="button" label="Export" icon="pi pi-file-export" class="p-button-success" @click="exportToExcel"/>
+                            <div class="flex justify-end gap-2" v-if="statusTabs[activeTabIndex]?.label === 'Completed'">
+                                <Button type="button" label="Export" icon="pi pi-file-export" class="p-button-success" @click="exportToExcel" />
                             </div>
                         </div>
                     </div>
@@ -78,39 +60,30 @@
                 <template #empty> No return orders found. </template>
                 <template #loading> Loading return orders data. Please wait. </template>
 
-                <Column v-if="statusTabs[activeTabIndex]?.label !== 'Completed' && canUpdate" header="Export All" style="min-width: 8rem" sortable>
+                <Column v-if="statusTabs[activeTabIndex]?.label !== 'Completed' && canUpdate" header="Export All" style="min-width: 8rem">
                     <template #header>
                         <div class="flex justify-center">
-                        <Checkbox
-                            :key="returnList.length" 
-                            :binary="true"
-                            :model-value="allSelected"  
-                            @change="() => toggleSelectAll()"  
-                        />
+                            <Checkbox :key="returnList.length" :binary="true" :model-value="allSelected" @change="() => toggleSelectAll()" />
                         </div>
                     </template>
 
                     <template #body="{ data }">
                         <div class="flex justify-center">
-                        <Checkbox
-                            :binary="true"
-                            :model-value="selectedExportIds.has(data.id)"
-                            @change="() => handleToggleExport(data.id)"
-                        />
+                            <Checkbox :binary="true" :model-value="selectedExportIds.has(data.id)" @change="() => handleToggleExport(data.id)" />
                         </div>
                     </template>
                 </Column>
                 <Column field="return_orderNo_ref" header="Ref No" dataType="date" style="min-width: 8rem" sortable>
                     <template #body="{ data }">
                         <RouterLink :to="`/scm/detailReturnOrder/${data.id}`" class="hover:underline font-bold text-primary-400">
-                        {{ data.return_orderNo_ref }}
+                            {{ data.return_orderNo_ref }}
                         </RouterLink>
                     </template>
                 </Column>
                 <Column field="dealerName" header="Ship-To" dataType="date" style="min-width: 8rem" sortable>
                     <template #body="{ data }">
                         <span class="font-bold">{{ data?.dealerName || '-' }}</span>
-                        <br>
+                        <br />
                         {{ data?.custaccountno ?? '-' }}
                     </template>
                 </Column>
@@ -119,12 +92,12 @@
                         {{ data?.storageLocation ?? '-' }}
                     </template>
                 </Column>
-                <Column field="city" header="City" style="max-width: 8rem"sortable>
+                <Column field="city" header="City" style="max-width: 8rem" sortable>
                     <template #body="{ data }">
                         {{ data?.city.replace(/,$/, '') ?? '-' }}
                     </template>
                 </Column>
-                <Column field="state" header="State" style="max-width: 8rem"sortable>
+                <Column field="state" header="State" style="max-width: 8rem" sortable>
                     <template #body="{ data }">
                         {{ data?.state ?? '-' }}
                     </template>
@@ -139,12 +112,12 @@
                         {{ data.delivery_information?.receive_datetime ? formatDate(data.delivery_information.receive_datetime) : 'No date assigned' }}
                     </template>
                 </Column>
-                <Column field="return_order_array.length" header="Return Items" style="min-width: 8rem;text-align: center;" sortable>
+                <Column field="return_order_array.length" header="Return Items" style="min-width: 8rem; text-align: center" sortable>
                     <template #body="{ data }">
-                            {{ data.return_order_array?.length || 0 }}
+                        {{ data.return_order_array?.length || 0 }}
                     </template>
                 </Column>
-                <Column field="delivery_status" header="Status" style="min-width: 8rem" >
+                <Column field="delivery_status" header="Status" style="min-width: 8rem">
                     <template #body="{ data }">
                         <Tag :value="data.delivery_status" :severity="getStatusSeverity(data.delivery_status)" />
                     </template>
@@ -180,21 +153,20 @@ const activeTabIndex = ref(0);
 const dateRange = ref(null);
 
 const formatDateDMY = (date) => {
-  const d = new Date(date);
-  const day = String(d.getDate()).padStart(2, "0");
-  const month = String(d.getMonth() + 1).padStart(2, "0");
-  const year = d.getFullYear();
-  return `${day}/${month}/${year}`;
+    const d = new Date(date);
+    const day = String(d.getDate()).padStart(2, '0');
+    const month = String(d.getMonth() + 1).padStart(2, '0');
+    const year = d.getFullYear();
+    return `${day}/${month}/${year}`;
 };
 const filters = ref({
     global: { value: null, matchMode: FilterMatchMode.CONTAINS }
 });
 
-
 const statusTabs = [
-    { label: 'New', submitLabel: 'NEW'},
-    { label: 'Pending',submitLabel: 'PENDING' },
-    { label: 'Completed', submitLabel: 'COMPLETED'}
+    { label: 'New', submitLabel: 'NEW' },
+    { label: 'Pending', submitLabel: 'PENDING' },
+    { label: 'Completed', submitLabel: 'COMPLETED' }
 ];
 
 watch(activeTabIndex, () => {
@@ -206,47 +178,52 @@ watch(activeTabIndex, () => {
         lastWeek.setDate(today.getDate() - 7);
 
         dateRange.value = [lastWeek, today];
-    }else{
+        const dateRangeStr = dateRange.value?.[0] && dateRange.value?.[1] ? `${formatDateDMY(dateRange.value[0])} - ${formatDateDMY(dateRange.value[1])}` : null;
+
+        // Prepare request body
+        const body = {
+            tab: tab.submitLabel,
+            date_range: dateRangeStr
+        };
+        fetchData(body);
+    } else {
         dateRange.value = null;
-
+        fetchData();
     }
-    fetchData();
+    selectedExportIds.value.clear();
 });
-
 
 // Computed boolean: are all rows selected?
 const allSelected = computed(() => {
-  return returnList.value.length > 0 &&
-         returnList.value.every(item => selectedExportIds.value.has(item.id));
+    return returnList.value.length > 0 && returnList.value.every((item) => selectedExportIds.value.has(item.id));
 });
 
 const handleToggleExport = (id) => {
-  if (selectedExportIds.value.has(id)) {
-    selectedExportIds.value.delete(id);
-  } else {
-    selectedExportIds.value.add(id);
-  }
-
+    if (selectedExportIds.value.has(id)) {
+        selectedExportIds.value.delete(id);
+    } else {
+        selectedExportIds.value.add(id);
+    }
 };
 
 // Check all
 const toggleSelectAll = () => {
-  if (allSelected.value) {
-    // Unselect all for this tab
-    returnList.value.forEach(item => {
-      selectedExportIds.value.delete(item.id);
-    });
-  } else {
-    // Select all for this tab
-    returnList.value.forEach(item => {
-      selectedExportIds.value.add(item.id);
-    });
-  }
+    if (allSelected.value) {
+        // Unselect all for this tab
+        returnList.value.forEach((item) => {
+            selectedExportIds.value.delete(item.id);
+        });
+    } else {
+        // Select all for this tab
+        returnList.value.forEach((item) => {
+            selectedExportIds.value.add(item.id);
+        });
+    }
 };
 
 // Export function PICKUP ONLY
 const handleExport1 = async () => {
-     const idsArray = Array.from(selectedExportIds.value).map(id => ({ id: Number(id) }));
+    const idsArray = Array.from(selectedExportIds.value).map((id) => ({ id: Number(id) }));
 
     if (idsArray.length === 0) {
         alert('Please select at least one row.');
@@ -254,19 +231,19 @@ const handleExport1 = async () => {
     }
     try {
         exportLoading1.value = true;
-        
-            const response = await api.postExtra(
+
+        const response = await api.postExtra(
             'excel/export-scm-return-order-list',
-        { returnorderids_array: JSON.stringify(idsArray) },
-        {
-            responseType: 'blob',
-            headers: {
-            'Content-Type': 'application/json',
+            { returnorderids_array: JSON.stringify(idsArray) },
+            {
+                responseType: 'blob',
+                headers: {
+                    'Content-Type': 'application/json'
+                }
             }
-        }
         );
-        const blob = new Blob([response.data], { 
-        type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' 
+        const blob = new Blob([response.data], {
+            type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
         });
 
         const url = window.URL.createObjectURL(blob);
@@ -289,7 +266,7 @@ const handleExport1 = async () => {
 };
 // Export function RECEIVE ONLY
 const handleExport2 = async () => {
-     const idsArray = Array.from(selectedExportIds.value).map(id => ({ id: Number(id) }));
+    const idsArray = Array.from(selectedExportIds.value).map((id) => ({ id: Number(id) }));
 
     if (idsArray.length === 0) {
         alert('Please select at least one row.');
@@ -297,19 +274,19 @@ const handleExport2 = async () => {
     }
     try {
         exportLoading2.value = true;
-        
-            const response = await api.postExtra(
+
+        const response = await api.postExtra(
             'excel/export-scm-receivereturn-order-list',
-        { returnorderids_array: JSON.stringify(idsArray) },
-        {
-            responseType: 'blob',
-            headers: {
-            'Content-Type': 'application/json',
+            { returnorderids_array: JSON.stringify(idsArray) },
+            {
+                responseType: 'blob',
+                headers: {
+                    'Content-Type': 'application/json'
+                }
             }
-        }
         );
-        const blob = new Blob([response.data], { 
-        type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' 
+        const blob = new Blob([response.data], {
+            type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
         });
 
         const url = window.URL.createObjectURL(blob);
@@ -338,16 +315,16 @@ const handleImport1 = async (event) => {
 
     try {
         importLoading1.value = true;
-        
+
         const formData = new FormData();
         formData.append('return_order_excel', file);
-        
+
         const response = await api.postExtra('excel/import-scm-return-order-list', formData, {
             headers: {
                 'Content-Type': 'multipart/form-data'
             }
-            });
-        
+        });
+
         if (response.data.status === 1) {
             // Refresh data after import
             await fetchData();
@@ -358,7 +335,7 @@ const handleImport1 = async (event) => {
                 detail: 'File imported successfully',
                 life: 3000
             });
-            } else {
+        } else {
             toast.add({
                 severity: 'error',
                 summary: 'Import Failed',
@@ -371,10 +348,10 @@ const handleImport1 = async (event) => {
         toast.add({ severity: 'error', summary: 'Error', detail: 'Failed to import data', life: 3000 });
     } finally {
         importLoading1.value = false;
-                    // Reset file input
-            if (importInput1.value) {
-                importInput1.value.value = '';
-            }
+        // Reset file input
+        if (importInput1.value) {
+            importInput1.value.value = '';
+        }
     }
 };
 // Import function RECEIVE ONLY
@@ -384,21 +361,19 @@ const handleImport2 = async (event) => {
 
     try {
         importLoading2.value = true;
-        
+
         const formData = new FormData();
         formData.append('return_order_excel', file);
-        
+
         const response = await api.postExtra('excel/import-scm-receivereturn-order-list', formData, {
             headers: {
                 'Content-Type': 'multipart/form-data'
             }
-            });
-        
+        });
+
         if (response.data.status === 1) {
             // Refresh data after import
             await fetchData();
-
-
 
             toast.add({
                 severity: 'success',
@@ -406,7 +381,7 @@ const handleImport2 = async (event) => {
                 detail: 'File imported successfully',
                 life: 3000
             });
-            } else {
+        } else {
             toast.add({
                 severity: 'error',
                 summary: 'Import Failed',
@@ -419,51 +394,50 @@ const handleImport2 = async (event) => {
         toast.add({ severity: 'error', summary: 'Error', detail: 'Failed to import data', life: 3000 });
     } finally {
         importLoading2.value = false;
-                    // Reset file input
-            if (importInput2.value) {
-                importInput2.value.value = '';
-            }
+        // Reset file input
+        if (importInput2.value) {
+            importInput2.value.value = '';
+        }
     }
 };
 const applyFilter = () => {
     const tab = statusTabs[activeTabIndex.value];
     if (tab.submitLabel === 'COMPLETED') {
-
-    // Must have BOTH start & end date
-    if (!dateRange.value?.[0] || !dateRange.value?.[1]) {
-      // Show message (toast, alert, etc.)
-      toast.add({
-        severity: 'warn',
-        summary: 'Date Range Required',
-        detail: 'Please select a full date range for Completed records.',
-        life: 3000
-      });
-      return; // STOP here, do NOT call API
+        // Must have BOTH start & end date
+        if (!dateRange.value?.[0] || !dateRange.value?.[1]) {
+            // Show message (toast, alert, etc.)
+            toast.add({
+                severity: 'warn',
+                summary: 'Date Range Required',
+                detail: 'Please select a full date range for Completed records.',
+                life: 3000
+            });
+            return; // STOP here, do NOT call API
+        }
     }
-  }
-  const dateRangeStr = dateRange.value?.[0] && dateRange.value?.[1]? `${formatDateDMY(dateRange.value[0])} - ${formatDateDMY(dateRange.value[1])}`: null// returns "dd/mm/yyyy - dd/mm/yyyy" or null
-  const body = {
-    tab: tab.submitLabel,
-    date_range: dateRangeStr
-  };
+    const dateRangeStr = dateRange.value?.[0] && dateRange.value?.[1] ? `${formatDateDMY(dateRange.value[0])} - ${formatDateDMY(dateRange.value[1])}` : null; // returns "dd/mm/yyyy - dd/mm/yyyy" or null
+    const body = {
+        tab: tab.submitLabel,
+        date_range: dateRangeStr
+    };
 
-  fetchData(body);
+    fetchData(body);
 };
 const clearDate = () => {
-  dateRange.value = null; // or []
+    dateRange.value = null; // or []
 };
 const fetchData = async (body = null) => {
     try {
         loading.value = true;
-            const payload = body || {
+        const payload = body || {
             tab: statusTabs[activeTabIndex.value].submitLabel
         };
-        const response = await api.postExtra('scm-return-order-list',payload);
+        const response = await api.postExtra('scm-return-order-list', payload);
         // console.log('API Response:', response.data);
         if (response.data.status === 1 && Array.isArray(response.data.admin_data)) {
-                returnList.value = response.data.admin_data.sort((a, b) => {
-        return new Date(b.created) - new Date(a.created);
-        });
+            returnList.value = response.data.admin_data.sort((a, b) => {
+                return new Date(b.created) - new Date(a.created);
+            });
         } else {
             console.error('API returned error or invalid data:', response.data);
             returnList.value = [];
@@ -486,9 +460,9 @@ const exportToExcel = () => {
     try {
         // Create worksheet data
         const headers = ['Ref No', 'Ship-To', 'Ship-To Acc No', 'Storage Location', 'City', 'State', 'Pickup Date', 'Receive Date', 'Return Items', 'Status'];
-        
+
         // Prepare data rows
-        const csvData = returnList.value.map(data => [
+        const csvData = returnList.value.map((data) => [
             `"${data.return_orderNo_ref || '-'}"`,
             `"${data.dealerName || '-'}"`,
             `"${data.custaccountno || '-'}"`,
@@ -498,30 +472,26 @@ const exportToExcel = () => {
             `"${data.delivery_information?.pickup_datetime ? formatDate(data.delivery_information.pickup_datetime) : 'No date assigned'}"`,
             `"${data.delivery_information?.receive_datetime ? formatDate(data.delivery_information.receive_datetime) : 'No date assigned'}"`,
             `"${data.return_order_array?.length || 0}"`,
-            `"${data.delivery_status || '-'}"`,
+            `"${data.delivery_status || '-'}"`
         ]);
 
         // Combine headers and data
-        const csvContent = [
-            headers.join(','),
-            ...csvData.map(row => row.join(','))
-        ].join('\n');
+        const csvContent = [headers.join(','), ...csvData.map((row) => row.join(','))].join('\n');
 
         // Create and download the file
         const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
         const link = document.createElement('a');
         const url = URL.createObjectURL(blob);
-        
+
         link.setAttribute('href', url);
         link.setAttribute('download', `return_order_list_${new Date().toISOString().split('T')[0]}.csv`);
         link.style.visibility = 'hidden';
-        
+
         document.body.appendChild(link);
         link.click();
         document.body.removeChild(link);
-        
+
         URL.revokeObjectURL(url);
-        
     } catch (error) {
         console.error('Error exporting to Excel:', error);
     }
@@ -530,15 +500,14 @@ onMounted(() => {
     fetchData();
 });
 function formatDate(dateString) {
-  if (!dateString) return '';
-  const date = new Date(dateString);
-  return date.toLocaleString('en-MY', {
-    year: 'numeric',
-    month: '2-digit',
-    day: '2-digit',
-  });
+    if (!dateString) return '';
+    const date = new Date(dateString);
+    return date.toLocaleString('en-MY', {
+        year: 'numeric',
+        month: '2-digit',
+        day: '2-digit'
+    });
 }
-
 
 function getStatusSeverity(status) {
     switch (status) {
@@ -552,5 +521,45 @@ function getStatusSeverity(status) {
             return 'secondary';
     }
 }
-
 </script>
+
+<style scoped>
+:deep(.rounded-table) {
+    border-radius: 12px;
+    overflow: hidden;
+    border: 1px solid #e5e7eb;
+
+    .p-datatable-header {
+        border-top-left-radius: 12px;
+        border-top-right-radius: 12px;
+    }
+
+    .p-paginator-bottom {
+        border-bottom-left-radius: 12px;
+        border-bottom-right-radius: 12px;
+    }
+
+    .p-datatable-thead > tr > th {
+        &:first-child {
+            border-top-left-radius: 12px;
+        }
+        &:last-child {
+            border-top-right-radius: 12px;
+        }
+    }
+
+    .p-datatable-tbody > tr:last-child > td {
+        &:first-child {
+            border-bottom-left-radius: 0;
+        }
+        &:last-child {
+            border-bottom-right-radius: 0;
+        }
+    }
+
+    .p-datatable-tbody > tr.p-datatable-emptymessage > td {
+        border-bottom-left-radius: 12px;
+        border-bottom-right-radius: 12px;
+    }
+}
+</style>

@@ -8,11 +8,15 @@
             :rows="10"
             :rowsPerPageOptions="[5, 10, 20]"
             dataKey="materialid"
+            removableSort
+            class="rounded-table"
             :rowHover="true"
             :loading="loading"
             :filters="filters"
             filterDisplay="menu"
-            :globalFilterFields="['materialid', 'pattern', 'origin', 'sectionwidth', 'tireseries', 'rimdiameter', 'speedplyrating','status']"
+            :globalFilterFields="['materialid', 'pattern', 'origin', 'sectionwidth', 'tireseries', 'rimdiameter', 'speedplyrating', 'status']"
+            paginatorTemplate="CurrentPageReport FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink RowsPerPageDropdown"
+            currentPageReportTemplate="Showing {first} to {last} of {totalRecords} entries"
         >
             <template #header>
                 <div class="flex items-center justify-between gap-4 w-full flex-wrap">
@@ -24,9 +28,8 @@
                             </InputIcon>
                             <InputText v-model="filters['global'].value" placeholder="Quick Search" class="w-full" />
                         </IconField>
-                        
                     </div>
-                    
+
                     <!-- Right: Export & Batch Buttons -->
                     <div class="flex items-center gap-2 ml-auto">
                         <!-- <Button 
@@ -45,29 +48,9 @@
                         :loading="stockLevelLoading"
                         @click="handleStockLevel"
                         /> -->
-                        <Button 
-                        type="button" 
-                        label="Export" 
-                        icon="pi pi-file-export" 
-                        class="p-button"
-                        :loading="exportLoading"
-                        @click="handleExport"
-                        />
-                        <Button v-if="canUpdate"
-                        type="button" 
-                        label="Import" 
-                        icon="pi pi-file-import" 
-                        class="p-button"
-                        @click="importInput?.click()"
-                        :loading="importLoading"
-                        />
-                        <input 
-                        ref="importInput"
-                        type="file" 
-                        accept=".xlsx,.xls" 
-                        style="display: none" 
-                        @change="handleImport"
-                        />
+                        <Button type="button" label="Export" icon="pi pi-file-export" class="p-button" :loading="exportLoading" @click="handleExport" />
+                        <Button v-if="canUpdate" type="button" label="Import" icon="pi pi-file-import" class="p-button" @click="importInput?.click()" :loading="importLoading" />
+                        <input ref="importInput" type="file" accept=".xlsx,.xls" style="display: none" @change="handleImport" />
                         <!-- <Button 
                         type="button" 
                         icon="pi pi-refresh" 
@@ -78,42 +61,34 @@
                     </div>
                 </div>
             </template>
-            
+
             <template #empty> No data found. </template>
             <template #loading> Loading data. Please wait... </template>
 
             <Column header="Export All" style="min-width: 8rem">
                 <template #header>
                     <div class="flex justify-center">
-                    <Checkbox
-                        :binary="true"
-                        :model-value="false"  
-                        @change="() => toggleSelectAll()"  
-                    />
+                        <Checkbox :binary="true" :model-value="false" @change="() => toggleSelectAll()" />
                     </div>
                 </template>
 
                 <template #body="{ data }">
                     <div class="flex justify-center">
-                    <Checkbox
-                        :binary="true"
-                        :model-value="selectedExportIds.has(data.id)"
-                        @change="() => handleToggleExport(data.id)"
-                    />
+                        <Checkbox :binary="true" :model-value="selectedExportIds.has(data.id)" @change="() => handleToggleExport(data.id)" />
                     </div>
                 </template>
             </Column>
             <Column field="materialid" header="Material ID" style="min-width: 6rem" sortable>
                 <template #body="{ data }">
                     <div class="flex flex-col items-start gap-1">
-                            {{ data.materialid }}
+                        {{ data.materialid }}
                     </div>
                 </template>
             </Column>
 
             <Column field="pattern" header="Pattern" style="min-width: 8rem" sortable>
                 <template #body="{ data }">
-                        {{ data.pattern }}
+                    {{ data.pattern }}
                 </template>
             </Column>
 
@@ -150,46 +125,27 @@
             <Column field="sell" header="Sell" style="min-width: 6rem" v-if="canUpdate">
                 <template #body="{ data }">
                     <div class="flex justify-center">
-                        <Checkbox 
-                            v-model="data.sell" 
-                            :binary="true" 
-                            :disabled="data.updatingSell"
-                            @change="handleToggleSell(data)"
-                            :class="data.sell ? 'p-checkbox-checked' : ''"
-                        />
+                        <Checkbox v-model="data.sell" :binary="true" :disabled="data.updatingSell" @change="handleToggleSell(data)" :class="data.sell ? 'p-checkbox-checked' : ''" />
                         <i v-if="data.updatingSell" class="pi pi-spin pi-spinner ml-2"></i>
                     </div>
                 </template>
             </Column>
-            
-            
+
             <!-- Warranty Column with Checkbox -->
             <Column field="warranty" header="Warranty" style="min-width: 8rem" v-if="canUpdate">
                 <template #body="{ data }">
                     <div class="flex justify-center">
-                        <Checkbox 
-                        v-model="data.warranty" 
-                        :binary="true" 
-                        :disabled="data.updatingWarranty"
-                        @change="handleToggleWarranty(data)"
-                        :class="data.warranty ? 'p-checkbox-checked' : ''"
-                        />
+                        <Checkbox v-model="data.warranty" :binary="true" :disabled="data.updatingWarranty" @change="handleToggleWarranty(data)" :class="data.warranty ? 'p-checkbox-checked' : ''" />
                         <i v-if="data.updatingWarranty" class="pi pi-spin pi-spinner ml-2"></i>
                     </div>
                 </template>
             </Column>
-            
+
             <!-- TWP Column with Checkbox -->
             <Column field="twp" header="TWP" style="min-width: 8rem" v-if="canUpdate">
                 <template #body="{ data }">
                     <div class="flex justify-center">
-                        <Checkbox 
-                            v-model="data.twp" 
-                            :binary="true" 
-                            :disabled="data.updatingTWP"
-                            @change="handleToggleTWP(data)"
-                            :class="data.twp ? 'p-checkbox-checked' : ''"
-                        />
+                        <Checkbox v-model="data.twp" :binary="true" :disabled="data.updatingTWP" @change="handleToggleTWP(data)" :class="data.twp ? 'p-checkbox-checked' : ''" />
                         <i v-if="data.updatingTWP" class="pi pi-spin pi-spinner ml-2"></i>
                     </div>
                 </template>
@@ -199,7 +155,7 @@
 </template>
 
 <script setup>
-import { onMounted, ref, computed  } from 'vue';
+import { onMounted, ref, computed } from 'vue';
 import { FilterMatchMode } from '@primevue/core/api';
 import api from '@/service/api';
 import { useToast } from 'primevue/usetoast';
@@ -228,13 +184,11 @@ const filters = ref({
     global: { value: null, matchMode: FilterMatchMode.CONTAINS }
 });
 
-
 // Fetch data function
 const fetchData = async () => {
     try {
         loading.value = true;
         const response = await api.get('material');
-
 
         if (response.data.status === 1 && Array.isArray(response.data.admin_data)) {
             tyres.value = response.data.admin_data.map((product) => ({
@@ -274,33 +228,33 @@ const handleMaterial = async () => {
     try {
         materialLoading.value = true;
         const response = await api.get('updatematerialmaster');
-        
+
         if (response.data.success) {
             const updatedCount = response.data.updated ? response.data.updated.length : 0;
-            toast.add({ 
-                severity: 'success', 
-                summary: 'Material Updated', 
-                detail: `Material master updated successfully. ${updatedCount} records processed.`, 
-                life: 5000 
+            toast.add({
+                severity: 'success',
+                summary: 'Material Updated',
+                detail: `Material master updated successfully. ${updatedCount} records processed.`,
+                life: 5000
             });
-            
+
             // Refresh the data to show updated materials
             await fetchData();
         } else {
-            toast.add({ 
-                severity: 'warn', 
-                summary: 'Material Update', 
-                detail: response.data.message || 'Material update completed with warnings', 
-                life: 5000 
+            toast.add({
+                severity: 'warn',
+                summary: 'Material Update',
+                detail: response.data.message || 'Material update completed with warnings',
+                life: 5000
             });
         }
     } catch (error) {
         console.error('Error updating material master:', error);
-        toast.add({ 
-            severity: 'error', 
-            summary: 'Update Failed', 
-            detail: 'Failed to update material master', 
-            life: 3000 
+        toast.add({
+            severity: 'error',
+            summary: 'Update Failed',
+            detail: 'Failed to update material master',
+            life: 3000
         });
     } finally {
         materialLoading.value = false;
@@ -312,32 +266,32 @@ const handleStockLevel = async () => {
     try {
         stockLevelLoading.value = true;
         const response = await api.get('updatestocklevel');
-        
+
         if (response.data.success) {
-            toast.add({ 
-                severity: 'success', 
-                summary: 'Stock Level Updated', 
-                detail: 'Stock levels updated successfully', 
-                life: 5000 
+            toast.add({
+                severity: 'success',
+                summary: 'Stock Level Updated',
+                detail: 'Stock levels updated successfully',
+                life: 5000
             });
-            
+
             // Refresh the data to show updated stock levels
             await fetchData();
         } else {
-            toast.add({ 
-                severity: 'warn', 
-                summary: 'Stock Level Update', 
-                detail: response.data.message || 'Stock level update completed with warnings', 
-                life: 5000 
+            toast.add({
+                severity: 'warn',
+                summary: 'Stock Level Update',
+                detail: response.data.message || 'Stock level update completed with warnings',
+                life: 5000
             });
         }
     } catch (error) {
         console.error('Error updating stock level:', error);
-        toast.add({ 
-            severity: 'error', 
-            summary: 'Update Failed', 
-            detail: 'Failed to update stock levels', 
-            life: 3000 
+        toast.add({
+            severity: 'error',
+            summary: 'Update Failed',
+            detail: 'Failed to update stock levels',
+            life: 3000
         });
     } finally {
         stockLevelLoading.value = false;
@@ -346,27 +300,27 @@ const handleStockLevel = async () => {
 
 // Computed boolean: are all rows selected?
 const allSelected = computed(() => {
-  return tyres.value.length > 0 && selectedExportIds.value.size === tyres.value.length;
+    return tyres.value.length > 0 && selectedExportIds.value.size === tyres.value.length;
 });
 
 // Toggle functions
 const handleToggleExport = (id) => {
-  if (selectedExportIds.value.has(id)) {
-    selectedExportIds.value.delete(id);
-  } else {
-    selectedExportIds.value.add(id);
-  }
+    if (selectedExportIds.value.has(id)) {
+        selectedExportIds.value.delete(id);
+    } else {
+        selectedExportIds.value.add(id);
+    }
 };
 
 // Check all
 const toggleSelectAll = () => {
-  if (allSelected.value) {
-    // Unselect all
-    selectedExportIds.value.clear();
-  } else {
-    // Select all
-    tyres.value.forEach(row => selectedExportIds.value.add(row.id));
-  }
+    if (allSelected.value) {
+        // Unselect all
+        selectedExportIds.value.clear();
+    } else {
+        // Select all
+        tyres.value.forEach((row) => selectedExportIds.value.add(row.id));
+    }
 };
 
 // Toggle functions
@@ -374,10 +328,8 @@ const handleToggleTWP = async (data) => {
     try {
         data.updatingTWP = true;
         const newStatus = data.twp ? 1 : 0;
-        await api.put(`material/toggleTWP/${data.id}`, {
+        await api.put(`material/toggleTWP/${data.id}`, {});
 
-        });
-        
         toast.add({ severity: 'success', summary: 'Success', detail: 'TWP status updated', life: 3000 });
     } catch (error) {
         console.error('Error updating TWP:', error);
@@ -392,11 +344,11 @@ const handleToggleWarranty = async (data) => {
     try {
         data.updatingWarranty = true;
         const newStatus = data.warranty ? 1 : 0;
-        
+
         await api.put(`material/toggleWarranty/${data.id}`, {
             status: newStatus
         });
-        
+
         toast.add({ severity: 'success', summary: 'Success', detail: 'Warranty status updated', life: 3000 });
     } catch (error) {
         console.error('Error updating warranty:', error);
@@ -411,11 +363,11 @@ const handleToggleSell = async (data) => {
     try {
         data.updatingSell = true;
         const newStatus = data.sell ? 1 : 0;
-        
+
         await api.put(`material/toggleSell/${data.id}`, {
             status: newStatus
         });
-        
+
         toast.add({ severity: 'success', summary: 'Success', detail: 'Sell status updated', life: 3000 });
     } catch (error) {
         console.error('Error updating sell status:', error);
@@ -428,7 +380,7 @@ const handleToggleSell = async (data) => {
 
 // Export function
 const handleExport = async () => {
-     const idsArray = Array.from(selectedExportIds.value).map(id => Number(id));
+    const idsArray = Array.from(selectedExportIds.value).map((id) => Number(id));
 
     if (idsArray.length === 0) {
         alert('Please select at least one row.');
@@ -436,19 +388,19 @@ const handleExport = async () => {
     }
     try {
         exportLoading.value = true;
-        
-            const response = await api.postExtra(
-        'material/export',
-        { material_id: JSON.stringify(idsArray) }, 
-        {
-            responseType: 'blob',
-            headers: {
-            'Content-Type': 'application/json',
+
+        const response = await api.postExtra(
+            'material/export',
+            { material_id: JSON.stringify(idsArray) },
+            {
+                responseType: 'blob',
+                headers: {
+                    'Content-Type': 'application/json'
+                }
             }
-        }
         );
-        const blob = new Blob([response.data], { 
-        type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' 
+        const blob = new Blob([response.data], {
+            type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
         });
 
         const url = window.URL.createObjectURL(blob);
@@ -473,22 +425,20 @@ const handleExport = async () => {
 // Import function
 const handleImport = async (event) => {
     const file = event.target.files[0];
-   
-
 
     if (!file) return;
 
     try {
         importLoading.value = true;
-        
+
         const formData = new FormData();
         formData.append('material_file', file);
         const response = await api.postExtra('material/import', formData, {
             headers: {
                 'Content-Type': 'multipart/form-data'
             }
-            });
-        
+        });
+
         if (response.data.status === 1) {
             // Refresh data after import
             await fetchData();
@@ -504,7 +454,7 @@ const handleImport = async (event) => {
                 detail: 'File imported successfully',
                 life: 3000
             });
-            } else {
+        } else {
             toast.add({
                 severity: 'error',
                 summary: 'Import Failed',
@@ -538,3 +488,43 @@ const getOverallStatusSeverity = (deleted) => {
     return deleted ? 'danger' : 'success';
 };
 </script>
+<style scoped>
+:deep(.rounded-table) {
+    border-radius: 12px;
+    overflow: hidden;
+    border: 1px solid #e5e7eb;
+
+    .p-datatable-header {
+        border-top-left-radius: 12px;
+        border-top-right-radius: 12px;
+    }
+
+    .p-paginator-bottom {
+        border-bottom-left-radius: 12px;
+        border-bottom-right-radius: 12px;
+    }
+
+    .p-datatable-thead > tr > th {
+        &:first-child {
+            border-top-left-radius: 12px;
+        }
+        &:last-child {
+            border-top-right-radius: 12px;
+        }
+    }
+
+    .p-datatable-tbody > tr:last-child > td {
+        &:first-child {
+            border-bottom-left-radius: 0;
+        }
+        &:last-child {
+            border-bottom-right-radius: 0;
+        }
+    }
+
+    .p-datatable-tbody > tr.p-datatable-emptymessage > td {
+        border-bottom-left-radius: 12px;
+        border-bottom-right-radius: 12px;
+    }
+}
+</style>
