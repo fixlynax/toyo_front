@@ -166,7 +166,7 @@ onUnmounted(() => {
                 <i class="pi pi-bars"></i>
             </button>
             <router-link to="/" class="layout-topbar-logo">
-                <img src="/demo/images/toyo_tires.png" alt="Logo" style="height: 25px; object-fit: contain" />
+                <img src="/demo/images/toyo_logo.png" alt="Logo" style="height: 25px; object-fit: contain" />
             </router-link>
         </div>
 
