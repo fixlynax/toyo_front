@@ -133,7 +133,7 @@
                                 </tr>
                                 <tr class="border-b">
                                     <td class="px-4 py-2 font-medium">Storage Location</td>
-                                    <td class="px-4 py-2 text-right font-medium">{{ orderData.storagelocation || '-' }}</td>
+                                    <td class="px-4 py-2 text-right font-medium">{{ deliveryInfo.storagelocation || '-' }}</td>
                                 </tr>
                                 <tr class="border-b">
                                     <td class="px-4 py-2 font-medium">Planned Date</td>
