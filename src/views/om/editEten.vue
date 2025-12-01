@@ -885,7 +885,7 @@ const handleUpdate = async () => {
                 detail: 'Dealer updated successfully',
                 life: 4000
             });
-            
+
             const custAccNo = form.value.custAccountNo || route.params.custAccNo;
 
             if (custAccNo) {
