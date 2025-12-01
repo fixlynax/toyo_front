@@ -506,6 +506,36 @@ const router = createRouter({
                     meta: { permission: 'Reward Catalogue', access: 'create' },
                 },
 
+                // Warranty Registration
+                 {
+                    path: 'marketing/listWarrantyRegistration',
+                    name: 'List-Warranty-Registration',
+                    component: () => import('@/views/marketing/listWarrantyRegistration.vue'),
+                    // meta: { permission: 'Events Management', access: 'view' },
+                },
+                 {
+                    path: 'marketing/detailWarrantyRegistration/:id',
+                    name: 'Detail-Warranty-Registration',
+                    component: () => import('@/views/marketing/detailWarrantyRegistration.vue'),
+                    // meta: { permission: 'Events Management', access: 'view' },
+                    props: true
+                },
+
+                // OE Registration
+                 {
+                    path: 'marketing/listOERegistration',
+                    name: 'List-OE-Registration',
+                    component: () => import('@/views/marketing/listOERegistration.vue'),
+                    // meta: { permission: 'Events Management', access: 'view' },
+                },
+                 {
+                    path: 'marketing/detailOERegistration/:id',
+                    name: 'Detail-OE-Registration',
+                    component: () => import('@/views/marketing/detailOERegistration.vue'),
+                    // meta: { permission: 'Events Management', access: 'view' },
+                    props: true
+                },
+
                 // Report
                 {
                     path: 'marketing/reportMember',
