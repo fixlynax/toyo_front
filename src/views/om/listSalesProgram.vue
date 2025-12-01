@@ -24,7 +24,7 @@ onBeforeMount(async () => {
     try {
         initFilters1();
         loading.value = true;
-        const response = await api.get('sales-program/list-sales-program');
+        const response = await api.post('sales-program/list-sales-program');
 
         console.log('API Response:', response.data);
 

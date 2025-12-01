@@ -10,6 +10,7 @@ const filters1 = ref({});
 const listData = ref([]);
 const loading = ref(true);
 const dateRange = ref([null, null]); // [startDate, endDate]
+const hasDateFilterApplied = ref(false); // New flag to track if date filter is applied
 
 // 🟢 Filters
 function initFilters1() {
@@ -35,12 +36,29 @@ const statusTabs = [
 const activeTabIndex = ref(0);
 
 // 🟢 Fetch Orders
-const fetchOrders = async (status = null) => {
+const fetchOrders = async (status = null, dateFilter = false) => {
     try {
         loading.value = true;
         const statusMapping = { 66: 'PROCESSING', 77: 'DELIVERY', 1: 'COMPLETE' };
         const tabs = statusMapping[status] || 'PROCESSING';
-        const response = await api.post('order/list-order', { tabs });
+
+        // Prepare request data
+        const requestData = { tabs };
+
+        // Add date range only for completed orders and when date filter is applied
+        if (status === 1 && dateFilter) {
+            if (dateRange.value[0] && dateRange.value[1]) {
+                // Format dates for backend (assuming backend expects d/m/Y format)
+                const formatDateForBackend = (date) => {
+                    const d = new Date(date);
+                    return `${d.getDate().toString().padStart(2, '0')}/${(d.getMonth() + 1).toString().padStart(2, '0')}/${d.getFullYear()}`;
+                };
+
+                requestData.date_range = `${formatDateForBackend(dateRange.value[0])} - ${formatDateForBackend(dateRange.value[1])}`;
+            }
+        }
+
+        const response = await api.post('order/list-order', requestData);
 
         if (response.data.status === 1 && Array.isArray(response.data.admin_data)) {
             listData.value = response.data.admin_data.map((order) => ({
@@ -80,23 +98,62 @@ const fetchOrders = async (status = null) => {
 watch(activeTabIndex, (newIndex) => {
     const selectedStatus = statusTabs[newIndex]?.status;
     dateRange.value = [null, null]; // Reset date range when tab changes
-    fetchOrders(selectedStatus);
+    hasDateFilterApplied.value = false; // Reset the flag
+
+    // For completed tab, don't fetch data until date range is set
+    if (selectedStatus === 1) {
+        listData.value = []; // Clear data when switching to completed tab
+    } else {
+        fetchOrders(selectedStatus);
+    }
 });
+
+// 🟢 Watch date range changes for completed tab
+watch(
+    dateRange,
+    (newRange, oldRange) => {
+        const selectedStatus = statusTabs[activeTabIndex.value]?.status;
+
+        // Only trigger fetch for completed tab when both dates are set
+        if (selectedStatus === 1) {
+            if (newRange[0] && newRange[1]) {
+                hasDateFilterApplied.value = true;
+                fetchOrders(selectedStatus, true);
+            } else if (newRange[0] === null && newRange[1] === null && hasDateFilterApplied.value) {
+                // Clear data if date range is cleared
+                listData.value = [];
+                hasDateFilterApplied.value = false;
+            }
+        }
+    },
+    { deep: true }
+);
 
 // 🟢 Initial load
 onBeforeMount(async () => {
     initFilters1();
     const selectedStatus = statusTabs[activeTabIndex.value]?.status;
-    await fetchOrders(selectedStatus);
+    // Don't fetch for completed tab on initial load
+    if (selectedStatus !== 1) {
+        await fetchOrders(selectedStatus);
+    } else {
+        loading.value = false;
+    }
 });
 
 // 🟢 Computed - Filter orders by status and date range
 const filteredOrders = computed(() => {
     const selectedStatus = statusTabs[activeTabIndex.value]?.status;
+
+    // For completed tab without date filter, return empty array
+    if (selectedStatus === 1 && !hasDateFilterApplied.value) {
+        return [];
+    }
+
     let filtered = listData.value.filter((order) => order.orderStatus === selectedStatus);
 
     // Apply date range filter only for completed orders (status 1)
-    if (selectedStatus === 1 && (dateRange.value[0] || dateRange.value[1])) {
+    if (selectedStatus === 1 && dateRange.value[0] && dateRange.value[1]) {
         filtered = filtered.filter((order) => {
             if (!order.created) return false;
 
@@ -148,6 +205,8 @@ const formatDeliveryDate = (dateString) => {
 // 🟢 Clear Date Range
 const clearDateRange = () => {
     dateRange.value = [null, null];
+    hasDateFilterApplied.value = false;
+    listData.value = []; // Clear data when date range is cleared
 };
 </script>
 
@@ -185,7 +244,6 @@ const clearDateRange = () => {
                                     <InputIcon><i class="pi pi-search" /></InputIcon>
                                     <InputText v-model="filters1['global'].value" placeholder="Quick Search" class="w-full" />
                                 </IconField>
-                                <Button type="button" icon="pi pi-cog" class="p-button" />
                             </div>
                             <div>
                                 <RouterLink to="/om/createOrder">
@@ -199,24 +257,39 @@ const clearDateRange = () => {
                             <div class="flex items-center gap-2">
                                 <span class="text-sm font-medium text-gray-700">Date Range:</span>
                                 <div class="flex items-center gap-2">
-                                    <Calendar v-model="dateRange[0]" placeholder="Start Date" dateFormat="yy-mm-dd" showIcon class="w-40" />
+                                    <Calendar v-model="dateRange[0]" placeholder="Start Date" dateFormat="yy-mm-dd" showIcon class="w-40" :disabled="loading" />
                                     <span class="text-gray-500">to</span>
-                                    <Calendar v-model="dateRange[1]" placeholder="End Date" dateFormat="yy-mm-dd" showIcon class="w-40" />
+                                    <Calendar v-model="dateRange[1]" placeholder="End Date" dateFormat="yy-mm-dd" showIcon class="w-40" :disabled="loading" />
                                 </div>
                                 <Button v-if="dateRange[0] || dateRange[1]" icon="pi pi-times" class="p-button-text p-button-sm" @click="clearDateRange" title="Clear date filter" />
                             </div>
-                            <div v-if="dateRange[0] || dateRange[1]" class="text-sm text-gray-600">Showing {{ filteredOrders.length }} orders</div>
+                            <div v-if="!hasDateFilterApplied" class="text-sm text-blue-600 italic">Please select a date range to view completed orders</div>
+                            <!-- <div v-else-if="dateRange[0] && dateRange[1]" class="text-sm text-gray-600">Showing {{ filteredOrders.length }} orders from {{ formatDate(dateRange[0]) }} to {{ formatDate(dateRange[1]) }}</div> -->
                         </div>
                     </div>
                 </template>
 
                 <template #empty>
                     <div class="text-center py-4 text-gray-500">
-                        <template v-if="activeTabIndex === 2 && (dateRange[0] || dateRange[1])"> No completed orders found in the selected date range. </template>
+                        <template v-if="activeTabIndex === 2 && !hasDateFilterApplied">
+                            <div class="flex flex-col items-center gap-2">
+                                <i class="pi pi-calendar text-3xl text-blue-400"></i>
+                                <span class="text-lg">Select a date range to view completed orders</span>
+                                <span class="text-sm text-gray-400">Choose both start and end dates to filter results</span>
+                            </div>
+                        </template>
+                        <template v-else-if="activeTabIndex === 2 && hasDateFilterApplied && (!dateRange[0] || !dateRange[1])">
+                            <div class="flex flex-col items-center gap-2">
+                                <i class="pi pi-exclamation-circle text-3xl text-yellow-400"></i>
+                                <span class="text-lg">Please select both start and end dates</span>
+                            </div>
+                        </template>
+                        <template v-else-if="activeTabIndex === 2 && hasDateFilterApplied"> No completed orders found in the selected date range. </template>
                         <template v-else> No orders found. </template>
                     </div>
                 </template>
 
+                <!-- ... Rest of the columns remain the same ... -->
                 <Column field="created" header="Created Date" style="min-width: 8rem">
                     <template #body="{ data }">{{ formatDate(data.created) }}</template>
                 </Column>
