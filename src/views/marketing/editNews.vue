@@ -19,6 +19,11 @@
                     </div>
 
                     <div class="md:col-span-2">
+                        <label class="block font-bold text-gray-700">Headline(180 max Characters)</label>
+                        <Textarea v-model="news.headline" rows="3" class="w-full" maxlength="180" />
+                    </div>
+
+                    <div class="md:col-span-2">
                         <label class="block font-bold text-gray-700">Description</label>
                         <Textarea v-model="news.description" rows="3" class="w-full" />
                     </div>
@@ -260,6 +265,7 @@ const updateNews = async () => {
 
         formData.append('title', news.value.title);
         formData.append('description', news.value.description);
+        formData.append('headline', news.value.headline);
         formData.append('audience', news.value.audience);
         formData.append('publishDate',formatDate(news.value.publishDate));
         formData.append('startDate', formatDate(news.value.startDate));

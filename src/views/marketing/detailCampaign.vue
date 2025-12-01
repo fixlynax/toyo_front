@@ -259,11 +259,11 @@
                         <Column field="signboardType" header="Signboard Type" style="min-width: 6rem"></Column>
 
                         <!-- Actions -->
-                        <Column header="Actions" style="min-width: 4rem; text-align: center">
+                        <!-- <Column header="Actions" style="min-width: 4rem; text-align: center">
                             <template #body="{ data }">
                                 <Button icon="pi pi-trash" class="p-button-text p-button-danger" @click="removeDealer(data)" />
                             </template>
-                        </Column>
+                        </Column> -->
                     </DataTable>
                 </div>
 

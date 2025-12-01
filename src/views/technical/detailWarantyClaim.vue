@@ -746,7 +746,7 @@
     <Dialog v-model:visible="showRejectDialog" header="Reject Warranty Claim" :modal="true" class="p-fluid" :style="{ width: '40rem' }">
         <div class="field">
             <label class="block font-bold text-gray-700 mb-1">Select Rejection Reason *</label>
-            <Dropdown v-model="selectedRejectReason" :options="rejectReasonsTypeB"filter filterBy="damageMode,code,grouping" optionLabel="damageMode" optionValue="id" placeholder="Select rejection reason" class="w-full mb-4" :class="{ 'p-invalid': !selectedRejectReason && rejecting }">
+            <Dropdown v-model="selectedRejectReason" :options="rejectReasonsTypeB"  filter:filterFields="['damageMode', 'code', 'part', 'grouping']" optionLabel="damageMode" optionValue="id" placeholder="Select rejection reason" class="w-full mb-4" :class="{ 'p-invalid': !selectedRejectReason && rejecting }">
                 <template #option="slotProps">
                     <div class="flex flex-col gap-1 py-2">
                         <div class="font-semibold text-gray-800">{{ slotProps.option.damageMode }}</div>
