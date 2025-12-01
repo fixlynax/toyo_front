@@ -29,14 +29,19 @@
                             <InputText v-model="filters['global'].value" placeholder="Quick Search" class="w-full" />
                         </IconField>
                     </div>
-
-                    <!-- Right: Export & Create Buttons -->
+                    <!-- Right: Export & Batch Buttons -->
                     <div class="flex items-center gap-2 ml-auto">
-                        <Button type="button" label="Export" icon="pi pi-file-export" class="p-button-success" @click="exportToCSV" :disabled="patterns.length === 0" />
+                        <Button type="button" label="Export" icon="pi pi-file-export" class="p-button" @click="fetchExportPattern" />
+                        <Button v-if="canUpdate" type="button" label="Import" icon="pi pi-file-import" class="p-button" @click="importInput?.click()" :loading="importLoading" />
+                        <input ref="importInput" type="file" accept=".xlsx,.xls" style="display: none" @change="handleImport" />
+                    </div>
+                    <!-- Right: Export & Create Buttons -->
+                    <!-- <div class="flex items-center gap-2 ml-auto"> -->
+                        <!-- <Button type="button" label="Export" icon="pi pi-file-export" class="p-button-success" @click="exportToCSV" :disabled="patterns.length === 0" /> -->
                         <!-- <RouterLink to="/technical/createPattern" v-if="canUpdate">
                         <Button type="button" label="Create" icon="pi pi-plus" class="p-button" />
                         </RouterLink> -->
-                    </div>
+                    <!-- </div> -->
                 </div>
             </template>
 
@@ -106,6 +111,9 @@ const patterns = ref([]);
 const loading = ref(true);
 const expandedRows = ref([]);
 
+const importInput = ref();
+const importLoading = ref(false);
+
 // Filters (for Quick Search)
 const filters = ref({
     global: { value: null, matchMode: FilterMatchMode.CONTAINS }
@@ -171,36 +179,76 @@ const exportToCSV = () => {
     }
 };
 
-// Alternative export function for Excel format (using CSV with .xls extension)
-const exportToExcel = () => {
-    if (patterns.value.length === 0) {
-        console.warn('No data to export');
-        return;
+const fetchExportPattern = async () => {
+    try {
+        loading.value = true;
+
+        const response = await api.getDownload('excel/export-material-pattern', {
+            responseType: 'arraybuffer'
+        });
+
+        const blob = new Blob([response.data], {
+            type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+        });
+
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = 'Pattern_Download.xlsx';
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        window.URL.revokeObjectURL(url);
+    } catch (err) {
+        console.error('error fetching OE Tire export:', err);
+    } finally {
+        loading.value = false;
     }
+};
+
+// Import function
+const handleImport = async (event) => {
+    const file = event.target.files[0];
+   
+    if (!file) return;
 
     try {
-        // Create worksheet data
-        const worksheetData = [['Pattern Code', 'Pattern Name', 'Created Date', 'Image URL'], ...patterns.value.map((pattern) => [pattern.pattern_code || '', pattern.pattern_name || '-', formatDate(pattern.created), pattern.imageURL || ''])];
+        importLoading.value = true;
+        
+        const formData = new FormData();
+        formData.append('material_pattern_excel : file', file);
+        const response = await api.postExtra('excel/import-material-pattern', formData, {
+            headers: {
+                'Content-Type': 'multipart/form-data'
+            }
+            });
+        
+        if (response.data.status === 1) {
+            // Refresh data after import
+            await fetchData();
 
-        // Convert to CSV format
-        const csvContent = worksheetData.map((row) => row.map((field) => `"${field}"`).join(',')).join('\n');
-
-        // Create and download the file with .xls extension
-        const blob = new Blob([csvContent], { type: 'application/vnd.ms-excel;charset=utf-8;' });
-        const link = document.createElement('a');
-        const url = URL.createObjectURL(blob);
-
-        link.setAttribute('href', url);
-        link.setAttribute('download', `pattern_list_${new Date().toISOString().split('T')[0]}.xls`);
-        link.style.visibility = 'hidden';
-
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
-
-        URL.revokeObjectURL(url);
+            toast.add({
+                severity: 'success',
+                summary: 'Success',
+                detail: 'File imported successfully',
+                life: 3000
+            });
+            } else {
+            toast.add({
+                severity: 'error',
+                summary: 'Import Failed',
+                detail: response.data.error || 'Server did not confirm success',
+                life: 3000
+            });
+        }
     } catch (error) {
-        console.error('Error exporting to Excel:', error);
+        console.error('Error importing data:', error);
+        toast.add({ severity: 'error', summary: 'Error', detail: 'Failed to import data', life: 3000 });
+    } finally {
+        importLoading.value = false;
+                    if (importInput.value) {
+                importInput.value.value = '';
+            }
     }
 };
 
