@@ -14,7 +14,7 @@
             :loading="loading"
             :filters="filters"
             filterDisplay="menu"
-            :globalFilterFields="['pattern_code', 'pattern_name', 'image_url']"
+            :globalFilterFields="['pattern_code', 'pattern_name', 'mfg_code', 'image_url']"
             paginatorTemplate="CurrentPageReport FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink RowsPerPageDropdown"
             currentPageReportTemplate="Showing {first} to {last} of {totalRecords} entries"
             tableStyle="min-width: 60rem"
@@ -254,6 +254,7 @@ onMounted(async () => {
             const transformedItems = response.data.material_patterns.map((pattern) => ({
                 pattern_id: pattern.pattern_id,
                 pattern_code: pattern.pattern_code,
+                mfg_code: pattern.mfg_code,
                 pattern_name: pattern.pattern_name,
                 imageURL: pattern.image_url,
                 created: pattern.created,
