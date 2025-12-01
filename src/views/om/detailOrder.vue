@@ -133,14 +133,18 @@
                                 </tr>
                                 <tr class="border-b">
                                     <td class="px-4 py-2 font-medium">Storage Location</td>
-                                    <td class="px-4 py-2 text-right font-medium">{{ orderData.storagelocation || '-' }}</td>
+                                    <td class="px-4 py-2 text-right font-medium">{{ deliveryInfo.storagelocation || '-' }}</td>
                                 </tr>
                                 <tr class="border-b">
-                                    <td class="px-4 py-2 font-medium">Scheduled Delivery</td>
+                                    <td class="px-4 py-2 font-medium">Planned Date</td>
                                     <td class="px-4 py-2 text-right font-medium">{{ formatDateTime(deliveryInfo.scheduled_delivery_time) || '-' }}</td>
                                 </tr>
                                 <tr class="border-b">
                                     <td class="px-4 py-2 font-medium">Delivered Date</td>
+                                    <td class="px-4 py-2 text-right font-medium">{{ formatDateTime(orderData.deliveryDate) || '-' }}</td>
+                                </tr>
+                                <tr class="border-b">
+                                    <td class="px-4 py-2 font-medium">ETA Date</td>
                                     <td class="px-4 py-2 text-right font-medium">{{ formatDateTime(deliveryInfo.delivered_datetime) || '-' }}</td>
                                 </tr>
                                 <tr class="border-b">
