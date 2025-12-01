@@ -24,7 +24,7 @@ onBeforeMount(async () => {
     try {
         initFilters1();
         loading.value = true;
-        const response = await api.get('sales-program/list-sales-program');
+        const response = await api.post('sales-program/list-sales-program');
 
         console.log('API Response:', response.data);
 
@@ -87,7 +87,7 @@ onBeforeMount(async () => {
                             </InputIcon>
                             <InputText v-model="filters1['global'].value" placeholder="Quick Search" class="w-full" />
                         </IconField>
-                        <Button type="button" icon="pi pi-cog" class="p-button" />
+                        <!-- <Button type="button" icon="pi pi-cog" class="p-button" /> -->
                     </div>
 
                     <!-- Create Button -->
