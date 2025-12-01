@@ -41,7 +41,7 @@
                                     </InputIcon>
                                     <InputText v-model="filters['global'].value" placeholder="Quick Search (Month, Date, Status)" class="w-full" />
                                 </IconField>
-                                <Button type="button" icon="pi pi-cog" class="p-button" />
+                                <!-- <Button type="button" icon="pi pi-cog" class="p-button" /> -->
                             </div>
                         </div>
                     </template>

@@ -87,7 +87,7 @@ onBeforeMount(async () => {
                             </InputIcon>
                             <InputText v-model="filters1['global'].value" placeholder="Quick Search" class="w-full" />
                         </IconField>
-                        <Button type="button" icon="pi pi-cog" class="p-button" />
+                        <!-- <Button type="button" icon="pi pi-cog" class="p-button" /> -->
                     </div>
 
                     <!-- Create Button -->
