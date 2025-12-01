@@ -5,13 +5,12 @@
             <div class="md:w-2/3 flex flex-col">
                 <!-- Detail Event -->
                 <div class="card flex flex-col w-full">
-                    <div class="flex items-center justify-between border-b pb-2">
+                    <div class="flex items-center justify-between border-b pb-2 mb-4">
                         <div class="flex items-center gap-3">
                             <RouterLink to="/marketing/listOERegistration">
                                 <Button icon="pi pi-arrow-left" class="p-button-text p-button-secondary text-xl" size="big" v-tooltip="'Back'" />
                             </RouterLink>
                             <div class="text-2xl font-bold text-gray-800">OE Warranty Registration</div>
-                         <div class="text-2xl font-bold text-gray-800">Vehicle Details</div>
                         </div>
                         <div class="inline-flex items-center gap-2"></div>
                     </div>
@@ -28,7 +27,7 @@
                 </div>
 
                 <div class="card flex flex-col w-full">
-                    <div class="flex items-center justify-between border-b pb-2">
+                    <div class="flex items-center justify-between border-b pb-2 mb-4">
                         <div class="flex items-center gap-3">
                             <div class="text-2xl font-bold text-gray-800">Vehicle Details</div>
                         </div>
@@ -62,7 +61,7 @@
                     </div>
                 </div>
                 <div class="card flex flex-col w-full">
-                    <div class="flex items-center justify-between border-b pb-2">
+                    <div class="flex items-center justify-between border-b pb-2 mb-4">
                         <div class="flex items-center gap-3">
                             <div class="text-2xl font-bold text-gray-800">Tyre Details</div>
                         </div>
