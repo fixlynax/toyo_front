@@ -66,9 +66,9 @@ const handleSubmit = (event) => {
             <div class="text-center px-4 sm:px-8">
                 <img src="/demo/images/toyo_logo.png" alt="Logo" class="h-16 sm:h-20 mx-auto mb-4 object-contain" />
 
-                <div class="flex flex-col sm:flex-row items-center justify-center gap-10 sm:gap-20 lg:gap-40 mb-6">
-                    <img src="/demo/images/Toyo ETen App_colour_FINAL.png" alt="eTEN Logo" class="h-24 sm:h-32 lg:h-40 object-contain opacity-90" />
-                    <img src="/demo/images/Toyo TCare App_colour_FINAL.png" alt="Care Logo" class="h-24 sm:h-36 lg:h-40 object-contain opacity-90" />
+                <div class="flex flex-col sm:flex-row items-center justify-center gap-2 sm:gap-2 lg:gap-2 mb-6">
+                    <img src="/demo/images/Toyo ETen App_colour_FINAL.png" alt="eTEN Logo" class="h-32 sm:h-32 lg:h-32 object-contain opacity-90" />
+                    <img src="/demo/images/Toyo TCare App_colour_FINAL.png" alt="Care Logo" class="h-32 sm:h-32 lg:h-32 object-contain opacity-90" />
                 </div>
 
                 <h2 class="text-xl sm:text-2xl lg:text-3xl font-bold text-white mb-2">TOYO Admin</h2>
