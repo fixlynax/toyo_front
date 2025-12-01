@@ -252,6 +252,10 @@
                         <span class="font-bold">Inv No</span>
                         <p><span  class="text-blue-600 cursor-pointer" @click="viewInvoice(warantyDetail.warranty_info.invAttachURL)">{{ warantyDetail.warranty_info?.inv_no || '-' }}</span></p>
                     </div>
+                    <div v-if="warantyDetail.warranty_info.inv_amount">
+                        <span class="font-bold">Invoice Amount</span>
+                        <p class="text-lg font-medium">RM {{ warantyDetail.warranty_info?.inv_amount || '-' }}</p>
+                    </div>
                 </div>
             </div>
 
@@ -484,6 +488,27 @@
                 <div class="flex items-center justify-between border-b pb-2 mb-2">
                     <div class="text-2xl font-bold text-gray-800">Reimbursement Detail</div>
                 </div>
+                <div v-if="warantyDetail.reject_invoice_remarks?.length > 0"
+                    class="bg-red-50 border border-red-300 rounded-lg p-4 mb-4">
+
+                    <div class="flex items-start gap-3">
+                        <i class="pi pi-times-circle text-red-600 mt-1"></i>
+
+                        <div>
+                            <p class="font-semibold text-red-800">Reject Invoice Remarks</p>
+
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm text-gray-800">
+                                <div v-for="(item, index) in warantyDetail.reject_invoice_remarks" :key="item.id"
+                                    class="text-red-700 text-sm">
+                                    <span class="font-semibold">
+                                        {{ index + 1 }}<sup>{{ getOrdinal(index + 1) }}</sup> Rejection:
+                                    </span>
+                                    {{ item.rejectClaimInvoiceRemarks }}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
                 <div v-if="warantyDetail.status_string  == 'Pending Customer Invoice'" class="bg-yellow-50 border border-yellow-200 rounded-lg p-4" >
                     <div class="flex items-start gap-3">
                         <i class="pi pi-exclamation-circle text-yellow-600 mt-1"></i>
@@ -563,17 +588,17 @@
                      <InputText v-model="editTireData.weekcode" class="w-full" maxlength="5"/>
                     <small v-if="(!editTireData.weekcode) && editValidationTire" class="text-red-600">Week Code is required.</small>
                 </div>
+                <div class="field">
+                    <label class="block font-bold text-gray-700 mb-2">Pattern Details *</label>
+                     <InputText v-model="editTireData.pattern" class="w-full" maxlength="3" />
+                    <small v-if="(!editTireData.pattern) && editValidationTire" class="text-red-600">Pattern Detail is required.</small>
+                </div>
+                <div class="field">
+                    <label class="block font-bold text-gray-700 mb-2">Pattern Description *</label>
+                     <InputText v-model="editTireData.desc" class="w-full"/>
+                    <small v-if="(!editTireData.desc) && editValidationTire" class="text-red-600">Pattern Description is required.</small>
+                </div>
             </div>
-            <label class="block font-bold text-gray-700 mb-1">Select Material ID</label>
-            <Dropdown v-model="selectedMaterial" :options="listMaterial" optionLabel="material" placeholder="Select material" class="w-full mb-4">
-                <template #option="slotProps">
-                    <div class="flex flex-col gap-1 py-2">
-                        <div class="font-semibold text-gray-800">{{ slotProps.option.material }}</div>
-                        <div class="text-xs text-gray-700">ID : {{ slotProps.option.materialid }}</div>
-                        <div class="text-sm text-gray-600"><span class="font-medium">Pattern : </span> {{ slotProps.option.pattern }} </div>
-                    </div>
-                </template>
-            </Dropdown>
         </div>
 
         <template #footer>
@@ -867,11 +892,18 @@ const editTireData = reactive({
     mfgcode: '',
     sizecode: '',
     tyrespec: '',
-    weekcode: ''
+    weekcode: '',
+    desc:     '',
+    pattern:   ''
 });
 const rejectInvoiceRemarks = reactive({
     remarks: '',
 });
+const getOrdinal = (n) => {
+    const s = ["th", "st", "nd", "rd"];
+    const v = n % 100;
+    return s[(v - 20) % 10] || s[v] || s[0];
+};
 const newClaimData = reactive({
     damageCode: '',
     problem: '',
@@ -1018,6 +1050,8 @@ const openEditTier = () => {
     editTireData.sizecode = '';
     editTireData.tyrespec = '';
     editTireData.weekcode = '';
+    editTireData.pattern = '';
+    editTireData.desc = '';
     editTire.value = false;
     editValidationTire.value = false;
 };
@@ -1037,7 +1071,7 @@ const hasSubmittedPhotos = computed(() => {
 const submitEditTire = async () => {
     editValidationTire.value = true;
     // Validate required fields
-    if (!editTireData.mfgcode || !editTireData.mfgcode || editTireData.tyrespec === null || editTireData.weekcode === null) {
+    if (!editTireData.mfgcode || !editTireData.mfgcode || editTireData.tyrespec === null || editTireData.weekcode === null  ||  editTireData.pattern === null || editTireData.desc === null) {
         toast.add({
             severity: 'error',
             summary: 'Error',
@@ -1046,22 +1080,18 @@ const submitEditTire = async () => {
         });
         return;
     }
-    if (!selectedMaterial.value) {
-        toast.add({
-            severity: 'error',
-            summary: 'Error',
-            detail: 'Please select Material ID',
-            life: 3000
-        });
-        return;
-    }
+
     try {
         editTire.value = true;
         const plateSerialValue = `${editTireData.mfgcode}-${editTireData.sizecode}-${editTireData.tyrespec}-${editTireData.weekcode}`;
         const formData = new FormData();
         formData.append('plateSerial', plateSerialValue);
-        formData.append('materialid', selectedMaterial.value.materialid);
-        
+        formData.append('description', editTireData.desc);
+        formData.append('pattern', editTireData.pattern);
+
+        for (let [key, value] of formData.entries()) {
+            console.log(key, value);
+        }
         const id = route.params.id;
         const response = await api.post(`warranty_claim/updatePlateSerial/${id}`,formData);
 
@@ -1498,6 +1528,8 @@ const fetchWarrantyClaim = async () => {
                 threadDepthPhotos: apiData.threadDepthPhotos || null,
                 //waranty_info
                 warranty_info: apiData.warranty_info || null,
+                reject_invoice_remarks: apiData.reject_invoice_remarks || [],
+
             };
             await loadScrapImages();
             await loadTireDeptImages();
@@ -1713,6 +1745,7 @@ const rejectInvoice = async () => {
         });
     } finally {
         rejectingInvoice.value = false;
+        closerejectInvoiceDialog();
     }
 };
 
