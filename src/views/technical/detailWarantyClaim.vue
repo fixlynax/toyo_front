@@ -248,6 +248,10 @@
                         <span class="font-bold">Mobile Number</span>
                         <p class="text-lg font-medium">{{ warantyDetail.customer_info?.mobileNo || '-' }}</p>
                     </div>
+                    <div v-if="warantyDetail.warranty_info.invAttachURL">
+                        <span class="font-bold">Inv No</span>
+                        <p><span  class="text-blue-600 cursor-pointer" @click="viewInvoice(warantyDetail.warranty_info.invAttachURL)">{{ warantyDetail.warranty_info?.inv_no || '-' }}</span></p>
+                    </div>
                 </div>
             </div>
 
@@ -528,7 +532,7 @@
                 </div>
                 <div v-if="(warantyDetail.status_string  !== 'Pending Customer Invoice') && warantyDetail.reimbursement && warantyDetail.status !=5 && canUpdate" class="flex justify-end gap-2 mt-4">
                     <Button label="Approve Invoice" class="p-button-success" size="small" @click="approveInvoice" :loading="approvingInvoice" icon="pi pi-check" />
-                    <Button label="Reject Invoice" class="p-button-warn" size="small" @click="rejectInvoice" :loading="rejectingInvoice" icon="pi pi-times" />
+                    <Button label="Reject Invoice" class="p-button-warn" size="small" @click="rejectInvoiceDialog" icon="pi pi-times" />
                     <!-- <Button label="Reject Claim" class="p-button-danger" size="small" @click="showRejectDialog = true" icon="pi pi-times" /> -->
                 </div>
             </div>
@@ -772,6 +776,17 @@
         </template>
     </Dialog>
 
+    <Dialog v-model:visible="showRejectDialogInv" header="Reject Invoice Claim" :modal="true" class="p-fluid" :style="{ width: '40rem' }">
+        <div class="field">
+            <label class="block font-bold text-gray-700 mb-2">Rejection Remarks *</label>
+            <InputText v-model="rejectInvoiceRemarks.remarks" class="w-full"/>
+        </div>
+        <template #footer>
+            <Button label="Cancel" icon="pi pi-times" class="p-button-text" @click="closerejectInvoiceDialog" :disabled="rejectingInvoice" />
+            <Button label="Reject Invoice" icon="pi pi-times-circle" class="p-button-danger" @click="rejectInvoice" :loading="rejectingInvoice" :disabled="rejectingInvoice" />
+        </template>
+    </Dialog>
+
     <Dialog v-model:visible="showRejectDialog" header="Reject Warranty Claim" :modal="true" class="p-fluid" :style="{ width: '40rem' }">
         <div class="field">
             <label class="block font-bold text-gray-700 mb-1">Select Rejection Reason *</label>
@@ -846,12 +861,16 @@ const creatingClaim = ref(false);
 const showEditTireDialog = ref(false);
 const editTire = ref(false);
 const editValidationTire = ref(false);
+const showRejectDialogInv = ref(false);
 
 const editTireData = reactive({
     mfgcode: '',
     sizecode: '',
     tyrespec: '',
     weekcode: ''
+});
+const rejectInvoiceRemarks = reactive({
+    remarks: '',
 });
 const newClaimData = reactive({
     damageCode: '',
@@ -1647,19 +1666,32 @@ const approveInvoice = async () => {
   });
 
 };
-
+const rejectInvoiceDialog = () => {
+    showRejectDialogInv.value = true;
+    rejectInvoiceRemarks.remarks = '';
+};
+const closerejectInvoiceDialog = () => {
+    showRejectDialogInv.value = false;
+    rejectInvoiceRemarks.remarks = '';
+};
 // Reject Invoice
 const rejectInvoice = async () => {
-    confirmation.require({
-    message: 'Are you sure you want to reject this invoice request?',
-    header: 'Reject Invoice',
-    icon: 'pi pi-exclamation-triangle',
-    acceptLabel: 'Yes',
-    rejectLabel: 'No',
-    accept: async () => {
+        if (!rejectInvoiceRemarks.remarks) {
+        toast.add({
+            severity: 'error',
+            summary: 'Error',
+            detail: 'Rejection Remarks missing',
+            life: 4000
+        });
+        return;
+    }
+    // console.log(rejectInvoiceRemarks.remarks)
+    // return;
     try {
         rejectingInvoice.value = true;
-        const response = await api.put(`warranty_claim/rejectReimbursement/${warantyDetail.value.id}`);
+        const response = await api.post(`warranty_claim/rejectReimbursement/${warantyDetail.value.id}`, {
+            remarks: rejectInvoiceRemarks.remarks,
+        });
         if (response.data.status === 1) {
             toast.add({
                 severity: 'success',
@@ -1682,8 +1714,6 @@ const rejectInvoice = async () => {
     } finally {
         rejectingInvoice.value = false;
     }
-    }
-  });
 };
 
 const openRejectDialog = () => {
