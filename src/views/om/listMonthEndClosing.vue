@@ -136,11 +136,11 @@
                     <div class="flex gap-4">
                         <div class="flex items-center">
                             <RadioButton v-model="newDate.status" inputId="create_status_active" name="create_status" :value="1" />
-                            <label for="create_status_active" class="ml-2">Active (Closing)</label>
+                            <label for="create_status_active" class="ml-2">Active</label>
                         </div>
                         <div class="flex items-center">
                             <RadioButton v-model="newDate.status" inputId="create_status_inactive" name="create_status" :value="0" />
-                            <label for="create_status_inactive" class="ml-2">Inactive (Not Closing)</label>
+                            <label for="create_status_inactive" class="ml-2">Inactive</label>
                         </div>
                     </div>
                 </div>
@@ -204,11 +204,11 @@
                     <div class="flex gap-4">
                         <div class="flex items-center">
                             <RadioButton v-model="currentDate.status" inputId="status_active" name="status" :value="1" />
-                            <label for="status_active" class="ml-2">Active (Closing)</label>
+                            <label for="status_active" class="ml-2">Active</label>
                         </div>
                         <div class="flex items-center">
                             <RadioButton v-model="currentDate.status" inputId="status_inactive" name="status" :value="0" />
-                            <label for="status_inactive" class="ml-2">Inactive (Not Closing)</label>
+                            <label for="status_inactive" class="ml-2">Inactive</label>
                         </div>
                     </div>
                 </div>
@@ -417,7 +417,7 @@ const getNewDate = () => {
 
 // API Status handling
 const getApiStatus = (status) => {
-    return status === 1 ? 'Close' : 'Incoming';
+    return status === 1 ? 'Active' : 'Inactive';
 };
 
 const getApiStatusSeverity = (status) => {
