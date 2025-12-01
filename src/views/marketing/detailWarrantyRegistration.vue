@@ -117,7 +117,6 @@
                 <div class="card flex flex-col w-full">
                     <div class="flex items-center justify-between border-b pb-2 mb-2">
                         <div class="text-2xl font-bold text-gray-800">ℹ️ User Details</div>
-                        <Tag :value="Warranty.status === 1 ? 'Active' : 'Inactive'" :severity="Warranty.status === 1 ? 'success' : 'danger'" />
                     </div>
 
                     <div class="overflow-x-auto">
@@ -150,7 +149,6 @@
                 <div class="card flex flex-col w-full">
                     <div class="flex items-center justify-between border-b pb-2 mb-4">
                         <div class="text-2xl font-bold text-gray-800">ℹ️ Invoice Details</div>
-                        <Tag :value="Warranty.status === 1 ? 'Active' : 'Inactive'" :severity="Warranty.status === 1 ? 'success' : 'danger'" />
                     </div>
 
                     <div class="flex-1">

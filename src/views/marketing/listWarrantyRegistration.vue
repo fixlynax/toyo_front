@@ -35,9 +35,9 @@
                         </div>
 
                         <!-- Right: Create Warranty Button -->
-                        <RouterLink to="/marketing/createWarranty">
+                        <!-- <RouterLink to="/marketing/createWarranty">
                             <Button type="button" label="Create" />
-                        </RouterLink>
+                        </RouterLink> -->
                     </div>
                 </template>
 
@@ -96,7 +96,7 @@
 
                 <Column field="status" header="Status" style="min-width: 6rem">
                     <template #body="{ data }">
-                        <Tag :value="data.status === 1 ? 'Active' : 'Inactive'" :severity="getOverallStatusSeverity(data.status)" />
+                        <Tag :value="data.status === 0 ? 'Active' : 'Inactive'" :severity="getOverallStatusSeverity(data.status)" />
                     </template>
                 </Column>
             </DataTable>
@@ -189,7 +189,7 @@ function formatDate(dateString) {
 }
 
 const getOverallStatusSeverity = (status) => {
-    return status === 1 ? 'success' : 'danger';
+    return status === 0 ? 'success' : 'danger';
 };
 </script>
 
