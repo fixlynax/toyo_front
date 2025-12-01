@@ -650,7 +650,7 @@
                     <div v-if="orderDetails" class="text-sm text-gray-600 mt-2">
                         <div v-if="orderDetails.orderRefNo">Order Number: {{ orderDetails.orderRefNo }}</div>
                         <div v-if="orderDetails.backOrderRefNo">Back Order Number: {{ orderDetails.backOrderRefNo }}</div>
-                        <div v-if="orderDetails.cartRefNo">Cart Reference: {{ orderDetails.cartRefNo }}</div>
+                        <!-- <div v-if="orderDetails.cartRefNo">Cart Reference: {{ orderDetails.cartRefNo }}</div> -->
                     </div>
                     <div v-if="orderError" class="text-sm text-red-600 mt-2">
                         {{ orderError }}
@@ -665,6 +665,7 @@
             </div>
             <template #footer>
                 <Button v-if="orderStatus === 'success' && !showDriverForm" label="View Order" icon="pi pi-eye" @click="viewOrderDetails" class="p-button-primary mr-2" />
+                <Button v-if="orderStatus === 'success' && !showDriverForm" label="View Back Order" icon="pi pi-eye" @click="viewBackOrderDetails" class="p-button-primary mr-2" />
                 <Button v-if="orderStatus === 'success' && !showDriverForm" label="Close" icon="pi pi-check" @click="closeOrderDialog" class="p-button-primary" />
                 <Button v-if="orderStatus === 'success' && showDriverForm" label="Submit Driver Info" icon="pi pi-check" @click="submitDriverInfoAfterOrder" class="p-button-primary" :loading="submittingDriverInfo" />
                 <Button v-if="orderStatus === 'error' && !orderError.includes('not fulfilled') && !orderError.includes('back order')" label="Close" icon="pi pi-times" @click="closeOrderDialog" class="p-button-secondary" />
@@ -2436,6 +2437,13 @@ const proceedWithoutBackOrder = async () => {
 const viewOrderDetails = () => {
     if (orderDetails.value?.orderRefNo) {
         router.push(`/om/detailOrder/${orderDetails.value.orderRefNo}`);
+    }
+    closeOrderDialog();
+};
+
+const viewBackOrderDetails = () => {
+    if (orderDetails.value?.orderRefNo) {
+        router.push(`/om/detailBackOrder/${orderDetails.value.backOrderRefNo}`);
     }
     closeOrderDialog();
 };
