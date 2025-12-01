@@ -200,11 +200,22 @@ watch(activeTabIndex, () => {
         lastWeek.setDate(today.getDate() - 7);
 
         dateRange.value = [lastWeek, today];
+        const dateRangeStr =
+            dateRange.value?.[0] && dateRange.value?.[1]
+                ? `${formatDateDMY(dateRange.value[0])} - ${formatDateDMY(dateRange.value[1])}`
+                : null;
+
+        // Prepare request body
+        const body = {
+            tab: tab.submitLabel,
+            date_range: dateRangeStr
+        };
+        fetchData(body);
     }else{
         dateRange.value = null;   
+        fetchData();
     }
     selectedExportIds.value.clear();
-    fetchData();
 });
 
 // Computed boolean: are all rows selected?
