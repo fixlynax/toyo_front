@@ -142,22 +142,22 @@
                         <table class="w-full text-sm text-left text-gray-700">
                             <tbody>
                                 <!-- Platform -->
-                                <tr class="border-b">
+                                <!-- <tr class="border-b">
                                     <td class="px-4 py-2 font-medium">Platform</td>
                                     <td class="px-4 py-2 text-right">{{ memberDetail.platform || 'Web' }}</td>
-                                </tr>
+                                </tr> -->
 
                                 <!-- FCM Token -->
-                                <tr class="border-b">
+                                <!-- <tr class="border-b">
                                     <td class="px-4 py-2 font-medium">FCM Token</td>
                                     <td class="px-4 py-2 text-right">{{ memberDetail.fcmToken ? 'Yes' : 'No' }}</td>
-                                </tr>
+                                </tr> -->
 
                                 <!-- Referrer Type -->
-                                <tr class="border-b">
+                                <!-- <tr class="border-b">
                                     <td class="px-4 py-2 font-medium">Referrer Type</td>
                                     <td class="px-4 py-2 text-right">{{ memberDetail.referrerType || '-' }}</td>
-                                </tr>
+                                </tr> -->
 
                                 <!-- Delete Status -->
                                 <tr class="border-b">
