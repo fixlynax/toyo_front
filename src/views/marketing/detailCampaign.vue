@@ -103,7 +103,7 @@
                         <!-- Win / Qty Column -->
                         <Column header="Win / Qty" style="min-width: 8rem">
                             <template #body="{ data }">
-                                <div>{{ data.prizeRemain }} / {{ data.prizeQuota }}</div>
+                                <div>{{ data.prizeWon }} / {{ data.prizeQuota }}</div>
                             </template>
                         </Column>
 
@@ -223,9 +223,9 @@
                 <div class="card flex flex-col w-full">
                     <!-- Header with Invite Button -->
                     <div class="flex items-center justify-between border-b pb-2 mb-2">
-                        <div class="text-2xl font-bold text-gray-800">🚩 Dealer list</div>
+                        <div class="text-2xl font-bold text-gray-800">🚩 Participating Dealer</div>
                         <Button 
-                            label="Invite Dealer" 
+                            label="Assign Dealer" 
                             icon="pi pi-user-plus" 
                             style="width: fit-content" 
                             class="p-button-sm p-button-success" 
@@ -259,11 +259,11 @@
                         <Column field="signboardType" header="Signboard Type" style="min-width: 6rem"></Column>
 
                         <!-- Actions -->
-                        <!-- <Column header="Actions" style="min-width: 4rem; text-align: center">
+                        <Column header="Actions" style="min-width: 4rem; text-align: center">
                             <template #body="{ data }">
                                 <Button icon="pi pi-trash" class="p-button-text p-button-danger" @click="removeDealer(data)" />
                             </template>
-                        </Column> -->
+                        </Column>
                     </DataTable>
                 </div>
 
@@ -637,6 +637,7 @@ const fetchCampaignDetails = async () => {
                         imageURL: catalog.imageURL,
                         prizeName: catalog.title,
                         prizeQuota: reward.total_qty,
+                        prizeWon: reward.won_qty,
                         prizeRemain: reward.total_qty - reward.won_qty,
                         catalogData: catalog
                     };

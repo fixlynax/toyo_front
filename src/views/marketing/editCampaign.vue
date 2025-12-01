@@ -305,6 +305,7 @@ const listPrize = ref([]);
 const listCriteria = ref([]);
 const originalRewards = ref([]);
 const originalCriteria = ref([]);
+const removedImages = ref([]);
 
 // 🎯 Reward State
 const rewards = ref([]);
@@ -329,12 +330,19 @@ const onImageSelect = (event, field) => {
             campaign.value[field] = e.target.result;
         };
         reader.readAsDataURL(file);
+
+                // Remove from removed images if it was previously marked for removal
+        const index = removedImages.value.indexOf(field);
+        if (index > -1) {
+            removedImages.value.splice(index, 1);
+        }
     }
 };
 
 const removeImage = (field) => {
+    removedImages.value.push(field);
     campaign.value[field] = '';
-    imageFiles.value[field] = null;
+    delete imageFiles.value[field];
 };
 
 // Format date to dd-mm-yyyy
@@ -696,6 +704,9 @@ const submitForm = async () => {
             const fieldName = `image${i}Path`;
             if (imageFiles.value[fieldName]) {
                 formData.append(`image${i}`, imageFiles.value[fieldName]);
+            } else if (removedImages.value.includes(fieldName)) {
+                // Send empty string to indicate image removal
+                formData.append(`image${i}`, '');
             }
         }
 
