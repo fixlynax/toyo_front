@@ -230,6 +230,7 @@ const clearDateRange = () => {
                 filterDisplay="menu"
                 :globalFilterFields="['orderNo', 'custAccountNo', 'companyName', 'shipToAccountNo', 'created', 'orderType', 'deliveryType', 'invoiceNo', 'doNo', 'soNo']"
                 class="rounded-table"
+                removableSort
                 sortField="created"
                 :sortOrder="-1"
                 currentPageReportTemplate="Showing {first} to {last} of {totalRecords} entries"
@@ -290,11 +291,11 @@ const clearDateRange = () => {
                 </template>
 
                 <!-- ... Rest of the columns remain the same ... -->
-                <Column field="created" header="Created Date" style="min-width: 8rem">
+                <Column field="created" header="Created Date" style="min-width: 8rem" sortable>
                     <template #body="{ data }">{{ formatDate(data.created) }}</template>
                 </Column>
 
-                <Column header="Order No" style="min-width: 10rem">
+                <Column header="Order No" style="min-width: 10rem" sortable>
                     <template #body="{ data }">
                         <RouterLink :to="`/om/detailOrder/${data.orderNo}`" class="hover:underline font-bold text-primary-400">
                             {{ data.orderNo || '-' }}
@@ -302,11 +303,11 @@ const clearDateRange = () => {
                     </template>
                 </Column>
 
-                <Column field="companyName" header="Customer Name" style="min-width: 10rem">
+                <Column field="companyName" header="Customer Name" style="min-width: 10rem" sortable>
                     <template #body="{ data }">{{ data.companyName || '-' }}<br />{{ data.custAccountNo || '-' }}</template>
                 </Column>
 
-                <Column field="orderType" header="Order Type" style="min-width: 7rem">
+                <Column field="orderType" header="Order Type" style="min-width: 7rem" sortable>
                     <template #body="{ data }">
                         <span v-if="data.orderType === 'NORMAL'">Normal</span>
                         <span v-else-if="data.orderType === 'DS'">DS</span>
@@ -315,7 +316,7 @@ const clearDateRange = () => {
                     </template>
                 </Column>
 
-                <Column field="deliveryType" header="Delivery" style="min-width: 6rem">
+                <Column field="deliveryType" header="Delivery" style="min-width: 6rem" sortable>
                     <template #body="{ data }">
                         <span v-if="data.deliveryType === 'DELIVER'">Deliver</span>
                         <span v-else-if="data.deliveryType === 'PICKUP'">Pickup</span>
@@ -325,7 +326,7 @@ const clearDateRange = () => {
                     </template>
                 </Column>
 
-                <Column field="shipToAccountNo" header="Ship To Acc No" style="min-width: 7rem">
+                <Column field="shipToAccountNo" header="Ship To Acc No" style="min-width: 7rem" sortable>
                     <template #body="{ data }">{{ data.shipToAccountNo || data.custAccountNo || '-' }}</template>
                 </Column>
 
