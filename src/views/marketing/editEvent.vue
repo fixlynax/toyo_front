@@ -255,11 +255,17 @@ const fetchEventDetails = async () => {
             };
 
             // Handle survey questions
-            if (eventData.survey_questions && eventData.survey_questions.length > 0) {
-                questions.value = eventData.survey_questions.map(q => ({
-                    question: q.question,
-                    answers: [q.answer1, q.answer2, q.answer3],
-                    correctAnswer: q.correctAnswer
+            if (eventData.survey_questions && eventData.survey_questions.length) {
+                const rawQuestions = eventData.survey_questions[0]; // <-- FIX
+
+                questions.value = rawQuestions.map(q => ({
+                    question: q.question || '',
+                    answers: [
+                        q.answer1 || '',
+                        q.answer2 || '',
+                        q.answer3 || ''
+                    ],
+                    // correctAnswer: q.correctAnswer || ''
                 }));
             }
 
@@ -311,7 +317,7 @@ const addQuestion = () => {
         questions.value.push({
             question: '',
             answers: ['', '', ''],
-            correctAnswer: ''
+            // correctAnswer: ''
         });
     }
 };
@@ -421,7 +427,7 @@ const submitEvent = async () => {
                 answer1: q.answers[0],
                 answer2: q.answers[1],
                 answer3: q.answers[2],
-                correctAnswer: q.correctAnswer
+                // correctAnswer: q.correctAnswer
             }));
             formData.append('survey_questions', JSON.stringify(surveyQuestions));
         } else {
