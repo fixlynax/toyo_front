@@ -83,12 +83,16 @@
                         </div>
                     </div>
 
-                    <!-- Main Branch as InputText -->
+                    <!-- Main Branch display showing Account No - Branch Name -->
                     <div class="flex flex-col md:flex-row gap-4">
                         <div class="w-full">
                             <label for="mainBranch">Main Branch Account</label>
-                            <InputText id="mainBranch" v-model="currentException.dealers" disabled placeholder="Main branch account" class="w-full" />
-                            <small v-if="isMainBranch" class="text-gray-500">This field is disabled for main branch accounts (ending with 00)</small>
+                            <div class="p-inputgroup">
+                                <InputText :value="mainBranchDisplay" disabled class="w-full font-medium" />
+                            </div>
+                            <small class="text-gray-500 mt-1 block">
+                                {{ isMainBranch ? 'This is a main branch account (ends with 00)' : currentException.dealers ? 'Linked to main branch' : 'No main branch linked' }}
+                            </small>
                         </div>
                     </div>
                 </div>
@@ -624,6 +628,27 @@ const isMainBranch = computed(() => {
     return form.value.custAccountNo?.endsWith('00');
 });
 
+// Computed property for main branch display text
+const mainBranchDisplay = computed(() => {
+    if (!currentException.value.dealers) {
+        return 'Not linked to any main branch';
+    }
+
+    const dealer = allDealers.value.find((d) => d.value === currentException.value.dealers);
+    if (dealer) {
+        // Extract account number (last digits in the label)
+        const accountMatch = dealer.label.match(/.*?(\d+)$/);
+        const accountNo = accountMatch ? accountMatch[1] : 'N/A';
+
+        // Remove account number from the end for the name
+        const name = dealer.label.replace(/\s*-\s*\d+$/, '').trim();
+
+        return `${accountNo} - ${name}`;
+    }
+
+    return currentException.value.dealers;
+});
+
 // Fetch dealer profile data
 const fetchDealerProfile = async () => {
     isLoading.value = true;
@@ -860,7 +885,14 @@ const handleUpdate = async () => {
                 detail: 'Dealer updated successfully',
                 life: 4000
             });
-            router.push('/om/listEten');
+
+            const custAccNo = form.value.custAccountNo || route.params.custAccNo;
+
+            if (custAccNo) {
+                router.push(`/om/detailEten/${custAccNo}`);
+            } else {
+                router.push('/om/listEten');
+            }
         } else {
             let errorMsg = 'Failed to update dealer';
             if (response.data.error?.message) {
@@ -887,7 +919,13 @@ const handleUpdate = async () => {
 };
 
 const handleCancel = () => {
-    router.push('/om/listEten');
+    const custAccNo = form.value.custAccountNo || route.params.custAccNo;
+
+    if (custAccNo) {
+        router.push(`/om/detailEten/${custAccNo}`);
+    } else {
+        router.push('/om/listEten');
+    }
 };
 
 // Lifecycle
