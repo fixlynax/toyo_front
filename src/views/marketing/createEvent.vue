@@ -197,7 +197,7 @@ const addQuestion = () => {
         questions.value.push({
             question: '',
             answers: ['', '', ''],
-            correctAnswer: ''
+            // correctAnswer: ''
         });
     }
 };
@@ -288,7 +288,7 @@ const submitEvent = async () => {
                 answer1: q.answers[0],
                 answer2: q.answers[1],
                 answer3: q.answers[2],
-                correctAnswer: q.correctAnswer
+                // correctAnswer: q.correctAnswer
             }));
             formData.append('survey_questions', JSON.stringify(surveyQuestions));
         } else {
