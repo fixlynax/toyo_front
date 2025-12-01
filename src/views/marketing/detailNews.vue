@@ -73,10 +73,10 @@
                                     <td class="px-4 py-2 font-medium">Published</td>
                                     <td class="px-4 py-2 text-right">{{ news.publishDate }}</td>
                                 </tr>
-                                <tr class="border-b">
+                                <!-- <tr class="border-b">
                                     <td class="px-4 py-2 font-medium">Audience</td>
                                     <td class="px-4 py-2 text-right">{{ news.audience }}</td>
-                                </tr>
+                                </tr> -->
                                 <tr class="border-b">
                                     <td class="px-4 py-2 font-medium">Total View</td>
                                     <td class="px-4 py-2 text-right">{{ news.view }}</td>

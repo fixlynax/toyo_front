@@ -300,58 +300,30 @@ const fetchClaimDetails = async (claimId) => {
 const fetchClaims = async () => {
     loading.value = true;
     try {
+        console.log('Starting API call...');
         const response = await api.get('warranty_claim');
+        console.log('Full API response:', response);
+        console.log('Response data:', response.data);
+        
         if (response.data.status === 1) {
-            const claims = response.data.admin_data.map((item) => ({
-                id: item.claim_id,
-                refNo: item.claimRefNo,
-                dealerName: item.dealer,
-                claimType: item.warrantyType || '-',
-                claimDate: item.claim_date || '-',
-                submissionDate: item.submit_date || '-',
-                warrantyRegCertNo: item.warrantyRegCertNo || '-',
-                status: item.status,
-                pendingCTC: false, // Will be updated after fetching details
-                pendingScrap: false, // Will be updated after fetching details
-                pendingInvoice: false // Will be updated after fetching details
-            }));
-
-            listData.value = claims;
-
-            // Fetch detailed information for each claim
-            const detailPromises = claims.map(claim => fetchClaimDetails(claim.id));
-            const detailedResults = await Promise.all(detailPromises);
-            
-            detailedClaims.value = detailedResults.filter(result => result !== null);
-            
-            // Update pending flags in listData
-            listData.value = listData.value.map(claim => {
-                const detail = detailedResults.find(d => d && d.id === claim.id);
-                if (detail) {
-                    return {
-                        ...claim,
-                        pendingCTC: detail.isCTC === 0 && pendingStatuses.includes(claim.status),
-                        pendingScrap: detail.isScrap === 0 && pendingStatuses.includes(claim.status),
-                        pendingInvoice: detail.isReimbursement === 0 && pendingStatuses.includes(claim.status)
-                    };
-                }
-                return claim;
-            });
-
-        } else {
-            listData.value = [];
+            console.log('API data structure:', response.data.admin_data);
+            // ... rest of your code
         }
     } catch (error) {
-        console.error('Error fetching claims:', error);
-        listData.value = [];
+        console.error('API Error details:', error);
     } finally {
         loading.value = false;
     }
 };
 
-onMounted(
-    // fetchClaims
-    );
+onMounted(() => {
+    try {
+        fetchClaims();
+    } catch (error) {
+        console.error('Component mount error:', error);
+        loading.value = false;
+    }
+});
 </script>
 
 <style scoped>

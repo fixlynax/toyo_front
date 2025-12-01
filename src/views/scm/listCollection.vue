@@ -54,11 +54,22 @@ watch(activeTabIndex, () => {
         const lastWeek = new Date();
         lastWeek.setDate(today.getDate() - 7);
         dateRange.value = [lastWeek, today];
+        const dateRangeStr =
+            dateRange.value?.[0] && dateRange.value?.[1]
+                ? `${formatDateDMY(dateRange.value[0])} - ${formatDateDMY(dateRange.value[1])}`
+                : null;
+
+        // Prepare request body
+        const body = {
+            tab: tab.submitLabel,
+            date_range: dateRangeStr
+        };
+        fetchData(body); 
     }else{
         dateRange.value = null;
+        fetchData();
     }
     selectedExportIds.value.clear();
-    fetchData();
 });
 
 const allSelected = computed(() => {
@@ -602,6 +613,50 @@ const generateReport = (report) => {
         printWindow.close();
     };
 };
+const exportToExcel = () => {
+    if (listData.value.length === 0) {
+        console.warn('No data to export');
+        return;
+    }
+
+    try {
+        // Create worksheet data
+        const headers = ['Date', 'Ref No', 'Collect Date', 'Receive Date', 'Status'];
+        
+        // Prepare data rows
+        const csvData = listData.value.map(data => [
+            `"${formatDate(data.created)}"`,
+            `"${data.claimRefno || '-'}"`,
+            `"${data.collectDate ? formatDate(data.collectDate) : 'Not Assigned'}"`,
+            `"${data.reachWH ? formatDate(data.reachWH) : 'Not Assigned'}"`,
+            `"${getStatusText(data.status) || '-'}"`,
+        ]);
+
+        // Combine headers and data
+        const csvContent = [
+            headers.join(','),
+            ...csvData.map(row => row.join(','))
+        ].join('\n');
+
+        // Create and download the file
+        const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+        const link = document.createElement('a');
+        const url = URL.createObjectURL(blob);
+        
+        link.setAttribute('href', url);
+        link.setAttribute('download', `ctc_collection_list_${new Date().toISOString().split('T')[0]}.csv`);
+        link.style.visibility = 'hidden';
+        
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        
+        URL.revokeObjectURL(url);
+        
+    } catch (error) {
+        console.error('Error exporting to Excel:', error);
+    }
+};
 onMounted(async () => {
     fetchData();
 });
@@ -675,6 +730,9 @@ onMounted(async () => {
                             style="display: none" 
                             @change="handleImport2"
                             />
+                        </div>
+                        <div class="flex justify-end gap-2"  v-if="statusTabs[activeTabIndex]?.label === 'Completed'">
+                            <Button type="button" label="Export" icon="pi pi-file-export" class="p-button-success" @click="exportToExcel"/>
                         </div>
                     </div>
                 </template>

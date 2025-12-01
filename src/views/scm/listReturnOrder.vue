@@ -28,7 +28,7 @@
                 :loading="loading"
                 :filters="filters"
                 filterDisplay="menu"
-                :globalFilterFields="['return_orderNo_ref', 'custAccountNo' , 'storageLocation' , 'city', 'dealerName' , 'delivery_status' , 'created']"
+                :globalFilterFields="['return_orderNo_ref', 'custaccountno' , 'storageLocation' , 'city', 'dealerName' , 'delivery_status' , 'created']"
                 paginatorTemplate="CurrentPageReport FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink RowsPerPageDropdown"
                 currentPageReportTemplate="Showing {first} to {last} of {totalRecords} entries"
                 >
@@ -67,6 +67,9 @@
                                 style="display: none" 
                                 @change="handleImport2"
                                 />
+                            </div>
+                            <div class="flex justify-end gap-2"  v-if="statusTabs[activeTabIndex]?.label === 'Completed'">
+                                <Button type="button" label="Export" icon="pi pi-file-export" class="p-button-success" @click="exportToExcel"/>
                             </div>
                         </div>
                     </div>
@@ -108,7 +111,7 @@
                     <template #body="{ data }">
                         <span class="font-bold">{{ data?.dealerName || '-' }}</span>
                         <br>
-                        {{ data?.custAccountNo ?? '-' }}
+                        {{ data?.custaccountno ?? '-' }}
                     </template>
                 </Column>
                 <Column field="storageLocation" header="Storage Location" style="max-width: 8rem" sortable>
@@ -118,7 +121,7 @@
                 </Column>
                 <Column field="city" header="City" style="max-width: 8rem"sortable>
                     <template #body="{ data }">
-                        {{ data?.city ?? '-' }}
+                        {{ data?.city.replace(/,$/, '') ?? '-' }}
                     </template>
                 </Column>
                 <Column field="state" header="State" style="max-width: 8rem"sortable>
@@ -203,11 +206,22 @@ watch(activeTabIndex, () => {
         lastWeek.setDate(today.getDate() - 7);
 
         dateRange.value = [lastWeek, today];
+        const dateRangeStr =
+            dateRange.value?.[0] && dateRange.value?.[1]
+                ? `${formatDateDMY(dateRange.value[0])} - ${formatDateDMY(dateRange.value[1])}`
+                : null;
+
+        // Prepare request body
+        const body = {
+            tab: tab.submitLabel,
+            date_range: dateRangeStr
+        };
+        fetchData(body);
     }else{
         dateRange.value = null;
-
+        fetchData();
     }
-    fetchData();
+    selectedExportIds.value.clear();
 });
 
 
@@ -474,6 +488,55 @@ const fetchData = async (body = null) => {
         loading.value = false;
     }
 };
+const exportToExcel = () => {
+    if (returnList.value.length === 0) {
+        toast.add({ severity: 'warn', summary: 'Warning', detail: 'No data to export', life: 3000 });
+        return;
+    }
+
+    try {
+        // Create worksheet data
+        const headers = ['Ref No', 'Ship-To', 'Ship-To Acc No', 'Storage Location', 'City', 'State', 'Pickup Date', 'Receive Date', 'Return Items', 'Status'];
+        
+        // Prepare data rows
+        const csvData = returnList.value.map(data => [
+            `"${data.return_orderNo_ref || '-'}"`,
+            `"${data.dealerName || '-'}"`,
+            `"${data.custaccountno || '-'}"`,
+            `"${data.storageLocation || '-'}"`,
+            `"${data.city || '-'}"`,
+            `"${data.state || '-'}"`,
+            `"${data.delivery_information?.pickup_datetime ? formatDate(data.delivery_information.pickup_datetime) : 'No date assigned'}"`,
+            `"${data.delivery_information?.receive_datetime ? formatDate(data.delivery_information.receive_datetime) : 'No date assigned'}"`,
+            `"${data.return_order_array?.length || 0}"`,
+            `"${data.delivery_status || '-'}"`,
+        ]);
+
+        // Combine headers and data
+        const csvContent = [
+            headers.join(','),
+            ...csvData.map(row => row.join(','))
+        ].join('\n');
+
+        // Create and download the file
+        const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+        const link = document.createElement('a');
+        const url = URL.createObjectURL(blob);
+        
+        link.setAttribute('href', url);
+        link.setAttribute('download', `return_order_list_${new Date().toISOString().split('T')[0]}.csv`);
+        link.style.visibility = 'hidden';
+        
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        
+        URL.revokeObjectURL(url);
+        
+    } catch (error) {
+        console.error('Error exporting to Excel:', error);
+    }
+};
 onMounted(() => {
     fetchData();
 });
@@ -487,24 +550,6 @@ function formatDate(dateString) {
   });
 }
 
-// function getStatusLabel(status) {
-//     switch (status) {
-//         case 0:
-//             return 'Pending';
-//         case 1:
-//             return 'Approve';
-//         case 2:
-//             return 'Rejected';
-//         case 66:
-//             return 'Processing';
-//         case 77:
-//             return 'Pending Collection';
-//         case 9:
-//             return 'Completed';
-//         default:
-//             return 'Unknown';
-//     }
-// }
 
 function getStatusSeverity(status) {
     switch (status) {

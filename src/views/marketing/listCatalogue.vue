@@ -13,7 +13,7 @@
                         </InputIcon>
                         <InputText v-model="searchQuery" placeholder="Quick Search" class="w-full" />
                     </IconField>
-                    <Button type="button" icon="pi pi-cog" class="p-button" />
+                    <!-- <Button type="button" icon="pi pi-cog" class="p-button" /> -->
                 </div>
 
                 <!-- Right: Create Button -->

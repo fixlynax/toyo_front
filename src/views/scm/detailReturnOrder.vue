@@ -69,10 +69,14 @@
                             <div class="text-2xl font-bold text-gray-800">Customer Details</div>
                         </div>
                     </div>
-                    <div class="mt-6 mb-4">
+                    <div class="grid grid-cols-1 md:grid-cols-2 mt-6 mb-4">
                         <div>
                             <span class="block text-sm font-bold text-black-700">Company Name</span>
                             <p class="font-medium text-lg">{{ `${returnList.dealer.dealer_shop.companyName1} ${returnList.dealer.dealer_shop.companyName2} ${returnList.dealer.dealer_shop.companyName3} ${returnList.dealer.dealer_shop?.companyName4}` }}</p>
+                        </div>
+                        <div>
+                            <span class="block text-sm font-bold text-black-700">Account Number</span>
+                            <span class="text-lg font-medium">{{ returnList.dealer.dealer_shop.custAccountNo }}</span>
                         </div>
                     </div>
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm text-gray-700">

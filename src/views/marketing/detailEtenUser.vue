@@ -6,7 +6,13 @@
                 <!-- Header -->
                 <div class="flex flex-col md:flex-row gap-8">
                     <div class="card flex flex-col gap-6 w-full">
-                        <div class="text-2xl font-bold text-gray-800 border-b pb-2">Member Information</div>
+                        <div class="flex items-center gap-4 border-b pb-2">
+                            <RouterLink to="/marketing/listEtenUser">
+                                <Button icon="pi pi-arrow-left font-bold" class="p-button-text p-button-secondary text-xl" size="big" v-tooltip="'Back'" />
+                            </RouterLink>
+
+                            <span class="text-2xl font-bold text-gray-800">Member Information</span>
+                        </div>
 
                         <!-- Loading State -->
                         <LoadingPage v-if="loading" :message="'Loading User Details...'" :sub-message="'Fetching member data'" />
@@ -136,22 +142,22 @@
                         <table class="w-full text-sm text-left text-gray-700">
                             <tbody>
                                 <!-- Platform -->
-                                <tr class="border-b">
+                                <!-- <tr class="border-b">
                                     <td class="px-4 py-2 font-medium">Platform</td>
                                     <td class="px-4 py-2 text-right">{{ memberDetail.platform || 'Web' }}</td>
-                                </tr>
+                                </tr> -->
 
                                 <!-- FCM Token -->
-                                <tr class="border-b">
+                                <!-- <tr class="border-b">
                                     <td class="px-4 py-2 font-medium">FCM Token</td>
                                     <td class="px-4 py-2 text-right">{{ memberDetail.fcmToken ? 'Yes' : 'No' }}</td>
-                                </tr>
+                                </tr> -->
 
                                 <!-- Referrer Type -->
-                                <tr class="border-b">
+                                <!-- <tr class="border-b">
                                     <td class="px-4 py-2 font-medium">Referrer Type</td>
                                     <td class="px-4 py-2 text-right">{{ memberDetail.referrerType || '-' }}</td>
-                                </tr>
+                                </tr> -->
 
                                 <!-- Delete Status -->
                                 <tr class="border-b">
@@ -306,7 +312,6 @@ const fetchMemberDetail = async () => {
                 deleted: userData.deleted,
                 mobile_number: userData.mobile_number || '-'
             };
-
         } else {
             console.error('API returned error or invalid data:', response.data);
             showToast('error', 'Error', 'Failed to load user details');
@@ -371,10 +376,8 @@ const toggleStatus = async () => {
     try {
         loadingAction.value = true;
 
-
         // Call the API to toggle status
         const response = await api.put(`cares/toggleInactive/${memberId.value}`);
-
 
         if (response.data.status === 1) {
             // Toggle the local status (1 = active, 0 = inactive)
@@ -384,7 +387,6 @@ const toggleStatus = async () => {
             // Show success message
             const action = newStatus === 1 ? 'activated' : 'deactivated';
             showToast('success', 'Success', `User ${action} successfully`);
-
         } else {
             console.warn('Status toggle failed:', response.data);
             showToast('error', 'Error', 'Failed to update user status');

@@ -38,10 +38,10 @@
                         <Calendar v-model="news.publishDate" dateFormat="yy-mm-dd" class="w-full" :minDate="news.startDate"  :maxDate="news.endDate"  :disabled="!news.startDate || !news.endDate"/>
                     </div>
 
-                    <div>
+                    <!-- <div>
                         <label class="block font-bold text-gray-700">Audience</label>
                         <Dropdown v-model="news.audience" :options="audienceOptions" optionLabel="label" optionValue="value" class="w-full" />
-                    </div>
+                    </div> -->
                 </div>
 
                 <!-- Upload Images -->
