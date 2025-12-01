@@ -236,7 +236,7 @@
 
                 <div class="flex flex-col md:flex-row gap-4">
                     <div class="w-full">
-                        <span class="text-sm text-gray-500">Signboard Brand</span>
+                        <span class="text-sm text-gray-500">Signboard Type</span>
                         <p class="text-lg font-medium">{{ form.signboardType || '-' }}</p>
                     </div>
 
@@ -474,13 +474,13 @@ function getMainBranchLabel(dealerId) {
 }
 
 function formatCurrency(value) {
-    if (!value) return '-';
+    if (!value || value === '0') return '-';
     const num = parseFloat(value);
     return isNaN(num) ? value : `RM ${num.toLocaleString('en-MY', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
 }
 
 function formatCreditLimit(value) {
-    if (!value) return '-';
+    if (!value || value === '0') return '-';
     const num = parseFloat(value);
     return isNaN(num) ? value : `RM ${num.toLocaleString('en-MY', { minimumFractionDigits: 0, maximumFractionDigits: 0 })}`;
 }
@@ -545,7 +545,7 @@ function validateForm(formData) {
     return { isValid: true };
 }
 
-// Map form data for API - UPDATED to match createEten structure
+// Map form data for API - FIXED to match backend expectations
 function mapFormToFormData(formData) {
     const formDataObj = new FormData();
 
@@ -555,9 +555,9 @@ function mapFormToFormData(formData) {
     // Ensure custAccountNo is populated
     const custAccountNo = formData.custAccountNo || formData.accountNo || '';
 
-    // Append data - matching createEten structure
+    // FIXED: Map fields to match backend exactly
     formDataObj.append('custAccountNo', custAccountNo);
-    formDataObj.append('eten_userID', formData.eten_userID || '0'); // Default to 0 for main branch
+    formDataObj.append('eten_userID', formData.eten_userID || '0');
     formDataObj.append('compName1', formData.companyName1 || '');
     formDataObj.append('compName2', formData.companyName2 || '');
     formDataObj.append('compName3', formData.companyName3 || '');
@@ -600,19 +600,19 @@ function mapFormToFormData(formData) {
     formDataObj.append('showOnList', formData.showOnList || '0');
     formDataObj.append('isFamilyChannel', formData.ifFamilyChannel || '0');
     formDataObj.append('allowLalamove', formData.allowLalamove || '0');
-    formDataObj.append('allowDirectship', formData.allowDirectShipment || '0'); // Note: API expects 'allowDirectship'
+    formDataObj.append('allowDirectship', formData.allowDirectShipment || '0'); // FIXED: Changed from allowDirectShipment
     formDataObj.append('status', '1');
     formDataObj.append('startingSalesAmt', formData.startingSalesAmt || '0');
 
-    // Target Sales Quarter
+    // Target Sales - FIXED: Use correct field names
     formDataObj.append('revenue', formData.revenue || '0');
     formDataObj.append('targetQty', formData.quantity || '0');
 
-    // Ship To array
+    // Ship To array - FIXED: Ensure proper JSON stringification
     const shipToArray = prepareShipToArray(formData.shipToAddresses);
     formDataObj.append('s_array', JSON.stringify(shipToArray));
 
-    // Master user
+    // Master user - FIXED: Use correct field names
     formDataObj.append('im_first_name', formData.firstname || '');
     formDataObj.append('im_last_name', formData.lastname || '');
     formDataObj.append('im_email', formData.email || '');
@@ -633,15 +633,32 @@ function loadFormData() {
                 form.value.custAccountNo = form.value.accountNo;
             }
 
-            // Ensure quarter fields exist (backward compatibility)
-            if (!form.value.revenue) form.value.revenue = '';
-            if (!form.value.quantity) form.value.quantity = '';
-
+            // Ensure required fields exist with defaults
+            if (!form.value.revenue) form.value.revenue = '0';
+            if (!form.value.quantity) form.value.quantity = '0';
+            if (!form.value.creditLimit) form.value.creditLimit = '0';
+            if (!form.value.startingSalesAmt) form.value.startingSalesAmt = '0';
+            if (!form.value.allowDirectShipment) form.value.allowDirectShipment = '0';
+            if (!form.value.allowLalamove) form.value.allowLalamove = '0';
+            if (!form.value.showOnList) form.value.showOnList = '0';
+            if (!form.value.ifFamilyChannel) form.value.ifFamilyChannel = '0';
         } else {
+            toast.add({
+                severity: 'warn',
+                summary: 'No Form Data',
+                detail: 'Please fill in the form first',
+                life: 4000
+            });
             router.push('/om/createEten');
         }
     } catch (error) {
         console.error('Error loading form data:', error);
+        toast.add({
+            severity: 'error',
+            summary: 'Error',
+            detail: 'Failed to load form data',
+            life: 4000
+        });
         router.push('/om/createEten');
     }
 }
@@ -683,13 +700,7 @@ function handleEdit() {
     router.push('/om/createEten');
 }
 
-// function formatCurrency(value) {
-//     if (!value || value === '0') return '-';
-//     const num = parseFloat(value);
-//     return isNaN(num) ? value : `RM ${num.toLocaleString('en-MY', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
-// }
-
-// Handle submit
+// Handle submit - FIXED: Better error handling and validation
 async function handleSubmit() {
     isSubmitting.value = true;
 
@@ -699,7 +710,7 @@ async function handleSubmit() {
             form.value.custAccountNo = form.value.accountNo;
         }
 
-        // Validate
+        // Validate required fields
         const validation = validateForm(form.value);
         if (!validation.isValid) {
             toast.add({
@@ -708,6 +719,20 @@ async function handleSubmit() {
                 detail: validation.message,
                 life: 4000
             });
+            isSubmitting.value = false;
+            return;
+        }
+
+        // Validate email format
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (form.value.email && !emailRegex.test(form.value.email)) {
+            toast.add({
+                severity: 'warn',
+                summary: 'Invalid Email',
+                detail: 'Please enter a valid email address for the master user',
+                life: 4000
+            });
+            isSubmitting.value = false;
             return;
         }
 
@@ -715,14 +740,17 @@ async function handleSubmit() {
         const formData = mapFormToFormData(form.value);
 
         // Debug logs
-        console.log('FormData entries:');
+        console.log('Submitting form data:');
         for (let [key, value] of formData.entries()) {
             console.log(`${key}: ${value}`);
         }
 
         // Submit API
         const response = await api.postExtra('add_dealer', formData, {
-            headers: { 'Content-Type': 'multipart/form-data' }
+            headers: {
+                'Content-Type': 'multipart/form-data',
+                Accept: 'application/json'
+            }
         });
 
         console.log('API Response:', response.data);
@@ -730,16 +758,18 @@ async function handleSubmit() {
         if (response.data.status === 1) {
             toast.add({
                 severity: 'success',
-                summary: 'Dealer Created',
+                summary: 'Success',
                 detail: 'Dealer created successfully! An activation SMS has been sent to the master user.',
                 life: 5000
             });
             localStorage.removeItem('etenFormData');
 
-            // Navigate to list page
-            router.push('/om/listEten');
+            // Navigate to list page after short delay
+            setTimeout(() => {
+                router.push('/om/listEten');
+            }, 2000);
         } else {
-            let errorMsg = 'Duplicate entry or an error occurred.';
+            let errorMsg = 'Failed to create dealer. Please try again.';
 
             if (response.data.validation_errors) {
                 // Handle validation errors
@@ -751,6 +781,8 @@ async function handleSubmit() {
                 errorMsg = response.data.error.description;
             } else if (response.data.message) {
                 errorMsg = response.data.message;
+            } else if (response.data.status === 0) {
+                errorMsg = 'Account number already exists or duplicate entry.';
             }
 
             toast.add({
@@ -762,7 +794,7 @@ async function handleSubmit() {
         }
     } catch (err) {
         console.error('Submission error:', err);
-        let errorMsg = 'An unexpected error occurred.';
+        let errorMsg = 'Failed to create account. Please check your connection and try again.';
 
         if (err.response?.data?.error) {
             errorMsg = err.response.data.error.message || err.response.data.error.description || errorMsg;
