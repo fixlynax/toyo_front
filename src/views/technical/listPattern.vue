@@ -1,6 +1,6 @@
 <template>
     <div class="card">
-        <div class="text-2xl font-bold text-gray-800 border-b pb-2">List Pattern</div>
+        <div class="text-2xl font-bold text-gray-800 border-b pb-2 mb-4">List Pattern</div>
 
         <DataTable
             v-model:expandedRows="expandedRows"
@@ -8,6 +8,8 @@
             :paginator="true"
             :rows="10"
             dataKey="pattern_id"
+            removableSort
+            class="rounded-table"
             :rowHover="true"
             :loading="loading"
             :filters="filters"
@@ -30,14 +32,7 @@
 
                     <!-- Right: Export & Create Buttons -->
                     <div class="flex items-center gap-2 ml-auto">
-                        <Button 
-                            type="button" 
-                            label="Export" 
-                            icon="pi pi-file-export" 
-                            class="p-button-success" 
-                            @click="exportToCSV"
-                            :disabled="patterns.length === 0"
-                        />
+                        <Button type="button" label="Export" icon="pi pi-file-export" class="p-button-success" @click="exportToCSV" :disabled="patterns.length === 0" />
                         <!-- <RouterLink to="/technical/createPattern" v-if="canUpdate">
                         <Button type="button" label="Create" icon="pi pi-plus" class="p-button" />
                         </RouterLink> -->
@@ -50,23 +45,21 @@
 
             <Column field="processedImageURL" header="Image" style="min-width: 8rem; text-align: center">
                 <template #body="{ data }">
-                    <img 
-                        v-if="data.processedImageURL" 
-                        :src="getImagePath(data.processedImageURL)" 
-                        alt="Pattern Image" 
-                        class="w-16 h-16 object-contain rounded-md shadow-sm border border-gray-200 cursor-pointer hover:scale-105 transition-transform" 
-                        @click="openImage(data.processedImageURL)" 
+                    <img
+                        v-if="data.processedImageURL"
+                        :src="getImagePath(data.processedImageURL)"
+                        alt="Pattern Image"
+                        class="w-16 h-16 object-contain rounded-md shadow-sm border border-gray-200 cursor-pointer hover:scale-105 transition-transform"
+                        @click="openImage(data.processedImageURL)"
                     />
-                    <div v-else class="w-16 h-16 flex items-center justify-center bg-gray-100 rounded-md border border-gray-200 text-gray-400 text-xs">
-                        No Image
-                    </div>
+                    <div v-else class="w-16 h-16 flex items-center justify-center bg-gray-100 rounded-md border border-gray-200 text-gray-400 text-xs">No Image</div>
                 </template>
             </Column>
 
             <Column field="pattern_code" header="Pattern Code" style="min-width: 8rem" sortable>
                 <template #body="{ data }">
-                     <RouterLink :to="`/technical/detailPattern/${data.pattern_id}`" class="hover:underline font-bold text-primary-400">
-                    <span class="font-semibold ml-1">{{ data.pattern_code }}</span>
+                    <RouterLink :to="`/technical/detailPattern/${data.pattern_id}`" class="hover:underline font-bold text-primary-400">
+                        <span class="font-semibold ml-1">{{ data.pattern_code }}</span>
                     </RouterLink>
                 </template>
             </Column>
@@ -101,7 +94,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted , computed } from 'vue';
+import { ref, onMounted, computed } from 'vue';
 import { FilterMatchMode } from '@primevue/core/api';
 import api from '@/service/api';
 import { useMenuStore } from '@/store/menu';
@@ -138,9 +131,9 @@ function formatDate(dateString) {
     return date.toLocaleString('en-MY', {
         year: 'numeric',
         month: '2-digit',
-        day: '2-digit',
+        day: '2-digit'
     });
-    }
+}
 
 // Export function to CSV
 const exportToCSV = () => {
@@ -152,35 +145,27 @@ const exportToCSV = () => {
     try {
         // Define CSV headers
         const headers = ['Pattern Code', 'Pattern Name', 'Created Date'];
-        
+
         // Prepare data rows
-        const csvData = patterns.value.map(pattern => [
-            `"${pattern.pattern_code || ''}"`,
-            `"${pattern.pattern_name || '-'}"`,
-            `"${formatDate(pattern.created)}"`
-        ]);
+        const csvData = patterns.value.map((pattern) => [`"${pattern.pattern_code || ''}"`, `"${pattern.pattern_name || '-'}"`, `"${formatDate(pattern.created)}"`]);
 
         // Combine headers and data
-        const csvContent = [
-            headers.join(','),
-            ...csvData.map(row => row.join(','))
-        ].join('\n');
+        const csvContent = [headers.join(','), ...csvData.map((row) => row.join(','))].join('\n');
 
         // Create and download the file
         const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
         const link = document.createElement('a');
         const url = URL.createObjectURL(blob);
-        
+
         link.setAttribute('href', url);
         link.setAttribute('download', `pattern_list_${new Date().toISOString().split('T')[0]}.csv`);
         link.style.visibility = 'hidden';
-        
+
         document.body.appendChild(link);
         link.click();
         document.body.removeChild(link);
-        
+
         URL.revokeObjectURL(url);
-        
     } catch (error) {
         console.error('Error exporting data:', error);
     }
@@ -195,36 +180,25 @@ const exportToExcel = () => {
 
     try {
         // Create worksheet data
-        const worksheetData = [
-            ['Pattern Code', 'Pattern Name', 'Created Date', 'Image URL'],
-            ...patterns.value.map(pattern => [
-                pattern.pattern_code || '',
-                pattern.pattern_name || '-',
-                formatDate(pattern.created),
-                pattern.imageURL || ''
-            ])
-        ];
+        const worksheetData = [['Pattern Code', 'Pattern Name', 'Created Date', 'Image URL'], ...patterns.value.map((pattern) => [pattern.pattern_code || '', pattern.pattern_name || '-', formatDate(pattern.created), pattern.imageURL || ''])];
 
         // Convert to CSV format
-        const csvContent = worksheetData.map(row => 
-            row.map(field => `"${field}"`).join(',')
-        ).join('\n');
+        const csvContent = worksheetData.map((row) => row.map((field) => `"${field}"`).join(',')).join('\n');
 
         // Create and download the file with .xls extension
         const blob = new Blob([csvContent], { type: 'application/vnd.ms-excel;charset=utf-8;' });
         const link = document.createElement('a');
         const url = URL.createObjectURL(blob);
-        
+
         link.setAttribute('href', url);
         link.setAttribute('download', `pattern_list_${new Date().toISOString().split('T')[0]}.xls`);
         link.style.visibility = 'hidden';
-        
+
         document.body.appendChild(link);
         link.click();
         document.body.removeChild(link);
-        
+
         URL.revokeObjectURL(url);
-        
     } catch (error) {
         console.error('Error exporting to Excel:', error);
     }
@@ -289,7 +263,6 @@ onMounted(async () => {
             // Process private images
             const processedItems = await processCatalogueImages(transformedItems);
             patterns.value = processedItems;
-
         } else {
             console.error('API returned error or invalid data:', response.data);
             patterns.value = [];
@@ -302,3 +275,43 @@ onMounted(async () => {
     }
 });
 </script>
+<style scoped>
+:deep(.rounded-table) {
+    border-radius: 12px;
+    overflow: hidden;
+    border: 1px solid #e5e7eb;
+
+    .p-datatable-header {
+        border-top-left-radius: 12px;
+        border-top-right-radius: 12px;
+    }
+
+    .p-paginator-bottom {
+        border-bottom-left-radius: 12px;
+        border-bottom-right-radius: 12px;
+    }
+
+    .p-datatable-thead > tr > th {
+        &:first-child {
+            border-top-left-radius: 12px;
+        }
+        &:last-child {
+            border-top-right-radius: 12px;
+        }
+    }
+
+    .p-datatable-tbody > tr:last-child > td {
+        &:first-child {
+            border-bottom-left-radius: 0;
+        }
+        &:last-child {
+            border-bottom-right-radius: 0;
+        }
+    }
+
+    .p-datatable-tbody > tr.p-datatable-emptymessage > td {
+        border-bottom-left-radius: 12px;
+        border-bottom-right-radius: 12px;
+    }
+}
+</style>

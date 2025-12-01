@@ -1,19 +1,20 @@
 <template>
     <div class="card">
-        <div class="text-2xl font-bold text-gray-800 border-b pb-2">List of SCM ETA</div>
+        <div class="text-2xl font-bold text-gray-800 border-b pb-2 mb-4">List of SCM ETA</div>
         <LoadingPage v-if="loading" message="Loading Order Delivery Details..." />
         <div v-else>
             <DataTable
-            
                 :value="ETAList"
                 :paginator="true"
                 :rows="10"
                 :rowsPerPageOptions="[5, 10, 20, 50, 100]"
                 dataKey="id"
+                removableSort
                 :rowHover="true"
                 :loading="loading"
                 :filters="filters"
                 filterDisplay="menu"
+                class="rounded-table"
                 :globalFilterFields="['storageLocation', 'state', 'postcode', 'city', 'eta']"
                 paginatorTemplate="CurrentPageReport FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink RowsPerPageDropdown"
                 currentPageReportTemplate="Showing {first} to {last} of {totalRecords} entries"
@@ -27,11 +28,10 @@
                                 </InputIcon>
                                 <InputText v-model="filters['global'].value" placeholder="Quick Search" class="w-full" />
                             </IconField>
-
                         </div>
                         <!-- Right: Export & Batch Buttons -->
                         <div class="flex items-center gap-2 ml-auto" v-if="canUpdate">
-                            <Button type="button" label="Export" icon="pi pi-file-export" class="p-button" @click="fetchExportETA" :loading="exportLoading"/>
+                            <Button type="button" label="Export" icon="pi pi-file-export" class="p-button" @click="fetchExportETA" :loading="exportLoading" />
                             <Button type="button" label="Import" icon="pi pi-file-import" class="p-button" @click="importInput?.click()" :loading="importLoading" />
                             <input ref="importInput" type="file" accept=".xlsx,.xls" style="display: none" @change="handleImport" />
                         </div>
@@ -58,13 +58,13 @@
                         </div>
                     </template>
                 </Column> -->
-                <Column field="storageLocation" header="Storage Location" style="min-width: 10rem" sortable/>
-                <Column field="state" header="State" style="min-width: 8rem" sortable/>
-                <Column field="postcode" header="Postcode" style="min-width: 8rem" sortable/>
-                <Column field="city" header="City" style="min-width: 10rem" sortable/>
-                <Column field="dailyCutOffTime" header="Cut-off Time" style="min-width: 10rem" sortable/>
-                <Column field="deliveryLeadTime" header="Lead Time" style="min-width: 8rem" sortable/>
-                <Column field="eta" header="ETA" style="min-width: 8rem" sortable/>
+                <Column field="storageLocation" header="Storage Location" style="min-width: 10rem" sortable />
+                <Column field="state" header="State" style="min-width: 8rem" sortable />
+                <Column field="postcode" header="Postcode" style="min-width: 8rem" sortable />
+                <Column field="city" header="City" style="min-width: 10rem" sortable />
+                <Column field="dailyCutOffTime" header="Cut-off Time" style="min-width: 10rem" sortable />
+                <Column field="deliveryLeadTime" header="Lead Time" style="min-width: 8rem" sortable />
+                <Column field="eta" header="ETA" style="min-width: 8rem" sortable />
             </DataTable>
         </div>
     </div>
@@ -88,7 +88,7 @@ const importLoading = ref(false);
 const exportLoading = ref(false);
 const showFilterMenu = ref(false);
 const ETAList = ref([]);
-const filteredList  = ref([]);
+const filteredList = ref([]);
 const filters = ref({
     global: { value: null, matchMode: FilterMatchMode.CONTAINS }
 });
@@ -103,9 +103,9 @@ function formatDate(dateString) {
     return date.toLocaleString('en-MY', {
         year: 'numeric',
         month: '2-digit',
-        day: '2-digit',
+        day: '2-digit'
     });
-    }
+}
 function formatTime(timeString) {
     if (!timeString) return '';
     const [hours, minutes, seconds] = timeString.split(':');
@@ -115,9 +115,9 @@ function formatTime(timeString) {
         hour: '2-digit',
         minute: '2-digit',
         second: '2-digit',
-        hour12: true,
+        hour12: true
     });
-    }
+}
 function formatDateFull(dateString) {
     if (!dateString) return '';
     const date = new Date(dateString);
@@ -130,13 +130,13 @@ function formatDateFull(dateString) {
         second: '2-digit',
         hour12: true
     });
-    }
+}
 const fetchData = async () => {
     try {
         loading.value = true;
         const response = await api.get('scm-setting-scm-eta/list');
         if (response.data.status === 1 && Array.isArray(response.data.admin_data)) {
-                    ETAList.value = response.data.admin_data.sort((a, b) => {
+            ETAList.value = response.data.admin_data.sort((a, b) => {
                 return new Date(b.updated) - new Date(a.updated);
             });
         } else {
@@ -159,12 +159,16 @@ const fetchExportETA = async () => {
     try {
         loading.value = true;
         exportLoading.value = true;
-        const response = await api.postExtra('excel/export-ETA', {}, {
-        responseType: 'arraybuffer',   // crucial for binary
-        headers: {
-            'Content-Type': 'application/json' // still OK for POST body
-        }
-        });
+        const response = await api.postExtra(
+            'excel/export-ETA',
+            {},
+            {
+                responseType: 'arraybuffer', // crucial for binary
+                headers: {
+                    'Content-Type': 'application/json' // still OK for POST body
+                }
+            }
+        );
 
         const blob = new Blob([response.data], {
             type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
@@ -191,15 +195,15 @@ const handleImport = async (event) => {
 
     try {
         importLoading.value = true;
-        
+
         const formData = new FormData();
         formData.append('scmeta_excel', file);
         const response = await api.postExtra('excel/import-ETA', formData, {
             headers: {
                 'Content-Type': 'multipart/form-data'
             }
-            });
-        
+        });
+
         if (response.data.status === 1) {
             // Refresh data after import
             await fetchData();
@@ -210,7 +214,7 @@ const handleImport = async (event) => {
                 detail: 'File imported successfully',
                 life: 3000
             });
-            } else {
+        } else {
             toast.add({
                 severity: 'error',
                 summary: 'Import Failed',
@@ -223,12 +227,53 @@ const handleImport = async (event) => {
         toast.add({ severity: 'error', summary: 'Error', detail: 'Failed to import data', life: 3000 });
     } finally {
         importLoading.value = false;
-                    if (importInput.value) {
-                importInput.value.value = '';
-            }
+        if (importInput.value) {
+            importInput.value.value = '';
+        }
     }
 };
 function getStatusSeverity(status) {
     return status === 'Active' ? 'success' : 'danger';
 }
 </script>
+
+<style scoped>
+:deep(.rounded-table) {
+    border-radius: 12px;
+    overflow: hidden;
+    border: 1px solid #e5e7eb;
+
+    .p-datatable-header {
+        border-top-left-radius: 12px;
+        border-top-right-radius: 12px;
+    }
+
+    .p-paginator-bottom {
+        border-bottom-left-radius: 12px;
+        border-bottom-right-radius: 12px;
+    }
+
+    .p-datatable-thead > tr > th {
+        &:first-child {
+            border-top-left-radius: 12px;
+        }
+        &:last-child {
+            border-top-right-radius: 12px;
+        }
+    }
+
+    .p-datatable-tbody > tr:last-child > td {
+        &:first-child {
+            border-bottom-left-radius: 0;
+        }
+        &:last-child {
+            border-bottom-right-radius: 0;
+        }
+    }
+
+    .p-datatable-tbody > tr.p-datatable-emptymessage > td {
+        border-bottom-left-radius: 12px;
+        border-bottom-right-radius: 12px;
+    }
+}
+</style>

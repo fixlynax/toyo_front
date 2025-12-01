@@ -218,6 +218,7 @@ onBeforeMount(() => {
                 filterDisplay="menu"
                 sortField="createdDate"
                 :sortOrder="-1"
+                removableSort
                 :globalFilterFields="['returnRequestNo', 'custAccountNo', 'customerName', 'reasonCode', 'orderStatus']"
                 class="rounded-table"
                 currentPageReportTemplate="Showing {first} to {last} of {totalRecords} entries"
@@ -277,14 +278,14 @@ onBeforeMount(() => {
                 </template>
 
                 <!-- Created Date Column -->
-                <Column header="Created Date" style="min-width: 8rem">
+                <Column header="Created Date" style="min-width: 8rem" sortable>
                     <template #body="{ data }">
                         {{ formatDate(data.createdDate) }}
                     </template>
                 </Column>
 
                 <!-- Return Request No Column -->
-                <Column header="Return Req No." style="min-width: 8rem">
+                <Column header="Return Req No." style="min-width: 8rem" sortable>
                     <template #body="{ data }">
                         <RouterLink :to="`/om/detailReturnOrder/${data.returnRequestNo}`" class="hover:underline font-bold text-primary-400">
                             {{ data.returnRequestNo }}
@@ -293,12 +294,12 @@ onBeforeMount(() => {
                 </Column>
 
                 <!-- Account No Column -->
-                <Column header="Customer Name" style="min-width: 10rem">
+                <Column header="Customer Name" style="min-width: 10rem" sortable>
                     <template #body="{ data }">{{ data.customerName || '-' }}<br />{{ data.custAccountNo || '-' }}</template>
                 </Column>
 
                 <!-- Reason Code Column -->
-                <Column header="Reason Code" style="min-width: 8rem">
+                <Column header="Reason Code" style="min-width: 8rem" sortable>
                     <template #body="{ data }">
                         {{ data.reasonCode || '-' }}
                     </template>

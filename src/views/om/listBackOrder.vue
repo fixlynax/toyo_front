@@ -17,7 +17,7 @@
             filterDisplay="menu"
             :globalFilterFields="['custAccountNo', 'orderNo', 'customerName', 'deliveryDate', 'expiry', 'orderStatus']"
             responsiveLayout="scroll"
-            stripedRows
+            removableSort
             sortField="created"
             :sortOrder="-1"
             currentPageReportTemplate="Showing {first} to {last} of {totalRecords} entries"
@@ -76,13 +76,13 @@
                 </div>
             </template>
 
-            <Column field="createdDate" header="Created Date" style="min-width: 8rem">
+            <Column field="createdDate" header="Created Date" style="min-width: 8rem" sortable>
                 <template #body="{ data }">
                     {{ formatDate(data.created) }}
                 </template>
             </Column>
 
-            <Column field="orderNo" header="Order No." style="min-width: 15rem">
+            <Column field="orderNo" header="Order No." style="min-width: 15rem" sortable>
                 <template #body="{ data }">
                     <RouterLink :to="`/om/detailBackOrder/${data.orderNo}`" class="hover:underline font-bold text-primary-400">
                         {{ data.orderNo }}
@@ -90,20 +90,20 @@
                 </template>
             </Column>
 
-            <Column field="companyName" header="Customer Name" style="min-width: 10rem">
+            <Column field="companyName" header="Customer Name" style="min-width: 10rem" sortable>
                 <template #body="{ data }">{{ data.customerName || '-' }}<br />{{ data.custAccountNo || '-' }}</template>
             </Column>
-            <Column field="deliveryType" header="Delivery" style="min-width: 8rem" />
+            <Column field="deliveryType" header="Delivery" style="min-width: 8rem" sortable/>
 
-            <Column field="orderDate" header="Order Date" style="min-width: 10rem">
+            <Column field="orderDate" header="Order Date" style="min-width: 10rem" sortable>
                 <template #body="{ data }">
                     {{ formatDate(data.orderDate) }}
                 </template>
             </Column>
 
-            <Column field="shipTo" header="Ship To Acc No." style="min-width: 8rem" />
+            <Column field="shipTo" header="Ship To Acc No." style="min-width: 8rem" sortable/>
 
-            <Column field="expiry" header="Back Order Expiry" style="min-width: 10rem">
+            <Column field="expiry" header="Back Order Expiry" style="min-width: 10rem" sortable>
                 <template #body="{ data }">
                     {{ formatDate(data.expiry) }}
                 </template>
