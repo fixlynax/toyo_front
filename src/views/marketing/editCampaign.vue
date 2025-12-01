@@ -116,7 +116,7 @@
         </div>
 
         <!-- 🏆 Reward Section -->
-        <div v-if="campaign.isGamification == 1 && !loading" class="card flex flex-col w-full mt-8">
+        <div class="card flex flex-col w-full mt-8">
             <div class="flex items-center justify-between border-b pb-2 mb-4">
                 <div class="text-xl font-bold text-gray-800">🏆 Reward Section</div>
             </div>
@@ -178,7 +178,7 @@
         </div>
 
         <!-- 📋 Criteria Section -->
-        <div v-if="campaign.isGamification == 1 && !loading" class="card flex flex-col w-full mt-8">
+        <div class="card flex flex-col w-full mt-8">
             <div class="flex items-center justify-between border-b pb-2 mb-4">
                 <div class="text-xl font-bold text-gray-800">📋 Criteria</div>
             </div>
@@ -362,11 +362,11 @@ const fetchCampaignDetails = async () => {
 
         if (response.data.status === 1 && response.data.admin_data) {
             const data = response.data.admin_data;
-            
+
             // Set campaign details
             if (data.campaign_details) {
                 const details = data.campaign_details;
-                
+
                 // Process dates from dd-mm-yyyy to Date objects
                 campaign.value = {
                     ...details,
@@ -382,13 +382,13 @@ const fetchCampaignDetails = async () => {
 
             // Set criteria
             if (Array.isArray(data.criteria)) {
-                criterias.value = data.criteria.map(item => ({
+                criterias.value = data.criteria.map((item) => ({
                     selected: {
                         material: item.title,
                         materialtype: item.type,
                         pattern_name: item.pattern,
                         sectionwidth: item.size ? item.size.split('/')[0] : '',
-                        tireseries: item.size ? item.size.split('/')[1] : '',
+                        tireseries: item.size ? item.size.split('/')[1] : ''
                         // rimdiameter: item.size ? item.size.split('R')[1] : ''
                     },
                     minQty: parseInt(item.minQty)
@@ -398,7 +398,7 @@ const fetchCampaignDetails = async () => {
 
             // Set rewards from reward_option
             if (Array.isArray(data.reward_option)) {
-                rewards.value = data.reward_option.map(reward => ({
+                rewards.value = data.reward_option.map((reward) => ({
                     selected: {
                         id: reward.catalogID,
                         title: reward.catalog?.title || 'Unknown Prize',
@@ -417,7 +417,6 @@ const fetchCampaignDetails = async () => {
             // Load additional data
             await fetchMaterials();
             await fetchCatalog();
-
         } else {
             console.error('API returned error or invalid data:', response.data);
             toast.add({
@@ -460,7 +459,7 @@ const fetchMaterials = async () => {
 const fetchCatalog = async () => {
     try {
         const response = await api.get('campaign/catalogs');
-        
+
         if (response.data.status === 1) {
             const transformedItems = (response.data.admin_data || []).map((item) => ({
                 id: item.id,
@@ -562,7 +561,7 @@ const validateFields = () => {
     // Basic field validation
     if (!campaign.value.title.trim()) errors.value.title = 'Title is required';
     if (!campaign.value.description.trim()) errors.value.description = 'Description is required';
-    if (!campaign.value.termCondition.trim()) errors.value.termCondition = 'Terms & Conditions are required';
+    if (!(campaign.value.termCondition || '').trim()) { errors.value.termCondition = 'Terms & Conditions are required'; }
     if (!campaign.value.publishDate) errors.value.publishDate = 'Publish date is required';
     if (!campaign.value.startDate) errors.value.startDate = 'Start date is required';
     if (!campaign.value.endDate) errors.value.endDate = 'End date is required';
@@ -575,29 +574,29 @@ const validateFields = () => {
     if (campaign.value.point3 === null || campaign.value.point3 < 0) errors.value.point3 = 'Valid platinum points are required';
 
     // Gamification specific validations
-    if (campaign.value.isGamification === 1) {
-        // Criteria validation
-        criterias.value.forEach((criteria, index) => {
-            if (!criteria.selected) {
-                errors.value[`criteria_${index}`] = 'Criteria selection is required';
-            }
-            if (!criteria.minQty || criteria.minQty <= 0) {
-                errors.value[`minQty_${index}`] = 'Valid minimum quantity is required';
-            }
-        });
+    // if (campaign.value.isGamification === 1) {
+    // Criteria validation
+    // criterias.value.forEach((criteria, index) => {
+    //     if (!criteria.selected) {
+    //         errors.value[`criteria_${index}`] = 'Criteria selection is required';
+    //     }
+    //     if (!criteria.minQty || criteria.minQty <= 0) {
+    //         errors.value[`minQty_${index}`] = 'Valid minimum quantity is required';
+    //     }
+    // });
 
-        // Reward validation
-        rewards.value.forEach((reward, index) => {
-            if (!reward.selected) {
-                errors.value[`reward_${index}`] = 'Reward selection is required';
-            }
-            if (!reward.qty || reward.qty <= 0) {
-                errors.value[`qty_${index}`] = 'Valid quantity is required';
-            } else if (reward.selected && reward.qty > reward.selected.availableqty) {
-                errors.value[`qty_${index}`] = `Quantity exceeds available stock (${reward.selected.availableqty} available)`;
-            }
-        });
-    }
+    // Reward validation
+    // rewards.value.forEach((reward, index) => {
+    //     if (!reward.selected) {
+    //         errors.value[`reward_${index}`] = 'Reward selection is required';
+    //     }
+    //     if (!reward.qty || reward.qty <= 0) {
+    //         errors.value[`qty_${index}`] = 'Valid quantity is required';
+    //     } else if (reward.selected && reward.qty > reward.selected.availableqty) {
+    //         errors.value[`qty_${index}`] = `Quantity exceeds available stock (${reward.selected.availableqty} available)`;
+    //     }
+    // });
+    // }
 
     // Date validation
     if (campaign.value.startDate && campaign.value.endDate) {
@@ -622,29 +621,25 @@ const validateFields = () => {
 // Calculate reward quantity changes
 const calculateRewardChanges = () => {
     const rewardOptions = [];
-    
+
     // Find removed rewards (in original but not in current)
-    originalRewards.value.forEach(original => {
-        const exists = rewards.value.find(reward => 
-            reward.selected && reward.selected.id === original.selected.id
-        );
-        
+    originalRewards.value.forEach((original) => {
+        const exists = rewards.value.find((reward) => reward.selected && reward.selected.id === original.selected.id);
+
         if (!exists) {
             // Reward was removed - set quantity to 0
             rewardOptions.push({
                 catalogID: original.selected.id.toString(),
-                quantity: "0"
+                quantity: '0'
             });
         }
     });
 
     // Process current rewards
-    rewards.value.forEach(reward => {
+    rewards.value.forEach((reward) => {
         if (reward.selected) {
-            const original = originalRewards.value.find(orig => 
-                orig.selected.id === reward.selected.id
-            );
-            
+            const original = originalRewards.value.find((orig) => orig.selected.id === reward.selected.id);
+
             if (original) {
                 // Existing reward - calculate difference
                 const difference = reward.qty - original.qty;
