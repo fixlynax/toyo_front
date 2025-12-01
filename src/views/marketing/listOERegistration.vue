@@ -17,7 +17,7 @@
                 :loading="tableLoading"
                 :filters="filters"
                 filterDisplay="menu"
-                :globalFilterFields="['title', 'location', 'publishDate', 'period', 'isSurvey', 'status']"
+                :globalFilterFields="['oe_cert_no', 'member_code', 'full_name', 'weekcode', 'mfgcode', 'tyresize', 'tyrespec', 'registered_on', 'vehicle_no']"
                 class="rounded-table"
             >
             
@@ -133,7 +133,6 @@ onMounted(async () => {
             listData.value = response.data.admin_data.map((oe) => ({
                 id: oe.id,
                 oe_cert_no: oe.warranty_cert_no || 'N/A',
-                invoice_no: oe.invoice_no || 'N/A',
                 member_code: oe.member_code || null,
                 full_name: oe.full_name || null,
                 mfgcode: oe.mfgcode || 'N/A',

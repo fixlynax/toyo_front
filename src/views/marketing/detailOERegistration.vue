@@ -3,26 +3,35 @@
         <div class="flex flex-col md:flex-row gap-8">
             <!-- LEFT SIDE (2/3) -->
             <div class="md:w-2/3 flex flex-col">
-                <!-- Detail Event -->
+                <!-- Detail Warranty -->
                 <div class="card flex flex-col w-full">
-                    <div class="flex items-center justify-between border-b pb-2 mb-4">
+                    <div class="flex items-center justify-between border-b pb-2">
                         <div class="flex items-center gap-3">
                             <RouterLink to="/marketing/listOERegistration">
                                 <Button icon="pi pi-arrow-left" class="p-button-text p-button-secondary text-xl" size="big" v-tooltip="'Back'" />
                             </RouterLink>
-                            <div class="text-2xl font-bold text-gray-800">OE Warranty Registration</div>
+                            <div class="text-2xl font-bold text-gray-800">Detail OE Registration</div>
                         </div>
                         <div class="inline-flex items-center gap-2"></div>
                     </div>
                     <div class="grid grid-cols-2 md:grid-cols-2 gap-4">
-                            <div class="w-full">
-                                <span class="block text-xm font-bold text-black-700">Date Register</span>
-                                <p class="text-lg font-medium">{{ event.startDate }}</p>
+                        <!-- Warranty Info -->
+                        <div class="mt-6">
+                            <span class="block text-lg font-bold text-black-700">Warranty Cert No</span>
+                            <p class="text-lg font-medium">{{ Warranty.warranty_info?.warranty_cert_no || '-' }}</p>
+                        </div>
+                        <div class="mt-6">
+                            <span class="block text-lg font-bold text-black-700">Registered Date</span>
+                            <p class="text-lg font-medium">{{ Warranty.warranty_info?.date_registered || '-' }}</p>
+                        </div>
+                        <div class="grid grid-cols-1 md:grid-cols-1 gap-4">
+                            <div v-if="Warranty.warranty_info?.registrationCard" class="rounded-xl overflow-hidden shadow-sm bg-gray-100 mb-6">
+                                <span class="block text-lg font-bold text-black-800 mb-3 text-center">Registration Card</span>
+                                <a :href="Warranty.warranty_info.registrationCard" target="_blank" rel="noopener noreferrer">
+                                    <img :src="Warranty.warranty_info.registrationCard" alt="Mileage Image" class="w-full h-64 object-cover hover:scale-105 transition-transform duration-300 cursor-pointer" />
+                                </a>
                             </div>
-                            <div class="w-full">
-                                <span class="block text-xm font-bold text-black-700">Registartion Card</span>
-                                <p class="text-lg font-medium">{{ event.endDate }}</p>
-                            </div>
+                        </div>
                     </div>
                 </div>
 
@@ -34,30 +43,38 @@
                         <div class="inline-flex items-center gap-2"></div>
                     </div>
                     <div class="grid grid-cols-2 md:grid-cols-2 gap-4">
-                            <div class="w-full">
-                                <span class="block text-xm font-bold text-black-700">Vehicle Plate No</span>
-                                <p class="text-lg font-medium">{{ event.startDate }}</p>
+                        <div class="w-full">
+                            <span class="block text-xm font-bold text-black-700">Vehicle Plate No</span>
+                            <p class="text-lg font-medium">{{ Warranty.vehicle_info?.vehicle_reg_no || '-' }}</p>
+                        </div>
+                        <div class="w-full">
+                            <span class="block text-xm font-bold text-black-700">Vehicle Type</span>
+                            <p class="text-lg font-medium">{{ Warranty.vehicle_info?.vehicle_type || '-' }}</p>
+                        </div>
+                        <div class="w-full">
+                            <span class="block text-xm font-bold text-black-700">Vehicle Brand</span>
+                            <p class="text-lg font-medium">{{ Warranty.vehicle_info?.vehicle_brand || '-' }}</p>
+                        </div>
+                        <div class="w-full">
+                            <span class="block text-xm font-bold text-black-700">Vehicle Model</span>
+                            <p class="text-lg font-medium">{{ Warranty.vehicle_info?.vehicle_model || '-' }}</p>
+                        </div>
+                        <div class="w-full">
+                            <span class="block text-xm font-bold text-black-700">Mileage </span>
+                            <p class="text-lg font-medium">{{ Warranty.vehicle_info?.mileage || '-' }}</p>
+                        </div>
+                        <div class="w-full">
+                            <span class="block text-xm font-bold text-black-700">Purchase Date</span>
+                            <p class="text-lg font-medium">{{ Warranty.vehicle_info?.purchase_date || '-' }}</p>
+                        </div>
+                        <div class="grid grid-cols-1 md:grid-cols-1 gap-4">
+                            <div v-if="Warranty.warranty_info?.mileageImage" class="rounded-xl overflow-hidden shadow-sm bg-gray-100 mb-6">
+                                <span class="block text-lg font-bold text-black-800 mb-3 text-center">Mileage Image</span>
+                                <a :href="Warranty.warranty_info.mileageImage" target="_blank" rel="noopener noreferrer">
+                                    <img :src="Warranty.warranty_info.mileageImage" alt="Mileage Image" class="w-full h-64 object-cover hover:scale-105 transition-transform duration-300 cursor-pointer" />
+                                </a>
                             </div>
-                            <div class="w-full">
-                                <span class="block text-xm font-bold text-black-700">Vehicle Type</span>
-                                <p class="text-lg font-medium">{{ event.endDate }}</p>
-                            </div>
-                            <div class="w-full">
-                                <span class="block text-xm font-bold text-black-700">Vehicle Brand</span>
-                                <p class="text-lg font-medium">{{ event.startDate }}</p>
-                            </div>
-                            <div class="w-full">
-                                <span class="block text-xm font-bold text-black-700">Vehicle Model</span>
-                                <p class="text-lg font-medium">{{ event.endDate }}</p>
-                            </div>
-                            <div class="w-full">
-                                <span class="block text-xm font-bold text-black-700">Mileage Photo</span>
-                                <p class="text-lg font-medium">{{ event.startDate }}</p>
-                            </div>
-                            <div class="w-full">
-                                <span class="block text-xm font-bold text-black-700">Purchase Date</span>
-                                <p class="text-lg font-medium">{{ event.endDate }}</p>
-                            </div>
+                        </div>
                     </div>
                 </div>
                 <div class="card flex flex-col w-full">
@@ -67,31 +84,47 @@
                         </div>
                         <div class="inline-flex items-center gap-2"></div>
                     </div>
-                    <div class="grid grid-cols-2 md:grid-cols-2 gap-4">
-                            <div class="w-full">
-                                <span class="block text-xm font-bold text-black-700">Tyre List</span>
-                                <p class="text-lg font-medium">{{ event.startDate }}</p>
-                            </div>
-                            <div class="w-full">
-                                <span class="block text-xm font-bold text-black-700">Tyre Pattern</span>
-                                <p class="text-lg font-medium">{{ event.endDate }}</p>
-                            </div>
-                            <div class="w-full">
-                                <span class="block text-xm font-bold text-black-700">Tyre Size</span>
-                                <p class="text-lg font-medium">{{ event.startDate }}</p>
-                            </div>
-                            <div class="w-full">
-                                <span class="block text-xm font-bold text-black-700">Tyre Description</span>
-                                <p class="text-lg font-medium">{{ event.endDate }}</p>
-                            </div>
-                            <div class="w-full">
-                                <span class="block text-xm font-bold text-black-700">Serial Plate No</span>
-                                <p class="text-lg font-medium">{{ event.startDate }}</p>
-                            </div>
+                    <div :class="['grid', 'gap-4', 'mb-2', 'grid-cols-2 md:grid-cols-4']">
+                        <div>
+                            <span class="block text-sm font-bold text-black-800">MFG Code</span>
+
+                            <!-- OLD (User) -->
+                            <p class="text-lg font-medium mb-2">{{ Warranty.tire_info?.mfgCode || '-' }}</p>
+                        </div>
+                        <div>
+                            <span class="block text-sm font-bold text-black-800">Size Code</span>
+                            <p class="text-lg font-medium mb-2">{{ Warranty.tire_info?.tyreSize || '-' }}</p>
+                        </div>
+                        <div>
+                            <span class="block text-sm font-bold text-black-800">Tyre Spec</span>
+                            <p class="text-lg font-medium mb-2">{{ Warranty.tire_info?.tyreSpec || '-' }}</p>
+                        </div>
+                        <div>
+                            <span class="block text-sm font-bold text-black-800">Week Code</span>
+                            <p class="text-lg font-medium mb-2">{{ Warranty.tire_info?.weekcode || '-' }}</p>
+                        </div>
+                        <div class="inline-flex items-center gap-2"></div>
                     </div>
+                    <div class="grid grid-cols-2 md:grid-cols-2 gap-4">
+                        <div class="w-full">
+                            <span class="block text-xm font-bold text-black-700">Tyre Pattern</span>
+                            <p class="text-lg font-medium">{{ Warranty.tire_info?.tire_pattern || '-' }}</p>
+                        </div>
+                        <div class="w-full">
+                            <span class="block text-xm font-bold text-black-700">Tyre Size</span>
+                            <p class="text-lg font-medium">{{ Warranty.tire_info?.tire_size || '-' }}</p>
+                        </div>
+                        <div class="w-full">
+                            <span class="block text-xm font-bold text-black-700">Tyre Description</span>
+                            <p class="text-lg font-medium">{{ Warranty.tire_info?.tire_desc || '-' }}</p>
+                        </div>
+                        <div class="w-full">
+                            <span class="block text-xm font-bold text-black-700">Serial Plate No</span>
+                            <p class="text-lg font-medium">{{ Warranty.tire_info?.mfgCode || '-' }}</p>
                         </div>
                     </div>
-                
+                </div>
+            </div>
 
             <!-- RIGHT SIDE (1/3) -->
             <div class="md:w-1/3 flex flex-col">
@@ -99,7 +132,7 @@
                 <div class="card flex flex-col w-full">
                     <div class="flex items-center justify-between border-b pb-2 mb-2">
                         <div class="text-2xl font-bold text-gray-800">ℹ️ User Details</div>
-                        <Tag :value="event.status === 1 ? 'Active' : 'Inactive'" :severity="event.status === 1 ? 'success' : 'danger'" />
+                        <Tag :value="Warranty.status === 1 ? 'Active' : 'Inactive'" :severity="Warranty.status === 1 ? 'success' : 'danger'" />
                     </div>
 
                     <div class="overflow-x-auto">
@@ -107,23 +140,23 @@
                             <tbody>
                                 <tr class="border-b">
                                     <td class="px-4 py-2 font-medium">TC member no</td>
-                                    <td class="px-4 py-2 text-right">{{ event.publishDate }}</td>
+                                    <td class="px-4 py-2 text-right">{{ Warranty.consumer_info?.membercode || '-' }}</td>
                                 </tr>
                                 <!-- <tr class="border-b">
                                     <td class="px-4 py-2 font-medium">Audience</td>
-                                    <td class="px-4 py-2 text-right">{{ event.audience }}</td>
+                                    <td class="px-4 py-2 text-right">{{ Warranty.audience }}</td>
                                 </tr> -->
                                 <tr class="border-b">
                                     <td class="px-4 py-2 font-medium">Member Name</td>
-                                    <td class="px-4 py-2 text-right">{{ event.view }}</td>
+                                    <td class="px-4 py-2 text-right">{{ Warranty.consumer_info?.fullname || '-' }}</td>
                                 </tr>
                                 <tr class="border-b">
                                     <td class="px-4 py-2 font-medium">Member Phone Number</td>
-                                    <td class="px-4 py-2 text-right">{{ event.isSurvey }}</td>
+                                    <td class="px-4 py-2 text-right">{{ Warranty.consumer_info?.phoneNumber || '-' }}</td>
                                 </tr>
-                                <tr v-if="event.isSurvey === 'Yes'" class="border-b">
+                                <tr class="border-b">
                                     <td class="px-4 py-2 font-medium">Member email</td>
-                                    <td class="px-4 py-2 text-right">{{ event.point1 }}</td>
+                                    <td class="px-4 py-2 text-right">{{ Warranty.consumer_info?.email || '-' }}</td>
                                 </tr>
                             </tbody>
                         </table>
@@ -145,151 +178,27 @@ const route = useRoute();
 const router = useRouter();
 const toast = useToast();
 const confirm = useConfirm(); // Added
+const Warranty = ref([]);
 
-const eventId = route.params.id;
+const WarrantyId = route.params.id;
 const loading = ref(true);
 // Removed: const deleteDialog = ref(false);
 
-// Event data
-const event = ref({
-    id: null,
-    audience: '',
-    isSurvey: 'No',
-    point1: 0,
-    point2: 0,
-    point3: 0,
-    title: '',
-    image1URL: '',
-    image2URL: '',
-    image3URL: '',
-    desc: '',
-    location: '',
-    publishDate: '',
-    startDate: '',
-    endDate: '',
-    view: 0,
-    status: 0
-});
+// Warranty data
 
 const surveyQuestions = ref([]);
 const participants = ref([]);
 
-// Computed property for toggle button
-const eventStatus = computed({
-    get: () => event.value.status === 1,
-    set: (newValue) => {
-        // This will be handled by the API call
-    }
-});
-
-// Toggle event status
-const toggleEventStatus = async () => {
-    try {
-        const response = await api.put(`event/togglePublish/${eventId}`);
-
-        if (response.data.status === 1) {
-            // Update local event status
-            event.value.status = event.value.status === 1 ? 0 : 1;
-
-            toast.add({
-                severity: 'success',
-                summary: 'Success',
-                detail: `Event ${event.value.status === 1 ? 'activated' : 'deactivated'} successfully`,
-                life: 3000
-            });
-        } else {
-            toast.add({
-                severity: 'error',
-                summary: 'Error',
-                detail: 'Failed to update event status',
-                life: 3000
-            });
-        }
-    } catch (error) {
-        console.error('Error updating event status:', error);
-        toast.add({
-            severity: 'error',
-            summary: 'Error',
-            detail: 'Failed to update event status',
-            life: 3000
-        });
-    }
-};
-
-// Confirm before delete
-const confirmDelete = () => {
-    confirm.require({
-        message: 'Are you sure you want to delete this event?',
-        header: 'Confirm Delete',
-        icon: 'pi pi-exclamation-triangle',
-        acceptLabel: 'Yes, Delete',
-        rejectLabel: 'Cancel',
-        acceptClass: 'p-button-danger',
-        accept: async () => {
-            try {
-                const response = await api.put(`event/delete/${event.value.id}`);
-
-                if (response.data.status === 1) {
-                    toast.add({
-                        severity: 'success',
-                        summary: 'Deleted',
-                        detail: 'Event deleted successfully.',
-                        life: 3000
-                    });
-                    router.push('/marketing/listEvent');
-                } else {
-                    toast.add({
-                        severity: 'error',
-                        summary: 'Error',
-                        detail: 'Failed to delete event.',
-                        life: 3000
-                    });
-                }
-            } catch (error) {
-                console.error('Delete failed:', error);
-                toast.add({
-                    severity: 'error',
-                    summary: 'Error',
-                    detail: 'Failed to delete event.',
-                    life: 3000
-                });
-            }
-        },
-        reject: () => {
-            toast.add({
-                severity: 'info',
-                summary: 'Cancelled',
-                detail: 'Deletion cancelled.',
-                life: 2000
-            });
-        }
-    });
-};
-
-// Fetch event details
-const fetchEventDetails = async () => {
+// Fetch Warranty details
+const fetchWarrantyDetails = async () => {
     try {
         loading.value = true;
-        const response = await api.get(`event/details/${eventId}`);
+        const id = route.params.id; // e.g. 1
+
+        const response = await api.get(`warranty_registration/oe/${id}`);
 
         if (response.data.status === 1) {
-            const eventData = response.data.admin_data;
-
-            // Update event data
-            event.value = {
-                ...event.value,
-                ...eventData
-            };
-
-            // Handle survey questions
-            if (eventData.survey_questions && eventData.survey_questions.length > 0) {
-                surveyQuestions.value = eventData.survey_questions[0] || [];
-            }
-
-            // Handle participants
-            if (eventData.participants) {
-                participants.value = eventData.participants;
-            }
+            Warranty.value = response.data.admin_data;
 
             // Process private images
             await processPrivateImages();
@@ -297,16 +206,16 @@ const fetchEventDetails = async () => {
             toast.add({
                 severity: 'error',
                 summary: 'Error',
-                detail: 'Failed to load event details',
+                detail: 'Failed to load Warranty details',
                 life: 3000
             });
         }
     } catch (error) {
-        console.error('Error fetching event details:', error);
+        console.error('Error fetching Warranty details:', error);
         toast.add({
             severity: 'error',
             summary: 'Error',
-            detail: 'Failed to load event details',
+            detail: 'Failed to load Warranty details',
             life: 3000
         });
     } finally {
@@ -316,24 +225,26 @@ const fetchEventDetails = async () => {
 
 // Process private images using the API method
 const processPrivateImages = async () => {
-    const imageFields = ['image1URL', 'image2URL', 'image3URL'];
+    const imageFields = ['mileageImage', 'registrationCard'];
 
     for (const field of imageFields) {
-        if (event.value[field] && typeof event.value[field] === 'string') {
+        const currentUrl = Warranty.value.warranty_info[field];
+        if (currentUrl && typeof currentUrl === 'string') {
             try {
-                const blobUrl = await api.getPrivateFile(event.value[field]);
+                const blobUrl = await api.getPrivateFile(currentUrl);
                 if (blobUrl) {
-                    event.value[field] = blobUrl;
+                    Warranty.value.warranty_info[field] = blobUrl; // <-- update the correct place
                 }
             } catch (error) {
                 console.error(`Error loading image ${field}:`, error);
-                // Keep the original URL if private file loading fails
             }
         }
     }
+
+    console.log('Processed Warranty with images:', { ...Warranty.value });
 };
 
 onMounted(() => {
-    fetchEventDetails();
+    fetchWarrantyDetails();
 });
 </script>
