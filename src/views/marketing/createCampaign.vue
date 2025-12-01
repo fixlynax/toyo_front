@@ -45,11 +45,6 @@
 
                     <div class="grid grid-cols-1 md:grid-cols-3 gap-4 md:col-span-2">
                         <div>
-                            <label class="block font-bold text-gray-700">Publish Date</label>
-                            <Calendar v-model="campaign.publishDate" showIcon dateFormat="dd-mm-yy" class="w-full" :minDate="today" />
-                            <small v-if="errors.publishDate" class="text-red-500">{{ errors.publishDate }}</small>
-                        </div>
-                        <div>
                             <label class="block font-bold text-gray-700">Start Date</label>
                             <Calendar v-model="campaign.startDate" showIcon dateFormat="dd-mm-yy" class="w-full" :minDate="today" @date-select="onStartDateSelect"/>
                             <small v-if="errors.startDate" class="text-red-500">{{ errors.startDate }}</small>
@@ -58,6 +53,11 @@
                             <label class="block font-bold text-gray-700">End Date</label>
                             <Calendar v-model="campaign.endDate" showIcon dateFormat="dd-mm-yy" class="w-full" :minDate="minEndDate"/>
                             <small v-if="errors.endDate" class="text-red-500">{{ errors.endDate }}</small>
+                        </div>
+                        <div>
+                            <label class="block font-bold text-gray-700">Publish Date</label>
+                            <Calendar v-model="campaign.publishDate" showIcon dateFormat="dd-mm-yy" class="w-full"  :maxDate="campaign.endDate"  :disabled="!campaign.startDate || !campaign.endDate" />
+                            <small v-if="errors.publishDate" class="text-red-500">{{ errors.publishDate }}</small>
                         </div>
                     </div>
                 </div>
@@ -216,6 +216,8 @@ import api from '@/service/api';
 const router = useRouter();
 const toast = useToast();
 const loading = ref(false);
+const today = new Date();
+const minEndDate = ref(today);
 
 // Campaign data
 const campaign = ref({
@@ -246,8 +248,8 @@ const imageFiles = ref({
 
 // When start date changes, reset end date if invalid
 const onStartDateSelect = () => {
-    if (news.value.endDate && news.value.endDate <= news.value.startDate) {
-        news.value.endDate = '';
+    if (campaign.value.endDate && campaign.value.endDate <= campaign.value.startDate) {
+        campaign.value.endDate = '';
         toast.add({
             severity: 'warn',
             summary: 'Invalid Date',
@@ -436,9 +438,9 @@ const validateFields = () => {
     if (campaign.value.point3 === null || campaign.value.point3 < 0) errors.value.point3 = 'Valid platinum points are required';
 
     // Image validation
-    if (!imageFiles.value.image1) errors.value.image1 = 'Image 1 is required';
-    if (!imageFiles.value.image2) errors.value.image2 = 'Image 2 is required';
-    if (!imageFiles.value.image3) errors.value.image3 = 'Image 3 is required';
+    // if (!imageFiles.value.image1) errors.value.image1 = 'Image 1 is required';
+    // if (!imageFiles.value.image2) errors.value.image2 = 'Image 2 is required';
+    // if (!imageFiles.value.image3) errors.value.image3 = 'Image 3 is required';
 
     // Criteria validation
     criterias.value.forEach((criteria, index) => {

@@ -132,7 +132,7 @@
 
                         <!-- Add Question -->
                         <div class="flex justify-start mt-4">
-                            <Button icon="pi pi-plus" label="Add Question" class="p-button-success p-button-sm" :disabled="questions.length >= 10" @click="addQuestion" />
+                            <Button icon="pi pi-plus" label="Add Question" class="p-button-success p-button-sm" :disabled="questions.length >= 20" @click="addQuestion" />
                         </div>
                     </div>
 
@@ -313,7 +313,7 @@ const processPrivateImages = async () => {
 
 // Question management
 const addQuestion = () => {
-    if (questions.value.length < 10) {
+    if (questions.value.length < 20) {
         questions.value.push({
             question: '',
             answers: ['', '', ''],
