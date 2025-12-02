@@ -133,7 +133,7 @@
                                 </tr>
                                 <tr class="border-b">
                                     <td class="px-4 py-2 font-medium">Storage Location</td>
-                                    <td class="px-4 py-2 text-right font-medium">{{ deliveryInfo.storageLocation || '-' }}</td>
+                                    <td class="px-4 py-2 text-right font-medium">{{ deliveryInfo.storageLocation || customerInfo.storageLocation || '-' }}</td>
                                 </tr>
                                 <tr class="border-b">
                                     <td class="px-4 py-2 font-medium">Planned Date</td>
@@ -458,6 +458,7 @@ const fetchOrderDetail = async () => {
             customerInfo.value = {
                 dealerName: etenInfo.companyName1 || '-',
                 signboard: etenInfo.signboardBrand || '-',
+                storageLocation : etenInfo.storageLocation || '-',
                 contactPerson: etenInfo.companyName3 || '-',
                 phoneNumber: etenInfo.phoneNumber || '-',
                 mobileNumber: etenInfo.mobileNumber || '-',
