@@ -1,13 +1,175 @@
+<template>
+    <div class="card">
+        <Toast />
+
+        <div class="flex justify-between items-center mb-4">
+            <div class="text-2xl font-bold text-black">List Other</div>
+        </div>
+
+        <!-- Error Message -->
+        <div v-if="error" class="p-4 mb-4 text-red-700 bg-red-100 rounded-lg border border-red-200">
+            <div class="flex items-center">
+                <i class="pi pi-exclamation-triangle mr-2"></i>
+                <span>Error loading other files data: {{ error }}</span>
+            </div>
+            <Button label="Try Again" icon="pi pi-refresh" class="p-button-text p-button-sm mt-2" @click="refreshData" />
+        </div>
+
+        <!-- Loading State -->
+        <LoadingPage v-if="loading" :message="'Loading Other Files Data...'" :sub-message="'Fetching other files information'" />
+
+        <!-- Data Table -->
+        <DataTable
+            v-else
+            :value="filteredData"
+            :paginator="true"
+            :rows="10"
+            dataKey="id"
+            class="rounded-table text-sm"
+            :rowHover="true"
+            :filters="filters1"
+            :rowsPerPageOptions="[10, 20, 50, 100]"
+            removableSort
+            sortField="sortableDate"
+            :sortOrder="-1"
+            currentPageReportTemplate="Showing {first} to {last} of {totalRecords} entries"
+            paginatorTemplate="CurrentPageReport FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink RowsPerPageDropdown"
+            v-model:selection="selectedFiles"
+        >
+            <template #header>
+                <div class="flex flex-col gap-4 w-full">
+                    <!-- Top Row: Search and Buttons -->
+                    <div class="flex items-center justify-between gap-4 w-full flex-wrap">
+                        <div class="flex items-center gap-2 w-full max-w-md">
+                            <IconField class="flex-1">
+                                <InputIcon>
+                                    <i class="pi pi-search" />
+                                </InputIcon>
+                                <InputText v-model="filters1['global'].value" placeholder="Quick Search..." class="w-full" />
+                            </IconField>
+                        </div>
+                        <div class="flex gap-2">
+                            <Button
+                                icon="pi pi-download"
+                                label="Download Selected"
+                                class="p-button p-button-sm"
+                                @click="handleBulkDownload"
+                                :disabled="selectedFiles.length === 0 || downloadLoading === 'bulk'"
+                                :loading="downloadLoading === 'bulk'"
+                                v-tooltip="selectedFiles.length > 0 ? `Download ${selectedFiles.length} selected files` : 'Select files to download'"
+                            />
+                            <Button icon="pi pi-refresh" class="p-button-info p-button-sm" @click="refreshData" :disabled="loading" v-tooltip="'Refresh data'" />
+                            <Button type="button" icon="pi pi-upload" label="Upload" class="p-button-info p-button-sm" @click="handleUploadClick" :loading="uploadLoading" :disabled="uploadLoading" />
+                            <input type="file" ref="fileInputRef" @change="handleFileUpload" accept=".pdf,.jpg,.jpeg,.png,.doc,.docx" style="display: none" />
+                        </div>
+                    </div>
+
+                    <!-- Date Range Filter -->
+                    <div class="flex items-center gap-4 mb-1 flex-wrap">
+                        <div class="flex items-center gap-2">
+                            <span class="text-sm font-medium text-gray-700">Date Range:</span>
+                            <div class="flex items-center gap-2">
+                                <Calendar v-model="dateRange[0]" placeholder="Start Date" dateFormat="yy-mm-dd" showIcon class="w-40" :disabled="loading" />
+                                <span class="text-gray-500">to</span>
+                                <Calendar v-model="dateRange[1]" placeholder="End Date" dateFormat="yy-mm-dd" showIcon class="w-40" :disabled="loading" />
+                            </div>
+                            <Button v-if="dateRange[0] || dateRange[1]" icon="pi pi-times" class="p-button-text p-button-sm" @click="clearDateRange" title="Clear date filter" />
+                        </div>
+                        <div v-if="!hasDateFilterApplied" class="text-sm text-blue-600 italic">Select a date range to filter by document date</div>
+                    </div>
+                </div>
+            </template>
+
+            <template #empty>
+                <div class="text-center py-8 text-gray-500">
+                    <template v-if="!hasDateFilterApplied">
+                        <div class="flex flex-col items-center gap-2">
+                            <i class="pi pi-calendar text-3xl text-blue-400"></i>
+                            <span class="text-lg">Select a date range to view other files</span>
+                            <span class="text-sm text-gray-400">Choose both start and end dates to filter results</span>
+                        </div>
+                    </template>
+                    <template v-else-if="hasDateFilterApplied && (!dateRange[0] || !dateRange[1])">
+                        <div class="flex flex-col items-center gap-2">
+                            <i class="pi pi-exclamation-circle text-3xl text-yellow-400"></i>
+                            <span class="text-lg">Please select both start and end dates</span>
+                        </div>
+                    </template>
+                    <template v-else>
+                        <i class="pi pi-file-excel text-4xl mb-2"></i>
+                        <div>No other files records found in the selected date range.</div>
+                    </template>
+                </div>
+            </template>
+
+            <Column selectionMode="multiple" headerStyle="width: 3rem"></Column>
+
+            <Column field="docsDate" header="Document Date" style="min-width: 8rem" sortable>
+                <template #body="{ data }">
+                    <span class="font-medium">{{ data.docsDate }}</span>
+                    <div class="text-xs text-gray-500">{{ formatDateForDisplay(data.docsDate) }}</div>
+                </template>
+            </Column>
+
+            <Column field="docType" header="Document Type" style="min-width: 10rem" sortable>
+                <template #body="{ data }">
+                    <span class="font-medium">{{ data.docType }}</span>
+                </template>
+            </Column>
+
+            <Column field="dealerId" header="Customer Acc No" style="min-width: 10rem" sortable>
+                <template #body="{ data }">
+                    <span v-if="data.dealerId" class="font-medium">{{ data.dealerId }}</span>
+                    <span v-else class="text-black">-</span>
+                </template>
+            </Column>
+
+            <Column field="dealerName" header="Customer Name" style="min-width: 10rem" sortable>
+                <template #body="{ data }">
+                    <span v-if="data.dealerName">{{ data.dealerName }}</span>
+                    <span v-else class="text-black">-</span>
+                </template>
+            </Column>
+
+            <Column header="Action" style="min-width: 10rem; text-align: left">
+                <template #body="{ data }">
+                    <div class="flex gap-2">
+                        <Button
+                            icon="pi pi-eye"
+                            class="p-button-xm p-button-info"
+                            :disabled="!data.download || viewLoading === data.id"
+                            :loading="viewLoading === data.id"
+                            @click="handleView(data)"
+                            v-tooltip.top="data.download ? 'View File' : 'View not available'"
+                        />
+                        <Button
+                            icon="pi pi-download"
+                            class="p-button-xm"
+                            :severity="data.download ? 'success' : 'secondary'"
+                            :disabled="!data.download || downloadLoading === data.id"
+                            :loading="downloadLoading === data.id"
+                            @click="handleDownload(data)"
+                            v-tooltip.top="data.download ? 'Download File' : 'Download not available'"
+                        />
+                    </div>
+                </template>
+            </Column>
+        </DataTable>
+    </div>
+</template>
+
 <script setup>
-import { onBeforeMount, ref, reactive } from 'vue';
+import { onBeforeMount, ref, reactive, computed, watch } from 'vue';
 import api from '@/service/api';
 import { FilterMatchMode, FilterOperator } from '@primevue/core/api';
 import LoadingPage from '@/components/LoadingPage.vue';
 import { useToast } from 'primevue/usetoast';
+import Calendar from 'primevue/calendar';
+import Button from 'primevue/button';
 
 const toast = useToast();
 
-// Reactive filters
+// 🟢 State Management
 const filters1 = reactive({
     global: { value: null, matchMode: FilterMatchMode.CONTAINS },
     dealerName: { operator: FilterOperator.AND, constraints: [{ value: null, matchMode: FilterMatchMode.STARTS_WITH }] },
@@ -21,28 +183,62 @@ const viewLoading = ref(null);
 const error = ref(null);
 const uploadLoading = ref(false);
 const fileInputRef = ref(null);
+const dateRange = ref([null, null]);
+const hasDateFilterApplied = ref(false);
 
 // Selection state for bulk download
 const selectedFiles = ref([]);
 
-// API service functions for Other Files
+// 🟢 API service functions for Other Files
 const OtherService = {
     async getOtherList() {
         try {
             const response = await api.get('credit/other');
             if (response.data.status === 1) {
                 // Transform the API data to match your table structure
-                return response.data.admin_data.map((item) => ({
-                    id: item.file_path,
-                    docsDate: item.date,
-                    docType: item.docType,
-                    dealerId: item.account_no,
-                    dealerName: item.custName,
-                    company: item.company,
-                    filePath: item.file_path,
-                    fileUrl: item.file_url,
-                    download: true
-                }));
+                return response.data.admin_data.map((item) => {
+                    // Parse the date for sorting and filtering
+                    const dateStr = item.date;
+                    let parsedDate = null;
+                    let sortableDate = null;
+
+                    // Parse the date from various formats
+                    if (dateStr) {
+                        // Try to parse DD/MM/YYYY format
+                        if (dateStr.includes('/')) {
+                            const [day, month, year] = dateStr.split('/');
+                            if (day && month && year) {
+                                parsedDate = new Date(`${year}-${month}-${day}`);
+                                sortableDate = parsedDate.getTime();
+                            }
+                        }
+                        // Try YYYY-MM-DD format
+                        else if (dateStr.includes('-')) {
+                            parsedDate = new Date(dateStr);
+                            sortableDate = parsedDate.getTime();
+                        }
+                        // Try ISO format
+                        else {
+                            parsedDate = new Date(dateStr);
+                            sortableDate = parsedDate.getTime();
+                        }
+                    }
+
+                    return {
+                        id: item.file_path,
+                        docsDate: item.date,
+                        sortableDate: sortableDate, // For proper sorting
+                        docType: item.docType,
+                        dealerId: item.account_no,
+                        dealerName: item.custName,
+                        company: item.company,
+                        filePath: item.file_path,
+                        fileUrl: item.file_url,
+                        download: true,
+                        parsedDate: parsedDate, // For date filtering
+                        fileExtension: item.file_path.split('.').pop()?.toLowerCase() || ''
+                    };
+                });
             } else {
                 throw new Error('Failed to fetch other files data');
             }
@@ -65,7 +261,6 @@ const OtherService = {
                 }
             );
 
-            // Create blob and download
             const blob = new Blob([response.data], { type: response.headers['content-type'] });
             const url = window.URL.createObjectURL(blob);
             const link = document.createElement('a');
@@ -75,7 +270,6 @@ const OtherService = {
             link.click();
             document.body.removeChild(link);
 
-            // Clean up URL after download
             setTimeout(() => {
                 window.URL.revokeObjectURL(url);
             }, 100);
@@ -89,7 +283,6 @@ const OtherService = {
 
     async viewFile(filePath, fileUrl) {
         try {
-            // First, try using the download endpoint with blob method (more reliable)
             const response = await api.postExtra(
                 'credit/download',
                 { file_path: filePath },
@@ -101,29 +294,24 @@ const OtherService = {
                 }
             );
 
-            // Create blob with proper MIME type
+            const mimeType = this.getMimeType(filePath);
             const blob = new Blob([response.data], {
-                type: this.getMimeType(filePath)
+                type: mimeType
             });
             const blobUrl = window.URL.createObjectURL(blob);
-
-            // Try to open in new window
             const newWindow = window.open(blobUrl, '_blank');
 
             if (newWindow) {
-                // Clean up when the new window loads
                 newWindow.onload = () => {
                     setTimeout(() => {
                         window.URL.revokeObjectURL(blobUrl);
                     }, 1000);
                 };
 
-                // Fallback cleanup if onload doesn't fire
                 setTimeout(() => {
                     window.URL.revokeObjectURL(blobUrl);
                 }, 5000);
             } else {
-                // If popup is blocked, create download link as fallback
                 const link = document.createElement('a');
                 link.href = blobUrl;
                 link.target = '_blank';
@@ -132,7 +320,6 @@ const OtherService = {
                 link.click();
                 document.body.removeChild(link);
 
-                // Clean up after fallback
                 setTimeout(() => {
                     window.URL.revokeObjectURL(blobUrl);
                 }, 1000);
@@ -142,10 +329,8 @@ const OtherService = {
         } catch (error) {
             console.error('Error viewing file via download endpoint:', error);
 
-            // If blob method fails, try the pre-signed URL as fallback
             if (fileUrl) {
                 try {
-                    console.log('Trying pre-signed URL as fallback:', fileUrl);
                     window.open(fileUrl, '_blank');
                     return true;
                 } catch (fallbackError) {
@@ -195,6 +380,52 @@ const OtherService = {
     }
 };
 
+// 🟢 Watcher for date range changes
+watch(
+    dateRange,
+    (newRange, oldRange) => {
+        if (newRange[0] && newRange[1]) {
+            hasDateFilterApplied.value = true;
+        } else if (newRange[0] === null && newRange[1] === null && hasDateFilterApplied.value) {
+            hasDateFilterApplied.value = false;
+        }
+    },
+    { deep: true }
+);
+
+// 🟢 Computed - Filter data by date range
+const filteredData = computed(() => {
+    if (!hasDateFilterApplied.value) {
+        return [];
+    }
+
+    let filtered = [...listData.value];
+
+    // Apply date range filter based on parsedDate
+    if (dateRange.value[0] && dateRange.value[1]) {
+        filtered = filtered.filter((item) => {
+            if (!item.parsedDate || isNaN(item.parsedDate.getTime())) return false;
+
+            const orderDate = new Date(item.parsedDate);
+            orderDate.setHours(0, 0, 0, 0);
+
+            const startDate = dateRange.value[0] ? new Date(dateRange.value[0]) : null;
+            const endDate = dateRange.value[1] ? new Date(dateRange.value[1]) : null;
+
+            if (startDate) startDate.setHours(0, 0, 0, 0);
+            if (endDate) endDate.setHours(23, 59, 59, 999);
+
+            const isAfterStart = !startDate || orderDate >= startDate;
+            const isBeforeEnd = !endDate || orderDate <= endDate;
+
+            return isAfterStart && isBeforeEnd;
+        });
+    }
+
+    return filtered;
+});
+
+// 🟢 Handle Download
 const handleDownload = async (data) => {
     if (!data.filePath || !data.download) {
         toast.add({
@@ -208,12 +439,11 @@ const handleDownload = async (data) => {
 
     downloadLoading.value = data.id;
     try {
-        // Sanitize filename to remove invalid characters
         const sanitizeFileName = (name) => (name ? name.replace(/[/\\?%*:|"<>]/g, '-') : 'Unknown');
-        const fileName = `Other_${sanitizeFileName(data.dealerName)}_${data.docType}.pdf`;
+        const fileExtension = data.fileExtension || 'file';
+        const fileName = `${sanitizeFileName(data.dealerName)}_${data.docType}_${data.docsDate.replace(/\//g, '-')}.${fileExtension}`;
         await OtherService.downloadFile(data.filePath, fileName);
 
-        // Show success toast
         toast.add({
             severity: 'success',
             summary: 'Download Successful',
@@ -230,7 +460,6 @@ const handleDownload = async (data) => {
             errorDetail = 'You do not have permission to download this file.';
         }
 
-        // Show error toast
         toast.add({
             severity: 'error',
             summary: 'Download Failed',
@@ -242,6 +471,7 @@ const handleDownload = async (data) => {
     }
 };
 
+// 🟢 Handle View
 const handleView = async (data) => {
     if (!data.filePath || !data.download) {
         toast.add({
@@ -257,7 +487,6 @@ const handleView = async (data) => {
     try {
         await OtherService.viewFile(data.filePath, data.fileUrl);
 
-        // Show success toast
         toast.add({
             severity: 'success',
             summary: 'File Opened',
@@ -278,7 +507,6 @@ const handleView = async (data) => {
             errorDetail = 'File cannot be accessed. Please contact administrator.';
         }
 
-        // Show error toast
         toast.add({
             severity: 'error',
             summary: 'View Failed',
@@ -290,6 +518,7 @@ const handleView = async (data) => {
     }
 };
 
+// 🟢 Handle Bulk Download
 const handleBulkDownload = async () => {
     if (selectedFiles.value.length === 0) {
         toast.add({
@@ -309,11 +538,11 @@ const handleBulkDownload = async () => {
         for (const file of selectedFiles.value) {
             try {
                 const sanitizeFileName = (name) => (name ? name.replace(/[/\\?%*:|"<>]/g, '-') : 'Unknown');
-                const fileName = `Other_${sanitizeFileName(file.dealerName)}_${file.docType}.pdf`;
+                const fileExtension = file.fileExtension || 'file';
+                const fileName = `${sanitizeFileName(file.dealerName)}_${file.docType}_${file.docsDate.replace(/\//g, '-')}.${fileExtension}`;
                 await OtherService.downloadFile(file.filePath, fileName);
                 successCount++;
 
-                // Small delay between downloads to prevent overwhelming the server
                 await new Promise((resolve) => setTimeout(resolve, 100));
             } catch (error) {
                 console.error(`Failed to download file: ${file.filePath}`, error);
@@ -321,7 +550,6 @@ const handleBulkDownload = async () => {
             }
         }
 
-        // Show appropriate toast based on results
         if (errorCount === 0) {
             toast.add({
                 severity: 'success',
@@ -345,11 +573,9 @@ const handleBulkDownload = async () => {
             });
         }
 
-        // Clear selection after download
         selectedFiles.value = [];
     } catch (error) {
         console.error('Bulk download failed:', error);
-        // Show error toast
         toast.add({
             severity: 'error',
             summary: 'Download Failed',
@@ -361,6 +587,7 @@ const handleBulkDownload = async () => {
     }
 };
 
+// 🟢 Handle Upload
 const handleUploadClick = () => {
     fileInputRef.value?.click();
 };
@@ -400,7 +627,6 @@ const handleFileUpload = async (event) => {
         // Refresh the list after successful upload
         await refreshData();
 
-        // Show success toast
         toast.add({
             severity: 'success',
             summary: 'Upload Successful',
@@ -412,7 +638,6 @@ const handleFileUpload = async (event) => {
         event.target.value = '';
     } catch (error) {
         console.error('Upload failed:', error);
-        // Show error toast
         toast.add({
             severity: 'error',
             summary: 'Upload Failed',
@@ -424,6 +649,7 @@ const handleFileUpload = async (event) => {
     }
 };
 
+// 🟢 Initial load
 onBeforeMount(async () => {
     await loadInitialData();
 });
@@ -449,7 +675,7 @@ const loadInitialData = async () => {
     }
 };
 
-// Refresh function
+// 🟢 Refresh function
 const refreshData = async () => {
     loading.value = true;
     error.value = null;
@@ -476,134 +702,39 @@ const refreshData = async () => {
         loading.value = false;
     }
 };
+
+// 🟢 Helper Functions
+const formatDateForDisplay = (dateString) => {
+    if (!dateString) return '';
+
+    try {
+        // Parse the date string (assuming DD/MM/YYYY format)
+        if (dateString.includes('/')) {
+            const [day, month, year] = dateString.split('/');
+            const date = new Date(`${year}-${month}-${day}`);
+
+            if (isNaN(date.getTime())) return '';
+
+            return date.toLocaleDateString('en-MY', {
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric'
+            });
+        }
+        return dateString;
+    } catch (error) {
+        console.error('Error formatting date for display:', error);
+        return '';
+    }
+};
+
+// 🟢 Clear Date Range
+const clearDateRange = () => {
+    dateRange.value = [null, null];
+    hasDateFilterApplied.value = false;
+    selectedFiles.value = []; // Clear selection when clearing date filter
+};
 </script>
-
-<template>
-    <div class="card">
-        <Toast />
-
-        <div class="flex justify-between items-center mb-4">
-            <div class="text-2xl font-bold text-black">List Other</div>
-            <div class="flex gap-2">
-                <Button
-                    icon="pi pi-download"
-                    label="Download Selected"
-                    class="p-button-outlined p-button-sm"
-                    @click="handleBulkDownload"
-                    :disabled="selectedFiles.length === 0 || downloadLoading === 'bulk'"
-                    :loading="downloadLoading === 'bulk'"
-                    v-tooltip="selectedFiles.length > 0 ? `Download ${selectedFiles.length} selected files` : 'Select files to download'"
-                />
-                <Button icon="pi pi-refresh" class="p-button-outlined p-button-sm" @click="refreshData" :disabled="loading" v-tooltip="'Refresh data'" />
-                <Button type="button" icon="pi pi-upload" label="Upload" class="p-button-outlined p-button-sm" @click="handleUploadClick" :loading="uploadLoading" :disabled="uploadLoading" />
-                <input type="file" ref="fileInputRef" @change="handleFileUpload" accept=".pdf,.jpg,.jpeg,.png,.doc,.docx" style="display: none" />
-            </div>
-        </div>
-
-        <!-- Error Message -->
-        <div v-if="error" class="p-4 mb-4 text-red-700 bg-red-100 rounded-lg border border-red-200">
-            <div class="flex items-center">
-                <i class="pi pi-exclamation-triangle mr-2"></i>
-                <span>Error loading other files data: {{ error }}</span>
-            </div>
-            <Button label="Try Again" icon="pi pi-refresh" class="p-button-text p-button-sm mt-2" @click="refreshData" />
-        </div>
-
-        <!-- Loading State -->
-        <LoadingPage v-if="loading" :message="'Loading Other Files Data...'" :sub-message="'Fetching other files information'" />
-
-        <!-- Data Table -->
-        <DataTable
-            v-else
-            :value="listData"
-            :paginator="true"
-            :rows="10"
-            dataKey="id"
-            class="rounded-table text-sm"
-            :rowHover="true"
-            :filters="filters1"
-            :rowsPerPageOptions="[10, 20, 50, 100]"
-            removableSort
-            sortField="docsDate"
-            :sortOrder="1"
-            currentPageReportTemplate="Showing {first} to {last} of {totalRecords} entries"
-            paginatorTemplate="CurrentPageReport FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink RowsPerPageDropdown"
-            v-model:selection="selectedFiles"
-        >
-            <template #header>
-                <div class="flex items-center justify-between gap-4 w-full flex-wrap">
-                    <div class="flex items-center gap-2 w-full max-w-md">
-                        <IconField class="flex-1">
-                            <InputIcon>
-                                <i class="pi pi-search" />
-                            </InputIcon>
-                            <InputText v-model="filters1['global'].value" placeholder="Quick Search..." class="w-full" />
-                        </IconField>
-                    </div>
-                </div>
-            </template>
-
-            <template #empty>
-                <div class="text-center py-8 text-black">
-                    <i class="pi pi-file-excel text-4xl mb-2"></i>
-                    <div>No other files records found.</div>
-                </div>
-            </template>
-
-            <Column selectionMode="multiple" headerStyle="width: 3rem"></Column>
-
-            <Column header="Document Date" style="min-width: 8rem" sortable>
-                <template #body="{ data }">
-                    <span class="font-medium">{{ data.docsDate }}</span>
-                </template>
-            </Column>
-
-            <Column header="Document Type" style="min-width: 10rem" sortable>
-                <template #body="{ data }">
-                    <span class="font-medium">{{ data.docType }}</span>
-                </template>
-            </Column>
-
-            <Column header="Customer Acc No" style="min-width: 10rem" sortable>
-                <template #body="{ data }">
-                    <span v-if="data.dealerId" class="font-medium">{{ data.dealerId }}</span>
-                    <span v-else class="text-black">-</span>
-                </template>
-            </Column>
-
-            <Column header="Customer Name" style="min-width: 10rem" sortable>
-                <template #body="{ data }">
-                    <span v-if="data.dealerName">{{ data.dealerName }}</span>
-                    <span v-else class="text-black">-</span>
-                </template>
-            </Column>
-
-            <Column header="Action" style="min-width: 10rem; text-align: left">
-                <template #body="{ data }">
-                    <div class="flex gap-2">
-                        <Button
-                            icon="pi pi-eye"
-                            class="p-button-xm p-button-info"
-                            :disabled="!data.download || viewLoading === data.id"
-                            :loading="viewLoading === data.id"
-                            @click="handleView(data)"
-                            v-tooltip.top="data.download ? 'View File' : 'View not available'"
-                        />
-                        <Button
-                            icon="pi pi-download"
-                            class="p-button-xm"
-                            :severity="data.download ? 'success' : 'secondary'"
-                            :disabled="!data.download || downloadLoading === data.id"
-                            :loading="downloadLoading === data.id"
-                            @click="handleDownload(data)"
-                            v-tooltip.top="data.download ? 'Download File' : 'Download not available'"
-                        />
-                    </div>
-                </template>
-            </Column>
-        </DataTable>
-    </div>
-</template>
 
 <style scoped>
 :deep(.rounded-table) {
@@ -642,6 +773,13 @@ const refreshData = async () => {
     .p-datatable-tbody > tr.p-datatable-emptymessage > td {
         border-bottom-left-radius: 12px;
         border-bottom-right-radius: 12px;
+    }
+}
+
+/* Custom styling for the date filter */
+:deep(.p-calendar) {
+    .p-inputtext {
+        padding: 0.5rem;
     }
 }
 </style>

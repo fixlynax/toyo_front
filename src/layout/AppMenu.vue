@@ -364,12 +364,12 @@ const model = ref([
                 to: '/billing/listAccountDetail'
             },
             {
-                label: 'Billing ',
+                label: 'E-Invoice ',
                 icon: 'pi pi-fw pi-file',
                 to: '/billing/listBilling'
             },
             {
-                label: 'E-Billing',
+                label: 'Self Bill E-Invoice',
                 icon: 'pi pi-fw pi-file-check',
                 to: '/billing/listEbilling'
             },

@@ -366,7 +366,7 @@
                         <div class="flex items-center justify-between px-2">
                             <div class="flex items-center gap-2 text-gray-700">
                                 <i class="pi pi-file text-blue-500"></i>
-                                <span>Billing</span>
+                                <span>E-Invoice</span>
                             </div>
                             <RouterLink to="/billing/listBilling">
                                 <Button label="Go" size="small" />
@@ -377,7 +377,7 @@
                         <div class="flex items-center justify-between px-2 mt-2">
                             <div class="flex items-center gap-2 text-gray-700">
                                 <i class="pi pi-file-check text-purple-500"></i>
-                                <span>E-Billing</span>
+                                <span>Self Bill E-Invoice</span>
                             </div>
                             <RouterLink to="/billing/listEbilling">
                                 <Button label="Go" size="small" />
