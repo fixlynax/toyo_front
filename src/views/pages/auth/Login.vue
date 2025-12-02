@@ -61,7 +61,7 @@ const handleSubmit = (event) => {
     <!-- Left Side: Background with overlay -->
     <div
       class="hidden md:flex w-2/3 relative items-center justify-center overflow-hidden"
-      style="clip-path: ellipse(150% 90% at 93% 10%);"
+      style="clip-path: ellipse(150% 90% at 99% 10%);"
     >
       <img
         src="https://www.toyotires.com.my/wp-content/uploads/2023/02/Toyo-Japan-Trip-Day-4-380-scaled.jpg"
@@ -83,7 +83,7 @@ const handleSubmit = (event) => {
 
     <!-- Right Side: Login Form -->
     <div class="flex w-full md:w-1/3 items-center justify-center p-8 sm:p-10 bg-primary-500">
-      <div class="w-full max-w-md bg-white dark:bg-gray-800 rounded-3xl shadow-lg p-6 sm:p-8 transition-transform hover:scale-105">
+      <div class="w-full max-w-md bg-white dark:bg-gray-800 rounded-3xl shadow-lg p-6 sm:p-8 ">
         <div class="text-center mb-6">
           <h1 class="text-2xl md:text-3xl font-semibold text-gray-900 dark:text-white mb-2">Login to your account</h1>
           <p class="text-gray-600 dark:text-gray-300 text-base">Enter your credentials below</p>
