@@ -22,7 +22,7 @@
                         </div>
                         <div class="mt-6">
                             <span class="block text-lg font-bold text-black-700">Registered Date</span>
-                            <p class="text-lg font-medium">{{ Warranty.warranty_info?.date_registered || '-' }}</p>
+                            <p class="text-lg font-medium">{{ formatDateOnly(Warranty.warranty_info?.date_registered || '-' )}}</p>
                         </div>
                         <div class="grid grid-cols-1 md:grid-cols-1 gap-4">
                             <div v-if="Warranty.warranty_info?.registrationCard" class="rounded-xl overflow-hidden shadow-sm bg-gray-100 mb-6">
@@ -65,7 +65,7 @@
                         </div>
                         <div class="w-full">
                             <span class="block text-xm font-bold text-black-700">Purchase Date</span>
-                            <p class="text-lg font-medium">{{ Warranty.vehicle_info?.purchase_date || '-' }}</p>
+                            <p class="text-lg font-medium">{{ formatDate(Warranty.vehicle_info?.purchase_date) || '-'}}</p>
                         </div>
                         <div class="grid grid-cols-1 md:grid-cols-1 gap-4">
                             <div v-if="Warranty.warranty_info?.mileageImage" class="rounded-xl overflow-hidden shadow-sm bg-gray-100 mb-6">
@@ -242,6 +242,31 @@ const processPrivateImages = async () => {
 
     console.log('Processed Warranty with images:', { ...Warranty.value });
 };
+
+function formatDate(dateString) {
+    if (!dateString) return '';
+
+    const date = new Date(dateString);
+    if (isNaN(date.getTime())) return '';
+
+    return date.toLocaleDateString('en-MY', {
+        year: 'numeric',
+        month: '2-digit',
+        day: '2-digit'
+    });
+}
+
+
+
+function formatDateOnly(dateString) {
+    if (!dateString) return '-';
+
+    // Extract first 10 chars "YYYY-MM-DD"
+    const raw = dateString.slice(0, 10); 
+    const [year, month, day] = raw.split('-');
+
+    return `${day}/${month}/${year}`;
+}
 
 onMounted(() => {
     fetchWarrantyDetails();
