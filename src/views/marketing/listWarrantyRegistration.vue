@@ -8,41 +8,74 @@
         <!-- Show content area when not in initial loading -->
         <div v-else>
             <DataTable
-                :value="listData"
+                :value="filteredData"
                 :paginator="true"
                 :rows="10"
                 :rowsPerPageOptions="[10, 25, 50, 100]"
                 dataKey="id"
+                removableSort
                 :rowHover="true"
                 :loading="tableLoading"
                 :filters="filters"
                 filterDisplay="menu"
                 :globalFilterFields="['warranty_cert_no', 'invoice_no', 'member_code', 'full_name', 'mfgcode', 'tyresize', 'tyrespec', 'registered_on']"
                 class="rounded-table"
+                sortField="registered_on"
+                :sortOrder="-1"
+                currentPageReportTemplate="Showing {first} to {last} of {totalRecords} entries"
+                paginatorTemplate="CurrentPageReport FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink RowsPerPageDropdown"
             >
-            
                 <template #header>
-                    <div class="flex items-center justify-between gap-4 w-full flex-wrap">
-                        <!-- Left: Search Field + Cog Button -->
-                        <div class="flex items-center gap-2 w-full max-w-md">
-                            <IconField class="flex-1">
-                                <InputIcon>
-                                    <i class="pi pi-search" />
-                                </InputIcon>
-                                <InputText v-model="filters['global'].value" placeholder="Quick Search" class="w-full" />
-                            </IconField>
-                            <!-- <Button type="button" icon="pi pi-cog" class="p-button" /> -->
-                        </div>
+                    <div class="flex flex-col gap-4 w-full">
+                        <!-- Top Row: Search -->
+                        <div class="flex items-center justify-between gap-4 w-full flex-wrap">
+                            <div class="flex items-center gap-2 w-full max-w-md">
+                                <IconField class="flex-1">
+                                    <InputIcon>
+                                        <i class="pi pi-search" />
+                                    </InputIcon>
+                                    <InputText v-model="filters['global'].value" placeholder="Quick Search" class="w-full" />
+                                </IconField>
+                                <!-- <Button type="button" icon="pi pi-cog" class="p-button" /> -->
+                            </div>
 
-                        <!-- Right: Create Warranty Button -->
-                        <!-- <RouterLink to="/marketing/createWarranty">
-                            <Button type="button" label="Create" />
-                        </RouterLink> -->
+                            <!-- Right: Create Warranty Button (currently commented) -->
+                            <!-- <RouterLink to="/marketing/createWarranty">
+                                <Button type="button" label="Create" />
+                            </RouterLink> -->
+                        </div>
+                    </div>
+                    <div class="flex items-center gap-4 flex-wrap mt-4">
+                        <div class="flex items-center gap-2">
+                            <span class="text-sm font-medium text-gray-700">Date Range:</span>
+                            <div class="flex items-center gap-2">
+                                <Calendar v-model="dateRange[0]" placeholder="Start Date" dateFormat="yy-mm-dd" showIcon class="w-40" :disabled="tableLoading" />
+                                <span class="text-gray-500">to</span>
+                                <Calendar v-model="dateRange[1]" placeholder="End Date" dateFormat="yy-mm-dd" showIcon class="w-40" :disabled="tableLoading" />
+                            </div>
+                            <Button v-if="dateRange[0] || dateRange[1]" icon="pi pi-times" class="p-button-text p-button-sm" @click="clearDateRange" title="Clear date filter" />
+                        </div>
+                        <div v-if="!hasDateFilterApplied" class="text-sm text-blue-600 italic">Select a date range to filter by registration date</div>
                     </div>
                 </template>
 
                 <template #empty>
-                    <div class="text-center py-8 text-gray-500">No Warranty registrations found.</div>
+                    <div class="text-center py-8 text-gray-500">
+                        <template v-if="!hasDateFilterApplied">
+                            <div class="flex flex-col items-center gap-2">
+                                <i class="pi pi-calendar text-3xl text-blue-400"></i>
+                                <span class="text-lg">Select a date range to view warranty registrations</span>
+                                <span class="text-sm text-gray-400">Choose both start and end dates to filter results</span>
+                            </div>
+                        </template>
+                        <template v-else-if="hasDateFilterApplied && (!dateRange[0] || !dateRange[1])">
+                            <div class="flex flex-col items-center gap-2">
+                                <i class="pi pi-exclamation-circle text-3xl text-yellow-400"></i>
+                                <span class="text-lg">Please select both start and end dates</span>
+                            </div>
+                        </template>
+                        <template v-else> No warranty registrations found in the selected date range. </template>
+                    </div>
                 </template>
 
                 <template #loading>
@@ -52,7 +85,7 @@
                     </div>
                 </template>
 
-                <Column field="warranty_cert_no" header="Warranty Cert No" style="min-width: 10rem">
+                <Column field="warranty_cert_no" header="Warranty Cert No" style="min-width: 8rem" sortable>
                     <template #body="{ data }">
                         <RouterLink :to="`/marketing/detailWarrantyRegistration/${data.id}`" class="hover:underline font-bold text-primary-400">
                             {{ data.warranty_cert_no }}
@@ -60,35 +93,56 @@
                     </template>
                 </Column>
 
-                <Column field="invoice_no" header="Invoice No" style="min-width: 8rem">
+                <Column field="invoice_no" header="Invoice No" style="min-width: 8rem" sortable>
                     <template #body="{ data }">
                         {{ data.invoice_no || 'N/A' }}
                     </template>
                 </Column>
 
                 <Column field="full_name" header="TC Member" style="min-width: 8rem">
-                   <template #body="{ data }"> 
+                    <template #body="{ data }">
                         <div v-if="data.member_code || data.full_name">
                             <div v-if="data.member_code">{{ data.member_code }}</div>
                             <div>{{ data.full_name || 'N/A' }}</div>
                         </div>
                         <div v-else>N/A</div>
-                   </template>
-                </Column>
-
-                <Column field="tyre_info" header="Tyre" style="min-width: 10rem">
-                    <template #body="{ data }">
-                        <div v-if="data.mfgcode || data.tyresize || data.tyrespec">
-                            <div><strong>MFG:</strong> {{ data.mfgcode || 'N/A' }}</div>
-                            <div><strong>Size:</strong> {{ data.tyresize || 'N/A' }}</div>
-                            <div><strong>Spec:</strong> {{ data.tyrespec || 'N/A' }}</div>
-                            <div><strong>Week:</strong> {{ data.weekcode || 'N/A' }}</div>
-                        </div>
-                        <div v-else>N/A</div>
                     </template>
                 </Column>
 
-                <Column field="registered_on" header="Registered Date" style="min-width: 8rem">
+                <Column field="tyre_info" header="Tyre" style="min-width: 6rem">
+                    <template #body="{ data }">
+                        <div class="flex flex-col space-y-1 text-sm">
+                            <!-- MFG -->
+                            <div class="flex justify-between items-center">
+                                <span class="font-semibold text-gray-600">MFG:</span>
+                                <span class="font-medium">{{ data.mfgcode || '-' }}</span>
+                            </div>
+
+                            <!-- Size -->
+                            <div class="flex justify-between items-center">
+                                <span class="font-semibold text-gray-600">Size:</span>
+                                <span class="font-medium">{{ data.tyresize || '-' }}</span>
+                            </div>
+
+                            <!-- Spec -->
+                            <div class="flex justify-between items-center">
+                                <span class="font-semibold text-gray-600">Spec:</span>
+                                <span class="font-medium">{{ data.tyrespec || '-' }}</span>
+                            </div>
+
+                            <!-- Week -->
+                            <div class="flex justify-between items-center" v-if="data.weekcode">
+                                <span class="font-semibold text-gray-600">Week:</span>
+                                <span class="font-medium">{{ data.weekcode }}</span>
+                            </div>
+
+                            <!-- Show message if all empty -->
+                            <div v-if="!data.mfgcode && !data.tyresize && !data.tyrespec && !data.weekcode" class="text-center text-gray-400 py-1">-</div>
+                        </div>
+                    </template>
+                </Column>
+
+                <Column field="registered_on" header="Registered Date" style="min-width: 6rem" sortable>
                     <template #body="{ data }">
                         {{ formatDate(data.registered_on) }}
                     </template>
@@ -105,34 +159,35 @@
 </template>
 
 <script setup>
-import { onMounted, ref } from 'vue';
+import { onMounted, ref, computed, watch } from 'vue';
 import api from '@/service/api';
 import { FilterMatchMode } from '@primevue/core/api';
 import LoadingPage from '@/components/LoadingPage.vue';
+import Calendar from 'primevue/calendar';
+import Button from 'primevue/button';
+import ProgressSpinner from 'primevue/progressspinner';
 
-// Data variables
+// 🟢 State Management
 const listData = ref([]);
-const initialLoading = ref(true); // For initial page load
-const tableLoading = ref(false); // For table operations
+const initialLoading = ref(true);
+const tableLoading = ref(false);
+const dateRange = ref([null, null]);
+const hasDateFilterApplied = ref(false);
 
-// Filters for quick search
+// 🟢 Filters
 const filters = ref({
     global: { value: null, matchMode: FilterMatchMode.CONTAINS }
 });
 
-onMounted(async () => {
+// 🟢 Fetch Data
+const fetchWarrantyData = async () => {
     try {
-        initialLoading.value = true;
         tableLoading.value = true;
 
-        // Call the warranty_registration/normal API endpoint
         const response = await api.post('warranty_registration/normal', {
             status: 1,
-            admin_data: [] // You can pass empty array or filter criteria if needed
+            admin_data: []
         });
-
-        // Debug: Log the response to see the structure
-        console.log('API Response:', response);
 
         if (response.data.status === 1 && Array.isArray(response.data.admin_data)) {
             listData.value = response.data.admin_data.map((warranty) => ({
@@ -145,38 +200,99 @@ onMounted(async () => {
                 tyresize: warranty.tyresize || 'N/A',
                 tyrespec: warranty.tyrespec || 'N/A',
                 weekcode: warranty.weekcode || 'N/A',
-                registered_on: warranty.registered_on || 'N/A',
+                registered_on: warranty.registered_on || null,
                 status: warranty.status || 0
             }));
-            
-            console.log('Processed data:', listData.value);
         } else {
-            console.error('API returned error or invalid data:', response.data);
             listData.value = [];
         }
     } catch (error) {
         console.error('Error fetching Warranty registration list:', error);
         listData.value = [];
     } finally {
-        initialLoading.value = false;
         tableLoading.value = false;
+    }
+};
+
+// 🟢 Watch date range changes
+watch(
+    dateRange,
+    (newRange, oldRange) => {
+        if (newRange[0] && newRange[1]) {
+            hasDateFilterApplied.value = true;
+        } else if (newRange[0] === null && newRange[1] === null && hasDateFilterApplied.value) {
+            // Clear the flag when both dates are cleared
+            hasDateFilterApplied.value = false;
+        }
+    },
+    { deep: true }
+);
+
+// 🟢 Computed - Filter data by date range
+const filteredData = computed(() => {
+    if (!hasDateFilterApplied.value) {
+        return [];
+    }
+
+    let filtered = [...listData.value];
+
+    // Apply date range filter based on registered_on date
+    if (dateRange.value[0] && dateRange.value[1]) {
+        filtered = filtered.filter((item) => {
+            if (!item.registered_on || item.registered_on === 'N/A') return false;
+
+            try {
+                // Convert registered_on (DD/MM/YYYY) to Date object
+                const [day, month, year] = item.registered_on.split('/');
+                const orderDate = new Date(`${year}-${month}-${day}`);
+                orderDate.setHours(0, 0, 0, 0);
+
+                const startDate = dateRange.value[0] ? new Date(dateRange.value[0]) : null;
+                const endDate = dateRange.value[1] ? new Date(dateRange.value[1]) : null;
+
+                if (startDate) startDate.setHours(0, 0, 0, 0);
+                if (endDate) endDate.setHours(23, 59, 59, 999);
+
+                const isAfterStart = !startDate || orderDate >= startDate;
+                const isBeforeEnd = !endDate || orderDate <= endDate;
+
+                return isAfterStart && isBeforeEnd;
+            } catch (error) {
+                console.error('Error parsing date:', item.registered_on, error);
+                return false;
+            }
+        });
+    }
+
+    return filtered;
+});
+
+// 🟢 Initial load
+onMounted(async () => {
+    try {
+        initialLoading.value = true;
+        await fetchWarrantyData();
+    } catch (error) {
+        console.error('Error in initial load:', error);
+    } finally {
+        initialLoading.value = false;
     }
 });
 
+// 🟢 Helper Functions
 function formatDate(dateString) {
     if (!dateString || dateString === 'N/A') return 'N/A';
-    
+
     try {
         // Handle DD/MM/YYYY format
         const [day, month, year] = dateString.split('/');
-        
-        // Validate date components
+
         if (!day || !month || !year) return dateString;
-        
+
         const date = new Date(`${year}-${month}-${day}`);
-        
+
         if (isNaN(date.getTime())) return dateString;
-        
+
         return date.toLocaleDateString('en-MY', {
             year: 'numeric',
             month: '2-digit',
@@ -191,6 +307,12 @@ function formatDate(dateString) {
 const getOverallStatusSeverity = (status) => {
     return status === 0 ? 'success' : 'danger';
 };
+
+// 🟢 Clear Date Range
+const clearDateRange = () => {
+    dateRange.value = [null, null];
+    hasDateFilterApplied.value = false;
+};
 </script>
 
 <style scoped lang="scss">
@@ -202,22 +324,21 @@ const getOverallStatusSeverity = (status) => {
     font-weight: bold;
 }
 
-// Rounded table styles
 :deep(.rounded-table) {
     border-radius: 12px;
     overflow: hidden;
     border: 1px solid #e5e7eb;
-    
+
     .p-datatable-header {
         border-top-left-radius: 12px;
         border-top-right-radius: 12px;
     }
-    
+
     .p-paginator-bottom {
         border-bottom-left-radius: 12px;
         border-bottom-right-radius: 12px;
     }
-    
+
     .p-datatable-thead > tr > th {
         &:first-child {
             border-top-left-radius: 12px;
@@ -226,8 +347,7 @@ const getOverallStatusSeverity = (status) => {
             border-top-right-radius: 12px;
         }
     }
-    
-    // For the last row in the table body
+
     .p-datatable-tbody > tr:last-child > td {
         &:first-child {
             border-bottom-left-radius: 0;
@@ -236,17 +356,17 @@ const getOverallStatusSeverity = (status) => {
             border-bottom-right-radius: 0;
         }
     }
-    
-    // When table is empty
+
     .p-datatable-tbody > tr.p-datatable-emptymessage > td {
         border-bottom-left-radius: 12px;
         border-bottom-right-radius: 12px;
     }
-    
-    // Style for the tyre info column
-    .tyre-info-cell {
-        line-height: 1.4;
-        font-size: 0.875rem;
+}
+
+/* Custom styling for the date filter */
+:deep(.p-calendar) {
+    .p-inputtext {
+        padding: 0.5rem;
     }
 }
 </style>
