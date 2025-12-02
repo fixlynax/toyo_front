@@ -13,12 +13,15 @@
                 :rows="10"
                 :rowsPerPageOptions="[5, 10, 20]"
                 dataKey="id"
+                removableSort
                 :rowHover="true"
                 :loading="tableLoading"
                 :filters="filters"
                 filterDisplay="menu"
                 :globalFilterFields="['gameNo', 'gameName', 'title', 'type', 'publishDate', 'status']"
                 class="rounded-table"
+                currentPageReportTemplate="Showing {first} to {last} of {totalRecords} entries"
+                paginatorTemplate="CurrentPageReport FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink RowsPerPageDropdown"
             >
                 <template #header>
                     <div class="flex items-center justify-between gap-4 w-full flex-wrap">
@@ -51,7 +54,7 @@
                     </div>
                 </template>
 
-                <Column field="gameNo" header="Game No" style="min-width: 6rem">
+                <Column field="gameNo" header="Game No" style="min-width: 6rem" sortable="">
                     <template #body="{ data }">
                         <RouterLink :to="`/marketing/detailGame/${data.id}`" class="hover:underline font-bold text-primary-400">
                             {{ data.gameNo }}
@@ -78,12 +81,12 @@
                         {{ formatDate(data.endDate) }}
                     </template>
                 </Column>
-                <Column field="publishDate" header="Publish Date" style="min-width: 6rem">
+                <Column field="publishDate" header="Publish Date" style="min-width: 6rem" sortable>
                     <template #body="{ data }">
                         {{formatDate(data.publishDate) }}
                     </template>
                 </Column>
-                <Column field="Total Participant" header="Total Participant" style="min-width: 6rem">
+                <Column field="Total Participant" header="Total Participant" style="min-width: 6rem" sortable>
                     <template #body="{ data }">
                         {{ data.totalParticipant }}
                     </template>

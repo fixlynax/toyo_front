@@ -365,12 +365,12 @@ const model = ref([
             },
             {
                 label: 'Billing ',
-                icon: 'pi pi-fw pi-list',
+                icon: 'pi pi-fw pi-file',
                 to: '/billing/listBilling'
             },
             {
                 label: 'E-Billing',
-                icon: 'pi pi-fw pi-envelope',
+                icon: 'pi pi-fw pi-file-check',
                 to: '/billing/listEbilling'
             },
             {
@@ -380,7 +380,7 @@ const model = ref([
             },
             {
                 label: 'Others',
-                icon: 'pi pi-fw pi-briefcase',
+                icon: 'pi pi-fw pi-folder',
                 to: '/billing/listOther'
             },
             {
@@ -390,7 +390,7 @@ const model = ref([
             },
             {
                 label: 'Messaging',
-                icon: 'pi pi-fw pi-envelope',
+                icon: 'pi pi-fw pi-send',
                 to: '/billing/listMessaging'
             }
         ]

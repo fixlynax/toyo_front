@@ -594,14 +594,14 @@ function mapFormToFormData(formData) {
     formDataObj.append('salesOffice', formData.salesOffice || '');
     formDataObj.append('salesDistrict', formData.salesDistrict || '');
     formDataObj.append('shippingCond', formData.shippingCond || '');
-    formDataObj.append('accountStatus', '1');
+    formDataObj.append('accountStatus', formData.accountStatus || '');
     formDataObj.append('accountLastUpdate', formData.accountLastUpdate || '');
     formDataObj.append('accountCreation', formData.accountCreation || new Date().toISOString().split('T')[0]);
     formDataObj.append('showOnList', formData.showOnList || '0');
     formDataObj.append('isFamilyChannel', formData.ifFamilyChannel || '0');
     formDataObj.append('allowLalamove', formData.allowLalamove || '0');
     formDataObj.append('allowDirectship', formData.allowDirectShipment || '0'); // FIXED: Changed from allowDirectShipment
-    formDataObj.append('status', '1');
+    formDataObj.append('status', 1);
     formDataObj.append('startingSalesAmt', formData.startingSalesAmt || '0');
 
     // Target Sales - FIXED: Use correct field names

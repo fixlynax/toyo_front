@@ -115,12 +115,13 @@ const exportToCSV = () => {
         // Use filtered data for export
         const exportData = filteredList.value.map((item) => ({
             'Ref No': item.refNo,
+            'Submission Date': item.claimDate,
             'Dealer Name': item.dealerName,
-            'Claim Type': item.claimType,
-            'Submission Date': item.submissionDate,
             'Warranty Cert No': item.warrantyRegCertNo,
-            Status: item.status,
-            Stage: item.stage
+            'Dealer Sales Office': item.dealer_sales_office,
+            'Claim Type': item.claimType,
+            'Status': item.status,
+            'Stage': item.stage
         }));
 
         if (exportData.length === 0) {
@@ -196,7 +197,7 @@ onMounted(fetchClaims);
                 :rowHover="true"
                 :filters="filters"
                 filterDisplay="menu"
-                :globalFilterFields="['refNo', 'dealerName', 'claimTypeDisplay', 'claimDate', 'status', 'stage', 'warrantyRegCertNo']"
+                :globalFilterFields="['refNo', 'dealerName', 'claimTypeDisplay', 'dealer_sales_office', 'claimDate', 'status', 'stage', 'warrantyRegCertNo']"
                 paginatorTemplate="CurrentPageReport FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink RowsPerPageDropdown"
                 currentPageReportTemplate="Showing {first} to {last} of {totalRecords} entries"
             >
@@ -227,8 +228,8 @@ onMounted(fetchClaims);
                     </template>
                 </Column>
 
-                <Column field="submissionDate" header="Submission Date" style="min-width: 15rem" sortable>
-                    <template #body="{ data }">{{ data?.submissionDate ? formatDate(data.submissionDate) : 'Not Assigned' }}</template>
+                <Column field="claimDate" header="Submission Date" style="min-width: 15rem" sortable>
+                    <template #body="{ data }">{{ data?.claimDate ? formatDate(data.claimDate) : 'Not Assigned' }}</template>
                 </Column>
 
                 <Column field="dealerName" header="Dealer Name" style="min-width: 12rem" sortable>
