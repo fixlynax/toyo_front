@@ -172,7 +172,7 @@
                             </tbody>
                         </table>
                     </div>
-                    <div v-if="!orderDelList.driverInformation && canUpdate" class="flex justify-end mt-3">
+                    <!-- <div v-if="!orderDelList.driverInformation && canUpdate" class="flex justify-end mt-3">
                         <Button  
                             style="width: auto !important"
                             label="Update Collector Information"
@@ -180,8 +180,8 @@
                             class="p-button-sm p-button-warning"
                             @click="confirmUpdatePickup(orderDelList)"
                         />
-                    </div>
-                    <div v-if="orderDelList.driverInformation && !orderDelList?.driverInformation?.pickup_datetime && canUpdate" class="flex justify-end mt-3">
+                    </div> -->
+                    <div v-if="!orderDelList?.driverInformation?.pickup_datetime && canUpdate" class="flex justify-end mt-3">
                         <Button  
                             style="width: auto !important"
                             label="Update Pickup Date"
