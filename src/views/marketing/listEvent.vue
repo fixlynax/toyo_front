@@ -13,14 +13,16 @@
                 :rows="10"
                 :rowsPerPageOptions="[10, 25, 50, 100]"
                 dataKey="id"
+                removableSort
                 :rowHover="true"
                 :loading="tableLoading"
                 :filters="filters"
                 filterDisplay="menu"
                 :globalFilterFields="['title', 'location', 'publishDate', 'period', 'isSurvey', 'status']"
                 class="rounded-table"
+                currentPageReportTemplate="Showing {first} to {last} of {totalRecords} entries"
+                paginatorTemplate="CurrentPageReport FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink RowsPerPageDropdown"
             >
-            
                 <template #header>
                     <div class="flex items-center justify-between gap-4 w-full flex-wrap">
                         <!-- Left: Search Field + Cog Button -->
@@ -73,7 +75,7 @@
                 </Column>
 
                 <Column field="period" header="Period" style="min-width: 8rem">
-                    <template #body="{ data }"> {{formatDate(data.startDate) }} - {{ formatDate(data.endDate) }} </template>
+                    <template #body="{ data }"> {{ formatDate(data.startDate) }} - {{ formatDate(data.endDate) }} </template>
                 </Column>
 
                 <Column field="isSurvey" header="Survey" style="min-width: 6rem">
@@ -115,7 +117,6 @@ onMounted(async () => {
         tableLoading.value = true;
 
         const response = await api.get('event/eventList');
-
 
         if (response.data.status === 1 && Array.isArray(response.data.admin_data)) {
             listData.value = response.data.admin_data.map((event) => ({
@@ -176,17 +177,17 @@ const getOverallStatusSeverity = (status) => {
     border-radius: 12px;
     overflow: hidden;
     border: 1px solid #e5e7eb;
-    
+
     .p-datatable-header {
         border-top-left-radius: 12px;
         border-top-right-radius: 12px;
     }
-    
+
     .p-paginator-bottom {
         border-bottom-left-radius: 12px;
         border-bottom-right-radius: 12px;
     }
-    
+
     .p-datatable-thead > tr > th {
         &:first-child {
             border-top-left-radius: 12px;
@@ -195,7 +196,7 @@ const getOverallStatusSeverity = (status) => {
             border-top-right-radius: 12px;
         }
     }
-    
+
     // For the last row in the table body
     .p-datatable-tbody > tr:last-child > td {
         &:first-child {
@@ -205,7 +206,7 @@ const getOverallStatusSeverity = (status) => {
             border-bottom-right-radius: 0;
         }
     }
-    
+
     // When table is empty
     .p-datatable-tbody > tr.p-datatable-emptymessage > td {
         border-bottom-left-radius: 12px;

@@ -13,12 +13,15 @@
                 :rows="10"
                 :rowsPerPageOptions="[5, 10, 20]"
                 dataKey="id"
+                removableSort
                 :rowHover="true"
                 :loading="tableLoading"
                 :filters="filters"
                 filterDisplay="menu"
                 :globalFilterFields="['campaignNo', 'title', 'publishDate', 'period', 'totalSub', 'status']"
                 class="rounded-table"
+                currentPageReportTemplate="Showing {first} to {last} of {totalRecords} entries"
+                paginatorTemplate="CurrentPageReport FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink RowsPerPageDropdown"
             >
                 <!-- ========================= -->
                 <!-- Header Section -->
@@ -54,7 +57,7 @@
                     </div>
                 </template>
 
-                <Column field="campaignNo" header="Campaign No" style="min-width: 8rem">
+                <Column field="campaignNo" header="Campaign No" style="min-width: 8rem" sortable>
                     <template #body="{ data }">
                         <RouterLink :to="`/marketing/detailCampaign/${data.id}`" class="hover:underline font-bold text-primary-400">
                             {{ data.campaignNo }}
@@ -68,7 +71,7 @@
                     </template>
                 </Column>
 
-                <Column field="publishDate" header="Publish Date" style="min-width: 6rem">
+                <Column field="publishDate" header="Publish Date" style="min-width: 6rem" sortable>
                     <template #body="{ data }">{{ data?.publishDate ? formatDate(data.publishDate) : 'Not Assigned' }}</template>
                 </Column>
 
@@ -76,7 +79,7 @@
                     <template #body="{ data }"> {{ formatDate(data.startDate) }} - {{formatDate(data.endDate) }} </template>
                 </Column>
 
-                <Column field="totalSub" header="Total Sub" style="min-width: 6rem">
+                <Column field="totalSub" header="Total Sub" style="min-width: 6rem" sortable>
                     <template #body="{ data }">
                         {{ data.totalSub }}
                     </template>
