@@ -2,7 +2,7 @@
     <Fluid>
         <div class="flex flex-col md:flex-row gap-8">
             <!-- Left Column - Customer Info & Order Items -->
-            <div class="md:w-2/3 flex flex-col gap-6">
+            <div class="md:w-2/3 flex flex-col">
                 <!-- Customer Information Card -->
                 <div class="card flex flex-col gap-6 w-full">
                     <div class="flex items-center gap-2 border-b pb-3">
@@ -89,10 +89,10 @@
             </div>
 
             <!-- Right Column - Advance Info & Shipping/Pickup Info -->
-            <div class="md:w-1/3 flex flex-col gap-6">
+            <div class="md:w-1/3 flex flex-col">
                 <!-- Advance Info Card -->
                 <div class="card flex flex-col w-full">
-                    <div class="flex items-center justify-between border-b pb-3 mb-4">
+                    <div class="flex items-center justify-between border-b pb-3">
                         <div class="text-2xl font-bold text-gray-800">Advance Info</div>
                         <Tag :value="orderStatusText" :severity="orderStatusSeverity" />
                     </div>
@@ -166,7 +166,7 @@
 
                 <!-- Shipping Info Card (for DELIVER type) -->
                 <div v-if="orderData.deliveryType === 'DELIVER'" class="card flex flex-col w-full">
-                    <div class="flex items-center justify-between border-b pb-3 mb-4">
+                    <div class="flex items-center justify-between border-b pb-3 ">
                         <div class="text-2xl font-bold text-gray-800">Shipping Info</div>
                     </div>
                     <div class="overflow-x-auto">
