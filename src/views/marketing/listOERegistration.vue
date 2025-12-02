@@ -38,7 +38,7 @@
                                 </IconField>
                             </div>
                             <div>
-                                <Button label="Export" icon="pi pi-upload" class="p-button-info" />
+                                <Button label="Export" icon="pi pi-upload" class="p-button-info" :loading="exportLoading" @click="exportToExcel" />
                             </div>
                         </div>
                     </div>
@@ -173,6 +173,7 @@ const initialLoading = ref(true);
 const tableLoading = ref(false);
 const dateRange = ref([null, null]);
 const hasDateFilterApplied = ref(false);
+const exportLoading = ref(false);
 
 // 🟢 Filters
 const filters = ref({
@@ -263,6 +264,52 @@ const filteredData = computed(() => {
 
     return filtered;
 });
+
+const exportToExcel = () => {
+    if (filteredData.value.length === 0) {
+        toast.add({ severity: 'warn', summary: 'Warning', detail: 'No data to export', life: 3000 });
+        return;
+    }
+
+    try {
+        // Create worksheet data
+        const headers = ['OE Cert No', 'TC Member Code', 'TC Member Name', 'Vehicle Number', 'MFG', 'Size', 'Spec', 'Week', 'Registered Date', 'Status'];
+
+        // Prepare data rows
+        const csvData = filteredData.value.map((oe) => [
+                `"${oe.oe_cert_no || ''}"`,
+                `"${oe.member_code || ''}"`,
+                `"${oe.full_name || ''}"`,
+                `"${oe.vehicle_no || ''}"`,
+                `"${oe.mfgcode  || ''}"`,
+                `"${oe.tyresize || ''}"`,
+                `"${oe.tyrespec || ''}"`,
+                `"${oe.weekcode || ''}"`,
+                `"${oe.registered_on || ''}"`,
+                `"${oe.status || ''}"`
+        ]);
+
+        // Combine headers and data
+        const csvContent = [headers.join(','), ...csvData.map((row) => row.join(','))].join('\n');
+
+        // Create and download the file
+        const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+        const link = document.createElement('a');
+        const url = URL.createObjectURL(blob);
+
+        link.setAttribute('href', url);
+        link.setAttribute('download', `OE_Registration_List_${new Date().toISOString().split('T')[0]}.csv`);
+        link.style.visibility = 'hidden';
+
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+
+        URL.revokeObjectURL(url);
+    } catch (error) {
+        console.error('Error exporting to Excel:', error);
+    }
+};
 
 // 🟢 Initial load
 onMounted(async () => {

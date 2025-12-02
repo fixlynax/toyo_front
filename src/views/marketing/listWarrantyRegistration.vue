@@ -40,7 +40,7 @@
                             </div>
 
                             <div>
-                                <Button label="Export" icon="pi pi-upload" class="p-button-info" />
+                                <Button label="Export" icon="pi pi-upload" class="p-button-info" :loading="exportLoading" @click="exportToExcel" />
                             </div>
                         </div>
                     </div>
@@ -172,6 +172,7 @@ const initialLoading = ref(true);
 const tableLoading = ref(false);
 const dateRange = ref([null, null]);
 const hasDateFilterApplied = ref(false);
+const exportLoading = ref(false);
 
 // 🟢 Filters
 const filters = ref({
@@ -312,6 +313,53 @@ const clearDateRange = () => {
     dateRange.value = [null, null];
     hasDateFilterApplied.value = false;
 };
+
+const exportToExcel = () => {
+    if (filteredData.value.length === 0) {
+        toast.add({ severity: 'warn', summary: 'Warning', detail: 'No data to export', life: 3000 });
+        return;
+    }
+
+    try {
+        // Create worksheet data
+        const headers = ['Warranty Cert No', 'Invoice No', 'TC Member Code','TC Member Name', 'MFG', 'Size', 'Spec', 'Week', 'Registered Date', 'Status'];
+
+        // Prepare data rows
+        const csvData = filteredData.value.map((warranty) => [
+             `"${warranty.warranty_cert_no || ''}"`,
+                `"${warranty.invoice_no || ''}"`,
+                `"${warranty.member_code || ''}"`,
+                `"${warranty.full_name || ''}"`,
+                `"${warranty.mfgcode  || ''}"`,
+                `"${warranty.tyresize || ''}"`,
+                `"${warranty.tyrespec || ''}"`,
+                `"${warranty.weekcode || ''}"`,
+                `"${warranty.registered_on || ''}"`,
+                `"${warranty.status || ''}"`
+        ]);
+
+        // Combine headers and data
+        const csvContent = [headers.join(','), ...csvData.map((row) => row.join(','))].join('\n');
+
+        // Create and download the file
+        const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+        const link = document.createElement('a');
+        const url = URL.createObjectURL(blob);
+
+        link.setAttribute('href', url);
+        link.setAttribute('download', `Waranty_Registration_List_${new Date().toISOString().split('T')[0]}.csv`);
+        link.style.visibility = 'hidden';
+
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+
+        URL.revokeObjectURL(url);
+    } catch (error) {
+        console.error('Error exporting to Excel:', error);
+    }
+};
+
 </script>
 
 <style scoped lang="scss">
