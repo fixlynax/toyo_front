@@ -149,10 +149,10 @@
                 </Column>
                 <Column v-if="showPickupColumn && canUpdate" field="" header="Action" style="min-width: 10rem">
                     <template #body="{ data }">
-                        <div v-if="!data.driverInformation" class="flex justify-center">
+                        <!-- <div v-if="!data.driverInformation" class="flex justify-center">
                             <Button icon="pi pi-pencil" class="p-button-sm p-button-text p-button-warning" @click="confirmUpdatePickup(data)" />
-                        </div>
-                        <div v-else class="flex justify-center">
+                        </div> -->
+                        <div class="flex justify-center">
                             <Button icon="pi pi-calendar" class="p-button-sm p-button-text p-button-warning" @click="confirmUpdatePickup2(data)" />
                         </div>
                     </template>

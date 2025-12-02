@@ -16,12 +16,15 @@
                 :rows="10"
                 :rowsPerPageOptions="[5, 10, 20]"
                 dataKey="id"
+                removableSort
                 :rowHover="true"
                 :loading="tableLoading"
                 :filters="filters"
                 filterDisplay="menu"
                 :globalFilterFields="['etenUserID', 'firstName', 'lastName', 'gender', 'race', 'state', 'level', 'memberSince', 'lastLogin', 'status']"
                 class="rounded-table"
+                currentPageReportTemplate="Showing {first} to {last} of {totalRecords} entries"
+                paginatorTemplate="CurrentPageReport FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink RowsPerPageDropdown"
             >
                 <template #header>
                     <div class="flex items-center justify-between gap-4 w-full flex-wrap">

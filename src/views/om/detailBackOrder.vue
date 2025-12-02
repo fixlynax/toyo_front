@@ -2,7 +2,7 @@
     <Fluid>
         <div class="flex flex-col md:flex-row gap-8">
             <!-- LEFT SIDE -->
-            <div class="md:w-2/3 flex flex-col gap-2">
+            <div class="md:w-2/3 flex flex-col">
                 <!-- CUSTOMER INFORMATION -->
                 <div class="card flex flex-col gap-6 w-full">
                     <div class="flex items-center gap-2 border-b pb-2">
@@ -188,10 +188,10 @@
             </div>
 
             <!-- RIGHT SIDE -->
-            <div class="md:w-1/3 flex flex-col gap-2">
+            <div class="md:w-1/3 flex flex-col">
                 <!-- ADVANCE INFO -->
                 <div class="card flex flex-col w-full">
-                    <div class="flex items-center justify-between border-b pb-3 mb-4">
+                    <div class="flex items-center justify-between border-b pb-3">
                         <div class="text-2xl font-bold text-gray-800">Advance Info</div>
                         <Tag :value="getBackOrderStatusText(order.orderstatus)" :severity="getBackOrderStatusSeverity(order.orderstatus)" />
                     </div>
@@ -258,7 +258,7 @@
 
                 <!-- SHIPPING INFO -->
                 <div class="card flex flex-col w-full mb-4">
-                    <div class="flex items-center justify-between border-b pb-3 mb-4">
+                    <div class="flex items-center justify-between border-b pb-3">
                         <div class="text-2xl font-bold text-gray-800">Shipping Info</div>
                     </div>
 

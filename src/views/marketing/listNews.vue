@@ -13,12 +13,15 @@
                 :rows="10"
                 :rowsPerPageOptions="[10, 25, 50, 100]"
                 dataKey="id"
+                removableSort
                 :rowHover="true"
                 :loading="tableLoading"
                 :filters="filters"
                 filterDisplay="menu"
                 :globalFilterFields="['title', 'publishDate', 'period', 'audience', 'viewer', 'status']"
                 class="rounded-table"
+                currentPageReportTemplate="Showing {first} to {last} of {totalRecords} entries"
+                paginatorTemplate="CurrentPageReport FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink RowsPerPageDropdown"
             >
                 <template #header>
                     <div class="flex items-center justify-between gap-4 w-full flex-wrap">

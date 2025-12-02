@@ -354,7 +354,7 @@
                         <!-- Account Details -->
                         <div class="flex items-center justify-between px-2 mt-2">
                             <div class="flex items-center gap-2 text-gray-700">
-                                <i class="pi pi-folder text-green-500"></i>
+                                <i class="pi pi-id-card text-green-500"></i>
                                 <span>Account Detail</span>
                             </div>
                             <RouterLink to="/billing/listAccountDetail">
@@ -365,7 +365,7 @@
                         <!-- Billing -->
                         <div class="flex items-center justify-between px-2">
                             <div class="flex items-center gap-2 text-gray-700">
-                                <i class="pi pi-folder text-blue-500"></i>
+                                <i class="pi pi-file text-blue-500"></i>
                                 <span>Billing</span>
                             </div>
                             <RouterLink to="/billing/listBilling">
@@ -376,7 +376,7 @@
                         <!-- Staff Billing -->
                         <div class="flex items-center justify-between px-2 mt-2">
                             <div class="flex items-center gap-2 text-gray-700">
-                                <i class="pi pi-folder text-purple-500"></i>
+                                <i class="pi pi-file-check text-purple-500"></i>
                                 <span>E-Billing</span>
                             </div>
                             <RouterLink to="/billing/listEbilling">
@@ -387,7 +387,7 @@
                         <!-- Statement -->
                         <div class="flex items-center justify-between px-2 mt-2">
                             <div class="flex items-center gap-2 text-gray-700">
-                                <i class="pi pi-folder text-pink-500"></i>
+                                <i class="pi pi-receipt text-pink-500"></i>
                                 <span>Statement</span>
                             </div>
                             <RouterLink to="/billing/listStatement">
