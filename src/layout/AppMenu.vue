@@ -294,16 +294,11 @@ const model = ref([
                 icon: 'pi pi-fw pi-briefcase',
                 to: '/scm/listLogistic'
             },
-            {
-                label: 'Back Order',
-                icon: 'pi pi-fw pi-history',
-                to: '/scm/listSCMBackOrder'
-            },
-            {
-                label: 'TEST',
-                icon: 'pi pi-fw pi-list',
-                to: '/scm/testpagination'
-            },
+            // {
+            //     label: 'Back Order',
+            //     icon: 'pi pi-fw pi-history',
+            //     to: '/scm/listSCMBackOrder'
+            // },
         ]
     },
     {
