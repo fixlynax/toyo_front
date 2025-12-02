@@ -23,7 +23,7 @@
                         </div>
                         <div class="mt-6">
                             <span class="block text-lg font-bold text-black-700">Registered Date</span>
-                            <p class="text-lg font-medium">{{ Warranty.warranty_info?.date_registered || '-'  }}</p>
+                            <p class="text-lg font-medium">{{ formatDateOnly(Warranty.warranty_info?.date_registered || '-' ) }}</p>
                         </div>
                     </div>
                 </div>
@@ -58,7 +58,7 @@
                         </div>
                         <div class="w-full">
                             <span class="block text-xm font-bold text-black-700">Purchase Date</span>
-                            <p class="text-lg font-medium">{{ Warranty.invoice_info?.purchase_date || '-'}}</p>
+                            <p class="text-lg font-medium">{{ formatDate(Warranty.invoice_info?.purchase_date) || '-'}}</p>
                         </div>
                     </div>
                 </div>
@@ -103,10 +103,10 @@
                             <span class="block text-xm font-bold text-black-700">Tyre Description</span>
                             <p class="text-lg font-medium">{{ Warranty.tire_info?.tire_desc || '-'  }}</p>
                         </div>
-                        <div class="w-full">
+                        <!-- <div class="w-full">
                             <span class="block text-xm font-bold text-black-700">Serial Plate No</span>
                             <p class="text-lg font-medium">{{ Warranty.tire_info?.mfgCode || '-'  }}</p>
-                        </div>
+                        </div> -->
                     </div>
                 </div>
             </div>
@@ -156,7 +156,7 @@
                             <tbody>
                                 <tr class="border-b">
                                     <td class="px-4 py-3 font-medium text-gray-600">Tyre Purchase Date</td>
-                                    <td class="px-4 py-3 text-right font-semibold text-gray-800">{{ Warranty.invoice_info?.purchase_date || '-' }}</td>
+                                    <td class="px-4 py-3 text-right font-semibold text-gray-800">{{ formatDate(Warranty.invoice_info?.purchase_date || '-' )}}</td>
                                 </tr>
                                 <tr class="border-b">
                                     <td class="px-4 py-3 font-medium text-gray-600">Invoice Number</td>
@@ -257,6 +257,34 @@ const processPrivateImages = async () => {
         }
     }
 };
+
+function formatDate(dateString) {
+    if (!dateString) return '';
+
+    // DD-MM-YYYY
+    const [day, month, year] = dateString.split('-');
+    const date = new Date(`${year}-${month}-${day}`);
+
+    if (isNaN(date.getTime())) return '';
+
+    return date.toLocaleDateString('en-MY', {
+        year: 'numeric',
+        month: '2-digit',
+        day: '2-digit'
+    });
+}
+
+
+function formatDateOnly(dateString) {
+    const date = new Date(dateString);
+    if (isNaN(date)) return '';
+    
+    const day = String(date.getDate()).padStart(2, '0');
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const year = date.getFullYear();
+
+    return `${day}/${month}/${year}`;
+}
 
 onMounted(() => {
     fetchWarrantyDetails();

@@ -63,7 +63,8 @@ const handleSubmit = (event) => {
 <template>
     <div class="flex min-h-screen bg-primary-500 font-sans">
         <!-- Left Side: Background with overlay -->
-        <div class="hidden md:flex w-2/3 relative items-center justify-center overflow-hidden" style="clip-path: ellipse(130% 91% at 99% 10%)">
+            <Toast position="top-right" />
+    <div class="hidden md:flex w-2/3 relative items-center justify-center overflow-hidden" style="clip-path: ellipse(130% 91% at 99% 10%)">
             <img :src="randomImage" alt="Background" class="absolute inset-0 w-full h-full object-cover scale-110 blur-sm transition-transform duration-700 ease-in-out hover:scale-115 hover:blur-0" />
             <div class="absolute inset-0 bg-black/30"></div>
 
