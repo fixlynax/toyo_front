@@ -72,7 +72,7 @@
                     <div class="grid grid-cols-1 md:grid-cols-2 mt-6 mb-4">
                         <div>
                             <span class="block text-sm font-bold text-black-700">Company Name</span>
-                            <p class="font-medium text-lg">{{ `${returnList.dealer.dealer_shop.companyName1} ${returnList.dealer.dealer_shop.companyName2} ${returnList.dealer.dealer_shop.companyName3} ${returnList.dealer.dealer_shop?.companyName4}` }}</p>
+                            <p class="font-medium text-lg">{{ `${returnList.dealer.dealer_shop.companyName1} ${returnList.dealer.dealer_shop.companyName2}` }}</p>
                         </div>
                         <div>
                             <span class="block text-sm font-bold text-black-700">Account Number</span>
@@ -214,6 +214,7 @@
       v-model:visible="openDialog"
       modal
       :style="{ width: '400px' }"
+      :closable="!loadingUpdate" 
     >
       <div class="flex flex-col gap-3">
         <!-- Schedule Date -->
@@ -226,7 +227,7 @@
 
         <!-- Actions -->
         <div class="flex justify-end gap-2 mt-3">
-          <Button label="Cancel" class="p-button-text" @click="openDialog = false" />
+          <Button label="Cancel" class="p-button-text" :loading="loadingUpdate"  @click="openDialog = false" />
           <Button label="Save" class="p-button-success" :loading="loadingUpdate" @click="savePickup" />
         </div>
       </div>
@@ -237,6 +238,7 @@
       v-model:visible="openDialog2"
       modal
       :style="{ width: '400px' }"
+      :closable="!loadingUpdate2" 
     >
       <div class="flex flex-col gap-3">
 
@@ -248,7 +250,7 @@
         />
 
         <div class="flex justify-end gap-2 mt-3">
-          <Button label="Cancel" class="p-button-text" @click="openDialog2 = false" />
+          <Button label="Cancel" class="p-button-text" :loading="loadingUpdate2"  @click="openDialog2 = false" />
           <Button label="Save" class="p-button-success" :loading="loadingUpdate2" @click="saveRecieve" />
         </div>
       </div>
@@ -331,11 +333,12 @@ const form2 = ref({
 
 // Save function
 const savePickup = async () => {
+
   if (!form.value.pickupdate) {
     toast.add({ severity: 'warn', summary: 'Warning', detail: 'Please select date', life: 3000 });
     return;
   }
-
+    loadingUpdate.value = true;
 
   try {
     const payload = {
@@ -355,6 +358,7 @@ const savePickup = async () => {
     toast.add({ severity: 'error', summary: 'Error', detail: 'API error', life: 3000 });
     }finally{
         openDialog.value = false;
+        loadingUpdate.value = false;
     }
 };
 
@@ -364,6 +368,7 @@ const saveRecieve = async () => {
     toast.add({ severity: 'warn', summary: 'Warning', detail: 'Please select date', life: 3000 });
     return;
   }
+    loadingUpdate2.value = true;
 
   try {
     const payload = {
@@ -371,18 +376,19 @@ const saveRecieve = async () => {
       receivedate: formatDateApi(form2.value.receivedate),
     //   deliveredtime: formatTimeApi(form2.value.deliverytime)
     };
-    const res = await api.post('update-delivered-order', payload);
+    const res = await api.post('update-receive-return-order', payload);
     if (res.data?.status === 1) {
         toast.add({ severity: 'success', summary: 'Updated', detail: 'Recieve date updated successfully', life: 3000 });
         InitfetchData(); // refresh table
     } else {
-        toast.add({ severity: 'error', summary: 'Error', detail: res.data?.error || 'Failed', life: 3000 });
+        toast.add({ severity: 'error', summary: 'Error', detail: res.data?.admin_data[0].sap_error.error_message || 'Failed', life: 3000 });
     }
     } catch (err) {
     console.error(err);
     toast.add({ severity: 'error', summary: 'Error', detail: 'API error', life: 3000 });
     }finally{
         openDialog2.value = false;
+        loadingUpdate2.value = false;
     }
 
 };
