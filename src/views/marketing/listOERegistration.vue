@@ -37,6 +37,9 @@
                                     <InputText v-model="filters['global'].value" placeholder="Quick Search" class="w-full" />
                                 </IconField>
                             </div>
+                            <div>
+                                <Button label="Export" icon="pi pi-upload" class="p-button-info" />
+                            </div>
                         </div>
                     </div>
 

@@ -39,10 +39,9 @@
                                 <!-- <Button type="button" icon="pi pi-cog" class="p-button" /> -->
                             </div>
 
-                            <!-- Right: Create Warranty Button (currently commented) -->
-                            <!-- <RouterLink to="/marketing/createWarranty">
-                                <Button type="button" label="Create" />
-                            </RouterLink> -->
+                            <div>
+                                <Button label="Export" icon="pi pi-upload" class="p-button-info" />
+                            </div>
                         </div>
                     </div>
                     <div class="flex items-center gap-4 flex-wrap mt-4">
