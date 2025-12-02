@@ -61,10 +61,10 @@ const handleSubmit = (event) => {
     <!-- Left Side: Background with overlay -->
     <div
       class="hidden md:flex w-2/3 relative items-center justify-center overflow-hidden"
-      style="clip-path: ellipse(150% 90% at 99% 10%);"
+      style="clip-path: ellipse(130% 91% at 99% 10%);"
     >
       <img
-        src="https://www.toyotires.com.my/wp-content/uploads/2023/02/Toyo-Japan-Trip-Day-4-380-scaled.jpg"
+        src="/demo/images/Toyo-Japan-Trip-Day-4-380-scaled.jpg"
         alt="Background"
         class="absolute inset-0 w-full h-full object-cover transition-transform duration-700 ease-in-out hover:scale-105"
       />
