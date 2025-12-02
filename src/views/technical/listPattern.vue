@@ -103,6 +103,8 @@ import { ref, onMounted, computed } from 'vue';
 import { FilterMatchMode } from '@primevue/core/api';
 import api from '@/service/api';
 import { useMenuStore } from '@/store/menu';
+import { useToast } from 'primevue/usetoast';
+const toast = useToast();
 
 const menuStore = useMenuStore();
 const canUpdate = computed(() => menuStore.canWrite('Pattern List'));
@@ -183,7 +185,7 @@ const fetchExportPattern = async () => {
     try {
         loading.value = true;
 
-        const response = await api.getDownload('excel/export-material-pattern', {
+        const response = await api.postExtra('excel/export-material-pattern',{}, {
             responseType: 'arraybuffer'
         });
 
@@ -216,7 +218,7 @@ const handleImport = async (event) => {
         importLoading.value = true;
         
         const formData = new FormData();
-        formData.append('material_pattern_excel : file', file);
+        formData.append('material_pattern_excel', file);
         const response = await api.postExtra('excel/import-material-pattern', formData, {
             headers: {
                 'Content-Type': 'multipart/form-data'
@@ -291,8 +293,7 @@ const processCatalogueImages = async (catalogueItems) => {
 
     return processedItems;
 };
-
-onMounted(async () => {
+const fetchData = async () => {
     try {
         loading.value = true;
 
@@ -322,6 +323,9 @@ onMounted(async () => {
     } finally {
         loading.value = false;
     }
+}
+onMounted(async () => {
+    fetchData();
 });
 </script>
 <style scoped>
