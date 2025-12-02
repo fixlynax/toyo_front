@@ -2236,8 +2236,8 @@ const generateReport = (report) => {
 
             <table class="small-table">
                 <tr>
-                    <td><strong>CUSTOMER :</strong> ${report.customer.custAccountNo}</td>
-                    <td><strong>BRANCH :</strong> ${report.branch.phoneNo}</td>
+                    <td><strong>CUSTOMER :</strong> ${report.customer.custAccountNo || '-'}</td>
+                    <td><strong>BRANCH :</strong> ${report.branch.phoneNo || '-'}</td>
                     <td><strong>WARRANTY CLAIM FORM</strong></td>
                 </tr>
                 <tr>
@@ -2271,7 +2271,7 @@ const generateReport = (report) => {
                             <tr>
                                 <td style="border:0;width: 100px;">WCF NO</td>
                                 <td style="border:0; width:10px;">:</td>
-                                <td style="border:0;">${report.claim_ref_no}</td>
+                                <td style="border:0;">${report.claim_ref_no || '-'}</td>
                             </tr>
                             <tr>
                                 <td style="border:0;">CLAIM STATUS</td>
@@ -2281,7 +2281,7 @@ const generateReport = (report) => {
                             <tr>
                                 <td style="border:0;">CLAIM DATE</td>
                                 <td style="border:0;">:</td>
-                                <td style="border:0;">${report.claim_date}</td>
+                                <td style="border:0;">${report.claim_date || '-'}</td>
                             </tr>
                         </table>
                     </td>
@@ -2331,17 +2331,17 @@ const generateReport = (report) => {
 
                 <div class="signature-box">
                     <strong>ADJUSTED BY</strong><br>
-                    ${report.adjustor.role}<br><br>
-                    <div>NAME : ${report.adjustor.fullName}</div><br>
-                    <div>DATE :${report.adjustor.approve_on}</div><br>
+                    ${report.adjustor?.role || ''}<br><br>
+                    <div>NAME : ${report.adjustor?.fullName || ''}</div><br>
+                    <div>DATE :${report.adjustor?.approve_on || ''}</div><br>
                     <div class="signature-line">Signature</div>
                 </div>
 
                 <div class="signature-box">
                     <strong>APPROVED BY</strong><br>
-                    ${report.approver.role}<br><br>
-                    <div>NAME :  ${report.approver.fullName}</div><br>
-                    <div>DATE : ${report.approver.approve_on}</div><br>
+                    ${report.approver?.role || ''}<br><br>
+                    <div>NAME :  ${report.approver?.fullName || ''}</div><br>
+                    <div>DATE : ${report.approver?.approve_on || ''}</div><br>
                     <div class="signature-line">Signature</div>
                 </div>
                             

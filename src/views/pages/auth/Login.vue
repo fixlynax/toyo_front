@@ -59,6 +59,7 @@ const handleSubmit = (event) => {
 <template>
   <div class="flex min-h-screen bg-primary-500 font-sans">
     <!-- Left Side: Background with overlay -->
+        <Toast position="top-right" />
     <div
       class="hidden md:flex w-2/3 relative items-center justify-center overflow-hidden"
       style="clip-path: ellipse(150% 90% at 99% 10%);"
