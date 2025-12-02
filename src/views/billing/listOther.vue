@@ -60,7 +60,7 @@
                             />
                             <Button icon="pi pi-refresh" class="p-button-info p-button-sm" @click="refreshData" :disabled="loading" v-tooltip="'Refresh data'" />
                             <Button type="button" icon="pi pi-upload" label="Upload" class="p-button-info p-button-sm" @click="handleUploadClick" :loading="uploadLoading" :disabled="uploadLoading" />
-                            <input type="file" ref="fileInputRef" @change="handleFileUpload" accept=".pdf,.jpg,.jpeg,.png,.doc,.docx" style="display: none" />
+                            <input type="file" ref="fileInputRef" @change="handleFileUpload" accept=".pdf,.jpg,.jpeg,.png,.doc,.docx" style="display: none" multiple />
                         </div>
                     </div>
 
@@ -75,7 +75,7 @@
                             </div>
                             <Button v-if="dateRange[0] || dateRange[1]" icon="pi pi-times" class="p-button-text p-button-sm" @click="clearDateRange" title="Clear date filter" />
                         </div>
-                        <div v-if="!hasDateFilterApplied" class="text-sm text-blue-600 italic">Select a date range to filter by document date</div>
+                        <div v-if="!hasDateFilterApplied" class="text-sm text-blue-600 italic">Select a date range to view other files</div>
                     </div>
                 </div>
             </template>
@@ -155,6 +155,97 @@
                 </template>
             </Column>
         </DataTable>
+
+        <!-- Upload Progress Dialog -->
+        <Dialog v-model:visible="uploadDialogVisible" modal header="Upload Files" :style="{ width: '500px' }" :closable="false" :closeOnEscape="false">
+            <div class="upload-dialog-content">
+                <!-- Overall Progress -->
+                <div v-if="uploadSummary.pending > 0" class="mb-4">
+                    <div class="flex justify-between mb-2">
+                        <span class="font-medium">Overall Progress</span>
+                        <span>{{ uploadProgress }}%</span>
+                    </div>
+                    <ProgressBar :value="uploadProgress" />
+                </div>
+
+                <!-- Files List -->
+                <div class="files-list max-h-60 overflow-y-auto">
+                    <div
+                        v-for="(file, index) in uploadingFiles"
+                        :key="index"
+                        class="file-item p-3 border-b border-gray-200 last:border-b-0"
+                        :class="{
+                            'bg-green-50': file.status === 'success',
+                            'bg-red-50': file.status === 'error',
+                            'bg-blue-50': file.status === 'uploading'
+                        }"
+                    >
+                        <div class="flex items-center justify-between">
+                            <div class="file-info">
+                                <div class="font-medium truncate max-w-xs">{{ file.name }}</div>
+                                <div class="text-sm text-gray-500">
+                                    {{ formatFileSize(file.size) }}
+                                    <span class="mx-2">•</span>
+                                    <span
+                                        :class="{
+                                            'text-green-600': file.status === 'success',
+                                            'text-red-600': file.status === 'error',
+                                            'text-blue-600': file.status === 'uploading',
+                                            'text-gray-500': file.status === 'pending'
+                                        }"
+                                    >
+                                        {{ file.status === 'success' ? 'Success' : file.status === 'error' ? 'Failed' : file.status === 'uploading' ? 'Uploading...' : 'Pending' }}
+                                    </span>
+                                </div>
+                            </div>
+                            <div class="file-status">
+                                <i v-if="file.status === 'success'" class="pi pi-check-circle text-green-500 text-xl"></i>
+                                <i v-else-if="file.status === 'error'" class="pi pi-times-circle text-red-500 text-xl"></i>
+                                <i v-else-if="file.status === 'uploading'" class="pi pi-spin pi-spinner text-blue-500 text-xl"></i>
+                                <i v-else class="pi pi-clock text-gray-400 text-xl"></i>
+                            </div>
+                        </div>
+
+                        <!-- Error message -->
+                        <div v-if="file.error" class="mt-2 text-sm text-red-600 bg-red-50 p-2 rounded">
+                            {{ file.error }}
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Summary -->
+                <div class="mt-4 pt-4 border-t border-gray-200">
+                    <div class="grid grid-cols-3 gap-4 text-center">
+                        <div>
+                            <div class="text-2xl font-bold text-blue-600">{{ uploadSummary.total }}</div>
+                            <div class="text-sm text-gray-500">Total</div>
+                        </div>
+                        <div>
+                            <div class="text-2xl font-bold text-green-600">{{ uploadSummary.success }}</div>
+                            <div class="text-sm text-gray-500">Success</div>
+                        </div>
+                        <div>
+                            <div class="text-2xl font-bold text-red-600">{{ uploadSummary.failed }}</div>
+                            <div class="text-sm text-gray-500">Failed</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <template #footer>
+                <Button label="Close" icon="pi pi-times" @click="closeUploadDialog" class="p-button-text" :disabled="uploadSummary.pending > 0" />
+                <Button
+                    label="Refresh List"
+                    icon="pi pi-refresh"
+                    @click="
+                        refreshData();
+                        closeUploadDialog();
+                    "
+                    class="p-button-success"
+                    v-if="uploadSummary.pending === 0 && uploadSummary.success > 0"
+                />
+            </template>
+        </Dialog>
     </div>
 </template>
 
@@ -166,6 +257,8 @@ import LoadingPage from '@/components/LoadingPage.vue';
 import { useToast } from 'primevue/usetoast';
 import Calendar from 'primevue/calendar';
 import Button from 'primevue/button';
+import Dialog from 'primevue/dialog';
+import ProgressBar from 'primevue/progressbar';
 
 const toast = useToast();
 
@@ -185,6 +278,14 @@ const uploadLoading = ref(false);
 const fileInputRef = ref(null);
 const dateRange = ref([null, null]);
 const hasDateFilterApplied = ref(false);
+
+// Upload progress state
+const uploadProgress = ref(0);
+const uploadDialogVisible = ref(false);
+const uploadingFiles = ref([]);
+const totalFilesToUpload = ref(0);
+const successfullyUploaded = ref(0);
+const failedUploads = ref(0);
 
 // Selection state for bulk download
 const selectedFiles = ref([]);
@@ -357,10 +458,18 @@ const OtherService = {
         return mimeTypes[extension] || 'application/octet-stream';
     },
 
-    async uploadFile(file) {
+    async uploadFile(files) {
         try {
             const formData = new FormData();
-            formData.append('file', file);
+
+            // Append each file
+            if (Array.isArray(files)) {
+                files.forEach((file) => {
+                    formData.append('file[]', file);
+                });
+            } else {
+                formData.append('file', files);
+            }
 
             const response = await api.postExtra('credit/upload', formData, {
                 headers: {
@@ -423,6 +532,21 @@ const filteredData = computed(() => {
     }
 
     return filtered;
+});
+
+// 🟢 Computed - Upload Summary
+const uploadSummary = computed(() => {
+    const total = totalFilesToUpload.value;
+    const success = successfullyUploaded.value;
+    const failed = failedUploads.value;
+    const pending = total - success - failed;
+
+    return {
+        total,
+        success,
+        failed,
+        pending
+    };
 });
 
 // 🟢 Handle Download
@@ -593,60 +717,178 @@ const handleUploadClick = () => {
 };
 
 const handleFileUpload = async (event) => {
-    const file = event.target.files[0];
-    if (!file) return;
+    const files = Array.from(event.target.files);
+    if (!files.length) return;
 
-    // Validate file size (5MB)
-    if (file.size > 5 * 1024 * 1024) {
-        toast.add({
-            severity: 'warn',
-            summary: 'File Too Large',
-            detail: 'File size must be less than 5MB',
-            life: 5000
+    // Validate each file
+    const validFiles = [];
+    const invalidFiles = [];
+
+    files.forEach((file) => {
+        // Validate file size (5MB)
+        if (file.size > 5 * 1024 * 1024) {
+            invalidFiles.push({
+                file,
+                reason: 'File size must be less than 5MB'
+            });
+            return;
+        }
+
+        // Validate file type
+        const allowedTypes = ['application/pdf', 'image/jpeg', 'image/png', 'application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'];
+
+        const allowedExtensions = ['.pdf', '.jpg', '.jpeg', '.png', '.doc', '.docx'];
+        const fileExtension = '.' + file.name.split('.').pop().toLowerCase();
+
+        if (!allowedTypes.includes(file.type) && !allowedExtensions.includes(fileExtension)) {
+            invalidFiles.push({
+                file,
+                reason: 'Invalid file type. Allowed: PDF, JPEG, PNG, DOC, DOCX'
+            });
+            return;
+        }
+
+        validFiles.push(file);
+    });
+
+    // Show validation errors
+    if (invalidFiles.length > 0) {
+        invalidFiles.forEach(({ file, reason }) => {
+            toast.add({
+                severity: 'warn',
+                summary: 'Invalid File',
+                detail: `${file.name}: ${reason}`,
+                life: 5000
+            });
         });
-        return;
     }
 
-    // Validate file type
-    const allowedTypes = ['application/pdf', 'image/jpeg', 'image/png', 'application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'];
-    if (!allowedTypes.includes(file.type)) {
-        toast.add({
-            severity: 'warn',
-            summary: 'Invalid File Type',
-            detail: 'Please select a valid file type (PDF, JPEG, PNG, DOC, DOCX)',
-            life: 5000
-        });
-        return;
-    }
-
-    uploadLoading.value = true;
-    try {
-        const result = await OtherService.uploadFile(file);
-        console.log('Upload successful:', result);
-
-        // Refresh the list after successful upload
-        await refreshData();
-
-        toast.add({
-            severity: 'success',
-            summary: 'Upload Successful',
-            detail: 'File has been uploaded successfully',
-            life: 3000
-        });
-
-        // Reset file input
+    if (validFiles.length === 0) {
         event.target.value = '';
+        return;
+    }
+
+    // Initialize upload dialog
+    uploadDialogVisible.value = true;
+    uploadLoading.value = true;
+    uploadingFiles.value = validFiles.map((file) => ({
+        name: file.name,
+        size: file.size,
+        status: 'pending',
+        progress: 0,
+        error: null
+    }));
+    totalFilesToUpload.value = validFiles.length;
+    successfullyUploaded.value = 0;
+    failedUploads.value = 0;
+    uploadProgress.value = 0;
+
+    try {
+        // Create FormData
+        const formData = new FormData();
+        validFiles.forEach((file) => {
+            formData.append('file[]', file);
+        });
+
+        // Configure axios for progress tracking
+        const config = {
+            headers: {
+                'Content-Type': 'multipart/form-data'
+            },
+            onUploadProgress: (progressEvent) => {
+                if (progressEvent.total) {
+                    uploadProgress.value = Math.round((progressEvent.loaded * 100) / progressEvent.total);
+                }
+            }
+        };
+
+        // Update file statuses
+        uploadingFiles.value = uploadingFiles.value.map((file) => ({
+            ...file,
+            status: 'uploading',
+            progress: 0
+        }));
+
+        // Upload files
+        const response = await api.postExtra('credit/upload', formData, config);
+
+        if (response.data.status === 1) {
+            // Update status for each file
+            response.data.files.forEach((uploadedFile, index) => {
+                if (uploadingFiles.value[index]) {
+                    uploadingFiles.value[index].status = 'success';
+                    uploadingFiles.value[index].progress = 100;
+                    successfullyUploaded.value++;
+                }
+            });
+
+            toast.add({
+                severity: 'success',
+                summary: 'Upload Successful',
+                detail: `${successfullyUploaded.value} of ${totalFilesToUpload.value} files uploaded successfully`,
+                life: 5000
+            });
+
+            // Refresh the list after successful upload
+            await refreshData();
+        } else {
+            throw new Error(response.data.message || 'Upload failed');
+        }
     } catch (error) {
         console.error('Upload failed:', error);
+
+        // Update failed files
+        uploadingFiles.value = uploadingFiles.value.map((file) => ({
+            ...file,
+            status: 'error',
+            error: error.message || 'Upload failed',
+            progress: 0
+        }));
+        failedUploads.value = totalFilesToUpload.value - successfullyUploaded.value;
+
         toast.add({
             severity: 'error',
             summary: 'Upload Failed',
-            detail: error.message || 'Failed to upload file. Please try again.',
+            detail: error.response?.data?.message || 'Failed to upload files. Please try again.',
             life: 5000
         });
     } finally {
         uploadLoading.value = false;
+
+        // Reset file input
+        event.target.value = '';
+
+        // Auto-close dialog after 3 seconds if all files are processed
+        if (successfullyUploaded.value + failedUploads.value === totalFilesToUpload.value) {
+            setTimeout(() => {
+                uploadDialogVisible.value = false;
+                // Reset upload state after dialog closes
+                setTimeout(() => {
+                    uploadingFiles.value = [];
+                    uploadProgress.value = 0;
+                }, 300);
+            }, 3000);
+        }
     }
+};
+
+// Add a method to manually close upload dialog
+const closeUploadDialog = () => {
+    uploadDialogVisible.value = false;
+    uploadingFiles.value = [];
+    uploadProgress.value = 0;
+    successfullyUploaded.value = 0;
+    failedUploads.value = 0;
+    totalFilesToUpload.value = 0;
+};
+
+// 🟢 Helper function to format file size
+const formatFileSize = (bytes) => {
+    if (bytes === 0) return '0 Bytes';
+    const k = 1024;
+    const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+    const i = Math.floor(Math.log(bytes) / Math.log(k));
+    return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
 };
 
 // 🟢 Initial load
@@ -780,6 +1022,36 @@ const clearDateRange = () => {
 :deep(.p-calendar) {
     .p-inputtext {
         padding: 0.5rem;
+    }
+}
+
+/* Upload Dialog Styles */
+:deep(.upload-dialog-content) {
+    .p-progressbar {
+        height: 6px;
+        border-radius: 3px;
+    }
+
+    .file-item {
+        transition: all 0.3s ease;
+    }
+
+    .files-list::-webkit-scrollbar {
+        width: 6px;
+    }
+
+    .files-list::-webkit-scrollbar-track {
+        background: #f1f1f1;
+        border-radius: 3px;
+    }
+
+    .files-list::-webkit-scrollbar-thumb {
+        background: #c1c1c1;
+        border-radius: 3px;
+    }
+
+    .files-list::-webkit-scrollbar-thumb:hover {
+        background: #a8a8a8;
     }
 }
 </style>
