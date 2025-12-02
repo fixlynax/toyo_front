@@ -355,7 +355,7 @@
                         <div class="flex items-center justify-between px-2 mt-2">
                             <div class="flex items-center gap-2 text-gray-700">
                                 <i class="pi pi-folder text-green-500"></i>
-                                <span>Account Details</span>
+                                <span>Account Detail</span>
                             </div>
                             <RouterLink to="/billing/listAccountDetail">
                                 <Button label="Go" size="small" />
@@ -377,7 +377,7 @@
                         <div class="flex items-center justify-between px-2 mt-2">
                             <div class="flex items-center gap-2 text-gray-700">
                                 <i class="pi pi-folder text-purple-500"></i>
-                                <span>E-invoice Billing</span>
+                                <span>E-Billing</span>
                             </div>
                             <RouterLink to="/billing/listEbilling">
                                 <Button label="Go" size="small" />
@@ -399,7 +399,7 @@
                         <div class="flex items-center justify-between px-2 mt-2">
                             <div class="flex items-center gap-2 text-gray-700">
                                 <i class="pi pi-folder text-orange-500"></i>
-                                <span>Other</span>
+                                <span>Others</span>
                             </div>
                             <RouterLink to="/billing/listOther">
                                 <Button label="Go" size="small" />
