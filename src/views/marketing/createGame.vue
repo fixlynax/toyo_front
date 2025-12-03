@@ -139,9 +139,21 @@
                                         </div>
                                         <div class="flex flex-col">
                                             <span class="font-semibold text-gray-800">{{ slotProps.option.prizeName }}</span>
-                                            <small class="text-gray-500">{{ slotProps.option.prizeType }}</small>
+                                            <small class="text-gray-500">{{ slotProps.option.prizeType }} • Available: {{ slotProps.option.availableqty }}</small>
                                         </div>
                                     </div>
+                                </template>
+                                <template #value="slotProps">
+                                    <div v-if="slotProps.value" class="flex items-center gap-3">
+                                        <div class="w-8 h-8 flex items-center justify-center bg-gray-100 rounded border">
+                                            <img :src="slotProps.value.processedImageURL" :alt="slotProps.value.prizeName" class="max-w-full max-h-full object-contain" />
+                                        </div>
+                                        <div>
+                                            <span class="font-semibold text-gray-800">{{ slotProps.value.prizeName }}</span>
+                                            <small class="block text-gray-500">{{ slotProps.value.prizeType }} • Available: {{ slotProps.value.availableqty }}</small>
+                                        </div>
+                                    </div>
+                                    <span v-else class="text-gray-400">Select Prize</span>
                                 </template>
                             </Dropdown>
                             <small v-if="errors[`prize_${index}`]" class="text-red-500">{{ errors[`prize_${index}`] }}</small>
@@ -211,6 +223,7 @@ const imageFiles = ref({
     image2: null,
     image3: null
 });
+
 
 const errors = ref({});
 
@@ -300,7 +313,7 @@ const fetchCatalog = async () => {
                 prizeName: item.title, // Map 'title' to 'prizeName'
                 prizeType: item.type, // Map 'type' to 'prizeType'
                 prizeQuota: item.totalqty,
-                prizeRemain: item.availableqty,
+                availableqty: item.availableqty,
                 description: item.description,
                 valueAmount: item.valueAmount,
                 valueType: item.valueType,
@@ -330,6 +343,7 @@ const fetchCatalog = async () => {
         });
     }
 };
+
 
 // Initialize data
 onMounted(() => {
