@@ -404,7 +404,8 @@
 import { ref, computed, onMounted } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { useToast } from 'primevue/usetoast';
-import { useConfirm } from 'primevue/useconfirm'; // Added useConfirm
+import { useConfirm } from 'primevue/useconfirm';
+import * as XLSX from 'xlsx'; // Import XLSX
 import api from '@/service/api';
 
 const route = useRoute();
@@ -714,12 +715,54 @@ const importPinList = () => {
 };
 
 const exportRedemptionList = () => {
-    toast.add({
-        severity: 'info',
-        summary: 'Info',
-        detail: 'Export redemption list functionality to be implemented',
-        life: 3000
-    });
+    if (!redeemList.value || redeemList.value.length === 0) {
+        toast.add({
+            severity: 'warn',
+            summary: 'No Data',
+            detail: 'No redemption data to export',
+            life: 3000
+        });
+        return;
+    }
+
+    try {
+        // Prepare data for export
+        const exportData = redeemList.value.map(item => ({
+            'Member Code': item.member_code || '-',
+            'Member Name': item.full_name || '-',
+            'Date Redeemed': formatDate(item.redeem_on) || '-'
+        }));
+
+        // Create worksheet
+        const worksheet = XLSX.utils.json_to_sheet(exportData);
+        
+        // Create workbook
+        const workbook = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(workbook, worksheet, 'Redemption List');
+        
+        // Generate filename with date
+        const date = new Date();
+        const formattedDate = date.toISOString().split('T')[0];
+        const fileName = `Redemption_List_${formattedDate}.xlsx`;
+        
+        // Export to Excel
+        XLSX.writeFile(workbook, fileName);
+        
+        toast.add({
+            severity: 'success',
+            summary: 'Export Successful',
+            detail: `Redemption list exported as ${fileName}`,
+            life: 3000
+        });
+    } catch (error) {
+        console.error('Export failed:', error);
+        toast.add({
+            severity: 'error',
+            summary: 'Export Failed',
+            detail: 'Failed to export redemption list',
+            life: 3000
+        });
+    }
 };
 
 const addStock = async () => {
