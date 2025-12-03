@@ -535,7 +535,7 @@ const exportToExcel = () => {
 
     try {
         // Create worksheet data
-        const headers = ['Created', 'SAP DO No', 'Customer Name', 'Customer Acc No', 'Storage Location', 'City', 'State', 'Order Type', 'Eta Date', 'Planned Date', 'Delivered Date', 'Status'];
+        const headers = ['Created', 'SAP DO No', 'Customer Name', 'Customer Acc No', 'Storage Location', 'City', 'State', 'Order Type', 'Driver Name', 'Driver IC', 'Driver Contact', 'Driver Truck Plate', 'Eta Date', 'Planned Date', 'Delivered Date', 'Status' , 'Item'];
 
         // Prepare data rows
         const csvData = orderDelList.value.map((data) => [
@@ -547,10 +547,15 @@ const exportToExcel = () => {
             `"${data.shipto_data?.city || '-'}"`,
             `"${data.shipto_data?.state || '-'}"`,
             `"${data.orderDesc || '-'}"`,
+            `"${data.scm_deliver_detail?.driverName || '-'}"`,
+            `"${data.scm_deliver_detail?.driverIC || '-'}"`,
+            `"${data.scm_deliver_detail?.driverContactNo || '-'}"`,
+            `"${data.scm_deliver_detail?.driverPlateNo || '-'}"`,
             `"${formatDate(data.deliveryDate)}"`,
             `"${data.scm_deliver_detail?.scheduled_delivery_time ? formatDate(data.scm_deliver_detail?.scheduled_delivery_time) : 'No date assigned'}"`,
             `"${data.scm_deliver_detail?.delivered_datetime ? formatDate(data.scm_deliver_detail?.delivered_datetime) : 'No date assigned'}"`,
-            `"${getStatusLabel2(data.status) || '-'}"`
+            `"${getStatusLabel2(data.status) || '-'}"`,
+            `"${data.fullfill_order_array?.map(item => `materialid:${item.materialid}, itemno:${item.itemno}, itemcategory:${item.itemcategory}, plant:${item.plant}, qty:${parseFloat(item.qty)}, salesprogramid:${item.salesprogramid || '-'}`).join('\n') || '-'}"`
         ]);
 
         // Combine headers and data

@@ -31,7 +31,7 @@
                 :loading="loading"
                 :filters="filters"
                 filterDisplay="menu"
-                :globalFilterFields="['claimRefno', 'created', 'deliveryDate', 'scheduleDeliveryDate', 'status', 'deliveryDate']"
+                :globalFilterFields="['claimRefno', 'created', 'custname', 'custaccountno','city','storagelocation','state', 'deliveryDate', 'scheduleDeliveryDate', 'status', 'deliveryDate']"
                 paginatorTemplate="CurrentPageReport FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink RowsPerPageDropdown"
                 currentPageReportTemplate="Showing {first} to {last} of {totalRecords} entries"
             >
@@ -108,6 +108,28 @@
                         <RouterLink :to="`/scm/detailReturnList/${data?.id}`" class="hover:underline font-bold text-primary">
                             {{ data?.claimRefno ?? '-' }}
                         </RouterLink>
+                    </template>
+                </Column>
+                <Column field="custname" header="Ship-To" dataType="date" style="min-width: 8rem" sortable>
+                    <template #body="{ data }">
+                        <span class="font-bold">{{ data?.custname || '-' }}</span>
+                        <br />
+                        {{ data?.custaccountno ?? '-' }}
+                    </template>
+                </Column>
+                <Column field="storagelocation" header="Storage Location" style="max-width: 8rem" sortable>
+                    <template #body="{ data }">
+                        {{ data?.storagelocation ?? '-' }}
+                    </template>
+                </Column>
+                <Column field="city" header="City" style="max-width: 8rem" sortable>
+                    <template #body="{ data }">
+                        {{ data?.city.replace(/,$/, '') ?? '-' }}
+                    </template>
+                </Column>
+                <Column field="state" header="State" style="max-width: 8rem" sortable>
+                    <template #body="{ data }">
+                        {{ data?.state ?? '-' }}
                     </template>
                 </Column>
                 <Column field="scheduleDeliveryDate" header="Delivery Date" style="min-width: 8rem" sortable>
