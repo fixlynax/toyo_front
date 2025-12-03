@@ -3,7 +3,6 @@
         <div class="flex flex-col md:flex-row gap-8">
             <!-- Left Content -->
             <div class="md:w-2/3">
-               
                 <div v-if="catalogue.type === 'EWALLET'" class="card flex flex-col w-full">
                     <!-- Header -->
                     <div class="flex items-center justify-between border-b pb-3 mb-6">
@@ -47,8 +46,8 @@
 
                                 <!-- Action Buttons -->
                                 <div class="flex gap-4 items-end w-full md:w-72">
-                                    <Button icon="pi pi-plus" class="p-button-text text-green-600 w-10 h-10 flex items-center justify-center" v-tooltip="'Add PIN'" @click="addPin" />
-                                    <Button icon="pi pi-minus" class="p-button-text text-yellow-600 w-10 h-10 flex items-center justify-center" v-tooltip="'Remove PIN'" @click="removePin" />
+                                    <!-- <Button icon="pi pi-plus" class="p-button-text text-green-600 w-10 h-10 flex items-center justify-center" v-tooltip="'Add PIN'" @click="addPin" />
+                                    <Button icon="pi pi-minus" class="p-button-text text-yellow-600 w-10 h-10 flex items-center justify-center" v-tooltip="'Remove PIN'" @click="removePin" /> -->
                                     <Button icon="pi pi-file-export" label="Export" v-tooltip="'Export PIN List'" @click="exportPinList" />
                                     <Button icon="pi pi-file-import" label="Import" v-tooltip="'Import PIN List'" @click="importPinList" />
                                 </div>
@@ -80,8 +79,20 @@
                                 </span>
                             </template>
                         </Column>
+                        <!-- Actions -->
+                        <Column header="Actions" style="min-width: 4rem; text-align: center">
+                            <template #body="{ data }">
+                                <Button 
+                                    icon="pi pi-trash" 
+                                    class="p-button-text p-button-danger" 
+                                    @click="removeDealer(data)"
+                                    :loading="deletingDealerId === data.id"
+                                    :disabled="deletingDealerId === data.id"
+                                />
+                            </template>
+                        </Column>
                     </DataTable>
-                    
+
                     <!-- Set Point Button -->
                     <div class="flex flex-row items-center gap-2 mt-4">
                         <Button label="Set Cost Redeem" class="p-button" size="small" style="width: auto" @click="showSetDialog = true" />
@@ -104,7 +115,6 @@
                     </Dialog>
                 </div>
 
-              
                 <div v-else-if="catalogue.type === 'EVOUCHER'" class="card flex flex-col w-full">
                     <!-- Header -->
                     <div class="flex items-center justify-between border-b pb-3 mb-6">
@@ -169,7 +179,6 @@
                     </Dialog>
                 </div>
 
-            
                 <div v-else-if="catalogue.type === 'ITEM'" class="card flex flex-col w-full">
                     <!-- Header -->
                     <div class="flex items-center justify-between border-b pb-3 mb-6">
@@ -262,7 +271,6 @@
                     </Dialog>
                 </div>
 
-               
                 <div class="card flex flex-col w-full mt-8">
                     <!-- Header -->
                     <div class="flex items-center justify-between border-b pb-3 mb-4">
@@ -329,13 +337,11 @@
                             <p class="text-base text-gray-700">{{ catalogue.instruction }}</p>
                         </div>
                     </div>
-                    
+
                     <div class="flex justify-end mt-8">
-                        <div class="w-auto" v-if="catalogue.status === 1">
-                            <Button label="Inactivate" class="p-button-danger" size="small" @click="toggleStatus(2)" />
-                        </div>
-                        <div class="w-auto" v-if="catalogue.status === 2">
-                            <Button label="Activate" class="p-button-success" size="small" @click="toggleStatus(1)" />
+                        <div class="flex justify-end">
+                            <!-- In template, bind to a local ref instead -->
+                            <ToggleButton v-model="localStatus" @change="toggleCatalogStatus" onLabel="Active" offLabel="Inactive" onIcon="pi pi-check" offIcon="pi pi-times" class="w-30" />
                         </div>
                     </div>
                 </div>
@@ -464,10 +470,10 @@ const fetchCatalogueDetails = async () => {
     try {
         const catalogueId = route.params.id;
         const response = await api.get(`catalog/details/${catalogueId}`);
-        
+
         if (response.data.status === 1 && response.data.admin_data) {
             catalogue.value = response.data.admin_data;
-            
+
             // Process image URL
             if (catalogue.value.imageURL) {
                 try {
@@ -480,12 +486,11 @@ const fetchCatalogueDetails = async () => {
             } else {
                 processedImageURL.value = 'https://via.placeholder.com/300x200?text=No+Image';
             }
-            
+
             // Initialize point values for dialog
             silverPoint.value = catalogue.value.point1 || 0;
             goldPoint.value = catalogue.value.point2 || 0;
             platinumPoint.value = catalogue.value.point3 || 0;
-            
         } else {
             throw new Error('Invalid response format');
         }
@@ -505,7 +510,7 @@ const fetchCatalogueDetails = async () => {
 // Computed properties
 const processedPins = computed(() => {
     if (!catalogue.value.ewallet_pin) return [];
-    return catalogue.value.ewallet_pin.map(pin => ({
+    return catalogue.value.ewallet_pin.map((pin) => ({
         ...pin,
         pincode: maskPin(pin.pincode)
     }));
@@ -513,7 +518,7 @@ const processedPins = computed(() => {
 
 const usedPins = computed(() => {
     if (!catalogue.value.ewallet_pin) return 0;
-    return catalogue.value.ewallet_pin.filter(pin => pin.status === 'REDEEMED').length;
+    return catalogue.value.ewallet_pin.filter((pin) => pin.status === 'REDEEMED').length;
 });
 
 const redeemList = computed(() => {
@@ -584,46 +589,84 @@ const getExpiryClass = (expiryDate) => {
 
 const formatType = (type) => {
     const typeMap = {
-        'EWALLET': 'E-Wallet',
-        'EVOUCHER': 'E-Voucher',
-        'ITEM': 'Item'
+        EWALLET: 'E-Wallet',
+        EVOUCHER: 'E-Voucher',
+        ITEM: 'Item'
     };
     return typeMap[type] || type;
 };
 
 const formatValueType = (valueType) => {
     const typeMap = {
-        'AMOUNT': 'Fixed Amount',
-        'PERCENTAGE': 'Percentage'
+        AMOUNT: 'Fixed Amount',
+        PERCENTAGE: 'Percentage'
     };
     return typeMap[valueType] || valueType;
 };
 
 const formatPurpose = (purpose) => {
     const purposeMap = {
-        'CATALOG': 'Catalog',
-        'CAMPAIGN': 'Campaign',
-        'GAME': 'Game'
+        CATALOG: 'Catalog',
+        CAMPAIGN: 'Campaign',
+        GAME: 'Game'
     };
     return purposeMap[purpose] || purpose;
 };
 
 const statusLabel = (status) => {
-    if (status === 0) return 'Draft';
+    if (status === 0) return 'Inactive';
     if (status === 1) return 'Active';
-    if (status === 2) return 'Inactive';
     return 'Unknown';
 };
 
 const statusSeverity = (status) => {
-    if (status === 0) return 'info';
+    if (status === 0) return 'danger';
     if (status === 1) return 'success';
-    if (status === 2) return 'warn';
     return 'secondary';
 };
 
 const handleImageError = (event) => {
     event.target.src = 'https://via.placeholder.com/300x200?text=No+Image';
+};
+
+const toggleCatalogStatus = async () => {
+    try {
+        const catalogueId = catalogue.value.id; // Get the ID from catalogue ref
+
+        // Determine the new status (toggle current status)
+        const newStatus = catalogue.value.status === 1 ? 0 : 1;
+
+        const response = await api.put(`catalog/toggleInactive/${catalogueId}`, {
+            status: newStatus
+        });
+
+        if (response.data.status === 1) {
+            // Update local catalogue status
+            catalogue.value.status = newStatus;
+
+            toast.add({
+                severity: 'success',
+                summary: 'Success',
+                detail: `Catalogue ${newStatus === 1 ? 'activated' : 'deactivated'} successfully`,
+                life: 3000
+            });
+        } else {
+            toast.add({
+                severity: 'error',
+                summary: 'Error',
+                detail: 'Failed to update catalogue status',
+                life: 3000
+            });
+        }
+    } catch (error) {
+        console.error('Error updating catalogue status:', error);
+        toast.add({
+            severity: 'error',
+            summary: 'Error',
+            detail: 'Failed to update catalogue status',
+            life: 3000
+        });
+    }
 };
 
 // DELETE FUNCTIONALITY - Integrated with API
@@ -639,7 +682,7 @@ const confirmDelete = () => {
             try {
                 // API call to delete catalogue - using PUT method as per API specification
                 const response = await api.put(`catalog/delete/${catalogue.value.id}`);
-                
+
                 if (response.data.status === 1) {
                     toast.add({
                         severity: 'success',
@@ -727,11 +770,7 @@ const exportToExcel = () => {
         const headers = ['Member Code', 'Member Name', 'Date Redeemed'];
 
         // Prepare data rows - use redeemList instead of processedPins
-        const csvData = redeemList.value.map((redeem) => [
-            `"${redeem.member_code || ''}"`,
-            `"${redeem.full_name || ''}"`,
-            `"${redeem.redeem_on || ''}"`
-        ]);
+        const csvData = redeemList.value.map((redeem) => [`"${redeem.member_code || ''}"`, `"${redeem.full_name || ''}"`, `"${redeem.redeem_on || ''}"`]);
 
         // Combine headers and data
         const csvContent = [headers.join(','), ...csvData.map((row) => row.join(','))].join('\n');
@@ -761,8 +800,6 @@ const exportToExcel = () => {
     }
 };
 
-
-
 const addStock = async () => {
     if (addQty.value > 0) {
         try {
@@ -771,7 +808,7 @@ const addStock = async () => {
             catalogue.value.availableqty += addQty.value;
             showAddDialog.value = false;
             addQty.value = 0;
-            
+
             toast.add({
                 severity: 'success',
                 summary: 'Success',
@@ -796,7 +833,7 @@ const removeStock = async () => {
             catalogue.value.availableqty -= removeQty.value;
             showRemoveDialog.value = false;
             removeQty.value = 0;
-            
+
             toast.add({
                 severity: 'success',
                 summary: 'Success',
@@ -821,7 +858,7 @@ const confirmSetPoint = async () => {
         catalogue.value.point2 = goldPoint.value;
         catalogue.value.point3 = platinumPoint.value;
         showSetDialog.value = false;
-        
+
         toast.add({
             severity: 'success',
             summary: 'Success',
@@ -842,7 +879,7 @@ const toggleStatus = async (newStatus) => {
     try {
         // API call to update status would go here
         catalogue.value.status = newStatus;
-        
+
         toast.add({
             severity: 'success',
             summary: 'Success',
