@@ -411,7 +411,6 @@ import { ref, computed, onMounted } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { useToast } from 'primevue/usetoast';
 import { useConfirm } from 'primevue/useconfirm';
-import * as XLSX from 'xlsx'; // Import XLSX
 import api from '@/service/api';
 
 const route = useRoute();

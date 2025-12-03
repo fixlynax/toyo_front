@@ -67,13 +67,13 @@
                         <div class="flex items-center gap-2">
                             <span class="text-sm font-medium text-gray-700">Date Range:</span>
                             <div class="flex items-center gap-2">
-                                <Calendar v-model="dateRange[0]" placeholder="Start Date" dateFormat="yy-mm-dd" showIcon class="w-40" :disabled="loading" />
+                                <Calendar v-model="dateRange[0]" placeholder="Start Date" dateFormat="yy-mm-dd" showIcon class="w-40" :disabled="loading" @date-select="handleDateChange" />
                                 <span class="text-gray-500">to</span>
-                                <Calendar v-model="dateRange[1]" placeholder="End Date" dateFormat="yy-mm-dd" showIcon class="w-40" :disabled="loading" />
+                                <Calendar v-model="dateRange[1]" placeholder="End Date" dateFormat="yy-mm-dd" showIcon class="w-40" :disabled="loading" @date-select="handleDateChange" />
                             </div>
                             <Button v-if="dateRange[0] || dateRange[1]" icon="pi pi-times" class="p-button-text p-button-sm" @click="clearDateRange" title="Clear date filter" />
                         </div>
-                        <div v-if="!hasDateFilterApplied" class="text-sm text-blue-600 italic">Select a date range to filter by document date</div>
+                        <div v-if="!hasDateFilterApplied" class="text-sm text-blue-600 italic">Select a date range to filter e-billing documents</div>
                     </div>
                 </div>
             </template>
@@ -84,7 +84,7 @@
                         <div class="flex flex-col items-center gap-2">
                             <i class="pi pi-calendar text-3xl text-blue-400"></i>
                             <span class="text-lg">Select a date range to view e-billing documents</span>
-                            <span class="text-sm text-gray-400">Choose both start and end dates to filter results</span>
+                            <span class="text-sm text-gray-400">Choose both start and end dates to load data</span>
                         </div>
                     </template>
                     <template v-else-if="hasDateFilterApplied && (!dateRange[0] || !dateRange[1])">
@@ -96,6 +96,7 @@
                     <template v-else>
                         <i class="pi pi-file-excel text-4xl mb-2"></i>
                         <div>No e-billing records found in the selected date range.</div>
+                        <Button label="Clear Filter" icon="pi pi-times" class="p-button-text p-button-sm mt-2" @click="clearDateRange" />
                     </template>
                 </div>
             </template>
@@ -187,21 +188,39 @@ const filters1 = reactive({
 });
 
 const listData = ref([]);
-const loading = ref(true);
+const loading = ref(false); // Start with false since we don't load initially
 const downloadLoading = ref(null);
 const viewLoading = ref(null);
 const error = ref(null);
 const dateRange = ref([null, null]);
 const hasDateFilterApplied = ref(false);
 
+// Debounce timer for date changes
+let debounceTimer = null;
+
 // Selection state for bulk download
 const selectedFiles = ref([]);
 
 // 🟢 API service functions for E-Billing
 const EBillingService = {
-    async getEBillingList() {
+    async getEBillingList(startDate = null, endDate = null) {
         try {
-            const response = await api.get('credit/ebilling');
+            let params = {};
+
+            // If dates are provided, format them for backend
+            if (startDate && endDate) {
+                const formatDateForAPI = (date) => {
+                    const d = new Date(date);
+                    const day = String(d.getDate()).padStart(2, '0');
+                    const month = String(d.getMonth() + 1).padStart(2, '0');
+                    const year = d.getFullYear();
+                    return `${day}/${month}/${year}`;
+                };
+
+                params.date_range = `${formatDateForAPI(startDate)} - ${formatDateForAPI(endDate)}`;
+            }
+
+            const response = await api.post('credit/ebilling', params);
             if (response.data.status === 1) {
                 // Transform the API data to match your table structure
                 return response.data.admin_data.map((item) => {
@@ -352,49 +371,84 @@ const EBillingService = {
     }
 };
 
-// 🟢 Watcher for date range changes
+// 🟢 Handle date change with debouncing
+const handleDateChange = () => {
+    // Clear any existing timer
+    if (debounceTimer) {
+        clearTimeout(debounceTimer);
+    }
+
+    // Set new timer to debounce the API call
+    debounceTimer = setTimeout(async () => {
+        // Only fetch data if both dates are selected
+        if (dateRange.value[0] && dateRange.value[1]) {
+            await loadFilteredData();
+        } else if (dateRange.value[0] === null && dateRange.value[1] === null && hasDateFilterApplied.value) {
+            // If both dates are cleared and we had data, clear the data
+            hasDateFilterApplied.value = false;
+            listData.value = [];
+            selectedFiles.value = [];
+        }
+    }, 500); // 500ms debounce delay
+};
+
+// 🟢 Load filtered data
+const loadFilteredData = async () => {
+    if (!dateRange.value[0] || !dateRange.value[1]) {
+        return;
+    }
+
+    loading.value = true;
+    error.value = null;
+    selectedFiles.value = []; // Clear selection when applying new filter
+
+    try {
+        listData.value = await EBillingService.getEBillingList(dateRange.value[0], dateRange.value[1]);
+        hasDateFilterApplied.value = true;
+
+        toast.add({
+            severity: 'success',
+            summary: 'Filter Applied',
+            detail: `Showing e-billing documents from ${formatDateForDisplay(dateRange.value[0])} to ${formatDateForDisplay(dateRange.value[1])}`,
+            life: 3000
+        });
+    } catch (err) {
+        console.error('Failed to load filtered data:', err);
+        error.value = err.message;
+        listData.value = [];
+        hasDateFilterApplied.value = false;
+
+        toast.add({
+            severity: 'error',
+            summary: 'Load Failed',
+            detail: 'Failed to load e-billing data',
+            life: 5000
+        });
+    } finally {
+        loading.value = false;
+    }
+};
+
+// 🟢 Watcher for date range changes (alternative approach)
 watch(
     dateRange,
-    (newRange, oldRange) => {
+    (newRange) => {
+        // Only trigger if both dates are set
         if (newRange[0] && newRange[1]) {
-            hasDateFilterApplied.value = true;
-        } else if (newRange[0] === null && newRange[1] === null && hasDateFilterApplied.value) {
-            hasDateFilterApplied.value = false;
+            handleDateChange();
         }
     },
     { deep: true }
 );
 
-// 🟢 Computed - Filter data by date range
+// 🟢 Computed - Filter data by search (only after date filter applied)
 const filteredData = computed(() => {
     if (!hasDateFilterApplied.value) {
         return [];
     }
 
-    let filtered = [...listData.value];
-
-    // Apply date range filter based on parsedDate
-    if (dateRange.value[0] && dateRange.value[1]) {
-        filtered = filtered.filter((item) => {
-            if (!item.parsedDate || isNaN(item.parsedDate.getTime())) return false;
-
-            const orderDate = new Date(item.parsedDate);
-            orderDate.setHours(0, 0, 0, 0);
-
-            const startDate = dateRange.value[0] ? new Date(dateRange.value[0]) : null;
-            const endDate = dateRange.value[1] ? new Date(dateRange.value[1]) : null;
-
-            if (startDate) startDate.setHours(0, 0, 0, 0);
-            if (endDate) endDate.setHours(23, 59, 59, 999);
-
-            const isAfterStart = !startDate || orderDate >= startDate;
-            const isBeforeEnd = !endDate || orderDate <= endDate;
-
-            return isAfterStart && isBeforeEnd;
-        });
-    }
-
-    return filtered;
+    // Return all data when date filter is applied (search filtering is handled by DataTable)
+    return listData.value;
 });
 
 // 🟢 Handle Download
@@ -557,38 +611,29 @@ const handleBulkDownload = async () => {
     }
 };
 
-// 🟢 Initial load
+// 🟢 Initial load - Don't load data initially, require date filter first
 onBeforeMount(async () => {
-    await loadInitialData();
+    loading.value = false; // Set loading to false since we won't load data initially
+    listData.value = []; // Initialize with empty array
+    hasDateFilterApplied.value = false; // No filter applied initially
 });
-
-const loadInitialData = async () => {
-    loading.value = true;
-    error.value = null;
-    try {
-        listData.value = await EBillingService.getEBillingList();
-    } catch (err) {
-        console.error('Failed to load e-billing data:', err);
-        error.value = err.message;
-        listData.value = [];
-
-        toast.add({
-            severity: 'error',
-            summary: 'Load Failed',
-            detail: 'Failed to load e-billing data',
-            life: 5000
-        });
-    } finally {
-        loading.value = false;
-    }
-};
 
 // 🟢 Refresh function
 const refreshData = async () => {
+    if (!hasDateFilterApplied.value) {
+        toast.add({
+            severity: 'warn',
+            summary: 'Date Filter Required',
+            detail: 'Please select a date range first',
+            life: 3000
+        });
+        return;
+    }
+
     loading.value = true;
     error.value = null;
     try {
-        listData.value = await EBillingService.getEBillingList();
+        listData.value = await EBillingService.getEBillingList(dateRange.value[0], dateRange.value[1]);
 
         toast.add({
             severity: 'success',
@@ -616,6 +661,15 @@ const formatDateForDisplay = (dateString) => {
     if (!dateString) return '';
 
     try {
+        // If dateString is a Date object from calendar
+        if (dateString instanceof Date) {
+            return dateString.toLocaleDateString('en-MY', {
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric'
+            });
+        }
+
         // Parse the date string (assuming DD/MM/YYYY format)
         if (dateString.includes('/')) {
             const [day, month, year] = dateString.split('/');
@@ -640,7 +694,15 @@ const formatDateForDisplay = (dateString) => {
 const clearDateRange = () => {
     dateRange.value = [null, null];
     hasDateFilterApplied.value = false;
-    selectedFiles.value = []; // Clear selection when clearing date filter
+    listData.value = [];
+    selectedFiles.value = [];
+
+    toast.add({
+        severity: 'info',
+        summary: 'Filter Cleared',
+        detail: 'Date filter has been cleared',
+        life: 3000
+    });
 };
 </script>
 

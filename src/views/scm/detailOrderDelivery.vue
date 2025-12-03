@@ -452,7 +452,7 @@ const saveSchedule = async () => {
     toast.add({ severity: 'warn', summary: 'Warning', detail: 'Please select date', life: 3000 });
     return;
   }
-  if (!form.value.drivername || !form.value.drivercontactnum || !form.value.drivervehicleplate || !form.value.driveric) {
+  if (!form.value.drivername || !form.value.drivervehicleplate || !form.value.driveric) {
     toast.add({ severity: 'warn', summary: 'Warning', detail: 'Please fullfill driver information', life: 3000 });
     return;
   }

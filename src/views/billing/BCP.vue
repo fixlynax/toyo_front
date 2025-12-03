@@ -2,15 +2,13 @@
     <ConfirmDialog v-if="!confirmDialogMounted" />
 
     <div class="card p-6 space-y-6">
-        <div class="text-2xl font-bold text-gray-800 border-b pb-2">
-            Business Contingency Plan (FLOW NOT CONFIRMED, NEED RECHECK)
-        </div>
+        <div class="text-2xl font-bold text-gray-800 border-b pb-2">Business Contingency Plan (BCP)</div>
 
         <!-- Step Indicators -->
-        <div class="flex items-center space-x-4">
+        <div class="flex items-center space-x-4 mb-8">
             <div class="flex items-center space-x-2">
                 <div class="w-8 h-8 rounded-full bg-blue-600 text-white flex items-center justify-center">1</div>
-                <div class="font-semibold">Customer & Order Info</div>
+                <div class="font-semibold">Enter Details</div>
             </div>
             <div class="flex-1 border-t"></div>
             <div class="flex items-center space-x-2" :class="sapDetails ? 'opacity-100' : 'opacity-40'">
@@ -20,193 +18,901 @@
             <div class="flex-1 border-t"></div>
             <div class="flex items-center space-x-2" :class="etenResult ? 'opacity-100' : 'opacity-40'">
                 <div class="w-8 h-8 rounded-full bg-blue-600 text-white flex items-center justify-center">3</div>
-                <div class="font-semibold">ETEN Order Created</div>
+                <div class="font-semibold">ETEN Created</div>
             </div>
         </div>
 
-        <!-- Step 1: Dealer & SAP Numbers -->
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <div>
-                <label class="block font-bold text-gray-700">Customer Account *</label>
-                <Dropdown v-model="form.dealerAcc" :options="dealerList" optionLabel="name" optionValue="id" filter class="w-full" />
+        <!-- Step 1: Form Inputs -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div class="space-y-2">
+                <label class="block font-bold text-gray-700">ETEN Order No *</label>
+                <InputText v-model="form.orderno" class="w-full" placeholder="e.g., ETEN001" :class="{ 'p-invalid': fieldErrors.orderno }" @input="clearFieldError('orderno')" />
+                <small v-if="fieldErrors.orderno" class="text-red-500">{{ fieldErrors.orderno }}</small>
+                <small class="text-gray-500 text-xs block">
+                    <i class="pi pi-info-circle mr-1"></i>
+                    Enter new ETEN order number to create
+                </small>
             </div>
 
-            <div>
-                <label class="block font-bold text-gray-700">SAP SO No *</label>
-                <InputText v-model="form.sapSoNo" class="w-full" />
+            <div class="space-y-2">
+                <label class="block font-bold text-gray-700">Customer Account No *</label>
+                <InputText v-model="form.custaccountno" class="w-full" placeholder="e.g., CUST001" :class="{ 'p-invalid': fieldErrors.custaccountno }" @input="clearFieldError('custaccountno')" />
+                <small v-if="fieldErrors.custaccountno" class="text-red-500">{{ fieldErrors.custaccountno }}</small>
             </div>
 
-            <div>
-                <label class="block font-bold text-gray-700">SAP NO Number *</label>
-                <InputText v-model="form.sapNoNumber" class="w-full" />
+            <div class="space-y-2">
+                <label class="block font-bold text-gray-700">SAP Sales Order No *</label>
+                <InputText v-model="form.saporderno" class="w-full" placeholder="e.g., SO123456" :class="{ 'p-invalid': fieldErrors.saporderno }" @input="clearFieldError('saporderno')" />
+                <small v-if="fieldErrors.saporderno" class="text-red-500">{{ fieldErrors.saporderno }}</small>
             </div>
         </div>
 
-        <!-- Step 1: Check duplication -->
-        <Button
-            label="Check Duplication"
-            class="w-full md:w-auto"
-            @click="checkSAPSO"
-            :loading="loading"
-            :disabled="!form.sapSoNo || !form.sapNoNumber || !form.dealerAcc"
-        />
-
-        <!-- Step 2: Enter ETEN Order No only after duplication check passed -->
-        <div v-if="allowETENInput" class="mt-4">
-            <label class="block font-bold text-gray-700">ETEN Order No *</label>
-            <InputText v-model="form.etenOrderNo" class="w-full" />
-            <Button
-                label="Show SAP Details"
-                class="mt-2"
-                @click="showSAPDetails"
-                :disabled="!form.etenOrderNo"
-            />
+        <!-- Order Description Dropdown -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div class="space-y-2">
+                <label class="block font-bold text-gray-700">Order Description *</label>
+                <Dropdown
+                    v-model="form.orderdesc"
+                    :options="orderDescOptions"
+                    optionLabel="label"
+                    optionValue="value"
+                    placeholder="Select Order Description"
+                    class="w-full"
+                    :class="{ 'p-invalid': fieldErrors.orderdesc }"
+                    @change="clearFieldError('orderdesc')"
+                />
+                <small v-if="fieldErrors.orderdesc" class="text-red-500">{{ fieldErrors.orderdesc }}</small>
+                <small class="text-gray-500 text-xs block">
+                    <i class="pi pi-info-circle mr-1"></i>
+                    Order description type for SAP
+                </small>
+            </div>
         </div>
 
-        <!-- Step 3: SAP Details and create ETEN Order -->
-        <div v-if="sapDetails" class="mt-6 border rounded p-4 bg-gray-50 space-y-4">
-            <div class="font-bold text-lg text-blue-700">SAP Sales Order Details</div>
-            <div><strong>Customer:</strong> {{ sapDetails.customer }}</div>
-            <div><strong>Total:</strong> RM {{ sapDetails.total }}</div>
-
-            <div class="font-semibold mt-2 mb-2">Items</div>
-            <DataTable :value="sapDetails.items" class="p-datatable-sm">
-                <Column field="sku" header="SKU"></Column>
-                <Column field="qty" header="Quantity"></Column>
-            </DataTable>
+        <!-- Action Buttons -->
+        <div class="flex flex-col md:flex-row gap-4 mt-8">
+            <Button label="Check SAP Details" icon="pi pi-search" class="w-full md:w-auto" @click="checkSAPDetails" :loading="loading.sapCheck" :disabled="!form.orderno || !form.custaccountno || !form.saporderno || !form.orderdesc" severity="info" />
 
             <Button
                 label="Create ETEN Order"
-                class="mt-4"
+                icon="pi pi-check"
+                class="w-full md:w-auto"
                 @click="createETENOrder"
-                :disabled="!form.etenOrderNo"
+                :loading="loading.orderCreate"
+                :disabled="!form.orderno || !sapDetails || !sapDetails.admin_data || isDuplicateOrder || !form.orderdesc"
+                severity="success"
+                :class="{ 'opacity-50': isDuplicateOrder }"
             />
+
+            <Button label="Clear Form" icon="pi pi-times" class="w-full md:w-auto p-button-outlined" @click="resetForm" severity="secondary" />
         </div>
 
-        <!-- ETEN Result -->
-        <div v-if="etenResult" class="mt-6 border rounded p-4 bg-green-50 space-y-3">
-            <div class="font-bold text-lg text-green-700">ETEN Order Created</div>
-            <div><strong>ETEN Order No:</strong> {{ etenResult.etenOrderNo }}</div>
-            <div><strong>Dealer Acc:</strong> {{ etenResult.dealerAccount }}</div>
-            <div><strong>SAP SO No:</strong> {{ etenResult.sapSoNo }}</div>
-            <div><strong>SAP NO Number:</strong> {{ etenResult.sapNoNumber }}</div>
+        <!-- Warning for duplicate order -->
+        <div v-if="isDuplicateOrder" class="mt-4 p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
+            <div class="flex items-center">
+                <i class="pi pi-exclamation-triangle mr-2 text-yellow-500"></i>
+                <div>
+                    <span class="font-medium text-yellow-700">Order Already Exists</span>
+                    <p class="text-yellow-600 text-sm mt-1">This ETEN order number already exists in the system. Please use a different ETEN order number.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Error Message -->
+        <div v-if="errorMessage" class="mt-4 p-4 bg-red-50 border border-red-200 rounded-lg">
+            <div class="flex items-center">
+                <i class="pi pi-exclamation-triangle mr-2 text-red-500"></i>
+                <div>
+                    <span class="font-medium text-red-700">Error</span>
+                    <p class="text-red-600 text-sm mt-1">{{ errorMessage }}</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Loading State for SAP Details -->
+        <div v-if="loading.sapCheck" class="mt-6 border rounded-lg p-8 bg-gray-50">
+            <div class="flex flex-col items-center justify-center space-y-4">
+                <ProgressSpinner style="width: 40px; height: 40px" strokeWidth="4" />
+                <div class="text-center">
+                    <div class="text-gray-700 font-medium">Fetching SAP Order Details</div>
+                    <div class="text-gray-500 text-sm mt-1">Checking order: {{ form.orderno }} | Customer: {{ form.custaccountno }} | SAP: {{ form.saporderno }} | Type: {{ getOrderDescLabel(form.orderdesc) }}</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Step 2: SAP Details -->
+        <div v-if="sapDetails && sapDetails.admin_data && !isDuplicateOrder" class="mt-6 border rounded-lg p-6 bg-blue-50">
+            <div class="flex items-center justify-between mb-6">
+                <div>
+                    <div class="font-bold text-xl text-blue-800">SAP Sales Order Details</div>
+                    <div class="text-blue-600 text-sm mt-1">Retrieved from SAP system - Ready to create ETEN order</div>
+                </div>
+                <Badge value="VALID" severity="success" />
+            </div>
+
+            <!-- Main Information Cards -->
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+                <div class="bg-white p-4 rounded-lg shadow-sm border border-blue-100">
+                    <div class="text-sm text-gray-500 mb-1">Customer Account</div>
+                    <div class="font-semibold text-lg text-blue-700">{{ sapDetails.admin_data.custaccountno || 'N/A' }}</div>
+                    <div class="text-sm text-gray-500 mt-1">Ship To: {{ sapDetails.admin_data.shipto || 'N/A' }}</div>
+                </div>
+
+                <div class="bg-white p-4 rounded-lg shadow-sm border border-blue-100">
+                    <div class="text-sm text-gray-500 mb-1">SAP Order No</div>
+                    <div class="font-semibold text-lg">{{ sapDetails.admin_data.saporderno || 'N/A' }}</div>
+                    <div class="text-sm text-gray-500 mt-1">Type: {{ sapDetails.admin_data.ordertype || 'N/A' }}</div>
+                </div>
+
+                <div class="bg-white p-4 rounded-lg shadow-sm border border-blue-100">
+                    <div class="text-sm text-gray-500 mb-1">ETEN Order No</div>
+                    <div class="font-semibold text-lg text-green-600">{{ sapDetails.admin_data.etenorderno || 'N/A' }}</div>
+                    <div class="text-sm text-gray-500 mt-1">Requested</div>
+                </div>
+
+                <div class="bg-white p-4 rounded-lg shadow-sm border border-blue-100">
+                    <div class="text-sm text-gray-500 mb-1">Order Description</div>
+                    <div class="font-semibold text-lg">{{ sapDetails.admin_data.orderdesc || 'N/A' }}</div>
+                    <div class="text-sm text-gray-500 mt-1">Selected: {{ form.orderdesc }}</div>
+                </div>
+            </div>
+
+            <!-- Order Details -->
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+                <div class="bg-white p-4 rounded-lg border border-blue-100">
+                    <div class="text-sm text-gray-500 mb-1">Order Dates</div>
+                    <div class="space-y-1">
+                        <div class="flex justify-between">
+                            <span class="text-gray-600">Order Date:</span>
+                            <span class="font-medium">{{ formatDate(sapDetails.admin_data.orderdate) }}</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span class="text-gray-600">Request Delivery:</span>
+                            <span class="font-medium">{{ formatDate(sapDetails.admin_data.requestdeliverydate) }}</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="bg-white p-4 rounded-lg border border-blue-100">
+                    <div class="text-sm text-gray-500 mb-1">Sales Organization</div>
+                    <div class="space-y-2">
+                        <div class="flex items-center">
+                            <div class="w-24 text-gray-600">Sales Org:</div>
+                            <Badge :value="sapDetails.admin_data.salesorg" severity="info" />
+                        </div>
+                        <div class="flex items-center">
+                            <div class="w-24 text-gray-600">Dist Channel:</div>
+                            <Badge :value="sapDetails.admin_data.distributionchannel" severity="info" />
+                        </div>
+                        <div class="flex items-center">
+                            <div class="w-24 text-gray-600">Division:</div>
+                            <Badge :value="sapDetails.admin_data.division" severity="info" />
+                        </div>
+                    </div>
+                </div>
+
+                <div class="bg-white p-4 rounded-lg border border-blue-100">
+                    <div class="text-sm text-gray-500 mb-1">Other Information</div>
+                    <div class="space-y-1">
+                        <div class="flex justify-between">
+                            <span class="text-gray-600">Price Group:</span>
+                            <span class="font-medium">{{ sapDetails.admin_data.pricegroup || 'N/A' }}</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span class="text-gray-600">Shipping Condition:</span>
+                            <span class="font-medium">{{ sapDetails.admin_data.shippingcond || 'N/A' }}</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span class="text-gray-600">Storage Location:</span>
+                            <span class="font-medium">{{ sapDetails.admin_data.storagelocation || 'N/A' }}</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Order Items -->
+            <div class="mt-6">
+                <div class="flex items-center justify-between mb-4">
+                    <div class="font-semibold text-lg text-blue-800 flex items-center">
+                        <i class="pi pi-list mr-2"></i>
+                        Order Items ({{ sapItems.length }} items)
+                    </div>
+                    <div class="text-sm text-blue-600">
+                        Total Items Value: <span class="font-bold">RM {{ formatCurrency(calculateTotalItemsValue()) }}</span>
+                    </div>
+                </div>
+
+                <DataTable :value="sapItems" class="p-datatable-sm" stripedRows :paginator="sapItems.length > 5" :rows="5">
+                    <Column field="lineno" header="Line No" style="width: 100px">
+                        <template #body="{ data }">
+                            <Badge :value="data.lineno" severity="info" />
+                        </template>
+                    </Column>
+                    <Column field="materialid" header="Material ID" style="min-width: 160px">
+                        <template #body="{ data }">
+                            <div class="font-medium">{{ data.materialid }}</div>
+                            <small class="text-gray-500 text-xs">Plant: {{ data.plant || 'TSM' }}</small>
+                        </template>
+                    </Column>
+                    <Column field="itemcategory" header="Category" style="width: 100px">
+                        <template #body="{ data }">
+                            <Badge :value="data.itemcategory" severity="info" />
+                        </template>
+                    </Column>
+                    <Column field="qty" header="Quantity" style="width: 100px">
+                        <template #body="{ data }">
+                            <div class="text-center">
+                                <span class="font-semibold">{{ data.qty || 0 }}</span>
+                            </div>
+                        </template>
+                    </Column>
+                    <Column field="unitprice" header="Unit Price" style="width: 120px">
+                        <template #body="{ data }">
+                            <div class="text-right">
+                                <div class="font-medium">RM {{ formatCurrency(data.unitprice || 0) }}</div>
+                            </div>
+                        </template>
+                    </Column>
+                    <Column field="totalamount" header="Total Amount" style="width: 130px">
+                        <template #body="{ data }">
+                            <div class="text-right">
+                                <div class="font-medium text-green-600">RM {{ formatCurrency(data.totalamount || 0) }}</div>
+                            </div>
+                        </template>
+                    </Column>
+                    <Column field="salesprogramid" header="Sales Program" style="width: 140px">
+                        <template #body="{ data }">
+                            <div class="text-center">
+                                <Badge v-if="data.salesprogramid" :value="data.salesprogramid" severity="success" />
+                                <span v-else class="text-gray-400">N/A</span>
+                            </div>
+                        </template>
+                    </Column>
+                    <template #empty>
+                        <div class="text-center py-8 text-gray-500">
+                            <i class="pi pi-exclamation-circle text-2xl mb-2"></i>
+                            <div>No items found in this SAP order</div>
+                        </div>
+                    </template>
+                </DataTable>
+            </div>
+
+            <!-- Additional Information (if available) -->
+            <div v-if="sapDetails.admin_data.deliveryno || sapDetails.admin_data.pgistatus || sapDetails.admin_data.invoiceno || sapDetails.admin_data.creditnoteno" class="mt-6">
+                <div class="font-semibold text-lg mb-3 text-blue-800 flex items-center">
+                    <i class="pi pi-info-circle mr-2"></i>
+                    Additional Information
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+                    <div v-if="sapDetails.admin_data.deliveryno" class="bg-white p-3 rounded border">
+                        <div class="text-sm text-gray-500 mb-1">Delivery No</div>
+                        <div class="font-medium">{{ sapDetails.admin_data.deliveryno }}</div>
+                    </div>
+                    <div v-if="sapDetails.admin_data.pgistatus" class="bg-white p-3 rounded border">
+                        <div class="text-sm text-gray-500 mb-1">PGI Status</div>
+                        <Badge :value="sapDetails.admin_data.pgistatus" :severity="sapDetails.admin_data.pgistatus ? 'success' : 'info'" />
+                    </div>
+                    <div v-if="sapDetails.admin_data.invoiceno" class="bg-white p-3 rounded border">
+                        <div class="text-sm text-gray-500 mb-1">Invoice No</div>
+                        <div class="font-medium">{{ sapDetails.admin_data.invoiceno }}</div>
+                    </div>
+                    <div v-if="sapDetails.admin_data.creditnoteno" class="bg-white p-3 rounded border">
+                        <div class="text-sm text-gray-500 mb-1">Credit Note No</div>
+                        <div class="font-medium">{{ sapDetails.admin_data.creditnoteno }}</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Ready to Create Banner -->
+            <div class="mt-8 p-4 bg-green-50 border border-green-200 rounded-lg">
+                <div class="flex items-center">
+                    <i class="pi pi-check-circle text-green-500 text-xl mr-3"></i>
+                    <div class="flex-1">
+                        <div class="font-medium text-green-700">Ready to Create ETEN Order</div>
+                        <div class="text-green-600 text-sm mt-1">SAP details verified. Click "Create ETEN Order" to proceed.</div>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-2 mt-2">
+                            <div class="text-green-600 text-sm"><span class="font-medium">Customer:</span> {{ sapDetails.admin_data.custaccountno }}</div>
+                            <div class="text-green-600 text-sm"><span class="font-medium">SAP Order:</span> {{ sapDetails.admin_data.saporderno }}</div>
+                            <div class="text-green-600 text-sm"><span class="font-medium">Order Desc:</span> {{ getOrderDescLabel(form.orderdesc) }}</div>
+                            <div class="text-green-600 text-sm"><span class="font-medium">Items:</span> {{ sapItems.length }} items</div>
+                        </div>
+                    </div>
+                    <div class="text-right">
+                        <div class="text-lg font-bold text-green-700">RM {{ formatCurrency(calculateTotalItemsValue()) }}</div>
+                        <div class="text-sm text-green-600">Total Value</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Step 3: ETEN Result -->
+        <div v-if="etenResult" class="mt-6 border rounded-lg p-6 bg-green-50">
+            <div class="flex items-center justify-between mb-6">
+                <div>
+                    <div class="font-bold text-xl text-green-800">ETEN Order Created Successfully!</div>
+                    <div class="text-green-600 text-sm mt-1">Order has been created and stock updated in the system</div>
+                </div>
+                <Badge value="COMPLETED" severity="success" />
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+                <div class="bg-white p-4 rounded-lg shadow-sm border border-green-100">
+                    <div class="text-sm text-gray-500 mb-1">ETEN Order No</div>
+                    <div class="font-semibold text-lg text-green-600">{{ etenResult.admin_data.order_no }}</div>
+                    <div class="text-xs text-gray-500 mt-1">Created at: {{ formatDateTime(etenResult.admin_data.created) }}</div>
+                </div>
+
+                <div class="bg-white p-4 rounded-lg shadow-sm border border-green-100">
+                    <div class="text-sm text-gray-500 mb-1">Customer Account</div>
+                    <div class="font-semibold text-lg">{{ etenResult.admin_data.custaccountno }}</div>
+                    <div class="text-xs text-gray-500 mt-1">Ship To: {{ etenResult.admin_data.shipto }}</div>
+                </div>
+
+                <div class="bg-white p-4 rounded-lg shadow-sm border border-green-100">
+                    <div class="text-sm text-gray-500 mb-1">SAP Reference</div>
+                    <div class="font-semibold text-lg">{{ etenResult.admin_data.so_no }}</div>
+                    <div class="text-xs text-gray-500 mt-1">SAP Order Type: {{ etenResult.admin_data.sapordertype }}</div>
+                </div>
+
+                <div class="bg-white p-4 rounded-lg shadow-sm border border-green-100">
+                    <div class="text-sm text-gray-500 mb-1">Order Description</div>
+                    <div class="font-semibold text-lg">{{ getOrderDescLabel(etenResult.admin_data.orderDesc) }}</div>
+                    <div class="text-xs text-gray-500 mt-1">{{ etenResult.admin_data.orderDesc || 'NORMAL' }}</div>
+                </div>
+            </div>
+
+            <!-- Financial Information -->
+            <div class="bg-white p-4 rounded-lg shadow-sm border border-green-100 mb-6">
+                <div class="text-sm text-gray-500 mb-1">Total Amount</div>
+                <div class="font-semibold text-2xl text-green-600">RM {{ formatCurrency(etenResult.admin_data.total || 0) }}</div>
+                <div class="text-sm text-gray-500 mt-1">Subtotal: RM {{ formatCurrency(etenResult.admin_data.subtotal || 0) }}</div>
+            </div>
+
+            <!-- Order Status Information -->
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+                <div class="bg-white p-3 rounded-lg border">
+                    <div class="text-sm text-gray-500 mb-1">Order Status</div>
+                    <Badge :value="getOrderStatus(etenResult.admin_data.orderstatus)" :severity="getOrderStatusSeverity(etenResult.admin_data.orderstatus)" />
+                </div>
+                <div class="bg-white p-3 rounded-lg border">
+                    <div class="text-sm text-gray-500 mb-1">Channel</div>
+                    <div class="font-medium">{{ etenResult.admin_data.channel || 'ADMIN' }}</div>
+                </div>
+                <div class="bg-white p-3 rounded-lg border">
+                    <div class="text-sm text-gray-500 mb-1">Storage Location</div>
+                    <div class="font-medium">{{ etenResult.admin_data.storagelocation || 'N/A' }}</div>
+                </div>
+            </div>
+
+            <!-- Order Items Created -->
+            <div class="mt-6">
+                <div class="font-semibold text-lg mb-3 text-green-800 flex items-center">
+                    <i class="pi pi-box mr-2"></i>
+                    Items Created
+                </div>
+                <DataTable :value="etenItems" class="p-datatable-sm" stripedRows :paginator="etenItems.length > 5" :rows="5">
+                    <Column field="materialid" header="Material ID" style="min-width: 120px"></Column>
+                    <Column field="itemno" header="Line No" style="width: 80px"></Column>
+                    <Column field="quantity" header="Quantity" style="width: 100px">
+                        <template #body="{ data }">
+                            <span class="font-semibold">{{ data.qty || 0 }}</span>
+                        </template>
+                    </Column>
+                    <Column field="price" header="Unit Price" style="width: 120px">
+                        <template #body="{ data }">
+                            <div class="text-right">
+                                <div class="font-medium">RM {{ formatCurrency(data.unitprice || 0) }}</div>
+                            </div>
+                        </template>
+                    </Column>
+                    <Column field="total" header="Total Amount" style="width: 120px">
+                        <template #body="{ data }">
+                            <div class="text-right">
+                                <div class="font-medium text-green-600">RM {{ formatCurrency(data.totalamt || 0) }}</div>
+                            </div>
+                        </template>
+                    </Column>
+                    <Column field="category" header="Category" style="width: 100px">
+                        <template #body="{ data }">
+                            {{ data.itemcategory || 'N/A' }}
+                        </template>
+                    </Column>
+                </DataTable>
+            </div>
+
+            <!-- Success Message -->
+            <div class="mt-6 p-4 bg-green-100 border border-green-300 rounded-lg">
+                <div class="flex items-center">
+                    <i class="pi pi-check-circle text-green-600 text-2xl mr-3"></i>
+                    <div>
+                        <div class="font-bold text-green-800">Order Successfully Processed</div>
+                        <div class="text-green-700 mt-1">The ETEN order has been created, stock levels updated, and all necessary system records have been processed.</div>
+                        <div class="text-green-700 text-sm mt-1">Order Description: {{ getOrderDescLabel(etenResult.admin_data.orderDesc) }}</div>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue';
+import { ref, computed, onMounted } from 'vue';
 import { useToast } from 'primevue/usetoast';
 import { useConfirm } from 'primevue/useconfirm';
+import api from '@/service/api';
 
 const toast = useToast();
 const confirm = useConfirm();
 
-const loading = ref(false);
+// Order Description Options (Only NORMAL available)
+const orderDescOptions = ref([{ label: 'NORMAL', value: 'NORMAL' }]);
+
+// State Management
+const loading = ref({
+    sapCheck: false,
+    orderCreate: false
+});
+
+const form = ref({
+    orderno: '',
+    custaccountno: '',
+    saporderno: '',
+    orderdesc: 'NORMAL' // Default value
+});
+
+const fieldErrors = ref({});
+const errorMessage = ref('');
 const sapDetails = ref(null);
 const etenResult = ref(null);
-const allowETENInput = ref(false);
 
 // ConfirmDialog mount
 const confirmDialogMounted = ref(false);
-onMounted(() => confirmDialogMounted.value = true);
+onMounted(() => (confirmDialogMounted.value = true));
 
-// Dealer list
-const dealerList = ref([
-    { id: 1, name: 'DA001 - ABM Dealer' },
-    { id: 2, name: 'DA002 - XOX Dealer' },
-    { id: 3, name: 'DA003 - Alpha Dealer' }
-]);
+// Computed Properties
+const isDuplicateOrder = computed(() => {
+    return sapDetails.value?.status === 0 && sapDetails.value?.message?.includes('already exist');
+});
 
-// ETEN DB simulation
-const hardcodedEtenDB = [
-    { sapSoNo: 'SO1001', etenOrderNo: 'ET001' },
-    { sapSoNo: 'SO1002', etenOrderNo: 'ET002' }
-];
+const sapItems = computed(() => {
+    if (!sapDetails.value?.admin_data?.order_items) return [];
 
-// SAP data simulation
-const hardcodedSAP = {
-    SO1234: { customer: 'ABM Dealer', total: 1200, items: [ { sku: 'MAT01', qty: 3 }, { sku: 'MAT02', qty: 2 } ] },
-    SO5678: { customer: 'XOX Dealer', total: 800, items: [ { sku: 'MAT03', qty: 5 }, { sku: 'MAT04', qty: 1 } ] }
+    const items = sapDetails.value.admin_data.order_items;
+
+    if (Array.isArray(items)) {
+        return items;
+    }
+
+    // If it's a single object, convert to array
+    return [items];
+});
+
+const etenItems = computed(() => {
+    if (!etenResult.value?.admin_data?.fullfill_order_array) return [];
+
+    try {
+        const items = JSON.parse(etenResult.value.admin_data.fullfill_order_array);
+        return Array.isArray(items) ? items : [];
+    } catch (error) {
+        console.error('Error parsing ETEN items:', error);
+        return [];
+    }
+});
+
+// Helper Functions
+const calculateTotalItemsValue = () => {
+    if (!sapItems.value.length) return 0;
+    return sapItems.value.reduce((total, item) => {
+        return total + (parseFloat(item.totalamount) || 0);
+    }, 0);
 };
 
-// Form state
-const form = ref({ dealerAcc: null, sapSoNo: '', sapNoNumber: '', etenOrderNo: '' });
+const clearFieldError = (fieldName) => {
+    if (fieldErrors.value[fieldName]) {
+        fieldErrors.value[fieldName] = '';
+    }
+    errorMessage.value = '';
+};
 
-// Step 1: Check duplication
-const checkSAPSO = () => {
-    loading.value = true;
+const getOrderDescLabel = (value) => {
+    const option = orderDescOptions.value.find((opt) => opt.value === value);
+    return option ? option.label : value;
+};
+
+const validateForm = () => {
+    const errors = {};
+
+    if (!form.value.orderno?.trim()) {
+        errors.orderno = 'ETEN order number is required';
+    }
+
+    if (!form.value.custaccountno?.trim()) {
+        errors.custaccountno = 'Customer account number is required';
+    }
+
+    if (!form.value.saporderno?.trim()) {
+        errors.saporderno = 'SAP sales order number is required';
+    }
+
+    if (!form.value.orderdesc) {
+        errors.orderdesc = 'Order description is required';
+    }
+
+    fieldErrors.value = errors;
+    return Object.keys(errors).length === 0;
+};
+
+const formatCurrency = (value) => {
+    const num = parseFloat(value);
+    if (isNaN(num)) return '0.00';
+    return num.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+};
+
+const formatDate = (dateString) => {
+    if (!dateString) return 'N/A';
+    try {
+        // Handle both ISO format and other date strings
+        const date = new Date(dateString);
+        if (isNaN(date.getTime())) {
+            return dateString;
+        }
+        return date.toLocaleDateString('en-MY', {
+            year: 'numeric',
+            month: 'short',
+            day: 'numeric'
+        });
+    } catch (error) {
+        return dateString;
+    }
+};
+
+const formatDateTime = (dateTimeString) => {
+    if (!dateTimeString) return 'N/A';
+    try {
+        const date = new Date(dateTimeString);
+        return (
+            date.toLocaleDateString('en-MY') +
+            ' ' +
+            date.toLocaleTimeString('en-MY', {
+                hour: '2-digit',
+                minute: '2-digit'
+            })
+        );
+    } catch (error) {
+        return dateTimeString;
+    }
+};
+
+const getOrderStatus = (statusCode) => {
+    const statusMap = {
+        66: 'BCP Created',
+        1: 'Pending',
+        2: 'Processing',
+        3: 'Completed',
+        4: 'Cancelled'
+    };
+    return statusMap[statusCode] || `Status ${statusCode}`;
+};
+
+const getOrderStatusSeverity = (statusCode) => {
+    const severityMap = {
+        66: 'success',
+        1: 'info',
+        2: 'warning',
+        3: 'success',
+        4: 'danger'
+    };
+    return severityMap[statusCode] || 'info';
+};
+
+const resetForm = () => {
+    form.value = {
+        orderno: '',
+        custaccountno: '',
+        saporderno: '',
+        orderdesc: 'NORMAL' // Reset to default
+    };
+    fieldErrors.value = {};
+    errorMessage.value = '';
     sapDetails.value = null;
     etenResult.value = null;
-    allowETENInput.value = false;
-
-    // Check SAP SO duplication
-    const duplicateSAP = hardcodedEtenDB.find(x => x.sapSoNo === form.value.sapSoNo);
-    if (duplicateSAP) {
-        toast.add({ severity: 'error', summary: 'Duplicate SAP SO', detail: 'SAP SO No already exists in ETEN', life: 3000 });
-        loading.value = false;
-        return;
-    }
-
-    loading.value = false;
-    allowETENInput.value = true; // allow admin to enter ETEN Order No
 };
 
-// Step 2: Show SAP details after ETEN Order No is entered
-const showSAPDetails = () => {
-    const sapData = hardcodedSAP[form.value.sapSoNo];
-    if (!sapData) {
-        toast.add({ severity: 'error', summary: 'SAP Error', detail: 'No SAP details found for this SO No', life: 3000 });
-        return;
+// Step 1: Check SAP Details
+const checkSAPDetails = async () => {
+    if (!validateForm()) return;
+
+    loading.value.sapCheck = true;
+    errorMessage.value = '';
+    sapDetails.value = null;
+    etenResult.value = null;
+
+    try {
+        // Call API with all 4 required parameters including orderdesc
+        const response = await api.post('credit/getSAPBCP', {
+            orderno: form.value.orderno,
+            custaccountno: form.value.custaccountno,
+            so_no: form.value.saporderno,
+            orderdesc: form.value.orderdesc // Add orderdesc to API call
+        });
+
+        sapDetails.value = response.data;
+
+        if (response.data.status === 1) {
+            toast.add({
+                severity: 'success',
+                summary: 'SAP Details Found',
+                detail: 'SAP order details retrieved successfully',
+                life: 3000
+            });
+        } else if (response.data.status === 0) {
+            if (response.data.message?.includes('already exist')) {
+                // This is expected behavior for duplicate check
+                toast.add({
+                    severity: 'warn',
+                    summary: 'Order Exists',
+                    detail: 'This ETEN order already exists. Please use a different order number.',
+                    life: 4000
+                });
+            } else {
+                errorMessage.value = response.data.message || 'No response from SAP. Please check the order details and try again.';
+                toast.add({
+                    severity: 'error',
+                    summary: 'SAP Check Failed',
+                    detail: errorMessage.value,
+                    life: 5000
+                });
+            }
+        }
+    } catch (error) {
+        console.error('Error checking SAP details:', error);
+        errorMessage.value = error.response?.data?.message || 'Failed to connect to SAP. Please try again later.';
+
+        toast.add({
+            severity: 'error',
+            summary: 'Connection Error',
+            detail: errorMessage.value,
+            life: 5000
+        });
+    } finally {
+        loading.value.sapCheck = false;
     }
-    sapDetails.value = sapData;
 };
 
-// Step 3: Create ETEN Order
+// Step 2: Create ETEN Order
 const createETENOrder = () => {
-    const duplicateETEN = hardcodedEtenDB.find(x => x.etenOrderNo === form.value.etenOrderNo);
-    if (duplicateETEN) {
-        toast.add({ severity: 'error', summary: 'Duplicate ETEN Order', detail: 'ETEN Order No already exists', life: 3000 });
+    if (!validateForm()) return;
+
+    if (isDuplicateOrder.value) {
+        toast.add({
+            severity: 'error',
+            summary: 'Duplicate Order',
+            detail: 'Cannot create order. This ETEN order number already exists.',
+            life: 4000
+        });
+        return;
+    }
+
+    if (!sapDetails.value?.admin_data) {
+        toast.add({
+            severity: 'warn',
+            summary: 'No SAP Details',
+            detail: 'Please check SAP details first',
+            life: 3000
+        });
+        return;
+    }
+
+    if (!form.value.orderdesc) {
+        toast.add({
+            severity: 'warn',
+            summary: 'Order Description Required',
+            detail: 'Please select an order description',
+            life: 3000
+        });
         return;
     }
 
     confirm.require({
-        message: 'Are you sure you want to create this ETEN order?',
-        header: 'Confirm ETEN Order',
+        message: `
+            <div class="space-y-2">
+                <div class="font-semibold">Confirm ETEN Order Creation</div>
+                <div class="text-sm text-gray-600">
+                    <div>ETEN Order: <span class="font-medium">${form.value.orderno}</span></div>
+                    <div>Customer: <span class="font-medium">${sapDetails.value.admin_data.custaccountno}</span></div>
+                    <div>SAP Order: <span class="font-medium">${sapDetails.value.admin_data.saporderno}</span></div>
+                    <div>Order Desc: <span class="font-medium">${getOrderDescLabel(form.value.orderdesc)}</span></div>
+                    <div>Total Items: <span class="font-medium">${sapItems.value.length} items</span></div>
+                    <div>Total Value: <span class="font-medium text-green-600">RM ${formatCurrency(calculateTotalItemsValue())}</span></div>
+                </div>
+                <div class="text-sm text-red-600 mt-2">
+                    <i class="pi pi-exclamation-triangle mr-1"></i>
+                    This action will update stock levels in the system.
+                </div>
+            </div>
+        `,
+        header: 'Create ETEN Order',
         icon: 'pi pi-exclamation-triangle',
-        acceptLabel: 'Yes, Create',
+        acceptLabel: 'Yes, Create Order',
         rejectLabel: 'Cancel',
-        accept: () => {
-            loading.value = true;
-            setTimeout(() => {
-                etenResult.value = {
-                    etenOrderNo: form.value.etenOrderNo,
-                    dealerAccount: form.value.dealerAcc,
-                    sapSoNo: form.value.sapSoNo,
-                    sapNoNumber: form.value.sapNoNumber,
-                    sapDetails: sapDetails.value,
-                    createdAt: new Date().toISOString()
-                };
+        acceptClass: 'p-button-success',
+        rejectClass: 'p-button-secondary',
+        accept: async () => {
+            loading.value.orderCreate = true;
 
-                hardcodedEtenDB.push({
-                    sapSoNo: form.value.sapSoNo,
-                    etenOrderNo: form.value.etenOrderNo
+            try {
+                const sapData = sapDetails.value.admin_data;
+                const sapOrderArray = [];
+
+                // Use the order_items from SAP response
+                sapData.order_items.forEach((item, index) => {
+                    sapOrderArray.push({
+                        materialid: item.materialid || '',
+                        lineno: item.lineno || (index + 1).toString().padStart(4, '0'),
+                        itemcategory: item.itemcategory || '',
+                        qty: item.qty || 0,
+                        unitprice: item.unitprice || 0,
+                        totalamount: item.totalamount || 0,
+                        salesprogramid: item.salesprogramid || ''
+                    });
                 });
 
-                toast.add({ severity: 'success', summary: 'Success', detail: 'ETEN ORDER CREATED', life: 3000 });
+                // Prepare BCP request data using SAP response data
+                const bcpData = {
+                    custaccountno: sapData.custaccountno || form.value.custaccountno,
+                    salesorg: sapData.salesorg || 'TSM',
+                    distributionchannel: sapData.distributionchannel || '01',
+                    division: sapData.division || '00',
+                    pricegroup: sapData.pricegroup || '04',
+                    orderdate: sapData.orderdate || new Date().toISOString().split('T')[0],
+                    requestdeliverydate: sapData.requestdeliverydate || new Date().toISOString().split('T')[0],
+                    orderdesc: form.value.orderdesc, // Use selected orderdesc
+                    ordertype: sapData.ordertype || 'ZCPO',
+                    orderno: form.value.orderno,
+                    shipto: sapData.shipto || sapData.custaccountno,
+                    shippingcond: sapData.shippingcond || '01',
+                    storagelocation: sapData.storagelocation || 'FG01',
+                    saporderno: sapData.saporderno,
+                    deliveryno: sapData.deliveryno || '',
+                    pgistatus: sapData.pgistatus || '',
+                    invoiceno: sapData.invoiceno || '',
+                    creditnoteno: sapData.creditnoteno || '',
+                    sap_order_array: JSON.stringify(sapOrderArray)
+                };
 
-                // Reset form
-                form.value.sapSoNo = '';
-                form.value.sapNoNumber = '';
-                form.value.etenOrderNo = '';
-                sapDetails.value = null;
-                allowETENInput.value = false;
-                loading.value = false;
-            }, 800);
+                const response = await api.post('credit/BCP', bcpData);
+
+                if (response.data.status === 1) {
+                    etenResult.value = response.data;
+
+                    toast.add({
+                        severity: 'success',
+                        summary: 'Order Created',
+                        detail: `ETEN order ${form.value.orderno} has been created successfully`,
+                        life: 4000
+                    });
+
+                    // Clear ETEN order number field for next entry
+                    form.value.orderno = '';
+                } else {
+                    throw new Error(response.data.message || 'Failed to create order');
+                }
+            } catch (error) {
+                console.error('Error creating ETEN order:', error);
+
+                const errorDetail = error.response?.data?.message || error.message || 'Failed to create ETEN order';
+                errorMessage.value = errorDetail;
+
+                toast.add({
+                    severity: 'error',
+                    summary: 'Creation Failed',
+                    detail: errorDetail,
+                    life: 5000
+                });
+            } finally {
+                loading.value.orderCreate = false;
+            }
         },
         reject: () => {
-            toast.add({ severity: 'info', summary: 'Cancelled', detail: 'ETEN Order creation cancelled', life: 2000 });
+            toast.add({
+                severity: 'info',
+                summary: 'Cancelled',
+                detail: 'ETEN order creation was cancelled',
+                life: 2000
+            });
         }
     });
 };
 </script>
+
+<style scoped>
+/* Custom styles for better visual hierarchy */
+:deep(.p-inputtext) {
+    padding: 0.75rem;
+    border-radius: 6px;
+    transition: all 0.2s ease;
+}
+
+:deep(.p-inputtext:focus) {
+    border-color: #3b82f6;
+    box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.1);
+}
+
+:deep(.p-inputtext.p-invalid) {
+    border-color: #ef4444;
+}
+
+:deep(.p-button) {
+    padding: 0.75rem 1.5rem;
+    border-radius: 6px;
+    font-weight: 500;
+    transition: all 0.2s ease;
+}
+
+:deep(.p-button:not(:disabled):hover) {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+}
+
+:deep(.p-datatable) {
+    border-radius: 8px;
+    overflow: hidden;
+    border: 1px solid #e5e7eb;
+}
+
+:deep(.p-datatable .p-datatable-thead > tr > th) {
+    background-color: #f8fafc;
+    font-weight: 600;
+    color: #334155;
+    padding: 0.75rem 1rem;
+}
+
+:deep(.p-datatable .p-datatable-tbody > tr > td) {
+    padding: 0.75rem 1rem;
+}
+
+:deep(.p-progress-spinner) {
+    width: 40px;
+    height: 40px;
+}
+
+.card {
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.1);
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+/* Step indicator animation */
+@keyframes stepComplete {
+    0% {
+        transform: scale(1);
+    }
+    50% {
+        transform: scale(1.1);
+    }
+    100% {
+        transform: scale(1);
+    }
+}
+
+.opacity-100 .w-8 {
+    animation: stepComplete 0.5s ease;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .card {
+        padding: 1rem;
+    }
+
+    :deep(.p-datatable) {
+        font-size: 0.875rem;
+    }
+
+    :deep(.p-button) {
+        width: 100%;
+    }
+}
+</style>

@@ -79,7 +79,7 @@
                     </div>
                     <div>
                         <label class="block font-bold text-gray-700 mb-1">MFG Code *</label>
-                            <InputText v-model="formHolder.mfg_code" class="w-full" placeholder="Insert Pattern Code" maxlength="3"/>
+                            <InputText v-model="formHolder.mfg_code" class="w-full" placeholder="Insert Pattern Code"/>
                         <small v-if="errors.mfg" class="text-red-500">{{ errors.mfg }}</small>
                     </div>
                 </div>
