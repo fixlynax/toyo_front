@@ -1205,7 +1205,85 @@ const goToStep = async (step) => {
     step3Validated.value = false;
 };
 
-// Add to Cart function with 0 stock support for NORMAL orders
+// UPDATED: Check sales program and actual price function
+const checkSalesProgramAndPrice = async () => {
+    if (!selectedCustomer.value || selectedTyres.value.length === 0) return;
+
+    try {
+        const orderArray = selectedTyres.value.map((item) => ({
+            materialid: item.materialid,
+            qty: item.quantity,
+            pattern: item.pattern,
+            pattern_name: item.pattern_name,
+            rimdiameter: item.rimdiameter,
+            price: item.price
+        }));
+
+        // Call both APIs in parallel for better performance
+        const [salesProgramResponse, actualPriceResponse] = await Promise.allSettled([
+            api.post('order/check-sales-program', {
+                custaccountno: selectedCustomer.value.code,
+                order_array: JSON.stringify(orderArray)
+            }),
+            api.post('order/getActualPrice', {
+                custaccountno: selectedCustomer.value.code,
+                order_array: JSON.stringify(orderArray),
+                isDSOrder: selectedOrderType.value === 'DIRECTSHIP' ? 1 : ''
+            })
+            // console.log(orderArray);
+        ]);
+//  console.log("get:", orderArray);
+        // Process sales program response
+        if (salesProgramResponse.status === 'fulfilled' && salesProgramResponse.value.data.status === 1 && salesProgramResponse.value.data.admin_data) {
+            freeItems.value = salesProgramResponse.value.data.admin_data.map((freeItem) => ({
+                ...freeItem,
+                itemcategory: freeItem.itemcategory || 'ZPRO'
+            }));
+
+            if (freeItems.value.length > 0) {
+                toast.add({
+                    severity: 'info',
+                    summary: 'Sales Program Applied',
+                    detail: `Found ${freeItems.value.length} free item(s) from sales program`,
+                    life: 5000
+                });
+            }
+        }
+
+        // Process actual price response
+        if (actualPriceResponse.status === 'fulfilled' && actualPriceResponse.value.data.status === 1) {
+            const priceData = actualPriceResponse.value.data.eten_data || [];
+
+            // Update prices in selectedTyres based on API response
+            priceData.forEach((priceItem) => {
+                const itemIndex = selectedTyres.value.findIndex((t) => t.materialid === priceItem.materialid);
+                if (itemIndex !== -1) {
+                    const newPrice = parseFloat(priceItem.price);
+                    const oldPrice = selectedTyres.value[itemIndex].price;
+
+                    // Only update if price is different and greater than 0
+                    if (newPrice > 0 && newPrice !== oldPrice) {
+                        selectedTyres.value[itemIndex].price = newPrice;
+
+                        // Show notification for price change
+                        const materialName = selectedTyres.value[itemIndex].material;
+                        toast.add({
+                            severity: 'info',
+                            summary: 'Price Updated',
+                            detail: `Price for ${materialName} updated from RM ${oldPrice.toFixed(2)} to RM ${newPrice.toFixed(2)}`,
+                            life: 3000
+                        });
+                    }
+                }
+            });
+        }
+    } catch (error) {
+        console.error('Error checking sales program and price:', error);
+        // Silently fail, as both are optional features
+    }
+};
+
+// UPDATED: Add to Cart function with 0 stock support for NORMAL orders and price check
 const addToCart = (tyre) => {
     // For DIRECTSHIP orders, prevent adding 0 stock items but allow insufficient stock
     if (selectedOrderType.value === 'DIRECTSHIP' && tyre.stockBalance === 0) {
@@ -1276,8 +1354,8 @@ const addToCart = (tyre) => {
         }
     }
 
-    // Check for sales program after adding to cart
-    checkSalesProgram();
+    // Check for sales program AND actual price after adding to cart
+    checkSalesProgramAndPrice();
 };
 
 // API Calls
@@ -1541,43 +1619,7 @@ const fetchMaterials = async (custAccountNo) => {
     }
 };
 
-const checkSalesProgram = async () => {
-    if (!selectedCustomer.value || selectedTyres.value.length === 0) return;
-
-    try {
-        const orderArray = selectedTyres.value.map((item) => ({
-            materialid: item.materialid,
-            qty: item.quantity,
-            pattern: item.pattern,
-            pattern_name: item.pattern_name,
-            rimdiameter: item.rimdiameter
-        }));
-
-        const response = await api.post('order/check-sales-program', {
-            custaccountno: selectedCustomer.value.code,
-            order_array: JSON.stringify(orderArray)
-        });
-
-        if (response.data.status === 1 && response.data.admin_data) {
-            freeItems.value = response.data.admin_data.map((freeItem) => ({
-                ...freeItem,
-                itemcategory: freeItem.itemcategory || 'ZPRO'
-            }));
-
-            if (freeItems.value.length > 0) {
-                toast.add({
-                    severity: 'success',
-                    summary: 'Sales Program Applied',
-                    detail: `Found ${freeItems.value.length} free item(s) from sales program`,
-                    life: 5000
-                });
-            }
-        }
-    } catch (error) {
-        console.error('Error checking sales program:', error);
-        // Silently fail, as sales program is optional
-    }
-};
+// UPDATED: Check sales program and actual price function (already defined above)
 
 // DIRECTSHIP: Create empty cart
 const createDirectShipCart = async () => {
@@ -1685,6 +1727,9 @@ const onExcelUpload = async (event) => {
             selectedTyres.value = response.eten_data.order_array || [];
             currentCartRefNo.value = response.eten_data.cartRefNo;
 
+            // Check sales program and price for imported items
+            checkSalesProgramAndPrice();
+
             setTimeout(() => {
                 showUploadDialog.value = false;
                 toast.add({ severity: 'success', summary: 'Success', detail: 'Excel imported successfully', life: 3000 });
@@ -1699,23 +1744,25 @@ const onExcelUpload = async (event) => {
     }
 };
 
+// UPDATED: Remove from cart with price check
 const removeFromCart = (tyre) => {
     const index = selectedTyres.value.findIndex((t) => t.id === tyre.id);
     if (index !== -1) {
         selectedTyres.value.splice(index, 1);
         toast.add({ severity: 'info', summary: 'Removed', detail: 'Product removed from cart', life: 2000 });
 
-        // Recheck sales program after removal
-        checkSalesProgram();
+        // Recheck sales program and price after removal
+        checkSalesProgramAndPrice();
     }
 };
 
 const isInCart = (tyre) => selectedTyres.value.some((t) => t.id === tyre.id);
 
+// UPDATED: onQuantityChange with price check
 const onQuantityChange = (item) => {
-    // Check sales program when quantity changes
+    // Check sales program and price when quantity changes
     if (selectedTyres.value.length > 0) {
-        checkSalesProgram();
+        checkSalesProgramAndPrice();
     }
 };
 
@@ -2574,7 +2621,7 @@ watch(
     selectedTyres,
     (newCart) => {
         if (newCart.length > 0) {
-            checkSalesProgram();
+            checkSalesProgramAndPrice();
         } else {
             freeItems.value = [];
         }

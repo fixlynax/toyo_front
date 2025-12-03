@@ -52,11 +52,11 @@
                             <div class="flex flex-col md:flex-row gap-4 mt-3">
                                 <div class="w-full">
                                     <span class="block text-xm font-bold text-black-700">Start Date</span>
-                                    <p class="text-lg font-medium">{{ campaign.startDate }}</p>
+                                    <p class="text-lg font-medium">{{ formatDate(campaign.startDate) }}</p>
                                 </div>
                                 <div class="w-full">
                                     <span class="block text-xm font-bold text-black-700">End Date</span>
-                                    <p class="text-lg font-medium">{{ campaign.endDate }}</p>
+                                    <p class="text-lg font-medium">{{ formatDate(campaign.endDate) }}</p>
                                 </div>
                             </div>
                         </div>
@@ -161,7 +161,7 @@
                                 </tr>
                                 <tr class="border-b">
                                     <td class="px-4 py-2 font-medium">Published</td>
-                                    <td class="px-4 py-2 text-right">{{ campaign.publishDate }}</td>
+                                    <td class="px-4 py-2 text-right">{{ formatDate(campaign.publishDate) }}</td>
                                 </tr>
                                 <tr>
                                     <td class="px-4 py-2 font-medium"></td>
@@ -415,6 +415,22 @@ const campaignStatus = computed({
         // This will be handled by the API call
     }
 });
+
+function formatDate(dateString) {
+    if (!dateString) return '';
+
+    // DD-MM-YYYY
+    const [day, month, year] = dateString.split('-');
+    const date = new Date(`${year}-${month}-${day}`);
+
+    if (isNaN(date.getTime())) return '';
+
+    return date.toLocaleDateString('en-MY', {
+        year: 'numeric',
+        month: '2-digit',
+        day: '2-digit'
+    });
+}
 
 // Toggle campaign status
 const toggleCampaignStatus = async () => {

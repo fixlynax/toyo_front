@@ -333,16 +333,40 @@ const formatGender = (gender) => {
 };
 
 // Format date (remove time if present)
-const formatDate = (dateString) => {
-    if (!dateString || dateString === '-') return '-';
-    return dateString.split(' ')[0]; // Return only date part
-};
+function formatDate(dateString) {
+    if (!dateString) return '-';
 
-// Format date-time
-const formatDateTime = (dateTimeString) => {
-    if (!dateTimeString || dateTimeString === '-') return '-';
-    return dateTimeString;
-};
+    const date = new Date(dateString); // Works for ISO, YYYY-MM-DD, YYYY-MM-DDTHH
+
+    if (isNaN(date)) return '-';
+
+    return date.toLocaleDateString('en-MY', {
+        year: 'numeric',
+        month: '2-digit',
+        day: '2-digit'
+    });
+}
+
+function formatDateTime(dateTimeString) {
+    if (!dateTimeString) return '-';
+
+    // Replace space with T if needed
+    const normalized = dateTimeString.replace(' ', 'T');
+
+    const date = new Date(normalized);
+
+    if (isNaN(date)) return '-';
+
+    return date.toLocaleString('en-MY', {
+        year: 'numeric',
+        month: '2-digit',
+        day: '2-digit',
+        hour: '2-digit',
+        minute: '2-digit',
+        second: '2-digit'
+    });
+}
+
 
 // Get device type from IP or device info
 const getDeviceType = (deviceInfo) => {
