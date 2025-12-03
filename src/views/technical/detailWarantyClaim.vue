@@ -570,34 +570,34 @@
                 <!-- Claim Percentage -->
                 <div class="field">
                     <label class="block font-bold text-gray-700 mb-2">MFG Code *</label>
-                     <InputText v-model="editTireData.mfgcode" class="w-full" maxlength="5" />
+                     <InputText v-model="editTireData.mfgcode" @input="editTireData.mfgcode = editTireData.mfgcode?.toUpperCase()" class="w-full" maxlength="5" />
                     <small v-if="(!editTireData.mfgcode) && editValidationTire" class="text-red-600">MFG Code is required.</small>
                 </div>
                 <div class="field">
                     <label class="block font-bold text-gray-700 mb-2">Size Code *</label>
-                     <InputText v-model="editTireData.sizecode" class="w-full" maxlength="5"/>
+                     <InputText v-model="editTireData.sizecode" @input="editTireData.sizecode = editTireData.sizecode?.toUpperCase()" class="w-full" maxlength="5"/>
                     <small v-if="(!editTireData.sizecode) && editValidationTire" class="text-red-600">Size Code is required.</small>
                 </div>
                 <div class="field">
                     <label class="block font-bold text-gray-700 mb-2">Tyre Spec *</label>
-                     <InputText v-model="editTireData.tyrespec" class="w-full" maxlength="5" />
+                     <InputText v-model="editTireData.tyrespec" @input="editTireData.tyrespec = editTireData.tyrespec?.toUpperCase()" class="w-full" maxlength="5" />
                     <small v-if="(!editTireData.tyrespec) && editValidationTire" class="text-red-600">Tyre Spec is required.</small>
                 </div>
                 <div class="field">
                     <label class="block font-bold text-gray-700 mb-2">Week Code *</label>
-                     <InputText v-model="editTireData.weekcode" class="w-full" maxlength="5"/>
+                     <InputText v-model="editTireData.weekcode" @input="editTireData.weekcode = editTireData.weekcode?.toUpperCase()" class="w-full" maxlength="5"/>
                     <small v-if="(!editTireData.weekcode) && editValidationTire" class="text-red-600">Week Code is required.</small>
                 </div>
                 <div class="field">
                     <label class="block font-bold text-gray-700 mb-2">Pattern Details *</label>
-                     <InputText v-model="editTireData.pattern" class="w-full" maxlength="3" />
+                     <InputText v-model="editTireData.pattern" @input="editTireData.pattern = editTireData.pattern?.toUpperCase()" class="w-full" maxlength="3" />
                     <small v-if="(!editTireData.pattern) && editValidationTire" class="text-red-600">Pattern Detail is required.</small>
                 </div>
-                <div class="field">
-                    <label class="block font-bold text-gray-700 mb-2">Pattern Description *</label>
-                     <InputText v-model="editTireData.desc" class="w-full"/>
-                    <small v-if="(!editTireData.desc) && editValidationTire" class="text-red-600">Pattern Description is required.</small>
-                </div>
+            </div>
+            <div class="field">
+                <label class="block font-bold text-gray-700 mb-2">Pattern Description *</label>
+                    <InputText v-model="editTireData.desc" @input="editTireData.desc = editTireData.desc?.toUpperCase()" class="w-full"/>
+                <small v-if="(!editTireData.desc) && editValidationTire" class="text-red-600">Pattern Description is required.</small>
             </div>
         </div>
 
@@ -607,7 +607,7 @@
         </template>
     </Dialog>
     <!-- Create Claim Dialog -->
-    <Dialog v-model:visible="showCreateClaimDialog" header="Create Claim Details" :modal="true" class="p-fluid" :style="{ width: '40rem' }">
+    <Dialog v-model:visible="showCreateClaimDialog" header="Create Claim Details" :modal="true" :closable="!creatingClaim" class="p-fluid" :style="{ width: '40rem' }">
         <div class="grid grid-cols-1 gap-4">
             <div class="field">
                 <label class="block font-bold text-gray-700 mb-2">Damage Type *</label>
@@ -705,7 +705,8 @@
 
         <template #footer>
             <Button label="Cancel" icon="pi pi-times" class="p-button-text" @click="closeCreateClaimDialog" :disabled="creatingClaim" />
-            <Button label="Create Claim" icon="pi pi-check" class="p-button-primary" @click="submitClaimDetails" :loading="creatingClaim" />
+            <Button label="Check Tread Depth" icon="pi pi-check" class="p-button-primary" @click="checkTread" :loading="creatingClaim" />
+            <Button label="Create Claim" icon="pi pi-check" class="p-button-primary" @click="submitClaimDetails" :loading="creatingClaim" v-if="checkingClaimResultFlag" />
         </template>
     </Dialog>
 
@@ -761,7 +762,7 @@
 
         <template #footer>
             <Button label="Cancel" icon="pi pi-times" class="p-button-text" :disabled="loadingAction" @click="closeReplacementDialog" />
-            <Button label="Create" icon="pi pi-check" class="p-button-primary" :loading="loadingAction" @click="submitReplacement" />
+            <Button label="Submit" icon="pi pi-check" class="p-button-primary" :loading="loadingAction" @click="submitReplacement" />
         </template>
     </Dialog>
 
@@ -797,7 +798,7 @@
         <template #footer>
             <Button label="Cancel" icon="pi pi-times" class="p-button-text" :disabled="loadingAction" @click="closeReimbursementDialog" />
             <Button label="Check Price" icon="pi pi-pen" class="p-button-success" :loading="loadingAction" @click="checkPrice" />
-            <Button label="Create" icon="pi pi-check" class="p-button-primary" :loading="loadingAction" @click="submitReimbursement" v-if="checkingPriceResultFlag"/>
+            <Button label="Submit" icon="pi pi-check" class="p-button-primary" :loading="loadingAction" @click="submitReimbursement" v-if="checkingPriceResultFlag"/>
         </template>
     </Dialog>
 
@@ -927,6 +928,7 @@ const checkingPriceResult = ref({
     price: 0
 });
 const checkingPriceResultFlag = ref(false);
+const checkingClaimResultFlag = ref(false);
 const replacementSubmitted = ref(false);
 const reimbursementSubmitted = ref(false);
 
@@ -1006,6 +1008,10 @@ watch(
   () => newClaimData.claimPercent,
   (val) => {
     if (updating) return;
+    if (val === null || val === '') {
+      newClaimData.claimPercent = null
+      return;
+    }
     updating = true;
     newClaimData.claimPercent = Math.min(Math.max(Number(val) || 0, 0), 100);
     newClaimData.wornPercent = 100 - newClaimData.claimPercent;
@@ -1018,6 +1024,10 @@ watch(
   () => newClaimData.wornPercent,
   (val) => {
     if (updating) return;
+    if (val === null || val === '') {
+      newClaimData.wornPercent = null
+      return;
+    }
     updating = true;
     newClaimData.wornPercent = Math.min(Math.max(Number(val) || 0, 0), 100);
     newClaimData.claimPercent = 100 - newClaimData.wornPercent;
@@ -1039,19 +1049,19 @@ const openCreateClaimDialog = () => {
 
 // Close Create Claim Dialog
 const closeCreateClaimDialog = () => {
+    newClaimData.damageCode = '';
+    newClaimData.problem = '';
+    newClaimData.claimPercent = null;
+    newClaimData.threadDepth = null;
+    newClaimData.wornPercent = null;
     showCreateClaimDialog.value = false;
     creatingClaim.value = false;
+    checkingClaimResultFlag.value = false;
 };
 
 const openEditTier = () => {
     showEditTireDialog.value = true;
     // Reset form data
-    editTireData.mfgcode = '';
-    editTireData.sizecode = '';
-    editTireData.tyrespec = '';
-    editTireData.weekcode = '';
-    editTireData.pattern = '';
-    editTireData.desc = '';
     editTire.value = false;
     editValidationTire.value = false;
 };
@@ -1449,8 +1459,22 @@ const fetchWarrantyClaim = async () => {
                     AdminplatePart2 = parts[1] || "-";
                     AdminplatePart3 = parts[2] || "-";
                     AdminplatePart4 = parts[3] || "-";
+                    editTireData.mfgcode = AdminplatePart1;
+                    editTireData.sizecode = AdminplatePart2;
+                    editTireData.tyrespec = AdminplatePart3;
+                    editTireData.weekcode = AdminplatePart4;
+                    editTireData.desc = tireInfo?.descriptionAdmin;
+                    editTireData.pattern = tireInfo?.patternAdmin;
                 }
+            }else{
+                    editTireData.mfgcode = platePart1;
+                    editTireData.sizecode = platePart2;
+                    editTireData.tyrespec = platePart3;
+                    editTireData.weekcode = platePart4;
+                    editTireData.desc = tireInfo?.desc;
+                    editTireData.pattern = tireInfo?.pattern;
             }
+            console.log(editTireData)
             warantyDetail.value = {
                 // Claim Info
                 id: apiData.claim_info?.id,
@@ -1976,6 +2000,63 @@ const checkPrice = async () => {
     } finally {
         loadingAction.value = false;
         checkingPriceResultFlag.value = true;
+    }
+};
+
+const checkTread = async () => {
+
+    if (newClaimData.threadDepth === null ) {
+        toast.add({
+            severity: 'error',
+            summary: 'Error',
+            detail: 'Validation Error.',
+            life: 4000
+        });
+        return;
+    }
+
+    try {
+        // checkingPriceResult.value.price
+        loadingAction.value = true;
+        const id = warantyDetail.value.id;
+        // 1. Call Reimbursement API
+        const checkingResponse = await api.post(`warranty_claim/getTreadDepthPercent`, {
+            claimID: id,
+            treadDepth: newClaimData.threadDepth
+        });
+
+        if (checkingResponse.data.status === 1) {
+            // 2. Automatically Request Scrap
+            const data = checkingResponse.data.admin_data;
+
+            newClaimData.claimPercent = parseInt(data.claim_percent) || 0;
+            newClaimData.wornPercent = parseInt(data.worn_percent);
+            toast.add({
+                severity: 'success',
+                summary: 'Success',
+                detail: 'Claim and Worn Percent Checking successfully',
+                life: 3000
+            });
+            
+        } else {
+            toast.add({
+                severity: 'error',
+                summary: 'Error',
+                detail: checkingResponse.data.error || 'Failed to checking worn and claim percent',
+                life: 7000
+            });
+        }
+    } catch (err) {
+        console.error('Error checking claim and percent:', err);
+        toast.add({
+            severity: 'error',
+            summary: 'Error',
+            detail: err.response?.data?.message || 'Failed to checking claim and percent',
+            life: 3000
+        });
+    } finally {
+        loadingAction.value = false;
+        checkingClaimResultFlag.value = true;
     }
 };
 const submitReimbursement = async () => {
