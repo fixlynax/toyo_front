@@ -294,16 +294,11 @@ const model = ref([
                 icon: 'pi pi-fw pi-briefcase',
                 to: '/scm/listLogistic'
             },
-            {
-                label: 'Back Order',
-                icon: 'pi pi-fw pi-history',
-                to: '/scm/listSCMBackOrder'
-            },
-            {
-                label: 'TEST',
-                icon: 'pi pi-fw pi-list',
-                to: '/scm/testpagination'
-            },
+            // {
+            //     label: 'Back Order',
+            //     icon: 'pi pi-fw pi-history',
+            //     to: '/scm/listSCMBackOrder'
+            // },
         ]
     },
     {
@@ -364,12 +359,12 @@ const model = ref([
                 to: '/billing/listAccountDetail'
             },
             {
-                label: 'Billing ',
+                label: 'E-Invoice ',
                 icon: 'pi pi-fw pi-file',
                 to: '/billing/listBilling'
             },
             {
-                label: 'E-Billing',
+                label: 'Self Bill E-Invoice',
                 icon: 'pi pi-fw pi-file-check',
                 to: '/billing/listEbilling'
             },
