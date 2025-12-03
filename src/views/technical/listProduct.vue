@@ -4,6 +4,7 @@
 
         <DataTable
             :value="tyres"
+            @filter="onTableFilter"
             :paginator="true"
             :rows="10"
             :rowsPerPageOptions="[5, 10, 20]"
@@ -68,7 +69,7 @@
             <Column header="Export All" style="min-width: 8rem">
                 <template #header>
                     <div class="flex justify-center">
-                        <Checkbox :binary="true" :model-value="false" @change="() => toggleSelectAll()" />
+                        <Checkbox :key="tyres.length" :binary="true" :model-value="isAllSelected()" @change="() => toggleSelectAll()" />
                     </div>
                 </template>
 
@@ -178,6 +179,8 @@ const materialLoading = ref(false);
 const stockLevelLoading = ref(false);
 const importInput = ref();
 const selectedExportIds = ref(new Set());
+
+const visibleRows = ref(tyres.value);
 
 // Filters for quick search
 const filters = ref({
@@ -298,11 +301,6 @@ const handleStockLevel = async () => {
     }
 };
 
-// Computed boolean: are all rows selected?
-const allSelected = computed(() => {
-    return tyres.value.length > 0 && selectedExportIds.value.size === tyres.value.length;
-});
-
 // Toggle functions
 const handleToggleExport = (id) => {
     if (selectedExportIds.value.has(id)) {
@@ -312,15 +310,27 @@ const handleToggleExport = (id) => {
     }
 };
 
-// Check all
+const onTableFilter = (event) => {
+    // Update visibleRows whenever filtering happens
+    visibleRows.value = event.filteredValue || tyres.value;
+};
+
+// Toggle all visible rows
 const toggleSelectAll = () => {
-    if (allSelected.value) {
-        // Unselect all
-        selectedExportIds.value.clear();
+    const allIds = visibleRows.value.map(item => item.id);
+
+    if (isAllSelected()) {
+        // Remove all visible IDs at once
+        selectedExportIds.value = new Set([...selectedExportIds.value].filter(id => !allIds.includes(id)));
     } else {
-        // Select all
-        tyres.value.forEach((row) => selectedExportIds.value.add(row.id));
+        // Add all visible IDs at once
+        selectedExportIds.value = new Set([...selectedExportIds.value, ...allIds]);
     }
+};
+
+// Computed: are all visible rows selected?
+const isAllSelected = () => {
+    return visibleRows.value.length > 0 && visibleRows.value.every(item => selectedExportIds.value.has(item.id));
 };
 
 // Toggle functions
