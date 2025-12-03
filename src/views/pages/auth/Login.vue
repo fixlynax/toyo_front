@@ -63,8 +63,8 @@ const handleSubmit = (event) => {
 <template>
     <div class="flex min-h-screen bg-primary-500 font-sans">
         <!-- Left Side: Background with overlay -->
-            <Toast position="top-right" />
-    <div class="hidden md:flex w-2/3 relative items-center justify-center overflow-hidden" style="clip-path: ellipse(130% 91% at 99% 10%)">
+        <Toast position="top-right" />
+        <div class="hidden md:flex w-2/3 relative items-center justify-center overflow-hidden" style="clip-path: ellipse(130% 91% at 99% 10%)">
             <img :src="randomImage" alt="Background" class="absolute inset-0 w-full h-full object-cover scale-110 blur-sm transition-transform duration-700 ease-in-out hover:scale-115 hover:blur-0" />
             <div class="absolute inset-0 bg-black/30"></div>
 
@@ -81,7 +81,7 @@ const handleSubmit = (event) => {
 
         <!-- Right Side: Login Form -->
         <div class="flex w-full md:w-1/3 items-center justify-center p-8 sm:p-10 bg-primary-500">
-            <div class="w-full max-w-md bg-white dark:bg-gray-800 rounded-3xl shadow-lg p-6 sm:p-8">
+            <div class="w-full max-w-md bg-white dark:bg-gray-800 rounded-3xl shadow-2xl border border-gray-200 dark:border-gray-700 p-6 sm:p-8">
                 <div class="text-center mb-6">
                     <h1 class="text-2xl md:text-3xl font-semibold text-gray-900 dark:text-white mb-2">Login to your account</h1>
                     <p class="text-gray-600 dark:text-gray-300 text-base">Enter your credentials below</p>

@@ -272,7 +272,7 @@
 
                         <!-- Export Button -->
                         <div class="flex items-center gap-2">
-                            <Button icon="pi pi-file-export" label="Export" class="p-button text-blue-600 p-2 flex items-center justify-center" v-tooltip="'Export Redemption List'" @click="exportRedemptionList" />
+                            <Button icon="pi pi-file-export" label="Export" class="p-button text-blue-600 p-2 flex items-center justify-center" v-tooltip="'Export Redemption List'" @click="exportToExcel" />
                         </div>
                     </div>
 
@@ -404,7 +404,7 @@
 import { ref, computed, onMounted } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { useToast } from 'primevue/usetoast';
-import { useConfirm } from 'primevue/useconfirm'; // Added useConfirm
+import { useConfirm } from 'primevue/useconfirm';
 import api from '@/service/api';
 
 const route = useRoute();
@@ -452,6 +452,7 @@ const removeQty = ref(0);
 const silverPoint = ref(0);
 const goldPoint = ref(0);
 const platinumPoint = ref(0);
+const exportLoading = ref(false);
 
 onMounted(async () => {
     await fetchCatalogueDetails();
@@ -713,14 +714,53 @@ const importPinList = () => {
     });
 };
 
-const exportRedemptionList = () => {
-    toast.add({
-        severity: 'info',
-        summary: 'Info',
-        detail: 'Export redemption list functionality to be implemented',
-        life: 3000
-    });
+const exportToExcel = () => {
+    // Change from processedPins.value to redeemList.value
+    if (redeemList.value.length === 0) {
+        toast.add({ severity: 'warn', summary: 'Warning', detail: 'No data to export', life: 3000 });
+        return;
+    }
+
+    try {
+        // Create worksheet data
+        const headers = ['Member Code', 'Member Name', 'Date Redeemed'];
+
+        // Prepare data rows - use redeemList instead of processedPins
+        const csvData = redeemList.value.map((redeem) => [
+            `"${redeem.member_code || ''}"`,
+            `"${redeem.full_name || ''}"`,
+            `"${redeem.redeem_on || ''}"`
+        ]);
+
+        // Combine headers and data
+        const csvContent = [headers.join(','), ...csvData.map((row) => row.join(','))].join('\n');
+
+        // Create and download the file
+        const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+        const link = document.createElement('a');
+        const url = URL.createObjectURL(blob);
+
+        link.setAttribute('href', url);
+        link.setAttribute('download', `Redemption_List_${new Date().toISOString().split('T')[0]}.csv`);
+        link.style.visibility = 'hidden';
+
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+
+        URL.revokeObjectURL(url);
+    } catch (error) {
+        console.error('Error exporting to Excel:', error);
+        toast.add({
+            severity: 'error',
+            summary: 'Error',
+            detail: 'Failed to export data',
+            life: 3000
+        });
+    }
 };
+
+
 
 const addStock = async () => {
     if (addQty.value > 0) {

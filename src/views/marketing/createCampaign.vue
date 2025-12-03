@@ -64,7 +64,7 @@
 
                 <!-- Upload Images -->
                 <div>
-                    <label class="block font-bold text-gray-700 mb-2">Upload Campaign Images <span class="text-xs bg-blue-100 text-blue-800 px-2 py-0.5 rounded-full">(Max file size: 2 MB)</span> </label>
+                    <label class="block font-bold text-gray-700 mb-2">Upload Campaign Images <span class="text-xs bg-blue-100 text-blue-800 px-2 py-0.5 rounded-full">1280 × 720 px (max 2MB)</span> </label>
                     <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
                         <div v-for="(field, idx) in ['image1', 'image2', 'image3']" :key="idx">
                             <FileUpload mode="basic" :name="field" accept="image/*" customUpload @select="onImageSelect($event, field)" :chooseLabel="`Upload Image ${idx + 1}`" class="w-full" />
@@ -145,6 +145,7 @@
             </div>
         </div>
 
+    
         <!-- 🏆 Reward Section -->
         <div class="card flex flex-col w-full mt-8">
             <div class="flex items-center justify-between border-b pb-2 mb-4">
@@ -159,26 +160,35 @@
                     </div>
 
                     <div class="grid grid-cols-1 md:grid-cols-3 gap-4 items-end">
+                        <!-- Select Prize -->
                         <div class="md:col-span-2">
-                            <label class="block font-bold text-gray-700 mb-1">Select Reward</label>
-                            <Dropdown v-model="reward.selected" :options="listPrize" optionLabel="title" placeholder="Select a reward" class="w-full">
+                            <label class="block font-bold text-gray-700 mb-1">Select Prize</label>
+                            <Dropdown v-model="reward.selected" :options="listPrize" optionLabel="title" placeholder="Select a prize" class="w-full">
                                 <template #option="slotProps">
                                     <div class="flex items-center gap-3">
-                                        <img v-if="slotProps.option.processedImageURL" :src="slotProps.option.processedImageURL" class="w-28 h-16 object-cover rounded" />
-                                        <div v-else class="w-28 h-16 bg-gray-200 rounded flex items-center justify-center">
-                                            <i class="pi pi-image text-gray-400"></i>
-                                        </div>
+                                        <img :src="slotProps.option.processedImageURL" class="w-28 h-16 object-cover rounded" />
                                         <div class="flex flex-col">
                                             <span class="font-semibold text-gray-800">{{ slotProps.option.title }}</span>
-                                            <small class="text-gray-500">{{ slotProps.option.type }} • {{ slotProps.option.purpose }}</small>
+                                            <small class="text-gray-500">{{ slotProps.option.type }} • Available: {{ slotProps.option.availableqty }}</small>
                                         </div>
                                     </div>
+                                </template>
+                                <template #value="slotProps">
+                                    <div v-if="slotProps.value" class="flex items-center gap-3">
+                                        <img :src="slotProps.value.processedImageURL" class="w-14 h-14 object-cover rounded" />
+                                        <div>
+                                            <span class="font-semibold text-gray-800">{{ slotProps.value.title }}</span>
+                                            <small class="block text-gray-500">{{ slotProps.value.type }} • Available: {{ slotProps.value.availableqty }}</small>
+                                        </div>
+                                    </div>
+                                    <span v-else class="text-gray-400">Select Prize</span>
                                 </template>
                             </Dropdown>
                             <small v-if="errors[`reward_${index}`]" class="text-red-500">{{ errors[`reward_${index}`] }}</small>
                         </div>
 
-                        <div class="w-full">
+                        <!-- Quantity -->
+                        <div>
                             <FloatLabel>
                                 <InputNumber id="qty" v-model="reward.qty" :min="1" class="w-full" />
                                 <label for="qty">Quantity</label>

@@ -52,7 +52,7 @@
 
                     <!-- Upload Images -->
                     <div>
-                        <label class="block font-bold text-gray-700 mb-2">Event Images</label>
+                        <label class="block font-bold text-gray-700 mb-2">Event Images <span class="text-xs bg-blue-100 text-blue-800 px-2 py-0.5 rounded-full">1280 × 720 px (max 2MB)</span> </label>
                         <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
                             <div v-for="(img, index) in [1, 2, 3]" :key="index" class="relative">
                                 <FileUpload mode="basic" :name="`image${img}`" accept="image/*" customUpload @select="onImageSelect($event, `image${img}`)" :chooseLabel="`Change Image ${img}`" class="w-full" />

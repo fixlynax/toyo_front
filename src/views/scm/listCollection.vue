@@ -21,6 +21,7 @@ const exportLoading2 = ref(false);
 const importLoading2 = ref(false);
 const importInput1 = ref();
 const importInput2 = ref();
+const visibleRows = ref(listData.value);
 
 // Data variables
 const activeTabIndex = ref(0);
@@ -72,11 +73,6 @@ watch(activeTabIndex, () => {
     selectedExportIds.value.clear();
 });
 
-const allSelected = computed(() => {
-  return listData.value.length > 0 &&
-         listData.value.every(item => selectedExportIds.value.has(item.claimID));
-});
-
 const handleToggleExport = (id) => {
   if (selectedExportIds.value.has(id)) {
     selectedExportIds.value.delete(id);
@@ -85,19 +81,27 @@ const handleToggleExport = (id) => {
   }
 };
 
-// Check all
+const onTableFilter = (event) => {
+    // Update visibleRows whenever filtering happens
+    visibleRows.value = event.filteredValue || orderDelList.value;
+};
+
+// Toggle all visible rows
 const toggleSelectAll = () => {
-  if (allSelected.value) {
-    // Unselect all for this tab
-    listData.value.forEach(item => {
-      selectedExportIds.value.delete(item.claimID);
-    });
-  } else {
-    // Select all for this tab
-    listData.value.forEach(item => {
-      selectedExportIds.value.add(item.claimID);
-    });
-  }
+    const allIds = visibleRows.value.map(item => item.claimID);
+
+    if (isAllSelected()) {
+        // Remove all visible IDs at once
+        selectedExportIds.value = new Set([...selectedExportIds.value].filter(claimID => !allIds.includes(claimID)));
+    } else {
+        // Add all visible IDs at once
+        selectedExportIds.value = new Set([...selectedExportIds.value, ...allIds]);
+    }
+};
+
+// Computed: are all visible rows selected?
+const isAllSelected = () => {
+    return visibleRows.value.length > 0 && visibleRows.value.every(item => selectedExportIds.value.has(item.claimID));
 };
 
 
@@ -686,6 +690,7 @@ onMounted(async () => {
 
             <DataTable
                 :value="listData"
+                @filter="onTableFilter"
                 :paginator="true"
                 :rows="10"
                 :rowsPerPageOptions="[5, 10, 20, 50, 100]"
@@ -696,7 +701,7 @@ onMounted(async () => {
                 :loading="loading"
                 :filters="filters"
                 filterDisplay="menu"
-                :globalFilterFields="['claimRefno', 'created', 'city', 'collectDate', 'collectTime', 'status']"
+                :globalFilterFields="['claimRefno', 'created', 'custname', 'custaccountno','city','storagelocation','state', 'collectDate', 'collectTime', 'status']"
                 paginatorTemplate="CurrentPageReport FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink RowsPerPageDropdown"
                 currentPageReportTemplate="Showing {first} to {last} of {totalRecords} entries"
             >
@@ -744,12 +749,7 @@ onMounted(async () => {
                 <Column v-if="statusTabs[activeTabIndex]?.label !== 'Completed' && canUpdate" header="Export All" style="min-width: 8rem" >
                     <template #header>
                         <div class="flex justify-center">
-                        <Checkbox
-                            :key="listData.length" 
-                            :binary="true"
-                            :model-value="allSelected"  
-                            @change="() => toggleSelectAll()"  
-                        />
+                            <Checkbox :key="listData.length" :binary="true" :model-value="isAllSelected()" @change="() => toggleSelectAll()" />
                         </div>
                     </template>
 
@@ -773,6 +773,28 @@ onMounted(async () => {
                         <RouterLink :to="`/scm/detailCollection/${data.id}`" class="hover:underline font-bold text-primary">
                             {{ data.claimRefno }}
                         </RouterLink>
+                    </template>
+                </Column>
+                <Column field="custname" header="Ship-To" dataType="date" style="min-width: 8rem" sortable>
+                    <template #body="{ data }">
+                        <span class="font-bold">{{ data?.custname || '-' }}</span>
+                        <br />
+                        {{ data?.custaccountno ?? '-' }}
+                    </template>
+                </Column>
+                <Column field="storagelocation" header="Storage Location" style="max-width: 8rem" sortable>
+                    <template #body="{ data }">
+                        {{ data?.storagelocation ?? '-' }}
+                    </template>
+                </Column>
+                <Column field="city" header="City" style="max-width: 8rem" sortable>
+                    <template #body="{ data }">
+                        {{ data?.city.replace(/,$/, '') ?? '-' }}
+                    </template>
+                </Column>
+                <Column field="state" header="State" style="max-width: 8rem" sortable>
+                    <template #body="{ data }">
+                        {{ data?.state ?? '-' }}
                     </template>
                 </Column>
                 <Column field="collectDate" header="Collect Date" style="min-width: 10rem" sortable>

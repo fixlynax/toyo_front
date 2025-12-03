@@ -45,7 +45,7 @@
 
                 <!-- Upload Images -->
                 <div>
-                    <label class="block font-bold text-gray-700 mb-2">Upload News Images <span class="text-xs bg-blue-100 text-blue-800 px-2 py-0.5 rounded-full">(Max file size: 2 MB)</span> </label>
+                    <label class="block font-bold text-gray-700 mb-2">Upload News Images <span class="text-xs bg-blue-100 text-blue-800 px-2 py-0.5 rounded-full">1280 × 720 px (max 2MB)</span> </label>
                     <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
                         <div v-for="n in 3" :key="n">
                             <FileUpload mode="basic" accept="image/*" customUpload :chooseLabel="`Upload Image ${n}`" class="w-full" @select="(e) => onImageSelect(e, `image${n}`)" />

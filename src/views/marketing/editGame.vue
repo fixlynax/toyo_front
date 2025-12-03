@@ -68,7 +68,7 @@
 
                 <!-- Upload Images -->
                 <div>
-                    <label class="block font-bold text-gray-700 mb-2">Upload Game Images</label>
+                    <label class="block font-bold text-gray-700 mb-2">Upload Game Images <span class="text-xs bg-blue-100 text-blue-800 px-2 py-0.5 rounded-full">1280 × 720 px (max 2MB)</span> </label>
                     <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
                         <div class="relative">
                             <FileUpload mode="basic" name="image1" accept="image/*" customUpload @select="onImageSelect($event, 'image1')" chooseLabel="Change Image 1" class="w-full" />
@@ -152,7 +152,7 @@
                                         </div>
                                         <div class="flex flex-col">
                                             <span class="font-semibold text-gray-800">{{ slotProps.option.prizeName }}</span>
-                                            <small class="text-gray-500">{{ slotProps.option.prizeType }}</small>
+                                            <small class="text-gray-500">{{ slotProps.option.prizeType }} • Available: {{ slotProps.option.availableqty }}</small>
                                         </div>
                                     </div>
                                 </template>
@@ -163,7 +163,7 @@
                                         </div>
                                         <div>
                                             <span class="font-semibold text-gray-800">{{ slotProps.value.prizeName }}</span>
-                                            <small class="block text-gray-500">{{ slotProps.value.prizeType }}</small>
+                                            <small class="block text-gray-500">{{ slotProps.value.prizeType }} • Available: {{ slotProps.value.availableqty }}</small>
                                         </div>
                                     </div>
                                     <span v-else class="text-gray-400">Select Prize</span>
@@ -310,7 +310,7 @@ const fetchCatalog = async () => {
                 prizeName: item.title,
                 prizeType: item.type,
                 prizeQuota: item.totalqty,
-                prizeRemain: item.availableqty,
+                availableqty: item.availableqty,
                 description: item.description,
                 valueAmount: item.valueAmount,
                 valueType: item.valueType,
