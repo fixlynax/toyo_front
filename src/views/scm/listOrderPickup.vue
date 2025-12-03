@@ -14,6 +14,7 @@
             </div>
             <DataTable
                 :value="orderDelList"
+                @filter="onTableFilter"
                 :paginator="true"
                 :rows="10"
                 :rowsPerPageOptions="[10, 20, 50, 100]"
@@ -66,7 +67,7 @@
                 <Column v-if="statusTabs[activeTabIndex]?.label !== 'Completed' && canUpdate" header="Export All" style="min-width: 8rem">
                     <template #header>
                         <div class="flex justify-center">
-                            <Checkbox :key="orderDelList.length" :binary="true" :model-value="allSelected" @change="() => toggleSelectAll()" />
+                            <Checkbox :key="orderDelList.length" :binary="true" :model-value="isAllSelected()" @change="() => toggleSelectAll()" />
                         </div>
                     </template>
 
@@ -242,7 +243,7 @@ const importLoading = ref(false);
 const importInput = ref();
 
 const selectedExportIds = ref(new Set());
-
+const visibleRows = ref(orderDelList.value);
 const formatDateDMY = (date) => {
     const d = new Date(date);
     const day = String(d.getDate()).padStart(2, '0');
@@ -263,10 +264,6 @@ const statusTabs = [
     { label: 'Pending', submitLabel: 'PENDING' },
     { label: 'Completed', submitLabel: 'COMPLETED' }
 ];
-// Computed boolean: are all rows selected?
-const allSelected = computed(() => {
-    return orderDelList.value.length > 0 && orderDelList.value.every((item) => selectedExportIds.value.has(item.id));
-});
 
 const handleToggleExport = (id) => {
     if (selectedExportIds.value.has(id)) {
@@ -275,20 +272,27 @@ const handleToggleExport = (id) => {
         selectedExportIds.value.add(id);
     }
 };
+const onTableFilter = (event) => {
+    // Update visibleRows whenever filtering happens
+    visibleRows.value = event.filteredValue || orderDelList.value;
+};
 
-// Check all
+// Toggle all visible rows
 const toggleSelectAll = () => {
-    if (allSelected.value) {
-        // Unselect all for this tab
-        returnList.value.forEach((item) => {
-            selectedExportIds.value.delete(item.id);
-        });
+    const allIds = visibleRows.value.map(item => item.id);
+
+    if (isAllSelected()) {
+        // Remove all visible IDs at once
+        selectedExportIds.value = new Set([...selectedExportIds.value].filter(id => !allIds.includes(id)));
     } else {
-        // Select all for this tab
-        returnList.value.forEach((item) => {
-            selectedExportIds.value.add(item.id);
-        });
+        // Add all visible IDs at once
+        selectedExportIds.value = new Set([...selectedExportIds.value, ...allIds]);
     }
+};
+
+// Computed: are all visible rows selected?
+const isAllSelected = () => {
+    return visibleRows.value.length > 0 && visibleRows.value.every(item => selectedExportIds.value.has(item.id));
 };
 // Export function PICKUP ONLY
 const handleExport = async () => {

@@ -20,6 +20,7 @@
             </div>
             <DataTable
                 :value="collectionList"
+                @filter="onTableFilter"
                 :paginator="true"
                 :rows="10"
                 :rowsPerPageOptions="[5, 10, 20, 50, 100]"
@@ -30,7 +31,7 @@
                 :loading="loading"
                 :filters="filters"
                 filterDisplay="menu"
-                :globalFilterFields="['claimRefno', 'created', 'deliveryDate', 'scheduleDeliveryDate', 'status', 'deliveryDate']"
+                :globalFilterFields="['claimRefno', 'created', 'custname', 'custaccountno','city','storagelocation','state', 'deliveryDate', 'scheduleDeliveryDate', 'status', 'deliveryDate']"
                 paginatorTemplate="CurrentPageReport FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink RowsPerPageDropdown"
                 currentPageReportTemplate="Showing {first} to {last} of {totalRecords} entries"
             >
@@ -82,12 +83,7 @@
                 <Column v-if="statusTabs[activeTabIndex]?.label !== 'Completed' && canUpdate" header="Export All" style="min-width: 8rem">
                     <template #header>
                         <div class="flex justify-center">
-                        <Checkbox
-                            :key="collectionList.length" 
-                            :binary="true"
-                            :model-value="allSelected"  
-                            @change="() => toggleSelectAll()"  
-                        />
+                            <Checkbox :key="collectionList.length" :binary="true" :model-value="isAllSelected()" @change="() => toggleSelectAll()" />
                         </div>
                     </template>
 
@@ -112,6 +108,28 @@
                         <RouterLink :to="`/scm/detailReturnList/${data?.id}`" class="hover:underline font-bold text-primary">
                             {{ data?.claimRefno ?? '-' }}
                         </RouterLink>
+                    </template>
+                </Column>
+                <Column field="custname" header="Ship-To" dataType="date" style="min-width: 8rem" sortable>
+                    <template #body="{ data }">
+                        <span class="font-bold">{{ data?.custname || '-' }}</span>
+                        <br />
+                        {{ data?.custaccountno ?? '-' }}
+                    </template>
+                </Column>
+                <Column field="storagelocation" header="Storage Location" style="max-width: 8rem" sortable>
+                    <template #body="{ data }">
+                        {{ data?.storagelocation ?? '-' }}
+                    </template>
+                </Column>
+                <Column field="city" header="City" style="max-width: 8rem" sortable>
+                    <template #body="{ data }">
+                        {{ data?.city.replace(/,$/, '') ?? '-' }}
+                    </template>
+                </Column>
+                <Column field="state" header="State" style="max-width: 8rem" sortable>
+                    <template #body="{ data }">
+                        {{ data?.state ?? '-' }}
                     </template>
                 </Column>
                 <Column field="scheduleDeliveryDate" header="Delivery Date" style="min-width: 8rem" sortable>
@@ -172,6 +190,7 @@ const collectionList = ref([]);
 
 const activeTabIndex = ref(0);
 const dateRange = ref(null);
+const visibleRows = ref(collectionList.value);
 
 const formatDateDMY = (date) => {
   const d = new Date(date);
@@ -220,11 +239,6 @@ watch(activeTabIndex, () => {
     selectedExportIds.value.clear();
 });
 
-// Computed boolean: are all rows selected?
-const allSelected = computed(() => {
-  return collectionList.value.length > 0 &&
-         collectionList.value.every(item => selectedExportIds.value.has(item.claimID));
-});
 
 const handleToggleExport = (id) => {
   if (selectedExportIds.value.has(id)) {
@@ -234,19 +248,27 @@ const handleToggleExport = (id) => {
   }
 };
 
-// Check all
+const onTableFilter = (event) => {
+    // Update visibleRows whenever filtering happens
+    visibleRows.value = event.filteredValue || collectionList.value;
+};
+
+// Toggle all visible rows
 const toggleSelectAll = () => {
-  if (allSelected.value) {
-    // Unselect all for this tab
-    collectionList.value.forEach(item => {
-      selectedExportIds.value.delete(item.claimID);
-    });
-  } else {
-    // Select all for this tab
-    collectionList.value.forEach(item => {
-      selectedExportIds.value.add(item.claimID);
-    });
-  }
+    const allIds = visibleRows.value.map(item => item.claimID);
+
+    if (isAllSelected()) {
+        // Remove all visible IDs at once
+        selectedExportIds.value = new Set([...selectedExportIds.value].filter(claimID => !allIds.includes(claimID)));
+    } else {
+        // Add all visible IDs at once
+        selectedExportIds.value = new Set([...selectedExportIds.value, ...allIds]);
+    }
+};
+
+// Computed: are all visible rows selected?
+const isAllSelected = () => {
+    return visibleRows.value.length > 0 && visibleRows.value.every(item => selectedExportIds.value.has(item.claimID));
 };
 
 
