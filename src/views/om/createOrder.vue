@@ -203,13 +203,9 @@
                 <div class="text-sm text-orange-600 mt-1">
                     The following items exceed the monthly limit of 50 units per material:
                     <ul class="mt-1 list-disc list-inside ml-2">
-                        <li v-for="item in exceedsMonthlyLimitItems" :key="item.materialid">
-                            {{ item.material }}: {{ item.quantity }} units (Limit: 50)
-                        </li>
+                        <li v-for="item in exceedsMonthlyLimitItems" :key="item.materialid">{{ item.material }}: {{ item.quantity }} units (Limit: 50)</li>
                     </ul>
-                    <div class="mt-2 text-xs text-orange-700 font-semibold">
-                        Note: The API will validate the actual monthly usage when placing the order.
-                    </div>
+                    <div class="mt-2 text-xs text-orange-700 font-semibold">Note: The API will validate the actual monthly usage when placing the order.</div>
                 </div>
             </div>
 
@@ -345,7 +341,7 @@
                                         decrementButtonIcon="pi pi-minus"
                                         style="width: fit-content"
                                         @update:modelValue="onQuantityChange(data)"
-                                        :class="{'border-orange-500': selectedOrderType === 'NORMAL' && data.quantity > 50}"
+                                        :class="{ 'border-orange-500': selectedOrderType === 'NORMAL' && data.quantity > 50 }"
                                     />
                                     <!-- Show monthly limit warning if applicable -->
                                     <div v-if="selectedOrderType === 'NORMAL' && data.quantity > 50" class="flex items-center gap-1 text-orange-600 text-xs">
@@ -436,8 +432,8 @@
                     <span class="font-semibold text-red-700">Maximum Line Items Reached</span>
                 </div>
                 <div class="text-sm text-red-600 mt-1">
-                    You have {{ totalLineItems }} line items in your cart ({{ selectedTyres.length }} order items + {{ freeItems.length }} free items).
-                    Maximum allowed per order is 10 line items. Please remove {{ totalLineItems - 10 }} item(s) to proceed.
+                    You have {{ totalLineItems }} line items in your cart ({{ selectedTyres.length }} order items + {{ freeItems.length }} free items). Maximum allowed per order is 10 line items. Please remove {{ totalLineItems - 10 }} item(s) to
+                    proceed.
                 </div>
             </div>
 
@@ -447,22 +443,12 @@
                     <i class="pi pi-exclamation-triangle text-orange-500"></i>
                     <span class="font-semibold text-orange-700">Monthly Quantity Limit Warning</span>
                 </div>
-                <div class="text-sm text-orange-600 mt-1">
-                    Some items in your cart exceed the monthly limit of 50 units per material.
-                    Please reduce quantities before proceeding to checkout.
-                </div>
+                <div class="text-sm text-orange-600 mt-1">Some items in your cart exceed the monthly limit of 50 units per material. Please reduce quantities before proceeding to checkout.</div>
             </div>
 
             <div class="flex justify-between mt-4">
                 <Button label="Back" icon="pi pi-arrow-left" class="p-button-secondary" @click="goToStep(1)" />
-                <Button 
-                    label="Next: Review Order" 
-                    icon="pi pi-arrow-right" 
-                    @click="goToStep(3)" 
-                    :disabled="!canProceedToStep3 || exceedsItemLimit" 
-                    :badge="totalLineItems.toString()"
-                    badgeClass="ml-2 bg-blue-500"
-                />
+                <Button label="Next: Review Order" icon="pi pi-arrow-right" @click="goToStep(3)" :disabled="!canProceedToStep3 || exceedsItemLimit" :badge="totalLineItems.toString()" badgeClass="ml-2 bg-blue-500" />
             </div>
 
             <!-- Overlay Panels -->
@@ -697,9 +683,7 @@
                         <div class="text-sm text-red-600 mt-1">
                             Some items exceed the monthly limit of 50 units per material. The order may be rejected by the system.
                             <ul class="mt-1 list-disc list-inside ml-2">
-                                <li v-for="item in exceedsMonthlyLimitItems" :key="item.materialid">
-                                    {{ item.material }}: {{ item.quantity }} units (Limit: 50)
-                                </li>
+                                <li v-for="item in exceedsMonthlyLimitItems" :key="item.materialid">{{ item.material }}: {{ item.quantity }} units (Limit: 50)</li>
                             </ul>
                         </div>
                     </div>
@@ -1054,9 +1038,9 @@ const exceedsItemLimit = computed(() => {
 // NEW: Check for 50-unit monthly limit violations
 const exceedsMonthlyLimitItems = computed(() => {
     if (selectedOrderType.value !== 'NORMAL') return [];
-    
+
     const exceededItems = [];
-    
+
     selectedTyres.value.forEach((item) => {
         if (item.quantity > 50) {
             exceededItems.push({
@@ -1067,7 +1051,7 @@ const exceedsMonthlyLimitItems = computed(() => {
             });
         }
     });
-    
+
     return exceededItems;
 });
 
@@ -1282,7 +1266,7 @@ const goToStep = async (step) => {
                     severity: 'error',
                     summary: 'Order Restricted',
                     detail: 'This customer cannot place orders due to risk category restrictions',
-                     life: 2000
+                    life: 2000
                 });
             }
             return;
@@ -1291,11 +1275,11 @@ const goToStep = async (step) => {
 
     if (step === 3 && !canProceedToStep3.value) {
         if (exceedsItemLimit.value) {
-            toast.add({ 
-                severity: 'warn', 
-                summary: 'Line Item Limit Exceeded', 
-                detail: 'Maximum 10 line items per order (including free items). Please remove some items before proceeding.', 
-                 life: 2000 
+            toast.add({
+                severity: 'warn',
+                summary: 'Line Item Limit Exceeded',
+                detail: 'Maximum 10 line items per order (including free items). Please remove some items before proceeding.',
+                life: 2000
             });
         } else {
             toast.add({ severity: 'warn', summary: 'Warning', detail: 'Please add products to cart before proceeding', life: 2000 });
@@ -1357,7 +1341,7 @@ const checkSalesProgramAndPrice = async () => {
                     severity: 'info',
                     summary: 'Sales Program Applied',
                     detail: `Found ${freeItems.value.length} free item(s) from sales program`,
-                     life: 1000
+                    life: 1000
                 });
             }
         }
@@ -1420,9 +1404,9 @@ const addToCart = (tyre) => {
             });
             return;
         }
-        
+
         existing.quantity += 1;
-        
+
         // Show monthly limit warning if exceeded
         if (selectedOrderType.value === 'NORMAL' && existing.quantity > 50) {
             toast.add({
@@ -1475,6 +1459,7 @@ const addToCart = (tyre) => {
 };
 
 // API Calls
+// API Calls
 const fetchCustomers = async () => {
     loadingCustomers.value = true;
     try {
@@ -1490,7 +1475,8 @@ const fetchCustomers = async () => {
             console.log('Dealers data:', dealers);
 
             if (dealers && typeof dealers === 'object') {
-                customerOptions.value = Object.keys(dealers).map((custAccountNo) => {
+                // Create array of customers first
+                const customersArray = Object.keys(dealers).map((custAccountNo) => {
                     const shop = dealers[custAccountNo].shop;
                     console.log(`Processing customer ${custAccountNo}:`, shop);
 
@@ -1501,12 +1487,25 @@ const fetchCustomers = async () => {
                         shopData: shop
                     };
                 });
+
+                // Sort customers by display name in ASCENDING alphabetical order (A to Z)
+                customersArray.sort((a, b) => {
+                    const displayA = a.display.toLowerCase();
+                    const displayB = b.display.toLowerCase();
+
+                    // For ascending order (A to Z), compare a to b
+                    if (displayA < displayB) return -1;
+                    if (displayA > displayB) return 1;
+                    return 0;
+                });
+
+                customerOptions.value = customersArray;
             } else {
                 console.warn('No dealers data found in response');
                 customerOptions.value = [];
             }
 
-            console.log('Final customer options:', customerOptions.value);
+            console.log('Final customer options (sorted A to Z):', customerOptions.value);
         } else {
             console.error('Customers API returned status 0:', response.data);
             toast.add({ severity: 'error', summary: 'Error', detail: 'Failed to fetch customers', life: 2000 });
@@ -1883,7 +1882,7 @@ const onQuantityChange = (item) => {
             life: 4000
         });
     }
-    
+
     // Check sales program and price when quantity changes
     if (selectedTyres.value.length > 0) {
         checkSalesProgramAndPrice();
@@ -1946,33 +1945,33 @@ const placeOrder = async () => {
                 orderStatus.value = 'error';
                 orderMessage.value = 'Maximum Line Items Exceeded';
                 orderError.value = 'Maximum 10 line items per order (including free items). Please remove some items and try again.';
-                
+
                 toast.add({
                     severity: 'error',
                     summary: 'Maximum Line Items Exceeded',
                     detail: 'Maximum 10 line items per order. Please remove some items and try again.',
-                     life: 2000
+                    life: 2000
                 });
             } else if (Array.isArray(addToCartResult.error) && addToCartResult.error[0]?.materialid) {
                 // 50-item per month limit error
                 const exceededItems = addToCartResult.error;
                 let errorMessage = 'Some items exceed the monthly limit (50 items per month):\n';
-                
+
                 exceededItems.forEach((item, index) => {
                     errorMessage += `${index + 1}. ${item.materialdescription} (${item.patternname || item.pattern}) \n Remaining quantity allowed: ${item.remainingqtytoorder}\n\n`;
                 });
-                
+
                 orderStatus.value = 'error';
                 orderMessage.value = 'Monthly Limit Exceeded';
                 orderError.value = errorMessage;
-                
+
                 // Show each error in separate toast for better visibility
                 exceededItems.forEach((item) => {
                     toast.add({
                         severity: 'error',
                         summary: 'Monthly Limit Exceeded',
                         detail: `${item.materialdescription} (${item.patternname || item.pattern}) - Only ${item.remainingqtytoorder} more allowed this month`,
-                         life: 2000
+                        life: 2000
                     });
                 });
             } else {
@@ -1990,7 +1989,7 @@ const placeOrder = async () => {
             severity: 'error',
             summary: 'Error',
             detail: error.message || 'Failed to process order',
-             life: 2000
+            life: 2000
         });
     } finally {
         processingOrder.value = false;
@@ -2180,7 +2179,7 @@ const handleOrderConfirmation = async (confirmResult, orderType) => {
                 severity: 'success',
                 summary: 'Success',
                 detail: `${orderType} order ${orderDetails.value.orderRefNo} created successfully`,
-                 life: 2000
+                life: 2000
             });
         }
     } else if (confirmResult.status === 0) {
@@ -2200,7 +2199,7 @@ const handleOrderConfirmation = async (confirmResult, orderType) => {
                 severity: 'error',
                 summary: 'Order Failed',
                 detail: errorMessage,
-                 life: 2000
+                life: 2000
             });
         }
     } else {
@@ -2214,7 +2213,7 @@ const handleOrderConfirmation = async (confirmResult, orderType) => {
             severity: 'error',
             summary: 'Error',
             detail: errorMessage,
-             life: 2000
+            life: 2000
         });
     }
 };
@@ -2282,7 +2281,7 @@ const handleBackOrderScenario = async (confirmResult, orderType) => {
             severity: 'warn',
             summary: 'Partial Fulfillment',
             detail: 'Some items require back order. Please review the options.',
-             life: 2000
+            life: 2000
         });
     } else if (processedFulfilled.length > 0) {
         // All items fulfilled
@@ -2449,7 +2448,7 @@ const showManualBackOrderOption = () => {
             severity: 'info',
             summary: 'Manual Back Order Detection',
             detail: 'Based on stock analysis, some items require back order.',
-             life: 2000
+            life: 2000
         });
     } else {
         // If no back order needed but we're here due to error, show different message
@@ -2531,7 +2530,7 @@ const proceedWithBackOrder = async () => {
                     severity: 'success',
                     summary: 'Success',
                     detail: `Order ${orderDetails.value.orderRefNo} created with back order ${orderDetails.value.backOrderRefNo}`,
-                     life: 2000
+                    life: 2000
                 });
             }
         } else {
@@ -2547,7 +2546,7 @@ const proceedWithBackOrder = async () => {
             severity: 'error',
             summary: 'Error',
             detail: error.message,
-             life: 2000
+            life: 2000
         });
     }
 };
@@ -2622,7 +2621,7 @@ const proceedWithoutBackOrder = async () => {
                     severity: 'success',
                     summary: 'Success',
                     detail: `Order ${result.eten_data.orderRefNo} created successfully`,
-                     life: 2000
+                    life: 2000
                 });
             }
         } else {
@@ -2637,7 +2636,7 @@ const proceedWithoutBackOrder = async () => {
             severity: 'error',
             summary: 'Error',
             detail: error.message || 'Failed to create order',
-             life: 2000
+            life: 2000
         });
     }
 };
