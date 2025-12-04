@@ -229,7 +229,7 @@
         :filter="true"
         :loading="loadingFreeMaterials"
         @change="onFreeMaterialChange"
-        :filterFields="['material', 'materialid']" <!-- Add this line -->
+        :filterFields="['material', 'materialid']"
     >
         <template #value="slotProps">
             <div v-if="slotProps.value" class="flex items-center">

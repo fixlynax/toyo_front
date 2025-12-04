@@ -174,7 +174,6 @@
                                     <!-- Dropdown -->
                                     <div>
                                         <label class="block text-sm font-medium text-gray-700 mb-2">Free Material</label>
-                                        <!-- In the template section, find the Free Material dropdown section -->
                                         <Dropdown
                                             v-model="programItem.selectedFreeMaterial"
                                             :options="freeMaterialOptions"
@@ -185,7 +184,7 @@
                                             :filter="true"
                                             :loading="loadingFreeMaterials"
                                             @change="onFreeMaterialChange"
-                                            :filterFields="['material', 'materialid']" <!-- Add this line -->
+                                            :filterFields="['material', 'materialid']"
                                         >
                                             <template #value="slotProps">
                                                 <div v-if="slotProps.value" class="flex items-center">
