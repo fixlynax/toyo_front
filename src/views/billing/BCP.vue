@@ -75,28 +75,6 @@
             <Button label="Clear Form" icon="pi pi-times" class="w-full md:w-auto p-button-outlined" @click="resetForm" severity="secondary" />
         </div>
 
-        <!-- Warning for duplicate order -->
-        <div v-if="isDuplicateOrder" class="mt-4 p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
-            <div class="flex items-center">
-                <i class="pi pi-exclamation-triangle mr-2 text-yellow-500"></i>
-                <div>
-                    <span class="font-medium text-yellow-700">Order Already Exists</span>
-                    <p class="text-yellow-600 text-sm mt-1">This ETEN order number already exists in the system. Please use a different ETEN order number.</p>
-                </div>
-            </div>
-        </div>
-
-        <!-- Error Message -->
-        <div v-if="errorMessage" class="mt-4 p-4 bg-red-50 border border-red-200 rounded-lg">
-            <div class="flex items-center">
-                <i class="pi pi-exclamation-triangle mr-2 text-red-500"></i>
-                <div>
-                    <span class="font-medium text-red-700">Error</span>
-                    <p class="text-red-600 text-sm mt-1">{{ errorMessage }}</p>
-                </div>
-            </div>
-        </div>
-
         <!-- Loading State for SAP Details -->
         <div v-if="loading.sapCheck" class="mt-6 border rounded-lg p-8 bg-gray-50">
             <div class="flex flex-col items-center justify-center space-y-4">
@@ -204,6 +182,27 @@
                     </div>
                 </div>
             </div>
+            <!-- Warning for duplicate order -->
+            <div v-if="isDuplicateOrder" class="mt-4 p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
+                <div class="flex items-center">
+                    <i class="pi pi-exclamation-triangle mr-2 text-yellow-500"></i>
+                    <div>
+                        <span class="font-medium text-yellow-700">Order Already Exists</span>
+                        <p class="text-yellow-600 text-sm mt-1">This ETEN order number already exists in the system. Please use a different ETEN order number.</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Error Message -->
+            <div v-if="errorMessage" class="mt-4 p-4 bg-red-50 border border-red-200 rounded-lg">
+                <div class="flex items-center">
+                    <i class="pi pi-exclamation-triangle mr-2 text-red-500"></i>
+                    <div>
+                        <span class="font-medium text-red-700">Error</span>
+                        <p class="text-red-600 text-sm mt-1">{{ errorMessage }}</p>
+                    </div>
+                </div>
+            </div>
             <div class="flex justify-end mt-6">
                 <Button
                     label="Create ETEN Order"
@@ -246,7 +245,6 @@
                     <div class="font-semibold text-lg">{{ etenResult.admin_data.so_no }}</div>
                     <div class="text-xs text-gray-500 mt-1">SAP Order Type: {{ etenResult.admin_data.sapordertype }}</div>
                 </div>
-
                 <div class="bg-white p-4 rounded-lg shadow-sm border border-green-100">
                     <div class="text-sm text-gray-500 mb-1">Order Description</div>
                     <div class="font-semibold text-lg">{{ getOrderDescLabel(etenResult.admin_data.orderDesc) }}</div>
@@ -273,12 +271,12 @@
                 </div>
                 <div class="bg-white p-3 rounded-lg border">
                     <div class="text-sm text-gray-500 mb-1">Storage Location</div>
-                    <div class="font-medium">{{ etenResult.admin_data.storagelocation || 'N/A' }}</div>
+                    <div class="font-medium">{{ etenResult.admin_data.storagelocation || '-' }}</div>
                 </div>
             </div>
 
             <!-- Order Items Created -->
-            <div class="mt-6">
+            <div class="mt-4">
                 <div class="font-semibold text-lg mb-3 text-green-800 flex items-center">
                     <i class="pi pi-box mr-2"></i>
                     Items Created
@@ -493,6 +491,40 @@ const getOrderStatusSeverity = (statusCode) => {
     return severityMap[statusCode] || 'info';
 };
 
+// New helper function to format date as dd-mm-yyyy
+const formatDateToDDMMYYYY = (dateString) => {
+    if (!dateString) return '';
+    
+    try {
+        const date = new Date(dateString);
+        if (isNaN(date.getTime())) {
+            // If dateString is already in dd-mm-yyyy format, return it as is
+            if (dateString.match(/^\d{4}-\d{2}-\d{2}$/)) {
+                return dateString;
+            }
+            // Try to parse other formats
+            const parts = dateString.split(/[-/]/);
+            if (parts.length === 3) {
+                const day = parts[0].padStart(2, '0');
+                const month = parts[1].padStart(2, '0');
+                const year = parts[2];
+                return `${year}-${month}-${day}`;
+            }
+            return dateString;
+        }
+        
+        // Format date to dd-mm-yyyy
+        const day = String(date.getDate()).padStart(2, '0');
+        const month = String(date.getMonth() + 1).padStart(2, '0');
+        const year = date.getFullYear();
+        
+        return `${day}-${month}-${year}`;
+    } catch (error) {
+        console.error('Error formatting date:', error);
+        return dateString;
+    }
+};
+
 const resetForm = () => {
     form.value = {
         orderno: '',
@@ -523,6 +555,7 @@ const checkSAPDetails = async () => {
         });
 
         sapDetails.value = response.data;
+        console.log('SAP Details Response : ',response.data);
 
         if (response.data.status === 1) {
             toast.add({
@@ -630,29 +663,44 @@ const createETENOrder = () => {
                     });
                 });
 
-                const bcpData = {
-                    custaccountno: sapData.custaccountno || form.value.custaccountno,
-                    salesorg: sapData.salesorg || 'TSM',
-                    distributionchannel: sapData.distributionchannel || '01',
-                    division: sapData.division || '00',
-                    pricegroup: sapData.pricegroup || '04',
-                    orderdate: sapData.orderdate || new Date().toISOString().split('T')[0],
-                    requestdeliverydate: sapData.requestdeliverydate || new Date().toISOString().split('T')[0],
-                    orderdesc: form.value.orderdesc, // Use selected orderdesc
-                    ordertype: sapData.ordertype || 'ZCPO',
-                    orderno: form.value.orderno,
-                    shipto: sapData.shipto || sapData.custaccountno,
-                    shippingcond: sapData.shippingcond || '01',
-                    storagelocation: sapData.storagelocation || 'FG01',
-                    saporderno: sapData.saporderno,
-                    deliveryno: sapData.deliveryno || '',
-                    pgistatus: sapData.pgistatus || '',
-                    invoiceno: sapData.invoiceno || '',
-                    creditnoteno: sapData.creditnoteno || '',
-                    sap_order_array: JSON.stringify(sapOrderArray)
-                };
+                // Create FormData object and append each field
+                const formData = new FormData();
+                
+                // Append all required fields
+                formData.append('custaccountno', sapData.custaccountno || form.value.custaccountno);
+                formData.append('salesorg', sapData.salesorg || 'TSM');
+                formData.append('distributionchannel', sapData.distributionchannel || '01');
+                formData.append('division', sapData.division || '00');
+                formData.append('pricegroup', sapData.pricegroup || '04');
+                // Format orderdate as dd-mm-yyyy and append
+                formData.append('orderdate', formatDateToDDMMYYYY(sapData.orderdate) || formatDateToDDMMYYYY(new Date().toISOString().split('T')[0]));
+                // Format requestdeliverydate as dd-mm-yyyy and append
+                formData.append('requestdeliverydate', formatDateToDDMMYYYY(sapData.requestdeliverydate) || formatDateToDDMMYYYY(new Date().toISOString().split('T')[0]));
+                formData.append('orderdesc', form.value.orderdesc);
+                formData.append('ordertype', sapData.ordertype || 'ZCPO');
+                formData.append('orderno', form.value.orderno);
+                formData.append('shipto', sapData.shipto || sapData.custaccountno);
+                formData.append('shippingcond', sapData.shippingcond || '01');
+                formData.append('storagelocation', sapData.storagelocation || 'FG01');
+                formData.append('saporderno', sapData.saporderno);
+                formData.append('deliveryno', sapData.deliveryno || '');
+                formData.append('pgistatus', sapData.pgistatus || '');
+                formData.append('invoiceno', sapData.invoiceno || '');
+                formData.append('creditnoteno', sapData.creditnoteno || '');
+                formData.append('sap_order_array', JSON.stringify(sapOrderArray));
 
-                const response = await api.post('credit/BCP', bcpData);
+                // Log FormData for debugging
+                console.log('FormData entries:');
+                for (let [key, value] of formData.entries()) {
+                    console.log(`${key}: ${value}`);
+                }
+
+                // Send FormData using the API
+                const response = await api.postExtra('credit/BCP', formData, {
+                    headers: {
+                        'Content-Type': 'multipart/form-data'
+                    }
+                });
 
                 if (response.data.status === 1) {
                     etenResult.value = response.data;
