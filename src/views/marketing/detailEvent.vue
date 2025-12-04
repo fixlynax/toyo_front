@@ -40,6 +40,7 @@
                         <!-- Event Info -->
                         <div class="mt-6">
                             <h1 class="text-2xl font-bold text-gray-800">{{ event.title }}</h1>
+                            <p class="text-lg font-medium">{{ event.headline }}</p>
                             <p class="text-lg font-medium">{{ event.desc }}</p>
 
                             <div class="flex flex-col md:flex-row gap-4 mt-3">
@@ -216,6 +217,7 @@ const event = ref({
     image1URL: '',
     image2URL: '',
     image3URL: '',
+    headline: '',
     desc: '',
     location: '',
     publishDate: '',

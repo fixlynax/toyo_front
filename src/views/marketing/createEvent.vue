@@ -15,6 +15,11 @@
                         </div>
 
                         <div class="md:col-span-2">
+                            <label class="block font-bold text-gray-700">Headline(180 max Character)</label>
+                            <Textarea v-model="event.headline" rows="3" class="w-full" maxlength="180" />
+                        </div>
+
+                        <div class="md:col-span-2">
                             <label class="block font-bold text-gray-700">Description</label>
                             <Textarea v-model="event.desc" rows="3" class="w-full" />
                         </div>
@@ -24,22 +29,21 @@
                             <InputText v-model="event.location" class="w-full" />
                         </div>
 
-                        
                         <div>
                             <label class="block font-bold text-gray-700">Start Date</label>
                             <Calendar v-model="event.startDate" :minDate="today" dateFormat="dd-mm-yy" showIcon class="w-full" @date-select="onStartDateSelect" />
                         </div>
-                        
+
                         <div>
                             <label class="block font-bold text-gray-700">End Date</label>
                             <Calendar v-model="event.endDate" :minDate="minEndDate" dateFormat="dd-mm-yy" showIcon class="w-full" />
                         </div>
-                        
+
                         <div>
                             <label class="block font-bold text-gray-700">Publish Date</label>
-                            <Calendar v-model="event.publishDate" dateFormat="dd-mm-yy" showIcon class="w-full"   :maxDate="event.endDate"  :disabled="!event.startDate || !event.endDate"/>
+                            <Calendar v-model="event.publishDate" dateFormat="dd-mm-yy" showIcon class="w-full" :maxDate="event.endDate" :disabled="!event.startDate || !event.endDate" />
                         </div>
-                        
+
                         <!-- <div>
                             <label class="block font-bold text-gray-700">Audience</label>
                             <Dropdown v-model="event.audience" :options="audienceOptions" optionLabel="label" optionValue="value" class="w-full" />
@@ -196,7 +200,7 @@ const addQuestion = () => {
     if (questions.value.length < 20) {
         questions.value.push({
             question: '',
-            answers: ['', '', ''],
+            answers: ['', '', '']
             // correctAnswer: ''
         });
     }
@@ -245,7 +249,7 @@ const validateFields = () => {
             return false;
         }
         for (let q of questions.value) {
-            if (!q.question || !q.answers[0] || !q.answers[1] || !q.answers[2] ) {
+            if (!q.question || !q.answers[0] || !q.answers[1] || !q.answers[2]) {
                 toast.add({
                     severity: 'warn',
                     summary: 'Validation',
@@ -268,6 +272,7 @@ const submitEvent = async () => {
 
         // Append basic fields
         formData.append('title', event.value.title);
+        formData.append('headline', event.value.headline);
         formData.append('description', event.value.desc);
         formData.append('publishDate', formatDate(event.value.publishDate));
         formData.append('startDate', formatDate(event.value.startDate));
@@ -287,7 +292,7 @@ const submitEvent = async () => {
                 question: q.question,
                 answer1: q.answers[0],
                 answer2: q.answers[1],
-                answer3: q.answers[2],
+                answer3: q.answers[2]
                 // correctAnswer: q.correctAnswer
             }));
             formData.append('survey_questions', JSON.stringify(surveyQuestions));
