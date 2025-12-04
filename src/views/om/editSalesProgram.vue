@@ -260,7 +260,7 @@
                                     </div>
                                 </div>
 
-                                <!-- Selected Free Material Display -->
+                                <!-- Selected Free Material Displays -->
                                 <div v-if="programItem.selectedFreeMaterial && programItem.freeMaterialData" class="space-y-3 mt-4">
                                     <div class="flex items-center justify-between">
                                         <span class="text-sm font-medium text-gray-700">Selected Free Material Details</span>
