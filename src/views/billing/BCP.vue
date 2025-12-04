@@ -25,6 +25,11 @@
         <!-- Step 1: Form Inputs -->
         <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
             <div class="space-y-2">
+                <label class="block font-bold text-gray-700">Customer Account No *</label>
+                <InputText v-model="form.custaccountno" class="w-full" placeholder="e.g., CUST001" :class="{ 'p-invalid': fieldErrors.custaccountno }" @input="clearFieldError('custaccountno')" />
+                <small v-if="fieldErrors.custaccountno" class="text-red-500">{{ fieldErrors.custaccountno }}</small>
+            </div>
+            <div class="space-y-2">
                 <label class="block font-bold text-gray-700">ETEN Order No *</label>
                 <InputText v-model="form.orderno" class="w-full" placeholder="e.g., ETEN001" :class="{ 'p-invalid': fieldErrors.orderno }" @input="clearFieldError('orderno')" />
                 <small v-if="fieldErrors.orderno" class="text-red-500">{{ fieldErrors.orderno }}</small>
@@ -32,12 +37,6 @@
                     <i class="pi pi-info-circle mr-1"></i>
                     Enter new ETEN order number to create
                 </small>
-            </div>
-
-            <div class="space-y-2">
-                <label class="block font-bold text-gray-700">Customer Account No *</label>
-                <InputText v-model="form.custaccountno" class="w-full" placeholder="e.g., CUST001" :class="{ 'p-invalid': fieldErrors.custaccountno }" @input="clearFieldError('custaccountno')" />
-                <small v-if="fieldErrors.custaccountno" class="text-red-500">{{ fieldErrors.custaccountno }}</small>
             </div>
 
             <div class="space-y-2">
@@ -72,17 +71,6 @@
         <!-- Action Buttons -->
         <div class="flex flex-col md:flex-row gap-4 mt-8">
             <Button label="Check SAP Details" icon="pi pi-search" class="w-full md:w-auto" @click="checkSAPDetails" :loading="loading.sapCheck" :disabled="!form.orderno || !form.custaccountno || !form.saporderno || !form.orderdesc" severity="info" />
-
-            <Button
-                label="Create ETEN Order"
-                icon="pi pi-check"
-                class="w-full md:w-auto"
-                @click="createETENOrder"
-                :loading="loading.orderCreate"
-                :disabled="!form.orderno || !sapDetails || !sapDetails.admin_data || isDuplicateOrder || !form.orderdesc"
-                severity="success"
-                :class="{ 'opacity-50': isDuplicateOrder }"
-            />
 
             <Button label="Clear Form" icon="pi pi-times" class="w-full md:w-auto p-button-outlined" @click="resetForm" severity="secondary" />
         </div>
@@ -120,190 +108,83 @@
             </div>
         </div>
 
-        <!-- Step 2: SAP Details -->
-        <div v-if="sapDetails && sapDetails.admin_data && !isDuplicateOrder" class="mt-6 border rounded-lg p-6 bg-blue-50">
-            <div class="flex items-center justify-between mb-6">
-                <div>
-                    <div class="font-bold text-xl text-blue-800">SAP Sales Order Details</div>
-                    <div class="text-blue-600 text-sm mt-1">Retrieved from SAP system - Ready to create ETEN order</div>
-                </div>
-                <Badge value="VALID" severity="success" />
-            </div>
-
-            <!-- Main Information Cards -->
-            <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
-                <div class="bg-white p-4 rounded-lg shadow-sm border border-blue-100">
-                    <div class="text-sm text-gray-500 mb-1">Customer Account</div>
-                    <div class="font-semibold text-lg text-blue-700">{{ sapDetails.admin_data.custaccountno || 'N/A' }}</div>
-                    <div class="text-sm text-gray-500 mt-1">Ship To: {{ sapDetails.admin_data.shipto || 'N/A' }}</div>
-                </div>
-
-                <div class="bg-white p-4 rounded-lg shadow-sm border border-blue-100">
-                    <div class="text-sm text-gray-500 mb-1">SAP Order No</div>
-                    <div class="font-semibold text-lg">{{ sapDetails.admin_data.saporderno || 'N/A' }}</div>
-                    <div class="text-sm text-gray-500 mt-1">Type: {{ sapDetails.admin_data.ordertype || 'N/A' }}</div>
-                </div>
-
-                <div class="bg-white p-4 rounded-lg shadow-sm border border-blue-100">
-                    <div class="text-sm text-gray-500 mb-1">ETEN Order No</div>
-                    <div class="font-semibold text-lg text-green-600">{{ sapDetails.admin_data.etenorderno || 'N/A' }}</div>
-                    <div class="text-sm text-gray-500 mt-1">Requested</div>
-                </div>
-
-                <div class="bg-white p-4 rounded-lg shadow-sm border border-blue-100">
-                    <div class="text-sm text-gray-500 mb-1">Order Description</div>
-                    <div class="font-semibold text-lg">{{ sapDetails.admin_data.orderdesc || 'N/A' }}</div>
-                    <div class="text-sm text-gray-500 mt-1">Selected: {{ form.orderdesc }}</div>
+        <div v-if="sapDetails && sapDetails.admin_data && !isDuplicateOrder" class="flex flex-col w-full">
+            <!-- Sales Order Details -->
+            <div class="card p-4">
+                <div class="text-xl font-bold text-primary-600 border-b pb-2 mb-4">📄 Sales Order Details</div>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                        <label class="block font-bold text-gray-700">Customer Account</label>
+                        <p class="text-gray-900">{{ sapDetails.admin_data.custaccountno || 'N/A' }}</p>
+                    </div>
+                    <div>
+                        <label class="block font-bold text-gray-700">Ship To</label>
+                        <p class="text-gray-900">{{ sapDetails.admin_data.shipto || 'N/A' }}</p>
+                    </div>
+                    <div>
+                        <label class="block font-bold text-gray-700">SAP Order No</label>
+                        <p class="text-gray-900">{{ sapDetails.admin_data.saporderno || 'N/A' }}</p>
+                    </div>
+                    <div>
+                        <label class="block font-bold text-gray-700">ETEN Order No</label>
+                        <p class="text-green-600 font-semibold">{{ sapDetails.admin_data.etenorderno || 'N/A' }}</p>
+                    </div>
+                    <div>
+                        <label class="block font-bold text-gray-700">Order Description</label>
+                        <p class="text-gray-900">{{ sapDetails.admin_data.orderdesc || 'N/A' }}</p>
+                    </div>
                 </div>
             </div>
 
-            <!-- Order Details -->
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-                <div class="bg-white p-4 rounded-lg border border-blue-100">
-                    <div class="text-sm text-gray-500 mb-1">Order Dates</div>
-                    <div class="space-y-1">
-                        <div class="flex justify-between">
-                            <span class="text-gray-600">Order Date:</span>
-                            <span class="font-medium">{{ formatDate(sapDetails.admin_data.orderdate) }}</span>
-                        </div>
-                        <div class="flex justify-between">
-                            <span class="text-gray-600">Request Delivery:</span>
-                            <span class="font-medium">{{ formatDate(sapDetails.admin_data.requestdeliverydate) }}</span>
-                        </div>
+            <!-- SAP Information -->
+            <div class="card p-4">
+                <div class="text-xl font-bold text-primary-600 border-b pb-2 mb-4">ℹ️ Order Information</div>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div>
+                        <label class="block font-bold text-gray-700">Order Dates</label>
+                        <p class="text-gray-900">{{ formatDate(sapDetails.admin_data.orderdate) }}</p>
                     </div>
-                </div>
-
-                <div class="bg-white p-4 rounded-lg border border-blue-100">
-                    <div class="text-sm text-gray-500 mb-1">Sales Organization</div>
-                    <div class="space-y-2">
-                        <div class="flex items-center">
-                            <div class="w-24 text-gray-600">Sales Org:</div>
-                            <Badge :value="sapDetails.admin_data.salesorg" severity="info" />
-                        </div>
-                        <div class="flex items-center">
-                            <div class="w-24 text-gray-600">Dist Channel:</div>
-                            <Badge :value="sapDetails.admin_data.distributionchannel" severity="info" />
-                        </div>
-                        <div class="flex items-center">
-                            <div class="w-24 text-gray-600">Division:</div>
-                            <Badge :value="sapDetails.admin_data.division" severity="info" />
-                        </div>
+                    <div>
+                        <label class="block font-bold text-gray-700">Request Delivery Date</label>
+                        <p class="text-gray-900">{{ formatDate(sapDetails.admin_data.requestdeliverydate) }}</p>
                     </div>
-                </div>
+                    <div>
+                        <label class="block font-bold text-gray-700">Sales Organization</label>
+                        <p class="text-gray-900">{{ sapDetails.admin_data.salesorg }}</p>
+                    </div>
+                    <div>
+                        <label class="block font-bold text-gray-700">Price Group</label>
+                        <p class="text-gray-900">{{ sapDetails.admin_data.pricegroup || '-' }}</p>
+                    </div>
+                    <div>
+                        <label class="block font-bold text-gray-700">Shipping Condition</label>
 
-                <div class="bg-white p-4 rounded-lg border border-blue-100">
-                    <div class="text-sm text-gray-500 mb-1">Other Information</div>
-                    <div class="space-y-1">
-                        <div class="flex justify-between">
-                            <span class="text-gray-600">Price Group:</span>
-                            <span class="font-medium">{{ sapDetails.admin_data.pricegroup || 'N/A' }}</span>
-                        </div>
-                        <div class="flex justify-between">
-                            <span class="text-gray-600">Shipping Condition:</span>
-                            <span class="font-medium">{{ sapDetails.admin_data.shippingcond || 'N/A' }}</span>
-                        </div>
-                        <div class="flex justify-between">
-                            <span class="text-gray-600">Storage Location:</span>
-                            <span class="font-medium">{{ sapDetails.admin_data.storagelocation || 'N/A' }}</span>
-                        </div>
+                        <p class="text-gray-900">{{ sapDetails.admin_data.shippingcond || '-' }}</p>
+                    </div>
+                    <div>
+                        <label class="block font-bold text-gray-700">Storage Location</label>
+
+                        <p class="text-gray-900">{{ sapDetails.admin_data.storagelocation || '-' }}</p>
                     </div>
                 </div>
             </div>
 
             <!-- Order Items -->
-            <div class="mt-6">
-                <div class="flex items-center justify-between mb-4">
-                    <div class="font-semibold text-lg text-blue-800 flex items-center">
-                        <i class="pi pi-list mr-2"></i>
-                        Order Items ({{ sapItems.length }} items)
-                    </div>
-                    <div class="text-sm text-blue-600">
-                        Total Items Value: <span class="font-bold">RM {{ formatCurrency(calculateTotalItemsValue()) }}</span>
-                    </div>
-                </div>
-
+            <div class="card p-4">
+                <div class="text-xl font-bold text-primary-600 border-b pb-2 mb-4">📦 Order Items ({{ sapItems.length }})</div>
                 <DataTable :value="sapItems" class="p-datatable-sm" stripedRows :paginator="sapItems.length > 5" :rows="5">
-                    <Column field="lineno" header="Line No" style="width: 100px">
-                        <template #body="{ data }">
-                            <Badge :value="data.lineno" severity="info" />
-                        </template>
+                    <Column field="materialid" header="Material ID" />
+                    <Column field="qty" header="Quantity" />
+                    <Column field="unitprice" header="Unit Price">
+                        <template #body="{ data }">RM {{ formatCurrency(data.unitprice || 0) }}</template>
                     </Column>
-                    <Column field="materialid" header="Material ID" style="min-width: 160px">
-                        <template #body="{ data }">
-                            <div class="font-medium">{{ data.materialid }}</div>
-                            <small class="text-gray-500 text-xs">Plant: {{ data.plant || 'TSM' }}</small>
-                        </template>
+                    <Column field="totalamount" header="Total Amount">
+                        <template #body="{ data }" class="text-right text-green-600 font-medium">RM {{ formatCurrency(data.totalamount || 0) }}</template>
                     </Column>
-                    <Column field="itemcategory" header="Category" style="width: 100px">
-                        <template #body="{ data }">
-                            <Badge :value="data.itemcategory" severity="info" />
-                        </template>
-                    </Column>
-                    <Column field="qty" header="Quantity" style="width: 100px">
-                        <template #body="{ data }">
-                            <div class="text-center">
-                                <span class="font-semibold">{{ data.qty || 0 }}</span>
-                            </div>
-                        </template>
-                    </Column>
-                    <Column field="unitprice" header="Unit Price" style="width: 120px">
-                        <template #body="{ data }">
-                            <div class="text-right">
-                                <div class="font-medium">RM {{ formatCurrency(data.unitprice || 0) }}</div>
-                            </div>
-                        </template>
-                    </Column>
-                    <Column field="totalamount" header="Total Amount" style="width: 130px">
-                        <template #body="{ data }">
-                            <div class="text-right">
-                                <div class="font-medium text-green-600">RM {{ formatCurrency(data.totalamount || 0) }}</div>
-                            </div>
-                        </template>
-                    </Column>
-                    <Column field="salesprogramid" header="Sales Program" style="width: 140px">
-                        <template #body="{ data }">
-                            <div class="text-center">
-                                <Badge v-if="data.salesprogramid" :value="data.salesprogramid" severity="success" />
-                                <span v-else class="text-gray-400">N/A</span>
-                            </div>
-                        </template>
-                    </Column>
-                    <template #empty>
-                        <div class="text-center py-8 text-gray-500">
-                            <i class="pi pi-exclamation-circle text-2xl mb-2"></i>
-                            <div>No items found in this SAP order</div>
-                        </div>
-                    </template>
                 </DataTable>
-            </div>
 
-            <!-- Additional Information (if available) -->
-            <div v-if="sapDetails.admin_data.deliveryno || sapDetails.admin_data.pgistatus || sapDetails.admin_data.invoiceno || sapDetails.admin_data.creditnoteno" class="mt-6">
-                <div class="font-semibold text-lg mb-3 text-blue-800 flex items-center">
-                    <i class="pi pi-info-circle mr-2"></i>
-                    Additional Information
-                </div>
-                <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
-                    <div v-if="sapDetails.admin_data.deliveryno" class="bg-white p-3 rounded border">
-                        <div class="text-sm text-gray-500 mb-1">Delivery No</div>
-                        <div class="font-medium">{{ sapDetails.admin_data.deliveryno }}</div>
-                    </div>
-                    <div v-if="sapDetails.admin_data.pgistatus" class="bg-white p-3 rounded border">
-                        <div class="text-sm text-gray-500 mb-1">PGI Status</div>
-                        <Badge :value="sapDetails.admin_data.pgistatus" :severity="sapDetails.admin_data.pgistatus ? 'success' : 'info'" />
-                    </div>
-                    <div v-if="sapDetails.admin_data.invoiceno" class="bg-white p-3 rounded border">
-                        <div class="text-sm text-gray-500 mb-1">Invoice No</div>
-                        <div class="font-medium">{{ sapDetails.admin_data.invoiceno }}</div>
-                    </div>
-                    <div v-if="sapDetails.admin_data.creditnoteno" class="bg-white p-3 rounded border">
-                        <div class="text-sm text-gray-500 mb-1">Credit Note No</div>
-                        <div class="font-medium">{{ sapDetails.admin_data.creditnoteno }}</div>
-                    </div>
-                </div>
+                <div class="flex justify-end mt-4 text-lg font-bold text-primary-600">Total: RM {{ formatCurrency(calculateTotalItemsValue()) }}</div>
             </div>
-
-            <!-- Ready to Create Banner -->
             <div class="mt-8 p-4 bg-green-50 border border-green-200 rounded-lg">
                 <div class="flex items-center">
                     <i class="pi pi-check-circle text-green-500 text-xl mr-3"></i>
@@ -322,6 +203,18 @@
                         <div class="text-sm text-green-600">Total Value</div>
                     </div>
                 </div>
+            </div>
+            <div class="flex justify-end mt-6">
+                <Button
+                    label="Create ETEN Order"
+                    icon="pi pi-check"
+                    class="w-full md:w-auto"
+                    @click="createETENOrder"
+                    :loading="loading.orderCreate"
+                    :disabled="!form.orderno || !sapDetails || !sapDetails.admin_data || isDuplicateOrder || !form.orderdesc"
+                    severity="success"
+                    :class="{ 'opacity-50': isDuplicateOrder }"
+                />
             </div>
         </div>
 
@@ -680,6 +573,7 @@ const checkSAPDetails = async () => {
 };
 
 // Step 2: Create ETEN Order
+// Step 2: Create ETEN Order
 const createETENOrder = () => {
     if (!validateForm()) return;
 
@@ -713,30 +607,22 @@ const createETENOrder = () => {
         return;
     }
 
+    // Get the confirmation message using a function
+    const getConfirmMessage = () => {
+        return `Confirm\n
+        ETEN Order: ${form.value.orderno}
+        ⚠️ This action will update stock levels in the system.`;
+    };
+
     confirm.require({
-        message: `
-            <div class="space-y-2">
-                <div class="font-semibold">Confirm ETEN Order Creation</div>
-                <div class="text-sm text-gray-600">
-                    <div>ETEN Order: <span class="font-medium">${form.value.orderno}</span></div>
-                    <div>Customer: <span class="font-medium">${sapDetails.value.admin_data.custaccountno}</span></div>
-                    <div>SAP Order: <span class="font-medium">${sapDetails.value.admin_data.saporderno}</span></div>
-                    <div>Order Desc: <span class="font-medium">${getOrderDescLabel(form.value.orderdesc)}</span></div>
-                    <div>Total Items: <span class="font-medium">${sapItems.value.length} items</span></div>
-                    <div>Total Value: <span class="font-medium text-green-600">RM ${formatCurrency(calculateTotalItemsValue())}</span></div>
-                </div>
-                <div class="text-sm text-red-600 mt-2">
-                    <i class="pi pi-exclamation-triangle mr-1"></i>
-                    This action will update stock levels in the system.
-                </div>
-            </div>
-        `,
+        message: getConfirmMessage(),
         header: 'Create ETEN Order',
         icon: 'pi pi-exclamation-triangle',
         acceptLabel: 'Yes, Create Order',
         rejectLabel: 'Cancel',
         acceptClass: 'p-button-success',
         rejectClass: 'p-button-secondary',
+        html: true, // <-- ADD THIS LINE to render HTML
         accept: async () => {
             loading.value.orderCreate = true;
 
@@ -864,24 +750,6 @@ const createETENOrder = () => {
     background-color: #f8fafc;
     font-weight: 600;
     color: #334155;
-    padding: 0.75rem 1rem;
-}
-
-:deep(.p-datatable .p-datatable-tbody > tr > td) {
-    padding: 0.75rem 1rem;
-}
-
-:deep(.p-progress-spinner) {
-    width: 40px;
-    height: 40px;
-}
-
-.card {
-    background: white;
-    border-radius: 12px;
-    box-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.1);
-    max-width: 1200px;
-    margin: 0 auto;
 }
 
 /* Step indicator animation */
