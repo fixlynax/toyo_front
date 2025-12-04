@@ -254,6 +254,8 @@ const dropdownAccountTypeValue = ref<DropdownOption[]>([
 const dropdownYesNo = ref<DropdownOption | null>(null);
 const dropdownAccountType = ref<DropdownOption | null>(null); // NEW: Account Type dropdown binding
 const dropdownAllowDirectShipment = ref<DropdownOption | null>(null); // NEW: Allow Direct Shipment dropdown
+const dropdownShowOnList = ref<DropdownOption | null>(null); // NEW: Show On List dropdown
+const dropdownFamilyChannel = ref<DropdownOption | null>(null); // NEW: If Family Channel dropdown
 
 const allDealers = ref<DealerOption[]>([]);
 const currentException = ref({
@@ -284,15 +286,15 @@ watch(accountNo, (newVal) => {
 function handleAccountNoInput(event: Event) {
     const input = event.target as HTMLInputElement;
     let value = input.value;
-    
+
     // Remove any non-digit characters
     value = value.replace(/\D/g, '');
-    
+
     // Limit to 10 characters
     if (value.length > 10) {
         value = value.substring(0, 10);
     }
-    
+
     accountNo.value = value;
 }
 
@@ -333,8 +335,8 @@ function handleSubmit() {
             accountType: dropdownAccountType.value?.code || '',
             allowLalamove: dropdownYesNo.value?.code || '0',
             allowDirectShipment: dropdownAllowDirectShipment.value?.code || '0',
-            showOnList: dropdownYesNo.value?.code || '0',
-            ifFamilyChannel: dropdownYesNo.value?.code || '0',
+            showOnList: dropdownShowOnList.value?.code || '0',
+            ifFamilyChannel: dropdownFamilyChannel.value?.code || '0',
             mainBranchDealer: currentException.value.dealers || null,
             accountNo: accountNo.value,
             selectedShipTo: selectedShipTo.value || null,
@@ -364,10 +366,10 @@ function handleSubmit() {
 async function fetchMainBranchDealer() {
     try {
         if (!accountNo.value) return;
-        
+
         // Extract main branch account number (first 8 digits + '00')
         const mainBranchAccountNo = accountNo.value.substring(0, 8) + '00';
-        
+
         // Use JSON object instead of FormData
         const requestData = {
             mainBranch: '1', // Always pass mainBranch=1 as per requirement
@@ -618,9 +620,22 @@ async function goNext() {
             const sapData = response.admin_data[0];
             form.value = mapSapResponseToForm(sapData);
 
-            // Set default values for dropdowns
-            dropdownYesNo.value = dropdownYesNoValue.value[0]; // Default to Yes
-            dropdownAllowDirectShipment.value = dropdownYesNoValue.value[0]; // NEW: Default Allow Direct Shipment to Yes
+            // MODIFIED: Set default values for dropdowns - "No" for all dropdowns
+            const noOption = dropdownYesNoValue.value.find((opt) => opt.name === 'No');
+
+            const yesOption = dropdownYesNoValue.value.find((opt) => opt.name === 'Yes');
+
+            // Set default to "No" for Allow Lalamove
+            dropdownYesNo.value = noOption || dropdownYesNoValue.value[0];
+
+            // Set default to "No" for Allow Direct Shipment
+            dropdownAllowDirectShipment.value = noOption || dropdownYesNoValue.value[0];
+
+            // Set default to "No" for Show On List
+            dropdownShowOnList.value = yesOption || dropdownYesNoValue.value[1];
+
+            // Set default to "No" for If Family Channel
+            dropdownFamilyChannel.value = yesOption || dropdownYesNoValue.value[1];
 
             showDetails.value = true;
         } else {
@@ -699,9 +714,17 @@ function resetForm() {
     };
     sapPopulatedFields.value.clear();
     sapPopulatedShipToFields.value.clear();
-    dropdownYesNo.value = null;
-    dropdownAccountType.value = null; // NEW: Reset account type dropdown
-    dropdownAllowDirectShipment.value = null; // NEW: Reset allow direct shipment dropdown
+
+    // MODIFIED: Find "No" option and set all dropdowns to "No"
+    const noOption = dropdownYesNoValue.value.find((opt) => opt.name === 'No');
+    const yesOption = dropdownYesNoValue.value.find((opt) => opt.name === 'Yes');
+
+    // Set all dropdowns to "No" by default
+    dropdownYesNo.value = noOption || dropdownYesNoValue.value[0];
+    dropdownAccountType.value = null;
+    dropdownAllowDirectShipment.value = noOption || dropdownYesNoValue.value[0];
+    dropdownShowOnList.value = yesOption || dropdownYesNoValue.value[1];
+    dropdownFamilyChannel.value = yesOption || dropdownYesNoValue.value[1];
     currentException.value.dealers = null;
     shipToAddresses.value = [];
     selectedShipTo.value = null;
@@ -730,15 +753,7 @@ onMounted(() => {
                             <label for="accountNo" class="font-medium">Account No.</label>
                             <i class="pi pi-info-circle cursor-pointer font-bold" v-tooltip="'SAP account number for the dealer. Must be exactly 10 characters. Main branch ends with 00, sub-branch ends with other digits.'"></i>
                         </div>
-                        <InputText 
-                            v-model="accountNo" 
-                            id="accountNo" 
-                            type="text" 
-                            class="w-full" 
-                            placeholder="Enter 10-digit SAP account number" 
-                            maxlength="10"
-                            @input="handleAccountNoInput"
-                        />
+                        <InputText v-model="accountNo" id="accountNo" type="text" class="w-full" placeholder="Enter 10-digit SAP account number" maxlength="10" @input="handleAccountNoInput" />
                     </div>
                     <div>
                         <Button label="Next" @click="goNext" :disabled="!accountNo" />
@@ -810,26 +825,14 @@ onMounted(() => {
                     <div class="flex flex-col md:flex-row gap-4" v-if="!isMainBranch && mainBranchDealer">
                         <div class="w-full">
                             <label for="mainBranch">Main Branch Account</label>
-                            <InputText 
-                                disabled 
-                                id="mainBranch" 
-                                type="text" 
-                                :value="mainBranchDealer.label" 
-                                class="w-full bg-gray-100" 
-                            />
+                            <InputText disabled id="mainBranch" type="text" :value="mainBranchDealer.label" class="w-full bg-gray-100" />
                             <small class="text-gray-500">Auto-filled with main branch data</small>
                         </div>
                     </div>
                     <div class="flex flex-col md:flex-row gap-4" v-else-if="isMainBranch">
                         <div class="w-full">
                             <label for="mainBranch">Main Branch Account</label>
-                            <InputText 
-                                disabled 
-                                id="mainBranch" 
-                                type="text" 
-                                value="This is a main branch account" 
-                                class="w-full bg-gray-100" 
-                            />
+                            <InputText disabled id="mainBranch" type="text" value="This is a main branch account" class="w-full bg-gray-100" />
                             <small class="text-gray-500">This is a main branch account (ending with 00)</small>
                         </div>
                     </div>
@@ -1035,10 +1038,12 @@ onMounted(() => {
                         </div>
                         <div class="w-full">
                             <label for="allowLalamove">Allow Lalamove</label>
+                            <!-- This will show "No" by default -->
                             <Dropdown v-model="dropdownYesNo" :options="dropdownYesNoValue" optionLabel="name" placeholder="Select Option" class="w-full" />
                         </div>
                         <div class="w-full">
                             <label for="allowDirectShipment">Allow Direct Shipment</label>
+                            <!-- This will show "No" by default -->
                             <Dropdown v-model="dropdownAllowDirectShipment" :options="dropdownYesNoValue" optionLabel="name" placeholder="Select Option" class="w-full" />
                         </div>
                     </div>
@@ -1053,11 +1058,13 @@ onMounted(() => {
                     <div class="flex flex-col md:flex-row gap-4">
                         <div class="w-full">
                             <label for="showOnList">Show On List</label>
-                            <Dropdown v-model="dropdownYesNo" :options="dropdownYesNoValue" optionLabel="name" placeholder="Select Option" class="w-full" />
+                            <!-- This will show "No" by default -->
+                            <Dropdown v-model="dropdownShowOnList" :options="dropdownYesNoValue" optionLabel="name" placeholder="Select Option" class="w-full" />
                         </div>
                         <div class="w-full">
                             <label for="ifFamilyChannel">If Family Channel</label>
-                            <Dropdown v-model="dropdownYesNo" :options="dropdownYesNoValue" optionLabel="name" placeholder="Select Option" class="w-full" />
+                            <!-- This will show "No" by default -->
+                            <Dropdown v-model="dropdownFamilyChannel" :options="dropdownYesNoValue" optionLabel="name" placeholder="Select Option" class="w-full" />
                         </div>
                     </div>
                 </div>
@@ -1189,7 +1196,7 @@ onMounted(() => {
                         </div>
                     </div>
 
-                    <div class="flex flex-col md:flex-row justify-end gap-2 mt-4">
+                    <div class="flex flex-col md:flex-row justify-end gap-S2 mt-4">
                         <div class="w-40">
                             <Button label="Cancel" class="w-full p-button-secondary" @click="handleBack" />
                         </div>
