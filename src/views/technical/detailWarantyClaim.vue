@@ -121,9 +121,16 @@
                         </div>
 
                         <div>
-                            <span class="block text-sm font-bold text-black-800">Description</span>
-                            <p class="text-lg font-medium">{{ warantyDetail.tire_info.desc || '-' }} <span v-if="warantyDetail.tire_info?.descriptionAdmin" class="text-xs bg-red-500 text-white px-1 rounded ml-1"> Old </span></p>
-                            <p v-if="warantyDetail.tire_info?.descriptionAdmin" class="text-lg font-medium">{{ warantyDetail.tire_info.descriptionAdmin || '-' }} <span class="text-xs bg-green-600 text-white px-1 rounded ml-1">New</span></p>
+                            <span class="block text-sm font-bold text-black-800">Material Description</span>
+                            <p class="text-lg font-medium">{{ warantyDetail.tire_info?.desc || '-' }} <span v-if="warantyDetail.tire_info?.descriptionAdmin" class="text-xs bg-red-500 text-white px-1 rounded ml-1"> Old </span></p>
+                            <p v-if="warantyDetail.tire_info?.descriptionAdmin" class="text-lg font-medium">{{ warantyDetail.tire_info?.descriptionAdmin || '-' }} <span class="text-xs bg-green-600 text-white px-1 rounded ml-1">New</span></p>
+                        </div>
+                    </div>
+                    <div class="grid grid-cols-2 md:grid-cols-2 gap-4 mb-2">
+                        <div>
+                            <span class="block text-sm font-bold text-black-800">Mileage</span>
+                            <p class="text-lg font-medium">{{ warantyDetail.tire_info?.mileage || '-' }} <span v-if="warantyDetail.tire_info?.mileageAdmin" class="text-xs bg-red-500 text-white px-1 rounded ml-1"> Old </span></p>
+                            <p v-if="warantyDetail.tire_info?.mileageAdmin" class="text-lg font-medium">{{ warantyDetail.tire_info?.mileageAdmin || '-' }} <span class="text-xs bg-green-600 text-white px-1 rounded ml-1">New</span></p>
                         </div>
                     </div>
                     <div class="grid grid-cols-2 md:grid-cols-2 gap-4">
@@ -589,15 +596,20 @@
                     <small v-if="(!editTireData.weekcode) && editValidationTire" class="text-red-600">Week Code is required.</small>
                 </div>
                 <div class="field">
-                    <label class="block font-bold text-gray-700 mb-2">Pattern Details *</label>
+                    <label class="block font-bold text-gray-700 mb-2">Pattern*</label>
                      <InputText v-model="editTireData.pattern" @input="editTireData.pattern = editTireData.pattern?.toUpperCase()" class="w-full" maxlength="3" />
-                    <small v-if="(!editTireData.pattern) && editValidationTire" class="text-red-600">Pattern Detail is required.</small>
+                    <small v-if="(!editTireData.pattern) && editValidationTire" class="text-red-600">Pattern is required.</small>
+                </div>
+                <div class="field">
+                    <label class="block font-bold text-gray-700 mb-2">Mileage*</label>
+                     <InputNumber v-model="editTireData.mileage" class="w-full" :min="0" />
+                    <small v-if="(!editTireData.mileage) && editValidationTire" class="text-red-600">Mileage is required.</small>
                 </div>
             </div>
             <div class="field">
-                <label class="block font-bold text-gray-700 mb-2">Pattern Description *</label>
+                <label class="block font-bold text-gray-700 mb-2">Material Description *</label>
                     <InputText v-model="editTireData.desc" @input="editTireData.desc = editTireData.desc?.toUpperCase()" class="w-full"/>
-                <small v-if="(!editTireData.desc) && editValidationTire" class="text-red-600">Pattern Description is required.</small>
+                <small v-if="(!editTireData.desc) && editValidationTire" class="text-red-600">Material Description is required.</small>
             </div>
         </div>
 
@@ -895,7 +907,8 @@ const editTireData = reactive({
     tyrespec: '',
     weekcode: '',
     desc:     '',
-    pattern:   ''
+    pattern:   '',
+    mileage:   0,
 });
 const rejectInvoiceRemarks = reactive({
     remarks: '',
@@ -1098,6 +1111,7 @@ const submitEditTire = async () => {
         formData.append('plateSerial', plateSerialValue);
         formData.append('description', editTireData.desc);
         formData.append('pattern', editTireData.pattern);
+        formData.append('mileage', editTireData.mileage);
 
         for (let [key, value] of formData.entries()) {
             console.log(key, value);
@@ -1465,6 +1479,7 @@ const fetchWarrantyClaim = async () => {
                     editTireData.weekcode = AdminplatePart4;
                     editTireData.desc = tireInfo?.descriptionAdmin;
                     editTireData.pattern = tireInfo?.patternAdmin;
+                    editTireData.mileage = tireInfo?.mileageAdmin;
                 }
             }else{
                     editTireData.mfgcode = platePart1;
@@ -1473,8 +1488,8 @@ const fetchWarrantyClaim = async () => {
                     editTireData.weekcode = platePart4;
                     editTireData.desc = tireInfo?.desc;
                     editTireData.pattern = tireInfo?.pattern;
+                    editTireData.mileage = tireInfo?.mileage;
             }
-            console.log(editTireData)
             warantyDetail.value = {
                 // Claim Info
                 id: apiData.claim_info?.id,
@@ -1524,7 +1539,6 @@ const fetchWarrantyClaim = async () => {
                 // CTC Info
                 ctc_details: apiData.ctc_info?.[0] || [],
                 return_info: apiData.return_info?.[0] || null,
-                // reimbursement: Array.isArray(apiData.reimbursement) ? (apiData.reimbursement.length > 0 ? apiData.reimbursement : null): apiData.reimbursement || null,
                 reimbursement: (() => {
                     const rm = apiData.reimbursement;
 

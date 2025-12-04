@@ -229,6 +229,7 @@
                                                 :filter="true"
                                                 :loading="loadingFreeMaterials"
                                                 @change="onFreeMaterialChange"
+                                                :filterFields="['material', 'materialid']"
                                             >
                                                 <template #value="slotProps">
                                                     <div v-if="slotProps.value" class="flex items-center">
@@ -260,7 +261,7 @@
                                     </div>
                                 </div>
 
-                                <!-- Selected Free Material Display -->
+                                <!-- Selected Free Material Displays -->
                                 <div v-if="programItem.selectedFreeMaterial && programItem.freeMaterialData" class="space-y-3 mt-4">
                                     <div class="flex items-center justify-between">
                                         <span class="text-sm font-medium text-gray-700">Selected Free Material Details</span>
@@ -288,7 +289,7 @@
                     <!-- Submit -->
                     <div class="flex justify-end gap-2 mt-8">
                         <div class="w-40">
-                            <RouterLink to="/om/listSalesProgram">
+                            <RouterLink :to="`/om/detailSalesProgram/${salesProgram.programID}`">
                                 <Button label="Cancel" class="w-full p-button-secondary" :disabled="submitting" />
                             </RouterLink>
                         </div>
@@ -966,9 +967,10 @@ const clearFreeSelection = () => {
     showInfo('Free material selection cleared');
 };
 
+// In the script section, find the getFreeMaterialLabel function
 const getFreeMaterialLabel = (materialId) => {
     const material = freeMaterialOptions.value.find((m) => m.materialid === materialId);
-    return material ? material.material : materialId;
+    return material ? `${material.material} (${material.materialid})` : materialId;
 };
 
 const formatFileSize = (bytes) => {
@@ -1257,7 +1259,7 @@ const submitForm = async () => {
             console.log('Sales program updated successfully');
             showSuccess('Sales program updated successfully!');
             setTimeout(() => {
-                router.push('/om/listSalesProgram');
+                router.push('/om/detailSalesProgram/' + salesProgram.value.programID);
             }, 1500);
         } else {
             console.error('Error updating sales program:', response.data.error);

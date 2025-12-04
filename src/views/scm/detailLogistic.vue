@@ -62,12 +62,20 @@
                   <td class="px-4 py-2 text-right">{{ logisticList.uname }}</td>
                 </tr>
                 <tr class="border-b">
+                  <td class="px-4 py-2 font-bold">Email</td>
+                  <td class="px-4 py-2 text-right">{{ logisticList.emailaddress }}</td>
+                </tr>
+                <tr class="border-b">
                   <td class="px-4 py-2 font-bold">Created Date</td>
                   <td class="px-4 py-2 text-right">{{ formatDate(logisticList.created) }}</td>
                 </tr>
                 <tr class="border-b">
                   <td class="px-4 py-2 font-bold">Last Login Date</td>
                   <td class="px-4 py-2 text-right">{{ logisticList.lastLogin ? formatDate(logisticList.lastLogin) : 'Never' }}</td>
+                </tr>
+                <tr class="border-b">
+                  <td class="px-4 py-2 font-bold">Status</td>
+                  <td class="px-4 py-2 text-right"><Tag :value="logisticList.status === 1 ? 'Active' : 'Inactive'" :severity="getOverallStatusSeverity(logisticList.status)" /></td>
                 </tr>
               </tbody>
             </table>
@@ -152,4 +160,7 @@ const InitfetchData = async () => {
 onMounted(() => {
     InitfetchData();
 });
+const getOverallStatusSeverity = (status) => {
+    return status === 1 ? 'success' : 'danger';
+};
 </script>

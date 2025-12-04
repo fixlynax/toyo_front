@@ -176,7 +176,7 @@
                         <div class="w-full">
                             <FloatLabel>
                                 <InputNumber id="qty" v-model="prize.qty" :min="1" class="w-full" />
-                                <label for="qty">Quantity</label>
+                                <label for="qty">Current Quantity({{ prize.qty }})</label>
                             </FloatLabel>
                             <small v-if="errors[`qty_${index}`]" class="text-red-500">{{ errors[`qty_${index}`] }}</small>
                         </div>
@@ -441,7 +441,19 @@ const removePrize = (index) => {
 
 const onImageSelect = (eventFile, field) => {
     const file = eventFile.files[0];
+
     if (file) {
+        // ✅ Check file size limit (2MB = 2 * 1024 * 1024 bytes)
+        if (file.size > 2 * 1024 * 1024) {
+            toast.add({
+                severity: 'warn',
+                summary: 'File too large',
+                detail: 'Maximum file size allowed is 2MB.',
+                life: 3000
+            });
+            return;
+        }
+
         imageFiles.value[field] = file;
 
         const reader = new FileReader();
@@ -451,6 +463,7 @@ const onImageSelect = (eventFile, field) => {
         reader.readAsDataURL(file);
     }
 };
+
 
 const removeImage = (field) => {
     game.value[`${field}URL`] = '';
@@ -584,7 +597,7 @@ const updateGame = async () => {
                 detail: 'Game updated successfully!',
                 life: 3000
             });
-            router.push('/marketing/listGame');
+            router.push(`/marketing/detailGame/${gameId}`); // Fixed: changed 'id' to 'gameId'
         } else {
             console.error('Backend error:', response.data);
             toast.add({

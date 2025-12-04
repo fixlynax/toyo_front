@@ -79,11 +79,15 @@
                     </div>
                 </template>
             </Column>
-            <Column field="materialid" header="Material ID" style="min-width: 6rem" sortable>
+            <Column field="materialid" header="Material" style="min-width: 6rem" sortable>
                 <template #body="{ data }">
-                    <div class="flex flex-col items-start gap-1">
-                        {{ data.materialid }}
-                    </div>
+                    <div class="flex flex-col">
+                            <!-- Top -->
+                            <div class="font-semibold">{{ data.materialid }}</div>
+
+                            <!-- Bottom -->
+                            <div class="text-gray-600 text-sm">{{ data.material }}</div>
+                        </div>  
                 </template>
             </Column>
 
@@ -197,6 +201,7 @@ const fetchData = async () => {
             tyres.value = response.data.admin_data.map((product) => ({
                 id: product.id, // Make sure this is included for API calls
                 materialid: product.materialid,
+                material: product.material,
                 twp: product.isTWP === 1,
                 warranty: product.isWarranty === 1,
                 sell: product.isSell === 1,

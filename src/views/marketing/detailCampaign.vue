@@ -108,11 +108,11 @@
                         </Column>
 
                         <!-- Action Column -->
-                        <Column header="Action" style="min-width: 6rem">
+                        <!-- <Column header="Action" style="min-width: 6rem">
                             <template #body="{ data }">
                                 <Button icon="pi pi-pencil" class="p-button-text p-button-info" @click="openEditDialog(data)" />
                             </template>
-                        </Column>
+                        </Column> -->
                     </DataTable>
                 </div>
             </div>
@@ -176,49 +176,6 @@
                     </div>
                 </div>
 
-                <!-- <div class="card flex flex-col w-full">
-                    <div class="flex items-center justify-between border-b pb-3 mb-4">
-                        <div class="text-2xl font-bold text-gray-800">👨🏻‍💻 Participant List</div>
-                        <Button icon="pi pi-file-export" label="Export" style="width: fit-content" class="p-button-danger p-button-sm" />
-                    </div>
-                    <DataTable :value="participants" :paginator="true" :rows="5" dataKey="id" :rowHover="true" responsiveLayout="scroll" class="text-sm">
-                        <template #empty>
-                            <div class="text-center py-8 text-gray-500">No participants found.</div>
-                        </template> -->
-                        
-                        <!-- User Column -->
-                        <!-- <Column header="User" style="min-width: 6rem">
-                            <template #body="{ data }">
-                                <div class="flex flex-col">
-                                    <RouterLink to="/marketing/detailParticipant" class="hover:underline">
-                                        <span class="font-bold text-gray-800">{{ data.fullName }}</span>
-                                    </RouterLink>
-                                    <span class="text-gray-600 text-xs mt-2">🎖️ {{ data.memberLevel }}</span>
-                                    <span class="text-gray-600 text-xs mt-2">📅 {{ data.date }}</span>
-                                </div>
-                            </template>
-                        </Column> -->
-
-                        <!-- Prize Type -->
-                        <!-- <Column field="prizeName" header="Prize" style="min-width: 8rem"></Column> -->
-
-                        <!-- Action Approve & Reject -->
-                        <!-- <Column header="Action" style="min-width: 8rem">
-                            <template #body="{ data }">
-                                <div class="flex gap-2 items-center"> -->
-                                    <!-- Approve Button -->
-                                    <!-- <Button v-if="!data.status" icon="pi pi-check" size="small" class="p-button-success p-button-sm" @click="approveParticipant(data)" /> -->
-
-                                    <!-- Reject Button -->
-                                    <!-- <Button v-if="!data.status" icon="pi pi-times" size="small" class="p-button-danger p-button-sm" @click="rejectParticipant(data)" /> -->
-
-                                    <!-- Status Tag -->
-                                    <!-- <Tag v-if="data.status" :value="data.status" :severity="data.status === 'Approved' ? 'success' : data.status === 'Rejected' ? 'danger' : 'info'" class="ml-2" />
-                                </div>
-                            </template>
-                        </Column> -->
-                    <!-- </DataTable>
-                </div> -->
 
                 <div class="card flex flex-col w-full">
                     <!-- Header with Invite Button -->
@@ -261,7 +218,13 @@
                         <!-- Actions -->
                         <Column header="Actions" style="min-width: 4rem; text-align: center">
                             <template #body="{ data }">
-                                <Button icon="pi pi-trash" class="p-button-text p-button-danger" @click="removeDealer(data)" />
+                                <Button 
+                                    icon="pi pi-trash" 
+                                    class="p-button-text p-button-danger" 
+                                    @click="removeDealer(data)"
+                                    :loading="deletingDealerId === data.id"
+                                    :disabled="deletingDealerId === data.id"
+                                />
                             </template>
                         </Column>
                     </DataTable>
@@ -372,6 +335,7 @@ const campaignId = route.params.id;
 const loading = ref(true);
 const tableLoading = ref(false);
 const inviteLoading = ref(false);
+const deletingDealerId = ref(null); // Add this at the top with other refs
 
 // Reactive data
 const hoverPrize = ref(null);
@@ -548,6 +512,78 @@ const inviteDealers = async () => {
     } finally {
         inviteLoading.value = false;
     }
+};
+
+// Remove Dealer Function - FIXED VERSION
+const removeDealer = async (dealer) => {
+    // Confirm deletion
+    confirm.require({
+        message: `Are you sure you want to remove ${dealer.companyName} from this campaign?`,
+        header: 'Confirm Removal',
+        icon: 'pi pi-exclamation-triangle',
+        acceptLabel: 'Yes, Remove',
+        rejectLabel: 'Cancel',
+        acceptClass: 'p-button-danger',
+        accept: async () => {
+            try {
+                // Set loading state for this specific dealer
+                deletingDealerId.value = dealer.id;
+
+                // OPTION 1: If your API service has a removeDealerFromCampaign method
+                // const result = await api.removeDealerFromCampaign(campaignId, dealer.id);
+                
+                // OPTION 2: Direct API call (use this if Option 1 doesn't work)
+                const formData = new FormData();
+                formData.append('dealerID', dealer.id);
+                formData.append('campaignID', campaignId);
+                
+                const response = await api.post('campaign/removeDealer', formData, {
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded',
+                    }
+                });
+
+                const result = response.data;
+
+                // Check if API call was successful
+                if (result.status === 1) {
+                    // Remove from local list only if API succeeds
+                    dealerList.value = dealerList.value.filter((d) => d.id !== dealer.id);
+                    
+                    // Show success message
+                    toast.add({
+                        severity: 'success',
+                        summary: 'Success',
+                        detail: 'Dealer removed successfully',
+                        life: 3000
+                    });
+                } else {
+                    throw new Error('API returned unsuccessful status');
+                }
+            } catch (error) {
+                console.error('Error removing dealer:', error);
+                
+                // Show error message
+                toast.add({
+                    severity: 'error',
+                    summary: 'Error',
+                    detail: 'Failed to remove dealer. Please try again.',
+                    life: 5000
+                });
+            } finally {
+                // Reset loading state
+                deletingDealerId.value = null;
+            }
+        },
+        reject: () => {
+            toast.add({
+                severity: 'info',
+                summary: 'Cancelled',
+                detail: 'Dealer removal cancelled',
+                life: 2000
+            });
+        }
+    });
 };
 
 // Confirm before delete
@@ -731,11 +767,6 @@ const mapPrizeType = (apiType) => {
         'POINT': 'Point'
     };
     return typeMap[apiType] || apiType;
-};
-
-// Existing functions (keep them as they are)
-const removeDealer = (dealer) => {
-    dealerList.value = dealerList.value.filter((d) => d.id !== dealer.id);
 };
 
 function openEditDialog(prize) {

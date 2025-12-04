@@ -86,74 +86,7 @@
                             </p>
                         </div>
                     </div>
-                </div>
-
-                <!-- Campaign Criteria -->
-                <div class="card flex flex-col gap-6 w-full" v-if="!loading && campaignCriteria.length > 0">
-                    <!-- Header Section -->
-                    <div class="flex items-center justify-between border-b pb-2">
-                        <h2 class="text-2xl font-bold text-gray-800">📋 Campaign Criteria</h2>
-                    </div>
-
-                    <!-- Criteria List -->
-                    <div class="grid grid-cols-1 gap-3">
-                        <div v-for="(criteria, index) in campaignCriteria" :key="index" class="border rounded-lg p-4">
-                            <div class="grid grid-cols-2 gap-4 text-sm">
-                                <div>
-                                    <span class="font-semibold text-gray-700">Title:</span>
-                                    <p class="text-gray-600">{{ criteria.title || 'N/A' }}</p>
-                                </div>
-                                <div>
-                                    <span class="font-semibold text-gray-700">Pattern:</span>
-                                    <p class="text-gray-600">{{ criteria.pattern || 'N/A' }}</p>
-                                </div>
-                                <div>
-                                    <span class="font-semibold text-gray-700">Size:</span>
-                                    <p class="text-gray-600">{{ criteria.size || 'N/A' }}</p>
-                                </div>
-                                <div>
-                                    <span class="font-semibold text-gray-700">Minimum Quantity:</span>
-                                    <p class="text-gray-600">{{ criteria.minQty || 'N/A' }}</p>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Status Result Cards -->
-                <div v-if="!loading && redemption.status === 1" class="card mt-6 border-l-4 border-green-500 bg-green-50 shadow-sm">
-                    <div class="flex items-center gap-2 mb-3">
-                        <i class="pi pi-check-circle text-green-600 text-xl"></i>
-                        <h3 class="font-bold text-green-700 text-lg">Redemption Approved</h3>
-                    </div>
-                    <div class="grid grid-cols-2 gap-3 text-xm">
-                        <div>
-                            <span class="font-semibold text-gray-700">Approved By:</span>
-                            <p class="text-gray-600">{{ redemption.approvedBy || 'N/A' }}</p>
-                        </div>
-                        <div>
-                            <span class="font-semibold text-gray-700">Approved Date:</span>
-                            <p class="text-gray-600">{{ formatDate(redemption.verifiedDate) }}</p>
-                        </div>
-                    </div>
-                </div>
-
-                <div v-if="!loading && redemption.status === 2" class="card mt-6 border-l-4 border-red-500 bg-red-50 shadow-sm">
-                    <div class="flex items-center gap-2 mb-3">
-                        <i class="pi pi-times-circle text-red-600 text-xl"></i>
-                        <h3 class="font-bold text-red-700 text-lg">Redemption Rejected</h3>
-                    </div>
-                    <div class="grid grid-cols-2 gap-3 text-xm">
-                        <div>
-                            <span class="font-semibold text-gray-700">Reason:</span>
-                            <p class="text-gray-600">{{ redemption.rejectReason || 'No reason provided' }}</p>
-                        </div>
-                        <div>
-                            <span class="font-semibold text-gray-700">Rejected Date:</span>
-                            <p class="text-gray-600">{{ formatDate(redemption.rejectedDate) }}</p>
-                        </div>
-                    </div>
-                </div>
+                </div>  
             </div>
 
 
@@ -161,8 +94,8 @@
                 <div class="card flex flex-col w-full">
                     <!-- Header with Status Tag -->
                     <div class="flex items-center justify-between border-b pb-2 mb-2">
-                        <h2 class="text-2xl font-bold text-gray-800">ℹ️ Advance Info</h2>
-                        <Tag :value="statusLabel(redemption.status)" :severity="statusSeverity(redemption.status)" />
+                        <h2 class="text-2xl font-bold text-gray-800">Advance Info</h2>
+                        <!-- <Tag :value="statusLabel(redemption.status)" :severity="statusSeverity(redemption.status)" /> -->
                     </div>
 
                     <!-- Info Table -->
@@ -208,73 +141,9 @@
                             </tbody>
                         </table>
                     </div>
-
-                    <!-- Action Buttons - Only show for pending status -->
-                    <div v-if="redemption.status === 0" class="flex justify-end mt-4 pt-4">
-                        <div class="flex gap-2">
-                            <!-- Reject Button -->
-                            <Button label="Reject" class="p-button-danger" @click="showRejectDialog = true" />
-
-                            <!-- Approve Button -->
-                            <Button label="Approve" class="p-button-success" @click="showApproveDialog = true" />
-                        </div>
-                    </div>
                 </div>
             </div>
         </div>
-
-        <!-- Rejection Reason Dialog -->
-        <Dialog v-model:visible="showRejectDialog" modal header="Reject Redemption" :style="{ width: '500px' }" :breakpoints="{ '960px': '75vw', '641px': '90vw' }">
-            <div class="flex flex-col gap-1">
-                <div>
-                    <label for="rejectReason" class="block text-sm font-medium text-gray-700 mb-2"> Reason for rejection <span class="text-red-500">*</span> </label>
-                    <textarea
-                        id="rejectReason"
-                        v-model="rejectReason"
-                        class="w-full border border-gray-300 rounded-md p-1 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                        placeholder="Please provide the reason for rejecting this redemption..."
-                        rows="4"
-                        :class="{ 'border-red-500': showValidationError }"
-                    ></textarea>
-                    <p v-if="showValidationError" class="text-red-500 text-sm mt-1">Please enter a reason for rejection</p>
-                </div>
-
-                <div class="mt-2">
-                    <p class="text-sm text-gray-600">This action cannot be undone. The user will be notified about the rejection.</p>
-                </div>
-            </div>
-
-            <template #footer>
-                <div class="flex justify-end gap-3">
-                    <Button label="Cancel" class="p-button-secondary p-button-sm" @click="closeRejectDialog" />
-                    <Button label="Submit Rejection" class="p-button-danger p-button-sm" @click="submitReject" :disabled="!rejectReason.trim()" />
-                </div>
-            </template>
-        </Dialog>
-
-        <!-- Approval Confirmation Dialog -->
-        <Dialog v-model:visible="showApproveDialog" modal header="Approve Redemption" :style="{ width: '400px' }" :breakpoints="{ '960px': '75vw', '641px': '90vw' }">
-            <div class="flex flex-col gap-3">
-                <div class="flex items-center gap-3">
-                    <i class="pi pi-exclamation-triangle text-yellow-500 text-xl"></i>
-                    <p class="text-gray-700">Are you sure you want to approve this redemption?</p>
-                </div>
-                <div class="bg-blue-50 p-3 rounded-md">
-                    <p class="text-sm text-blue-700">
-                        <strong>Item:</strong> {{ redemption.itemName || 'N/A' }}<br />
-                        <strong>Recipient:</strong> {{ redemption.recipientName || 'N/A' }}<br />
-                        <strong>Points:</strong> {{ redemption.totalPoint || 0 }}
-                    </p>
-                </div>
-            </div>
-
-            <template #footer>
-                <div class="flex justify-end gap-3">
-                    <Button label="Cancel" class="p-button-secondary p-button-sm" @click="showApproveDialog = false" />
-                    <Button label="Confirm Approval" class="p-button-success p-button-sm" @click="submitApprove" />
-                </div>
-            </template>
-        </Dialog>
 
         <!-- Toast Component for notifications -->
         <Toast />

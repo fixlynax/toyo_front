@@ -62,6 +62,7 @@
                                 class="w-full" 
                                 :class="{ 'p-invalid': formErrors.recipient }"
                                 placeholder="Recipient Name" 
+                                disabled 
                             />
                             <small v-if="formErrors.recipient" class="p-error">{{ formErrors.recipient[0] }}</small>
                         </div>
@@ -75,6 +76,7 @@
                                 class="w-full" 
                                 :class="{ 'p-invalid': formErrors.contact }"
                                 placeholder="Contact Number" 
+                                disabled 
                             />
                             <small v-if="formErrors.contact" class="p-error">{{ formErrors.contact[0] }}</small>
                         </div>
@@ -114,6 +116,7 @@
                                 class="w-full" 
                                 :class="{ 'p-invalid': formErrors.address_line_1 }"
                                 placeholder="Street Address" 
+                                disabled 
                             />
                             <small v-if="formErrors.address_line_1" class="p-error">{{ formErrors.address_line_1[0] }}</small>
                         </div>
@@ -126,6 +129,7 @@
                                 type="text" 
                                 class="w-full" 
                                 placeholder="Apartment, Suite, etc. (optional)" 
+                                disabled 
                             />
                         </div>
 
@@ -138,6 +142,7 @@
                                 class="w-full" 
                                 :class="{ 'p-invalid': formErrors.city }"
                                 placeholder="City" 
+                                disabled 
                             />
                             <small v-if="formErrors.city" class="p-error">{{ formErrors.city[0] }}</small>
                         </div>
@@ -149,6 +154,7 @@
                                 class="w-full" 
                                 :class="{ 'p-invalid': formErrors.state }"
                                 placeholder="State" 
+                                disabled 
                             />
                             <small v-if="formErrors.state" class="p-error">{{ formErrors.state[0] }}</small>
                         </div>
@@ -162,6 +168,7 @@
                                 class="w-full" 
                                 :class="{ 'p-invalid': formErrors.postcode }"
                                 placeholder="Postcode" 
+                                disabled 
                             />
                             <small v-if="formErrors.postcode" class="p-error">{{ formErrors.postcode[0] }}</small>
                         </div>
@@ -172,7 +179,8 @@
                                 type="text" 
                                 class="w-full" 
                                 :class="{ 'p-invalid': formErrors.country }"
-                                placeholder="Country" 
+                                placeholder="Country"
+                                disabled 
                             />
                             <small v-if="formErrors.country" class="p-error">{{ formErrors.country[0] }}</small>
                         </div>
@@ -200,8 +208,8 @@
             <div class="md:w-1/3 flex flex-col" v-if="!loading">
                 <div class="card flex flex-col w-full">
                     <div class="flex items-center justify-between border-b pb-2 mb-2">
-                        <h2 class="text-2xl font-bold text-gray-800">ℹ️ Advance Info</h2>
-                        <Tag :value="statusLabel(redemption.status)" :severity="statusSeverity(redemption.status)" />
+                        <h2 class="text-2xl font-bold text-gray-800">Advance Info</h2>
+                        <!-- <Tag :value="statusLabel(redemption.status)" :severity="statusSeverity(redemption.status)" /> -->
                     </div>
 
                     <div class="overflow-x-auto">
@@ -384,17 +392,10 @@ const saveChanges = async () => {
 
         // Create FormData and append all fields
         const formData = new FormData();
-        formData.append('recipient', form.value.recipient);
-        formData.append('contact', form.value.contact);
         formData.append('courier', form.value.courier);
         formData.append('ship_date', formattedDate); // Use formatted date string
         formData.append('tracking_no', form.value.tracking_no);
-        formData.append('address_line_1', form.value.address_line_1);
-        formData.append('address_line_2', form.value.address_line_2 || '');
-        formData.append('city', form.value.city);
-        formData.append('state', form.value.state);
-        formData.append('postcode', form.value.postcode);
-        formData.append('country', form.value.country);
+        
 
         // Debug: Log all form data
         for (let [key, value] of formData.entries()) {

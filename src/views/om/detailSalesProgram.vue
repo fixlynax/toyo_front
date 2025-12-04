@@ -89,7 +89,7 @@
                                         <td class="px-4 py-2 text-right font-semibold">{{ salesProgram.pricegroup }}</td>
                                     </tr>
                                     <tr class="border-b">
-                                        <td class="px-4 py-2 font-medium">Availability </td>
+                                        <td class="px-4 py-2 font-medium">Availability</td>
                                         <td class="px-4 py-2 text-right">{{ salesProgram.showSP === 1 ? 'Yes' : 'No' }}</td>
                                     </tr>
                                     <tr class="border-b">
