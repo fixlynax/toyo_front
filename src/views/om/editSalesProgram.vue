@@ -220,37 +220,37 @@
                                         <div>
                                             <label class="block text-sm font-medium text-gray-700 mb-2">Free Material</label>
                                             <Dropdown
-        v-model="programItem.selectedFreeMaterial"
-        :options="freeMaterialOptions"
-        optionLabel="material"
-        optionValue="materialid"
-        placeholder="Select Free Material"
-        class="w-full"
-        :filter="true"
-        :loading="loadingFreeMaterials"
-        @change="onFreeMaterialChange"
-        :filterFields="['material', 'materialid']"
-    >
-        <template #value="slotProps">
-            <div v-if="slotProps.value" class="flex items-center">
-                <div>
-                    <div class="font-medium">{{ getFreeMaterialLabel(slotProps.value) }}</div>
-                    <div class="text-xs text-gray-500">{{ slotProps.value }}</div>
-                </div>
-            </div>
-            <span v-else>
-                {{ slotProps.placeholder }}
-            </span>
-        </template>
-        <template #option="slotProps">
-            <div class="flex items-center">
-                <div>
-                    <div class="font-medium">{{ slotProps.option.material }}</div>
-                    <div class="text-xs text-gray-500">{{ slotProps.option.materialid }}</div>
-                </div>
-            </div>
-        </template>
-    </Dropdown>
+                                                v-model="programItem.selectedFreeMaterial"
+                                                :options="freeMaterialOptions"
+                                                optionLabel="material"
+                                                optionValue="materialid"
+                                                placeholder="Select Free Material"
+                                                class="w-full"
+                                                :filter="true"
+                                                :loading="loadingFreeMaterials"
+                                                @change="onFreeMaterialChange"
+                                                :filterFields="['material', 'materialid']"
+                                            >
+                                                <template #value="slotProps">
+                                                    <div v-if="slotProps.value" class="flex items-center">
+                                                        <div>
+                                                            <div class="font-medium">{{ getFreeMaterialLabel(slotProps.value) }}</div>
+                                                            <div class="text-xs text-gray-500">{{ slotProps.value }}</div>
+                                                        </div>
+                                                    </div>
+                                                    <span v-else>
+                                                        {{ slotProps.placeholder }}
+                                                    </span>
+                                                </template>
+                                                <template #option="slotProps">
+                                                    <div class="flex items-center">
+                                                        <div>
+                                                            <div class="font-medium">{{ slotProps.option.material }}</div>
+                                                            <div class="text-xs text-gray-500">{{ slotProps.option.materialid }}</div>
+                                                        </div>
+                                                    </div>
+                                                </template>
+                                            </Dropdown>
                                         </div>
 
                                         <!-- InputNumber -->
@@ -289,7 +289,7 @@
                     <!-- Submit -->
                     <div class="flex justify-end gap-2 mt-8">
                         <div class="w-40">
-                            <RouterLink :to="`/om/detailSalesProgram/${salesProgram.programID}` ">
+                            <RouterLink :to="`/om/detailSalesProgram/${salesProgram.programID}`">
                                 <Button label="Cancel" class="w-full p-button-secondary" :disabled="submitting" />
                             </RouterLink>
                         </div>

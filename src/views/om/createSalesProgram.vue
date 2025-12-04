@@ -190,7 +190,8 @@
                                                 <div v-if="slotProps.value" class="flex items-center">
                                                     <div>
                                                         <div class="font-medium">{{ getFreeMaterialLabel(slotProps.value) }}</div>
-                                                        <div class="text-xs text-gray-500">{{ slotProps.value }}</div> <!-- Show material ID -->
+                                                        <div class="text-xs text-gray-500">{{ slotProps.value }}</div>
+                                                        <!-- Show material ID -->
                                                     </div>
                                                 </div>
                                                 <span v-else>
@@ -201,7 +202,8 @@
                                                 <div class="flex items-center">
                                                     <div>
                                                         <div class="font-medium">{{ slotProps.option.material }}</div>
-                                                        <div class="text-xs text-gray-500">{{ slotProps.option.materialid }}</div> <!-- Show material ID -->
+                                                        <div class="text-xs text-gray-500">{{ slotProps.option.materialid }}</div>
+                                                        <!-- Show material ID -->
                                                     </div>
                                                 </div>
                                             </template>
