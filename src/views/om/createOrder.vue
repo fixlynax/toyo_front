@@ -168,8 +168,8 @@
                             <div class="text-sm font-bold">RM {{ formatCurrency(cartTotal.toFixed(2)) }}</div>
                         </div>
                         <div class="bg-white p-2 rounded border">
-                            <div class="text-xs text-gray-500">Total Items</div>
-                            <div class="text-sm font-bold">{{ selectedTyres.length + freeItems.length }}</div>
+                            <div class="text-xs text-gray-500">Total Line Items</div>
+                            <div class="text-sm font-bold">{{ totalLineItems }}</div>
                         </div>
                         <div class="bg-white p-2 rounded border">
                             <div class="text-xs text-gray-500">Total Volume</div>
@@ -177,7 +177,7 @@
                         </div>
                         <div class="bg-white p-2 rounded border">
                             <div class="text-xs text-gray-500">Free Items</div>
-                            <div class="text-sm font-bold text-green-600">{{ freeItemsCount }}</div>
+                            <div class="text-sm font-bold text-green-600">{{ freeItems.length }}</div>
                         </div>
                     </div>
                 </div>
@@ -194,13 +194,21 @@
                 </div>
             </div>
 
-            <!-- Sales Program Free Items -->
-            <div v-if="freeItems.length > 0" class="bg-green-50 border border-green-200 rounded-lg p-4">
-                <div class="font-semibold text-green-800 mb-2">🎁 Free Items from Sales Program</div>
-                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
-                    <div v-for="freeItem in freeItems" :key="freeItem.materialid" class="bg-white p-3 rounded border border-green-300">
-                        <div class="font-medium text-green-700">{{ freeItem.material }}</div>
-                        <div class="text-sm text-gray-600">Qty: {{ freeItem.qty }} | Category: {{ freeItem.itemcategory }}</div>
+            <!-- Monthly Limit Warning -->
+            <div v-if="hasMonthlyLimitViolations" class="mt-4 p-4 bg-orange-50 border border-orange-200 rounded-lg">
+                <div class="flex items-center gap-2">
+                    <i class="pi pi-exclamation-triangle text-orange-500"></i>
+                    <span class="font-semibold text-orange-700">Monthly Quantity Limit Warning</span>
+                </div>
+                <div class="text-sm text-orange-600 mt-1">
+                    The following items exceed the monthly limit of 50 units per material:
+                    <ul class="mt-1 list-disc list-inside ml-2">
+                        <li v-for="item in exceedsMonthlyLimitItems" :key="item.materialid">
+                            {{ item.material }}: {{ item.quantity }} units (Limit: 50)
+                        </li>
+                    </ul>
+                    <div class="mt-2 text-xs text-orange-700 font-semibold">
+                        Note: The API will validate the actual monthly usage when placing the order.
                     </div>
                 </div>
             </div>
@@ -271,16 +279,18 @@
                     </template>
                 </Column>
 
-                <!-- Action Column - Allow 0 stock items for NORMAL orders -->
+                <!-- Action Column -->
                 <Column header="Action" style="width: 10rem">
                     <template #body="{ data }">
-                        <Button
-                            label="Add"
-                            icon="pi pi-shopping-cart"
-                            class="p-button-primary p-button-sm"
-                            @click="addToCart(data)"
-                            :disabled="isInCart(data) || (selectedOrderType === 'DIRECTSHIP' && (data.stockBalance === 0 || containerCapacity >= maxContainerCapacity))"
-                        />
+                        <div class="flex flex-col gap-1">
+                            <Button
+                                label="Add"
+                                icon="pi pi-shopping-cart"
+                                class="p-button-primary p-button-sm"
+                                @click="addToCart(data)"
+                                :disabled="isInCart(data) || (selectedOrderType === 'DIRECTSHIP' && (data.stockBalance === 0 || containerCapacity >= maxContainerCapacity)) || exceedsItemLimit"
+                            />
+                        </div>
                     </template>
                 </Column>
             </DataTable>
@@ -322,19 +332,27 @@
 
                         <Column header="Qty" style="min-width: 6rem; text-align: left">
                             <template #body="{ data }">
-                                <InputNumber
-                                    v-model="data.quantity"
-                                    :min="getMinQuantity()"
-                                    :max="getMaxQuantity(data)"
-                                    :showButtons="true"
-                                    buttonLayout="horizontal"
-                                    incrementButtonClass="p-button-text p-button-sm"
-                                    decrementButtonClass="p-button-text p-button-sm"
-                                    incrementButtonIcon="pi pi-plus"
-                                    decrementButtonIcon="pi pi-minus"
-                                    style="width: fit-content"
-                                    @update:modelValue="onQuantityChange(data)"
-                                />
+                                <div class="flex flex-col gap-1">
+                                    <InputNumber
+                                        v-model="data.quantity"
+                                        :min="getMinQuantity()"
+                                        :max="getMaxQuantity(data)"
+                                        :showButtons="true"
+                                        buttonLayout="horizontal"
+                                        incrementButtonClass="p-button-text p-button-sm"
+                                        decrementButtonClass="p-button-text p-button-sm"
+                                        incrementButtonIcon="pi pi-plus"
+                                        decrementButtonIcon="pi pi-minus"
+                                        style="width: fit-content"
+                                        @update:modelValue="onQuantityChange(data)"
+                                        :class="{'border-orange-500': selectedOrderType === 'NORMAL' && data.quantity > 50}"
+                                    />
+                                    <!-- Show monthly limit warning if applicable -->
+                                    <div v-if="selectedOrderType === 'NORMAL' && data.quantity > 50" class="flex items-center gap-1 text-orange-600 text-xs">
+                                        <i class="pi pi-exclamation-triangle text-xs"></i>
+                                        <span>Monthly limit: 50 units</span>
+                                    </div>
+                                </div>
                             </template>
                         </Column>
 
@@ -388,11 +406,11 @@
                         </div>
                         <div>
                             <div class="text-sm text-gray-500">Free Items</div>
-                            <div class="text-lg font-bold text-green-600">{{ freeItemsCount }}</div>
+                            <div class="text-lg font-bold text-green-600">{{ freeItems.length }}</div>
                         </div>
                         <div>
-                            <div class="text-sm text-gray-500">Total Items</div>
-                            <div class="text-lg font-bold text-green-600">{{ selectedTyres.length + freeItemsCount }}</div>
+                            <div class="text-sm text-gray-500">Total Line Items</div>
+                            <div class="text-lg font-bold text-purple-600">{{ totalLineItems }}</div>
                         </div>
                         <div>
                             <div class="text-sm text-gray-500">Total Amount</div>
@@ -411,9 +429,40 @@
                 </div>
             </div>
 
+            <!-- Item Limit Warning (Bottom) -->
+            <div v-if="exceedsItemLimit" class="mt-4 p-4 bg-red-50 border border-red-200 rounded-lg">
+                <div class="flex items-center gap-2">
+                    <i class="pi pi-exclamation-triangle text-red-500"></i>
+                    <span class="font-semibold text-red-700">Maximum Line Items Reached</span>
+                </div>
+                <div class="text-sm text-red-600 mt-1">
+                    You have {{ totalLineItems }} line items in your cart ({{ selectedTyres.length }} order items + {{ freeItems.length }} free items).
+                    Maximum allowed per order is 10 line items. Please remove {{ totalLineItems - 10 }} item(s) to proceed.
+                </div>
+            </div>
+
+            <!-- Monthly Limit Warning (Bottom) -->
+            <div v-if="hasMonthlyLimitViolations" class="mt-4 p-4 bg-orange-50 border border-orange-200 rounded-lg">
+                <div class="flex items-center gap-2">
+                    <i class="pi pi-exclamation-triangle text-orange-500"></i>
+                    <span class="font-semibold text-orange-700">Monthly Quantity Limit Warning</span>
+                </div>
+                <div class="text-sm text-orange-600 mt-1">
+                    Some items in your cart exceed the monthly limit of 50 units per material.
+                    Please reduce quantities before proceeding to checkout.
+                </div>
+            </div>
+
             <div class="flex justify-between mt-4">
                 <Button label="Back" icon="pi pi-arrow-left" class="p-button-secondary" @click="goToStep(1)" />
-                <Button label="Next: Review Order" icon="pi pi-arrow-right" @click="goToStep(3)" :disabled="!canProceedToStep3" />
+                <Button 
+                    label="Next: Review Order" 
+                    icon="pi pi-arrow-right" 
+                    @click="goToStep(3)" 
+                    :disabled="!canProceedToStep3 || exceedsItemLimit" 
+                    :badge="totalLineItems.toString()"
+                    badgeClass="ml-2 bg-blue-500"
+                />
             </div>
 
             <!-- Overlay Panels -->
@@ -544,12 +593,16 @@
                                     <span class="text-gray-600">Container Volume:</span>
                                     <span class="font-semibold">{{ containerCapacity }} units</span>
                                 </div>
+                                <div class="flex justify-between">
+                                    <span class="text-gray-600">Total Line Items:</span>
+                                    <span class="font-semibold">{{ totalLineItems }} items</span>
+                                </div>
                             </div>
                         </div>
 
                         <!-- Items Summary -->
                         <div class="p-4 border-b">
-                            <div class="font-semibold text-gray-700 mb-3">Items Summary</div>
+                            <div class="font-semibold text-gray-700 mb-3">Items Summary ({{ totalLineItems }} items)</div>
                             <div class="space-y-3">
                                 <!-- Regular Items -->
                                 <div v-for="item in selectedTyres" :key="item.id" class="flex justify-between items-center">
@@ -562,6 +615,8 @@
                                             <span v-else-if="selectedOrderType === 'NORMAL' && item.quantity > item.stockBalance" class="text-orange-600 font-semibold ml-2">
                                                 ({{ item.stockBalance }} available, {{ item.quantity - item.stockBalance }} back order)
                                             </span>
+                                            <!-- Monthly limit warning in review -->
+                                            <span v-if="selectedOrderType === 'NORMAL' && item.quantity > 50" class="text-red-600 font-semibold ml-2">⚠️ Exceeds monthly limit</span>
                                         </div>
                                     </div>
                                     <div class="font-semibold">RM {{ formatCurrency((item.price * item.quantity).toFixed(2)) }}</div>
@@ -582,12 +637,16 @@
                         <div class="p-4">
                             <div class="space-y-2">
                                 <div class="flex justify-between">
-                                    <span>Total Order:</span>
+                                    <span>Total Order Items:</span>
                                     <span>{{ selectedTyres.length }} Items</span>
                                 </div>
                                 <div v-if="freeItems.length > 0" class="flex justify-between">
-                                    <span>Total Free:</span>
-                                    <span class="text-green-600">{{ freeItemsCount }} Items</span>
+                                    <span>Total Free Items:</span>
+                                    <span class="text-green-600">{{ freeItems.length }} Items</span>
+                                </div>
+                                <div class="flex justify-between border-t pt-2">
+                                    <span class="font-semibold">Total Line Items:</span>
+                                    <span class="font-semibold">{{ totalLineItems }} Items</span>
                                 </div>
                                 <div class="flex justify-between border-t pt-2">
                                     <span class="font-semibold">Total Quantity:</span>
@@ -628,6 +687,22 @@
                             </ul>
                         </div>
                     </div>
+
+                    <!-- Monthly Limit Notice -->
+                    <div v-if="selectedOrderType === 'NORMAL' && hasMonthlyLimitViolations" class="mt-4 p-4 bg-red-50 border border-red-200 rounded-lg">
+                        <div class="flex items-center gap-2">
+                            <i class="pi pi-exclamation-triangle text-red-500"></i>
+                            <span class="font-semibold text-red-700">Monthly Limit Warning</span>
+                        </div>
+                        <div class="text-sm text-red-600 mt-1">
+                            Some items exceed the monthly limit of 50 units per material. The order may be rejected by the system.
+                            <ul class="mt-1 list-disc list-inside ml-2">
+                                <li v-for="item in exceedsMonthlyLimitItems" :key="item.materialid">
+                                    {{ item.material }}: {{ item.quantity }} units (Limit: 50)
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
                 </div>
             </div>
 
@@ -650,9 +725,8 @@
                     <div v-if="orderDetails" class="text-sm text-gray-600 mt-2">
                         <div v-if="orderDetails.orderRefNo">Order Number: {{ orderDetails.orderRefNo }}</div>
                         <div v-if="orderDetails.backOrderRefNo">Back Order Number: {{ orderDetails.backOrderRefNo }}</div>
-                        <!-- <div v-if="orderDetails.cartRefNo">Cart Reference: {{ orderDetails.cartRefNo }}</div> -->
                     </div>
-                    <div v-if="orderError" class="text-sm text-red-600 mt-2">
+                    <div v-if="orderError" class="text-sm text-red-600 mt-2 whitespace-pre-line">
                         {{ orderError }}
                     </div>
 
@@ -665,7 +739,7 @@
             </div>
             <template #footer>
                 <Button v-if="orderStatus === 'success' && !showDriverForm" label="View Order" icon="pi pi-eye" @click="viewOrderDetails" class="p-button-primary mr-2" />
-                <Button v-if="orderStatus === 'success' && !showDriverForm" label="View Back Order" icon="pi pi-eye" @click="viewBackOrderDetails" class="p-button-primary mr-2" />
+                <Button v-if="orderStatus === 'success' && !showDriverForm && orderDetails.backOrderRefNo != null" label="View Back Order" icon="pi pi-eye" @click="viewBackOrderDetails" class="p-button-primary mr-2" />
                 <Button v-if="orderStatus === 'success' && !showDriverForm" label="Close" icon="pi pi-check" @click="closeOrderDialog" class="p-button-primary" />
                 <Button v-if="orderStatus === 'success' && showDriverForm" label="Submit Driver Info" icon="pi pi-check" @click="submitDriverInfoAfterOrder" class="p-button-primary" :loading="submittingDriverInfo" />
                 <Button v-if="orderStatus === 'error' && !orderError.includes('not fulfilled') && !orderError.includes('back order')" label="Close" icon="pi pi-times" @click="closeOrderDialog" class="p-button-secondary" />
@@ -942,6 +1016,9 @@ const freeItemsCount = computed(() => freeItems.value.reduce((sum, item) => sum 
 
 const freeItemsQuantity = computed(() => freeItems.value.reduce((sum, item) => sum + (parseInt(item.qty) || 0), 0));
 
+// Total line items count (order items + free items)
+const totalLineItems = computed(() => selectedTyres.value.length + freeItems.value.length);
+
 const containerCapacity = computed(() => {
     if (selectedOrderType.value !== 'DIRECTSHIP') return 0;
 
@@ -969,6 +1046,33 @@ const progressValue = computed(() => {
     return Math.round(progress);
 });
 
+// Check if total line items exceed 10 limit
+const exceedsItemLimit = computed(() => {
+    return totalLineItems.value > 10;
+});
+
+// NEW: Check for 50-unit monthly limit violations
+const exceedsMonthlyLimitItems = computed(() => {
+    if (selectedOrderType.value !== 'NORMAL') return [];
+    
+    const exceededItems = [];
+    
+    selectedTyres.value.forEach((item) => {
+        if (item.quantity > 50) {
+            exceededItems.push({
+                materialid: item.materialid,
+                material: item.material,
+                quantity: item.quantity,
+                limit: 50
+            });
+        }
+    });
+    
+    return exceededItems;
+});
+
+const hasMonthlyLimitViolations = computed(() => exceedsMonthlyLimitItems.value.length > 0);
+
 // Risk Category Validation
 const canProceedWithRiskA = computed(() => {
     if (!selectedCustomer.value) return false;
@@ -980,16 +1084,17 @@ const canProceedWithRiskA = computed(() => {
     return riskCategory === 'A' || !riskCategory;
 });
 
-// UPDATED: Enhanced canProceedToStep2 with better validation
+// Enhanced canProceedToStep2 with better validation
 const canProceedToStep2 = computed(() => {
     const basicChecks = selectedCustomer.value && selectedOrderType.value && selectedDeliveryMethod.value;
     return basicChecks && canProceedWithRiskA.value;
 });
 
-// UPDATED: Enhanced canProceedToStep3 with back order support for NORMAL orders
+// Enhanced canProceedToStep3 with back order support for NORMAL orders and 10-line-item limit
 const canProceedToStep3 = computed(() => {
     const hasItems = selectedTyres.value.length > 0;
     const priceValid = !selectedTyres.value.some((item) => !item.price || item.price <= 0);
+    const withinItemLimit = !exceedsItemLimit.value; // Check if within 10 line items limit
 
     // Stock validation differs by order type
     let stockValid = true;
@@ -998,7 +1103,6 @@ const canProceedToStep3 = computed(() => {
         stockValid = !selectedTyres.value.some((item) => item.quantity > item.stockBalance);
     } else {
         // NORMAL orders allow any quantity (0 stock or exceeding stock for back orders)
-        // No stock validation needed for NORMAL orders as back orders are always allowed
         stockValid = true;
     }
 
@@ -1008,7 +1112,7 @@ const canProceedToStep3 = computed(() => {
         containerValid = containerCapacity.value >= minContainerCapacity.value && containerCapacity.value <= maxContainerCapacity.value;
     }
 
-    return hasItems && stockValid && priceValid && containerValid;
+    return hasItems && stockValid && priceValid && containerValid && withinItemLimit;
 });
 
 const canPlaceOrder = computed(() => {
@@ -1031,7 +1135,7 @@ const creditLimitClass = computed(() => {
     return 'text-green-700';
 });
 
-// UPDATED: Enhanced back order detection for NORMAL orders
+// Enhanced back order detection for NORMAL orders
 const hasBackOrderItems = computed(() => {
     if (selectedOrderType.value !== 'NORMAL') return false;
 
@@ -1105,15 +1209,15 @@ const formatCurrency = (amount) => {
 // Helper function for unique sorted values
 const uniqueSorted = (arr) => [...new Set(arr)].sort((a, b) => (a > b ? 1 : -1));
 
-// NEW: Get minimum quantity (1 for all order types)
+// Get minimum quantity (1 for all order types)
 const getMinQuantity = () => {
     return 1;
 };
 
-// UPDATED: Helper function to get maximum quantity based on stock and order type
+// Helper function to get maximum quantity based on stock, order type, and monthly limit
 const getMaxQuantity = (tyre) => {
     if (selectedOrderType.value === 'NORMAL') {
-        // For NORMAL orders, maximum is 50 regardless of stock (for back orders)
+        // For NORMAL orders, maximum is 50 per month regardless of stock
         return 50;
     } else {
         // For DIRECTSHIP or other order types, use stock balance as limit
@@ -1178,7 +1282,7 @@ const goToStep = async (step) => {
                     severity: 'error',
                     summary: 'Order Restricted',
                     detail: 'This customer cannot place orders due to risk category restrictions',
-                    life: 5000
+                     life: 2000
                 });
             }
             return;
@@ -1186,7 +1290,16 @@ const goToStep = async (step) => {
     }
 
     if (step === 3 && !canProceedToStep3.value) {
-        toast.add({ severity: 'warn', summary: 'Warning', detail: 'Please add products to cart before proceeding', life: 3000 });
+        if (exceedsItemLimit.value) {
+            toast.add({ 
+                severity: 'warn', 
+                summary: 'Line Item Limit Exceeded', 
+                detail: 'Maximum 10 line items per order (including free items). Please remove some items before proceeding.', 
+                 life: 2000 
+            });
+        } else {
+            toast.add({ severity: 'warn', summary: 'Warning', detail: 'Please add products to cart before proceeding', life: 2000 });
+        }
         return;
     }
 
@@ -1195,7 +1308,7 @@ const goToStep = async (step) => {
         try {
             await createDirectShipCart();
         } catch (error) {
-            toast.add({ severity: 'error', summary: 'Error', detail: 'Failed to create cart. Please try again.', life: 3000 });
+            toast.add({ severity: 'error', summary: 'Error', detail: 'Failed to create cart. Please try again.', life: 2000 });
             return;
         }
     }
@@ -1205,7 +1318,7 @@ const goToStep = async (step) => {
     step3Validated.value = false;
 };
 
-// UPDATED: Check sales program and actual price function
+// Check sales program and actual price function
 const checkSalesProgramAndPrice = async () => {
     if (!selectedCustomer.value || selectedTyres.value.length === 0) return;
 
@@ -1230,9 +1343,8 @@ const checkSalesProgramAndPrice = async () => {
                 order_array: JSON.stringify(orderArray),
                 isDSOrder: selectedOrderType.value === 'DIRECTSHIP' ? 1 : ''
             })
-            // console.log(orderArray);
         ]);
-//  console.log("get:", orderArray);
+
         // Process sales program response
         if (salesProgramResponse.status === 'fulfilled' && salesProgramResponse.value.data.status === 1 && salesProgramResponse.value.data.admin_data) {
             freeItems.value = salesProgramResponse.value.data.admin_data.map((freeItem) => ({
@@ -1245,7 +1357,7 @@ const checkSalesProgramAndPrice = async () => {
                     severity: 'info',
                     summary: 'Sales Program Applied',
                     detail: `Found ${freeItems.value.length} free item(s) from sales program`,
-                    life: 5000
+                     life: 1000
                 });
             }
         }
@@ -1271,7 +1383,7 @@ const checkSalesProgramAndPrice = async () => {
                             severity: 'info',
                             summary: 'Price Updated',
                             detail: `Price for ${materialName} updated from RM ${oldPrice.toFixed(2)} to RM ${newPrice.toFixed(2)}`,
-                            life: 3000
+                            life: 2000
                         });
                     }
                 }
@@ -1283,46 +1395,50 @@ const checkSalesProgramAndPrice = async () => {
     }
 };
 
-// UPDATED: Add to Cart function with 0 stock support for NORMAL orders and price check
+// UPDATED: Add to Cart function with 10-line-item limit and monthly limit toast warnings
 const addToCart = (tyre) => {
-    // For DIRECTSHIP orders, prevent adding 0 stock items but allow insufficient stock
-    if (selectedOrderType.value === 'DIRECTSHIP' && tyre.stockBalance === 0) {
+    // Check 10-line-item limit first
+    if (totalLineItems.value >= 10) {
         toast.add({
             severity: 'warn',
-            summary: 'Out of Stock',
-            detail: 'This product is currently out of stock for Direct Shipment',
-            life: 3000
+            summary: 'Maximum Line Items Reached',
+            detail: 'Maximum 10 line items per order (including free items). Please remove some items before adding more.',
+            life: 2000
         });
         return;
     }
 
-    // Check container capacity for DIRECTSHIP
-    if (selectedOrderType.value === 'DIRECTSHIP') {
-        const itemVolume = tyre.volume || 0;
-        const currentVolume = containerCapacity.value;
-        const maxVolume = maxContainerCapacity.value;
-
-        if (currentVolume + itemVolume > maxVolume) {
+    const existing = selectedTyres.value.find((t) => t.id === tyre.id);
+    if (existing) {
+        // Check if increasing quantity would exceed monthly limit for NORMAL orders
+        if (selectedOrderType.value === 'NORMAL' && existing.quantity + 1 > 50) {
             toast.add({
                 severity: 'warn',
-                summary: 'Container Full',
-                detail: 'Container capacity reached',
-                life: 3000
+                summary: 'Monthly Limit',
+                detail: `Maximum 50 units per month for ${tyre.material}. Please adjust quantity.`,
+                life: 2000
             });
             return;
         }
-    }
-
-    const existing = selectedTyres.value.find((t) => t.id === tyre.id);
-    if (existing) {
-        // Allow increasing quantity even if exceeds stock (for back order scenarios)
+        
         existing.quantity += 1;
-        toast.add({
-            severity: 'success',
-            summary: 'Success',
-            detail: 'Quantity updated in cart',
-            life: 2000
-        });
+        
+        // Show monthly limit warning if exceeded
+        if (selectedOrderType.value === 'NORMAL' && existing.quantity > 50) {
+            toast.add({
+                severity: 'warn',
+                summary: 'Monthly Limit Warning',
+                detail: `Maximum 50 units per month for ${tyre.material}. You've selected ${existing.quantity} units.`,
+                life: 4000
+            });
+        } else {
+            toast.add({
+                severity: 'success',
+                summary: 'Success',
+                detail: 'Quantity updated in cart',
+                life: 1000
+            });
+        }
     } else {
         selectedTyres.value.push({
             ...tyre,
@@ -1335,21 +1451,21 @@ const addToCart = (tyre) => {
                 severity: 'info',
                 summary: 'Added to Cart',
                 detail: 'Item added - will be processed as back order',
-                life: 3000
+                life: 2000
             });
         } else if (tyre.stockBalance > 0 && selectedOrderType.value === 'NORMAL') {
             toast.add({
                 severity: 'success',
                 summary: 'Success',
                 detail: 'Product added to cart',
-                life: 2000
+                life: 1000
             });
         } else if (selectedOrderType.value === 'DIRECTSHIP' && tyre.stockBalance > 0) {
             toast.add({
                 severity: 'success',
                 summary: 'Success',
                 detail: 'Product added to cart',
-                life: 2000
+                life: 1000
             });
         }
     }
@@ -1393,17 +1509,17 @@ const fetchCustomers = async () => {
             console.log('Final customer options:', customerOptions.value);
         } else {
             console.error('Customers API returned status 0:', response.data);
-            toast.add({ severity: 'error', summary: 'Error', detail: 'Failed to fetch customers', life: 3000 });
+            toast.add({ severity: 'error', summary: 'Error', detail: 'Failed to fetch customers', life: 2000 });
         }
     } catch (error) {
         console.error('Error fetching customers:', error);
-        toast.add({ severity: 'error', summary: 'Error', detail: 'Failed to load customers', life: 3000 });
+        toast.add({ severity: 'error', summary: 'Error', detail: 'Failed to load customers', life: 2000 });
     } finally {
         loadingCustomers.value = false;
     }
 };
 
-// NEW: Fetch eligible order settings including container capacities
+// Fetch eligible order settings including container capacities
 const fetchEligibleOrderSettings = async (custAccountNo) => {
     if (!custAccountNo) return;
 
@@ -1498,7 +1614,7 @@ const fetchShipToAddresses = async (custAccountNo) => {
         }
     } catch (error) {
         console.error('Error fetching ship to addresses:', error);
-        toast.add({ severity: 'error', summary: 'Error', detail: 'Failed to load ship-to addresses', life: 3000 });
+        toast.add({ severity: 'error', summary: 'Error', detail: 'Failed to load ship-to addresses', life: 2000 });
     } finally {
         loadingShipTo.value = false;
     }
@@ -1577,7 +1693,7 @@ const fetchMaterials = async (custAccountNo) => {
                         quantity: 1,
                         itemcategory: 'ZT02', // Default for regular items
                         plant: 'TSM',
-                        salesprogramid: material.salesprogramid || '' // ADDED: salesprogramid
+                        salesprogramid: material.salesprogramid || ''
                     };
                 });
 
@@ -1585,7 +1701,7 @@ const fetchMaterials = async (custAccountNo) => {
                     severity: 'success',
                     summary: 'Success',
                     detail: `Loaded ${tyres.value.length} products`,
-                    life: 3000
+                    life: 2000
                 });
             } else {
                 tyres.value = [];
@@ -1593,7 +1709,7 @@ const fetchMaterials = async (custAccountNo) => {
                     severity: 'warn',
                     summary: 'Warning',
                     detail: 'No products available for this customer',
-                    life: 3000
+                    life: 2000
                 });
             }
         } else {
@@ -1602,7 +1718,7 @@ const fetchMaterials = async (custAccountNo) => {
                 severity: 'warn',
                 summary: 'Warning',
                 detail: 'No products available for this customer',
-                life: 3000
+                life: 2000
             });
         }
     } catch (error) {
@@ -1611,15 +1727,13 @@ const fetchMaterials = async (custAccountNo) => {
             severity: 'error',
             summary: 'Error',
             detail: 'Failed to load products',
-            life: 3000
+            life: 2000
         });
         tyres.value = [];
     } finally {
         loading.value = false;
     }
 };
-
-// UPDATED: Check sales program and actual price function (already defined above)
 
 // DIRECTSHIP: Create empty cart
 const createDirectShipCart = async () => {
@@ -1634,14 +1748,14 @@ const createDirectShipCart = async () => {
 
         if (response.data.status === 1) {
             currentCartRefNo.value = response.data.eten_data.cartRefNo;
-            toast.add({ severity: 'success', summary: 'Success', detail: 'Direct shipment cart created', life: 3000 });
+            toast.add({ severity: 'success', summary: 'Success', detail: 'Direct shipment cart created', life: 2000 });
             return currentCartRefNo.value;
         } else {
             throw new Error(response.data.error?.message || 'Failed to create cart');
         }
     } catch (error) {
         console.error('Error creating cart:', error);
-        toast.add({ severity: 'error', summary: 'Error', detail: 'Failed to create order cart', life: 3000 });
+        toast.add({ severity: 'error', summary: 'Error', detail: 'Failed to create order cart', life: 2000 });
         throw error;
     }
 };
@@ -1649,7 +1763,7 @@ const createDirectShipCart = async () => {
 // Reset DIRECTSHIP cart
 const resetDirectShipCart = async () => {
     if (!currentCartRefNo.value) {
-        toast.add({ severity: 'warn', summary: 'Warning', detail: 'No cart to reset', life: 3000 });
+        toast.add({ severity: 'warn', summary: 'Warning', detail: 'No cart to reset', life: 2000 });
         return;
     }
 
@@ -1660,20 +1774,20 @@ const resetDirectShipCart = async () => {
             selectedTyres.value = [];
             freeItems.value = [];
             currentCartRefNo.value = '';
-            toast.add({ severity: 'success', summary: 'Success', detail: 'Cart reset successfully', life: 3000 });
+            toast.add({ severity: 'success', summary: 'Success', detail: 'Cart reset successfully', life: 2000 });
         } else {
             throw new Error('Failed to reset cart');
         }
     } catch (error) {
         console.error('Error resetting cart:', error);
-        toast.add({ severity: 'error', summary: 'Error', detail: 'Failed to reset cart', life: 3000 });
+        toast.add({ severity: 'error', summary: 'Error', detail: 'Failed to reset cart', life: 2000 });
     }
 };
 
 // Excel Import/Export
 const importExcel = () => {
     if (selectedOrderType.value !== 'DIRECTSHIP') {
-        toast.add({ severity: 'warn', summary: 'Warning', detail: 'Excel import is only available for Direct Shipment orders', life: 3000 });
+        toast.add({ severity: 'warn', summary: 'Warning', detail: 'Excel import is only available for Direct Shipment orders', life: 2000 });
         return;
     }
     showUploadDialog.value = true;
@@ -1682,12 +1796,12 @@ const importExcel = () => {
 
 const exportExcel = async () => {
     if (selectedOrderType.value !== 'DIRECTSHIP') {
-        toast.add({ severity: 'warn', summary: 'Warning', detail: 'Excel export is only available for Direct Shipment orders', life: 3000 });
+        toast.add({ severity: 'warn', summary: 'Warning', detail: 'Excel export is only available for Direct Shipment orders', life: 2000 });
         return;
     }
 
     if (!currentCartRefNo.value) {
-        toast.add({ severity: 'warn', summary: 'Warning', detail: 'No cart available for export', life: 3000 });
+        toast.add({ severity: 'warn', summary: 'Warning', detail: 'No cart available for export', life: 2000 });
         return;
     }
 
@@ -1705,10 +1819,10 @@ const exportExcel = async () => {
         link.remove();
         window.URL.revokeObjectURL(url);
 
-        toast.add({ severity: 'success', summary: 'Success', detail: 'Excel file downloaded successfully', life: 3000 });
+        toast.add({ severity: 'success', summary: 'Success', detail: 'Excel file downloaded successfully', life: 2000 });
     } catch (error) {
         console.error('Error exporting Excel:', error);
-        toast.add({ severity: 'error', summary: 'Error', detail: 'Failed to export Excel file', life: 3000 });
+        toast.add({ severity: 'error', summary: 'Error', detail: 'Failed to export Excel file', life: 2000 });
     }
 };
 
@@ -1732,7 +1846,7 @@ const onExcelUpload = async (event) => {
 
             setTimeout(() => {
                 showUploadDialog.value = false;
-                toast.add({ severity: 'success', summary: 'Success', detail: 'Excel imported successfully', life: 3000 });
+                toast.add({ severity: 'success', summary: 'Success', detail: 'Excel imported successfully', life: 2000 });
             }, 2000);
         } else {
             uploadMessage.value = response.message || 'Upload failed';
@@ -1744,12 +1858,12 @@ const onExcelUpload = async (event) => {
     }
 };
 
-// UPDATED: Remove from cart with price check
+// Remove from cart with price check
 const removeFromCart = (tyre) => {
     const index = selectedTyres.value.findIndex((t) => t.id === tyre.id);
     if (index !== -1) {
         selectedTyres.value.splice(index, 1);
-        toast.add({ severity: 'info', summary: 'Removed', detail: 'Product removed from cart', life: 2000 });
+        toast.add({ severity: 'info', summary: 'Removed', detail: 'Product removed from cart', life: 1000 });
 
         // Recheck sales program and price after removal
         checkSalesProgramAndPrice();
@@ -1758,8 +1872,18 @@ const removeFromCart = (tyre) => {
 
 const isInCart = (tyre) => selectedTyres.value.some((t) => t.id === tyre.id);
 
-// UPDATED: onQuantityChange with price check
+// UPDATED: onQuantityChange with monthly limit toast warnings
 const onQuantityChange = (item) => {
+    // Check monthly limit for NORMAL orders
+    if (selectedOrderType.value === 'NORMAL' && item.quantity > 50) {
+        toast.add({
+            severity: 'warn',
+            summary: 'Monthly Limit Warning',
+            detail: `Maximum 50 units per month for ${item.material}. You've selected ${item.quantity} units.`,
+            life: 4000
+        });
+    }
+    
     // Check sales program and price when quantity changes
     if (selectedTyres.value.length > 0) {
         checkSalesProgramAndPrice();
@@ -1777,7 +1901,7 @@ const clearFilters = () => {
     filters.value.sectionwidth.value = '';
 };
 
-// UPDATED: Main Order Placement Function with proper API flow
+// Enhanced error handling in placeOrder function
 const placeOrder = async () => {
     if (!canPlaceOrder.value) {
         step3Validated.value = true;
@@ -1816,7 +1940,45 @@ const placeOrder = async () => {
                 await processDirectShipOrder(cartRefNo, orderArray);
             }
         } else {
-            throw new Error(addToCartResult.message || 'Failed to add items to cart');
+            // Handle specific API errors
+            if (addToCartResult.error && addToCartResult.error.code === '450') {
+                // 10-item limit error
+                orderStatus.value = 'error';
+                orderMessage.value = 'Maximum Line Items Exceeded';
+                orderError.value = 'Maximum 10 line items per order (including free items). Please remove some items and try again.';
+                
+                toast.add({
+                    severity: 'error',
+                    summary: 'Maximum Line Items Exceeded',
+                    detail: 'Maximum 10 line items per order. Please remove some items and try again.',
+                     life: 2000
+                });
+            } else if (Array.isArray(addToCartResult.error) && addToCartResult.error[0]?.materialid) {
+                // 50-item per month limit error
+                const exceededItems = addToCartResult.error;
+                let errorMessage = 'Some items exceed the monthly limit (50 items per month):\n';
+                
+                exceededItems.forEach((item, index) => {
+                    errorMessage += `${index + 1}. ${item.materialdescription} (${item.patternname || item.pattern}) \n Remaining quantity allowed: ${item.remainingqtytoorder}\n\n`;
+                });
+                
+                orderStatus.value = 'error';
+                orderMessage.value = 'Monthly Limit Exceeded';
+                orderError.value = errorMessage;
+                
+                // Show each error in separate toast for better visibility
+                exceededItems.forEach((item) => {
+                    toast.add({
+                        severity: 'error',
+                        summary: 'Monthly Limit Exceeded',
+                        detail: `${item.materialdescription} (${item.patternname || item.pattern}) - Only ${item.remainingqtytoorder} more allowed this month`,
+                         life: 2000
+                    });
+                });
+            } else {
+                // General error
+                throw new Error(addToCartResult.error?.messageEnglish || addToCartResult.message || 'Failed to add items to cart');
+            }
         }
     } catch (error) {
         console.error('Order placement error:', error);
@@ -1828,14 +1990,14 @@ const placeOrder = async () => {
             severity: 'error',
             summary: 'Error',
             detail: error.message || 'Failed to process order',
-            life: 5000
+             life: 2000
         });
     } finally {
         processingOrder.value = false;
     }
 };
 
-// NEW: Helper to prepare order array for confirmation
+// Helper to prepare order array for confirmation
 const prepareOrderArrayForConfirmation = () => {
     const orderArray = [];
     let itemNo = 10;
@@ -1891,7 +2053,7 @@ const prepareOrderArrayForConfirmation = () => {
     return orderArray;
 };
 
-// UPDATED: Process NORMAL Order
+// Process NORMAL Order
 const processNormalOrder = async (cartRefNo, orderArray) => {
     if (!cartRefNo) {
         throw new Error('Cart reference not found');
@@ -1901,7 +2063,7 @@ const processNormalOrder = async (cartRefNo, orderArray) => {
     await handleOrderConfirmation(confirmResult, 'NORMAL');
 };
 
-// UPDATED: Process DIRECTSHIP Order
+// Process DIRECTSHIP Order
 const processDirectShipOrder = async (cartRefNo, orderArray) => {
     if (!cartRefNo) {
         throw new Error('Direct shipment cart reference not found');
@@ -1911,7 +2073,7 @@ const processDirectShipOrder = async (cartRefNo, orderArray) => {
     await handleOrderConfirmation(confirmResult, 'DIRECTSHIP');
 };
 
-// UPDATED: addToCartAPI with proper structure for backend
+// addToCartAPI with proper structure for backend
 const addToCartAPI = async (cartRefNo = null) => {
     if (!selectedCustomer.value || !shipToAccount.value || selectedTyres.value.length === 0) {
         throw new Error('Missing required data for checkout');
@@ -1925,7 +2087,6 @@ const addToCartAPI = async (cartRefNo = null) => {
         pattern: item.pattern,
         pattern_name: item.pattern_name,
         rimdiameter: item.rimdiameter
-        // Note: salesprogramid is NOT needed here, it will be assigned by the backend
     }));
 
     // Prepare request payload
@@ -1951,7 +2112,7 @@ const addToCartAPI = async (cartRefNo = null) => {
     return response.data;
 };
 
-// UPDATED: confirmOrderAPI with proper structure
+// confirmOrderAPI with proper structure
 const confirmOrderAPI = async (cartRefNo, orderArray) => {
     try {
         console.log('Confirming order with array:', orderArray);
@@ -1975,7 +2136,7 @@ const confirmOrderAPI = async (cartRefNo, orderArray) => {
     }
 };
 
-// UPDATED: confirmBackOrderAPI with proper structure
+// confirmBackOrderAPI with proper structure
 const confirmBackOrderAPI = async (cartRefNo, orderArray, backorderArray) => {
     try {
         console.log('Confirming back order with arrays:', { orderArray, backorderArray });
@@ -1997,7 +2158,7 @@ const confirmBackOrderAPI = async (cartRefNo, orderArray, backorderArray) => {
     }
 };
 
-// UPDATED: Enhanced handleOrderConfirmation with proper back order detection
+// Enhanced handleOrderConfirmation with proper back order detection
 const handleOrderConfirmation = async (confirmResult, orderType) => {
     console.log('Order confirmation result:', confirmResult);
 
@@ -2019,7 +2180,7 @@ const handleOrderConfirmation = async (confirmResult, orderType) => {
                 severity: 'success',
                 summary: 'Success',
                 detail: `${orderType} order ${orderDetails.value.orderRefNo} created successfully`,
-                life: 5000
+                 life: 2000
             });
         }
     } else if (confirmResult.status === 0) {
@@ -2039,7 +2200,7 @@ const handleOrderConfirmation = async (confirmResult, orderType) => {
                 severity: 'error',
                 summary: 'Order Failed',
                 detail: errorMessage,
-                life: 5000
+                 life: 2000
             });
         }
     } else {
@@ -2053,12 +2214,12 @@ const handleOrderConfirmation = async (confirmResult, orderType) => {
             severity: 'error',
             summary: 'Error',
             detail: errorMessage,
-            life: 5000
+             life: 2000
         });
     }
 };
 
-// UPDATED: Enhanced handleBackOrderScenario
+// Enhanced handleBackOrderScenario
 const handleBackOrderScenario = async (confirmResult, orderType) => {
     console.log('Handling back order scenario:', confirmResult);
 
@@ -2121,7 +2282,7 @@ const handleBackOrderScenario = async (confirmResult, orderType) => {
             severity: 'warn',
             summary: 'Partial Fulfillment',
             detail: 'Some items require back order. Please review the options.',
-            life: 5000
+             life: 2000
         });
     } else if (processedFulfilled.length > 0) {
         // All items fulfilled
@@ -2174,7 +2335,7 @@ const submitDriverInfoAfterOrder = async () => {
             severity: 'error',
             summary: 'Error',
             detail: 'Please fill in all required driver information fields',
-            life: 3000
+            life: 2000
         });
         return;
     }
@@ -2186,7 +2347,7 @@ const submitDriverInfoAfterOrder = async () => {
             severity: 'error',
             summary: 'Error',
             detail: 'IC number is required for self collection',
-            life: 3000
+            life: 2000
         });
         return;
     }
@@ -2201,7 +2362,7 @@ const submitDriverInfoAfterOrder = async () => {
                 severity: 'success',
                 summary: 'Success',
                 detail: 'Driver information submitted successfully',
-                life: 3000
+                life: 2000
             });
             showDriverForm.value = false;
             closeOrderDialog();
@@ -2221,7 +2382,7 @@ const submitDriverInfoAfterOrder = async () => {
             severity: 'error',
             summary: 'Error',
             detail: 'Failed to submit driver information',
-            life: 3000
+            life: 2000
         });
     } finally {
         submittingDriverInfo.value = false;
@@ -2234,7 +2395,7 @@ const triggerManualBackOrder = () => {
     showManualBackOrderOption();
 };
 
-// UPDATED: Enhanced manual back order detection
+// Enhanced manual back order detection
 const showManualBackOrderOption = () => {
     // Create manual back order analysis based on stock levels
     const manualFulfilled = [];
@@ -2288,7 +2449,7 @@ const showManualBackOrderOption = () => {
             severity: 'info',
             summary: 'Manual Back Order Detection',
             detail: 'Based on stock analysis, some items require back order.',
-            life: 5000
+             life: 2000
         });
     } else {
         // If no back order needed but we're here due to error, show different message
@@ -2298,7 +2459,7 @@ const showManualBackOrderOption = () => {
     }
 };
 
-// UPDATED: Enhanced proceedWithBackOrder
+// Enhanced proceedWithBackOrder
 const proceedWithBackOrder = async () => {
     showBackOrderDialog.value = false;
     showOrderDialog.value = true;
@@ -2370,7 +2531,7 @@ const proceedWithBackOrder = async () => {
                     severity: 'success',
                     summary: 'Success',
                     detail: `Order ${orderDetails.value.orderRefNo} created with back order ${orderDetails.value.backOrderRefNo}`,
-                    life: 5000
+                     life: 2000
                 });
             }
         } else {
@@ -2386,12 +2547,12 @@ const proceedWithBackOrder = async () => {
             severity: 'error',
             summary: 'Error',
             detail: error.message,
-            life: 5000
+             life: 2000
         });
     }
 };
 
-// UPDATED: proceedWithoutBackOrder with better salesprogramid handling
+// proceedWithoutBackOrder with better salesprogramid handling
 const proceedWithoutBackOrder = async () => {
     showBackOrderDialog.value = false;
     showOrderDialog.value = true;
@@ -2461,7 +2622,7 @@ const proceedWithoutBackOrder = async () => {
                     severity: 'success',
                     summary: 'Success',
                     detail: `Order ${result.eten_data.orderRefNo} created successfully`,
-                    life: 5000
+                     life: 2000
                 });
             }
         } else {
@@ -2476,7 +2637,7 @@ const proceedWithoutBackOrder = async () => {
             severity: 'error',
             summary: 'Error',
             detail: error.message || 'Failed to create order',
-            life: 5000
+             life: 2000
         });
     }
 };
@@ -2523,7 +2684,7 @@ const onCustomerChange = (event) => {
     if (event.value && event.value.code) {
         fetchMaterials(event.value.code);
         fetchShipToAddresses(event.value.code);
-        fetchEligibleOrderSettings(event.value.code); // NEW: Fetch container settings
+        fetchEligibleOrderSettings(event.value.code);
         selectedTyres.value = [];
         freeItems.value = [];
         currentCartRefNo.value = '';

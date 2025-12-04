@@ -304,7 +304,10 @@ const clearDateRange = () => {
                 </Column>
 
                 <Column field="companyName" header="Customer Name" style="min-width: 10rem" sortable>
-                    <template #body="{ data }">{{ data.companyName || '-' }}<br />{{ data.custAccountNo || '-' }}</template>
+                    <template #body="{ data }">
+                        <span class="font-bold">{{ data.companyName || '-' }}</span
+                        ><br />{{ data.custAccountNo || '-' }}
+                    </template>
                 </Column>
 
                 <Column field="orderType" header="Order Type" style="min-width: 7rem" sortable>

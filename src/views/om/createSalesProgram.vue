@@ -154,7 +154,7 @@
                             </div>
                         </div>
 
-                        <!-- Free Material Section -->
+                        <!-- Free Material Sections -->
                         <div class="bg-green-50 p-4 rounded-lg border border-green-100">
                             <div class="flex items-center justify-between mb-4">
                                 <div class="flex items-center gap-2">
