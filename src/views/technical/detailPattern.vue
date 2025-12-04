@@ -132,7 +132,7 @@ import { useRoute, useRouter } from 'vue-router';
 import api from '@/service/api';
 import Button from 'primevue/button';
 import { useToast } from 'primevue/usetoast';
-
+const props = defineProps(['id']);
 const toast = useToast();
 const loading = ref(true);
 const route = useRoute();
@@ -317,7 +317,7 @@ const getImagePath = (path) => {
     if (!path) return '';
     return path.replace(/^public\//, '/');
 };
-onMounted(async () => {
+const fetchdata = async () => {
     try {
         loading.value = true;
         const id = route.params.id;
@@ -337,5 +337,8 @@ onMounted(async () => {
     } finally {
         loading.value = false;
     }
+};
+onMounted(async () => {
+    fetchdata();
 });
 </script>
