@@ -392,17 +392,10 @@ const saveChanges = async () => {
 
         // Create FormData and append all fields
         const formData = new FormData();
-        formData.append('recipient', form.value.recipient);
-        formData.append('contact', form.value.contact);
         formData.append('courier', form.value.courier);
         formData.append('ship_date', formattedDate); // Use formatted date string
         formData.append('tracking_no', form.value.tracking_no);
-        formData.append('address_line_1', form.value.address_line_1);
-        formData.append('address_line_2', form.value.address_line_2 || '');
-        formData.append('city', form.value.city);
-        formData.append('state', form.value.state);
-        formData.append('postcode', form.value.postcode);
-        formData.append('country', form.value.country);
+        
 
         // Debug: Log all form data
         for (let [key, value] of formData.entries()) {

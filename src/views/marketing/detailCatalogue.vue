@@ -236,10 +236,13 @@
                     <Dialog v-model:visible="showRemoveDialog" header="Remove Quantity" modal class="w-96">
                         <div class="flex flex-col gap-3">
                             <label for="removeQty" class="font-medium">Quantity to Remove</label>
-                            <InputNumber v-model="removeQty" id="removeQty" showButtons min="1" :max="catalogue.availableqty" />
+                            <InputNumber v-model="removeQty" id="removeQty" showButtons :min="1" :max="getMaxRemoveQuantity()" @input="validateRemoveQuantity" />
+                            <div v-if="removeQty.value > catalogue.availableqty" class="text-sm text-red-600">❌ Cannot remove more than {{ catalogue.availableqty }} available items</div>
+                            <div v-else-if="removeQty.value === catalogue.availableqty" class="text-sm text-red-600">⚠️ Cannot remove all stock. Maximum: {{ catalogue.availableqty - 1 }}</div>
+                            <div v-else class="text-sm text-gray-600">✅ Valid quantity. {{ catalogue.availableqty - removeQty }} items will remain</div>
                             <div class="flex justify-end gap-2 mt-3">
                                 <Button label="Cancel" class="p-button-text" @click="showRemoveDialog = false" />
-                                <Button label="Confirm" class="p-button-warning" @click="removeStock" />
+                                <Button label="Confirm" class="p-button-warning" @click="removeStock" :disabled="removeQty <= 0 || removeQty > catalogue.availableqty - 1" />
                             </div>
                         </div>
                     </Dialog>
@@ -414,6 +417,17 @@ const toast = useToast();
 const confirm = useConfirm(); // Initialize confirmation dialog
 const downloadingTemplate = ref(false);
 
+// Helper function to calculate max removable quantity
+const getMaxRemoveQuantity = () => {
+    return Math.max(0, catalogue.value.availableqty - 1);
+};
+
+// Validation function for real-time feedback
+const validateRemoveQuantity = () => {
+    // Optional: You can add real-time validation logic here
+    // The InputNumber component will handle the max/min bounds
+};
+
 // Reactive data
 const catalogue = ref({
     id: 0,
@@ -471,9 +485,7 @@ const fetchCatalogueDetails = async () => {
 
             // FILTER OUT DELETED PINS
             if (catalogue.value.ewallet_pin) {
-                catalogue.value.ewallet_pin = catalogue.value.ewallet_pin.filter(pin => 
-                    pin.status !== 'DELETED' && (!pin.deleted || pin.deleted === null)
-                );
+                catalogue.value.ewallet_pin = catalogue.value.ewallet_pin.filter((pin) => pin.status !== 'DELETED' && (!pin.deleted || pin.deleted === null));
             }
 
             // Process image URL
@@ -846,7 +858,24 @@ const exportToExcel = () => {
 const addStock = async () => {
     if (addQty.value > 0) {
         try {
-            // API call to add stock would go here
+            // Prepare FormData for API call
+            const formData = new FormData();
+            formData.append('catalogID', catalogue.value.id); // Use catalogID as per API
+            formData.append('quantity', addQty.value); // Positive value for adding stock
+
+            // API call to add stock
+            const response = await api.post(`catalog/updateStock/${catalogue.value.id}`, formData, {
+                headers: {
+                    'Content-Type': 'multipart/form-data'
+                }
+            });
+
+            if (response.data.status === 0) {
+                // Handle API error response
+                throw new Error(response.data.error || 'Failed to add stock');
+            }
+
+            // Update local state after successful API call
             catalogue.value.totalqty += addQty.value;
             catalogue.value.availableqty += addQty.value;
             showAddDialog.value = false;
@@ -859,41 +888,98 @@ const addStock = async () => {
                 life: 3000
             });
         } catch (error) {
+            console.error('Error adding stock:', error);
             toast.add({
                 severity: 'error',
                 summary: 'Error',
-                detail: 'Failed to add stock',
+                detail: error.message || 'Failed to add stock',
                 life: 3000
             });
         }
+    } else {
+        toast.add({
+            severity: 'warn',
+            summary: 'Warning',
+            detail: 'Please enter a valid quantity',
+            life: 3000
+        });
     }
 };
 
 const removeStock = async () => {
-    if (removeQty.value > 0 && catalogue.value.availableqty >= removeQty.value) {
-        try {
-            // API call to remove stock would go here
-            catalogue.value.availableqty -= removeQty.value;
-            showRemoveDialog.value = false;
-            removeQty.value = 0;
+    // Check if quantity is valid
+    if (removeQty.value <= 0) {
+        toast.add({
+            severity: 'warn',
+            summary: 'Warning',
+            detail: 'Please enter a valid quantity',
+            life: 3000
+        });
+        return;
+    }
 
-            toast.add({
-                severity: 'success',
-                summary: 'Success',
-                detail: 'Stock removed successfully',
-                life: 3000
-            });
-        } catch (error) {
-            toast.add({
-                severity: 'error',
-                summary: 'Error',
-                detail: 'Failed to remove stock',
-                life: 3000
-            });
+    // Check if trying to remove more than available
+    if (catalogue.value.availableqty < removeQty.value) {
+        toast.add({
+            severity: 'error',
+            summary: 'Error',
+            detail: `Cannot remove ${removeQty.value} items. Only ${catalogue.value.availableqty} items available.`,
+            life: 3000
+        });
+        return; // Stop execution here
+    }
+
+    // Check if trying to remove ALL available quantity
+    if (catalogue.value.availableqty === removeQty.value) {
+        toast.add({
+            severity: 'error',
+            summary: 'Error',
+            detail: `Cannot remove all available stock. You can remove maximum ${catalogue.value.availableqty - 1} items.`,
+            life: 3000
+        });
+        return; // Stop execution here
+    }
+
+    // If all validations pass, proceed with removal
+    try {
+        // Prepare FormData for API call
+        const formData = new FormData();
+        formData.append('catalogID', catalogue.value.id);
+        formData.append('quantity', -removeQty.value); // Negative value for removing stock
+
+        // API call to remove stock
+        const response = await api.post(`catalog/updateStock/${catalogue.value.id}`, formData, {
+            headers: {
+                'Content-Type': 'multipart/form-data'
+            }
+        });
+
+        if (response.data.status === 0) {
+            // Handle API error response
+            throw new Error(response.data.error || 'Failed to remove stock');
         }
+
+        // Update local state after successful API call
+        catalogue.value.availableqty -= removeQty.value;
+        showRemoveDialog.value = false;
+        removeQty.value = 0;
+
+        toast.add({
+            severity: 'success',
+            summary: 'Success',
+            detail: 'Stock removed successfully',
+            life: 3000
+        });
+    } catch (error) {
+        console.error('Error removing stock:', error);
+        toast.add({
+            severity: 'error',
+            summary: 'Error',
+            detail: error.message || 'Failed to remove stock',
+            life: 3000
+        });
     }
 };
-
 // Add this reactive variable at the top with your other refs
 const deletingPinId = ref(null);
 
@@ -911,7 +997,7 @@ const removeListPin = async (pin) => {
 
                 // API call to soft delete the PIN
                 const response = await api.put(`catalog/deletePin/${pin.id}`);
-                
+
                 const result = response.data;
 
                 if (result.status === 1) {
@@ -919,7 +1005,7 @@ const removeListPin = async (pin) => {
                     if (catalogue.value.ewallet_pin) {
                         catalogue.value.ewallet_pin = catalogue.value.ewallet_pin.filter((p) => p.id !== pin.id);
                     }
-                    
+
                     // Update quantity counts
                     if (catalogue.value.totalqty > 0) {
                         catalogue.value.totalqty -= 1;
