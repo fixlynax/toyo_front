@@ -34,21 +34,21 @@
                             <div class="flex flex-col md:flex-row items-center justify-between gap-4 w-full">
                                 <!-- Summary Info -->
                                 <div class="flex gap-4 w-full md:w-auto">
-                                    <div class="w-32">
+                                    <!-- <div class="w-32">
                                         <label class="block font-medium text-gray-700 mb-1">Used</label>
-                                        <span class="text-gray-800 font-semibold">{{ usedPins }}</span>
-                                    </div>
+                                        <span class="text-gray-800 font-semibold">{{ usedPins }}</span> -->
+                                    <!-- </div>
                                     <div class="w-32">
                                         <label class="block font-medium text-gray-700 mb-1">Total</label>
                                         <span class="text-gray-800 font-semibold">{{ catalogue.totalqty }}</span>
-                                    </div>
+                                    </div> -->
                                 </div>
 
                                 <!-- Action Buttons -->
                                 <div class="flex gap-4 items-end w-full md:w-72">
                                     <!-- <Button icon="pi pi-plus" class="p-button-text text-green-600 w-10 h-10 flex items-center justify-center" v-tooltip="'Add PIN'" @click="addPin" />
                                     <Button icon="pi pi-minus" class="p-button-text text-yellow-600 w-10 h-10 flex items-center justify-center" v-tooltip="'Remove PIN'" @click="removePin" /> -->
-                                    <Button icon="pi pi-file-export" label="Export" v-tooltip="'Export PIN List'" @click="exportPinList" />
+                                    <Button icon="pi pi-file-export" label="Export" v-tooltip="'Export PIN List'" @click="downloadEmptyTemplate" :loading="downloadingTemplate" />
                                     <Button icon="pi pi-file-import" label="Import" v-tooltip="'Import PIN List'" @click="importPinList" />
                                 </div>
                             </div>
@@ -82,13 +82,8 @@
                         <!-- Actions -->
                         <Column header="Actions" style="min-width: 4rem; text-align: center">
                             <template #body="{ data }">
-                                <Button 
-                                    icon="pi pi-trash" 
-                                    class="p-button-text p-button-danger" 
-                                    @click="removeDealer(data)"
-                                    :loading="deletingDealerId === data.id"
-                                    :disabled="deletingDealerId === data.id"
-                                />
+                                <!-- Update the button bindings -->
+                                <Button icon="pi pi-trash" class="p-button-text p-button-danger" @click="removeListPin(data)" :loading="deletingPinId === data.id" :disabled="deletingPinId === data.id" />
                             </template>
                         </Column>
                     </DataTable>
@@ -389,10 +384,10 @@
                                     <td class="px-4 py-2 font-medium">Platinum Point</td>
                                     <td class="px-4 py-2 text-right">{{ catalogue.point3 }}</td>
                                 </tr>
-                                <tr class="border-b">
+                                <!-- <tr class="border-b">
                                     <td class="px-4 py-2 font-medium">Quantity</td>
                                     <td class="px-4 py-2 text-right">{{ catalogue.availableqty }} of {{ catalogue.totalqty }}</td>
-                                </tr>
+                                </tr> -->
                                 <tr class="border-b" :class="getExpiryClass(catalogue.expiry)">
                                     <td class="px-4 py-2 font-medium">Expiry</td>
                                     <td class="px-4 py-2 text-right">{{ formatExpiryDate(catalogue.expiry) }}</td>
@@ -417,6 +412,7 @@ const route = useRoute();
 const router = useRouter();
 const toast = useToast();
 const confirm = useConfirm(); // Initialize confirmation dialog
+const downloadingTemplate = ref(false);
 
 // Reactive data
 const catalogue = ref({
@@ -472,6 +468,13 @@ const fetchCatalogueDetails = async () => {
 
         if (response.data.status === 1 && response.data.admin_data) {
             catalogue.value = response.data.admin_data;
+
+            // FILTER OUT DELETED PINS
+            if (catalogue.value.ewallet_pin) {
+                catalogue.value.ewallet_pin = catalogue.value.ewallet_pin.filter(pin => 
+                    pin.status !== 'DELETED' && (!pin.deleted || pin.deleted === null)
+                );
+            }
 
             // Process image URL
             if (catalogue.value.imageURL) {
@@ -739,13 +742,54 @@ const removePin = () => {
     });
 };
 
-const exportPinList = () => {
-    toast.add({
-        severity: 'info',
-        summary: 'Info',
-        detail: 'Export PIN list functionality to be implemented',
-        life: 3000
-    });
+const downloadEmptyTemplate = async () => {
+    downloadingTemplate.value = true;
+    try {
+        const response = await api.customRequest({
+            method: 'GET',
+            url: '/api/catalog/emptyPinTemplate',
+            responseType: 'blob' // Important for file downloads
+        });
+
+        // Create a blob from the response data
+        const blob = new Blob([response.data], {
+            type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+        });
+
+        // Create a temporary URL for the blob
+        const url = window.URL.createObjectURL(blob);
+
+        // Create a temporary link element to trigger the download
+        const link = document.createElement('a');
+        link.href = url;
+        link.setAttribute('download', 'ewallet-pin-template.xlsx');
+
+        // Append to body, click, and remove
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+
+        // Clean up the URL object
+        window.URL.revokeObjectURL(url);
+
+        toast.add({
+            severity: 'success',
+            summary: 'Success',
+            detail: 'Template downloaded successfully',
+            life: 3000
+        });
+    } catch (error) {
+        console.error('Download Error:', error);
+        const message = error.response?.data?.message || 'Failed to download template';
+        toast.add({
+            severity: 'error',
+            summary: 'Error',
+            detail: message,
+            life: 4000
+        });
+    } finally {
+        downloadingTemplate.value = false;
+    }
 };
 
 const importPinList = () => {
@@ -850,21 +894,110 @@ const removeStock = async () => {
     }
 };
 
+// Add this reactive variable at the top with your other refs
+const deletingPinId = ref(null);
+
+const removeListPin = async (pin) => {
+    confirm.require({
+        message: `Are you sure you want to remove this PIN?`,
+        header: 'Confirm Removal',
+        icon: 'pi pi-exclamation-triangle',
+        acceptLabel: 'Yes, Remove',
+        rejectLabel: 'Cancel',
+        acceptClass: 'p-button-danger',
+        accept: async () => {
+            try {
+                deletingPinId.value = pin.id;
+
+                // API call to soft delete the PIN
+                const response = await api.put(`catalog/deletePin/${pin.id}`);
+                
+                const result = response.data;
+
+                if (result.status === 1) {
+                    // Remove from local list - filter out deleted pins
+                    if (catalogue.value.ewallet_pin) {
+                        catalogue.value.ewallet_pin = catalogue.value.ewallet_pin.filter((p) => p.id !== pin.id);
+                    }
+                    
+                    // Update quantity counts
+                    if (catalogue.value.totalqty > 0) {
+                        catalogue.value.totalqty -= 1;
+                    }
+                    if (catalogue.value.availableqty > 0) {
+                        catalogue.value.availableqty -= 1;
+                    }
+
+                    toast.add({
+                        severity: 'success',
+                        summary: 'Success',
+                        detail: 'PIN removed successfully',
+                        life: 3000
+                    });
+
+                    // Refresh data to get updated list (without deleted pins)
+                    await fetchCatalogueDetails();
+                } else {
+                    throw new Error('API returned unsuccessful status');
+                }
+            } catch (error) {
+                console.error('Error removing PIN:', error);
+                toast.add({
+                    severity: 'error',
+                    summary: 'Error',
+                    detail: 'Failed to remove PIN. Please try again.',
+                    life: 5000
+                });
+            } finally {
+                deletingPinId.value = null;
+            }
+        },
+        reject: () => {
+            toast.add({
+                severity: 'info',
+                summary: 'Cancelled',
+                detail: 'PIN removal cancelled',
+                life: 2000
+            });
+        }
+    });
+};
+
 const confirmSetPoint = async () => {
     try {
-        // API call to update points would go here
-        catalogue.value.point1 = silverPoint.value;
-        catalogue.value.point2 = goldPoint.value;
-        catalogue.value.point3 = platinumPoint.value;
-        showSetDialog.value = false;
+        const catalogueId = catalogue.value.id; // Get the catalogue ID
 
-        toast.add({
-            severity: 'success',
-            summary: 'Success',
-            detail: 'Cost redeem points updated successfully',
-            life: 3000
+        // Create FormData for the request
+        const formData = new FormData();
+        formData.append('point1', silverPoint.value);
+        formData.append('point2', goldPoint.value);
+        formData.append('point3', platinumPoint.value);
+
+        // Make the API call
+        const response = await api.post(`catalog/setCost/${catalogueId}`, formData, {
+            headers: {
+                'Content-Type': 'multipart/form-data'
+            }
         });
+
+        if (response.data.status === 1) {
+            // Update local state only after successful API response
+            catalogue.value.point1 = silverPoint.value;
+            catalogue.value.point2 = goldPoint.value;
+            catalogue.value.point3 = platinumPoint.value;
+            showSetDialog.value = false;
+
+            toast.add({
+                severity: 'success',
+                summary: 'Success',
+                detail: 'Cost redeem points updated successfully',
+                life: 3000
+            });
+        } else {
+            throw new Error('API returned unsuccessful status');
+        }
     } catch (error) {
+        console.error('Error updating points:', error);
         toast.add({
             severity: 'error',
             summary: 'Error',
