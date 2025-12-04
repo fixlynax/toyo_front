@@ -309,6 +309,18 @@
                                     <td class="px-4 py-2 text-right">{{ form.shippingCond || '-' }}</td>
                                 </tr>
                                 <tr class="border-b">
+                                    <td class="px-4 py-2 font-medium">Family Channel</td>
+                                    <td class="px-4 py-2 text-right">
+                                        {{ form.isFamilyChannel == 1 ? 'Yes' : 'No' }}
+                                    </td>
+                                </tr>
+                                <tr class="border-b">
+                                    <td class="px-4 py-2 font-medium">Show on List</td>
+                                    <td class="px-4 py-2 text-right">
+                                        {{ form.showOnList == 1 ? 'Yes' : 'No' }}
+                                    </td>
+                                </tr>
+                                <tr class="border-b">
                                     <td class="px-4 py-2 font-medium">Allow Lalamove</td>
                                     <td class="px-4 py-2 text-right">
                                         {{ form.allowLalamove == 1 ? 'Yes' : 'No' }}
