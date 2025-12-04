@@ -337,7 +337,6 @@ import api from '@/service/api';
 const toast = useToast();
 const confirm = useConfirm();
 
-// Order Description Options (Only NORMAL available)
 const orderDescOptions = ref([{ label: 'NORMAL', value: 'NORMAL' }]);
 
 // State Management
@@ -350,7 +349,7 @@ const form = ref({
     orderno: '',
     custaccountno: '',
     saporderno: '',
-    orderdesc: 'NORMAL' // Default value
+    orderdesc: 'NORMAL'
 });
 
 const fieldErrors = ref({});
@@ -358,11 +357,9 @@ const errorMessage = ref('');
 const sapDetails = ref(null);
 const etenResult = ref(null);
 
-// ConfirmDialog mount
 const confirmDialogMounted = ref(false);
 onMounted(() => (confirmDialogMounted.value = true));
 
-// Computed Properties
 const isDuplicateOrder = computed(() => {
     return sapDetails.value?.status === 0 && sapDetails.value?.message?.includes('already exist');
 });
@@ -376,7 +373,6 @@ const sapItems = computed(() => {
         return items;
     }
 
-    // If it's a single object, convert to array
     return [items];
 });
 
@@ -444,7 +440,6 @@ const formatCurrency = (value) => {
 const formatDate = (dateString) => {
     if (!dateString) return 'N/A';
     try {
-        // Handle both ISO format and other date strings
         const date = new Date(dateString);
         if (isNaN(date.getTime())) {
             return dateString;
@@ -503,7 +498,7 @@ const resetForm = () => {
         orderno: '',
         custaccountno: '',
         saporderno: '',
-        orderdesc: 'NORMAL' // Reset to default
+        orderdesc: 'NORMAL'
     };
     fieldErrors.value = {};
     errorMessage.value = '';
@@ -511,7 +506,6 @@ const resetForm = () => {
     etenResult.value = null;
 };
 
-// Step 1: Check SAP Details
 const checkSAPDetails = async () => {
     if (!validateForm()) return;
 
@@ -521,12 +515,11 @@ const checkSAPDetails = async () => {
     etenResult.value = null;
 
     try {
-        // Call API with all 4 required parameters including orderdesc
         const response = await api.post('credit/getSAPBCP', {
             orderno: form.value.orderno,
             custaccountno: form.value.custaccountno,
             so_no: form.value.saporderno,
-            orderdesc: form.value.orderdesc // Add orderdesc to API call
+            orderdesc: form.value.orderdesc
         });
 
         sapDetails.value = response.data;
@@ -540,7 +533,6 @@ const checkSAPDetails = async () => {
             });
         } else if (response.data.status === 0) {
             if (response.data.message?.includes('already exist')) {
-                // This is expected behavior for duplicate check
                 toast.add({
                     severity: 'warn',
                     summary: 'Order Exists',
@@ -572,8 +564,6 @@ const checkSAPDetails = async () => {
     }
 };
 
-// Step 2: Create ETEN Order
-// Step 2: Create ETEN Order
 const createETENOrder = () => {
     if (!validateForm()) return;
 
@@ -607,11 +597,9 @@ const createETENOrder = () => {
         return;
     }
 
-    // Get the confirmation message using a function
     const getConfirmMessage = () => {
         return `Confirm\n
-        ETEN Order: ${form.value.orderno}
-        ⚠️ This action will update stock levels in the system.`;
+        Order: ${form.value.orderno}\n`;
     };
 
     confirm.require({
@@ -622,7 +610,7 @@ const createETENOrder = () => {
         rejectLabel: 'Cancel',
         acceptClass: 'p-button-success',
         rejectClass: 'p-button-secondary',
-        html: true, // <-- ADD THIS LINE to render HTML
+        html: true,
         accept: async () => {
             loading.value.orderCreate = true;
 
@@ -630,7 +618,6 @@ const createETENOrder = () => {
                 const sapData = sapDetails.value.admin_data;
                 const sapOrderArray = [];
 
-                // Use the order_items from SAP response
                 sapData.order_items.forEach((item, index) => {
                     sapOrderArray.push({
                         materialid: item.materialid || '',
@@ -643,7 +630,6 @@ const createETENOrder = () => {
                     });
                 });
 
-                // Prepare BCP request data using SAP response data
                 const bcpData = {
                     custaccountno: sapData.custaccountno || form.value.custaccountno,
                     salesorg: sapData.salesorg || 'TSM',
@@ -678,7 +664,6 @@ const createETENOrder = () => {
                         life: 4000
                     });
 
-                    // Clear ETEN order number field for next entry
                     form.value.orderno = '';
                 } else {
                     throw new Error(response.data.message || 'Failed to create order');
@@ -712,7 +697,6 @@ const createETENOrder = () => {
 </script>
 
 <style scoped>
-/* Custom styles for better visual hierarchy */
 :deep(.p-inputtext) {
     padding: 0.75rem;
     border-radius: 6px;
@@ -752,7 +736,6 @@ const createETENOrder = () => {
     color: #334155;
 }
 
-/* Step indicator animation */
 @keyframes stepComplete {
     0% {
         transform: scale(1);
@@ -769,7 +752,6 @@ const createETENOrder = () => {
     animation: stepComplete 0.5s ease;
 }
 
-/* Responsive adjustments */
 @media (max-width: 768px) {
     .card {
         padding: 1rem;
