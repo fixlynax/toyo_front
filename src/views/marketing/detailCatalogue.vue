@@ -34,21 +34,21 @@
                             <div class="flex flex-col md:flex-row items-center justify-between gap-4 w-full">
                                 <!-- Summary Info -->
                                 <div class="flex gap-4 w-full md:w-auto">
-                                    <div class="w-32">
+                                    <!-- <div class="w-32">
                                         <label class="block font-medium text-gray-700 mb-1">Used</label>
-                                        <span class="text-gray-800 font-semibold">{{ usedPins }}</span>
-                                    </div>
+                                        <span class="text-gray-800 font-semibold">{{ usedPins }}</span> -->
+                                    <!-- </div>
                                     <div class="w-32">
                                         <label class="block font-medium text-gray-700 mb-1">Total</label>
                                         <span class="text-gray-800 font-semibold">{{ catalogue.totalqty }}</span>
-                                    </div>
+                                    </div> -->
                                 </div>
 
                                 <!-- Action Buttons -->
                                 <div class="flex gap-4 items-end w-full md:w-72">
                                     <!-- <Button icon="pi pi-plus" class="p-button-text text-green-600 w-10 h-10 flex items-center justify-center" v-tooltip="'Add PIN'" @click="addPin" />
                                     <Button icon="pi pi-minus" class="p-button-text text-yellow-600 w-10 h-10 flex items-center justify-center" v-tooltip="'Remove PIN'" @click="removePin" /> -->
-                                    <Button icon="pi pi-file-export" label="Export" v-tooltip="'Export PIN List'" @click="exportPinList" />
+                                    <Button icon="pi pi-file-export" label="Export" v-tooltip="'Export PIN List'" @click="downloadEmptyTemplate" :loading="downloadingTemplate" />
                                     <Button icon="pi pi-file-import" label="Import" v-tooltip="'Import PIN List'" @click="importPinList" />
                                 </div>
                             </div>
@@ -82,13 +82,8 @@
                         <!-- Actions -->
                         <Column header="Actions" style="min-width: 4rem; text-align: center">
                             <template #body="{ data }">
-                                <Button 
-                                    icon="pi pi-trash" 
-                                    class="p-button-text p-button-danger" 
-                                    @click="removeDealer(data)"
-                                    :loading="deletingDealerId === data.id"
-                                    :disabled="deletingDealerId === data.id"
-                                />
+                                <!-- Update the button bindings -->
+                                <Button icon="pi pi-trash" class="p-button-text p-button-danger" @click="removeListPin(data)" :loading="deletingPinId === data.id" :disabled="deletingPinId === data.id" />
                             </template>
                         </Column>
                     </DataTable>
@@ -241,10 +236,13 @@
                     <Dialog v-model:visible="showRemoveDialog" header="Remove Quantity" modal class="w-96">
                         <div class="flex flex-col gap-3">
                             <label for="removeQty" class="font-medium">Quantity to Remove</label>
-                            <InputNumber v-model="removeQty" id="removeQty" showButtons min="1" :max="catalogue.availableqty" />
+                            <InputNumber v-model="removeQty" id="removeQty" showButtons :min="1" :max="getMaxRemoveQuantity()" @input="validateRemoveQuantity" />
+                            <div v-if="removeQty.value > catalogue.availableqty" class="text-sm text-red-600">❌ Cannot remove more than {{ catalogue.availableqty }} available items</div>
+                            <div v-else-if="removeQty.value === catalogue.availableqty" class="text-sm text-red-600">⚠️ Cannot remove all stock. Maximum: {{ catalogue.availableqty - 1 }}</div>
+                            <div v-else class="text-sm text-gray-600">✅ Valid quantity. {{ catalogue.availableqty - removeQty }} items will remain</div>
                             <div class="flex justify-end gap-2 mt-3">
                                 <Button label="Cancel" class="p-button-text" @click="showRemoveDialog = false" />
-                                <Button label="Confirm" class="p-button-warning" @click="removeStock" />
+                                <Button label="Confirm" class="p-button-warning" @click="removeStock" :disabled="removeQty <= 0 || removeQty > catalogue.availableqty - 1" />
                             </div>
                         </div>
                     </Dialog>
@@ -389,10 +387,10 @@
                                     <td class="px-4 py-2 font-medium">Platinum Point</td>
                                     <td class="px-4 py-2 text-right">{{ catalogue.point3 }}</td>
                                 </tr>
-                                <tr class="border-b">
+                                <!-- <tr class="border-b">
                                     <td class="px-4 py-2 font-medium">Quantity</td>
                                     <td class="px-4 py-2 text-right">{{ catalogue.availableqty }} of {{ catalogue.totalqty }}</td>
-                                </tr>
+                                </tr> -->
                                 <tr class="border-b" :class="getExpiryClass(catalogue.expiry)">
                                     <td class="px-4 py-2 font-medium">Expiry</td>
                                     <td class="px-4 py-2 text-right">{{ formatExpiryDate(catalogue.expiry) }}</td>
@@ -417,6 +415,18 @@ const route = useRoute();
 const router = useRouter();
 const toast = useToast();
 const confirm = useConfirm(); // Initialize confirmation dialog
+const downloadingTemplate = ref(false);
+
+// Helper function to calculate max removable quantity
+const getMaxRemoveQuantity = () => {
+    return Math.max(0, catalogue.value.availableqty - 1);
+};
+
+// Validation function for real-time feedback
+const validateRemoveQuantity = () => {
+    // Optional: You can add real-time validation logic here
+    // The InputNumber component will handle the max/min bounds
+};
 
 // Reactive data
 const catalogue = ref({
@@ -472,6 +482,11 @@ const fetchCatalogueDetails = async () => {
 
         if (response.data.status === 1 && response.data.admin_data) {
             catalogue.value = response.data.admin_data;
+
+            // FILTER OUT DELETED PINS
+            if (catalogue.value.ewallet_pin) {
+                catalogue.value.ewallet_pin = catalogue.value.ewallet_pin.filter((pin) => pin.status !== 'DELETED' && (!pin.deleted || pin.deleted === null));
+            }
 
             // Process image URL
             if (catalogue.value.imageURL) {
@@ -739,13 +754,54 @@ const removePin = () => {
     });
 };
 
-const exportPinList = () => {
-    toast.add({
-        severity: 'info',
-        summary: 'Info',
-        detail: 'Export PIN list functionality to be implemented',
-        life: 3000
-    });
+const downloadEmptyTemplate = async () => {
+    downloadingTemplate.value = true;
+    try {
+        const response = await api.customRequest({
+            method: 'GET',
+            url: '/api/catalog/emptyPinTemplate',
+            responseType: 'blob' // Important for file downloads
+        });
+
+        // Create a blob from the response data
+        const blob = new Blob([response.data], {
+            type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+        });
+
+        // Create a temporary URL for the blob
+        const url = window.URL.createObjectURL(blob);
+
+        // Create a temporary link element to trigger the download
+        const link = document.createElement('a');
+        link.href = url;
+        link.setAttribute('download', 'ewallet-pin-template.xlsx');
+
+        // Append to body, click, and remove
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+
+        // Clean up the URL object
+        window.URL.revokeObjectURL(url);
+
+        toast.add({
+            severity: 'success',
+            summary: 'Success',
+            detail: 'Template downloaded successfully',
+            life: 3000
+        });
+    } catch (error) {
+        console.error('Download Error:', error);
+        const message = error.response?.data?.message || 'Failed to download template';
+        toast.add({
+            severity: 'error',
+            summary: 'Error',
+            detail: message,
+            life: 4000
+        });
+    } finally {
+        downloadingTemplate.value = false;
+    }
 };
 
 const importPinList = () => {
@@ -802,7 +858,24 @@ const exportToExcel = () => {
 const addStock = async () => {
     if (addQty.value > 0) {
         try {
-            // API call to add stock would go here
+            // Prepare FormData for API call
+            const formData = new FormData();
+            formData.append('catalogID', catalogue.value.id); // Use catalogID as per API
+            formData.append('quantity', addQty.value); // Positive value for adding stock
+
+            // API call to add stock
+            const response = await api.post(`catalog/updateStock/${catalogue.value.id}`, formData, {
+                headers: {
+                    'Content-Type': 'multipart/form-data'
+                }
+            });
+
+            if (response.data.status === 0) {
+                // Handle API error response
+                throw new Error(response.data.error || 'Failed to add stock');
+            }
+
+            // Update local state after successful API call
             catalogue.value.totalqty += addQty.value;
             catalogue.value.availableqty += addQty.value;
             showAddDialog.value = false;
@@ -815,56 +888,202 @@ const addStock = async () => {
                 life: 3000
             });
         } catch (error) {
+            console.error('Error adding stock:', error);
             toast.add({
                 severity: 'error',
                 summary: 'Error',
-                detail: 'Failed to add stock',
+                detail: error.message || 'Failed to add stock',
                 life: 3000
             });
         }
+    } else {
+        toast.add({
+            severity: 'warn',
+            summary: 'Warning',
+            detail: 'Please enter a valid quantity',
+            life: 3000
+        });
     }
 };
 
 const removeStock = async () => {
-    if (removeQty.value > 0 && catalogue.value.availableqty >= removeQty.value) {
-        try {
-            // API call to remove stock would go here
-            catalogue.value.availableqty -= removeQty.value;
-            showRemoveDialog.value = false;
-            removeQty.value = 0;
-
-            toast.add({
-                severity: 'success',
-                summary: 'Success',
-                detail: 'Stock removed successfully',
-                life: 3000
-            });
-        } catch (error) {
-            toast.add({
-                severity: 'error',
-                summary: 'Error',
-                detail: 'Failed to remove stock',
-                life: 3000
-            });
-        }
+    // Check if quantity is valid
+    if (removeQty.value <= 0) {
+        toast.add({
+            severity: 'warn',
+            summary: 'Warning',
+            detail: 'Please enter a valid quantity',
+            life: 3000
+        });
+        return;
     }
-};
 
-const confirmSetPoint = async () => {
+    // Check if trying to remove more than available
+    if (catalogue.value.availableqty < removeQty.value) {
+        toast.add({
+            severity: 'error',
+            summary: 'Error',
+            detail: `Cannot remove ${removeQty.value} items. Only ${catalogue.value.availableqty} items available.`,
+            life: 3000
+        });
+        return; // Stop execution here
+    }
+
+    // Check if trying to remove ALL available quantity
+    if (catalogue.value.availableqty === removeQty.value) {
+        toast.add({
+            severity: 'error',
+            summary: 'Error',
+            detail: `Cannot remove all available stock. You can remove maximum ${catalogue.value.availableqty - 1} items.`,
+            life: 3000
+        });
+        return; // Stop execution here
+    }
+
+    // If all validations pass, proceed with removal
     try {
-        // API call to update points would go here
-        catalogue.value.point1 = silverPoint.value;
-        catalogue.value.point2 = goldPoint.value;
-        catalogue.value.point3 = platinumPoint.value;
-        showSetDialog.value = false;
+        // Prepare FormData for API call
+        const formData = new FormData();
+        formData.append('catalogID', catalogue.value.id);
+        formData.append('quantity', -removeQty.value); // Negative value for removing stock
+
+        // API call to remove stock
+        const response = await api.post(`catalog/updateStock/${catalogue.value.id}`, formData, {
+            headers: {
+                'Content-Type': 'multipart/form-data'
+            }
+        });
+
+        if (response.data.status === 0) {
+            // Handle API error response
+            throw new Error(response.data.error || 'Failed to remove stock');
+        }
+
+        // Update local state after successful API call
+        catalogue.value.availableqty -= removeQty.value;
+        showRemoveDialog.value = false;
+        removeQty.value = 0;
 
         toast.add({
             severity: 'success',
             summary: 'Success',
-            detail: 'Cost redeem points updated successfully',
+            detail: 'Stock removed successfully',
             life: 3000
         });
     } catch (error) {
+        console.error('Error removing stock:', error);
+        toast.add({
+            severity: 'error',
+            summary: 'Error',
+            detail: error.message || 'Failed to remove stock',
+            life: 3000
+        });
+    }
+};
+// Add this reactive variable at the top with your other refs
+const deletingPinId = ref(null);
+
+const removeListPin = async (pin) => {
+    confirm.require({
+        message: `Are you sure you want to remove this PIN?`,
+        header: 'Confirm Removal',
+        icon: 'pi pi-exclamation-triangle',
+        acceptLabel: 'Yes, Remove',
+        rejectLabel: 'Cancel',
+        acceptClass: 'p-button-danger',
+        accept: async () => {
+            try {
+                deletingPinId.value = pin.id;
+
+                // API call to soft delete the PIN
+                const response = await api.put(`catalog/deletePin/${pin.id}`);
+
+                const result = response.data;
+
+                if (result.status === 1) {
+                    // Remove from local list - filter out deleted pins
+                    if (catalogue.value.ewallet_pin) {
+                        catalogue.value.ewallet_pin = catalogue.value.ewallet_pin.filter((p) => p.id !== pin.id);
+                    }
+
+                    // Update quantity counts
+                    if (catalogue.value.totalqty > 0) {
+                        catalogue.value.totalqty -= 1;
+                    }
+                    if (catalogue.value.availableqty > 0) {
+                        catalogue.value.availableqty -= 1;
+                    }
+
+                    toast.add({
+                        severity: 'success',
+                        summary: 'Success',
+                        detail: 'PIN removed successfully',
+                        life: 3000
+                    });
+
+                    // Refresh data to get updated list (without deleted pins)
+                    await fetchCatalogueDetails();
+                } else {
+                    throw new Error('API returned unsuccessful status');
+                }
+            } catch (error) {
+                console.error('Error removing PIN:', error);
+                toast.add({
+                    severity: 'error',
+                    summary: 'Error',
+                    detail: 'Failed to remove PIN. Please try again.',
+                    life: 5000
+                });
+            } finally {
+                deletingPinId.value = null;
+            }
+        },
+        reject: () => {
+            toast.add({
+                severity: 'info',
+                summary: 'Cancelled',
+                detail: 'PIN removal cancelled',
+                life: 2000
+            });
+        }
+    });
+};
+
+const confirmSetPoint = async () => {
+    try {
+        const catalogueId = catalogue.value.id; // Get the catalogue ID
+
+        // Create FormData for the request
+        const formData = new FormData();
+        formData.append('point1', silverPoint.value);
+        formData.append('point2', goldPoint.value);
+        formData.append('point3', platinumPoint.value);
+
+        // Make the API call
+        const response = await api.post(`catalog/setCost/${catalogueId}`, formData, {
+            headers: {
+                'Content-Type': 'multipart/form-data'
+            }
+        });
+
+        if (response.data.status === 1) {
+            // Update local state only after successful API response
+            catalogue.value.point1 = silverPoint.value;
+            catalogue.value.point2 = goldPoint.value;
+            catalogue.value.point3 = platinumPoint.value;
+            showSetDialog.value = false;
+
+            toast.add({
+                severity: 'success',
+                summary: 'Success',
+                detail: 'Cost redeem points updated successfully',
+                life: 3000
+            });
+        } else {
+            throw new Error('API returned unsuccessful status');
+        }
+    } catch (error) {
+        console.error('Error updating points:', error);
         toast.add({
             severity: 'error',
             summary: 'Error',

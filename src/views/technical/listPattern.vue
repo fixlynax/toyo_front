@@ -52,10 +52,10 @@
                 <template #body="{ data }">
                     <img
                         v-if="data.processedImageURL"
-                        :src="getImagePath(data.processedImageURL)"
+                        :src="getImagePath(data.processedImageURL || '/placeholder.png')"
                         alt="Pattern Image"
                         class="w-16 h-16 object-contain rounded-md shadow-sm border border-gray-200 cursor-pointer hover:scale-105 transition-transform"
-                        @click="openImage(data.processedImageURL)"
+                        @click="openImage(data.processedImageURL || '/placeholder.png')"
                     />
                     <div v-else class="w-16 h-16 flex items-center justify-center bg-gray-100 rounded-md border border-gray-200 text-gray-400 text-xs">No Image</div>
                 </template>
@@ -258,41 +258,41 @@ const processCatalogueImages = async (catalogueItems) => {
     const processedItems = [];
 
     for (const item of catalogueItems) {
-        if (item.imageURL && typeof item.imageURL === 'string') {
-            try {
-                const blobUrl = await api.getPrivateFile(item.imageURL);
-                if (blobUrl) {
-                    processedItems.push({
-                        ...item,
-                        processedImageURL: blobUrl
-                    });
-                } else {
-                    // Fallback to original URL if private file loading fails
-                    processedItems.push({
-                        ...item,
-                        processedImageURL: item.imageURL
-                    });
-                    console.warn('Failed to process private image, using original:', item.imageURL);
-                }
-            } catch (error) {
-                console.error(`Error loading catalogue image for ${item.prizeName}:`, error);
-                // Fallback to original URL
-                processedItems.push({
-                    ...item,
-                    processedImageURL: item.imageURL
-                });
-            }
-        } else {
-            // No image URL, use placeholder
+        const url = item.imageURL;
+
+        // Skip if no URL
+        if (!url) {
+            processedItems.push({ ...item, processedImageURL: '' });
+            continue;
+        }
+
+        // Skip calling private API if not private file
+        const isPrivate = url.includes('/private-file/');
+
+        if (!isPrivate) {
+            processedItems.push({ ...item, processedImageURL: url });
+            continue;
+        }
+
+        // Only here we call getPrivateFile()
+        try {
+            const blobUrl = await api.getPrivateFile(url);
             processedItems.push({
                 ...item,
-                processedImageURL: ''
+                processedImageURL: blobUrl || url
+            });
+        } catch (err) {
+            console.error('Private image error:', err);
+            processedItems.push({
+                ...item,
+                processedImageURL: url
             });
         }
     }
 
     return processedItems;
 };
+
 const fetchData = async () => {
     try {
         loading.value = true;
@@ -307,14 +307,18 @@ const fetchData = async () => {
                 pattern_name: pattern.pattern_name,
                 imageURL: pattern.image_url,
                 created: pattern.created,
-                processedImageURL: null // For private image processing
+                processedImageURL: null
             }));
 
-            // Process private images
-            const processedItems = await processCatalogueImages(transformedItems);
-            patterns.value = processedItems;
+            // STEP 1: Show list instantly
+            patterns.value = transformedItems;
+
+            // STEP 2: Load images IN BACKGROUND
+            processCatalogueImages(transformedItems).then((processed) => {
+                patterns.value = processed;
+            });
         } else {
-            console.error('API returned error or invalid data:', response.data);
+            console.error('API returned error/invalid:', response.data);
             patterns.value = [];
         }
     } catch (error) {
@@ -323,7 +327,8 @@ const fetchData = async () => {
     } finally {
         loading.value = false;
     }
-}
+};
+
 onMounted(async () => {
     fetchData();
 });

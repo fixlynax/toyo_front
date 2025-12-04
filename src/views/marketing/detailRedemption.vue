@@ -141,21 +141,9 @@
                             </tbody>
                         </table>
                     </div>
-
-                    <!-- Action Buttons - Only show for pending status -->
-                    <div v-if="redemption.status === 0" class="flex justify-end mt-4 pt-4">
-                        <div class="flex gap-2">
-                            <!-- Reject Button -->
-                            <!-- <Button label="Reject" class="p-button-danger" @click="showRejectDialog = true" /> -->
-
-                            <!-- Approve Button -->
-                            <!-- <Button label="Approve" class="p-button-success" @click="showApproveDialog = true" /> -->
-                        </div>
-                    </div>
                 </div>
             </div>
         </div>
-
 
         <!-- Toast Component for notifications -->
         <Toast />

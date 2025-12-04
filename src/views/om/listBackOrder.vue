@@ -91,7 +91,7 @@
             </Column>
 
             <Column field="companyName" header="Customer Name" style="min-width: 10rem" sortable>
-                <template #body="{ data }">{{ data.customerName || '-' }}<br />{{ data.custAccountNo || '-' }}</template>
+                <template #body="{ data }"><span class="font-bold">{{ data.customerName || '-' }}</span><br />{{ data.custAccountNo || '-' }}</template>
             </Column>
             <Column field="deliveryType" header="Delivery" style="min-width: 8rem" sortable/>
 
