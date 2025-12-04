@@ -2,7 +2,11 @@
     <Fluid>
         <!-- Step 1: Customer & Order Type Selection -->
         <div v-if="currentStep === 1" class="card flex flex-col gap-6">
-            <div class="text-2xl font-bold text-gray-800 border-b pb-2">Step 1: Select Customer & Order Type</div>
+            <div class="flex items-center gap-2 border-b pb-2">
+            <RouterLink to="/om/listSalesProgram">
+                                    <Button icon="pi pi-arrow-left font-bold" class="p-button-text p-button-secondary text-xl" size="big" v-tooltip="'Back'" />
+                                </RouterLink>
+            <div class="text-2xl font-bold text-gray-800">Step 1: Select Customer & Order Type</div></div>
 
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <!-- Customer Account -->
