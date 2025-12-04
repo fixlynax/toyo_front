@@ -651,9 +651,10 @@ const router = createRouter({
                     component: () => import('@/views/it/createUserAccount.vue')
                 },
                 {
-                    path: 'it/editUserAccount',
+                    path: 'it/editUserAccount/:id',
                     name: 'Edit-User-Account',
-                    component: () => import('@/views/it/editUserAccount.vue')
+                    component: () => import('@/views/it/editUserAccount.vue'),
+                    props: true
                 },
 
                 // Salesman Accounts
