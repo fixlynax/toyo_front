@@ -261,11 +261,11 @@ const savePatternEdit = async () => {
             router.go(0);
         }, 1000);
         } else {
-            toast.add({ severity: 'error', summary: 'Error', detail: response.data.message || 'Failed to update pattern', life: 3000 });
+            toast.add({ severity: 'error', summary: 'Error', detail: response.data.error || 'Failed to update pattern', life: 3000 });
         }
     } catch (error) {
         console.error('Error update pattern:', error);
-        toast.add({ severity: 'error', summary: 'Error', detail: 'Failed to update pattern', life: 3000 });
+        toast.add({ severity: 'error', summary: 'Error', detail: error.response?.data?.error || 'Failed to update pattern', life: 3000 });
     }
 };
 
