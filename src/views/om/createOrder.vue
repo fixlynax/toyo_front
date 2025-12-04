@@ -921,8 +921,8 @@ const availableCredit = ref(0);
 // Options
 const customerOptions = ref([]);
 const orderTypeOptions = ref([
-    { label: 'Normal', value: 'NORMAL' },
-    { label: 'Direct Shipment', value: 'DIRECTSHIP' }
+    { label: 'Direct Shipment', value: 'DIRECTSHIP' },
+    { label: 'Normal', value: 'NORMAL' }
 ]);
 
 // Delivery Method Options - Computed based on API settings

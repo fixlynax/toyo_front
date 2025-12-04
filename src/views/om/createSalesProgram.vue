@@ -175,38 +175,38 @@
                                     <div>
                                         <label class="block text-sm font-medium text-gray-700 mb-2">Free Material</label>
                                         <!-- In the template section, find the Free Material dropdown section -->
-<Dropdown
-    v-model="programItem.selectedFreeMaterial"
-    :options="freeMaterialOptions"
-    optionLabel="material"
-    optionValue="materialid"
-    placeholder="Select Free Material"
-    class="w-full"
-    :filter="true"
-    :loading="loadingFreeMaterials"
-    @change="onFreeMaterialChange"
-    :filterFields="['material', 'materialid']" <!-- Add this line -->
->
-    <template #value="slotProps">
-        <div v-if="slotProps.value" class="flex items-center">
-            <div>
-                <div class="font-medium">{{ getFreeMaterialLabel(slotProps.value) }}</div>
-                <div class="text-xs text-gray-500">{{ slotProps.value }}</div> <!-- Show material ID -->
-            </div>
-        </div>
-        <span v-else>
-            {{ slotProps.placeholder }}
-        </span>
-    </template>
-    <template #option="slotProps">
-        <div class="flex items-center">
-            <div>
-                <div class="font-medium">{{ slotProps.option.material }}</div>
-                <div class="text-xs text-gray-500">{{ slotProps.option.materialid }}</div> <!-- Show material ID -->
-            </div>
-        </div>
-    </template>
-</Dropdown>
+                                        <Dropdown
+                                            v-model="programItem.selectedFreeMaterial"
+                                            :options="freeMaterialOptions"
+                                            optionLabel="material"
+                                            optionValue="materialid"
+                                            placeholder="Select Free Material"
+                                            class="w-full"
+                                            :filter="true"
+                                            :loading="loadingFreeMaterials"
+                                            @change="onFreeMaterialChange"
+                                            :filterFields="['material', 'materialid']" <!-- Add this line -->
+                                        >
+                                            <template #value="slotProps">
+                                                <div v-if="slotProps.value" class="flex items-center">
+                                                    <div>
+                                                        <div class="font-medium">{{ getFreeMaterialLabel(slotProps.value) }}</div>
+                                                        <div class="text-xs text-gray-500">{{ slotProps.value }}</div> <!-- Show material ID -->
+                                                    </div>
+                                                </div>
+                                                <span v-else>
+                                                    {{ slotProps.placeholder }}
+                                                </span>
+                                            </template>
+                                            <template #option="slotProps">
+                                                <div class="flex items-center">
+                                                    <div>
+                                                        <div class="font-medium">{{ slotProps.option.material }}</div>
+                                                        <div class="text-xs text-gray-500">{{ slotProps.option.materialid }}</div> <!-- Show material ID -->
+                                                    </div>
+                                                </div>
+                                            </template>
+                                        </Dropdown>
                                     </div>
 
                                     <!-- InputNumber -->
