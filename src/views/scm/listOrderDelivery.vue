@@ -534,14 +534,16 @@ const exportToExcel = () => {
     }
 
     try {
-        // Create worksheet data
-        const headers = ['Created', 'SAP DO No', 'Customer Name', 'Customer Acc No', 'Storage Location', 'City', 'State', 'Order Type', 'Driver Name', 'Driver IC', 'Driver Contact', 'Driver Truck Plate', 'Eta Date', 'Planned Date', 'Delivered Date', 'Status' , 'Item'];
+            // Create worksheet data
+    const headers = ['Created', 'SAP DO No', 'Customer Name', 'Customer Acc No','Storage Location', 'City', 'State', 'Order Type', 'Driver Name','Driver IC', 'Driver Contact', 'Driver Truck Plate', 'Eta Date','Planned Date', 'Delivered Date', 'Status','Pattern Name', 'Description', 'Qty'];
 
-        // Prepare data rows
-        const csvData = orderDelList.value.map((data) => [
+    const csvData = [];
+
+    orderDelList.value.forEach(data => {
+        const baseRow = [
             `"${formatDate(data.created)}"`,
             `"${data.do_no || '-'}"`,
-            `"${data.shipto_data?.companyName1 || ''} ${data.shipto_data?.companyName2 || ''} "`,
+            `"${data.shipto_data?.companyName1 || ''} ${data.shipto_data?.companyName2 || ''}"`,
             `"${data.shipto_data?.custAccountNo || '-'}"`,
             `"${data.storagelocation || '-'}"`,
             `"${data.shipto_data?.city || '-'}"`,
@@ -554,9 +556,19 @@ const exportToExcel = () => {
             `"${formatDate(data.deliveryDate)}"`,
             `"${data.scm_deliver_detail?.scheduled_delivery_time ? formatDate(data.scm_deliver_detail?.scheduled_delivery_time) : 'No date assigned'}"`,
             `"${data.scm_deliver_detail?.delivered_datetime ? formatDate(data.scm_deliver_detail?.delivered_datetime) : 'No date assigned'}"`,
-            `"${getStatusLabel2(data.status) || '-'}"`,
-            `"${data.fullfill_order_array?.map(item => `materialid:${item.materialid}, itemno:${item.itemno}, itemcategory:${item.itemcategory}, plant:${item.plant}, qty:${parseFloat(item.qty)}, salesprogramid:${item.salesprogramid || '-'}`).join('\n') || '-'}"`
-        ]);
+            `"${getStatusLabel2(data.status) || '-'}"`
+        ];
+
+        // Duplicate row for each item
+        data.fullfill_order_array.forEach(item => {
+                csvData.push([
+                    ...baseRow,
+                    `"${item.patternName || '-'}"`,
+                    `"${item.materialdescription || '-'}"`,
+                    `"${parseFloat(item.qty) || '-'}"`
+                ]);
+            });
+        });
 
         // Combine headers and data
         const csvContent = [headers.join(','), ...csvData.map((row) => row.join(','))].join('\n');
