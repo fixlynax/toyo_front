@@ -430,7 +430,7 @@
 
                 <div class="flex flex-col md:flex-row justify-end gap-2 mt-6">
                     <div class="w-40">
-                        <Button label="Edit" class="w-full p-button-secondary" @click="handleEdit" />
+                        <Button label="Cancel" class="w-full p-button-secondary" @click="handleEdit" />
                     </div>
                     <div class="w-40">
                         <Button label="Submit" class="w-full" @click="handleSubmit" :loading="isSubmitting" />
