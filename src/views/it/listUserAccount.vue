@@ -22,7 +22,7 @@
                 v-model:expandedRows="expandedRows"
                 dataKey="id"
                 filterDisplay="menu"
-                :globalFilterFields="['username', 'email', 'first_name', 'last_name', 'role.name']"
+                :globalFilterFields="['username', 'email', 'first_name', 'last_name', 'role.name', 'mobilephone']"
                 class="rounded-table"
                 currentPageReportTemplate="Showing {first} to {last} of {totalRecords} entries"
                 paginatorTemplate="CurrentPageReport FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink RowsPerPageDropdown"
@@ -44,7 +44,7 @@
                     </div>
                 </template>
 
-                <template #empty> 
+                <template #empty>
                     <div class="text-center py-8">
                         <i class="pi pi-inbox text-4xl text-gray-300 mb-3"></i>
                         <p class="text-gray-500">No users found.</p>
@@ -144,9 +144,7 @@
                                 <div class="bg-gray-100 px-4 py-2 border-b">
                                     <div class="flex justify-between items-center">
                                         <h5 class="font-semibold text-gray-700">{{ groupName }}</h5>
-                                        <span class="text-xs text-gray-500 bg-white px-2 py-1 rounded">
-                                            {{ groupPermissions.length }} function(s)
-                                        </span>
+                                        <span class="text-xs text-gray-500 bg-white px-2 py-1 rounded"> {{ groupPermissions.length }} function(s) </span>
                                     </div>
                                 </div>
 
@@ -160,12 +158,7 @@
                                                     {{ perm.function_description || 'No description' }}
                                                 </div>
                                             </div>
-                                            <Tag 
-                                                :value="perm.is_write ? 'Write' : 'Read'" 
-                                                :severity="perm.is_write ? 'success' : 'info'"
-                                                size="small"
-                                                class="ml-2"
-                                            />
+                                            <Tag :value="perm.is_write ? 'Write' : 'Read'" :severity="perm.is_write ? 'success' : 'info'" size="small" class="ml-2" />
                                         </div>
                                     </div>
                                 </div>
@@ -184,12 +177,7 @@
                                                 {{ perm.function_description || 'No description' }}
                                             </div>
                                         </div>
-                                        <Tag 
-                                            :value="perm.is_write ? 'Write' : 'Read'" 
-                                            :severity="perm.is_write ? 'success' : 'info'"
-                                            size="small"
-                                            class="ml-2"
-                                        />
+                                        <Tag :value="perm.is_write ? 'Write' : 'Read'" :severity="perm.is_write ? 'success' : 'info'" size="small" class="ml-2" />
                                     </div>
                                 </div>
                             </div>
@@ -210,22 +198,25 @@
 
         <!-- Delete Confirmation Dialog -->
         <Dialog v-model:visible="deleteDialogVisible" header="Confirm Deletion" modal :closable="true" :style="{ width: '450px' }">
-            <div class="confirmation-content">
-                <i class="pi pi-exclamation-triangle mr-3" style="font-size: 2rem" />
-                <span v-if="selectedUser">
-                    Are you sure you want to delete user <strong>"{{ selectedUser.username }}"</strong>?
-                </span>
+            <div class="confirmation-content flex items-center">
+                <i class="pi pi-exclamation-triangle mr-3 text-yellow-500" style="font-size: 2rem" />
+                <div>
+                    <span v-if="selectedUser">
+                        Are you sure you want to delete user <strong>"{{ selectedUser.username }}"</strong>?
+                        <p class="text-sm text-gray-500 mt-1">This action cannot be undone.</p>
+                    </span>
+                </div>
             </div>
             <template #footer>
-                <Button label="No" icon="pi pi-times" class="p-button-text" @click="deleteDialogVisible = false" />
-                <Button label="Yes" icon="pi pi-check" class="p-button-danger" @click="deleteUser" :loading="deleting" />
+                <Button label="No" icon="pi pi-times" class="p-button-text" @click="deleteDialogVisible = false" :disabled="deleting" />
+                <Button label="Yes" icon="pi pi-check" class="p-button-danger" @click="deleteUser" :loading="deleting" :disabled="deleting" />
             </template>
         </Dialog>
     </Fluid>
 </template>
 
 <script setup>
-import { onMounted, ref, reactive, computed } from 'vue';
+import { onMounted, ref, reactive } from 'vue';
 import { useRouter } from 'vue-router';
 import { FilterMatchMode } from '@primevue/core/api';
 import { useToast } from 'primevue/usetoast';
@@ -280,37 +271,39 @@ function formatDate(dateString) {
 const getPermissionCount = (permissions, type) => {
     if (!permissions) return 0;
     if (type === 'read') {
-        return permissions.filter(p => !p.is_write).length;
+        return permissions.filter((p) => !p.is_write).length;
     } else {
-        return permissions.filter(p => p.is_write).length;
+        return permissions.filter((p) => p.is_write).length;
     }
 };
 
 const groupPermissionsByCategory = (permissions) => {
     if (!permissions) return {};
-    
+
     const grouped = {};
-    
-    permissions.forEach(permission => {
+
+    permissions.forEach((permission) => {
         // Try to get the group name from function_group_id
         let groupName = 'General';
         if (permission.function_group_id && functionGroupMap[permission.function_group_id]) {
             groupName = functionGroupMap[permission.function_group_id];
         }
-        
+
         if (!grouped[groupName]) {
             grouped[groupName] = [];
         }
-        
+
         grouped[groupName].push(permission);
     });
-    
+
     // Sort group names alphabetically
     const sortedGroups = {};
-    Object.keys(grouped).sort().forEach(key => {
-        sortedGroups[key] = grouped[key];
-    });
-    
+    Object.keys(grouped)
+        .sort()
+        .forEach((key) => {
+            sortedGroups[key] = grouped[key];
+        });
+
     return sortedGroups;
 };
 
@@ -371,34 +364,46 @@ const deleteUser = async () => {
     deleting.value = true;
 
     try {
-        // Note: Update this endpoint based on your API
-        const res = await api.delete(`admin/user/${selectedUser.value.id}`);
+        const res = await api.post('admin/delete-user', {
+            user_id: selectedUser.value.id
+        });
 
         if (res.data.status === 1) {
             toast.add({
                 severity: 'success',
-                summary: 'Deleted',
-                detail: `"${selectedUser.value.username}" has been deleted.`,
+                summary: 'Success',
+                detail: res.data.message || `"${selectedUser.value.username}" has been deleted successfully.`,
                 life: 3000
             });
 
-            await fetchUsers();
+            // Remove the deleted user from the list
+            const index = listData.value.findIndex((user) => user.id === selectedUser.value.id);
+            if (index !== -1) {
+                listData.value.splice(index, 1);
+            }
+
+            // Reset dialog and selection
             deleteDialogVisible.value = false;
             selectedUser.value = null;
+
+            // Collapse any expanded rows
+            expandedRows.value = [];
         } else {
+            const errorMessage = res.data.error?.message || res.data.message || 'Failed to delete user';
             toast.add({
                 severity: 'error',
                 summary: 'Error',
-                detail: res.data.error?.messageEnglish || 'Failed to delete user',
+                detail: errorMessage,
                 life: 4000
             });
         }
     } catch (err) {
-        console.error(err);
+        console.error('Delete user error:', err);
+        const errorMessage = err.response?.data?.error?.message || err.response?.data?.message || 'Network error. Please try again.';
         toast.add({
             severity: 'error',
             summary: 'Error',
-            detail: err.response?.data?.error?.messageEnglish || 'Something went wrong',
+            detail: errorMessage,
             life: 4000
         });
     } finally {
@@ -418,9 +423,9 @@ const deleteUser = async () => {
 }
 
 .confirmation-content {
-    display: flex;
-    align-items: center;
-    justify-content: center;
+    .pi-exclamation-triangle {
+        color: #f59e0b;
+    }
 }
 
 /* Expand icon styling */
