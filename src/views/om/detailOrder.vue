@@ -506,15 +506,18 @@ const submitDriverInfo = async () => {
         payload.append('driverName', driverForm.value.driverName);
         payload.append('driverPhoneNum', driverForm.value.driverPhoneNumber);
         payload.append('driverPlateNum', driverForm.value.driverTruckPlate);
+        // payload.append('driverIC', driverForm.value.driverIC || '');
         if (driverForm.value.driverIC) {
             payload.append('driverIC', driverForm.value.driverIC);
+        } else {
+            payload.append('driverIC', '');
         }
 
         const orderNo = route.params.orderNo;
         console.log('Submitting driver info for order:', orderNo);
         console.log('Driver payload:', Object.fromEntries(payload));
 
-        const response = await api.post(`order/driver-information/${orderNo}`, payload, {
+        const response = await api.postExtra(`order/driver-information/${orderNo}`, payload, {
             headers: {
                 'Content-Type': 'application/x-www-form-urlencoded',
                 Accept: 'application/json'
