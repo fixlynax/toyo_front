@@ -19,8 +19,12 @@
                     </div>
 
                     <div class="md:col-span-2">
-                        <label class="block font-bold text-gray-700">Headline(180 max Characters)</label>
+                        <label class="block font-bold text-gray-700">Headline (180 max Character)</label>
+
                         <Textarea v-model="news.headline" rows="3" class="w-full" maxlength="180" />
+
+                        <!-- Character Counter -->
+                        <div class="text-xm text-gray-500 mt-1 text-right">{{ news.headline?.length || 0 }}/180</div>
                     </div>
 
                     <div class="md:col-span-2">
