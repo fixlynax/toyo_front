@@ -367,7 +367,7 @@
                         <div class="flex items-center justify-between px-2 mt-2">
                             <div class="flex items-center gap-2 text-gray-700">
                                 <i class="pi pi-id-card text-green-500"></i>
-                                <span>Account Detail</span>
+                                <span>Account Details</span>
                             </div>
                             <RouterLink to="/billing/listAccountDetail">
                                 <Button label="Go" size="small" />
