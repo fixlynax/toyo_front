@@ -369,9 +369,7 @@
                                 <i class="pi pi-id-card text-green-500"></i>
                                 <span>Account Details</span>
                             </div>
-                            <RouterLink to="/billing/listAccountDetail">
-                                <Button label="Go" size="small" />
-                            </RouterLink>
+                            <RouterLink :to="`/billing/listAccountDetailPersonal/${form.custAccountNo}`"> <Button label="Go" size="small" /> </RouterLink>
                         </div>
 
                         <!-- Billing -->
@@ -380,9 +378,7 @@
                                 <i class="pi pi-file text-blue-500"></i>
                                 <span>E-Invoice</span>
                             </div>
-                            <RouterLink to="/billing/listBilling">
-                                <Button label="Go" size="small" />
-                            </RouterLink>
+                            <RouterLink :to="`/billing/listBillingPersonal/${form.custAccountNo}`"> <Button label="Go" size="small" /> </RouterLink>
                         </div>
 
                         <!-- Staff Billing -->
@@ -391,9 +387,7 @@
                                 <i class="pi pi-file-check text-purple-500"></i>
                                 <span>Self Bill E-Invoice</span>
                             </div>
-                            <RouterLink to="/billing/listEbilling">
-                                <Button label="Go" size="small" />
-                            </RouterLink>
+                            <RouterLink :to="`/billing/listEbillingPersonal/${form.custAccountNo}`"> <Button label="Go" size="small" /> </RouterLink>
                         </div>
 
                         <!-- Statement -->
@@ -402,9 +396,7 @@
                                 <i class="pi pi-receipt text-pink-500"></i>
                                 <span>Statement</span>
                             </div>
-                            <RouterLink to="/billing/listStatement">
-                                <Button label="Go" size="small" />
-                            </RouterLink>
+                            <RouterLink :to="`/billing/listStatementPersonal/${form.custAccountNo}`"> <Button label="Go" size="small" /> </RouterLink>
                         </div>
 
                         <!-- Finance Document -->
@@ -413,9 +405,7 @@
                                 <i class="pi pi-folder text-orange-500"></i>
                                 <span>Others</span>
                             </div>
-                            <RouterLink to="/billing/listOther">
-                                <Button label="Go" size="small" />
-                            </RouterLink>
+                            <RouterLink :to="`/billing/listOtherPersonal/${form.custAccountNo}`"> <Button label="Go" size="small" /> </RouterLink>
                         </div>
                     </div>
                 </div>
