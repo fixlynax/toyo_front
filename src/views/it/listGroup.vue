@@ -1,6 +1,6 @@
 <template>
     <div class="card">
-        <div class="text-2xl font-bold text-gray-800 border-b pb-2 mb-4">List Group</div>
+        <div class="text-2xl font-bold text-gray-800 border-b pb-2 mb-4">User Group</div>
 
         <!-- Show LoadingPage during initial page load -->
         <LoadingPage v-if="initialLoading" :message="'Loading Group...'" :sub-message="'Fetching list Group'" />
@@ -97,7 +97,7 @@
             <Column header="Actions" style="min-width: 10rem">
                 <template #body="{ data }">
                     <div class="flex gap-2">
-                        <Button icon="pi pi-pencil" class="p-button-text p-button-info p-button-sm" @click="editGroup(data)" />
+                        <Button icon="pi pi-pencil" class="p-button-text p-button-sm" :class="data.is_super_admin ? 'p-button-secondary' : 'p-button-info'" @click="editGroup(data)" :disabled="data.is_super_admin" />
                         <Button icon="pi pi-trash" class="p-button-text p-button-danger p-button-sm" @click="confirmDeleteGroup(data)" />
                     </div>
                 </template>
@@ -485,6 +485,11 @@ const initializeEditPermissionState = (permissions = []) => {
 
 // Edit group (now only for permissions)
 const editGroup = async (group) => {
+    // Don't allow editing if it's a super admin role
+    if (group.is_super_admin) {
+        return;
+    }
+
     try {
         // Populate edit form with minimal info
         editForm.value = {

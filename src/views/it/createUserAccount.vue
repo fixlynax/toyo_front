@@ -97,7 +97,7 @@
 </template>
 
 <script setup>
-import { ref, reactive, onMounted } from 'vue';
+import { ref, reactive, onMounted, computed } from 'vue';
 import { useRouter } from 'vue-router';
 import { useToast } from 'primevue/usetoast';
 import InputText from 'primevue/inputtext';
@@ -133,6 +133,31 @@ const statusOptions = [
 const userRoleOptions = ref([]);
 const submitting = ref(false);
 const loadingRoles = ref(false);
+
+// List of allowed email domains (you can add more as needed)
+const allowedEmailDomains = ref([
+    'gmail.com',
+    'yahoo.com',
+    'hotmail.com',
+    'outlook.com',
+    'company.com' // Add your company domain here
+]);
+
+// Computed property to extract domain from email
+const emailDomain = computed(() => {
+    if (!form.value.email.includes('@')) return null;
+    return form.value.email.split('@')[1]?.toLowerCase();
+});
+
+// Email domain validation function
+const validateEmailDomain = () => {
+    if (!form.value.email.trim()) return true; // Let required validation handle empty
+
+    const domain = emailDomain.value;
+    if (!domain) return false;
+
+    return allowedEmailDomains.value.some((allowedDomain) => domain === allowedDomain.toLowerCase());
+};
 
 // Fetch user roles from API
 const fetchUserRoles = async () => {
@@ -194,6 +219,11 @@ const validateForm = () => {
     } else if (form.value.email.length > 255) {
         errors.email = 'Email must not exceed 255 characters';
         isValid = false;
+    } else if (!validateEmailDomain()) {
+        // Show allowed domains in the error message
+        const allowedDomainsList = allowedEmailDomains.value.join(', ');
+        errors.email = `Email domain is not allowed. Allowed domains are: ${allowedDomainsList}`;
+        isValid = false;
     }
 
     // Password validation
@@ -233,6 +263,7 @@ const validateForm = () => {
     }
 
     // Mobile phone validation (if provided)
+    // FIXED: Changed from 15 to 30 characters to match backend validation
     if (form.value.mobilephone && form.value.mobilephone.length > 30) {
         errors.mobilephone = 'Mobile phone must not exceed 30 characters';
         isValid = false;
@@ -256,7 +287,7 @@ const submitForm = async () => {
             password: form.value.password,
             first_name: form.value.first_name || null,
             last_name: form.value.last_name || null,
-            mobilephone: form.value.mobilephone || null,
+            mobilephone: form.value.mobilephone || null, // This should now work properly
             user_role_id: form.value.user_role_id,
             salesOffice: form.value.salesOffice || null,
             salesDistrict: form.value.salesDistrict || null,

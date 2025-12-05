@@ -87,7 +87,7 @@
                 </div>
 
                 <div>
-                    <label class="block text-sm font-bold text-gray-700 mb-2">Reason for Update</label>
+                    <label class="block text-sm font-bold text-gray-700 mb-2">Reason for Update *</label>
                     <InputText v-model="updateDialog.reason" class="w-full" placeholder="Enter reason for update" />
                 </div>
             </div>
