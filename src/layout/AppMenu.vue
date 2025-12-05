@@ -317,11 +317,11 @@ const model = ref([
                     }
                 ]
             },
-            {
-                label: 'Salesman',
-                icon: 'pi pi-fw pi-id-card',
-                to: '/it/listSalesAccount'
-            },
+            // {
+            //     label: 'Salesman',
+            //     icon: 'pi pi-fw pi-id-card',
+            //     to: '/it/listSalesAccount'
+            // },
             {
                 label: 'Setting',
                 icon: 'pi pi-fw pi-cog',
