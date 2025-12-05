@@ -105,23 +105,7 @@
 
             <!-- Expanded Row Template - Permission Details Only -->
             <template #expansion="{ data }">
-                <div class="p-4 bg-gray-50 border-t">
-                    <div class="mb-3">
-                        <h4 class="font-bold text-gray-700 mb-2">Permission Details for: {{ data.usergroup }}</h4>
-                        <div class="flex items-center justify-end">
-                            <div class="flex gap-3 text-sm">
-                                <span class="flex items-center">
-                                    <span class="w-3 h-3 bg-blue-500 rounded-full mr-1"></span>
-                                    Read: {{ getPermissionCount(data.permissions, 'read') }}
-                                </span>
-                                <span class="flex items-center">
-                                    <span class="w-3 h-3 bg-green-500 rounded-full mr-1"></span>
-                                    Write: {{ getPermissionCount(data.permissions, 'write') }}
-                                </span>
-                            </div>
-                        </div>
-                    </div>
-
+                <div>
                     <!-- Permission Categories -->
                     <div v-if="data.permissions && data.permissions.length > 0" class="space-y-4">
                         <!-- Group permissions by category -->
@@ -130,7 +114,17 @@
                             <div class="bg-gray-100 px-4 py-2 border-b">
                                 <div class="flex justify-between items-center">
                                     <h5 class="font-semibold text-gray-700">{{ groupName }}</h5>
-                                    <span class="text-xs text-gray-500 bg-white px-2 py-1 rounded"> {{ groupPermissions.length }} permission(s) </span>
+                                    <!-- <span class="text-xs text-gray-500 bg-white px-2 py-1 rounded"> {{ groupPermissions.length }} permission(s) </span> -->
+                                    <div class="flex gap-3 text-sm">
+                                        <span class="flex items-center">
+                                            <span class="w-3 h-3 bg-blue-500 rounded-full mr-1"></span>
+                                            Read: {{ getPermissionCount(data.permissions, 'read') }}
+                                        </span>
+                                        <span class="flex items-center">
+                                            <span class="w-3 h-3 bg-green-500 rounded-full mr-1"></span>
+                                            Write: {{ getPermissionCount(data.permissions, 'write') }}
+                                        </span>
+                                    </div>
                                 </div>
                             </div>
 
