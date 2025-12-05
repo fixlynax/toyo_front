@@ -70,17 +70,14 @@
 
                     <div v-if="editingId === data.id" class="mb-4">
                         <div class="font-semibold text-gray-700 mb-2">Edit Email Recipients:</div>
-
-                        <MultiSelect
-                            v-model="form.emails"
-                            :options="emailOptions"
-                            optionLabel="label"
-                            optionValue="value"
-                            filter
-                            placeholder="Select email recipients"
-                            display="chip"
-                            class="resizable-multiselect min-w-[250px] max-w-[800px] w-full"
-                            style="resize: horizontal; overflow: auto; min-height: 42px"
+                        
+                        <!-- Changed from MultiSelect to Textarea for comma-separated input -->
+                        <Textarea
+                            v-model="emailInput"
+                            :autoResize="true"
+                            rows="3"
+                            placeholder="Enter email addresses separated by commas. Example: abc@gmail.com,def@gmail.com,ghi@gmail.com"
+                            class="w-full p-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                         />
 
                         <div class="flex justify-end gap-2 mt-4">
@@ -135,7 +132,7 @@ export default {
             expandedRows: {},
             filters1: { global: { value: null, matchMode: 'contains' } },
             form: { emails: [], shippingPoint: '' },
-            emailOptions: []
+            emailInput: '' // New data property for textarea input
         };
     },
     methods: {
@@ -153,10 +150,6 @@ export default {
                         lastUpdated: item.last_updated || '-',
                         emails: item.email_addresses ? item.email_addresses.split(',') : []
                     }));
-
-                    const allEmails = new Set();
-                    this.listData.forEach(i => i.emails.forEach(e => allEmails.add(e)));
-                    this.emailOptions = Array.from(allEmails).map(e => ({ label: e, value: e }));
 
                     this.toast.add({ severity: 'success', summary: 'Loaded', detail: 'Mail settings loaded', life: 2000 });
                 }
@@ -176,14 +169,34 @@ export default {
             this.editingId = setting.id;
             this.form.emails = [...setting.emails];
             this.form.shippingPoint = setting.shippingPoint;
+            // Convert array to comma-separated string for textarea
+            this.emailInput = setting.emails.join(', ');
             this.expandedRows = { [setting.id]: true };
             this.toast.add({ severity: 'info', summary: 'Editing', detail: 'Edit mode enabled', life: 2000 });
         },
 
         async saveSetting(row) {
             try {
+                // Parse comma-separated emails, trim whitespace, and filter out empty values
+                const emailArray = this.emailInput
+                    .split(',')
+                    .map(email => email.trim())
+                    .filter(email => email.length > 0);
+                
+                // Validate email format (optional)
+                const invalidEmails = emailArray.filter(email => !this.isValidEmail(email));
+                if (invalidEmails.length > 0) {
+                    this.toast.add({ 
+                        severity: 'warn', 
+                        summary: 'Warning', 
+                        detail: `Invalid email format: ${invalidEmails.join(', ')}`, 
+                        life: 3000 
+                    });
+                    return;
+                }
+
                 const payload = {
-                    email_addresses: this.form.emails.join(','),
+                    email_addresses: emailArray.join(','),
                     storage_location: this.form.shippingPoint
                 };
 
@@ -191,7 +204,7 @@ export default {
 
                 const index = this.listData.findIndex(i => i.id === row.id);
                 if (index !== -1) {
-                    this.listData[index].emails = [...this.form.emails];
+                    this.listData[index].emails = emailArray;
                     this.listData[index].shippingPoint = this.form.shippingPoint;
                 }
 
@@ -202,12 +215,18 @@ export default {
             }
         },
 
+        isValidEmail(email) {
+            // Simple email validation regex
+            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            return emailRegex.test(email);
+        },
+
         cancelEdit() {
             this.editingId = null;
             this.form.emails = [];
             this.form.shippingPoint = '';
+            this.emailInput = '';
             this.expandedRows = {};
-            
         },
 
         onRowToggle(event) {
@@ -234,7 +253,6 @@ export default {
     }
 };
 </script>
-
 
 <style scoped lang="scss">
 :deep(.p-row-expanded) { background-color: #f9fafb !important; }
