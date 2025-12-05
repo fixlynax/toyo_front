@@ -14,6 +14,11 @@
                         </div>
 
                         <div class="md:col-span-2">
+                        <label class="block font-bold text-gray-700">Headline(180 max Characters)</label>
+                        <Textarea v-model="event.headline" rows="3" class="w-full" maxlength="180" />
+                    </div>
+
+                        <div class="md:col-span-2">
                             <label class="block font-bold text-gray-700">Description</label>
                             <Textarea v-model="event.desc" rows="3" class="w-full" />
                         </div>
@@ -39,10 +44,10 @@
                             <Calendar v-model="event.publishDate" dateFormat="dd-mm-yy" showIcon class="w-full" :minDate="event.startDate"  :maxDate="event.endDate"  :disabled="!event.startDate || !event.endDate"/>
                         </div>
 
-                        <!-- <div>
+                        <div>
                             <label class="block font-bold text-gray-700">Audience</label>
                             <Dropdown v-model="event.audience" :options="audienceOptions" optionLabel="label" optionValue="value" class="w-full" />
-                        </div> -->
+                        </div>
 
                         <div>
                             <label class="block font-bold text-gray-700">Survey</label>
@@ -52,7 +57,7 @@
 
                     <!-- Upload Images -->
                     <div>
-                        <label class="block font-bold text-gray-700 mb-2">Event Images</label>
+                        <label class="block font-bold text-gray-700 mb-2">Event Images <span class="text-xs bg-blue-100 text-blue-800 px-2 py-0.5 rounded-full">1280 × 720 px (max 2MB)</span> </label>
                         <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
                             <div v-for="(img, index) in [1, 2, 3]" :key="index" class="relative">
                                 <FileUpload mode="basic" :name="`image${img}`" accept="image/*" customUpload @select="onImageSelect($event, `image${img}`)" :chooseLabel="`Change Image ${img}`" class="w-full" />
@@ -163,6 +168,7 @@ const toast = useToast();
 const loading = ref(false);
 const minDate = ref(new Date());
 
+// Get event ID from route
 const eventId = route.params.id;
 
 // Dropdown options
@@ -186,6 +192,7 @@ const event = ref({
     point2: 0,
     point3: 0,
     title: '',
+    headline: '', // Added this missing field
     desc: '',
     location: '',
     publishDate: null,
@@ -220,11 +227,13 @@ const formatDate = (date) => {
     const year = d.getFullYear();
     return `${day}-${month}-${year}`;
 };
+
 const parseDMY = (str) => {
     if (!str) return null;
     const [day, month, year] = str.split('-').map(Number); 
     return new Date(year, month - 1, day);
 };
+
 // Fetch event details
 const fetchEventDetails = async () => {
     try {
@@ -238,11 +247,12 @@ const fetchEventDetails = async () => {
             event.value = {
                 id: eventData.id,
                 audience: eventData.audience,
-                isSurvey: eventData.isSurvey ,
+                isSurvey: eventData.isSurvey,
                 point1: eventData.point1 || 0,
                 point2: eventData.point2 || 0,
                 point3: eventData.point3 || 0,
                 title: eventData.title,
+                headline: eventData.headline || '', // Added headline
                 desc: eventData.desc,
                 location: eventData.location,
                 publishDate: parseDate(eventData.publishDate),
@@ -256,7 +266,7 @@ const fetchEventDetails = async () => {
 
             // Handle survey questions
             if (eventData.survey_questions && eventData.survey_questions.length) {
-                const rawQuestions = eventData.survey_questions[0]; // <-- FIX
+                const rawQuestions = eventData.survey_questions[0];
 
                 questions.value = rawQuestions.map(q => ({
                     question: q.question || '',
@@ -361,27 +371,96 @@ const removeImage = (fieldName) => {
 // Validation
 const validateFields = () => {
     // Basic validation
-    if (!event.value.title || !event.value.desc || !event.value.location || !event.value.startDate || !event.value.endDate || !event.value.audience) {
-        toast.add({ severity: 'warn', summary: 'Validation', detail: 'Please fill all required fields.', life: 3000 });
+    const requiredFields = [
+        { field: event.value.title, message: 'Title is required' },
+        { field: event.value.headline, message: 'Headline is required' },
+        { field: event.value.desc, message: 'Description is required' },
+        { field: event.value.location, message: 'Location is required' },
+        { field: event.value.startDate, message: 'Start Date is required' },
+        { field: event.value.endDate, message: 'End Date is required' },
+        { field: event.value.audience, message: 'Audience is required' }
+    ];
+
+    for (const { field, message } of requiredFields) {
+        if (!field || (typeof field === 'string' && field.trim() === '')) {
+            toast.add({ severity: 'warn', summary: 'Validation', detail: message, life: 3000 });
+            return false;
+        }
+    }
+
+    // Headline length validation
+    if (event.value.headline && event.value.headline.length > 180) {
+        toast.add({ 
+            severity: 'warn', 
+            summary: 'Validation', 
+            detail: 'Headline must be 180 characters or less', 
+            life: 3000 
+        });
         return false;
+    }
+
+    // Date validation
+    if (event.value.startDate && event.value.endDate) {
+        const start = new Date(event.value.startDate);
+        const end = new Date(event.value.endDate);
+        
+        if (end < start) {
+            toast.add({ 
+                severity: 'warn', 
+                summary: 'Validation', 
+                detail: 'End Date cannot be before Start Date', 
+                life: 3000 
+            });
+            return false;
+        }
+
+        if (event.value.publishDate) {
+            const publish = new Date(event.value.publishDate);
+            if (publish < start || publish > end) {
+                toast.add({ 
+                    severity: 'warn', 
+                    summary: 'Validation', 
+                    detail: 'Publish Date must be between Start Date and End Date', 
+                    life: 3000 
+                });
+                return false;
+            }
+        }
     }
 
     // Survey-specific validation
     if (event.value.isSurvey === 'Yes') {
-        if (!event.value.point1 || !event.value.point2 || !event.value.point3) {
-            toast.add({ severity: 'warn', summary: 'Validation', detail: 'Please fill all point fields.', life: 3000 });
+        if (event.value.point1 === null || event.value.point1 === undefined ||
+            event.value.point2 === null || event.value.point2 === undefined ||
+            event.value.point3 === null || event.value.point3 === undefined) {
+            toast.add({ 
+                severity: 'warn', 
+                summary: 'Validation', 
+                detail: 'Please fill all point fields.', 
+                life: 3000 
+            });
             return false;
         }
+        
         if (questions.value.length === 0) {
-            toast.add({ severity: 'warn', summary: 'Validation', detail: 'Add at least one survey question.', life: 3000 });
+            toast.add({ 
+                severity: 'warn', 
+                summary: 'Validation', 
+                detail: 'Add at least one survey question.', 
+                life: 3000 
+            });
             return false;
         }
+        
         for (let q of questions.value) {
-            if (!q.question || !q.answers[0] || !q.answers[1] || !q.answers[2]) {
+            if (!q.question || q.question.trim() === '' || 
+                !q.answers[0] || q.answers[0].trim() === '' || 
+                !q.answers[1] || q.answers[1].trim() === '' || 
+                !q.answers[2] || q.answers[2].trim() === '') {
                 toast.add({
                     severity: 'warn',
                     summary: 'Validation',
-                    detail: 'All questions, answers, and correct answers are required.',
+                    detail: 'All questions and answers are required.',
                     life: 3000
                 });
                 return false;
@@ -391,7 +470,7 @@ const validateFields = () => {
     return true;
 };
 
-// Submit event
+// Submit event - FIXED VERSION
 const submitEvent = async () => {
     if (!validateFields()) return;
 
@@ -402,6 +481,7 @@ const submitEvent = async () => {
 
         // Append basic fields using FormData.append()
         formData.append('title', event.value.title);
+        formData.append('headline', event.value.headline);
         formData.append('description', event.value.desc);
         formData.append('location', event.value.location);
         formData.append('audience', event.value.audience);
@@ -411,23 +491,25 @@ const submitEvent = async () => {
         // Append dates in dd-mm-yyyy format
         if (event.value.publishDate) {
             formData.append('publishDate', formatDate(event.value.publishDate));
+        } else {
+            formData.append('publishDate', ''); // Send empty if null
         }
         formData.append('startDate', formatDate(event.value.startDate));
         formData.append('endDate', formatDate(event.value.endDate));
 
         // Append points
         if (event.value.isSurvey === 'Yes') {
-            formData.append('point1', event.value.point1.toString());
-            formData.append('point2', event.value.point2.toString());
-            formData.append('point3', event.value.point3.toString());
+            formData.append('point1', event.value.point1?.toString() || '0');
+            formData.append('point2', event.value.point2?.toString() || '0');
+            formData.append('point3', event.value.point3?.toString() || '0');
 
-            // Append survey questions
+            // Append survey questions - FIXED: Ensure we send proper structure
             const surveyQuestions = questions.value.map((q) => ({
-                question: q.question,
-                answer1: q.answers[0],
-                answer2: q.answers[1],
-                answer3: q.answers[2],
-                // correctAnswer: q.correctAnswer
+                question: q.question || '',
+                answer1: q.answers[0] || '',
+                answer2: q.answers[1] || '',
+                answer3: q.answers[2] || '',
+                // correctAnswer: q.correctAnswer || ''
             }));
             formData.append('survey_questions', JSON.stringify(surveyQuestions));
         } else {
@@ -438,18 +520,27 @@ const submitEvent = async () => {
             formData.append('survey_questions', JSON.stringify([]));
         }
 
-        // Append image files
+        // Append image files - Handle new, removed, and existing images
         for (let i = 1; i <= 3; i++) {
             const fieldName = `image${i}`;
+            const urlFieldName = `${fieldName}URL`;
+            
             if (imageFiles.value[fieldName]) {
+                // New file uploaded
                 formData.append(fieldName, imageFiles.value[fieldName]);
             } else if (removedImages.value.includes(fieldName)) {
-                // Send empty string to indicate image removal
+                // Image was removed - send empty string
                 formData.append(fieldName, '');
+            } else if (event.value[urlFieldName] && event.value[urlFieldName].includes('blob:')) {
+                // This is a blob URL from private file loading, skip it
+                // The backend should keep the existing image
+                continue;
             }
+            // If none of the above, the backend should keep the existing image
         }
        
-     // Use customRequest to send FormData with proper headers
+        // Use customRequest to send FormData with proper headers
+        // FIXED: Use eventId directly (which is route.params.id)
         const response = await api.customRequest({
             method: 'POST',
             url: `/api/event/edit/${eventId}`,
@@ -466,7 +557,8 @@ const submitEvent = async () => {
                 detail: 'Event updated successfully!',
                 life: 3000
             });
-            router.push('/marketing/listEvent');
+            // FIXED: Use eventId instead of undefined 'id' variable
+            router.push(`/marketing/detailEvent/${eventId}`);
         } else {
             console.error('Backend error:', response.data);
             toast.add({
@@ -490,7 +582,7 @@ const submitEvent = async () => {
             toast.add({
                 severity: 'error',
                 summary: 'Error',
-                detail: 'Network error or server unavailable',
+                detail: error.message || 'Network error or server unavailable',
                 life: 3000
             });
         }

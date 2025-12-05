@@ -2,10 +2,31 @@
     <Fluid>
         <div class="card">
             <div class="flex justify-between items-center mb-4">
-                <div class="text-2xl font-bold">List User List</div>
+                <div class="text-2xl font-bold">User Account</div>
             </div>
 
-            <DataTable :value="listData" :loading="loading" :filters="filters" paginator :rows="10" :rowsPerPageOptions="[10, 20, 50]" filterDisplay="menu" :globalFilterFields="['usergroup', 'description', 'created']" class="rounded-table">
+            <!-- Show LoadingPage during initial page load -->
+            <LoadingPage v-if="initialLoading" :message="'Loading Users...'" :sub-message="'Fetching user list'" />
+
+            <!-- Show LoadingPage during table reloads -->
+            <LoadingPage v-else-if="loading && !initialLoading" :message="'Refreshing Data...'" :sub-message="'Updating user information'" :is-full-page="false" />
+
+            <!-- Show DataTable when not loading -->
+            <DataTable
+                v-else
+                :value="listData"
+                :filters="filters"
+                :paginator="true"
+                :rows="10"
+                :rowsPerPageOptions="[10, 25, 50, 100]"
+                v-model:expandedRows="expandedRows"
+                dataKey="id"
+                filterDisplay="menu"
+                :globalFilterFields="['username', 'email', 'first_name', 'last_name', 'role.name', 'mobilephone']"
+                class="rounded-table"
+                currentPageReportTemplate="Showing {first} to {last} of {totalRecords} entries"
+                paginatorTemplate="CurrentPageReport FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink RowsPerPageDropdown"
+            >
                 <template #header>
                     <div class="flex items-center justify-between gap-4 w-full flex-wrap">
                         <div class="flex items-center gap-2 w-full max-w-md">
@@ -15,7 +36,6 @@
                                 </InputIcon>
                                 <InputText v-model="filters['global'].value" placeholder="Quick Search" class="w-full" />
                             </IconField>
-                            <Button type="button" icon="pi pi-cog" class="p-button" />
                         </div>
 
                         <RouterLink to="/it/createUserAccount">
@@ -24,32 +44,37 @@
                     </div>
                 </template>
 
-                <Column field="userlist" header="List User & Role" style="min-width: 12rem">
+                <template #empty>
+                    <div class="text-center py-8">
+                        <i class="pi pi-inbox text-4xl text-gray-300 mb-3"></i>
+                        <p class="text-gray-500">No users found.</p>
+                    </div>
+                </template>
+
+                <!-- Expand/Collapse Column -->
+                <Column :expander="true" headerStyle="width: 3rem" />
+
+                <Column field="username" header="Username & Role" style="min-width: 12rem">
                     <template #body="{ data }">
                         <div class="flex flex-col gap-1">
-                            <span class="font-bold text-primary-400">{{ data.userlist }}</span>
+                            <span class="font-bold text-primary-400">{{ data.username }}</span>
                             <div class="flex gap-2">
-                                <Tag :value="data.is_super_admin ? 'Super Admin' : 'User'" :severity="data.is_super_admin ? 'primary' : 'secondary'" />
-                                <Tag v-if="data.sales_person" value="Sales" severity="info" />
+                                <Tag v-if="data.role?.is_super_admin" value="Super Admin" severity="primary" />
+                                <Tag v-if="data.role?.is_sales_person === 1" value="Sales" severity="info" />
                             </div>
                         </div>
                     </template>
                 </Column>
 
-                <Column field="description" header="Description" style="min-width: 12rem">
+                <Column field="full_name" header="Full Name" style="min-width: 12rem">
                     <template #body="{ data }">
-                        <span class="">{{ data.description }}</span>
-                    </template>
-                </Column>
-                <Column field="department" header="Department" style="min-width: 12rem">
-                    <template #body="{ data }">
-                        {{ data.department || '-' }}
+                        <span>{{ data.first_name }} {{ data.last_name }}</span>
                     </template>
                 </Column>
 
-                <Column field="mobile" header="Mobile No" style="min-width: 12rem">
+                <Column field="mobilephone" header="Mobile No" style="min-width: 12rem">
                     <template #body="{ data }">
-                        {{ data.mobile || '-' }}
+                        {{ data.mobilephone || '-' }}
                     </template>
                 </Column>
 
@@ -59,211 +84,375 @@
                     </template>
                 </Column>
 
-                <Column field="usergroup" header="User Group" style="min-width: 12rem">
+                <Column field="role.name" header="User Role" style="min-width: 12rem">
                     <template #body="{ data }">
-                        <span>{{ data.usergroup || '-' }}</span>
-                    </template>
-                </Column>
-
-                <Column field="modules" header="Module / Function List" style="min-width: 12rem">
-                    <template #body="{ data }">
-                        <Button icon="pi pi-eye" class="p-button-text p-button-sm text-blue-600" @click="openModuleDialog(data.modules)" />
-                        <span class="ml-2">{{ data.modules.length || '-' }} Modules</span>
+                        <span>{{ data.role?.name || '-' }}</span>
                     </template>
                 </Column>
 
                 <Column field="created" header="Created" style="min-width: 12rem">
                     <template #body="{ data }">
-                        {{ data.created ? new Date(data.created).toLocaleDateString('en-GB') : '-' }}
+                        {{ formatDate(data.created) }}
+                    </template>
+                </Column>
+
+                <Column field="last_login" header="Last Login" style="min-width: 12rem">
+                    <template #body="{ data }">
+                        {{ formatDate(data.last_login) }}
                     </template>
                 </Column>
 
                 <Column header="Status" style="min-width: 6rem">
                     <template #body="{ data }">
-                        <Tag :severity="data.statusUser === 1 ? 'success' : 'danger'" :value="data.statusUser === 1 ? 'Active' : 'Inactive'" />
+                        <Tag :severity="data.status === 1 ? 'success' : 'danger'" :value="data.status === 1 ? 'Active' : 'Inactive'" />
                     </template>
                 </Column>
 
                 <Column header="Action" style="min-width: 12rem">
                     <template #body="{ data }">
                         <div class="flex gap-2">
-                            <div class="flex gap-2">
-                                <Button icon="pi pi-pencil" class="p-button-text p-button-info p-button-sm" @click="editUser(data)" />
-                                <Button icon="pi pi-trash" class="p-button-text p-button-danger p-button-sm" @click="deleteUser(data)" />
-                            </div>
+                            <Button icon="pi pi-pencil" class="p-button-text p-button-info p-button-sm" @click="editUser(data)" />
+                            <Button icon="pi pi-trash" class="p-button-text p-button-danger p-button-sm" @click="confirmDeleteUser(data)" />
                         </div>
                     </template>
                 </Column>
+
+                <!-- Expanded Row Template - Function Permissions -->
+                <template #expansion="{ data }">
+                    <div class="p-4 bg-gray-50 border-t">
+                        <div class="mb-3">
+                            <h4 class="font-bold text-gray-700 mb-2">Function Permissions for: {{ data.username }}</h4>
+                            <div class="flex items-center justify-end">
+                                <div class="flex gap-3 text-sm">
+                                    <span class="flex items-center">
+                                        <span class="w-3 h-3 bg-blue-500 rounded-full mr-1"></span>
+                                        Read: {{ getPermissionCount(data.permissions, 'read') }}
+                                    </span>
+                                    <span class="flex items-center">
+                                        <span class="w-3 h-3 bg-green-500 rounded-full mr-1"></span>
+                                        Write: {{ getPermissionCount(data.permissions, 'write') }}
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Permissions List -->
+                        <div v-if="data.permissions && data.permissions.length > 0" class="space-y-3">
+                            <!-- Group permissions by category if available -->
+                            <div v-for="(groupPermissions, groupName) in groupPermissionsByCategory(data.permissions)" :key="groupName" class="border rounded-lg overflow-hidden">
+                                <!-- Category Header -->
+                                <div class="bg-gray-100 px-4 py-2 border-b">
+                                    <div class="flex justify-between items-center">
+                                        <h5 class="font-semibold text-gray-700">{{ groupName }}</h5>
+                                        <span class="text-xs text-gray-500 bg-white px-2 py-1 rounded"> {{ groupPermissions.length }} function(s) </span>
+                                    </div>
+                                </div>
+
+                                <!-- Functions List -->
+                                <div class="bg-white">
+                                    <div class="grid grid-cols-1 md:grid-cols-5 gap-1 p-3">
+                                        <div v-for="perm in groupPermissions" :key="perm.function_id" class="flex items-center justify-between p-2 border rounded hover:bg-gray-50">
+                                            <div class="flex-1">
+                                                <div class="text-sm font-medium text-gray-800">{{ perm.function_name }}</div>
+                                                <div class="text-xs text-gray-500 truncate" :title="perm.function_description || ''">
+                                                    {{ perm.function_description || 'No description' }}
+                                                </div>
+                                            </div>
+                                            <Tag :value="perm.is_write ? 'Write' : 'Read'" :severity="perm.is_write ? 'success' : 'info'" size="small" class="ml-2" />
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- If no categories found, show flat list -->
+                            <div v-if="Object.keys(groupPermissionsByCategory(data.permissions)).length === 0" class="border rounded-lg overflow-hidden">
+                                <div class="bg-gray-100 px-4 py-2 border-b">
+                                    <h5 class="font-semibold text-gray-700">All Functions</h5>
+                                </div>
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-1 p-3">
+                                    <div v-for="perm in data.permissions" :key="perm.function_id" class="flex items-center justify-between p-2 border rounded hover:bg-gray-50">
+                                        <div class="flex-1">
+                                            <div class="text-sm font-medium text-gray-800">{{ perm.function_name }}</div>
+                                            <div class="text-xs text-gray-500 truncate" :title="perm.function_description || ''">
+                                                {{ perm.function_description || 'No description' }}
+                                            </div>
+                                        </div>
+                                        <Tag :value="perm.is_write ? 'Write' : 'Read'" :severity="perm.is_write ? 'success' : 'info'" size="small" class="ml-2" />
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- No Permissions State -->
+                        <div v-else class="text-center py-6">
+                            <div class="inline-flex items-center justify-center w-12 h-12 rounded-full bg-gray-100 mb-3">
+                                <i class="pi pi-lock text-gray-400 text-xl"></i>
+                            </div>
+                            <p class="text-gray-500 font-medium">No functions assigned to this user</p>
+                            <p class="text-gray-400 text-sm mt-1">Edit user to assign functions</p>
+                        </div>
+                    </div>
+                </template>
             </DataTable>
         </div>
 
-        <Dialog v-model:visible="moduleDialogVisible" header="Module List" modal style="width: 50rem">
-            <div class="overflow-x-auto">
-                <div class="min-w-full border rounded-lg divide-y divide-gray-200">
-                    <!-- Header -->
-                    <div class="grid grid-cols-2 bg-gray-100 text-gray-700 font-semibold p-3">
-                        <div>Module</div>
-                        <div class="text-center">Permission</div>
-                    </div>
-
-                    <!-- Module rows -->
-                    <div v-for="(m, i) in selectedModules" :key="i" class="grid grid-cols-2 p-3 items-center hover:bg-gray-50">
-                        <div class="flex items-center gap-2">
-                            <span class="font-bold">-</span>
-                            <span>{{ m.name }}</span>
-                        </div>
-                        <div class="flex justify-center">
-                            <Tag :value="m.write ? 'Write' : 'Read'" :severity="m.write ? 'success' : 'info'" class="px-3 py-1 text-sm" />
-                        </div>
-                    </div>
+        <!-- Delete Confirmation Dialog -->
+        <Dialog v-model:visible="deleteDialogVisible" header="Confirm Deletion" modal :closable="true" :style="{ width: '450px' }">
+            <div class="confirmation-content flex items-center">
+                <i class="pi pi-exclamation-triangle mr-3 text-yellow-500" style="font-size: 2rem" />
+                <div>
+                    <span v-if="selectedUser">
+                        Are you sure you want to delete user <strong>"{{ selectedUser.username }}"</strong>?
+                        <p class="text-sm text-gray-500 mt-1">This action cannot be undone.</p>
+                    </span>
                 </div>
             </div>
+            <template #footer>
+                <Button label="No" icon="pi pi-times" class="p-button-text" @click="deleteDialogVisible = false" :disabled="deleting" />
+                <Button label="Yes" icon="pi pi-check" class="p-button-danger" @click="deleteUser" :loading="deleting" :disabled="deleting" />
+            </template>
         </Dialog>
     </Fluid>
 </template>
 
 <script setup>
-import { onMounted, ref } from 'vue';
+import { onMounted, ref, reactive } from 'vue';
 import { useRouter } from 'vue-router';
 import { FilterMatchMode } from '@primevue/core/api';
-import api from '@/service/api';
 import { useToast } from 'primevue/usetoast';
+import api from '@/service/api';
+import LoadingPage from '@/components/LoadingPage.vue';
 
 const router = useRouter();
 const toast = useToast();
-
 const listData = ref([]);
-const loading = ref(true);
+const loading = ref(false);
+const initialLoading = ref(true);
+const deleting = ref(false);
 
-const moduleDialogVisible = ref(false);
-const selectedModules = ref([]);
+// Expanded rows state
+const expandedRows = ref([]);
+
+// Delete dialog
+const deleteDialogVisible = ref(false);
+const selectedUser = ref(null);
+
+// Function group mapping
+const functionGroupMap = {
+    1: 'Marketing',
+    2: 'OM',
+    3: 'IT & Administration',
+    4: 'Credit Control',
+    5: 'SCM',
+    6: 'OM Report',
+    7: 'Technical',
+    9: 'Members',
+    10: 'Member Reports',
+    13: 'Product',
+    15: 'Maintenance'
+};
 
 const filters = ref({
     global: { value: null, matchMode: FilterMatchMode.CONTAINS }
 });
 
-function openModuleDialog(modules) {
-    selectedModules.value = modules;
-    moduleDialogVisible.value = true;
+// Helper functions
+function formatDate(dateString) {
+    if (!dateString) return '-';
+
+    try {
+        const date = new Date(dateString);
+        return date.toLocaleDateString('en-GB');
+    } catch {
+        return '-';
+    }
 }
+
+const getPermissionCount = (permissions, type) => {
+    if (!permissions) return 0;
+    if (type === 'read') {
+        return permissions.filter((p) => !p.is_write).length;
+    } else {
+        return permissions.filter((p) => p.is_write).length;
+    }
+};
+
+const groupPermissionsByCategory = (permissions) => {
+    if (!permissions) return {};
+
+    const grouped = {};
+
+    permissions.forEach((permission) => {
+        // Try to get the group name from function_group_id
+        let groupName = 'General';
+        if (permission.function_group_id && functionGroupMap[permission.function_group_id]) {
+            groupName = functionGroupMap[permission.function_group_id];
+        }
+
+        if (!grouped[groupName]) {
+            grouped[groupName] = [];
+        }
+
+        grouped[groupName].push(permission);
+    });
+
+    // Sort group names alphabetically
+    const sortedGroups = {};
+    Object.keys(grouped)
+        .sort()
+        .forEach((key) => {
+            sortedGroups[key] = grouped[key];
+        });
+
+    return sortedGroups;
+};
 
 onMounted(async () => {
     await fetchUsers();
 });
 
-const fetchUsers = async () => {
-    loading.value = true;
+const fetchUsers = async (showLoading = true) => {
+    if (showLoading) {
+        loading.value = true;
+    }
     try {
-        const res = await api.get('getAdminUserProfile');
-        
-        if (res.data.status === 1 && res.data.user_profile) {
-            const userProfile = res.data.user_profile;
-            
-            // Transform the single user profile into array format for the table
-            listData.value = [{
-                id: userProfile.user_id,
-                userlist: userProfile.username,
-                description: userProfile.full_name || userProfile.role_info?.role_description || '-',
-                is_super_admin: userProfile.role_info?.is_super_admin ? 1 : 0,
-                sales_person: false, // This field might not be available in the new response
-                created: userProfile.created_date,
-                modules: extractModulesFromPermissions(userProfile.permissions),
-                statusUser: userProfile.user_status ? 1 : 0,
-                department: '-', // Not available in new response
-                mobile: '-', // Not available in new response
-                email: userProfile.email_address || '-',
-                usergroup: userProfile.role_info?.role_name || '-'
-            }];
+        const res = await api.get('admin/list-user');
+
+        if (res.data.status === 1 && res.data.data) {
+            listData.value = res.data.data.map((user) => ({
+                ...user,
+                full_name: `${user.first_name || ''} ${user.last_name || ''}`.trim()
+            }));
         } else {
             listData.value = [];
             toast.add({
                 severity: 'warn',
                 summary: 'No Data',
-                detail: 'No user profile found',
+                detail: 'No users found',
                 life: 3000
             });
         }
     } catch (err) {
+        console.error('Error fetching users:', err);
         listData.value = [];
         toast.add({
             severity: 'error',
             summary: 'Error',
-            detail: 'Failed to fetch user profile',
+            detail: err.response?.data?.message || 'Failed to fetch users',
             life: 3000
         });
     } finally {
-        loading.value = false;
-    }
-};
-
-// Helper function to extract modules from the new permissions structure
-const extractModulesFromPermissions = (permissions) => {
-    if (!permissions || !permissions.function_groups) {
-        return [];
-    }
-
-    const modules = [];
-    
-    permissions.function_groups.forEach(group => {
-        if (group.functions && Array.isArray(group.functions)) {
-            group.functions.forEach(func => {
-                modules.push({
-                    name: func.function_name,
-                    write: func.has_write_access === 1
-                });
-            });
+        if (showLoading) {
+            loading.value = false;
         }
-    });
-
-    return modules;
+        initialLoading.value = false;
+    }
 };
 
 const editUser = (user) => {
-    router.push(`/it/editGroup/${user.id}`);
+    router.push(`/it/editUserAccount/${user.id}`);
 };
 
-const deleteUser = async (user) => {
-    if (!confirm(`Are you sure you want to delete "${user.userlist}"?`)) return;
+const confirmDeleteUser = (user) => {
+    selectedUser.value = user;
+    deleteDialogVisible.value = true;
+};
+
+const deleteUser = async () => {
+    if (!selectedUser.value) return;
+
+    deleting.value = true;
 
     try {
-        // Note: You might need to update the delete endpoint as well
-        const res = await api.delete(`admin/delete-user-role/${user.id}`);
+        const res = await api.post('admin/delete-user', {
+            user_id: selectedUser.value.id
+        });
 
         if (res.data.status === 1) {
             toast.add({
                 severity: 'success',
-                summary: 'Deleted',
-                detail: `"${user.userlist}" has been deleted.`,
+                summary: 'Success',
+                detail: res.data.message || `"${selectedUser.value.username}" has been deleted successfully.`,
                 life: 3000
             });
-            await fetchUsers();
+
+            // Remove the deleted user from the list
+            const index = listData.value.findIndex((user) => user.id === selectedUser.value.id);
+            if (index !== -1) {
+                listData.value.splice(index, 1);
+            }
+
+            // Reset dialog and selection
+            deleteDialogVisible.value = false;
+            selectedUser.value = null;
+
+            // Collapse any expanded rows
+            expandedRows.value = [];
         } else {
+            const errorMessage = res.data.error?.message || res.data.message || 'Failed to delete user';
             toast.add({
                 severity: 'error',
                 summary: 'Error',
-                detail: res.data.error?.messageEnglish || 'Failed to delete user',
+                detail: errorMessage,
                 life: 4000
             });
         }
     } catch (err) {
-        console.error(err);
+        console.error('Delete user error:', err);
+        const errorMessage = err.response?.data?.error?.message || err.response?.data?.message || 'Network error. Please try again.';
         toast.add({
             severity: 'error',
             summary: 'Error',
-            detail: err.response?.data?.error?.messageEnglish || 'Something went wrong',
+            detail: errorMessage,
             life: 4000
         });
+    } finally {
+        deleting.value = false;
     }
 };
 </script>
 
 <style scoped lang="scss">
-:deep(.p-datatable-frozen-tbody) {
-    font-weight: bold;
+.card {
+    background: white;
+    border-radius: 8px;
+    padding: 24px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    position: relative;
+    min-height: 400px;
 }
 
-:deep(.p-datatable-scrollable .p-frozen-column) {
-    font-weight: bold;
+.confirmation-content {
+    .pi-exclamation-triangle {
+        color: #f59e0b;
+    }
+}
+
+/* Expand icon styling */
+:deep(.p-row-toggler) {
+    transition: transform 0.3s ease;
+}
+
+:deep(.p-row-toggler.p-icon) {
+    color: #3b82f6;
+}
+
+:deep(.p-row-toggler:hover) {
+    background-color: #f3f4f6;
+    border-radius: 4px;
+}
+
+:deep(.p-row-toggler.p-row-toggler-open) {
+    transform: rotate(90deg);
+}
+
+/* Expanded row styling */
+:deep(.p-datatable .p-datatable-tbody > tr.p-highlight) {
+    background-color: #f0f9ff !important;
+}
+
+:deep(.p-datatable .p-datatable-tbody > tr.p-highlight td) {
+    border-bottom: 1px solid #dbeafe !important;
 }
 
 // Rounded table styles
@@ -291,7 +480,6 @@ const deleteUser = async (user) => {
         }
     }
 
-    // For the last row in the table body
     .p-datatable-tbody > tr:last-child > td {
         &:first-child {
             border-bottom-left-radius: 0;
@@ -301,10 +489,39 @@ const deleteUser = async (user) => {
         }
     }
 
-    // When table is empty
     .p-datatable-tbody > tr.p-datatable-emptymessage > td {
         border-bottom-left-radius: 12px;
         border-bottom-right-radius: 12px;
     }
+}
+
+/* Expanded row permission styling */
+:deep(.permission-category) {
+    border: 1px solid #e5e7eb;
+    border-radius: 8px;
+    overflow: hidden;
+    margin-bottom: 8px;
+}
+
+:deep(.permission-category-header) {
+    background-color: #f9fafb;
+    padding: 12px 16px;
+    border-bottom: 1px solid #e5e7eb;
+    font-weight: 600;
+    color: #374151;
+}
+
+:deep(.permission-item) {
+    padding: 8px 12px;
+    border-bottom: 1px solid #f3f4f6;
+    transition: background-color 0.2s;
+}
+
+:deep(.permission-item:hover) {
+    background-color: #f9fafb;
+}
+
+:deep(.permission-item:last-child) {
+    border-bottom: none;
 }
 </style>

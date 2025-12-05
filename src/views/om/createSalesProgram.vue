@@ -184,12 +184,14 @@
                                             :filter="true"
                                             :loading="loadingFreeMaterials"
                                             @change="onFreeMaterialChange"
+                                            :filterFields="['material', 'materialid']"
                                         >
                                             <template #value="slotProps">
                                                 <div v-if="slotProps.value" class="flex items-center">
                                                     <div>
                                                         <div class="font-medium">{{ getFreeMaterialLabel(slotProps.value) }}</div>
                                                         <div class="text-xs text-gray-500">{{ slotProps.value }}</div>
+                                                        <!-- Show material ID -->
                                                     </div>
                                                 </div>
                                                 <span v-else>
@@ -201,6 +203,7 @@
                                                     <div>
                                                         <div class="font-medium">{{ slotProps.option.material }}</div>
                                                         <div class="text-xs text-gray-500">{{ slotProps.option.materialid }}</div>
+                                                        <!-- Show material ID -->
                                                     </div>
                                                 </div>
                                             </template>
@@ -746,7 +749,7 @@ const clearFreeSelection = () => {
 
 const getFreeMaterialLabel = (materialId) => {
     const material = freeMaterialOptions.value.find((m) => m.materialid === materialId);
-    return material ? material.material : materialId;
+    return material ? `${material.material} (${material.materialid})` : materialId;
 };
 
 const formatFileSize = (bytes) => {

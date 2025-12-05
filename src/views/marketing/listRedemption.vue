@@ -39,8 +39,8 @@
 
                         <!-- Right: Export & Template Buttons -->
                         <div class="flex items-center gap-2 ml-auto">
-                            <Button type="button" label="Update" icon="pi pi-sync" class="p-button-success" />
-                            <Button type="button" label="Template" icon="pi pi-download" class="p-button-danger" />
+                            <!-- <Button type="button" label="Update" icon="pi pi-sync" class="p-button-success" />
+                            <Button type="button" label="Template" icon="pi pi-download" class="p-button-danger" /> -->
                         </div>
                     </div>
                 </template>

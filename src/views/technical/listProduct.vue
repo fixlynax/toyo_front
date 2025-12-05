@@ -4,6 +4,7 @@
 
         <DataTable
             :value="tyres"
+            @filter="onTableFilter"
             :paginator="true"
             :rows="10"
             :rowsPerPageOptions="[5, 10, 20]"
@@ -68,7 +69,7 @@
             <Column header="Export All" style="min-width: 8rem">
                 <template #header>
                     <div class="flex justify-center">
-                        <Checkbox :binary="true" :model-value="false" @change="() => toggleSelectAll()" />
+                        <Checkbox :key="tyres.length" :binary="true" :model-value="isAllSelected()" @change="() => toggleSelectAll()" />
                     </div>
                 </template>
 
@@ -78,11 +79,15 @@
                     </div>
                 </template>
             </Column>
-            <Column field="materialid" header="Material ID" style="min-width: 6rem" sortable>
+            <Column field="materialid" header="Material" style="min-width: 6rem" sortable>
                 <template #body="{ data }">
-                    <div class="flex flex-col items-start gap-1">
-                        {{ data.materialid }}
-                    </div>
+                    <div class="flex flex-col">
+                            <!-- Top -->
+                            <div class="font-semibold">{{ data.materialid }}</div>
+
+                            <!-- Bottom -->
+                            <div class="text-gray-600 text-sm">{{ data.material }}</div>
+                        </div>  
                 </template>
             </Column>
 
@@ -179,6 +184,8 @@ const stockLevelLoading = ref(false);
 const importInput = ref();
 const selectedExportIds = ref(new Set());
 
+const visibleRows = ref(tyres.value);
+
 // Filters for quick search
 const filters = ref({
     global: { value: null, matchMode: FilterMatchMode.CONTAINS }
@@ -194,6 +201,7 @@ const fetchData = async () => {
             tyres.value = response.data.admin_data.map((product) => ({
                 id: product.id, // Make sure this is included for API calls
                 materialid: product.materialid,
+                material: product.material,
                 twp: product.isTWP === 1,
                 warranty: product.isWarranty === 1,
                 sell: product.isSell === 1,
@@ -298,11 +306,6 @@ const handleStockLevel = async () => {
     }
 };
 
-// Computed boolean: are all rows selected?
-const allSelected = computed(() => {
-    return tyres.value.length > 0 && selectedExportIds.value.size === tyres.value.length;
-});
-
 // Toggle functions
 const handleToggleExport = (id) => {
     if (selectedExportIds.value.has(id)) {
@@ -312,15 +315,27 @@ const handleToggleExport = (id) => {
     }
 };
 
-// Check all
+const onTableFilter = (event) => {
+    // Update visibleRows whenever filtering happens
+    visibleRows.value = event.filteredValue || tyres.value;
+};
+
+// Toggle all visible rows
 const toggleSelectAll = () => {
-    if (allSelected.value) {
-        // Unselect all
-        selectedExportIds.value.clear();
+    const allIds = visibleRows.value.map(item => item.id);
+
+    if (isAllSelected()) {
+        // Remove all visible IDs at once
+        selectedExportIds.value = new Set([...selectedExportIds.value].filter(id => !allIds.includes(id)));
     } else {
-        // Select all
-        tyres.value.forEach((row) => selectedExportIds.value.add(row.id));
+        // Add all visible IDs at once
+        selectedExportIds.value = new Set([...selectedExportIds.value, ...allIds]);
     }
+};
+
+// Computed: are all visible rows selected?
+const isAllSelected = () => {
+    return visibleRows.value.length > 0 && visibleRows.value.every(item => selectedExportIds.value.has(item.id));
 };
 
 // Toggle functions

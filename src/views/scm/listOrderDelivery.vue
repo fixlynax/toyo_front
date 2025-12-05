@@ -14,6 +14,7 @@
             </div>
             <DataTable
                 :value="orderDelList"
+                @filter="onTableFilter"
                 :paginator="true"
                 :rows="10"
                 :rowsPerPageOptions="[10, 20, 50, 100]"
@@ -73,7 +74,7 @@
                 <Column v-if="statusTabs[activeTabIndex]?.label !== 'Completed' && canUpdate" header="Export All" style="min-width: 8rem">
                     <template #header>
                         <div class="flex justify-center">
-                            <Checkbox :key="orderDelList.length" :binary="true" :model-value="allSelected" @change="() => toggleSelectAll()" />
+                            <Checkbox :key="orderDelList.length" :binary="true" :model-value="isAllSelected()" @change="() => toggleSelectAll()" />
                         </div>
                     </template>
 
@@ -182,6 +183,7 @@ const selectedExportIds = ref(new Set());
 const loading = ref(true);
 const orderDelList = ref([]);
 const dateRange = ref(null);
+const visibleRows = ref(orderDelList.value);
 
 const formatDateDMY = (date) => {
     const d = new Date(date);
@@ -223,11 +225,6 @@ watch(activeTabIndex, () => {
     selectedExportIds.value.clear();
 });
 
-// Computed boolean: are all rows selected?
-const allSelected = computed(() => {
-    return orderDelList.value.length > 0 && orderDelList.value.every((item) => selectedExportIds.value.has(item.id));
-});
-
 const handleToggleExport = (id) => {
     if (selectedExportIds.value.has(id)) {
         selectedExportIds.value.delete(id);
@@ -237,19 +234,27 @@ const handleToggleExport = (id) => {
     //   console.log(selectedExportIds.value);
 };
 
-// Check all
+const onTableFilter = (event) => {
+    // Update visibleRows whenever filtering happens
+    visibleRows.value = event.filteredValue || orderDelList.value;
+};
+
+// Toggle all visible rows
 const toggleSelectAll = () => {
-    if (allSelected.value) {
-        // Unselect all for this tab
-        orderDelList.value.forEach((item) => {
-            selectedExportIds.value.delete(item.id);
-        });
+    const allIds = visibleRows.value.map(item => item.id);
+
+    if (isAllSelected()) {
+        // Remove all visible IDs at once
+        selectedExportIds.value = new Set([...selectedExportIds.value].filter(id => !allIds.includes(id)));
     } else {
-        // Select all for this tab
-        orderDelList.value.forEach((item) => {
-            selectedExportIds.value.add(item.id);
-        });
+        // Add all visible IDs at once
+        selectedExportIds.value = new Set([...selectedExportIds.value, ...allIds]);
     }
+};
+
+// Computed: are all visible rows selected?
+const isAllSelected = () => {
+    return visibleRows.value.length > 0 && visibleRows.value.every(item => selectedExportIds.value.has(item.id));
 };
 
 onMounted(async () => {
@@ -529,24 +534,41 @@ const exportToExcel = () => {
     }
 
     try {
-        // Create worksheet data
-        const headers = ['Created', 'SAP DO No', 'Customer Name', 'Customer Acc No', 'Storage Location', 'City', 'State', 'Order Type', 'Eta Date', 'Planned Date', 'Delivered Date', 'Status'];
+            // Create worksheet data
+    const headers = ['Created', 'SAP DO No', 'Customer Name', 'Customer Acc No','Storage Location', 'City', 'State', 'Order Type', 'Driver Name','Driver IC', 'Driver Contact', 'Driver Truck Plate', 'Eta Date','Planned Date', 'Delivered Date', 'Status','Pattern Name', 'Description', 'Qty'];
 
-        // Prepare data rows
-        const csvData = orderDelList.value.map((data) => [
+    const csvData = [];
+
+    orderDelList.value.forEach(data => {
+        const baseRow = [
             `"${formatDate(data.created)}"`,
             `"${data.do_no || '-'}"`,
-            `"${data.shipto_data?.companyName1 || ''} ${data.shipto_data?.companyName2 || ''} "`,
+            `"${data.shipto_data?.companyName1 || ''} ${data.shipto_data?.companyName2 || ''}"`,
             `"${data.shipto_data?.custAccountNo || '-'}"`,
             `"${data.storagelocation || '-'}"`,
             `"${data.shipto_data?.city || '-'}"`,
             `"${data.shipto_data?.state || '-'}"`,
             `"${data.orderDesc || '-'}"`,
+            `"${data.scm_deliver_detail?.driverName || '-'}"`,
+            `"${data.scm_deliver_detail?.driverIC || '-'}"`,
+            `"${data.scm_deliver_detail?.driverContactNo || '-'}"`,
+            `"${data.scm_deliver_detail?.driverPlateNo || '-'}"`,
             `"${formatDate(data.deliveryDate)}"`,
             `"${data.scm_deliver_detail?.scheduled_delivery_time ? formatDate(data.scm_deliver_detail?.scheduled_delivery_time) : 'No date assigned'}"`,
             `"${data.scm_deliver_detail?.delivered_datetime ? formatDate(data.scm_deliver_detail?.delivered_datetime) : 'No date assigned'}"`,
             `"${getStatusLabel2(data.status) || '-'}"`
-        ]);
+        ];
+
+        // Duplicate row for each item
+        data.fullfill_order_array.forEach(item => {
+                csvData.push([
+                    ...baseRow,
+                    `"${item.patternName || '-'}"`,
+                    `"${item.materialdescription || '-'}"`,
+                    `"${parseFloat(item.qty) || '-'}"`
+                ]);
+            });
+        });
 
         // Combine headers and data
         const csvContent = [headers.join(','), ...csvData.map((row) => row.join(','))].join('\n');

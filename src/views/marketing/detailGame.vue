@@ -5,8 +5,14 @@
             <div class="md:w-2/3 flex flex-col">
                 <!-- Detail Event -->
                 <div class="card flex flex-col w-full">
-                    <div class="flex items-center justify-between border-b pb-2">
-                        <div class="text-2xl font-bold text-gray-800">Game Details</div>
+                    <div class="flex items-center justify-between border-b pb-2 mb-2">
+                        <div class="flex items-center gap-3">
+                            <RouterLink to="/marketing/listGame">
+                                <Button icon="pi pi-arrow-left" class="p-button-text p-button-secondary text-xl" size="big" v-tooltip="'Back'" />
+                            </RouterLink>
+                            <div class="text-2xl font-bold text-gray-800">Game Details</div>
+                        </div>
+
                         <div class="inline-flex items-center gap-2">
                             <!-- Edit Event -->
                             <RouterLink :to="`/marketing/editGame/${gameId}`">
@@ -40,11 +46,11 @@
                         <div class="flex flex-col md:flex-row gap-4 mt-3">
                             <div class="w-full">
                                 <span class="block text-xm font-bold text-black-700">Start Date</span>
-                                <p class="text-lg font-medium">{{ formatDisplayDate(game.startDate) }}</p>
+                                <p class="text-lg font-medium">{{ formatDate(game.startDate) }}</p>
                             </div>
                             <div class="w-full">
                                 <span class="block text-xm font-bold text-black-700">End Date</span>
-                                <p class="text-lg font-medium">{{ formatDisplayDate(game.endDate) }}</p>
+                                <p class="text-lg font-medium">{{ formatDate(game.endDate) }}</p>
                             </div>
                         </div>
                     </div>
@@ -88,11 +94,11 @@
                         </Column>
 
                         <!-- Action Column -->
-                        <Column header="Action" style="min-width: 6rem">
+                        <!-- <Column header="Action" style="min-width: 6rem">
                             <template #body="{ data }">
                                 <Button icon="pi pi-pencil" class="p-button-text p-button-info" @click="openEditDialog(data)" />
                             </template>
-                        </Column>
+                        </Column> -->
                     </DataTable>
                 </div>
             </div>
@@ -115,7 +121,7 @@
                                 </tr>
                                 <tr class="border-b">
                                     <td class="px-4 py-2 font-medium">Published</td>
-                                    <td class="px-4 py-2 text-right">{{ formatDisplayDate(game.publishDate) }}</td>
+                                    <td class="px-4 py-2 text-right">{{ formatDate(game.publishDate) }}</td>
                                 </tr>
                                 <tr class="border-b">
                                     <td class="px-4 py-2 font-medium">Type</td>
@@ -131,7 +137,7 @@
                                 </tr>
                                 <tr class="border-b">
                                     <td class="px-4 py-2 font-medium align-top">QR Game</td>
-                                    <td class=" py-2">
+                                    <td class="py-2">
                                         <div class="flex flex-col items-end gap-3">
                                             <div ref="qrWrapper" class="bg-white p-2 rounded-xl shadow-sm">
                                                 <qrcode-vue :value="qrCodeData" :size="70" level="H" render-as="canvas" />
@@ -265,6 +271,22 @@ const gameStatus = computed({
     }
 });
 
+function formatDate(dateString) {
+    if (!dateString) return '';
+
+    // DD-MM-YYYY
+    const [day, month, year] = dateString.split('-');
+    const date = new Date(`${year}-${month}-${day}`);
+
+    if (isNaN(date.getTime())) return '';
+
+    return date.toLocaleDateString('en-MY', {
+        year: 'numeric',
+        month: '2-digit',
+        day: '2-digit'
+    });
+}
+
 // Format date from YYYY-MM-DD to DD-MM-YYYY
 function formatDisplayDate(dateString) {
     if (!dateString) return '';
@@ -391,15 +413,12 @@ const toggleGameStatus = async () => {
         const response = await api.put(`game/toggleInactive/${gameId}`);
 
         if (response.data.status === 1) {
-
-
             toast.add({
                 severity: 'success',
                 summary: 'Success',
                 detail: `Game status updated successfully`,
                 life: 3000
             });
-            
         } else {
             toast.add({
                 severity: 'error',
@@ -416,8 +435,7 @@ const toggleGameStatus = async () => {
             detail: 'Failed to update game status',
             life: 3000
         });
-    }
-    finally {
+    } finally {
         fetchGameDetails();
     }
 };
@@ -434,7 +452,7 @@ const confirmDelete = () => {
         accept: async () => {
             try {
                 const response = await api.put(`game/delete/${gameId}`);
-                
+
                 if (response.data.status === 1) {
                     toast.add({
                         severity: 'success',

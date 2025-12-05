@@ -44,14 +44,6 @@ const router = createRouter({
             path: '/',
             component: AppLayout,
             children: [
-                // ===============================
-                // TEST API CONNECTION
-                // ===============================
-                // {
-                //     path: 'test-api',
-                //     name: 'Test-API',
-                //     component: () => import('@/views/TestAPI.vue')
-                // },
 
                 // ===============================
                 // DASHBOARD
@@ -659,9 +651,10 @@ const router = createRouter({
                     component: () => import('@/views/it/createUserAccount.vue')
                 },
                 {
-                    path: 'it/editUserAccount',
+                    path: 'it/editUserAccount/:id',
                     name: 'Edit-User-Account',
-                    component: () => import('@/views/it/editUserAccount.vue')
+                    component: () => import('@/views/it/editUserAccount.vue'),
+                    props: true
                 },
 
                 // Salesman Accounts
@@ -873,104 +866,21 @@ const router = createRouter({
                     props: true
                 },
 
-                // Back Order
-                {
-                    path: 'scm/listSCMBackOrder',
-                    name: 'List-SCM-BackOrder',
-                    component: () => import('@/views/scm/listSCMBackOrder.vue'),
-                    meta: { permission: '3PL Account', access: 'view' },
-                },
-                {
-                    path: 'scm/detailSCMBackOrder/:boNo',
-                    name: 'Detail-SCM-BackOrder',
-                    component: () => import('@/views/scm/detailSCMBackOrder.vue'),
-                    meta: { permission: 'Back Order', access: 'view' },
-                    props: true
-                },
-                {
-                    path: 'scm/testpagination',
-                    name: 'List-SCM-BackOrder',
-                    component: () => import('@/views/scm/testpagination.vue'),
-                },
+                // // Back Order
+                // {
+                //     path: 'scm/listSCMBackOrder',
+                //     name: 'List-SCM-BackOrder',
+                //     component: () => import('@/views/scm/listSCMBackOrder.vue'),
+                //     meta: { permission: 'Back Order', access: 'view' },
+                // },
+                // {
+                //     path: 'scm/detailSCMBackOrder/:boNo',
+                //     name: 'Detail-SCM-BackOrder',
+                //     component: () => import('@/views/scm/detailSCMBackOrder.vue'),
+                //     meta: { permission: 'Back Order', access: 'view' },
+                //     props: true
+                // },
 
-                // ===============================
-                // UI KIT (Documentation/Components)
-                // ===============================
-                {
-                    path: 'uikit/formlayout',
-                    name: 'formlayout',
-                    component: () => import('@/views/uikit/FormLayout.vue')
-                },
-                {
-                    path: 'uikit/input',
-                    name: 'input',
-                    component: () => import('@/views/uikit/InputDoc.vue')
-                },
-                {
-                    path: 'uikit/button',
-                    name: 'button',
-                    component: () => import('@/views/uikit/ButtonDoc.vue')
-                },
-                {
-                    path: 'uikit/table',
-                    name: 'table',
-                    component: () => import('@/views/uikit/TableDoc.vue')
-                },
-                {
-                    path: 'uikit/list',
-                    name: 'list',
-                    component: () => import('@/views/uikit/ListDoc.vue')
-                },
-                {
-                    path: 'uikit/tree',
-                    name: 'tree',
-                    component: () => import('@/views/uikit/TreeDoc.vue')
-                },
-                {
-                    path: 'uikit/panel',
-                    name: 'panel',
-                    component: () => import('@/views/uikit/PanelsDoc.vue')
-                },
-                {
-                    path: 'uikit/overlay',
-                    name: 'overlay',
-                    component: () => import('@/views/uikit/OverlayDoc.vue')
-                },
-                {
-                    path: 'uikit/media',
-                    name: 'media',
-                    component: () => import('@/views/uikit/MediaDoc.vue')
-                },
-                {
-                    path: 'uikit/message',
-                    name: 'message',
-                    component: () => import('@/views/uikit/MessagesDoc.vue')
-                },
-                {
-                    path: 'uikit/file',
-                    name: 'file',
-                    component: () => import('@/views/uikit/FileDoc.vue')
-                },
-                {
-                    path: 'uikit/menu',
-                    name: 'menu',
-                    component: () => import('@/views/uikit/MenuDoc.vue')
-                },
-                {
-                    path: 'uikit/charts',
-                    name: 'charts',
-                    component: () => import('@/views/uikit/ChartDoc.vue')
-                },
-                {
-                    path: 'uikit/misc',
-                    name: 'misc',
-                    component: () => import('@/views/uikit/MiscDoc.vue')
-                },
-                {
-                    path: 'uikit/timeline',
-                    name: 'timeline',
-                    component: () => import('@/views/uikit/TimelineDoc.vue')
-                },
 
                 // ===============================
                 // PAGES
@@ -985,16 +895,6 @@ const router = createRouter({
                     name: 'unauthorize',
                     component: () => import('@/views/pages/Empty.vue')
                 },
-                {
-                    path: 'pages/crud',
-                    name: 'crud',
-                    component: () => import('@/views/pages/Crud.vue')
-                },
-                {
-                    path: 'documentation',
-                    name: 'documentation',
-                    component: () => import('@/views/pages/Documentation.vue')
-                }
             ]
         },
 

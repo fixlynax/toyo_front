@@ -68,7 +68,7 @@
 
                 <!-- Upload Images -->
                 <div>
-                    <label class="block font-bold text-gray-700 mb-2">Upload Game Images</label>
+                    <label class="block font-bold text-gray-700 mb-2">Upload Game Images <span class="text-xs bg-blue-100 text-blue-800 px-2 py-0.5 rounded-full">1280 × 720 px (max 2MB)</span> </label>
                     <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
                         <div class="relative">
                             <FileUpload mode="basic" name="image1" accept="image/*" customUpload @select="onImageSelect($event, 'image1')" chooseLabel="Change Image 1" class="w-full" />
@@ -152,7 +152,7 @@
                                         </div>
                                         <div class="flex flex-col">
                                             <span class="font-semibold text-gray-800">{{ slotProps.option.prizeName }}</span>
-                                            <small class="text-gray-500">{{ slotProps.option.prizeType }}</small>
+                                            <small class="text-gray-500">{{ slotProps.option.prizeType }} • Available: {{ slotProps.option.availableqty }}</small>
                                         </div>
                                     </div>
                                 </template>
@@ -163,7 +163,7 @@
                                         </div>
                                         <div>
                                             <span class="font-semibold text-gray-800">{{ slotProps.value.prizeName }}</span>
-                                            <small class="block text-gray-500">{{ slotProps.value.prizeType }}</small>
+                                            <small class="block text-gray-500">{{ slotProps.value.prizeType }} • Available: {{ slotProps.value.availableqty }}</small>
                                         </div>
                                     </div>
                                     <span v-else class="text-gray-400">Select Prize</span>
@@ -176,7 +176,7 @@
                         <div class="w-full">
                             <FloatLabel>
                                 <InputNumber id="qty" v-model="prize.qty" :min="1" class="w-full" />
-                                <label for="qty">Quantity</label>
+                                <label for="qty">Current Quantity({{ prize.qty }})</label>
                             </FloatLabel>
                             <small v-if="errors[`qty_${index}`]" class="text-red-500">{{ errors[`qty_${index}`] }}</small>
                         </div>
@@ -310,7 +310,7 @@ const fetchCatalog = async () => {
                 prizeName: item.title,
                 prizeType: item.type,
                 prizeQuota: item.totalqty,
-                prizeRemain: item.availableqty,
+                availableqty: item.availableqty,
                 description: item.description,
                 valueAmount: item.valueAmount,
                 valueType: item.valueType,
@@ -441,7 +441,19 @@ const removePrize = (index) => {
 
 const onImageSelect = (eventFile, field) => {
     const file = eventFile.files[0];
+
     if (file) {
+        // ✅ Check file size limit (2MB = 2 * 1024 * 1024 bytes)
+        if (file.size > 2 * 1024 * 1024) {
+            toast.add({
+                severity: 'warn',
+                summary: 'File too large',
+                detail: 'Maximum file size allowed is 2MB.',
+                life: 3000
+            });
+            return;
+        }
+
         imageFiles.value[field] = file;
 
         const reader = new FileReader();
@@ -451,6 +463,7 @@ const onImageSelect = (eventFile, field) => {
         reader.readAsDataURL(file);
     }
 };
+
 
 const removeImage = (field) => {
     game.value[`${field}URL`] = '';
@@ -584,7 +597,7 @@ const updateGame = async () => {
                 detail: 'Game updated successfully!',
                 life: 3000
             });
-            router.push('/marketing/listGame');
+            router.push(`/marketing/detailGame/${gameId}`); // Fixed: changed 'id' to 'gameId'
         } else {
             console.error('Backend error:', response.data);
             toast.add({

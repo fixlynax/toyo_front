@@ -40,6 +40,7 @@
                         <!-- Event Info -->
                         <div class="mt-6">
                             <h1 class="text-2xl font-bold text-gray-800">{{ event.title }}</h1>
+                            <p class="text-lg font-medium">{{ event.headline }}</p>
                             <p class="text-lg font-medium">{{ event.desc }}</p>
 
                             <div class="flex flex-col md:flex-row gap-4 mt-3">
@@ -52,11 +53,11 @@
                             <div class="flex flex-col md:flex-row gap-4 mt-3">
                                 <div class="w-full">
                                     <span class="block text-xm font-bold text-black-700">Start Date</span>
-                                    <p class="text-lg font-medium">{{ event.startDate }}</p>
+                                    <p class="text-lg font-medium">{{ formatDate(event.startDate) }}</p>
                                 </div>
                                 <div class="w-full">
                                     <span class="block text-xm font-bold text-black-700">End Date</span>
-                                    <p class="text-lg font-medium">{{ event.endDate }}</p>
+                                    <p class="text-lg font-medium">{{ formatDate(event.endDate) }}</p>
                                 </div>
                             </div>
                         </div>
@@ -67,7 +68,7 @@
                 <div class="card flex flex-col w-full" v-if="event.isSurvey === 'Yes' && surveyQuestions.length > 0">
                     <div class="flex items-center justify-between border-b pb-2 mb-2">
                         <div class="text-2xl font-bold text-gray-800">📋 Survey Info</div>
-                        <Button icon="pi pi-download" label="Report" style="width: fit-content" class="p-button-danger p-button-sm" />
+                        <!-- <Button icon="pi pi-download" label="Report" style="width: fit-content" class="p-button-danger p-button-sm" /> -->
                     </div>
 
                     <div class="space-y-6">
@@ -119,7 +120,7 @@
                             <tbody>
                                 <tr class="border-b">
                                     <td class="px-4 py-2 font-medium">Published</td>
-                                    <td class="px-4 py-2 text-right">{{ event.publishDate }}</td>
+                                    <td class="px-4 py-2 text-right">{{ formatDate(event.publishDate) }}</td>
                                 </tr>
                                 <!-- <tr class="border-b">
                                     <td class="px-4 py-2 font-medium">Audience</td>
@@ -168,7 +169,6 @@
                         <div class="text-2xl font-bold text-gray-800">👨🏻‍💻 Participant List</div>
                         <Button icon="pi pi-file-export" label="Export" style="width: fit-content" class="p-button-danger p-button-sm" />
                     </div>
-
                     <DataTable :value="participants" :paginator="true" :rows="10" dataKey="id" :rowHover="true" responsiveLayout="scroll" class="text-sm">
                         <Column header="User" style="min-width: 1rem">
                             <template #body="{ data }">
@@ -217,6 +217,7 @@ const event = ref({
     image1URL: '',
     image2URL: '',
     image3URL: '',
+    headline: '',
     desc: '',
     location: '',
     publishDate: '',
@@ -283,7 +284,7 @@ const confirmDelete = () => {
         accept: async () => {
             try {
                 const response = await api.put(`event/delete/${event.value.id}`);
-                
+
                 if (response.data.status === 1) {
                     toast.add({
                         severity: 'success',
@@ -321,6 +322,22 @@ const confirmDelete = () => {
     });
 };
 
+function formatDate(dateString) {
+    if (!dateString) return '';
+
+    // DD-MM-YYYY
+    const [day, month, year] = dateString.split('-');
+    const date = new Date(`${year}-${month}-${day}`);
+
+    if (isNaN(date.getTime())) return '';
+
+    return date.toLocaleDateString('en-MY', {
+        year: 'numeric',
+        month: '2-digit',
+        day: '2-digit'
+    });
+}
+
 // Fetch event details
 const fetchEventDetails = async () => {
     try {
@@ -343,7 +360,7 @@ const fetchEventDetails = async () => {
 
             // Handle participants
             if (eventData.participants) {
-                participants.value = eventData.participants;
+                participants.value = (eventData.participants || []).filter((p) => p && typeof p === 'object');
             }
 
             // Process private images

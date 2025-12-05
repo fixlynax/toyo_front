@@ -48,6 +48,7 @@
                                 placeholder="Select Shipping Date" 
                                 dateFormat="dd-mm-yy"
                                 :class="{ 'p-invalid': formErrors.ship_date }"
+                                showIcon
                             />
                             <small v-if="formErrors.ship_date" class="p-error">{{ formErrors.ship_date[0] }}</small>
                         </div>
@@ -61,6 +62,7 @@
                                 class="w-full" 
                                 :class="{ 'p-invalid': formErrors.recipient }"
                                 placeholder="Recipient Name" 
+                                disabled 
                             />
                             <small v-if="formErrors.recipient" class="p-error">{{ formErrors.recipient[0] }}</small>
                         </div>
@@ -74,6 +76,7 @@
                                 class="w-full" 
                                 :class="{ 'p-invalid': formErrors.contact }"
                                 placeholder="Contact Number" 
+                                disabled 
                             />
                             <small v-if="formErrors.contact" class="p-error">{{ formErrors.contact[0] }}</small>
                         </div>
@@ -113,6 +116,7 @@
                                 class="w-full" 
                                 :class="{ 'p-invalid': formErrors.address_line_1 }"
                                 placeholder="Street Address" 
+                                disabled 
                             />
                             <small v-if="formErrors.address_line_1" class="p-error">{{ formErrors.address_line_1[0] }}</small>
                         </div>
@@ -125,6 +129,7 @@
                                 type="text" 
                                 class="w-full" 
                                 placeholder="Apartment, Suite, etc. (optional)" 
+                                disabled 
                             />
                         </div>
 
@@ -137,6 +142,7 @@
                                 class="w-full" 
                                 :class="{ 'p-invalid': formErrors.city }"
                                 placeholder="City" 
+                                disabled 
                             />
                             <small v-if="formErrors.city" class="p-error">{{ formErrors.city[0] }}</small>
                         </div>
@@ -148,6 +154,7 @@
                                 class="w-full" 
                                 :class="{ 'p-invalid': formErrors.state }"
                                 placeholder="State" 
+                                disabled 
                             />
                             <small v-if="formErrors.state" class="p-error">{{ formErrors.state[0] }}</small>
                         </div>
@@ -161,6 +168,7 @@
                                 class="w-full" 
                                 :class="{ 'p-invalid': formErrors.postcode }"
                                 placeholder="Postcode" 
+                                disabled 
                             />
                             <small v-if="formErrors.postcode" class="p-error">{{ formErrors.postcode[0] }}</small>
                         </div>
@@ -171,7 +179,8 @@
                                 type="text" 
                                 class="w-full" 
                                 :class="{ 'p-invalid': formErrors.country }"
-                                placeholder="Country" 
+                                placeholder="Country"
+                                disabled 
                             />
                             <small v-if="formErrors.country" class="p-error">{{ formErrors.country[0] }}</small>
                         </div>
@@ -199,8 +208,8 @@
             <div class="md:w-1/3 flex flex-col" v-if="!loading">
                 <div class="card flex flex-col w-full">
                     <div class="flex items-center justify-between border-b pb-2 mb-2">
-                        <h2 class="text-2xl font-bold text-gray-800">ℹ️ Advance Info</h2>
-                        <Tag :value="statusLabel(redemption.status)" :severity="statusSeverity(redemption.status)" />
+                        <h2 class="text-2xl font-bold text-gray-800">Advance Info</h2>
+                        <!-- <Tag :value="statusLabel(redemption.status)" :severity="statusSeverity(redemption.status)" /> -->
                     </div>
 
                     <div class="overflow-x-auto">
@@ -266,7 +275,7 @@ const redemption = ref({
     redemptionDate: '',
     courierName: '',
     trackingNumber: '',
-    shippedDate: '',
+    ship_date: '',
     adminID: '',
     approvedBy: '',
     status: 0,
@@ -278,7 +287,7 @@ const form = ref({
     recipient: '',
     contact: '',
     courier: '',
-    ship_date: null,
+    shippedDate: null,
     tracking_no: '',
     address_line_1: '',
     address_line_2: '',
@@ -316,7 +325,7 @@ const fetchRedemptionDetails = async () => {
                 redemptionDate: redemptionData.created,
                 courierName: redemptionData.courierName,
                 trackingNumber: redemptionData.trackingNumber,
-                shippedDate: redemptionData.shippedDate,
+                shippedDate: redemptionData.ship_date,
                 adminID: redemptionData.adminID,
                 approvedBy: redemptionData.approvedBy,
                 status: redemptionData.status,
@@ -328,7 +337,7 @@ const fetchRedemptionDetails = async () => {
                 recipient: redemptionData.recipientName || '',
                 contact: redemptionData.contactNumber || '',
                 courier: redemptionData.courierName || '',
-                ship_date: parseDate(redemptionData.shippedDate),
+                shippedDate: redemptionData.ship_date ? parseDate(redemptionData.ship_date) : null,
                 tracking_no: redemptionData.trackingNumber || '',
                 address_line_1: redemptionData.addLine1 || '',
                 address_line_2: redemptionData.addLine2 || '',
@@ -351,10 +360,20 @@ const fetchRedemptionDetails = async () => {
 };
 
 const parseDate = (dateStr) => {
-                if (!dateStr) return '';
-                const [day, month, year] = dateStr.split('-');
-                return new Date(`${year}-${month}-${day}`);
-            };
+    if (!dateStr) return null;
+    try {
+        // Handle different date formats
+        if (dateStr.includes('-')) {
+            const [day, month, year] = dateStr.split('-');
+            return new Date(`${year}-${month}-${day}`);
+        }
+        // If it's already in ISO format or other format
+        return new Date(dateStr);
+    } catch (error) {
+        console.error('Error parsing date:', error);
+        return null;
+    }
+};
 
 // Save Changes with FormData
 const saveChanges = async () => {
@@ -363,23 +382,25 @@ const saveChanges = async () => {
 
     try {
         // Format date to dd-mm-yyyy
-        const formattedDate = form.value.ship_date 
-            ? formatDateForAPI(form.value.ship_date)
+        const formattedDate = form.value.shippedDate 
+            ? formatDateForAPI(form.value.shippedDate)
             : '';
+
+        // Debug log
+        console.log('Form date value:', form.value.shippedDate);
+        console.log('Formatted date:', formattedDate);
 
         // Create FormData and append all fields
         const formData = new FormData();
-        formData.append('recipient', form.value.recipient);
-        formData.append('contact', form.value.contact);
         formData.append('courier', form.value.courier);
-        formData.append('ship_date', formattedDate);
+        formData.append('ship_date', formattedDate); // Use formatted date string
         formData.append('tracking_no', form.value.tracking_no);
-        formData.append('address_line_1', form.value.address_line_1);
-        formData.append('address_line_2', form.value.address_line_2 || '');
-        formData.append('city', form.value.city);
-        formData.append('state', form.value.state);
-        formData.append('postcode', form.value.postcode);
-        formData.append('country', form.value.country);
+        
+
+        // Debug: Log all form data
+        for (let [key, value] of formData.entries()) {
+            console.log(`${key}:`, value);
+        }
 
         // Send update request
         const response = await api.post(`redeem/edit/${redemptionId}`, formData, {
@@ -418,12 +439,25 @@ const saveChanges = async () => {
 const formatDateForAPI = (date) => {
     if (!date) return '';
     
-    const d = new Date(date);
-    const day = String(d.getDate()).padStart(2, '0');
-    const month = String(d.getMonth() + 1).padStart(2, '0');
-    const year = d.getFullYear();
-    
-    return `${day}-${month}-${year}`;
+    try {
+        // Handle both Date objects and strings
+        const d = date instanceof Date ? date : new Date(date);
+        
+        // Check if date is valid
+        if (isNaN(d.getTime())) {
+            console.error('Invalid date:', date);
+            return '';
+        }
+        
+        const day = String(d.getDate()).padStart(2, '0');
+        const month = String(d.getMonth() + 1).padStart(2, '0');
+        const year = d.getFullYear();
+        
+        return `${day}-${month}-${year}`;
+    } catch (error) {
+        console.error('Error formatting date for API:', error);
+        return '';
+    }
 };
 
 // Format date for display
@@ -432,6 +466,21 @@ const formatDate = (dateString) => {
     
     try {
         const date = new Date(dateString);
+        if (isNaN(date.getTime())) {
+            // Try parsing dd-mm-yyyy format
+            if (dateString.includes('-')) {
+                const [day, month, year] = dateString.split('-');
+                const parsedDate = new Date(`${year}-${month}-${day}`);
+                if (!isNaN(parsedDate.getTime())) {
+                    return parsedDate.toLocaleDateString('en-US', {
+                        year: 'numeric',
+                        month: 'short',
+                        day: 'numeric'
+                    });
+                }
+            }
+            return dateString;
+        }
         return date.toLocaleDateString('en-US', {
             year: 'numeric',
             month: 'short',

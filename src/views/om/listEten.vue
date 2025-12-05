@@ -31,7 +31,6 @@
                             </InputIcon>
                             <InputText v-model="filters['global'].value" placeholder="Quick Search" class="w-full" />
                         </IconField>
-                        <Button type="button" icon="pi pi-cog" class="p-button" />
                     </div>
                     <div class="flex gap-2">
                         <!-- <Button type="button" label="Bulk Update" @click="fetchData" /> -->

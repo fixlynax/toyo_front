@@ -2,410 +2,302 @@
     <Fluid>
         <div class="flex flex-col md:flex-row gap-8">
             <div class="card flex flex-col gap-6 w-full">
-                <!-- Header -->
-                <div class="text-2xl font-bold text-gray-800 border-b pb-2">Create User Role</div>
+                <div class="text-2xl font-bold text-gray-800 border-b pb-2">Create Group</div>
 
-                <!-- Form -->
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
-                    <!-- Name -->
-                    <div class="md:col-span-1">
-                        <label class="block font-bold text-gray-700 mb-2">Name</label>
-                        <InputText v-model="form.name" placeholder="Enter role name" class="w-full" />
-                    </div>
-
-                    <!-- Status -->
-                    <div class="md:col-span-1">
-                        <label class="block font-bold text-gray-700 mb-2">Status</label>
-                        <Select v-model="form.status" :options="statusOptions" optionLabel="label" optionValue="value" placeholder="Select status" class="w-full" />
-                    </div>
-
-                    <!-- Description -->
-                    <div class="md:col-span-2">
-                        <label class="block font-bold text-gray-700 mb-2">Description</label>
-                        <Textarea v-model="form.description" rows="3" placeholder="Enter role description" class="w-full" />
-                    </div>
-
-                    <!-- Permissions Dropdown -->
-                    <div class="md:col-span-2">
-                        <label class="block font-bold text-gray-700 mb-2">Permissions</label>
-                        <div class="flex items-center gap-2">
-                            <InputText :value="getSelectedPermissionsText" placeholder="Click to set permissions" class="w-full" readonly @click="permissionsDialogVisible = true" />
-                            <Button icon="pi pi-cog" class="p-button-outlined" @click="permissionsDialogVisible = true" tooltip="Configure Permissions" />
-                        </div>
-                        <small class="text-gray-500">
-                            {{ getSelectedPermissionsCount }}
-                        </small>
-                    </div>
-                    
-                    <!-- Is Super Admin -->
-                    <div class="md:col-span-2">
-                        <div class="flex items-center gap-2">
-                            <Checkbox v-model="form.is_super_admin" :binary="true" inputId="super_admin" />
-                            <label for="super_admin" class="font-bold text-gray-700 cursor-pointer"> Super Administrator (Full system access) </label>
-                        </div>
-                    </div>
-
-                    <!-- Is Sales Person -->
-                    <div class="md:col-span-2">
-                        <div class="flex items-center gap-2">
-                            <Checkbox v-model="form.is_sales_person" :binary="true" inputId="sales_person" />
-                            <label for="sales_person" class="font-bold text-gray-700 cursor-pointer"> Sales Person (Can place orders) </label>
-                        </div>
+                <!-- Error Alert for non-field errors -->
+                <div v-if="apiErrors.general" class="p-4 mb-4 border border-red-300 bg-red-50 rounded-md">
+                    <div class="flex items-center">
+                        <i class="pi pi-exclamation-circle text-red-500 mr-2"></i>
+                        <span class="text-red-700 font-medium">{{ apiErrors.general }}</span>
                     </div>
                 </div>
 
-                <!-- Action Buttons -->
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
+                    <div class="md:col-span-1">
+                        <label class="block font-bold text-gray-700 mb-2">Name</label>
+                        <InputText v-model="form.name" placeholder="Enter group name" class="w-full" :class="{ 'p-invalid': fieldErrors.name }" />
+                        <small v-if="fieldErrors.name" class="p-error block mt-1">
+                            <i class="pi pi-exclamation-circle text-xs mr-1"></i>
+                            {{ fieldErrors.name }}
+                        </small>
+                    </div>
+
+                    <div class="md:col-span-1">
+                        <label class="block font-bold text-gray-700 mb-2">Status</label>
+                        <Select v-model="form.status" :options="statusOptions" optionLabel="label" optionValue="value" placeholder="Select status" class="w-full" :class="{ 'p-invalid': fieldErrors.status }" />
+                        <small v-if="fieldErrors.status" class="p-error block mt-1">
+                            <i class="pi pi-exclamation-circle text-xs mr-1"></i>
+                            {{ fieldErrors.status }}
+                        </small>
+                    </div>
+
+                    <div class="md:col-span-2">
+                        <label class="block font-bold text-gray-700 mb-2">Description</label>
+                        <Textarea v-model="form.description" rows="3" placeholder="Enter description" class="w-full" :class="{ 'p-invalid': fieldErrors.description }" />
+                        <small v-if="fieldErrors.description" class="p-error block mt-1">
+                            <i class="pi pi-exclamation-circle text-xs mr-1"></i>
+                            {{ fieldErrors.description }}
+                        </small>
+                    </div>
+
+                    <div class="md:col-span-2">
+                        <div class="flex items-center gap-2">
+                            <Checkbox v-model="form.is_super_admin" :binary="true" inputId="super_admin" :class="{ 'p-invalid': fieldErrors.is_super_admin }" />
+                            <label for="super_admin" class="font-bold text-gray-700 cursor-pointer">Super Administrator</label>
+                        </div>
+                        <small v-if="fieldErrors.is_super_admin" class="p-error block mt-1 ml-6">
+                            <i class="pi pi-exclamation-circle text-xs mr-1"></i>
+                            {{ fieldErrors.is_super_admin }}
+                        </small>
+                    </div>
+
+                    <div class="md:col-span-2">
+                        <div class="flex items-center gap-2">
+                            <Checkbox v-model="form.is_sales_person" :binary="true" inputId="sales_person" :class="{ 'p-invalid': fieldErrors.is_sales_person }" />
+                            <label for="sales_person" class="font-bold text-gray-700 cursor-pointer">Sales Person</label>
+                        </div>
+                        <small v-if="fieldErrors.is_sales_person" class="p-error block mt-1 ml-6">
+                            <i class="pi pi-exclamation-circle text-xs mr-1"></i>
+                            {{ fieldErrors.is_sales_person }}
+                        </small>
+                    </div>
+                </div>
+
                 <div class="flex justify-end mt-8 gap-2">
                     <div class="w-32">
-                        <Button label="Cancel" class="w-full p-button-secondary" @click="cancel" />
+                        <Button label="Cancel" class="w-full p-button-secondary" @click="cancel" :disabled="submitting" />
                     </div>
                     <div class="w-32">
-                        <Button label="Create" class="w-full p-button" @click="submitForm" :loading="submitting" />
+                        <Button label="Create" class="w-full p-button" @click="submitForm" :loading="submitting" :disabled="submitting" />
                     </div>
                 </div>
             </div>
         </div>
-
-        <!-- Permissions Dialog -->
-        <Dialog v-model:visible="permissionsDialogVisible" header="Set Permissions" modal :closable="true" :focusOnShow="false" style="width: 60rem; max-width: 90vw">
-            <div class="flex flex-col gap-6 max-h-96 overflow-y-auto">
-                <!-- Quick Actions -->
-                <div class="flex gap-2 mb-4">
-                    <Button label="Set All Read" class="p-button-outlined p-button-sm" @click="setAllPermissions('read')" />
-                    <Button label="Set All Write" class="p-button-outlined p-button-sm" @click="setAllPermissions('write')" />
-                    <Button label="Clear All" class="p-button-outlined p-button-sm" @click="setAllPermissions('none')" />
-                </div>
-
-                <!-- Permission Groups -->
-                <div v-for="group in permissionGroups" :key="group.group_id" class="border rounded-lg p-4">
-                    <div class="font-bold text-lg mb-3 text-gray-800">
-                        {{ group.group_name || 'General' }}
-                    </div>
-                    <div class="grid grid-cols-1 gap-3">
-                        <div v-for="func in group.functions" :key="func.id" class="flex items-center justify-between p-2 hover:bg-gray-50 rounded">
-                            <div class="flex-1">
-                                <div class="font-medium text-gray-800">{{ func.name }}</div>
-                                <div class="text-sm text-gray-500">{{ func.description }}</div>
-                                <div class="text-xs text-gray-400">{{ func.code }}</div>
-                            </div>
-                            <div class="flex gap-4 items-center">
-                                <!-- None -->
-                                <div class="flex items-center gap-2">
-                                    <RadioButton v-model="permissionState[func.id]" :inputId="func.id + '_none'" :name="'perm_' + func.id" value="none" />
-                                    <label :for="func.id + '_none'" class="cursor-pointer text-gray-600 text-sm">None</label>
-                                </div>
-
-                                <!-- Read -->
-                                <div class="flex items-center gap-2">
-                                    <RadioButton v-model="permissionState[func.id]" :inputId="func.id + '_read'" :name="'perm_' + func.id" value="read" />
-                                    <label :for="func.id + '_read'" class="cursor-pointer text-blue-600 text-sm">Read</label>
-                                </div>
-
-                                <!-- Write -->
-                                <div class="flex items-center gap-2">
-                                    <RadioButton v-model="permissionState[func.id]" :inputId="func.id + '_write'" :name="'perm_' + func.id" value="write" />
-                                    <label :for="func.id + '_write'" class="cursor-pointer text-green-600 text-sm">Write</label>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <template #footer>
-                <div class="flex justify-between items-center w-full">
-                    <div class="text-sm text-gray-600">
-                        {{ getSelectedPermissionsCount }}
-                    </div>
-                    <div class="flex gap-2">
-                        <Button label="Close" class="p-button-secondary" @click="permissionsDialogVisible = false" />
-                    </div>
-                </div>
-            </template>
-        </Dialog>
     </Fluid>
 </template>
 
 <script setup>
-import { ref, reactive, watch, onMounted, computed } from 'vue';
+import { ref, reactive, computed } from 'vue';
 import { useRouter } from 'vue-router';
 import { useToast } from 'primevue/usetoast';
 import InputText from 'primevue/inputtext';
 import Textarea from 'primevue/textarea';
 import Select from 'primevue/select';
 import Button from 'primevue/button';
-import Dialog from 'primevue/dialog';
-import RadioButton from 'primevue/radiobutton';
 import Checkbox from 'primevue/checkbox';
 import api from '@/service/api';
 
 const router = useRouter();
 const toast = useToast();
 
-const form = ref({
+// Form data
+const form = reactive({
     name: '',
     description: '',
     status: 1,
-    is_super_admin: 0,
-    is_sales_person: 0
+    is_super_admin: false,
+    is_sales_person: false
 });
 
-const permissionsDialogVisible = ref(false);
-const submitting = ref(false);
-const loadingPermissions = ref(false);
+// Error handling objects
+const fieldErrors = reactive({
+    name: '',
+    description: '',
+    status: '',
+    is_super_admin: '',
+    is_sales_person: ''
+});
 
-// Options for dropdowns
+const apiErrors = reactive({
+    general: '',
+    code: '',
+    message: ''
+});
+
+const submitting = ref(false);
+
 const statusOptions = [
     { label: 'Active', value: 1 },
     { label: 'Suspend', value: 0 }
 ];
 
-// Function group mapping
-const functionGroupMap = {
-    1: 'Marketing',
-    2: 'OM',
-    3: 'IT & Administration',
-    4: 'Credit Control',
-    5: 'SCM',
-    6: 'OM Report',
-    7: 'Technical',
-    9: 'Members',
-    10: 'Member Reports',
-    13: 'Product',
-    15: 'Maintenance'
+// Computed property to check if form has any errors
+const hasErrors = computed(() => {
+    return Object.values(fieldErrors).some((error) => error !== '') || apiErrors.general !== '' || apiErrors.message !== '';
+});
+
+// Clear all errors
+const clearAllErrors = () => {
+    Object.keys(fieldErrors).forEach((key) => {
+        fieldErrors[key] = '';
+    });
+    apiErrors.general = '';
+    apiErrors.code = '';
+    apiErrors.message = '';
 };
 
-// Permission groups (will be populated from API)
-const permissionGroups = ref([]);
+// Clear specific field error
+const clearFieldError = (fieldName) => {
+    if (fieldErrors[fieldName]) {
+        fieldErrors[fieldName] = '';
+    }
+};
 
-// Initialize permission state with 'none' for each permission
-const permissionState = reactive({});
+// Frontend validation
+const validateForm = () => {
+    clearAllErrors();
+    let isValid = true;
 
-// Fetch permissions from API
-const fetchPermissions = async () => {
-    loadingPermissions.value = true;
-    try {
-        const response = await api.get('admin/list-function');
-        
-        if (response.data && Array.isArray(response.data)) {
-            const functions = response.data;
-            
-            // Group functions by function_group_id
-            const groupedFunctions = {};
-            
-            functions.forEach(func => {
-                if (!groupedFunctions[func.function_group_id]) {
-                    groupedFunctions[func.function_group_id] = [];
-                }
-                groupedFunctions[func.function_group_id].push(func);
-            });
-            
-            // Convert to permissionGroups format
-            permissionGroups.value = Object.entries(groupedFunctions).map(([groupId, functions]) => ({
-                group_id: parseInt(groupId),
-                group_name: functionGroupMap[groupId] || `Group ${groupId}`,
-                functions: functions.sort((a, b) => a.sort - b.sort)
-            }));
-            
-            // Sort groups by group_id for consistent display
-            permissionGroups.value.sort((a, b) => a.group_id - b.group_id);
-            
-            // Initialize permission state
-            permissionGroups.value.forEach((group) => {
-                group.functions.forEach((func) => {
-                    permissionState[func.id] = 'none';
+    // Name validation
+    if (!form.name.trim()) {
+        fieldErrors.name = 'Group name is required';
+        isValid = false;
+    } else if (form.name.length > 100) {
+        fieldErrors.name = 'Group name cannot exceed 100 characters';
+        isValid = false;
+    }
+
+    // Description validation
+    if (!form.description.trim()) {
+        fieldErrors.description = 'Description is required';
+        isValid = false;
+    }
+
+    // Status validation
+    if (form.status === null || form.status === undefined) {
+        fieldErrors.status = 'Status is required';
+        isValid = false;
+    }
+
+    return isValid;
+};
+
+// Handle API error response
+const handleApiError = (error) => {
+    clearAllErrors();
+
+    // Network error or server not responding
+    if (!error.response) {
+        apiErrors.general = 'Network error. Please check your connection and try again.';
+        return;
+    }
+
+    const { status, data } = error.response;
+
+    // Handle different status codes
+    switch (status) {
+        case 422: // Validation errors
+            if (data.validation_errors) {
+                Object.keys(data.validation_errors).forEach((field) => {
+                    const errorMessages = data.validation_errors[field];
+                    if (errorMessages && errorMessages.length > 0) {
+                        // Map API field names to our form field names
+                        const fieldName = field === 'is_super_admin' ? 'is_super_admin' : field === 'is_sales_person' ? 'is_sales_person' : field;
+
+                        if (fieldErrors[fieldName] !== undefined) {
+                            fieldErrors[fieldName] = errorMessages[0];
+                        } else {
+                            apiErrors.general = errorMessages[0];
+                        }
+                    }
                 });
-            });
-            
-            console.log('Loaded permission groups:', permissionGroups.value);
-        } else {
-            console.error('Unexpected API response structure:', response.data);
-            toast.add({
-                severity: 'error',
-                summary: 'Error',
-                detail: 'Failed to load permissions',
-                life: 4000
-            });
+            }
+            break;
+
+        case 401: // Unauthorized
+            apiErrors.general = 'You are not authorized to perform this action. Please login again.';
+            break;
+
+        case 403: // Forbidden
+            apiErrors.general = 'You do not have permission to create groups.';
+            break;
+
+        case 409: // Conflict (e.g., duplicate name)
+            apiErrors.general = 'A group with this name already exists.';
+            break;
+
+        case 500: // Server error
+            apiErrors.general = 'Server error. Please try again later.';
+            break;
+
+        default:
+            // Handle API's custom error format
+            if (data.error && data.error.message) {
+                apiErrors.message = data.error.message;
+                apiErrors.code = data.error.code;
+            } else if (data.message) {
+                apiErrors.general = data.message;
+            } else {
+                apiErrors.general = 'An unexpected error occurred. Please try again.';
+            }
+    }
+
+    // If we have a general error message from API, use it
+    if (data.message && !apiErrors.general) {
+        apiErrors.general = data.message;
+    }
+};
+
+// Handle successful API response
+const handleApiSuccess = (response) => {
+    if (response.data.status === 1) {
+        toast.add({
+            severity: 'success',
+            summary: 'Success',
+            detail: response.data.message || `Group "${form.name}" created successfully!`,
+            life: 5000
+        });
+
+        // Redirect after delay
+        setTimeout(() => {
+            router.push('/it/ListGroup');
+        }, 1500);
+    } else {
+        // API returned status 0 but not an HTTP error
+        apiErrors.general = response.data.message || 'Failed to create group';
+
+        if (response.data.error) {
+            apiErrors.message = response.data.error.message;
+            apiErrors.code = response.data.error.code;
         }
-    } catch (err) {
-        console.error('Error fetching permissions:', err);
+    }
+};
+
+// Submit form
+const submitForm = async () => {
+    if (!validateForm()) {
         toast.add({
             severity: 'error',
-            summary: 'Error',
-            detail: 'Failed to load permissions',
+            summary: 'Validation Error',
+            detail: 'Please fix the errors in the form',
             life: 4000
         });
-    } finally {
-        loadingPermissions.value = false;
+        return;
     }
-};
 
-// Computed properties
-const getActivePermissionsCount = computed(() => {
-    return Object.values(permissionState).filter((val) => val !== 'none').length;
-});
-
-const getSelectedPermissionsCount = computed(() => {
-    const activeCount = getActivePermissionsCount.value;
-    const totalCount = permissionGroups.value.reduce((total, group) => total + group.functions.length, 0);
-    return `${activeCount} of ${totalCount} permissions selected`;
-});
-
-const getSelectedPermissionsText = computed(() => {
-    const activeCount = getActivePermissionsCount.value;
-    return activeCount > 0 ? `${activeCount} permissions selected` : 'Click to set permissions';
-});
-
-// Watch reactive state and sync with form.permissions
-watch(
-    permissionState,
-    (newVal) => {
-        form.value.permissions = {};
-        Object.keys(newVal).forEach((id) => {
-            if (newVal[id] === 'read' || newVal[id] === 'write') {
-                form.value.permissions[id] = newVal[id];
-            }
-        });
-    },
-    { deep: true }
-);
-
-// Watch super admin checkbox
-watch(
-    () => form.value.is_super_admin,
-    (isSuperAdmin) => {
-        if (isSuperAdmin) {
-            // If super admin, set all permissions to write
-            setAllPermissions('write');
-        }
-    }
-);
-
-// Cancel
-const cancel = () => router.push('/it/ListGroup');
-
-// Permission management functions
-const setAllPermissions = (type) => {
-    permissionGroups.value.forEach((group) => {
-        group.functions.forEach((func) => {
-            permissionState[func.id] = type;
-        });
-    });
-};
-
-// Enhanced validation
-const validateForm = () => {
-    const errors = [];
-
-    if (!form.value.name) errors.push('Role name is required');
-    if (!form.value.description) errors.push('Description is required');
-
-    return errors;
-};
-
-// Submit
-const submitForm = async () => {
     submitting.value = true;
+    clearAllErrors();
 
     try {
-        // Validate required fields
-        const validationErrors = validateForm();
-        if (validationErrors.length > 0) {
-            toast.add({
-                severity: 'error',
-                summary: 'Validation Error',
-                detail: validationErrors.join('; '),
-                life: 5000
-            });
-            return;
-        }
-
-        // Prepare permissions array in the format expected by your API
-        const permissionsArray = [];
-        permissionGroups.value.forEach((group) => {
-            group.functions.forEach((func) => {
-                const permissionType = permissionState[func.id];
-                if (permissionType !== 'none') {
-                    permissionsArray.push({
-                        function_id: func.id,
-                        function_name: func.name,
-                        function_code: func.code,
-                        is_write: permissionType === 'write',
-                        is_active: true
-                    });
-                }
-            });
-        });
-
         const payload = {
-            name: form.value.name,
-            description: form.value.description,
-            permissions: permissionsArray,
-            status: form.value.status,
-            is_super_admin: form.value.is_super_admin ? 1 : 0,
-            is_sales_person: form.value.is_sales_person ? 1 : 0
+            name: form.name.trim(),
+            description: form.description.trim(),
+            status: form.status,
+            is_super_admin: form.is_super_admin ? 1 : 0,
+            is_sales_person: form.is_sales_person ? 1 : 0
         };
 
-        console.log('Creating user role with payload:', JSON.stringify(payload, null, 2));
-
-        // Use the appropriate endpoint for your API
         const response = await api.post('admin/create-user-role', payload);
+        handleApiSuccess(response);
+    } catch (error) {
+        handleApiError(error);
 
-        if (response.data.status === 1) {
-            toast.add({
-                severity: 'success',
-                summary: 'Success',
-                detail: `User role "${form.value.name}" created successfully!`,
-                life: 5000
-            });
-
-            // Redirect to user role list
-            setTimeout(() => {
-                router.push('/it/ListGroup');
-            }, 1500);
-        } else {
+        // Show toast for general errors
+        if (apiErrors.general) {
             toast.add({
                 severity: 'error',
                 summary: 'Error',
-                detail: response.data.message || 'Failed to create user role',
-                life: 4000
-            });
-        }
-    } catch (err) {
-        console.error('Error creating user role:', err);
-
-        // Handle specific error cases
-        if (err.response?.data?.validation_errors) {
-            const validationErrors = err.response.data.validation_errors;
-            const errorMessages = Object.entries(validationErrors)
-                .map(([field, errors]) => `${field}: ${errors.join(', ')}`)
-                .join('; ');
-
-            toast.add({
-                severity: 'error',
-                summary: 'Validation Error',
-                detail: errorMessages || 'Please check your input data',
-                life: 6000
-            });
-        } else if (err.response?.data?.message) {
-            toast.add({
-                severity: 'error',
-                summary: 'Error',
-                detail: err.response.data.message,
-                life: 5000
-            });
-        } else if (err.code === 'NETWORK_ERROR') {
-            toast.add({
-                severity: 'error',
-                summary: 'Network Error',
-                detail: 'Please check your internet connection',
-                life: 5000
-            });
-        } else {
-            toast.add({
-                severity: 'error',
-                summary: 'Error',
-                detail: 'Something went wrong while creating the user role',
+                detail: apiErrors.general,
                 life: 5000
             });
         }
@@ -414,10 +306,24 @@ const submitForm = async () => {
     }
 };
 
-onMounted(() => {
-    // Fetch permissions when component mounts
-    fetchPermissions();
-});
+const cancel = () => {
+    if (!submitting.value) {
+        router.push('/it/ListGroup');
+    }
+};
+
+// Clear field error when user starts typing
+const clearErrorOnInput = (fieldName) => {
+    if (fieldErrors[fieldName]) {
+        clearFieldError(fieldName);
+    }
+    if (apiErrors.general) {
+        apiErrors.general = '';
+    }
+};
+
+// Watch for form changes to clear errors
+// (You can also use @input on each form field if you prefer)
 </script>
 
 <style scoped>
@@ -426,6 +332,22 @@ onMounted(() => {
     border-radius: 8px;
     padding: 24px;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+:deep(.p-invalid) {
+    border-color: #f44336 !important;
+}
+
+:deep(.p-invalid:focus) {
+    box-shadow: 0 0 0 0.2rem rgba(244, 67, 54, 0.25) !important;
+}
+
+:deep(.p-checkbox.p-invalid .p-checkbox-box) {
+    border-color: #f44336 !important;
+}
+
+:deep(.p-select.p-invalid .p-select-trigger) {
+    border-color: #f44336 !important;
 }
 
 :deep(.p-radiobutton .p-radiobutton-box) {

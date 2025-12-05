@@ -109,7 +109,7 @@
             <div class="md:w-1/3 flex flex-col">
                 <div class="card flex flex-col w-full">
                     <div class="flex items-center justify-between border-b pb-3 mb-4">
-                        <div class="text-2xl font-bold text-gray-800">Advance Info</div>
+                        <div class="text-2xl font-bold text-gray-800">Advance Information</div>
                         <Tag :value="getOrderStatusText2(orderDelList.status)" :severity="getOrderStatusSeverity2(orderDelList.status)" />
                     </div>
 
@@ -180,6 +180,35 @@
                             class="p-button-sm p-button-warning"
                             @click="openDialog2  = true"
                         />
+                    </div>
+
+                </div>
+                <div class="card flex flex-col w-full" v-if="orderDelList?.scm_deliver_detail?.scheduled_delivery_time">
+                    <div class="flex items-center justify-between border-b pb-3 mb-4">
+                        <div class="text-2xl font-bold text-gray-800">Driver Information</div>
+                    </div>
+
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-sm text-left text-gray-700">
+                            <tbody>
+                                <tr class="border-b">
+                                    <td class="px-4 py-2 font-bold">Driver Name</td>
+                                    <td class="px-4 py-2 text-right">{{ orderDelList.scm_deliver_detail?.driverName || '-' }}</td>
+                                </tr>
+                                <tr class="border-b">
+                                    <td class="px-4 py-2 font-bold">Driver Contact</td>
+                                    <td class="px-4 py-2 text-right">{{ orderDelList.scm_deliver_detail?.driverContactNo || '-' }}</td>
+                                </tr>
+                                <tr class="border-b">
+                                    <td class="px-4 py-2 font-bold">Driver Ic</td>
+                                    <td class="px-4 py-2 text-right">{{ orderDelList.scm_deliver_detail?.driverIC || '-' }}</td>
+                                </tr>
+                                <tr class="border-b">
+                                    <td class="px-4 py-2 font-bold">Driver Truck Plate No</td>
+                                    <td class="px-4 py-2 text-right">{{ orderDelList.scm_deliver_detail?.driverPlateNo || '-' }}</td>
+                                </tr>
+                            </tbody>
+                        </table>
                     </div>
 
                 </div>
@@ -423,7 +452,7 @@ const saveSchedule = async () => {
     toast.add({ severity: 'warn', summary: 'Warning', detail: 'Please select date', life: 3000 });
     return;
   }
-  if (!form.value.drivername || !form.value.drivercontactnum || !form.value.drivervehicleplate || !form.value.driveric) {
+  if (!form.value.drivername || !form.value.drivervehicleplate || !form.value.driveric) {
     toast.add({ severity: 'warn', summary: 'Warning', detail: 'Please fullfill driver information', life: 3000 });
     return;
   }

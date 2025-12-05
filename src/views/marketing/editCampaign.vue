@@ -75,7 +75,7 @@
 
                 <!-- Upload Images -->
                 <div v-if="!loading">
-                    <label class="block font-bold text-gray-700 mb-2">Campaign Images</label>
+                    <label class="block font-bold text-gray-700 mb-2">Campaign Images <span class="text-xs bg-blue-100 text-blue-800 px-2 py-0.5 rounded-full">1280 × 720 px (max 2MB)</span> </label>
                     <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
                         <div v-for="(field, idx) in ['image1Path', 'image2Path', 'image3Path']" :key="idx" class="relative">
                             <FileUpload mode="basic" :name="field" accept="image/*" customUpload @select="onImageSelect($event, field)" :chooseLabel="`Change Image ${idx + 1}`" class="w-full" />
@@ -159,9 +159,11 @@
                         <!-- Quantity -->
                         <div>
                             <FloatLabel>
+                                <!-- ✅ Fixed: Bind to reward.qty -->
                                 <InputNumber id="qty" v-model="reward.qty" :min="1" class="w-full" />
                                 <label for="qty">Quantity</label>
                             </FloatLabel>
+                            <div class="text-xs text-gray-500 mt-1">Current: {{ reward.displayqty }} | Available: {{ reward.selected?.availableqty || 0 }}</div>
                             <small v-if="errors[`qty_${index}`]" class="text-red-500">{{ errors[`qty_${index}`] }}</small>
                         </div>
                     </div>
@@ -320,7 +322,19 @@ const removeCriteria = (index) => criterias.value.splice(index, 1);
 // 📸 Image Handling
 const onImageSelect = (event, field) => {
     const file = event.files[0];
+
     if (file) {
+        // ✅ Check file size 2MB limit
+        if (file.size > 2 * 1024 * 1024) {
+            toast.add({
+                severity: 'warn',
+                summary: 'File too large',
+                detail: 'Maximum file size allowed is 2MB.',
+                life: 3000
+            });
+            return;
+        }
+
         // Store the file for upload
         imageFiles.value[field] = file;
 
@@ -331,7 +345,7 @@ const onImageSelect = (event, field) => {
         };
         reader.readAsDataURL(file);
 
-                // Remove from removed images if it was previously marked for removal
+        // Remove from removed list if needed
         const index = removedImages.value.indexOf(field);
         if (index > -1) {
             removedImages.value.splice(index, 1);
@@ -414,7 +428,8 @@ const fetchCampaignDetails = async () => {
                         availableqty: reward.catalog?.availableqty || 0,
                         processedImageURL: reward.catalog?.imageURL || ''
                     },
-                    qty: parseInt(reward.total_qty)
+                    qty: 0, // Ensure it's a number
+                    displayqty: Number(reward.total_qty) || 0
                 }));
                 originalRewards.value = [...rewards.value];
 
@@ -569,7 +584,9 @@ const validateFields = () => {
     // Basic field validation
     if (!campaign.value.title.trim()) errors.value.title = 'Title is required';
     if (!campaign.value.description.trim()) errors.value.description = 'Description is required';
-    if (!(campaign.value.termCondition || '').trim()) { errors.value.termCondition = 'Terms & Conditions are required'; }
+    if (!(campaign.value.termCondition || '').trim()) {
+        errors.value.termCondition = 'Terms & Conditions are required';
+    }
     if (!campaign.value.publishDate) errors.value.publishDate = 'Publish date is required';
     if (!campaign.value.startDate) errors.value.startDate = 'Start date is required';
     if (!campaign.value.endDate) errors.value.endDate = 'End date is required';
@@ -581,30 +598,7 @@ const validateFields = () => {
     if (campaign.value.point2 === null || campaign.value.point2 < 0) errors.value.point2 = 'Valid gold points are required';
     if (campaign.value.point3 === null || campaign.value.point3 < 0) errors.value.point3 = 'Valid platinum points are required';
 
-    // Gamification specific validations
-    // if (campaign.value.isGamification === 1) {
-    // Criteria validation
-    // criterias.value.forEach((criteria, index) => {
-    //     if (!criteria.selected) {
-    //         errors.value[`criteria_${index}`] = 'Criteria selection is required';
-    //     }
-    //     if (!criteria.minQty || criteria.minQty <= 0) {
-    //         errors.value[`minQty_${index}`] = 'Valid minimum quantity is required';
-    //     }
-    // });
 
-    // Reward validation
-    // rewards.value.forEach((reward, index) => {
-    //     if (!reward.selected) {
-    //         errors.value[`reward_${index}`] = 'Reward selection is required';
-    //     }
-    //     if (!reward.qty || reward.qty <= 0) {
-    //         errors.value[`qty_${index}`] = 'Valid quantity is required';
-    //     } else if (reward.selected && reward.qty > reward.selected.availableqty) {
-    //         errors.value[`qty_${index}`] = `Quantity exceeds available stock (${reward.selected.availableqty} available)`;
-    //     }
-    // });
-    // }
 
     // Date validation
     if (campaign.value.startDate && campaign.value.endDate) {
@@ -630,38 +624,14 @@ const validateFields = () => {
 const calculateRewardChanges = () => {
     const rewardOptions = [];
 
-    // Find removed rewards (in original but not in current)
-    originalRewards.value.forEach((original) => {
-        const exists = rewards.value.find((reward) => reward.selected && reward.selected.id === original.selected.id);
-
-        if (!exists) {
-            // Reward was removed - set quantity to 0
-            rewardOptions.push({
-                catalogID: original.selected.id.toString(),
-                quantity: '0'
-            });
-        }
-    });
-
-    // Process current rewards
+    // Process all current rewards
     rewards.value.forEach((reward) => {
         if (reward.selected) {
-            const original = originalRewards.value.find((orig) => orig.selected.id === reward.selected.id);
-
-            if (original) {
-                // Existing reward - calculate difference
-                const difference = reward.qty - original.qty;
-                rewardOptions.push({
-                    catalogID: reward.selected.id.toString(),
-                    quantity: difference.toString()
-                });
-            } else {
-                // New reward - add with full quantity
-                rewardOptions.push({
-                    catalogID: reward.selected.id.toString(),
-                    quantity: reward.qty.toString()
-                });
-            }
+            // Always send the ABSOLUTE quantity, not the difference
+            rewardOptions.push({
+                catalogID: reward.selected.id.toString(),
+                quantity: reward.qty.toString() // Send total quantity
+            });
         }
     });
 
@@ -710,8 +680,6 @@ const submitForm = async () => {
             }
         }
 
-        // Prepare criteria array (only for gamification campaigns)
-        if (campaign.value.isGamification === 1) {
             const criteriaArray = criterias.value.map((criteria) => ({
                 title: criteria.selected.material,
                 type: criteria.selected.materialtype,
@@ -720,17 +688,14 @@ const submitForm = async () => {
                 minQty: criteria.minQty.toString()
             }));
             formData.append('criteria', JSON.stringify(criteriaArray));
-        } else {
-            formData.append('criteria', JSON.stringify([]));
-        }
 
         // Prepare reward options with quantity changes
-        const rewardOptions = campaign.value.isGamification === 1 ? calculateRewardChanges() : [];
+        const rewardOptions =  calculateRewardChanges() ;
         formData.append('reward_option', JSON.stringify(rewardOptions));
 
         const response = await api.customRequest({
             method: 'POST',
-            url: `/api/campaign/edit/${campaignId}`,
+            url: `api/campaign/edit/${campaignId}`,
             data: formData,
             headers: {
                 'Content-Type': 'multipart/form-data'
@@ -744,7 +709,7 @@ const submitForm = async () => {
                 detail: 'Campaign updated successfully!',
                 life: 3000
             });
-            router.push('/marketing/listCampaign');
+            router.push(`/marketing/detailCampaign/${campaignId}`);
         } else {
             console.error('Backend error:', response.data);
             toast.add({

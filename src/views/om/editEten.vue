@@ -542,6 +542,12 @@ interface FormData {
     showOnList: number;
     isFamilyChannel: number;
     memberCode: string;
+
+    // Added fields to send to backend
+    status: string | number;
+    accountStatus: string;
+    accountCreation: string;
+    accountLastUpdate: string;
 }
 
 // UI state
@@ -594,7 +600,12 @@ const form = ref<FormData>({
     allowDirectship: 0,
     showOnList: 0,
     isFamilyChannel: 0,
-    memberCode: ''
+    memberCode: '',
+    // Added fields initialization
+    status: '',
+    accountStatus: '',
+    accountCreation: '',
+    accountLastUpdate: ''
 });
 
 // ShipTo addresses
@@ -704,7 +715,12 @@ const fetchDealerProfile = async () => {
                 allowDirectship: dealerData.allowDirectship || 0,
                 showOnList: dealerData.showOnList || 0,
                 isFamilyChannel: dealerData.isFamilyChannel || 0,
-                memberCode: dealerData.memberCode || ''
+                memberCode: dealerData.memberCode || '',
+                // Map the added fields
+                status: dealerData.status || '1',
+                accountStatus: dealerData.accountStatus || '',
+                accountCreation: dealerData.accountCreation || '',
+                accountLastUpdate: dealerData.accountLastUpdate || ''
             };
 
             // Set dropdown values
@@ -821,10 +837,10 @@ function prepareShipToArray(shipToAddresses: ShipToAddress[]) {
 const handleUpdate = async () => {
     loadingUpdate.value = true;
     try {
-        // Prepare ship-to data - FIXED: Use the new function
+        // Prepare ship-to data
         const shipToArray = prepareShipToArray(shipToAddresses.value);
 
-        // Prepare data for API
+        // Prepare data for API - INCLUDED THE MISSING FIELDS
         const updateData = {
             custAccountNo: form.value.custAccountNo,
             eten_userID: currentException.value.dealers || '0',
@@ -871,7 +887,12 @@ const handleUpdate = async () => {
             startingSalesAmt: form.value.startingSalesAmt,
             revenue: form.value.revenue,
             targetQty: form.value.targetQty,
-            s_array: JSON.stringify(shipToArray) // FIXED: Use properly formatted ship-to data
+            // Added the missing fields to send to backend
+            status: form.value.status || '1',
+            accountStatus: form.value.accountStatus || '',
+            accountCreation: form.value.accountCreation || '',
+            accountLastUpdate: form.value.accountLastUpdate || '',
+            s_array: JSON.stringify(shipToArray)
         };
 
         console.log('Update Data:', updateData); // For debugging

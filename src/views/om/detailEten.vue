@@ -309,6 +309,18 @@
                                     <td class="px-4 py-2 text-right">{{ form.shippingCond || '-' }}</td>
                                 </tr>
                                 <tr class="border-b">
+                                    <td class="px-4 py-2 font-medium">Family Channel</td>
+                                    <td class="px-4 py-2 text-right">
+                                        {{ form.isFamilyChannel == 1 ? 'Yes' : 'No' }}
+                                    </td>
+                                </tr>
+                                <tr class="border-b">
+                                    <td class="px-4 py-2 font-medium">Show on List</td>
+                                    <td class="px-4 py-2 text-right">
+                                        {{ form.showOnList == 1 ? 'Yes' : 'No' }}
+                                    </td>
+                                </tr>
+                                <tr class="border-b">
                                     <td class="px-4 py-2 font-medium">Allow Lalamove</td>
                                     <td class="px-4 py-2 text-right">
                                         {{ form.allowLalamove == 1 ? 'Yes' : 'No' }}
@@ -355,7 +367,7 @@
                         <div class="flex items-center justify-between px-2 mt-2">
                             <div class="flex items-center gap-2 text-gray-700">
                                 <i class="pi pi-id-card text-green-500"></i>
-                                <span>Account Detail</span>
+                                <span>Account Details</span>
                             </div>
                             <RouterLink to="/billing/listAccountDetail">
                                 <Button label="Go" size="small" />
@@ -366,7 +378,7 @@
                         <div class="flex items-center justify-between px-2">
                             <div class="flex items-center gap-2 text-gray-700">
                                 <i class="pi pi-file text-blue-500"></i>
-                                <span>Billing</span>
+                                <span>E-Invoice</span>
                             </div>
                             <RouterLink to="/billing/listBilling">
                                 <Button label="Go" size="small" />
@@ -377,7 +389,7 @@
                         <div class="flex items-center justify-between px-2 mt-2">
                             <div class="flex items-center gap-2 text-gray-700">
                                 <i class="pi pi-file-check text-purple-500"></i>
-                                <span>E-Billing</span>
+                                <span>Self Bill E-Invoice</span>
                             </div>
                             <RouterLink to="/billing/listEbilling">
                                 <Button label="Go" size="small" />
