@@ -1,10 +1,6 @@
 <script setup>
-
-
+import { defineProps, ref } from 'vue';
 import AppMenuItem from './AppMenuItem.vue';
-import { computed, onMounted } from 'vue'
-import { ref } from 'vue';
-import { defineProps } from 'vue';
 
 // LOCAL
 const model = ref([
@@ -118,7 +114,7 @@ const model = ref([
                         label: 'Claim List',
                         icon: 'pi pi-fw pi-list',
                         to: '/technical/listClaim'
-                    },
+                    }
                 ]
             },
             {
@@ -234,11 +230,11 @@ const model = ref([
                         icon: 'pi pi-fw pi-exclamation-triangle',
                         to: '/om/listMaterialException'
                     },
-                   {
-                       label: 'Directship Container',
-                       icon: 'pi pi-fw pi-box',
-                       to: '/om/listContainer'
-                   }
+                    {
+                        label: 'Directship Container',
+                        icon: 'pi pi-fw pi-box',
+                        to: '/om/listContainer'
+                    }
                 ]
             }
         ]
@@ -293,7 +289,7 @@ const model = ref([
                 label: '3PL Account',
                 icon: 'pi pi-fw pi-briefcase',
                 to: '/scm/listLogistic'
-            },
+            }
             // {
             //     label: 'Back Order',
             //     icon: 'pi pi-fw pi-history',
@@ -321,11 +317,11 @@ const model = ref([
                     }
                 ]
             },
-            {
-                label: 'Salesman',
-                icon: 'pi pi-fw pi-id-card',
-                to: '/it/listSalesAccount'
-            },
+            // {
+            //     label: 'Salesman',
+            //     icon: 'pi pi-fw pi-id-card',
+            //     to: '/it/listSalesAccount'
+            // },
             {
                 label: 'Setting',
                 icon: 'pi pi-fw pi-cog',
@@ -363,6 +359,7 @@ const model = ref([
                 icon: 'pi pi-fw pi-file',
                 to: '/billing/listBilling'
             },
+
             {
                 label: 'Self Bill E-Invoice',
                 icon: 'pi pi-fw pi-file-check',
@@ -395,10 +392,10 @@ const model = ref([
 
 // STAGING
 const props = defineProps({
-  Navbar: {
-    type: Array,
-    default: () => []
-  }
+    Navbar: {
+        type: Array,
+        default: () => []
+    }
 });
 // STAGING
 </script>
