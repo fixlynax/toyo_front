@@ -119,7 +119,7 @@
 
                 <!-- Expanded Row Template - Function Permissions -->
                 <template #expansion="{ data }">
-                    <div class="p-4 bg-gray-50 border-t">
+                    <div>
                         <!-- Permissions List -->
                         <div v-if="data.permissions && data.permissions.length > 0" class="space-y-3">
                             <!-- Group permissions by category if available -->
