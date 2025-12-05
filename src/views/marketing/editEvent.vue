@@ -14,9 +14,13 @@
                         </div>
 
                         <div class="md:col-span-2">
-                        <label class="block font-bold text-gray-700">Headline(180 max Characters)</label>
-                        <Textarea v-model="event.headline" rows="3" class="w-full" maxlength="180" />
-                    </div>
+                            <label class="block font-bold text-gray-700">Headline (180 max Character)</label>
+
+                            <Textarea v-model="event.headline" rows="3" class="w-full" maxlength="180" />
+
+                            <!-- Character Counter -->
+                            <div class="text-xm text-gray-500 mt-1 text-right">{{ event.headline?.length || 0 }}/180</div>
+                        </div>
 
                         <div class="md:col-span-2">
                             <label class="block font-bold text-gray-700">Description</label>
@@ -28,20 +32,19 @@
                             <InputText v-model="event.location" class="w-full" />
                         </div>
 
-                        
                         <div>
                             <label class="block font-bold text-gray-700">Start Date</label>
                             <Calendar v-model="event.startDate" dateFormat="dd-mm-yy" showIcon class="w-full" :minDate="minDate" />
                         </div>
-                        
+
                         <div>
                             <label class="block font-bold text-gray-700">End Date</label>
-                            <Calendar v-model="event.endDate" dateFormat="dd-mm-yy" showIcon class="w-full":minDate="minDate" />
+                            <Calendar v-model="event.endDate" dateFormat="dd-mm-yy" showIcon class="w-full" :minDate="minDate" />
                         </div>
-                        
+
                         <div>
                             <label class="block font-bold text-gray-700">Publish Date</label>
-                            <Calendar v-model="event.publishDate" dateFormat="dd-mm-yy" showIcon class="w-full" :minDate="event.startDate"  :maxDate="event.endDate"  :disabled="!event.startDate || !event.endDate"/>
+                            <Calendar v-model="event.publishDate" dateFormat="dd-mm-yy" showIcon class="w-full" :minDate="event.startDate" :maxDate="event.endDate" :disabled="!event.startDate || !event.endDate" />
                         </div>
 
                         <div>
@@ -230,7 +233,7 @@ const formatDate = (date) => {
 
 const parseDMY = (str) => {
     if (!str) return null;
-    const [day, month, year] = str.split('-').map(Number); 
+    const [day, month, year] = str.split('-').map(Number);
     return new Date(year, month - 1, day);
 };
 
@@ -268,13 +271,9 @@ const fetchEventDetails = async () => {
             if (eventData.survey_questions && eventData.survey_questions.length) {
                 const rawQuestions = eventData.survey_questions[0];
 
-                questions.value = rawQuestions.map(q => ({
+                questions.value = rawQuestions.map((q) => ({
                     question: q.question || '',
-                    answers: [
-                        q.answer1 || '',
-                        q.answer2 || '',
-                        q.answer3 || ''
-                    ],
+                    answers: [q.answer1 || '', q.answer2 || '', q.answer3 || '']
                     // correctAnswer: q.correctAnswer || ''
                 }));
             }
@@ -326,7 +325,7 @@ const addQuestion = () => {
     if (questions.value.length < 20) {
         questions.value.push({
             question: '',
-            answers: ['', '', ''],
+            answers: ['', '', '']
             // correctAnswer: ''
         });
     }
@@ -353,7 +352,7 @@ const onImageSelect = (eventFile, fieldName) => {
         };
         reader.readAsDataURL(file);
         imageFiles.value[fieldName] = file;
-        
+
         // Remove from removed images if it was previously marked for removal
         const index = removedImages.value.indexOf(fieldName);
         if (index > -1) {
@@ -390,11 +389,11 @@ const validateFields = () => {
 
     // Headline length validation
     if (event.value.headline && event.value.headline.length > 180) {
-        toast.add({ 
-            severity: 'warn', 
-            summary: 'Validation', 
-            detail: 'Headline must be 180 characters or less', 
-            life: 3000 
+        toast.add({
+            severity: 'warn',
+            summary: 'Validation',
+            detail: 'Headline must be 180 characters or less',
+            life: 3000
         });
         return false;
     }
@@ -403,13 +402,13 @@ const validateFields = () => {
     if (event.value.startDate && event.value.endDate) {
         const start = new Date(event.value.startDate);
         const end = new Date(event.value.endDate);
-        
+
         if (end < start) {
-            toast.add({ 
-                severity: 'warn', 
-                summary: 'Validation', 
-                detail: 'End Date cannot be before Start Date', 
-                life: 3000 
+            toast.add({
+                severity: 'warn',
+                summary: 'Validation',
+                detail: 'End Date cannot be before Start Date',
+                life: 3000
             });
             return false;
         }
@@ -417,11 +416,11 @@ const validateFields = () => {
         if (event.value.publishDate) {
             const publish = new Date(event.value.publishDate);
             if (publish < start || publish > end) {
-                toast.add({ 
-                    severity: 'warn', 
-                    summary: 'Validation', 
-                    detail: 'Publish Date must be between Start Date and End Date', 
-                    life: 3000 
+                toast.add({
+                    severity: 'warn',
+                    summary: 'Validation',
+                    detail: 'Publish Date must be between Start Date and End Date',
+                    life: 3000
                 });
                 return false;
             }
@@ -430,33 +429,28 @@ const validateFields = () => {
 
     // Survey-specific validation
     if (event.value.isSurvey === 'Yes') {
-        if (event.value.point1 === null || event.value.point1 === undefined ||
-            event.value.point2 === null || event.value.point2 === undefined ||
-            event.value.point3 === null || event.value.point3 === undefined) {
-            toast.add({ 
-                severity: 'warn', 
-                summary: 'Validation', 
-                detail: 'Please fill all point fields.', 
-                life: 3000 
+        if (event.value.point1 === null || event.value.point1 === undefined || event.value.point2 === null || event.value.point2 === undefined || event.value.point3 === null || event.value.point3 === undefined) {
+            toast.add({
+                severity: 'warn',
+                summary: 'Validation',
+                detail: 'Please fill all point fields.',
+                life: 3000
             });
             return false;
         }
-        
+
         if (questions.value.length === 0) {
-            toast.add({ 
-                severity: 'warn', 
-                summary: 'Validation', 
-                detail: 'Add at least one survey question.', 
-                life: 3000 
+            toast.add({
+                severity: 'warn',
+                summary: 'Validation',
+                detail: 'Add at least one survey question.',
+                life: 3000
             });
             return false;
         }
-        
+
         for (let q of questions.value) {
-            if (!q.question || q.question.trim() === '' || 
-                !q.answers[0] || q.answers[0].trim() === '' || 
-                !q.answers[1] || q.answers[1].trim() === '' || 
-                !q.answers[2] || q.answers[2].trim() === '') {
+            if (!q.question || q.question.trim() === '' || !q.answers[0] || q.answers[0].trim() === '' || !q.answers[1] || q.answers[1].trim() === '' || !q.answers[2] || q.answers[2].trim() === '') {
                 toast.add({
                     severity: 'warn',
                     summary: 'Validation',
@@ -508,7 +502,7 @@ const submitEvent = async () => {
                 question: q.question || '',
                 answer1: q.answers[0] || '',
                 answer2: q.answers[1] || '',
-                answer3: q.answers[2] || '',
+                answer3: q.answers[2] || ''
                 // correctAnswer: q.correctAnswer || ''
             }));
             formData.append('survey_questions', JSON.stringify(surveyQuestions));
@@ -524,7 +518,7 @@ const submitEvent = async () => {
         for (let i = 1; i <= 3; i++) {
             const fieldName = `image${i}`;
             const urlFieldName = `${fieldName}URL`;
-            
+
             if (imageFiles.value[fieldName]) {
                 // New file uploaded
                 formData.append(fieldName, imageFiles.value[fieldName]);
@@ -538,7 +532,7 @@ const submitEvent = async () => {
             }
             // If none of the above, the backend should keep the existing image
         }
-       
+
         // Use customRequest to send FormData with proper headers
         // FIXED: Use eventId directly (which is route.params.id)
         const response = await api.customRequest({
