@@ -254,6 +254,7 @@ const dropdownAccountTypeValue = ref<DropdownOption[]>([
 const dropdownYesNo = ref<DropdownOption | null>(null);
 const dropdownAccountType = ref<DropdownOption | null>(null); // NEW: Account Type dropdown binding
 const dropdownAllowDirectShipment = ref<DropdownOption | null>(null); // NEW: Allow Direct Shipment dropdown
+const dropdownAllowOwnCollection = ref<DropdownOption | null>(null); // NEW: Allow Direct Shipment dropdown
 const dropdownShowOnList = ref<DropdownOption | null>(null); // NEW: Show On List dropdown
 const dropdownFamilyChannel = ref<DropdownOption | null>(null); // NEW: If Family Channel dropdown
 
@@ -335,6 +336,7 @@ function handleSubmit() {
             accountType: dropdownAccountType.value?.code || '',
             allowLalamove: dropdownYesNo.value?.code || '0',
             allowDirectShipment: dropdownAllowDirectShipment.value?.code || '0',
+            allowOwnCollection: dropdownAllowOwnCollection.value?.code || '0',
             showOnList: dropdownShowOnList.value?.code || '0',
             ifFamilyChannel: dropdownFamilyChannel.value?.code || '0',
             mainBranchDealer: currentException.value.dealers || null,
@@ -631,6 +633,9 @@ async function goNext() {
             // Set default to "No" for Allow Direct Shipment
             dropdownAllowDirectShipment.value = noOption || dropdownYesNoValue.value[0];
 
+            // Set default to "No" for Allow Own Collection
+            dropdownAllowOwnCollection.value = yesOption || dropdownYesNoValue.value[1];
+
             // Set default to "No" for Show On List
             dropdownShowOnList.value = yesOption || dropdownYesNoValue.value[1];
 
@@ -723,6 +728,7 @@ function resetForm() {
     dropdownYesNo.value = noOption || dropdownYesNoValue.value[0];
     dropdownAccountType.value = null;
     dropdownAllowDirectShipment.value = noOption || dropdownYesNoValue.value[0];
+    dropdownAllowOwnCollection.value = noOption || dropdownYesNoValue.value[0];
     dropdownShowOnList.value = yesOption || dropdownYesNoValue.value[1];
     dropdownFamilyChannel.value = yesOption || dropdownYesNoValue.value[1];
     currentException.value.dealers = null;
@@ -1040,6 +1046,11 @@ onMounted(() => {
                             <label for="allowLalamove">Allow Lalamove</label>
                             <!-- This will show "No" by default -->
                             <Dropdown v-model="dropdownYesNo" :options="dropdownYesNoValue" optionLabel="name" placeholder="Select Option" class="w-full" />
+                        </div>
+                        <div class="w-full">
+                            <label for="allowOwnCollection">Allow Own Collection</label>
+                            <!-- This will show "No" by default -->
+                            <Dropdown v-model="dropdownAllowOwnCollection" :options="dropdownYesNoValue" optionLabel="name" placeholder="Select Option" class="w-full" />
                         </div>
                         <div class="w-full">
                             <label for="allowDirectShipment">Allow Direct Shipment</label>

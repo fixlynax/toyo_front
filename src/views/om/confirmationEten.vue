@@ -286,6 +286,10 @@
                         <span class="text-sm text-gray-500">Allow Direct Shipment</span>
                         <p class="text-lg font-medium">{{ form.allowDirectShipment === '1' ? 'Yes' : 'No' }}</p>
                     </div>
+                    <div class="w-full">
+                        <span class="text-sm text-gray-500">Allow Own Collection</span>
+                        <p class="text-lg font-medium">{{ form.allowOwnCollection === '1' ? 'Yes' : 'No' }}</p>
+                    </div>
                 </div>
             </div>
         </div>
@@ -600,7 +604,8 @@ function mapFormToFormData(formData) {
     formDataObj.append('showOnList', formData.showOnList || '0');
     formDataObj.append('isFamilyChannel', formData.ifFamilyChannel || '0');
     formDataObj.append('allowLalamove', formData.allowLalamove || '0');
-    formDataObj.append('allowDirectship', formData.allowDirectShipment || '0'); // FIXED: Changed from allowDirectShipment
+    formDataObj.append('allowDirectShipment', formData.allowDirectShipment || '0'); // FIXED: Changed from allowDirectShipment
+    formDataObj.append('allowOwnCollection', formData.allowOwnCollection || '0'); // FIXED: Changed from allowOwnCollection
     formDataObj.append('status', 1);
     formDataObj.append('startingSalesAmt', formData.startingSalesAmt || '0');
 
@@ -638,6 +643,7 @@ function loadFormData() {
             if (!form.value.quantity) form.value.quantity = '0';
             if (!form.value.creditLimit) form.value.creditLimit = '0';
             if (!form.value.startingSalesAmt) form.value.startingSalesAmt = '0';
+            if (!form.value.allowOwnCollection) form.value.allowOwnCollection = '0';
             if (!form.value.allowDirectShipment) form.value.allowDirectShipment = '0';
             if (!form.value.allowLalamove) form.value.allowLalamove = '0';
             if (!form.value.showOnList) form.value.showOnList = '0';

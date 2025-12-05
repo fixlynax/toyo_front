@@ -326,7 +326,12 @@
                                         {{ form.allowLalamove == 1 ? 'Yes' : 'No' }}
                                     </td>
                                 </tr>
-
+                                <tr class="border-b">
+                                    <td class="px-4 py-2 font-medium">Allow Own Collection</td>
+                                    <td class="px-4 py-2 text-right">
+                                        {{ form.allowOwnCollection == 1 ? 'Yes' : 'No' }}
+                                    </td>
+                                </tr>
                                 <tr class="border-b">
                                     <td class="px-4 py-2 font-medium">Allow Direct Shipment</td>
                                     <td class="px-4 py-2 text-right">
