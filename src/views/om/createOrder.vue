@@ -884,7 +884,9 @@ const containerSettings = ref({
     min_container_twenty: 1,
     min_container_forty: 500,
     isNotMonthClosing: 0,
-    allowLalamove: 0
+    allowLalamove: 0,
+    allowOwnCollection: 0,
+    allowDirectShip: 0
 });
 
 // Driver Information (now collected after order success)
@@ -925,10 +927,18 @@ const availableCredit = ref(0);
 
 // Options
 const customerOptions = ref([]);
-const orderTypeOptions = ref([
-    { label: 'Direct Shipment', value: 'DIRECTSHIP' },
-    { label: 'Normal', value: 'NORMAL' }
-]);
+const orderTypeOptions = computed(() => {
+    const options = [
+        { label: 'Normal', value: 'NORMAL' }
+    ];
+
+    // Add DIRECTSHIP only if allowed
+    if (containerSettings.value.allowDirectShip === 1) {
+        options.unshift({ label: 'Direct Shipment', value: 'DIRECTSHIP' });
+    }
+
+    return options;
+});
 
 // Delivery Method Options - Computed based on API settings
 const deliveryMethodOptions = computed(() => {
@@ -940,7 +950,7 @@ const deliveryMethodOptions = computed(() => {
     }
 
     // Add SELFCOLLECT only if not month end closing
-    if (containerSettings.value.isNotMonthClosing === 0) {
+    if (containerSettings.value.allowOwnCollection === 1 && containerSettings.value.isNotMonthClosing === 0) {
         baseOptions.push({ label: 'Pickup - Own Collection', value: 'SELFCOLLECT' });
     }
 
@@ -1546,7 +1556,9 @@ const fetchEligibleOrderSettings = async (custAccountNo) => {
                 min_container_twenty: settings.min_container_twenty || 1,
                 min_container_forty: settings.min_container_forty || 500,
                 isNotMonthClosing: settings.isNotMonthClosing || 0,
-                allowLalamove: settings.isAllowLalamove || 0
+                allowLalamove: settings.isAllowLalamove || 0,
+                allowOwnCollection: settings.isAllowOwnCollection || 0,
+                allowDirectShip: settings.isEligible_directship || 0
             };
 
             console.log('Updated container settings:', containerSettings.value);
@@ -1562,7 +1574,9 @@ const fetchEligibleOrderSettings = async (custAccountNo) => {
             min_container_twenty: 1,
             min_container_forty: 500,
             isNotMonthClosing: 0,
-            allowLalamove: 0
+            allowLalamove: 0,
+            allowOwnCollection: 0,
+            allowDirectShip: 0
         };
     }
 };
