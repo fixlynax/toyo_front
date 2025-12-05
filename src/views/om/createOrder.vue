@@ -935,12 +935,12 @@ const deliveryMethodOptions = computed(() => {
     const baseOptions = [{ label: 'Delivery', value: 'DELIVER' }];
 
     // Add LALAMOVE only if allowed
-    if (containerSettings.value.allowLalamove === 1 && containerSettings.value.isNotMonthClosing === 1) {
+    if (containerSettings.value.allowLalamove === 1 && containerSettings.value.isNotMonthClosing === 0) {
         baseOptions.push({ label: 'Pickup - Lalamove', value: 'LALAMOVE' });
     }
 
     // Add SELFCOLLECT only if not month end closing
-    if (containerSettings.value.isNotMonthClosing === 1) {
+    if (containerSettings.value.isNotMonthClosing === 0) {
         baseOptions.push({ label: 'Pickup - Own Collection', value: 'SELFCOLLECT' });
     }
 
