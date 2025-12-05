@@ -281,14 +281,14 @@
                         <span class="text-sm text-gray-500">Allow Lalamove</span>
                         <p class="text-lg font-medium">{{ form.allowLalamove === '1' ? 'Yes' : 'No' }}</p>
                     </div>
+                    <div class="w-full">
+                        <span class="text-sm text-gray-500">Allow Own Collection</span>
+                        <p class="text-lg font-medium">{{ form.allowOwnCollection === '1' ? 'Yes' : 'No' }}</p>
+                    </div>
                     <!-- NEW: Allow Direct Shipment -->
                     <div class="w-full">
                         <span class="text-sm text-gray-500">Allow Direct Shipment</span>
                         <p class="text-lg font-medium">{{ form.allowDirectShipment === '1' ? 'Yes' : 'No' }}</p>
-                    </div>
-                    <div class="w-full">
-                        <span class="text-sm text-gray-500">Allow Own Collection</span>
-                        <p class="text-lg font-medium">{{ form.allowOwnCollection === '1' ? 'Yes' : 'No' }}</p>
                     </div>
                 </div>
             </div>
