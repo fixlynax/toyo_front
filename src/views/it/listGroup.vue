@@ -231,7 +231,42 @@
             </div>
             <template #footer>
                 <Button label="No" icon="pi pi-times" class="p-button-text" @click="deleteDialogVisible = false" />
-                <Button label="Yes" icon="pi pi-check" class="p-button-danger" @click="deleteGroup" :loading="deleting" />
+                <Button label="Yes" icon="pi pi-check" class="p-button-danger" @click="checkRoleHasActiveUsers" :loading="checkingActiveUsers" />
+            </template>
+        </Dialog>
+
+        <!-- Role has active users dialog -->
+        <Dialog v-model:visible="hasActiveUsersDialog" header="Role Has Active Users" modal :closable="true" :style="{ width: '500px' }">
+            <div class="confirmation-content flex-col items-start">
+                <div class="flex items-center mb-4">
+                    <i class="pi pi-exclamation-triangle mr-3 text-yellow-600" style="font-size: 2rem" />
+                    <span class="text-gray-700"> This User Role has existing users. You will need to select a new user role to assign to existing users before deleting this role. </span>
+                </div>
+
+                <div class="w-full mt-4">
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Select New Role for Existing Users</label>
+                    <Dropdown v-model="selectedNewRoleId" :options="availableRoles" optionLabel="usergroup" optionValue="id" placeholder="Select a role" class="w-full" :class="{ 'p-invalid': !selectedNewRoleId }" />
+                    <small class="text-red-500 mt-1 block" v-if="!selectedNewRoleId">Please select a role to proceed</small>
+                </div>
+            </div>
+            <template #footer>
+                <Button label="Cancel" icon="pi pi-times" class="p-button-text" @click="hasActiveUsersDialog = false" />
+                <Button label="Proceed" icon="pi pi-check" class="p-button-warning" @click="assignAndDelete" :loading="assigningRole" />
+            </template>
+        </Dialog>
+
+        <!-- Final delete confirmation after reassignment -->
+        <Dialog v-model:visible="finalDeleteDialog" header="Confirm Final Deletion" modal :closable="true" :style="{ width: '450px' }">
+            <div class="confirmation-content">
+                <i class="pi pi-exclamation-triangle mr-3" style="font-size: 2rem" />
+                <span v-if="selectedGroup">
+                    Role assignment completed successfully. <br /><br />
+                    Do you want to delete the role <strong>"{{ selectedGroup.usergroup }}"</strong> now?
+                </span>
+            </div>
+            <template #footer>
+                <Button label="No" icon="pi pi-times" class="p-button-text" @click="finalDeleteDialog = false" />
+                <Button label="Yes, Delete" icon="pi pi-check" class="p-button-danger" @click="performFinalDelete" :loading="deleting" />
             </template>
         </Dialog>
     </div>
@@ -252,6 +287,8 @@ const loading = ref(false);
 const initialLoading = ref(true);
 const updating = ref(false);
 const deleting = ref(false);
+const checkingActiveUsers = ref(false);
+const assigningRole = ref(false);
 
 // Expanded rows state
 const expandedRows = ref([]);
@@ -259,9 +296,13 @@ const expandedRows = ref([]);
 // Dialogs
 const editDialogVisible = ref(false);
 const deleteDialogVisible = ref(false);
+const hasActiveUsersDialog = ref(false);
+const finalDeleteDialog = ref(false);
 
 // Selected group for deletion
 const selectedGroup = ref(null);
+const selectedNewRoleId = ref(null);
+const availableRoles = ref([]);
 
 // Forms
 const editForm = ref({
@@ -562,7 +603,118 @@ const confirmDeleteGroup = (group) => {
     deleteDialogVisible.value = true;
 };
 
-const deleteGroup = async () => {
+// Check if role has active users
+const checkRoleHasActiveUsers = async () => {
+    if (!selectedGroup.value) return;
+
+    checkingActiveUsers.value = true;
+
+    try {
+        const payload = {
+            user_role_id: selectedGroup.value.id
+        };
+
+        const response = await api.post('admin/check-user-role', payload);
+
+        if (response.data.success === true) {
+            // Role has active users - show reassignment dialog
+            deleteDialogVisible.value = false;
+
+            // Get available roles (excluding the current one)
+            availableRoles.value = listData.value.filter((role) => role.id !== selectedGroup.value.id);
+
+            selectedNewRoleId.value = null;
+            hasActiveUsersDialog.value = true;
+        } else {
+            // Role has no active users - proceed directly to delete
+            await performDelete();
+        }
+    } catch (err) {
+        console.error('Error checking active users:', err);
+
+        if (err.response?.status === 404) {
+            // If 404, role has no active users (based on API logic)
+            await performDelete();
+        } else {
+            toast.add({
+                severity: 'error',
+                summary: 'Error',
+                detail: err.response?.data?.message || 'Failed to check role usage',
+                life: 4000
+            });
+            deleteDialogVisible.value = false;
+        }
+    } finally {
+        checkingActiveUsers.value = false;
+    }
+};
+
+// Assign users to new role and prepare for deletion
+const assignAndDelete = async () => {
+    if (!selectedGroup.value || !selectedNewRoleId.value) {
+        toast.add({
+            severity: 'warn',
+            summary: 'Warning',
+            detail: 'Please select a role to assign existing users to',
+            life: 4000
+        });
+        return;
+    }
+
+    assigningRole.value = true;
+
+    try {
+        const payload = {
+            from_role_id: selectedGroup.value.id,
+            to_role_id: selectedNewRoleId.value
+        };
+
+        const response = await api.post('admin/assign-user-role', payload);
+
+        if (response.data.success === true) {
+            toast.add({
+                severity: 'success',
+                summary: 'Success',
+                detail: response.data.message || 'Users reassigned successfully',
+                life: 5000
+            });
+
+            // Close current dialog and show final delete confirmation
+            hasActiveUsersDialog.value = false;
+            finalDeleteDialog.value = true;
+        } else {
+            toast.add({
+                severity: 'error',
+                summary: 'Error',
+                detail: response.data.message || 'Failed to reassign users',
+                life: 4000
+            });
+        }
+    } catch (err) {
+        console.error('Error assigning user role:', err);
+
+        if (err.response?.data?.message) {
+            toast.add({
+                severity: 'error',
+                summary: 'Error',
+                detail: err.response.data.message,
+                life: 5000
+            });
+        } else {
+            toast.add({
+                severity: 'error',
+                summary: 'Error',
+                detail: 'Something went wrong while reassigning users',
+                life: 5000
+            });
+        }
+    } finally {
+        assigningRole.value = false;
+    }
+};
+
+// Perform the actual deletion
+const performDelete = async () => {
     if (!selectedGroup.value) return;
 
     deleting.value = true;
@@ -583,8 +735,6 @@ const deleteGroup = async () => {
             });
 
             await fetchGroups();
-            deleteDialogVisible.value = false;
-            selectedGroup.value = null;
         } else {
             toast.add({
                 severity: 'error',
@@ -613,7 +763,17 @@ const deleteGroup = async () => {
         }
     } finally {
         deleting.value = false;
+        deleteDialogVisible.value = false;
+        selectedGroup.value = null;
+        selectedNewRoleId.value = null;
+        finalDeleteDialog.value = false;
     }
+};
+
+// Final delete after reassignment
+const performFinalDelete = async () => {
+    finalDeleteDialog.value = false;
+    await performDelete();
 };
 
 onMounted(() => {
@@ -748,5 +908,9 @@ onMounted(() => {
 
 :deep(.permission-item:last-child) {
     border-bottom: none;
+}
+
+:deep(.p-dropdown) {
+    width: 100%;
 }
 </style>
