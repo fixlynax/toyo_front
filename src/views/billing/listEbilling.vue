@@ -3,7 +3,7 @@
         <Toast />
 
         <div class="flex justify-between items-center mb-4">
-            <div class="text-2xl font-bold text-black">List Self Bill E-Invoice</div>
+            <div class="text-2xl font-bold text-black">Self Bill E-Invoice</div>
         </div>
 
         <!-- Error Message -->
@@ -73,7 +73,7 @@
                             </div>
                             <Button v-if="dateRange[0] || dateRange[1]" icon="pi pi-times" class="p-button-text p-button-sm" @click="clearDateRange" title="Clear date filter" />
                         </div>
-                        <div v-if="!hasDateFilterApplied" class="text-sm text-blue-600 italic">Select a date range to filter e-billing documents</div>
+                        <div v-if="!hasDateFilterApplied" class="text-sm text-blue-600 italic">Select a date range to filter</div>
                     </div>
                 </div>
             </template>
@@ -83,7 +83,7 @@
                     <template v-if="!hasDateFilterApplied">
                         <div class="flex flex-col items-center gap-2">
                             <i class="pi pi-calendar text-3xl text-blue-400"></i>
-                            <span class="text-lg">Select a date range to view e-billing documents</span>
+                            <span class="text-lg">Select a date range to view e-billing</span>
                             <span class="text-sm text-gray-400">Choose both start and end dates to load data</span>
                         </div>
                     </template>
