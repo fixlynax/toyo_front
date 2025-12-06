@@ -30,24 +30,12 @@
 
                         <div class="grid md:grid-cols-2 gap-4">
                             <div>
+                                <span class="text-sm text-gray-500">Customer Name</span>
+                                <p class="text-lg font-medium">{{ getCustomerName() || '-' }}</p>
+                            </div>
+                            <div>
                                 <span class="text-sm text-gray-500">Company Registration No</span>
                                 <p class="text-lg font-medium">{{ form.companyRegNo || '-' }}</p>
-                            </div>
-                            <div>
-                                <span class="text-sm text-gray-500">Company Name 1</span>
-                                <p class="text-lg font-medium">{{ form.companyName1 || '-' }}</p>
-                            </div>
-                            <div>
-                                <span class="text-sm text-gray-500">Company Name 2</span>
-                                <p class="text-lg font-medium">{{ form.companyName2 || '-' }}</p>
-                            </div>
-                            <div>
-                                <span class="text-sm text-gray-500">Company Name 3</span>
-                                <p class="text-lg font-medium">{{ form.companyName3 || '-' }}</p>
-                            </div>
-                            <div>
-                                <span class="text-sm text-gray-500">Company Name 4</span>
-                                <p class="text-lg font-medium">{{ form.companyName4 || '-' }}</p>
                             </div>
                             <div>
                                 <span class="text-sm text-gray-500">Sales Tax No</span>
@@ -66,20 +54,8 @@
                                 <p class="text-lg font-medium">{{ form.vatNo || '-' }}</p>
                             </div>
                             <div>
-                                <span class="text-sm text-gray-500">Address Line 1 </span>
-                                <p class="text-lg font-medium">{{ form.addressLine1 || '-' }}</p>
-                            </div>
-                            <div>
-                                <span class="text-sm text-gray-500">Address Line 2</span>
-                                <p class="text-lg font-medium">{{ form.addressLine2 || '-' }}</p>
-                            </div>
-                            <div>
-                                <span class="text-sm text-gray-500">Address Line 3 </span>
-                                <p class="text-lg font-medium">{{ form.addressLine3 || '-' }}</p>
-                            </div>
-                            <div>
-                                <span class="text-sm text-gray-500">Address Line 4</span>
-                                <p class="text-lg font-medium">{{ form.addressLine4 || '-' }}</p>
+                                <span class="text-sm text-gray-500">Address</span>
+                                <p class="text-lg font-medium">{{ getAddress() || '-' }}</p>
                             </div>
                             <div>
                                 <span class="text-sm text-gray-500">City</span>
@@ -98,12 +74,8 @@
                                 <p class="text-lg font-medium">{{ form.country || '-' }}</p>
                             </div>
                             <div>
-                                <span class="text-sm text-gray-500">Map Longtitude</span>
-                                <p class="text-lg font-medium">{{ form.mapLongitude || '-' }}</p>
-                            </div>
-                            <div>
-                                <span class="text-sm text-gray-500">Map Latitude</span>
-                                <p class="text-lg font-medium">{{ form.mapLatitude || '-' }}</p>
+                                <span class="text-sm text-gray-500">Coordinate Map (Long, Lat)</span>
+                                <p class="text-lg font-medium">{{ form.mapLatitude ?? '-' }}° , {{ form.mapLongitude ?? '-' }}°</p>
                             </div>
                             <div>
                                 <span class="text-sm text-gray-500">Phone No.</span>
@@ -128,18 +100,12 @@
                             <Column header="Company Name" style="min-width: 13rem">
                                 <template #body="{ data }">
                                     <span class="font-bold"> {{ data.custAccountNo }}<br /></span>
-                                    {{ data.companyName1 || '' }}<br />
-                                    <span v-if="data.companyName2">{{ data.companyName2 }}<br /></span>
-                                    <span v-if="data.companyName3">{{ data.companyName3 }}<br /></span>
-                                    <span v-if="data.companyName4">{{ data.companyName4 }}<br /></span>
+                                    {{ getShipToCustomerName(data) || '' }}<br />
                                 </template>
                             </Column>
                             <Column header="Address" style="min-width: 13rem">
                                 <template #body="{ data }">
-                                    {{ data.addressLine1 || '' }}<br />
-                                    <span v-if="data.addressLine2">{{ data.addressLine2 }}<br /></span>
-                                    <span v-if="data.addressLine3">{{ data.addressLine3 }}<br /></span>
-                                    <span v-if="data.addressLine4">{{ data.addressLine4 }}<br /></span>
+                                    {{ getShipToAddress(data) || '' }}<br />
                                     {{ data.city }} {{ data.state }} {{ data.postcode }}<br />
                                     {{ data.country }}
                                 </template>
@@ -440,6 +406,43 @@ const loadingPullSAP = ref(false);
 // Chart data
 const chartData = ref();
 const chartOptions = ref();
+
+// Helper functions to combine customer name and address
+const getCustomerName = () => {
+    const parts = [];
+    if (form.value.companyName1) parts.push(form.value.companyName1);
+    if (form.value.companyName2) parts.push(form.value.companyName2);
+    if (form.value.companyName3) parts.push(form.value.companyName3);
+    if (form.value.companyName4) parts.push(form.value.companyName4);
+    return parts.join(' ');
+};
+
+const getAddress = () => {
+    const parts = [];
+    if (form.value.addressLine1) parts.push(form.value.addressLine1);
+    if (form.value.addressLine2) parts.push(form.value.addressLine2);
+    if (form.value.addressLine3) parts.push(form.value.addressLine3);
+    if (form.value.addressLine4) parts.push(form.value.addressLine4);
+    return parts.join(', ');
+};
+
+const getShipToCustomerName = (data) => {
+    const parts = [];
+    if (data.companyName1) parts.push(data.companyName1);
+    if (data.companyName2) parts.push(data.companyName2);
+    if (data.companyName3) parts.push(data.companyName3);
+    if (data.companyName4) parts.push(data.companyName4);
+    return parts.join(' ');
+};
+
+const getShipToAddress = (data) => {
+    const parts = [];
+    if (data.addressLine1) parts.push(data.addressLine1);
+    if (data.addressLine2) parts.push(data.addressLine2);
+    if (data.addressLine3) parts.push(data.addressLine3);
+    if (data.addressLine4) parts.push(data.addressLine4);
+    return parts.join(', ');
+};
 
 // Pull SAP Data function
 const pullSAPData = async () => {
