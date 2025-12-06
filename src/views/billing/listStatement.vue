@@ -62,38 +62,47 @@
                             <Button icon="pi pi-refresh" class="p-button-info p-button-sm" @click="refreshData" :disabled="loading" v-tooltip="'Refresh data'" />
                         </div>
                     </div>
-                    
+
                     <!-- Filter Row: Date Range and Customer Account No. -->
                     <div class="flex items-center gap-4 mb-1 flex-wrap">
                         <!-- Customer Account No. Filter -->
                         <div class="flex items-center gap-2">
                             <span class="text-sm font-medium text-gray-700">Customer Account No.:</span>
-                            <InputText 
-                                v-model="customerAccountFilter" 
+                            <InputNumber
+                                v-model="customerAccountFilter"
                                 placeholder="Filter by account number"
                                 class="w-48"
                                 :disabled="loading"
-                                @input="handleCustomerAccountFilter"
+                                :useGrouping="false"
+                                :maxFractionDigits="0"
+                                :min="0"
+                                :max="9999999999"
+                                inputId="customer-account-filter"
                             />
-                            <Button 
-                                v-if="customerAccountFilter" 
-                                icon="pi pi-times" 
-                                class="p-button-text p-button-sm" 
-                                @click="clearCustomerAccountFilter" 
-                                title="Clear account filter" 
-                            />
+                            <Button v-if="customerAccountFilter" icon="pi pi-times" class="p-button-text p-button-sm" @click="clearCustomerAccountFilter" title="Clear account filter" />
                         </div>
-                        
+
                         <!-- Date Range Filter -->
                         <div class="flex items-center gap-2">
                             <span class="text-sm font-medium text-gray-700">Date Range:</span>
                             <div class="flex items-center gap-2">
-                                <Calendar v-model="dateRange[0]" placeholder="Start Date" dateFormat="yy-mm-dd" showIcon class="w-40" :disabled="loading" @date-select="handleDateChange" />
+                                <Calendar v-model="dateRange[0]" placeholder="Start Date" dateFormat="yy-mm-dd" showIcon class="w-40" :disabled="loading" />
                                 <span class="text-gray-500">to</span>
-                                <Calendar v-model="dateRange[1]" placeholder="End Date" dateFormat="yy-mm-dd" showIcon class="w-40" :disabled="loading" @date-select="handleDateChange" />
+                                <Calendar v-model="dateRange[1]" placeholder="End Date" dateFormat="yy-mm-dd" showIcon class="w-40" :disabled="loading" />
                             </div>
                             <Button v-if="dateRange[0] || dateRange[1]" icon="pi pi-times" class="p-button-text p-button-sm" @click="clearDateRange" title="Clear date filter" />
                         </div>
+
+                        <!-- Filter Button -->
+                        <Button
+                            icon="pi pi-filter"
+                            label="Filter"
+                            class="p-button-primary p-button-sm"
+                            @click="applyFilter"
+                            :disabled="loading || (!dateRange[0] && !dateRange[1] && !customerAccountFilter)"
+                            :loading="filterLoading"
+                            v-tooltip="'Apply date and account number filters'"
+                        />
                     </div>
                 </div>
             </template>
@@ -171,7 +180,7 @@
 </template>
 
 <script setup>
-import { onBeforeMount, ref, reactive, computed, watch } from 'vue';
+import { onBeforeMount, ref, reactive, computed } from 'vue';
 import api from '@/service/api';
 import { FilterMatchMode, FilterOperator } from '@primevue/core/api';
 import LoadingPage from '@/components/LoadingPage.vue';
@@ -179,6 +188,7 @@ import { useToast } from 'primevue/usetoast';
 import Calendar from 'primevue/calendar';
 import Button from 'primevue/button';
 import InputText from 'primevue/inputtext';
+import InputNumber from 'primevue/inputnumber';
 
 const toast = useToast();
 
@@ -191,6 +201,7 @@ const filters1 = reactive({
 
 const listData = ref([]);
 const loading = ref(false);
+const filterLoading = ref(false);
 const downloadLoading = ref(null);
 const viewLoading = ref(null);
 const error = ref(null);
@@ -199,9 +210,7 @@ const customerAccountFilter = ref('');
 const hasDateFilterApplied = ref(false);
 const sortField = ref('sortableDate');
 
-// Debounce timers
-let debounceTimer = null;
-let accountFilterTimer = null;
+// Removed debounce timers since we're using button click now
 
 // Selection state for bulk download
 const selectedFiles = ref([]);
@@ -245,7 +254,7 @@ const StatementService = {
                             try {
                                 // Parse the date string
                                 const [day, month, year] = dateStr.split('/');
-                                
+
                                 // Create a sortable date string in YYYY-MM-DD format
                                 // This ensures proper sorting by year, then month, then day
                                 sortableDate = `${year}-${month.padStart(2, '0')}-${day.padStart(2, '0')}`;
@@ -392,45 +401,105 @@ const StatementService = {
     }
 };
 
-// 🟢 Handle customer account number filter change
-const handleCustomerAccountFilter = () => {
-    // Clear any existing timer
-    if (accountFilterTimer) {
-        clearTimeout(accountFilterTimer);
+// 🟢 Apply Filter Button Handler
+const applyFilter = async () => {
+    // Validate date range - either both dates or none
+    if ((dateRange.value[0] && !dateRange.value[1]) || (!dateRange.value[0] && dateRange.value[1])) {
+        toast.add({
+            severity: 'warn',
+            summary: 'Invalid Date Range',
+            detail: 'Please select both start and end dates, or clear both',
+            life: 3000
+        });
+        return;
     }
 
-    // Set new timer to debounce the API call
-    accountFilterTimer = setTimeout(async () => {
-        if (dateRange.value[0] && dateRange.value[1]) {
-            await loadFilteredData();
+    // Validate customer account number format (only numbers, max 10 digits)
+    if (customerAccountFilter.value) {
+        const accountStr = customerAccountFilter.value.toString();
+        if (!/^\d+$/.test(accountStr)) {
+            toast.add({
+                severity: 'error',
+                summary: 'Invalid Account Number',
+                detail: 'Customer account number must contain only numbers',
+                life: 3000
+            });
+            return;
         }
-    }, 500);
+
+        if (accountStr.length > 10) {
+            toast.add({
+                severity: 'error',
+                summary: 'Invalid Account Number',
+                detail: 'Customer account number must be at most 10 digits',
+                life: 3000
+            });
+            return;
+        }
+    }
+
+    filterLoading.value = true;
+
+    try {
+        // If no dates but has account filter, we need to show warning
+        if (!dateRange.value[0] && !dateRange.value[1] && customerAccountFilter.value) {
+            toast.add({
+                severity: 'warn',
+                summary: 'Date Range Required',
+                detail: 'Please select a date range when filtering by account number',
+                life: 3000
+            });
+            return;
+        }
+
+        // If no dates and no account filter, show empty state
+        if (!dateRange.value[0] && !dateRange.value[1] && !customerAccountFilter.value) {
+            hasDateFilterApplied.value = false;
+            listData.value = [];
+            selectedFiles.value = [];
+
+            toast.add({
+                severity: 'info',
+                summary: 'Filter Cleared',
+                detail: 'No filters applied. Please select date range or account number to filter.',
+                life: 3000
+            });
+            return;
+        }
+
+        // Load data with filters
+        await loadFilteredData();
+    } catch (error) {
+        console.error('Filter application failed:', error);
+        toast.add({
+            severity: 'error',
+            summary: 'Filter Failed',
+            detail: 'Failed to apply filters. Please try again.',
+            life: 5000
+        });
+    } finally {
+        filterLoading.value = false;
+    }
 };
 
 // 🟢 Clear customer account filter
 const clearCustomerAccountFilter = () => {
     customerAccountFilter.value = '';
-    if (dateRange.value[0] && dateRange.value[1]) {
-        loadFilteredData();
-    }
+    // Note: This doesn't trigger filter automatically
+    // User needs to click Filter button again if they want to apply changes
 };
 
-// 🟢 Load filtered data
+// 🟢 Load filtered data (modified to be called by applyFilter)
 const loadFilteredData = async () => {
-    if (!dateRange.value[0] || !dateRange.value[1]) {
-        return;
-    }
+    // Convert customerAccountFilter to string for API call
+    const accountFilterValue = customerAccountFilter.value ? customerAccountFilter.value.toString() : null;
 
     loading.value = true;
     error.value = null;
     selectedFiles.value = []; // Clear selection when applying new filter
 
     try {
-        listData.value = await StatementService.getStatementList(
-            dateRange.value[0], 
-            dateRange.value[1], 
-            customerAccountFilter.value
-        );
+        listData.value = await StatementService.getStatementList(dateRange.value[0], dateRange.value[1], accountFilterValue);
         hasDateFilterApplied.value = true;
 
         // Sort the data by document date from new to old (YYYY-MM-DD format)
@@ -439,9 +508,12 @@ const loadFilteredData = async () => {
             return b.sortableDate.localeCompare(a.sortableDate);
         });
 
-        let filterMessage = `Showing statements from ${formatDateForDisplay(dateRange.value[0])} to ${formatDateForDisplay(dateRange.value[1])}`;
-        if (customerAccountFilter.value) {
-            filterMessage += ` for account: ${customerAccountFilter.value}`;
+        let filterMessage = `Showing statements`;
+        if (dateRange.value[0] && dateRange.value[1]) {
+            filterMessage += ` from ${formatDateForDisplay(dateRange.value[0])} to ${formatDateForDisplay(dateRange.value[1])}`;
+        }
+        if (accountFilterValue) {
+            filterMessage += ` for account: ${accountFilterValue}`;
         }
 
         toast.add({
@@ -470,16 +542,16 @@ const loadFilteredData = async () => {
 // 🟢 Handle sort event
 const onSort = (event) => {
     sortField.value = event.sortField;
-    
+
     // If sorting by docsDate (which uses sortableDate field), we need to sort by the sortableDate field
     if (event.sortField === 'sortableDate') {
         listData.value.sort((a, b) => {
             if (!a.sortableDate || !b.sortableDate) return 0;
-            
+
             // For descending order (new to old)
             if (event.sortOrder === -1) {
                 return b.sortableDate.localeCompare(a.sortableDate);
-            } 
+            }
             // For ascending order (old to new)
             else {
                 return a.sortableDate.localeCompare(b.sortableDate);
@@ -487,35 +559,6 @@ const onSort = (event) => {
         });
     }
 };
-
-// 🟢 Handle date change with debouncing
-const handleDateChange = () => {
-    if (debounceTimer) {
-        clearTimeout(debounceTimer);
-    }
-
-    debounceTimer = setTimeout(async () => {
-        if (dateRange.value[0] && dateRange.value[1]) {
-            await loadFilteredData();
-        } else if (dateRange.value[0] === null && dateRange.value[1] === null && hasDateFilterApplied.value) {
-            hasDateFilterApplied.value = false;
-            customerAccountFilter.value = '';
-            listData.value = [];
-            selectedFiles.value = [];
-        }
-    }, 500);
-};
-
-// 🟢 Watcher for date range changes
-watch(
-    dateRange,
-    (newRange) => {
-        if (newRange[0] && newRange[1]) {
-            handleDateChange();
-        }
-    },
-    { deep: true }
-);
 
 // 🟢 Computed - Filter data by search
 const filteredData = computed(() => {
@@ -707,12 +750,9 @@ const refreshData = async () => {
     loading.value = true;
     error.value = null;
     try {
-        listData.value = await StatementService.getStatementList(
-            dateRange.value[0], 
-            dateRange.value[1], 
-            customerAccountFilter.value
-        );
-        
+        const accountFilterValue = customerAccountFilter.value ? customerAccountFilter.value.toString() : null;
+        listData.value = await StatementService.getStatementList(dateRange.value[0], dateRange.value[1], accountFilterValue);
+
         listData.value.sort((a, b) => {
             if (!a.sortableDate || !b.sortableDate) return 0;
             return b.sortableDate.localeCompare(a.sortableDate);
@@ -750,7 +790,7 @@ const clearDateRange = () => {
     toast.add({
         severity: 'info',
         summary: 'Filter Cleared',
-        detail: 'Date filter has been cleared',
+        detail: 'Date filter has been cleared. Click Filter button to apply new filters.',
         life: 3000
     });
 };
@@ -844,6 +884,18 @@ const formatDateForDisplay = (dateString) => {
 :deep(.p-calendar) {
     .p-inputtext {
         padding: 0.5rem;
+    }
+}
+
+/* Custom styling for InputNumber */
+:deep(.p-inputnumber) {
+    .p-inputtext {
+        padding: 0.5rem;
+        text-align: left;
+    }
+
+    .p-inputnumber-input {
+        font-family: monospace;
     }
 }
 </style>

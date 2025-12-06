@@ -3,7 +3,7 @@
         <Toast />
 
         <div class="flex justify-between items-center mb-4">
-            <div class="text-2xl font-bold text-black">List Other - Customer: {{ custAccNo }}</div>
+            <div class="text-2xl font-bold text-black">Others - Customer: {{ custAccNo }}</div>
         </div>
 
         <!-- Error Message -->
