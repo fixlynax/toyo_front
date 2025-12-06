@@ -30,11 +30,12 @@
             :filters="filters1"
             :rowsPerPageOptions="[10, 20, 50, 100]"
             removableSort
-            sortField="sortableDate"
+            :sortField="sortField"
             :sortOrder="-1"
             currentPageReportTemplate="Showing {first} to {last} of {totalRecords} entries"
             paginatorTemplate="CurrentPageReport FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink RowsPerPageDropdown"
             v-model:selection="selectedFiles"
+            @sort="onSort"
         >
             <template #header>
                 <div class="flex flex-col gap-4 w-full">
@@ -71,8 +72,16 @@
                         </div>
                     </div>
 
-                    <!-- Date Range Filter -->
+                    <!-- Filter Row: Date Range and Customer Account No. -->
                     <div class="flex items-center gap-4 mb-1 flex-wrap">
+                        <!-- Customer Account No. Filter -->
+                        <div class="flex items-center gap-2">
+                            <span class="text-sm font-medium text-gray-700">Customer Account No.:</span>
+                            <InputText v-model="customerAccountFilter" placeholder="Filter by account number" class="w-48" :disabled="loading" @input="handleCustomerAccountFilter" />
+                            <Button v-if="customerAccountFilter" icon="pi pi-times" class="p-button-text p-button-sm" @click="clearCustomerAccountFilter" title="Clear account filter" />
+                        </div>
+
+                        <!-- Date Range Filter -->
                         <div class="flex items-center gap-2">
                             <span class="text-sm font-medium text-gray-700">Date Range:</span>
                             <div class="flex items-center gap-2">
@@ -82,7 +91,6 @@
                             </div>
                             <Button v-if="dateRange[0] || dateRange[1]" icon="pi pi-times" class="p-button-text p-button-sm" @click="clearDateRange" title="Clear date filter" />
                         </div>
-                        <div v-if="!hasDateFilterApplied" class="text-sm text-blue-600 italic">Select a date range to view other files</div>
                     </div>
                 </div>
             </template>
@@ -112,7 +120,7 @@
 
             <Column selectionMode="multiple" headerStyle="width: 3rem"></Column>
 
-            <Column field="docsDate" header="Document Date" style="min-width: 8rem" sortable>
+            <Column field="sortableDate" header="Document Date" style="min-width: 8rem" sortable>
                 <template #body="{ data }">
                     <span class="font-medium">{{ data.docsDate }}</span>
                     <div class="text-xs text-gray-500">{{ formatDateForDisplay(data.docsDate) }}</div>
@@ -265,6 +273,7 @@ import LoadingPage from '@/components/LoadingPage.vue';
 import { useToast } from 'primevue/usetoast';
 import Calendar from 'primevue/calendar';
 import Button from 'primevue/button';
+import InputText from 'primevue/inputtext';
 import Dialog from 'primevue/dialog';
 import ProgressBar from 'primevue/progressbar';
 
@@ -278,17 +287,20 @@ const filters1 = reactive({
 });
 
 const listData = ref([]);
-const loading = ref(false); // Start with false since we don't load initially
+const loading = ref(false);
 const downloadLoading = ref(null);
 const viewLoading = ref(null);
 const error = ref(null);
 const uploadLoading = ref(false);
 const fileInputRef = ref(null);
 const dateRange = ref([null, null]);
+const customerAccountFilter = ref('');
 const hasDateFilterApplied = ref(false);
+const sortField = ref('sortableDate');
 
-// Debounce timer for date changes
+// Debounce timers
 let debounceTimer = null;
+let accountFilterTimer = null;
 
 // Upload progress state
 const uploadProgress = ref(0);
@@ -303,7 +315,7 @@ const selectedFiles = ref([]);
 
 // 🟢 API service functions for Other Files
 const OtherService = {
-    async getOtherList(startDate = null, endDate = null) {
+    async getOtherList(startDate = null, endDate = null, accountNo = null) {
         try {
             let params = {};
 
@@ -320,41 +332,60 @@ const OtherService = {
                 params.date_range = `${formatDateForAPI(startDate)} - ${formatDateForAPI(endDate)}`;
             }
 
+            // Add customer account number filter if provided
+            if (accountNo && accountNo.trim() !== '') {
+                params.custAccountNo = accountNo.trim();
+            }
+
             const response = await api.post('credit/other', params);
             if (response.data.status === 1) {
                 // Transform the API data to match your table structure
                 return response.data.admin_data.map((item) => {
                     // Parse the date for sorting and filtering
                     const dateStr = item.date;
-                    let parsedDate = null;
                     let sortableDate = null;
 
                     // Parse the date from various formats
                     if (dateStr) {
                         // Try to parse DD/MM/YYYY format
                         if (dateStr.includes('/')) {
-                            const [day, month, year] = dateStr.split('/');
-                            if (day && month && year) {
-                                parsedDate = new Date(`${year}-${month}-${day}`);
-                                sortableDate = parsedDate.getTime();
+                            try {
+                                // Parse the date string
+                                const [day, month, year] = dateStr.split('/');
+
+                                // Create a sortable date string in YYYY-MM-DD format
+                                // This ensures proper sorting by year, then month, then day
+                                sortableDate = `${year}-${month.padStart(2, '0')}-${day.padStart(2, '0')}`;
+                            } catch (error) {
+                                console.error('Error parsing date:', dateStr);
+                                sortableDate = '0000-00-00'; // Fallback for invalid dates
                             }
                         }
                         // Try YYYY-MM-DD format
                         else if (dateStr.includes('-')) {
-                            parsedDate = new Date(dateStr);
-                            sortableDate = parsedDate.getTime();
+                            try {
+                                // Ensure it's in YYYY-MM-DD format
+                                const [year, month, day] = dateStr.split('-');
+                                sortableDate = `${year}-${month.padStart(2, '0')}-${day.padStart(2, '0')}`;
+                            } catch (error) {
+                                sortableDate = '0000-00-00';
+                            }
                         }
                         // Try ISO format
                         else {
-                            parsedDate = new Date(dateStr);
-                            sortableDate = parsedDate.getTime();
+                            try {
+                                const parsedDate = new Date(dateStr);
+                                sortableDate = parsedDate.toISOString().split('T')[0];
+                            } catch (error) {
+                                sortableDate = '0000-00-00';
+                            }
                         }
                     }
 
                     return {
                         id: item.file_path,
                         docsDate: item.date,
-                        sortableDate: sortableDate, // For proper sorting
+                        sortableDate: sortableDate, // For proper sorting (YYYY-MM-DD format)
                         docType: item.docType,
                         dealerId: item.account_no,
                         dealerName: item.custName,
@@ -362,7 +393,7 @@ const OtherService = {
                         filePath: item.file_path,
                         fileUrl: item.file_url,
                         download: true,
-                        parsedDate: parsedDate, // For date filtering
+                        parsedDate: sortableDate ? new Date(sortableDate) : null, // For date filtering
                         fileExtension: item.file_path.split('.').pop()?.toLowerCase() || ''
                     };
                 });
@@ -515,25 +546,27 @@ const OtherService = {
     }
 };
 
-// 🟢 Handle date change with debouncing
-const handleDateChange = () => {
+// 🟢 Handle customer account number filter change
+const handleCustomerAccountFilter = () => {
     // Clear any existing timer
-    if (debounceTimer) {
-        clearTimeout(debounceTimer);
+    if (accountFilterTimer) {
+        clearTimeout(accountFilterTimer);
     }
 
     // Set new timer to debounce the API call
-    debounceTimer = setTimeout(async () => {
-        // Only fetch data if both dates are selected
+    accountFilterTimer = setTimeout(async () => {
         if (dateRange.value[0] && dateRange.value[1]) {
             await loadFilteredData();
-        } else if (dateRange.value[0] === null && dateRange.value[1] === null && hasDateFilterApplied.value) {
-            // If both dates are cleared and we had data, clear the data
-            hasDateFilterApplied.value = false;
-            listData.value = [];
-            selectedFiles.value = [];
         }
-    }, 500); // 500ms debounce delay
+    }, 500);
+};
+
+// 🟢 Clear customer account filter
+const clearCustomerAccountFilter = () => {
+    customerAccountFilter.value = '';
+    if (dateRange.value[0] && dateRange.value[1]) {
+        loadFilteredData();
+    }
 };
 
 // 🟢 Load filtered data
@@ -547,13 +580,24 @@ const loadFilteredData = async () => {
     selectedFiles.value = []; // Clear selection when applying new filter
 
     try {
-        listData.value = await OtherService.getOtherList(dateRange.value[0], dateRange.value[1]);
+        listData.value = await OtherService.getOtherList(dateRange.value[0], dateRange.value[1], customerAccountFilter.value);
         hasDateFilterApplied.value = true;
+
+        // Sort the data by document date from new to old (YYYY-MM-DD format)
+        listData.value.sort((a, b) => {
+            if (!a.sortableDate || !b.sortableDate) return 0;
+            return b.sortableDate.localeCompare(a.sortableDate);
+        });
+
+        let filterMessage = `Showing other files from ${formatDateForDisplay(dateRange.value[0])} to ${formatDateForDisplay(dateRange.value[1])}`;
+        if (customerAccountFilter.value) {
+            filterMessage += ` for account: ${customerAccountFilter.value}`;
+        }
 
         toast.add({
             severity: 'success',
             summary: 'Filter Applied',
-            detail: `Showing other files from ${formatDateForDisplay(dateRange.value[0])} to ${formatDateForDisplay(dateRange.value[1])}`,
+            detail: filterMessage,
             life: 3000
         });
     } catch (err) {
@@ -573,11 +617,49 @@ const loadFilteredData = async () => {
     }
 };
 
-// 🟢 Watcher for date range changes (alternative approach)
+// 🟢 Handle sort event
+const onSort = (event) => {
+    sortField.value = event.sortField;
+
+    // If sorting by docsDate (which uses sortableDate field), we need to sort by the sortableDate field
+    if (event.sortField === 'sortableDate') {
+        listData.value.sort((a, b) => {
+            if (!a.sortableDate || !b.sortableDate) return 0;
+
+            // For descending order (new to old)
+            if (event.sortOrder === -1) {
+                return b.sortableDate.localeCompare(a.sortableDate);
+            }
+            // For ascending order (old to new)
+            else {
+                return a.sortableDate.localeCompare(b.sortableDate);
+            }
+        });
+    }
+};
+
+// 🟢 Handle date change with debouncing
+const handleDateChange = () => {
+    if (debounceTimer) {
+        clearTimeout(debounceTimer);
+    }
+
+    debounceTimer = setTimeout(async () => {
+        if (dateRange.value[0] && dateRange.value[1]) {
+            await loadFilteredData();
+        } else if (dateRange.value[0] === null && dateRange.value[1] === null && hasDateFilterApplied.value) {
+            hasDateFilterApplied.value = false;
+            customerAccountFilter.value = '';
+            listData.value = [];
+            selectedFiles.value = [];
+        }
+    }, 500);
+};
+
+// 🟢 Watcher for date range changes
 watch(
     dateRange,
     (newRange) => {
-        // Only trigger if both dates are set
         if (newRange[0] && newRange[1]) {
             handleDateChange();
         }
@@ -585,13 +667,11 @@ watch(
     { deep: true }
 );
 
-// 🟢 Computed - Filter data by search (only after date filter applied)
+// 🟢 Computed - Filter data by search
 const filteredData = computed(() => {
     if (!hasDateFilterApplied.value) {
         return [];
     }
-
-    // Return all data when date filter is applied (search filtering is handled by DataTable)
     return listData.value;
 });
 
@@ -781,7 +861,7 @@ const handleFileUpload = async (event) => {
     const files = Array.from(event.target.files);
     if (!files.length) return;
 
-    // 🟢 ADDED: Limit of 20 files per upload
+    // Limit of 20 files per upload
     if (files.length > 20) {
         toast.add({
             severity: 'error',
@@ -964,11 +1044,11 @@ const formatFileSize = (bytes) => {
     return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
 };
 
-// 🟢 Initial load - Don't load data initially, require date filter first
+// 🟢 Initial load
 onBeforeMount(async () => {
-    loading.value = false; // Set loading to false since we won't load data initially
-    listData.value = []; // Initialize with empty array
-    hasDateFilterApplied.value = false; // No filter applied initially
+    loading.value = false;
+    listData.value = [];
+    hasDateFilterApplied.value = false;
 });
 
 // 🟢 Refresh function
@@ -986,7 +1066,12 @@ const refreshData = async () => {
     loading.value = true;
     error.value = null;
     try {
-        listData.value = await OtherService.getOtherList(dateRange.value[0], dateRange.value[1]);
+        listData.value = await OtherService.getOtherList(dateRange.value[0], dateRange.value[1], customerAccountFilter.value);
+
+        listData.value.sort((a, b) => {
+            if (!a.sortableDate || !b.sortableDate) return 0;
+            return b.sortableDate.localeCompare(a.sortableDate);
+        });
 
         toast.add({
             severity: 'success',
@@ -1007,6 +1092,22 @@ const refreshData = async () => {
     } finally {
         loading.value = false;
     }
+};
+
+// 🟢 Clear Date Range
+const clearDateRange = () => {
+    dateRange.value = [null, null];
+    customerAccountFilter.value = '';
+    hasDateFilterApplied.value = false;
+    listData.value = [];
+    selectedFiles.value = [];
+
+    toast.add({
+        severity: 'info',
+        summary: 'Filter Cleared',
+        detail: 'Date filter has been cleared',
+        life: 3000
+    });
 };
 
 // 🟢 Helper Functions
@@ -1042,21 +1143,6 @@ const formatDateForDisplay = (dateString) => {
         return '';
     }
 };
-
-// 🟢 Clear Date Range
-const clearDateRange = () => {
-    dateRange.value = [null, null];
-    hasDateFilterApplied.value = false;
-    listData.value = [];
-    selectedFiles.value = [];
-
-    toast.add({
-        severity: 'info',
-        summary: 'Filter Cleared',
-        detail: 'Date filter has been cleared',
-        life: 3000
-    });
-};
 </script>
 
 <style scoped>
@@ -1073,6 +1159,11 @@ const clearDateRange = () => {
     .p-paginator-bottom {
         border-bottom-left-radius: 12px;
         border-bottom-right-radius: 12px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 1rem;
     }
 
     .p-datatable-thead > tr > th {
@@ -1096,6 +1187,11 @@ const clearDateRange = () => {
     .p-datatable-tbody > tr.p-datatable-emptymessage > td {
         border-bottom-left-radius: 12px;
         border-bottom-right-radius: 12px;
+    }
+
+    :deep(.p-paginator-current) {
+        margin-right: auto;
+        order: -1;
     }
 }
 
