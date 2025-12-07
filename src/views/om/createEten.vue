@@ -85,9 +85,23 @@ interface SapResponseItem {
     customermaster: CustomerMaster;
 }
 
+interface ApiError {
+    status: number;
+    error?: {
+        code: string;
+        message: string;
+    };
+    message?: string;
+}
+
 interface ApiResponse {
     status: number;
-    admin_data: SapResponseItem[];
+    admin_data?: SapResponseItem[];
+    error?: {
+        code: string;
+        message: string;
+    };
+    message?: string;
 }
 
 interface FormData {
@@ -423,9 +437,11 @@ async function fetchDealerDetails(accountNo: string): Promise<ApiResponse> {
             custAccountNo: accountNo
         });
 
+        // Return the full response data including error messages
         return response.data;
     } catch (error) {
         console.error('Error fetching dealer details:', error);
+        // Re-throw the error so goNext can handle it appropriately
         throw error;
     }
 }
@@ -622,9 +638,8 @@ async function goNext() {
             const sapData = response.admin_data[0];
             form.value = mapSapResponseToForm(sapData);
 
-            // MODIFIED: Set default values for dropdowns - "No" for all dropdowns
+            // Set default values for dropdowns - "No" for all dropdowns
             const noOption = dropdownYesNoValue.value.find((opt) => opt.name === 'No');
-
             const yesOption = dropdownYesNoValue.value.find((opt) => opt.name === 'Yes');
 
             // Set default to "No" for Allow Lalamove
@@ -644,22 +659,89 @@ async function goNext() {
 
             showDetails.value = true;
         } else {
-            toast.add({
-                severity: 'warn',
-                summary: 'Account Already Exist',
-                detail: `Account Already Exist for Account No: ${accountNo.value}`,
-                life: 4000
-            });
+            // Check for specific error messages from backend
+            if (response.message && response.message.includes('No response from SAP')) {
+                toast.add({
+                    severity: 'error',
+                    summary: 'Data Not Found',
+                    detail: 'No response from SAP, please contact admin.',
+                    life: 4000
+                });
+            } else if (response.status === 0) {
+                // Check if it's the "Account Already Exist" error
+                if (response.error && (response.error.message === 'Account Already Exist' || response.error.code === '429')) {
+                    toast.add({
+                        severity: 'warn',
+                        summary: 'Account Already Exist',
+                        detail: `Account Already Exist for Account No: ${accountNo.value}`,
+                        life: 4000
+                    });
+                } else if (response.error && response.error.message) {
+                    // Handle other backend errors
+                    toast.add({
+                        severity: 'error',
+                        summary: 'Error',
+                        detail: response.error.message,
+                        life: 4000
+                    });
+                }
+            } else {
+                // Generic error
+                toast.add({
+                    severity: 'warn',
+                    summary: 'Account Not Found',
+                    detail: `No data found for Account No: ${accountNo.value}`,
+                    life: 4000
+                });
+            }
             resetForm();
         }
-    } catch (error) {
+    } catch (error: any) {
         console.error('Error:', error);
-        toast.add({
-            severity: 'error',
-            summary: 'Error',
-            detail: 'Error fetching dealer details. Please try again.',
-            life: 4000
-        });
+
+        // Handle network or unexpected errors
+        if (error.response) {
+            // Handle HTTP error responses
+            if (error.response.status === 404) {
+                toast.add({
+                    severity: 'error',
+                    summary: 'Service Not Found',
+                    detail: 'SAP service is currently unavailable. Please try again later.',
+                    life: 4000
+                });
+            } else if (error.response.data && error.response.data.message) {
+                toast.add({
+                    severity: 'error',
+                    summary: 'Error',
+                    detail: error.response.data.message,
+                    life: 4000
+                });
+            } else {
+                toast.add({
+                    severity: 'error',
+                    summary: 'Error',
+                    detail: 'Error fetching dealer details. Please try again.',
+                    life: 4000
+                });
+            }
+        } else if (error.request) {
+            // The request was made but no response was received
+            toast.add({
+                severity: 'error',
+                summary: 'Network Error',
+                detail: 'Unable to connect to the server. Please check your network connection.',
+                life: 4000
+            });
+        } else {
+            // Something happened in setting up the request
+            toast.add({
+                severity: 'error',
+                summary: 'Error',
+                detail: 'Error fetching dealer details. Please try again.',
+                life: 4000
+            });
+        }
+
         resetForm();
     } finally {
         isLoading.value = false;
@@ -720,7 +802,7 @@ function resetForm() {
     sapPopulatedFields.value.clear();
     sapPopulatedShipToFields.value.clear();
 
-    // MODIFIED: Find "No" option and set all dropdowns to "No"
+    // Set default values for dropdowns
     const noOption = dropdownYesNoValue.value.find((opt) => opt.name === 'No');
     const yesOption = dropdownYesNoValue.value.find((opt) => opt.name === 'Yes');
 
@@ -743,7 +825,25 @@ const handleBack = () => {
 };
 
 onMounted(() => {
-    // fetchMainBranchDealer();
+    // Add keyboard event listener for Enter key on accountNo input
+    const accountNoInput = document.getElementById('accountNo');
+    if (accountNoInput) {
+        accountNoInput.addEventListener('keydown', (event) => {
+            if (event.key === 'Enter') {
+                event.preventDefault(); // Prevent form submission if any
+                goNext();
+            }
+        });
+    }
+
+    // Alternative approach: Handle Enter key on the whole page
+    document.addEventListener('keydown', (event) => {
+        // Only trigger if the Enter key is pressed and the accountNo input is focused
+        if (event.key === 'Enter' && document.activeElement?.id === 'accountNo' && accountNo.value.trim() !== '') {
+            event.preventDefault();
+            goNext();
+        }
+    });
 });
 </script>
 
@@ -762,7 +862,7 @@ onMounted(() => {
                         <InputText v-model="accountNo" id="accountNo" type="text" class="w-full" placeholder="Enter 10-digit SAP account number" maxlength="10" @input="handleAccountNoInput" />
                     </div>
                     <div>
-                        <Button label="Next" @click="goNext" :disabled="!accountNo" />
+                        <Button label="Next" @click="goNext" :disabled="!accountNo || isLoading" />
                     </div>
                 </div>
             </div>
