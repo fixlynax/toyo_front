@@ -151,9 +151,9 @@
             </Column>
 
             <!-- Amount Due -->
-            <Column field="amtdue" header="Amount Due" style="min-width: 12rem; text-align: right" sortable>
+            <Column field="amtdue" header="Amount Due (RM)" style="min-width: 7rem; text-align: right" sortable>
                 <template #body="{ data }">
-                    <div class="flex justify-start items-center w-full">
+                    <div class="flex justify-end items-center w-full">
                         <span class="font-bold" :class="data.amtdue < 0 ? 'text-red-500' : 'text-black'">
                             {{ formatCurrency(data.amtdue) }}
                         </span>
@@ -805,8 +805,8 @@ const formatCurrency = (value) => {
     if (value === null || value === undefined || value === '') return '-';
 
     return new Intl.NumberFormat('en-MY', {
-        style: 'currency',
-        currency: 'MYR',
+        // style: 'currency',
+        // currency: 'MYR',
         minimumFractionDigits: 2,
         maximumFractionDigits: 2
     }).format(Number(value));
