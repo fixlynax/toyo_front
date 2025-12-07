@@ -1,7 +1,7 @@
 <template>
     <Fluid>
         <Toast />
-        
+
         <div class="flex flex-col gap-8">
             <!-- Header -->
             <div class="card flex flex-col gap-6 w-full">
@@ -15,159 +15,20 @@
                         <!-- Report Type -->
                         <div>
                             <label class="block font-bold text-gray-700 mb-2">Report Type</label>
-                            <Dropdown 
-                                v-model="selectedReport" 
-                                :options="reportTypes" 
-                                optionLabel="label" 
-                                placeholder="Select Report Type" 
-                                class="w-full"
-                            />
+                            <Dropdown v-model="selectedReport" :options="reportTypes" optionLabel="label" placeholder="Select Report Type" class="w-full" />
                         </div>
 
                         <!-- Year Filter -->
                         <div>
                             <label class="block font-bold text-gray-700 mb-2">Year</label>
-                            <MultiSelect 
-                                v-model="filters.years" 
-                                :options="yearOptions" 
-                                optionLabel="label" 
-                                optionValue="value" 
-                                placeholder="Select Year(s)" 
-                                class="w-full"
-                                :maxSelectedLabels="3"
-                                display="chip"
-                            />
+                            <MultiSelect v-model="filters.years" :options="yearOptions" optionLabel="label" optionValue="value" placeholder="Select Year(s)" class="w-full" :maxSelectedLabels="3" display="chip" />
                         </div>
-                    </div>
-
-                    <!-- Additional Filters Row (conditional) -->
-                    <div v-if="selectedReport.value === 'by-birthday'" class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
-                        <div>
-                            <label class="block font-bold text-gray-700 mb-2">Month</label>
-                            <Dropdown 
-                                v-model="filters.month" 
-                                :options="monthOptions" 
-                                optionLabel="label" 
-                                optionValue="value" 
-                                placeholder="Select Month" 
-                                class="w-full"
-                            />
-                        </div>
-                        <!-- Empty column for alignment -->
-                        <div></div>
-                    </div>
-
-                    <div v-if="selectedReport.value === 'point-expiry'" class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
-                        <div>
-                            <label class="block font-bold text-gray-700 mb-2">Expiry Range (Days)</label>
-                            <div class="flex gap-2">
-                                <InputNumber 
-                                    v-model="filters.expiryFrom" 
-                                    placeholder="From" 
-                                    :min="0" 
-                                    class="w-full"
-                                />
-                                <InputNumber 
-                                    v-model="filters.expiryTo" 
-                                    placeholder="To" 
-                                    :min="0" 
-                                    class="w-full"
-                                />
-                            </div>
-                        </div>
-                        <!-- Empty column for alignment -->
-                        <div></div>
                     </div>
 
                     <!-- Action Buttons -->
                     <div class="flex justify-end gap-4 mt-6">
-                        <Button 
-                            label="Clear Filters" 
-                            class="p-button-outlined p-button-secondary" 
-                            @click="clearFilters" 
-                        />
-                        <Button 
-                            label="Export Excel" 
-                            icon="pi pi-file-excel" 
-                            class="p-button-success" 
-                            @click="exportExcel" 
-                            :loading="exportLoading" 
-                            :disabled="!filters.years || filters.years.length === 0"
-                        />
-                    </div>
-                </div>
-            </div>
-
-            <!-- Report Preview/Summary -->
-            <div class="card p-6">
-                <div class="mb-4">
-                    <h3 class="text-lg font-semibold text-gray-700">Report Preview</h3>
-                    <p class="text-sm text-gray-500">Preview of the data that will be exported</p>
-                </div>
-                
-                <div class="bg-gray-50 p-4 rounded-lg">
-                    <div class="text-center py-8" v-if="!filters.years || filters.years.length === 0">
-                        <i class="pi pi-chart-bar text-4xl text-gray-300 mb-4"></i>
-                        <p class="text-gray-500">Select year(s) and click Export Excel to generate the report.</p>
-                    </div>
-                    <div v-else-if="loadingData" class="text-center py-8">
-                        <i class="pi pi-spinner pi-spin text-4xl text-gray-300 mb-4"></i>
-                        <p class="text-gray-500">Loading report data...</p>
-                    </div>
-                    <div v-else-if="reportData.length === 0 && filters.years.length > 0" class="text-center py-8">
-                        <i class="pi pi-exclamation-circle text-4xl text-gray-300 mb-4"></i>
-                        <p class="text-gray-500">No data available for the selected filters.</p>
-                    </div>
-                    <div v-else-if="reportData.length > 0">
-                        <!-- Preview Table -->
-                        <div class="overflow-x-auto">
-                            <table class="min-w-full bg-white border border-gray-200">
-                                <thead class="bg-gray-100">
-                                    <tr>
-                                        <th class="py-2 px-4 border-b border-gray-200 text-left font-semibold text-gray-700">
-                                            {{ getReportColumnHeader() }}
-                                        </th>
-                                        <th v-for="year in filters.years" 
-                                            :key="year" 
-                                            class="py-2 px-4 border-b border-gray-200 text-left font-semibold text-gray-700">
-                                            {{ year }}
-                                        </th>
-                                        <th class="py-2 px-4 border-b border-gray-200 text-left font-semibold text-gray-700">
-                                            %
-                                        </th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    <tr v-for="(item, index) in reportData" 
-                                        :key="index"
-                                        :class="index % 2 === 0 ? 'bg-white' : 'bg-gray-50'">
-                                        <td class="py-2 px-4 border-b border-gray-200">
-                                            {{ item.label }}
-                                        </td>
-                                        <td v-for="year in filters.years" 
-                                            :key="year" 
-                                            class="py-2 px-4 border-b border-gray-200 text-center">
-                                            {{ item[year] || '' }}
-                                        </td>
-                                        <td class="py-2 px-4 border-b border-gray-200 text-center">
-                                            {{ item.percentage || '' }}
-                                        </td>
-                                    </tr>
-                                </tbody>
-                            </table>
-                        </div>
-                        
-                        <!-- Report Metadata -->
-                        <div class="mt-4 pt-4 border-t border-gray-200 space-y-2 text-sm text-gray-600">
-                            <p><strong>Report Type:</strong> {{ selectedReport.label }}</p>
-                            <p><strong>Selected Years:</strong> {{ filters.years.join(', ') }}</p>
-                            <p v-if="filters.month"><strong>Month:</strong> {{ getMonthLabel(filters.month) }}</p>
-                            <p v-if="filters.expiryFrom || filters.expiryTo">
-                                <strong>Expiry Range:</strong> 
-                                {{ filters.expiryFrom || '0' }} to {{ filters.expiryTo || 'Unlimited' }} days
-                            </p>
-                            <p><strong>Total Records:</strong> {{ getTotalRecords() }}</p>
-                        </div>
+                        <Button label="Clear Filters" class="p-button-outlined p-button-secondary" @click="clearFilters" />
+                        <Button label="Export Excel" icon="pi pi-file-excel" class="p-button-success" @click="exportExcel" :loading="exportLoading" :disabled="!filters.years || filters.years.length === 0" />
                     </div>
                 </div>
             </div>
@@ -259,15 +120,33 @@ const getReportColumnHeader = () => {
 
 // ✅ Get Month Label
 const getMonthLabel = (monthValue) => {
-    const month = monthOptions.value.find(m => m.value === monthValue);
+    const month = monthOptions.value.find((m) => m.value === monthValue);
     return month ? month.label : 'All Months';
 };
 
 // ✅ Get Total Records
 const getTotalRecords = () => {
     if (reportData.value.length === 0) return 0;
-    const lastRow = reportData.value[reportData.value.length - 1];
-    return lastRow[Object.keys(lastRow).find(key => key.includes('Total'))] || 0;
+    
+    const totalRow = reportData.value.find(row => 
+        row.label && row.label.toLowerCase().includes('total') ||
+        row.label && row.label.toLowerCase().includes('grand')
+    );
+    
+    if (totalRow && filters.years.length > 0) {
+        const year = filters.years[0];
+        return totalRow[year] || 0;
+    }
+    
+    if (filters.years.length > 0) {
+        const year = filters.years[0];
+        return reportData.value.reduce((sum, row) => {
+            const value = parseFloat(row[year]) || 0;
+            return sum + value;
+        }, 0);
+    }
+    
+    return 0;
 };
 
 // ✅ Clear Filters
@@ -277,48 +156,39 @@ const clearFilters = () => {
     filters.expiryFrom = null;
     filters.expiryTo = null;
     reportData.value = [];
-    
+
     showToast('info', 'Filters Cleared', 'All filters have been reset to default values.');
 };
 
-// ✅ Prepare FormData for API
-const prepareFormData = () => {
-    const formData = new FormData();
-    
-    // ✅ CORRECT FORMAT: Add years as JSON stringified array
-    if (filters.years && filters.years.length > 0) {
-        // Stringify the entire array: "[2024, 2025]"
-        formData.append('years', JSON.stringify(filters.years));
-        console.log('Stringified years array:', JSON.stringify(filters.years));
-    } else {
+// ✅ Prepare JSON Body for API
+const prepareRequestBody = () => {
+    if (!filters.years || filters.years.length === 0) {
         showToast('warn', 'Years Required', 'Please select at least one year.');
         return null;
     }
+
+    const requestBody = {
+        years: filters.years
+    };
     
-    // Add additional parameters based on report type
+    // Add additional filters
     if (selectedReport.value.value === 'by-birthday' && filters.month) {
-        formData.append('month', filters.month);
+        requestBody.month = filters.month;
     }
     
     if (selectedReport.value.value === 'point-expiry') {
         if (filters.expiryFrom !== null && filters.expiryFrom !== undefined) {
-            formData.append('expiryFrom', filters.expiryFrom.toString());
+            requestBody.expiryFrom = filters.expiryFrom;
         }
         if (filters.expiryTo !== null && filters.expiryTo !== undefined) {
-            formData.append('expiryTo', filters.expiryTo.toString());
+            requestBody.expiryTo = filters.expiryTo;
         }
     }
     
-    // Log what we're sending
-    console.log('FormData contents:');
-    for (let pair of formData.entries()) {
-        console.log(pair[0] + ': ' + pair[1]);
-    }
-    
-    return formData;
+    return requestBody;
 };
 
-// ✅ FETCH DATA FOR PREVIEW - EXPECTS JSON
+// ✅ FETCH DATA FOR PREVIEW
 const fetchReportData = async () => {
     if (!filters.years || filters.years.length === 0) {
         reportData.value = [];
@@ -326,144 +196,40 @@ const fetchReportData = async () => {
     }
 
     loadingData.value = true;
+    
     try {
         const endpoint = selectedReport.value.apiEndpoint;
-        const formData = prepareFormData();
+        const requestBody = prepareRequestBody();
         
-        if (!formData) {
+        if (!requestBody) {
             loadingData.value = false;
             return;
         }
+
+        console.log('📊 Fetching preview from:', endpoint, 'with:', requestBody);
         
-        console.log('Fetching preview data from:', endpoint);
+        // For preview, use regular post (JSON response)
+        const response = await api.post(endpoint, requestBody);
         
-        // Add parameter to request JSON for preview
-        formData.append('format', 'json');
-        
-        const response = await api.post(endpoint, formData, {
-            headers: {
-                'Content-Type': 'multipart/form-data'
-            },
-            responseType: 'json' // Explicitly request JSON
-        });
-        
-        console.log('✅ Preview API Response:', response.data);
-        
-        // Process the response
-        if (response.data && (response.data.status === 1 || response.data.success)) {
-            const data = response.data.data || response.data;
-            reportData.value = formatReportData(data);
-            
-            if (reportData.value.length > 0) {
-                showToast('success', 'Data Loaded', 
-                    `Report data loaded successfully for ${filters.years.length} year(s)`);
-            } else {
-                showToast('warn', 'No Data', 'No data available for the selected filters.');
-            }
+        // Process response
+        if (response.data && response.data.status === 1) {
+            const data = response.data.data || response.data.report_data || response.data;
+            reportData.value = Array.isArray(data) ? data : [];
+            showToast('success', 'Data Loaded', 'Report data loaded successfully');
         } else {
-            console.error('API Response Error:', response.data);
             reportData.value = [];
-            showToast('error', 'API Error', 
-                response.data?.message || 'Failed to fetch report data');
+            showToast('warn', 'No Data', 'No data available for selected filters');
         }
-        
     } catch (error) {
         console.error('Error fetching preview data:', error);
-        
-        // Handle blob response error (API returned Excel instead of JSON)
-        if (error.response && error.response.data instanceof Blob) {
-            console.log('API returned Excel blob instead of JSON for preview');
-            reportData.value = [];
-            showToast('info', 'Preview Note', 
-                'This report returns Excel data directly. Click Export Excel to download.');
-            return;
-        }
-        
-        // Handle JSON parsing errors
-        if (error.code === 'ERR_BAD_RESPONSE' || error.message.includes('Unexpected token')) {
-            console.log('API returned non-JSON response (likely Excel)');
-            reportData.value = [];
-            showToast('info', 'Preview Unavailable', 
-                'Real-time preview is not available. Click Export Excel to download the report.');
-            return;
-        }
-        
         reportData.value = [];
-        
-        // Show detailed error message
-        if (error.response?.status === 422) {
-            const errorData = error.response?.data;
-            let errorMessage = 'Validation error. ';
-            
-            if (errorData?.errors) {
-                Object.keys(errorData.errors).forEach(key => {
-                    errorMessage += `${key}: ${errorData.errors[key].join(', ')} `;
-                });
-            } else if (errorData?.message) {
-                errorMessage = errorData.message;
-            }
-            
-            showToast('error', 'Validation Error', errorMessage);
-        } else if (error.response?.status === 500) {
-            showToast('error', 'Server Error', 
-                'The server encountered an error. Please try again later.');
-        } else {
-            showToast('error', 'Fetch Error', 
-                'Failed to fetch report data. Please check your connection and try again.');
-        }
+        showToast('error', 'Error', 'Failed to load data');
     } finally {
         loadingData.value = false;
     }
 };
 
-// ✅ FORMAT API RESPONSE FOR PREVIEW
-const formatReportData = (apiData) => {
-    const formattedData = [];
-    
-    // Handle different API response structures
-    if (Array.isArray(apiData)) {
-        apiData.forEach(item => {
-            const row = { 
-                label: item.label || item.category || item.name || item.gender || 
-                       item.race || item.state || item.ageGroup || item.month || 'N/A'
-            };
-            
-            filters.years.forEach(year => {
-                row[year] = item[year] || item[`year_${year}`] || 
-                           item[`count_${year}`] || item.count || '';
-            });
-            
-            row.percentage = item.percentage || item.percent || 
-                            (item.percentage ? `${item.percentage}%` : '');
-            
-            formattedData.push(row);
-        });
-    } else if (apiData && typeof apiData === 'object') {
-        Object.keys(apiData).forEach(key => {
-            if (key !== 'status' && key !== 'success' && key !== 'message') {
-                const item = apiData[key];
-                const row = { 
-                    label: key.charAt(0).toUpperCase() + key.slice(1)
-                };
-                
-                if (typeof item === 'object') {
-                    filters.years.forEach(year => {
-                        row[year] = item[year] || item.value || item.count || '';
-                    });
-                    row.percentage = item.percentage || item.percent || '';
-                } else {
-                    row[filters.years[0]] = item;
-                }
-                
-                formattedData.push(row);
-            }
-        });
-    }
-    
-    return formattedData;
-};
-
-// ✅ EXPORT TO EXCEL - EXPECTS BLOB
+// ✅ EXPORT TO EXCEL - FIXED VERSION
 const exportExcel = async () => {
     if (!filters.years || filters.years.length === 0) {
         showToast('warn', 'Year Required', 'Please select at least one year.');
@@ -471,145 +237,319 @@ const exportExcel = async () => {
     }
 
     exportLoading.value = true;
-    
+
     try {
         const endpoint = selectedReport.value.apiEndpoint;
-        const formData = prepareFormData();
+        const requestBody = prepareRequestBody();
         
-        if (!formData) {
+        if (!requestBody) {
             exportLoading.value = false;
             return;
         }
+
+        console.log('📤 Exporting Excel from:', endpoint);
+        console.log('Request Body:', JSON.stringify(requestBody, null, 2));
+
+        // 🔴 CRITICAL FIX 1: Use exact same format as your returnCollection component
+        // returnCollection uses: { warrantyentryids_array: JSON.stringify(idsArray) }
+        // Try if your backend expects JSON string for arrays
         
-        console.log('Exporting Excel from:', endpoint);
+        // OPTION 1: Try with stringified years (like returnCollection does)
+        const alternativeBody = {
+            years: JSON.stringify(filters.years)  // Stringify the array
+        };
         
-        // ✅ Request blob response (Excel file)
-        const response = await api.post(endpoint, formData, {
-            headers: {
-                'Content-Type': 'multipart/form-data'
-            },
-            responseType: 'blob' // CRITICAL: Expect Excel binary
-        });
+        // Copy other filters
+        if (selectedReport.value.value === 'by-birthday' && filters.month) {
+            alternativeBody.month = filters.month;
+        }
         
-        console.log('✅ Excel response received:', response);
+        if (selectedReport.value.value === 'point-expiry') {
+            if (filters.expiryFrom !== null) {
+                alternativeBody.expiryFrom = filters.expiryFrom;
+            }
+            if (filters.expiryTo !== null) {
+                alternativeBody.expiryTo = filters.expiryTo;
+            }
+        }
+
+        console.log('Alternative Body:', alternativeBody);
+
+        // 🔴 CRITICAL FIX 2: Try different approaches sequentially
+        let response;
         
-        // Determine content type
+        // Approach 1: Try with stringified years (like returnCollection)
+        try {
+            console.log('Trying Approach 1: Stringified years');
+            response = await api.postExtra(
+                endpoint, 
+                alternativeBody,
+                {
+                    responseType: 'blob',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                }
+            );
+            console.log('Approach 1 succeeded');
+        } catch (error1) {
+            console.log('Approach 1 failed, trying Approach 2...');
+            
+            // Approach 2: Try with original request body
+            response = await api.postExtra(
+                endpoint, 
+                requestBody,
+                {
+                    responseType: 'blob',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                }
+            );
+            console.log('Approach 2 succeeded');
+        }
+
+        // Verify we got a blob response
+        if (!response.data || !(response.data instanceof Blob)) {
+            throw new Error('Server did not return Excel file');
+        }
+
+        // 🔴 CRITICAL FIX 3: Check content type
         const contentType = response.headers['content-type'] || 
+                           response.data.type || 
                            'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet';
         
-        // Create blob from response
-        const blob = new Blob([response.data], { type: contentType });
+        console.log('Response Content-Type:', contentType);
         
-        // Create download link
+        // Create blob
+        const blob = new Blob([response.data], { type: contentType });
+
+        // Generate download URL
         const url = window.URL.createObjectURL(blob);
-        const link = document.createElement('a');
+        const a = document.createElement('a');
         
         // Generate filename
-        let filename = 'report_export.xlsx';
+        const timestamp = new Date().toISOString().split('T')[0];
+        const reportName = selectedReport.value.label.replace(/\s+/g, '_');
+        const yearsStr = filters.years.join('_');
         
-        // Try to extract filename from Content-Disposition header
+        // Try to get filename from Content-Disposition header
+        let filename = `${reportName}_${yearsStr}_${timestamp}.xlsx`;
         const contentDisposition = response.headers['content-disposition'];
         if (contentDisposition) {
-            const fileNameMatch = contentDisposition.match(/filename[^;=\n]*=((['"]).*?\2|[^;\n]*)/);
-            if (fileNameMatch && fileNameMatch[1]) {
-                filename = fileNameMatch[1].replace(/['"]/g, '');
+            const filenameMatch = contentDisposition.match(/filename\*?=["']?([^"']+)["']?/i);
+            if (filenameMatch && filenameMatch[1]) {
+                filename = decodeURIComponent(filenameMatch[1]);
             }
         }
         
-        // Fallback: Generate descriptive filename
-        if (filename === 'report_export.xlsx') {
-            const timestamp = new Date().toISOString().replace(/[:.]/g, '').slice(0, 15);
-            filename = `${selectedReport.value.value.replace(/-/g, '_')}_report`;
-            
-            if (filters.years.length > 0) {
-                filename += `_${filters.years.join('_')}`;
-            }
-            
-            if (selectedReport.value.value === 'by-birthday' && filters.month) {
-                const monthLabel = getMonthLabel(filters.month).replace(/\s+/g, '_');
-                filename += `_${monthLabel}`;
-            }
-            
-            filename += `_${timestamp}.xlsx`;
-        }
+        a.href = url;
+        a.download = filename;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
         
-        // Trigger download
-        link.href = url;
-        link.setAttribute('download', filename);
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
-        window.URL.revokeObjectURL(url);
-        
-        showToast('success', 'Export Successful', 
-            `${selectedReport.value.label} report downloaded successfully!`);
+        // Cleanup
+        setTimeout(() => {
+            window.URL.revokeObjectURL(url);
+        }, 100);
+
+        showToast('success', 'Export Successful', `${filename} downloaded successfully!`);
         
     } catch (error) {
-        console.error('Export Error:', error);
+        console.error('❌ Export Error Details:', error);
         
-        // Handle blob parsing errors
-        if (error.response && error.response.data instanceof Blob) {
-            try {
-                // Try to read error message from blob
-                const errorText = await error.response.data.text();
-                const errorData = JSON.parse(errorText);
-                showToast('error', 'Export Failed', 
-                    errorData.message || 'Server returned an error while generating Excel.');
-            } catch (parseError) {
-                showToast('error', 'Export Failed', 
-                    'Failed to generate Excel file. Please try again.');
-            }
-        } else if (error.response?.status === 422) {
-            const errorData = error.response?.data;
-            let errorMessage = 'Validation error. ';
+        // Enhanced error logging
+        if (error.response) {
+            console.error('Error Status:', error.response.status);
+            console.error('Error Headers:', error.response.headers);
             
-            if (errorData?.errors) {
-                Object.keys(errorData.errors).forEach(key => {
-                    errorMessage += `${key}: ${errorData.errors[key].join(', ')} `;
-                });
-            } else if (errorData?.message) {
-                errorMessage = errorData.message;
+            // Try to read error message from blob if it's a blob
+            if (error.response.data instanceof Blob) {
+                try {
+                    const errorText = await error.response.data.text();
+                    console.error('Error Blob Content:', errorText);
+                    
+                    // Try to parse as JSON
+                    try {
+                        const errorJson = JSON.parse(errorText);
+                        console.error('Error JSON:', errorJson);
+                        showToast('error', 'Server Error', errorJson.message || errorJson.error || 'Server error occurred');
+                    } catch (parseError) {
+                        console.error('Could not parse error as JSON');
+                        showToast('error', 'Server Error', 'Server returned error file');
+                    }
+                } catch (blobError) {
+                    console.error('Could not read error blob:', blobError);
+                    showToast('error', 'Export Failed', `Server error: ${error.response.status}`);
+                }
+            } else {
+                // Regular error response
+                console.error('Error Data:', error.response.data);
+                const errorMsg = error.response.data?.message || 
+                               error.response.data?.error || 
+                               `Server error: ${error.response.status}`;
+                showToast('error', 'Export Failed', errorMsg);
             }
-            
-            showToast('error', 'Validation Error', errorMessage);
-        } else if (error.response?.status === 500) {
-            showToast('error', 'Server Error', 
-                'The server encountered an error while generating the report.');
+        } else if (error.request) {
+            console.error('No response received:', error.request);
+            showToast('error', 'Network Error', 'No response from server');
         } else {
-            showToast('error', 'Export Error', 
-                'Failed to export. Please check your network and try again.');
+            console.error('Request setup error:', error.message);
+            showToast('error', 'Export Error', error.message || 'Failed to export');
         }
+        
+        // 🔴 CRITICAL FIX 4: Try one more approach with FormData
+        console.log('Trying FormData approach as last resort...');
+        await tryFormDataApproach();
     } finally {
         exportLoading.value = false;
     }
 };
 
-// ✅ Watch for filter changes to update data
-watch([() => selectedReport.value, () => filters.years], 
-    ([newReport, newYears], [oldReport, oldYears]) => {
-    
-    const yearsChanged = JSON.stringify(newYears) !== JSON.stringify(oldYears);
-    const reportChanged = newReport.value !== oldReport.value;
-    
-    if ((yearsChanged || reportChanged) && newYears && newYears.length > 0) {
-        fetchReportData();
-    } else {
-        reportData.value = [];
+// ✅ TRY FORM DATA APPROACH (like returnCollection's import)
+const tryFormDataApproach = async () => {
+    try {
+        const endpoint = selectedReport.value.apiEndpoint;
+        const formData = new FormData();
+        
+        // Append data as FormData
+        formData.append('years', filters.years.join(','));
+        
+        if (selectedReport.value.value === 'by-birthday' && filters.month) {
+            formData.append('month', filters.month);
+        }
+        
+        if (selectedReport.value.value === 'point-expiry') {
+            if (filters.expiryFrom !== null) {
+                formData.append('expiryFrom', filters.expiryFrom.toString());
+            }
+            if (filters.expiryTo !== null) {
+                formData.append('expiryTo', filters.expiryTo.toString());
+            }
+        }
+        
+        console.log('Trying FormData with:', Object.fromEntries(formData.entries()));
+        
+        const response = await api.postExtra(
+            endpoint,
+            formData,
+            {
+                responseType: 'blob',
+                headers: {
+                    'Content-Type': 'multipart/form-data'
+                }
+            }
+        );
+        
+        if (response.data instanceof Blob) {
+            const blob = new Blob([response.data], { 
+                type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' 
+            });
+            
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `${selectedReport.value.label}_${filters.years.join('_')}.xlsx`;
+            a.click();
+            
+            showToast('success', 'Export Successful (FormData)', 'File downloaded using FormData');
+        }
+    } catch (formDataError) {
+        console.error('FormData approach also failed:', formDataError);
     }
-}, { deep: true });
+};
 
-// ✅ Initialize with default values
+// ✅ DEBUG FUNCTION: Test API directly
+const testApiManually = async () => {
+    console.log('🧪 Testing API manually...');
+    
+    try {
+        // Test with simplest possible request
+        const testBody = { years: ['2024'] };
+        
+        // Test 1: Regular POST (should work for preview)
+        const previewResponse = await api.post('report/gender-report', testBody);
+        console.log('✅ Preview POST success:', previewResponse.data);
+        
+        // Test 2: postExtra with blob
+        console.log('Testing postExtra with blob...');
+        const exportResponse = await api.postExtra(
+            'report/gender-report',
+            testBody,
+            {
+                responseType: 'blob',
+                headers: { 'Content-Type': 'application/json' }
+            }
+        );
+        
+        console.log('✅ postExtra response received');
+        console.log('Response type:', typeof exportResponse.data);
+        console.log('Is Blob?', exportResponse.data instanceof Blob);
+        console.log('Headers:', exportResponse.headers);
+        
+        // Try to read the blob
+        if (exportResponse.data instanceof Blob) {
+            const text = await exportResponse.data.text();
+            console.log('Blob first 500 chars:', text.substring(0, 500));
+            
+            // Check if it's actually HTML error page
+            if (text.includes('<!DOCTYPE') || text.includes('<html')) {
+                console.error('⚠️ Server returned HTML error page instead of Excel');
+                showToast('error', 'Server Error', 'Server returned HTML error. Check server logs.');
+            }
+        }
+        
+    } catch (error) {
+        console.error('❌ Manual test failed:', error);
+        if (error.response) {
+            console.error('Response data:', error.response.data);
+        }
+    }
+};
+
+// Watch for filter changes
+let debounceTimer = null;
+watch(
+    () => [selectedReport.value, filters.years, filters.month, filters.expiryFrom, filters.expiryTo],
+    () => {
+        if (debounceTimer) {
+            clearTimeout(debounceTimer);
+        }
+        
+        debounceTimer = setTimeout(() => {
+            if (filters.years && filters.years.length > 0) {
+                fetchReportData();
+            } else {
+                reportData.value = [];
+            }
+        }, 500);
+    },
+    { deep: true }
+);
+
+// Initialize
 onMounted(() => {
-    // Set default years (e.g., current year)
+    // Set default to current year
     const currentYear = new Date().getFullYear().toString();
     filters.years = [currentYear];
     
-    // Fetch initial data after a short delay
+    // Initial fetch
     setTimeout(() => {
-        fetchReportData();
-    }, 500);
+        if (filters.years.length > 0) {
+            fetchReportData();
+        }
+    }, 300);
+    
+    // Add test button to window for debugging
+    window.testReportApi = testApiManually;
+    console.log('🔧 Debug: Call testReportApi() in console to test API manually');
 });
 </script>
+
+<style scoped>
+/* Styles remain the same */
+</style>
 
 <style scoped>
 :deep(.p-multiselect),
@@ -645,7 +585,8 @@ table {
     width: 100%;
 }
 
-th, td {
+th,
+td {
     padding: 8px 12px;
     border: 1px solid #e5e7eb;
 }
@@ -663,17 +604,18 @@ tbody tr:hover {
     .grid-cols-1.md\:grid-cols-2 {
         grid-template-columns: 1fr;
     }
-    
+
     .flex.gap-2 {
         flex-direction: column;
         gap: 0.5rem;
     }
-    
+
     table {
         font-size: 14px;
     }
-    
-    th, td {
+
+    th,
+    td {
         padding: 6px 8px;
     }
 }
