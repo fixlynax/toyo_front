@@ -1,471 +1,622 @@
 <template>
     <Fluid>
-        <!-- Header & Summary -->
-        <div class="card flex flex-col gap-6 w-full">
-            <div class="text-2xl font-bold text-gray-800">Member Report & Analytics</div>
+        <Toast />
 
-            <!-- Summary Cards -->
-            <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
-                <div class="card p-4 !bg-gray-50 border rounded-lg shadow-sm">
-                    <div class="flex items-center justify-between">
+        <div class="flex flex-col gap-8">
+            <!-- Header -->
+            <div class="card flex flex-col gap-6 w-full">
+                <!-- Title -->
+                <div class="text-2xl font-bold text-gray-800 border-b pb-2 mb-4">{{ selectedReport.label }}</div>
+
+                <!-- Filters Section -->
+                <div>
+                    <!-- Main Filters Row -->
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <!-- Report Type -->
                         <div>
-                            <div class="text-sm font-semibold text-gray-600">Total Members</div>
-                            <div class="text-2xl font-bold text-blue-600 mt-1">{{ summaryStats.totalMembers.toLocaleString() }}</div>
+                            <label class="block font-bold text-gray-700 mb-2">Report Type</label>
+                            <Dropdown v-model="selectedReport" :options="reportTypes" optionLabel="label" placeholder="Select Report Type" class="w-full" />
                         </div>
-                        <div class="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center">
-                            <i class="pi pi-users text-blue-600 text-xl"></i>
+
+                        <!-- Year Filter -->
+                        <div>
+                            <label class="block font-bold text-gray-700 mb-2">Year</label>
+                            <MultiSelect v-model="filters.years" :options="yearOptions" optionLabel="label" optionValue="value" placeholder="Select Year(s)" class="w-full" :maxSelectedLabels="3" display="chip" />
                         </div>
                     </div>
-                    <div class="text-xs text-green-600 mt-2"><i class="pi pi-arrow-up"></i> 12.5% from last month</div>
-                </div>
 
-                <div class="card p-4 !bg-gray-50 border rounded-lg shadow-sm">
-                    <div class="flex items-center justify-between">
-                        <div>
-                            <div class="text-sm font-semibold text-gray-600">Active Members</div>
-                            <div class="text-2xl font-bold text-green-600 mt-1">{{ summaryStats.activeMembers.toLocaleString() }}</div>
-                        </div>
-                        <div class="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center">
-                            <i class="pi pi-user-plus text-green-600 text-xl"></i>
-                        </div>
+                    <!-- Action Buttons -->
+                    <div class="flex justify-end gap-4 mt-6">
+                        <Button label="Clear Filters" class="p-button-outlined p-button-secondary" @click="clearFilters" />
+                        <Button label="Export Excel" icon="pi pi-file-excel" class="p-button-success" @click="exportExcel" :loading="exportLoading" :disabled="!filters.years || filters.years.length === 0" />
                     </div>
-                    <div class="text-xs text-green-600 mt-2"><i class="pi pi-arrow-up"></i> 8.3% from last month</div>
-                </div>
-
-                <div class="card p-4 !bg-gray-50 border rounded-lg shadow-sm">
-                    <div class="flex items-center justify-between">
-                        <div>
-                            <div class="text-sm font-semibold text-gray-600">Avg Points</div>
-                            <div class="text-2xl font-bold text-purple-600 mt-1">{{ summaryStats.averagePoints.toLocaleString() }}</div>
-                        </div>
-                        <div class="w-12 h-12 bg-purple-100 rounded-full flex items-center justify-center">
-                            <i class="pi pi-star text-purple-600 text-xl"></i>
-                        </div>
-                    </div>
-                    <div class="text-xs text-red-600 mt-2"><i class="pi pi-arrow-down"></i> 2.1% from last month</div>
-                </div>
-
-                <div class="card p-4 !bg-gray-50 border rounded-lg shadow-sm">
-                    <div class="flex items-center justify-between">
-                        <div>
-                            <div class="text-sm font-semibold text-gray-600">Points Expiring</div>
-                            <div class="text-2xl font-bold text-orange-600 mt-1">{{ summaryStats.pointsExpiring.toLocaleString() }}</div>
-                        </div>
-                        <div class="w-12 h-12 bg-orange-100 rounded-full flex items-center justify-center">
-                            <i class="pi pi-clock text-orange-600 text-xl"></i>
-                        </div>
-                    </div>
-                    <div class="text-xs text-red-600 mt-2">This month</div>
                 </div>
             </div>
-        </div>
-
-        <!-- Filters Section -->
-        <div class="card border rounded-lg p-4 bg-gray-50 mt-8">
-            <div class="text-lg font-bold text-gray-800 mb-4">Member Report Filters</div>
-            <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
-                <div>
-                    <label class="block font-bold text-gray-700 mb-2">Date Range</label>
-                    <Calendar v-model="filters.dateRange" selectionMode="range" :manualInput="false" placeholder="Select Date Range" class="w-full" />
-                </div>
-
-                <div>
-                    <label class="block font-bold text-gray-700 mb-2">Program Type</label>
-                    <Dropdown v-model="filters.programType" :options="programTypeOptions" optionLabel="label" optionValue="value" placeholder="All Programs" class="w-full" />
-                </div>
-
-                <div>
-                    <label class="block font-bold text-gray-700 mb-2">State</label>
-                    <Dropdown v-model="filters.state" :options="stateOptions" placeholder="All States" class="w-full" />
-                </div>
-
-                <div>
-                    <label class="block font-bold text-gray-700 mb-2">Age Group</label>
-                    <Dropdown v-model="filters.ageGroup" :options="ageGroupOptions" optionLabel="label" optionValue="value" placeholder="All Ages" class="w-full" />
-                </div>
-            </div>
-
-            <div class="flex justify-end gap-4 mt-4">
-                <Button label="Clear Filters" class="p-button-outlined p-button-secondary" @click="clearFilters" />
-                <Button label="Generate Report" class="p-button-primary" @click="generateReport" />
-                <Button label="Export Summary" icon="pi pi-download" class="p-button-success" @click="exportSummary" />
-            </div>
-        </div>
-
-        <!-- Charts Section -->
-        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-8">
-            <div class="card p-4 bg-white border rounded-lg">
-                <div class="text-lg font-bold text-gray-800 mb-4">Gender Distribution</div>
-                <Chart type="pie" :data="genderChartData" :options="chartOptions" style="height: 300px" />
-            </div>
-
-            <div class="card p-4 bg-white border rounded-lg">
-                <div class="text-lg font-bold text-gray-800 mb-4">Age Group Distribution</div>
-                <Chart type="bar" :data="ageGroupChartData" :options="chartOptions" style="height: 300px" />
-            </div>
-
-            <div class="card p-4 bg-white border rounded-lg">
-                <div class="text-lg font-bold text-gray-800 mb-4">State Distribution</div>
-                <Chart type="doughnut" :data="stateChartData" :options="chartOptions" style="height: 300px" />
-            </div>
-
-            <div class="card p-4 bg-white border rounded-lg">
-                <div class="text-lg font-bold text-gray-800 mb-4">Birthday Month Distribution</div>
-                <Chart type="polarArea" :data="birthdayChartData" :options="chartOptions" style="height: 300px" />
-            </div>
-        </div>
-
-        <!-- Detailed Member Report Table -->
-        <div class="card flex flex-col gap-6 w-full mt-8">
-            <div class="flex justify-between items-center">
-                <div class="text-lg font-bold text-gray-800">Detailed Member Report</div>
-                <div class="flex gap-2">
-                    <Button label="Export CSV" icon="pi pi-download" class="p-button-outlined p-button-secondary" @click="exportToCSV" />
-                    <Button label="Print Report" icon="pi pi-print" class="p-button-outlined" @click="printReport" />
-                </div>
-            </div>
-
-            <DataTable :value="memberReportData" :paginator="true" :rows="10" :rowsPerPageOptions="[5, 10, 20, 50]" dataKey="id" :rowHover="true" :loading="loading" responsiveLayout="scroll" scrollHeight="400px">
-                <Column field="memberId" header="Member ID" style="min-width: 100px" :sortable="true">
-                    <template #body="{ data }"><div class="font-mono text-sm">{{ data.memberId }}</div></template>
-                </Column>
-
-                <Column field="name" header="Name" style="min-width: 150px" :sortable="true">
-                    <template #body="{ data }">
-                        <div class="font-semibold">{{ data.name }}</div>
-                        <div class="text-xs text-gray-500">{{ data.email }}</div>
-                    </template>
-                </Column>
-
-                <Column field="gender" header="Gender" style="min-width: 80px" :sortable="true">
-                    <template #body="{ data }"><Tag :value="data.gender" :severity="getGenderSeverity(data.gender)" /></template>
-                </Column>
-
-                <Column field="state" header="State" style="min-width: 100px" :sortable="true">
-                    <template #body="{ data }"><div class="flex items-center gap-1"><i class="pi pi-map-marker text-gray-400 text-xs"></i><span>{{ data.state }}</span></div></template>
-                </Column>
-
-                <Column field="age" header="Age" style="min-width: 80px" :sortable="true">
-                    <template #body="{ data }"><Badge :value="data.age" :severity="getAgeSeverity(data.age)" /></template>
-                </Column>
-
-                <Column field="totalPoints" header="Total Points" style="min-width: 100px" :sortable="true">
-                    <template #body="{ data }"><div class="font-bold text-blue-600">{{ data.totalPoints.toLocaleString() }}</div></template>
-                </Column>
-
-                <Column field="pointsExpiring" header="Points Expiring" style="min-width: 120px" :sortable="true">
-                    <template #body="{ data }"><div class="font-bold" :class="data.pointsExpiring > 0 ? 'text-orange-600' : 'text-gray-400'">{{ data.pointsExpiring.toLocaleString() }}</div></template>
-                </Column>
-
-                <Column field="membershipTier" header="Tier" style="min-width: 100px" :sortable="true">
-                    <template #body="{ data }"><Tag :value="data.membershipTier" :severity="getTierSeverity(data.membershipTier)" /></template>
-                </Column>
-
-                <Column field="joinDate" header="Join Date" style="min-width: 120px" :sortable="true">
-                    <template #body="{ data }"><div class="text-sm">{{ formatDate(data.joinDate) }}</div></template>
-                </Column>
-
-                <template #empty>
-                    <div class="text-center text-gray-500 py-8"><i class="pi pi-inbox text-4xl mb-2"></i><div>No member data found.</div></div>
-                </template>
-            </DataTable>
-        </div>
-
-        <!-- Points Expiry Summary Table -->
-        <div class="card p-4 bg-white border rounded-lg mt-8">
-            <div class="text-lg font-bold text-gray-800 mb-4">Points Expiry Summary</div>
-            <DataTable :value="pointsExpiryData" :paginator="true" :rows="5" dataKey="month" :rowHover="true" responsiveLayout="scroll">
-                <Column field="month" header="Month" style="min-width: 120px" />
-                <Column field="totalPointsExpiring" header="Total Points Expiring" style="min-width: 150px">
-                    <template #body="{ data }"><div class="font-bold text-orange-600">{{ data.totalPointsExpiring.toLocaleString() }}</div></template>
-                </Column>
-                <Column field="affectedMembers" header="Affected Members" style="min-width: 150px">
-                    <template #body="{ data }"><div class="font-bold text-red-600">{{ data.affectedMembers.toLocaleString() }}</div></template>
-                </Column>
-                <Column field="averagePointsPerMember" header="Avg Points/Member" style="min-width: 150px">
-                    <template #body="{ data }"><div class="font-bold text-blue-600">{{ data.averagePointsPerMember.toLocaleString() }}</div></template>
-                </Column>
-                <Column header="Actions" style="min-width: 100px">
-                    <template #body="{ data }">
-                        <Button label="Notify" class="p-button-outlined p-button-warning p-button-sm" @click="notifyExpiry(data.month)" />
-                    </template>
-                </Column>
-            </DataTable>
         </div>
     </Fluid>
 </template>
 
-
-
 <script setup>
-import { ref, reactive, onMounted } from 'vue';
-import Chart from 'primevue/chart';
+import { ref, reactive, onMounted, watch } from 'vue';
+import MultiSelect from 'primevue/multiselect';
+import Dropdown from 'primevue/dropdown';
+import InputNumber from 'primevue/inputnumber';
+import Toast from 'primevue/toast';
+import { useToast } from 'primevue/usetoast';
+import api from '@/service/api';
 
-const loading = ref(false);
+// Initialize Toast
+const toast = useToast();
 
-// Filters
+// ✅ Report Types with API endpoint mapping
+const reportTypes = ref([
+    { label: 'TC by Gender', value: 'by-gender', apiEndpoint: 'report/gender-report', columnHeader: 'Gender' },
+    { label: 'TC by Race', value: 'by-race', apiEndpoint: 'report/race-report', columnHeader: 'Race' },
+    { label: 'TC by State', value: 'by-state', apiEndpoint: 'report/state-report', columnHeader: 'State' },
+    { label: 'TC by Age', value: 'by-age', apiEndpoint: 'report/age-report', columnHeader: 'Age Group' },
+    { label: 'TC by Birthday', value: 'by-birthday', apiEndpoint: 'report/birthMonth-report', columnHeader: 'Birth Month' },
+    { label: 'TC Point Expiry', value: 'point-expiry', apiEndpoint: 'report/pointExpiry-report', columnHeader: 'Month' }
+]);
+
+// ✅ Selected Report
+const selectedReport = ref(reportTypes.value[0]);
+
+// ✅ Filters
 const filters = reactive({
-    dateRange: null,
-    programType: null,
-    state: null,
-    ageGroup: null
+    years: [],
+    month: null,
+    expiryFrom: null,
+    expiryTo: null
 });
 
-// Options for filters
-const programTypeOptions = ref([
-    { label: 'All Programs', value: null },
-    { label: 'Eten Program', value: 'eten' },
-    { label: 'Toyo Care', value: 'toyo_care' },
-    { label: 'Premium', value: 'premium' }
+// ✅ Report Data
+const reportData = ref([]);
+
+// ✅ Loading states
+const exportLoading = ref(false);
+const loadingData = ref(false);
+
+// ✅ Year Options
+const yearOptions = ref([
+    { label: '2025', value: '2025' },
+    { label: '2024', value: '2024' },
+    { label: '2023', value: '2023' },
+    { label: '2022', value: '2022' },
+    { label: '2021', value: '2021' },
+    { label: '2020', value: '2020' }
 ]);
 
-const stateOptions = ref([
-    'Johor', 'Kedah', 'Kelantan', 'Melaka', 'Negeri Sembilan',
-    'Pahang', 'Penang', 'Perak', 'Perlis', 'Sabah', 'Sarawak',
-    'Selangor', 'Terengganu', 'Kuala Lumpur', 'Putrajaya', 'Labuan'
+// ✅ Month Options (for birthday report)
+const monthOptions = ref([
+    { label: 'All Months', value: null },
+    { label: 'January', value: '1' },
+    { label: 'February', value: '2' },
+    { label: 'March', value: '3' },
+    { label: 'April', value: '4' },
+    { label: 'May', value: '5' },
+    { label: 'June', value: '6' },
+    { label: 'July', value: '7' },
+    { label: 'August', value: '8' },
+    { label: 'September', value: '9' },
+    { label: 'October', value: '10' },
+    { label: 'November', value: '11' },
+    { label: 'December', value: '12' }
 ]);
 
-const ageGroupOptions = ref([
-    { label: 'All Ages', value: null },
-    { label: '18-25', value: '18-25' },
-    { label: '26-35', value: '26-35' },
-    { label: '36-45', value: '36-45' },
-    { label: '46-55', value: '46-55' },
-    { label: '56+', value: '56+' }
-]);
-
-// Summary Statistics
-const summaryStats = reactive({
-    totalMembers: 15420,
-    activeMembers: 12850,
-    averagePoints: 2450,
-    pointsExpiring: 125000
-});
-
-// Sample data for charts and tables
-const memberReportData = ref([
-    {
-        id: 1,
-        memberId: 'MEM001234',
-        name: 'Ahmad bin Ismail',
-        email: 'ahmad.ismail@email.com',
-        gender: 'Male',
-        race: 'Malay',
-        state: 'Selangor',
-        age: 32,
-        birthdayMonth: 'January',
-        totalPoints: 3450,
-        pointsExpiring: 500,
-        membershipTier: 'Gold',
-        joinDate: new Date('2023-03-15')
-    },
-    {
-        id: 2,
-        memberId: 'MEM001235',
-        name: 'Siti Nurhaliza',
-        email: 'siti.nur@email.com',
-        gender: 'Female',
-        race: 'Malay',
-        state: 'Kuala Lumpur',
-        age: 28,
-        birthdayMonth: 'March',
-        totalPoints: 2100,
-        pointsExpiring: 0,
-        membershipTier: 'Silver',
-        joinDate: new Date('2023-06-22')
-    },
-    {
-        id: 3,
-        memberId: 'MEM001236',
-        name: 'Raj Kumar',
-        email: 'raj.kumar@email.com',
-        gender: 'Male',
-        race: 'Indian',
-        state: 'Penang',
-        age: 45,
-        birthdayMonth: 'July',
-        totalPoints: 5670,
-        pointsExpiring: 1200,
-        membershipTier: 'Platinum',
-        joinDate: new Date('2022-11-08')
-    },
-    {
-        id: 4,
-        memberId: 'MEM001237',
-        name: 'Chen Li Wei',
-        email: 'chen.li@email.com',
-        gender: 'Male',
-        race: 'Chinese',
-        state: 'Johor',
-        age: 38,
-        birthdayMonth: 'December',
-        totalPoints: 1890,
-        pointsExpiring: 300,
-        membershipTier: 'Silver',
-        joinDate: new Date('2023-08-14')
-    },
-    {
-        id: 5,
-        memberId: 'MEM001238',
-        name: 'Nor Aishah',
-        email: 'nor.aishah@email.com',
-        gender: 'Female',
-        race: 'Malay',
-        state: 'Kelantan',
-        age: 26,
-        birthdayMonth: 'May',
-        totalPoints: 4320,
-        pointsExpiring: 750,
-        membershipTier: 'Gold',
-        joinDate: new Date('2023-01-30')
-    }
-]);
-
-const pointsExpiryData = ref([
-    { month: 'January 2024', totalPointsExpiring: 45000, affectedMembers: 320, averagePointsPerMember: 141 },
-    { month: 'February 2024', totalPointsExpiring: 38000, affectedMembers: 280, averagePointsPerMember: 136 },
-    { month: 'March 2024', totalPointsExpiring: 52000, affectedMembers: 410, averagePointsPerMember: 127 },
-    { month: 'April 2024', totalPointsExpiring: 29000, affectedMembers: 220, averagePointsPerMember: 132 },
-    { month: 'May 2024', totalPointsExpiring: 61000, affectedMembers: 480, averagePointsPerMember: 127 }
-]);
-
-// Chart Data
-const genderChartData = ref({
-    labels: ['Male', 'Female'],
-    datasets: [
-        {
-            data: [65, 35],
-            backgroundColor: ['#3B82F6', '#EC4899'],
-            hoverBackgroundColor: ['#2563EB', '#DB2777']
-        }
-    ]
-});
-
-const ageGroupChartData = ref({
-    labels: ['18-25', '26-35', '36-45', '46-55', '56+'],
-    datasets: [
-        {
-            label: 'Members',
-            data: [25, 35, 20, 15, 5],
-            backgroundColor: '#3B82F6',
-            borderColor: '#2563EB',
-            borderWidth: 1
-        }
-    ]
-});
-
-const stateChartData = ref({
-    labels: ['Selangor', 'Kuala Lumpur', 'Johor', 'Penang', 'Sabah', 'Others'],
-    datasets: [
-        {
-            data: [35, 25, 15, 10, 8, 7],
-            backgroundColor: [
-                '#3B82F6', '#EC4899', '#10B981', '#F59E0B', '#8B5CF6', '#6B7280'
-            ]
-        }
-    ]
-});
-
-const birthdayChartData = ref({
-    labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
-    datasets: [
-        {
-            data: [8, 7, 9, 8, 10, 7, 8, 9, 8, 9, 8, 9],
-            backgroundColor: [
-                '#3B82F6', '#EC4899', '#10B981', '#F59E0B', '#8B5CF6', '#6B7280',
-                '#EF4444', '#84CC16', '#06B6D4', '#F97316', '#8B5CF6', '#64748B'
-            ]
-        }
-    ]
-});
-
-const chartOptions = ref({
-    plugins: {
-        legend: {
-            position: 'bottom',
-            labels: {
-                usePointStyle: true
-            }
-        }
-    },
-    maintainAspectRatio: false
-});
-
-// Methods
-const formatDate = (date) => {
-    return new Date(date).toLocaleDateString('en-MY', {
-        year: 'numeric',
-        month: 'short',
-        day: 'numeric'
+// ✅ Show Toast Notification
+const showToast = (severity, summary, detail, life = 3000) => {
+    toast.add({
+        severity,
+        summary,
+        detail,
+        life
     });
 };
 
-const getGenderSeverity = (gender) => {
-    return gender === 'Male' ? 'info' : 'warning';
+// ✅ Get Report Column Header
+const getReportColumnHeader = () => {
+    return selectedReport.value.columnHeader || selectedReport.value.label;
 };
 
-const getAgeSeverity = (age) => {
-    if (age < 30) return 'success';
-    if (age < 40) return 'info';
-    if (age < 50) return 'warning';
-    return 'danger';
+// ✅ Get Month Label
+const getMonthLabel = (monthValue) => {
+    const month = monthOptions.value.find((m) => m.value === monthValue);
+    return month ? month.label : 'All Months';
 };
 
-const getTierSeverity = (tier) => {
-    switch (tier) {
-        case 'Platinum': return 'primary';
-        case 'Gold': return 'warning';
-        case 'Silver': return 'secondary';
-        default: return 'info';
+// ✅ Get Total Records
+const getTotalRecords = () => {
+    if (reportData.value.length === 0) return 0;
+    
+    const totalRow = reportData.value.find(row => 
+        row.label && row.label.toLowerCase().includes('total') ||
+        row.label && row.label.toLowerCase().includes('grand')
+    );
+    
+    if (totalRow && filters.years.length > 0) {
+        const year = filters.years[0];
+        return totalRow[year] || 0;
+    }
+    
+    if (filters.years.length > 0) {
+        const year = filters.years[0];
+        return reportData.value.reduce((sum, row) => {
+            const value = parseFloat(row[year]) || 0;
+            return sum + value;
+        }, 0);
+    }
+    
+    return 0;
+};
+
+// ✅ Clear Filters
+const clearFilters = () => {
+    filters.years = [];
+    filters.month = null;
+    filters.expiryFrom = null;
+    filters.expiryTo = null;
+    reportData.value = [];
+
+    showToast('info', 'Filters Cleared', 'All filters have been reset to default values.');
+};
+
+// ✅ Prepare JSON Body for API
+const prepareRequestBody = () => {
+    if (!filters.years || filters.years.length === 0) {
+        showToast('warn', 'Years Required', 'Please select at least one year.');
+        return null;
+    }
+
+    const requestBody = {
+        years: filters.years
+    };
+    
+    // Add additional filters
+    if (selectedReport.value.value === 'by-birthday' && filters.month) {
+        requestBody.month = filters.month;
+    }
+    
+    if (selectedReport.value.value === 'point-expiry') {
+        if (filters.expiryFrom !== null && filters.expiryFrom !== undefined) {
+            requestBody.expiryFrom = filters.expiryFrom;
+        }
+        if (filters.expiryTo !== null && filters.expiryTo !== undefined) {
+            requestBody.expiryTo = filters.expiryTo;
+        }
+    }
+    
+    return requestBody;
+};
+
+// ✅ FETCH DATA FOR PREVIEW
+const fetchReportData = async () => {
+    if (!filters.years || filters.years.length === 0) {
+        reportData.value = [];
+        return;
+    }
+
+    loadingData.value = true;
+    
+    try {
+        const endpoint = selectedReport.value.apiEndpoint;
+        const requestBody = prepareRequestBody();
+        
+        if (!requestBody) {
+            loadingData.value = false;
+            return;
+        }
+
+        console.log('📊 Fetching preview from:', endpoint, 'with:', requestBody);
+        
+        // For preview, use regular post (JSON response)
+        const response = await api.post(endpoint, requestBody);
+        
+        // Process response
+        if (response.data && response.data.status === 1) {
+            const data = response.data.data || response.data.report_data || response.data;
+            reportData.value = Array.isArray(data) ? data : [];
+            showToast('success', 'Data Loaded', 'Report data loaded successfully');
+        } else {
+            reportData.value = [];
+            showToast('warn', 'No Data', 'No data available for selected filters');
+        }
+    } catch (error) {
+        console.error('Error fetching preview data:', error);
+        reportData.value = [];
+        showToast('error', 'Error', 'Failed to load data');
+    } finally {
+        loadingData.value = false;
     }
 };
 
-const clearFilters = () => {
-    filters.dateRange = null;
-    filters.programType = null;
-    filters.state = null;
-    filters.ageGroup = null;
+// ✅ EXPORT TO EXCEL - FIXED VERSION
+const exportExcel = async () => {
+    if (!filters.years || filters.years.length === 0) {
+        showToast('warn', 'Year Required', 'Please select at least one year.');
+        return;
+    }
+
+    exportLoading.value = true;
+
+    try {
+        const endpoint = selectedReport.value.apiEndpoint;
+        const requestBody = prepareRequestBody();
+        
+        if (!requestBody) {
+            exportLoading.value = false;
+            return;
+        }
+
+        console.log('📤 Exporting Excel from:', endpoint);
+        console.log('Request Body:', JSON.stringify(requestBody, null, 2));
+
+        // 🔴 CRITICAL FIX 1: Use exact same format as your returnCollection component
+        // returnCollection uses: { warrantyentryids_array: JSON.stringify(idsArray) }
+        // Try if your backend expects JSON string for arrays
+        
+        // OPTION 1: Try with stringified years (like returnCollection does)
+        const alternativeBody = {
+            years: JSON.stringify(filters.years)  // Stringify the array
+        };
+        
+        // Copy other filters
+        if (selectedReport.value.value === 'by-birthday' && filters.month) {
+            alternativeBody.month = filters.month;
+        }
+        
+        if (selectedReport.value.value === 'point-expiry') {
+            if (filters.expiryFrom !== null) {
+                alternativeBody.expiryFrom = filters.expiryFrom;
+            }
+            if (filters.expiryTo !== null) {
+                alternativeBody.expiryTo = filters.expiryTo;
+            }
+        }
+
+        console.log('Alternative Body:', alternativeBody);
+
+        // 🔴 CRITICAL FIX 2: Try different approaches sequentially
+        let response;
+        
+        // Approach 1: Try with stringified years (like returnCollection)
+        try {
+            console.log('Trying Approach 1: Stringified years');
+            response = await api.postExtra(
+                endpoint, 
+                alternativeBody,
+                {
+                    responseType: 'blob',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                }
+            );
+            console.log('Approach 1 succeeded');
+        } catch (error1) {
+            console.log('Approach 1 failed, trying Approach 2...');
+            
+            // Approach 2: Try with original request body
+            response = await api.postExtra(
+                endpoint, 
+                requestBody,
+                {
+                    responseType: 'blob',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                }
+            );
+            console.log('Approach 2 succeeded');
+        }
+
+        // Verify we got a blob response
+        if (!response.data || !(response.data instanceof Blob)) {
+            throw new Error('Server did not return Excel file');
+        }
+
+        // 🔴 CRITICAL FIX 3: Check content type
+        const contentType = response.headers['content-type'] || 
+                           response.data.type || 
+                           'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet';
+        
+        console.log('Response Content-Type:', contentType);
+        
+        // Create blob
+        const blob = new Blob([response.data], { type: contentType });
+
+        // Generate download URL
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        
+        // Generate filename
+        const timestamp = new Date().toISOString().split('T')[0];
+        const reportName = selectedReport.value.label.replace(/\s+/g, '_');
+        const yearsStr = filters.years.join('_');
+        
+        // Try to get filename from Content-Disposition header
+        let filename = `${reportName}_${yearsStr}_${timestamp}.xlsx`;
+        const contentDisposition = response.headers['content-disposition'];
+        if (contentDisposition) {
+            const filenameMatch = contentDisposition.match(/filename\*?=["']?([^"']+)["']?/i);
+            if (filenameMatch && filenameMatch[1]) {
+                filename = decodeURIComponent(filenameMatch[1]);
+            }
+        }
+        
+        a.href = url;
+        a.download = filename;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        
+        // Cleanup
+        setTimeout(() => {
+            window.URL.revokeObjectURL(url);
+        }, 100);
+
+        showToast('success', 'Export Successful', `${filename} downloaded successfully!`);
+        
+    } catch (error) {
+        console.error('❌ Export Error Details:', error);
+        
+        // Enhanced error logging
+        if (error.response) {
+            console.error('Error Status:', error.response.status);
+            console.error('Error Headers:', error.response.headers);
+            
+            // Try to read error message from blob if it's a blob
+            if (error.response.data instanceof Blob) {
+                try {
+                    const errorText = await error.response.data.text();
+                    console.error('Error Blob Content:', errorText);
+                    
+                    // Try to parse as JSON
+                    try {
+                        const errorJson = JSON.parse(errorText);
+                        console.error('Error JSON:', errorJson);
+                        showToast('error', 'Server Error', errorJson.message || errorJson.error || 'Server error occurred');
+                    } catch (parseError) {
+                        console.error('Could not parse error as JSON');
+                        showToast('error', 'Server Error', 'Server returned error file');
+                    }
+                } catch (blobError) {
+                    console.error('Could not read error blob:', blobError);
+                    showToast('error', 'Export Failed', `Server error: ${error.response.status}`);
+                }
+            } else {
+                // Regular error response
+                console.error('Error Data:', error.response.data);
+                const errorMsg = error.response.data?.message || 
+                               error.response.data?.error || 
+                               `Server error: ${error.response.status}`;
+                showToast('error', 'Export Failed', errorMsg);
+            }
+        } else if (error.request) {
+            console.error('No response received:', error.request);
+            showToast('error', 'Network Error', 'No response from server');
+        } else {
+            console.error('Request setup error:', error.message);
+            showToast('error', 'Export Error', error.message || 'Failed to export');
+        }
+        
+        // 🔴 CRITICAL FIX 4: Try one more approach with FormData
+        console.log('Trying FormData approach as last resort...');
+        await tryFormDataApproach();
+    } finally {
+        exportLoading.value = false;
+    }
 };
 
-const generateReport = () => {
-    loading.value = true;
-    // Simulate API call
-    setTimeout(() => {
-        loading.value = false;
-    }, 1000);
+// ✅ TRY FORM DATA APPROACH (like returnCollection's import)
+const tryFormDataApproach = async () => {
+    try {
+        const endpoint = selectedReport.value.apiEndpoint;
+        const formData = new FormData();
+        
+        // Append data as FormData
+        formData.append('years', filters.years.join(','));
+        
+        if (selectedReport.value.value === 'by-birthday' && filters.month) {
+            formData.append('month', filters.month);
+        }
+        
+        if (selectedReport.value.value === 'point-expiry') {
+            if (filters.expiryFrom !== null) {
+                formData.append('expiryFrom', filters.expiryFrom.toString());
+            }
+            if (filters.expiryTo !== null) {
+                formData.append('expiryTo', filters.expiryTo.toString());
+            }
+        }
+        
+        console.log('Trying FormData with:', Object.fromEntries(formData.entries()));
+        
+        const response = await api.postExtra(
+            endpoint,
+            formData,
+            {
+                responseType: 'blob',
+                headers: {
+                    'Content-Type': 'multipart/form-data'
+                }
+            }
+        );
+        
+        if (response.data instanceof Blob) {
+            const blob = new Blob([response.data], { 
+                type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' 
+            });
+            
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `${selectedReport.value.label}_${filters.years.join('_')}.xlsx`;
+            a.click();
+            
+            showToast('success', 'Export Successful (FormData)', 'File downloaded using FormData');
+        }
+    } catch (formDataError) {
+        console.error('FormData approach also failed:', formDataError);
+    }
 };
 
-const exportToCSV = () => {
-    // In real implementation, this would generate and download CSV
-    alert('CSV export functionality would be implemented here');
+// ✅ DEBUG FUNCTION: Test API directly
+const testApiManually = async () => {
+    console.log('🧪 Testing API manually...');
+    
+    try {
+        // Test with simplest possible request
+        const testBody = { years: ['2024'] };
+        
+        // Test 1: Regular POST (should work for preview)
+        const previewResponse = await api.post('report/gender-report', testBody);
+        console.log('✅ Preview POST success:', previewResponse.data);
+        
+        // Test 2: postExtra with blob
+        console.log('Testing postExtra with blob...');
+        const exportResponse = await api.postExtra(
+            'report/gender-report',
+            testBody,
+            {
+                responseType: 'blob',
+                headers: { 'Content-Type': 'application/json' }
+            }
+        );
+        
+        console.log('✅ postExtra response received');
+        console.log('Response type:', typeof exportResponse.data);
+        console.log('Is Blob?', exportResponse.data instanceof Blob);
+        console.log('Headers:', exportResponse.headers);
+        
+        // Try to read the blob
+        if (exportResponse.data instanceof Blob) {
+            const text = await exportResponse.data.text();
+            console.log('Blob first 500 chars:', text.substring(0, 500));
+            
+            // Check if it's actually HTML error page
+            if (text.includes('<!DOCTYPE') || text.includes('<html')) {
+                console.error('⚠️ Server returned HTML error page instead of Excel');
+                showToast('error', 'Server Error', 'Server returned HTML error. Check server logs.');
+            }
+        }
+        
+    } catch (error) {
+        console.error('❌ Manual test failed:', error);
+        if (error.response) {
+            console.error('Response data:', error.response.data);
+        }
+    }
 };
 
-const printReport = () => {
-    window.print();
-};
+// Watch for filter changes
+let debounceTimer = null;
+watch(
+    () => [selectedReport.value, filters.years, filters.month, filters.expiryFrom, filters.expiryTo],
+    () => {
+        if (debounceTimer) {
+            clearTimeout(debounceTimer);
+        }
+        
+        debounceTimer = setTimeout(() => {
+            if (filters.years && filters.years.length > 0) {
+                fetchReportData();
+            } else {
+                reportData.value = [];
+            }
+        }, 500);
+    },
+    { deep: true }
+);
 
-const notifyExpiry = (month) => {
-    alert(`Notification would be sent for ${month} expiry`);
-};
-
-// Initialize charts
+// Initialize
 onMounted(() => {
+    // Set default to current year
+    const currentYear = new Date().getFullYear().toString();
+    filters.years = [currentYear];
+    
+    // Initial fetch
+    setTimeout(() => {
+        if (filters.years.length > 0) {
+            fetchReportData();
+        }
+    }, 300);
+    
+    // Add test button to window for debugging
+    window.testReportApi = testApiManually;
+    console.log('🔧 Debug: Call testReportApi() in console to test API manually');
 });
 </script>
 
 <style scoped>
-:deep(.p-calendar),
-:deep(.p-dropdown) {
+/* Styles remain the same */
+</style>
+
+<style scoped>
+:deep(.p-multiselect),
+:deep(.p-dropdown),
+:deep(.p-inputnumber) {
     width: 100%;
 }
 
-@media print {
-    .no-print {
-        display: none !important;
+:deep(.p-button) {
+    min-width: 120px;
+}
+
+:deep(.p-button:disabled) {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+/* Custom styling for the multi-select chips */
+:deep(.p-multiselect-chip .p-multiselect-token) {
+    background-color: #e2e8f0;
+    color: #1e293b;
+    font-weight: 500;
+}
+
+/* Toast positioning */
+:deep(.p-toast) {
+    z-index: 1000;
+}
+
+/* Table styling */
+table {
+    border-collapse: collapse;
+    width: 100%;
+}
+
+th,
+td {
+    padding: 8px 12px;
+    border: 1px solid #e5e7eb;
+}
+
+thead {
+    background-color: #f9fafb;
+}
+
+tbody tr:hover {
+    background-color: #f3f4f6;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .grid-cols-1.md\:grid-cols-2 {
+        grid-template-columns: 1fr;
     }
-    
-    .card {
-        break-inside: avoid;
+
+    .flex.gap-2 {
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+
+    table {
+        font-size: 14px;
+    }
+
+    th,
+    td {
+        padding: 6px 8px;
     }
 }
 </style>
