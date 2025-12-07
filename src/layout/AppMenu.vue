@@ -57,11 +57,11 @@ const model = ref([
                 label: 'TC Members',
                 icon: 'pi pi-fw pi-users',
                 items: [
-                    {
-                        label: 'Members Dashboard',
-                        icon: 'pi pi-fw pi-id-card',
-                        to: '/marketing/memberDashboard'
-                    },
+                    // {
+                    //     label: 'Members Dashboard',
+                    //     icon: 'pi pi-fw pi-id-card',
+                    //     to: '/marketing/memberDashboard'
+                    // },
                     {
                         label: 'Member List',
                         icon: 'pi pi-fw pi-id-card',
@@ -77,18 +77,18 @@ const model = ref([
             {
                 label: 'Report',
                 icon: 'pi pi-fw pi-chart-bar',
-                items: [
-                    {
-                        label: 'Member',
-                        icon: 'pi pi-fw pi-user',
-                        to: '/marketing/reportMember'
-                    },
-                    {
-                        label: 'Referral',
-                        icon: 'pi pi-fw pi-users',
-                        to: '/marketing/reportReferral'
-                    }
-                ]
+                 to: '/marketing/reportMember'
+                    // {
+                    //     label: 'Member',
+                    //     icon: 'pi pi-fw pi-user',
+                    //     to: '/marketing/reportMember'
+                    // },
+                    // {
+                    //     label: 'Referral',
+                    //     icon: 'pi pi-fw pi-users',
+                    //     to: '/marketing/reportReferral'
+                    // }
+           
             }
         ]
     },
