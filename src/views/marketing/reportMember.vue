@@ -37,13 +37,12 @@
 </template>
 
 <script setup>
-import { ref, reactive, onMounted, watch } from 'vue';
-import MultiSelect from 'primevue/multiselect';
+import api from '@/service/api';
 import Dropdown from 'primevue/dropdown';
-import InputNumber from 'primevue/inputnumber';
+import MultiSelect from 'primevue/multiselect';
 import Toast from 'primevue/toast';
 import { useToast } from 'primevue/usetoast';
-import api from '@/service/api';
+import { onMounted, reactive, ref, watch } from 'vue';
 
 // Initialize Toast
 const toast = useToast();
@@ -517,13 +516,13 @@ watch(
             clearTimeout(debounceTimer);
         }
         
-        debounceTimer = setTimeout(() => {
-            if (filters.years && filters.years.length > 0) {
-                fetchReportData();
-            } else {
-                reportData.value = [];
-            }
-        }, 500);
+        // debounceTimer = setTimeout(() => {
+        //     if (filters.years && filters.years.length > 0) {
+        //         fetchReportData();
+        //     } else {
+        //         reportData.value = [];
+        //     }
+        // }, 500);
     },
     { deep: true }
 );
@@ -534,12 +533,12 @@ onMounted(() => {
     const currentYear = new Date().getFullYear().toString();
     filters.years = [currentYear];
     
-    // Initial fetch
-    setTimeout(() => {
-        if (filters.years.length > 0) {
-            fetchReportData();
-        }
-    }, 300);
+    // // Initial fetch
+    // setTimeout(() => {
+    //     if (filters.years.length > 0) {
+    //         fetchReportData();
+    //     }
+    // }, 300);
     
     // Add test button to window for debugging
     window.testReportApi = testApiManually;
