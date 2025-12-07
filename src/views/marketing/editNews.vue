@@ -19,8 +19,10 @@
                     </div>
 
                     <div class="md:col-span-2">
-                        <label class="block font-bold text-gray-700">Headline(180 max Characters)</label>
+                        <label class="block font-bold text-gray-700">Headline (180 max Character)</label>
                         <Textarea v-model="news.headline" rows="3" class="w-full" maxlength="180" />
+                        <!-- Character Counter -->
+                        <div class="text-xm text-gray-500 mt-1 text-right">{{ news.headline?.length || 0 }}/180</div>
                     </div>
 
                     <div class="md:col-span-2">
@@ -40,26 +42,53 @@
 
                     <div>
                         <label class="block font-bold text-gray-700">Publish Date</label>
-                        <Calendar v-model="news.publishDate" dateFormat="yy-mm-dd" class="w-full" :minDate="news.startDate"  :maxDate="news.endDate"  :disabled="!news.startDate || !news.endDate"/>
+                        <Calendar v-model="news.publishDate" dateFormat="yy-mm-dd" class="w-full" :minDate="news.startDate" :maxDate="news.endDate" :disabled="!news.startDate || !news.endDate" />
                     </div>
-
-                    <!-- <div>
-                        <label class="block font-bold text-gray-700">Audience</label>
-                        <Dropdown v-model="news.audience" :options="audienceOptions" optionLabel="label" optionValue="value" class="w-full" />
-                    </div> -->
                 </div>
 
                 <!-- Upload Images -->
                 <div>
-                    <label class="block font-bold text-gray-700 mb-2">News Images <span class="text-xs bg-blue-100 text-blue-800 px-2 py-0.5 rounded-full">1280 × 720 px (max 2MB)</span> </label>
+                    <label class="block font-bold text-gray-700 mb-2">
+                        News Images
+                        <span class="text-xs bg-blue-100 text-blue-800 px-2 py-0.5 rounded-full">1280 × 720 px (max 2MB)</span>
+                    </label>
                     <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                        <div v-for="(field, index) in ['image1URL', 'image2URL', 'image3URL']" :key="index" class="relative">
-                            <FileUpload mode="basic" accept="image/*" customUpload @select="onImageSelect($event, field)" :chooseLabel="`Change Image ${index + 1}`" class="w-full" />
-                            <div v-if="previewImages[field]" class="relative mt-2">
-                                <img :src="previewImages[field]" alt="Preview" class="rounded-lg shadow-md object-cover w-full h-80" />
-                                <button @click="removeImage(field)" class="absolute top-2 right-2 bg-red-500 text-white px-2 py-1 rounded-full hover:bg-red-600" title="Remove Image">&times;</button>
+                        <div v-for="(img, index) in [1, 2, 3]" :key="index" class="relative">
+                            <FileUpload
+                                mode="basic"
+                                :name="`image${img}`"
+                                accept="image/*"
+                                :maxFileSize="2 * 1024 * 1024"
+                                customUpload
+                                @select="onImageSelect($event, `image${img}`)"
+                                @remove="() => removeImage(`image${img}`)"
+                                @error="onUploadError"
+                                :chooseLabel="`Change Image ${img}`"
+                                class="w-full"
+                                :invalidFileSizeMessage="`File size exceeds 2MB limit`"
+                                :invalidFileTypeMessage="`Invalid image type. Only PNG, JPG, JPEG, HEIF, HEIC are allowed`"
+                            />
+                            <!-- Image Preview Area -->
+                            <div v-if="previewImages[`image${img}URL`]" class="relative mt-2 group">
+                                <img :src="previewImages[`image${img}URL`]" alt="Preview" class="rounded-lg shadow-md object-cover w-full h-80" />
+                                <!-- Remove Button -->
+                                <button @click="removeImage(`image${img}`)" class="absolute top-2 right-2 bg-red-500 text-white rounded-full p-2 opacity-0 group-hover:opacity-100 transition-opacity duration-200 hover:bg-red-600" title="Remove Image">
+                                    <i class="pi pi-times text-sm"></i>
+                                </button>
+                                <!-- Image Status Indicators -->
+                                <div class="text-xs mt-1 text-center">
+                                    <span v-if="!imageChanges[`image${img}`] && originalImages[`image${img}URL`]" class="text-blue-600"> Current image </span>
+                                    <span v-if="imageChanges[`image${img}`] && imageFiles[`image${img}`]" class="text-green-600"> New image selected </span>
+                                    <span v-if="imageChanges[`image${img}`] && removedImages.includes(`image${img}`)" class="text-red-600"> Image will be removed </span>
+                                </div>
+                                <!-- File Size Display -->
+                                <div v-if="imageSizes[`image${img}`]" class="text-xs text-gray-500 text-center">Size: {{ formatFileSize(imageSizes[`image${img}`]) }}</div>
                             </div>
                             <div v-else class="mt-2 p-4 border-2 border-dashed border-gray-300 rounded-lg text-center text-gray-500">No Image</div>
+                            <!-- Error Message -->
+                            <div v-if="imageErrors[`image${img}`]" class="text-red-500 text-xs mt-1">
+                                {{ imageErrors[`image${img}`] }}
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -93,12 +122,6 @@ const saving = ref(false);
 const error = ref(null);
 const minDate = ref(new Date());
 
-const audienceOptions = [
-    { label: 'TC', value: 'TC' },
-    { label: 'ETEN', value: 'ETEN' },
-    { label: 'ALL', value: 'ALL' }
-];
-
 const news = ref({
     title: '',
     description: '',
@@ -112,33 +135,94 @@ const news = ref({
     status: 0
 });
 
+// Track original images from server
 const originalImages = ref({
     image1URL: null,
     image2URL: null,
     image3URL: null
 });
 
+// Track current images (can be File object, URL string, or 'REMOVED')
 const currentImages = ref({
     image1URL: null,
     image2URL: null,
     image3URL: null
 });
 
+// Track if image has been changed
 const imageChanges = ref({
-    image1URL: false,
-    image2URL: false,
-    image3URL: false
+    image1: false,
+    image2: false,
+    image3: false
 });
 
+// Track image files for new uploads
+const imageFiles = ref({
+    image1: null,
+    image2: null,
+    image3: null
+});
+
+// Track removed images
+const removedImages = ref([]);
+
+// Preview URLs for display
 const previewImages = ref({
     image1URL: null,
     image2URL: null,
     image3URL: null
 });
+
+// Track image file sizes
+const imageSizes = ref({
+    image1: 0,
+    image2: 0,
+    image3: 0
+});
+
+// Track image errors
+const imageErrors = ref({
+    image1: '',
+    image2: '',
+    image3: ''
+});
+
 const parseDMY = (str) => {
     if (!str) return null;
-    const [day, month, year] = str.split('-').map(Number); 
+    const [day, month, year] = str.split('-').map(Number);
     return new Date(year, month - 1, day);
+};
+
+// Validate image file
+const validateImageFile = (file) => {
+    // Check file size (2MB limit)
+    const maxSize = 2 * 1024 * 1024; // 2MB in bytes
+    if (file.size > maxSize) {
+        return {
+            valid: false,
+            message: `File size exceeds 2MB limit. Your file is ${formatFileSize(file.size)}`
+        };
+    }
+
+    // Check file type
+    const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/heif', 'image/heic'];
+    if (!allowedTypes.includes(file.type.toLowerCase())) {
+        return {
+            valid: false,
+            message: 'Invalid image type. Only PNG, JPG, JPEG, HEIF, HEIC are allowed'
+        };
+    }
+
+    return { valid: true, message: '' };
+};
+
+// Format file size for display
+const formatFileSize = (bytes) => {
+    if (bytes === 0) return '0 Bytes';
+    const k = 1024;
+    const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+    const i = Math.floor(Math.log(bytes) / Math.log(k));
+    return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
 };
 
 const fetchNewsDetails = async () => {
@@ -154,23 +238,20 @@ const fetchNewsDetails = async () => {
                 endDate: data.endDate ? parseDMY(data.endDate) : null
             };
 
-            if (data.image1URL) {
-                const imageUrl = await fetchPrivateImage(data.image1URL);
-                previewImages.value.image1URL = imageUrl;
-                originalImages.value.image1URL = data.image1URL;
-                currentImages.value.image1URL = data.image1URL;
-            }
-            if (data.image2URL) {
-                const imageUrl = await fetchPrivateImage(data.image2URL);
-                previewImages.value.image2URL = imageUrl;
-                originalImages.value.image2URL = data.image2URL;
-                currentImages.value.image2URL = data.image2URL;
-            }
-            if (data.image3URL) {
-                const imageUrl = await fetchPrivateImage(data.image3URL);
-                previewImages.value.image3URL = imageUrl;
-                originalImages.value.image3URL = data.image3URL;
-                currentImages.value.image3URL = data.image3URL;
+            // Load images
+            const imageFields = ['image1URL', 'image2URL', 'image3URL'];
+            for (const field of imageFields) {
+                if (data[field]) {
+                    try {
+                        const imageUrl = await fetchPrivateImage(data[field]);
+                        previewImages.value[field] = imageUrl;
+                        originalImages.value[field] = data[field];
+                        currentImages.value[field] = data[field];
+                    } catch (e) {
+                        console.error(`Error loading ${field}:`, e);
+                        imageErrors.value[field.replace('URL', '')] = 'Failed to load image';
+                    }
+                }
             }
         } else {
             error.value = 'News not found.';
@@ -231,31 +312,171 @@ const validateDates = () => {
     }
 };
 
-const onImageSelect = (event, property) => {
+const onImageSelect = (event, fieldName) => {
     const file = event.files[0];
-    if (!file) return;
-    news.value[property] = file;
-    currentImages.value[property] = file; // Store the new file
-    imageChanges.value[property] = true; // Mark as changed
-    previewImages.value[property] = URL.createObjectURL(file);
+    if (!file) {
+        imageErrors.value[fieldName] = 'No file selected';
+        return;
+    }
+
+    // Validate the image
+    const validation = validateImageFile(file);
+    if (!validation.valid) {
+        imageErrors.value[fieldName] = validation.message;
+        toast.add({
+            severity: 'error',
+            summary: 'Invalid Image',
+            detail: validation.message,
+            life: 3000
+        });
+        return;
+    }
+
+    // Clear any previous errors
+    imageErrors.value[fieldName] = '';
+
+    // Create preview
+    const reader = new FileReader();
+    reader.onload = (e) => {
+        previewImages.value[`${fieldName}URL`] = e.target.result;
+    };
+    reader.readAsDataURL(file);
+
+    // Store the file
+    imageFiles.value[fieldName] = file;
+    imageChanges.value[fieldName] = true;
+    imageSizes.value[fieldName] = file.size;
+
+    // Remove from removed images if it was previously marked for removal
+    const index = removedImages.value.indexOf(fieldName);
+    if (index > -1) {
+        removedImages.value.splice(index, 1);
+    }
+
+    toast.add({
+        severity: 'success',
+        summary: 'Image Selected',
+        detail: `Image ${fieldName.replace('image', '')} will be updated`,
+        life: 2000
+    });
 };
 
-const removeImage = (property) => {
-    news.value[property] = null;
-    currentImages.value[property] = 'REMOVED'; 
-    imageChanges.value[property] = true; 
-    previewImages.value[property] = null;
+const removeImage = (fieldName) => {
+    previewImages.value[`${fieldName}URL`] = '';
+    removedImages.value.push(fieldName);
+    imageChanges.value[fieldName] = true;
+    imageSizes.value[fieldName] = 0;
+    imageErrors.value[fieldName] = '';
+    delete imageFiles.value[fieldName];
+
+    toast.add({
+        severity: 'info',
+        summary: 'Image Removed',
+        detail: `Image ${fieldName.replace('image', '')} will be removed`,
+        life: 2000
+    });
+};
+
+// Handle upload errors
+const onUploadError = (error) => {
+    console.error('Upload error:', error);
+    toast.add({
+        severity: 'error',
+        summary: 'Upload Error',
+        detail: 'Failed to upload image. Please try again.',
+        life: 3000
+    });
+};
+
+// Validate form including images
+const validateForm = () => {
+    // Check required fields
+    if (!news.value.title?.trim()) {
+        toast.add({
+            severity: 'warn',
+            summary: 'Missing Title',
+            detail: 'Please enter a title for the news',
+            life: 3000
+        });
+        return false;
+    }
+
+    if (!news.value.headline?.trim()) {
+        toast.add({
+            severity: 'warn',
+            summary: 'Missing Headline',
+            detail: 'Please enter a headline for the news',
+            life: 3000
+        });
+        return false;
+    }
+
+    if (!news.value.description?.trim()) {
+        toast.add({
+            severity: 'warn',
+            summary: 'Missing Description',
+            detail: 'Please enter a description for the news',
+            life: 3000
+        });
+        return false;
+    }
+
+    if (!news.value.startDate) {
+        toast.add({
+            severity: 'warn',
+            summary: 'Missing Start Date',
+            detail: 'Please select a start date',
+            life: 3000
+        });
+        return false;
+    }
+
+    if (!news.value.endDate) {
+        toast.add({
+            severity: 'warn',
+            summary: 'Missing End Date',
+            detail: 'Please select an end date',
+            life: 3000
+        });
+        return false;
+    }
+
+    if (news.value.endDate && news.value.startDate && new Date(news.value.endDate) < new Date(news.value.startDate)) {
+        toast.add({
+            severity: 'error',
+            summary: 'Invalid Date Range',
+            detail: 'End date cannot be before start date.',
+            life: 3000
+        });
+        return false;
+    }
+
+    // Validate any new images that are uploaded
+    for (const field of ['image1', 'image2', 'image3']) {
+        const file = imageFiles.value[field];
+
+        if (file) {
+            const validation = validateImageFile(file);
+            if (!validation.valid) {
+                imageErrors.value[field] = validation.message;
+                toast.add({
+                    severity: 'error',
+                    summary: 'Invalid Image',
+                    detail: `${field}: ${validation.message}`,
+                    life: 3000
+                });
+                return false;
+            }
+        }
+    }
+
+    return true;
 };
 
 const updateNews = async () => {
     try {
-        if (news.value.startDate && news.value.endDate && new Date(news.value.endDate) < new Date(news.value.startDate)) {
-            toast.add({
-                severity: 'error',
-                summary: 'Invalid Date Range',
-                detail: 'End date cannot be before start date.',
-                life: 3000
-            });
+        // Validate form
+        if (!validateForm()) {
             return;
         }
 
@@ -263,35 +484,41 @@ const updateNews = async () => {
         const id = route.params.id;
         const formData = new FormData();
 
+        // Append basic fields
         formData.append('title', news.value.title);
         formData.append('description', news.value.description);
         formData.append('headline', news.value.headline);
         formData.append('audience', news.value.audience);
-        formData.append('publishDate',formatDate(news.value.publishDate));
+        formData.append('publishDate', formatDate(news.value.publishDate));
         formData.append('startDate', formatDate(news.value.startDate));
         formData.append('endDate', formatDate(news.value.endDate));
         formData.append('isPublish', news.value.status ?? 0);
-                                                                                                                                                                                                        
-        ['image1URL', 'image2URL', 'image3URL'].forEach((field, index) => {
-            const imageField = `image${index + 1}`;
-            const current = currentImages.value[field];
-            const hasChanged = imageChanges.value[field];
+
+        // Handle image fields based on changes
+        for (let i = 1; i <= 3; i++) {
+            const fieldName = `image${i}`;
+            const hasChanged = imageChanges.value[fieldName];
+            const file = imageFiles.value[fieldName];
+            const isRemoved = removedImages.value.includes(fieldName);
 
             if (hasChanged) {
-                if (current instanceof File) {
-                    formData.append(imageField, current);
-                } else if (current === 'REMOVED') {
-                    formData.append(imageField, '');
+                if (file) {
+                    // New file uploaded
+                    formData.append(fieldName, file);
+                } else if (isRemoved) {
+                    // Image marked for removal - send empty string
+                    formData.append(fieldName, '');
                 }
             }
-        });
-        
-            const response = await api.postExtra(`news/edit/${id}`, formData, {
+            // If not changed, don't send anything (backend will keep existing)
+        }
+
+        const response = await api.postExtra(`news/edit/${id}`, formData, {
             headers: {
                 'Content-Type': 'multipart/form-data'
             }
-            });
-       
+        });
+
         if (response.data.status === 1) {
             toast.add({
                 severity: 'success',
@@ -301,11 +528,57 @@ const updateNews = async () => {
             });
             router.push(`/marketing/detailNews/${id}`);
         } else {
-            error.value = 'Failed to update news.';
+            // Handle backend validation errors
+            if (response.data.error) {
+                const errors = response.data.error;
+                let errorMessage = 'Failed to update news. ';
+
+                if (typeof errors === 'object') {
+                    const errorList = Object.values(errors).flat();
+                    errorMessage += errorList.join(', ');
+                }
+
+                toast.add({
+                    severity: 'error',
+                    summary: 'Validation Error',
+                    detail: errorMessage,
+                    life: 5000
+                });
+            } else {
+                toast.add({
+                    severity: 'error',
+                    summary: 'Error',
+                    detail: 'Failed to update news.',
+                    life: 3000
+                });
+            }
         }
     } catch (err) {
         console.error('Error updating news:', err);
-        error.value = 'Error updating news.';
+
+        // Handle specific error cases
+        if (err.response?.status === 413) {
+            toast.add({
+                severity: 'error',
+                summary: 'File Too Large',
+                detail: 'Total image size exceeds server limit',
+                life: 3000
+            });
+        } else if (err.response?.status === 422) {
+            toast.add({
+                severity: 'error',
+                summary: 'Validation Error',
+                detail: 'Please check your form inputs',
+                life: 3000
+            });
+        } else {
+            toast.add({
+                severity: 'error',
+                summary: 'Error',
+                detail: 'Error updating news. Please try again.',
+                life: 3000
+            });
+        }
     } finally {
         saving.value = false;
     }

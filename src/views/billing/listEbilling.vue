@@ -3,7 +3,7 @@
         <Toast />
 
         <div class="flex justify-between items-center mb-4">
-            <div class="text-2xl font-bold text-black">List Self Bill E-Invoice</div>
+            <div class="text-2xl font-bold text-black">Self Bill E-Invoice</div>
         </div>
 
         <!-- Error Message -->
@@ -30,11 +30,12 @@
             :filters="filters1"
             :rowsPerPageOptions="[10, 20, 50, 100]"
             removableSort
-            sortField="sortableDate"
+            :sortField="sortField"
             :sortOrder="-1"
             currentPageReportTemplate="Showing {first} to {last} of {totalRecords} entries"
             paginatorTemplate="CurrentPageReport FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink RowsPerPageDropdown"
             v-model:selection="selectedFiles"
+            @sort="onSort"
         >
             <template #header>
                 <div class="flex flex-col gap-4 w-full">
@@ -62,18 +63,46 @@
                         </div>
                     </div>
 
-                    <!-- Date Range Filter -->
+                    <!-- Filter Row: Date Range and Customer Account No. -->
                     <div class="flex items-center gap-4 mb-1 flex-wrap">
+                        <!-- Customer Account No. Filter -->
+                        <div class="flex items-center gap-2">
+                            <span class="text-sm font-medium text-gray-700">Customer Account No.:</span>
+                            <InputNumber
+                                v-model="customerAccountFilter"
+                                placeholder="Filter by account no."
+                                class="w-50"
+                                :disabled="loading"
+                                :useGrouping="false"
+                                :maxFractionDigits="0"
+                                :min="0"
+                                :max="9999999999"
+                                inputId="customer-account-filter"
+                            />
+                            <Button v-if="customerAccountFilter" icon="pi pi-times" class="p-button-text p-button-sm" @click="clearCustomerAccountFilter" title="Clear account filter" />
+                        </div>
+
+                        <!-- Date Range Filter -->
                         <div class="flex items-center gap-2">
                             <span class="text-sm font-medium text-gray-700">Date Range:</span>
                             <div class="flex items-center gap-2">
-                                <Calendar v-model="dateRange[0]" placeholder="Start Date" dateFormat="yy-mm-dd" showIcon class="w-40" :disabled="loading" @date-select="handleDateChange" />
+                                <Calendar v-model="dateRange[0]" placeholder="Start Date" dateFormat="yy-mm-dd" showIcon class="w-40" :disabled="loading" />
                                 <span class="text-gray-500">to</span>
-                                <Calendar v-model="dateRange[1]" placeholder="End Date" dateFormat="yy-mm-dd" showIcon class="w-40" :disabled="loading" @date-select="handleDateChange" />
+                                <Calendar v-model="dateRange[1]" placeholder="End Date" dateFormat="yy-mm-dd" showIcon class="w-40" :disabled="loading" />
                             </div>
                             <Button v-if="dateRange[0] || dateRange[1]" icon="pi pi-times" class="p-button-text p-button-sm" @click="clearDateRange" title="Clear date filter" />
                         </div>
-                        <div v-if="!hasDateFilterApplied" class="text-sm text-blue-600 italic">Select a date range to filter e-billing documents</div>
+
+                        <!-- Filter Button -->
+                        <Button
+                            icon="pi pi-filter"
+                            label="Filter"
+                            class="p-button-primary p-button-sm"
+                            @click="applyFilter"
+                            :disabled="loading || (!dateRange[0] && !dateRange[1] && !customerAccountFilter)"
+                            :loading="filterLoading"
+                            v-tooltip="'Apply date and account number filters'"
+                        />
                     </div>
                 </div>
             </template>
@@ -83,7 +112,7 @@
                     <template v-if="!hasDateFilterApplied">
                         <div class="flex flex-col items-center gap-2">
                             <i class="pi pi-calendar text-3xl text-blue-400"></i>
-                            <span class="text-lg">Select a date range to view e-billing documents</span>
+                            <span class="text-lg">Select a date range to view e-billing</span>
                             <span class="text-sm text-gray-400">Choose both start and end dates to load data</span>
                         </div>
                     </template>
@@ -103,7 +132,7 @@
 
             <Column selectionMode="multiple" headerStyle="width: 3rem"></Column>
 
-            <Column field="docsDate" header="Document Date" style="min-width: 8rem" sortable>
+            <Column field="sortableDate" header="Document Date" style="min-width: 8rem" sortable>
                 <template #body="{ data }">
                     <span class="font-medium">{{ data.docsDate }}</span>
                     <div class="text-xs text-gray-500">{{ formatDateForDisplay(data.docsDate) }}</div>
@@ -170,13 +199,16 @@
 </template>
 
 <script setup>
-import { onBeforeMount, ref, reactive, computed, watch } from 'vue';
+import { onBeforeMount, ref, reactive, computed } from 'vue';
 import { FilterMatchMode, FilterOperator } from '@primevue/core/api';
 import api from '@/service/api';
 import LoadingPage from '@/components/LoadingPage.vue';
 import { useToast } from 'primevue/usetoast';
 import Calendar from 'primevue/calendar';
 import Button from 'primevue/button';
+import InputText from 'primevue/inputtext';
+import InputNumber from 'primevue/inputnumber';
+import Tag from 'primevue/tag';
 
 const toast = useToast();
 
@@ -188,22 +220,24 @@ const filters1 = reactive({
 });
 
 const listData = ref([]);
-const loading = ref(false); // Start with false since we don't load initially
+const loading = ref(false);
+const filterLoading = ref(false);
 const downloadLoading = ref(null);
 const viewLoading = ref(null);
 const error = ref(null);
 const dateRange = ref([null, null]);
+const customerAccountFilter = ref('');
 const hasDateFilterApplied = ref(false);
+const sortField = ref('sortableDate');
 
-// Debounce timer for date changes
-let debounceTimer = null;
+// Removed debounce timers
 
 // Selection state for bulk download
 const selectedFiles = ref([]);
 
 // 🟢 API service functions for E-Billing
 const EBillingService = {
-    async getEBillingList(startDate = null, endDate = null) {
+    async getEBillingList(startDate = null, endDate = null, accountNo = null) {
         try {
             let params = {};
 
@@ -220,41 +254,60 @@ const EBillingService = {
                 params.date_range = `${formatDateForAPI(startDate)} - ${formatDateForAPI(endDate)}`;
             }
 
+            // Add customer account number filter if provided
+            if (accountNo && accountNo.trim() !== '') {
+                params.custAccountNo = accountNo.trim();
+            }
+
             const response = await api.post('credit/ebilling', params);
             if (response.data.status === 1) {
                 // Transform the API data to match your table structure
                 return response.data.admin_data.map((item) => {
                     // Parse the date for sorting and filtering
                     const dateStr = item.date;
-                    let parsedDate = null;
                     let sortableDate = null;
 
                     // Parse the date from various formats
                     if (dateStr) {
                         // Try to parse DD/MM/YYYY format
                         if (dateStr.includes('/')) {
-                            const [day, month, year] = dateStr.split('/');
-                            if (day && month && year) {
-                                parsedDate = new Date(`${year}-${month}-${day}`);
-                                sortableDate = parsedDate.getTime();
+                            try {
+                                // Parse the date string
+                                const [day, month, year] = dateStr.split('/');
+
+                                // Create a sortable date string in YYYY-MM-DD format
+                                // This ensures proper sorting by year, then month, then day
+                                sortableDate = `${year}-${month.padStart(2, '0')}-${day.padStart(2, '0')}`;
+                            } catch (error) {
+                                console.error('Error parsing date:', dateStr);
+                                sortableDate = '0000-00-00'; // Fallback for invalid dates
                             }
                         }
                         // Try YYYY-MM-DD format
                         else if (dateStr.includes('-')) {
-                            parsedDate = new Date(dateStr);
-                            sortableDate = parsedDate.getTime();
+                            try {
+                                // Ensure it's in YYYY-MM-DD format
+                                const [year, month, day] = dateStr.split('-');
+                                sortableDate = `${year}-${month.padStart(2, '0')}-${day.padStart(2, '0')}`;
+                            } catch (error) {
+                                sortableDate = '0000-00-00';
+                            }
                         }
                         // Try ISO format
                         else {
-                            parsedDate = new Date(dateStr);
-                            sortableDate = parsedDate.getTime();
+                            try {
+                                const parsedDate = new Date(dateStr);
+                                sortableDate = parsedDate.toISOString().split('T')[0];
+                            } catch (error) {
+                                sortableDate = '0000-00-00';
+                            }
                         }
                     }
 
                     return {
                         id: item.file_path,
                         docsDate: item.date,
-                        sortableDate: sortableDate, // For proper sorting
+                        sortableDate: sortableDate, // For proper sorting (YYYY-MM-DD format)
                         docsNo: item.docno,
                         docsType: item.doctype,
                         referenceDocsNo: item.refdocno,
@@ -264,7 +317,7 @@ const EBillingService = {
                         filePath: item.file_path,
                         fileUrl: item.file_url,
                         download: true,
-                        parsedDate: parsedDate // For date filtering
+                        parsedDate: sortableDate ? new Date(sortableDate) : null // For date filtering
                     };
                 });
             } else {
@@ -371,45 +424,125 @@ const EBillingService = {
     }
 };
 
-// 🟢 Handle date change with debouncing
-const handleDateChange = () => {
-    // Clear any existing timer
-    if (debounceTimer) {
-        clearTimeout(debounceTimer);
+// 🟢 Apply Filter Button Handler
+const applyFilter = async () => {
+    // Validate date range - either both dates or none
+    if ((dateRange.value[0] && !dateRange.value[1]) || (!dateRange.value[0] && dateRange.value[1])) {
+        toast.add({
+            severity: 'warn',
+            summary: 'Invalid Date Range',
+            detail: 'Please select both start and end dates, or clear both',
+            life: 3000
+        });
+        return;
     }
 
-    // Set new timer to debounce the API call
-    debounceTimer = setTimeout(async () => {
-        // Only fetch data if both dates are selected
-        if (dateRange.value[0] && dateRange.value[1]) {
-            await loadFilteredData();
-        } else if (dateRange.value[0] === null && dateRange.value[1] === null && hasDateFilterApplied.value) {
-            // If both dates are cleared and we had data, clear the data
+    // Validate customer account number format (only numbers, max 10 digits)
+    if (customerAccountFilter.value) {
+        const accountStr = customerAccountFilter.value.toString();
+        if (!/^\d+$/.test(accountStr)) {
+            toast.add({
+                severity: 'error',
+                summary: 'Invalid Account Number',
+                detail: 'Customer account number must contain only numbers',
+                life: 3000
+            });
+            return;
+        }
+
+        if (accountStr.length > 10) {
+            toast.add({
+                severity: 'error',
+                summary: 'Invalid Account Number',
+                detail: 'Customer account number must be at most 10 digits',
+                life: 3000
+            });
+            return;
+        }
+    }
+
+    filterLoading.value = true;
+
+    try {
+        // If no dates but has account filter, we need to show warning
+        if (!dateRange.value[0] && !dateRange.value[1] && customerAccountFilter.value) {
+            toast.add({
+                severity: 'warn',
+                summary: 'Date Range Required',
+                detail: 'Please select a date range when filtering by account number',
+                life: 3000
+            });
+            return;
+        }
+
+        // If no dates and no account filter, show empty state
+        if (!dateRange.value[0] && !dateRange.value[1] && !customerAccountFilter.value) {
             hasDateFilterApplied.value = false;
             listData.value = [];
             selectedFiles.value = [];
+
+            toast.add({
+                severity: 'info',
+                summary: 'Filter Cleared',
+                detail: 'No filters applied. Please select date range or account number to filter.',
+                life: 3000
+            });
+            return;
         }
-    }, 500); // 500ms debounce delay
+
+        // Load data with filters
+        await loadFilteredData();
+    } catch (error) {
+        console.error('Filter application failed:', error);
+        toast.add({
+            severity: 'error',
+            summary: 'Filter Failed',
+            detail: 'Failed to apply filters. Please try again.',
+            life: 5000
+        });
+    } finally {
+        filterLoading.value = false;
+    }
 };
 
-// 🟢 Load filtered data
+// 🟢 Clear customer account filter
+const clearCustomerAccountFilter = () => {
+    customerAccountFilter.value = '';
+    // Note: This doesn't trigger filter automatically
+    // User needs to click Filter button again if they want to apply changes
+};
+
+// 🟢 Load filtered data (modified to be called by applyFilter)
 const loadFilteredData = async () => {
-    if (!dateRange.value[0] || !dateRange.value[1]) {
-        return;
-    }
+    // Convert customerAccountFilter to string for API call
+    const accountFilterValue = customerAccountFilter.value ? customerAccountFilter.value.toString() : null;
 
     loading.value = true;
     error.value = null;
     selectedFiles.value = []; // Clear selection when applying new filter
 
     try {
-        listData.value = await EBillingService.getEBillingList(dateRange.value[0], dateRange.value[1]);
+        listData.value = await EBillingService.getEBillingList(dateRange.value[0], dateRange.value[1], accountFilterValue);
         hasDateFilterApplied.value = true;
+
+        // Sort the data by document date from new to old (YYYY-MM-DD format)
+        listData.value.sort((a, b) => {
+            if (!a.sortableDate || !b.sortableDate) return 0;
+            return b.sortableDate.localeCompare(a.sortableDate);
+        });
+
+        let filterMessage = `Showing e-billing documents`;
+        if (dateRange.value[0] && dateRange.value[1]) {
+            filterMessage += ` from ${formatDateForDisplay(dateRange.value[0])} to ${formatDateForDisplay(dateRange.value[1])}`;
+        }
+        if (accountFilterValue) {
+            filterMessage += ` for account: ${accountFilterValue}`;
+        }
 
         toast.add({
             severity: 'success',
             summary: 'Filter Applied',
-            detail: `Showing e-billing documents from ${formatDateForDisplay(dateRange.value[0])} to ${formatDateForDisplay(dateRange.value[1])}`,
+            detail: filterMessage,
             life: 3000
         });
     } catch (err) {
@@ -429,25 +562,32 @@ const loadFilteredData = async () => {
     }
 };
 
-// 🟢 Watcher for date range changes (alternative approach)
-watch(
-    dateRange,
-    (newRange) => {
-        // Only trigger if both dates are set
-        if (newRange[0] && newRange[1]) {
-            handleDateChange();
-        }
-    },
-    { deep: true }
-);
+// 🟢 Handle sort event
+const onSort = (event) => {
+    sortField.value = event.sortField;
 
-// 🟢 Computed - Filter data by search (only after date filter applied)
+    // If sorting by docsDate (which uses sortableDate field), we need to sort by the sortableDate field
+    if (event.sortField === 'sortableDate') {
+        listData.value.sort((a, b) => {
+            if (!a.sortableDate || !b.sortableDate) return 0;
+
+            // For descending order (new to old)
+            if (event.sortOrder === -1) {
+                return b.sortableDate.localeCompare(a.sortableDate);
+            }
+            // For ascending order (old to new)
+            else {
+                return a.sortableDate.localeCompare(b.sortableDate);
+            }
+        });
+    }
+};
+
+// 🟢 Computed - Filter data by search
 const filteredData = computed(() => {
     if (!hasDateFilterApplied.value) {
         return [];
     }
-
-    // Return all data when date filter is applied (search filtering is handled by DataTable)
     return listData.value;
 });
 
@@ -611,11 +751,11 @@ const handleBulkDownload = async () => {
     }
 };
 
-// 🟢 Initial load - Don't load data initially, require date filter first
+// 🟢 Initial load
 onBeforeMount(async () => {
-    loading.value = false; // Set loading to false since we won't load data initially
-    listData.value = []; // Initialize with empty array
-    hasDateFilterApplied.value = false; // No filter applied initially
+    loading.value = false;
+    listData.value = [];
+    hasDateFilterApplied.value = false;
 });
 
 // 🟢 Refresh function
@@ -633,7 +773,13 @@ const refreshData = async () => {
     loading.value = true;
     error.value = null;
     try {
-        listData.value = await EBillingService.getEBillingList(dateRange.value[0], dateRange.value[1]);
+        const accountFilterValue = customerAccountFilter.value ? customerAccountFilter.value.toString() : null;
+        listData.value = await EBillingService.getEBillingList(dateRange.value[0], dateRange.value[1], accountFilterValue);
+
+        listData.value.sort((a, b) => {
+            if (!a.sortableDate || !b.sortableDate) return 0;
+            return b.sortableDate.localeCompare(a.sortableDate);
+        });
 
         toast.add({
             severity: 'success',
@@ -654,6 +800,22 @@ const refreshData = async () => {
     } finally {
         loading.value = false;
     }
+};
+
+// 🟢 Clear Date Range
+const clearDateRange = () => {
+    dateRange.value = [null, null];
+    customerAccountFilter.value = '';
+    hasDateFilterApplied.value = false;
+    listData.value = [];
+    selectedFiles.value = [];
+
+    toast.add({
+        severity: 'info',
+        summary: 'Filter Cleared',
+        detail: 'Date filter has been cleared. Click Filter button to apply new filters.',
+        life: 3000
+    });
 };
 
 // 🟢 Helper Functions
@@ -689,21 +851,6 @@ const formatDateForDisplay = (dateString) => {
         return '';
     }
 };
-
-// 🟢 Clear Date Range
-const clearDateRange = () => {
-    dateRange.value = [null, null];
-    hasDateFilterApplied.value = false;
-    listData.value = [];
-    selectedFiles.value = [];
-
-    toast.add({
-        severity: 'info',
-        summary: 'Filter Cleared',
-        detail: 'Date filter has been cleared',
-        life: 3000
-    });
-};
 </script>
 
 <style scoped>
@@ -720,6 +867,11 @@ const clearDateRange = () => {
     .p-paginator-bottom {
         border-bottom-left-radius: 12px;
         border-bottom-right-radius: 12px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 1rem;
     }
 
     .p-datatable-thead > tr > th {
@@ -744,12 +896,25 @@ const clearDateRange = () => {
         border-bottom-left-radius: 12px;
         border-bottom-right-radius: 12px;
     }
+
+    :deep(.p-paginator-current) {
+        margin-right: auto;
+        order: -1;
+    }
 }
 
 /* Custom styling for the date filter */
 :deep(.p-calendar) {
     .p-inputtext {
         padding: 0.5rem;
+    }
+}
+
+/* Custom styling for InputNumber */
+:deep(.p-inputnumber) {
+    .p-inputtext {
+        padding: 0.6rem;
+        text-align: left;
     }
 }
 </style>

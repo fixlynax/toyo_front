@@ -13,8 +13,10 @@
                     </div>
 
                     <div class="md:col-span-2">
-                        <label class="block font-bold text-gray-700">Headline(180 max Character)</label>
-                        <Textarea v-model="news.headline" rows="3" class="w-full" maxlength="180"/>
+                        <label class="block font-bold text-gray-700">Headline (180 max Character)</label>
+                        <Textarea v-model="news.headline" rows="3" class="w-full" maxlength="180" />
+                        <!-- Character Counter -->
+                        <div class="text-xm text-gray-500 mt-1 text-right">{{ news.headline?.length || 0 }}/180</div>
                     </div>
 
                     <div class="md:col-span-2">
@@ -34,22 +36,49 @@
 
                     <div>
                         <label class="block font-bold text-gray-700">Publish Date</label>
-                        <Calendar v-model="news.publishDate" dateFormat="yy-mm-dd" showIcon class="w-full" :minDate="news.startDate"  :maxDate="news.endDate"  :disabled="!news.startDate || !news.endDate"/>
+                        <Calendar v-model="news.publishDate" dateFormat="yy-mm-dd" showIcon class="w-full" :minDate="news.startDate" :maxDate="news.endDate" :disabled="!news.startDate || !news.endDate" />
                     </div>
-
-                    <!-- <div>
-                        <label class="block font-bold text-gray-700">Audience</label>
-                        <Dropdown v-model="news.audience" :options="audienceOptions" optionLabel="label" optionValue="value" class="w-full" />
-                    </div> -->
                 </div>
 
                 <!-- Upload Images -->
                 <div>
-                    <label class="block font-bold text-gray-700 mb-2">Upload News Images <span class="text-xs bg-blue-100 text-blue-800 px-2 py-0.5 rounded-full">1280 × 720 px (max 2MB)</span> </label>
+                    <label class="block font-bold text-gray-700 mb-2">
+                        Upload News Images
+                        <span class="text-xs bg-blue-100 text-blue-800 px-2 py-0.5 rounded-full">1280 × 720 px (max 2MB)</span>
+                    </label>
                     <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
                         <div v-for="n in 3" :key="n">
-                            <FileUpload mode="basic" accept="image/*" customUpload :chooseLabel="`Upload Image ${n}`" class="w-full" @select="(e) => onImageSelect(e, `image${n}`)" />
-                            <img v-if="preview[`image${n}`]" :src="preview[`image${n}`]" :alt="`Preview ${n}`" class="mt-2 rounded-lg shadow-md object-cover w-full h-40" />
+                            <FileUpload
+                                mode="basic"
+                                accept="image/*"
+                                :maxFileSize="2 * 1024 * 1024"
+                                customUpload
+                                :chooseLabel="`Upload Image ${n}`"
+                                class="w-full"
+                                @select="(e) => onImageSelect(e, `image${n}`)"
+                                @remove="() => onImageRemove(`image${n}`)"
+                                @error="onUploadError"
+                                :invalidFileSizeMessage="`File size exceeds 2MB limit`"
+                                :invalidFileTypeMessage="`Invalid image type. Only PNG, JPG, JPEG, HEIF, HEIC are allowed`"
+                            />
+                            <!-- Image Preview with Remove Button -->
+                            <div v-if="preview[`image${n}`]" class="mt-2 relative group">
+                                <img :src="preview[`image${n}`]" :alt="`Preview ${n}`" class="rounded-lg shadow-md object-cover w-full h-40" />
+                                <!-- Remove Button -->
+                                <button
+                                    @click="onImageRemove(`image${n}`)"
+                                    class="absolute top-2 right-2 bg-red-500 text-white rounded-full p-1.5 opacity-0 group-hover:opacity-100 transition-opacity duration-200 hover:bg-red-600"
+                                    title="Remove image"
+                                >
+                                    <i class="pi pi-times text-sm"></i>
+                                </button>
+                                <!-- File Size Info -->
+                                <div class="text-xs text-gray-500 mt-1 text-center">Size: {{ imageSizes[`image${n}`] ? formatFileSize(imageSizes[`image${n}`]) : '' }}</div>
+                            </div>
+                            <!-- Image Error Message -->
+                            <div v-if="imageErrors[`image${n}`]" class="text-red-500 text-xs mt-1">
+                                {{ imageErrors[`image${n}`] }}
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -60,10 +89,10 @@
                         <Button label="Cancel" class="p-button-secondary w-full" @click="$router.back()" />
                     </div>
                     <div class="w-40">
-                        <Button label="Save as Draft" class="w-full p-button-outlined p-button-info" @click="handleSave(0)" />
+                        <Button label="Save as Draft" class="w-full p-button-outlined p-button-info" @click="handleSave(0)" :loading="loading" />
                     </div>
                     <div class="w-40">
-                        <Button label="Save & Publish" class="w-full p-button-success" @click="handleSave(1)" />
+                        <Button label="Save & Publish" class="w-full p-button-success" @click="handleSave(1)" :loading="loading" />
                     </div>
                 </div>
             </div>
@@ -80,18 +109,13 @@ import { useToast } from 'primevue/usetoast';
 const router = useRouter();
 const toast = useToast();
 
-// Audience options
-const audienceOptions = [
-    { label: 'TC', value: 'TC' },
-    { label: 'ETEN', value: 'ETEN' },
-    { label: 'ALL', value: 'ALL' }
-];
-
 // Reactive data
 const today = new Date();
+const loading = ref(false);
 const news = ref({
     title: '',
     desc: '',
+    headline: '',
     startDate: '',
     endDate: '',
     publishDate: '',
@@ -104,6 +128,20 @@ const news = ref({
 
 // Preview images
 const preview = ref({
+    image1: '',
+    image2: '',
+    image3: ''
+});
+
+// Track image sizes
+const imageSizes = ref({
+    image1: 0,
+    image2: 0,
+    image3: 0
+});
+
+// Track image errors
+const imageErrors = ref({
     image1: '',
     image2: '',
     image3: ''
@@ -127,43 +165,238 @@ const onStartDateSelect = () => {
     }
 };
 
+// Validate image file
+const validateImageFile = (file) => {
+    // Check file size (2MB limit)
+    const maxSize = 2 * 1024 * 1024; // 2MB in bytes
+    if (file.size > maxSize) {
+        return {
+            valid: false,
+            message: `File size exceeds 2MB limit. Your file is ${formatFileSize(file.size)}`
+        };
+    }
+
+    // Check file type
+    const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/heif', 'image/heic'];
+    if (!allowedTypes.includes(file.type.toLowerCase())) {
+        return {
+            valid: false,
+            message: 'Invalid image type. Only PNG, JPG, JPEG, HEIF, HEIC are allowed'
+        };
+    }
+
+    return { valid: true, message: '' };
+};
+
 // Handle file selection and preview
 const onImageSelect = (event, field) => {
     const file = event.files[0];
-    if (file) {
-        news.value[field] = file;
-        const reader = new FileReader();
-        reader.onload = (e) => {
-            preview.value[field] = e.target.result;
-        };
-        reader.readAsDataURL(file);
-    }
-};
 
-// Handle save (draft or publish)
-const handleSave = async (isPublish) => {
-    // Validate required fields
-    if (!news.value.title || !news.value.desc || !news.value.startDate || !news.value.endDate) {
+    if (!file) {
+        imageErrors.value[field] = 'No file selected';
+        return;
+    }
+
+    // Validate the image
+    const validation = validateImageFile(file);
+    if (!validation.valid) {
+        imageErrors.value[field] = validation.message;
         toast.add({
-            severity: 'warn',
-            summary: 'Missing Fields',
-            detail: 'Please fill in all required fields.',
+            severity: 'error',
+            summary: 'Invalid Image',
+            detail: validation.message,
             life: 3000
         });
         return;
+    }
+
+    // Clear any previous errors
+    imageErrors.value[field] = '';
+
+    // Store the file
+    news.value[field] = file;
+    imageSizes.value[field] = file.size;
+
+    // Create preview
+    const reader = new FileReader();
+    reader.onload = (e) => {
+        preview.value[field] = e.target.result;
+    };
+    reader.onerror = () => {
+        imageErrors.value[field] = 'Failed to read image file';
+        toast.add({
+            severity: 'error',
+            summary: 'Error',
+            detail: 'Failed to read image file',
+            life: 3000
+        });
+    };
+    reader.readAsDataURL(file);
+
+    toast.add({
+        severity: 'success',
+        summary: 'Image Selected',
+        detail: `Image ${field.replace('image', '')} uploaded successfully`,
+        life: 2000
+    });
+};
+
+// Handle image removal
+const onImageRemove = (field) => {
+    // Clear the file
+    news.value[field] = null;
+    preview.value[field] = '';
+    imageSizes.value[field] = 0;
+    imageErrors.value[field] = '';
+
+    toast.add({
+        severity: 'info',
+        summary: 'Image Removed',
+        detail: `Image ${field.replace('image', '')} has been removed`,
+        life: 2000
+    });
+};
+
+// Handle upload errors
+const onUploadError = (error) => {
+    console.error('Upload error:', error);
+    toast.add({
+        severity: 'error',
+        summary: 'Upload Error',
+        detail: 'Failed to upload image. Please try again.',
+        life: 3000
+    });
+};
+
+// Format file size for display
+const formatFileSize = (bytes) => {
+    if (bytes === 0) return '0 Bytes';
+    const k = 1024;
+    const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+    const i = Math.floor(Math.log(bytes) / Math.log(k));
+    return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+};
+
+// Validate the form before submission
+const validateForm = () => {
+    // Check required fields
+    if (!news.value.title.trim()) {
+        toast.add({
+            severity: 'warn',
+            summary: 'Missing Title',
+            detail: 'Please enter a title for the news',
+            life: 3000
+        });
+        return false;
+    }
+
+    if (!news.value.headline.trim()) {
+        toast.add({
+            severity: 'warn',
+            summary: 'Missing Headline',
+            detail: 'Please enter a headline for the news',
+            life: 3000
+        });
+        return false;
+    }
+
+    if (!news.value.desc.trim()) {
+        toast.add({
+            severity: 'warn',
+            summary: 'Missing Description',
+            detail: 'Please enter a description for the news',
+            life: 3000
+        });
+        return false;
+    }
+
+    if (!news.value.startDate) {
+        toast.add({
+            severity: 'warn',
+            summary: 'Missing Start Date',
+            detail: 'Please select a start date',
+            life: 3000
+        });
+        return false;
+    }
+
+    if (!news.value.endDate) {
+        toast.add({
+            severity: 'warn',
+            summary: 'Missing End Date',
+            detail: 'Please select an end date',
+            life: 3000
+        });
+        return false;
     }
 
     if (news.value.endDate <= news.value.startDate) {
         toast.add({
             severity: 'error',
             summary: 'Invalid Date Range',
-            detail: 'End date must be after start date.',
+            detail: 'End date must be after start date',
+            life: 3000
+        });
+        return false;
+    }
+
+    // Check if any image has validation errors
+    for (const field in imageErrors.value) {
+        if (imageErrors.value[field]) {
+            toast.add({
+                severity: 'error',
+                summary: 'Image Error',
+                detail: `Please fix the issue with ${field}`,
+                life: 3000
+            });
+            return false;
+        }
+    }
+
+    // Validate images that are uploaded
+    for (let i = 1; i <= 3; i++) {
+        const field = `image${i}`;
+        const file = news.value[field];
+
+        if (file) {
+            const validation = validateImageFile(file);
+            if (!validation.valid) {
+                imageErrors.value[field] = validation.message;
+                toast.add({
+                    severity: 'error',
+                    summary: 'Invalid Image',
+                    detail: `Image ${i}: ${validation.message}`,
+                    life: 3000
+                });
+                return false;
+            }
+        }
+    }
+
+    return true;
+};
+
+// Handle save (draft or publish)
+const handleSave = async (isPublish) => {
+    // Validate the form
+    if (!validateForm()) {
+        return;
+    }
+
+    // Additional validation for publish
+    if (isPublish === 1 && !news.value.publishDate) {
+        toast.add({
+            severity: 'warn',
+            summary: 'Missing Publish Date',
+            detail: 'Please select a publish date when publishing',
             life: 3000
         });
         return;
     }
 
     try {
+        loading.value = true;
+
         const formData = new FormData();
         formData.append('title', news.value.title);
         formData.append('description', news.value.desc);
@@ -177,6 +410,7 @@ const handleSave = async (isPublish) => {
             formData.append('publishDate', formatDate(news.value.publishDate));
         }
 
+        // Append images if they exist
         if (news.value.image1) formData.append('image1', news.value.image1);
         if (news.value.image2) formData.append('image2', news.value.image2);
         if (news.value.image3) formData.append('image3', news.value.image3);
@@ -205,13 +439,33 @@ const handleSave = async (isPublish) => {
             });
         }
     } catch (error) {
-        console.error(error);
-        toast.add({
-            severity: 'error',
-            summary: 'Error',
-            detail: 'Something went wrong while saving news',
-            life: 3000
-        });
+        console.error('Save error:', error);
+
+        // Handle specific error cases
+        if (error.response?.status === 413) {
+            toast.add({
+                severity: 'error',
+                summary: 'File Too Large',
+                detail: 'Total image size exceeds server limit',
+                life: 3000
+            });
+        } else if (error.response?.status === 422) {
+            toast.add({
+                severity: 'error',
+                summary: 'Validation Error',
+                detail: 'Please check your form inputs',
+                life: 3000
+            });
+        } else {
+            toast.add({
+                severity: 'error',
+                summary: 'Error',
+                detail: 'Something went wrong while saving news',
+                life: 3000
+            });
+        }
+    } finally {
+        loading.value = false;
     }
 };
 

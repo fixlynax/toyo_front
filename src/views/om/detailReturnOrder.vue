@@ -220,16 +220,24 @@ const getItemPrice = (item) => {
     const materialId = item.materialid;
     const itemNo = item.salesdoclineitem || item.itemno;
 
+    // Format item number for comparison (pad with zeros to 6 digits)
+    const formattedItemNo = itemNo.toString().padStart(6, '0');
+
     // First, try to find the item in fullfill_order_array with exact match
     if (orderData.value.fullfill_order_array && Array.isArray(orderData.value.fullfill_order_array)) {
-        const originalItem = orderData.value.fullfill_order_array.find((orderItem) => orderItem.materialid === materialId && orderItem.itemno === formatItemNoForComparison(itemNo));
+        const originalItem = orderData.value.fullfill_order_array.find((orderItem) => orderItem.materialid === materialId && orderItem.itemno === formattedItemNo);
 
         if (originalItem && originalItem.unitprice !== undefined && originalItem.unitprice !== null) {
             return Number(originalItem.unitprice) || 0;
         }
     }
 
-    // If not found, try to find by material ID only (fallback)
+    // If not found, check if there's a unitprice already in the return item (from API)
+    if (item.unitprice !== undefined && item.unitprice !== null) {
+        return Number(item.unitprice) || 0;
+    }
+
+    // Last resort: try to find by material ID only (fallback)
     if (orderData.value.fullfill_order_array && Array.isArray(orderData.value.fullfill_order_array)) {
         const fallbackItem = orderData.value.fullfill_order_array.find((orderItem) => orderItem.materialid === materialId);
 

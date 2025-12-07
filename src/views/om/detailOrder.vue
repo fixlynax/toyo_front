@@ -136,15 +136,15 @@
                                     <td class="px-4 py-2 text-right font-medium">{{ deliveryInfo.storageLocation || customerInfo.storageLocation || '-' }}</td>
                                 </tr>
                                 <tr class="border-b">
+                                    <td class="px-4 py-2 font-medium">ETA Date</td>
+                                    <td class="px-4 py-2 text-right font-medium">{{ formatDateTime(orderData.deliveryDate) || '-' }}</td>
+                                </tr>
+                                <tr class="border-b">
                                     <td class="px-4 py-2 font-medium">Planned Date</td>
                                     <td class="px-4 py-2 text-right font-medium">{{ formatDateTime(deliveryInfo.scheduled_delivery_time) || '-' }}</td>
                                 </tr>
                                 <tr class="border-b">
                                     <td class="px-4 py-2 font-medium">Delivered Date</td>
-                                    <td class="px-4 py-2 text-right font-medium">{{ formatDateTime(orderData.deliveryDate) || '-' }}</td>
-                                </tr>
-                                <tr class="border-b">
-                                    <td class="px-4 py-2 font-medium">ETA Date</td>
                                     <td class="px-4 py-2 text-right font-medium">{{ formatDateTime(deliveryInfo.delivered_datetime) || '-' }}</td>
                                 </tr>
                                 <tr class="border-b">
@@ -166,7 +166,7 @@
 
                 <!-- Shipping Info Card (for DELIVER type) -->
                 <div v-if="orderData.deliveryType === 'DELIVER'" class="card flex flex-col w-full">
-                    <div class="flex items-center justify-between border-b pb-3 ">
+                    <div class="flex items-center justify-between border-b pb-3">
                         <div class="text-2xl font-bold text-gray-800">Shipping Info</div>
                     </div>
                     <div class="overflow-x-auto">
@@ -198,11 +198,14 @@
                 </div>
 
                 <!-- Pickup Info Card (for LALAMOVE/SELFCOLLECT type) -->
-                <div v-if="(orderData.deliveryType === 'LALAMOVE' || orderData.deliveryType === 'SELFCOLLECT') && pickupDetail.driverName" class="card flex flex-col w-full">
+                <div v-if="orderData.deliveryType === 'LALAMOVE' || orderData.deliveryType === 'SELFCOLLECT'" class="card flex flex-col w-full">
                     <div class="flex items-center justify-between border-b pb-3">
                         <div class="text-2xl font-bold text-gray-800">Pickup Info</div>
+                        <Tag v-if="!hasPickupInfo" value="No Collector" severity="warning" />
                     </div>
-                    <div class="overflow-x-auto">
+
+                    <!-- When pickup detail exists -->
+                    <div v-if="hasPickupInfo" class="overflow-x-auto">
                         <table class="w-full text-sm text-left text-gray-700">
                             <tbody>
                                 <tr class="border-b even:bg-gray-50">
@@ -228,9 +231,51 @@
                             </tbody>
                         </table>
                     </div>
+
+                    <!-- When no pickup detail exists -->
+                    <div v-else class="p-6 text-center">
+                        <div class="text-gray-500 mb-4">
+                            <i class="pi pi-info-circle text-2xl mb-2"></i>
+                            <p class="text-lg font-medium">No collector information available</p>
+                        </div>
+                        <Button label="Add Driver" icon="pi pi-plus" class="p-button-primary" @click="showAddDriverDialog = true" :disabled="loadingDriver" />
+                    </div>
                 </div>
             </div>
         </div>
+
+        <!-- Add Driver Dialog -->
+        <Dialog v-model:visible="showAddDriverDialog" header="Add Driver Information" modal :style="{ width: '30rem' }" :closable="false">
+            <div class="flex flex-col gap-4">
+                <div class="p-fluid">
+                    <label for="driverName" class="font-semibold">Driver Name <span class="text-red-500">*</span></label>
+                    <InputText id="driverName" v-model="driverForm.driverName" placeholder="Enter driver name" class="w-full" :class="{ 'p-invalid': driverFormSubmitted && !driverForm.driverName }" />
+                    <small v-if="driverFormSubmitted && !driverForm.driverName" class="p-error">Driver name is required.</small>
+                </div>
+
+                <div class="p-fluid">
+                    <label for="driverPhoneNumber" class="font-semibold">Phone Number <span class="text-red-500">*</span></label>
+                    <InputText id="driverPhoneNumber" v-model="driverForm.driverPhoneNumber" placeholder="Enter phone number" class="w-full" :class="{ 'p-invalid': driverFormSubmitted && !driverForm.driverPhoneNumber }" />
+                    <small v-if="driverFormSubmitted && !driverForm.driverPhoneNumber" class="p-error">Phone number is required.</small>
+                </div>
+
+                <div class="p-fluid">
+                    <label for="driverTruckPlate" class="font-semibold">Truck Plate No <span class="text-red-500">*</span></label>
+                    <InputText id="driverTruckPlate" v-model="driverForm.driverTruckPlate" placeholder="Enter truck plate number" class="w-full" :class="{ 'p-invalid': driverFormSubmitted && !driverForm.driverTruckPlate }" />
+                    <small v-if="driverFormSubmitted && !driverForm.driverTruckPlate" class="p-error">Truck plate number is required.</small>
+                </div>
+
+                <div class="p-fluid">
+                    <label for="driverIC" class="font-semibold">IC Number</label>
+                    <InputText id="driverIC" v-model="driverForm.driverIC" placeholder="Enter IC number (optional)" class="w-full" />
+                </div>
+
+                <div class="flex justify-end gap-2 mt-4">
+                    <Button label="Cancel" class="p-button-secondary" @click="cancelAddDriver" :disabled="loadingDriver" />
+                    <Button label="Submit" class="p-button-primary" @click="submitDriverInfo" :loading="loadingDriver" />
+                </div>
+            </div>
+        </Dialog>
 
         <!-- Return Order Dialog -->
         <Dialog v-model:visible="showReturnOrderDialog" header="Return Order" modal :style="{ width: '70rem' }" :closable="false">
@@ -321,6 +366,17 @@ const selectedReturnItems = ref([]);
 const returnQuantities = ref({});
 const returnFormSubmitted = ref(false);
 
+// Driver form reactive data
+const showAddDriverDialog = ref(false);
+const loadingDriver = ref(false);
+const driverFormSubmitted = ref(false);
+const driverForm = ref({
+    driverName: '',
+    driverPhoneNumber: '',
+    driverTruckPlate: '',
+    driverIC: ''
+});
+
 // Return reasons
 const returnReasons = ref([
     { code: 'Wrong DOM', name: 'Wrong DOM' },
@@ -352,6 +408,11 @@ const zt02Items = computed(() => {
         return [];
     }
     return orderData.value.remaining_return_items.filter((item) => item.itemcategory === 'ZT02');
+});
+
+// Check if pickup info exists
+const hasPickupInfo = computed(() => {
+    return pickupDetail.value && pickupDetail.value.driverName;
 });
 
 // Formatting methods
@@ -408,6 +469,106 @@ const onSelectionChange = (event) => {
     selectedReturnItems.value = newlySelectedItems;
 };
 
+// Driver form methods
+const cancelAddDriver = () => {
+    showAddDriverDialog.value = false;
+    resetDriverForm();
+};
+
+const resetDriverForm = () => {
+    driverForm.value = {
+        driverName: '',
+        driverPhoneNumber: '',
+        driverTruckPlate: '',
+        driverIC: ''
+    };
+    driverFormSubmitted.value = false;
+};
+
+const submitDriverInfo = async () => {
+    try {
+        driverFormSubmitted.value = true;
+        loadingDriver.value = true;
+
+        // Validate required fields
+        if (!driverForm.value.driverName || !driverForm.value.driverPhoneNumber || !driverForm.value.driverTruckPlate) {
+            toast.add({
+                severity: 'warn',
+                summary: 'Warning',
+                detail: 'Please fill in all required fields',
+                life: 3000
+            });
+            loadingDriver.value = false;
+            return;
+        }
+
+        const payload = new URLSearchParams();
+        payload.append('driverName', driverForm.value.driverName);
+        payload.append('driverPhoneNum', driverForm.value.driverPhoneNumber);
+        payload.append('driverPlateNum', driverForm.value.driverTruckPlate);
+        // payload.append('driverIC', driverForm.value.driverIC || '');
+        if (driverForm.value.driverIC) {
+            payload.append('driverIC', driverForm.value.driverIC);
+        } else {
+            payload.append('driverIC', '');
+        }
+
+        const orderNo = route.params.orderNo;
+        console.log('Submitting driver info for order:', orderNo);
+        console.log('Driver payload:', Object.fromEntries(payload));
+
+        const response = await api.postExtra(`order/driver-information/${orderNo}`, payload, {
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded',
+                Accept: 'application/json'
+            }
+        });
+
+        console.log('Driver info response:', response.data);
+
+        if (response.data.status === 1) {
+            toast.add({
+                severity: 'success',
+                summary: 'Success',
+                detail: 'Driver information added successfully',
+                life: 3000
+            });
+            showAddDriverDialog.value = false;
+            resetDriverForm();
+            // Refresh order details to show updated pickup info
+            await fetchOrderDetail();
+        } else {
+            const errorMessage = response.data.error?.message || 'Failed to add driver information';
+            toast.add({
+                severity: 'error',
+                summary: 'Error',
+                detail: errorMessage,
+                life: 5000
+            });
+        }
+    } catch (error) {
+        console.error('Error adding driver info:', error);
+        let errorMessage = 'Failed to add driver information';
+
+        if (error.response?.data?.error?.message) {
+            errorMessage = error.response.data.error.message;
+        } else if (error.response?.data?.message) {
+            errorMessage = error.response.data.message;
+        } else if (error.message) {
+            errorMessage = error.message;
+        }
+
+        toast.add({
+            severity: 'error',
+            summary: 'Error',
+            detail: errorMessage,
+            life: 5000
+        });
+    } finally {
+        loadingDriver.value = false;
+    }
+};
+
 // Watch for selection changes
 watch(
     selectedReturnItems,
@@ -458,7 +619,7 @@ const fetchOrderDetail = async () => {
             customerInfo.value = {
                 dealerName: etenInfo.companyName1 || '-',
                 signboard: etenInfo.signboardBrand || '-',
-                storageLocation : etenInfo.storageLocation || '-',
+                storageLocation: etenInfo.storageLocation || '-',
                 contactPerson: etenInfo.companyName3 || '-',
                 phoneNumber: etenInfo.phoneNumber || '-',
                 mobileNumber: etenInfo.mobileNumber || '-',

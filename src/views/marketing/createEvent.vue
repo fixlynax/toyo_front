@@ -15,8 +15,10 @@
                         </div>
 
                         <div class="md:col-span-2">
-                            <label class="block font-bold text-gray-700">Headline(180 max Character)</label>
+                            <label class="block font-bold text-gray-700">Headline (180 max Character)</label>
                             <Textarea v-model="event.headline" rows="3" class="w-full" maxlength="180" />
+                            <!-- Character Counter -->
+                            <div class="text-xm text-gray-500 mt-1 text-right">{{ event.headline?.length || 0 }}/180</div>
                         </div>
 
                         <div class="md:col-span-2">
@@ -44,11 +46,6 @@
                             <Calendar v-model="event.publishDate" dateFormat="dd-mm-yy" showIcon class="w-full" :maxDate="event.endDate" :disabled="!event.startDate || !event.endDate" />
                         </div>
 
-                        <!-- <div>
-                            <label class="block font-bold text-gray-700">Audience</label>
-                            <Dropdown v-model="event.audience" :options="audienceOptions" optionLabel="label" optionValue="value" class="w-full" />
-                        </div> -->
-
                         <div>
                             <label class="block font-bold text-gray-700">Survey</label>
                             <Dropdown v-model="event.isSurvey" :options="surveyOptions" optionLabel="label" optionValue="value" class="w-full" />
@@ -57,11 +54,44 @@
 
                     <!-- Upload Images -->
                     <div>
-                        <label class="block font-bold text-gray-700 mb-2">Upload Event Image <span class="text-xs bg-blue-100 text-blue-800 px-2 py-0.5 rounded-full">1280 × 720 px (max 2MB)</span> </label>
+                        <label class="block font-bold text-gray-700 mb-2">
+                            Upload Event Image
+                            <span class="text-xs bg-blue-100 text-blue-800 px-2 py-0.5 rounded-full">1280 × 720 px (max 2MB)</span>
+                        </label>
                         <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
                             <div v-for="n in 3" :key="n">
-                                <FileUpload mode="basic" :name="`image${n}`" accept="image/*" customUpload @select="(e) => onImageSelect(e, `image${n}`)" :chooseLabel="`Upload Image ${n}`" class="w-full" />
-                                <img v-if="event[`image${n}URL`]" :src="event[`image${n}URL`]" :alt="`Preview ${n}`" class="mt-2 rounded-lg shadow-md object-cover w-full h-80" />
+                                <FileUpload
+                                    mode="basic"
+                                    :name="`image${n}`"
+                                    accept="image/*"
+                                    :maxFileSize="2 * 1024 * 1024"
+                                    customUpload
+                                    @select="(e) => onImageSelect(e, `image${n}`)"
+                                    @remove="() => onImageRemove(`image${n}`)"
+                                    @error="onUploadError"
+                                    :chooseLabel="`Upload Image ${n}`"
+                                    class="w-full"
+                                    :invalidFileSizeMessage="`File size exceeds 2MB limit`"
+                                    :invalidFileTypeMessage="`Invalid image type. Only PNG, JPG, JPEG, HEIF, HEIC are allowed`"
+                                />
+                                <!-- Image Preview with Remove Button -->
+                                <div v-if="event[`image${n}URL`]" class="mt-2 relative group">
+                                    <img :src="event[`image${n}URL`]" :alt="`Preview ${n}`" class="mt-2 rounded-lg shadow-md object-cover w-full h-80" />
+                                    <!-- Remove Button -->
+                                    <button
+                                        @click="onImageRemove(`image${n}`)"
+                                        class="absolute top-2 right-2 bg-red-500 text-white rounded-full p-1.5 opacity-0 group-hover:opacity-100 transition-opacity duration-200 hover:bg-red-600"
+                                        title="Remove image"
+                                    >
+                                        <i class="pi pi-times text-sm"></i>
+                                    </button>
+                                    <!-- File Size Info -->
+                                    <div v-if="imageSizes[`image${n}`]" class="text-xs text-gray-500 mt-1 text-center">Size: {{ formatFileSize(imageSizes[`image${n}`]) }}</div>
+                                </div>
+                                <!-- Image Error Message -->
+                                <div v-if="imageErrors[`image${n}`]" class="text-red-500 text-xs mt-1">
+                                    {{ imageErrors[`image${n}`] }}
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -71,7 +101,7 @@
                             <Button label="Cancel" class="p-button-secondary w-full mr-2" @click="$router.back()" />
                         </div>
                         <div class="w-40">
-                            <Button label="Submit" class="w-full" @click="submitEvent" />
+                            <Button label="Submit" class="w-full" @click="submitEvent" :loading="loading" />
                         </div>
                     </div>
                 </div>
@@ -111,11 +141,6 @@
                                     <label :for="`answer-${index}-${i}`">Answer {{ i + 1 }}</label>
                                 </FloatLabel>
                             </div>
-
-                            <!-- <div class="mt-4">
-                                <label class="block font-semibold text-gray-700 mb-2">Correct Answer</label>
-                                <Dropdown v-model="q.correctAnswer" :options="correctAnswerOptions" optionLabel="label" optionValue="value" placeholder="Select correct answer" class="w-full" />
-                            </div> -->
                         </div>
                     </div>
 
@@ -130,7 +155,7 @@
                             <Button label="Cancel" class="p-button-secondary w-full mr-2" @click="$router.back()" />
                         </div>
                         <div class="w-40">
-                            <Button label="Submit" class="w-full" @click="submitEvent" />
+                            <Button label="Submit" class="w-full" @click="submitEvent" :loading="loading" />
                         </div>
                     </div>
                 </div>
@@ -147,6 +172,7 @@ import { useToast } from 'primevue/usetoast';
 
 const toast = useToast();
 const router = useRouter();
+const loading = ref(false);
 
 // dropdown options
 const audienceOptions = [
@@ -175,6 +201,7 @@ const event = ref({
     point3: '0',
     title: '',
     desc: '',
+    headline: '',
     location: '',
     publishDate: '',
     startDate: '',
@@ -182,6 +209,20 @@ const event = ref({
     image1URL: '',
     image2URL: '',
     image3URL: ''
+});
+
+// Track image sizes
+const imageSizes = ref({
+    image1: 0,
+    image2: 0,
+    image3: 0
+});
+
+// Track image errors
+const imageErrors = ref({
+    image1: '',
+    image2: '',
+    image3: ''
 });
 
 const today = new Date();
@@ -209,16 +250,118 @@ const removeQuestion = (index) => {
     questions.value.splice(index, 1);
 };
 
-// handle image preview and file storage
+// Image handling functions
 const imageFiles = ref({});
+
+// Validate image file
+const validateImageFile = (file) => {
+    // Check file size (2MB limit)
+    const maxSize = 2 * 1024 * 1024; // 2MB in bytes
+    if (file.size > maxSize) {
+        return {
+            valid: false,
+            message: `File size exceeds 2MB limit. Your file is ${formatFileSize(file.size)}`
+        };
+    }
+
+    // Check file type
+    const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/heif', 'image/heic'];
+    if (!allowedTypes.includes(file.type.toLowerCase())) {
+        return {
+            valid: false,
+            message: 'Invalid image type. Only PNG, JPG, JPEG, HEIF, HEIC are allowed'
+        };
+    }
+
+    return { valid: true, message: '' };
+};
+
+// Handle image selection
 const onImageSelect = (eventFile, fieldName) => {
     const file = eventFile.files[0];
-    if (file) {
-        const reader = new FileReader();
-        reader.onload = (e) => (event.value[`${fieldName}URL`] = e.target.result);
-        reader.readAsDataURL(file);
-        imageFiles.value[fieldName] = file;
+    if (!file) {
+        imageErrors.value[fieldName] = 'No file selected';
+        return;
     }
+
+    // Validate the image
+    const validation = validateImageFile(file);
+    if (!validation.valid) {
+        imageErrors.value[fieldName] = validation.message;
+        toast.add({
+            severity: 'error',
+            summary: 'Invalid Image',
+            detail: validation.message,
+            life: 3000
+        });
+        return;
+    }
+
+    // Clear any previous errors
+    imageErrors.value[fieldName] = '';
+
+    // Store the file
+    imageFiles.value[fieldName] = file;
+    imageSizes.value[fieldName] = file.size;
+
+    // Create preview
+    const reader = new FileReader();
+    reader.onload = (e) => {
+        event.value[`${fieldName}URL`] = e.target.result;
+    };
+    reader.onerror = () => {
+        imageErrors.value[fieldName] = 'Failed to read image file';
+        toast.add({
+            severity: 'error',
+            summary: 'Error',
+            detail: 'Failed to read image file',
+            life: 3000
+        });
+    };
+    reader.readAsDataURL(file);
+
+    toast.add({
+        severity: 'success',
+        summary: 'Image Selected',
+        detail: `Image ${fieldName.replace('image', '')} uploaded successfully`,
+        life: 2000
+    });
+};
+
+// Handle image removal
+const onImageRemove = (fieldName) => {
+    // Clear the file
+    imageFiles.value[fieldName] = null;
+    event.value[`${fieldName}URL`] = '';
+    imageSizes.value[fieldName] = 0;
+    imageErrors.value[fieldName] = '';
+
+    toast.add({
+        severity: 'info',
+        summary: 'Image Removed',
+        detail: `Image ${fieldName.replace('image', '')} has been removed`,
+        life: 2000
+    });
+};
+
+// Handle upload errors
+const onUploadError = (error) => {
+    console.error('Upload error:', error);
+    toast.add({
+        severity: 'error',
+        summary: 'Upload Error',
+        detail: 'Failed to upload image. Please try again.',
+        life: 3000
+    });
+};
+
+// Format file size for display
+const formatFileSize = (bytes) => {
+    if (bytes === 0) return '0 Bytes';
+    const k = 1024;
+    const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+    const i = Math.floor(Math.log(bytes) / Math.log(k));
+    return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
 };
 
 // Format date from Date object to dd-mm-yyyy string
@@ -231,11 +374,49 @@ const formatDate = (date) => {
     return `${day}-${month}-${year}`;
 };
 
+// Validate form fields including images
 const validateFields = () => {
     // Basic validation
     if (!event.value.title || !event.value.desc || !event.value.location || !event.value.publishDate || !event.value.startDate || !event.value.endDate || !event.value.audience) {
         toast.add({ severity: 'warn', summary: 'Validation', detail: 'Please fill all required fields.', life: 3000 });
         return false;
+    }
+
+    // Headline validation (max 180 characters)
+    if (!event.value.headline || event.value.headline.trim().length === 0) {
+        toast.add({ severity: 'warn', summary: 'Validation', detail: 'Please enter a headline.', life: 3000 });
+        return false;
+    }
+
+    if (event.value.headline.length > 180) {
+        toast.add({ severity: 'warn', summary: 'Validation', detail: 'Headline must be 180 characters or less.', life: 3000 });
+        return false;
+    }
+
+    // Date validation
+    if (new Date(event.value.endDate) <= new Date(event.value.startDate)) {
+        toast.add({ severity: 'warn', summary: 'Validation', detail: 'End date must be after start date.', life: 3000 });
+        return false;
+    }
+
+    // Validate images that are uploaded
+    for (let i = 1; i <= 3; i++) {
+        const field = `image${i}`;
+        const file = imageFiles.value[field];
+
+        if (file) {
+            const validation = validateImageFile(file);
+            if (!validation.valid) {
+                imageErrors.value[field] = validation.message;
+                toast.add({
+                    severity: 'error',
+                    summary: 'Invalid Image',
+                    detail: `Image ${i}: ${validation.message}`,
+                    life: 3000
+                });
+                return false;
+            }
+        }
     }
 
     // Survey-specific validation
@@ -260,6 +441,7 @@ const validateFields = () => {
             }
         }
     }
+
     return true;
 };
 
@@ -268,6 +450,8 @@ const submitEvent = async () => {
     if (!validateFields()) return;
 
     try {
+        loading.value = true;
+
         const formData = new FormData();
 
         // Append basic fields
@@ -357,6 +541,8 @@ const submitEvent = async () => {
                 life: 3000
             });
         }
+    } finally {
+        loading.value = false;
     }
 };
 </script>

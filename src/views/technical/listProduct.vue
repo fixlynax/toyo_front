@@ -79,6 +79,7 @@
                     </div>
                 </template>
             </Column>
+            
             <Column field="materialid" header="Material" style="min-width: 6rem" sortable>
                 <template #body="{ data }">
                     <div class="flex flex-col">

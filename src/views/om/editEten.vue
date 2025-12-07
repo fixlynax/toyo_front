@@ -298,6 +298,10 @@
                             <Dropdown v-model="dropdownAllowLalamove" :options="dropdownYesNoValue" optionLabel="name" placeholder="Select Option" class="w-full" />
                         </div>
                         <div class="w-full">
+                            <label for="allowOwnCollection">Allow Own Collection</label>
+                            <Dropdown v-model="dropdownAllowOwnCollection" :options="dropdownYesNoValue" optionLabel="name" placeholder="Select Option" class="w-full" />
+                        </div>
+                        <div class="w-full">
                             <label for="allowDirectShipment">Allow Direct Shipment</label>
                             <Dropdown v-model="dropdownAllowDirectShipment" :options="dropdownYesNoValue" optionLabel="name" placeholder="Select Option" class="w-full" />
                         </div>
@@ -539,6 +543,7 @@ interface FormData {
     shippingCond: string;
     allowLalamove: number;
     allowDirectship: number;
+    allowOwnCollection: number;
     showOnList: number;
     isFamilyChannel: number;
     memberCode: string;
@@ -598,6 +603,7 @@ const form = ref<FormData>({
     shippingCond: '',
     allowLalamove: 0,
     allowDirectship: 0,
+    allowOwnCollection: 0,
     showOnList: 0,
     isFamilyChannel: 0,
     memberCode: '',
@@ -626,6 +632,7 @@ const dropdownAccountTypeValue = ref<DropdownOption[]>([
 const dropdownAccountType = ref<DropdownOption | null>(null);
 const dropdownAllowLalamove = ref<DropdownOption | null>(null);
 const dropdownAllowDirectShipment = ref<DropdownOption | null>(null);
+const dropdownAllowOwnCollection = ref<DropdownOption | null>(null);
 const dropdownShowOnList = ref<DropdownOption | null>(null);
 const dropdownFamilyChannel = ref<DropdownOption | null>(null);
 
@@ -713,6 +720,7 @@ const fetchDealerProfile = async () => {
                 shippingCond: dealerData.shippingCond || '',
                 allowLalamove: dealerData.allowLalamove || 0,
                 allowDirectship: dealerData.allowDirectship || 0,
+                allowOwnCollection: dealerData.allowOwnCollection || 0,
                 showOnList: dealerData.showOnList || 0,
                 isFamilyChannel: dealerData.isFamilyChannel || 0,
                 memberCode: dealerData.memberCode || '',
@@ -729,6 +737,8 @@ const fetchDealerProfile = async () => {
             dropdownAllowLalamove.value = dropdownYesNoValue.value.find((item) => item.code === form.value.allowLalamove?.toString()) || dropdownYesNoValue.value[1]; // Default to No
 
             dropdownAllowDirectShipment.value = dropdownYesNoValue.value.find((item) => item.code === form.value.allowDirectship?.toString()) || dropdownYesNoValue.value[1]; // Default to No
+            
+            dropdownAllowOwnCollection.value = dropdownYesNoValue.value.find((item) => item.code === form.value.allowOwnCollection?.toString()) || dropdownYesNoValue.value[1]; // Default to No
 
             dropdownShowOnList.value = dropdownYesNoValue.value.find((item) => item.code === form.value.showOnList?.toString()) || dropdownYesNoValue.value[1]; // Default to No
 
@@ -883,6 +893,7 @@ const handleUpdate = async () => {
             showOnList: dropdownShowOnList.value?.code || '0',
             isFamilyChannel: dropdownFamilyChannel.value?.code || '0',
             allowLalamove: dropdownAllowLalamove.value?.code || '0',
+            allowOwnCollection: dropdownAllowOwnCollection.value?.code || '0',
             allowDirectship: dropdownAllowDirectShipment.value?.code || '0',
             startingSalesAmt: form.value.startingSalesAmt,
             revenue: form.value.revenue,
