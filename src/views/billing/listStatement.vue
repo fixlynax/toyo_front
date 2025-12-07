@@ -70,8 +70,8 @@
                             <span class="text-sm font-medium text-gray-700">Customer Account No.:</span>
                             <InputNumber
                                 v-model="customerAccountFilter"
-                                placeholder="Filter by account number"
-                                class="w-48"
+                                placeholder="Filter by account no."
+                                class="w-50"
                                 :disabled="loading"
                                 :useGrouping="false"
                                 :maxFractionDigits="0"
@@ -890,12 +890,8 @@ const formatDateForDisplay = (dateString) => {
 /* Custom styling for InputNumber */
 :deep(.p-inputnumber) {
     .p-inputtext {
-        padding: 0.5rem;
+        padding: 0.6rem;
         text-align: left;
-    }
-
-    .p-inputnumber-input {
-        font-family: monospace;
     }
 }
 </style>
