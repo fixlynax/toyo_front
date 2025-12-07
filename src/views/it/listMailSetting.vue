@@ -1,111 +1,161 @@
 <template>
     <div class="card">
-        <div class="text-2xl font-bold text-gray-800 border-b pb-2 ">List Mail Setting</div>
+        <div class="text-2xl font-bold text-gray-800 border-b pb-2 mb-4">Email Settings</div>
 
-        <DataTable :value="listData" :paginator="true" :rows="10" dataKey="id" :rowHover="true" :loading="loading" :filters="filters1" filterDisplay="menu" :expandedRows="expandedRows" @row-toggle="onRowToggle">
+        <DataTable :value="listData" :paginator="true" :rows="10" dataKey="id" :rowHover="true" :loading="loading" :filters="filters1" filterDisplay="menu" :expandedRows="expandedRows" @row-toggle="onRowToggle" class="p-datatable-sm">
             <template #header>
                 <div class="flex items-center justify-between gap-4 w-full flex-wrap">
                     <div class="flex items-center gap-2 w-full max-w-md">
                         <IconField class="flex-1">
                             <InputIcon><i class="pi pi-search" /></InputIcon>
-                            <InputText v-model="filters1['global'].value" placeholder="Quick Search" class="w-full" />
+                            <InputText v-model="filters1['global'].value" placeholder="Search by function, platform, or shipping point..." class="w-full" />
                         </IconField>
-                        <Button type="button" icon="pi pi-cog" class="p-button" />
                     </div>
                 </div>
             </template>
 
-            <template #empty>No Mail Setting found.</template>
-            <template #loading>Loading Mail Setting data. Please wait.</template>
+            <template #empty>
+                <div class="text-center py-8">
+                    <i class="pi pi-inbox text-4xl text-gray-300 mb-3"></i>
+                    <p class="text-gray-500">No email settings found.</p>
+                </div>
+            </template>
+            <template #loading>
+                <div class="flex items-center justify-center py-8">
+                    <i class="pi pi-spin pi-spinner text-2xl text-primary-500 mr-3"></i>
+                    <span class="text-gray-600">Loading email settings...</span>
+                </div>
+            </template>
 
             <Column :expander="true" headerStyle="width: 3rem" />
 
-            <Column field="function" header="Function" style="min-width: 10rem" class="font-bold">
+            <Column field="function" header="Function" style="min-width: 8rem">
                 <template #body="{ data }">
-                    <div class="font-bold text-primary-400">{{ data.function }}</div>
+                    <div class="flex items-center">
+                        <span class="font-semibold text-gray-800">{{ data.function }}</span>
+                    </div>
                 </template>
             </Column>
 
-            <Column field="platform" header="Platform" style="min-width: 10rem">
+            <Column field="platform" header="Platform" style="min-width: 8rem">
                 <template #body="{ data }">
-                    <div class="text-gray-700">{{ data.platform }}</div>
+                    <Badge value="TC" severity="info" class="font-medium" />
                 </template>
             </Column>
 
-            <Column field="shippingPoint" header="Shipping Point" style="min-width: 18rem">
+            <Column field="shippingPoint" header="Shipping Point" style="min-width: 10rem">
                 <template #body="{ data }">
-                    <div class="text-gray-700">{{ data.shippingPoint }}</div>
+                    <div class="flex items-center">
+                        <i class="pi pi-map-marker text-gray-400 mr-2"></i>
+                        <span class="text-gray-700">{{ data.shippingPoint || 'Not specified' }}</span>
+                    </div>
                 </template>
             </Column>
 
-            <Column field="created" header="Created Date" style="min-width: 18rem">
+            <Column header="Timeline" style="min-width: 10rem">
                 <template #body="{ data }">
-                    <div class="text-gray-700">{{ formatDate(data.created) }}</div>
+                    <div class="space-y-1">
+                        <div class="flex items-start">
+                            <i class="pi pi-calendar-plus text-green-500 mt-1 mr-2 text-sm"></i>
+                            <div>
+                                <div class="text-xs text-gray-500">Created</div>
+                                <div class="text-sm font-medium text-gray-800">{{ formatDate(data.created) }}</div>
+                            </div>
+                        </div>
+                        <div class="flex items-start">
+                            <i class="pi pi-history text-blue-500 mt-1 mr-2 text-sm"></i>
+                            <div>
+                                <div class="text-xs text-gray-500">Last Updated</div>
+                                <div class="text-sm font-medium text-gray-800">{{ formatDate(data.lastUpdated) }}</div>
+                            </div>
+                        </div>
+                    </div>
                 </template>
             </Column>
 
-            <Column field="lastUpdated" header="Last Updated" style="min-width: 18rem">
-                <template #body="{ data }">
-                    <div class="text-gray-700">{{ formatDate(data.lastUpdated) }}</div>
-                </template>
-            </Column>
-
-            <Column header="Actions" style="min-width: 10rem">
+            <Column header="Actions" style="width: 100px">
                 <template #body="{ data }">
                     <div class="flex gap-2">
-                        <div v-if="editingId === data.id">
-                            <Button icon="pi pi-check" class="p-button-text p-button-success p-button-sm" @click="saveSetting(data)" />
-                            <Button icon="pi pi-times" class="p-button-text p-button-danger p-button-sm" @click="cancelEdit()" />
-                        </div>
-                        <div v-else>
-                            <Button icon="pi pi-pencil" class="p-button-text p-button-info p-button-sm" @click="editSetting(data)" />
-                        </div>
+                        <Button v-if="editingId === data.id" icon="pi pi-check" class="p-button-text p-button-success p-button-sm" @click="saveSetting(data)" title="Save" />
+                        <Button v-if="editingId === data.id" icon="pi pi-times" class="p-button-text p-button-danger p-button-sm" @click="cancelEdit()" title="Cancel" />
+                        <Button v-else icon="pi pi-pencil" class="p-button-text p-button-primary p-button-sm" @click="editSetting(data)" title="Edit" />
                     </div>
                 </template>
             </Column>
 
             <template #expansion="{ data }">
-                <div class="p-4 bg-gray-50 rounded-lg">
-                    <div class="text-lg font-bold text-gray-800 mb-4">Email List</div>
+                <div class="p-4 bg-gray-50 border-t border-gray-200">
+                    <div class="flex items-center mb-4">
+                        <i class="pi pi-users text-lg text-gray-600 mr-2"></i>
+                        <div class="text-lg font-bold text-gray-800">Email Recipients</div>
+                        <Badge :value="data.emails.length" severity="secondary" class="ml-2" />
+                    </div>
 
-                    <div v-if="editingId === data.id" class="mb-4">
-                        <div class="font-semibold text-gray-700 mb-2">Edit Email Recipients:</div>
-                        
-                        <!-- Changed from MultiSelect to Textarea for comma-separated input -->
-                        <Textarea
-                            v-model="emailInput"
-                            :autoResize="true"
-                            rows="3"
-                            placeholder="Enter email addresses separated by commas. Example: abc@gmail.com,def@gmail.com,ghi@gmail.com"
-                            class="w-full p-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                        />
+                    <div v-if="editingId === data.id">
+                        <!-- Email Input with Tags -->
+                        <div class="mb-4">
+                            <label class="block text-sm font-medium text-gray-700 mb-2"> Edit Email Recipients </label>
 
-                        <div class="flex justify-end gap-2 mt-4">
-                            <Button label="Save" icon="pi pi-check" class="p-button p-button-sm" @click="saveSetting(data)" />
-                            <Button label="Cancel" icon="pi pi-times" class="p-button-secondary p-button-sm" @click="cancelEdit()" />
+                            <!-- Current Email Tags Display -->
+                            <div class="flex flex-wrap gap-2 mb-3 p-3 bg-gray-50 border border-gray-200 rounded-md min-h-[3.5rem]">
+                                <div v-for="(emailObj, index) in emailObjects" :key="index" class="inline-flex items-center gap-1 bg-white border border-gray-300 rounded-full px-3 py-1 text-sm">
+                                    <span class="text-gray-700">
+                                        {{ emailObj.email }}
+                                        <span v-if="emailObj.tag" class="text-gray-500">({{ emailObj.tag }})</span>
+                                    </span>
+                                    <button type="button" @click="removeEmail(index)" class="ml-1 text-gray-400 hover:text-red-500 focus:outline-none" title="Remove email">
+                                        <i class="pi pi-times text-xs"></i>
+                                    </button>
+                                </div>
+                                <span v-if="emailObjects.length === 0" class="text-gray-400 italic self-center"> No emails added </span>
+                            </div>
+
+                            <!-- Email Input Form -->
+                            <div class="grid grid-cols-1 md:grid-cols-8 gap-4 mb-2">
+                                <div class="md:col-span-7">
+                                    <InputText v-model="newEmail" placeholder="Enter email address" class="w-full" @keyup.enter="addEmail" ref="emailInput" />
+                                </div>
+                                    <Button label="Add Email" icon="pi pi-plus" class="p-button-sm" @click="addEmail" :disabled="!newEmail.trim()" />
+                            </div>
+                        </div>
+
+                        <!-- Action Buttons -->
+                        <div class="flex justify-end gap-2 pt-4 border-t border-gray-200">
+                            <Button label="Cancel" icon="pi pi-times" class="p-button-outlined p-button-sm" @click="cancelEdit()" />
+                            <Button label="Save Changes" icon="pi pi-check" class="p-button p-button-sm" @click="saveSetting(data)" :disabled="emailObjects.length === 0" />
                         </div>
                     </div>
 
-                    <DataTable
-                        v-else
-                        :value="getEmailData(data.emails)"
-                        :paginator="true"
-                        :rows="5"
-                        :rowsPerPageOptions="[3,5,7,15,20,25,30,50]"
-                        dataKey="email"
-                        :rowHover="true"
-                        responsiveLayout="scroll"
-                    >
-                        <Column field="email" header="Email Address" style="min-width: 20rem">
+                    <!-- Read-only Email List -->
+                    <DataTable v-else :value="getEmailData(data.emails)" :paginator="true" :rows="5" :rowsPerPageOptions="[3, 5, 7, 15, 20, 25, 30, 50]" dataKey="email" :rowHover="true" responsiveLayout="scroll" class="p-datatable-sm">
+                        <Column header="Email Address" style="min-width: 20rem">
                             <template #body="{ data }">
-                                <div class="text-gray-800 hover:underline">
-                                    <a :href="`mailto:${data.email}`">{{ data.email }}</a>
+                                <div class="flex items-center">
+                                    <i class="pi pi-user text-gray-400 mr-2"></i>
+                                    <a :href="`mailto:${data.email}`" class="text-primary-600 hover:text-primary-800 hover:underline flex-1">
+                                        {{ data.email }}
+                                    </a>
+                                    <Badge v-if="data.tag" :value="data.tag" severity="info" class="ml-2 text-xs" />
                                 </div>
                             </template>
                         </Column>
 
+                        <Column header="Status" style="width: 100px">
+                            <template #body="{ data }">
+                                <Badge value="Active" severity="success" class="text-xs font-normal" />
+                            </template>
+                        </Column>
+
                         <template #empty>
-                            <div class="text-center text-gray-500 py-4">No email recipients configured.</div>
+                            <div class="text-center py-6">
+                                <i class="pi pi-users text-3xl text-gray-300 mb-3"></i>
+                                <p class="text-gray-500">No email recipients configured</p>
+                                <p class="text-gray-400 text-sm mt-1">Click Edit to add email addresses</p>
+                            </div>
+                        </template>
+
+                        <template #footer>
+                            <div class="text-xs text-gray-500 px-3 py-2">Total: {{ data.emails.length }} recipient(s)</div>
                         </template>
                     </DataTable>
                 </div>
@@ -117,9 +167,13 @@
 <script>
 import api from '@/service/api';
 import { useToast } from 'primevue/usetoast';
+import Badge from 'primevue/badge';
 
 export default {
     name: 'MailSettingList',
+    components: {
+        Badge
+    },
     setup() {
         const toast = useToast();
         return { toast };
@@ -131,8 +185,10 @@ export default {
             editingId: null,
             expandedRows: {},
             filters1: { global: { value: null, matchMode: 'contains' } },
-            form: { emails: [], shippingPoint: '' },
-            emailInput: '' // New data property for textarea input
+            // Email editing state
+            newEmail: '',
+            newTag: '',
+            emailObjects: []
         };
     },
     methods: {
@@ -141,111 +197,232 @@ export default {
                 this.loading = true;
                 const res = await api.get('emailSettings');
                 if (res.data.status === 1) {
-                    this.listData = res.data.email_settings.map(item => ({
+                    this.listData = res.data.email_settings.map((item) => ({
                         id: item.email_setting_id,
                         function: item.notification_type,
                         platform: 'TC',
                         shippingPoint: item.storage_location || '-',
                         created: item.created_date || '-',
                         lastUpdated: item.last_updated || '-',
-                        emails: item.email_addresses ? item.email_addresses.split(',') : []
+                        emails: this.parseEmailString(item.email_addresses || '')
                     }));
 
-                    this.toast.add({ severity: 'success', summary: 'Loaded', detail: 'Mail settings loaded', life: 2000 });
+                    this.toast.add({
+                        severity: 'success',
+                        summary: 'Success',
+                        detail: 'Email settings loaded successfully',
+                        life: 2000
+                    });
                 }
             } catch (err) {
-                this.toast.add({ severity: 'error', summary: 'Error', detail: 'Failed to load data', life: 2500 });
+                this.toast.add({
+                    severity: 'error',
+                    summary: 'Error',
+                    detail: 'Failed to load email settings',
+                    life: 3000
+                });
+                console.error('Load error:', err);
             } finally {
                 this.loading = false;
             }
         },
 
-        getEmailData(emails) {
-            return emails.map(email => ({ email }));
+        parseEmailString(emailString) {
+            if (!emailString) return [];
+
+            return emailString
+                .split(',')
+                .map((item) => {
+                    const trimmed = item.trim();
+                    // Match email with optional tag in parentheses
+                    const match = trimmed.match(/^([^\(]+?)(?:\s*\((.+)\))?$/);
+                    if (match) {
+                        const email = match[1].trim();
+                        const tag = match[2] ? match[2].trim() : null;
+                        return { email, tag };
+                    }
+                    return { email: trimmed, tag: null };
+                })
+                .filter((item) => item.email && item.email.length > 0);
+        },
+
+        formatEmailObjects(emailObjects) {
+            return emailObjects
+                .map((obj) => {
+                    return obj.tag ? `${obj.email} (${obj.tag})` : obj.email;
+                })
+                .join(', ');
+        },
+
+        getEmailData(emailObjects) {
+            return emailObjects;
         },
 
         editSetting(setting) {
             if (this.editingId) this.cancelEdit();
+
             this.editingId = setting.id;
-            this.form.emails = [...setting.emails];
-            this.form.shippingPoint = setting.shippingPoint;
-            // Convert array to comma-separated string for textarea
-            this.emailInput = setting.emails.join(', ');
+            this.emailObjects = JSON.parse(JSON.stringify(setting.emails)); // Deep copy
+            this.newEmail = '';
+            this.newTag = '';
             this.expandedRows = { [setting.id]: true };
-            this.toast.add({ severity: 'info', summary: 'Editing', detail: 'Edit mode enabled', life: 2000 });
+
+            // Focus on email input
+            this.$nextTick(() => {
+                if (this.$refs.emailInput) {
+                    this.$refs.emailInput.$el.focus();
+                }
+            });
+
+            this.toast.add({
+                severity: 'info',
+                summary: 'Edit Mode',
+                detail: `Editing ${setting.function}`,
+                life: 2000
+            });
+        },
+
+        addEmail() {
+            if (!this.newEmail.trim()) {
+                this.toast.add({
+                    severity: 'warn',
+                    summary: 'Warning',
+                    detail: 'Please enter an email address',
+                    life: 2000
+                });
+                return;
+            }
+
+            if (!this.isValidEmail(this.newEmail.trim())) {
+                this.toast.add({
+                    severity: 'warn',
+                    summary: 'Invalid Email',
+                    detail: 'Please enter a valid email address',
+                    life: 2000
+                });
+                return;
+            }
+
+            // Check for duplicate email
+            if (this.emailObjects.some((obj) => obj.email.toLowerCase() === this.newEmail.trim().toLowerCase())) {
+                this.toast.add({
+                    severity: 'warn',
+                    summary: 'Duplicate',
+                    detail: 'This email is already added',
+                    life: 2000
+                });
+                return;
+            }
+
+            this.emailObjects.push({
+                email: this.newEmail.trim(),
+                tag: this.newTag.trim() || null
+            });
+
+            // Clear inputs and focus back to email field
+            this.newEmail = '';
+            this.newTag = '';
+
+            this.$nextTick(() => {
+                if (this.$refs.emailInput) {
+                    this.$refs.emailInput.$el.focus();
+                }
+            });
+        },
+
+        removeEmail(index) {
+            // Remove the email at the specified index
+            this.emailObjects.splice(index, 1);
         },
 
         async saveSetting(row) {
-            try {
-                // Parse comma-separated emails, trim whitespace, and filter out empty values
-                const emailArray = this.emailInput
-                    .split(',')
-                    .map(email => email.trim())
-                    .filter(email => email.length > 0);
-                
-                // Validate email format (optional)
-                const invalidEmails = emailArray.filter(email => !this.isValidEmail(email));
-                if (invalidEmails.length > 0) {
-                    this.toast.add({ 
-                        severity: 'warn', 
-                        summary: 'Warning', 
-                        detail: `Invalid email format: ${invalidEmails.join(', ')}`, 
-                        life: 3000 
-                    });
-                    return;
-                }
+            if (this.emailObjects.length === 0) {
+                this.toast.add({
+                    severity: 'warn',
+                    summary: 'Warning',
+                    detail: 'Please add at least one email address',
+                    life: 2000
+                });
+                return;
+            }
 
+            try {
+                const emailString = this.formatEmailObjects(this.emailObjects);
                 const payload = {
-                    email_addresses: emailArray.join(','),
-                    storage_location: this.form.shippingPoint
+                    email_addresses: emailString,
+                    storage_location: row.shippingPoint
                 };
 
                 await api.post(`emailSetting/update/${row.id}`, payload);
 
-                const index = this.listData.findIndex(i => i.id === row.id);
+                // Update local data
+                const index = this.listData.findIndex((i) => i.id === row.id);
                 if (index !== -1) {
-                    this.listData[index].emails = emailArray;
-                    this.listData[index].shippingPoint = this.form.shippingPoint;
+                    this.listData[index].emails = [...this.emailObjects];
+                    this.listData[index].lastUpdated = new Date().toISOString();
                 }
 
-                this.toast.add({ severity: 'success', summary: 'Saved', detail: 'Mail setting updated successfully', life: 2000 });
+                this.toast.add({
+                    severity: 'success',
+                    summary: 'Success',
+                    detail: 'Email settings updated successfully',
+                    life: 3000
+                });
                 this.cancelEdit();
             } catch (err) {
-                this.toast.add({ severity: 'error', summary: 'Error', detail: 'Failed to save', life: 2500 });
+                this.toast.add({
+                    severity: 'error',
+                    summary: 'Error',
+                    detail: 'Failed to save changes',
+                    life: 3000
+                });
+                console.error('Save error:', err);
             }
         },
 
         isValidEmail(email) {
-            // Simple email validation regex
             const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
             return emailRegex.test(email);
         },
 
         cancelEdit() {
             this.editingId = null;
-            this.form.emails = [];
-            this.form.shippingPoint = '';
-            this.emailInput = '';
+            this.emailObjects = [];
+            this.newEmail = '';
+            this.newTag = '';
             this.expandedRows = {};
         },
 
         onRowToggle(event) {
             if (this.editingId && !event.data) {
+                this.toast.add({
+                    severity: 'info',
+                    summary: 'Edit Cancelled',
+                    detail: 'Changes were not saved',
+                    life: 2000
+                });
                 this.cancelEdit();
-                this.toast.add({ severity: 'info', summary: 'Closed', detail: 'Row collapsed while editing', life: 2000 });
             }
         },
 
         formatDate(dateStr) {
-            if (!dateStr) return '-';
-            const date = new Date(dateStr);
-            return new Intl.DateTimeFormat('en-GB', {
-                year: 'numeric',
-                month: 'short',
-                day: '2-digit',
-                hour: '2-digit',
-                minute: '2-digit'
-            }).format(date);
+            if (!dateStr || dateStr === '-') return '-';
+
+            try {
+                const date = new Date(dateStr);
+                if (isNaN(date.getTime())) return '-';
+
+                return new Intl.DateTimeFormat('en-GB', {
+                    year: 'numeric',
+                    month: 'short',
+                    day: '2-digit',
+                    hour: '2-digit',
+                    minute: '2-digit',
+                    hour12: false
+                }).format(date);
+            } catch (error) {
+                return '-';
+            }
         }
     },
     mounted() {
@@ -255,6 +432,44 @@ export default {
 </script>
 
 <style scoped lang="scss">
-:deep(.p-row-expanded) { background-color: #f9fafb !important; }
-:deep(.p-row-editing) { background-color: #f0f9ff !important; }
+:deep(.p-datatable .p-row-expanded) {
+    background-color: #f8fafc !important;
+    border-left: 3px solid #3b82f6;
+}
+
+:deep(.p-datatable .p-row-editing) {
+    background-color: #eff6ff !important;
+}
+
+:deep(.p-badge) {
+    font-size: 0.75rem;
+    min-width: auto;
+    padding: 0.125rem 0.375rem;
+}
+
+:deep(.p-column-title) {
+    font-weight: 600;
+    color: #374151;
+}
+
+.card {
+    background: white;
+    border-radius: 0.75rem;
+    padding: 1.5rem;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+/* Custom email tag styling */
+.email-tag {
+    transition: all 0.2s ease;
+}
+
+.email-tag:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.email-tag button:hover {
+    color: #ef4444 !important;
+}
 </style>
