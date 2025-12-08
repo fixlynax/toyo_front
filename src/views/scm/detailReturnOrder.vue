@@ -13,17 +13,17 @@
 
                     <div class="mt-6 mb-4">
                         <div>
-                            <span class="block text-sm font-bold text-black-700">Return Reference Number</span>
+                            <span class="block text-sm text-black-700">Return Reference Number</span>
                             <span class="text-lg font-medium">{{ returnList.return_orderNo_ref }}</span>
                         </div>
                     </div>
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm text-gray-700">
                         <div>
-                            <span class="block text-sm font-bold text-black-700">Status</span>
+                            <span class="block text-sm text-black-700">Status</span>
                             <Tag :value="returnList.delivery_status" :severity="getStatusSeverity(returnList.delivery_status)" />
                         </div>
                         <div>
-                            <span class="block text-sm font-bold text-black-700">Reason</span>
+                            <span class="block text-sm text-black-700">Reason</span>
                             <p class="font-medium text-lg">{{ `(${returnList.reason_code}) ${returnList.reason_message}` }}</p>
                         </div>
                     </div>
@@ -71,37 +71,37 @@
                     </div>
                     <div class="grid grid-cols-1 md:grid-cols-2 mt-6 mb-4">
                         <div>
-                            <span class="block text-sm font-bold text-black-700">Company Name</span>
+                            <span class="block text-sm text-black-700">Company Name</span>
                             <p class="font-medium text-lg">{{ `${returnList.dealer.dealer_shop.companyName1} ${returnList.dealer.dealer_shop.companyName2}` }}</p>
                         </div>
                         <div>
-                            <span class="block text-sm font-bold text-black-700">Account Number</span>
+                            <span class="block text-sm text-black-700">Account Number</span>
                             <span class="text-lg font-medium">{{ returnList.dealer.dealer_shop.custAccountNo }}</span>
                         </div>
                     </div>
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm text-gray-700">
                         <div>
-                            <span class="block text-sm font-bold text-black-700">Member Code</span>
+                            <span class="block text-sm text-black-700">Member Code</span>
                             <span class="text-lg font-medium">{{ returnList.dealer.dealer_shop.memberCode }}</span>
                         </div>
                         <div>
-                            <span class="block text-sm font-bold text-black-700">Reg No</span>
+                            <span class="block text-sm text-black-700">Reg No</span>
                             <p class="font-medium text-lg">{{ returnList.dealer.dealer_shop.companyRegNo }}</p>
                         </div>
                         <div>
-                            <span class="block text-sm font-bold text-black-700">Address</span>
+                            <span class="block text-sm text-black-700">Address</span>
                             <p class="font-medium text-lg">{{ `${returnList.dealer.dealer_shop.addressLine1} ${returnList.dealer.dealer_shop?.addressLine2 || ''} ${returnList.dealer.dealer_shop?.addressLine3 || ''} ${returnList.dealer.dealer_shop?.addressLine4 || ''} ${returnList.dealer.dealer_shop.city} ,${returnList.dealer.dealer_shop.postcode}` }}</p>
                         </div>
                         <div>
-                            <span class="block text-sm font-bold text-black-700">Contact Person</span>
+                            <span class="block text-sm text-black-700">Contact Person</span>
                             <p class="font-medium text-lg">{{ returnList.dealer.dealer_shop.phoneNumber }}</p>
                         </div>
                         <div>
-                            <span class="block text-sm font-bold text-black-700">Storage</span>
+                            <span class="block text-sm text-black-700">Storage</span>
                             <p class="font-medium text-lg">{{ returnList.dealer.dealer_shop.storageLocation }}</p>
                         </div>
                         <div>
-                            <span class="block text-sm font-bold text-black-700">City</span>
+                            <span class="block text-sm text-black-700">City</span>
                             <p class="font-medium text-lg">{{ returnList.dealer.dealer_shop.city }}</p>
                         </div>
                     </div>
