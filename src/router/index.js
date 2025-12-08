@@ -652,24 +652,6 @@ const router = createRouter({
                     component: () => import('@/views/it/editUserAccount.vue'),
                     props: true
                 },
-
-                // Salesman Accounts
-                {
-                    path: 'it/listSalesAccount',
-                    name: 'List-Sales',
-                    component: () => import('@/views/it/listSalesAccount.vue')
-                },
-                {
-                    path: 'it/createSalesAccount',
-                    name: 'Create-Sales',
-                    component: () => import('@/views/it/createSalesAccount.vue')
-                },
-                {
-                    path: 'it/editSalesAcc',
-                    name: 'Edit-Sales',
-                    component: () => import('@/views/it/editSalesAcc.vue')
-                },
-
                 // Settings
                 {
                     path: 'it/maintenanceMode',
@@ -695,6 +677,16 @@ const router = createRouter({
                     path: 'it/termsCondition',
                     name: 'Terms-Condition',
                     component: () => import('@/views/it/termsCondition.vue')
+                },
+
+                // ===============================
+                // SALES
+                // ===============================
+                // Test Page
+                {
+                    path: 'sales/test',
+                    name: 'Sales-Test',
+                    component: () => import('@/views/sales/test.vue')
                 },
 
                 // ===============================
