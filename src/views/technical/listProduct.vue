@@ -108,20 +108,69 @@
                 <template #body="{ data }">
                     <div class="flex flex-col leading-relaxed text-sm text-gray-700">
                         <div class="flex">
-                            <span class="w-40 text-gray-800 font-semibold">Section Width:</span>
+                            <span class="w-18 text-gray-800 font-semibold">Section Width:</span>
                             <span>{{ data.sectionwidth }}</span>
                         </div>
                         <div class="flex">
-                            <span class="w-40 text-gray-800 font-semibold">Tyre Series:</span>
+                            <span class="w-15 text-gray-800 font-semibold">Tyre Series:</span>
                             <span>{{ data.tireseries }}</span>
                         </div>
                         <div class="flex">
-                            <span class="w-40 text-gray-800 font-semibold">Rim Diameter:</span>
+                            <span class="w-15 text-gray-800 font-semibold">Rim Diameter:</span>
                             <span>{{ data.rimdiameter }}"</span>
                         </div>
                         <div class="flex">
-                            <span class="w-40 text-gray-800 font-semibold">Speed Rating:</span>
+                            <span class="w-15 text-gray-800 font-semibold">Speed Rating:</span>
                             <span>{{ data.speedplyrating }}</span>
+                        </div>
+                    </div>
+                </template>
+            </Column>
+
+            <Column field="price" header="Price" style="min-width: 12rem" sortable>
+                <template #body="{ data }">
+                    <div class="flex flex-col leading-relaxed text-sm text-gray-700">
+                        <div class="flex">
+                            <span class="w-15 text-gray-800 font-semibold">Price 1:</span>
+                            <span>{{ data.price01 }}</span>
+                        </div>
+                        <div class="flex">
+                            <span class="w-15 text-gray-800 font-semibold">Price 2:</span>
+                            <span>{{ data.price02 }}</span>
+                        </div>
+                        <div class="flex">
+                            <span class="w-15 text-gray-800 font-semibold">Price 3:</span>
+                            <span>{{ data.price03 }}"</span>
+                        </div>
+                        <div class="flex">
+                            <span class="w-15 text-gray-800 font-semibold">Price 4:</span>
+                            <span>{{ data.price04 }}</span>
+                        </div>
+                        <div class="flex">
+                            <span class="w-15 text-gray-800 font-semibold">Price 5:</span>
+                            <span>{{ data.price05 }}</span>
+                        </div>
+                    </div>
+                </template>
+            </Column>
+
+            <Column field="valid" header="Valid" style="min-width: 15rem">
+                <template #body="{ data }">
+                    <div class="flex flex-col leading-relaxed text-sm text-gray-700">
+                        <div class="flex">
+                            <span >{{ formatDate(data.price01_validitystartdate) }} - {{ formatDate(data.price_01_validityenddate) }}</span>
+                        </div>
+                        <div class="flex">
+                            <span >{{ formatDate(data.price02_validitystartdate) }} - {{formatDate(data.price_02_validityenddate) }}</span>
+                        </div>
+                        <div class="flex">
+                            <span>{{ formatDate(data.price03_validitystartdate) }} - {{ formatDate(data.price_03_validityenddate) }}"</span>
+                        </div>
+                        <div class="flex">
+                            <span >{{ formatDate(data.price04_validitystartdate) }} - {{ formatDate(data.price_04_validityenddate) }}</span>
+                        </div>
+                        <div class="flex">
+                            <span >{{ formatDate(data.price05_validitystartdate) }} - {{ formatDate(data.price_05_validityenddate) }}</span>
                         </div>
                     </div>
                 </template>
@@ -215,6 +264,21 @@ const fetchData = async () => {
                 speedplyrating: product.speedplyrating,
                 updatingTWP: false,
                 updatingWarranty: false,
+                price01: product.price01,
+                price02: product.price02,
+                price03: product.price03,
+                price04: product.price04,
+                price05: product.price05,
+                price01_validitystartdate: product.price01_validitystartdate,
+                price_01_validityenddate: product.price_01_validityenddate,
+                price02_validitystartdate: product.price02_validitystartdate,
+                price_02_validityenddate: product.price_02_validityenddate,
+                price03_validitystartdate: product.price03_validitystartdate,
+                price_03_validityenddate: product.price_03_validityenddate,
+                price04_validitystartdate: product.price04_validitystartdate,
+                price_04_validityenddate: product.price_04_validityenddate,
+                price05_validitystartdate: product.price05_validitystartdate,
+                price_05_validityenddate: product.price_05_validityenddate,
                 updatingSell: false
             }));
         } else {
@@ -503,6 +567,20 @@ const getOverallStatusLabel = (deleted) => {
 const getOverallStatusSeverity = (deleted) => {
     return deleted ? 'danger' : 'success';
 };
+
+function formatDate(dateString) {
+    if (!dateString) return '-';
+
+    const date = new Date(dateString); // Works for ISO, YYYY-MM-DD, YYYY-MM-DDTHH
+
+    if (isNaN(date)) return '-';
+
+    return date.toLocaleDateString('en-MY', {
+        year: 'numeric',
+        month: '2-digit',
+        day: '2-digit'
+    });
+}
 </script>
 <style scoped>
 :deep(.rounded-table) {
