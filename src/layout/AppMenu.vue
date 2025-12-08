@@ -132,7 +132,7 @@ const model = ref([
                         to: '/technical/listPattern'
                     },
                     {
-                        label: 'OE Tire LIst',
+                        label: 'OE Tyre LIst',
                         icon: 'pi pi-fw pi-slack',
                         to: '/technical/listOETire'
                     }
@@ -277,7 +277,7 @@ const model = ref([
             },
             {
                 label: 'Return Order',
-                icon: 'pi pi-fw pi-list',
+                icon: 'pi pi-fw pi-reply',
                 to: '/scm/listReturnOrder'
             },
             {
@@ -290,11 +290,42 @@ const model = ref([
                 icon: 'pi pi-fw pi-briefcase',
                 to: '/scm/listLogistic'
             }
-            // {
-            //     label: 'Back Order',
-            //     icon: 'pi pi-fw pi-history',
-            //     to: '/scm/listSCMBackOrder'
-            // },
+        ]
+    },
+    {
+        label: 'Sales',
+        icon: 'pi pi-fw pi-sitemap',
+        items: [
+            {
+                label: 'Customer List',
+                icon: 'pi pi-fw pi-users',
+                to: '/sales/customerList'
+            }, 
+            {
+                label: 'Customer Appointment',
+                icon: 'pi pi-fw pi-book',
+                to: '/sales/customerAppointment'
+            }, 
+            {
+                label: 'Customer Warranty Claim',
+                icon: 'pi pi-fw pi-file',
+                to: '/sales/customerWarrantyClaim'
+            }, 
+            {
+                label: 'Customer Order',
+                icon: 'pi pi-fw pi-shopping-cart',
+                to: '/sales/customerOrder'
+            }, 
+            {
+                label: 'Customer Return Order',
+                icon: 'pi pi-fw pi-reply',
+                to: '/sales/customerReturnOrder'
+            }, 
+            {
+                label: 'Customer Back Order',
+                icon: 'pi pi-fw pi-history',
+                to: '/sales/customerBackOrder'
+            }, 
         ]
     },
     {
@@ -306,7 +337,7 @@ const model = ref([
                 icon: 'pi pi-fw pi-lock',
                 items: [
                     {
-                        label: 'User Group',
+                        label: 'User Role',
                         icon: 'pi pi-fw pi-users',
                         to: '/it/ListGroup'
                     },
@@ -317,11 +348,6 @@ const model = ref([
                     }
                 ]
             },
-            // {
-            //     label: 'Salesman',
-            //     icon: 'pi pi-fw pi-id-card',
-            //     to: '/it/listSalesAccount'
-            // },
             {
                 label: 'Setting',
                 icon: 'pi pi-fw pi-cog',
@@ -345,6 +371,8 @@ const model = ref([
             }
         ]
     },
+    
+
     {
         label: 'Credit Control',
         icon: 'pi pi-fw pi-credit-card',

@@ -13,7 +13,7 @@
                     <div class="my-8 flex flex-col items-center gap-4">
                         <div class="flex items-center">
                             <span class="text-5xl font-bold mr-2 text-surface-900 dark:text-surface-0">RM 220</span>
-                            <span class="text-surface-600 dark:text-surface-200">per tires</span>
+                            <span class="text-surface-600 dark:text-surface-200">per tyres</span>
                         </div>
                         <Button label="Get Started" class="p-button-rounded border-0 ml-4 font-light leading-tight bg-blue-500 text-white"></Button>
                     </div>
@@ -25,7 +25,7 @@
                         </li>
                         <li class="py-2">
                             <i class="pi pi-fw pi-check text-xl text-cyan-500 mr-2"></i>
-                            <span class="text-xl leading-normal">Will Not Make Your Tire Bald Even Doing Drift </span>
+                            <span class="text-xl leading-normal">Will Not Make Your tyres Bald Even Doing Drift </span>
                         </li>
                         <li class="py-2">
                             <i class="pi pi-fw pi-check text-xl text-cyan-500 mr-2"></i>
@@ -46,7 +46,7 @@
                     <div class="my-8 flex flex-col items-center gap-4">
                         <div class="flex items-center">
                             <span class="text-5xl font-bold mr-2 text-surface-900 dark:text-surface-0">RM 300</span>
-                            <span class="text-surface-600 dark:text-surface-200">per tires</span>
+                            <span class="text-surface-600 dark:text-surface-200">per tyres</span>
                         </div>
                         <Button label="Get Started" class="p-button-rounded border-0 ml-4 font-light leading-tight bg-blue-500 text-white"></Button>
                     </div>
@@ -79,7 +79,7 @@
                     <div class="my-8 flex flex-col items-center gap-4">
                         <div class="flex items-center">
                             <span class="text-5xl font-bold mr-2 text-surface-900 dark:text-surface-0">RM 350</span>
-                            <span class="text-surface-600 dark:text-surface-200">per tires</span>
+                            <span class="text-surface-600 dark:text-surface-200">per tyres</span>
                         </div>
                         <Button label="Get Started" class="p-button-rounded border-0 ml-4 font-light leading-tight bg-blue-500 text-white"></Button>
                     </div>

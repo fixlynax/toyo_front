@@ -2,7 +2,7 @@
     <Fluid>
         <div class="flex flex-col md:flex-row gap-8">
             <div class="card flex flex-col gap-6 w-full">
-                <div class="text-2xl font-bold text-gray-800 border-b pb-2">Create Group</div>
+                <div class="text-2xl font-bold text-gray-800 border-b pb-2">Create Role</div>
 
                 <!-- Error Alert for non-field errors -->
                 <div v-if="apiErrors.general" class="p-4 mb-4 border border-red-300 bg-red-50 rounded-md">
@@ -15,7 +15,7 @@
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
                     <div class="md:col-span-1">
                         <label class="block font-bold text-gray-700 mb-2">Name</label>
-                        <InputText v-model="form.name" placeholder="Enter group name" class="w-full" :class="{ 'p-invalid': fieldErrors.name }" />
+                        <InputText v-model="form.name" placeholder="Enter role name" class="w-full" :class="{ 'p-invalid': fieldErrors.name }" />
                         <small v-if="fieldErrors.name" class="p-error block mt-1">
                             <i class="pi pi-exclamation-circle text-xs mr-1"></i>
                             {{ fieldErrors.name }}
@@ -150,10 +150,10 @@ const validateForm = () => {
 
     // Name validation
     if (!form.name.trim()) {
-        fieldErrors.name = 'Group name is required';
+        fieldErrors.name = 'Role name is required';
         isValid = false;
     } else if (form.name.length > 100) {
-        fieldErrors.name = 'Group name cannot exceed 100 characters';
+        fieldErrors.name = 'Role name cannot exceed 100 characters';
         isValid = false;
     }
 
@@ -209,11 +209,11 @@ const handleApiError = (error) => {
             break;
 
         case 403: // Forbidden
-            apiErrors.general = 'You do not have permission to create groups.';
+            apiErrors.general = 'You do not have permission to create role.';
             break;
 
         case 409: // Conflict (e.g., duplicate name)
-            apiErrors.general = 'A group with this name already exists.';
+            apiErrors.general = 'A role with this name already exists.';
             break;
 
         case 500: // Server error
@@ -244,7 +244,7 @@ const handleApiSuccess = (response) => {
         toast.add({
             severity: 'success',
             summary: 'Success',
-            detail: response.data.message || `Group "${form.name}" created successfully!`,
+            detail: response.data.message || `Role "${form.name}" created successfully!`,
             life: 5000
         });
 
@@ -254,7 +254,7 @@ const handleApiSuccess = (response) => {
         }, 1500);
     } else {
         // API returned status 0 but not an HTTP error
-        apiErrors.general = response.data.message || 'Failed to create group';
+        apiErrors.general = response.data.message || 'Failed to create role. Please try again.';
 
         if (response.data.error) {
             apiErrors.message = response.data.error.message;

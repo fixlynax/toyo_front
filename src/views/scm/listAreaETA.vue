@@ -15,7 +15,7 @@
                 :filters="filters"
                 filterDisplay="menu"
                 class="rounded-table"
-                :globalFilterFields="['storageLocation', 'state', 'postcode', 'city', 'eta']"
+                :globalFilterFields="['storageLocation', 'state', 'city']"
                 paginatorTemplate="CurrentPageReport FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink RowsPerPageDropdown"
                 currentPageReportTemplate="Showing {first} to {last} of {totalRecords} entries"
             >
@@ -32,7 +32,7 @@
                         <!-- Right: Export & Batch Buttons -->
                         <div class="flex items-center gap-2 ml-auto" v-if="canUpdate">
                             <Button type="button" label="Export" icon="pi pi-file-export" class="p-button" @click="fetchExportETA" :loading="exportLoading" />
-                            <Button type="button" label="Import" icon="pi pi-file-import" class="p-button" @click="importInput?.click()" :loading="importLoading" />
+                            <Button type="button" label="Bulk Update" icon="pi pi-file-import" class="p-button" @click="importInput?.click()" :loading="importLoading" />
                             <input ref="importInput" type="file" accept=".xlsx,.xls" style="display: none" @change="handleImport" />
                         </div>
                     </div>
@@ -60,11 +60,9 @@
                 </Column> -->
                 <Column field="storageLocation" header="Storage Location" style="min-width: 10rem" sortable />
                 <Column field="state" header="State" style="min-width: 8rem" sortable />
-                <Column field="postcode" header="Postcode" style="min-width: 8rem" sortable />
                 <Column field="city" header="City" style="min-width: 10rem" sortable />
                 <Column field="dailyCutOffTime" header="Cut-off Time" style="min-width: 10rem" sortable />
                 <Column field="deliveryLeadTime" header="Lead Time" style="min-width: 8rem" sortable />
-                <Column field="eta" header="ETA" style="min-width: 8rem" sortable />
             </DataTable>
         </div>
     </div>

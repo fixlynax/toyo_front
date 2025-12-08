@@ -22,12 +22,12 @@ const props = defineProps({
         type: [String, Array],
         default: () => [
             'Loading Toyo Tires...',
-            'Checking tire pressure...',
+            'Checking tyre pressure...',
             'Starting engine...',
             'Preparing performance data...',
             'Revving up system...',
             'Warming up the track...',
-            'Balancing tire grip...',
+            'Balancing tyre grip...',
             'Polishing alloy rims...',
             'Optimizing traction control...',
             'Aligning suspension geometry...',
@@ -43,7 +43,7 @@ const props = defineProps({
             'Tightening lug nuts...',
             'Warming up the pit crew...',
             'Scanning for optimal performance...',
-            'Finalizing tire rotation data...',
+            'Finalizing tyre rotation data...',
             'Setting race mode...',
             'Burning some virtual rubber...'
         ]

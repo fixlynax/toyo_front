@@ -30,7 +30,7 @@
                        <Tag :value="getStatusText(warantyDetail.status)" :severity="getStatusSeverity(warantyDetail.status)" />
                     </div>
                 </div>
-                <div class="grid grid-cols-3 md:grid-cols-3 gap-4">
+                <div class="grid grid-cols-3 md:grid-cols-3 gap-4 mt-4">
                     <div>
                         <span class="block text-sm font-bold text-black-800">Ref No</span>
                         <span class="text-lg font-medium">{{ warantyDetail.claimRefNo }}</span>
@@ -74,7 +74,7 @@
                 <div class="card flex flex-col w-full">
                     <div class="flex items-center justify-between border-b pb-2 mb-4">
                         <div class="text-2xl font-bold text-gray-800">Tyre Detail</div>
-                        <Button label="Update Tyre Details" class="p-button-info" size="small" @click="openEditTier" v-if="warantyDetail.status !== 6 && warantyDetail.status !== 5 && warantyDetail.status_string !== 'Pending Customer Invoice'"/>
+                        <!-- <Button label="Update Tyre Details" class="p-button-info" size="small" @click="openEditTier" v-if="warantyDetail.status !== 6 && warantyDetail.status !== 5 && warantyDetail.status_string !== 'Pending Customer Invoice'"/> -->
                     </div>
                     <div :class="['grid',  'gap-4', 'mb-2', warantyDetail.tire_info?.plateSerialAdmin ? 'grid-cols-2 md:grid-cols-5' : 'grid-cols-2 md:grid-cols-4']">
                         <div>
@@ -272,8 +272,8 @@
                     <div class="text-2xl font-bold text-gray-800">CTC Detail</div>
                     <!-- Show Request button only if no CTC data exists -->
                     <!-- <Button v-if="!hasCTCData && !ctcSkipped" label="Request CTC" class="p-button-info" size="small" @click="showCTCConfirmationDialog = true" :loading="loadingCTC" /> -->
-                    <Button v-if="warantyDetail.isCTC === 0 && !hasClaimDetails && canUpdate" label="Request CTC" class="p-button-info" size="small" @click="confirmCTCRequest" :loading="loadingCTC" />
-                    <div v-else-if="warantyDetail.isReturn === 1 && warantyDetail.ctc_details.reachWH && canUpdate" class="text-right mt-3 text-sm font-bold text-green-600">
+                    <!-- <Button v-if="warantyDetail.isCTC === 0 && !hasClaimDetails && canUpdate" label="Request CTC" class="p-button-info" size="small" @click="confirmCTCRequest" :loading="loadingCTC" /> -->
+                    <div v-if="warantyDetail.isReturn === 1 && warantyDetail.ctc_details.reachWH && canUpdate" class="text-right mt-3 text-sm font-bold text-green-600">
                         <i class="pi pi-check-circle mr-2"></i>
                         Return CTC Requested
                     </div>
@@ -382,10 +382,10 @@
                     <i class="pi pi-check-circle mr-2"></i>
                     Claim Approved
                 </div>
-                <div class="flex justify-end gap-2 mt-4 pt-4 border-t" v-if="!hasClaimDetails && canUpdate">
+                <!-- <div class="flex justify-end gap-2 mt-4 pt-4 border-t" v-if="!hasClaimDetails && canUpdate">
                     <Button label="Create Claim" class="p-button-success" size="small" @click="openCreateClaimDialog" icon="pi pi-check" />
                     <Button label="Reject Claim" class="p-button-danger" size="small" @click="showRejectDialog = true" icon="pi pi-times" />
-                </div>
+                </div> -->
             </div>
 
             <div class="card w-full mb-4" v-if="warantyDetail.status === 6">

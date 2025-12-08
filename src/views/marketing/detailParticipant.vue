@@ -23,7 +23,7 @@
                             <p class="text-lg font-medium">{{ customerInfo.regNo }}</p>
                         </div>
                         <div>
-                            <span class="block text-sm font-bold text-gray-700">Tire Pattern</span>
+                            <span class="block text-sm font-bold text-gray-700">Tyre Pattern</span>
                             <p class="text-lg text-gray-500">{{ item.patternName }}</p>
                         </div>
                         <div>

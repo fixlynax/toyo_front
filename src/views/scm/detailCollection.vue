@@ -32,7 +32,7 @@
                                 <p class="font-medium text-lg">{{ listData.claim?.tire?.plateSerial }}</p>
                             </div>
                             <div>
-                                <span class="block text-sm font-bold text-gray-800">Tire Size</span>
+                                <span class="block text-sm font-bold text-gray-800">Tyre Size</span>
                                 <p class="font-medium text-lg">{{ listData.claim?.tire?.tyresize }}</p>
                             </div>
                             <div>
