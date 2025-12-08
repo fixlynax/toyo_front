@@ -141,23 +141,11 @@
                     <div v-else class="overflow-x-auto">
                         <table class="w-full text-sm text-left text-gray-700">
                             <tbody>
-                                <!-- Platform -->
-                                <!-- <tr class="border-b">
-                                    <td class="px-4 py-2 font-medium">Platform</td>
-                                    <td class="px-4 py-2 text-right">{{ memberDetail.platform || 'Web' }}</td>
-                                </tr> -->
-
-                                <!-- FCM Token -->
-                                <!-- <tr class="border-b">
-                                    <td class="px-4 py-2 font-medium">FCM Token</td>
-                                    <td class="px-4 py-2 text-right">{{ memberDetail.fcmToken ? 'Yes' : 'No' }}</td>
-                                </tr> -->
-
-                                <!-- Referrer Type -->
-                                <!-- <tr class="border-b">
-                                    <td class="px-4 py-2 font-medium">Referrer Type</td>
-                                    <td class="px-4 py-2 text-right">{{ memberDetail.referrerType || '-' }}</td>
-                                </tr> -->
+                                <!-- Latest Point -->
+                                <tr class="border-b">
+                                    <td class="px-4 py-2 font-medium">Latest Point</td>
+                                    <td class="px-4 py-2 text-right">{{ memberDetail.lastest_point || '0' }}</td>
+                                </tr>
 
                                 <!-- Delete Status -->
                                 <tr class="border-b">
@@ -192,9 +180,61 @@
                     </div>
                 </div>
 
+                <!-- Point Transactions -->
+                <div class="card flex flex-col w-full">
+                    <div class="text-2xl font-bold text-gray-800 border-b pb-2 mb-3">Point Transactions</div>
+
+                    <div v-if="loading" class="text-center py-8">
+                        <ProgressSpinner style="width: 30px; height: 30px" />
+                    </div>
+
+                    <div v-else class="overflow-x-auto">
+                        <!-- If no transactions -->
+                        <div v-if="!memberDetail.point_transactions || memberDetail.point_transactions.length === 0" class="text-center py-4 text-gray-500">No point transactions available</div>
+
+                        <!-- Display all transactions -->
+                        <div v-else class="p-4 space-y-4">
+                            <div class="text-sm font-medium mb-2">Recent Transactions</div>
+
+                            <!-- Transaction List -->
+                            <div class="space-y-4">
+                                <div v-for="(transaction, index) in memberDetail.point_transactions" :key="transaction.id || index" class="bg-gray-50 rounded-lg p-4 border border-gray-200">
+                                    <!-- First Row: Ref No + Points -->
+                                    <div class="flex justify-between items-center mb-2">
+                                        <div class="space-y-1">
+                                            <span class="block text-xs font-medium text-gray-500">Ref No</span>
+                                            <span class="text-sm font-semibold text-gray-800">{{ transaction.refno || '-' }}</span>
+                                        </div>
+                                        <div class="text-right space-y-1">
+                                            <span class="block text-xs font-medium text-gray-500">Points</span>
+                                            <span :class="['text-sm font-bold', transaction.transactionType === 'EARN' ? 'text-green-600' : 'text-red-600']">
+                                                {{ transaction.transactionType === 'EARN' ? '+' : '-' }}{{ transaction.point || '0' }}
+                                            </span>
+                                        </div>
+                                    </div>
+
+                                    <!-- Second Row: Description -->
+                                    <div class="mt-3 pt-3 border-t border-gray-100">
+                                        <div class="space-y-1">
+                                            <span class="block text-xs font-medium text-gray-500">Description</span>
+                                            <span class="text-sm text-gray-700">{{ transaction.desc || '-' }}</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Show total transactions -->
+                            <div class="mt-6 pt-4 border-t border-gray-200 text-center">
+                                <div class="text-sm text-gray-500">Showing {{ memberDetail.point_transactions.length }} transaction(s)</div>
+                                <div class="text-xs text-gray-400 mt-1">Latest transactions are shown first</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
                 <!-- Device List -->
                 <div class="card flex flex-col w-full">
-                    <div class="text-2xl font-bold text-gray-800 border-b pb-2 mb-3">Devices</div>
+                    <div class="text-2xl font-bold text-gray-800 border-b pb-2 mb-3">Device Information</div>
 
                     <div v-if="loading" class="text-center py-8">
                         <ProgressSpinner style="width: 30px; height: 30px" />
@@ -203,15 +243,15 @@
                     <div v-else class="overflow-x-auto">
                         <table class="w-full text-sm text-left">
                             <tbody>
-                                <tr v-if="memberDetail.device" class="border-b">
-                                    <!-- Device info -->
+                                <tr v-if="memberDetail.device && memberDetail.device !== '-'" class="border-b">
                                     <td class="px-4 py-3">
                                         <div class="flex items-center gap-2 text-gray-800 font-bold">
-                                            <i class="pi pi-tablet text-primary-500"></i>
-                                            {{ getDeviceType(memberDetail.device) }}
+                                            <i class="pi pi-mobile text-primary-500"></i>
+                                            {{ formatDevice(memberDetail.device) }}
                                         </div>
                                         <div class="ml-6 text-gray-500 text-xs mt-2">
-                                            <div>IP: {{ memberDetail.device }}</div>
+                                            <div>Platform: {{ memberDetail.device }}</div>
+                                            <div>FCM Token: {{ memberDetail.fcmToken ? 'Available' : 'Not available' }}</div>
                                             <div>Last Active: {{ formatDateTime(memberDetail.lastLogin) }}</div>
                                         </div>
                                     </td>
@@ -269,7 +309,9 @@ const memberDetail = ref({
     created: '',
     deleteReason: null,
     deleted: null,
-    mobile_number: ''
+    mobile_number: '',
+    lastest_point: '',
+    point_transactions: []
 });
 
 // Fetch member details from API
@@ -279,8 +321,15 @@ const fetchMemberDetail = async () => {
 
         const response = await api.get(`cares/user/${memberId.value}`);
 
-        if (response.data.status === 1 && response.data.admin_data) {
-            const userData = response.data.admin_data;
+        if (response.data.status === 1) {
+            // Extract data from response structure
+            const apiData = response.data;
+
+            // Combine data from admin_data and root level
+            const userData = {
+                ...apiData, // Root level data
+                ...(apiData.admin_data || {}) // admin_data properties (will override root if duplicates)
+            };
 
             // Map API response to component data structure
             memberDetail.value = {
@@ -310,10 +359,14 @@ const fetchMemberDetail = async () => {
                 created: userData.created || '-',
                 deleteReason: userData.deleteReason,
                 deleted: userData.deleted,
-                mobile_number: userData.mobile_number || '-'
+                mobile_number: userData.mobile_number || '-',
+                lastest_point: userData.lastest_point || '0',
+                point_transactions: userData.point_transactions || []
             };
+
+            console.log('Loaded user data:', memberDetail.value);
         } else {
-            console.error('API returned error or invalid data:', response.data);
+            console.error('API returned error:', response.data);
             showToast('error', 'Error', 'Failed to load user details');
         }
     } catch (error) {
@@ -351,7 +404,7 @@ function formatDateTime(dateTimeString) {
     if (!dateTimeString) return '-';
 
     // Replace space with T if needed
-    const normalized = dateTimeString.replace(' ', 'T');
+    const normalized = dateTimeString.includes('T') ? dateTimeString : dateTimeString.replace(' ', 'T');
 
     const date = new Date(normalized);
 
@@ -363,16 +416,23 @@ function formatDateTime(dateTimeString) {
         day: '2-digit',
         hour: '2-digit',
         minute: '2-digit',
-        second: '2-digit'
+        second: '2-digit',
+        hour12: true
     });
 }
 
-
-// Get device type from IP or device info
-const getDeviceType = (deviceInfo) => {
+// Format device display
+const formatDevice = (deviceInfo) => {
     if (!deviceInfo || deviceInfo === '-') return 'Unknown Device';
-    if (deviceInfo.includes('.')) return 'IP Device';
-    return deviceInfo;
+
+    const deviceMap = {
+        iOS: 'Apple iPhone/iPad',
+        Android: 'Android Device',
+        web: 'Web Browser',
+        Web: 'Web Browser'
+    };
+
+    return deviceMap[deviceInfo] || deviceInfo;
 };
 
 // Get status text
@@ -466,5 +526,13 @@ onMounted(() => {
 
 .space-y-1 > * + * {
     margin-top: 0.25rem;
+}
+
+.text-green-600 {
+    color: #059669;
+}
+
+.text-red-600 {
+    color: #dc2626;
 }
 </style>
