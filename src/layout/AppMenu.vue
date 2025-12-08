@@ -297,10 +297,35 @@ const model = ref([
         icon: 'pi pi-fw pi-sitemap',
         items: [
             {
-                label: 'Sales Test',
-                icon: 'pi pi-fw pi-star',
-                to: '/sales/test'
-            }
+                label: 'Customer List',
+                icon: 'pi pi-fw pi-users',
+                to: '/sales/customerList'
+            }, 
+            {
+                label: 'Customer Appointment',
+                icon: 'pi pi-fw pi-book',
+                to: '/sales/customerAppointment'
+            }, 
+            {
+                label: 'Customer Warranty Claim',
+                icon: 'pi pi-fw pi-file',
+                to: '/sales/customerWarrantyClaim'
+            }, 
+            {
+                label: 'Customer Order',
+                icon: 'pi pi-fw pi-shopping-cart',
+                to: '/sales/customerOrder'
+            }, 
+            {
+                label: 'Customer Return Order',
+                icon: 'pi pi-fw pi-reply',
+                to: '/sales/customerReturnOrder'
+            }, 
+            {
+                label: 'Customer Back Order',
+                icon: 'pi pi-fw pi-history',
+                to: '/sales/customerBackOrder'
+            }, 
         ]
     },
     {

@@ -682,11 +682,46 @@ const router = createRouter({
                 // ===============================
                 // SALES
                 // ===============================
-                // Test Page
+                // Customer List
                 {
-                    path: 'sales/test',
-                    name: 'Sales-Test',
-                    component: () => import('@/views/sales/test.vue')
+                    path: 'sales/customerList',
+                    name: 'Customer-List',
+                    component: () => import('@/views/sales/customerList.vue')
+                },
+
+                // Customer Appointment
+                {
+                    path: 'sales/customerAppointment',
+                    name: 'Appointment-List',
+                    component: () => import('@/views/sales/customerAppointment.vue')
+                },
+
+                // Customer Warranty Claim
+                {
+                    path: 'sales/customerWarrantyClaim',
+                    name: 'Customer-Warranty-Claim',
+                    component: () => import('@/views/sales/customerWarrantyClaim.vue')
+                },
+
+                // Customer Order
+                {
+                    path: 'sales/customerOrder',
+                    name: 'Customer-Order',
+                    component: () => import('@/views/sales/customerOrder.vue')
+                },
+
+                // Customer Return Order
+                {
+                    path: 'sales/customerReturnOrder',
+                    name: 'Customer-Return-Order',
+                    component: () => import('@/views/sales/customerReturnOrder.vue')
+                },
+
+                // Customer Back Order
+                {
+                    path: 'sales/customerBackOrder',
+                    name: 'Customer-Back-Order',
+                    component: () => import('@/views/sales/customerBackOrder.vue')
                 },
 
                 // ===============================
