@@ -277,7 +277,7 @@ const model = ref([
             },
             {
                 label: 'Return Order',
-                icon: 'pi pi-fw pi-list',
+                icon: 'pi pi-fw pi-reply',
                 to: '/scm/listReturnOrder'
             },
             {
@@ -290,11 +290,17 @@ const model = ref([
                 icon: 'pi pi-fw pi-briefcase',
                 to: '/scm/listLogistic'
             }
-            // {
-            //     label: 'Back Order',
-            //     icon: 'pi pi-fw pi-history',
-            //     to: '/scm/listSCMBackOrder'
-            // },
+        ]
+    },
+    {
+        label: 'Sales',
+        icon: 'pi pi-fw pi-sitemap',
+        items: [
+            {
+                label: 'Sales Test',
+                icon: 'pi pi-fw pi-star',
+                to: '/sales/test'
+            }
         ]
     },
     {
@@ -317,11 +323,6 @@ const model = ref([
                     }
                 ]
             },
-            // {
-            //     label: 'Salesman',
-            //     icon: 'pi pi-fw pi-id-card',
-            //     to: '/it/listSalesAccount'
-            // },
             {
                 label: 'Setting',
                 icon: 'pi pi-fw pi-cog',
@@ -345,6 +346,8 @@ const model = ref([
             }
         ]
     },
+    
+
     {
         label: 'Credit Control',
         icon: 'pi pi-fw pi-credit-card',
