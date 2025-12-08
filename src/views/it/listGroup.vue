@@ -1,6 +1,6 @@
 <template>
     <div class="card">
-        <div class="text-2xl font-bold text-gray-800 border-b pb-2 mb-4">User Group</div>
+        <div class="text-2xl font-bold text-gray-800 border-b pb-2 mb-4">User Role</div>
 
         <!-- Show LoadingPage during initial page load -->
         <LoadingPage v-if="initialLoading" :message="'Loading Group...'" :sub-message="'Fetching list Group'" />
@@ -54,7 +54,7 @@
             <!-- Expand/Collapse Column -->
             <Column :expander="true" headerStyle="width: 3rem" />
 
-            <Column field="usergroup" header="User Group" style="min-width: 20rem" class="font-bold text-primary-400">
+            <Column field="usergroup" header="User Role" style="min-width: 20rem" class="font-bold text-primary-400">
                 <template #body="{ data }">
                     <span class="font-bold">{{ data.usergroup }}</span>
                 </template>

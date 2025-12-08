@@ -306,7 +306,7 @@ const model = ref([
                 icon: 'pi pi-fw pi-lock',
                 items: [
                     {
-                        label: 'User Group',
+                        label: 'User Role',
                         icon: 'pi pi-fw pi-users',
                         to: '/it/ListGroup'
                     },
