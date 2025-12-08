@@ -155,11 +155,9 @@
                         <Column header="Email Address" style="min-width: 20rem">
                             <template #body="{ data }">
                                 <div class="flex items-center">
-                                    <i class="pi pi-user text-gray-400 mr-2"></i>
-                                    <a :href="`mailto:${data.email}`" class="text-primary-600 hover:text-primary-800 hover:underline flex-1">
+                                    <span class="text-black hover:text-primary-800 flex-1">
                                         {{ data.email }}
-                                    </a>
-                                    <Badge v-if="data.tag" :value="data.tag" severity="info" class="ml-2 text-xs" />
+                                    </span>
                                 </div>
                             </template>
                         </Column>
