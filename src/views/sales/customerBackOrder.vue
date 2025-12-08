@@ -4,7 +4,7 @@
         <p class="text-lg mb-8 text-gray-600 text-center">This is a test page for the Sales module.</p>
     </div>
      <div>
-        <RouterLink to="/user/create">
+        <RouterLink to="/sales/detailCustomerBackOrder">
             <Button type="button" label="Create User" icon="pi pi-plus" />
         </RouterLink>
     </div>

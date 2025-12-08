@@ -688,12 +688,22 @@ const router = createRouter({
                     name: 'Customer-List',
                     component: () => import('@/views/sales/customerList.vue')
                 },
+                {
+                    path: 'sales/detailCustomer/:custAccNo',
+                    name: 'detail-Customer',
+                    component: () => import('@/views/sales/detailCustomer.vue')
+                },
 
                 // Customer Appointment
                 {
                     path: 'sales/customerAppointment',
                     name: 'Appointment-List',
                     component: () => import('@/views/sales/customerAppointment.vue')
+                },
+                {
+                    path: 'sales/detailCustomerAppointment',
+                    name: 'detail-Appointment',
+                    component: () => import('@/views/sales/detailCustomerAppointment.vue')
                 },
 
                 // Customer Warranty Claim
@@ -702,11 +712,21 @@ const router = createRouter({
                     name: 'Customer-Warranty-Claim',
                     component: () => import('@/views/sales/customerWarrantyClaim.vue')
                 },
+                {
+                    path: 'sales/detailCustomerWarrantyClaim',
+                    name: 'Detail-Customer-Warranty-Claim',
+                    component: () => import('@/views/sales/detailCustomerWarrantyClaim.vue')
+                },
 
                 // Customer Order
                 {
-                    path: 'sales/customerOrder',
+                    path: 'sales/detailCustomerOrder',
                     name: 'Customer-Order',
+                    component: () => import('@/views/sales/detailCustomerOrder.vue')
+                },
+                {
+                    path: 'sales/customerOrder',
+                    name: 'Detail-Customer-Order',
                     component: () => import('@/views/sales/customerOrder.vue')
                 },
 
@@ -716,12 +736,22 @@ const router = createRouter({
                     name: 'Customer-Return-Order',
                     component: () => import('@/views/sales/customerReturnOrder.vue')
                 },
+                {
+                    path: 'sales/detailCustomerReturnOrder',
+                    name: 'Detail-Customer-Return-Order',
+                    component: () => import('@/views/sales/detailCustomerReturnOrder.vue')
+                },
 
                 // Customer Back Order
                 {
                     path: 'sales/customerBackOrder',
                     name: 'Customer-Back-Order',
                     component: () => import('@/views/sales/customerBackOrder.vue')
+                },
+                {
+                    path: 'sales/detailCustomerBackOrder',
+                    name: 'Detail-Customer-Back-Order',
+                    component: () => import('@/views/sales/detailCustomerBackOrder.vue')
                 },
 
                 // ===============================
