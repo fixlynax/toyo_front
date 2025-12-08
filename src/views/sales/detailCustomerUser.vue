@@ -20,16 +20,14 @@
                     <div class="card flex flex-col gap-6 w-full">
                         <div class="flex items-center justify-between border-b pb-2">
                             <div class="flex items-center space-x-3">
-                                <RouterLink to="/om/listEten">
-                                    <Button icon="pi pi-arrow-left font-bold" class="p-button-text p-button-secondary text-xl" size="big" v-tooltip="'Back'" />
-                                </RouterLink>
+                                <Button icon="pi pi-arrow-left font-bold" class="p-button-text p-button-secondary text-xl" size="big" v-tooltip="'Back'" @click="$router.back()" />
 
                                 <div class="text-2xl font-bold text-gray-800">Member Information</div>
                             </div>
 
-                            <RouterLink :to="`/om/editEtenUser/${memberId}`">
+                            <!-- <RouterLink :to="`/om/editEtenUser/${memberId}`">
                                 <Button type="button" label="Edit" />
-                            </RouterLink>
+                            </RouterLink> -->
                         </div>
 
                         <!-- <div class="font-semibold text-xl pb-2">👤 Account Details</div> -->
@@ -59,7 +57,7 @@
                             </div>
                             <div class="w-full">
                                 <span class="text-xm font-bold text-black-700">Last Login</span>
-                                <p class="text-lg font-medium">{{ formatDateTime(memberDetail.lastLogin) }}</p>
+                                <p class="text-lg font-medium">{{ formatDateTime(memberDetail.lastLogin) || '-' }}</p>
                             </div>
                         </div>
 
@@ -73,7 +71,7 @@
                             <div class="w-full">
                                 <span class="text-xm font-bold text-black-700">Activated Date</span>
                                 <div class="text-lg font-medium">
-                                      <p class="text-lg font-medium">{{ formatDateTime(memberDetail.activated) }}</p>
+                                    <p class="text-lg font-medium">{{ formatDateTime(memberDetail.activated) }}</p>
                                 </div>
                             </div>
                         </div>
@@ -132,11 +130,11 @@
                 <div class="card flex flex-col border-b w-full">
                     <div class="flex items-center justify-between border-b pb-2 mb-3">
                         <div class="text-2xl font-bold text-gray-800">Devices</div>
-                        <div class="flex justify-end">
+                        <!-- <div class="flex justify-end">
                             <RouterLink :to="`/om/manageDevices/${memberId}`">
                                 <Button label="Manage All Devices" icon="pi pi-tablet" size="small" class="!py-1 !px-3 text-sm" />
                             </RouterLink>
-                        </div>
+                        </div> -->
                     </div>
 
                     <div>
@@ -200,7 +198,7 @@ const sortedDevices = computed(() => {
 
 // Methods
 const formatDate = (dateString) => {
-    if (!dateString) return 'N/A';
+    if (!dateString) return '-';
     return new Date(dateString).toLocaleDateString('en-US', {
         year: 'numeric',
         month: 'long',
@@ -209,7 +207,7 @@ const formatDate = (dateString) => {
 };
 
 const formatDateTime = (dateTimeString) => {
-    if (!dateTimeString) return 'N/A';
+    if (!dateTimeString) return '-';
     return new Date(dateTimeString).toLocaleString('en-US', {
         year: 'numeric',
         month: 'short',

@@ -141,7 +141,7 @@
                             <Column header="User Info" style="min-width: 1rem">
                                 <template #body="{ data }">
                                     <div class="flex flex-col">
-                                        <RouterLink :to="`/om/detailUser/${data.id}`" class="hover:underline font-bold">
+                                        <RouterLink :to="`/sales/detailCustomerUser/${data.id}`" class="hover:underline font-bold">
                                             {{ data.firstName }} {{ data.lastName }}
                                             <span v-if="data.isMaster === 1" class="text-blue-400">(Master)</span>
                                         </RouterLink>
