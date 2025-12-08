@@ -2,7 +2,22 @@
     <div class="card">
         <div class="text-2xl font-bold text-gray-800 border-b pb-2 mb-4">Email Settings</div>
 
-        <DataTable :value="listData" :paginator="true" :rows="10" dataKey="id" :rowHover="true" :loading="loading" :filters="filters1" filterDisplay="menu" :expandedRows="expandedRows" @row-toggle="onRowToggle" class="p-datatable-sm">
+        <DataTable 
+            :value="listData" 
+            :paginator="true" 
+            :rows="10" 
+            dataKey="id" 
+            :rowHover="true" 
+            :loading="loading" 
+            :filters="filters1" 
+            filterDisplay="menu" 
+            :expandedRows="expandedRows" 
+            @row-toggle="onRowToggle" 
+            class=" rounded-table"
+            currentPageReportTemplate="Showing {first} to {last} of {totalRecords} entries"
+            paginatorTemplate="CurrentPageReport FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink RowsPerPageDropdown"
+        >
+        
             <template #header>
                 <div class="flex items-center justify-between gap-4 w-full flex-wrap">
                     <div class="flex items-center gap-2 w-full max-w-md">
@@ -84,7 +99,7 @@
             </Column>
 
             <template #expansion="{ data }">
-                <div class="p-4 bg-gray-50 border-t border-gray-200">
+                <div class="p-4">
                     <div class="flex items-center mb-4">
                         <i class="pi pi-users text-lg text-gray-600 mr-2"></i>
                         <div class="text-lg font-bold text-gray-800">Email Recipients</div>
@@ -101,7 +116,6 @@
                                 <div v-for="(emailObj, index) in emailObjects" :key="index" class="inline-flex items-center gap-1 bg-white border border-gray-300 rounded-full px-3 py-1 text-sm">
                                     <span class="text-gray-700">
                                         {{ emailObj.email }}
-                                        <span v-if="emailObj.tag" class="text-gray-500">({{ emailObj.tag }})</span>
                                     </span>
                                     <button type="button" @click="removeEmail(index)" class="ml-1 text-gray-400 hover:text-red-500 focus:outline-none" title="Remove email">
                                         <i class="pi pi-times text-xs"></i>
@@ -115,7 +129,7 @@
                                 <div class="md:col-span-7">
                                     <InputText v-model="newEmail" placeholder="Enter email address" class="w-full" @keyup.enter="addEmail" ref="emailInput" />
                                 </div>
-                                    <Button label="Add Email" icon="pi pi-plus" class="p-button-sm" @click="addEmail" :disabled="!newEmail.trim()" />
+                                <Button label="Add Email" icon="pi pi-plus" class="p-button-sm" @click="addEmail" :disabled="!newEmail.trim()" />
                             </div>
                         </div>
 
@@ -127,7 +141,17 @@
                     </div>
 
                     <!-- Read-only Email List -->
-                    <DataTable v-else :value="getEmailData(data.emails)" :paginator="true" :rows="5" :rowsPerPageOptions="[3, 5, 7, 15, 20, 25, 30, 50]" dataKey="email" :rowHover="true" responsiveLayout="scroll" class="p-datatable-sm">
+                    <DataTable 
+                        v-else :value="getEmailData(data.emails)" 
+                        :paginator="true" :rows="5" 
+                        :rowsPerPageOptions="[5, 10, 20, 25, 50]" 
+                        dataKey="email" 
+                        :rowHover="true" 
+                        responsiveLayout="scroll" 
+                        class="rounded-table" 
+                        :alwaysShowPaginator="false"
+                        currentPageReportTemplate="Showing {first} to {last} of {totalRecords} entries"
+                        paginatorTemplate="CurrentPageReport FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink RowsPerPageDropdown">
                         <Column header="Email Address" style="min-width: 20rem">
                             <template #body="{ data }">
                                 <div class="flex items-center">
@@ -140,11 +164,11 @@
                             </template>
                         </Column>
 
-                        <Column header="Status" style="width: 100px">
+                        <!-- <Column header="Status" style="width: 100px">
                             <template #body="{ data }">
                                 <Badge value="Active" severity="success" class="text-xs font-normal" />
                             </template>
-                        </Column>
+                        </Column> -->
 
                         <template #empty>
                             <div class="text-center py-6">
@@ -152,10 +176,6 @@
                                 <p class="text-gray-500">No email recipients configured</p>
                                 <p class="text-gray-400 text-sm mt-1">Click Edit to add email addresses</p>
                             </div>
-                        </template>
-
-                        <template #footer>
-                            <div class="text-xs text-gray-500 px-3 py-2">Total: {{ data.emails.length }} recipient(s)</div>
                         </template>
                     </DataTable>
                 </div>
@@ -432,6 +452,45 @@ export default {
 </script>
 
 <style scoped lang="scss">
+:deep(.rounded-table) {
+    border-radius: 12px;
+    overflow: hidden;
+    border: 1px solid #e5e7eb;
+
+    .p-datatable-header {
+        border-top-left-radius: 12px;
+        border-top-right-radius: 12px;
+    }
+
+    .p-paginator-bottom {
+        border-bottom-left-radius: 12px;
+        border-bottom-right-radius: 12px;
+    }
+
+    .p-datatable-thead > tr > th {
+        &:first-child {
+            border-top-left-radius: 12px;
+        }
+        &:last-child {
+            border-top-right-radius: 12px;
+        }
+    }
+
+    .p-datatable-tbody > tr:last-child > td {
+        &:first-child {
+            border-bottom-left-radius: 0;
+        }
+        &:last-child {
+            border-bottom-right-radius: 0;
+        }
+    }
+
+    .p-datatable-tbody > tr.p-datatable-emptymessage > td {
+        border-bottom-left-radius: 12px;
+        border-bottom-right-radius: 12px;
+    }
+}
+
 :deep(.p-datatable .p-row-expanded) {
     background-color: #f8fafc !important;
     border-left: 3px solid #3b82f6;

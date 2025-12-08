@@ -176,8 +176,7 @@ function formatDate(dateString) {
     // Detect DD-MM-YYYY
     else if (/^\d{2}-\d{2}-\d{4}$/.test(dateString)) {
         [day, month, year] = dateString.split('-');
-    }
-    else {
+    } else {
         return ''; // unsupported format
     }
 
@@ -191,27 +190,24 @@ function formatDate(dateString) {
         day: '2-digit'
     });
 }
-
-
 </script>
 
 <style scoped>
-
 :deep(.rounded-table) {
     border-radius: 12px;
     overflow: hidden;
     border: 1px solid #e5e7eb;
-    
+
     .p-datatable-header {
         border-top-left-radius: 12px;
         border-top-right-radius: 12px;
     }
-    
+
     .p-paginator-bottom {
         border-bottom-left-radius: 12px;
         border-bottom-right-radius: 12px;
     }
-    
+
     .p-datatable-thead > tr > th {
         &:first-child {
             border-top-left-radius: 12px;
@@ -220,20 +216,19 @@ function formatDate(dateString) {
             border-top-right-radius: 12px;
         }
     }
-    
+
     .p-datatable-tbody > tr:last-child > td {
         &:first-child {
             border-bottom-left-radius: 0;
         }
         &:last-child {
-            border-bottom-right-radius:0;
+            border-bottom-right-radius: 0;
         }
     }
-    
+
     .p-datatable-tbody > tr.p-datatable-emptymessage > td {
         border-bottom-left-radius: 12px;
         border-bottom-right-radius: 12px;
     }
 }
-
 </style>
