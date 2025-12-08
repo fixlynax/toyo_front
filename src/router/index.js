@@ -693,6 +693,11 @@ const router = createRouter({
                     name: 'detail-Customer',
                     component: () => import('@/views/sales/detailCustomer.vue')
                 },
+                {
+                    path: 'sales/detailCustomerUser/:id',
+                    name: 'detail-customer-user',
+                    component: () => import('@/views/sales/detailCustomerUser.vue')
+                },
 
                 // Customer Appointment
                 {
