@@ -438,7 +438,7 @@ onBeforeMount(async () => {
                 <!-- Return Request No Column -->
                 <Column header="Return Req No." style="min-width: 8rem" sortable>
                     <template #body="{ data }">
-                        <RouterLink :to="`/om/detailReturnOrder/${data.returnRequestNo}`" class="hover:underline font-bold text-primary-400">
+                        <RouterLink :to="`/sales/detailCustomerReturnOrder/${data.returnRequestNo}`" class="hover:underline font-bold text-primary-400">
                             {{ data.returnRequestNo }}
                         </RouterLink>
                     </template>

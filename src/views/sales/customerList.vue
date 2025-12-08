@@ -37,9 +37,9 @@
                         <div class="flex gap-2">
                             <!-- <Button type="button" label="Bulk Update" @click="fetchData" /> -->
                             <!-- Right: Create Customer Button -->
-                            <RouterLink to="/om/createEten">
+                            <!-- <RouterLink to="/om/createEten">
                                 <Button type="button" label="Create" icon="pi pi-plus" />
-                            </RouterLink>
+                            </RouterLink> -->
                         </div>
                     </div>
 
@@ -113,7 +113,7 @@
 
             <Column field="memberCode" header="Customer Code" style="min-width: 6rem">
                 <template #body="{ data }">
-                    <RouterLink :to="`/om/detailCustomer/${data.custAccountNo}`" class="hover:underline font-bold text-primary-400">
+                    <RouterLink :to="`/sales/detailCustomer/${data.custAccountNo}`" class="hover:underline font-bold text-primary-400">
                         {{ data.memberCode }}
                     </RouterLink>
                 </template>

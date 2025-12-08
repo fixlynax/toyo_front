@@ -34,11 +34,11 @@
                                     <InputText v-model="filters1['global'].value" placeholder="Quick Search" class="w-full" />
                                 </IconField>
                             </div>
-                            <div>
+                            <!-- <div>
                                 <RouterLink to="/om/createOrder">
                                     <Button label="Create" icon="pi pi-plus" class="p-button-primary" />
                                 </RouterLink>
-                            </div>
+                            </div> -->
                         </div>
 
                         <!-- Filter Row: Customer Name Filter -->
@@ -144,7 +144,7 @@
 
                 <Column header="Order No" style="min-width: 10rem" sortable>
                     <template #body="{ data }">
-                        <RouterLink :to="`/om/detailOrder/${data.orderNo}`" class="hover:underline font-bold text-primary-400">
+                        <RouterLink :to="`/sales/detailCustomerOrder/${data.orderNo}`" class="hover:underline font-bold text-primary-400">
                             {{ data.orderNo || '-' }}
                         </RouterLink>
                     </template>

@@ -142,7 +142,7 @@
 
             <Column field="orderNo" header="Order No." style="min-width: 15rem" sortable>
                 <template #body="{ data }">
-                    <RouterLink :to="`/om/detailBackOrder/${data.orderNo}`" class="hover:underline font-bold text-primary-400">
+                    <RouterLink :to="`/sales/detailCustomerBackOrder/${data.orderNo}`" class="hover:underline font-bold text-primary-400">
                         {{ data.orderNo }}
                     </RouterLink>
                 </template>
