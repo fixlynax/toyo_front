@@ -124,76 +124,61 @@
                 </div>
 
                 <!-- Warranty Certificates Section -->
-                <!-- Warranty Certificates Section -->
-<div class="flex flex-col md:flex-row gap-8">
-    <div class="card flex flex-col gap-6 w-full">
-        <div class="flex items-center gap-4 border-b pb-2">
-            <span class="text-2xl font-bold text-gray-800">Warranty Certificates</span>
-        </div>
-        
-        <!-- Loading State -->
-        <LoadingPage v-if="loading" :message="'Loading User Details...'" :sub-message="'Fetching member data'" />
-        
-        <!-- No Warranty Certificates -->
-        <div v-else-if="!memberDetail.warrantyCerts || memberDetail.warrantyCerts.length === 0" class="p-6 text-center">
-            <div class="text-gray-500 mb-2">No warranty certificates found</div>
-            <div class="text-gray-400 text-sm">This member has not registered any warranty certificates</div>
-        </div>
-        
-        <!-- Warranty Certificates List -->
-        <div v-else class="p-4 space-y-4">
-            <div class="grid grid-cols-1 gap-4">
-                <!-- Certificate Item -->
-                <div v-for="cert in memberDetail.warrantyCerts" :key="cert.id" 
-                     class="bg-gray-50 rounded-lg p-4 border border-gray-200 hover:bg-gray-100 transition-colors">
-                    <div class="flex justify-between items-start">
-                        <!-- Left Side: Certificate Info -->
-                        <div class="space-y-3">
-                            <div>
-                                <span class="block text-xm font-medium text-gray-500">Warranty Certificate No</span>
-                                <p class="text-base font-semibold text-gray-800">{{ cert.warrantyCertNo }}</p>
-                            </div>
-                            <div class="flex items-center gap-3">
-                                <div>
-                                    <span class="block text-xm font-medium text-gray-500">Type</span>
-                                    <Tag :value="cert.type" 
-                                         :severity="cert.type === 'NORMAL' ? 'success' : 'warning'" 
-                                         size="small" />
-                                </div>
-                                <!-- <div>
-                                    <span class="block text-xs font-medium text-gray-500">ID</span>
-                                    <span class="text-sm font-semibold text-gray-600">#{{ cert.id }}</span>
-                                </div> -->
-                            </div>
+                <div class="flex flex-col md:flex-row gap-8">
+                    <div class="card flex flex-col gap-6 w-full">
+                        <div class="flex items-center gap-4 border-b pb-2">
+                            <span class="text-2xl font-bold text-gray-800">Warranty Certificates</span>
                         </div>
-                        
-                        <!-- Right Side: Action Button -->
-                        <div class="flex flex-col items-end gap-2">
-                            <RouterLink 
-                                :to="cert.type === 'NORMAL' 
-                                    ? `/marketing/detailWarrantyRegistration/${cert.id}`
-                                    : `/marketing/detailOERegistration/${cert.id}`">
-                                <Button 
-                                    :label="cert.type === 'NORMAL' ? 'View Details' : 'View OE Details'"
-                                    icon="pi pi-external-link"
-                                    size="small"
-                                    class="p-button-outlined"
-                                    :class="cert.type === 'NORMAL' ? 'p-button-primary' : 'p-button-warning'"
-                                />
-                            </RouterLink>
-                            <span class="text-xs text-gray-500">
-                                Click to view {{ cert.type === 'NORMAL' ? 'Normal' : 'OE' }} certificate details
-                            </span>
+
+                        <!-- Loading State -->
+                        <LoadingPage v-if="loading" :message="'Loading User Details...'" :sub-message="'Fetching member data'" />
+
+                        <!-- No Warranty Certificates -->
+                        <div v-else-if="!memberDetail.warrantyCerts || memberDetail.warrantyCerts.length === 0" class="p-6 text-center">
+                            <div class="text-gray-500 mb-2">No warranty certificates found</div>
+                            <div class="text-gray-400 text-sm">This member has not registered any warranty certificates</div>
+                        </div>
+
+                        <!-- Warranty Certificates List -->
+                        <div v-else class="p-4 space-y-4">
+                            <div class="grid grid-cols-1 gap-4">
+                                <!-- Certificate Item -->
+                                <div v-for="cert in memberDetail.warrantyCerts" :key="cert.id" class="bg-gray-50 rounded-lg p-4 border border-gray-200 hover:bg-gray-100 transition-colors">
+                                    <div class="flex justify-between items-start">
+                                        <!-- Left Side: Certificate Info -->
+                                        <div class="space-y-3">
+                                            <div>
+                                                <span class="block text-xm font-medium text-gray-500">Warranty Certificate No</span>
+                                                <p class="text-base font-semibold text-gray-800">{{ cert.warrantyCertNo }}</p>
+                                            </div>
+                                            <div class="flex items-center gap-3">
+                                                <div>
+                                                    <span class="block text-xm font-medium text-gray-500">Type</span>
+                                                    <Tag :value="cert.type" :severity="cert.type === 'NORMAL' ? 'success' : 'warning'" size="small" />
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <!-- Right Side: Action Button -->
+                                        <div class="flex flex-col items-end gap-2">
+                                            <RouterLink :to="cert.type === 'NORMAL' ? `/marketing/detailWarrantyRegistration/${cert.id}` : `/marketing/detailOERegistration/${cert.id}`">
+                                                <Button
+                                                    :label="cert.type === 'NORMAL' ? 'View Details' : 'View OE Details'"
+                                                    icon="pi pi-external-link"
+                                                    size="small"
+                                                    class="p-button-outlined"
+                                                    :class="cert.type === 'NORMAL' ? 'p-button-primary' : 'p-button-warning'"
+                                                />
+                                            </RouterLink>
+                                            <span class="text-xs text-gray-500"> Click to view {{ cert.type === 'NORMAL' ? 'Normal' : 'OE' }} certificate details </span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
             </div>
-                </div>
-            </div>
-        </div>
-    </div>
-
-                    
 
             <div class="md:w-1/3">
                 <!-- Account Info -->
@@ -332,35 +317,6 @@
                                     <span class="block text-xs font-medium text-gray-500 mb-1">Description</span>
                                     <span class="text-sm text-gray-700 line-clamp-2">{{ transaction.desc || '-' }}</span>
                                 </div>
-
-                                <!-- Transaction Details in two columns -->
-                                <div class="grid grid-cols-2 gap-3 text-xs">
-                                    <!-- Transaction Type -->
-                                    <div>
-                                        <span class="block font-medium text-gray-500 mb-1">Type</span>
-                                        <span class="text-gray-800">
-                                            <Tag :value="transaction.transactionType || '-'" :severity="transaction.transactionType === 'EARN' ? 'success' : 'danger'" size="small" />
-                                        </span>
-                                    </div>
-
-                                    <!-- Transaction Date -->
-                                    <div v-if="transaction.created">
-                                        <span class="block font-medium text-gray-500 mb-1">Date</span>
-                                        <span class="text-gray-800">{{ formatDateTime(transaction.created) }}</span>
-                                    </div>
-
-                                    <!-- If no date, show transaction ID or index -->
-                                    <div v-else-if="transaction.id">
-                                        <span class="block font-medium text-gray-500 mb-1">ID</span>
-                                        <span class="text-gray-800 font-mono text-xs">{{ transaction.id }}</span>
-                                    </div>
-
-                                    <!-- Empty placeholder if no date or ID -->
-                                    <div v-else>
-                                        <span class="block font-medium text-gray-500 mb-1">Index</span>
-                                        <span class="text-gray-800">#{{ index + 1 }}</span>
-                                    </div>
-                                </div>
                             </div>
                         </div>
                     </div>
@@ -416,7 +372,6 @@ import { useRoute } from 'vue-router';
 import { useToast } from 'primevue/usetoast';
 import api from '@/service/api';
 import LoadingPage from '@/components/LoadingPage.vue';
-
 
 const route = useRoute();
 const toast = useToast();
