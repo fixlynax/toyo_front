@@ -30,7 +30,7 @@
                        <Tag :value="getStatusText(warantyDetail.status)" :severity="getStatusSeverity(warantyDetail.status)" />
                     </div>
                 </div>
-                <div class="grid grid-cols-3 md:grid-cols-3 gap-4">
+                <div class="grid grid-cols-3 md:grid-cols-3 gap-4 mt-4">
                     <div>
                         <span class="block text-sm font-bold text-black-800">Ref No</span>
                         <span class="text-lg font-medium">{{ warantyDetail.claimRefNo }}</span>
