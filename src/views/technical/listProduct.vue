@@ -112,7 +112,7 @@
                             <span>{{ data.sectionwidth }}</span>
                         </div>
                         <div class="flex">
-                            <span class="w-40 text-gray-800 font-semibold">Tire Series:</span>
+                            <span class="w-40 text-gray-800 font-semibold">Tyre Series:</span>
                             <span>{{ data.tireseries }}</span>
                         </div>
                         <div class="flex">

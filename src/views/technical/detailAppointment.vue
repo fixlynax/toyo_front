@@ -272,7 +272,7 @@ onMounted(() => {
             <!-- Tire Information - Side by side like customer info -->
             <div class="card flex flex-col w-full" v-if="hasTireInfo">
                 <div class="flex items-center justify-between border-b pb-2 mb-4">
-                    <div class="text-2xl font-bold text-gray-800">Tire Information</div>
+                    <div class="text-2xl font-bold text-gray-800">Tyre Information</div>
                 </div>
             <!-- "pattern": "P57",
             "tyresize": "16",

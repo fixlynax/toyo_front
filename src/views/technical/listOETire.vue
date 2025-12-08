@@ -1,6 +1,6 @@
 <template>
     <div class="card">
-        <div class="text-2xl font-bold text-gray-800 border-b pb-2 mb-4">List OE Tire</div>
+        <div class="text-2xl font-bold text-gray-800 border-b pb-2 mb-4">List OE Tyre</div>
 
         <DataTable
             :value="tyres"
@@ -68,7 +68,7 @@
                             <span>{{ data.section_width }}</span>
                         </div>
                         <div class="flex">
-                            <span class="w-40 text-gray-800 font-semibold">Tire Size:</span>
+                            <span class="w-40 text-gray-800 font-semibold">Tyre Size:</span>
                             <span>{{ data.tyre_size }}</span>
                         </div>
                         <div class="flex">
@@ -139,7 +139,7 @@ const fetchExportOE = async () => {
         document.body.removeChild(a);
         window.URL.revokeObjectURL(url);
     } catch (err) {
-        console.error('error fetching OE Tire export:', err);
+        console.error('error fetching OE Tyre export:', err);
     } finally {
         loading.value = false;
     }

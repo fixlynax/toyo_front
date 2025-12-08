@@ -202,7 +202,7 @@ const fetchExportPattern = async () => {
         document.body.removeChild(a);
         window.URL.revokeObjectURL(url);
     } catch (err) {
-        console.error('error fetching OE Tire export:', err);
+        console.error('error fetching OE Tyre export:', err);
     } finally {
         loading.value = false;
     }

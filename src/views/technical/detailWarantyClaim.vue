@@ -73,8 +73,8 @@
                 <!-- Tire Detail -->
                 <div class="card flex flex-col w-full">
                     <div class="flex items-center justify-between border-b pb-2 mb-4">
-                        <div class="text-2xl font-bold text-gray-800">Tire Detail</div>
-                        <Button label="Update Tire Details" class="p-button-info" size="small" @click="openEditTier" v-if="warantyDetail.status !== 6 && warantyDetail.status !== 5 && warantyDetail.status_string !== 'Pending Customer Invoice'"/>
+                        <div class="text-2xl font-bold text-gray-800">Tyre Detail</div>
+                        <Button label="Update Tyre Details" class="p-button-info" size="small" @click="openEditTier" v-if="warantyDetail.status !== 6 && warantyDetail.status !== 5 && warantyDetail.status_string !== 'Pending Customer Invoice'"/>
                     </div>
                     <div :class="['grid',  'gap-4', 'mb-2', warantyDetail.tire_info?.plateSerialAdmin ? 'grid-cols-2 md:grid-cols-5' : 'grid-cols-2 md:grid-cols-4']">
                         <div>
@@ -185,7 +185,7 @@
                 <!-- Tire Detail -->
                 <div class="card flex flex-col w-full">
                     <div class="flex items-center justify-between border-b pb-2 mb-4">
-                        <div class="text-2xl font-bold text-gray-800">Tire Depth Image</div>
+                        <div class="text-2xl font-bold text-gray-800">Tyre Depth Image</div>
                     </div>
                     <div v-if="TireDepthImages.length > 0" class="mb-6">
                         <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
@@ -206,7 +206,7 @@
                     </div>
                     <div v-else class="text-center py-8 bg-gray-50 rounded-lg mb-6">
                         <i class="pi pi-image text-4xl text-gray-400 mb-3"></i>
-                        <p class="text-gray-500 font-medium">No tire depth images available</p>
+                        <p class="text-gray-500 font-medium">No tyre depth images available</p>
                     </div>
                 </div>
 
@@ -615,7 +615,7 @@
 
         <template #footer>
             <Button label="Cancel" icon="pi pi-times" class="p-button-text" @click="closeEditTire" :disabled="editTire" />
-            <Button label="Update Tire" icon="pi pi-check" class="p-button-primary" @click="submitEditTire" :loading="editTire" />
+            <Button label="Update Tyre" icon="pi pi-check" class="p-button-primary" @click="submitEditTire" :loading="editTire" />
         </template>
     </Dialog>
     <!-- Create Claim Dialog -->
@@ -1123,23 +1123,23 @@ const submitEditTire = async () => {
             toast.add({
                 severity: 'success',
                 summary: 'Success',
-                detail: 'Tire details updated successfully',
+                detail: 'Tyre details updated successfully',
                 life: 3000
             });
         } else {
             toast.add({
                 severity: 'error',
                 summary: 'Error',
-                detail: response.data.message || 'Failed to Update Tire details',
+                detail: response.data.message || 'Failed to Update Tyre details',
                 life: 3000
             });
         }
     } catch (error) {
-        console.error('Error Update Tire details:', error);
+        console.error('Error Update Tyre details:', error);
         toast.add({
             severity: 'error',
             summary: 'Error',
-            detail: error.response?.data?.message || 'Failed to Update Tire details',
+            detail: error.response?.data?.message || 'Failed to Update Tyre details',
             life: 3000
         });
     } finally {
@@ -1635,14 +1635,14 @@ const loadTireDeptImages = async () => {
             images.push({
                 itemImageSrc: imageSrc,
                 thumbnailImageSrc: imageSrc,
-                alt: `Tire Depth ${index + 1}`
+                alt: `Tyre Depth ${index + 1}`
             });
         } catch (err) {
-            console.error('Error loading tire depth image:', err);
+            console.error('Error loading Tyre depth image:', err);
             images.push({
                 itemImageSrc: '/placeholder-image.jpg',
                 thumbnailImageSrc: '/placeholder-image.jpg',
-                alt: `Tire Depth ${index + 1} - Failed to load`
+                alt: `Tyre Depth ${index + 1} - Failed to load`
             });
         }
     }
@@ -1655,7 +1655,7 @@ const loadSubmittedPhotos = async () => {
     const photoTypes = [
         { key: 'mileageFileURL', label: 'Mileage' },
         { key: 'serialNoFileURL', label: 'Serial Number' },
-        { key: 'tireSizeFileURL', label: 'Tire Size' },
+        { key: 'tireSizeFileURL', label: 'Tyre Size' },
         { key: 'defectAreaFileURL', label: 'Defect Area' }
     ];
 
