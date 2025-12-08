@@ -89,7 +89,7 @@
                     <template v-if="!selectedCustomer">
                         <div class="flex flex-col items-center gap-2">
                             <i class="pi pi-building text-3xl text-blue-400"></i>
-                            <span class="text-lg">Select a customer to view data</span>
+                            <span class="text-lg">Select a customer to view</span>
                             <span class="text-sm text-gray-400">Choose a customer name from the dropdown above</span>
                         </div>
                     </template>

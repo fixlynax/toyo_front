@@ -393,7 +393,7 @@ onBeforeMount(async () => {
                             </div>
 
                             <!-- Status messages -->
-                            <div v-if="!hasCustomerSelected" class="text-sm text-blue-600 italic">Select a customer to view return orders</div>
+                            <div v-if="!hasCustomerSelected" class="text-sm text-blue-600 italic">Select a customer to view</div>
                             <div v-else-if="showDateRangeFilter && !hasDateFilterApplied" class="text-sm text-blue-600 italic">Please select a date range to view {{ currentTabLabel }} orders</div>
                         </div>
                     </div>
@@ -404,7 +404,7 @@ onBeforeMount(async () => {
                         <template v-if="!hasCustomerSelected">
                             <div class="flex flex-col items-center gap-2">
                                 <i class="pi pi-building text-3xl text-blue-400"></i>
-                                <span class="text-lg">Select a customer to view return orders</span>
+                                <span class="text-lg">Select a customer to view</span>
                                 <span class="text-sm text-gray-400">Choose a customer name from the dropdown above</span>
                             </div>
                         </template>

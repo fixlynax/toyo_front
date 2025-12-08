@@ -90,7 +90,7 @@
                             </div>
 
                             <!-- Status message -->
-                            <div v-if="!hasCustomerSelected && activeTabIndex !== 2" class="text-sm text-blue-600 italic">Select a customer to view orders</div>
+                            <div v-if="!hasCustomerSelected && activeTabIndex !== 2" class="text-sm text-blue-600 italic">Select a customer to view</div>
                             <div v-else-if="activeTabIndex === 2 && !hasDateFilterApplied" class="text-sm text-blue-600 italic">Please select a date range to view completed orders</div>
                         </div>
                     </div>
@@ -101,7 +101,7 @@
                         <template v-if="!hasCustomerSelected && activeTabIndex !== 2">
                             <div class="flex flex-col items-center gap-2">
                                 <i class="pi pi-building text-3xl text-blue-400"></i>
-                                <span class="text-lg">Select a customer to view orders</span>
+                                <span class="text-lg">Select a customer to view</span>
                                 <span class="text-sm text-gray-400">Choose a customer name from the dropdown above</span>
                             </div>
                         </template>
