@@ -26,6 +26,7 @@ const statusTabs = [
     { label: 'Approved', status: 'APPROVED', requiresDateRange: false },
     { label: 'Rejected', status: 'REJECTED', requiresDateRange: true },
     { label: 'Pending Collection', status: 'PENDING_COLLECTION', requiresDateRange: false },
+    { label: 'Return Received', status: 'CREDITNOTE', requiresDateRange: false }, 
     { label: 'Completed', status: 'COMPLETE', requiresDateRange: true }
 ];
 const activeTabIndex = ref(0);
@@ -36,7 +37,8 @@ const STATUS_MAP = {
     1: { label: 'Approved', severity: 'success' },
     2: { label: 'Rejected', severity: 'danger' },
     77: { label: 'Pending Collection', severity: 'secondary' },
-    9: { label: 'Completed', severity: 'primary' }
+    9: { label: 'Completed', severity: 'primary' },
+    88: { label: 'Return Received', severity: 'info' }
 };
 
 // 🧩 Computed properties
@@ -46,13 +48,22 @@ const showDateRangeFilter = computed(() => currentTab.value?.requiresDateRange |
 const isCompletedTab = computed(() => currentTab.value?.status === 'COMPLETE');
 const isPendingCTCTab = computed(() => currentTab.value?.status === 'PENDING_COLLECTION');
 const isRejectedTab = computed(() => currentTab.value?.status === 'REJECTED');
+const isPendingCNTab = computed(() => currentTab.value?.status === 'CREDITNOTE'); 
 
 // 🧩 Helpers
 const getOverallStatusSeverity = (orderStatus) => {
+    // If current tab is Pending CN, use the Pending Credit Note severity
+    if (isPendingCNTab.value && currentTab.value?.status === 'CREDITNOTE') {
+        return STATUS_MAP[88].severity;
+    }
     return STATUS_MAP[Number(orderStatus)]?.severity || 'warn';
 };
 
 const getOverallStatusLabel = (orderStatus) => {
+    // If current tab is Pending CN, use the Pending Credit Note label
+    if (isPendingCNTab.value && currentTab.value?.status === 'CREDITNOTE') {
+        return STATUS_MAP[88].label;
+    }
     return STATUS_MAP[Number(orderStatus)]?.label || 'Pending';
 };
 
@@ -64,6 +75,11 @@ const isCompletedStatus = (orderStatus) => {
 // 🧩 Check if status is pending collection
 const isPendingCTCStatus = (orderStatus) => {
     return Number(orderStatus) === 77;
+};
+
+// 🧩 Check if status is pending credit note
+const isPendingCNStatus = (orderStatus) => {
+    return Number(orderStatus) === 88;
 };
 
 // 🧩 Date Formatter
