@@ -682,11 +682,81 @@ const router = createRouter({
                 // ===============================
                 // SALES
                 // ===============================
-                // Test Page
+                // Customer List
                 {
-                    path: 'sales/test',
-                    name: 'Sales-Test',
-                    component: () => import('@/views/sales/test.vue')
+                    path: 'sales/customerList',
+                    name: 'Customer-List',
+                    component: () => import('@/views/sales/customerList.vue')
+                },
+                {
+                    path: 'sales/detailCustomer/:custAccNo',
+                    name: 'detail-Customer',
+                    component: () => import('@/views/sales/detailCustomer.vue')
+                },
+                {
+                    path: 'sales/detailCustomerUser/:id',
+                    name: 'detail-customer-user',
+                    component: () => import('@/views/sales/detailCustomerUser.vue')
+                },
+
+                // Customer Appointment
+                {
+                    path: 'sales/customerAppointment/',
+                    name: 'Appointment-List',
+                    component: () => import('@/views/sales/customerAppointment.vue')
+                },
+                {
+                    path: 'sales/detailCustomerAppointment/:id',
+                    name: 'detail-Appointment',
+                    component: () => import('@/views/sales/detailCustomerAppointment.vue')
+                },
+
+                // Customer Warranty Claim
+                {
+                    path: 'sales/customerWarrantyClaim',
+                    name: 'Customer-Warranty-Claim',
+                    component: () => import('@/views/sales/customerWarrantyClaim.vue')
+                },
+                {
+                    path: 'sales/detailCustomerWarrantyClaim/:id',
+                    name: 'Detail-Customer-Warranty-Claim',
+                    component: () => import('@/views/sales/detailCustomerWarrantyClaim.vue')
+                },
+
+                // Customer Order
+                {
+                    path: 'sales/detailCustomerOrder/:orderNo',
+                    name: 'Customer-Order',
+                    component: () => import('@/views/sales/detailCustomerOrder.vue')
+                },
+                {
+                    path: 'sales/customerOrder',
+                    name: 'Detail-Customer-Order',
+                    component: () => import('@/views/sales/customerOrder.vue')
+                },
+
+                // Customer Return Order
+                {
+                    path: 'sales/customerReturnOrder',
+                    name: 'Customer-Return-Order',
+                    component: () => import('@/views/sales/customerReturnOrder.vue')
+                },
+                {
+                    path: 'sales/detailCustomerReturnOrder/:retOrdNo',
+                    name: 'Detail-Customer-Return-Order',
+                    component: () => import('@/views/sales/detailCustomerReturnOrder.vue')
+                },
+
+                // Customer Back Order
+                {
+                    path: 'sales/customerBackOrder',
+                    name: 'Customer-Back-Order',
+                    component: () => import('@/views/sales/customerBackOrder.vue')
+                },
+                {
+                    path: 'sales/detailCustomerBackOrder/:boNo',
+                    name: 'Detail-Customer-Back-Order',
+                    component: () => import('@/views/sales/detailCustomerBackOrder.vue')
                 },
 
                 // ===============================
