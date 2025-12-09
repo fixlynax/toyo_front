@@ -2371,7 +2371,7 @@ const generateReport = (report) => {
                             <tr>
                                 <td style="border:0;">CLAIM STATUS</td>
                                 <td style="border:0;">:</td>
-                                <td style="border:0;">COMPLETED</td>
+                                <td style="border:0;">${report.status || 'COMPLETED'}</td>
                             </tr>
                             <tr>
                                 <td style="border:0;">CLAIM DATE</td>
