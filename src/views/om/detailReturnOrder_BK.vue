@@ -86,7 +86,6 @@
                                 {{ data.materialid }} <br />
                                 {{ data.materialdescription }}
                                 <span class="block text-xs text-gray-500">SP: {{ data.salesprogramid || '-' }} </span>
-                                <Tag v-if="data.itemcategory === 'ZR3F'" value="ZR3F" severity="warning" size="small" class="mt-1" />
                             </template>
                         </Column>
 
@@ -182,148 +181,26 @@
                     <!-- Action Buttons -->
                     <div class="flex justify-end mt-4 gap-2" v-if="order.orderstatus === 0">
                         <Button label="Reject" severity="danger" size="small" @click="onRejectReturnOrder" :loading="loadingAction === 'reject'" />
-                        <Button label="Approve" severity="success" size="small" @click="openEditPopup" :loading="loadingAction === 'approve'" />
+                        <Button label="Approve" severity="success" size="small" @click="onApproveReturnOrder" :loading="loadingAction === 'approve'" />
                     </div>
+
+                    <!-- Status Labels after action -->
+                    <!-- <div class="flex justify-end mt-4" v-else>
+                        <Tag :value="getActionStatusLabel(order.orderstatus)" :severity="getActionStatusSeverity(order.orderstatus)" />
+                    </div> -->
                 </div>
             </div>
         </div>
-
-        <!-- Edit Return Items Dialog -->
-        <Dialog v-model:visible="showEditDialog" modal header="Edit Return Items" :style="{ width: '800px' }" :closable="false">
-            <div class="p-4">
-                <div class="mb-4 p-3 bg-yellow-50 border border-yellow-200 rounded-md">
-                    <p class="text-sm text-yellow-800 font-medium">
-                        <i class="pi pi-info-circle mr-2"></i>
-                        Only items with category <span class="font-bold">ZR3F</span> can be edited. You can modify quantities or remove these items.
-                    </p>
-                </div>
-
-                <DataTable :value="editableItems" class="p-datatable-sm" dataKey="id" stripedRows>
-                    <Column header="Material" style="width: 200px">
-                        <template #body="{ data }">
-                            <div class="font-medium">{{ data.materialid }}</div>
-                            <div class="text-sm text-gray-600">{{ data.materialdescription }}</div>
-                        </template>
-                    </Column>
-                    
-                    <Column field="itemcategory" header="Category" style="width: 100px">
-                        <template #body="{ data }">
-                            <Tag :value="data.itemcategory" 
-                                 :severity="data.itemcategory === 'ZR3F' ? 'warning' : 'info'" 
-                                 size="small" />
-                        </template>
-                    </Column>
-                    
-                    <Column header="Original Qty" style="width: 100px">
-                        <template #body="{ data }">
-                            <div class="text-center">{{ data.originalQty }}</div>
-                        </template>
-                    </Column>
-                    
-                    <Column header="New Qty" style="width: 150px">
-                        <template #body="{ data }">
-                            <div v-if="data.itemcategory === 'ZR3F'">
-                                <InputNumber v-model="data.qty" 
-                                             :min="0" 
-                                             :max="9999"
-                                             showButtons
-                                             buttonLayout="horizontal"
-                                             :step="1"
-                                             class="w-full"
-                                             :disabled="data.removed || data.itemcategory !== 'ZR3F'">
-                                    <template #incrementbuttonicon>
-                                        <span class="pi pi-plus" />
-                                    </template>
-                                    <template #decrementbuttonicon>
-                                        <span class="pi pi-minus" />
-                                    </template>
-                                </InputNumber>
-                            </div>
-                            <div v-else class="text-center text-gray-500">
-                                {{ data.qty }}
-                            </div>
-                        </template>
-                    </Column>
-                    
-                    <Column header="Status" style="width: 100px">
-                        <template #body="{ data }">
-                            <span v-if="data.removed" class="px-2 py-1 bg-red-100 text-red-800 text-xs rounded-full">Removed</span>
-                            <span v-else-if="data.qty !== data.originalQty" class="px-2 py-1 bg-blue-100 text-blue-800 text-xs rounded-full">Modified</span>
-                            <span v-else class="px-2 py-1 bg-gray-100 text-gray-800 text-xs rounded-full">No Change</span>
-                        </template>
-                    </Column>
-                    
-                    <Column header="Actions" style="width: 120px">
-                        <template #body="{ data }">
-                            <div v-if="data.itemcategory === 'ZR3F'">
-                                <Button v-if="!data.removed" 
-                                        icon="pi pi-trash" 
-                                        severity="danger" 
-                                        text 
-                                        rounded
-                                        @click="removeZR3FItem(data)"
-                                        v-tooltip="'Remove item'" />
-                                
-                                <Button v-if="data.removed" 
-                                        icon="pi pi-undo" 
-                                        severity="secondary" 
-                                        text 
-                                        rounded
-                                        @click="restoreZR3FItem(data)"
-                                        v-tooltip="'Restore item'" />
-                            </div>
-                            <div v-else class="text-center text-gray-400">
-                                <i class="pi pi-lock"></i>
-                            </div>
-                        </template>
-                    </Column>
-                </DataTable>
-
-                <div class="mt-6 p-3 bg-blue-50 border border-blue-200 rounded-md">
-                    <div class="flex justify-between items-center">
-                        <div>
-                            <p class="text-sm font-medium text-blue-800">
-                                Total ZR3F Items: {{ zr3fItemCount }} ({{ editableZR3FItems.length }} editable)
-                            </p>
-                            <p v-if="hasZR3FChanges" class="text-sm text-blue-600 mt-1">
-                                <i class="pi pi-exclamation-circle mr-1"></i>
-                                Changes detected: {{ changeSummary }}
-                            </p>
-                            <p v-else class="text-sm text-green-600 mt-1">
-                                <i class="pi pi-check-circle mr-1"></i>
-                                No changes to ZR3F items
-                            </p>
-                        </div>
-                        <div class="text-right">
-                            <p class="text-sm text-gray-600">Click "Proceed" to approve with changes</p>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            
-            <template #footer>
-                <Button label="Cancel" icon="pi pi-times" severity="secondary" @click="closeEditDialog" 
-                        :disabled="loadingAction === 'approve'" />
-                <Button label="Proceed" icon="pi pi-check" severity="success" @click="proceedWithApproval" 
-                        :loading="loadingAction === 'approve'" />
-            </template>
-        </Dialog>
 
         <Toast />
     </Fluid>
 </template>
 
 <script setup>
-import { ref, onMounted, computed } from 'vue';
+import { ref, onMounted, watch, computed } from 'vue';
 import { useRoute } from 'vue-router';
 import { useToast } from 'primevue/usetoast';
 import api from '@/service/api';
-import Dialog from 'primevue/dialog';
-import InputNumber from 'primevue/inputnumber';
-import Tag from 'primevue/tag';
-import Button from 'primevue/button';
-import DataTable from 'primevue/datatable';
-import Column from 'primevue/column';
 
 const route = useRoute();
 const toast = useToast();
@@ -337,53 +214,6 @@ const returnOrderArray = ref([]);
 const loading = ref(true);
 const loadingAction = ref(null);
 const error = ref(null);
-
-// Add new reactive variables for edit functionality
-const showEditDialog = ref(false);
-const editableItems = ref([]);
-const originalItems = ref([]);
-
-// Check if there are ZR3F items
-const hasZR3FItems = computed(() => {
-    return returnOrderArray.value.some(item => item.itemcategory === 'ZR3F');
-});
-
-const zr3FItems = computed(() => {
-    return returnOrderArray.value.filter(item => item.itemcategory === 'ZR3F');
-});
-
-const editableZR3FItems = computed(() => {
-    return editableItems.value.filter(item => item.itemcategory === 'ZR3F');
-});
-
-const zr3fItemCount = computed(() => {
-    return zr3FItems.value.length;
-});
-
-const hasZR3FChanges = computed(() => {
-    return editableItems.value.some(item => 
-        item.itemcategory === 'ZR3F' && 
-        (item.removed || item.qty !== item.originalQty)
-    );
-});
-
-const changeSummary = computed(() => {
-    const changedItems = editableItems.value.filter(item => 
-        item.itemcategory === 'ZR3F' && 
-        (item.removed || item.qty !== item.originalQty)
-    );
-    
-    if (changedItems.length === 0) return 'No changes';
-    
-    const removed = changedItems.filter(item => item.removed).length;
-    const qtyChanged = changedItems.filter(item => !item.removed && item.qty !== item.originalQty).length;
-    
-    const parts = [];
-    if (removed > 0) parts.push(`${removed} removed`);
-    if (qtyChanged > 0) parts.push(`${qtyChanged} quantity changed`);
-    
-    return parts.join(', ');
-});
 
 // ✅ Enhanced price mapping functions
 const getItemPrice = (item) => {
@@ -417,6 +247,12 @@ const getItemPrice = (item) => {
     }
 
     return 0;
+};
+
+// Helper to format item number for comparison (remove leading zeros)
+const formatItemNoForComparison = (itemNo) => {
+    if (!itemNo) return '';
+    return itemNo.toString().replace(/^0+/, '');
 };
 
 // Method to calculate item total
@@ -536,6 +372,15 @@ const fetchReturnOrderDetail = async () => {
 
             console.log('Order Data:', orderData.value);
             console.log('Return Items:', returnOrderArray.value);
+            console.log('Fullfill Order Array:', orderData.value.fullfill_order_array);
+
+            // Log price mapping for debugging
+            returnOrderArray.value.forEach((item) => {
+                const price = getItemPrice(item);
+                const total = calculateItemTotal(item);
+                console.log(`Item ${item.materialid}: Qty=${item.qty}, Price=${price}, Total=${total}`);
+            });
+            console.log('Subtotal:', subtotal.value);
         } else {
             error.value = 'No data found for this return order';
             showToast('error', 'Error', error.value);
@@ -548,246 +393,60 @@ const fetchReturnOrderDetail = async () => {
     }
 };
 
-// Open edit dialog
-const openEditPopup = () => {
-    if (!hasZR3FItems.value) {
-        // If no ZR3F items, proceed directly to approval
-        onApproveReturnOrder();
-        return;
-    }
-    
-    // Prepare editable items
-    editableItems.value = returnOrderArray.value.map((item, index) => ({
-        ...item,
-        id: `${item.materialid}_${item.salesdoclineitem || item.itemno}_${index}`,
-        originalQty: parseInt(item.qty) || 0,
-        qty: parseInt(item.qty) || 0,
-        removed: false,
-        index: index
-    }));
-    
-    originalItems.value = JSON.parse(JSON.stringify(editableItems.value));
-    showEditDialog.value = true;
-};
-
-// Close edit dialog
-const closeEditDialog = () => {
-    showEditDialog.value = false;
-    editableItems.value = [];
-    originalItems.value = [];
-};
-
-// Remove ZR3F item
-const removeZR3FItem = (item) => {
-    if (item.itemcategory === 'ZR3F') {
-        item.removed = true;
-        item.qty = 0;
-    }
-};
-
-// Restore ZR3F item
-const restoreZR3FItem = (item) => {
-    if (item.itemcategory === 'ZR3F') {
-        item.removed = false;
-        item.qty = item.originalQty;
-    }
-};
-
-// Proceed with approval after editing
-const proceedWithApproval = async () => {
-    try {
-        loadingAction.value = 'approve';
-        
-        // Check if there are any changes to ZR3F items
-        const hasChanges = hasZR3FChanges.value;
-        
-        // Prepare the modified return_order_array
-        const modifiedArray = editableItems.value
-            .filter(item => !item.removed)
-            .map(item => ({
-                materialid: item.materialid,
-                salesdoclineitem: item.salesdoclineitem || item.itemno,
-                itemcategory: item.itemcategory,
-                plant: item.plant,
-                qty: item.qty.toString(),
-            }));
-        
-        console.log('Modified return array:', modifiedArray);
-        console.log('Has ZR3F changes:', hasChanges);
-        
-        // Send to API with modified data
-        const payload = new URLSearchParams();
-        payload.append('status', '1'); // 1 = Approved
-        
-        // Only send return_order_array if there are changes to ZR3F items
-        if (hasChanges) {
-            payload.append('return_order_array', JSON.stringify(modifiedArray));
-            console.log('Sending modified array to backend');
-        } else {
-            console.log('No changes to ZR3F items, sending empty array');
-            payload.append('return_order_array', JSON.stringify([])); // Send empty array if no changes
-        }
-        
-        const response = await api.postExtra(`order/update-return-order/${returnOrderNo}`, payload, {
-            headers: {
-                'Content-Type': 'application/x-www-form-urlencoded',
-                Accept: 'application/json'
-            }
-        });
-        
-        console.log('Approve response:', response.data);
-        
-        if (response.data.status === 1) {
-            const message = hasChanges ? 
-                'Return order approved successfully with modifications!' : 
-                'Return order approved successfully!';
-            
-            showToast('success', 'Success', message);
-            order.value.orderstatus = 1;
-            
-            if (response.data.admin_data) {
-                Object.assign(order.value, response.data.admin_data);
-            }
-            
-            // Update local data
-            await fetchReturnOrderDetail();
-            closeEditDialog();
-        } else {
-            // Handle SAP errors from backend
-            let errorMessage = 'Failed to approve return order';
-            let sapError = null;
-            
-            if (response.data.error) {
-                const errorData = response.data.error;
-                errorMessage = errorData.message || errorData.code || errorMessage;
-                
-                // Check if it's an SAP error
-                if (errorData.code && errorData.code.startsWith('SAP')) {
-                    sapError = errorMessage;
-                    errorMessage = `SAP Error: ${errorMessage}`;
-                }
-            } else if (response.data.message) {
-                errorMessage = response.data.message;
-                // Try to extract SAP error from message
-                if (errorMessage.includes('SAP') || errorMessage.includes('sap')) {
-                    sapError = errorMessage;
-                }
-            }
-            
-            // Show detailed error in toast
-            if (sapError) {
-                showToast('error', 'SAP Error', sapError);
-            } else {
-                showToast('error', 'Error', errorMessage);
-            }
-        }
-    } catch (err) {
-        console.error('Approve error:', err);
-        let errorMessage = 'Failed to approve return order';
-        let sapError = null;
-        
-        if (err.response?.data?.error?.message) {
-            errorMessage = err.response.data.error.message;
-            if (errorMessage.includes('SAP') || errorMessage.includes('sap')) {
-                sapError = errorMessage;
-            }
-        } else if (err.response?.data?.message) {
-            errorMessage = err.response.data.message;
-            if (errorMessage.includes('SAP') || errorMessage.includes('sap')) {
-                sapError = errorMessage;
-            }
-        } else if (err.message) {
-            errorMessage = err.message;
-        }
-        
-        // Show detailed error in toast
-        if (sapError) {
-            showToast('error', 'SAP Error', sapError);
-        } else {
-            showToast('error', 'Error', errorMessage);
-        }
-    } finally {
-        loadingAction.value = null;
-    }
-};
-
-// ✅ Modified onApproveReturnOrder (now only used when no ZR3F items)
+// ✅ Fixed Approve return order
 const onApproveReturnOrder = async () => {
     try {
         loadingAction.value = 'approve';
-        
+
+        // Use URLSearchParams instead of FormData for application/x-www-form-urlencoded
         const payload = new URLSearchParams();
-        payload.append('status', '1');
-        payload.append('return_order_array', JSON.stringify([])); // Send empty array
-        
-        console.log('Approving return order (no ZR3F items):', returnOrderNo);
-        
+        payload.append('status', '1'); // 1 = Approved
+
+        console.log('Approving return order:', returnOrderNo);
+        console.log('Payload:', { status: '1' });
+
         const response = await api.postExtra(`order/update-return-order/${returnOrderNo}`, payload, {
             headers: {
                 'Content-Type': 'application/x-www-form-urlencoded',
                 Accept: 'application/json'
             }
         });
-        
+
         console.log('Approve response:', response.data);
-        
+
         if (response.data.status === 1) {
             showToast('success', 'Success', 'Return order approved successfully!');
+            // ✅ Instantly update local status (no need to refetch)
             order.value.orderstatus = 1;
-            
+            // Also update the order object with response data if available
             if (response.data.admin_data) {
                 Object.assign(order.value, response.data.admin_data);
             }
-            
-            // Update local data
-            await fetchReturnOrderDetail();
         } else {
             const errorData = response.data.error;
             let errorMessage = 'Failed to approve return order';
-            let sapError = null;
-            
+
             if (errorData) {
                 errorMessage = errorData.message || errorData.code || errorMessage;
-                if (errorMessage.includes('SAP') || errorMessage.includes('sap')) {
-                    sapError = errorMessage;
-                }
             } else if (response.data.message) {
                 errorMessage = response.data.message;
-                if (errorMessage.includes('SAP') || errorMessage.includes('sap')) {
-                    sapError = errorMessage;
-                }
             }
-            
-            if (sapError) {
-                showToast('error', 'SAP Error', sapError);
-            } else {
-                showToast('error', 'Error', errorMessage);
-            }
+
+            showToast('error', 'Error', errorMessage);
         }
     } catch (err) {
         console.error('Approve error:', err);
         let errorMessage = 'Failed to approve return order';
-        let sapError = null;
-        
+
         if (err.response?.data?.error?.message) {
             errorMessage = err.response.data.error.message;
-            if (errorMessage.includes('SAP') || errorMessage.includes('sap')) {
-                sapError = errorMessage;
-            }
         } else if (err.response?.data?.message) {
             errorMessage = err.response.data.message;
-            if (errorMessage.includes('SAP') || errorMessage.includes('sap')) {
-                sapError = errorMessage;
-            }
         } else if (err.message) {
             errorMessage = err.message;
         }
-        
-        if (sapError) {
-            showToast('error', 'SAP Error', sapError);
-        } else {
-            showToast('error', 'Error', errorMessage);
-        }
+
+        showToast('error', 'Error', errorMessage);
     } finally {
         loadingAction.value = null;
     }
@@ -797,45 +456,47 @@ const onApproveReturnOrder = async () => {
 const onRejectReturnOrder = async () => {
     try {
         loadingAction.value = 'reject';
-        
+
+        // Use URLSearchParams instead of FormData for application/x-www-form-urlencoded
         const payload = new URLSearchParams();
-        payload.append('status', '2');
-        payload.append('return_order_array', JSON.stringify([])); // Send empty array for reject
-        
+        payload.append('status', '2'); // 2 = Rejected
+
         console.log('Rejecting return order:', returnOrderNo);
-        
+        console.log('Payload:', { status: '2' });
+
         const response = await api.postExtra(`order/update-return-order/${returnOrderNo}`, payload, {
             headers: {
                 'Content-Type': 'application/x-www-form-urlencoded',
                 Accept: 'application/json'
             }
         });
-        
+
         console.log('Reject response:', response.data);
-        
+
         if (response.data.status === 1) {
             showToast('success', 'Success', 'Return order rejected successfully!');
+            // ✅ Instantly update local status
             order.value.orderstatus = 2;
-            
+            // Also update the order object with response data if available
             if (response.data.admin_data) {
                 Object.assign(order.value, response.data.admin_data);
             }
         } else {
             const errorData = response.data.error;
             let errorMessage = 'Failed to reject return order';
-            
+
             if (errorData) {
                 errorMessage = errorData.message || errorData.code || errorMessage;
             } else if (response.data.message) {
                 errorMessage = response.data.message;
             }
-            
+
             showToast('error', 'Error', errorMessage);
         }
     } catch (err) {
         console.error('Reject error:', err);
         let errorMessage = 'Failed to reject return order';
-        
+
         if (err.response?.data?.error?.message) {
             errorMessage = err.response.data.error.message;
         } else if (err.response?.data?.message) {
@@ -843,7 +504,7 @@ const onRejectReturnOrder = async () => {
         } else if (err.message) {
             errorMessage = err.message;
         }
-        
+
         showToast('error', 'Error', errorMessage);
     } finally {
         loadingAction.value = null;
