@@ -31,7 +31,7 @@
                     </div>
                     <!-- Right: Export & Batch Buttons -->
                     <div class="flex items-center gap-2 ml-auto">
-                        <Button type="button" label="Export" icon="pi pi-file-export" class="p-button" @click="fetchExportPattern" />
+                        <Button type="button" label="Export" icon="pi pi-file-export" class="p-button-success" @click="fetchExportPattern" />
                         <Button v-if="canUpdate" type="button" label="Import" icon="pi pi-file-import" class="p-button" @click="importInput?.click()" :loading="importLoading" />
                         <input ref="importInput" type="file" accept=".xlsx,.xls" style="display: none" @change="handleImport" />
                     </div>

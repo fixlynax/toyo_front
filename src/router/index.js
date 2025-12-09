@@ -614,7 +614,36 @@ const router = createRouter({
                     component: () => import('@/views/technical/createPattern.vue'),
                     meta: { permission: 'Pattern List', access: 'create' }
                 },
-
+                                {
+                    path: 'technical/listVehicleModel',
+                    name: 'List-Vehicle-Model',
+                    component: () => import('@/views/technical/listVehicleModel.vue'),
+                },
+                                {
+                    path: 'technical/listTreadDepth',
+                    name: 'List-Tread-Depth',
+                    component: () => import('@/views/technical/listTreadDepth.vue'),
+                },
+                                {
+                    path: 'technical/listSizeCode',
+                    name: 'List-Size-Code',
+                    component: () => import('@/views/technical/listSizeCode.vue'),
+                },
+                    //                 {
+                    //     label: 'Vechicle Model List',
+                    //     icon: 'pi pi-fw pi-slack',
+                    //     to: '/technical/listVechicleModel'
+                    // },
+                    // {
+                    //     label: 'Tread Depth List',
+                    //     icon: 'pi pi-fw pi-slack',
+                    //     to: '/technical/listTreadDepth'
+                    // },
+                    // {
+                    //     label: 'Size Code List',
+                    //     icon: 'pi pi-fw pi-slack',
+                    //     to: '/technical/listSizeCode'
+                    // }
                 // ===============================
                 // IT
                 // ===============================

@@ -1,20 +1,20 @@
 <template>
     <div class="card">
-        <div class="text-2xl font-bold text-gray-800 border-b pb-2 mb-4">List OE Tyre</div>
+        <div class="text-2xl font-bold text-gray-800 border-b pb-2 mb-4">List Vehicle Model</div>
 
         <DataTable
-            :value="tyres"
+            :value="tread_depths"
             :paginator="true"
             :rows="10"
             :rowsPerPageOptions="[5, 10, 20]"
-            dataKey="id"
+            dataKey="tread_depth_id"
             removableSort
             class="rounded-table"
             :rowHover="true"
             :loading="loading"
             :filters="filters"
             filterDisplay="menu"
-            :globalFilterFields="['id', 'pattern', 'brand', 'model',  'construction']"
+            :globalFilterFields="['pattern', 'section_width', 'updated_formatted', 'tire_series', 'rim_diameter']"
             paginatorTemplate="CurrentPageReport FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink RowsPerPageDropdown"
             currentPageReportTemplate="Showing {first} to {last} of {totalRecords} entries"
         >
@@ -32,8 +32,8 @@
 
                     <!-- Right: Export & Batch Buttons -->
                     <div class="flex items-center gap-2 ml-auto">
-                        <Button type="button" label="Export" icon="pi pi-file-export" class="p-button-success" @click="fetchExportOE" />
-                        <Button v-if="canUpdate" type="button" label="Import" icon="pi pi-file-import" class="p-button" @click="importInput?.click()" :loading="importLoading" />
+                        <Button type="button" label="Export" icon="pi pi-file-export" class="p-button-success" @click="fetchExport" />
+                        <Button type="button" label="Import" icon="pi pi-file-import" class="p-button" @click="importInput?.click()" :loading="importLoading" />
                         <input ref="importInput" type="file" accept=".xlsx,.xls" style="display: none" @change="handleImport" />
                     </div>
                 </div>
@@ -42,51 +42,81 @@
             <template #empty> No data found. </template>
             <template #loading> Loading data. Please wait... </template>
 
+            <Column field="updated_formatted" header="Last Updated" style="min-width: 8rem" sortable>
+                <template #body="{ data }">
+                    {{ data.updated_formatted }}
+                </template>
+            </Column>
+
             <Column field="pattern" header="Pattern" style="min-width: 8rem" sortable>
                 <template #body="{ data }">
                     {{ data.pattern }}
                 </template>
             </Column>
 
-            <Column field="brand" header="Brand" style="min-width: 8rem" sortable>
+            <Column field="section_width" header="Section Widht" style="min-width: 8rem" sortable>
                 <template #body="{ data }">
-                    {{ data.brand }}
+                    {{ data.section_width }}
                 </template>
             </Column>
 
-            <Column field="model" header="Model" style="min-width: 8rem" sortable>
+            <Column field="section_width" header="Section Widht" style="min-width: 8rem" sortable>
                 <template #body="{ data }">
-                    {{ data.model }}
+                    {{ data.section_width }}
                 </template>
             </Column>
 
-            <Column field="section_width" header="Size" style="min-width: 12rem" sortable>
+            <Column field="tire_series" header="Tyre Series" style="min-width: 8rem" sortable>
                 <template #body="{ data }">
-                    <div class="flex flex-col leading-relaxed text-sm text-gray-700">
-                        <div class="flex">
-                            <span class="w-40 text-gray-800 font-semibold">Section Width:</span>
-                            <span>{{ data.section_width }}</span>
-                        </div>
-                        <div class="flex">
-                            <span class="w-40 text-gray-800 font-semibold">Tyre Size:</span>
-                            <span>{{ data.tyre_size }}</span>
-                        </div>
-                        <div class="flex">
-                            <span class="w-40 text-gray-800 font-semibold">Rim Diameter:</span>
-                            <span>{{ data.rim_diameter }}"</span>
-                        </div class="flex">
-                        <div class="flex">
-                            <span class="w-40 text-gray-800 font-semibold">Load Index:</span>
-                            <span>{{ data.load_index }}</span>
-                        </div>
+                    {{ data.tire_series }}
+                </template>
+            </Column>
+
+            <Column field="rim_diameter" header="Rim Diameter" style="min-width: 8rem" sortable>
+                <template #body="{ data }">
+                    {{ data.rim_diameter }}
+                </template>
+            </Column>
+            
+            <Column header="Range" style="min-width: 14rem">
+                <template #body="{ data }">
+                    <div class="grid grid-cols-2">
+
+                        <!-- Column 1 -->
+                        <div>p10: {{ data.p10 }}</div>
+                        <div>p60: {{ data.p60 }}</div>
+
+                        <div>p15: {{ data.p15 }}</div>
+                        <div>p65: {{ data.p65 }}</div>
+
+                        <div>p20: {{ data.p20 }}</div>
+                        <div>p70: {{ data.p70 }}</div>
+
+                        <div>p25: {{ data.p25 }}</div>
+                        <div>p75: {{ data.p75 }}</div>
+
+                        <div>p30: {{ data.p30 }}</div>
+                        <div>p80: {{ data.p80 }}</div>
+
+                        <div>p35: {{ data.p35 }}</div>
+                        <div>p85: {{ data.p85 }}</div>
+
+                        <div>p40: {{ data.p40 }}</div>
+                        <div>p90: {{ data.p90 }}</div>
+
+                        <div>p45: {{ data.p45 }}</div>
+                        <div>p95: {{ data.p95 }}</div>
+
+                        <div>p50: {{ data.p50 }}</div>
+                        <div>p100: {{ data.p100 }}</div>
+
+                        <div>p55: {{ data.p55 }}</div>
+                        <div></div>
+
                     </div>
                 </template>
             </Column>
-            <!-- <Column field="origin" header="Origin" style="min-width: 8rem">
-                <template #body="{ data }">
-                    {{ data.construction }}
-                </template>
-            </Column> -->
+
         </DataTable>
     </div>
 </template>
@@ -97,32 +127,30 @@ import { FilterMatchMode } from '@primevue/core/api';
 import api from '@/service/api';
 import { useRouter } from 'vue-router';
 import { useToast } from 'primevue/usetoast';
-import { useMenuStore } from '@/store/menu';
+// import { useMenuStore } from '@/store/menu';
 
-const menuStore = useMenuStore();
-const canUpdate = computed(() => menuStore.canWrite('OE Tire LIst'));
-const denyAccess = computed(() => menuStore.canTest('OE Tire LIst'));
+// const menuStore = useMenuStore();
+// const canUpdate = computed(() => menuStore.canWrite('OE Tire LIst'));
+// const denyAccess = computed(() => menuStore.canTest('OE Tire LIst'));
 
 const toast = useToast();
 
 const importInput = ref();
 const importLoading = ref(false);
 
-const router = useRouter();
 // Data variables
-const tyres = ref([]);
+const tread_depths = ref([]);
 const loading = ref(true);
-const fileUpload = ref(null);
 // Filters for quick search
 const filters = ref({
     global: { value: null, matchMode: FilterMatchMode.CONTAINS }
 });
 
-const fetchExportOE = async () => {
+const fetchExport = async () => {
     try {
         loading.value = true;
 
-        const response = await api.getDownload('oeTire/downloadData', {
+        const response = await api.getDownload('treaddepthlist/downloadData', {
             responseType: 'arraybuffer'
         });
 
@@ -133,7 +161,7 @@ const fetchExportOE = async () => {
         const url = window.URL.createObjectURL(blob);
         const a = document.createElement('a');
         a.href = url;
-        a.download = 'OE_Download.xlsx';
+        a.download = 'TreadDepth_Download.xlsx';
         document.body.appendChild(a);
         a.click();
         document.body.removeChild(a);
@@ -158,7 +186,7 @@ const handleImport = async (event) => {
         
         const formData = new FormData();
         formData.append('excel_file', file);
-        const response = await api.postExtra('oeTire/uploadExcel', formData, {
+        const response = await api.postExtra('treaddepthlist/uploadExcel', formData, {
             headers: {
                 'Content-Type': 'multipart/form-data'
             }
@@ -193,35 +221,35 @@ const handleImport = async (event) => {
     }
 };
 
+function formatDate(dateString) {
+    if (!dateString) return '';
+    const date = new Date(dateString);
+    return date.toLocaleString('en-MY', {
+        year: 'numeric',
+        month: '2-digit',
+        day: '2-digit'
+    });
+}
+
 const fetchData = async () => {
     try {
         loading.value = true;
 
-        const response = await api.get('oeTireList');
+        const response = await api.get('treaddepthlist');
 
 
-        if (response.data.status === 1 && Array.isArray(response.data.oe_tires)) {
-            tyres.value = response.data.oe_tires.map((product) => ({
-                id: product.tire_id,
-                brand: product.brand,
-                model: product.model,
-                construction: product.construction,
-                created: product.created,
-                load_index: product.load_index,
-                model: product.model,
-                pattern: product.pattern,
-                rim_diameter: product.rim_diameter,
-                section_width: product.section_width,
-                status: product.status,
-                tyre_size: product.tyre_size
+        if (response.data.status === 1 && Array.isArray(response.data.tread_depths)) {
+            tread_depths.value = response.data.tread_depths.map(item => ({
+                ...item,
+                updated_formatted: formatDate(item.updated)
             }));
         } else {
             console.error('API returned error or invalid data:', response.data);
-            tyres.value = [];
+            tread_depths.value = [];
         }
     } catch (error) {
         console.error('Error fetching OE list:', error);
-        tyres.value = [];
+        tread_depths.value = [];
     } finally {
         loading.value = false;
     }
