@@ -98,7 +98,6 @@
 
 <script setup>
 import { onMounted, ref, computed } from 'vue';
-import { FilterMatchMode, FilterOperator } from '@primevue/core/api';
 import api from '@/service/api';
 
 const listData = ref([]);
@@ -106,13 +105,6 @@ const detailedClaims = ref([]);
 const loading = ref(true);
 const exportLoading = ref(false);
 
-const filters1 = ref({
-    global: { value: null, matchMode: FilterMatchMode.CONTAINS },
-    refNo: { operator: FilterOperator.AND, constraints: [{ value: null, matchMode: FilterMatchMode.CONTAINS }] },
-    dealerName: { operator: FilterOperator.AND, constraints: [{ value: null, matchMode: FilterMatchMode.CONTAINS }] },
-    claimType: { operator: FilterOperator.AND, constraints: [{ value: null, matchMode: FilterMatchMode.CONTAINS }] },
-    submissionDate: { operator: FilterOperator.AND, constraints: [{ value: null, matchMode: FilterMatchMode.CONTAINS }] }
-});
 
 // Pending status definitions
 const pendingStatuses = [
@@ -277,31 +269,12 @@ const exportToCSV = () => {
     }
 };
 
-// Fetch detailed claim information
-const fetchClaimDetails = async (claimId) => {
-    try {
-        const response = await api.get(`warranty_claim/${claimId}`);
-        if (response.data.status === 1) {
-            return {
-                id: claimId,
-                isCTC: response.data.admin_data.claim_info.isCTC || 0,
-                isScrap: response.data.admin_data.claim_info.isScrap || 0,
-                isReimbursement: response.data.admin_data.claim_info.isReimbursement || 0,
-                status: response.data.admin_data.claim_info.status_string || 'Unknown'
-            };
-        }
-    } catch (error) {
-        console.error(`Error fetching details for claim ${claimId}:`, error);
-    }
-    return null;
-};
-
 // FETCH DATA
 const fetchClaims = async () => {
     loading.value = true;
     try {
         console.log('Starting API call...');
-        const response = await api.get('warranty_claim');
+        const response = await api.post('warranty_claim');
         console.log('Full API response:', response);
         console.log('Response data:', response.data);
         
@@ -317,12 +290,7 @@ const fetchClaims = async () => {
 };
 
 onMounted(() => {
-    try {
-        fetchClaims();
-    } catch (error) {
-        console.error('Component mount error:', error);
-        loading.value = false;
-    }
+    // fetchClaims();
 });
 </script>
 

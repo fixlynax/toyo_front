@@ -65,7 +65,7 @@ const filteredList = computed(() => {
 const fetchClaims = async () => {
     loading.value = true;
     try {
-        const response = await api.get('warranty_claim');
+        const response = await api.post('warranty_claim');
         if (response.data.status === 1) {
             listData.value = response.data.admin_data.map((item) => ({
                 id: item.claim_id,
