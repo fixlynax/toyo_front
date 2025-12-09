@@ -406,7 +406,7 @@ const getStatusColor = (status) => {
                 <!-- Columns -->
                 <Column field="appointmentCode" header="Appointment Code" style="min-width: 12rem" sortable>
                     <template #body="{ data }">
-                        <RouterLink :to="`/technical/detailAppointment/${data.id}`" class="hover:underline font-bold text-primary-400">
+                        <RouterLink :to="`/sales/detailCustomerAppointment/${data.id}`" class="hover:underline font-bold text-primary-400">
                             {{ data.appointmentCode }}
                         </RouterLink>
                     </template>
