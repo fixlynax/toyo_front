@@ -153,7 +153,10 @@
                         <!-- <div v-if="!data.driverInformation" class="flex justify-center">
                             <Button icon="pi pi-pencil" class="p-button-sm p-button-text p-button-warning" @click="confirmUpdatePickup(data)" />
                         </div> -->
-                        <div class="flex justify-center">
+                        <div v-if="data.deliveryType != 'LALAMOVE'" class="flex justify-center">
+                            <Button icon="pi pi-calendar" class="p-button-sm p-button-text p-button-warning" @click="promptUpdatePickup(data)" />
+                        </div>
+                        <div v-else class="flex justify-center">
                             <Button icon="pi pi-calendar" class="p-button-sm p-button-text p-button-warning" @click="confirmUpdatePickup2(data)" />
                         </div>
                     </template>
@@ -215,7 +218,7 @@ import { RouterLink } from 'vue-router';
 import api from '@/service/api';
 import LoadingPage from '@/components/LoadingPage.vue';
 import { useToast } from 'primevue/usetoast';
-// import { useConfirm } from 'primevue';
+import { useConfirm } from 'primevue';
 import { useMenuStore } from '@/store/menu';
 
 const menuStore = useMenuStore();
@@ -413,7 +416,7 @@ onMounted(async () => {
 });
 
 const toast = useToast();
-// const confirmation = useConfirm();
+const confirmation = useConfirm();
 
 const handleIcInput = (e) => {
     if (!/[0-9]/.test(e.key)) {
@@ -527,6 +530,36 @@ const submitPickupUpdate2 = async () => {
     } finally {
         handleCloseDialog2();
     }
+};
+const promptUpdatePickup = (data) => {
+  confirmation.require({
+    message: `Are you sure you want to confirm pickup for order ${data.order_no} ?`,
+    header: 'Pickup Confirmation',
+    icon: 'pi pi-exclamation-triangle',
+    acceptLabel: 'Yes',
+    rejectLabel: 'No',
+    accept: async () => {
+      try {
+        const payload = new FormData();
+        payload.append('orderno', data.order_no);
+
+        const res = await api.post('update-collect-time', payload);
+
+        if (res.data?.status === 1) {
+          toast.add({ severity: 'success', summary: 'Updated', detail: 'Pickup date set to now', life: 3000 });
+          InitfetchData(); // refresh table
+        } else {
+          toast.add({ severity: 'error', summary: 'Error', detail: res.data?.message || 'Failed', life: 3000 });
+        }
+      } catch (err) {
+        console.error(err);
+        toast.add({ severity: 'error', summary: 'Error', detail: 'API error', life: 3000 });
+      }
+    },
+    reject: () => {
+      // optional action on cancel
+    }
+  });
 };
 function formatDate(dateString) {
     if (!dateString) return '';
