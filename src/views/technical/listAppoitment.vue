@@ -36,7 +36,7 @@ const filteredAppointments = computed(() => {
 const fetchAppointments = async () => {
     try {
         loading.value = true;
-        const response = await api.get('appointment');
+        const response = await api.post('appointment');
 
         if (response.data.status === 1 && Array.isArray(response.data.admin_data)) {
             listData.value = response.data.admin_data.map((item) => ({

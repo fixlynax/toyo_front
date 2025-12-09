@@ -14,7 +14,7 @@
                     <div class="grid grid-cols-2 gap-4">
                         <div>
                             <span class="text-sm font-bold text-black-700">Customer Name</span>
-                            <p class="text-lg font-medium">{{ orderDelList.eten_user?.companyName1 || '-' }} {{ orderDelList.eten_user?.companyName2 }} {{ orderDelList.eten_user?.companyName3 }} {{ orderDelList.eten_user?.companyName4 }}</p>
+                            <p class="text-lg font-medium">{{ orderDelList.eten_user?.companyName1 || '-' }} {{ orderDelList.eten_user?.companyName2 || '' }} {{ orderDelList.eten_user?.companyName3 || '' }} {{ orderDelList.eten_user?.companyName4 || '' }}</p>
                         </div>
                         <div>
                             <span class="text-sm font-bold text-black-700">Account Number</span>

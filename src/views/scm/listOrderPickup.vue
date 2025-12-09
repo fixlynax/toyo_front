@@ -92,7 +92,7 @@
                 </Column>
                 <Column field="eten_user.companyName1" header="Customer Name" style="min-width: 12rem" sortable>
                     <template #body="{ data }">
-                        <span class="font-bold">{{ ` ${data.eten_user?.companyName1} ${data.eten_user?.companyName2} ${data.eten_user?.companyName3} ${data.eten_user?.companyName4} ` }}</span>
+                        <span class="font-bold">{{ ` ${data.eten_user?.companyName1 || '-'} ${data.eten_user?.companyName2 || ''} ${data.eten_user?.companyName3 || ''} ${data.eten_user?.companyName4 || ''} ` }}</span>
                         <br />
                         {{ data.eten_user?.custAccountNo }}
                     </template>

@@ -32,6 +32,7 @@ const statusTabs = [
     { label: 'Approved', status: 'APPROVED', requiresDateRange: false },
     { label: 'Rejected', status: 'REJECTED', requiresDateRange: true },
     { label: 'Pending Collection', status: 'PENDING_COLLECTION', requiresDateRange: false },
+    { label: 'Return Received', status: 'CREDITNOTE', requiresDateRange: false },
     { label: 'Completed', status: 'COMPLETE', requiresDateRange: true }
 ];
 const activeTabIndex = ref(0);
@@ -42,7 +43,8 @@ const STATUS_MAP = {
     1: { label: 'Approved', severity: 'success' },
     2: { label: 'Rejected', severity: 'danger' },
     77: { label: 'Pending Collection', severity: 'secondary' },
-    9: { label: 'Completed', severity: 'primary' }
+    9: { label: 'Completed', severity: 'primary' },
+    88: { label: 'Return Received', severity: 'info' }
 };
 
 // 🧩 Computed properties
@@ -52,14 +54,23 @@ const showDateRangeFilter = computed(() => currentTab.value?.requiresDateRange |
 const isCompletedTab = computed(() => currentTab.value?.status === 'COMPLETE');
 const isPendingCTCTab = computed(() => currentTab.value?.status === 'PENDING_COLLECTION');
 const isRejectedTab = computed(() => currentTab.value?.status === 'REJECTED');
+const isPendingCNTab = computed(() => currentTab.value?.status === 'CREDITNOTE');
 const hasCustomerSelected = computed(() => !!selectedCustomer.value);
 
 // 🧩 Helpers
 const getOverallStatusSeverity = (orderStatus) => {
+    // If current tab is Pending CN, use the Pending Credit Note severity
+    if (isPendingCNTab.value && currentTab.value?.status === 'CREDITNOTE') {
+        return STATUS_MAP[88].severity;
+    }
     return STATUS_MAP[Number(orderStatus)]?.severity || 'warn';
 };
 
 const getOverallStatusLabel = (orderStatus) => {
+    // If current tab is Pending CN, use the Pending Credit Note label
+    if (isPendingCNTab.value && currentTab.value?.status === 'CREDITNOTE') {
+        return STATUS_MAP[88].label;
+    }
     return STATUS_MAP[Number(orderStatus)]?.label || 'Pending';
 };
 
@@ -135,7 +146,7 @@ const fetchReturnOrders = async (tabStatus = 'PENDING') => {
     try {
         const selectedTab = currentTab.value;
 
-        // Don't fetch if customer is not selected (except for tabs with date range requirements)
+        // Don't fetch if customer is not selected
         if (!hasCustomerSelected.value) {
             listData.value = [];
             isLoadingData.value = false;
@@ -336,15 +347,16 @@ onBeforeMount(async () => {
                         <div class="flex items-center gap-4 mb-1 flex-wrap">
                             <!-- Customer Name Filter -->
                             <div class="flex items-center gap-2">
-                                <span class="text-sm font-medium text-gray-700">Customer:</span>
+                                <span class="text-sm font-medium text-gray-700">Customer Name:</span>
                                 <Dropdown
                                     v-model="selectedCustomer"
                                     :options="customerOptions"
                                     optionLabel="name"
-                                    placeholder="Select Customer"
-                                    class="w-100"
+                                    placeholder="Select Customer Name"
+                                    class="w-64"
                                     :loading="loadingCustomers"
                                     :disabled="loadingCustomers || loading"
+                                    showClear
                                     :filter="true"
                                     filterPlaceholder="Search customers..."
                                 >
@@ -381,7 +393,7 @@ onBeforeMount(async () => {
                             </div>
 
                             <!-- Status messages -->
-                            <div v-if="!hasCustomerSelected" class="text-sm text-blue-600 italic">Select a customer to view return orders</div>
+                            <div v-if="!hasCustomerSelected" class="text-sm text-blue-600 italic">Select a customer to view</div>
                             <div v-else-if="showDateRangeFilter && !hasDateFilterApplied" class="text-sm text-blue-600 italic">Please select a date range to view {{ currentTabLabel }} orders</div>
                         </div>
                     </div>
@@ -392,7 +404,7 @@ onBeforeMount(async () => {
                         <template v-if="!hasCustomerSelected">
                             <div class="flex flex-col items-center gap-2">
                                 <i class="pi pi-building text-3xl text-blue-400"></i>
-                                <span class="text-lg">Select a customer to view return orders</span>
+                                <span class="text-lg">Select a customer to view</span>
                                 <span class="text-sm text-gray-400">Choose a customer name from the dropdown above</span>
                             </div>
                         </template>
@@ -438,7 +450,7 @@ onBeforeMount(async () => {
                 <!-- Return Request No Column -->
                 <Column header="Return Req No." style="min-width: 8rem" sortable>
                     <template #body="{ data }">
-                        <RouterLink :to="`/sales/detailCustomerReturnOrder/${data.returnRequestNo}`" class="hover:underline font-bold text-primary-400">
+                        <RouterLink :to="`/om/detailReturnOrder/${data.returnRequestNo}`" class="hover:underline font-bold text-primary-400">
                             {{ data.returnRequestNo }}
                         </RouterLink>
                     </template>
