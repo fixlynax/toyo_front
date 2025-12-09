@@ -375,24 +375,28 @@
                 <div v-if="freeItems.length > 0" class="mt-6">
                     <div class="font-semibold text-lg mb-3 text-green-700">🎁 Free Items</div>
                     <DataTable :value="freeItems" class="rounded-table" scrollable scrollHeight="200px">
-                        <Column header="Product" style="min-width: 14rem">
+                        <Column header="Product" style="min-width: 10rem">
                             <template #body="{ data }">
                                 <div class="font-semibold text-green-800">{{ data.material }}</div>
                                 <div class="text-xs text-gray-500">Free Item</div>
                             </template>
                         </Column>
 
-                        <Column header="Category" field="itemcategory" style="min-width: 8rem; text-align: center" />
-
-                        <Column header="Qty" style="min-width: 6rem; text-align: center">
+                        <Column header="Price" style="min-width: 6rem; text-align: left">
                             <template #body="{ data }">
-                                <span class="font-bold text-green-600">{{ data.qty }}</span>
+                                <div class="ml-1 font-medium text-green-600">FREE</div>
                             </template>
                         </Column>
 
-                        <Column header="Price" style="min-width: 7rem; text-align: center">
+                        <Column header="Qty" style="min-width: 6rem; text-align: left">
                             <template #body="{ data }">
-                                <div class="font-medium text-green-600">FREE</div>
+                                <span class="ml-1 font-bold text-green-600">{{ data.qty }}</span>
+                            </template>
+                        </Column>
+
+                        <Column header="Category" style="min-width: 10rem; text-align: left">
+                            <template #body="{ data }">
+                                <span class="ml-1 font-bold text-green-700">{{ data.itemcategory }}</span>
                             </template>
                         </Column>
                     </DataTable>
@@ -928,9 +932,7 @@ const availableCredit = ref(0);
 // Options
 const customerOptions = ref([]);
 const orderTypeOptions = computed(() => {
-    const options = [
-        { label: 'Normal', value: 'NORMAL' }
-    ];
+    const options = [{ label: 'Normal', value: 'NORMAL' }];
 
     // Add DIRECTSHIP only if allowed
     if (containerSettings.value.allowDirectShip === 1) {
