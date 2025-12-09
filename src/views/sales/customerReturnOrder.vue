@@ -347,16 +347,15 @@ onBeforeMount(async () => {
                         <div class="flex items-center gap-4 mb-1 flex-wrap">
                             <!-- Customer Name Filter -->
                             <div class="flex items-center gap-2">
-                                <span class="text-sm font-medium text-gray-700">Customer Name:</span>
+                                <span class="text-sm font-medium text-gray-700">Customer:</span>
                                 <Dropdown
                                     v-model="selectedCustomer"
                                     :options="customerOptions"
                                     optionLabel="name"
-                                    placeholder="Select Customer Name"
-                                    class="w-64"
+                                    placeholder="Select Customer"
+                                    class="w-100"
                                     :loading="loadingCustomers"
                                     :disabled="loadingCustomers || loading"
-                                    showClear
                                     :filter="true"
                                     filterPlaceholder="Search customers..."
                                 >

@@ -3,6 +3,7 @@
         <Toast />
 
         <div class="flex justify-between items-center mb-4">
+            <Button @click="$route.back()" icon="pi pi-arrow-left font-bold" class="p-button-text p-button-secondary text-xl" size="big" v-tooltip="'Back'" />
             <div class="text-2xl font-bold text-black">Others - Customer: {{ custAccNo }}</div>
         </div>
 
@@ -989,7 +990,7 @@ onBeforeMount(async () => {
     loading.value = false; // Set loading to false since we won't load data initially
     listData.value = []; // Initialize with empty array
     hasDateFilterApplied.value = false; // No filter applied initially
-    
+
     // Initialize customer account number from route parameters
     custAccNo.value = route.params.custAccNo || '';
 });
@@ -1079,6 +1080,10 @@ const clearDateRange = () => {
         detail: 'Date filter has been cleared',
         life: 3000
     });
+};
+
+const handleBack = () => {
+    router.back();
 };
 </script>
 

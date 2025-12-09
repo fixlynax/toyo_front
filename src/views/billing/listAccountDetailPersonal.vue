@@ -2,7 +2,8 @@
     <div class="card">
         <Toast />
 
-        <div class="flex justify-between items-center mb-4">
+        <div class="flex justify-start items-center mb-4">
+            <Button @click="$router.back()" icon="pi pi-arrow-left font-bold" class="p-button-text p-button-secondary text-xl" size="big" v-tooltip="'Back'" />
             <div class="text-2xl font-bold text-black">Account Details - Customer: {{ custAccNo }}</div>
         </div>
 

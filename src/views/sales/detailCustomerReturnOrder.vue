@@ -185,9 +185,9 @@
                     </div> -->
 
                     <!-- Status Labels after action -->
-                    <div class="flex justify-end mt-4">
+                    <!-- <div class="flex justify-end mt-4">
                         <Tag :value="getActionStatusLabel(order.orderstatus)" :severity="getActionStatusSeverity(order.orderstatus)" />
-                    </div>
+                    </div> -->
                 </div>
             </div>
         </div>
