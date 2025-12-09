@@ -542,18 +542,19 @@ const fetchData = async (body = null) => {
 };
 
 const exportToExcel = () => {
-    if (orderDelList.value.length === 0) {
-        toast.add({ severity: 'warn', summary: 'Warning', detail: 'No data to export', life: 3000 });
+    const rowsToExport = visibleRows.value || [];
+
+    if (rowsToExport.length === 0) {
+        toast.add({severity: 'warn',summary: 'Warning', detail: 'No data to export', life: 3000 });
         return;
     }
 
     try {
-            // Create worksheet data
-    const headers = ['Created', 'SAP DO No', 'Customer Name', 'Customer Acc No','Storage Location', 'City', 'State', 'Order Type', 'Driver Name','Driver IC', 'Driver Contact', 'Driver Truck Plate', 'Eta Date','Planned Date', 'Delivered Date', 'Status','Pattern Name', 'Description', 'Qty'];
+    const headers = ['Created', 'SAP DO No', 'Customer Name', 'Customer Acc No', 'Storage Location','City', 'State', 'Order Type', 'Driver Name', 'Driver IC', 'Driver Contact','Driver Truck Plate', 'Eta Date', 'Planned Date', 'Delivered Date', 'Status','Pattern Name', 'Description', 'Qty'];
 
     const csvData = [];
 
-    orderDelList.value.forEach(data => {
+    rowsToExport.forEach(data => {
         const baseRow = [
             `"${formatDate(data.created)}"`,
             `"${data.do_no || '-'}"`,
@@ -573,8 +574,8 @@ const exportToExcel = () => {
             `"${getStatusLabel2(data.status) || '-'}"`
         ];
 
-        // Duplicate row for each item
-        data.fullfill_order_array.forEach(item => {
+            // FIX: prevent undefined forEach
+            (data.fullfill_order_array || []).forEach(item => {
                 csvData.push([
                     ...baseRow,
                     `"${item.patternName || '-'}"`,
@@ -584,17 +585,15 @@ const exportToExcel = () => {
             });
         });
 
-        // Combine headers and data
-        const csvContent = [headers.join(','), ...csvData.map((row) => row.join(','))].join('\n');
+        const csvContent = [headers.join(','), ...csvData.map(row => row.join(',')) ].join('\n');
 
-        // Create and download the file
         const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
         const link = document.createElement('a');
         const url = URL.createObjectURL(blob);
 
-        link.setAttribute('href', url);
-        link.setAttribute('download', `order_delivery_list_${new Date().toISOString().split('T')[0]}.csv`);
-        link.style.visibility = 'hidden';
+        link.href = url;
+        link.download = `order_delivery_list_${new Date().toISOString().split('T')[0]}.csv`;
+        link.style.display = 'none';
 
         document.body.appendChild(link);
         link.click();

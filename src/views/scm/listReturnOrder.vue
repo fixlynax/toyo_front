@@ -470,8 +470,10 @@ const fetchData = async (body = null) => {
     }
 };
 const exportToExcel = () => {
-    if (returnList.value.length === 0) {
-        toast.add({ severity: 'warn', summary: 'Warning', detail: 'No data to export', life: 3000 });
+    const rowsToExport = visibleRows.value || [];
+
+    if (rowsToExport.length === 0) {
+        toast.add({severity: 'warn',summary: 'Warning', detail: 'No data to export', life: 3000 });
         return;
     }
 
@@ -480,7 +482,7 @@ const exportToExcel = () => {
         const headers = ['Ref No', 'Ship-To', 'Ship-To Acc No', 'Storage Location', 'City', 'State', 'Pickup Date', 'Receive Date', 'Return Items', 'Status'];
 
         // Prepare data rows
-        const csvData = returnList.value.map((data) => [
+        const csvData = rowsToExport.map((data) => [
             `"${data.return_orderNo_ref || '-'}"`,
             `"${data.dealerName || '-'}"`,
             `"${data.custaccountno || '-'}"`,
@@ -494,16 +496,16 @@ const exportToExcel = () => {
         ]);
 
         // Combine headers and data
-        const csvContent = [headers.join(','), ...csvData.map((row) => row.join(','))].join('\n');
+        const csvContent = [headers.join(','), ...csvData.map(row => row.join(',')) ].join('\n');
 
         // Create and download the file
         const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
         const link = document.createElement('a');
         const url = URL.createObjectURL(blob);
 
-        link.setAttribute('href', url);
-        link.setAttribute('download', `return_order_list_${new Date().toISOString().split('T')[0]}.csv`);
-        link.style.visibility = 'hidden';
+        link.href = url;
+        link.download = `return_order_list_${new Date().toISOString().split('T')[0]}.csv`;
+        link.style.display = 'none';
 
         document.body.appendChild(link);
         link.click();

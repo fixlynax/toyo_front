@@ -781,8 +781,10 @@ const generateReport = (report) => {
     };
 };
 const exportToExcel = () => {
-    if (collectionList.value.length === 0) {
-        console.warn('No data to export');
+    const rowsToExport = visibleRows.value || [];
+
+    if (rowsToExport.length === 0) {
+        toast.add({severity: 'warn',summary: 'Warning', detail: 'No data to export', life: 3000 });
         return;
     }
 
@@ -791,7 +793,7 @@ const exportToExcel = () => {
         const headers = ['Date', 'Ref No', 'Delivery Date', 'Delivered Date', 'Status'];
         
         // Prepare data rows
-        const csvData = collectionList.value.map(data => [
+        const csvData = rowsToExport.map(data => [
             `"${formatDate(data.created)}"`,
             `"${data.claimRefno || '-'}"`,
             `"${data.scheduleDeliveryDate ? formatDate(data.scheduleDeliveryDate) : 'Not Assigned'}"`,
@@ -800,19 +802,16 @@ const exportToExcel = () => {
         ]);
 
         // Combine headers and data
-        const csvContent = [
-            headers.join(','),
-            ...csvData.map(row => row.join(','))
-        ].join('\n');
+        const csvContent = [headers.join(','), ...csvData.map(row => row.join(',')) ].join('\n');
 
         // Create and download the file
         const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
         const link = document.createElement('a');
         const url = URL.createObjectURL(blob);
         
-        link.setAttribute('href', url);
-        link.setAttribute('download', `ctc_return_collection_list_${new Date().toISOString().split('T')[0]}.csv`);
-        link.style.visibility = 'hidden';
+        link.href = url;
+        link.download = `ctc_return_collection_list_${new Date().toISOString().split('T')[0]}.csv`;
+        link.style.display = 'none';
         
         document.body.appendChild(link);
         link.click();
