@@ -11,10 +11,14 @@
                         </div>
                     </div>
 
-                    <div class="mt-6 mb-4">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm text-gray-700 mb-4 mt-4">
                         <div>
-                            <span class="block text-sm text-black-700">Return Reference Number</span>
+                            <span class="block text-sm text-black-700">Return Ref No.</span>
                             <span class="text-lg font-medium">{{ returnList.return_orderNo_ref }}</span>
+                        </div>
+                        <div>
+                            <span class="block text-sm text-black-700">SAP Return No.</span>
+                            <span class="text-lg font-medium">{{ returnList.delivery_information?.sapreturndeliveryno ?? '-' }}</span>
                         </div>
                     </div>
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm text-gray-700">
@@ -105,29 +109,6 @@
                         </div>
                     </div>
                 </div>
-                <div class="card flex flex-col gap-6 w-full">
-                    <div class="flex items-center gap-2 border-b">
-                        <div class="text-2xl font-bold text-gray-800">Driver Details</div>
-                    </div>
-                    <div class="grid grid-cols-2 gap-4">
-                        <div>
-                            <span class="text-sm font-bold text-black-700">Driver</span>
-                            <p lass="text-lg font-medium">{{ returnList.delivery_information?.driverName ? returnList.delivery_information.driverName : 'Not Assigned' }}</p>
-                        </div>
-                        <div>
-                            <span class="text-sm font-bold text-black-700">Contact No</span>
-                            <p lass="text-lg font-medium">{{ returnList.delivery_information?.driverContactNo ? returnList.delivery_information.driverContactNo : 'Not Assigned' }}</p>
-                        </div>
-                        <div>
-                            <span class="text-sm font-bold text-black-700">IC No</span>
-                            <p lass="text-lg font-medium">{{ returnList.delivery_information?.driverIC ? returnList.delivery_information.driverIC : 'Not Assigned' }}</p>
-                        </div>
-                        <div>
-                            <span class="text-sm font-bold text-black-700">Plate No</span>
-                            <p lass="text-lg font-medium">{{ returnList.delivery_information?.driverPlateNo ? returnList.delivery_information.driverPlateNo : 'Not Assigned' }}</p>
-                        </div>
-                    </div>
-                </div>
             </div>
 
             <!-- RIGHT SIDE -->
@@ -142,16 +123,32 @@
                         <table class="w-full text-sm text-left text-gray-700">
                             <tbody>
                                 <tr class="border-b">
-                                    <td class="px-4 py-2 font-medium">Order Ref</td>
-                                    <td class="px-4 py-2 text-right">{{ returnList.return_orderNo_ref || '-' }}</td>
+                                    <td class="px-4 py-2 font-medium">Order No</td>
+                                    <td class="px-4 py-2 text-right">{{ returnList.order_data.order_no || '-' }}</td>
                                 </tr>
                                 <tr class="border-b">
-                                    <td class="px-4 py-2 font-medium">SAP Return No</td>
-                                    <td class="px-4 py-2 text-right">{{ returnList.delivery_information?.sapreturndeliveryno ?? '-' }}</td>
+                                    <td class="px-4 py-2 font-medium">Remarks</td>
+                                    <td class="px-4 py-2 text-right">{{ returnList.order_data.orderReceiveRemarks || '-' }}</td>
+                                </tr>
+                                <tr class="border-b">
+                                    <td class="px-4 py-2 font-medium">Type</td>
+                                    <td class="px-4 py-2 text-right">{{ returnList.order_data.deliveryType || '-' }}</td>
+                                </tr>
+                                <tr class="border-b">
+                                    <td class="px-4 py-2 font-medium">Description</td>
+                                    <td class="px-4 py-2 text-right">{{ returnList.order_data.orderDesc || '-' }}</td>
+                                </tr>
+                                <tr class="border-b">
+                                    <td class="px-4 py-2 font-medium">SO No</td>
+                                    <td class="px-4 py-2 text-right">{{ returnList.order_data.so_no || '-' }}</td>
                                 </tr>
                                 <tr class="border-b">
                                     <td class="px-4 py-2 font-medium">DO No</td>
                                     <td class="px-4 py-2 text-right">{{ returnList.order_data?.do_no ?? '-' }}</td>
+                                </tr>
+                                <tr class="border-b">
+                                    <td class="px-4 py-2 font-medium">Inv No</td>
+                                    <td class="px-4 py-2 text-right">{{ returnList.order_data.inv_no || '-' }}</td>
                                 </tr>
                                 <tr>
                                     <td class="px-4 py-2 font-medium">SAP Created</td>
@@ -175,7 +172,30 @@
                         </div>
                     </div>
                 </div>
-                <div class="card flex flex-col w-full">
+                <div class="card flex flex-col gap-6 w-full">
+                    <div class="flex items-center gap-2 border-b">
+                        <div class="text-2xl font-bold text-gray-800">Driver Details</div>
+                    </div>
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <span class="text-sm font-bold text-black-700">Driver</span>
+                            <p lass="text-lg font-medium">{{ returnList.delivery_information?.driverName ? returnList.delivery_information.driverName : 'Not Assigned' }}</p>
+                        </div>
+                        <div>
+                            <span class="text-sm font-bold text-black-700">Contact No</span>
+                            <p lass="text-lg font-medium">{{ returnList.delivery_information?.driverContactNo ? returnList.delivery_information.driverContactNo : 'Not Assigned' }}</p>
+                        </div>
+                        <div>
+                            <span class="text-sm font-bold text-black-700">IC No</span>
+                            <p lass="text-lg font-medium">{{ returnList.delivery_information?.driverIC ? returnList.delivery_information.driverIC : 'Not Assigned' }}</p>
+                        </div>
+                        <div>
+                            <span class="text-sm font-bold text-black-700">Plate No</span>
+                            <p lass="text-lg font-medium">{{ returnList.delivery_information?.driverPlateNo ? returnList.delivery_information.driverPlateNo : 'Not Assigned' }}</p>
+                        </div>
+                    </div>
+                </div>
+                <!-- <div class="card flex flex-col w-full">
                     <div class="flex items-center justify-between border-b pb-3 mb-4">
                         <div class="text-2xl font-bold text-gray-800">Order Information</div>
                     </div>
@@ -207,14 +227,10 @@
                                     <td class="px-4 py-2 font-medium">SO No</td>
                                     <td class="px-4 py-2 text-right">{{ returnList.order_data.so_no || '-' }}</td>
                                 </tr>
-                                <!-- <tr class="border-b">
-                                    <td class="px-4 py-2 font-medium">Subtotal</td>
-                                    <td class="px-4 py-2 text-right">{{` RM ${returnList.order_data.subtotal || '-'} `}}</td>
-                                </tr> -->
                             </tbody>
                         </table>
                     </div>
-                </div>
+                </div> -->
             </div>
         </div>
     </Fluid>

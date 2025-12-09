@@ -144,6 +144,18 @@
                                     <td class="px-4 py-2 text-right font-semibold text-primary">{{ orderData.order_no || '-' }}</td>
                                 </tr>
                                 <tr class="border-b">
+                                    <td class="px-4 py-2 font-medium">Return Remark</td>
+                                    <td class="px-4 py-2 text-right font-semibold text-primary">{{ order.remarks || '-' }}</td>
+                                </tr>
+                                <tr class="border-b">
+                                    <td class="px-4 py-2 font-medium">Type</td>
+                                    <td class="px-4 py-2 text-right font-semibold">{{ orderData.deliveryType || '-' }}</td>
+                                </tr>
+                                <tr class="border-b">
+                                    <td class="px-4 py-2 font-medium">Description</td>
+                                    <td class="px-4 py-2 text-right font-semibold">{{ orderData.orderDesc || '-' }}</td>
+                                </tr>
+                                <tr class="border-b">
                                     <td class="px-4 py-2 font-medium">SO No</td>
                                     <td class="px-4 py-2 text-right font-semibold">{{ orderData.so_no || '-' }}</td>
                                 </tr>
@@ -171,7 +183,7 @@
                                     <td class="px-4 py-2 font-medium">Delivery Status</td>
                                     <td class="px-4 py-2 text-right font-semibold">{{ getDeliveryStatusText(order.delivery_status) }}</td>
                                 </tr>
-                                <tr>
+                                <tr class="border-b">
                                     <td class="px-4 py-2 font-medium">Created</td>
                                     <td class="px-4 py-2 text-right font-semibold">{{ formatDate(order.created) || '-' }}</td>
                                 </tr>
