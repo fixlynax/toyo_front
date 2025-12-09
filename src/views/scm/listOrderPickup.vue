@@ -5,13 +5,6 @@
         <LoadingPage v-if="loading" message="Loading Order Delivery Details..." />
         <div v-else>
             <TabMenu :model="statusTabs" v-model:activeIndex="activeTabIndex" class="mb-4" />
-            <div class="flex items-center gap-3 mb-4 ml-4">
-                <!-- LEFT SIDE -->
-
-                <Calendar v-model="dateRange" selectionMode="range" dateFormat="dd/mm/yy" placeholder="Select date range" style="width: 390px" />
-                <Button label="Clear" class="p-button-sm p-button-danger" @click="clearDate" />
-                <Button label="Filter" class="p-button-sm" @click="applyFilter" />
-            </div>
             <DataTable
                 :value="orderDelList"
                 @filter="onTableFilter"
@@ -43,21 +36,42 @@
             >
                 <template #header>
                     <div class="flex items-center justify-between gap-4 w-full flex-wrap">
-                        <div class="flex items-center gap-2 w-full max-w-md">
-                            <IconField class="flex-1">
-                                <InputIcon>
-                                    <i class="pi pi-search" />
-                                </InputIcon>
-                                <InputText v-model="filters['global'].value" placeholder="Quick Search" class="w-full" />
-                            </IconField>
+                        <div class="flex items-center justify-between gap-4 w-full flex-wrap">
+                            <div class="flex items-center gap-2 w-full max-w-md">
+                                <IconField class="flex-1">
+                                    <InputIcon>
+                                        <i class="pi pi-search" />
+                                    </InputIcon>
+                                    <InputText v-model="filters['global'].value" placeholder="Quick Search" class="w-full" />
+                                </IconField>
+                            </div>
+                            <div class="flex justify-end gap-2" v-if="statusTabs[activeTabIndex]?.label === 'Pending' && canUpdate">
+                                <Button type="button" label="Export" icon="pi pi-file-export" class="p-button-success" :loading="exportLoading" @click="handleExport" />
+                                <Button type="button" label="Bulk Update" icon="pi pi-file-import" @click="importInput?.click()" :loading="importLoading" />
+                                <input ref="importInput" type="file" accept=".xlsx,.xls" style="display: none" @change="handleImport" />
+                            </div>
+                            <div class="flex justify-end gap-2" v-if="statusTabs[activeTabIndex]?.label === 'Completed'">
+                                <Button type="button" label="Export" icon="pi pi-file-export" class="p-button-success" @click="exportToExcel" />
+                            </div>
                         </div>
-                        <div class="flex justify-end gap-2" v-if="statusTabs[activeTabIndex]?.label === 'Pending' && canUpdate">
-                            <Button type="button" label="Export" icon="pi pi-file-export" class="p-button-success" :loading="exportLoading" @click="handleExport" />
-                            <Button type="button" label="Bulk Update" icon="pi pi-file-import" @click="importInput?.click()" :loading="importLoading" />
-                            <input ref="importInput" type="file" accept=".xlsx,.xls" style="display: none" @change="handleImport" />
-                        </div>
-                        <div class="flex justify-end gap-2" v-if="statusTabs[activeTabIndex]?.label === 'Completed'">
-                            <Button type="button" label="Export" icon="pi pi-file-export" class="p-button-success" @click="exportToExcel" />
+                        <div class="flex items-center gap-4 mb-1 flex-wrap">
+                            <div class="flex items-center gap-2">
+                                <span class="text-sm font-medium text-gray-700">Date Range:</span>
+                                <div class="flex items-center gap-2">
+                                    <Calendar v-model="dateRange[0]" placeholder="Start Date" dateFormat="yy-mm-dd" showIcon class="w-40" :disabled="loading" />
+                                    <span class="text-gray-500">to</span>
+                                    <Calendar v-model="dateRange[1]"  placeholder="End Date" dateFormat="yy-mm-dd" showIcon class="w-40" :disabled="loading" />
+                                </div>
+                                <Button v-if="dateRange[0] || dateRange[1]"  icon="pi pi-times" class="p-button-text p-button-sm" @click="clearDate" title="Clear date filter" />
+                            </div>
+                            <Button 
+                                icon="pi pi-filter" 
+                                label="Filter" 
+                                class="p-button-primary p-button-sm" 
+                                @click="applyFilter" 
+                                :disabled="(dateRange[0] && !dateRange[1]) || (!dateRange[0] && dateRange[1])"
+                                :loading="loading"
+                            />
                         </div>
                     </div>
                 </template>
@@ -239,7 +253,7 @@ let selectedData = null;
 const loading = ref(true);
 const orderDelList = ref([]);
 const activeTabIndex = ref(0);
-const dateRange = ref(null);
+const dateRange = ref([null, null]);
 
 const exportLoading = ref(false);
 const importLoading = ref(false);
@@ -405,7 +419,7 @@ watch(activeTabIndex, () => {
         };
         fetchData(body);
     } else {
-        dateRange.value = null;
+        dateRange.value = [null, null];
         fetchData();
     }
     selectedExportIds.value.clear();
@@ -619,7 +633,7 @@ const applyFilter = () => {
     fetchData(body);
 };
 const clearDate = () => {
-    dateRange.value = null; // or []
+    dateRange.value = [null, null];
 };
 const fetchData = async (body = null) => {
     try {

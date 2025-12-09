@@ -4,13 +4,6 @@
         <LoadingPage v-if="loading" message="Loading Return Order Details..." />
         <div v-else>
             <TabMenu :model="statusTabs" v-model:activeIndex="activeTabIndex" class="mb-4" />
-            <div class="flex items-center gap-3 mb-4 ml-4">
-                <!-- LEFT SIDE -->
-
-                <Calendar v-model="dateRange" selectionMode="range" dateFormat="dd/mm/yy" placeholder="Select date range" style="width: 390px" />
-                <Button label="Clear" class="p-button-sm p-button-danger" @click="clearDate" />
-                <Button label="Filter" class="p-button-sm" @click="applyFilter" />
-            </div>
             <DataTable
                 :value="returnList"
                 @filter="onTableFilter"
@@ -29,7 +22,7 @@
                 currentPageReportTemplate="Showing {first} to {last} of {totalRecords} entries"
             >
                 <template #header>
-                    <div class="flex flex-col gap-4 w-full">
+                    <div class="flex items-center justify-between gap-4 w-full flex-wrap">
                         <!-- Search and Filters Row -->
                         <div class="flex items-center justify-between gap-4 w-full flex-wrap">
                             <!-- Left: Search Field -->
@@ -54,6 +47,25 @@
                             <div class="flex justify-end gap-2" v-if="statusTabs[activeTabIndex]?.label === 'Completed'">
                                 <Button type="button" label="Export" icon="pi pi-file-export" class="p-button-success" @click="exportToExcel" />
                             </div>
+                        </div>
+                        <div class="flex items-center gap-4 mb-1 flex-wrap">
+                            <div class="flex items-center gap-2">
+                                <span class="text-sm font-medium text-gray-700">Date Range:</span>
+                                <div class="flex items-center gap-2">
+                                    <Calendar v-model="dateRange[0]" placeholder="Start Date" dateFormat="yy-mm-dd" showIcon class="w-40" :disabled="loading" />
+                                    <span class="text-gray-500">to</span>
+                                    <Calendar v-model="dateRange[1]"  placeholder="End Date" dateFormat="yy-mm-dd" showIcon class="w-40" :disabled="loading" />
+                                </div>
+                                <Button v-if="dateRange[0] || dateRange[1]"  icon="pi pi-times" class="p-button-text p-button-sm" @click="clearDate" title="Clear date filter" />
+                            </div>
+                            <Button 
+                                icon="pi pi-filter" 
+                                label="Filter" 
+                                class="p-button-primary p-button-sm" 
+                                @click="applyFilter" 
+                                :disabled="(dateRange[0] && !dateRange[1]) || (!dateRange[0] && dateRange[1])"
+                                :loading="loading"
+                            />
                         </div>
                     </div>
                 </template>
@@ -95,7 +107,7 @@
                 </Column>
                 <Column field="city" header="City" style="max-width: 8rem" sortable>
                     <template #body="{ data }">
-                        {{ data?.city.replace(/,$/, '') ?? '-' }}
+                        {{ data?.city?.replace(/,$/, '') ?? '-' }}
                     </template>
                 </Column>
                 <Column field="state" header="State" style="max-width: 8rem" sortable>
@@ -152,7 +164,7 @@ const importInput2 = ref();
 const selectedExportIds = ref(new Set());
 const visibleRows = ref(returnList.value);
 const activeTabIndex = ref(0);
-const dateRange = ref(null);
+const dateRange = ref([null, null]);
 
 const formatDateDMY = (date) => {
     const d = new Date(date);
@@ -189,7 +201,7 @@ watch(activeTabIndex, () => {
         };
         fetchData(body);
     } else {
-        dateRange.value = null;
+        dateRange.value = [null, null];
         fetchData();
     }
     selectedExportIds.value.clear();
@@ -430,7 +442,7 @@ const applyFilter = () => {
     fetchData(body);
 };
 const clearDate = () => {
-    dateRange.value = null; // or []
+    dateRange.value = [null, null];
 };
 const fetchData = async (body = null) => {
     try {
