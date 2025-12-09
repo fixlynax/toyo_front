@@ -132,9 +132,24 @@ const model = ref([
                         to: '/technical/listPattern'
                     },
                     {
-                        label: 'OE Tyre LIst',
+                        label: 'OE Tyre List',
                         icon: 'pi pi-fw pi-slack',
                         to: '/technical/listOETire'
+                    },
+                    {
+                        label: 'Vechicle Model List',
+                        icon: 'pi pi-fw pi-slack',
+                        to: '/technical/listVehicleModel'
+                    },
+                    {
+                        label: 'Tread Depth List',
+                        icon: 'pi pi-fw pi-slack',
+                        to: '/technical/listTreadDepth'
+                    },
+                    {
+                        label: 'Size Code List',
+                        icon: 'pi pi-fw pi-slack',
+                        to: '/technical/listSizeCode'
                     }
                 ]
             }
@@ -429,25 +444,25 @@ const props = defineProps({
 </script>
 
 <!-- LOCAL -->
-<template>
+<!-- <template>
     <ul class="layout-menu">
         <template v-for="(item, i) in model" :key="item">
             <app-menu-item v-if="!item.separator" :item="item" :index="i"></app-menu-item>
             <li v-if="item.separator" class="menu-separator"></li>
         </template>
     </ul>
-</template>
+</template> -->
 <!-- LOCAL -->
 
 <!-- STAGING -->
-<!-- <template>
+<template>
     <ul class="layout-menu">
         <template v-for="(item, i) in props.Navbar" :key="item.label">
             <app-menu-item v-if="!item.separator" :item="item" :index="i"></app-menu-item>
             <li v-if="item.separator" class="menu-separator"></li>
         </template>
     </ul>
-</template> -->
+</template>
 <!-- STAGING -->
 
 <style lang="scss" scoped></style>
