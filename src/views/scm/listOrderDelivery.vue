@@ -99,7 +99,7 @@
                 </Column>
                 <Column field="shipto_data.companyName1" header="Customer Name" style="min-width: 12rem" sortable>
                     <template #body="{ data }">
-                        <span class="font-bold">{{ ` ${data.shipto_data?.companyName1 || ''} ${data.shipto_data?.companyName2 || ''} ` }}</span>
+                        <span class="font-bold">{{ ` ${data.shipto_data?.companyName1 || '-'} ${data.shipto_data?.companyName2 || ''} ` }}</span>
                         <br />
                         {{ data.shipto_data?.custAccountNo || '-' }}
                     </template>

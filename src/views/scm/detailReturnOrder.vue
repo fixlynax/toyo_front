@@ -72,7 +72,7 @@
                     <div class="grid grid-cols-1 md:grid-cols-2 mt-6 mb-4">
                         <div>
                             <span class="block text-sm text-black-700">Company Name</span>
-                            <p class="font-medium text-lg">{{ `${returnList.dealer.dealer_shop.companyName1} ${returnList.dealer.dealer_shop.companyName2}` }}</p>
+                            <p class="font-medium text-lg">{{ `${returnList.dealer.dealer_shop.companyName1 || '-'} ${returnList.dealer.dealer_shop.companyName2 || ''}` }}</p>
                         </div>
                         <div>
                             <span class="block text-sm text-black-700">Account Number</span>
