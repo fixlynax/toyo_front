@@ -86,7 +86,7 @@
                                 {{ data.materialid }} <br />
                                 {{ data.materialdescription }}
                                 <span class="block text-xs text-gray-500">SP: {{ data.salesprogramid || '-' }} </span>
-                                <Tag v-if="data.itemcategory === 'ZR3F'" value="ZR3F" severity="warning" size="small" class="mt-1" />
+                                <!-- <Tag v-if="data.itemcategory === 'ZR3F'" value="ZR3F" severity="warning" size="small" class="mt-1" /> -->
                             </template>
                         </Column>
 

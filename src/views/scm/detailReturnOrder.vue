@@ -28,13 +28,8 @@
                         </div>
                     </div>
                     <div class="mt-6 mb-4">
-                        <div class="font-semibold text-xl border-b pb-3 px-4 flex items-center gap-2 text-gray-800"><span>Return Item</span></div>
-                        <DataTable 
-                            :value="returnList.return_order_array"
-                            :rows="10"
-                            dataKey=""
-                            :rowHover="true">
-
+                        <!-- <div class="font-semibold text-xl border-b pb-3 px-4 flex items-center gap-2 text-gray-800 mb-4"><span>Return Order Item</span></div> -->
+                        <DataTable :value="returnList.return_order_array" :rows="10" dataKey="" :rowHover="true" class="rounded-table">
                             <Column field="materialid" header="Material ID" style="min-width: 10rem">
                                 <template #body="{ data }">
                                     {{ data?.materialid || '-' }}
@@ -47,23 +42,23 @@
                             </Column>
                             <Column field="itemcategory" header="Category" style="min-width: 12rem">
                                 <template #body="{ data }">
-                                        {{ data.itemcategory }}
+                                    {{ data.itemcategory }}
                                 </template>
                             </Column>
                             <Column field="plant" header="Plant" style="min-width: 8rem">
                                 <template #body="{ data }">
-                                        {{ data.plant }}
+                                    {{ data.plant }}
                                 </template>
                             </Column>
                             <Column field="quantity" header="Quantity" style="min-width: 8rem">
                                 <template #body="{ data }">
-                                        {{ data.qty }}
+                                    {{ data.qty }}
                                 </template>
                             </Column>
                         </DataTable>
                     </div>
                 </div>
-                 <div class="card flex flex-col w-full">
+                <div class="card flex flex-col w-full">
                     <div class="flex items-center justify-between border-b pb-2">
                         <div class="flex items-center gap-3">
                             <div class="text-2xl font-bold text-gray-800">Customer Details</div>
@@ -90,7 +85,11 @@
                         </div>
                         <div>
                             <span class="block text-sm text-black-700">Address</span>
-                            <p class="font-medium text-lg">{{ `${returnList.dealer.dealer_shop.addressLine1} ${returnList.dealer.dealer_shop?.addressLine2 || ''} ${returnList.dealer.dealer_shop?.addressLine3 || ''} ${returnList.dealer.dealer_shop?.addressLine4 || ''} ${returnList.dealer.dealer_shop.city} ,${returnList.dealer.dealer_shop.postcode}` }}</p>
+                            <p class="font-medium text-lg">
+                                {{
+                                    `${returnList.dealer.dealer_shop.addressLine1} ${returnList.dealer.dealer_shop?.addressLine2 || ''} ${returnList.dealer.dealer_shop?.addressLine3 || ''} ${returnList.dealer.dealer_shop?.addressLine4 || ''} ${returnList.dealer.dealer_shop.city} ,${returnList.dealer.dealer_shop.postcode}`
+                                }}
+                            </p>
                         </div>
                         <div>
                             <span class="block text-sm text-black-700">Contact Person</span>
@@ -106,11 +105,33 @@
                         </div>
                     </div>
                 </div>
+                <div class="card flex flex-col gap-6 w-full">
+                    <div class="flex items-center gap-2 border-b">
+                        <div class="text-2xl font-bold text-gray-800">Driver Details</div>
+                    </div>
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <span class="text-sm font-bold text-black-700">Driver</span>
+                            <p lass="text-lg font-medium">{{ returnList.delivery_information?.driverName ? returnList.delivery_information.driverName : 'Not Assigned' }}</p>
+                        </div>
+                        <div>
+                            <span class="text-sm font-bold text-black-700">Contact No</span>
+                            <p lass="text-lg font-medium">{{ returnList.delivery_information?.driverContactNo ? returnList.delivery_information.driverContactNo : 'Not Assigned' }}</p>
+                        </div>
+                        <div>
+                            <span class="text-sm font-bold text-black-700">IC No</span>
+                            <p lass="text-lg font-medium">{{ returnList.delivery_information?.driverIC ? returnList.delivery_information.driverIC : 'Not Assigned' }}</p>
+                        </div>
+                        <div>
+                            <span class="text-sm font-bold text-black-700">Plate No</span>
+                            <p lass="text-lg font-medium">{{ returnList.delivery_information?.driverPlateNo ? returnList.delivery_information.driverPlateNo : 'Not Assigned' }}</p>
+                        </div>
+                    </div>
+                </div>
             </div>
-            
+
             <!-- RIGHT SIDE -->
             <div class="md:w-1/3 flex flex-col">
-
                 <div class="card flex flex-col w-full">
                     <div class="flex items-center justify-between border-b pb-3 mb-4">
                         <div class="text-2xl font-bold text-gray-800">Advance Information</div>
@@ -124,7 +145,7 @@
                                     <td class="px-4 py-2 font-medium">Order Ref</td>
                                     <td class="px-4 py-2 text-right">{{ returnList.return_orderNo_ref || '-' }}</td>
                                 </tr>
-                                 <tr class="border-b">
+                                <tr class="border-b">
                                     <td class="px-4 py-2 font-medium">SAP Return No</td>
                                     <td class="px-4 py-2 text-right">{{ returnList.delivery_information?.sapreturndeliveryno ?? '-' }}</td>
                                 </tr>
@@ -146,23 +167,11 @@
                                 </tr>
                             </tbody>
                         </table>
-                        <div v-if="(returnList.delivery_status == 'NEW') && canUpdate" class="flex justify-end mt-3">
-                        <Button 
-                        style="width: auto !important"
-                            label="Update Pickup Date" 
-                            icon="pi pi-calendar"
-                            class="p-button-warning p-button-sm"
-                            @click="openDialog = true"
-                        />
+                        <div v-if="returnList.delivery_status == 'NEW' && canUpdate" class="flex justify-end mt-3">
+                            <Button style="width: auto !important" label="Update Pickup Date" icon="pi pi-calendar" class="p-button-warning p-button-sm" @click="openDialog = true" />
                         </div>
-                        <div v-if="(returnList.delivery_status == 'PENDING') && canUpdate" class="flex justify-end mt-3">
-                        <Button  
-                            style="width: auto !important"
-                            label="Update Recieve Date"
-                            icon="pi pi-calendar"
-                            class="p-button-sm p-button-warning"
-                            @click="openDialog2  = true"
-                        />
+                        <div v-if="returnList.delivery_status == 'PENDING' && canUpdate" class="flex justify-end mt-3">
+                            <Button style="width: auto !important" label="Update Recieve Date" icon="pi pi-calendar" class="p-button-sm p-button-warning" @click="openDialog2 = true" />
                         </div>
                     </div>
                 </div>
@@ -178,7 +187,7 @@
                                     <td class="px-4 py-2 font-medium">Order No</td>
                                     <td class="px-4 py-2 text-right">{{ returnList.order_data.order_no || '-' }}</td>
                                 </tr>
-                                 <tr class="border-b">
+                                <tr class="border-b">
                                     <td class="px-4 py-2 font-medium">Inv No</td>
                                     <td class="px-4 py-2 text-right">{{ returnList.order_data.inv_no || '-' }}</td>
                                 </tr>
@@ -206,77 +215,31 @@
                         </table>
                     </div>
                 </div>
-                <div class="card flex flex-col gap-6 w-full">
-                    <div class="flex items-center gap-2 border-b">
-                        <div class="text-2xl font-bold text-gray-800">Driver Details</div>
-                    </div>
-                    <div class="grid grid-cols-2 gap-4">
-                        <div>
-                            <span class="text-sm font-bold text-black-700">Driver</span>
-                            <p lass="text-lg font-medium">{{ returnList.delivery_information?.driverName ? returnList.delivery_information.driverName: 'Not Assigned' }}</p>
-                        </div>
-                        <div>
-                            <span class="text-sm font-bold text-black-700">Contact No</span>
-                            <p lass="text-lg font-medium">{{ returnList.delivery_information?.driverContactNo ? returnList.delivery_information.driverContactNo: 'Not Assigned' }}</p>
-                        </div>
-                        <div>
-                            <span class="text-sm font-bold text-black-700">IC No</span>
-                            <p lass="text-lg font-medium">{{ returnList.delivery_information?.driverIC ? returnList.delivery_information.driverIC: 'Not Assigned' }}</p>
-                        </div>
-                        <div>
-                            <span class="text-sm font-bold text-black-700">Plate No</span>
-                            <p lass="text-lg font-medium">{{ returnList.delivery_information?.driverPlateNo ? returnList.delivery_information.driverPlateNo: 'Not Assigned' }}</p>
-                        </div>
-                    </div>
-                </div>
             </div>
         </div>
     </Fluid>
-    <Dialog
-      header="Update Pickup Date"
-      v-model:visible="openDialog"
-      modal
-      :style="{ width: '400px' }"
-      :closable="!loadingUpdate" 
-    >
-      <div class="flex flex-col gap-3">
-        <!-- Schedule Date -->
-        <Calendar
-          v-model="form.pickupdate"
-          dateFormat="yy-mm-dd"
-          placeholder="Select Pickup Date"
-          :minDate="new Date()"
-        />
+    <Dialog header="Update Pickup Date" v-model:visible="openDialog" modal :style="{ width: '400px' }" :closable="!loadingUpdate">
+        <div class="flex flex-col gap-3">
+            <!-- Schedule Date -->
+            <Calendar v-model="form.pickupdate" dateFormat="yy-mm-dd" placeholder="Select Pickup Date" :minDate="new Date()" />
 
-        <!-- Actions -->
-        <div class="flex justify-end gap-2 mt-3">
-          <Button label="Cancel" class="p-button-text" :loading="loadingUpdate"  @click="openDialog = false" />
-          <Button label="Save" class="p-button-success" :loading="loadingUpdate" @click="savePickup" />
+            <!-- Actions -->
+            <div class="flex justify-end gap-2 mt-3">
+                <Button label="Cancel" class="p-button-text" :loading="loadingUpdate" @click="openDialog = false" />
+                <Button label="Save" class="p-button-success" :loading="loadingUpdate" @click="savePickup" />
+            </div>
         </div>
-      </div>
     </Dialog>
 
-    <Dialog
-      header="Update Recieve Date"
-      v-model:visible="openDialog2"
-      modal
-      :style="{ width: '400px' }"
-      :closable="!loadingUpdate2" 
-    >
-      <div class="flex flex-col gap-3">
+    <Dialog header="Update Recieve Date" v-model:visible="openDialog2" modal :style="{ width: '400px' }" :closable="!loadingUpdate2">
+        <div class="flex flex-col gap-3">
+            <Calendar v-model="form2.receivedate" dateFormat="yy-mm-dd" placeholder="Select Recieve Date" :maxDate="new Date()" />
 
-        <Calendar
-          v-model="form2.receivedate"
-          dateFormat="yy-mm-dd"
-          placeholder="Select Recieve Date"
-          :maxDate="new Date()"
-        />
-
-        <div class="flex justify-end gap-2 mt-3">
-          <Button label="Cancel" class="p-button-text" :loading="loadingUpdate2"  @click="openDialog2 = false" />
-          <Button label="Save" class="p-button-success" :loading="loadingUpdate2" @click="saveRecieve" />
+            <div class="flex justify-end gap-2 mt-3">
+                <Button label="Cancel" class="p-button-text" :loading="loadingUpdate2" @click="openDialog2 = false" />
+                <Button label="Save" class="p-button-success" :loading="loadingUpdate2" @click="saveRecieve" />
+            </div>
         </div>
-      </div>
     </Dialog>
 </template>
 
@@ -297,10 +260,10 @@ const loadingUpdate = ref(false);
 const loadingUpdate2 = ref(false);
 
 defineProps({
-  id: {
-    type: [String, Number],
-    required: true
-  }
+    id: {
+        type: [String, Number],
+        required: true
+    }
 });
 const toast = useToast();
 const exportLoading = ref(false);
@@ -309,77 +272,75 @@ const route = useRoute();
 const router = useRouter();
 const importInput = ref();
 const returnList = ref({
-  dealer: {
-    dealer_shop: {},
-  },
-  shiptoData: {},
-  delivery_information: {},
-  order_data: {},
+    dealer: {
+        dealer_shop: {}
+    },
+    shiptoData: {},
+    delivery_information: {},
+    order_data: {}
 });
 const loading = ref(true);
 function formatDateTime(dateString) {
-  if (!dateString) return '';
-  const date = new Date(dateString);
-  return date.toLocaleString('en-MY', {
-    year: 'numeric',
-    month: '2-digit',
-    day: '2-digit',
-    hour: '2-digit',
-    minute: '2-digit',
-    second: '2-digit',
-    hour12: true
-  });
+    if (!dateString) return '';
+    const date = new Date(dateString);
+    return date.toLocaleString('en-MY', {
+        year: 'numeric',
+        month: '2-digit',
+        day: '2-digit',
+        hour: '2-digit',
+        minute: '2-digit',
+        second: '2-digit',
+        hour12: true
+    });
 }
 function formatDate(dateString) {
-  if (!dateString) return '';
-  const date = new Date(dateString);
-  return date.toLocaleString('en-MY', {
-    year: 'numeric',
-    month: '2-digit',
-    day: '2-digit',
-  });
+    if (!dateString) return '';
+    const date = new Date(dateString);
+    return date.toLocaleString('en-MY', {
+        year: 'numeric',
+        month: '2-digit',
+        day: '2-digit'
+    });
 }
-
 
 // Form
 const form = ref({
-  returnorderno: null, 
-  pickupdate: null,      
-//   scheduleTime: null      
+    returnorderno: null,
+    pickupdate: null
+    //   scheduleTime: null
 });
 
 const form2 = ref({
-  returnorderno: null, 
-  receivedate: null,      
-//   deliverytime: null      
+    returnorderno: null,
+    receivedate: null
+    //   deliverytime: null
 });
 
 // Save function
 const savePickup = async () => {
-
-  if (!form.value.pickupdate) {
-    toast.add({ severity: 'warn', summary: 'Warning', detail: 'Please select date', life: 3000 });
-    return;
-  }
+    if (!form.value.pickupdate) {
+        toast.add({ severity: 'warn', summary: 'Warning', detail: 'Please select date', life: 3000 });
+        return;
+    }
     loadingUpdate.value = true;
 
-  try {
-    const payload = {
-      returnorderno: form.value.returnorderno,
-      pickupdate: formatDateApi(form.value.pickupdate),
-    //   scheduletime: formatTimeApi(form.value.scheduleTime)
-    };
-    const res = await api.post('update-pickup-return-order', payload);
-    if (res.data?.status === 1) {
-        toast.add({ severity: 'success', summary: 'Updated', detail: 'Pickup date updated successfully', life: 3000 });
-        InitfetchData(); // refresh table
-    } else {
-        toast.add({ severity: 'error', summary: 'Error', detail: res.data?.error || 'Failed', life: 3000 });
-    }
+    try {
+        const payload = {
+            returnorderno: form.value.returnorderno,
+            pickupdate: formatDateApi(form.value.pickupdate)
+            //   scheduletime: formatTimeApi(form.value.scheduleTime)
+        };
+        const res = await api.post('update-pickup-return-order', payload);
+        if (res.data?.status === 1) {
+            toast.add({ severity: 'success', summary: 'Updated', detail: 'Pickup date updated successfully', life: 3000 });
+            InitfetchData(); // refresh table
+        } else {
+            toast.add({ severity: 'error', summary: 'Error', detail: res.data?.error || 'Failed', life: 3000 });
+        }
     } catch (err) {
-    console.error(err);
-    toast.add({ severity: 'error', summary: 'Error', detail: 'API error', life: 3000 });
-    }finally{
+        console.error(err);
+        toast.add({ severity: 'error', summary: 'Error', detail: 'API error', life: 3000 });
+    } finally {
         openDialog.value = false;
         loadingUpdate.value = false;
     }
@@ -387,49 +348,48 @@ const savePickup = async () => {
 
 // Save function
 const saveRecieve = async () => {
-  if (!form2.value.receivedate) {
-    toast.add({ severity: 'warn', summary: 'Warning', detail: 'Please select date', life: 3000 });
-    return;
-  }
+    if (!form2.value.receivedate) {
+        toast.add({ severity: 'warn', summary: 'Warning', detail: 'Please select date', life: 3000 });
+        return;
+    }
     loadingUpdate2.value = true;
 
-  try {
-    const payload = {
-      returnorderno: form2.value.returnorderno,
-      receivedate: formatDateApi(form2.value.receivedate),
-    //   deliveredtime: formatTimeApi(form2.value.deliverytime)
-    };
-    const res = await api.post('update-receive-return-order', payload);
-    if (res.data?.status === 1) {
-        toast.add({ severity: 'success', summary: 'Updated', detail: 'Recieve date updated successfully', life: 3000 });
-        InitfetchData(); // refresh table
-    } else {
-        toast.add({ severity: 'error', summary: 'Error', detail: res.data?.admin_data[0].sap_error.error_message || 'Failed', life: 3000 });
-    }
+    try {
+        const payload = {
+            returnorderno: form2.value.returnorderno,
+            receivedate: formatDateApi(form2.value.receivedate)
+            //   deliveredtime: formatTimeApi(form2.value.deliverytime)
+        };
+        const res = await api.post('update-receive-return-order', payload);
+        if (res.data?.status === 1) {
+            toast.add({ severity: 'success', summary: 'Updated', detail: 'Recieve date updated successfully', life: 3000 });
+            InitfetchData(); // refresh table
+        } else {
+            toast.add({ severity: 'error', summary: 'Error', detail: res.data?.admin_data[0].sap_error.error_message || 'Failed', life: 3000 });
+        }
     } catch (err) {
-    console.error(err);
-    toast.add({ severity: 'error', summary: 'Error', detail: 'API error', life: 3000 });
-    }finally{
+        console.error(err);
+        toast.add({ severity: 'error', summary: 'Error', detail: 'API error', life: 3000 });
+    } finally {
         openDialog2.value = false;
         loadingUpdate2.value = false;
     }
-
 };
 // Helpers
 const formatDateApi = (date) => {
-  const d = new Date(date);
-  return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+    const d = new Date(date);
+    return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
 };
 const InitfetchData = async () => {
     try {
         loading.value = true;
         const id = route.params.id;
         const response = await api.get(`scm-return-order-detail/${id}`);
-        if ( (response.data.admin_data)) {
+        if (response.data.admin_data) {
             // response.data.status === 1 &&
             returnList.value = response.data.admin_data[0];
-            form.value.returnorderno =returnList.value.return_orderNo_ref;
-            form2.value.returnorderno =returnList.value.return_orderNo_ref;
+            form.value.returnorderno = returnList.value.return_orderNo_ref;
+            form2.value.returnorderno = returnList.value.return_orderNo_ref;
         } else {
             console.error('API returned error or invalid data:', response.data);
             toast.add({ severity: 'error', summary: 'Error', detail: 'Failed to load data', life: 3000 });
@@ -456,21 +416,21 @@ function getStatusSeverity(status) {
     }
 }
 const handleExport = async () => {
- const idexport = Number(route.params.id);
+    const idexport = Number(route.params.id);
     try {
         exportLoading.value = true;
-            const response = await api.postExtra(
+        const response = await api.postExtra(
             'excel/exportsingle-scm-return-order-list',
-        { id: idexport  },
-        {
-            responseType: 'blob',
-            headers: {
-            'Content-Type': 'application/json',
+            { id: idexport },
+            {
+                responseType: 'blob',
+                headers: {
+                    'Content-Type': 'application/json'
+                }
             }
-        }
         );
-        const blob = new Blob([response.data], { 
-        type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' 
+        const blob = new Blob([response.data], {
+            type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
         });
 
         const url = window.URL.createObjectURL(blob);
@@ -496,20 +456,19 @@ const handleImport = async (event) => {
 
     try {
         importLoading.value = true;
-        
+
         const formData = new FormData();
         formData.append('return_order_excel', file);
-        
+
         const response = await api.postExtra('excel/importsingle-scm-return-order-list', formData, {
             headers: {
                 'Content-Type': 'multipart/form-data'
             }
-            });
-        
+        });
+
         if (response.data.status === 1) {
             // Refresh data after import
             await InitfetchData();
-
 
             toast.add({
                 severity: 'success',
@@ -539,5 +498,44 @@ const handleImport = async (event) => {
 onMounted(() => {
     InitfetchData();
 });
-
 </script>
+<style scoped>
+:deep(.rounded-table) {
+    border-radius: 12px;
+    overflow: hidden;
+    border: 1px solid #e5e7eb;
+
+    .p-datatable-header {
+        border-top-left-radius: 12px;
+        border-top-right-radius: 12px;
+    }
+
+    .p-paginator-bottom {
+        border-bottom-left-radius: 12px;
+        border-bottom-right-radius: 12px;
+    }
+
+    .p-datatable-thead > tr > th {
+        &:first-child {
+            border-top-left-radius: 12px;
+        }
+        &:last-child {
+            border-top-right-radius: 12px;
+        }
+    }
+
+    .p-datatable-tbody > tr:last-child > td {
+        &:first-child {
+            border-bottom-left-radius: 0;
+        }
+        &:last-child {
+            border-bottom-right-radius: 0;
+        }
+    }
+
+    .p-datatable-tbody > tr.p-datatable-emptymessage > td {
+        border-bottom-left-radius: 12px;
+        border-bottom-right-radius: 12px;
+    }
+}
+</style>

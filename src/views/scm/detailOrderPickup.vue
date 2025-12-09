@@ -14,7 +14,9 @@
                     <div class="grid grid-cols-2 gap-4">
                         <div>
                             <span class="text-sm font-bold text-black-700">Customer Name</span>
-                            <p class="text-lg font-medium">{{ orderDelList.eten_user?.companyName1 || '-' }} {{ orderDelList.eten_user?.companyName2 || '' }} {{ orderDelList.eten_user?.companyName3 || '' }} {{ orderDelList.eten_user?.companyName4 || '' }}</p>
+                            <p class="text-lg font-medium">
+                                {{ orderDelList.eten_user?.companyName1 || '-' }} {{ orderDelList.eten_user?.companyName2 || '' }} {{ orderDelList.eten_user?.companyName3 || '' }} {{ orderDelList.eten_user?.companyName4 || '' }}
+                            </p>
                         </div>
                         <div>
                             <span class="text-sm font-bold text-black-700">Account Number</span>
@@ -27,7 +29,8 @@
                         <div>
                             <span class="text-sm font-bold text-black-700">Location</span>
                             <p class="text-lg font-medium">
-                                {{ orderDelList.eten_user?.addressLine1 }} {{ orderDelList.eten_user?.addressLine2 }} {{ orderDelList.eten_user?.addressLine3 }} {{ orderDelList.eten_user?.addressLine4 }}, {{ orderDelList.eten_user?.postcode }} {{ orderDelList.eten_user?.city }} {{ orderDelList.eten_user?.state }} 
+                                {{ orderDelList.eten_user?.addressLine1 }} {{ orderDelList.eten_user?.addressLine2 }} {{ orderDelList.eten_user?.addressLine3 }} {{ orderDelList.eten_user?.addressLine4 }}, {{ orderDelList.eten_user?.postcode }}
+                                {{ orderDelList.eten_user?.city }} {{ orderDelList.eten_user?.state }}
                             </p>
                         </div>
                         <div>
@@ -45,30 +48,6 @@
                         <div>
                             <span class="text-sm font-bold text-black-700">City</span>
                             <p class="text-lg font-medium">{{ orderDelList.eten_user?.city || '-' }}</p>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="card flex flex-col gap-6 w-full">
-                    <div class="flex items-center gap-2 border-b">
-                        <div class="text-2xl font-bold text-gray-800">Collector Details</div>
-                    </div>
-                    <div class="grid grid-cols-2 gap-4">
-                        <div>
-                            <span class="text-sm font-bold text-black-700">Driver</span>
-                            <p lass="text-lg font-medium">{{ orderDelList.driverInformation?.driverName ? orderDelList.driverInformation.driverName: 'Not Assigned' }}</p>
-                        </div>
-                        <div>
-                            <span class="text-sm font-bold text-black-700">Contact No</span>
-                            <p lass="text-lg font-medium">{{ orderDelList.driverInformation?.driverPhoneNumber ? orderDelList.driverInformation.driverPhoneNumber: 'Not Assigned' }}</p>
-                        </div>
-                        <div>
-                            <span class="text-sm font-bold text-black-700">IC No</span>
-                            <p lass="text-lg font-medium">{{ orderDelList.driverInformation?.driverIC ? orderDelList.driverInformation.driverIC: 'Not Assigned' }}</p>
-                        </div>
-                        <div>
-                            <span class="text-sm font-bold text-black-700">Truck Plate</span>
-                            <p lass="text-lg font-medium">{{ orderDelList.driverInformation?.driverTruckPlate ? orderDelList.driverInformation.driverTruckPlate: 'Not Assigned' }}</p>
                         </div>
                     </div>
                 </div>
@@ -163,7 +142,7 @@
                                 </tr>
                                 <tr class="border-b">
                                     <td class="px-4 py-2 font-bold">Pickup</td>
-                                    <td class="px-4 py-2 text-right">{{ orderDelList.driverInformation?.pickup_datetime? formatDate(orderDelList.driverInformation.pickup_datetime): 'Not Assigned' }}</td>
+                                    <td class="px-4 py-2 text-right">{{ orderDelList.driverInformation?.pickup_datetime ? formatDate(orderDelList.driverInformation.pickup_datetime) : 'Not Assigned' }}</td>
                                 </tr>
                                 <tr>
                                     <td class="px-4 py-2 font-bold">Created</td>
@@ -181,38 +160,42 @@
                             @click="confirmUpdatePickup(orderDelList)"
                         />
                     </div> -->
-                    <div v-if="orderDelList.deliveryType !='LALAMOVE' && !orderDelList?.driverInformation?.pickup_datetime && canUpdate" class="flex justify-end mt-3">
-                        <Button  
-                            style="width: auto !important"
-                            label="Update Pickup Date"
-                            icon="pi pi-calendar"
-                            class="p-button-sm p-button-warning"
-                            @click="promptUpdatePickup(orderDelList)"
-                        />
+                    <div v-if="orderDelList.deliveryType != 'LALAMOVE' && !orderDelList?.driverInformation?.pickup_datetime && canUpdate" class="flex justify-end mt-3">
+                        <Button style="width: auto !important" label="Update Pickup Date" icon="pi pi-calendar" class="p-button-sm p-button-warning" @click="promptUpdatePickup(orderDelList)" />
                     </div>
-                    <div v-if="orderDelList.deliveryType =='LALAMOVE' && !orderDelList?.driverInformation?.pickup_datetime && canUpdate" class="flex justify-end mt-3">
-                        <Button  
-                            style="width: auto !important"
-                            label="Update Pickup Date"
-                            icon="pi pi-calendar"
-                            class="p-button-sm p-button-warning"
-                            @click="confirmUpdatePickup2(orderDelList)"
-                        />
+                    <div v-if="orderDelList.deliveryType == 'LALAMOVE' && !orderDelList?.driverInformation?.pickup_datetime && canUpdate" class="flex justify-end mt-3">
+                        <Button style="width: auto !important" label="Update Pickup Date" icon="pi pi-calendar" class="p-button-sm p-button-warning" @click="confirmUpdatePickup2(orderDelList)" />
+                    </div>
+                </div>
+                <div class="card flex flex-col gap-6 w-full">
+                    <div class="flex items-center gap-2 border-b">
+                        <div class="text-2xl font-bold text-gray-800">Collector Details</div>
+                    </div>
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <span class="text-sm font-bold text-black-700">Driver</span>
+                            <p lass="text-lg font-medium">{{ orderDelList.driverInformation?.driverName ? orderDelList.driverInformation.driverName: 'Not Assigned' }}</p>
+                        </div>
+                        <div>
+                            <span class="text-sm font-bold text-black-700">Contact No</span>
+                            <p lass="text-lg font-medium">{{ orderDelList.driverInformation?.driverPhoneNumber ? orderDelList.driverInformation.driverPhoneNumber: 'Not Assigned' }}</p>
+                        </div>
+                        <div>
+                            <span class="text-sm font-bold text-black-700">IC No</span>
+                            <p lass="text-lg font-medium">{{ orderDelList.driverInformation?.driverIC ? orderDelList.driverInformation.driverIC: 'Not Assigned' }}</p>
+                        </div>
+                        <div>
+                            <span class="text-sm font-bold text-black-700">Truck Plate</span>
+                            <p lass="text-lg font-medium">{{ orderDelList.driverInformation?.driverTruckPlate ? orderDelList.driverInformation.driverTruckPlate: 'Not Assigned' }}</p>
+                        </div>
                     </div>
                 </div>
             </div>
         </div>
     </Fluid>
-    <Dialog 
-            v-model:visible="showIcDialog" 
-            header="Update Collector information" 
-            modal 
-            :style="{ width: '50rem' }"
-    >
+    <Dialog v-model:visible="showIcDialog" header="Update Collector information" modal :style="{ width: '50rem' }">
         <div class="flex flex-col gap-3 w-full">
-            <div class="font-semibold">
-                SAP DO No: {{ selectedData?.do_no }}
-            </div>
+            <div class="font-semibold">SAP DO No: {{ selectedData?.do_no }}</div>
             <div class="grid md:grid-cols-2 gap-4">
                 <div>
                     <label class="block mb-2 font-medium w-full">Collector IC Number</label>
@@ -220,7 +203,7 @@
                 </div>
                 <div>
                     <label class="block mb-2 font-medium w-full">Collector Driver Name</label>
-                    <InputText v-model="form.driverName" placeholder="Enter Driver Name" class="w-full"  />
+                    <InputText v-model="form.driverName" placeholder="Enter Driver Name" class="w-full" />
                 </div>
             </div>
             <div class="grid md:grid-cols-2 mb-2 gap-4">
@@ -230,7 +213,7 @@
                 </div>
                 <div>
                     <label class="block mb-2 font-medium w-full">Collector Plate No</label>
-                    <InputText v-model="form.driverPlateNum" placeholder="Enter Plate No" maxlength="8" class="w-full"  />
+                    <InputText v-model="form.driverPlateNum" placeholder="Enter Plate No" maxlength="8" class="w-full" />
                 </div>
             </div>
         </div>
@@ -240,17 +223,11 @@
             <Button label="Confirm" @click="submitPickupUpdate" />
         </template>
     </Dialog>
-    <Dialog 
-            v-model:visible="showIcDialog2" 
-            header="Pickup Confirmation" 
-            modal 
-            :style="{ width: '30rem' }"
-    >
+    <Dialog v-model:visible="showIcDialog2" header="Pickup Confirmation" modal :style="{ width: '30rem' }">
         <div class="flex flex-col gap-3 w-full">
-
             <div>
                 <label class="block mb-4 font-medium w-full">Please enter collector IC number to confirm</label>
-                <InputText v-model="icNo" placeholder="Enter IC No" maxlength="12" class="w-full" @keypress="handleIcInput"  />
+                <InputText v-model="icNo" placeholder="Enter IC No" maxlength="12" class="w-full" @keypress="handleIcInput" />
             </div>
         </div>
 
@@ -270,10 +247,10 @@ import { useConfirm } from 'primevue';
 import { useMenuStore } from '@/store/menu';
 
 defineProps({
-  id: {
-    type: [String, Number],
-    required: false
-  }
+    id: {
+        type: [String, Number],
+        required: false
+    }
 });
 
 const menuStore = useMenuStore();
@@ -292,30 +269,30 @@ const showIcDialog2 = ref(false);
 const confirmation = useConfirm();
 
 const form = ref({
-  driverIC: '', 
-  driverName: '',      
-  driverPhoneNum: '',      
-  driverPlateNum: '',      
+    driverIC: '',
+    driverName: '',
+    driverPhoneNum: '',
+    driverPlateNum: ''
 });
 const icNo = ref('');
 let selectedData = null;
 
 const handleIcInput = (e) => {
-  if (!/[0-9]/.test(e.key)) {
-    e.preventDefault(); // ⛔ block non-digits
-  }
+    if (!/[0-9]/.test(e.key)) {
+        e.preventDefault(); // ⛔ block non-digits
+    }
 };
 const allowOnlyNumbers = (event) => {
-  const key = event.key;
+    const key = event.key;
 
-  // allow digits
-  if (/[0-9]/.test(key)) return;
+    // allow digits
+    if (/[0-9]/.test(key)) return;
 
-  // allow "-"
-  if (key === '-') return;
+    // allow "-"
+    if (key === '-') return;
 
-  // block everything else
-  event.preventDefault();
+    // block everything else
+    event.preventDefault();
 };
 const confirmUpdatePickup = (data) => {
     selectedData = data;
@@ -336,16 +313,16 @@ const handleCloseDialog = () => {
 };
 
 const submitPickupUpdate = async () => {
-        if (!form.value.driverIC || form.value.driverIC.length !== 12) {
-            toast.add({
+    if (!form.value.driverIC || form.value.driverIC.length !== 12) {
+        toast.add({
             severity: 'warn',
             summary: 'Invalid IC No',
             detail: 'IC Number must be exactly 12 digits.',
             life: 3000
-            });
-            return;
-        }
-      try {
+        });
+        return;
+    }
+    try {
         const payload = new FormData();
         // payload.append('orderno', selectedData.order_no);
         payload.append('driverIC', form.value.driverIC);
@@ -356,17 +333,17 @@ const submitPickupUpdate = async () => {
         const res = await api.post(`order/driver-information-scm/${selectedData.order_no}`, payload);
 
         if (res.data?.status === 1) {
-          toast.add({ severity: 'success', summary: 'Updated', detail: 'Pickup date collecter information updated', life: 3000 });
-          InitfetchData(); // refresh table
+            toast.add({ severity: 'success', summary: 'Updated', detail: 'Pickup date collecter information updated', life: 3000 });
+            InitfetchData(); // refresh table
         } else {
-          toast.add({ severity: 'error', summary: 'Error', detail: res.data?.message || 'Failed', life: 3000 });
+            toast.add({ severity: 'error', summary: 'Error', detail: res.data?.message || 'Failed', life: 3000 });
         }
-      } catch (err) {
+    } catch (err) {
         console.error(err);
         toast.add({ severity: 'error', summary: 'Error', detail: 'API error', life: 3000 });
-      }finally{
+    } finally {
         handleCloseDialog();
-      }
+    }
 };
 
 const confirmUpdatePickup2 = (data) => {
@@ -376,22 +353,22 @@ const confirmUpdatePickup2 = (data) => {
 };
 
 const handleCloseDialog2 = () => {
-  icNo.value = '';
-  selectedData = null;
-   showIcDialog2.value = false;
+    icNo.value = '';
+    selectedData = null;
+    showIcDialog2.value = false;
 };
 
 const submitPickupUpdate2 = async () => {
-        if (!icNo.value || icNo.value.length !== 12) {
-            toast.add({
+    if (!icNo.value || icNo.value.length !== 12) {
+        toast.add({
             severity: 'warn',
             summary: 'Invalid IC No',
             detail: 'IC Number must be exactly 12 digits.',
             life: 3000
-            });
-            return;
-        }
-      try {
+        });
+        return;
+    }
+    try {
         const payload = new FormData();
         payload.append('orderno', selectedData.order_no);
         payload.append('collectoric', icNo.value);
@@ -399,48 +376,47 @@ const submitPickupUpdate2 = async () => {
         const res = await api.post('update-collect-time', payload);
 
         if (res.data?.status === 1) {
-          toast.add({ severity: 'success', summary: 'Updated', detail: 'Pickup date set to now', life: 3000 });
-          InitfetchData(); // refresh table
+            toast.add({ severity: 'success', summary: 'Updated', detail: 'Pickup date set to now', life: 3000 });
+            InitfetchData(); // refresh table
         } else {
-          toast.add({ severity: 'error', summary: 'Error', detail: res.data?.message || 'Failed', life: 3000 });
+            toast.add({ severity: 'error', summary: 'Error', detail: res.data?.message || 'Failed', life: 3000 });
         }
-      } catch (err) {
+    } catch (err) {
         console.error(err);
         toast.add({ severity: 'error', summary: 'Error', detail: 'API error', life: 3000 });
-      }finally{
+    } finally {
         handleCloseDialog2();
-      }
-
+    }
 };
 const promptUpdatePickup = (data) => {
-  confirmation.require({
-    message: `Are you sure you want to confirm pickup for order ${data.order_no} ?`,
-    header: 'Pickup Confirmation',
-    icon: 'pi pi-exclamation-triangle',
-    acceptLabel: 'Yes',
-    rejectLabel: 'No',
-    accept: async () => {
-      try {
-        const payload = new FormData();
-        payload.append('orderno', data.order_no);
+    confirmation.require({
+        message: `Are you sure you want to confirm pickup for order ${data.order_no} ?`,
+        header: 'Pickup Confirmation',
+        icon: 'pi pi-exclamation-triangle',
+        acceptLabel: 'Yes',
+        rejectLabel: 'No',
+        accept: async () => {
+            try {
+                const payload = new FormData();
+                payload.append('orderno', data.order_no);
 
-        const res = await api.post('update-collect-time', payload);
+                const res = await api.post('update-collect-time', payload);
 
-        if (res.data?.status === 1) {
-          toast.add({ severity: 'success', summary: 'Updated', detail: 'Pickup date set to now', life: 3000 });
-          InitfetchData(); // refresh table
-        } else {
-          toast.add({ severity: 'error', summary: 'Error', detail: res.data?.message || 'Failed', life: 3000 });
+                if (res.data?.status === 1) {
+                    toast.add({ severity: 'success', summary: 'Updated', detail: 'Pickup date set to now', life: 3000 });
+                    InitfetchData(); // refresh table
+                } else {
+                    toast.add({ severity: 'error', summary: 'Error', detail: res.data?.message || 'Failed', life: 3000 });
+                }
+            } catch (err) {
+                console.error(err);
+                toast.add({ severity: 'error', summary: 'Error', detail: 'API error', life: 3000 });
+            }
+        },
+        reject: () => {
+            // optional action on cancel
         }
-      } catch (err) {
-        console.error(err);
-        toast.add({ severity: 'error', summary: 'Error', detail: 'API error', life: 3000 });
-      }
-    },
-    reject: () => {
-      // optional action on cancel
-    }
-  });
+    });
 };
 const formatItemNo = (itemNo) => {
     if (!itemNo) return '-';
@@ -452,9 +428,9 @@ function formatDate(dateString) {
     return date.toLocaleString('en-MY', {
         year: 'numeric',
         month: '2-digit',
-        day: '2-digit',
+        day: '2-digit'
     });
-    }
+}
 function formatTime(timeString) {
     if (!timeString) return '';
     const [hours, minutes, seconds] = timeString.split(':');
@@ -464,9 +440,9 @@ function formatTime(timeString) {
         hour: '2-digit',
         minute: '2-digit',
         second: '2-digit',
-        hour12: true,
+        hour12: true
     });
-    }
+}
 function formatDateFull(dateString) {
     if (!dateString) return '';
     const date = new Date(dateString);
@@ -479,8 +455,8 @@ function formatDateFull(dateString) {
         second: '2-digit',
         hour12: true
     });
-    }
-    const getOrderStatusText = (status) => {
+}
+const getOrderStatusText = (status) => {
     const statusMap = {
         0: 'Pending',
         1: 'Approved',
@@ -504,17 +480,17 @@ const getOrderStatusSeverity = (status) => {
 };
 const getOrderStatusText2 = (status) => {
     const statusMap = {
-        "PENDING": 'Pending',
+        PENDING: 'Pending',
         // "PENDING": 'Delivery',
-        "COMPLETED": 'Completed',
+        COMPLETED: 'Completed'
     };
     return statusMap[status] || `Status: ${status}`;
 };
 const getOrderStatusSeverity2 = (status) => {
     const severityMap = {
-        "PENDING": 'info',
+        PENDING: 'info',
         // "PENDING": 'warn',
-        "COMPLETED": 'success',
+        COMPLETED: 'success'
     };
     return severityMap[status] || 'secondary';
 };
@@ -524,7 +500,7 @@ const InitfetchData = async () => {
         loading.value = true;
         const id = route.params.id;
         const response = await api.get(`order-pickup/detail/${id}`);
-        if ( (response.data.admin_data)) {
+        if (response.data.admin_data) {
             // response.data.status === 1 &&
             orderDelList.value = response.data.admin_data;
         } else {
@@ -543,3 +519,43 @@ onMounted(() => {
     InitfetchData();
 });
 </script>
+<style scoped>
+:deep(.rounded-table) {
+    border-radius: 12px;
+    overflow: hidden;
+    border: 1px solid #e5e7eb;
+
+    .p-datatable-header {
+        border-top-left-radius: 12px;
+        border-top-right-radius: 12px;
+    }
+
+    .p-paginator-bottom {
+        border-bottom-left-radius: 12px;
+        border-bottom-right-radius: 12px;
+    }
+
+    .p-datatable-thead > tr > th {
+        &:first-child {
+            border-top-left-radius: 12px;
+        }
+        &:last-child {
+            border-top-right-radius: 12px;
+        }
+    }
+
+    .p-datatable-tbody > tr:last-child > td {
+        &:first-child {
+            border-bottom-left-radius: 0;
+        }
+        &:last-child {
+            border-bottom-right-radius: 0;
+        }
+    }
+
+    .p-datatable-tbody > tr.p-datatable-emptymessage > td {
+        border-bottom-left-radius: 12px;
+        border-bottom-right-radius: 12px;
+    }
+}
+</style>
