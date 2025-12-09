@@ -78,42 +78,17 @@
                 </template>
             </Column>
             
-            <Column header="Range" style="min-width: 14rem">
+
+            <Column
+                v-for="step in [100,95,90,85,80,75,70,65,60,55,50,45,40,35,30,25,20,15,10]"
+                :key="step"
+                :field="'p' + step"
+                :header="step + '%'"
+                style="min-width: 5rem" 
+                sortable
+            >
                 <template #body="{ data }">
-                    <div class="grid grid-cols-2">
-
-                        <!-- Column 1 -->
-                        <div>p10: {{ data.p10 }}</div>
-                        <div>p60: {{ data.p60 }}</div>
-
-                        <div>p15: {{ data.p15 }}</div>
-                        <div>p65: {{ data.p65 }}</div>
-
-                        <div>p20: {{ data.p20 }}</div>
-                        <div>p70: {{ data.p70 }}</div>
-
-                        <div>p25: {{ data.p25 }}</div>
-                        <div>p75: {{ data.p75 }}</div>
-
-                        <div>p30: {{ data.p30 }}</div>
-                        <div>p80: {{ data.p80 }}</div>
-
-                        <div>p35: {{ data.p35 }}</div>
-                        <div>p85: {{ data.p85 }}</div>
-
-                        <div>p40: {{ data.p40 }}</div>
-                        <div>p90: {{ data.p90 }}</div>
-
-                        <div>p45: {{ data.p45 }}</div>
-                        <div>p95: {{ data.p95 }}</div>
-
-                        <div>p50: {{ data.p50 }}</div>
-                        <div>p100: {{ data.p100 }}</div>
-
-                        <div>p55: {{ data.p55 }}</div>
-                        <div></div>
-
-                    </div>
+                    {{ data['p' + step] }}
                 </template>
             </Column>
 
