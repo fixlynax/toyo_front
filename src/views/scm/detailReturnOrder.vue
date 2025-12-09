@@ -206,6 +206,29 @@
                         </table>
                     </div>
                 </div>
+                <div class="card flex flex-col gap-6 w-full">
+                    <div class="flex items-center gap-2 border-b">
+                        <div class="text-2xl font-bold text-gray-800">Driver Details</div>
+                    </div>
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <span class="text-sm font-bold text-black-700">Driver</span>
+                            <p lass="text-lg font-medium">{{ returnList.delivery_information?.driverName ? returnList.delivery_information.driverName: 'Not Assigned' }}</p>
+                        </div>
+                        <div>
+                            <span class="text-sm font-bold text-black-700">Contact No</span>
+                            <p lass="text-lg font-medium">{{ returnList.delivery_information?.driverContactNo ? returnList.delivery_information.driverContactNo: 'Not Assigned' }}</p>
+                        </div>
+                        <div>
+                            <span class="text-sm font-bold text-black-700">IC No</span>
+                            <p lass="text-lg font-medium">{{ returnList.delivery_information?.driverIC ? returnList.delivery_information.driverIC: 'Not Assigned' }}</p>
+                        </div>
+                        <div>
+                            <span class="text-sm font-bold text-black-700">Plate No</span>
+                            <p lass="text-lg font-medium">{{ returnList.delivery_information?.driverPlateNo ? returnList.delivery_information.driverPlateNo: 'Not Assigned' }}</p>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
     </Fluid>

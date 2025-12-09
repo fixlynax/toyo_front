@@ -191,7 +191,12 @@ const loading = ref(true);
 const toast =useToast();
 const showScheduleModal = ref(false);
 const loadingSchedule = ref(false);
-
+defineProps({
+  id: {
+    type: [String, Number],
+    required: true
+  }
+});
 const form = ref({
     warrantyno: '',
     scheduledata: '' // user selects date

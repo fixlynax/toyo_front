@@ -242,7 +242,7 @@
         </div>
         <div class="grid md:grid-cols-2 mb-2 gap-4">
             <div>
-                <label class="block mb-2 font-medium w-full">Driver Contact Number</label>
+                <label class="block mb-2 font-medium w-full">Driver Contact Number (Optional)</label>
                 <InputText v-model="form.drivercontactnum" placeholder="Enter Contact Number" maxlength="15" class="w-full" @keypress="allowOnlyNumbers" />
             </div>
             <div>
