@@ -41,7 +41,7 @@
                                     <Dropdown v-model="form.countryCode" :options="countryCodes" optionLabel="label" optionValue="value" class="w-full" placeholder="Code" :class="{ 'p-invalid': errors.countryCode }" />
                                 </div>
                                 <div class="flex-1">
-                                    <InputText v-model="form.mobileNum" class="w-full" placeholder="Enter mobile number (without country code)" :class="{ 'p-invalid': errors.mobileNum }" />
+                                    <InputText v-model="form.mobileNum" class="w-full" placeholder="Enter mobile number" :class="{ 'p-invalid': errors.mobileNum }" />
                                 </div>
                             </div>
                             <small class="text-red-500 text-sm" v-if="errors.countryCode || errors.mobileNum">
@@ -132,8 +132,8 @@ const route = useRoute();
 const loading = ref(false);
 
 const countryCodes = ref([
-    { label: 'Malaysia (+60)', value: '60' },
-    { label: 'Singapore (+65)', value: '65' }
+    { label: '(+60) Malaysia', value: '60' },
+    // { label: 'Singapore (+65)', value: '65' }
 ]);
 
 const masterOptions = ref([
