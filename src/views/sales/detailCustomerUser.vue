@@ -57,7 +57,7 @@
                             </div>
                             <div class="w-full">
                                 <span class="text-xm font-bold text-black-700">Last Login</span>
-                                <p class="text-lg font-medium">{{ formatDateTime(memberDetail.lastLogin) }}</p>
+                                <p class="text-lg font-medium">{{ formatDateTime(memberDetail.lastLogin) || '-' }}</p>
                             </div>
                         </div>
 
@@ -198,7 +198,7 @@ const sortedDevices = computed(() => {
 
 // Methods
 const formatDate = (dateString) => {
-    if (!dateString) return 'N/A';
+    if (!dateString) return '-';
     return new Date(dateString).toLocaleDateString('en-US', {
         year: 'numeric',
         month: 'long',
@@ -207,7 +207,7 @@ const formatDate = (dateString) => {
 };
 
 const formatDateTime = (dateTimeString) => {
-    if (!dateTimeString) return 'N/A';
+    if (!dateTimeString) return '-';
     return new Date(dateTimeString).toLocaleString('en-US', {
         year: 'numeric',
         month: 'short',

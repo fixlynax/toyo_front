@@ -49,12 +49,12 @@ const toast = useToast();
 
 // ✅ Report Types with API endpoint mapping
 const reportTypes = ref([
-    { label: 'TC by Gender', value: 'by-gender', apiEndpoint: 'report/gender-report', columnHeader: 'Gender' },
-    { label: 'TC by Race', value: 'by-race', apiEndpoint: 'report/race-report', columnHeader: 'Race' },
-    { label: 'TC by State', value: 'by-state', apiEndpoint: 'report/state-report', columnHeader: 'State' },
-    { label: 'TC by Age', value: 'by-age', apiEndpoint: 'report/age-report', columnHeader: 'Age Group' },
-    { label: 'TC by Birthday', value: 'by-birthday', apiEndpoint: 'report/birthMonth-report', columnHeader: 'Birth Month' },
-    { label: 'TC Point Expiry', value: 'point-expiry', apiEndpoint: 'report/pointExpiry-report', columnHeader: 'Month' }
+    { label: 'T-Care by Gender', value: 'by-gender', apiEndpoint: 'report/gender-report', columnHeader: 'Gender' },
+    { label: 'T-Care by Race', value: 'by-race', apiEndpoint: 'report/race-report', columnHeader: 'Race' },
+    { label: 'T-Care by State', value: 'by-state', apiEndpoint: 'report/state-report', columnHeader: 'State' },
+    { label: 'T-Care by Age', value: 'by-age', apiEndpoint: 'report/age-report', columnHeader: 'Age Group' },
+    { label: 'T-Care by Birthday', value: 'by-birthday', apiEndpoint: 'report/birthMonth-report', columnHeader: 'Birth Month' },
+    { label: 'T-Care Point Expiry', value: 'point-expiry', apiEndpoint: 'report/pointExpiry-report', columnHeader: 'Month' }
 ]);
 
 // ✅ Selected Report

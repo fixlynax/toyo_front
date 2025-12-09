@@ -16,27 +16,27 @@
                     <div class="md:col-span-2">
                         <div class="grid grid-cols-2 md:grid-cols-2 gap-3">
                             <div class="md:col-span-2 mb-4">
-                                <span class="block text-sm font-bold text-gray-800">Ref No</span>
-                                <p class="font-medium font-semibold text-lg">{{ listData.claim?.claim_ref_no }}</p>
+                                <span class="block text-sm font-semibold text-gray-800">Ref No</span>
+                                <p class="font-medium font-semibold text-primary text-lg">{{ listData.claim?.claim_ref_no }}</p>
                             </div>
                              <div>
-                            <span class="block text-sm font-bold text-gray-800">Description</span>
+                            <span class="block text-sm text-gray-800">Description</span>
                              <p class="font-medium text-lg">{{ listData.claim?.tire?.description }}</p>
                             </div>
                             <div>
-                                <span class="block text-sm font-bold text-gray-800">Pattern</span>
+                                <span class="block text-sm text-gray-800">Pattern</span>
                                 <p class="font-medium text-lg">{{ listData.claim?.tire?.pattern }}</p>
                             </div>
                             <div>
-                                <span class="block text-sm font-bold text-gray-800">Plate Serial</span>
+                                <span class="block text-sm text-gray-800">Plate Serial</span>
                                 <p class="font-medium text-lg">{{ listData.claim?.tire?.plateSerial }}</p>
                             </div>
                             <div>
-                                <span class="block text-sm font-bold text-gray-800">Tyre Size</span>
+                                <span class="block text-sm text-gray-800">Tyre Size</span>
                                 <p class="font-medium text-lg">{{ listData.claim?.tire?.tyresize }}</p>
                             </div>
                             <div>
-                                <span class="block text-sm font-bold text-gray-800">Code</span>
+                                <span class="block text-sm text-gray-800">Code</span>
                                 <p class="font-medium text-lg">{{ listData.claim?.tire?.weekcode || '-' }}</p>
                             </div>
                         </div>
@@ -53,23 +53,23 @@
                     <div class="md:col-span-2">
                         <div class="grid grid-cols-2 md:grid-cols-2 gap-3">
                             <div class="md:col-span-2 mb-4">
-                                <span class="block text-sm font-bold text-black-700">Company Name</span>
+                                <span class="block text-sm text-black-700">Company Name</span>
                                 <p class="font-medium text-lg">{{ listData.dealer?.companyName1 }}</p>
                             </div>
                             <div>
-                                <span class="block text-sm font-bold text-black-700">Acc No</span>
+                                <span class="block text-sm text-black-700">Acc No</span>
                                 <p class="font-medium text-lg">{{ listData.dealer?.custAccountNo }}</p>
                             </div>
                             <div>
-                                <span class="block text-sm font-bold text-black-700">Email</span>
+                                <span class="block text-sm text-black-700">Email</span>
                                 <p class="font-medium text-lg">{{ listData.dealer?.emailAddress }}</p>
                             </div>
                             <div>
-                                <span class="block text-sm font-bold text-black-700">Phone Number</span>
+                                <span class="block text-sm text-black-700">Phone Number</span>
                                 <p class="font-medium text-lg">{{ listData.dealer?.phoneNumber }}</p>
                             </div>
                             <div>
-                                <span class="block text-sm font-bold text-black-700">Address</span>
+                                <span class="block text-sm text-black-700">Address</span>
                                 <p class="font-medium text-lg">{{ listData.dealer?.address }}</p>
                             </div>
                         </div>
@@ -89,11 +89,11 @@
                     <table class="w-full text-sm text-left text-gray-700">
                         <tbody>
                             <tr class="border-b">
-                                <td class="px-4 py-2 font-bold">Collect Date</td>
+                                <td class="px-4 py-2">Collect Date</td>
                                 <td class="px-4 py-2 text-right">{{ listData.collectDate ? formatDate(listData.collectDate): 'Not Assigned'}}</td>
                             </tr>
                             <tr class="border-b">
-                                <td class="px-4 py-2 font-bold">Receive Date</td>
+                                <td class="px-4 py-2">Receive Date</td>
                                 <td class="px-4 py-2 text-right">{{ listData.reachWH ? formatDate(listData.reachWH) : 'Not Assigned' }}</td>
                             </tr>
                         </tbody>

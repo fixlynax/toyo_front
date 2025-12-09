@@ -132,9 +132,24 @@ const model = ref([
                         to: '/technical/listPattern'
                     },
                     {
-                        label: 'OE Tyre LIst',
+                        label: 'OE Tyre List',
                         icon: 'pi pi-fw pi-slack',
                         to: '/technical/listOETire'
+                    },
+                    {
+                        label: 'Vechicle Model List',
+                        icon: 'pi pi-fw pi-slack',
+                        to: '/technical/listVehicleModel'
+                    },
+                    {
+                        label: 'Tread Depth List',
+                        icon: 'pi pi-fw pi-slack',
+                        to: '/technical/listTreadDepth'
+                    },
+                    {
+                        label: 'Size Code List',
+                        icon: 'pi pi-fw pi-slack',
+                        to: '/technical/listSizeCode'
                     }
                 ]
             }

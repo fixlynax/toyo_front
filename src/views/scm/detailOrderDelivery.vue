@@ -14,7 +14,7 @@
                     <div class="grid grid-cols-2 gap-4">
                         <div>
                             <span class="text-sm font-bold text-black-700">Customer Name</span>
-                            <p class="text-lg font-medium">{{ orderDelList.eten_user?.companyName1 || '-' }} {{ orderDelList.eten_user?.companyName2 }} {{ orderDelList.eten_user?.companyName3 }} {{ orderDelList.eten_user?.companyName4 }}</p>
+                            <p class="text-lg font-medium">{{ orderDelList.eten_user?.companyName1 || '-' }} {{ orderDelList.eten_user?.companyName2 || '' }} {{ orderDelList.eten_user?.companyName3 || '' }} {{ orderDelList.eten_user?.companyName4 || '' }}</p>
                         </div>
                         <div>
                             <span class="text-sm font-bold text-black-700">Account Number</span>
@@ -242,7 +242,7 @@
         </div>
         <div class="grid md:grid-cols-2 mb-2 gap-4">
             <div>
-                <label class="block mb-2 font-medium w-full">Driver Contact Number</label>
+                <label class="block mb-2 font-medium w-full">Driver Contact Number (Optional)</label>
                 <InputText v-model="form.drivercontactnum" placeholder="Enter Contact Number" maxlength="15" class="w-full" @keypress="allowOnlyNumbers" />
             </div>
             <div>

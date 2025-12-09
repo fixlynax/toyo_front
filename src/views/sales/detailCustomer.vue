@@ -17,10 +17,10 @@
 
                             <!-- RIGHT SIDE -->
                             <div class="flex items-center gap-2">
-                                <Button @click="pullSAPData" :loading="loadingPullSAP" :disabled="loadingPullSAP" icon="pi pi-refresh" class="p-button-info" style="width: 70px">
+                                <!-- <Button @click="pullSAPData" :loading="loadingPullSAP" :disabled="loadingPullSAP" icon="pi pi-refresh" class="p-button-info" style="width: 70px">
                                     <span v-if="loadingPullSAP">Pulling SAP...</span>
                                     <span v-else>Pull SAP</span>
-                                </Button>
+                                </Button> -->
 
                                 <!-- <RouterLink :to="`/om/editEten/${form.custAccountNo}`">
                                     <Button icon="pi pi-pencil" class="p-button-warning" v-tooltip="'Edit'" />
@@ -175,12 +175,12 @@
                                 </template>
                             </Column>
 
-                            <Column header="Activation Code" style="min-width: 8rem">
+                            <!-- <Column header="Activation Code" style="min-width: 8rem">
                                 <template #body="{ data }">
                                     <Button v-if="data.activated === null" icon="pi pi-send" label="Send" style="width: fit-content" class="p-button-info p-button-sm" @click="sendActivationCode(data)" />
                                     <label v-else>-</label>
                                 </template>
-                            </Column>
+                            </Column> -->
                         </DataTable>
                     </div>
                 </div>

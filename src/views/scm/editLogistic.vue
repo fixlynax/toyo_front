@@ -225,6 +225,7 @@ const submitForm  = async () => {
         return;
     }
     const formData = new FormData();
+    formData.append('username', form.uname);
     formData.append('companyname', form.companyname);
     formData.append('addressline1', form.addressline1);
     formData.append('addressline2', form.addressline2);
@@ -244,7 +245,7 @@ const submitForm  = async () => {
     try {
         loading.value = true;
         const id = route.params.id;
-        const response = await api.postExtra(`3pl-users/update/${id}`, formData, {
+        const response = await api.postExtra(`create3pl`, formData, {
             // headers: { 'Content-Type': 'multipart/form-data' }
         });
         if (response.data.status === 1) {

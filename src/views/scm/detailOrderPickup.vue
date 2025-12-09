@@ -14,7 +14,7 @@
                     <div class="grid grid-cols-2 gap-4">
                         <div>
                             <span class="text-sm font-bold text-black-700">Customer Name</span>
-                            <p class="text-lg font-medium">{{ orderDelList.eten_user?.companyName1 || '-' }} {{ orderDelList.eten_user?.companyName2 }} {{ orderDelList.eten_user?.companyName3 }} {{ orderDelList.eten_user?.companyName4 }}</p>
+                            <p class="text-lg font-medium">{{ orderDelList.eten_user?.companyName1 || '-' }} {{ orderDelList.eten_user?.companyName2 || '' }} {{ orderDelList.eten_user?.companyName3 || '' }} {{ orderDelList.eten_user?.companyName4 || '' }}</p>
                         </div>
                         <div>
                             <span class="text-sm font-bold text-black-700">Account Number</span>
@@ -181,7 +181,16 @@
                             @click="confirmUpdatePickup(orderDelList)"
                         />
                     </div> -->
-                    <div v-if="!orderDelList?.driverInformation?.pickup_datetime && canUpdate" class="flex justify-end mt-3">
+                    <div v-if="orderDelList.deliveryType !='LALAMOVE' && !orderDelList?.driverInformation?.pickup_datetime && canUpdate" class="flex justify-end mt-3">
+                        <Button  
+                            style="width: auto !important"
+                            label="Update Pickup Date"
+                            icon="pi pi-calendar"
+                            class="p-button-sm p-button-warning"
+                            @click="promptUpdatePickup(orderDelList)"
+                        />
+                    </div>
+                    <div v-if="orderDelList.deliveryType =='LALAMOVE' && !orderDelList?.driverInformation?.pickup_datetime && canUpdate" class="flex justify-end mt-3">
                         <Button  
                             style="width: auto !important"
                             label="Update Pickup Date"
@@ -233,17 +242,14 @@
     </Dialog>
     <Dialog 
             v-model:visible="showIcDialog2" 
-            header="Update Pickup Date" 
+            header="Pickup Confirmation" 
             modal 
             :style="{ width: '30rem' }"
     >
         <div class="flex flex-col gap-3 w-full">
-            <div class="font-semibold">
-                SAP DO No: {{ selectedData?.do_no }}
-            </div>
 
             <div>
-                <label class="block mb-4 font-medium w-full">Collector IC Number</label>
+                <label class="block mb-4 font-medium w-full">Please enter collector IC number to confirm</label>
                 <InputText v-model="icNo" placeholder="Enter IC No" maxlength="12" class="w-full" @keypress="handleIcInput"  />
             </div>
         </div>
@@ -283,6 +289,8 @@ const toast = useToast();
 
 const showIcDialog = ref(false);
 const showIcDialog2 = ref(false);
+const confirmation = useConfirm();
+
 const form = ref({
   driverIC: '', 
   driverName: '',      
@@ -404,7 +412,36 @@ const submitPickupUpdate2 = async () => {
       }
 
 };
+const promptUpdatePickup = (data) => {
+  confirmation.require({
+    message: `Are you sure you want to confirm pickup for order ${data.order_no} ?`,
+    header: 'Pickup Confirmation',
+    icon: 'pi pi-exclamation-triangle',
+    acceptLabel: 'Yes',
+    rejectLabel: 'No',
+    accept: async () => {
+      try {
+        const payload = new FormData();
+        payload.append('orderno', data.order_no);
 
+        const res = await api.post('update-collect-time', payload);
+
+        if (res.data?.status === 1) {
+          toast.add({ severity: 'success', summary: 'Updated', detail: 'Pickup date set to now', life: 3000 });
+          InitfetchData(); // refresh table
+        } else {
+          toast.add({ severity: 'error', summary: 'Error', detail: res.data?.message || 'Failed', life: 3000 });
+        }
+      } catch (err) {
+        console.error(err);
+        toast.add({ severity: 'error', summary: 'Error', detail: 'API error', life: 3000 });
+      }
+    },
+    reject: () => {
+      // optional action on cancel
+    }
+  });
+};
 const formatItemNo = (itemNo) => {
     if (!itemNo) return '-';
     return itemNo.toString().padStart(2, '0');

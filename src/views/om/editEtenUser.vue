@@ -56,25 +56,7 @@
                             </small>
                         </div>
 
-                        <!-- Password - Only show for Master users -->
-                        <div class="space-y-2" v-if="form.isMaster === 1 && showPasswordFields">
-                            <label class="block font-semibold text-gray-700">Password</label>
-                            <Password v-model="form.password" :feedback="false" toggleMask autocomplete="off" class="w-full" placeholder="Enter new password" :class="{ 'p-invalid': errors.password }" :inputClass="'w-full'" />
-                            <small class="text-red-500 text-sm" v-if="errors.password"> <i class="pi pi-exclamation-circle mr-1"></i>{{ errors.password }} </small>
-                            <small class="text-gray-500 text-sm flex items-center gap-1">
-                                <i class="pi pi-info-circle"></i>
-                                Leave blank to keep current password
-                            </small>
-                        </div>
-
-                        <!-- Confirm Password - Only show for Master users -->
-                        <div class="space-y-2" v-if="form.isMaster === 1 && showPasswordFields">
-                            <label class="block font-semibold text-gray-700">Confirm Password</label>
-                            <Password v-model="form.confirm_password" :feedback="false" toggleMask autocomplete="off" class="w-full" placeholder="Confirm new password" :class="{ 'p-invalid': errors.confirm_password }" :inputClass="'w-full'" />
-                            <small class="text-red-500 text-sm" v-if="errors.confirm_password"> <i class="pi pi-exclamation-circle mr-1"></i>{{ errors.confirm_password }} </small>
-                        </div>
-
-                        <!-- Master User -->
+                        <!-- Master User - Hidden since API forces isMaster to 0 -->
                         <div class="space-y-2" hidden>
                             <label class="block font-semibold text-gray-700 required">Master User</label>
                             <Dropdown v-model="form.isMaster" :options="masterOptions" optionLabel="label" optionValue="value" class="w-full" placeholder="Select" :class="{ 'p-invalid': errors.isMaster }" />
@@ -95,7 +77,7 @@
                 </template>
             </Card>
 
-            <!-- Modules Access Card -->
+            <!-- Modules Access Card - Only show editable modules -->
             <Card class="mb-4" v-if="form.isMaster === 0">
                 <template #title>
                     <div class="flex items-center gap-2">
@@ -104,12 +86,15 @@
                     </div>
                 </template>
                 <template #content>
-                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                        <div v-for="module in moduleOptions" :key="module.value" class="flex items-center">
-                            <Checkbox v-model="form.modules" :inputId="module.value" :value="module.value" :binary="false" class="mr-3" />
-                            <label :for="module.value" class="text-gray-700 cursor-pointer">
-                                {{ module.label }}
-                            </label>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <!-- Only showing the two modules that are editable -->
+                        <div class="flex items-center">
+                            <Checkbox v-model="form.mod_warranty" :inputId="'mod_warranty'" :binary="true" class="mr-3" />
+                            <label for="mod_warranty" class="text-gray-700 cursor-pointer"> Warranty Management </label>
+                        </div>
+                        <div class="flex items-center">
+                            <Checkbox v-model="form.mod_order" :inputId="'mod_order'" :binary="true" class="mr-3" />
+                            <label for="mod_order" class="text-gray-700 cursor-pointer"> Order Management </label>
                         </div>
                     </div>
                     <small class="text-red-500 text-sm mt-2" v-if="errors.modules"> <i class="pi pi-exclamation-circle mr-1"></i>{{ errors.modules }} </small>
@@ -175,25 +160,16 @@ const statusOptions = ref([
     { label: 'Inactive', value: 0 }
 ]);
 
-const moduleOptions = [
-    { label: 'Warranty Management', value: 'mod_warranty' },
-    { label: 'Order Management', value: 'mod_order' },
-    { label: 'Billing Management', value: 'mod_billing' },
-    { label: 'Sales Management', value: 'mod_sale' },
-    { label: 'User Management', value: 'mod_user' }
-];
-
 const form = ref({
     first_name: '',
     last_name: '',
     email: '',
     mobileNum: '',
     countryCode: '60', // Fixed to +60
-    password: '',
-    confirm_password: '',
     dealerAccountNo: '',
     shiptoID: null,
-    modules: [],
+    mod_warranty: false,
+    mod_order: false,
     isMaster: 0,
     status: 1
 });
@@ -204,15 +180,7 @@ const originalData = ref({});
 
 // Computed property to check if user is activated (has activation date)
 const isUserActivated = computed(() => {
-    return memberDetail.value.activated !== null && 
-           memberDetail.value.activated !== undefined && 
-           memberDetail.value.activated !== '';
-});
-
-// Computed property to determine if password fields should be shown
-const showPasswordFields = computed(() => {
-    // Only show password fields for Master users who are activated
-    return form.value.isMaster === 1 && isUserActivated.value;
+    return memberDetail.value.activated !== null && memberDetail.value.activated !== undefined && memberDetail.value.activated !== '';
 });
 
 // Computed property to check if form has been modified
@@ -227,8 +195,8 @@ const isFormModified = computed(() => {
         current.mobileNum !== original.mobileNumber ||
         current.isMaster !== original.isMaster ||
         current.status !== original.status ||
-        (current.isMaster === 1 && current.password) || // Password is being changed for master user
-        JSON.stringify(current.modules) !== JSON.stringify(getOriginalModules(original))
+        current.mod_warranty !== (original.allow_warranty === 1) ||
+        current.mod_order !== (original.allow_order === 1)
     );
 });
 
@@ -237,14 +205,13 @@ watch(
     () => form.value.isMaster,
     (newValue) => {
         if (newValue === 1) {
-            // If master user, select all modules
-            form.value.modules = moduleOptions.map((module) => module.value);
-            // Clear password fields when switching to master user
-            form.value.password = '';
-            form.value.confirm_password = '';
+            // If master user, enable all available modules
+            form.value.mod_warranty = true;
+            form.value.mod_order = true;
         } else {
             // If switching from master to non-master, clear modules
-            form.value.modules = [];
+            form.value.mod_warranty = false;
+            form.value.mod_order = false;
         }
     }
 );
@@ -252,21 +219,6 @@ watch(
 onMounted(() => {
     loadUserData();
 });
-
-// Helper function to get original modules from user data
-const getOriginalModules = (userData) => {
-    if (userData.isMaster === 1) {
-        return moduleOptions.map((module) => module.value);
-    }
-
-    const selectedModules = [];
-    if (userData.allow_warranty === 1) selectedModules.push('mod_warranty');
-    if (userData.allow_order === 1) selectedModules.push('mod_order');
-    if (userData.allow_billing === 1) selectedModules.push('mod_billing');
-    if (userData.allow_sale === 1) selectedModules.push('mod_sale');
-    if (userData.allow_user === 1) selectedModules.push('mod_user');
-    return selectedModules;
-};
 
 const loadUserData = async () => {
     loadingData.value = true;
@@ -290,13 +242,12 @@ const loadUserData = async () => {
             form.value.dealerAccountNo = userData.dealer_shop?.custAccountNo || '';
 
             // Set modules based on permissions
-            form.value.modules = getOriginalModules(userData);
+            form.value.mod_warranty = userData.allow_warranty === 1;
+            form.value.mod_order = userData.allow_order === 1;
 
             console.log('Loaded user data:', userData);
-            console.log('Set modules:', form.value.modules);
             console.log('Dealer Account No:', form.value.dealerAccountNo);
             console.log('User activated status:', isUserActivated.value);
-            console.log('Show password fields:', showPasswordFields.value);
         } else {
             toast.add({
                 severity: 'error',
@@ -344,37 +295,13 @@ const validateForm = () => {
         errors.value.mobileNum = 'Mobile number is too short';
     }
 
-    // Password validation - only validate for Master users who are changing password
-    const isChangingPassword = showPasswordFields.value && (form.value.password || form.value.confirm_password);
-
-    if (isChangingPassword) {
-        if (!form.value.password) {
-            errors.value.password = 'Password is required when confirming password';
-        } else if (form.value.password.length < 6) {
-            errors.value.password = 'Password must be at least 6 characters';
-        } else if (!/(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/.test(form.value.password)) {
-            errors.value.password = 'Password must contain at least one uppercase letter, one lowercase letter, and one number';
-        }
-
-        if (!form.value.confirm_password) {
-            errors.value.confirm_password = 'Please confirm your password';
-        } else if (form.value.password !== form.value.confirm_password) {
-            errors.value.confirm_password = 'Passwords do not match';
-        }
-    }
-
-    // Master user validation
-    if (form.value.isMaster === null || form.value.isMaster === undefined || form.value.isMaster === '') {
-        errors.value.isMaster = 'Please specify if this is a master user';
-    }
-
     // Status validation
     if (form.value.status === null || form.value.status === undefined || form.value.status === '') {
         errors.value.status = 'Please select user status';
     }
 
     // Module validation for non-master users
-    if (form.value.isMaster === 0 && (!form.value.modules || form.value.modules.length === 0)) {
+    if (form.value.isMaster === 0 && !form.value.mod_warranty && !form.value.mod_order) {
         errors.value.modules = 'Please select at least one module for non-master users';
     }
 
@@ -385,7 +312,7 @@ const validateForm = () => {
 const createFormData = () => {
     const formData = new FormData();
 
-    // Append all required form fields
+    // Append all required form fields according to API
     formData.append('first_name', form.value.first_name.trim());
     formData.append('last_name', form.value.last_name.trim());
     formData.append('email', form.value.email.trim().toLowerCase());
@@ -396,26 +323,16 @@ const createFormData = () => {
     formData.append('isMaster', form.value.isMaster);
     formData.append('status', form.value.status);
 
-    // Handle password - only include for Master users who want to change password
-    const isChangingPassword = showPasswordFields.value && form.value.password && form.value.confirm_password;
-
-    if (isChangingPassword) {
-        // Master user wants to change password
-        formData.append('password', form.value.password);
-        formData.append('confirm_password', form.value.confirm_password);
-    } else {
-        // For sub-users or when password is not being changed
-        // Send a placeholder that meets validation requirements
-        formData.append('password', 'CurrentPassword123');
-        formData.append('confirm_password', 'CurrentPassword123');
-    }
-
     // Append module permissions
-    formData.append('mod_warranty', form.value.isMaster === 1 ? 1 : form.value.modules.includes('mod_warranty') ? 1 : 0);
-    formData.append('mod_order', form.value.isMaster === 1 ? 1 : form.value.modules.includes('mod_order') ? 1 : 0);
-    formData.append('mod_billing', form.value.isMaster === 1 ? 1 : form.value.modules.includes('mod_billing') ? 1 : 0);
-    formData.append('mod_sale', form.value.isMaster === 1 ? 1 : form.value.modules.includes('mod_sale') ? 1 : 0);
-    formData.append('mod_user', form.value.isMaster === 1 ? 1 : form.value.modules.includes('mod_user') ? 1 : 0);
+    // Only mod_warranty and mod_order are editable in UI
+    formData.append('mod_warranty', form.value.isMaster === 1 ? 1 : form.value.mod_warranty ? 1 : 0);
+    formData.append('mod_order', form.value.isMaster === 1 ? 1 : form.value.mod_order ? 1 : 0);
+
+    // Always send these modules but set values based on isMaster
+    // They are not shown in UI but required by API
+    formData.append('mod_sale', form.value.isMaster === 1 ? 1 : 0);
+    formData.append('mod_billing', form.value.isMaster === 1 ? 1 : 0);
+    formData.append('mod_user', form.value.isMaster === 1 ? 1 : 0);
 
     // Debug: Log all form data
     console.log('Form Data to be sent:');
@@ -536,3 +453,21 @@ const handleCancel = () => {
     }
 };
 </script>
+
+<style scoped>
+.required::after {
+    content: ' *';
+    color: #ef4444;
+}
+
+:deep(.p-card) {
+    box-shadow:
+        0 1px 3px 0 rgba(0, 0, 0, 0.1),
+        0 1px 2px 0 rgba(0, 0, 0, 0.06);
+}
+
+:deep(.p-card .p-card-title) {
+    font-size: 1.25rem;
+    color: #374151;
+}
+</style>

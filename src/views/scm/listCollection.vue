@@ -25,7 +25,7 @@ const visibleRows = ref(listData.value);
 
 // Data variables
 const activeTabIndex = ref(0);
-const dateRange = ref(null);
+const dateRange = ref([null, null]);
 
 const formatDateDMY = (date) => {
   const d = new Date(date);
@@ -67,7 +67,7 @@ watch(activeTabIndex, () => {
         };
         fetchData(body); 
     }else{
-        dateRange.value = null;
+        dateRange.value = [null, null];
         fetchData();
     }
     selectedExportIds.value.clear();
@@ -358,7 +358,7 @@ const applyFilter = () => {
   fetchData(body);
 };
 const clearDate = () => {
-  dateRange.value = null; // or []
+  dateRange.value = [null, null];
 };
 const fetchData = async (body = null) => {
     try {
@@ -618,8 +618,10 @@ const generateReport = (report) => {
     };
 };
 const exportToExcel = () => {
-    if (listData.value.length === 0) {
-        console.warn('No data to export');
+    const rowsToExport = visibleRows.value || [];
+
+    if (rowsToExport.length === 0) {
+        toast.add({severity: 'warn',summary: 'Warning', detail: 'No data to export', life: 3000 });
         return;
     }
 
@@ -628,7 +630,7 @@ const exportToExcel = () => {
         const headers = ['Date', 'Ref No', 'Collect Date', 'Receive Date', 'Status'];
         
         // Prepare data rows
-        const csvData = listData.value.map(data => [
+        const csvData = rowsToExport.map(data => [
             `"${formatDate(data.created)}"`,
             `"${data.claimRefno || '-'}"`,
             `"${data.collectDate ? formatDate(data.collectDate) : 'Not Assigned'}"`,
@@ -637,19 +639,16 @@ const exportToExcel = () => {
         ]);
 
         // Combine headers and data
-        const csvContent = [
-            headers.join(','),
-            ...csvData.map(row => row.join(','))
-        ].join('\n');
+        const csvContent = [headers.join(','), ...csvData.map(row => row.join(',')) ].join('\n');
 
         // Create and download the file
         const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
         const link = document.createElement('a');
         const url = URL.createObjectURL(blob);
         
-        link.setAttribute('href', url);
-        link.setAttribute('download', `ctc_collection_list_${new Date().toISOString().split('T')[0]}.csv`);
-        link.style.visibility = 'hidden';
+        link.href = url;
+        link.download = `ctc_collection_list_${new Date().toISOString().split('T')[0]}.csv`;
+        link.style.display = 'none';
         
         document.body.appendChild(link);
         link.click();
@@ -673,20 +672,6 @@ onMounted(async () => {
         <LoadingPage v-if="loading" message="Loading CTC Collection Details..." />
         <div v-else>
             <TabMenu :model="statusTabs" v-model:activeIndex="activeTabIndex" class="mb-4" />
-            <div class="flex items-center gap-3 mb-4 ml-4">
-                <!-- LEFT SIDE -->
-
-                    <Calendar
-                        v-model="dateRange"
-                        selectionMode="range"
-                        dateFormat="dd/mm/yy"
-                        placeholder="Select date range"
-                        style="width: 390px;"
-                    />
-                    <Button label="Clear" class="p-button-sm p-button-danger" @click="clearDate" />
-                    <Button label="Filter" class="p-button-sm" @click="applyFilter" />
-
-            </div>
 
             <DataTable
                 :value="listData"
@@ -707,41 +692,63 @@ onMounted(async () => {
             >
                 <template #header>
                     <div class="flex items-center justify-between gap-4 w-full flex-wrap">
-                        <div class="flex items-center gap-2 w-full max-w-md">
-                            <IconField class="flex-1">
-                                <InputIcon>
-                                    <i class="pi pi-search" />
-                                </InputIcon>
-                                <InputText v-model="filters['global'].value" placeholder="Quick Search" class="w-full" />
-                            </IconField>
+                        <div class="flex items-center justify-between gap-4 w-full flex-wrap">
+                            <div class="flex items-center gap-2 w-full max-w-md">
+                                <IconField class="flex-1">
+                                    <InputIcon>
+                                        <i class="pi pi-search" />
+                                    </InputIcon>
+                                    <InputText v-model="filters['global'].value" placeholder="Quick Search" class="w-full" />
+                                </IconField>
+                            </div>
+                            
+                            <div class="flex justify-end gap-2"  v-if="statusTabs[activeTabIndex]?.label === 'New' && canUpdate">
+                                <Button type="button" label="Export" icon="pi pi-file-export" class="p-button-success" :loading="exportLoading1" @click="handleExport1"/>
+                                <Button type="button" label="Bulk Update" icon="pi pi-file-import" @click="importInput1?.click()":loading="importLoading1" />
+                                <input 
+                                ref="importInput1"
+                                type="file" 
+                                accept=".xlsx,.xls" 
+                                style="display: none" 
+                                @change="handleImport1"
+                                />
+                            </div>
+                            <div class="flex justify-end gap-2"  v-if="statusTabs[activeTabIndex]?.label === 'Pending' && canUpdate">
+                                <Button type="button" label="Export" icon="pi pi-file-export" class="p-button-success" :loading="exportLoading2" @click="handleExport2"/>
+                                <Button type="button" label="Bulk Update" icon="pi pi-file-import" @click="importInput2?.click()":loading="importLoading2" />
+                                <input 
+                                ref="importInput2"
+                                type="file" 
+                                accept=".xlsx,.xls" 
+                                style="display: none" 
+                                @change="handleImport2"
+                                />
+                            </div>
+                            <div class="flex justify-end gap-2"  v-if="statusTabs[activeTabIndex]?.label === 'Completed'">
+                                <Button type="button" label="Export" icon="pi pi-file-export" class="p-button-success" @click="exportToExcel"/>
+                            </div>
                         </div>
-
-                        <div class="flex justify-end gap-2"  v-if="statusTabs[activeTabIndex]?.label === 'New' && canUpdate">
-                            <Button type="button" label="Export" icon="pi pi-file-export" class="p-button-success" :loading="exportLoading1" @click="handleExport1"/>
-                            <Button type="button" label="Bulk Update" icon="pi pi-file-import" @click="importInput1?.click()":loading="importLoading1" />
-                            <input 
-                            ref="importInput1"
-                            type="file" 
-                            accept=".xlsx,.xls" 
-                            style="display: none" 
-                            @change="handleImport1"
+                        <div class="flex items-center gap-4 mb-1 flex-wrap">
+                            <div class="flex items-center gap-2">
+                                <span class="text-sm font-medium text-gray-700">Date Range:</span>
+                                <div class="flex items-center gap-2">
+                                    <Calendar v-model="dateRange[0]" placeholder="Start Date" dateFormat="yy-mm-dd" showIcon class="w-40" :disabled="loading" />
+                                    <span class="text-gray-500">to</span>
+                                    <Calendar v-model="dateRange[1]"  placeholder="End Date" dateFormat="yy-mm-dd" showIcon class="w-40" :disabled="loading" />
+                                </div>
+                                <Button v-if="dateRange[0] || dateRange[1]"  icon="pi pi-times" class="p-button-text p-button-sm" @click="clearDate" title="Clear date filter" />
+                            </div>
+                            <Button 
+                                icon="pi pi-filter" 
+                                label="Filter" 
+                                class="p-button-primary p-button-sm" 
+                                @click="applyFilter" 
+                                :disabled="(dateRange[0] && !dateRange[1]) || (!dateRange[0] && dateRange[1])"
+                                :loading="loading"
                             />
-                        </div>
-                        <div class="flex justify-end gap-2"  v-if="statusTabs[activeTabIndex]?.label === 'Pending' && canUpdate">
-                            <Button type="button" label="Export" icon="pi pi-file-export" class="p-button-success" :loading="exportLoading2" @click="handleExport2"/>
-                            <Button type="button" label="Bulk Update" icon="pi pi-file-import" @click="importInput2?.click()":loading="importLoading2" />
-                            <input 
-                            ref="importInput2"
-                            type="file" 
-                            accept=".xlsx,.xls" 
-                            style="display: none" 
-                            @change="handleImport2"
-                            />
-                        </div>
-                        <div class="flex justify-end gap-2"  v-if="statusTabs[activeTabIndex]?.label === 'Completed'">
-                            <Button type="button" label="Export" icon="pi pi-file-export" class="p-button-success" @click="exportToExcel"/>
                         </div>
                     </div>
+
                 </template>
 
                 <template #empty> No Collection found. </template>
