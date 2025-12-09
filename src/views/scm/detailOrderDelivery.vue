@@ -27,7 +27,7 @@
                         <div>
                             <span class="text-sm font-bold text-black-700">Location</span>
                             <p class="text-lg font-medium">
-                                {{ orderDelList.eten_user?.addressLine1 }} {{ orderDelList.eten_user?.addressLine2 }} {{ orderDelList.eten_user?.addressLine3 }} {{ orderDelList.eten_user?.addressLine4 }}, {{ orderDelList.eten_user?.postcode }} {{ orderDelList.eten_user?.city }} {{ orderDelList.eten_user?.state }} 
+                                {{ orderDelList.eten_user?.addressLine1 || ''  }} {{ orderDelList.eten_user?.addressLine2 || '' }} {{ orderDelList.eten_user?.addressLine3 || '' }} {{ orderDelList.eten_user?.addressLine4 || '' }}, {{ orderDelList.eten_user?.postcode || '' }} {{ orderDelList.eten_user?.city || '' }} {{ orderDelList.eten_user?.state || '' }} 
                             </p>
                         </div>
                         <div>
@@ -45,6 +45,33 @@
                         <div>
                             <span class="text-sm font-bold text-black-700">City</span>
                             <p class="text-lg font-medium">{{ orderDelList.eten_user?.city || '-' }}</p>
+                        </div>
+                    </div>
+                </div>
+                                <div class="card flex flex-col gap-6 w-full">
+                    <div class="font-semibold text-xl border-b pb-2 mt-2">Ship-To Details</div>
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <span class="text-sm font-bold text-black-700">Customer Name</span>
+                            <p class="text-lg font-medium">{{ orderDelList.shipto_data?.companyName1 || '-' }} {{ orderDelList.shipto_data?.companyName2 || '' }} {{ orderDelList.shipto_data?.companyName3 || '' }} {{ orderDelList.shipto_data?.companyName4 || '' }}</p>
+                        </div>
+                        <div>
+                            <span class="text-sm font-bold text-black-700">Email</span>
+                            <p class="text-lg font-medium">{{ orderDelList.shipto_data?.emailAddress || '-' }}</p>
+                        </div>
+                        <div>
+                            <span class="text-sm font-bold text-black-700">Account Number</span>
+                            <p class="text-lg font-medium">{{ orderDelList.shipto_data?.custAccountNo || '-' }}</p>
+                        </div>
+                        <div>
+                            <span class="text-sm font-bold text-black-700">Location</span>
+                            <p class="text-lg font-medium">
+                                {{ orderDelList.shipto_data?.addressLine1 || '' }} {{ orderDelList.shipto_data?.addressLine2 || '' }} {{ orderDelList.shipto_data?.addressLine3 || '' }} {{ orderDelList.shipto_data?.addressLine4 || '' }}, {{ orderDelList.shipto_data?.postcode || '' }} {{ orderDelList.shipto_data?.city || '' }} {{ orderDelList.shipto_data?.state || '' }} 
+                            </p>
+                        </div>
+                        <div>
+                            <span class="text-sm font-bold text-black-700">Contact Person</span>
+                            <p class="text-lg font-medium">{{ orderDelList.shipto_data?.phoneNumber || '-' }}</p>
                         </div>
                     </div>
                 </div>
