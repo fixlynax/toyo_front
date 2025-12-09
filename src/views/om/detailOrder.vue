@@ -238,7 +238,7 @@
                             <i class="pi pi-info-circle text-2xl mb-2"></i>
                             <p class="text-lg font-medium">No collector information available</p>
                         </div>
-                        <Button label="Add Driver" icon="pi pi-plus" class="p-button-primary" @click="showAddDriverDialog = true" :disabled="loadingDriver" />
+                        <Button label="Add Driver" icon="pi pi-plus" class="p-button-primary" style="width: fit-content" @click="showAddDriverDialog = true" :disabled="loadingDriver" />
                     </div>
                 </div>
             </div>
