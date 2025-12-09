@@ -162,8 +162,8 @@
                 <!-- Photo Grid -->
                 <div v-if="hasSubmittedPhotos"  class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
                     <div
-                        v-for="photo in submittedPhotos"
-                        :key="photo"
+                        v-for="(photo, index) in submittedPhotos"
+                        :key="index"
                         class="rounded-xl overflow-hidden shadow-sm bg-gray-100">
                         <span class="block text-lg font-bold text-black-800 mb-3 text-center">{{ photo.label }}</span>
                         <a :href="photo.imageSrc" target="_blank" rel="noopener noreferrer">

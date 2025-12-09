@@ -63,7 +63,7 @@
                         </div>
                         <div class="flex justify-end gap-2"  v-if="statusTabs[activeTabIndex]?.label === 'Pending' && canUpdate">
                             <Button type="button" label="Export" icon="pi pi-file-export" class="p-button-success" :loading="exportLoading2" @click="handleExport2"/>
-                            <Button type="button" label="Import" icon="pi pi-file-import" @click="importInput2?.click()":loading="importLoading2" />
+                            <Button type="button" label="Bulk Update" icon="pi pi-file-import" @click="importInput2?.click()":loading="importLoading2" />
                             <input 
                             ref="importInput2"
                             type="file" 
