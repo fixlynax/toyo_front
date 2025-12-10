@@ -558,8 +558,8 @@ const generateReport = (report) => {
                 <tr>
                     <td>1</td>
                     <td>${report.material_desc || "-"}</td>
-                    <td>${report.serial_no}</td>
-                    <td>${report.claim_no}</td>
+                    <td>${report.serial_no || "-"}}</td>
+                    <td>${report.claim_no || "-"}}</td>
                     <td>${report.remarks || "-"}</td>
                 </tr>
             </table>

@@ -218,11 +218,28 @@
             </div>
         </div>
     </Fluid>
-    <Dialog header="Update Pickup Date" v-model:visible="openDialog" modal :style="{ width: '400px' }" :closable="!loadingUpdate">
+    <Dialog header="Update Pickup Date" v-model:visible="openDialog" modal :style="{ width: '500px' }" :closable="!loadingUpdate">
         <div class="flex flex-col gap-3">
             <!-- Schedule Date -->
             <Calendar v-model="form.pickupdate" dateFormat="yy-mm-dd" placeholder="Select Pickup Date" :minDate="new Date()" />
-
+            <div class="grid md:grid-cols-2 gap-4">
+                <div>
+                    <label class="block mb-2 font-medium w-full">Driver Name</label>
+                    <InputText v-model="form.driverName" placeholder="Enter Driver Name" class="w-full" />
+                </div>
+                <div>
+                    <label class="block mb-2 font-medium w-full">Driver Plate No</label>
+                    <InputText v-model="form.driverPlateNum" placeholder="Enter Plate No" maxlength="8" class="w-full" />
+                </div>
+                <div>
+                    <label class="block mb-2 font-medium w-full">Driver IC No (Optional)</label>
+                    <InputText v-model="form.driverIC" placeholder="Enter IC No" maxlength="12" class="w-full" @keypress="handleIcInput" />
+                </div>
+                <div>
+                    <label class="block mb-2 font-medium w-full">Driver Contact Number (Optional)</label>
+                    <InputText v-model="form.driverPhoneNum" placeholder="Enter Contact Number" maxlength="15" class="w-full" @keypress="allowOnlyNumbers" />
+                </div>
+            </div>
             <!-- Actions -->
             <div class="flex justify-end gap-2 mt-3">
                 <Button label="Cancel" class="p-button-text" :loading="loadingUpdate" @click="openDialog = false" />
@@ -302,11 +319,31 @@ function formatDate(dateString) {
         day: '2-digit'
     });
 }
+const handleIcInput = (e) => {
+    if (!/[0-9]/.test(e.key)) {
+        e.preventDefault(); // ⛔ block non-digits
+    }
+};
+const allowOnlyNumbers = (event) => {
+    const key = event.key;
 
+    // allow digits
+    if (/[0-9]/.test(key)) return;
+
+    // allow "-"
+    if (key === '-') return;
+
+    // block everything else
+    event.preventDefault();
+};
 // Form
 const form = ref({
     returnorderno: null,
-    pickupdate: null
+    pickupdate: null,
+    driverIC: '',
+    driverName: '',
+    driverPhoneNum: '',
+    driverPlateNum: ''
     //   scheduleTime: null
 });
 
@@ -322,14 +359,22 @@ const savePickup = async () => {
         toast.add({ severity: 'warn', summary: 'Warning', detail: 'Please select date', life: 3000 });
         return;
     }
+    if (!form.value.driverName || !form.value.driverPlateNum) {
+        toast.add({ severity: 'warn', summary: 'Warning', detail: 'Please input driver name and plate number', life: 3000 });
+        return;
+    }
     loadingUpdate.value = true;
 
     try {
         const payload = {
             returnorderno: form.value.returnorderno,
-            pickupdate: formatDateApi(form.value.pickupdate)
-            //   scheduletime: formatTimeApi(form.value.scheduleTime)
+            pickupdate: formatDateApi(form.value.pickupdate),
+            drivername: form.value.driverName,
+            drivercontactnum: form.value.driverPhoneNum,
+            drivervehicleplate: form.value.driverPlateNum,
+            driveric: form.value.driverIC,
         };
+
         const res = await api.post('update-pickup-return-order', payload);
         if (res.data?.status === 1) {
             toast.add({ severity: 'success', summary: 'Updated', detail: 'Pickup date updated successfully', life: 3000 });
