@@ -61,11 +61,11 @@ const handleSubmit = (event) => {
 </script>
 
 <template>
-    <div class="flex min-h-screen bg-primary-500 font-sans">
+    <div class="flex min-h-screen bg-primary-400 font-sans">
         <!-- Left Side: Background with overlay -->
         <Toast position="top-right" />
         <div class="hidden md:flex w-2/3 relative items-center justify-center overflow-hidden" style="clip-path: ellipse(130% 91% at 99% 10%)">
-            <img :src="randomImage" alt="Background" class="absolute inset-0 w-full h-full object-cover scale-110 blur-sm transition-transform duration-700 ease-in-out hover:scale-115 hover:blur-0" />
+            <!-- <img :src="randomImage" alt="Background" class="absolute inset-0 w-full h-full object-cover scale-110 blur-sm transition-transform duration-700 ease-in-out hover:scale-115 hover:blur-0" /> -->
             <div class="absolute inset-0 bg-black/30"></div>
 
             <div class="relative z-10 text-center px-8 max-w-xl mx-auto space-y-4">
@@ -74,7 +74,7 @@ const handleSubmit = (event) => {
                     <img src="/demo/images/Toyo ETen App_colour_FINAL.png" alt="eTEN Logo" class="h-24 object-contain opacity-90" />
                     <img src="/demo/images/Toyo TCare App_colour_FINAL.png" alt="Care Logo" class="h-24 object-contain opacity-90" />
                 </div>
-                <h2 class="text-3xl md:text-4xl font-extrabold text-white mb-2 animate-fade-in-up">TOYO Admin</h2>
+                <h2 class="text-3xl md:text-4xl font-extrabold text-white mb-2 animate-fade-in-up">eTEN Support</h2>
                 <p class="text-white/70 text-lg animate-fade-in-up">Welcome back! Please login to continue.</p>
             </div>
         </div>
