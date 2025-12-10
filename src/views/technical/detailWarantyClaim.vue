@@ -132,6 +132,10 @@
                             <p class="text-lg font-medium">{{ warantyDetail.tire_info?.mileage || '-' }} <span v-if="warantyDetail.tire_info?.mileageAdmin" class="text-xs bg-red-500 text-white px-1 rounded ml-1"> Old </span></p>
                             <p v-if="warantyDetail.tire_info?.mileageAdmin" class="text-lg font-medium">{{ warantyDetail.tire_info?.mileageAdmin || '-' }} <span class="text-xs bg-green-600 text-white px-1 rounded ml-1">New</span></p>
                         </div>
+                        <div>
+                            <span class="block text-sm font-bold text-black-800">Remarks</span>
+                            <p class="text-lg font-medium">{{ warantyDetail.tire_info?.remarks || '-' }}</p>
+                        </div>
                     </div>
                     <div class="grid grid-cols-2 md:grid-cols-2 gap-4">
                         <div>

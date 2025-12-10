@@ -140,6 +140,10 @@
                                     <td class="px-4 py-2 font-bold">Division</td>
                                     <td class="px-4 py-2 text-right">{{ orderDelList.division || '-' }}</td>
                                 </tr>
+                                 <tr class="border-b">
+                                    <td class="px-4 py-2 font-bold">Collector IC No</td>
+                                    <td class="px-4 py-2 text-right">{{ orderDelList?.driverInformation?.collectorIC ? orderDelList.driverInformation.collectorIC : 'Not Assigned' }}</td>
+                                </tr>
                                 <tr class="border-b">
                                     <td class="px-4 py-2 font-bold">Pickup</td>
                                     <td class="px-4 py-2 text-right">{{ orderDelList.driverInformation?.pickup_datetime ? formatDate(orderDelList.driverInformation.pickup_datetime) : 'Not Assigned' }}</td>
@@ -169,7 +173,7 @@
                 </div>
                 <div class="card flex flex-col gap-6 w-full">
                     <div class="flex items-center gap-2 border-b">
-                        <div class="text-2xl font-bold text-gray-800">Collector Details</div>
+                        <div class="text-2xl font-bold text-gray-800">Driver Details</div>
                     </div>
                     <div class="grid grid-cols-2 gap-4">
                         <div>
