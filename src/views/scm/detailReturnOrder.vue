@@ -240,20 +240,20 @@
             <Calendar v-model="form.pickupdate" dateFormat="yy-mm-dd" placeholder="Select Pickup Date" :minDate="new Date()" />
             <div class="grid md:grid-cols-2 gap-4">
                 <div>
+                    <label class="block mb-2 font-medium w-full">Driver IC Number</label>
+                    <InputText v-model="form.driverIC" placeholder="Enter IC No" maxlength="12" class="w-full" @keypress="handleIcInput" />
+                </div>
+                <div>
                     <label class="block mb-2 font-medium w-full">Driver Name</label>
                     <InputText v-model="form.driverName" placeholder="Enter Driver Name" class="w-full" />
                 </div>
                 <div>
-                    <label class="block mb-2 font-medium w-full">Driver Plate No</label>
-                    <InputText v-model="form.driverPlateNum" placeholder="Enter Plate No" maxlength="8" class="w-full" />
-                </div>
-                <div>
-                    <label class="block mb-2 font-medium w-full">Driver IC No (Optional)</label>
-                    <InputText v-model="form.driverIC" placeholder="Enter IC No" maxlength="12" class="w-full" @keypress="handleIcInput" />
-                </div>
-                <div>
                     <label class="block mb-2 font-medium w-full">Driver Contact Number (Optional)</label>
                     <InputText v-model="form.driverPhoneNum" placeholder="Enter Contact Number" maxlength="15" class="w-full" @keypress="allowOnlyNumbers" />
+                </div>
+                <div>
+                    <label class="block mb-2 font-medium w-full">Driver Plate No</label>
+                    <InputText v-model="form.driverPlateNum" placeholder="Enter Plate No" maxlength="8" class="w-full" />
                 </div>
             </div>
             <!-- Actions -->
