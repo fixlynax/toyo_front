@@ -2239,7 +2239,7 @@ const generateReport = (report) => {
                     font-size: 32px;
                     font-weight: 900;
                     color: #d69c00;
-                    margin-bottom: 5px; 
+                    margin-bottom: 10px; 
                 }
                 .company-info { 
                     font-size: 14px;
@@ -2317,7 +2317,7 @@ const generateReport = (report) => {
         </head>
         <body>
 
-            <div class="top-header">TOYO TIRES</div>
+            <div class="top-header"><img src="/demo/images/toyo_logo.png" alt="Logo" style="height: 25px; object-fit: contain"/></div>
             <div class="company-info">
                 Toyo Tyre Sales And Marketing Malaysia Sdn Bhd<br>
             </div>

@@ -578,7 +578,7 @@ const generateReport = (report) => {
                     font-size: 32px;
                     font-weight: 900;
                     color: #d69c00;
-                    margin-bottom: 5px;
+                    margin-bottom: 10px;
                 }
                 .sub-header {
                     font-size: 14px;
@@ -687,7 +687,7 @@ const generateReport = (report) => {
         </head>
         <body>
 
-            <div class="header-logo">TOYO TIRES</div>
+            <div class="header-logo"><img src="/demo/images/toyo_logo.png" alt="Logo" style="height: 25px; object-fit: contain"/></div>
             <div class="sub-header">Toyo Tyre Sales And Marketing Malaysia Sdn Bhd</div>
 
             <div class="title-box">CLAIM TIRE COLLECTION <span style="color:red;">(RETURN)</span></div>
