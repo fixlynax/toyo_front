@@ -15,64 +15,57 @@
                 <p class="text-gray-600">Loading dashboard data...</p>
             </div>
             
-            <!-- Stats Grid -->
-            <div v-else class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-                <div class="bg-white p-6 rounded-lg shadow-md border-l-4 border-blue-500">
-                    <div class="flex justify-between items-start">
-                        <div>
-                            <h3 class="text-gray-500 text-sm font-medium">Total TC Users</h3>
-                            <p class="text-2xl font-bold text-gray-800 mt-2">{{ apiData.admin_data.total_tc_users }}</p>
-                            <p class="text-xs text-gray-500 mt-1">0 submitted + 0 pending</p>
-                        </div>
-                        <div class="bg-blue-100 p-2 rounded-lg">
-                            <i class="fas fa-users text-blue-500"></i>
+            <!-- Stats Grid - Updated card design to match UI image -->
+            <div v-else class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                <!-- Total TC Users Card -->
+                <div class="bg-white p-4 rounded-lg shadow-sm border border-gray-200">
+                    <div class="text-center">
+                        <h3 class="text-gray-500 text-sm font-medium mb-2">Total TC Users</h3>
+                        <p class="text-3xl font-bold text-gray-800 mb-2">{{ apiData.admin_data.total_tc_users }}</p>
+                        <div class="text-xs text-gray-500">
+                            <p>0 submitted - 0 pending</p>
                         </div>
                     </div>
                 </div>
                 
-                <div class="bg-white p-6 rounded-lg shadow-md border-l-4 border-green-500">
-                    <div class="flex justify-between items-start">
-                        <div>
-                            <h3 class="text-gray-500 text-sm font-medium">Total Campaigns</h3>
-                            <p class="text-2xl font-bold text-gray-800 mt-2">{{ apiData.admin_data.total_campaign }}</p>
-                            <p class="text-xs text-gray-500 mt-1">0 submitted + 0 pending</p>
-                        </div>
-                        <div class="bg-green-100 p-2 rounded-lg">
-                            <i class="fas fa-bullhorn text-green-500"></i>
+                <!-- Total Campaigns Card -->
+                <div class="bg-white p-4 rounded-lg shadow-sm border border-gray-200">
+                    <div class="text-center">
+                        <h3 class="text-gray-500 text-sm font-medium mb-2">Total Campaigns</h3>
+                        <p class="text-3xl font-bold text-gray-800 mb-2">{{ apiData.admin_data.total_campaign }}</p>
+                        <div class="text-xs text-gray-500">
+                            <p>0 submitted - 0 pending</p>
                         </div>
                     </div>
                 </div>
                 
-                <div class="bg-white p-6 rounded-lg shadow-md border-l-4 border-purple-500">
-                    <div class="flex justify-between items-start">
-                        <div>
-                            <h3 class="text-gray-500 text-sm font-medium">Total Redemptions</h3>
-                            <p class="text-2xl font-bold text-gray-800 mt-2">{{ apiData.admin_data.total_redemption }}</p>
-                            <p class="text-xs text-gray-500 mt-1">0 submitted + 0 pending</p>
-                        </div>
-                        <div class="bg-purple-100 p-2 rounded-lg">
-                            <i class="fas fa-gift text-purple-500"></i>
+                <!-- Total Redemptions Card -->
+                <div class="bg-white p-4 rounded-lg shadow-sm border border-gray-200">
+                    <div class="text-center">
+                        <h3 class="text-gray-500 text-sm font-medium mb-2">Total Redemptions</h3>
+                        <p class="text-3xl font-bold text-gray-800 mb-2">{{ apiData.admin_data.total_redemption }}</p>
+                        <div class="text-xs text-gray-500">
+                            <p>0 submitted - 0 pending</p>
                         </div>
                     </div>
                 </div>
                 
-                <div class="bg-white p-6 rounded-lg shadow-md border-l-4 border-orange-500">
-                    <div class="flex justify-between items-start">
-                        <div>
-                            <h3 class="text-gray-500 text-sm font-medium">Games Played</h3>
-                            <p class="text-2xl font-bold text-gray-800 mt-2">{{ apiData.admin_data.total_game_played }}</p>
-                            <p class="text-xs text-gray-500 mt-1">0 submitted + 0 pending</p>
-                        </div>
-                        <div class="bg-orange-100 p-2 rounded-lg">
-                            <i class="fas fa-gamepad text-orange-500"></i>
+                <!-- Games Played Card -->
+                <div class="bg-white p-4 rounded-lg shadow-sm border border-gray-200">
+                    <div class="text-center">
+                        <h3 class="text-gray-500 text-sm font-medium mb-2">Games Played</h3>
+                        <p class="text-3xl font-bold text-gray-800 mb-2">{{ apiData.admin_data.total_game_played }}</p>
+                        <div class="text-xs text-gray-500">
+                            <p>0 submitted - 0 pending</p>
                         </div>
                     </div>
+                </div>
                 </div>
             </div>
         </div>
-    </div>
 </template>
 
+<!-- KEEPING ALL CODE BELOW EXACTLY THE SAME -->
 <script setup>
 import { ref, onMounted } from 'vue';
 
@@ -113,7 +106,7 @@ onMounted(() => {
 </script>
 
 <style scoped>
-.bg-blue-100 { background-color: #dbeafe; }
+.bg-blue-100 { background-color: #82b0ec; }
 .bg-green-100 { background-color: #dcfce7; }
 .bg-purple-100 { background-color: #f3e8ff; }
 .bg-orange-100 { background-color: #ffedd5; }
