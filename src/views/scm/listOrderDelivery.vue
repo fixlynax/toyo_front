@@ -550,7 +550,7 @@ const exportToExcel = () => {
     }
 
     try {
-    const headers = ['Created', 'SAP DO No', 'Customer Name', 'Customer Acc No', 'Storage Location','City', 'State', 'Order Type', 'Driver Name', 'Driver IC', 'Driver Contact','Driver Truck Plate', 'Eta Date', 'Planned Date', 'Delivered Date', 'Status','Pattern Name', 'Description', 'Qty'];
+    const headers = ['Created', 'SAP DO No', 'Customer Name', 'Customer Acc No', 'Storage Location','City', 'State', 'Order Type', 'Driver Name', 'Driver IC', 'Driver Contact','Driver Truck Plate', 'Eta Date', 'Planned Date', 'Delivered Date', 'Status','Item No','Pattern Name', 'Description', 'Qty'];
 
     const csvData = [];
 
@@ -578,6 +578,7 @@ const exportToExcel = () => {
             (data.fullfill_order_array || []).forEach(item => {
                 csvData.push([
                     ...baseRow,
+                    `"${item.itemno || '-'}"`,
                     `"${item.patternName || '-'}"`,
                     `"${item.materialdescription || '-'}"`,
                     `"${parseFloat(item.qty) || '-'}"`
