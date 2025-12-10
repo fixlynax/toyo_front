@@ -91,21 +91,21 @@
                             <span class="block text-sm text-black-700">Address</span>
                             <p class="font-medium text-lg">
                                 {{
-                                    `${returnList.dealer.dealer_shop.addressLine1} ${returnList.dealer.dealer_shop?.addressLine2 || ''} ${returnList.dealer.dealer_shop?.addressLine3 || ''} ${returnList.dealer.dealer_shop?.addressLine4 || ''} ${returnList.dealer.dealer_shop.city} ,${returnList.dealer.dealer_shop.postcode}`
+                                    `${returnList.dealer.dealer_shop.addressLine1} ${returnList.dealer.dealer_shop?.addressLine2 || ''} ${returnList.dealer.dealer_shop?.addressLine3 || ''} ${returnList.dealer.dealer_shop?.addressLine4 || ''} ${returnList.dealer.dealer_shop.city} ${returnList.dealer.dealer_shop.postcode}`
                                 }}
                             </p>
                         </div>
                         <div>
                             <span class="block text-sm text-black-700">Contact Person</span>
-                            <p class="font-medium text-lg">{{ returnList.dealer.dealer_shop.phoneNumber }}</p>
+                            <p class="font-medium text-lg">{{ returnList.dealer?.dealer_shop?.phoneNumber }}</p>
                         </div>
                         <div>
                             <span class="block text-sm text-black-700">Storage</span>
-                            <p class="font-medium text-lg">{{ returnList.dealer.dealer_shop.storageLocation }}</p>
+                            <p class="font-medium text-lg">{{ returnList.dealer?.dealer_shop?.storageLocation }}</p>
                         </div>
                         <div>
                             <span class="block text-sm text-black-700">City</span>
-                            <p class="font-medium text-lg">{{ returnList.dealer.dealer_shop.city }}</p>
+                            <p class="font-medium text-lg">{{ returnList.dealer?.dealer_shop?.city.replace(/,$/, '') }}</p>
                         </div>
                     </div>
                 </div>

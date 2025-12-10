@@ -47,7 +47,7 @@
                         </div>
                         <div>
                             <span class="text-sm font-bold text-black-700">City</span>
-                            <p class="text-lg font-medium">{{ orderDelList.eten_user?.city || '-' }}</p>
+                            <p class="text-lg font-medium">{{ orderDelList.eten_user?.city.replace(/,$/, '') || '-' }}</p>
                         </div>
                     </div>
                 </div>
@@ -58,7 +58,7 @@
                     <div class="grid grid-cols-2 gap-4 mt-4">
                         <div>
                             <span class="text-sm font-bold text-black-700">Pickup Type</span>
-                            <p class="text-lg font-medium">{{ orderDelList.deliveryType || '-' }}</p>
+                            <p class="text-lg font-medium">{{ orderDelList.deliveryType === 'SELFCOLLECT' ? 'OWNCOLLECT' : orderDelList.deliveryType }}</p>
                         </div>
                         <div>
                             <span class="text-sm font-bold text-black-700">Order Remarks</span>
