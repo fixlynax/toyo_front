@@ -159,7 +159,7 @@
                                     <td class="px-4 py-2 text-right">{{ returnList.delivery_information?.pickup_datetime ? formatDate(returnList.delivery_information?.pickup_datetime) : 'No date assigned' }}</td>
                                 </tr>
                                 <tr class="border-b">
-                                    <td class="px-4 py-2 font-medium">Recieve Date</td>
+                                    <td class="px-4 py-2 font-medium">Received Date</td>
                                     <td class="px-4 py-2 text-right">{{ returnList.delivery_information?.receive_datetime ? formatDate(returnList.delivery_information?.receive_datetime) : 'No date assigned' }}</td>
                                 </tr>
                             </tbody>
@@ -168,7 +168,7 @@
                             <Button style="width: auto !important" label="Update Pickup Date" icon="pi pi-calendar" class="p-button-warning p-button-sm" @click="openDialog = true" />
                         </div>
                         <div v-if="returnList.delivery_status == 'PENDING' && canUpdate" class="flex justify-end mt-3">
-                            <Button style="width: auto !important" label="Update Recieve Date" icon="pi pi-calendar" class="p-button-sm p-button-warning" @click="openDialog2 = true" />
+                            <Button style="width: auto !important" label="Update Received Date" icon="pi pi-calendar" class="p-button-sm p-button-warning" @click="openDialog2 = true" />
                         </div>
                     </div>
                 </div>
@@ -264,9 +264,9 @@
         </div>
     </Dialog>
 
-    <Dialog header="Update Recieve Date" v-model:visible="openDialog2" modal :style="{ width: '400px' }" :closable="!loadingUpdate2">
+    <Dialog header="Update Received Date" v-model:visible="openDialog2" modal :style="{ width: '400px' }" :closable="!loadingUpdate2">
         <div class="flex flex-col gap-3">
-            <Calendar v-model="form2.receivedate" dateFormat="yy-mm-dd" placeholder="Select Recieve Date" :maxDate="new Date()" />
+            <Calendar v-model="form2.receivedate" dateFormat="yy-mm-dd" placeholder="Select Received Date" :maxDate="new Date()" />
 
             <div class="flex justify-end gap-2 mt-3">
                 <Button label="Cancel" class="p-button-text" :loading="loadingUpdate2" @click="openDialog2 = false" />
@@ -375,8 +375,8 @@ const savePickup = async () => {
         toast.add({ severity: 'warn', summary: 'Warning', detail: 'Please select date', life: 3000 });
         return;
     }
-    if (!form.value.driverName || !form.value.driverPlateNum) {
-        toast.add({ severity: 'warn', summary: 'Warning', detail: 'Please input driver name and plate number', life: 3000 });
+    if (!form.value.driverName || !form.value.driverPlateNum || !form.value.driverIC) {
+        toast.add({ severity: 'warn', summary: 'Warning', detail: 'Please input driver name, IC No and plate number', life: 3000 });
         return;
     }
     loadingUpdate.value = true;
@@ -423,7 +423,7 @@ const saveRecieve = async () => {
         };
         const res = await api.post('update-receive-return-order', payload);
         if (res.data?.status === 1) {
-            toast.add({ severity: 'success', summary: 'Updated', detail: 'Recieve date updated successfully', life: 3000 });
+            toast.add({ severity: 'success', summary: 'Updated', detail: 'Received date updated successfully', life: 3000 });
             InitfetchData(); // refresh table
         } else {
             toast.add({ severity: 'error', summary: 'Error', detail: res.data?.admin_data[0].sap_error.error_message || 'Failed', life: 3000 });
