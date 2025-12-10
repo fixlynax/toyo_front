@@ -213,6 +213,15 @@
                 <div class="card flex flex-col w-full" v-if="orderDelList?.scm_deliver_detail?.scheduled_delivery_time">
                     <div class="flex items-center justify-between border-b pb-3 mb-4">
                         <div class="text-2xl font-bold text-gray-800">Driver Information</div>
+                        <div v-if="!loading && orderDelList && orderDelList?.scm_deliver_detail?.scheduled_delivery_time && !orderDelList?.scm_deliver_detail?.delivered_datetime && canUpdate" class="flex justify-end mt-3">
+                        <Button  
+                            style="width: auto !important"
+                            label="Update Information"
+                            icon="pi pi-pencil"
+                            class="p-button-sm p-button-warning"
+                            @click="openDialogFn2()"
+                        />
+                    </div>
                     </div>
 
                     <div class="overflow-x-auto">
@@ -313,6 +322,48 @@
         <div class="flex justify-end gap-2 mt-3">
           <Button label="Cancel" class="p-button-text" @click="openDialog2 = false" />
           <Button label="Save" class="p-button-success" :loading="loadingUpdate2" @click="saveDelivered" />
+        </div>
+      </div>
+    </Dialog>
+    <Dialog
+      header="Update Planned Information"
+      v-model:visible="openDialog3"
+      modal
+      :style="{ width: '50rem' }"
+    >
+      <div class="flex flex-col gap-3">
+        <!-- Schedule Date -->
+        <Calendar
+          v-model="form3.scheduleDate"
+          dateFormat="yy-mm-dd"
+          placeholder="Select Planned Date"
+          :minDate="new Date()"
+        />
+        <div class="grid md:grid-cols-2 gap-4">
+            <div>
+                <label class="block mb-2 font-medium w-full">Driver IC Number</label>
+                <InputText v-model="form3.driveric" placeholder="Enter IC No" maxlength="12" class="w-full" @keypress="handleIcInput" />
+            </div>
+            <div>
+                <label class="block mb-2 font-medium w-full">Driver Name</label>
+                <InputText v-model="form3.drivername" placeholder="Enter Driver Name" class="w-full"  />
+            </div>
+        </div>
+        <div class="grid md:grid-cols-2 mb-2 gap-4">
+            <div>
+                <label class="block mb-2 font-medium w-full">Driver Contact Number (Optional)</label>
+                <InputText v-model="form3.drivercontactnum" placeholder="Enter Contact Number" maxlength="15" class="w-full" @keypress="allowOnlyNumbers" />
+            </div>
+            <div>
+                <label class="block mb-2 font-medium w-full">Driver Plate No</label>
+                <InputText v-model="form3.drivervehicleplate" placeholder="Enter Plate No" maxlength="8" class="w-full"  />
+            </div>
+        </div>
+
+        <!-- Actions -->
+        <div class="flex justify-end gap-2 mt-3">
+          <Button label="Cancel" class="p-button-text" @click="openDialog3 = false" />
+          <Button label="Save" class="p-button-success" :loading="loadingUpdate3" @click="saveSchedule3" />
         </div>
       </div>
     </Dialog>
@@ -423,7 +474,8 @@ const openDialog = ref(false);
 const openDialog2 = ref(false);
 const loadingUpdate = ref(false);
 const loadingUpdate2 = ref(false);
-
+const loadingUpdate3 = ref(false);
+const openDialog3 = ref(false);
 const openDialogFn = () => {
   if (orderDelList.value.deliveryDate) {
     form.value.scheduleDate = new Date(orderDelList.value.deliveryDate)
@@ -437,6 +489,18 @@ const openDialogFn = () => {
   openDialog.value = true;
 }
 
+const openDialogFn2 = () => {
+  if (orderDelList.value.deliveryDate) {
+    form3.value.scheduleDate = new Date(orderDelList.value.scm_deliver_detail?.scheduled_delivery_time)
+    form3.value.drivername = orderDelList.value.scm_deliver_detail?.driverName;
+    form3.value.drivercontactnum = orderDelList.value.scm_deliver_detail?.driverContactNo;
+    form3.value.drivervehicleplate = orderDelList.value.scm_deliver_detail?.driverPlateNo;
+    form3.value.driveric = orderDelList.value.scm_deliver_detail?.driverIC;
+  } else {
+    form3.value.scheduleDate = new Date() // default to today
+  }
+  openDialog3.value = true;
+}
 const handleIcInput = (e) => {
   if (!/[0-9]/.test(e.key)) {
     e.preventDefault(); // ⛔ block non-digits
@@ -465,6 +529,14 @@ const form = ref({
   drivervehicleplate: '', 
   driveric: '',       
 //   scheduleTime: null      
+});
+const form3 = ref({
+  orderno: '', 
+  scheduleDate: null,  
+  drivername: '', 
+  drivercontactnum: '',   
+  drivervehicleplate: '', 
+  driveric: '',          
 });
 
 const form2 = ref({
@@ -514,7 +586,48 @@ const saveSchedule = async () => {
         openDialog.value = false;
     }
 };
+const saveSchedule3 = async () => {
+  if (!form3.value.scheduleDate) {
+    toast.add({ severity: 'warn', summary: 'Warning', detail: 'Please select date', life: 3000 });
+    return;
+  }
+  if (!form3.value.drivername || !form3.value.drivervehicleplate || !form3.value.driveric) {
+    toast.add({ severity: 'warn', summary: 'Warning', detail: 'Please fullfill driver information', life: 3000 });
+    return;
+  }
 
+    loadingUpdate3.value = true;
+  try {
+    const payload = {
+     
+      orderno: form3.value.orderno,
+      scheduledate: formatDateApi(form3.value.scheduleDate),
+      drivername: form3.value.drivername,
+      drivercontactnum: form3.value.drivercontactnum,
+      drivervehicleplate: form3.value.drivervehicleplate,
+      driveric: form3.value.driveric,
+    //   scheduletime: formatTimeApi(form.value.scheduleTime)
+    };
+    const res = await api.post('update-schedule-order', payload);
+    if (res.data?.status === 1) {
+        toast.add({ severity: 'success', summary: 'Updated', detail: 'Planned date details updated successfully', life: 3000 });
+        InitfetchData(); // refresh table
+    } else {
+        toast.add({ severity: 'error', summary: 'Error', detail: res.data?.error || 'Failed', life: 3000 });
+    }
+    } catch (err) {
+    console.error(err);
+    toast.add({ severity: 'error', summary: 'Error', detail: 'API error', life: 3000 });
+    }finally{
+        loadingUpdate3.value = false;
+        form3.value.scheduleDate = null;  
+        form3.value.drivername = ''; 
+        form3.value.drivercontactnum = '';  
+        form3.value.drivervehicleplate = '';
+        form3.value.driveric = '';  
+        openDialog3.value = false;
+    }
+};
 // Save function
 const saveDelivered = async () => {
   if (!form2.value.delivereddate) {
@@ -560,6 +673,7 @@ const InitfetchData = async () => {
             orderDelList.value = response.data.admin_data;
             form.value.orderno = orderDelList.value.order_no;
             form2.value.orderno = orderDelList.value.order_no;
+            form3.value.orderno = orderDelList.value.order_no;
         } else {
             console.error('API returned error or invalid data:', response.data);
             toast.add({ severity: 'error', summary: 'Error', detail: 'Failed to load data', life: 3000 });
