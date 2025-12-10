@@ -127,55 +127,7 @@
                 </template>
             </Column>
 
-            <Column field="price" header="Price" style="min-width: 12rem" sortable>
-                <template #body="{ data }">
-                    <div class="flex flex-col leading-relaxed text-sm text-gray-700">
-                        <div class="flex">
-                            <span class="w-15 text-gray-800 font-semibold">Price 1:</span>
-                            <span>{{ data.price01 }}</span>
-                        </div>
-                        <div class="flex">
-                            <span class="w-15 text-gray-800 font-semibold">Price 2:</span>
-                            <span>{{ data.price02 }}</span>
-                        </div>
-                        <div class="flex">
-                            <span class="w-15 text-gray-800 font-semibold">Price 3:</span>
-                            <span>{{ data.price03 }}"</span>
-                        </div>
-                        <div class="flex">
-                            <span class="w-15 text-gray-800 font-semibold">Price 4:</span>
-                            <span>{{ data.price04 }}</span>
-                        </div>
-                        <div class="flex">
-                            <span class="w-15 text-gray-800 font-semibold">Price 5:</span>
-                            <span>{{ data.price05 }}</span>
-                        </div>
-                    </div>
-                </template>
-            </Column>
-
-            <Column field="valid" header="Valid" style="min-width: 15rem">
-                <template #body="{ data }">
-                    <div class="flex flex-col leading-relaxed text-sm text-gray-700">
-                        <div class="flex">
-                            <span >{{ formatDate(data.price01_validitystartdate) }} - {{ formatDate(data.price_01_validityenddate) }}</span>
-                        </div>
-                        <div class="flex">
-                            <span >{{ formatDate(data.price02_validitystartdate) }} - {{formatDate(data.price_02_validityenddate) }}</span>
-                        </div>
-                        <div class="flex">
-                            <span>{{ formatDate(data.price03_validitystartdate) }} - {{ formatDate(data.price_03_validityenddate) }}"</span>
-                        </div>
-                        <div class="flex">
-                            <span >{{ formatDate(data.price04_validitystartdate) }} - {{ formatDate(data.price_04_validityenddate) }}</span>
-                        </div>
-                        <div class="flex">
-                            <span >{{ formatDate(data.price05_validitystartdate) }} - {{ formatDate(data.price_05_validityenddate) }}</span>
-                        </div>
-                    </div>
-                </template>
-            </Column>
-
+            
             <!-- Sell Column with Checkbox -->
             <Column field="sell" header="Sell" style="min-width: 6rem" v-if="canUpdate">
                 <template #body="{ data }">
@@ -202,6 +154,54 @@
                     <div class="flex justify-center">
                         <Checkbox v-model="data.twp" :binary="true" :disabled="data.updatingTWP" @change="handleToggleTWP(data)" :class="data.twp ? 'p-checkbox-checked' : ''" />
                         <i v-if="data.updatingTWP" class="pi pi-spin pi-spinner ml-2"></i>
+                    </div>
+                </template>
+            </Column>
+            <Column field="price" header="Price(RM)" style="min-width: 12rem" sortable>
+                <template #body="{ data }">
+                    <div class="flex flex-col leading-relaxed text-sm text-gray-700">
+                        <div class="flex">
+                            <span class="w-15 text-gray-800 font-semibold">Price 1:</span>
+                            <span>{{ data.price01 }}</span>
+                        </div>
+                        <div class="flex">
+                            <span class="w-15 text-gray-800 font-semibold">Price 2:</span>
+                            <span>{{ data.price02 }}</span>
+                        </div>
+                        <div class="flex">
+                            <span class="w-15 text-gray-800 font-semibold">Price 3:</span>
+                            <span>{{ data.price03 }}</span>
+                        </div>
+                        <div class="flex">
+                            <span class="w-15 text-gray-800 font-semibold">Price 4:</span>
+                            <span>{{ data.price04 }}</span>
+                        </div>
+                        <div class="flex">
+                            <span class="w-15 text-gray-800 font-semibold">Price 5:</span>
+                            <span>{{ data.price05 }}</span>
+                        </div>
+                    </div>
+                </template>
+            </Column>
+
+            <Column field="valid" header="Valid" style="min-width: 15rem">
+                <template #body="{ data }">
+                    <div class="flex flex-col leading-relaxed text-sm text-gray-700">
+                        <div class="flex">
+                            <span >{{ formatDate(data.price01_validitystartdate) }} - {{ formatDate(data.price_01_validityenddate) }}</span>
+                        </div>
+                        <div class="flex">
+                            <span >{{ formatDate(data.price02_validitystartdate) }} - {{formatDate(data.price_02_validityenddate) }}</span>
+                        </div>
+                        <div class="flex">
+                            <span>{{ formatDate(data.price03_validitystartdate) }} - {{ formatDate(data.price_03_validityenddate) }}</span>
+                        </div>
+                        <div class="flex">
+                            <span >{{ formatDate(data.price04_validitystartdate) }} - {{ formatDate(data.price_04_validityenddate) }}</span>
+                        </div>
+                        <div class="flex">
+                            <span >{{ formatDate(data.price05_validitystartdate) }} - {{ formatDate(data.price_05_validityenddate) }}</span>
+                        </div>
                     </div>
                 </template>
             </Column>
