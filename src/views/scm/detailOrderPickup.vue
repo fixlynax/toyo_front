@@ -46,7 +46,7 @@
                             <p class="text-lg font-medium">{{ orderDelList.eten_user?.storageLocation || '-' }}</p>
                         </div>
                         <div>
-                            <span class="text-sm font-bold text-black-700">City</span>
+                            <span class="text-sm font-medium text-black-700">City</span>
                             <p class="text-lg font-medium">{{ orderDelList.eten_user?.city.replace(/,$/, '') || '-' }}</p>
                         </div>
                     </div>
@@ -122,7 +122,7 @@
                                 </tr>
                                 <tr class="border-b">
                                     <td class="px-4 py-2 font-medium">Order Type</td>
-                                    <td class="px-4 py-2 text-right font-medium">{{ orderDelList.deliveryType || '-' }}</td>
+                                    <td class="px-4 py-2 text-right font-medium">{{ orderDelList.deliveryType === 'SELFCOLLECT' ? 'OWNCOLLECT' : orderDelList.deliveryType}}</td>
                                 </tr>
                                 <tr class="border-b">
                                     <td class="px-4 py-2 font-medium">Order Description</td>
