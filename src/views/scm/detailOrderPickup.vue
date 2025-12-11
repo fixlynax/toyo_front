@@ -54,25 +54,7 @@
 
                 <div class="card flex flex-col w-full bg-white shadow-sm rounded-2xl border border-gray-100">
                     <!-- Header -->
-                    <div class="font-semibold text-xl border-b pb-2 mt-2">Order Item</div>
-                    <div class="grid grid-cols-2 gap-4 mt-4">
-                        <div>
-                            <span class="text-sm font-bold text-black-700">Pickup Type</span>
-                            <p class="text-lg font-medium">{{ orderDelList.deliveryType === 'SELFCOLLECT' ? 'OWNCOLLECT' : orderDelList.deliveryType }}</p>
-                        </div>
-                        <div>
-                            <span class="text-sm font-bold text-black-700">Order Remarks</span>
-                            <p class="text-lg font-medium">{{ orderDelList.order_remarks || '-' }}</p>
-                        </div>
-                        <div>
-                            <span class="text-sm font-bold text-black-700">Ship To</span>
-                            <p class="text-lg font-medium">{{ orderDelList.shipto || '-' }}</p>
-                        </div>
-                        <div>
-                            <span class="text-sm font-bold text-black-700">Inv No</span>
-                            <p class="text-lg font-medium">{{ orderDelList.inv_no || '-' }}</p>
-                        </div>
-                    </div>
+                    <div class="font-bold text-xl border-b pb-2 mt-2">Order Item</div>
                     <!-- Table -->
                     <DataTable :value="orderDelList.fullfill_order_array" dataKey="materialid" class="rounded-table mt-6">
                         <Column field="itemno" header="Item No">
