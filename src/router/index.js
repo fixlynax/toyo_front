@@ -25,6 +25,11 @@ const router = createRouter({
             name: 'login',
             component: () => import('@/views/pages/auth/Login.vue')
         },
+         {
+            path: '/auth/forgot-password',
+            name: 'forgotPassword',
+            component: () => import('@/views/pages/auth/ForgotPassword.vue')
+        },
         {
             path: '/auth/access',
             name: 'accessDenied',
@@ -1023,7 +1028,7 @@ const router = createRouter({
 
 // Route guard
 router.beforeEach(async (to, from, next) => {
-    const publicPages = ['/auth/login', '/auth/access', '/auth/error', '/landing', '/pages/notfound'];
+    const publicPages = ['/auth/login', '/auth/forgot-password', '/auth/access', '/auth/error', '/landing', '/pages/notfound'];
 
     const relativePath = to.path.replace(BASE_PATH, '/');
     const authRequired = !publicPages.includes(relativePath);

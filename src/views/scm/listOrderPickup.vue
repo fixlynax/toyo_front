@@ -2,7 +2,7 @@
     <div class="card">
         <div class="text-2xl font-bold text-gray-800 border-b pb-2">Self Order Pickup List</div>
 
-        <LoadingPage v-if="loading" message="Loading Order Delivery Details..." />
+        <LoadingPage v-if="loading" message="Loading Order Pickup Details..." />
         <div v-else>
             <TabMenu :model="statusTabs" v-model:activeIndex="activeTabIndex" class="mb-4" />
             <DataTable
@@ -29,7 +29,7 @@
                     'eten_user.city',
                     'eten_user.state',
                     'deliveryType',
-                    'orderstatus'
+                    'status'
                 ]"
                 paginatorTemplate="CurrentPageReport FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink RowsPerPageDropdown"
                 currentPageReportTemplate="Showing {first} to {last} of {totalRecords} entries"
@@ -157,7 +157,7 @@
                         {{ data.driverInformation?.pickup_datetime ? formatDate(data.driverInformation.pickup_datetime) : 'Not Assigned' }}
                     </template>
                 </Column>
-                <Column field="orderstatus" header="Status" style="min-width: 8rem">
+                <Column field="status" header="Status" style="min-width: 10rem">
                     <template #body="{ data }">
                         <Tag :value="getStatusLabel2(data.status)" :severity="getStatusSeverity2(data.status)" />
                     </template>
@@ -736,10 +736,10 @@ function getStatusSeverity(status) {
 const getStatusLabel2 = (status) => {
     const statusMap = {
         PENDING: 'Pending',
-        // "PENDING": 'Delivery',
+        "NO COLLECTOR": 'No Collector',
         COMPLETED: 'Completed'
     };
-    return statusMap[status] || `Status: ${status}`;
+    return statusMap[status] || `${status}`;
 };
 const getStatusSeverity2 = (status) => {
     const severityMap = {
