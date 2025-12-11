@@ -47,7 +47,7 @@
                         </div>
                         <div>
                             <span class="text-sm font-medium text-black-700">City</span>
-                            <p class="text-lg font-medium">{{ orderDelList.eten_user?.city || '-' }}</p>
+                            <p class="text-lg font-medium">{{ orderDelList.eten_user?.city.replace(/,$/, '') || '-' }}</p>
                         </div>
                     </div>
                 </div>
