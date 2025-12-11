@@ -104,7 +104,7 @@
                                 </tr>
                                 <tr class="border-b">
                                     <td class="px-4 py-2 font-medium">Order Type</td>
-                                    <td class="px-4 py-2 text-right font-medium">{{ orderDelList.deliveryType || '-' }}</td>
+                                    <td class="px-4 py-2 text-right font-medium">{{ orderDelList.deliveryType === 'SELFCOLLECT' ? 'OWNCOLLECT' : orderDelList.deliveryType}}</td>
                                 </tr>
                                 <tr class="border-b">
                                     <td class="px-4 py-2 font-medium">Order Description</td>
