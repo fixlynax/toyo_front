@@ -43,19 +43,24 @@
                             </div>
                         </div>
 
-                        <!-- Second Row: Date Range Filter -->
-                        <div class="flex items-center gap-3 flex-wrap">
-                            <Calendar 
-                                v-model="dateRange" 
-                                selectionMode="range" 
-                                dateFormat="dd/mm/yy" 
-                                placeholder="Select date range" 
-                                style="width: 390px" 
-                                :showIcon="true"
-                                iconDisplay="input"
+                        <div class="flex items-center gap-4 mb-1 flex-wrap">
+                            <div class="flex items-center gap-2">
+                                <span class="text-sm font-medium text-gray-700">Date Range:</span>
+                                <div class="flex items-center gap-2">
+                                    <Calendar v-model="dateRange[0]" placeholder="Start Date" dateFormat="yy-mm-dd" showIcon class="w-40" :disabled="loading" />
+                                    <span class="text-gray-500">to</span>
+                                    <Calendar v-model="dateRange[1]"  placeholder="End Date" dateFormat="yy-mm-dd" showIcon class="w-40" :disabled="loading" />
+                                </div>
+                                <Button v-if="dateRange[0] || dateRange[1]"  icon="pi pi-times" class="p-button-text p-button-sm" @click="clearDate" title="Clear date filter" />
+                            </div>
+                            <Button 
+                                icon="pi pi-filter" 
+                                label="Filter" 
+                                class="p-button-primary p-button-sm" 
+                                @click="applyFilter" 
+                                :disabled="(dateRange[0] && !dateRange[1]) || (!dateRange[0] && dateRange[1])"
+                                :loading="loading"
                             />
-                            <Button label="Clear" class="p-button-sm p-button-primarry p-button-danger" @click="clearDate" />
-                            <Button label="Filter" class="p-button-sm p-button-primary" @click="applyFilter" />
                         </div>
                     </div>
                 </template>
@@ -150,8 +155,8 @@ const listData = ref([]);
 const initialLoading = ref(true);
 const tableLoading = ref(false);
 const exportLoading = ref(false);
-const dateRange = ref(null);
-
+const dateRange = ref([null, null]);
+const loading = ref(false);
 const formatDateDMY = (date) => {
     const d = new Date(date);
     const day = String(d.getDate()).padStart(2, '0');
@@ -205,7 +210,7 @@ const applyFilter = () => {
   fetchWarrantyData(body);
 };
 const clearDate = () => {
-  dateRange.value = null; // or []
+  dateRange.value = [null, null]; // or []
 };
 
 // 🟢 Initial load
