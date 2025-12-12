@@ -74,6 +74,63 @@
                             <p class="text-lg font-medium">{{ order.reason_message || '-' }}</p>
                         </div>
                     </div>
+
+                    <div class="grid grid-cols-2 gap-4 mt-4">
+                        <div>
+                            <span class="text-sm text-gray-500">Return Image</span>
+
+                            <!-- Image Display -->
+                            <div v-if="order.imageURL" class="mt-2">
+                                <div class="rounded-xl overflow-hidden shadow-sm bg-gray-100 relative min-h-[12rem]">
+                                    <!-- Loading State -->
+                                    <div v-if="imageLoading" class="absolute inset-0 flex items-center justify-center">
+                                        <div class="text-center">
+                                            <i class="pi pi-spin pi-spinner text-3xl text-primary mb-2"></i>
+                                            <p class="text-sm text-gray-600">Loading image...</p>
+                                        </div>
+                                    </div>
+
+                                    <!-- Error State -->
+                                    <div v-else-if="imageError" class="absolute inset-0 flex items-center justify-center bg-gray-100">
+                                        <div class="text-center p-4">
+                                            <i class="pi pi-image text-4xl text-gray-400 mb-2"></i>
+                                            <p class="text-gray-500 text-sm">Failed to load image</p>
+                                            <p class="text-xs text-gray-400 mt-1">URL: {{ order.imageURL.substring(0, 50) }}...</p>
+                                        </div>
+                                    </div>
+
+                                    <!-- Image -->
+                                    <a :href="order.imageURL" target="_blank" rel="noopener noreferrer" class="block">
+                                        <img
+                                            :src="order.imageURL"
+                                            alt="Return Image"
+                                            class="w-full h-48 object-cover hover:scale-105 transition-transform duration-300 cursor-pointer"
+                                            :class="{ 'opacity-0': imageLoading || imageError }"
+                                            @load="handleImageLoad"
+                                            @error="handleImageError"
+                                        />
+                                    </a>
+                                </div>
+                                <p class="text-xs text-gray-500 mt-1 text-center">Click image to view full size</p>
+                            </div>
+
+                            <!-- No Image State -->
+                            <div v-else class="mt-2">
+                                <div class="rounded-xl overflow-hidden shadow-sm bg-gray-100 h-48 flex items-center justify-center">
+                                    <div class="text-center">
+                                        <i class="pi pi-image text-4xl text-gray-300 mb-2"></i>
+                                        <p class="text-gray-400">No image available</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div>
+                            <span class="text-sm text-gray-500">Return Remark</span>
+                            <p class="text-lg font-medium">{{ order.remarks || '-' }}</p>
+                        </div>
+                    </div>
+
                     <!-- Table -->
                     <DataTable :value="returnOrderArray" dataKey="materialid" class="rounded-table mt-6">
                         <Column field="itemno" header="Item No">
@@ -132,7 +189,7 @@
             <div class="md:w-1/3 flex flex-col">
                 <div class="card flex flex-col w-full">
                     <div class="flex items-center justify-between border-b pb-3 mb-4">
-                        <div class="text-2xl font-bold text-gray-800">Advance Info</div>
+                        <div class="text-2xl font-bold text-gray-800">Order Info</div>
                         <Tag :value="getOrderStatusText(order.orderstatus)" :severity="getOrderStatusSeverity(order.orderstatus)" />
                     </div>
 
@@ -142,10 +199,6 @@
                                 <tr class="border-b">
                                     <td class="px-4 py-2 font-medium">Order No</td>
                                     <td class="px-4 py-2 text-right font-semibold text-primary">{{ orderData.order_no || '-' }}</td>
-                                </tr>
-                                <tr class="border-b">
-                                    <td class="px-4 py-2 font-medium">Return Remark</td>
-                                    <td class="px-4 py-2 text-right font-semibold text-primary">{{ order.remarks || '-' }}</td>
                                 </tr>
                                 <tr class="border-b">
                                     <td class="px-4 py-2 font-medium">Order Type</td>
@@ -449,23 +502,23 @@ const getOrderStatusSeverity = (status) => {
     return severityMap[status] || 'secondary';
 };
 
-const getActionStatusLabel = (status) => {
-    const actionMap = {
-        1: 'Approved',
-        2: 'Rejected',
-        9: 'Completed'
-    };
-    return actionMap[status] || '';
-};
+// const getActionStatusLabel = (status) => {
+//     const actionMap = {
+//         1: 'Approved',
+//         2: 'Rejected',
+//         9: 'Completed'
+//     };
+//     return actionMap[status] || '';
+// };
 
-const getActionStatusSeverity = (status) => {
-    const severityMap = {
-        1: 'success',
-        2: 'danger',
-        9: 'success'
-    };
-    return severityMap[status] || 'secondary';
-};
+// const getActionStatusSeverity = (status) => {
+//     const severityMap = {
+//         1: 'success',
+//         2: 'danger',
+//         9: 'success'
+//     };
+//     return severityMap[status] || 'secondary';
+// };
 
 // Helper methods
 const formatAddress = (dealerShop) => {
@@ -499,6 +552,43 @@ const showToast = (severity, summary, detail) => {
     });
 };
 
+// Add these to your reactive variables
+const imageLoading = ref(false);
+const imageError = ref(false);
+
+// Add these methods to your script
+const handleImageLoad = () => {
+    imageLoading.value = false;
+};
+
+const handleImageError = () => {
+    imageLoading.value = false;
+    imageError.value = true;
+};
+
+// Update your processPrivateImage function
+const processPrivateImage = async () => {
+    if (order.value.imageURL && typeof order.value.imageURL === 'string') {
+        try {
+            imageLoading.value = true;
+            imageError.value = false;
+
+            // Check if it's a private file URL that needs processing
+            if (order.value.imageURL.includes('private')) {
+                const blobUrl = await api.getPrivateFile(order.value.imageURL);
+                if (blobUrl) {
+                    order.value.imageURL = blobUrl;
+                }
+            }
+        } catch (error) {
+            console.error('Error loading return image:', error);
+            imageError.value = true;
+        } finally {
+            imageLoading.value = false;
+        }
+    }
+};
+
 // Fetch order details
 const fetchReturnOrderDetail = async () => {
     try {
@@ -506,6 +596,7 @@ const fetchReturnOrderDetail = async () => {
         error.value = null;
 
         const response = await api.get(`order/detail-return-order/${returnOrderNo}`);
+            console.log('Order Data:', orderData.value);
 
         if (response.data.status === 1 && response.data.admin_data && response.data.admin_data.length > 0) {
             const orderDataResponse = response.data.admin_data[0];
@@ -515,9 +606,14 @@ const fetchReturnOrderDetail = async () => {
             orderDelivery.value = orderDataResponse.delivery_information || {};
             returnOrderArray.value = orderDataResponse.return_order_array || [];
 
+            // Process the return image if it exists
+            await processPrivateImage();
+
             console.log('Order Data:', orderData.value);
             console.log('Return Items:', returnOrderArray.value);
             console.log('Has ZR3F items:', hasZR3FItems.value);
+
+            console.log('imageURL after processing:', order.value.imageURL);
         } else {
             error.value = 'No data found for this return order';
             showToast('error', 'Error', error.value);

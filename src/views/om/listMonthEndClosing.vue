@@ -4,7 +4,7 @@
             <div class="card flex flex-col gap-6 w-full">
                 <!-- Header with Create Button -->
                 <div class="flex justify-between items-center border-b pb-2 mb-4">
-                    <div class="text-2xl font-bold text-gray-800">Month End Closing Calendar</div>
+                    <div class="text-2xl font-bold text-gray-800">Month End Closing</div>
                     <Button label="Create" icon="pi pi-plus" class="p-button-primary" @click="openCreateDialog" style="width: fit-content" />
                 </div>
 

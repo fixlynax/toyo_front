@@ -127,7 +127,8 @@ const filters = ref({
 const statusTabs = ref([
     { label: 'All Users' }, 
     { label: 'Active' }, 
-    { label: 'Inactive' }
+    { label: 'Inactive' },
+    { label: 'Deleted' }
 ]);
 const activeTabIndex = ref(0);
 
@@ -139,7 +140,9 @@ const filteredUsers = computed(() => {
         case 1: // Active
             return listData.value.filter((user) => user.status === 1);
         case 2: // Inactive
-            return listData.value.filter((user) => user.status !== 1);
+            return listData.value.filter((user) => user.status == 0);
+        case 3: // Deleted
+            return listData.value.filter((user) => user.status == 9);
         default:
             return listData.value;
     }
@@ -189,13 +192,24 @@ const fetchUsers = async () => {
     }
 };
 
-const getOverallStatusSeverity = (status) => {
-    return status === 1 ? 'success' : 'danger';
-};
+const getStatusText = (status) => {
+  const statusMap = {
+    1: 'success',
+    9: 'warn',
+    0: 'danger'
+  };
+
 
 const getStatusText = (status) => {
-    return status === 1 ? 'Active' : 'Inactive';
+  const statusMap = {
+    1: 'Active',
+    9: 'Deleted',
+    0: 'Inactive'
+  };
+
+  return statusMap[status] || 'Unknown';
 };
+
 
 const formatGender = (gender) => {
     if (!gender || gender === '-') return '-';
