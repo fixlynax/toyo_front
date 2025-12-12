@@ -58,23 +58,33 @@ const handleSubmit = (event) => {
     event.preventDefault();
     handleLogin();
 };
+
+const handleForgotPassword = () => {
+    // toast.add({
+    //     severity: 'info',
+    //     summary: 'Forgot Password',
+    //     detail: 'Please contact your system administrator to reset your password.',
+    //     life: 5000
+    // });
+    router.push('/auth/forgot-password');
+};
 </script>
 
 <template>
-    <div class="flex min-h-screen bg-primary-500 font-sans">
+    <div class="flex min-h-screen bg-primary-400 font-sans">
         <!-- Left Side: Background with overlay -->
         <Toast position="top-right" />
         <div class="hidden md:flex w-2/3 relative items-center justify-center overflow-hidden" style="clip-path: ellipse(130% 91% at 99% 10%)">
-            <img :src="randomImage" alt="Background" class="absolute inset-0 w-full h-full object-cover scale-110 blur-sm transition-transform duration-700 ease-in-out hover:scale-115 hover:blur-0" />
+            <!-- <img :src="randomImage" alt="Background" class="absolute inset-0 w-full h-full object-cover scale-110 blur-sm transition-transform duration-700 ease-in-out hover:scale-115 hover:blur-0" /> -->
             <div class="absolute inset-0 bg-black/30"></div>
 
             <div class="relative z-10 text-center px-8 max-w-xl mx-auto space-y-4">
-                <img src="/demo/images/toyo_logo.png" alt="Logo" class="h-20 mx-auto mb-4 object-contain animate-fade-in" />
+                <img src="/demo/images/toyo_logo_auth.png" alt="Logo" class="h-20 mx-auto mb-4 object-contain animate-fade-in" />
                 <div class="flex justify-center items-center gap-4 mx-auto">
                     <img src="/demo/images/Toyo ETen App_colour_FINAL.png" alt="eTEN Logo" class="h-24 object-contain opacity-90" />
                     <img src="/demo/images/Toyo TCare App_colour_FINAL.png" alt="Care Logo" class="h-24 object-contain opacity-90" />
                 </div>
-                <h2 class="text-3xl md:text-4xl font-extrabold text-white mb-2 animate-fade-in-up">TOYO Admin</h2>
+                <h2 class="text-3xl md:text-4xl font-extrabold text-white mb-2 animate-fade-in-up">eTEN Support</h2>
                 <p class="text-white/70 text-lg animate-fade-in-up">Welcome back! Please login to continue.</p>
             </div>
         </div>
@@ -113,6 +123,16 @@ const handleSubmit = (event) => {
                             class="w-full border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition"
                             input-class="px-4 py-3 rounded-lg w-full focus:outline-none"
                         />
+                        <!-- Forgot Password Link -->
+                        <div class="mt-2 text-right">
+                            <a 
+                                href="#" 
+                                @click.prevent="handleForgotPassword" 
+                                class="text-sm text-primary hover:text-primary-dark font-medium transition-colors duration-200"
+                            >
+                                Forgot password?
+                            </a>
+                        </div>
                     </div>
 
                     <!-- Login Button -->

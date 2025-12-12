@@ -9,76 +9,79 @@
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
                     <!-- Username -->
                     <div class="md:col-span-1">
-                        <label class="block font-bold text-gray-700 mb-2">Username *</label>
+                        <label class="block font-bold text-gray-700 mb-2">Username<span style="color:red"> *</span></label>
                         <InputText v-model="form.username" placeholder="Enter username" class="w-full" />
                         <small v-if="errors.username" class="text-red-500 text-sm">{{ errors.username }}</small>
                     </div>
 
                     <!-- Email -->
                     <div class="md:col-span-1">
-                        <label class="block font-bold text-gray-700 mb-2">Email *</label>
+                        <label class="block font-bold text-gray-700 mb-2">Email<span style="color:red"> *</span></label>
                         <InputText v-model="form.email" placeholder="Enter email" class="w-full" />
                         <small v-if="errors.email" class="text-red-500 text-sm">{{ errors.email }}</small>
                     </div>
 
-                    <!-- Password -->
-                    <div class="md:col-span-1">
-                        <label class="block font-bold text-gray-700 mb-2">Password *</label>
-                        <Password v-model="form.password" placeholder="Enter password" class="w-full" :feedback="false" toggleMask />
-                        <small v-if="errors.password" class="text-red-500 text-sm">{{ errors.password }}</small>
-                    </div>
-
-                    <!-- Confirm Password -->
-                    <div class="md:col-span-1">
-                        <label class="block font-bold text-gray-700 mb-2">Confirm Password *</label>
-                        <Password v-model="form.confirmPassword" placeholder="Confirm password" class="w-full" :feedback="false" toggleMask />
-                        <small v-if="errors.confirmPassword" class="text-red-500 text-sm">{{ errors.confirmPassword }}</small>
-                    </div>
-
                     <!-- First Name -->
                     <div class="md:col-span-1">
-                        <label class="block font-bold text-gray-700 mb-2">First Name</label>
+                        <label class="block font-bold text-gray-700 mb-2">First Name<span style="color:red"> *</span></label>
                         <InputText v-model="form.first_name" placeholder="Enter first name" class="w-full" />
                         <small v-if="errors.first_name" class="text-red-500 text-sm">{{ errors.first_name }}</small>
                     </div>
 
                     <!-- Last Name -->
                     <div class="md:col-span-1">
-                        <label class="block font-bold text-gray-700 mb-2">Last Name</label>
+                        <label class="block font-bold text-gray-700 mb-2">Last Name<span style="color:red"> *</span></label>
                         <InputText v-model="form.last_name" placeholder="Enter last name" class="w-full" />
                         <small v-if="errors.last_name" class="text-red-500 text-sm">{{ errors.last_name }}</small>
                     </div>
 
                     <!-- Mobile Phone -->
                     <div class="md:col-span-1">
-                        <label class="block font-bold text-gray-700 mb-2">Mobile Phone</label>
+                        <label class="block font-bold text-gray-700 mb-2">Mobile Phone<span style="color:red"> *</span></label>
                         <InputText v-model="form.mobilephone" placeholder="Enter mobile phone" class="w-full" />
                         <small v-if="errors.mobilephone" class="text-red-500 text-sm">{{ errors.mobilephone }}</small>
                     </div>
 
                     <!-- User Role -->
                     <div class="md:col-span-1">
-                        <label class="block font-bold text-gray-700 mb-2">User Role *</label>
+                        <label class="block font-bold text-gray-700 mb-2">User Role<span style="color:red"> *</span></label>
                         <Select v-model="form.user_role_id" :options="userRoleOptions" optionLabel="label" optionValue="value" placeholder="Select user role" class="w-full" :loading="loadingRoles" />
                         <small v-if="errors.user_role_id" class="text-red-500 text-sm">{{ errors.user_role_id }}</small>
                     </div>
 
                     <!-- Sales Office -->
                     <div class="md:col-span-1">
-                        <label class="block font-bold text-gray-700 mb-2">Sales Office</label>
-                        <InputText v-model="form.salesOffice" placeholder="Enter sales office" class="w-full" />
+                        <label class="block font-bold text-gray-700 mb-2">Sales Office<span style="color:red"> *</span></label>
+                        <MultiSelect v-model="form.salesOffice" :options="salesOfficeOptions" placeholder="Select sales office(s)" class="w-full" />
+                        <small v-if="errors.salesOffice" class="text-red-500 text-sm">{{ errors.salesOffice }}</small>
                     </div>
 
                     <!-- Sales District -->
                     <div class="md:col-span-1">
-                        <label class="block font-bold text-gray-700 mb-2">Sales District</label>
-                        <InputText v-model="form.salesDistrict" placeholder="Enter sales district" class="w-full" />
+                        <label class="block font-bold text-gray-700 mb-2">Sales District<span style="color:red"> *</span></label>
+                        <MultiSelect v-model="form.salesDistrict" :options="salesDistrictOptions" placeholder="Select sales district(s)" class="w-full" />
+                        <small v-if="errors.salesDistrict" class="text-red-500 text-sm">{{ errors.salesDistrict }}</small>
+                    </div>
+
+                    <!-- Department -->
+                    <div class="md:col-span-1">
+                        <label class="block font-bold text-gray-700 mb-2">Department<span style="color:red"> *</span></label>
+                        <InputText v-model="form.department" placeholder="Enter department" class="w-full" />
+                        <small v-if="errors.department" class="text-red-500 text-sm">{{ errors.department }}</small>
+                    </div>
+
+                    <!-- Storage Location -->
+                    <div class="md:col-span-1">
+                        <label class="block font-bold text-gray-700 mb-2">Storage Location<span style="color:red"> *</span></label>
+                        <MultiSelect v-model="form.storageLocation" :options="storageLocationOptions" placeholder="Select storage location(s)" class="w-full" />
+                        <small v-if="errors.storageLocation" class="text-red-500 text-sm">{{ errors.storageLocation }}</small>
                     </div>
 
                     <!-- Status -->
                     <div class="md:col-span-1">
-                        <label class="block font-bold text-gray-700 mb-2">Status</label>
+                        <label class="block font-bold text-gray-700 mb-2">Status </label>
                         <Select v-model="form.status" :options="statusOptions" optionLabel="label" optionValue="value" placeholder="Select status" class="w-full" />
+                        <small v-if="errors.status" class="text-red-500 text-sm">{{ errors.status }}</small>
                     </div>
                 </div>
 
@@ -102,8 +105,8 @@ import { useRouter } from 'vue-router';
 import { useToast } from 'primevue/usetoast';
 import InputText from 'primevue/inputtext';
 import Select from 'primevue/select';
+import MultiSelect from 'primevue/multiselect';
 import Button from 'primevue/button';
-import Password from 'primevue/password';
 import api from '@/service/api';
 
 const router = useRouter();
@@ -112,14 +115,14 @@ const toast = useToast();
 const form = ref({
     username: '',
     email: '',
-    password: '',
-    confirmPassword: '',
+    department: '',
+    storageLocation: [],
     first_name: '',
     last_name: '',
     mobilephone: '',
     user_role_id: null,
-    salesOffice: '',
-    salesDistrict: '',
+    salesOffice: [],
+    salesDistrict: [],
     status: 1
 });
 
@@ -129,6 +132,46 @@ const statusOptions = [
     { label: 'Active', value: 1 },
     { label: 'Inactive', value: 0 }
 ];
+
+// Hardcoded sales office options
+const salesOfficeOptions = ref([
+    { label: 'New York Office', value: 'new_york' },
+    { label: 'Los Angeles Office', value: 'los_angeles' },
+    { label: 'Chicago Office', value: 'chicago' },
+    { label: 'Houston Office', value: 'houston' },
+    { label: 'Miami Office', value: 'miami' },
+    { label: 'San Francisco Office', value: 'san_francisco' },
+    { label: 'Seattle Office', value: 'seattle' },
+    { label: 'Boston Office', value: 'boston' }
+]);
+
+// Hardcoded sales district options
+const salesDistrictOptions = ref([
+    { label: 'Northeast District', value: 'northeast' },
+    { label: 'Southeast District', value: 'southeast' },
+    { label: 'Midwest District', value: 'midwest' },
+    { label: 'Southwest District', value: 'southwest' },
+    { label: 'West Coast District', value: 'west_coast' },
+    { label: 'Northwest District', value: 'northwest' },
+    { label: 'Central District', value: 'central' },
+    { label: 'Mountain District', value: 'mountain' }
+]);
+
+// Hardcoded storage location options
+const storageLocationOptions = ref([
+    { label: 'Main Warehouse', value: 'main_warehouse' },
+    { label: 'Cold Storage', value: 'cold_storage' },
+    { label: 'Dry Storage', value: 'dry_storage' },
+    { label: 'High-Value Vault', value: 'high_value_vault' },
+    { label: 'Bulk Storage Area', value: 'bulk_storage' },
+    { label: 'Returns Section', value: 'returns_section' },
+    { label: 'Picking Zone A', value: 'picking_zone_a' },
+    { label: 'Picking Zone B', value: 'picking_zone_b' },
+    { label: 'Shipping Dock Storage', value: 'shipping_dock' },
+    { label: 'Receiving Area Storage', value: 'receiving_area' },
+    { label: 'Overflow Storage', value: 'overflow_storage' },
+    { label: 'Archives Room', value: 'archives_room' }
+]);
 
 const userRoleOptions = ref([]);
 const submitting = ref(false);
@@ -226,21 +269,45 @@ const validateForm = () => {
         isValid = false;
     }
 
-    // Password validation
-    if (!form.value.password) {
-        errors.password = 'Password is required';
+    // Department validation
+    if (!form.value.department.trim()) {
+        errors.department = 'Department is required';
         isValid = false;
-    } else if (form.value.password.length < 6) {
-        errors.password = 'Password must be at least 6 characters';
+    } else if (form.value.department.length > 100) {
+        errors.department = 'Department must not exceed 100 characters';
         isValid = false;
     }
 
-    // Confirm password validation
-    if (!form.value.confirmPassword) {
-        errors.confirmPassword = 'Please confirm your password';
+    // Storage Location validation
+    if (!form.value.storageLocation || form.value.storageLocation.length === 0) {
+        errors.storageLocation = 'At least one storage location must be selected';
         isValid = false;
-    } else if (form.value.password !== form.value.confirmPassword) {
-        errors.confirmPassword = 'Passwords do not match';
+    }
+
+    // First name validation
+    if (!form.value.first_name.trim()) {
+        errors.first_name = 'First name is required';
+        isValid = false;
+    } else if (form.value.first_name.length > 100) {
+        errors.first_name = 'First name must not exceed 100 characters';
+        isValid = false;
+    }
+
+    // Last name validation
+    if (!form.value.last_name.trim()) {
+        errors.last_name = 'Last name is required';
+        isValid = false;
+    } else if (form.value.last_name.length > 100) {
+        errors.last_name = 'Last name must not exceed 100 characters';
+        isValid = false;
+    }
+
+    // Mobile phone validation
+    if (!form.value.mobilephone.trim()) {
+        errors.mobilephone = 'Mobile phone is required';
+        isValid = false;
+    } else if (form.value.mobilephone.length > 30) {
+        errors.mobilephone = 'Mobile phone must not exceed 30 characters';
         isValid = false;
     }
 
@@ -250,22 +317,21 @@ const validateForm = () => {
         isValid = false;
     }
 
-    // First name validation (if provided)
-    if (form.value.first_name && form.value.first_name.length > 100) {
-        errors.first_name = 'First name must not exceed 100 characters';
+    // Sales Office validation
+    if (!form.value.salesOffice || form.value.salesOffice.length === 0) {
+        errors.salesOffice = 'At least one sales office must be selected';
         isValid = false;
     }
 
-    // Last name validation (if provided)
-    if (form.value.last_name && form.value.last_name.length > 100) {
-        errors.last_name = 'Last name must not exceed 100 characters';
+    // Sales District validation
+    if (!form.value.salesDistrict || form.value.salesDistrict.length === 0) {
+        errors.salesDistrict = 'At least one sales district must be selected';
         isValid = false;
     }
 
-    // Mobile phone validation (if provided)
-    // FIXED: Changed from 15 to 30 characters to match backend validation
-    if (form.value.mobilephone && form.value.mobilephone.length > 30) {
-        errors.mobilephone = 'Mobile phone must not exceed 30 characters';
+    // Status validation
+    if (form.value.status === null || form.value.status === undefined) {
+        errors.status = 'Status is required';
         isValid = false;
     }
 
@@ -284,13 +350,14 @@ const submitForm = async () => {
         const payload = {
             username: form.value.username,
             email: form.value.email,
-            password: form.value.password,
-            first_name: form.value.first_name || null,
-            last_name: form.value.last_name || null,
-            mobilephone: form.value.mobilephone || null, // This should now work properly
+            department: form.value.department,
+            storageLocation: form.value.storageLocation,
+            first_name: form.value.first_name,
+            last_name: form.value.last_name,
+            mobilephone: form.value.mobilephone,
             user_role_id: form.value.user_role_id,
-            salesOffice: form.value.salesOffice || null,
-            salesDistrict: form.value.salesDistrict || null,
+            salesOffice: form.value.salesOffice,
+            salesDistrict: form.value.salesDistrict,
             status: form.value.status
         };
 
@@ -379,11 +446,7 @@ onMounted(() => {
     width: 100%;
 }
 
-:deep(.p-password) {
-    width: 100%;
-}
-
-:deep(.p-password input) {
+:deep(.p-multiselect) {
     width: 100%;
 }
 </style>

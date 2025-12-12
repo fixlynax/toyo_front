@@ -1,7 +1,7 @@
 <template>
     <div class="card">
         <div class="text-2xl font-bold text-gray-800 border-b pb-2 mb-4">List of SCM ETA</div>
-        <LoadingPage v-if="loading" message="Loading Order Delivery Details..." />
+        <LoadingPage v-if="loading" message="Loading Area ETA Details..." />
         <div v-else>
             <DataTable
                 :value="ETAList"
