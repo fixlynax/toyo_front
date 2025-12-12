@@ -149,7 +149,7 @@
                 </Column>
                 <Column field="deliveryType" header="Pickup Type" style="min-width: 10rem" sortable>
                     <template #body="{ data }">
-                        {{ data.deliveryType }}
+                        {{ data.deliveryType === 'SELFCOLLECT' ? 'OWNCOLLECT' : data.deliveryType }}
                     </template>
                 </Column>
                 <Column field="driverInformation.pickup_datetime" header="Pickup Date" style="min-width: 10rem" sortable>
