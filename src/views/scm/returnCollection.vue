@@ -627,7 +627,6 @@ const generateReport = (report) => {
                     font-size: 13px;
                 }
                 th {
-                    background-color: #f4c842;
                     border: 1px solid #000;
                     text-align: center;
                     padding: 6px;
