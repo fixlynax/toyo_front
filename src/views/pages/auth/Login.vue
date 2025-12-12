@@ -58,6 +58,16 @@ const handleSubmit = (event) => {
     event.preventDefault();
     handleLogin();
 };
+
+const handleForgotPassword = () => {
+    // toast.add({
+    //     severity: 'info',
+    //     summary: 'Forgot Password',
+    //     detail: 'Please contact your system administrator to reset your password.',
+    //     life: 5000
+    // });
+    router.push('/auth/forgot-password');
+};
 </script>
 
 <template>
@@ -113,6 +123,16 @@ const handleSubmit = (event) => {
                             class="w-full border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition"
                             input-class="px-4 py-3 rounded-lg w-full focus:outline-none"
                         />
+                        <!-- Forgot Password Link -->
+                        <div class="mt-2 text-right">
+                            <a 
+                                href="#" 
+                                @click.prevent="handleForgotPassword" 
+                                class="text-sm text-primary hover:text-primary-dark font-medium transition-colors duration-200"
+                            >
+                                Forgot password?
+                            </a>
+                        </div>
                     </div>
 
                     <!-- Login Button -->

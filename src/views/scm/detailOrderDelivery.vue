@@ -10,95 +10,51 @@
                         <div class="text-2xl font-bold text-gray-800">Order Delivery Details</div>
                     </div>
 
-                    <div class="font-semibold text-xl border-b pb-2 mt-2">Customer Details</div>
+                    <div class="font-bold text-xl border-b pb-2 mt-2">Customer Details</div>
                     <div class="grid grid-cols-2 gap-4">
                         <div>
-                            <span class="text-sm font-bold text-black-700">Customer Name</span>
-                            <p class="text-lg font-medium">{{ orderDelList.eten_user?.companyName1 || '-' }} {{ orderDelList.eten_user?.companyName2 || '' }} {{ orderDelList.eten_user?.companyName3 || '' }} {{ orderDelList.eten_user?.companyName4 || '' }}</p>
+                            <span class="text-sm font-medium text-black-700">Customer Name</span>
+                            <p class="text-lg font-medium">
+                                {{ orderDelList.eten_user?.companyName1 || '-' }} {{ orderDelList.eten_user?.companyName2 || '' }} {{ orderDelList.eten_user?.companyName3 || '' }} {{ orderDelList.eten_user?.companyName4 || '' }}
+                            </p>
                         </div>
                         <div>
-                            <span class="text-sm font-bold text-black-700">Account Number</span>
+                            <span class="text-sm font-medium text-black-700">Account Number</span>
                             <p class="text-lg font-medium">{{ orderDelList.eten_user?.custAccountNo || '-' }}</p>
                         </div>
                         <div>
-                            <span class="text-sm font-bold text-black-700">Member Code</span>
+                            <span class="text-sm font-medium text-black-700">Member Code</span>
                             <p class="text-lg font-medium">{{ orderDelList.eten_user?.memberCode || '-' }}</p>
                         </div>
                         <div>
-                            <span class="text-sm font-bold text-black-700">Location</span>
+                            <span class="text-sm font-medium text-black-700">Location</span>
                             <p class="text-lg font-medium">
-                                {{ orderDelList.eten_user?.addressLine1 || ''  }} {{ orderDelList.eten_user?.addressLine2 || '' }} {{ orderDelList.eten_user?.addressLine3 || '' }} {{ orderDelList.eten_user?.addressLine4 || '' }}, {{ orderDelList.eten_user?.postcode || '' }} {{ orderDelList.eten_user?.city || '' }} {{ orderDelList.eten_user?.state || '' }} 
+                                {{ orderDelList.eten_user?.addressLine1 || '' }} {{ orderDelList.eten_user?.addressLine2 || '' }} {{ orderDelList.eten_user?.addressLine3 || '' }} {{ orderDelList.eten_user?.addressLine4 || '' }},
+                                {{ orderDelList.eten_user?.postcode || '' }} {{ orderDelList.eten_user?.city || '' }} {{ orderDelList.eten_user?.state || '' }}
                             </p>
                         </div>
                         <div>
-                            <span class="text-sm font-bold text-black-700">Contact Person</span>
+                            <span class="text-sm font-medium text-black-700">Contact Person</span>
                             <p class="text-lg font-medium">{{ orderDelList.eten_user?.phoneNumber || '-' }}</p>
                         </div>
                         <div>
-                            <span class="text-sm font-bold text-black-700">Channel</span>
+                            <span class="text-sm font-medium text-black-700">Channel</span>
                             <p class="text-lg font-medium">{{ orderDelList.eten_user?.channel || '-' }}</p>
                         </div>
                         <div>
-                            <span class="text-sm font-bold text-black-700">Storage Location</span>
+                            <span class="text-sm font-medium text-black-700">Storage Location</span>
                             <p class="text-lg font-medium">{{ orderDelList.storagelocation || '-' }}</p>
                         </div>
                         <div>
-                            <span class="text-sm font-bold text-black-700">City</span>
-                            <p class="text-lg font-medium">{{ orderDelList.eten_user?.city || '-' }}</p>
-                        </div>
-                    </div>
-                </div>
-                                <div class="card flex flex-col gap-6 w-full">
-                    <div class="font-semibold text-xl border-b pb-2 mt-2">Ship-To Details</div>
-                    <div class="grid grid-cols-2 gap-4">
-                        <div>
-                            <span class="text-sm font-bold text-black-700">Customer Name</span>
-                            <p class="text-lg font-medium">{{ orderDelList.shipto_data?.companyName1 || '-' }} {{ orderDelList.shipto_data?.companyName2 || '' }} {{ orderDelList.shipto_data?.companyName3 || '' }} {{ orderDelList.shipto_data?.companyName4 || '' }}</p>
-                        </div>
-                        <div>
-                            <span class="text-sm font-bold text-black-700">Email</span>
-                            <p class="text-lg font-medium">{{ orderDelList.shipto_data?.emailAddress || '-' }}</p>
-                        </div>
-                        <div>
-                            <span class="text-sm font-bold text-black-700">Account Number</span>
-                            <p class="text-lg font-medium">{{ orderDelList.shipto_data?.custAccountNo || '-' }}</p>
-                        </div>
-                        <div>
-                            <span class="text-sm font-bold text-black-700">Location</span>
-                            <p class="text-lg font-medium">
-                                {{ orderDelList.shipto_data?.addressLine1 || '' }} {{ orderDelList.shipto_data?.addressLine2 || '' }} {{ orderDelList.shipto_data?.addressLine3 || '' }} {{ orderDelList.shipto_data?.addressLine4 || '' }}, {{ orderDelList.shipto_data?.postcode || '' }} {{ orderDelList.shipto_data?.city || '' }} {{ orderDelList.shipto_data?.state || '' }} 
-                            </p>
-                        </div>
-                        <div>
-                            <span class="text-sm font-bold text-black-700">Contact Person</span>
-                            <p class="text-lg font-medium">{{ orderDelList.shipto_data?.phoneNumber || '-' }}</p>
+                            <span class="text-sm font-medium text-black-700">City</span>
+                            <p class="text-lg font-medium">{{ orderDelList.eten_user?.city.replace(/,$/, '') || '-' }}</p>
                         </div>
                     </div>
                 </div>
 
                 <div class="card flex flex-col w-full bg-white shadow-sm rounded-2xl border border-gray-100">
                     <!-- Header -->
-                    <div class="font-semibold text-xl border-b pb-2 mt-2">Order Item</div>
-                    <div class="grid grid-cols-2 gap-4 mt-4">
-                        <div>
-                            <span class="text-sm font-bold text-black-700">Order Type</span>
-                            <p class="text-lg font-medium">{{ orderDelList.orderDesc || '-' }}</p>
-                        </div>
-                        <div>
-                            <span class="text-sm font-bold text-black-700">Order Remarks</span>
-                            <p class="text-lg font-medium">{{ orderDelList.order_remarks || '-' }}</p>
-                        </div>
-                    </div>
-                    <div class="grid grid-cols-2 gap-4 mt-4">
-                        <div>
-                            <span class="text-sm font-bold text-black-700">Ship To</span>
-                            <p class="text-lg font-medium">{{ orderDelList.shipto || '-' }}</p>
-                        </div>
-                        <div>
-                            <span class="text-sm font-bold text-black-700">Inv No</span>
-                            <p class="text-lg font-medium">{{ orderDelList.inv_no || '-' }}</p>
-                        </div>
-                    </div>
+                    <div class="font-bold text-xl border-b pb-2 mt-2">Order Item</div>
                     <!-- Table -->
                     <DataTable :value="orderDelList.fullfill_order_array" dataKey="materialid" class="rounded-table mt-6">
                         <Column field="itemno" header="Item No">
@@ -112,7 +68,7 @@
                                 {{ data.materialid }}
                             </template>
                         </Column>
-                         <Column field="materialdescription" header="Description">
+                        <Column field="materialdescription" header="Description">
                             <template #body="{ data }">
                                 {{ data.materialdescription }}
                             </template>
@@ -136,7 +92,7 @@
             <div class="md:w-1/3 flex flex-col">
                 <div class="card flex flex-col w-full">
                     <div class="flex items-center justify-between border-b pb-3 mb-4">
-                        <div class="text-2xl font-bold text-gray-800">Advance Information</div>
+                        <div class="text-2xl font-bold text-gray-800">Advance Info</div>
                         <Tag :value="getOrderStatusText2(orderDelList.status)" :severity="getOrderStatusSeverity2(orderDelList.status)" />
                     </div>
 
@@ -144,84 +100,77 @@
                         <table class="w-full text-sm text-left text-gray-700">
                             <tbody>
                                 <tr class="border-b">
-                                    <td class="px-4 py-2 font-bold">Order No</td>
-                                    <td class="px-4 py-2 text-right">{{ orderDelList.order_no || '-' }}</td>
+                                    <td class="px-4 py-2 font-medium">Order No</td>
+                                    <td class="px-4 py-2 text-right font-bold text-primary">{{ orderDelList.order_no || '-' }}</td>
                                 </tr>
                                 <tr class="border-b">
-                                    <td class="px-4 py-2 font-bold">SO No</td>
+                                    <td class="px-4 py-2 font-medium">Order Remark</td>
+                                    <td class="px-4 py-2 text-right font-bold text-primary">{{ orderDelList.order_remarks || '-' }}</td>
+                                </tr>
+                                <tr class="border-b">
+                                    <td class="px-4 py-2 font-medium">Order Type</td>
+                                    <td class="px-4 py-2 text-right font-medium">{{ orderDelList.deliveryType || '-' }}</td>
+                                </tr>
+                                <tr class="border-b">
+                                    <td class="px-4 py-2 font-medium">Order Description</td>
+                                    <td class="px-4 py-2 text-right font-medium">{{ orderDelList.orderDesc || '-' }}</td>
+                                </tr>
+                                <tr class="border-b">
+                                    <td class="px-4 py-2 font-medium">SO No</td>
                                     <td class="px-4 py-2 text-right">{{ orderDelList.so_no || '-' }}</td>
                                 </tr>
                                 <tr class="border-b">
-                                    <td class="px-4 py-2 font-bold">DO No</td>
+                                    <td class="px-4 py-2 font-medium">DO No</td>
                                     <td class="px-4 py-2 text-right">{{ orderDelList.do_no || '-' }}</td>
                                 </tr>
                                 <tr class="border-b">
-                                    <td class="px-4 py-2 font-bold">Invoice No</td>
+                                    <td class="px-4 py-2 font-medium">Invoice No</td>
                                     <td class="px-4 py-2 text-right">{{ orderDelList.inv_no || '-' }}</td>
                                 </tr>
                                 <tr class="border-b">
-                                    <td class="px-4 py-2 font-bold">SAP Return No</td>
+                                    <td class="px-4 py-2 font-medium">SAP Return No</td>
                                     <td class="px-4 py-2 text-right">{{ orderDelList.sapreturnno || '-' }}</td>
                                 </tr>
                                 <tr class="border-b">
-                                    <td class="px-4 py-2 font-bold">SAP Order Type</td>
+                                    <td class="px-4 py-2 font-medium">SAP Order Type</td>
                                     <td class="px-4 py-2 text-right">{{ orderDelList.sapordertype || '-' }}</td>
                                 </tr>
                                 <tr class="border-b">
-                                    <td class="px-4 py-2 font-bold">Division</td>
+                                    <td class="px-4 py-2 font-medium">Division</td>
                                     <td class="px-4 py-2 text-right">{{ orderDelList.division || '-' }}</td>
                                 </tr>
                                 <tr class="border-b">
-                                    <td class="px-4 py-2 font-bold">ETA Date</td>
+                                    <td class="px-4 py-2 font-medium">ETA Date</td>
                                     <td class="px-4 py-2 text-right">{{ orderDelList.deliveryDate ? formatDate(orderDelList.deliveryDate) : 'Not Assigned' }}</td>
                                 </tr>
                                 <tr class="border-b">
-                                    <td class="px-4 py-2 font-bold">Planned Date</td>
-                                    <td class="px-4 py-2 text-right">{{ orderDelList?.scm_deliver_detail?.scheduled_delivery_time? formatDate(orderDelList.scm_deliver_detail.scheduled_delivery_time): 'Not Assigned'}}</td>
+                                    <td class="px-4 py-2 font-medium">Planned Date</td>
+                                    <td class="px-4 py-2 text-right">{{ orderDelList?.scm_deliver_detail?.scheduled_delivery_time ? formatDate(orderDelList.scm_deliver_detail.scheduled_delivery_time) : 'Not Assigned' }}</td>
                                 </tr>
                                 <tr class="border-b">
-                                    <td class="px-4 py-2 font-bold">Delivered Date</td>
-                                    <td class="px-4 py-2 text-right">{{ orderDelList?.scm_deliver_detail?.delivered_datetime? formatDate(orderDelList.scm_deliver_detail.delivered_datetime): 'Not Assigned'}}</td>
+                                    <td class="px-4 py-2 font-medium">Delivered Date</td>
+                                    <td class="px-4 py-2 text-right">{{ orderDelList?.scm_deliver_detail?.delivered_datetime ? formatDate(orderDelList.scm_deliver_detail.delivered_datetime) : 'Not Assigned' }}</td>
                                 </tr>
                                 <tr>
-                                    <td class="px-4 py-2 font-bold">Created</td>
-                                    <td class="px-4 py-2 text-right">{{ formatDate(orderDelList.created)}}</td>
+                                    <td class="px-4 py-2 font-medium">Created</td>
+                                    <td class="px-4 py-2 text-right">{{ formatDate(orderDelList.created) }}</td>
                                 </tr>
                             </tbody>
                         </table>
                     </div>
                     <div v-if="!loading && orderDelList && !orderDelList?.scm_deliver_detail?.scheduled_delivery_time && !orderDelList?.scm_deliver_detail?.delivered_datetime && canUpdate" class="flex justify-end mt-3">
-                        <Button  
-                            style="width: auto !important"
-                            label="Update Planned Date"
-                            icon="pi pi-calendar"
-                            class="p-button-sm p-button-warning"
-                            @click="openDialogFn()"
-                        />
+                        <Button style="width: auto !important" label="Update Planned Date" icon="pi pi-calendar" class="p-button-sm p-button-warning" @click="openDialogFn()" />
                     </div>
                     <div v-if="!loading && orderDelList && orderDelList?.scm_deliver_detail?.scheduled_delivery_time && !orderDelList?.scm_deliver_detail?.delivered_datetime && canUpdate" class="flex justify-end mt-3">
-                        <Button  
-                            style="width: auto !important"
-                            label="Update Delivered Date"
-                            icon="pi pi-calendar"
-                            class="p-button-sm p-button-warning"
-                            @click="openDialog2  = true"
-                        />
+                        <Button style="width: auto !important" label="Update Delivered Date" icon="pi pi-calendar" class="p-button-sm p-button-warning" @click="openDialog2 = true" />
                     </div>
-
                 </div>
                 <div class="card flex flex-col w-full" v-if="orderDelList?.scm_deliver_detail?.scheduled_delivery_time">
                     <div class="flex items-center justify-between border-b pb-3 mb-4">
                         <div class="text-2xl font-bold text-gray-800">Driver Information</div>
                         <div v-if="!loading && orderDelList && orderDelList?.scm_deliver_detail?.scheduled_delivery_time && !orderDelList?.scm_deliver_detail?.delivered_datetime && canUpdate" class="flex justify-end mt-3">
-                        <Button  
-                            style="width: auto !important"
-                            label="Update Information"
-                            icon="pi pi-pencil"
-                            class="p-button-sm p-button-warning"
-                            @click="openDialogFn2()"
-                        />
-                    </div>
+                            <Button style="width: auto !important" label="Update Information" icon="pi pi-pencil" class="p-button-sm p-button-warning" @click="openDialogFn2()" />
+                        </div>
                     </div>
 
                     <div class="overflow-x-auto">
@@ -246,72 +195,82 @@
                             </tbody>
                         </table>
                     </div>
+                </div>
 
+                <div class="card flex flex-col w-full">
+                    <div class="flex items-center justify-between border-b pb-3">
+                        <div class="text-2xl font-bold text-gray-800">Shipping Info</div>
+                    </div>
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-sm text-left text-gray-700">
+                            <tbody>
+                                <tr class="border-b even:bg-gray-50">
+                                    <td class="px-4 py-2 font-medium">Company Name</td>
+                                    <td class="px-4 py-2 text-right font-semibold"> {{ orderDelList.shipto_data?.companyName1 || '-' }} {{ orderDelList.shipto_data?.companyName2 || '' }} {{ orderDelList.shipto_data?.companyName3 || '' }} {{ orderDelList.shipto_data?.companyName4 || '' }}</td>
+                                </tr>
+                                <tr class="border-b even:bg-gray-50">
+                                    <td class="px-4 py-2 font-medium">Company Account No.</td>
+                                    <td class="px-4 py-2 text-right font-semibold">{{ orderDelList.shipto_data?.custAccountNo || '-' }}</td>
+                                </tr>
+                                <tr class="border-b even:bg-gray-50">
+                                    <td class="px-4 py-2 font-medium">Address</td>
+                                    <td class="px-4 py-2 text-right font-semibold">{{ orderDelList.shipto_data?.addressLine1 || '' }} {{ orderDelList.shipto_data?.addressLine2 || '' }} {{ orderDelList.shipto_data?.addressLine3 || '' }} {{ orderDelList.shipto_data?.addressLine4 || '' }},
+                                {{ orderDelList.shipto_data?.postcode || '' }} {{ orderDelList.shipto_data?.city || '' }} {{ orderDelList.shipto_data?.state || '' }}</td>
+                                </tr>
+                                <tr class="border-b even:bg-gray-50">
+                                    <td class="px-4 py-2 font-medium">Phone No</td>
+                                    <td class="px-4 py-2 text-right font-semibold">{{ orderDelList.shipto_data?.phoneNumber || '-' }}</td>
+                                </tr>
+                                <tr class="border-b even:bg-gray-50">
+                                    <td class="px-4 py-2 font-medium">Email</td>
+                                    <td class="px-4 py-2 text-right font-semibold">{{ orderDelList.shipto_data?.emailAddress || '-' }}</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
             </div>
         </div>
     </Fluid>
 
-    <Dialog
-      header="Update Planned Date"
-      v-model:visible="openDialog"
-      modal
-      :style="{ width: '50rem' }"
-    >
-      <div class="flex flex-col gap-3">
-        <!-- Schedule Date -->
-        <Calendar
-          v-model="form.scheduleDate"
-          dateFormat="yy-mm-dd"
-          placeholder="Select Planned Date"
-          :minDate="new Date()"
-        />
-        <div class="grid md:grid-cols-2 gap-4">
-            <div>
-                <label class="block mb-2 font-medium w-full">Driver IC Number</label>
-                <InputText v-model="form.driveric" placeholder="Enter IC No" maxlength="12" class="w-full" @keypress="handleIcInput" />
+    <Dialog header="Update Planned Information" v-model:visible="openDialog" modal :style="{ width: '50rem' }">
+        <div class="flex flex-col gap-3">
+            <!-- Schedule Date -->
+            <Calendar v-model="form.scheduleDate" dateFormat="yy-mm-dd" placeholder="Select Planned Date" :minDate="new Date()" />
+            <div class="grid md:grid-cols-2 gap-4">
+                <div>
+                    <label class="block mb-2 font-medium w-full">Driver IC Number</label>
+                    <InputText v-model="form.driveric" placeholder="Enter IC No" maxlength="12" class="w-full" @keypress="handleIcInput" />
+                </div>
+                <div>
+                    <label class="block mb-2 font-medium w-full">Driver Name</label>
+                    <InputText v-model="form.drivername" placeholder="Enter Driver Name" class="w-full" />
+                </div>
             </div>
-            <div>
-                <label class="block mb-2 font-medium w-full">Driver Name</label>
-                <InputText v-model="form.drivername" placeholder="Enter Driver Name" class="w-full"  />
+            <div class="grid md:grid-cols-2 mb-2 gap-4">
+                <div>
+                    <label class="block mb-2 font-medium w-full">Driver Contact Number (Optional)</label>
+                    <InputText v-model="form.drivercontactnum" placeholder="Enter Contact Number" maxlength="15" class="w-full" @keypress="allowOnlyNumbers" />
+                </div>
+                <div>
+                    <label class="block mb-2 font-medium w-full">Driver Plate No</label>
+                    <InputText v-model="form.drivervehicleplate" placeholder="Enter Plate No" maxlength="8" class="w-full" />
+                </div>
             </div>
-        </div>
-        <div class="grid md:grid-cols-2 mb-2 gap-4">
-            <div>
-                <label class="block mb-2 font-medium w-full">Driver Contact Number (Optional)</label>
-                <InputText v-model="form.drivercontactnum" placeholder="Enter Contact Number" maxlength="15" class="w-full" @keypress="allowOnlyNumbers" />
-            </div>
-            <div>
-                <label class="block mb-2 font-medium w-full">Driver Plate No</label>
-                <InputText v-model="form.drivervehicleplate" placeholder="Enter Plate No" maxlength="8" class="w-full"  />
-            </div>
-        </div>
 
-        <!-- Actions -->
-        <div class="flex justify-end gap-2 mt-3">
-          <Button label="Cancel" class="p-button-text" @click="openDialog = false" />
-          <Button label="Save" class="p-button-success" :loading="loadingUpdate" @click="saveSchedule" />
+            <!-- Actions -->
+            <div class="flex justify-end gap-2 mt-3">
+                <Button label="Cancel" class="p-button-text" @click="openDialog = false" />
+                <Button label="Save" class="p-button-success" :loading="loadingUpdate" @click="saveSchedule" />
+            </div>
         </div>
-      </div>
     </Dialog>
 
-    <Dialog
-      header="Update Delivered Date"
-      v-model:visible="openDialog2"
-      modal
-      :style="{ width: '400px' }"
-    >
-      <div class="flex flex-col gap-3">
+    <Dialog header="Update Delivered Date" v-model:visible="openDialog2" modal :style="{ width: '400px' }">
+        <div class="flex flex-col gap-3">
+            <Calendar v-model="form2.delivereddate" dateFormat="yy-mm-dd" placeholder="Select Delivered Date" :maxDate="new Date()" />
 
-        <Calendar
-          v-model="form2.delivereddate"
-          dateFormat="yy-mm-dd"
-          placeholder="Select Delivered Date"
-          :maxDate="new Date()"
-        />
-
-
-        <!-- <Calendar
+            <!-- <Calendar
           v-model="form2.deliverytime"
           showTime
           hourFormat="24"
@@ -319,53 +278,43 @@
           placeholder="Select Schedule Time"
         /> -->
 
-        <div class="flex justify-end gap-2 mt-3">
-          <Button label="Cancel" class="p-button-text" @click="openDialog2 = false" />
-          <Button label="Save" class="p-button-success" :loading="loadingUpdate2" @click="saveDelivered" />
+            <div class="flex justify-end gap-2 mt-3">
+                <Button label="Cancel" class="p-button-text" @click="openDialog2 = false" />
+                <Button label="Save" class="p-button-success" :loading="loadingUpdate2" @click="saveDelivered" />
+            </div>
         </div>
-      </div>
     </Dialog>
-    <Dialog
-      header="Update Planned Information"
-      v-model:visible="openDialog3"
-      modal
-      :style="{ width: '50rem' }"
-    >
-      <div class="flex flex-col gap-3">
-        <!-- Schedule Date -->
-        <Calendar
-          v-model="form3.scheduleDate"
-          dateFormat="yy-mm-dd"
-          placeholder="Select Planned Date"
-          :minDate="new Date()"
-        />
-        <div class="grid md:grid-cols-2 gap-4">
-            <div>
-                <label class="block mb-2 font-medium w-full">Driver IC Number</label>
-                <InputText v-model="form3.driveric" placeholder="Enter IC No" maxlength="12" class="w-full" @keypress="handleIcInput" />
+    <Dialog header="Update Planned Information" v-model:visible="openDialog3" modal :style="{ width: '50rem' }">
+        <div class="flex flex-col gap-3">
+            <!-- Schedule Date -->
+            <Calendar v-model="form3.scheduleDate" dateFormat="yy-mm-dd" placeholder="Select Planned Date" :minDate="new Date()" />
+            <div class="grid md:grid-cols-2 gap-4">
+                <div>
+                    <label class="block mb-2 font-medium w-full">Driver IC Number</label>
+                    <InputText v-model="form3.driveric" placeholder="Enter IC No" maxlength="12" class="w-full" @keypress="handleIcInput" />
+                </div>
+                <div>
+                    <label class="block mb-2 font-medium w-full">Driver Name</label>
+                    <InputText v-model="form3.drivername" placeholder="Enter Driver Name" class="w-full" />
+                </div>
             </div>
-            <div>
-                <label class="block mb-2 font-medium w-full">Driver Name</label>
-                <InputText v-model="form3.drivername" placeholder="Enter Driver Name" class="w-full"  />
+            <div class="grid md:grid-cols-2 mb-2 gap-4">
+                <div>
+                    <label class="block mb-2 font-medium w-full">Driver Contact Number (Optional)</label>
+                    <InputText v-model="form3.drivercontactnum" placeholder="Enter Contact Number" maxlength="15" class="w-full" @keypress="allowOnlyNumbers" />
+                </div>
+                <div>
+                    <label class="block mb-2 font-medium w-full">Driver Plate No</label>
+                    <InputText v-model="form3.drivervehicleplate" placeholder="Enter Plate No" maxlength="8" class="w-full" />
+                </div>
             </div>
-        </div>
-        <div class="grid md:grid-cols-2 mb-2 gap-4">
-            <div>
-                <label class="block mb-2 font-medium w-full">Driver Contact Number (Optional)</label>
-                <InputText v-model="form3.drivercontactnum" placeholder="Enter Contact Number" maxlength="15" class="w-full" @keypress="allowOnlyNumbers" />
-            </div>
-            <div>
-                <label class="block mb-2 font-medium w-full">Driver Plate No</label>
-                <InputText v-model="form3.drivervehicleplate" placeholder="Enter Plate No" maxlength="8" class="w-full"  />
-            </div>
-        </div>
 
-        <!-- Actions -->
-        <div class="flex justify-end gap-2 mt-3">
-          <Button label="Cancel" class="p-button-text" @click="openDialog3 = false" />
-          <Button label="Save" class="p-button-success" :loading="loadingUpdate3" @click="saveSchedule3" />
+            <!-- Actions -->
+            <div class="flex justify-end gap-2 mt-3">
+                <Button label="Cancel" class="p-button-text" @click="openDialog3 = false" />
+                <Button label="Save" class="p-button-success" :loading="loadingUpdate3" @click="saveSchedule3" />
+            </div>
         </div>
-      </div>
     </Dialog>
 </template>
 
@@ -381,10 +330,10 @@ const canUpdate = computed(() => menuStore.canWrite('Order Delivery'));
 const denyAccess = computed(() => menuStore.canTest('Order Delivery'));
 
 defineProps({
-  id: {
-    type: [String, Number],
-    required: true
-  }
+    id: {
+        type: [String, Number],
+        required: true
+    }
 });
 const toast = useToast();
 const route = useRoute();
@@ -402,9 +351,9 @@ function formatDate(dateString) {
     return date.toLocaleString('en-MY', {
         year: 'numeric',
         month: '2-digit',
-        day: '2-digit',
+        day: '2-digit'
     });
-    }
+}
 function formatTime(timeString) {
     if (!timeString) return '';
     const [hours, minutes, seconds] = timeString.split(':');
@@ -414,9 +363,9 @@ function formatTime(timeString) {
         hour: '2-digit',
         minute: '2-digit',
         second: '2-digit',
-        hour12: true,
+        hour12: true
     });
-    }
+}
 function formatDateFull(dateString) {
     if (!dateString) return '';
     const date = new Date(dateString);
@@ -429,8 +378,8 @@ function formatDateFull(dateString) {
         second: '2-digit',
         hour12: true
     });
-    }
-    const getOrderStatusText = (status) => {
+}
+const getOrderStatusText = (status) => {
     const statusMap = {
         0: 'Pending',
         1: 'Approved',
@@ -455,17 +404,17 @@ const getOrderStatusSeverity = (status) => {
 
 const getOrderStatusText2 = (status) => {
     const statusMap = {
-        "NEW": 'Pending',
-        "PENDING": 'Delivery',
-        "COMPLETED": 'Completed',
+        NEW: 'Pending',
+        PENDING: 'Delivery',
+        COMPLETED: 'Completed'
     };
     return statusMap[status] || `Status: ${status}`;
 };
 const getOrderStatusSeverity2 = (status) => {
     const severityMap = {
-        "NEW": 'info',
-        "PENDING": 'warn',
-        "COMPLETED": 'success',
+        NEW: 'info',
+        PENDING: 'warn',
+        COMPLETED: 'success'
     };
     return severityMap[status] || 'secondary';
 };
@@ -477,199 +426,195 @@ const loadingUpdate2 = ref(false);
 const loadingUpdate3 = ref(false);
 const openDialog3 = ref(false);
 const openDialogFn = () => {
-  if (orderDelList.value.deliveryDate) {
-    form.value.scheduleDate = new Date(orderDelList.value.deliveryDate)
-  } else {
-    form.value.scheduleDate = new Date() // default to today
-  }
-  form.value.drivername = '';
-  form.value.drivercontactnum = '';
-  form.value.drivervehicleplate = '';
-  form.value.driveric = '';
-  openDialog.value = true;
-}
+    if (orderDelList.value.deliveryDate) {
+        form.value.scheduleDate = new Date(orderDelList.value.deliveryDate);
+    } else {
+        form.value.scheduleDate = new Date(); // default to today
+    }
+    form.value.drivername = '';
+    form.value.drivercontactnum = '';
+    form.value.drivervehicleplate = '';
+    form.value.driveric = '';
+    openDialog.value = true;
+};
 
 const openDialogFn2 = () => {
-  if (orderDelList.value.deliveryDate) {
-    form3.value.scheduleDate = new Date(orderDelList.value.scm_deliver_detail?.scheduled_delivery_time)
-    form3.value.drivername = orderDelList.value.scm_deliver_detail?.driverName;
-    form3.value.drivercontactnum = orderDelList.value.scm_deliver_detail?.driverContactNo;
-    form3.value.drivervehicleplate = orderDelList.value.scm_deliver_detail?.driverPlateNo;
-    form3.value.driveric = orderDelList.value.scm_deliver_detail?.driverIC;
-  } else {
-    form3.value.scheduleDate = new Date() // default to today
-  }
-  openDialog3.value = true;
-}
+    if (orderDelList.value.deliveryDate) {
+        form3.value.scheduleDate = new Date(orderDelList.value.scm_deliver_detail?.scheduled_delivery_time);
+        form3.value.drivername = orderDelList.value.scm_deliver_detail?.driverName;
+        form3.value.drivercontactnum = orderDelList.value.scm_deliver_detail?.driverContactNo;
+        form3.value.drivervehicleplate = orderDelList.value.scm_deliver_detail?.driverPlateNo;
+        form3.value.driveric = orderDelList.value.scm_deliver_detail?.driverIC;
+    } else {
+        form3.value.scheduleDate = new Date(); // default to today
+    }
+    openDialog3.value = true;
+};
 const handleIcInput = (e) => {
-  if (!/[0-9]/.test(e.key)) {
-    e.preventDefault(); // ⛔ block non-digits
-  }
+    if (!/[0-9]/.test(e.key)) {
+        e.preventDefault(); // ⛔ block non-digits
+    }
 };
 
 const allowOnlyNumbers = (event) => {
-  const key = event.key;
+    const key = event.key;
 
-  // allow digits
-  if (/[0-9]/.test(key)) return;
+    // allow digits
+    if (/[0-9]/.test(key)) return;
 
-  // allow "-"
-  if (key === '-') return;
+    // allow "-"
+    if (key === '-') return;
 
-  // block everything else
-  event.preventDefault();
+    // block everything else
+    event.preventDefault();
 };
 
 // Form
 const form = ref({
-  orderno: '', 
-  scheduleDate: null,  
-  drivername: '', 
-  drivercontactnum: '',   
-  drivervehicleplate: '', 
-  driveric: '',       
-//   scheduleTime: null      
+    orderno: '',
+    scheduleDate: null,
+    drivername: '',
+    drivercontactnum: '',
+    drivervehicleplate: '',
+    driveric: ''
+    //   scheduleTime: null
 });
 const form3 = ref({
-  orderno: '', 
-  scheduleDate: null,  
-  drivername: '', 
-  drivercontactnum: '',   
-  drivervehicleplate: '', 
-  driveric: '',          
+    orderno: '',
+    scheduleDate: null,
+    drivername: '',
+    drivercontactnum: '',
+    drivervehicleplate: '',
+    driveric: ''
 });
 
 const form2 = ref({
-  orderno: null, 
-  delivereddate: null,      
-//   deliverytime: null      
+    orderno: null,
+    delivereddate: null
+    //   deliverytime: null
 });
 
 // Save function
 const saveSchedule = async () => {
-  if (!form.value.scheduleDate) {
-    toast.add({ severity: 'warn', summary: 'Warning', detail: 'Please select date', life: 3000 });
-    return;
-  }
-  if (!form.value.drivername || !form.value.drivervehicleplate || !form.value.driveric) {
-    toast.add({ severity: 'warn', summary: 'Warning', detail: 'Please fullfill driver information', life: 3000 });
-    return;
-  }
-
-
-  try {
-    const payload = {
-      orderno: form.value.orderno,
-      scheduledate: formatDateApi(form.value.scheduleDate),
-      drivername: form.value.drivername,
-      drivercontactnum: form.value.drivercontactnum,
-      drivervehicleplate: form.value.drivervehicleplate,
-      driveric: form.value.driveric,
-    //   scheduletime: formatTimeApi(form.value.scheduleTime)
-    };
-    const res = await api.post('update-schedule-order', payload);
-    if (res.data?.status === 1) {
-        toast.add({ severity: 'success', summary: 'Updated', detail: 'Planned date updated successfully', life: 3000 });
-        InitfetchData(); // refresh table
-    } else {
-        toast.add({ severity: 'error', summary: 'Error', detail: res.data?.error || 'Failed', life: 3000 });
+    if (!form.value.scheduleDate) {
+        toast.add({ severity: 'warn', summary: 'Warning', detail: 'Please select date', life: 3000 });
+        return;
     }
+    if (!form.value.drivername || !form.value.drivervehicleplate || !form.value.driveric) {
+        toast.add({ severity: 'warn', summary: 'Warning', detail: 'Please fullfill driver information', life: 3000 });
+        return;
+    }
+
+    try {
+        const payload = {
+            orderno: form.value.orderno,
+            scheduledate: formatDateApi(form.value.scheduleDate),
+            drivername: form.value.drivername,
+            drivercontactnum: form.value.drivercontactnum,
+            drivervehicleplate: form.value.drivervehicleplate,
+            driveric: form.value.driveric
+            //   scheduletime: formatTimeApi(form.value.scheduleTime)
+        };
+        const res = await api.post('update-schedule-order', payload);
+        if (res.data?.status === 1) {
+            toast.add({ severity: 'success', summary: 'Updated', detail: 'Planned date updated successfully', life: 3000 });
+            InitfetchData(); // refresh table
+        } else {
+            toast.add({ severity: 'error', summary: 'Error', detail: res.data?.error || 'Failed', life: 3000 });
+        }
     } catch (err) {
-    console.error(err);
-    toast.add({ severity: 'error', summary: 'Error', detail: 'API error', life: 3000 });
-    }finally{
-        form.value.scheduleDate = null;  
-        form.value.drivername = ''; 
-        form.value.drivercontactnum = '';  
+        console.error(err);
+        toast.add({ severity: 'error', summary: 'Error', detail: 'API error', life: 3000 });
+    } finally {
+        form.value.scheduleDate = null;
+        form.value.drivername = '';
+        form.value.drivercontactnum = '';
         form.value.drivervehicleplate = '';
-        form.value.driveric = '';  
+        form.value.driveric = '';
         openDialog.value = false;
     }
 };
 const saveSchedule3 = async () => {
-  if (!form3.value.scheduleDate) {
-    toast.add({ severity: 'warn', summary: 'Warning', detail: 'Please select date', life: 3000 });
-    return;
-  }
-  if (!form3.value.drivername || !form3.value.drivervehicleplate || !form3.value.driveric) {
-    toast.add({ severity: 'warn', summary: 'Warning', detail: 'Please fullfill driver information', life: 3000 });
-    return;
-  }
+    if (!form3.value.scheduleDate) {
+        toast.add({ severity: 'warn', summary: 'Warning', detail: 'Please select date', life: 3000 });
+        return;
+    }
+    if (!form3.value.drivername || !form3.value.drivervehicleplate || !form3.value.driveric) {
+        toast.add({ severity: 'warn', summary: 'Warning', detail: 'Please fullfill driver information', life: 3000 });
+        return;
+    }
 
     loadingUpdate3.value = true;
-  try {
-    const payload = {
-     
-      orderno: form3.value.orderno,
-      scheduledate: formatDateApi(form3.value.scheduleDate),
-      drivername: form3.value.drivername,
-      drivercontactnum: form3.value.drivercontactnum,
-      drivervehicleplate: form3.value.drivervehicleplate,
-      driveric: form3.value.driveric,
-    //   scheduletime: formatTimeApi(form.value.scheduleTime)
-    };
-    const res = await api.post('update-schedule-order', payload);
-    if (res.data?.status === 1) {
-        toast.add({ severity: 'success', summary: 'Updated', detail: 'Planned date details updated successfully', life: 3000 });
-        InitfetchData(); // refresh table
-    } else {
-        toast.add({ severity: 'error', summary: 'Error', detail: res.data?.error || 'Failed', life: 3000 });
-    }
+    try {
+        const payload = {
+            orderno: form3.value.orderno,
+            scheduledate: formatDateApi(form3.value.scheduleDate),
+            drivername: form3.value.drivername,
+            drivercontactnum: form3.value.drivercontactnum,
+            drivervehicleplate: form3.value.drivervehicleplate,
+            driveric: form3.value.driveric
+            //   scheduletime: formatTimeApi(form.value.scheduleTime)
+        };
+        const res = await api.post('update-schedule-order', payload);
+        if (res.data?.status === 1) {
+            toast.add({ severity: 'success', summary: 'Updated', detail: 'Planned date details updated successfully', life: 3000 });
+            InitfetchData(); // refresh table
+        } else {
+            toast.add({ severity: 'error', summary: 'Error', detail: res.data?.error || 'Failed', life: 3000 });
+        }
     } catch (err) {
-    console.error(err);
-    toast.add({ severity: 'error', summary: 'Error', detail: 'API error', life: 3000 });
-    }finally{
+        console.error(err);
+        toast.add({ severity: 'error', summary: 'Error', detail: 'API error', life: 3000 });
+    } finally {
         loadingUpdate3.value = false;
-        form3.value.scheduleDate = null;  
-        form3.value.drivername = ''; 
-        form3.value.drivercontactnum = '';  
+        form3.value.scheduleDate = null;
+        form3.value.drivername = '';
+        form3.value.drivercontactnum = '';
         form3.value.drivervehicleplate = '';
-        form3.value.driveric = '';  
+        form3.value.driveric = '';
         openDialog3.value = false;
     }
 };
 // Save function
 const saveDelivered = async () => {
-  if (!form2.value.delivereddate) {
-    toast.add({ severity: 'warn', summary: 'Warning', detail: 'Please select date', life: 3000 });
-    return;
-  }
-
-  try {
-    const payload = {
-      orderno: form2.value.orderno,
-      delivereddate: formatDateApi(form2.value.delivereddate),
-    //   deliveredtime: formatTimeApi(form2.value.deliverytime)
-    };
-    const res = await api.post('update-delivered-order', payload);
-    if (res.data?.status === 1) {
-        toast.add({ severity: 'success', summary: 'Updated', detail: 'Delivered date updated successfully', life: 3000 });
-        InitfetchData(); // refresh table
-    } else {
-        toast.add({ severity: 'error', summary: 'Error', detail: res.data?.error || 'Failed', life: 3000 });
+    if (!form2.value.delivereddate) {
+        toast.add({ severity: 'warn', summary: 'Warning', detail: 'Please select date', life: 3000 });
+        return;
     }
+
+    try {
+        const payload = {
+            orderno: form2.value.orderno,
+            delivereddate: formatDateApi(form2.value.delivereddate)
+            //   deliveredtime: formatTimeApi(form2.value.deliverytime)
+        };
+        const res = await api.post('update-delivered-order', payload);
+        if (res.data?.status === 1) {
+            toast.add({ severity: 'success', summary: 'Updated', detail: 'Delivered date updated successfully', life: 3000 });
+            InitfetchData(); // refresh table
+        } else {
+            toast.add({ severity: 'error', summary: 'Error', detail: res.data?.error || 'Failed', life: 3000 });
+        }
     } catch (err) {
-    console.error(err);
-    toast.add({ severity: 'error', summary: 'Error', detail: 'API error', life: 3000 });
-    }finally{
+        console.error(err);
+        toast.add({ severity: 'error', summary: 'Error', detail: 'API error', life: 3000 });
+    } finally {
         openDialog2.value = false;
     }
-
 };
 
 // Helpers
 const formatDateApi = (date) => {
-  const d = new Date(date);
-  return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+    const d = new Date(date);
+    return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
 };
-
 
 const InitfetchData = async () => {
     try {
         loading.value = true;
         const id = route.params.id;
         const response = await api.get(`order-delivery/detail/${id}`);
-        if ( (response.data.admin_data)) {
+        if (response.data.admin_data) {
             orderDelList.value = response.data.admin_data;
             form.value.orderno = orderDelList.value.order_no;
             form2.value.orderno = orderDelList.value.order_no;

@@ -148,11 +148,11 @@
                                     <td class="px-4 py-2 text-right font-semibold text-primary">{{ order.remarks || '-' }}</td>
                                 </tr>
                                 <tr class="border-b">
-                                    <td class="px-4 py-2 font-medium">Type</td>
+                                    <td class="px-4 py-2 font-medium">Order Type</td>
                                     <td class="px-4 py-2 text-right font-semibold">{{ orderData.deliveryType || '-' }}</td>
                                 </tr>
                                 <tr class="border-b">
-                                    <td class="px-4 py-2 font-medium">Description</td>
+                                    <td class="px-4 py-2 font-medium">Order Description</td>
                                     <td class="px-4 py-2 text-right font-semibold">{{ orderData.orderDesc || '-' }}</td>
                                 </tr>
                                 <tr class="border-b">
