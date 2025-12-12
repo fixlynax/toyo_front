@@ -47,7 +47,7 @@
                         </div>
                         <div>
                             <span class="text-sm font-medium text-black-700">City</span>
-                            <p class="text-lg font-medium">{{ orderDelList.eten_user?.city || '-' }}</p>
+                            <p class="text-lg font-medium">{{ orderDelList.eten_user?.city.replace(/,$/, '') || '-' }}</p>
                         </div>
                     </div>
                 </div>
@@ -165,6 +165,37 @@
                         <Button style="width: auto !important" label="Update Delivered Date" icon="pi pi-calendar" class="p-button-sm p-button-warning" @click="openDialog2 = true" />
                     </div>
                 </div>
+                <div class="card flex flex-col w-full" v-if="orderDelList?.scm_deliver_detail?.scheduled_delivery_time">
+                    <div class="flex items-center justify-between border-b pb-3 mb-4">
+                        <div class="text-2xl font-bold text-gray-800">Driver Information</div>
+                        <div v-if="!loading && orderDelList && orderDelList?.scm_deliver_detail?.scheduled_delivery_time && !orderDelList?.scm_deliver_detail?.delivered_datetime && canUpdate" class="flex justify-end mt-3">
+                            <Button style="width: auto !important" label="Update Information" icon="pi pi-pencil" class="p-button-sm p-button-warning" @click="openDialogFn2()" />
+                        </div>
+                    </div>
+
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-sm text-left text-gray-700">
+                            <tbody>
+                                <tr class="border-b">
+                                    <td class="px-4 py-2 font-bold">Driver Name</td>
+                                    <td class="px-4 py-2 text-right">{{ orderDelList.scm_deliver_detail?.driverName || '-' }}</td>
+                                </tr>
+                                <tr class="border-b">
+                                    <td class="px-4 py-2 font-bold">Driver Contact</td>
+                                    <td class="px-4 py-2 text-right">{{ orderDelList.scm_deliver_detail?.driverContactNo || '-' }}</td>
+                                </tr>
+                                <tr class="border-b">
+                                    <td class="px-4 py-2 font-bold">Driver Ic</td>
+                                    <td class="px-4 py-2 text-right">{{ orderDelList.scm_deliver_detail?.driverIC || '-' }}</td>
+                                </tr>
+                                <tr class="border-b">
+                                    <td class="px-4 py-2 font-bold">Driver Truck Plate No</td>
+                                    <td class="px-4 py-2 text-right">{{ orderDelList.scm_deliver_detail?.driverPlateNo || '-' }}</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
 
                 <div class="card flex flex-col w-full">
                     <div class="flex items-center justify-between border-b pb-3">
@@ -198,43 +229,11 @@
                         </table>
                     </div>
                 </div>
-
-                <div class="card flex flex-col w-full" v-if="orderDelList?.scm_deliver_detail?.scheduled_delivery_time">
-                    <div class="flex items-center justify-between border-b pb-3 mb-4">
-                        <div class="text-2xl font-medium text-gray-800">Driver Information</div>
-                        <div v-if="!loading && orderDelList && orderDelList?.scm_deliver_detail?.scheduled_delivery_time && !orderDelList?.scm_deliver_detail?.delivered_datetime && canUpdate" class="flex justify-end mt-3">
-                            <Button style="width: auto !important" label="Update Information" icon="pi pi-pencil" class="p-button-sm p-button-warning" @click="openDialogFn2()" />
-                        </div>
-                    </div>
-
-                    <div class="overflow-x-auto">
-                        <table class="w-full text-sm text-left text-gray-700">
-                            <tbody>
-                                <tr class="border-b">
-                                    <td class="px-4 py-2 font-bold">Driver Name</td>
-                                    <td class="px-4 py-2 text-right">{{ orderDelList.scm_deliver_detail?.driverName || '-' }}</td>
-                                </tr>
-                                <tr class="border-b">
-                                    <td class="px-4 py-2 font-bold">Driver Contact</td>
-                                    <td class="px-4 py-2 text-right">{{ orderDelList.scm_deliver_detail?.driverContactNo || '-' }}</td>
-                                </tr>
-                                <tr class="border-b">
-                                    <td class="px-4 py-2 font-bold">Driver Ic</td>
-                                    <td class="px-4 py-2 text-right">{{ orderDelList.scm_deliver_detail?.driverIC || '-' }}</td>
-                                </tr>
-                                <tr class="border-b">
-                                    <td class="px-4 py-2 font-bold">Driver Truck Plate No</td>
-                                    <td class="px-4 py-2 text-right">{{ orderDelList.scm_deliver_detail?.driverPlateNo || '-' }}</td>
-                                </tr>
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
             </div>
         </div>
     </Fluid>
 
-    <Dialog header="Update Planned Date" v-model:visible="openDialog" modal :style="{ width: '50rem' }">
+    <Dialog header="Update Planned Information" v-model:visible="openDialog" modal :style="{ width: '50rem' }">
         <div class="flex flex-col gap-3">
             <!-- Schedule Date -->
             <Calendar v-model="form.scheduleDate" dateFormat="yy-mm-dd" placeholder="Select Planned Date" :minDate="new Date()" />

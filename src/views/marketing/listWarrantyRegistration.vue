@@ -7,13 +7,6 @@
 
         <!-- Show content area when not in initial loading -->
         <div v-else>
-            <div class="flex items-center gap-3 mb-4 ml-4">
-                <!-- LEFT SIDE -->
-
-                <Calendar v-model="dateRange" selectionMode="range" dateFormat="dd/mm/yy" placeholder="Select date range" style="width: 390px" />
-                <Button label="Clear" class="p-button-sm p-button-danger" @click="clearDate" />
-                <Button label="Filter" class="p-button-sm" @click="applyFilter" />
-            </div>
             <DataTable
                 :value="listData"
                 :paginator="true"
@@ -34,7 +27,7 @@
             >
                 <template #header>
                     <div class="flex flex-col gap-4 w-full">
-                        <!-- Top Row: Search -->
+                        <!-- Top Row: Search and Export -->
                         <div class="flex items-center justify-between gap-4 w-full flex-wrap">
                             <div class="flex items-center gap-2 w-full max-w-md">
                                 <IconField class="flex-1">
@@ -43,12 +36,26 @@
                                     </InputIcon>
                                     <InputText v-model="filters['global'].value" placeholder="Quick Search" class="w-full" />
                                 </IconField>
-                                <!-- <Button type="button" icon="pi pi-cog" class="p-button" /> -->
                             </div>
 
                             <div>
-                                <Button label="Export" icon="pi pi-upload" class="p-button-info" :loading="exportLoading" @click="exportToExcel" />
+                                <Button label="Export" icon="pi pi-upload" class="p-button-success" :loading="exportLoading" @click="exportToExcel" />
                             </div>
+                        </div>
+
+                        <!-- Second Row: Date Range Filter -->
+                        <div class="flex items-center gap-3 flex-wrap">
+                            <Calendar 
+                                v-model="dateRange" 
+                                selectionMode="range" 
+                                dateFormat="dd/mm/yy" 
+                                placeholder="Select date range" 
+                                style="width: 390px" 
+                                :showIcon="true"
+                                iconDisplay="input"
+                            />
+                            <Button label="Clear" class="p-button-sm p-button-primarry p-button-danger" @click="clearDate" />
+                            <Button label="Filter" class="p-button-sm p-button-primary" @click="applyFilter" />
                         </div>
                     </div>
                 </template>
