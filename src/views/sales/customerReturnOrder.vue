@@ -11,6 +11,9 @@ const listData = ref([]);
 const loading = ref(true);
 const dateRange = ref([null, null]); // [startDate, endDate]
 const hasDateFilterApplied = ref(false); // Track if date filter is applied
+const dealers = ref([]); // List of dealers (main accounts only)
+const selectedDealer = ref(null); // Selected dealer
+const isDealerSelected = ref(false); // Flag to track if dealer is selected
 
 // 🟢 Initialize filters
 function initFilters() {
@@ -50,6 +53,49 @@ const isPendingCTCTab = computed(() => currentTab.value?.status === 'PENDING_COL
 const isRejectedTab = computed(() => currentTab.value?.status === 'REJECTED');
 const isPendingCNTab = computed(() => currentTab.value?.status === 'CREDITNOTE');
 
+// 🧩 Fetch Dealers (Main accounts only)
+const fetchDealers = async () => {
+    try {
+        const response = await api.post('list_dealer', {
+            mainBranch: 0 // Get all dealers including sub-branches
+        });
+
+        if (response.data.status === 1 && response.data.admin_data) {
+            const dealerData = response.data.admin_data;
+            const mainDealerList = [];
+
+            // Process dealer data - only include main dealers (accounts ending with "00")
+            Object.entries(dealerData).forEach(([custAccountNo, data]) => {
+                const mainShop = data.shop;
+
+                // Only add main dealers (ending with "00")
+                if (mainShop.custAccountNo && mainShop.custAccountNo.toString().endsWith('00')) {
+                    mainDealerList.push({
+                        custAccountNo: mainShop.custAccountNo,
+                        companyName: trimCompanyName(mainShop.companyName1, mainShop.companyName2),
+                        isMain: true,
+                        hasSubBranches: Object.keys(data.subBranches || {}).length > 0
+                    });
+                }
+            });
+
+            // Sort alphabetically by company name
+            dealers.value = mainDealerList.sort((a, b) => a.companyName.localeCompare(b.companyName));
+        } else {
+            dealers.value = [];
+        }
+    } catch (error) {
+        console.error('Error fetching dealers:', error);
+        dealers.value = [];
+    }
+};
+
+// Helper function to trim company name
+const trimCompanyName = (name1, name2) => {
+    const fullName = `${name1 || ''} ${name2 || ''}`.trim();
+    return fullName || 'Unknown';
+};
+
 // 🧩 Helpers
 const getOverallStatusSeverity = (orderStatus) => {
     // If current tab is Pending CN, use the Pending Credit Note severity
@@ -67,21 +113,6 @@ const getOverallStatusLabel = (orderStatus) => {
     return STATUS_MAP[Number(orderStatus)]?.label || 'Pending';
 };
 
-// 🧩 Check if status is completed
-const isCompletedStatus = (orderStatus) => {
-    return Number(orderStatus) === 9;
-};
-
-// 🧩 Check if status is pending collection
-const isPendingCTCStatus = (orderStatus) => {
-    return Number(orderStatus) === 77;
-};
-
-// 🧩 Check if status is pending credit note
-const isPendingCNStatus = (orderStatus) => {
-    return Number(orderStatus) === 88;
-};
-
 // 🧩 Date Formatter
 const formatDate = (dateString) => {
     if (!dateString) return '';
@@ -94,7 +125,7 @@ const formatDate = (dateString) => {
 };
 
 // 🟢 Fetch return orders based on tab
-const fetchReturnOrders = async (tabStatus = 'PENDING') => {
+const fetchReturnOrders = async (tabStatus = 'PENDING', mainAccountNo = null) => {
     loading.value = true;
     try {
         const selectedTab = currentTab.value;
@@ -118,6 +149,12 @@ const fetchReturnOrders = async (tabStatus = 'PENDING') => {
             };
 
             params.date_range = `${formatDateForBackend(dateRange.value[0])} - ${formatDateForBackend(dateRange.value[1])}`;
+        }
+
+        // Add dealer filter if selected
+        if (mainAccountNo) {
+            params.custaccountno = mainAccountNo;
+            params.mainBranch = 1; // Tell backend this is a main branch selection
         }
 
         const response = await api.post(`order/list-return-order`, params);
@@ -149,6 +186,27 @@ const fetchReturnOrders = async (tabStatus = 'PENDING') => {
     }
 };
 
+// 🟢 Handle dealer selection (only main accounts in dropdown)
+const handleDealerChange = () => {
+    const selectedTab = currentTab.value;
+
+    if (selectedDealer.value) {
+        isDealerSelected.value = true;
+
+        // Reset date range when changing dealer
+        dateRange.value = [null, null];
+        hasDateFilterApplied.value = false;
+
+        // Pass the main account number to fetchReturnOrders
+        // The API should handle filtering for main account + sub-accounts
+        fetchReturnOrders(selectedTab.status, selectedDealer.value);
+    } else {
+        isDealerSelected.value = false;
+        listData.value = [];
+        loading.value = false;
+    }
+};
+
 // 🟢 Watch for tab change
 watch(activeTabIndex, (newIndex, oldIndex) => {
     const selectedTab = statusTabs[newIndex];
@@ -161,9 +219,9 @@ watch(activeTabIndex, (newIndex, oldIndex) => {
     if (selectedTab?.requiresDateRange && !selectedTab?.initialLoad) {
         listData.value = [];
         loading.value = false;
-    } else {
-        const selectedStatus = selectedTab?.status;
-        fetchReturnOrders(selectedStatus);
+    } else if (selectedDealer.value && isDealerSelected.value) {
+        // If dealer is selected, fetch for that dealer
+        fetchReturnOrders(selectedTab.status, selectedDealer.value);
     }
 });
 
@@ -173,17 +231,17 @@ watch(
     (newRange, oldRange) => {
         const selectedTab = currentTab.value;
 
-        // Only trigger fetch when both dates are set
-        if (newRange[0] && newRange[1]) {
+        // Only trigger fetch when both dates are set AND dealer is selected
+        if (newRange[0] && newRange[1] && isDealerSelected.value && selectedDealer.value) {
             hasDateFilterApplied.value = true;
-            fetchReturnOrders(selectedTab.status);
+            fetchReturnOrders(selectedTab.status, selectedDealer.value);
         } else if (newRange[0] === null && newRange[1] === null && hasDateFilterApplied.value) {
-            // Clear data if date range is cleared
+            // Handle clearing date range
             hasDateFilterApplied.value = false;
 
-            // For tabs with initial load, reload all data
-            if (selectedTab?.initialLoad) {
-                fetchReturnOrders(selectedTab.status);
+            // For tabs with initial load, reload dealer data
+            if (selectedTab?.initialLoad && isDealerSelected.value && selectedDealer.value) {
+                fetchReturnOrders(selectedTab.status, selectedDealer.value);
             } else {
                 // For tabs without initial load, clear data
                 listData.value = [];
@@ -193,22 +251,39 @@ watch(
     { deep: true }
 );
 
+// 🟢 Watch dealer selection
+watch(selectedDealer, () => {
+    handleDealerChange();
+});
+
 // 🟢 Clear date range
 const clearDateRange = () => {
     dateRange.value = [null, null];
     hasDateFilterApplied.value = false;
 
     // Reload data for tabs with initial load, clear for others
-    if (currentTab.value?.initialLoad) {
-        fetchReturnOrders(currentTab.value.status);
+    if (currentTab.value?.initialLoad && isDealerSelected.value && selectedDealer.value) {
+        fetchReturnOrders(currentTab.value.status, selectedDealer.value);
     } else {
         listData.value = [];
     }
 };
 
+// 🟢 Clear Dealer Filter
+const clearDealerFilter = () => {
+    selectedDealer.value = null;
+    isDealerSelected.value = false;
+    listData.value = [];
+    dateRange.value = [null, null];
+    hasDateFilterApplied.value = false;
+    loading.value = false;
+};
+
 // 🟢 Initial data load
-onBeforeMount(() => {
+onBeforeMount(async () => {
     initFilters();
+    await fetchDealers(); // Load dealers first
+
     const firstTab = statusTabs[activeTabIndex.value];
 
     // Don't fetch if first tab requires date range and doesn't have initial load
@@ -216,7 +291,8 @@ onBeforeMount(() => {
         loading.value = false;
         listData.value = [];
     } else {
-        fetchReturnOrders(firstTab?.status);
+        // Don't fetch until customer is selected
+        loading.value = false;
     }
 });
 </script>
@@ -226,16 +302,71 @@ onBeforeMount(() => {
         <!-- Header -->
         <div class="text-2xl font-bold text-gray-800 border-b pb-2">List Return Order</div>
 
-        <!-- 🟢 Loading Page -->
-        <LoadingPage v-if="loading" :message="'Loading Return Orders...'" :sub-message="'Fetching Return Order list...'" />
-
-        <!-- 🟢 Tab Menu and Table -->
-        <div v-else>
-            <!-- 🟣 Status Tabs -->
+        <div>
             <TabMenu :model="statusTabs" v-model:activeIndex="activeTabIndex" class="mb-6" />
 
-            <!-- 🟢 DataTable -->
+            <!-- Header with Search and Filters (Always shown) -->
+            <div class="mb-6 p-4 bg-gray-50 rounded-lg border">
+                <div class="flex flex-col gap-4 w-full">
+                    <!-- Search Row -->
+                    <div class="flex items-center gap-4 w-full">
+                        <div class="flex items-center gap-2 w-full max-w-md">
+                            <IconField class="flex-1">
+                                <InputIcon><i class="pi pi-search" /></InputIcon>
+                                <InputText v-model="filters['global'].value" placeholder="Quick Search" class="w-full" :disabled="!isDealerSelected" />
+                            </IconField>
+                        </div>
+                    </div>
+
+                    <!-- Filter Row: Customer and Date Range in one line -->
+                    <div class="flex items-center gap-6 flex-wrap">
+                        <!-- Customer Dropdown (Main accounts only) -->
+                        <div class="flex items-center gap-2">
+                            <span class="text-sm font-medium text-gray-700 whitespace-nowrap">Customer:</span>
+                            <div class="relative">
+                                <Dropdown v-model="selectedDealer" :options="dealers" optionLabel="companyName" optionValue="custAccountNo" placeholder="Select Customer" class="w-100" :filter="true" :disabled="loading">
+                                    <template #option="slotProps">
+                                        <div class="flex items-center gap-2">
+                                            <span class="text-blue-600 font-bold">🏢</span>
+                                            <span>{{ slotProps.option.companyName }}</span>
+                                            <span class="text-xs text-gray-400 ml-auto">{{ slotProps.option.custAccountNo }}</span>
+                                        </div>
+                                    </template>
+                                    <template #value="slotProps">
+                                        <div v-if="slotProps.value" class="flex items-center gap-2">
+                                            <span class="text-blue-600 font-bold">🏢</span>
+                                            <span>{{ dealers.find((d) => d.custAccountNo === slotProps.value)?.companyName }}</span>
+                                        </div>
+                                        <span v-else>{{ slotProps.placeholder }}</span>
+                                    </template>
+                                </Dropdown>
+                                <Button v-if="selectedDealer" icon="pi pi-times" class="p-button-text p-button-sm ml-2" @click="clearDealerFilter" title="Clear customer filter" />
+                            </div>
+                        </div>
+
+                        <!-- Date Range Filter -->
+                        <div class="flex items-center gap-2">
+                            <span class="text-sm font-medium text-gray-700 whitespace-nowrap">Date Range:</span>
+                            <div class="flex items-center gap-2">
+                                <Calendar v-model="dateRange[0]" placeholder="Start Date" dateFormat="yy-mm-dd" showIcon class="w-40" :disabled="loading || !isDealerSelected" />
+                                <span class="text-gray-500">to</span>
+                                <Calendar v-model="dateRange[1]" placeholder="End Date" dateFormat="yy-mm-dd" showIcon class="w-40" :disabled="loading || !isDealerSelected" />
+                            </div>
+                            <Button v-if="dateRange[0] || dateRange[1]" icon="pi pi-times" class="p-button-text p-button-sm" @click="clearDateRange" title="Clear date filter" :disabled="!isDealerSelected" />
+                        </div>
+
+                        <!-- Show message only for Completed/Rejected tabs without date filter -->
+                        <div v-if="isDealerSelected && showDateRangeFilter && !currentTab?.initialLoad && !hasDateFilterApplied" class="text-sm text-blue-600 italic">Please select a date range to view {{ currentTabLabel }} orders</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 🟢 Loading Page -->
+            <LoadingPage v-if="loading" :message="'Loading Return Orders...'" :sub-message="'Fetching Return Order list...'" />
+
+            <!-- 🟢 DataTable (Only shown when customer is selected) -->
             <DataTable
+                v-if="!loading && isDealerSelected"
                 :value="listData"
                 :paginator="true"
                 :rows="10"
@@ -252,42 +383,16 @@ onBeforeMount(() => {
                 currentPageReportTemplate="Showing {first} to {last} of {totalRecords} entries"
                 paginatorTemplate="CurrentPageReport FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink RowsPerPageDropdown"
             >
-                <!-- Header -->
-                <template #header>
-                    <div class="flex flex-col gap-4 w-full">
-                        <!-- Top Row: Search -->
-                        <div class="flex items-center justify-between gap-4 w-full flex-wrap">
-                            <div class="flex items-center gap-2 w-full max-w-md">
-                                <IconField class="flex-1">
-                                    <InputIcon>
-                                        <i class="pi pi-search" />
-                                    </InputIcon>
-                                    <InputText v-model="filters['global'].value" placeholder="Quick Search" class="w-full" />
-                                </IconField>
-                                <!-- <Button type="button" icon="pi pi-cog" class="p-button" /> -->
-                            </div>
-                        </div>
-
-                        <!-- Date Range Filter (for all tabs) -->
-                        <div class="flex items-center gap-4 flex-wrap">
-                            <div class="flex items-center gap-2">
-                                <span class="text-sm font-medium text-gray-700">Date Range:</span>
-                                <div class="flex items-center gap-2">
-                                    <Calendar v-model="dateRange[0]" placeholder="Start Date" dateFormat="yy-mm-dd" showIcon class="w-40" :disabled="loading" />
-                                    <span class="text-gray-500">to</span>
-                                    <Calendar v-model="dateRange[1]" placeholder="End Date" dateFormat="yy-mm-dd" showIcon class="w-40" :disabled="loading" />
-                                </div>
-                                <Button v-if="dateRange[0] || dateRange[1]" icon="pi pi-times" class="p-button-text p-button-sm" @click="clearDateRange" title="Clear date filter" />
-                            </div>
-                            <!-- Show message for tabs that require date range but don't have initial load -->
-                            <div v-if="showDateRangeFilter && !currentTab?.initialLoad && !hasDateFilterApplied" class="text-sm text-blue-600 italic">Please select a date range to view {{ currentTabLabel }} orders</div>
-                        </div>
-                    </div>
-                </template>
-
                 <template #empty>
                     <div class="text-center py-4 text-gray-500">
-                        <template v-if="showDateRangeFilter && !currentTab?.initialLoad && !hasDateFilterApplied">
+                        <template v-if="!isDealerSelected || !selectedDealer">
+                            <div class="flex flex-col items-center gap-2">
+                                <i class="pi pi-users text-3xl text-blue-400"></i>
+                                <span class="text-lg">Please select a customer first</span>
+                                <span class="text-sm text-gray-400">Choose a customer from the dropdown above to view their return orders</span>
+                            </div>
+                        </template>
+                        <template v-else-if="showDateRangeFilter && !currentTab?.initialLoad && !hasDateFilterApplied">
                             <div class="flex flex-col items-center gap-2">
                                 <i class="pi pi-calendar text-3xl text-blue-400"></i>
                                 <span class="text-lg">Select a date range to view {{ currentTabLabel }} orders</span>
@@ -300,7 +405,7 @@ onBeforeMount(() => {
                                 <span class="text-lg">Please select both start and end dates</span>
                             </div>
                         </template>
-                        <template v-else-if="hasDateFilterApplied"> No {{ currentTabLabel }} orders found in the selected date range. </template>
+                        <template v-else-if="selectedDealer"> No return orders found for the selected customer. </template>
                         <template v-else> No return orders found for this status. </template>
                     </div>
                 </template>
@@ -371,6 +476,15 @@ onBeforeMount(() => {
                     </template>
                 </Column>
             </DataTable>
+
+            <!-- Initial state when no customer is selected -->
+            <div v-if="!loading && !isDealerSelected" class="text-center py-12 bg-gray-50 rounded-lg border">
+                <div class="flex flex-col items-center gap-4">
+                    <i class="pi pi-users text-5xl text-blue-300"></i>
+                    <h3 class="text-xl font-semibold text-gray-700">No Customer Selected</h3>
+                    <p class="text-gray-500 max-w-md">Please select a customer from the dropdown above to view their return order history. The table will display return orders for the selected customer and all its branches.</p>
+                </div>
+            </div>
         </div>
     </div>
 </template>
@@ -438,5 +552,14 @@ onBeforeMount(() => {
         border-bottom-left-radius: 12px;
         border-bottom-right-radius: 12px;
     }
+}
+
+/* Dealer dropdown styling */
+:deep(.p-dropdown) {
+    min-width: 200px;
+}
+
+:deep(.p-dropdown-item) {
+    padding: 0.5rem 1rem;
 }
 </style>
