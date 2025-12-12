@@ -192,14 +192,14 @@ const fetchUsers = async () => {
     }
 };
 
-const getStatusText = (status) => {
+const getOverallStatusSeverity = (status) => {
   const statusMap = {
     1: 'success',
     9: 'warn',
     0: 'danger'
   };
 
-
+}
 const getStatusText = (status) => {
   const statusMap = {
     1: 'Active',
