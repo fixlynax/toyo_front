@@ -162,7 +162,8 @@ const fetchUsers = async () => {
         if (response.data.status === 1 && response.data.admin_data) {
             const allUsers = [
                 ...(response.data.admin_data.active_user || []), 
-                ...(response.data.admin_data.inactive_user || [])
+                ...(response.data.admin_data.inactive_user || []),
+                ...(response.data.admin_data.deleted_user || [])
             ];
 
             listData.value = allUsers.map((user) => ({
@@ -176,9 +177,8 @@ const fetchUsers = async () => {
                 level: user.member_level || '-',
                 memberSince: user.member_since || '-',
                 lastLogin: user.last_login || '-',
-                status: user.status === 1 ? 1 : 0 // Normalize status: 1 for active, 0 for inactive
+                status: user.status 
             }));
-            
         } else {
             console.error('API returned error or invalid data:', response.data);
             listData.value = [];
