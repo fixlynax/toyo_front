@@ -20,14 +20,14 @@ function initFilters() {
     };
 }
 
-// 🟢 Tab setup with date range requirement
+// 🟢 Tab setup with date range requirement and initial load control
 const statusTabs = [
-    { label: 'Pending', status: 'PENDING', requiresDateRange: false },
-    { label: 'Approved', status: 'APPROVED', requiresDateRange: false },
-    { label: 'Rejected', status: 'REJECTED', requiresDateRange: true },
-    { label: 'Pending Collection', status: 'PENDING_COLLECTION', requiresDateRange: false },
-    { label: 'Return Received', status: 'CREDITNOTE', requiresDateRange: false }, 
-    { label: 'Completed', status: 'COMPLETE', requiresDateRange: true }
+    { label: 'Pending', status: 'PENDING', requiresDateRange: false, initialLoad: true },
+    { label: 'Approved', status: 'APPROVED', requiresDateRange: false, initialLoad: true },
+    { label: 'Rejected', status: 'REJECTED', requiresDateRange: true, initialLoad: false },
+    { label: 'Pending Collection', status: 'PENDING_COLLECTION', requiresDateRange: false, initialLoad: true },
+    { label: 'Return Received', status: 'CREDITNOTE', requiresDateRange: false, initialLoad: true },
+    { label: 'Completed', status: 'COMPLETE', requiresDateRange: true, initialLoad: false }
 ];
 const activeTabIndex = ref(0);
 
@@ -48,7 +48,7 @@ const showDateRangeFilter = computed(() => currentTab.value?.requiresDateRange |
 const isCompletedTab = computed(() => currentTab.value?.status === 'COMPLETE');
 const isPendingCTCTab = computed(() => currentTab.value?.status === 'PENDING_COLLECTION');
 const isRejectedTab = computed(() => currentTab.value?.status === 'REJECTED');
-const isPendingCNTab = computed(() => currentTab.value?.status === 'CREDITNOTE'); 
+const isPendingCNTab = computed(() => currentTab.value?.status === 'CREDITNOTE');
 
 // 🧩 Helpers
 const getOverallStatusSeverity = (orderStatus) => {
@@ -99,8 +99,8 @@ const fetchReturnOrders = async (tabStatus = 'PENDING') => {
     try {
         const selectedTab = currentTab.value;
 
-        // For tabs requiring date range, don't fetch until date range is set
-        if (selectedTab?.requiresDateRange && !hasDateFilterApplied.value) {
+        // For tabs requiring date range and without initial load, don't fetch until date range is set
+        if (selectedTab?.requiresDateRange && !selectedTab?.initialLoad && !hasDateFilterApplied.value) {
             listData.value = [];
             loading.value = false;
             return;
@@ -110,7 +110,7 @@ const fetchReturnOrders = async (tabStatus = 'PENDING') => {
         const params = { tabs: tabStatus };
 
         // Add date range if applied
-        if (selectedTab?.requiresDateRange && hasDateFilterApplied.value && dateRange.value[0] && dateRange.value[1]) {
+        if (hasDateFilterApplied.value && dateRange.value[0] && dateRange.value[1]) {
             // Format dates for backend (d/m/Y format)
             const formatDateForBackend = (date) => {
                 const d = new Date(date);
@@ -157,9 +157,10 @@ watch(activeTabIndex, (newIndex, oldIndex) => {
     dateRange.value = [null, null];
     hasDateFilterApplied.value = false;
 
-    // Clear data when switching to tabs requiring date range
-    if (selectedTab?.requiresDateRange) {
+    // Clear data when switching to tabs requiring date range and without initial load
+    if (selectedTab?.requiresDateRange && !selectedTab?.initialLoad) {
         listData.value = [];
+        loading.value = false;
     } else {
         const selectedStatus = selectedTab?.status;
         fetchReturnOrders(selectedStatus);
@@ -172,15 +173,20 @@ watch(
     (newRange, oldRange) => {
         const selectedTab = currentTab.value;
 
-        // Only trigger fetch for tabs that require date range
-        if (selectedTab?.requiresDateRange) {
-            if (newRange[0] && newRange[1]) {
-                hasDateFilterApplied.value = true;
+        // Only trigger fetch when both dates are set
+        if (newRange[0] && newRange[1]) {
+            hasDateFilterApplied.value = true;
+            fetchReturnOrders(selectedTab.status);
+        } else if (newRange[0] === null && newRange[1] === null && hasDateFilterApplied.value) {
+            // Clear data if date range is cleared
+            hasDateFilterApplied.value = false;
+
+            // For tabs with initial load, reload all data
+            if (selectedTab?.initialLoad) {
                 fetchReturnOrders(selectedTab.status);
-            } else if (newRange[0] === null && newRange[1] === null && hasDateFilterApplied.value) {
-                // Clear data if date range is cleared
+            } else {
+                // For tabs without initial load, clear data
                 listData.value = [];
-                hasDateFilterApplied.value = false;
             }
         }
     },
@@ -191,7 +197,13 @@ watch(
 const clearDateRange = () => {
     dateRange.value = [null, null];
     hasDateFilterApplied.value = false;
-    listData.value = [];
+
+    // Reload data for tabs with initial load, clear for others
+    if (currentTab.value?.initialLoad) {
+        fetchReturnOrders(currentTab.value.status);
+    } else {
+        listData.value = [];
+    }
 };
 
 // 🟢 Initial data load
@@ -199,8 +211,8 @@ onBeforeMount(() => {
     initFilters();
     const firstTab = statusTabs[activeTabIndex.value];
 
-    // Don't fetch if first tab requires date range
-    if (firstTab?.requiresDateRange) {
+    // Don't fetch if first tab requires date range and doesn't have initial load
+    if (firstTab?.requiresDateRange && !firstTab?.initialLoad) {
         loading.value = false;
         listData.value = [];
     } else {
@@ -256,8 +268,8 @@ onBeforeMount(() => {
                             </div>
                         </div>
 
-                        <!-- Date Range Filter (for Completed and Rejected tabs) -->
-                        <div v-if="showDateRangeFilter" class="flex items-center gap-4 flex-wrap">
+                        <!-- Date Range Filter (for all tabs) -->
+                        <div class="flex items-center gap-4 flex-wrap">
                             <div class="flex items-center gap-2">
                                 <span class="text-sm font-medium text-gray-700">Date Range:</span>
                                 <div class="flex items-center gap-2">
@@ -267,28 +279,28 @@ onBeforeMount(() => {
                                 </div>
                                 <Button v-if="dateRange[0] || dateRange[1]" icon="pi pi-times" class="p-button-text p-button-sm" @click="clearDateRange" title="Clear date filter" />
                             </div>
-                            <div v-if="!hasDateFilterApplied" class="text-sm text-blue-600 italic">Please select a date range to view {{ currentTabLabel }} orders</div>
-                            <!-- <div v-else-if="dateRange[0] && dateRange[1]" class="text-sm text-gray-600">Showing {{ listData.length }} orders from {{ formatDate(dateRange[0]) }} to {{ formatDate(dateRange[1]) }}</div> -->
+                            <!-- Show message for tabs that require date range but don't have initial load -->
+                            <div v-if="showDateRangeFilter && !currentTab?.initialLoad && !hasDateFilterApplied" class="text-sm text-blue-600 italic">Please select a date range to view {{ currentTabLabel }} orders</div>
                         </div>
                     </div>
                 </template>
 
                 <template #empty>
                     <div class="text-center py-4 text-gray-500">
-                        <template v-if="showDateRangeFilter && !hasDateFilterApplied">
+                        <template v-if="showDateRangeFilter && !currentTab?.initialLoad && !hasDateFilterApplied">
                             <div class="flex flex-col items-center gap-2">
                                 <i class="pi pi-calendar text-3xl text-blue-400"></i>
                                 <span class="text-lg">Select a date range to view {{ currentTabLabel }} orders</span>
                                 <span class="text-sm text-gray-400">Choose both start and end dates to filter results</span>
                             </div>
                         </template>
-                        <template v-else-if="showDateRangeFilter && hasDateFilterApplied && (!dateRange[0] || !dateRange[1])">
+                        <template v-else-if="hasDateFilterApplied && (!dateRange[0] || !dateRange[1])">
                             <div class="flex flex-col items-center gap-2">
                                 <i class="pi pi-exclamation-circle text-3xl text-yellow-400"></i>
                                 <span class="text-lg">Please select both start and end dates</span>
                             </div>
                         </template>
-                        <template v-else-if="showDateRangeFilter && hasDateFilterApplied"> No {{ currentTabLabel }} orders found in the selected date range. </template>
+                        <template v-else-if="hasDateFilterApplied"> No {{ currentTabLabel }} orders found in the selected date range. </template>
                         <template v-else> No return orders found for this status. </template>
                     </div>
                 </template>
@@ -311,7 +323,10 @@ onBeforeMount(() => {
 
                 <!-- Account No Column -->
                 <Column header="Customer Name" style="min-width: 10rem" sortable>
-                    <template #body="{ data }"><span class="font-bold">{{ data.customerName || '-' }}</span><br />{{ data.custAccountNo || '-' }}</template>
+                    <template #body="{ data }"
+                        ><span class="font-bold">{{ data.customerName || '-' }}</span
+                        ><br />{{ data.custAccountNo || '-' }}</template
+                    >
                 </Column>
 
                 <!-- Reason Code Column -->

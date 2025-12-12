@@ -113,10 +113,11 @@
                 </div>
 
                 <!-- FULFILLMENT ORDERS -->
-                <div class="card flex flex-col gap-4" v-if="order.list_order && order.list_order.length > 0">
+                <!-- Modified condition: Only show if there are orders with SO number -->
+                <div class="card flex flex-col gap-4" v-if="hasFulfillmentOrdersWithSO">
                     <div class="font-semibold text-xl border-b pb-2">🚛 Fulfillment Orders</div>
 
-                    <div v-for="fulfillOrder in order.list_order" :key="fulfillOrder.id" class="border rounded-lg p-4 mb-4 bg-gray-50">
+                    <div v-for="fulfillOrder in filteredFulfillmentOrders" :key="fulfillOrder.id" class="border rounded-lg p-4 mb-4 bg-gray-50">
                         <div class="flex justify-between items-start mb-3">
                             <!-- Left: Order -->
                             <div>
@@ -223,9 +224,10 @@
                                     <td class="px-4 py-2 font-medium">Expiry</td>
                                     <td class="px-4 py-2 text-right">{{ formatDate(order.expiry) }}</td>
                                 </tr>
+                                <!-- Modified: Total Orders based on orders with SO number -->
                                 <tr class="border-t">
                                     <td class="px-4 py-2 font-medium">Total Orders</td>
-                                    <td class="px-4 py-2 text-right font-bold">{{ order.list_order ? order.list_order.length : 0 }}</td>
+                                    <td class="px-4 py-2 text-right font-bold">{{ filteredFulfillmentOrders.length }}</td>
                                 </tr>
                             </tbody>
                         </table>
@@ -358,6 +360,19 @@ const shippingDetail = computed(() => {
         return null;
     }
     return order.value.shippingDetail[0];
+});
+
+// Computed property to filter fulfillment orders that have SO number
+const filteredFulfillmentOrders = computed(() => {
+    if (!order.value.list_order || !Array.isArray(order.value.list_order)) {
+        return [];
+    }
+    return order.value.list_order.filter(order => order.so_no != null && order.so_no !== '');
+});
+
+// Computed property to check if there are fulfillment orders with SO number
+const hasFulfillmentOrdersWithSO = computed(() => {
+    return filteredFulfillmentOrders.value.length > 0;
 });
 
 // Helper methods to format shipping information
@@ -516,7 +531,8 @@ const getFulfilledQuantity = (materialId) => {
 
     let totalFulfilled = 0;
     order.value.list_order.forEach((orderItem) => {
-        if (orderItem.fullfill_order_array) {
+        // Only count fulfillment from orders with SO number
+        if (orderItem.so_no != null && orderItem.so_no !== '' && orderItem.fullfill_order_array) {
             orderItem.fullfill_order_array.forEach((fulfillItem) => {
                 if (fulfillItem.materialid === materialId) {
                     totalFulfilled += parseFloat(fulfillItem.qty);
