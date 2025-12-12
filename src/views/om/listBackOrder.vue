@@ -341,13 +341,13 @@ const getProgressBarClass = (progress) => {
 };
 
 const formatDate = (dateString) => {
-    if (!dateString) return '-';
-    try {
-        const date = new Date(dateString);
-        return date.toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' });
-    } catch {
-        return dateString;
-    }
+    if (!dateString) return '';
+    const date = new Date(dateString);
+    return date.toLocaleString('en-MY', {
+        year: 'numeric',
+        month: '2-digit',
+        day: '2-digit'
+    });
 };
 
 const getStatusLabel = (data) => {

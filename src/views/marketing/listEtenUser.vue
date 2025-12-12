@@ -127,7 +127,8 @@ const filters = ref({
 const statusTabs = ref([
     { label: 'All Users' }, 
     { label: 'Active' }, 
-    { label: 'Inactive' }
+    { label: 'Inactive' },
+    { label: 'Deleted' }
 ]);
 const activeTabIndex = ref(0);
 
@@ -139,7 +140,9 @@ const filteredUsers = computed(() => {
         case 1: // Active
             return listData.value.filter((user) => user.status === 1);
         case 2: // Inactive
-            return listData.value.filter((user) => user.status !== 1);
+            return listData.value.filter((user) => user.status == 0);
+        case 3: // Deleted
+            return listData.value.filter((user) => user.status == 9);
         default:
             return listData.value;
     }
@@ -159,7 +162,8 @@ const fetchUsers = async () => {
         if (response.data.status === 1 && response.data.admin_data) {
             const allUsers = [
                 ...(response.data.admin_data.active_user || []), 
-                ...(response.data.admin_data.inactive_user || [])
+                ...(response.data.admin_data.inactive_user || []),
+                ...(response.data.admin_data.deleted_user || [])
             ];
 
             listData.value = allUsers.map((user) => ({
@@ -173,9 +177,8 @@ const fetchUsers = async () => {
                 level: user.member_level || '-',
                 memberSince: user.member_since || '-',
                 lastLogin: user.last_login || '-',
-                status: user.status === 1 ? 1 : 0 // Normalize status: 1 for active, 0 for inactive
+                status: user.status 
             }));
-            
         } else {
             console.error('API returned error or invalid data:', response.data);
             listData.value = [];
@@ -190,12 +193,23 @@ const fetchUsers = async () => {
 };
 
 const getOverallStatusSeverity = (status) => {
-    return status === 1 ? 'success' : 'danger';
+  const severityMap = {
+    1: 'success',
+    9: 'warn',
+    0: 'danger'
+  };
+     return severityMap[status] || 'secondary';
+}
+const getStatusText = (status) => {
+  const statusMap = {
+    1: 'Active',
+    9: 'Deleted',
+    0: 'Inactive'
+  };
+
+  return statusMap[status] || 'Unknown';
 };
 
-const getStatusText = (status) => {
-    return status === 1 ? 'Active' : 'Inactive';
-};
 
 const formatGender = (gender) => {
     if (!gender || gender === '-') return '-';

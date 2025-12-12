@@ -79,7 +79,7 @@ const handleForgotPassword = () => {
             <div class="absolute inset-0 bg-black/30"></div>
 
             <div class="relative z-10 text-center px-8 max-w-xl mx-auto space-y-4">
-                <img src="/demo/images/toyo_logo.png" alt="Logo" class="h-20 mx-auto mb-4 object-contain animate-fade-in" />
+                <img src="/demo/images/toyo_logo_auth.png" alt="Logo" class="h-20 mx-auto mb-4 object-contain animate-fade-in" />
                 <div class="flex justify-center items-center gap-4 mx-auto">
                     <img src="/demo/images/Toyo ETen App_colour_FINAL.png" alt="eTEN Logo" class="h-24 object-contain opacity-90" />
                     <img src="/demo/images/Toyo TCare App_colour_FINAL.png" alt="Care Logo" class="h-24 object-contain opacity-90" />

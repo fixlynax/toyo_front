@@ -554,9 +554,9 @@ const router = createRouter({
                     meta: { permission: 'Technical Dashboard', access: 'view' }
                 },
                 {
-                    path: 'technical/listAppoitment',
+                    path: 'technical/listAppointment',
                     name: 'List-Appointment',
-                    component: () => import('@/views/technical/listAppoitment.vue'),
+                    component: () => import('@/views/technical/listAppointment.vue'),
                     meta: { permission: 'Appointment', access: 'view' }
                 },
                 {

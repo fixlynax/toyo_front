@@ -104,7 +104,7 @@ const model = ref([
             {
                 label: 'Appointment',
                 icon: 'pi pi-book',
-                to: '/technical/listAppoitment'
+                to: '/technical/listAppointment'
             },
             {
                 label: 'Warranty Claim',

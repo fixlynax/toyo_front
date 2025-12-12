@@ -217,7 +217,7 @@ const getStatusColor = (status) => {
 
                         <!-- Right: Export & Template -->
                         <div class="flex items-center gap-2 ml-auto">
-                            <Button type="button" label="Export" icon="pi pi-download" class="p-button" :loading="exportLoading" @click="exportToExcel" />
+                            <Button type="button" label="Export" icon="pi pi-download" class="p-button-success" :loading="exportLoading" @click="exportToExcel" />
                         </div>
                     </div>
                 </template>

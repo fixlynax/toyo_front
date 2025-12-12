@@ -178,28 +178,13 @@ const filteredOrders = computed(() => {
 
 // 🟢 Format Date
 const formatDate = (dateString) => {
-    if (!dateString) return '-';
-    try {
-        const date = new Date(dateString);
-        return date.toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' });
-    } catch (error) {
-        return dateString;
-    }
-};
-
-// 🟢 Format DateTime for delivery information (date only)
-const formatDeliveryDate = (dateString) => {
-    if (!dateString) return '-';
-    try {
-        const date = new Date(dateString);
-        return date.toLocaleDateString('en-US', {
-            year: 'numeric',
-            month: 'short',
-            day: 'numeric'
-        });
-    } catch (error) {
-        return dateString;
-    }
+    if (!dateString) return '';
+    const date = new Date(dateString);
+    return date.toLocaleString('en-MY', {
+        year: 'numeric',
+        month: '2-digit',
+        day: '2-digit'
+    });
 };
 
 // 🟢 Clear Date Range
@@ -340,13 +325,13 @@ const clearDateRange = () => {
                             <!-- ETA -->
                             <div class="flex justify-between items-center">
                                 <span class="font-semibold text-gray-600">ETA:</span>
-                                <span class="font-medium">{{ formatDeliveryDate(data.deliveryDate) || '-' }}</span>
+                                <span class="font-medium">{{ formatDate(data.deliveryDate) || '-' }}</span>
                             </div>
 
                             <!-- Planned -->
                             <div class="flex justify-between items-center">
                                 <span class="font-semibold text-gray-600">Planned:</span>
-                                <span class="font-medium">{{ data.scmDeliverInfo ? formatDeliveryDate(data.scmDeliverInfo.scheduled_delivery_time) : '-' }}</span>
+                                <span class="font-medium">{{ data.scmDeliverInfo ? formatDate(data.scmDeliverInfo.scheduled_delivery_time) : '-' }}</span>
                             </div>
 
                             <!-- Delivered -->
@@ -354,10 +339,10 @@ const clearDateRange = () => {
                                 <span class="font-semibold text-gray-600">Delivered:</span>
                                 <span class="font-medium">
                                     <template v-if="data.scmDeliverInfo?.delivered_datetime">
-                                        {{ formatDeliveryDate(data.scmDeliverInfo.delivered_datetime) }}
+                                        {{ formatDate(data.scmDeliverInfo.delivered_datetime) }}
                                     </template>
                                     <template v-else-if="data.scmPickupInfo?.pickup_datetime">
-                                        {{ formatDeliveryDate(data.scmPickupInfo.pickup_datetime) }}
+                                        {{ formatDate(data.scmPickupInfo.pickup_datetime) }}
                                     </template>
                                     <template v-else>-</template>
                                 </span>
