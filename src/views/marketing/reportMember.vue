@@ -25,6 +25,13 @@
                         </div>
                     </div>
 
+                     <!-- ✅ Include Deleted Users Checkbox -->
+                            <div class="flex items-center gap-2 mt-6">
+                                <Checkbox v-model="filters.includeDeleted" inputId="includeDeleted" :binary="true" />
+                                <label for="includeDeleted" class="text-gray-700 cursor-pointer">Include Deleted Users</label>
+                            </div>
+                        </div>
+
                     <!-- Action Buttons -->
                     <div class="flex justify-end gap-4 mt-6">
                         <Button label="Clear Filters" class="p-button-outlined p-button-secondary" @click="clearFilters" />
@@ -32,7 +39,6 @@
                     </div>
                 </div>
             </div>
-        </div>
     </Fluid>
 </template>
 
@@ -40,6 +46,7 @@
 import api from '@/service/api';
 import Dropdown from 'primevue/dropdown';
 import MultiSelect from 'primevue/multiselect';
+import Checkbox from 'primevue/checkbox'; // ✅ Import Checkbox
 import Toast from 'primevue/toast';
 import { useToast } from 'primevue/usetoast';
 import { onMounted, reactive, ref, watch } from 'vue';
@@ -60,12 +67,13 @@ const reportTypes = ref([
 // ✅ Selected Report
 const selectedReport = ref(reportTypes.value[0]);
 
-// ✅ Filters
+// ✅ Filters - Add includeDeleted with default value
 const filters = reactive({
     years: [],
     month: null,
     expiryFrom: null,
-    expiryTo: null
+    expiryTo: null,
+    includeDeleted: false // ✅ Default to false (0)
 });
 
 // ✅ Report Data
@@ -148,18 +156,19 @@ const getTotalRecords = () => {
     return 0;
 };
 
-// ✅ Clear Filters
+// ✅ Clear Filters - Reset includeDeleted to false
 const clearFilters = () => {
     filters.years = [];
     filters.month = null;
     filters.expiryFrom = null;
     filters.expiryTo = null;
+    filters.includeDeleted = false; // ✅ Reset to false
     reportData.value = [];
 
     showToast('info', 'Filters Cleared', 'All filters have been reset to default values.');
 };
 
-// ✅ Prepare JSON Body for API
+// ✅ Prepare JSON Body for API - Add include_deleted parameter
 const prepareRequestBody = () => {
     if (!filters.years || filters.years.length === 0) {
         showToast('warn', 'Years Required', 'Please select at least one year.');
@@ -167,7 +176,8 @@ const prepareRequestBody = () => {
     }
 
     const requestBody = {
-        years: filters.years
+        years: filters.years,
+        include_deleted: filters.includeDeleted ? 1 : 0 // ✅ Add include_deleted parameter
     };
     
     // Add additional filters
@@ -228,7 +238,7 @@ const fetchReportData = async () => {
     }
 };
 
-// ✅ EXPORT TO EXCEL - FIXED VERSION
+// ✅ EXPORT TO EXCEL - Updated to include include_deleted parameter
 const exportExcel = async () => {
     if (!filters.years || filters.years.length === 0) {
         showToast('warn', 'Year Required', 'Please select at least one year.');
@@ -249,13 +259,10 @@ const exportExcel = async () => {
         console.log('📤 Exporting Excel from:', endpoint);
         console.log('Request Body:', JSON.stringify(requestBody, null, 2));
 
-        // 🔴 CRITICAL FIX 1: Use exact same format as your returnCollection component
-        // returnCollection uses: { warrantyentryids_array: JSON.stringify(idsArray) }
-        // Try if your backend expects JSON string for arrays
-        
-        // OPTION 1: Try with stringified years (like returnCollection does)
+        // Try with stringified years (like returnCollection does)
         const alternativeBody = {
-            years: JSON.stringify(filters.years)  // Stringify the array
+            years: JSON.stringify(filters.years),
+            include_deleted: filters.includeDeleted ? 1 : 0 // ✅ Add include_deleted
         };
         
         // Copy other filters
@@ -274,7 +281,7 @@ const exportExcel = async () => {
 
         console.log('Alternative Body:', alternativeBody);
 
-        // 🔴 CRITICAL FIX 2: Try different approaches sequentially
+        // Try different approaches sequentially
         let response;
         
         // Approach 1: Try with stringified years (like returnCollection)
@@ -313,7 +320,7 @@ const exportExcel = async () => {
             throw new Error('Server did not return Excel file');
         }
 
-        // 🔴 CRITICAL FIX 3: Check content type
+        // Check content type
         const contentType = response.headers['content-type'] || 
                            response.data.type || 
                            'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet';
@@ -327,13 +334,14 @@ const exportExcel = async () => {
         const url = window.URL.createObjectURL(blob);
         const a = document.createElement('a');
         
-        // Generate filename
+        // Generate filename with include_deleted indicator
         const timestamp = new Date().toISOString().split('T')[0];
         const reportName = selectedReport.value.label.replace(/\s+/g, '_');
         const yearsStr = filters.years.join('_');
+        const deletedIndicator = filters.includeDeleted ? '_with_deleted' : '_active_only';
         
         // Try to get filename from Content-Disposition header
-        let filename = `${reportName}_${yearsStr}_${timestamp}.xlsx`;
+        let filename = `${reportName}_${yearsStr}${deletedIndicator}_${timestamp}.xlsx`;
         const contentDisposition = response.headers['content-disposition'];
         if (contentDisposition) {
             const filenameMatch = contentDisposition.match(/filename\*?=["']?([^"']+)["']?/i);
@@ -398,7 +406,7 @@ const exportExcel = async () => {
             showToast('error', 'Export Error', error.message || 'Failed to export');
         }
         
-        // 🔴 CRITICAL FIX 4: Try one more approach with FormData
+        // Try one more approach with FormData
         console.log('Trying FormData approach as last resort...');
         await tryFormDataApproach();
     } finally {
@@ -406,7 +414,7 @@ const exportExcel = async () => {
     }
 };
 
-// ✅ TRY FORM DATA APPROACH (like returnCollection's import)
+// ✅ TRY FORM DATA APPROACH - Updated to include include_deleted
 const tryFormDataApproach = async () => {
     try {
         const endpoint = selectedReport.value.apiEndpoint;
@@ -414,6 +422,7 @@ const tryFormDataApproach = async () => {
         
         // Append data as FormData
         formData.append('years', filters.years.join(','));
+        formData.append('include_deleted', filters.includeDeleted ? '1' : '0'); // ✅ Add include_deleted
         
         if (selectedReport.value.value === 'by-birthday' && filters.month) {
             formData.append('month', filters.month);
@@ -449,7 +458,8 @@ const tryFormDataApproach = async () => {
             const url = window.URL.createObjectURL(blob);
             const a = document.createElement('a');
             a.href = url;
-            a.download = `${selectedReport.value.label}_${filters.years.join('_')}.xlsx`;
+            const deletedIndicator = filters.includeDeleted ? '_with_deleted' : '_active_only';
+            a.download = `${selectedReport.value.label}_${filters.years.join('_')}${deletedIndicator}.xlsx`;
             a.click();
             
             showToast('success', 'Export Successful (FormData)', 'File downloaded using FormData');
@@ -464,8 +474,11 @@ const testApiManually = async () => {
     console.log('🧪 Testing API manually...');
     
     try {
-        // Test with simplest possible request
-        const testBody = { years: ['2024'] };
+        // Test with include_deleted parameter
+        const testBody = { 
+            years: ['2024'],
+            include_deleted: 1 
+        };
         
         // Test 1: Regular POST (should work for preview)
         const previewResponse = await api.post('report/gender-report', testBody);
@@ -510,12 +523,13 @@ const testApiManually = async () => {
 // Watch for filter changes
 let debounceTimer = null;
 watch(
-    () => [selectedReport.value, filters.years, filters.month, filters.expiryFrom, filters.expiryTo],
+    () => [selectedReport.value, filters.years, filters.month, filters.expiryFrom, filters.expiryTo, filters.includeDeleted], // ✅ Add includeDeleted to watch
     () => {
         if (debounceTimer) {
             clearTimeout(debounceTimer);
         }
         
+        // Uncomment if you want to auto-fetch when filters change
         // debounceTimer = setTimeout(() => {
         //     if (filters.years && filters.years.length > 0) {
         //         fetchReportData();
@@ -532,8 +546,9 @@ onMounted(() => {
     // Set default to current year
     const currentYear = new Date().getFullYear().toString();
     filters.years = [currentYear];
+    filters.includeDeleted = false; // ✅ Default to false
     
-    // // Initial fetch
+    // Uncomment for initial fetch
     // setTimeout(() => {
     //     if (filters.years.length > 0) {
     //         fetchReportData();
