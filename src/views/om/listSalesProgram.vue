@@ -1,16 +1,26 @@
 <script setup>
 import api from '@/service/api';
 import { FilterMatchMode, FilterOperator } from '@primevue/core/api';
-import { onBeforeMount, ref } from 'vue';
+import { onBeforeMount, ref, computed } from 'vue';
 import LoadingPage from '@/components/LoadingPage.vue';
 
 const filters1 = ref(null);
 const listData = ref([]);
 const loading = ref(true);
 
-const statusMap = {
-    0: { label: 'Inactive', severity: 'danger' },
-    1: { label: 'Active', severity: 'success' }
+// Helper function to determine status based on period
+const getStatusFromPeriod = (startDate, endDate) => {
+    const now = new Date();
+    const start = new Date(startDate);
+    const end = new Date(endDate);
+
+    if (now < start) {
+        return { label: 'Upcoming', severity: 'info' };
+    } else if (now >= start && now <= end) {
+        return { label: 'Active', severity: 'success' };
+    } else {
+        return { label: 'Unactive', severity: 'danger' };
+    }
 };
 
 function initFilters1() {
@@ -29,16 +39,24 @@ onBeforeMount(async () => {
         console.log('API Response:', response.data);
 
         if (response.data.status === 1 && Array.isArray(response.data.admin_data)) {
-            listData.value = response.data.admin_data.map((sales) => ({
-                id: sales.id,
-                programId: sales.programid,
-                title: sales.title,
-                startDate: sales.startDate,
-                endDate: sales.endDate,
-                freeQuota: sales.freeQuota || '-',
-                status: sales.status,
-                created: sales.created
-            }));
+            listData.value = response.data.admin_data.map((sales) => {
+                // Determine status based on period
+                const periodStatus = getStatusFromPeriod(sales.startDate, sales.endDate);
+
+                return {
+                    id: sales.id,
+                    programId: sales.programid,
+                    title: sales.title,
+                    startDate: sales.startDate,
+                    endDate: sales.endDate,
+                    freeQuota: sales.freeQuota || '-',
+                    // Use the period-based status instead of API status
+                    status: periodStatus,
+                    created: sales.created,
+                    // Keep original status if needed for other purposes
+                    originalStatus: sales.status
+                };
+            });
 
             console.log('Transformed data:', listData.value);
         } else {
@@ -58,7 +76,7 @@ onBeforeMount(async () => {
     <div class="card">
         <div class="text-2xl font-bold text-gray-800 border-b pb-2 mb-3">List Sales Program</div>
         <!-- 🟢 Use LoadingPage for initial load, hide everything else -->
-        <LoadingPage v-if="loading" :message="'Loading your Sales Progtame...'" :sub-message="'Fetching your Sales Progtame'" />
+        <LoadingPage v-if="loading" :message="'Loading your Sales Programs...'" :sub-message="'Fetching your Sales Programs'" />
 
         <DataTable
             v-else
@@ -111,17 +129,18 @@ onBeforeMount(async () => {
             <!-- Program Name -->
             <Column field="title" header="Program Name" style="min-width: 12rem" />
 
-            <Column field="created" header="Created Data" style="min-width: 12rem" hidden/>
+            <Column field="created" header="Created Date" style="min-width: 12rem" hidden />
 
             <!-- Period -->
             <Column header="Period" style="min-width: 12rem">
                 <template #body="{ data }"> {{ data.startDate }} → {{ data.endDate }} </template>
             </Column>
             <Column field="freeQuota" header="Quota" style="min-width: 12rem" />
-            <!-- Status -->
+
+            <!-- Status (now based on period) -->
             <Column header="Status" style="min-width: 8rem">
                 <template #body="{ data }">
-                    <Tag :value="statusMap[data.status]?.label || 'Unknown'" :severity="statusMap[data.status]?.severity || 'secondary'" />
+                    <Tag :value="data.status.label" :severity="data.status.severity" />
                 </template>
             </Column>
         </DataTable>

@@ -1,132 +1,3 @@
-<template>
-    <div class="card flex flex-col w-full">
-        <div class="text-2xl font-bold text-gray-800 border-b pb-2">📦 List Back Order</div>
-        <TabMenu :model="statusTabs" v-model:activeIndex="activeTabIndex" class="mb-6" />
-
-        <LoadingPage v-if="loading" :sub-message="'Fetching your Back Order list'" />
-
-        <DataTable
-            v-if="!loading"
-            :value="filteredList"
-            :paginator="true"
-            :rows="10"
-            :rowsPerPageOptions="[10, 25, 50, 100]"
-            dataKey="id"
-            :rowHover="true"
-            :filters="filters"
-            filterDisplay="menu"
-            :globalFilterFields="['custAccountNo', 'orderNo', 'customerName', 'deliveryDate', 'expiry', 'orderStatus']"
-            responsiveLayout="scroll"
-            removableSort
-            sortField="created"
-            :sortOrder="-1"
-            currentPageReportTemplate="Showing {first} to {last} of {totalRecords} entries"
-            paginatorTemplate="CurrentPageReport FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink RowsPerPageDropdown"
-            class="rounded-table"
-        >
-            <template #header>
-                <div class="flex flex-col gap-4 w-full">
-                    <!-- Top Row: Search -->
-                    <div class="flex items-center justify-between gap-4 w-full flex-wrap">
-                        <div class="flex items-center gap-2 w-full max-w-md">
-                            <IconField class="flex-1">
-                                <InputIcon>
-                                    <i class="pi pi-search" />
-                                </InputIcon>
-                                <InputText v-model="filters['global'].value" placeholder="Quick Search" class="w-full" />
-                            </IconField>
-                            <!-- <Button type="button" icon="pi pi-cog" class="p-button" /> -->
-                        </div>
-                    </div>
-
-                    <!-- Date Range Filter (for Completed, Cancelled, Expired tabs) -->
-                    <div v-if="showDateRangeFilter" class="flex items-center gap-4 flex-wrap">
-                        <div class="flex items-center gap-2">
-                            <span class="text-sm font-medium text-gray-700">Date Range:</span>
-                            <div class="flex items-center gap-2">
-                                <Calendar v-model="dateRange[0]" placeholder="Start Date" dateFormat="yy-mm-dd" showIcon class="w-40" :disabled="loading" />
-                                <span class="text-gray-500">to</span>
-                                <Calendar v-model="dateRange[1]" placeholder="End Date" dateFormat="yy-mm-dd" showIcon class="w-40" :disabled="loading" />
-                            </div>
-                            <Button v-if="dateRange[0] || dateRange[1]" icon="pi pi-times" class="p-button-text p-button-sm" @click="clearDateRange" title="Clear date filter" />
-                        </div>
-                        <div v-if="!hasDateFilterApplied" class="text-sm text-blue-600 italic">Please select a date range to view {{ currentTabLabel }} orders</div>
-                        <!-- <div v-else-if="dateRange[0] && dateRange[1]" class="text-sm text-gray-600">Showing {{ filteredList.length }} orders from {{ formatDate(dateRange[0]) }} to {{ formatDate(dateRange[1]) }}</div> -->
-                    </div>
-                </div>
-            </template>
-
-            <template #empty>
-                <div class="text-center py-4 text-gray-500">
-                    <template v-if="showDateRangeFilter && !hasDateFilterApplied">
-                        <div class="flex flex-col items-center gap-2">
-                            <i class="pi pi-calendar text-3xl text-blue-400"></i>
-                            <span class="text-lg">Select a date range to view {{ currentTabLabel }} orders</span>
-                            <span class="text-sm text-gray-400">Choose both start and end dates to filter results</span>
-                        </div>
-                    </template>
-                    <template v-else-if="showDateRangeFilter && hasDateFilterApplied && (!dateRange[0] || !dateRange[1])">
-                        <div class="flex flex-col items-center gap-2">
-                            <i class="pi pi-exclamation-circle text-3xl text-yellow-400"></i>
-                            <span class="text-lg">Please select both start and end dates</span>
-                        </div>
-                    </template>
-                    <template v-else-if="showDateRangeFilter && hasDateFilterApplied"> No {{ currentTabLabel }} orders found in the selected date range. </template>
-                    <template v-else> No back orders found. </template>
-                </div>
-            </template>
-
-            <Column field="createdDate" header="Created Date" style="min-width: 8rem" sortable>
-                <template #body="{ data }">
-                    {{ formatDate(data.created) }}
-                </template>
-            </Column>
-
-            <Column field="orderNo" header="Order No." style="min-width: 15rem" sortable>
-                <template #body="{ data }">
-                    <RouterLink :to="`/om/detailBackOrder/${data.orderNo}`" class="hover:underline font-bold text-primary-400">
-                        {{ data.orderNo }}
-                    </RouterLink>
-                </template>
-            </Column>
-
-            <Column field="companyName" header="Customer Name" style="min-width: 10rem" sortable>
-                <template #body="{ data }"><span class="font-bold">{{ data.customerName || '-' }}</span><br />{{ data.custAccountNo || '-' }}</template>
-            </Column>
-            <Column field="deliveryType" header="Delivery" style="min-width: 8rem" sortable/>
-
-            <Column field="orderDate" header="Order Date" style="min-width: 10rem" sortable>
-                <template #body="{ data }">
-                    {{ formatDate(data.orderDate) }}
-                </template>
-            </Column>
-
-            <Column field="shipTo" header="Ship To Acc No." style="min-width: 8rem" sortable/>
-
-            <Column field="expiry" header="Back Order Expiry" style="min-width: 10rem" sortable>
-                <template #body="{ data }">
-                    {{ formatDate(data.expiry) }}
-                </template>
-            </Column>
-
-            <Column field="orderStatus" header="Status" style="min-width: 8rem; text-align: left">
-                <template #body="{ data }">
-                    <Tag :value="getStatusLabel(data)" :severity="getStatusSeverity(data)" />
-                </template>
-            </Column>
-
-            <Column field="progress" header="Progress" style="min-width: 10rem">
-                <template #body="{ data }">
-                    <div class="flex items-center gap-2">
-                        <ProgressBar :value="data.progress" class="w-full" :showValue="false" :class="getProgressBarClass(data.progress)" />
-                        <span class="text-sm font-semibold">{{ data.progress }}%</span>
-                    </div>
-                </template>
-            </Column>
-        </DataTable>
-    </div>
-</template>
-
 <script setup>
 import { onMounted, ref, watch, computed } from 'vue';
 import { FilterMatchMode } from '@primevue/core/api';
@@ -146,10 +17,10 @@ const filters = ref({
 });
 
 const statusTabs = [
-    { label: 'Pending', status: 0, type: 'PENDING', requiresDateRange: false },
-    { label: 'Completed', status: 1, type: 'COMPLETED', requiresDateRange: true },
-    { label: 'Cancelled', status: 9, type: 'CANCELLED', requiresDateRange: true },
-    { label: 'Expired', status: '', type: 'EXPIRED', requiresDateRange: true }
+    { label: 'Pending', status: 0, type: 'PENDING', requiresDateRange: false, initialLoad: true },
+    { label: 'Completed', status: 1, type: 'COMPLETED', requiresDateRange: true, initialLoad: false },
+    { label: 'Cancelled', status: 9, type: 'CANCELLED', requiresDateRange: true, initialLoad: false },
+    { label: 'Expired', status: '', type: 'EXPIRED', requiresDateRange: true, initialLoad: false }
 ];
 
 // Computed properties
@@ -162,8 +33,8 @@ const fetchBackOrders = async () => {
         const selectedTab = currentTab.value;
         if (!selectedTab) return;
 
-        // For tabs requiring date range, don't fetch until date range is set
-        if (selectedTab.requiresDateRange && !hasDateFilterApplied.value) {
+        // For tabs requiring date range and initialLoad is false, don't fetch until date range is set
+        if (selectedTab.requiresDateRange && !selectedTab.initialLoad && !hasDateFilterApplied.value) {
             listData.value = [];
             filteredList.value = [];
             loading.value = false;
@@ -174,7 +45,7 @@ const fetchBackOrders = async () => {
         formData.append('type', selectedTab.type);
 
         // Add date range if applied
-        if (selectedTab.requiresDateRange && hasDateFilterApplied.value && dateRange.value[0] && dateRange.value[1]) {
+        if (hasDateFilterApplied.value && dateRange.value[0] && dateRange.value[1]) {
             // Format dates for backend (d/m/Y format)
             const formatDateForBackend = (date) => {
                 const d = new Date(date);
@@ -221,8 +92,8 @@ const fetchBackOrders = async () => {
 };
 
 onMounted(async () => {
-    // Don't fetch on initial mount if it requires date range
-    if (currentTab.value?.requiresDateRange) {
+    // For tabs that don't require initial load, don't fetch until date range is set
+    if (currentTab.value?.requiresDateRange && !currentTab.value?.initialLoad) {
         loading.value = false;
         return;
     }
@@ -237,8 +108,8 @@ watch(activeTabIndex, (newIndex, oldIndex) => {
     dateRange.value = [null, null];
     hasDateFilterApplied.value = false;
 
-    // Clear data when switching to tabs requiring date range
-    if (selectedTab?.requiresDateRange) {
+    // Clear data when switching to tabs that require date range and don't have initial load
+    if (selectedTab?.requiresDateRange && !selectedTab?.initialLoad) {
         listData.value = [];
         filteredList.value = [];
         loading.value = false;
@@ -253,16 +124,19 @@ watch(
     (newRange, oldRange) => {
         const selectedTab = currentTab.value;
 
-        // Only trigger fetch for tabs that require date range
-        if (selectedTab?.requiresDateRange) {
-            if (newRange[0] && newRange[1]) {
-                hasDateFilterApplied.value = true;
+        // Only trigger fetch when both dates are set
+        if (newRange[0] && newRange[1]) {
+            hasDateFilterApplied.value = true;
+            fetchBackOrders();
+        } else if (newRange[0] === null && newRange[1] === null && hasDateFilterApplied.value) {
+            // Clear data if date range is cleared
+            listData.value = [];
+            filteredList.value = [];
+            hasDateFilterApplied.value = false;
+
+            // Reload data for tabs that have initialLoad
+            if (selectedTab?.initialLoad) {
                 fetchBackOrders();
-            } else if (newRange[0] === null && newRange[1] === null && hasDateFilterApplied.value) {
-                // Clear data if date range is cleared
-                listData.value = [];
-                filteredList.value = [];
-                hasDateFilterApplied.value = false;
             }
         }
     },
@@ -300,8 +174,15 @@ const filterByTab = () => {
 const clearDateRange = () => {
     dateRange.value = [null, null];
     hasDateFilterApplied.value = false;
-    listData.value = [];
-    filteredList.value = [];
+
+    // Clear data for tabs that don't have initial load
+    if (!currentTab.value?.initialLoad) {
+        listData.value = [];
+        filteredList.value = [];
+    } else {
+        // Reload data for tabs that have initial load
+        fetchBackOrders();
+    }
 };
 
 const calculateProgress = (order) => {
@@ -390,6 +271,139 @@ const getStatusSeverity = (data) => {
     }
 };
 </script>
+
+<template>
+    <div class="card flex flex-col w-full">
+        <div class="text-2xl font-bold text-gray-800 border-b pb-2">📦 List Back Order</div>
+        <TabMenu :model="statusTabs" v-model:activeIndex="activeTabIndex" class="mb-6" />
+
+        <LoadingPage v-if="loading" :sub-message="'Fetching your Back Order list'" />
+
+        <DataTable
+            v-if="!loading"
+            :value="filteredList"
+            :paginator="true"
+            :rows="10"
+            :rowsPerPageOptions="[10, 25, 50, 100]"
+            dataKey="id"
+            :rowHover="true"
+            :filters="filters"
+            filterDisplay="menu"
+            :globalFilterFields="['custAccountNo', 'orderNo', 'customerName', 'deliveryDate', 'expiry', 'orderStatus']"
+            responsiveLayout="scroll"
+            removableSort
+            sortField="created"
+            :sortOrder="-1"
+            currentPageReportTemplate="Showing {first} to {last} of {totalRecords} entries"
+            paginatorTemplate="CurrentPageReport FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink RowsPerPageDropdown"
+            class="rounded-table"
+        >
+            <template #header>
+                <div class="flex flex-col gap-4 w-full">
+                    <!-- Top Row: Search -->
+                    <div class="flex items-center justify-between gap-4 w-full flex-wrap">
+                        <div class="flex items-center gap-2 w-full max-w-md">
+                            <IconField class="flex-1">
+                                <InputIcon>
+                                    <i class="pi pi-search" />
+                                </InputIcon>
+                                <InputText v-model="filters['global'].value" placeholder="Quick Search" class="w-full" />
+                            </IconField>
+                            <!-- <Button type="button" icon="pi pi-cog" class="p-button" /> -->
+                        </div>
+                    </div>
+
+                    <!-- Date Range Filter (for all tabs) -->
+                    <div class="flex items-center gap-4 flex-wrap">
+                        <div class="flex items-center gap-2">
+                            <span class="text-sm font-medium text-gray-700">Date Range:</span>
+                            <div class="flex items-center gap-2">
+                                <Calendar v-model="dateRange[0]" placeholder="Start Date" dateFormat="yy-mm-dd" showIcon class="w-40" :disabled="loading" />
+                                <span class="text-gray-500">to</span>
+                                <Calendar v-model="dateRange[1]" placeholder="End Date" dateFormat="yy-mm-dd" showIcon class="w-40" :disabled="loading" />
+                            </div>
+                            <Button v-if="dateRange[0] || dateRange[1]" icon="pi pi-times" class="p-button-text p-button-sm" @click="clearDateRange" title="Clear date filter" />
+                        </div>
+                        <!-- Conditional message for tabs that require date range but don't have initial load -->
+                        <div v-if="showDateRangeFilter && !currentTab?.initialLoad && !hasDateFilterApplied" class="text-sm text-blue-600 italic">Please select a date range to view {{ currentTabLabel }} orders</div>
+                        <!-- <div v-else-if="dateRange[0] && dateRange[1]" class="text-sm text-gray-600">Showing {{ filteredList.length }} orders from {{ formatDate(dateRange[0]) }} to {{ formatDate(dateRange[1]) }}</div> -->
+                    </div>
+                </div>
+            </template>
+
+            <template #empty>
+                <div class="text-center py-4 text-gray-500">
+                    <template v-if="showDateRangeFilter && !currentTab?.initialLoad && !hasDateFilterApplied">
+                        <div class="flex flex-col items-center gap-2">
+                            <i class="pi pi-calendar text-3xl text-blue-400"></i>
+                            <span class="text-lg">Select a date range to view {{ currentTabLabel }} orders</span>
+                            <span class="text-sm text-gray-400">Choose both start and end dates to filter results</span>
+                        </div>
+                    </template>
+                    <template v-else-if="showDateRangeFilter && hasDateFilterApplied && (!dateRange[0] || !dateRange[1])">
+                        <div class="flex flex-col items-center gap-2">
+                            <i class="pi pi-exclamation-circle text-3xl text-yellow-400"></i>
+                            <span class="text-lg">Please select both start and end dates</span>
+                        </div>
+                    </template>
+                    <template v-else-if="showDateFilterApplied && hasDateFilterApplied"> No {{ currentTabLabel }} orders found in the selected date range. </template>
+                    <template v-else> No back orders found. </template>
+                </div>
+            </template>
+
+            <Column field="createdDate" header="Created Date" style="min-width: 8rem" sortable>
+                <template #body="{ data }">
+                    {{ formatDate(data.created) }}
+                </template>
+            </Column>
+
+            <Column field="orderNo" header="Order No." style="min-width: 15rem" sortable>
+                <template #body="{ data }">
+                    <RouterLink :to="`/om/detailBackOrder/${data.orderNo}`" class="hover:underline font-bold text-primary-400">
+                        {{ data.orderNo }}
+                    </RouterLink>
+                </template>
+            </Column>
+
+            <Column field="companyName" header="Customer Name" style="min-width: 10rem" sortable>
+                <template #body="{ data }"
+                    ><span class="font-bold">{{ data.customerName || '-' }}</span
+                    ><br />{{ data.custAccountNo || '-' }}</template
+                >
+            </Column>
+            <Column field="deliveryType" header="Delivery" style="min-width: 8rem" sortable />
+
+            <Column field="orderDate" header="Order Date" style="min-width: 10rem" sortable>
+                <template #body="{ data }">
+                    {{ formatDate(data.orderDate) }}
+                </template>
+            </Column>
+
+            <Column field="shipTo" header="Ship To Acc No." style="min-width: 8rem" sortable />
+
+            <Column field="expiry" header="Back Order Expiry" style="min-width: 10rem" sortable>
+                <template #body="{ data }">
+                    {{ formatDate(data.expiry) }}
+                </template>
+            </Column>
+
+            <Column field="orderStatus" header="Status" style="min-width: 8rem; text-align: left">
+                <template #body="{ data }">
+                    <Tag :value="getStatusLabel(data)" :severity="getStatusSeverity(data)" />
+                </template>
+            </Column>
+
+            <Column field="progress" header="Progress" style="min-width: 10rem">
+                <template #body="{ data }">
+                    <div class="flex items-center gap-2">
+                        <ProgressBar :value="data.progress" class="w-full" :showValue="false" :class="getProgressBarClass(data.progress)" />
+                        <span class="text-sm font-semibold">{{ data.progress }}%</span>
+                    </div>
+                </template>
+            </Column>
+        </DataTable>
+    </div>
+</template>
 
 <style scoped lang="scss">
 :deep(.p-progressbar) {
