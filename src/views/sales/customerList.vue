@@ -136,7 +136,7 @@ onMounted(async () => {
                 // Use master user status if available, otherwise fallback to shop status
                 const masterStatus = masterUser ? masterUser.status : shop.status;
 
-                // Add main branch
+                // Add main branch only (removed sub-branches logic)
                 transformedData.push({
                     id: shop.id,
                     memberCode: shop.memberCode || 'Untitled',
@@ -152,33 +152,6 @@ onMounted(async () => {
                     user_list: customer.user_list,
                     created: shop.created
                 });
-
-                // Add sub-branches if they exist
-                if (customer.subBranches) {
-                    Object.keys(customer.subBranches).forEach((subKey) => {
-                        const subBranch = customer.subBranches[subKey];
-                        const subShop = subBranch.shop;
-
-                        const subMasterUser = subBranch.user_list?.find((user) => user.isMaster === 1);
-                        const subMasterStatus = subMasterUser ? subMasterUser.status : subShop.status;
-
-                        transformedData.push({
-                            id: subShop.id,
-                            memberCode: subShop.memberCode || 'Untitled',
-                            custAccountNo: subShop.custAccountNo,
-                            companyName1: subShop.companyName1,
-                            companyName2: subShop.companyName2,
-                            city: subShop.city,
-                            state: subShop.state,
-                            phoneNumber: subShop.phoneNumber || '-',
-                            signboardType: subShop.signboardType || '-',
-                            status: subShop.status,
-                            masterStatus: subMasterStatus,
-                            user_list: subBranch.user_list,
-                            created: subShop.created
-                        });
-                    });
-                }
             });
 
             listData.value = transformedData;
