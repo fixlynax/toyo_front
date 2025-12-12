@@ -733,18 +733,6 @@ const router = createRouter({
                     component: () => import('@/views/sales/detailCustomerUser.vue')
                 },
 
-                // Customer Appointment
-                {
-                    path: 'sales/customerAppointment/',
-                    name: 'Appointment-List',
-                    component: () => import('@/views/sales/customerAppointment.vue')
-                },
-                {
-                    path: 'sales/detailCustomerAppointment/:id',
-                    name: 'detail-Appointment',
-                    component: () => import('@/views/sales/detailCustomerAppointment.vue')
-                },
-
                 // Customer Warranty Claim
                 {
                     path: 'sales/customerWarrantyClaim',

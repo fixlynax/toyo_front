@@ -315,19 +315,21 @@ const clearDateRange = () => {
 
                 <Column field="orderType" header="Order Type" style="min-width: 7rem" sortable>
                     <template #body="{ data }">
-                        <span v-if="data.orderType === 'NORMAL'">Normal</span>
-                        <span v-else-if="data.orderType === 'DS'">DS</span>
-                        <span v-else-if="data.orderType === 'OWN-USE'">Own-use</span>
+                        <span v-if="data.orderType === 'Normal'">NORMAL</span>
+                        <span v-else-if="data.orderType === 'Directship'">DS</span>
+                        <span v-else-if="data.orderType === 'Own'">OWN USE</span>
+                        <span v-else-if="data.orderType === 'Warranty'">WARRANTY</span>
+                        <span v-else-if="data.orderType === 'Back Order'">BACK ORDER</span>
                         <span v-else>{{ data.orderType || data.sapOrderType || '-' }}</span>
                     </template>
                 </Column>
 
                 <Column field="deliveryType" header="Delivery" style="min-width: 6rem" sortable>
                     <template #body="{ data }">
-                        <span v-if="data.deliveryType === 'DELIVER'">Deliver</span>
-                        <span v-else-if="data.deliveryType === 'PICKUP'">Pickup</span>
-                        <span v-else-if="data.deliveryType === 'SELFCOLLECT'">Self Collect</span>
-                        <span v-else-if="data.deliveryType === 'LALAMOVE'">Lalamove</span>
+                        <span v-if="data.deliveryType === 'DELIVER'">DELIVER</span>
+                        <span v-else-if="data.deliveryType === 'PICKUP'">PICKUP</span>
+                        <span v-else-if="data.deliveryType === 'SELFCOLLECT'">OWNCOLLECT</span>
+                        <span v-else-if="data.deliveryType === 'LALAMOVE'">LALAMOVE</span>
                         <span v-else>{{ data.deliveryType || '-' }}</span>
                     </template>
                 </Column>
