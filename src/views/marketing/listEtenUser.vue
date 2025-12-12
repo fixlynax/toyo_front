@@ -193,12 +193,12 @@ const fetchUsers = async () => {
 };
 
 const getOverallStatusSeverity = (status) => {
-  const statusMap = {
+  const severityMap = {
     1: 'success',
     9: 'warn',
     0: 'danger'
   };
-
+     return severityMap[status] || 'secondary';
 }
 const getStatusText = (status) => {
   const statusMap = {
