@@ -134,7 +134,7 @@ const handleResetPassword = async () => {
 };
 
 const goToLogin = () => {
-    router.push('/login');
+    router.push('/auth/login');
 };
 </script>
 
