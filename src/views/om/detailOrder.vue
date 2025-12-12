@@ -93,7 +93,7 @@
                 <!-- Advance Info Card -->
                 <div class="card flex flex-col w-full">
                     <div class="flex items-center justify-between border-b pb-3">
-                        <div class="text-2xl font-bold text-gray-800">Advance Info</div>
+                        <div class="text-2xl font-bold text-gray-800">Order Info</div>
                         <Tag :value="orderStatusText" :severity="orderStatusSeverity" />
                     </div>
                     <div class="overflow-x-auto">
