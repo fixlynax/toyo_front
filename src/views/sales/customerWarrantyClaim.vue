@@ -3,8 +3,10 @@ import LoadingPage from '@/components/LoadingPage.vue';
 import api from '@/service/api';
 import { FilterMatchMode } from '@primevue/core/api';
 import { onMounted, ref, computed, watch } from 'vue';
+import { useRouter } from 'vue-router';
 import Dropdown from 'primevue/dropdown';
 
+const router = useRouter();
 const listData = ref([]);
 const loading = ref(true);
 const loadingCustomers = ref(false);
@@ -13,6 +15,9 @@ const exportLoading = ref(false);
 const selectedCustomer = ref(null);
 const customerOptions = ref([]);
 const debounceTimer = ref(null);
+const claimSearch = ref(''); // For direct claim number search
+const searchingClaim = ref(false); // Track if searching for claim
+const searchError = ref(''); // For search errors
 
 const activeTab = ref(0);
 
@@ -22,14 +27,6 @@ const tabs = [
     { label: 'Completed', value: 'Completed' },
     { label: 'Rejected', value: 'Rejected' }
 ];
-
-// Define status categories based on your requirements
-// const statusCategories = {
-//     Processing: ['Pending Dealer', 'Pending CTC', 'Processing'],
-//     'In Progress': ['In Progress', 'Pending Scrap', 'Pending Manager Approve', 'Pending Invoice', 'Pending Invoice Approve'],
-//     Completed: ['Completed', 'Admin Approved', 'Dealer Approved', 'Settled'],
-//     Reject: ['Reject', 'Admin Rejected', 'Dealer Rejected']
-// };
 
 const getOverallStatusSeverity = (status) => {
     switch (status) {
@@ -70,59 +67,52 @@ const filteredList = computed(() => {
     return listData.value.filter((item) => item.status === tabValue);
 });
 
-// 🟢 Fetch Customers for Dropdown
+// 🟢 Fetch Customers for Dropdown - MODIFIED to show Main accounts only
 const fetchCustomers = async () => {
     try {
         loadingCustomers.value = true;
 
         // Fetch customers from the list_dealer endpoint
-        const response = await api.post('list_dealer');
+        const response = await api.post('list_dealer', {
+            mainBranch: 0 // Get all dealers including sub-branches
+        });
 
         if (response.data.status === 1 && response.data.admin_data) {
             const adminData = response.data.admin_data;
-            const customers = new Map();
+            const mainDealerList = [];
 
             Object.keys(adminData).forEach((key) => {
                 const customer = adminData[key];
                 const shop = customer.shop;
 
-                if (shop.companyName1 && shop.custAccountNo) {
-                    customers.set(shop.custAccountNo, {
+                // 🟢 Only include main dealers (accounts ending with "00")
+                if (shop.companyName1 && shop.custAccountNo && shop.custAccountNo.toString().endsWith('00')) {
+                    mainDealerList.push({
                         id: shop.id,
-                        name: shop.companyName1,
+                        name: trimCompanyName(shop.companyName1, shop.companyName2),
                         accountNo: shop.custAccountNo,
                         city: shop.city,
-                        state: shop.state
-                    });
-                }
-
-                // Also add sub-branches if they have different names
-                if (customer.subBranches) {
-                    Object.keys(customer.subBranches).forEach((subKey) => {
-                        const subBranch = customer.subBranches[subKey];
-                        const subShop = subBranch.shop;
-
-                        if (subShop.companyName1 && subShop.custAccountNo) {
-                            customers.set(subShop.custAccountNo, {
-                                id: subShop.id,
-                                name: subShop.companyName1,
-                                accountNo: subShop.custAccountNo,
-                                city: subShop.city,
-                                state: subShop.state
-                            });
-                        }
+                        state: shop.state,
+                        isMain: true,
+                        hasSubBranches: Object.keys(customer.subBranches || {}).length > 0
                     });
                 }
             });
 
-            // Convert Map to array and sort by name
-            customerOptions.value = Array.from(customers.values()).sort((a, b) => a.name.localeCompare(b.name));
+            // Sort alphabetically by company name
+            customerOptions.value = mainDealerList.sort((a, b) => a.name.localeCompare(b.name));
         }
     } catch (error) {
         console.error('Error fetching customer list for dropdown:', error);
     } finally {
         loadingCustomers.value = false;
     }
+};
+
+// 🟢 Helper function to trim company name
+const trimCompanyName = (name1, name2) => {
+    const fullName = `${name1 || ''} ${name2 || ''}`.trim();
+    return fullName || 'Unknown';
 };
 
 const fetchClaims = async () => {
@@ -161,6 +151,37 @@ const fetchClaims = async () => {
     } finally {
         isLoadingData.value = false;
         loading.value = false;
+    }
+};
+
+// 🟢 Direct claim number search
+const searchClaimDirectly = async () => {
+    if (!claimSearch.value.trim()) {
+        searchError.value = 'Please enter a claim reference number';
+        return;
+    }
+
+    searchingClaim.value = true;
+    searchError.value = '';
+
+    try {
+        // First, try to fetch claim details by ref number
+        const response = await api.post('warranty_claim', {
+            claimRefNo: claimSearch.value.trim()
+        });
+
+        if (response.data.status === 1 && response.data.admin_data && response.data.admin_data.length > 0) {
+            // Found the claim, navigate to detail page
+            const claim = response.data.admin_data[0];
+            router.push(`/sales/detailCustomerWarrantyClaim/${claim.claim_id}`);
+        } else {
+            searchError.value = `Claim reference "${claimSearch.value}" not found. Please check the number and try again.`;
+        }
+    } catch (error) {
+        console.error('Error searching claim:', error);
+        searchError.value = 'Error searching for claim. Please try again.';
+    } finally {
+        searchingClaim.value = false;
     }
 };
 
@@ -267,6 +288,19 @@ const clearCustomerFilter = () => {
     listData.value = [];
 };
 
+// 🟢 Clear claim search
+const clearClaimSearch = () => {
+    claimSearch.value = '';
+    searchError.value = '';
+};
+
+// 🟢 Handle Enter key in claim search
+const handleClaimSearchKeydown = (event) => {
+    if (event.key === 'Enter') {
+        searchClaimDirectly();
+    }
+};
+
 onMounted(async () => {
     await fetchCustomers();
     loading.value = false;
@@ -275,9 +309,51 @@ onMounted(async () => {
 
 <template>
     <div class="card">
-        <div class="text-2xl font-bold text-gray-800 border-b pb-2">List Claim</div>
+        <div class="text-2xl font-bold text-gray-800 border-b pb-2 mb-4">List Claim</div>
 
-        <!-- Custom Tabs with Counts -->
+        <!-- High-Level Claim Search (Above Tabs) -->
+        <div class="mb-4 p-4 bg-blue-50 rounded-lg border border-blue-200">
+            <div class="flex items-center justify-between mb-2">
+                <div class="flex items-center gap-2">
+                    <i class="pi pi-search text-blue-500"></i>
+                    <span class="text-lg font-semibold text-gray-800">Claim Search</span>
+                </div>
+                <Badge value="Quick Access" severity="info" />
+            </div>
+
+            <p class="text-sm text-gray-600 mb-4">Enter a claim reference number to go directly to the claim details page</p>
+
+            <div class="flex items-center gap-2">
+                <IconField class="flex-1">
+                    <InputIcon><i class="pi pi-id-card" /></InputIcon>
+                    <InputText v-model="claimSearch" placeholder="Enter Claim Reference Number (e.g., W-2024-00123)" class="w-full" @keydown="handleClaimSearchKeydown" :disabled="searchingClaim" />
+                </IconField>
+
+                <Button label="Go to Claim" icon="pi pi-arrow-right" class="p-button-primary" @click="searchClaimDirectly" :loading="searchingClaim" :disabled="!claimSearch.trim() || searchingClaim" />
+
+                <Button v-if="claimSearch" icon="pi pi-times" class="p-button-text p-button-sm" @click="clearClaimSearch" title="Clear search" />
+            </div>
+
+            <!-- Search Error Message -->
+            <div v-if="searchError" class="mt-3 p-3 bg-red-50 border border-red-200 rounded-md">
+                <div class="flex items-center gap-2">
+                    <i class="pi pi-exclamation-circle text-red-500"></i>
+                    <span class="text-sm text-red-700">{{ searchError }}</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- OR Divider -->
+        <div class="relative">
+            <div class="absolute inset-0 flex items-center">
+                <div class="w-full border-t border-gray-300"></div>
+            </div>
+            <div class="relative flex justify-center text-sm">
+                <span class="px-4 bg-white text-gray-500">OR</span>
+            </div>
+        </div>
+
+        <!-- Custom Tabs -->
         <div class="border-gray-200 mb-4">
             <div class="flex space-x-8">
                 <button
@@ -297,7 +373,78 @@ onMounted(async () => {
         <LoadingPage v-if="loading" message="Loading Warranty Claim List..." />
 
         <div v-else>
+            <!-- SEPARATE FILTER/SEARCH SECTION -->
+            <div class="mb-6 p-4 bg-gray-50 rounded-lg border">
+                <div class="flex flex-col gap-4 w-full">
+                    <!-- Search Row -->
+                    <div class="flex items-center gap-4 w-full">
+                        <div class="flex items-center gap-2 w-full max-w-md">
+                            <IconField class="flex-1">
+                                <InputIcon><i class="pi pi-search" /></InputIcon>
+                                <InputText v-model="filters['global'].value" placeholder="Quick Search" class="w-full" :disabled="!hasCustomerSelected" />
+                            </IconField>
+                        </div>
+
+                        <!-- Export Button in Filter Section -->
+                        <div class="flex items-center gap-2 ml-auto">
+                            <Button type="button" label="Export" icon="pi pi-download" class="p-button-success" @click="exportToCSV" :loading="exportLoading" :disabled="filteredList.length === 0 || !hasCustomerSelected" />
+                        </div>
+                    </div>
+
+                    <!-- Filter Row: Customer Name Filter -->
+                    <div class="flex items-center gap-6 flex-wrap">
+                        <!-- Customer Filter -->
+                        <div class="flex items-center gap-2">
+                            <span class="text-sm font-medium text-gray-700">Customer:</span>
+                            <div class="relative">
+                                <Dropdown
+                                    v-model="selectedCustomer"
+                                    :options="customerOptions"
+                                    optionLabel="name"
+                                    placeholder="Select Customer (Main Accounts Only)"
+                                    class="w-100"
+                                    :loading="loadingCustomers"
+                                    :disabled="loadingCustomers || loading"
+                                    :filter="true"
+                                    filterPlaceholder="Search main customers..."
+                                >
+                                    <template #value="slotProps">
+                                        <div v-if="slotProps.value" class="flex items-center gap-2">
+                                            <span class="text-blue-600 font-bold">🏢</span>
+                                            <span>{{ slotProps.value.name }}</span>
+                                            <span v-if="isLoadingData" class="ml-2">
+                                                <i class="pi pi-spin pi-spinner text-sm text-primary-500"></i>
+                                            </span>
+                                        </div>
+                                        <span v-else>
+                                            {{ slotProps.placeholder }}
+                                        </span>
+                                    </template>
+                                    <template #option="slotProps">
+                                        <div class="flex items-center gap-2">
+                                            <span class="text-blue-600 font-bold">🏢</span>
+                                            <div class="flex flex-col">
+                                                <span class="font-medium">{{ slotProps.option.name }}</span>
+                                                <span class="text-xs text-gray-500">{{ slotProps.option.accountNo }}</span>
+                                            </div>
+                                            <Badge v-if="slotProps.option.hasSubBranches" value="Has Branches" severity="info" size="small" class="ml-auto" />
+                                        </div>
+                                    </template>
+                                </Dropdown>
+                                <Button v-if="selectedCustomer" icon="pi pi-times" class="p-button-text p-button-sm ml-2" @click="clearCustomerFilter" title="Clear customer filter" :disabled="isLoadingData" />
+                            </div>
+                        </div>
+
+                        <!-- Status message -->
+                        <!-- <div v-if="!hasCustomerSelected" class="text-sm text-blue-600 italic">Select a main customer account to view claims</div>
+                        <div v-else-if="isLoadingData" class="text-sm text-blue-600 italic">Loading warranty claims for {{ selectedCustomer.name }}...</div> -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- DATA TABLE -->
             <DataTable
+                v-if="hasCustomerSelected"
                 :value="filteredList"
                 :paginator="true"
                 :rows="10"
@@ -310,79 +457,12 @@ onMounted(async () => {
                 :globalFilterFields="['refNo', 'dealerName', 'claimTypeDisplay', 'dealer_sales_office', 'claimDate', 'status', 'stage', 'warrantyRegCertNo']"
                 paginatorTemplate="CurrentPageReport FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink RowsPerPageDropdown"
                 currentPageReportTemplate="Showing {first} to {last} of {totalRecords} entries"
+                sortField="claimDate"
+                :sortOrder="-1"
             >
-                <template #header>
-                    <div class="flex flex-col gap-4 w-full">
-                        <!-- Top Row: Search -->
-                        <div class="flex items-center justify-between gap-4 w-full flex-wrap">
-                            <div class="flex items-center gap-2 w-full max-w-md">
-                                <IconField class="flex-1">
-                                    <InputIcon>
-                                        <i class="pi pi-search" />
-                                    </InputIcon>
-                                    <InputText v-model="filters['global'].value" placeholder="Quick Search" class="w-full" />
-                                </IconField>
-                            </div>
-
-                            <div class="flex items-center gap-2 ml-auto">
-                                <Button type="button" label="Export " icon="pi pi-download" class="p-button-success" @click="exportToCSV" :loading="exportLoading" :disabled="filteredList.length === 0" />
-                            </div>
-                        </div>
-
-                        <!-- Filter Row: Customer Name Filter -->
-                        <div class="flex items-center gap-4 mb-1 flex-wrap">
-                            <!-- Customer Name Filter -->
-                            <div class="flex items-center gap-2">
-                                <span class="text-sm font-medium text-gray-700">Customer:</span>
-                                <Dropdown
-                                    v-model="selectedCustomer"
-                                    :options="customerOptions"
-                                    optionLabel="name"
-                                    placeholder="Select Customer"
-                                    class="w-100"
-                                    :loading="loadingCustomers"
-                                    :disabled="loadingCustomers || loading"
-                                    :filter="true"
-                                    filterPlaceholder="Search customers..."
-                                >
-                                    <template #value="slotProps">
-                                        <div v-if="slotProps.value" class="flex items-center">
-                                            <span>{{ slotProps.value.name }}</span>
-                                            <span v-if="isLoadingData" class="ml-2">
-                                                <i class="pi pi-spin pi-spinner text-sm text-primary-500"></i>
-                                            </span>
-                                        </div>
-                                        <span v-else>
-                                            {{ slotProps.placeholder }}
-                                        </span>
-                                    </template>
-                                    <template #option="slotProps">
-                                        <div class="flex flex-col">
-                                            <span class="font-medium">{{ slotProps.option.name }}</span>
-                                            <span class="text-xs text-gray-500">{{ slotProps.option.accountNo }}</span>
-                                        </div>
-                                    </template>
-                                </Dropdown>
-                                <Button v-if="selectedCustomer" icon="pi pi-times" class="p-button-text p-button-sm" @click="clearCustomerFilter" title="Clear customer filter" :disabled="isLoadingData" />
-                            </div>
-
-                            <!-- Status message -->
-                            <div v-if="!hasCustomerSelected" class="text-sm text-blue-600 italic">Select a customer to view</div>
-                            <div v-else-if="isLoadingData" class="text-sm text-blue-600 italic">Loading warranty claims...</div>
-                        </div>
-                    </div>
-                </template>
-
                 <template #empty>
                     <div class="text-center py-8 text-gray-500">
-                        <template v-if="!hasCustomerSelected">
-                            <div class="flex flex-col items-center gap-2">
-                                <i class="pi pi-building text-3xl text-blue-400"></i>
-                                <span class="text-lg">Select a customer to view</span>
-                                <span class="text-sm text-gray-400">Choose a customer name from the dropdown above</span>
-                            </div>
-                        </template>
-                        <template v-else-if="isLoadingData">
+                        <template v-if="isLoadingData">
                             <div class="flex flex-col items-center gap-2">
                                 <i class="pi pi-spin pi-spinner text-3xl text-primary-500"></i>
                                 <span class="text-lg">Loading warranty claims for {{ selectedCustomer?.name }}</span>
@@ -394,7 +474,7 @@ onMounted(async () => {
                                 <i class="pi pi-file-excel text-3xl text-yellow-400"></i>
                                 <span class="text-lg" v-if="selectedCustomer">No warranty claims found for {{ selectedCustomer.name }}</span>
                                 <span class="text-lg" v-else>No warranty claims found</span>
-                                <span class="text-sm text-gray-400">Try selecting a different customer</span>
+                                <span class="text-sm text-gray-400">Try selecting a different main customer account</span>
                                 <Button label="Clear Filter" icon="pi pi-times" class="p-button-text p-button-sm mt-2" @click="clearCustomerFilter" />
                             </div>
                         </template>
@@ -423,9 +503,11 @@ onMounted(async () => {
                         </div>
                     </template>
                 </Column>
+
                 <Column field="dealer_sales_office" header="Dealer Sales Office" style="min-width: 15rem" sortable>
                     <template #body="{ data }">{{ data.dealer_sales_office }}</template>
                 </Column>
+
                 <Column field="claimTypeDisplay" header="Claim Type" style="min-width: 15rem" sortable>
                     <template #body="{ data }">
                         {{ data.claimTypeDisplay }}
@@ -444,6 +526,15 @@ onMounted(async () => {
                     </template>
                 </Column>
             </DataTable>
+
+            <!-- Initial state when no customer is selected -->
+            <div v-if="!hasCustomerSelected && !loading" class="text-center py-12 bg-gray-50 rounded-lg border">
+                <div class="flex flex-col items-center gap-4">
+                    <i class="pi pi-users text-5xl text-blue-300"></i>
+                    <h3 class="text-xl font-semibold text-gray-700">No Customer Selected</h3>
+                    <p class="text-gray-500 max-w-md">Please select a customer from the dropdown above to view their warranty claim history. The table will display claims for the selected customer and all its branches.</p>
+                </div>
+            </div>
         </div>
     </div>
 </template>
@@ -478,6 +569,9 @@ onMounted(async () => {
     .p-datatable-header {
         border-top-left-radius: 12px;
         border-top-right-radius: 12px;
+        background: transparent !important;
+        border: none !important;
+        padding: 0 !important;
     }
 
     .p-paginator-bottom {
@@ -542,6 +636,18 @@ onMounted(async () => {
     }
     to {
         transform: rotate(360deg);
+    }
+}
+
+/* Direct claim search styling */
+:deep(.p-inputtext) {
+    &.claim-search {
+        border-color: #3b82f6;
+        border-width: 2px;
+
+        &:focus {
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+        }
     }
 }
 </style>
