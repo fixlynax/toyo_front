@@ -185,6 +185,11 @@ const model = ref([
                 to: '/om/listReturnOrder'
             },
             {
+                label: 'Failed Order',
+                icon: 'pi pi-fw pi-times-circle',
+                to: '/om/listFailOrder'
+            },
+            {
                 label: 'Report',
                 icon: 'pi pi-fw pi-chart-line',
                 items: [

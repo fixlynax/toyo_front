@@ -200,6 +200,21 @@ const router = createRouter({
                     meta: { permission: 'Return Order', access: 'create' }
                 },
 
+                //Failed Order
+                {
+                    path: 'om/listFailOrder',
+                    name: 'List-Fail-Order',
+                    component: () => import('@/views/om/listFailOrder.vue'),
+                    // meta: { permission: 'Fail Order', access: 'view' }
+                },
+                {
+                    path: 'om/detailFailOrder/:orderNo',
+                    name: 'Detail-Fail-Order',
+                    component: () => import('@/views/om/detailFailOrder.vue'),
+                    // meta: { permission: 'Order', access: 'view' },
+                    props: true
+                },
+
                 // Report
                 {
                     path: 'om/reportSF',
