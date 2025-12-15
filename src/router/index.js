@@ -26,7 +26,7 @@ const router = createRouter({
             name: 'login',
             component: () => import('@/views/pages/auth/Login.vue')
         },
-         {
+        {
             path: '/auth/forgot-password',
             name: 'forgotPassword',
             component: () => import('@/views/pages/auth/ForgotPassword.vue')
@@ -204,7 +204,7 @@ const router = createRouter({
                 {
                     path: 'om/listFailOrder',
                     name: 'List-Fail-Order',
-                    component: () => import('@/views/om/listFailOrder.vue'),
+                    component: () => import('@/views/om/listFailOrder.vue')
                     // meta: { permission: 'Fail Order', access: 'view' }
                 },
                 {
@@ -634,36 +634,36 @@ const router = createRouter({
                     component: () => import('@/views/technical/createPattern.vue'),
                     meta: { permission: 'Pattern List', access: 'create' }
                 },
-                                {
+                {
                     path: 'technical/listVehicleModel',
                     name: 'List-Vehicle-Model',
-                    component: () => import('@/views/technical/listVehicleModel.vue'),
+                    component: () => import('@/views/technical/listVehicleModel.vue')
                 },
-                                {
+                {
                     path: 'technical/listTreadDepth',
                     name: 'List-Tread-Depth',
-                    component: () => import('@/views/technical/listTreadDepth.vue'),
+                    component: () => import('@/views/technical/listTreadDepth.vue')
                 },
-                                {
+                {
                     path: 'technical/listSizeCode',
                     name: 'List-Size-Code',
-                    component: () => import('@/views/technical/listSizeCode.vue'),
+                    component: () => import('@/views/technical/listSizeCode.vue')
                 },
-                    //                 {
-                    //     label: 'Vechicle Model List',
-                    //     icon: 'pi pi-fw pi-slack',
-                    //     to: '/technical/listVechicleModel'
-                    // },
-                    // {
-                    //     label: 'Tread Depth List',
-                    //     icon: 'pi pi-fw pi-slack',
-                    //     to: '/technical/listTreadDepth'
-                    // },
-                    // {
-                    //     label: 'Size Code List',
-                    //     icon: 'pi pi-fw pi-slack',
-                    //     to: '/technical/listSizeCode'
-                    // }
+                //                 {
+                //     label: 'Vechicle Model List',
+                //     icon: 'pi pi-fw pi-slack',
+                //     to: '/technical/listVechicleModel'
+                // },
+                // {
+                //     label: 'Tread Depth List',
+                //     icon: 'pi pi-fw pi-slack',
+                //     to: '/technical/listTreadDepth'
+                // },
+                // {
+                //     label: 'Size Code List',
+                //     icon: 'pi pi-fw pi-slack',
+                //     to: '/technical/listSizeCode'
+                // }
                 // ===============================
                 // IT
                 // ===============================
@@ -818,6 +818,11 @@ const router = createRouter({
                     component: () => import('@/views/billing/listAccountDetailPersonal.vue'),
                     props: true
                 },
+                {
+                    path: 'sales/listAccountDetailSales',
+                    name: 'Billing-Account-Sales',
+                    component: () => import('@/views/sales/listAccountDetailSales.vue')
+                },
 
                 // Billing History
                 {
@@ -832,6 +837,13 @@ const router = createRouter({
                     props: true
                 },
                 {
+                    path: 'sales/listBillingSales',
+                    name: 'Billing-Sales',
+                    component: () => import('@/views/sales/listBillingSales.vue')
+                },
+
+                // E-Billing History
+                {
                     path: 'billing/listEbilling',
                     name: 'E-Billing',
                     component: () => import('@/views/billing/listEbilling.vue')
@@ -842,6 +854,13 @@ const router = createRouter({
                     component: () => import('@/views/billing/listEbillingPersonal.vue'),
                     props: true
                 },
+                {
+                    path: 'sales/listEbillingSales',
+                    name: 'E-Billing-Sales',
+                    component: () => import('@/views/sales/listEbillingSales.vue')
+                },
+
+                // Other Bills
                 {
                     path: 'billing/listOther',
                     name: 'List-Other',
@@ -854,6 +873,13 @@ const router = createRouter({
                     props: true
                 },
                 {
+                    path: 'sales/listOtherSales',
+                    name: 'List-Other-Sales',
+                    component: () => import('@/views/sales/listOtherSales.vue')
+                },
+
+                // Statements
+                {
                     path: 'billing/listStatement',
                     name: 'List-Statement',
                     component: () => import('@/views/billing/listStatement.vue')
@@ -864,11 +890,17 @@ const router = createRouter({
                     component: () => import('@/views/billing/listStatementPersonal.vue')
                 },
                 {
+                    path: 'sales/listStatementSales',
+                    name: 'List-Statement-Sales',
+                    component: () => import('@/views/sales/listStatementSales.vue')
+                },
+
+                // Messaging
+                {
                     path: 'billing/listMessaging',
                     name: 'List-Messaging',
                     component: () => import('@/views/billing/listMessaging.vue')
                 },
-                // In your router/index.js file
                 {
                     path: 'billing/detailMessaging',
                     name: 'Detail-Messaging',
@@ -879,6 +911,8 @@ const router = createRouter({
                     name: 'Create-Messaging',
                     component: () => import('@/views/billing/createMessaging.vue')
                 },
+
+                // BCP
                 {
                     path: 'billing/BCP',
                     name: 'Create-Messaging',
