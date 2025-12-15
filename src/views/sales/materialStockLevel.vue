@@ -1,15 +1,20 @@
 <script setup>
 import api from '@/service/api';
-import { FilterMatchMode, FilterOperator } from '@primevue/core/api';
+import { FilterMatchMode } from '@primevue/core/api';
 import { onBeforeMount, ref, computed } from 'vue';
 import LoadingPage from '@/components/LoadingPage.vue';
+import { useToast } from 'primevue/usetoast';
+
+const toast = useToast();
 
 // 🟢 State
 const filters = ref({});
 const materialData = ref([]);
 const loading = ref(true);
 const selectedStorage = ref('TMJB'); // Default storage location
-const searchQuery = ref('');
+const exportLoading = ref(false);
+const visibleRows = ref([]);
+const selectedExportIds = ref(new Set());
 
 // 🟢 Hardcoded storage locations
 const storageLocations = [
@@ -25,9 +30,7 @@ const storageLocations = [
 // 🟢 Filters
 function initFilters() {
     filters.value = {
-        global: { value: null, matchMode: FilterMatchMode.CONTAINS },
-        materialid: { operator: FilterOperator.AND, constraints: [{ value: null, matchMode: FilterMatchMode.STARTS_WITH }] },
-        pattern_name: { operator: FilterOperator.AND, constraints: [{ value: null, matchMode: FilterMatchMode.CONTAINS }] }
+        global: { value: null, matchMode: FilterMatchMode.CONTAINS }
     };
 }
 
@@ -72,6 +75,11 @@ const fetchMaterialStock = async (storageLocation) => {
                 price03_validitystartdate: material.price03_validitystartdate,
                 price04_validitystartdate: material.price04_validitystartdate,
                 price05_validitystartdate: material.price05_validitystartdate,
+                price_01_validityenddate: material.price_01_validityenddate,
+                price_02_validityenddate: material.price_02_validityenddate,
+                price_03_validityenddate: material.price_03_validityenddate,
+                price_04_validityenddate: material.price_04_validityenddate,
+                price_05_validityenddate: material.price_05_validityenddate,
                 // Origin
                 origin: material.origin,
                 isSell: material.isSell,
@@ -85,16 +93,32 @@ const fetchMaterialStock = async (storageLocation) => {
                     plant: material.stock_level.plant,
                     stocklevelmaster: material.stock_level.stocklevelmaster,
                     DOM: material.stock_level.DOM,
-                    stockBalance: parseFloat(material.stock_level.stockBalance),
+                    stockBalance: material.stock_level.stockBalance ? parseFloat(material.stock_level.stockBalance) : 0,
+                    created: material.stock_level.created,
                     updated: material.stock_level.updated
                 } : null
             }));
+            visibleRows.value = materialData.value;
         } else {
             materialData.value = [];
+            visibleRows.value = [];
+            toast.add({ 
+                severity: 'warn', 
+                summary: 'No Data', 
+                detail: 'No stock data available for selected location', 
+                life: 3000 
+            });
         }
     } catch (error) {
         console.error('Error fetching material stock levels:', error);
         materialData.value = [];
+        visibleRows.value = [];
+        toast.add({ 
+            severity: 'error', 
+            summary: 'Error', 
+            detail: 'Failed to load material stock levels', 
+            life: 3000 
+        });
     } finally {
         loading.value = false;
     }
@@ -106,6 +130,7 @@ const handleStorageChange = () => {
         fetchMaterialStock(selectedStorage.value);
     } else {
         materialData.value = [];
+        visibleRows.value = [];
         loading.value = false;
     }
 };
@@ -116,49 +141,41 @@ onBeforeMount(async () => {
     await fetchMaterialStock(selectedStorage.value);
 });
 
-// 🟢 Computed - Filtered materials
-const filteredMaterials = computed(() => {
-    if (!searchQuery.value) return materialData.value;
-    
-    const query = searchQuery.value.toLowerCase();
-    return materialData.value.filter(material => 
-        material.materialid.toLowerCase().includes(query) ||
-        material.material.toLowerCase().includes(query) ||
-        material.pattern_name.toLowerCase().includes(query) ||
-        (material.stock_level?.storagelocation?.toLowerCase() || '').includes(query)
-    );
-});
-
 // 🟢 Parse stock level master JSON
 const parseStockLevelMaster = (stockLevelMaster) => {
     try {
+        if (!stockLevelMaster) return [];
+        
         if (typeof stockLevelMaster === 'string') {
             const parsed = JSON.parse(stockLevelMaster);
-            return parsed.stocklevelmaster || parsed;
+            // Handle different structures
+            if (parsed.stocklevelmaster) {
+                return Array.isArray(parsed.stocklevelmaster) ? parsed.stocklevelmaster : [parsed.stocklevelmaster];
+            } else if (Array.isArray(parsed)) {
+                return parsed;
+            } else {
+                return [parsed];
+            }
         }
-        return stockLevelMaster;
+        
+        if (Array.isArray(stockLevelMaster)) {
+            return stockLevelMaster;
+        }
+        
+        return [stockLevelMaster];
     } catch (error) {
-        console.error('Error parsing stocklevelmaster:', error);
-        return null;
+        console.error('Error parsing stocklevelmaster:', error, stockLevelMaster);
+        return [];
     }
 };
 
 // 🟢 Calculate total stock from stock level master
-const calculateTotalStock = (stockLevelMaster) => {
+const calculateTotalFromBatches = (stockLevelMaster) => {
     try {
-        const stockData = parseStockLevelMaster(stockLevelMaster);
-        
-        if (!stockData) return 0;
-        
-        if (Array.isArray(stockData)) {
-            return stockData.reduce((total, item) => {
-                return total + parseFloat(item.stockbalance || 0);
-            }, 0);
-        } else if (stockData.stockbalance) {
-            return parseFloat(stockData.stockbalance);
-        }
-        
-        return 0;
+        const batches = parseStockLevelMaster(stockLevelMaster);
+        return batches.reduce((total, batch) => {
+            return total + parseFloat(batch.stockbalance || batch.stockBalance || 0);
+        }, 0);
     } catch (error) {
         console.error('Error calculating total stock:', error);
         return 0;
@@ -168,46 +185,168 @@ const calculateTotalStock = (stockLevelMaster) => {
 // 🟢 Format Date
 const formatDate = (dateString) => {
     if (!dateString) return '-';
-    const date = new Date(dateString);
-    return date.toLocaleString('en-MY', {
-        year: 'numeric',
-        month: '2-digit',
-        day: '2-digit'
-    });
+    
+    try {
+        const date = new Date(dateString);
+        if (isNaN(date.getTime())) return '-';
+        
+        return date.toLocaleDateString('en-MY', {
+            year: 'numeric',
+            month: '2-digit',
+            day: '2-digit'
+        });
+    } catch (error) {
+        console.error('Error formatting date:', error);
+        return '-';
+    }
 };
 
 // 🟢 Format Price
 const formatPrice = (price) => {
-    if (!price) return '-';
-    return `RM ${parseFloat(price).toFixed(2)}`;
-};
-
-// 🟢 Clear Search
-const clearSearch = () => {
-    searchQuery.value = '';
+    if (!price || price === '0.00' || price === '0') return '-';
+    try {
+        return `RM ${parseFloat(price).toFixed(2)}`;
+    } catch (error) {
+        console.error('Error formatting price:', error);
+        return '-';
+    }
 };
 
 // 🟢 Get current price (latest valid price)
 const getCurrentPrice = (material) => {
     const today = new Date();
     const prices = [
-        { price: material.price05, validFrom: material.price05_validitystartdate },
-        { price: material.price04, validFrom: material.price04_validitystartdate },
-        { price: material.price03, validFrom: material.price03_validitystartdate },
-        { price: material.price02, validFrom: material.price02_validitystartdate },
-        { price: material.price01, validFrom: material.price01_validitystartdate }
+        { price: material.price01, validFrom: material.price01_validitystartdate, validTo: material.price_01_validityenddate },
+        { price: material.price02, validFrom: material.price02_validitystartdate, validTo: material.price_02_validityenddate },
+        { price: material.price03, validFrom: material.price03_validitystartdate, validTo: material.price_03_validityenddate },
+        { price: material.price04, validFrom: material.price04_validitystartdate, validTo: material.price_04_validityenddate },
+        { price: material.price05, validFrom: material.price05_validitystartdate, validTo: material.price_05_validityenddate }
     ];
     
-    // Find the most recent price that is valid (not null and valid date is today or earlier)
+    // Find the most recent price that is valid (not null and within validity period)
     for (const priceInfo of prices) {
-        if (priceInfo.price) {
-            if (!priceInfo.validFrom) return priceInfo.price; // No validity date, assume always valid
+        if (priceInfo.price && priceInfo.price !== '0.00' && priceInfo.price !== '0') {
+            if (!priceInfo.validFrom) return priceInfo.price; // No start date, assume always valid
+            
             const validFrom = new Date(priceInfo.validFrom);
-            if (validFrom <= today) return priceInfo.price;
+            let isValid = validFrom <= today;
+            
+            // Check end date if exists
+            if (priceInfo.validTo && priceInfo.validTo !== '9999-12-31') {
+                const validTo = new Date(priceInfo.validTo);
+                isValid = isValid && today <= validTo;
+            }
+            
+            if (isValid) return priceInfo.price;
         }
     }
     
     return null;
+};
+
+// 🟢 Export function
+const handleExport = async () => {
+    const idsArray = Array.from(selectedExportIds.value).map((id) => Number(id));
+
+    if (idsArray.length === 0) {
+        toast.add({ 
+            severity: 'warn', 
+            summary: 'Warning', 
+            detail: 'Please select at least one row to export', 
+            life: 3000 
+        });
+        return;
+    }
+    
+    try {
+        exportLoading.value = true;
+
+        const response = await api.postExtra(
+            'material/export',
+            { material_id: JSON.stringify(idsArray) },
+            {
+                responseType: 'blob',
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            }
+        );
+        
+        const blob = new Blob([response.data], {
+            type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+        });
+
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `Material_Stock_${selectedStorage.value}_${new Date().toISOString().split('T')[0]}.xlsx`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        window.URL.revokeObjectURL(url);
+
+        toast.add({ 
+            severity: 'success', 
+            summary: 'Success', 
+            detail: 'Export completed successfully', 
+            life: 3000 
+        });
+        selectedExportIds.value.clear();
+    } catch (error) {
+        console.error('Error exporting data:', error);
+        toast.add({ 
+            severity: 'error', 
+            summary: 'Error', 
+            detail: 'Failed to export data', 
+            life: 3000 
+        });
+    } finally {
+        exportLoading.value = false;
+    }
+};
+
+// 🟢 Toggle selection functions
+const handleToggleExport = (id) => {
+    if (selectedExportIds.value.has(id)) {
+        selectedExportIds.value.delete(id);
+    } else {
+        selectedExportIds.value.add(id);
+    }
+};
+
+const onTableFilter = (event) => {
+    visibleRows.value = event.filteredValue || materialData.value;
+};
+
+// 🟢 Toggle all visible rows
+const toggleSelectAll = () => {
+    const allIds = visibleRows.value.map(item => item.id);
+
+    if (isAllSelected()) {
+        selectedExportIds.value = new Set([...selectedExportIds.value].filter(id => !allIds.includes(id)));
+    } else {
+        selectedExportIds.value = new Set([...selectedExportIds.value, ...allIds]);
+    }
+};
+
+// 🟢 Computed: are all visible rows selected?
+const isAllSelected = () => {
+    return visibleRows.value.length > 0 && visibleRows.value.every(item => selectedExportIds.value.has(item.id));
+};
+
+// 🟢 Stock summary computed properties
+const stockSummary = computed(() => {
+    const total = materialData.value.length;
+    const inStock = materialData.value.filter(m => m.stock_level?.stockBalance > 0).length;
+    const outOfStock = materialData.value.filter(m => !m.stock_level || m.stock_level.stockBalance <= 0).length;
+    const lowStock = materialData.value.filter(m => m.stock_level?.stockBalance > 0 && m.stock_level.stockBalance < 50).length;
+    
+    return { total, inStock, outOfStock, lowStock };
+});
+
+// 🟢 Format boolean values for display
+const formatBoolean = (value) => {
+    return value === 1 || value === true ? 'Yes' : 'No';
 };
 </script>
 
@@ -215,46 +354,61 @@ const getCurrentPrice = (material) => {
     <div class="card">
         <div class="text-2xl font-bold text-gray-800 border-b pb-2">Material Stock Levels</div>
 
-        <!-- Header with Search and Filters -->
-        <div class="mb-6 p-4 bg-gray-50 rounded-lg border">
-            <div class="flex flex-col gap-4 w-full">
-                <!-- Search Row -->
-                <div class="flex items-center gap-4 w-full">
-                    <div class="flex items-center gap-2 w-full max-w-md">
-                        <IconField class="flex-1">
-                            <InputIcon><i class="pi pi-search" /></InputIcon>
-                            <InputText v-model="searchQuery" placeholder="Search by Material ID, Name, or Pattern" class="w-full" />
-                        </IconField>
-                        <Button v-if="searchQuery" icon="pi pi-times" class="p-button-text p-button-sm" @click="clearSearch" title="Clear search" />
-                    </div>
-                </div>
+        <LoadingPage v-if="loading" :message="'Loading Material Stock...'" :sub-message="'Fetching stock levels from warehouse'" />
 
-                <!-- Filter Row: Storage Location -->
-                <div class="flex items-center gap-6 flex-wrap">
-                    <!-- Storage Location Dropdown -->
-                    <div class="flex items-center gap-2">
-                        <span class="text-sm font-medium text-gray-700 whitespace-nowrap">Storage Location:</span>
+        <DataTable
+            v-if="!loading"
+            :value="materialData"
+            @filter="onTableFilter"
+            :paginator="true"
+            :rows="10"
+            :rowsPerPageOptions="[5, 10, 20]"
+            dataKey="materialid"
+            removableSort
+            class="rounded-table"
+            :rowHover="true"
+            :filters="filters"
+            filterDisplay="menu"
+            :globalFilterFields="['materialid', 'material', 'pattern_name', 'origin', 'sectionwidth', 'tireseries', 'rimdiameter', 'speedplyrating']"
+            paginatorTemplate="CurrentPageReport FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink RowsPerPageDropdown"
+            currentPageReportTemplate="Showing {first} to {last} of {totalRecords} entries"
+            sortField="materialid"
+            :sortOrder="1"
+        >
+            <template #header>
+                <div class="flex items-center justify-between gap-4 w-full flex-wrap">
+                    <!-- Left: Search Field + Storage Location -->
+                    <div class="flex items-center gap-4 w-full max-w-3xl">
+                        <!-- Search Field -->
+                        <IconField class="flex-1">
+                            <InputIcon>
+                                <i class="pi pi-search" />
+                            </InputIcon>
+                            <InputText v-model="filters['global'].value" placeholder="Quick Search by Material ID, Name, Pattern, etc." class="w-full" />
+                        </IconField>
+                        
+                        <!-- Storage Location Dropdown -->
                         <div class="flex items-center gap-2">
+                            <span class="text-sm font-medium text-gray-700 whitespace-nowrap">Storage:</span>
                             <Dropdown 
                                 v-model="selectedStorage" 
                                 :options="storageLocations" 
                                 optionLabel="name" 
                                 optionValue="code" 
-                                placeholder="Select Storage Location" 
-                                class="w-64" 
+                                placeholder="Select Storage" 
+                                class="w-48" 
                                 :filter="true"
                                 @change="handleStorageChange"
                             >
                                 <template #option="slotProps">
                                     <div class="flex items-center gap-2">
-                                        <span class="text-blue-600 font-bold">🏭</span>
+                                        <i class="pi pi-warehouse text-blue-600"></i>
                                         <span>{{ slotProps.option.name }}</span>
-                                        <span class="text-xs text-gray-400 ml-auto">{{ slotProps.option.code }}</span>
                                     </div>
                                 </template>
                                 <template #value="slotProps">
                                     <div v-if="slotProps.value" class="flex items-center gap-2">
-                                        <!-- <span class="text-blue-600 font-bold">🏭</span> -->
+                                        <i class="pi pi-warehouse text-blue-600"></i>
                                         <span>{{ storageLocations.find(s => s.code === slotProps.value)?.name }}</span>
                                     </div>
                                     <span v-else>{{ slotProps.placeholder }}</span>
@@ -263,222 +417,298 @@ const getCurrentPrice = (material) => {
                         </div>
                     </div>
 
-                    <!-- Stock Summary -->
-                    <div class="flex items-center gap-4">
-                        <!-- <div class="flex items-center gap-2">
-                            <span class="text-sm font-medium text-gray-700">Total Materials:</span>
-                            <span class="font-bold text-gray-800">{{ materialData.length }}</span>
-                        </div> -->
-                        <div class="flex items-center gap-2">
-                            <span class="text-sm font-medium text-gray-700">In Stock:</span>
-                            <span class="font-bold text-green-600">{{ materialData.filter(m => m.stock_level?.stockBalance > 0).length }}</span>
+                    <!-- Right: Export Button & Stock Summary -->
+                    <div class="flex items-center gap-4 ml-auto">
+                        <!-- Stock Summary -->
+                        <div class="flex items-center gap-4 bg-gray-50 px-4 py-2 rounded-lg border">
+                            <!-- <div class="flex items-center gap-2">
+                                <span class="text-sm font-medium text-gray-700">Total:</span>
+                                <span class="font-bold text-gray-800">{{ stockSummary.total }}</span>
+                            </div> -->
+                            <div class="flex items-center gap-2">
+                                <i class="pi pi-check-circle text-green-600"></i>
+                                <span class="text-sm font-medium text-gray-700">In Stock:</span>
+                                <span class="font-bold text-green-600">{{ stockSummary.inStock }}</span>
+                            </div>
+                            <div class="flex items-center gap-2">
+                                <i class="pi pi-exclamation-triangle text-yellow-600"></i>
+                                <span class="text-sm font-medium text-gray-700">Low:</span>
+                                <span class="font-bold text-yellow-600">{{ stockSummary.lowStock }}</span>
+                            </div>
+                            <div class="flex items-center gap-2">
+                                <i class="pi pi-times-circle text-red-600"></i>
+                                <span class="text-sm font-medium text-gray-700">Out:</span>
+                                <span class="font-bold text-red-600">{{ stockSummary.outOfStock }}</span>
+                            </div>
                         </div>
-                        <div class="flex items-center gap-2">
-                            <span class="text-sm font-medium text-gray-700">Out of Stock:</span>
-                            <span class="font-bold text-red-600">{{ materialData.filter(m => !m.stock_level || m.stock_level.stockBalance <= 0).length }}</span>
-                        </div>
+                        
+                        <!-- Export Button -->
+                        <Button 
+                            type="button" 
+                            label="Export" 
+                            icon="pi pi-file-export" 
+                            class="p-button-success" 
+                            :loading="exportLoading" 
+                            @click="handleExport" 
+                            :disabled="materialData.length === 0"
+                        />
                     </div>
                 </div>
-            </div>
-        </div>
+            </template>
 
-        <LoadingPage v-if="loading" :message="'Loading Material Stock...'" :sub-message="'Fetching stock levels from warehouse'" />
-
-        <!-- DataTable -->
-        <DataTable
-            v-if="!loading"
-            :value="filteredMaterials"
-            :paginator="true"
-            :rows="15"
-            dataKey="id"
-            :rowHover="true"
-            :filters="filters"
-            :rowsPerPageOptions="[15, 30, 50, 100]"
-            filterDisplay="menu"
-            :globalFilterFields="['materialid', 'material', 'pattern_name', 'origin', 'speedplyrating']"
-            class="rounded-table"
-            removableSort
-            sortField="material"
-            :sortOrder="1"
-            currentPageReportTemplate="Showing {first} to {last} of {totalRecords} materials"
-            paginatorTemplate="CurrentPageReport FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink RowsPerPageDropdown"
-        >
             <template #empty>
                 <div class="text-center py-8 text-gray-500">
                     <div class="flex flex-col items-center gap-2">
                         <i class="pi pi-box text-3xl text-blue-400"></i>
                         <span class="text-lg">No materials found</span>
-                        <span class="text-sm text-gray-400">No stock data available for the selected storage location</span>
+                        <span class="text-sm text-gray-400">No stock data available for {{ selectedStorage }}</span>
                     </div>
                 </div>
             </template>
 
-            <!-- Columns -->
+            <template #loading> Loading data. Please wait... </template>
 
+            <!-- Export All Column -->
+            <Column header="Export" style="min-width: 3rem">
+                <template #header>
+                    <div class="flex justify-center">
+                        <Checkbox :binary="true" :model-value="isAllSelected()" @change="toggleSelectAll" />
+                    </div>
+                </template>
+
+                <template #body="{ data }">
+                    <div class="flex justify-center">
+                        <Checkbox :binary="true" :model-value="selectedExportIds.has(data.id)" @change="() => handleToggleExport(data.id)" />
+                    </div>
+                </template>
+            </Column>
+            
             <!-- Material ID & Name -->
-            <Column field="materialid" header="Material ID" style="min-width: 12rem" sortable>
+            <Column field="materialid" header="Material" style="min-width: 8rem" sortable>
                 <template #body="{ data }">
                     <div class="flex flex-col">
-                        <span class="font-bold text-blue-600">{{ data.materialid }}</span>
-                        <span class="text-sm text-gray-600 truncate max-w-xs">{{ data.material }}</span>
+                        <!-- Top -->
+                        <div class="font-semibold text-blue-600">{{ data.materialid }}</div>
+                        <!-- Bottom -->
+                        <div class="text-gray-600 text-sm truncate max-w-xs">{{ data.material }}</div>
                     </div>
                 </template>
             </Column>
 
-            <!-- Pattern & Specifications -->
-            <Column header="Pattern & Specs" style="min-width: 14rem">
+            <!-- Pattern -->
+            <Column field="pattern" header="Pattern" style="min-width: 4rem" sortable>
                 <template #body="{ data }">
-                    <div class="flex flex-col space-y-1">
-                        <div class="flex items-center gap-2">
-                            <span class="font-semibold text-gray-700">Pattern:</span>
-                            <Tag :value="data.pattern_name" severity="info" class="text-xs" />
+                    <div class="flex flex-col">
+                        <div class="font-medium">{{ data.pattern }}</div>
+                        <div class="text-gray-600 text-sm">{{ data.pattern_name }}</div>
+                    </div>
+                </template>
+            </Column>
+
+            <!-- Origin -->
+            <Column field="origin" header="Origin" style="min-width: 3rem" sortable>
+                <template #body="{ data }">
+                    {{ data.origin }}
+                </template>
+            </Column>
+
+            <!-- Size Details -->
+            <Column header="Size" style="min-width: 10rem" sortable :sort-field="'sectionwidth'">
+                <template #body="{ data }">
+                    <div class="flex flex-col leading-relaxed text-sm text-gray-700">
+                        <div class="flex">
+                            <span class="w-18 text-gray-800 font-semibold">Section Width:</span>
+                            <span>{{ data.sectionwidth }}</span>
                         </div>
-                        <div class="grid grid-cols-2 gap-1 text-sm">
-                            <div class="flex justify-between">
-                                <span class="text-gray-600">Size:</span>
-                                <span class="font-medium">{{ data.sectionwidth }}/{{ data.tireseries }}R{{ data.rimdiameter }}</span>
-                            </div>
-                            <div class="flex justify-between">
-                                <span class="text-gray-600">Rating:</span>
-                                <span class="font-medium">{{ data.speedplyrating }}</span>
-                            </div>
+                        <div class="flex">
+                            <span class="w-15 text-gray-800 font-semibold">Tyre Series:</span>
+                            <span>{{ data.tireseries }}</span>
+                        </div>
+                        <div class="flex">
+                            <span class="w-15 text-gray-800 font-semibold">Rim Diameter:</span>
+                            <span>{{ data.rimdiameter }}"</span>
+                        </div>
+                        <div class="flex">
+                            <span class="w-15 text-gray-800 font-semibold">Speed Rating:</span>
+                            <span>{{ data.speedplyrating }}</span>
                         </div>
                     </div>
                 </template>
             </Column>
 
             <!-- Stock Information -->
-            <Column header="Stock Info" style="min-width: 10rem">
+            <Column header="Stock Info" style="min-width: 14rem">
                 <template #body="{ data }">
                     <template v-if="data.stock_level">
-                        <div class="flex flex-col space-y-2">
-                            <div class="flex items-center justify-between">
-                                <span class="font-semibold text-gray-700">Balance:</span>
+                        <div class="flex flex-col leading-relaxed text-sm text-gray-700">
+                            <div class="flex items-center justify-between mb-1">
+                                <span class="text-gray-800 font-semibold">Balance:</span>
                                 <div class="flex items-center gap-2">
                                     <span :class="{
-                                        'font-bold text-xl': true,
+                                        'font-bold text-lg': true,
                                         'text-green-600': data.stock_level.stockBalance > 50,
                                         'text-yellow-600': data.stock_level.stockBalance > 0 && data.stock_level.stockBalance <= 50,
                                         'text-red-600': data.stock_level.stockBalance <= 0
                                     }">
-                                        {{ data.stock_level.stockBalance }}
+                                        {{ data.stock_level.stockBalance || 0 }}
                                     </span>
                                     <Tag :value="getStockStatus(data.stock_level.stockBalance).label" 
                                          :severity="getStockStatus(data.stock_level.stockBalance).severity" 
                                          class="text-xs" />
                                 </div>
                             </div>
-                            <div class="flex justify-between text-sm">
-                                <span class="text-gray-600">DOM:</span>
+                            <div class="flex">
+                                <span class="w-20 text-gray-600">Location:</span>
+                                <span class="font-medium">{{ data.stock_level.storagelocation }}</span>
+                            </div>
+                            <div class="flex">
+                                <span class="w-20 text-gray-600">Plant:</span>
+                                <span class="font-medium">{{ data.stock_level.plant }}</span>
+                            </div>
+                            <div class="flex">
+                                <span class="w-20 text-gray-600">DOM:</span>
                                 <span class="font-medium">{{ data.stock_level.DOM || '-' }}</span>
                             </div>
-                            <div class="flex justify-between text-sm">
-                                <span class="text-gray-600">Updated:</span>
+                            <div class="flex">
+                                <span class="w-20 text-gray-600">Updated:</span>
                                 <span class="font-medium text-xs">{{ formatDate(data.stock_level.updated) }}</span>
                             </div>
                         </div>
                     </template>
                     <template v-else>
-                        <div class="text-center text-gray-400 italic">No stock data</div>
+                        <div class="text-center text-gray-400 italic py-2">No stock data</div>
                     </template>
                 </template>
             </Column>
 
-            <!-- Price Information -->
-            <Column header="Price (RM)" style="min-width: 12rem">
+            <!-- Batch Details -->
+            <!-- <Column header="Batch Details" style="min-width: 12rem">
                 <template #body="{ data }">
-                    <div class="flex flex-col space-y-1 text-sm">
-                        <div class="flex justify-between items-center">
-                            <span class="font-semibold text-gray-600">Current:</span>
-                            <span class="font-bold text-green-700">
+                    <template v-if="data.stock_level && data.stock_level.stocklevelmaster">
+                        <div class="max-h-32 overflow-y-auto pr-2">
+                            <div class="space-y-2">
+                                <div v-for="(batch, index) in parseStockLevelMaster(data.stock_level.stocklevelmaster)" 
+                                    :key="index"
+                                    class="p-2 bg-gray-50 rounded border border-gray-200">
+                                    <div class="flex justify-between items-center mb-1">
+                                        <span class="font-mono text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded">#{{ batch.batchno || `Batch ${index + 1}` }}</span>
+                                        <span class="font-bold">
+                                            {{ parseFloat(batch.stockbalance || batch.stockBalance || 0).toFixed(0) }} units
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="text-xs text-gray-500 mt-2 text-center">
+                            {{ parseStockLevelMaster(data.stock_level.stocklevelmaster).length }} batch(es)
+                            • Total: {{ calculateTotalFromBatches(data.stock_level.stocklevelmaster) }}
+                        </div>
+                    </template>
+                    <template v-else>
+                        <div class="text-center text-gray-400 italic py-2">No batch details</div>
+                    </template>
+                </template>
+            </Column> -->
+
+            <!-- Price Information -->
+            <Column header="Price(RM)" style="min-width: 15rem">
+                <template #body="{ data }">
+                    <div class="flex flex-col leading-relaxed text-sm text-gray-700">
+                        <div class="flex items-center justify-between mb-2 pb-1 border-b">
+                            <span class="text-gray-800 font-semibold">Current:</span>
+                            <span class="font-bold text-green-700 text-lg">
                                 {{ formatPrice(getCurrentPrice(data)) }}
                             </span>
                         </div>
                         
-                        <div v-if="data.price01" class="flex justify-between items-center">
-                            <span class="text-gray-500">P1:</span>
-                            <span>{{ formatPrice(data.price01) }}</span>
+                        <div v-if="data.price01 && data.price01 !== '0.00'" class="flex items-center justify-between">
+                            <span class="text-gray-600">Price 1:</span>
+                            <span class="font-medium">{{ formatPrice(data.price01) }}</span>
                         </div>
                         
-                        <div v-if="data.price02" class="flex justify-between items-center">
-                            <span class="text-gray-500">P2:</span>
-                            <span>{{ formatPrice(data.price02) }}</span>
+                        <div v-if="data.price02 && data.price02 !== '0.00'" class="flex items-center justify-between">
+                            <span class="text-gray-600">Price 2:</span>
+                            <span class="font-medium">{{ formatPrice(data.price02) }}</span>
                         </div>
                         
-                        <div v-if="data.price03" class="flex justify-between items-center">
-                            <span class="text-gray-500">P3:</span>
-                            <span>{{ formatPrice(data.price03) }}</span>
+                        <div v-if="data.price03 && data.price03 !== '0.00'" class="flex items-center justify-between">
+                            <span class="text-gray-600">Price 3:</span>
+                            <span class="font-medium">{{ formatPrice(data.price03) }}</span>
                         </div>
                         
-                        <div v-if="!data.price01 && !data.price02 && !data.price03" class="text-center text-gray-400 py-1">
+                        <div v-if="data.price04 && data.price04 !== '0.00'" class="flex items-center justify-between">
+                            <span class="text-gray-600">Price 4:</span>
+                            <span class="font-medium">{{ formatPrice(data.price04) }}</span>
+                        </div>
+                        
+                        <div v-if="data.price05 && data.price05 !== '0.00'" class="flex items-center justify-between">
+                            <span class="text-gray-600">Price 5:</span>
+                            <span class="font-medium">{{ formatPrice(data.price05) }}</span>
+                        </div>
+                        
+                        <div v-if="!data.price01 && !data.price02 && !data.price03 && !data.price04 && !data.price05" 
+                             class="text-center text-gray-400 py-2">
                             No price data
                         </div>
                     </div>
                 </template>
             </Column>
 
-            <!-- Stock Details (Batch Breakdown) -->
-            <Column header="Batch Details" style="min-width: 14rem">
+            <!-- Price Validity -->
+            <Column header="Valid" style="min-width: 8rem">
                 <template #body="{ data }">
-                    <template v-if="data.stock_level && data.stock_level.stocklevelmaster">
-                        <div class="max-h-40 overflow-y-auto pr-2">
-                            <div class="space-y-1">
-                                <div v-for="(batch, index) in (Array.isArray(parseStockLevelMaster(data.stock_level.stocklevelmaster)) 
-                                    ? parseStockLevelMaster(data.stock_level.stocklevelmaster) 
-                                    : [parseStockLevelMaster(data.stock_level.stocklevelmaster)])" 
-                                    :key="index"
-                                    class="flex justify-between items-center text-xs border-b border-gray-100 pb-1">
-                                    <div class="flex items-center gap-1">
-                                        <span class="font-mono bg-gray-100 px-1 rounded">#{{ batch.batchno || 'N/A' }}</span>
-                                        <span v-if="batch.stockbalance" class="text-gray-600">
-                                            ({{ parseFloat(batch.stockbalance).toFixed(0) }})
-                                        </span>
-                                    </div>
-                                    <span class="font-medium">
-                                        {{ parseFloat(batch.stockbalance || 0).toFixed(0) }} units
-                                    </span>
-                                </div>
-                            </div>
+                    <div class="flex flex-col leading-relaxed text-sm text-gray-700">
+                        <div v-if="data.price01_validitystartdate" class="flex">
+                            <span class="text-xs">{{ formatDate(data.price01_validitystartdate) }} - {{ formatDate(data.price_01_validityenddate) }}</span>
                         </div>
-                        <div class="text-xs text-gray-500 mt-1 text-center">
-                            {{ (Array.isArray(parseStockLevelMaster(data.stock_level.stocklevelmaster)) 
-                                ? parseStockLevelMaster(data.stock_level.stocklevelmaster).length 
-                                : 1) }} batch(es)
+                        <div v-if="data.price02_validitystartdate" class="flex">
+                            <span class="text-xs">{{ formatDate(data.price02_validitystartdate) }} - {{ formatDate(data.price_02_validityenddate) }}</span>
                         </div>
-                    </template>
-                    <template v-else>
-                        <div class="text-center text-gray-400 italic">No batch details</div>
-                    </template>
+                        <div v-if="data.price03_validitystartdate" class="flex">
+                            <span class="text-xs">{{ formatDate(data.price03_validitystartdate) }} - {{ formatDate(data.price_03_validityenddate) }}</span>
+                        </div>
+                        <div v-if="data.price04_validitystartdate" class="flex">
+                            <span class="text-xs">{{ formatDate(data.price04_validitystartdate) }} - {{ formatDate(data.price_04_validityenddate) }}</span>
+                        </div>
+                        <div v-if="data.price05_validitystartdate" class="flex">
+                            <span class="text-xs">{{ formatDate(data.price05_validitystartdate) }} - {{ formatDate(data.price_05_validityenddate) }}</span>
+                        </div>
+                        <div v-if="!data.price01_validitystartdate && !data.price02_validitystartdate && !data.price03_validitystartdate && !data.price04_validitystartdate && !data.price05_validitystartdate" 
+                             class="text-center text-gray-400 text-xs py-1">
+                            No validity dates
+                        </div>
+                    </div>
                 </template>
             </Column>
 
-            <!-- Product Info -->
-            <Column header="Product Info" style="min-width: 10rem">
+            <!-- Product Status -->
+            <Column header="Status" style="min-width: 10rem">
                 <template #body="{ data }">
-                    <div class="flex flex-col space-y-1 text-sm">
-                        <div class="flex justify-between">
-                            <span class="text-gray-600">Type:</span>
-                            <span class="font-medium">{{ data.materialtype }}</span>
+                    <div class="flex flex-col space-y-1">
+                        <div class="flex items-center justify-between">
+                            <span class="text-gray-600 text-sm">Sell:</span>
+                            <Tag :value="formatBoolean(data.isSell)" 
+                                 :severity="data.isSell ? 'success' : 'secondary'" 
+                                 class="text-xs" />
                         </div>
-                        <div class="flex justify-between">
-                            <span class="text-gray-600">Origin:</span>
-                            <span class="font-medium">{{ data.origin }}</span>
+                        <div class="flex items-center justify-between">
+                            <span class="text-gray-600 text-sm">Warranty:</span>
+                            <Tag :value="formatBoolean(data.isWarranty)" 
+                                 :severity="data.isWarranty ? 'info' : 'secondary'" 
+                                 class="text-xs" />
                         </div>
-                        <div class="flex justify-between">
-                            <span class="text-gray-600">Volume:</span>
-                            <span class="font-medium">{{ data.volume }}</span>
-                        </div>
-                        <div class="flex gap-2 mt-1">
-                            <Tag v-if="data.isSell" value="Sellable" severity="success" class="text-xs" />
-                            <Tag v-if="data.isWarranty" value="Warranty" severity="info" class="text-xs" />
-                            <Tag v-if="data.isTWP" value="TWP" severity="warning" class="text-xs" />
+                        <div class="flex items-center justify-between">
+                            <span class="text-gray-600 text-sm">TWP:</span>
+                            <Tag :value="formatBoolean(data.isTWP)" 
+                                 :severity="data.isTWP ? 'warning' : 'secondary'" 
+                                 class="text-xs" />
                         </div>
                     </div>
                 </template>
             </Column>
 
             <!-- Last Updated -->
-            <Column field="updated" header="Last Updated" style="min-width: 8rem" sortable>
+            <Column field="updated" header="Updated" style="min-width: 8rem" sortable>
                 <template #body="{ data }">
                     <div class="text-sm">
                         {{ formatDate(data.updated) }}
@@ -489,37 +719,66 @@ const getCurrentPrice = (material) => {
     </div>
 </template>
 
-<style scoped lang="scss">
-:deep(.p-datatable .p-datatable-thead > tr > th) {
-    background-color: #f8fafc;
-    font-weight: 600;
-    border-bottom: 2px solid #e5e7eb;
-}
-
+<style scoped>
 :deep(.rounded-table) {
     border-radius: 12px;
     overflow: hidden;
     border: 1px solid #e5e7eb;
-}
 
-:deep(.p-dropdown) {
-    min-width: 200px;
-}
+    .p-datatable-header {
+        border-top-left-radius: 12px;
+        border-top-right-radius: 12px;
+        background-color: #f8fafc;
+        padding: 1rem 1.5rem;
+    }
 
-:deep(.p-dropdown-item) {
-    padding: 0.5rem 1rem;
+    .p-paginator-bottom {
+        border-bottom-left-radius: 12px;
+        border-bottom-right-radius: 12px;
+    }
+
+    .p-datatable-thead > tr > th {
+        background-color: #f8fafc;
+        font-weight: 600;
+        color: #374151;
+        border-bottom: 2px solid #e5e7eb;
+        
+        &:first-child {
+            border-top-left-radius: 12px;
+        }
+        &:last-child {
+            border-top-right-radius: 12px;
+        }
+    }
+
+    .p-datatable-tbody > tr:last-child > td {
+        &:first-child {
+            border-bottom-left-radius: 0;
+        }
+        &:last-child {
+            border-bottom-right-radius: 0;
+        }
+    }
+
+    .p-datatable-tbody > tr.p-datatable-emptymessage > td {
+        border-bottom-left-radius: 12px;
+        border-bottom-right-radius: 12px;
+    }
 }
 
 /* Custom styling for stock status tags */
 :deep(.p-tag) {
     font-size: 0.75rem;
     padding: 0.125rem 0.5rem;
+    min-width: 70px;
+    text-align: center;
 }
 
 /* Scrollbar styling for batch details */
 :deep(.p-datatable-tbody) {
-    .batch-details-cell {
-        .scroll-container {
+    td {
+        .max-h-32 {
+            max-height: 8rem;
             &::-webkit-scrollbar {
                 width: 4px;
             }
@@ -540,17 +799,25 @@ const getCurrentPrice = (material) => {
 
 /* Highlight row based on stock level */
 :deep(.p-datatable-tbody > tr) {
-    &.low-stock {
-        background-color: #fef3c7 !important;
-        &:hover {
-            background-color: #fde68a !important;
-        }
+    transition: background-color 0.2s;
+    
+    &:hover {
+        background-color: #f9fafb !important;
     }
     
-    &.out-of-stock {
-        background-color: #fee2e2 !important;
-        &:hover {
-            background-color: #fecaca !important;
+    &[data-stock-balance] {
+        &[data-stock-balance="0"] {
+            background-color: #fef2f2 !important;
+            &:hover {
+                background-color: #fee2e2 !important;
+            }
+        }
+        
+        &[data-stock-balance*="low"] {
+            background-color: #fffbeb !important;
+            &:hover {
+                background-color: #fef3c7 !important;
+            }
         }
     }
 }
