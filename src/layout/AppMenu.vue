@@ -336,6 +336,11 @@ const model = ref([
                 icon: 'pi pi-fw pi-history',
                 to: '/sales/customerBackOrder'
             }, 
+            {
+                label: 'Material Stock Level',
+                icon: 'pi pi-fw pi-warehouse',
+                to: '/sales/materialStockLevel'
+            }, 
         ]
     },
     {

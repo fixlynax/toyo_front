@@ -781,6 +781,13 @@ const router = createRouter({
                     component: () => import('@/views/sales/detailCustomerBackOrder.vue')
                 },
 
+                // Material Stock Level
+                {
+                    path: 'sales/materialStockLevel',
+                    name: 'Material-Stock-Level',
+                    component: () => import('@/views/sales/materialStockLevel.vue')
+                },
+
                 // ===============================
                 // BILLING
                 // ===============================
