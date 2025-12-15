@@ -7,8 +7,10 @@
 
         <!-- Show content area when not in initial loading -->
         <div v-else>
+            <TabMenu :model="statusTabs" v-model:activeIndex="activeTabIndex" class="mb-6" />
+
             <DataTable
-                :value="listData"
+                :value="filteredUsers"
                 :paginator="true"
                 :rows="10"
                 :rowsPerPageOptions="[10, 25, 50, 100]"
@@ -133,8 +135,8 @@
                 </Column>
 
                 <Column field="status" header="Status" style="min-width: 6rem">
-                    <template #body="{ data }">
-                        <Tag :value="data.status === 0 ? 'Active' : 'Inactive'" :severity="getOverallStatusSeverity(data.status)" />
+                   <template #body="{ data }">
+                        <Tag :value="(data.status)" :severity="getOverallStatusSeverity(data.status)" />
                     </template>
                 </Column>
             </DataTable>
@@ -189,7 +191,7 @@ const fetchWarrantyData = async (body = null) => {
                 tyrespec: warranty.tyrespec || 'N/A',
                 weekcode: warranty.weekcode || 'N/A',
                 registered_on: warranty.registered_on || null,
-                status: warranty.status || 0
+                status: warranty.status 
             }));
         } else {
             listData.value = [];
@@ -225,6 +227,28 @@ onMounted(async () => {
     }
 });
 
+// Tabs for status filtering
+const statusTabs = ref([
+    { label: 'Active' }, 
+    { label: 'Claimed' },
+    { label: 'Expired' }
+]);
+const activeTabIndex = ref(0);
+
+// Computed: Filter listData based on active tab
+const filteredUsers = computed(() => {
+    switch (activeTabIndex.value) {
+        case 0: // All Users
+            return listData.value.filter((user) => user.status === 'Active');
+        case 1: // Active
+            return listData.value.filter((user) => user.status === 'Claimed');
+        case 2: // Inactive
+            return listData.value.filter((user) => user.status == 'Expired');
+        default:
+            return listData.value;
+    }
+});
+
 // 🟢 Helper Functions
 function formatDate(dateString) {
     if (!dateString || dateString === 'N/A') return 'N/A';
@@ -251,7 +275,10 @@ function formatDate(dateString) {
 }
 
 const getOverallStatusSeverity = (status) => {
-    return status === 0 ? 'success' : 'danger';
+    if (status === 'Active') return 'success'; // Fixed: was 'warn', should be 'warning'
+    if (status === 'Claimed') return 'warn';
+    if (status === 'Expired') return 'danger';
+    return 'secondary';
 };
 
 
