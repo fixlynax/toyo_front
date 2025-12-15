@@ -733,18 +733,6 @@ const router = createRouter({
                     component: () => import('@/views/sales/detailCustomerUser.vue')
                 },
 
-                // Customer Appointment
-                {
-                    path: 'sales/customerAppointment/',
-                    name: 'Appointment-List',
-                    component: () => import('@/views/sales/customerAppointment.vue')
-                },
-                {
-                    path: 'sales/detailCustomerAppointment/:id',
-                    name: 'detail-Appointment',
-                    component: () => import('@/views/sales/detailCustomerAppointment.vue')
-                },
-
                 // Customer Warranty Claim
                 {
                     path: 'sales/customerWarrantyClaim',
@@ -791,6 +779,13 @@ const router = createRouter({
                     path: 'sales/detailCustomerBackOrder/:boNo',
                     name: 'Detail-Customer-Back-Order',
                     component: () => import('@/views/sales/detailCustomerBackOrder.vue')
+                },
+
+                // Material Stock Level
+                {
+                    path: 'sales/materialStockLevel',
+                    name: 'Material-Stock-Level',
+                    component: () => import('@/views/sales/materialStockLevel.vue')
                 },
 
                 // ===============================

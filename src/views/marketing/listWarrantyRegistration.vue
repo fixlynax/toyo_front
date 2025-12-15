@@ -7,8 +7,10 @@
 
         <!-- Show content area when not in initial loading -->
         <div v-else>
+            <TabMenu :model="statusTabs" v-model:activeIndex="activeTabIndex" class="mb-6" />
+
             <DataTable
-                :value="listData"
+                :value="filteredUsers"
                 :paginator="true"
                 :rows="10"
                 :rowsPerPageOptions="[10, 25, 50, 100]"
@@ -43,19 +45,24 @@
                             </div>
                         </div>
 
-                        <!-- Second Row: Date Range Filter -->
-                        <div class="flex items-center gap-3 flex-wrap">
-                            <Calendar 
-                                v-model="dateRange" 
-                                selectionMode="range" 
-                                dateFormat="dd/mm/yy" 
-                                placeholder="Select date range" 
-                                style="width: 390px" 
-                                :showIcon="true"
-                                iconDisplay="input"
+                        <div class="flex items-center gap-4 mb-1 flex-wrap">
+                            <div class="flex items-center gap-2">
+                                <span class="text-sm font-medium text-gray-700">Date Range:</span>
+                                <div class="flex items-center gap-2">
+                                    <Calendar v-model="dateRange[0]" placeholder="Start Date" dateFormat="yy-mm-dd" showIcon class="w-40" :disabled="loading" />
+                                    <span class="text-gray-500">to</span>
+                                    <Calendar v-model="dateRange[1]"  placeholder="End Date" dateFormat="yy-mm-dd" showIcon class="w-40" :disabled="loading" />
+                                </div>
+                                <Button v-if="dateRange[0] || dateRange[1]"  icon="pi pi-times" class="p-button-text p-button-sm" @click="clearDate" title="Clear date filter" />
+                            </div>
+                            <Button 
+                                icon="pi pi-filter" 
+                                label="Filter" 
+                                class="p-button-primary p-button-sm" 
+                                @click="applyFilter" 
+                                :disabled="(dateRange[0] && !dateRange[1]) || (!dateRange[0] && dateRange[1])"
+                                :loading="loading"
                             />
-                            <Button label="Clear" class="p-button-sm p-button-primarry p-button-danger" @click="clearDate" />
-                            <Button label="Filter" class="p-button-sm p-button-primary" @click="applyFilter" />
                         </div>
                     </div>
                 </template>
@@ -128,8 +135,8 @@
                 </Column>
 
                 <Column field="status" header="Status" style="min-width: 6rem">
-                    <template #body="{ data }">
-                        <Tag :value="data.status === 0 ? 'Active' : 'Inactive'" :severity="getOverallStatusSeverity(data.status)" />
+                   <template #body="{ data }">
+                        <Tag :value="(data.status)" :severity="getOverallStatusSeverity(data.status)" />
                     </template>
                 </Column>
             </DataTable>
@@ -150,8 +157,8 @@ const listData = ref([]);
 const initialLoading = ref(true);
 const tableLoading = ref(false);
 const exportLoading = ref(false);
-const dateRange = ref(null);
-
+const dateRange = ref([null, null]);
+const loading = ref(false);
 const formatDateDMY = (date) => {
     const d = new Date(date);
     const day = String(d.getDate()).padStart(2, '0');
@@ -184,7 +191,7 @@ const fetchWarrantyData = async (body = null) => {
                 tyrespec: warranty.tyrespec || 'N/A',
                 weekcode: warranty.weekcode || 'N/A',
                 registered_on: warranty.registered_on || null,
-                status: warranty.status || 0
+                status: warranty.status 
             }));
         } else {
             listData.value = [];
@@ -205,7 +212,7 @@ const applyFilter = () => {
   fetchWarrantyData(body);
 };
 const clearDate = () => {
-  dateRange.value = null; // or []
+  dateRange.value = [null, null]; // or []
 };
 
 // 🟢 Initial load
@@ -217,6 +224,28 @@ onMounted(async () => {
         console.error('Error in initial load:', error);
     } finally {
         initialLoading.value = false;
+    }
+});
+
+// Tabs for status filtering
+const statusTabs = ref([
+    { label: 'Active' }, 
+    { label: 'Claimed' },
+    { label: 'Expired' }
+]);
+const activeTabIndex = ref(0);
+
+// Computed: Filter listData based on active tab
+const filteredUsers = computed(() => {
+    switch (activeTabIndex.value) {
+        case 0: // All Users
+            return listData.value.filter((user) => user.status === 'Active');
+        case 1: // Active
+            return listData.value.filter((user) => user.status === 'Claimed');
+        case 2: // Inactive
+            return listData.value.filter((user) => user.status == 'Expired');
+        default:
+            return listData.value;
     }
 });
 
@@ -246,7 +275,10 @@ function formatDate(dateString) {
 }
 
 const getOverallStatusSeverity = (status) => {
-    return status === 0 ? 'success' : 'danger';
+    if (status === 'Active') return 'success'; // Fixed: was 'warn', should be 'warning'
+    if (status === 'Claimed') return 'warn';
+    if (status === 'Expired') return 'danger';
+    return 'secondary';
 };
 
 

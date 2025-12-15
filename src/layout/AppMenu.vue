@@ -317,11 +317,6 @@ const model = ref([
                 to: '/sales/customerList'
             }, 
             {
-                label: 'Customer Appointment',
-                icon: 'pi pi-fw pi-book',
-                to: '/sales/customerAppointment'
-            }, 
-            {
                 label: 'Customer Warranty Claim',
                 icon: 'pi pi-fw pi-file',
                 to: '/sales/customerWarrantyClaim'
@@ -340,6 +335,11 @@ const model = ref([
                 label: 'Customer Back Order',
                 icon: 'pi pi-fw pi-history',
                 to: '/sales/customerBackOrder'
+            }, 
+            {
+                label: 'Material Stock Level',
+                icon: 'pi pi-fw pi-warehouse',
+                to: '/sales/materialStockLevel'
             }, 
         ]
     },

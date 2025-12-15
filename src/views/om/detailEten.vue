@@ -88,15 +88,14 @@
                         </div>
                     </div>
 
-                    <div class="card flex flex-col gap-4 w-full">
+                    <div class="card flex flex-col gap-1 w-full">
                         <!-- Header -->
                         <div class="flex items-center justify-between border-b pb-2 mb-4">
                             <div class="text-2xl font-bold text-gray-800">Ship To</div>
-                            <div></div>
                         </div>
 
                         <!-- Ship To Table -->
-                        <DataTable :value="shiptoList" :rows="5" dataKey="id" :rowHover="true" responsiveLayout="scroll" class="text-sm">
+                        <DataTable :value="shiptoList" :rows="5" dataKey="id" :rowHover="true" responsiveLayout="scroll" class="rounded-table">
                             <Column header="Company Name" style="min-width: 13rem">
                                 <template #body="{ data }">
                                     <span class="font-bold"> {{ data.custAccountNo }}<br /></span>
@@ -125,11 +124,18 @@
                             </Column>
                         </DataTable>
                     </div>
-                    <div class="card flex flex-col gap-4 w-full">
+                    <div class="card flex flex-col gap-1 w-full">
                         <!-- Header -->
                         <div class="flex items-center justify-between border-b pb-2 mb-4">
                             <div class="text-2xl font-bold text-gray-800">User List</div>
                             <div class="inline-flex items-center gap-2">
+                                <!-- Search Input -->
+                                    <IconField class="flex-1">
+                                        <InputIcon>
+                                            <i class="pi pi-search" />
+                                        </InputIcon>
+                                        <InputText v-model="userSearchTerm" placeholder="Search users..." class="p-inputtext-sm" @input="onUserSearch" />
+                                    </IconField>
                                 <RouterLink :to="`/om/createUserEten/${form.custAccountNo}`">
                                     <Button label="Create" class="p-button-info" size="small" />
                                 </RouterLink>
@@ -137,7 +143,18 @@
                         </div>
 
                         <!-- User Table -->
-                        <DataTable :value="users" :rows="5" dataKey="id" :rowHover="true" responsiveLayout="scroll" class="text-sm">
+                        <DataTable
+                            :value="filteredUsers"
+                            :rows="5"
+                            dataKey="id"
+                            :rowHover="true"
+                            responsiveLayout="scroll"
+                            class="rounded-table"
+                            :paginator="true"
+                            :rowsPerPageOptions="[5, 10, 20, 50]"
+                            paginatorTemplate="FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink CurrentPageReport RowsPerPageDropdown"
+                            currentPageReportTemplate="Showing {first} to {last} of {totalRecords} users"
+                        >
                             <Column header="User Info" style="min-width: 1rem">
                                 <template #body="{ data }">
                                     <div class="flex flex-col">
@@ -182,6 +199,15 @@
                                 </template>
                             </Column>
                         </DataTable>
+                    </div>
+
+                    <!-- Forecast vs Actual Chart -->
+                    <div class="card flex flex-col w-full">
+                        <div class="text-2xl font-bold text-gray-800 border-b pb-2 mb-3">Forecast vs Actual Comparison</div>
+                        <div v-if="salesForecast && salesForecast.comparison" class="h-[30rem]">
+                            <Chart type="bar" :data="chartData" :options="chartOptions" class="h-full" />
+                        </div>
+                        <div v-else class="h-[30rem] flex items-center justify-center text-gray-500">No forecast data available</div>
                     </div>
                 </div>
             </div>
@@ -318,15 +344,6 @@
                     </div>
                 </div>
 
-                <!-- Forecast vs Actual Chart -->
-                <div class="card flex flex-col w-full">
-                    <div class="text-2xl font-bold text-gray-800 border-b pb-2 mb-3">Forecast vs Actual Comparison</div>
-                    <div v-if="salesForecast && salesForecast.comparison" class="h-[30rem]">
-                        <Chart type="bar" :data="chartData" :options="chartOptions" class="h-full" />
-                    </div>
-                    <div v-else class="h-[30rem] flex items-center justify-center text-gray-500">No forecast data available</div>
-                </div>
-
                 <!-- Finance Document -->
                 <div class="card flex flex-col w-full">
                     <!-- Title -->
@@ -388,7 +405,7 @@
 <script setup>
 import api from '@/service/api';
 import { useToast } from 'primevue/usetoast';
-import { onMounted, ref, watch } from 'vue';
+import { onMounted, ref, watch, computed } from 'vue';
 import { useRoute } from 'vue-router';
 
 const toast = useToast();
@@ -403,9 +420,30 @@ const loading = ref(false);
 const isSuspended = ref(false);
 const loadingPullSAP = ref(false);
 
+// User search functionality
+const userSearchTerm = ref('');
+
 // Chart data
 const chartData = ref();
 const chartOptions = ref();
+
+// Computed property for filtered users
+const filteredUsers = computed(() => {
+    if (!userSearchTerm.value.trim()) {
+        return users.value;
+    }
+
+    const searchTerm = userSearchTerm.value.toLowerCase().trim();
+    return users.value.filter((user) => {
+        return (
+            (user.firstName && user.firstName.toLowerCase().includes(searchTerm)) ||
+            (user.lastName && user.lastName.toLowerCase().includes(searchTerm)) ||
+            (user.emailAddress && user.emailAddress.toLowerCase().includes(searchTerm)) ||
+            (user.countryCode && user.countryCode.toLowerCase().includes(searchTerm)) ||
+            (user.mobileNumber && user.mobileNumber.includes(searchTerm))
+        );
+    });
+});
 
 // Helper functions to combine customer name and address
 const getCustomerName = () => {
@@ -442,6 +480,11 @@ const getShipToAddress = (data) => {
     if (data.addressLine3) parts.push(data.addressLine3);
     if (data.addressLine4) parts.push(data.addressLine4);
     return parts.join(' ');
+};
+
+// User search handler
+const onUserSearch = () => {
+    // Search is handled by computed property
 };
 
 // Pull SAP Data function
@@ -613,6 +656,13 @@ const setChartData = () => {
     const documentStyle = getComputedStyle(document.documentElement);
     const comparison = salesForecast.value.comparison;
 
+    // Calculate target sales line position
+    const targetSalesValue = form.value.targetQty ? form.value.targetQty / 3 : 0;
+
+    // Find the maximum value for proper positioning
+    const allValues = Object.values(comparison).flatMap((item) => [item.forecast, item.actual]);
+    const maxValue = Math.max(...allValues, targetSalesValue);
+
     return {
         labels: Object.keys(comparison),
         datasets: [
@@ -633,6 +683,18 @@ const setChartData = () => {
                 borderRadius: 16,
                 borderSkipped: false,
                 data: Object.values(comparison).map((item) => item.actual)
+            },
+            // Target Sales Line Dataset (as annotation line)
+            {
+                type: 'line',
+                label: 'Target Sales',
+                borderColor: '#FF6B6B',
+                borderWidth: 3,
+                borderDash: [5, 5],
+                fill: false,
+                pointRadius: 0,
+                pointHoverRadius: 0,
+                data: Object.keys(comparison).map(() => targetSalesValue)
             }
         ]
     };
@@ -680,10 +742,16 @@ const setChartOptions = () => {
                     label: function (context) {
                         const label = context.dataset.label || '';
                         const value = context.parsed.x;
+
+                        // Don't show label for target sales line in tooltip
+                        if (context.datasetIndex === 2) {
+                            return '';
+                        }
+
                         return `${label}: ${value}`;
                     },
                     afterBody: function (context) {
-                        if (context.length === 2) {
+                        if (context.length >= 2 && context[0].datasetIndex !== 2) {
                             const forecast = context[0].parsed.x;
                             const actual = context[1].parsed.x;
                             const difference = actual - forecast;
@@ -694,12 +762,46 @@ const setChartOptions = () => {
                         return [];
                     },
                     labelColor: function (context) {
+                        // Don't show color box for target sales line
+                        if (context.datasetIndex === 2) {
+                            return {
+                                borderColor: 'transparent',
+                                backgroundColor: 'transparent',
+                                borderWidth: 0,
+                                borderRadius: 0
+                            };
+                        }
                         return {
                             borderColor: context.dataset.borderColor,
                             backgroundColor: context.dataset.backgroundColor,
                             borderWidth: 2,
                             borderRadius: 2
                         };
+                    }
+                }
+            },
+            annotation: {
+                annotations: {
+                    targetLine: {
+                        type: 'line',
+                        yMin: 0,
+                        yMax: 1,
+                        xMin: form.value.targetQty ? form.value.targetQty / 3 : 0,
+                        xMax: form.value.targetQty ? form.value.targetQty / 3 : 0,
+                        borderColor: '#FF6B6B',
+                        borderWidth: 3,
+                        borderDash: [5, 5],
+                        label: {
+                            content: `Target: ${form.value.targetQty ? (form.value.targetQty / 3).toFixed(2) : '0'}`,
+                            enabled: true,
+                            position: 'top',
+                            backgroundColor: 'rgba(255, 107, 107, 0.8)',
+                            color: '#fff',
+                            font: {
+                                size: 11,
+                                weight: 'bold'
+                            }
+                        }
                     }
                 }
             }
@@ -747,10 +849,15 @@ const setChartOptions = () => {
                 hoverBackgroundColor: function (context) {
                     if (context.datasetIndex === 0) {
                         return '#004a80';
-                    } else {
+                    } else if (context.datasetIndex === 1) {
                         return '#8ecaff';
                     }
+                    return null;
                 }
+            },
+            line: {
+                tension: 0,
+                fill: false
             }
         },
         barPercentage: 0.7,
@@ -777,3 +884,43 @@ watch(
     }
 );
 </script>
+<style scoped>
+:deep(.rounded-table) {
+    border-radius: 12px;
+    overflow: hidden;
+    border: 1px solid #e5e7eb;
+
+    .p-datatable-header {
+        border-top-left-radius: 12px;
+        border-top-right-radius: 12px;
+    }
+
+    .p-paginator-bottom {
+        border-bottom-left-radius: 12px;
+        border-bottom-right-radius: 12px;
+    }
+
+    .p-datatable-thead > tr > th {
+        &:first-child {
+            border-top-left-radius: 12px;
+        }
+        &:last-child {
+            border-top-right-radius: 12px;
+        }
+    }
+
+    .p-datatable-tbody > tr:last-child > td {
+        &:first-child {
+            border-bottom-left-radius: 0;
+        }
+        &:last-child {
+            border-bottom-right-radius: 0;
+        }
+    }
+
+    .p-datatable-tbody > tr.p-datatable-emptymessage > td {
+        border-bottom-left-radius: 12px;
+        border-bottom-right-radius: 12px;
+    }
+}
+</style>
