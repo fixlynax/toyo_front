@@ -1482,7 +1482,8 @@ const fetchCustomers = async () => {
     try {
         console.log('Fetching customers...');
         const response = await api.post('list_dealer', {
-            mainBranch: 0
+            // mainBranch: 0
+            tabs: 'ORDER'
         });
 
         console.log('Customers API Response:', response.data);
