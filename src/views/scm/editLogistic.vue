@@ -238,10 +238,9 @@ const submitForm  = async () => {
     formData.append('mobileno', form.mobileno);
     formData.append('status', form.status);
     formData.append('storage_list', JSON.stringify(form.storage_list));
-    console.log('FormData contents:');
-    for (const [key, value] of formData.entries()) {
-        console.log(key, value);
-    }
+    // for (const [key, value] of formData.entries()) {
+    //     console.log(key, value);
+    // }
     try {
         loading.value = true;
         const id = route.params.id;

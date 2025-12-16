@@ -30,7 +30,6 @@ const passwordForm = ref({
 watch(
     forceReset,
     (newValue) => {
-        console.log('Force Reset changed:', newValue);
         if (newValue === 1) {
             // Show force reset dialog
             showForceResetDialog.value = true;

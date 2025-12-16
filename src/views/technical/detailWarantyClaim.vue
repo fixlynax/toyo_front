@@ -601,7 +601,17 @@
                 </div>
                 <div class="field">
                     <label class="block font-bold text-gray-700 mb-2">Pattern*</label>
-                     <InputText v-model="editTireData.pattern" @input="editTireData.pattern = editTireData.pattern?.toUpperCase()" class="w-full" maxlength="3" />
+                    <Dropdown
+                        v-model="editTireData.pattern"
+                        :options="patternOptions"
+                        optionLabel="label"
+                        optionValue="value"
+                        placeholder="Select Pattern"
+                        class="w-full"
+                        filter
+                        @change="onPatternChange"
+                    />
+                     <!-- <InputText v-model="editTireData.pattern" @input="editTireData.pattern = editTireData.pattern?.toUpperCase()" class="w-full" maxlength="3" /> -->
                     <small v-if="(!editTireData.pattern) && editValidationTire" class="text-red-600">Pattern is required.</small>
                 </div>
                 <div class="field">
@@ -612,7 +622,17 @@
             </div>
             <div class="field">
                 <label class="block font-bold text-gray-700 mb-2">Material Description *</label>
-                    <InputText v-model="editTireData.desc" @input="editTireData.desc = editTireData.desc?.toUpperCase()" class="w-full"/>
+                    <Dropdown
+                        v-model="editTireData.desc"
+                        :options="descOptions"
+                        optionLabel="label"
+                        optionValue="value"
+                        placeholder="Select Material Description"
+                        class="w-full"
+                        :disabled="!editTireData.pattern"
+                        filter
+                    />
+                    <!-- <InputText v-model="editTireData.desc" @input="editTireData.desc = editTireData.desc?.toUpperCase()" class="w-full"/> -->
                 <small v-if="(!editTireData.desc) && editValidationTire" class="text-red-600">Material Description is required.</small>
             </div>
         </div>
@@ -920,10 +940,51 @@ const editTireData = reactive({
     sizecode: '',
     tyrespec: '',
     weekcode: '',
-    desc:     '',
-    pattern:   '',
+    desc:     null,
+    pattern:   null,
     mileage:   0,
 });
+const mappingEditTireData = reactive({
+    mfgcode: '',
+    sizecode: '',
+    tyrespec: '',
+    weekcode: '',
+    desc:     null,
+    pattern:   null,
+    mileage:   0,
+});
+const patternOptions = computed(() => {
+    if (!listPattern.value) return [];
+
+    return Object.keys(listPattern.value).map(key => ({
+        label: key,
+        value: key
+    }));
+});
+
+// Desc options depend on selected pattern
+const descOptions = computed(() => {
+    if (!editTireData.pattern || !listPattern.value) {
+        return [];
+    }
+    return (listPattern.value[editTireData.pattern] || []).map(item => ({
+        label: item,
+        value: item
+    }));
+});
+
+// Reset desc when pattern changes
+const onPatternChange = () => {
+    editTireData.desc = null;
+};
+
+const mapPatternFromCode = (code) => {
+    if (!code || !listPattern.value) return null;
+
+    return Object.keys(listPattern.value)
+        .find(key => key.startsWith(code)) || null;
+};
+
 const rejectInvoiceRemarks = reactive({
     remarks: '',
 });
@@ -966,6 +1027,7 @@ const scrapImages = ref([]);
 const submittedPhotos = ref([]);
 const TireDepthImages = ref([]);
 const listMaterial = ref([]);
+const listPattern = ref([]);
 const selectedMaterial = ref(null);
 
 const listDamageType = [
@@ -1073,6 +1135,7 @@ const closeCreateClaimDialog = () => {
 
 const openEditTier = () => {
     showEditTireDialog.value = true;
+    Object.assign(editTireData, mappingEditTireData);
     // Reset form data
     editTire.value = false;
     editValidationTire.value = false;
@@ -1109,12 +1172,12 @@ const submitEditTire = async () => {
         const formData = new FormData();
         formData.append('plateSerial', plateSerialValue);
         formData.append('description', editTireData.desc);
-        formData.append('pattern', editTireData.pattern);
+        formData.append('pattern', editTireData.pattern ? editTireData.pattern.slice(0, 3) : '');
         formData.append('mileage', editTireData.mileage);
 
-        for (let [key, value] of formData.entries()) {
-            console.log(key, value);
-        }
+        // for (let [key, value] of formData.entries()) {
+        //     console.log(key, value);
+        // }
         const id = route.params.id;
         const response = await api.post(`warranty_claim/updatePlateSerial/${id}`,formData);
 
@@ -1251,6 +1314,31 @@ const fetchMaterial = async () => {
             severity: 'error',
             summary: 'Error',
             detail: 'Failed to load materials',
+            life: 3000
+        });
+    }
+};
+const fetchPattern = async () => {
+    try {
+        const id = route.params.id; // Use actual claim ID
+        const response = await api.get(`getPatternMaterial`);
+
+        if (response.data.status === 1) {
+            listPattern.value = response.data.admin_data;
+        } else {
+            toast.add({
+                severity: 'error',
+                summary: 'Error',
+                detail: 'No Pattern Found',
+                life: 3000
+            });
+        }
+    } catch (error) {
+        console.error('Error Pattern material:', error);
+        toast.add({
+            severity: 'error',
+            summary: 'Error',
+            detail: 'Failed to load pattern',
             life: 3000
         });
     }
@@ -1472,22 +1560,22 @@ const fetchWarrantyClaim = async () => {
                     AdminplatePart2 = parts[1] || "-";
                     AdminplatePart3 = parts[2] || "-";
                     AdminplatePart4 = parts[3] || "-";
-                    editTireData.mfgcode = AdminplatePart1;
-                    editTireData.sizecode = AdminplatePart2;
-                    editTireData.tyrespec = AdminplatePart3;
-                    editTireData.weekcode = AdminplatePart4;
-                    editTireData.desc = tireInfo?.descriptionAdmin;
-                    editTireData.pattern = tireInfo?.patternAdmin;
-                    editTireData.mileage = tireInfo?.mileageAdmin;
+                    mappingEditTireData.mfgcode = AdminplatePart1;
+                    mappingEditTireData.sizecode = AdminplatePart2;
+                    mappingEditTireData.tyrespec = AdminplatePart3;
+                    mappingEditTireData.weekcode = AdminplatePart4;
+                    mappingEditTireData.desc = tireInfo?.descriptionAdmin;
+                    mappingEditTireData.pattern = mapPatternFromCode(tireInfo?.patternAdmin);
+                    mappingEditTireData.mileage = tireInfo?.mileageAdmin;
                 }
             }else{
-                    editTireData.mfgcode = platePart1;
-                    editTireData.sizecode = platePart2;
-                    editTireData.tyrespec = platePart3;
-                    editTireData.weekcode = platePart4;
-                    editTireData.desc = tireInfo?.desc;
-                    editTireData.pattern = tireInfo?.pattern;
-                    editTireData.mileage = tireInfo?.mileage;
+                    mappingEditTireData.mfgcode = platePart1;
+                    mappingEditTireData.sizecode = platePart2;
+                    mappingEditTireData.tyrespec = platePart3;
+                    mappingEditTireData.weekcode = platePart4;
+                    mappingEditTireData.desc = tireInfo?.desc;
+                    mappingEditTireData.pattern = mapPatternFromCode(tireInfo?.pattern);
+                    mappingEditTireData.mileage = tireInfo?.mileage;
             }
             warantyDetail.value = {
                 // Claim Info
@@ -2463,5 +2551,6 @@ onMounted(() => {
     fetchWarrantyClaim();
     fetchMaterial();
     fetchRejectReasons();
+    fetchPattern();
 });
 </script>
