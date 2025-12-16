@@ -75,8 +75,8 @@
                         <!-- Sub: otherwise -->
                         <span v-else class="text-[10px] font-semibold text-white bg-green-700 px-2 py-[2px] rounded shadow-sm"> Sub </span>
                     </div>
-                </template></Column
-            >
+                </template>
+            </Column>
 
             <Column field="companyName1" header="Company Name" style="min-width: 8rem" />
 
