@@ -9,6 +9,7 @@ import { useMenuStore } from '../store/menu';
 
 const menuStore = useMenuStore();
 const adminName = computed(() => menuStore.adminName); 
+const forceReset = computed(() => menuStore.forceReset); 
 const { toggleMenu } = useLayout();
 const router = useRouter();
 const confirm = useConfirm();
