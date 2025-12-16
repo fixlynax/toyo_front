@@ -419,28 +419,6 @@ const formatBoolean = (value) => {
 
                     <!-- Right: Export Button & Stock Summary -->
                     <div class="flex items-center gap-4 ml-auto">
-                        <!-- Stock Summary -->
-                        <div class="flex items-center gap-4 bg-gray-50 px-4 py-2 rounded-lg border">
-                            <!-- <div class="flex items-center gap-2">
-                                <span class="text-sm font-medium text-gray-700">Total:</span>
-                                <span class="font-bold text-gray-800">{{ stockSummary.total }}</span>
-                            </div> -->
-                            <div class="flex items-center gap-2">
-                                <i class="pi pi-check-circle text-green-600"></i>
-                                <span class="text-sm font-medium text-gray-700">In Stock:</span>
-                                <span class="font-bold text-green-600">{{ stockSummary.inStock }}</span>
-                            </div>
-                            <div class="flex items-center gap-2">
-                                <i class="pi pi-exclamation-triangle text-yellow-600"></i>
-                                <span class="text-sm font-medium text-gray-700">Low:</span>
-                                <span class="font-bold text-yellow-600">{{ stockSummary.lowStock }}</span>
-                            </div>
-                            <div class="flex items-center gap-2">
-                                <i class="pi pi-times-circle text-red-600"></i>
-                                <span class="text-sm font-medium text-gray-700">Out:</span>
-                                <span class="font-bold text-red-600">{{ stockSummary.outOfStock }}</span>
-                            </div>
-                        </div>
                         
                         <!-- Export Button -->
                         <Button 
@@ -513,23 +491,23 @@ const formatBoolean = (value) => {
             </Column>
 
             <!-- Size Details -->
-            <Column header="Size" style="min-width: 10rem" sortable :sort-field="'sectionwidth'">
+            <Column header="Size" style="min-width: 12rem" sortable :sort-field="'sectionwidth'">
                 <template #body="{ data }">
                     <div class="flex flex-col leading-relaxed text-sm text-gray-700">
-                        <div class="flex">
-                            <span class="w-18 text-gray-800 font-semibold">Section Width:</span>
+                        <div class="flex items-center justify-between mb-2">
+                            <span class="text-gray-800 font-semibold">Section Width:</span>
                             <span>{{ data.sectionwidth }}</span>
                         </div>
-                        <div class="flex">
-                            <span class="w-15 text-gray-800 font-semibold">Tyre Series:</span>
+                        <div class="flex items-center justify-between mb-2">
+                            <span class="text-gray-800 font-semibold">Tyre Series:</span>
                             <span>{{ data.tireseries }}</span>
                         </div>
-                        <div class="flex">
-                            <span class="w-15 text-gray-800 font-semibold">Rim Diameter:</span>
+                        <div class="flex items-center justify-between mb-2">
+                            <span class="text-gray-800 font-semibold">Rim Diameter:</span>
                             <span>{{ data.rimdiameter }}"</span>
                         </div>
-                        <div class="flex">
-                            <span class="w-15 text-gray-800 font-semibold">Speed Rating:</span>
+                        <div class="flex items-center justify-between mb-2">
+                            <span class="text-gray-800 font-semibold">Speed Rating:</span>
                             <span>{{ data.speedplyrating }}</span>
                         </div>
                     </div>
@@ -541,7 +519,7 @@ const formatBoolean = (value) => {
                 <template #body="{ data }">
                     <template v-if="data.stock_level">
                         <div class="flex flex-col leading-relaxed text-sm text-gray-700">
-                            <div class="flex items-center justify-between mb-1">
+                            <div class="flex items-center justify-between mb-2">
                                 <span class="text-gray-800 font-semibold">Balance:</span>
                                 <div class="flex items-center gap-2">
                                     <span :class="{
@@ -557,19 +535,19 @@ const formatBoolean = (value) => {
                                          class="text-xs" />
                                 </div>
                             </div>
-                            <div class="flex">
+                            <div class="flex items-center justify-between mb-2">
                                 <span class="w-20 text-gray-600">Location:</span>
                                 <span class="font-medium">{{ data.stock_level.storagelocation }}</span>
                             </div>
-                            <div class="flex">
+                            <div class="flex items-center justify-between mb-2">
                                 <span class="w-20 text-gray-600">Plant:</span>
                                 <span class="font-medium">{{ data.stock_level.plant }}</span>
                             </div>
-                            <div class="flex">
+                            <div class="flex items-center justify-between mb-2">
                                 <span class="w-20 text-gray-600">DOM:</span>
                                 <span class="font-medium">{{ data.stock_level.DOM || '-' }}</span>
                             </div>
-                            <div class="flex">
+                            <div class="flex items-center justify-between mb-2">
                                 <span class="w-20 text-gray-600">Updated:</span>
                                 <span class="font-medium text-xs">{{ formatDate(data.stock_level.updated) }}</span>
                             </div>
@@ -613,30 +591,23 @@ const formatBoolean = (value) => {
             <!-- Price Information -->
             <Column header="Price(RM)" style="min-width: 15rem">
                 <template #body="{ data }">
-                    <div class="flex flex-col leading-relaxed text-sm text-gray-700">
-                        <div class="flex items-center justify-between mb-2 pb-1 border-b">
-                            <span class="text-gray-800 font-semibold">Current:</span>
-                            <span class="font-bold text-green-700 text-lg">
-                                {{ formatPrice(getCurrentPrice(data)) }}
-                            </span>
-                        </div>
-                        
-                        <div v-if="data.price01 && data.price01 !== '0.00'" class="flex items-center justify-between">
+                    <div class="flex flex-col leading-relaxed text-sm text-gray-700">      
+                        <div v-if="data.price01 && data.price01 !== '0.00'" class="flex items-center justify-between mb-2">
                             <span class="text-gray-600">Price 1:</span>
                             <span class="font-medium">{{ formatPrice(data.price01) }}</span>
                         </div>
                         
-                        <div v-if="data.price02 && data.price02 !== '0.00'" class="flex items-center justify-between">
+                        <div v-if="data.price02 && data.price02 !== '0.00'" class="flex items-center justify-between mb-2">
                             <span class="text-gray-600">Price 2:</span>
                             <span class="font-medium">{{ formatPrice(data.price02) }}</span>
                         </div>
                         
-                        <div v-if="data.price03 && data.price03 !== '0.00'" class="flex items-center justify-between">
+                        <div v-if="data.price03 && data.price03 !== '0.00'" class="flex items-center justify-between mb-2">
                             <span class="text-gray-600">Price 3:</span>
                             <span class="font-medium">{{ formatPrice(data.price03) }}</span>
                         </div>
                         
-                        <div v-if="data.price04 && data.price04 !== '0.00'" class="flex items-center justify-between">
+                        <div v-if="data.price04 && data.price04 !== '0.00'" class="flex items-center justify-between mb-2">
                             <span class="text-gray-600">Price 4:</span>
                             <span class="font-medium">{{ formatPrice(data.price04) }}</span>
                         </div>
@@ -658,20 +629,20 @@ const formatBoolean = (value) => {
             <Column header="Valid" style="min-width: 8rem">
                 <template #body="{ data }">
                     <div class="flex flex-col leading-relaxed text-sm text-gray-700">
-                        <div v-if="data.price01_validitystartdate" class="flex">
-                            <span class="text-xs">{{ formatDate(data.price01_validitystartdate) }} - {{ formatDate(data.price_01_validityenddate) }}</span>
+                        <div v-if="data.price01_validitystartdate" class="flex mb-2">
+                            <span >{{ formatDate(data.price01_validitystartdate) }} - {{ formatDate(data.price_01_validityenddate) }}</span>
                         </div>
-                        <div v-if="data.price02_validitystartdate" class="flex">
-                            <span class="text-xs">{{ formatDate(data.price02_validitystartdate) }} - {{ formatDate(data.price_02_validityenddate) }}</span>
+                        <div v-if="data.price02_validitystartdate" class="flex mb-2">
+                            <span >{{ formatDate(data.price02_validitystartdate) }} - {{ formatDate(data.price_02_validityenddate) }}</span>
                         </div>
-                        <div v-if="data.price03_validitystartdate" class="flex">
-                            <span class="text-xs">{{ formatDate(data.price03_validitystartdate) }} - {{ formatDate(data.price_03_validityenddate) }}</span>
+                        <div v-if="data.price03_validitystartdate" class="flex mb-2">
+                            <span >{{ formatDate(data.price03_validitystartdate) }} - {{ formatDate(data.price_03_validityenddate) }}</span>
                         </div>
-                        <div v-if="data.price04_validitystartdate" class="flex">
-                            <span class="text-xs">{{ formatDate(data.price04_validitystartdate) }} - {{ formatDate(data.price_04_validityenddate) }}</span>
+                        <div v-if="data.price04_validitystartdate" class="flex mb-2">
+                            <span >{{ formatDate(data.price04_validitystartdate) }} - {{ formatDate(data.price_04_validityenddate) }}</span>
                         </div>
                         <div v-if="data.price05_validitystartdate" class="flex">
-                            <span class="text-xs">{{ formatDate(data.price05_validitystartdate) }} - {{ formatDate(data.price_05_validityenddate) }}</span>
+                            <span >{{ formatDate(data.price05_validitystartdate) }} - {{ formatDate(data.price_05_validityenddate) }}</span>
                         </div>
                         <div v-if="!data.price01_validitystartdate && !data.price02_validitystartdate && !data.price03_validitystartdate && !data.price04_validitystartdate && !data.price05_validitystartdate" 
                              class="text-center text-gray-400 text-xs py-1">
@@ -688,7 +659,7 @@ const formatBoolean = (value) => {
                         <div class="flex items-center justify-between">
                             <span class="text-gray-600 text-sm">Sell:</span>
                             <Tag :value="formatBoolean(data.isSell)" 
-                                 :severity="data.isSell ? 'success' : 'secondary'" 
+                                 :severity="data.isSell ? 'info' : 'secondary'" 
                                  class="text-xs" />
                         </div>
                         <div class="flex items-center justify-between">
@@ -700,7 +671,7 @@ const formatBoolean = (value) => {
                         <div class="flex items-center justify-between">
                             <span class="text-gray-600 text-sm">TWP:</span>
                             <Tag :value="formatBoolean(data.isTWP)" 
-                                 :severity="data.isTWP ? 'warning' : 'secondary'" 
+                                 :severity="data.isTWP ? 'info' : 'secondary'" 
                                  class="text-xs" />
                         </div>
                     </div>
