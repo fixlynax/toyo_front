@@ -352,7 +352,7 @@ const formatBoolean = (value) => {
 
 <template>
     <div class="card">
-        <div class="text-2xl font-bold text-gray-800 border-b pb-2">Material Stock Levels</div>
+        <div class="text-2xl font-bold text-gray-800 border-b pb-2 mb-4">Material Stock Level</div>
 
         <LoadingPage v-if="loading" :message="'Loading Material Stock...'" :sub-message="'Fetching stock levels from warehouse'" />
 

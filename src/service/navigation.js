@@ -7,5 +7,7 @@ export async function fetchNavigation() {
     menu: response.data.data.navbar,       
     permissions: response.data.data.permission,
     role: response.data.data.role,   
+    isManager: response.data.data.isManager,   
+    forceReset: response.data.data.forceReset,   
   };
 }

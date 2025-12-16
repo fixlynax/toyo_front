@@ -77,18 +77,17 @@ const model = ref([
             {
                 label: 'Report',
                 icon: 'pi pi-fw pi-chart-bar',
-                 to: '/marketing/reportMember'
-                    // {
-                    //     label: 'Member',
-                    //     icon: 'pi pi-fw pi-user',
-                    //     to: '/marketing/reportMember'
-                    // },
-                    // {
-                    //     label: 'Referral',
-                    //     icon: 'pi pi-fw pi-users',
-                    //     to: '/marketing/reportReferral'
-                    // }
-           
+                to: '/marketing/reportMember'
+                // {
+                //     label: 'Member',
+                //     icon: 'pi pi-fw pi-user',
+                //     to: '/marketing/reportMember'
+                // },
+                // {
+                //     label: 'Referral',
+                //     icon: 'pi pi-fw pi-users',
+                //     to: '/marketing/reportReferral'
+                // }
             }
         ]
     },
@@ -183,6 +182,11 @@ const model = ref([
                 label: 'Return Order',
                 icon: 'pi pi-fw pi-reply',
                 to: '/om/listReturnOrder'
+            },
+            {
+                label: 'Failed Order',
+                icon: 'pi pi-fw pi-times-circle',
+                to: '/om/listFailOrder'
             },
             {
                 label: 'Report',
@@ -315,32 +319,64 @@ const model = ref([
                 label: 'Customer List',
                 icon: 'pi pi-fw pi-users',
                 to: '/sales/customerList'
-            }, 
+            },
             {
                 label: 'Customer Warranty Claim',
                 icon: 'pi pi-fw pi-file',
                 to: '/sales/customerWarrantyClaim'
-            }, 
+            },
             {
                 label: 'Customer Order',
                 icon: 'pi pi-fw pi-shopping-cart',
                 to: '/sales/customerOrder'
-            }, 
+            },
             {
                 label: 'Customer Return Order',
                 icon: 'pi pi-fw pi-reply',
                 to: '/sales/customerReturnOrder'
-            }, 
+            },
             {
                 label: 'Customer Back Order',
                 icon: 'pi pi-fw pi-history',
                 to: '/sales/customerBackOrder'
-            }, 
+            },
             {
                 label: 'Material Stock Level',
                 icon: 'pi pi-fw pi-warehouse',
                 to: '/sales/materialStockLevel'
-            }, 
+            },
+            {
+                label: 'Credit Control',
+                icon: 'pi pi-fw pi-folder-open',
+                items: [
+                    {
+                        label: 'Account Detail',
+                        icon: 'pi pi-fw pi-id-card',
+                        to: '/sales/listAccountDetailSales'
+                    },
+                    {
+                        label: 'E-Invoice ',
+                        icon: 'pi pi-fw pi-file',
+                        to: '/sales/listBillingSales'
+                    },
+
+                    {
+                        label: 'Self Bill E-Invoice',
+                        icon: 'pi pi-fw pi-file-check',
+                        to: '/sales/listEbillingSales'
+                    },
+                    {
+                        label: 'Statement',
+                        icon: 'pi pi-fw pi-receipt',
+                        to: '/sales/listStatementSales'
+                    },
+                    {
+                        label: 'Others',
+                        icon: 'pi pi-fw pi-file-plus',
+                        to: '/sales/listOtherSales'
+                    }
+                ]
+            }
         ]
     },
     {
@@ -386,7 +422,6 @@ const model = ref([
             }
         ]
     },
-    
 
     {
         label: 'Credit Control',
@@ -415,7 +450,7 @@ const model = ref([
             },
             {
                 label: 'Others',
-                icon: 'pi pi-fw pi-folder',
+                icon: 'pi pi-fw pi-file-plus',
                 to: '/billing/listOther'
             },
             {
@@ -444,25 +479,25 @@ const props = defineProps({
 </script>
 
 <!-- LOCAL -->
-<template>
+<!-- <template>
     <ul class="layout-menu">
         <template v-for="(item, i) in model" :key="item">
             <app-menu-item v-if="!item.separator" :item="item" :index="i"></app-menu-item>
             <li v-if="item.separator" class="menu-separator"></li>
         </template>
     </ul>
-</template>
+</template> -->
 <!-- LOCAL -->
 
 <!-- STAGING -->
-<!-- <template>
+<template>
     <ul class="layout-menu">
         <template v-for="(item, i) in props.Navbar" :key="item.label">
             <app-menu-item v-if="!item.separator" :item="item" :index="i"></app-menu-item>
             <li v-if="item.separator" class="menu-separator"></li>
         </template>
     </ul>
-</template> -->
+</template>
 <!-- STAGING -->
 
 <style lang="scss" scoped></style>

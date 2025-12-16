@@ -6,16 +6,23 @@ export const useMenuStore = defineStore('menu', {
     adminName: '', 
     menu: [],         // Navbar
     permissions: [],   // PermFunc
-    role: ''
+    role: '',
+    isManager: 0,
+    forceReset : 0,
+    hasFetched: false, // NEW FLAG
   }),
   actions: {
     // Fetch menu and permissions from API
     async loadMenuAndPermissions() {
-      const { adminName,menu, permissions, role } = await fetchNavigation();
+      if (this.hasFetched) return;
+      const { adminName, menu, permissions, role, isManager, forceReset } = await fetchNavigation();
       this.adminName = adminName;
       this.menu = menu;
       this.permissions = permissions;
       this.role = role;
+      this.isManager = isManager;
+      this.forceReset = forceReset;
+      this.hasFetched = true;
     },
     // Can the user view this function?
     canView(funcName) {
@@ -36,6 +43,9 @@ export const useMenuStore = defineStore('menu', {
       this.permissions = [];
       this.adminName = '';
       this.role = '';
+      this.isManager = 0;
+      this.forceReset = 0;
+      this.hasFetched = false;
     }
   },
    persist: true 

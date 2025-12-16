@@ -422,7 +422,7 @@ const clearDealerFilter = () => {
 
                 <Column header="Order No" style="min-width: 10rem" sortable>
                     <template #body="{ data }">
-                        <RouterLink :to="`/om/detailOrder/${data.orderNo}`" class="hover:underline font-bold text-primary-400">
+                        <RouterLink :to="`/sales/detailCustomerOrder/${data.orderNo}`" class="hover:underline font-bold text-primary-400">
                             {{ data.orderNo || '-' }}
                         </RouterLink>
                     </template>
