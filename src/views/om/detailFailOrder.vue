@@ -6,7 +6,7 @@
                 <!-- Customer Information Card -->
                 <div class="card flex flex-col gap-6 w-full">
                     <div class="flex items-center gap-2 border-b pb-3">
-                        <RouterLink to="/om/listOrder">
+                        <RouterLink to="/om/listFailOrder">
                             <Button icon="pi pi-arrow-left" class="p-button-text p-button-secondary text-xl" size="big" v-tooltip="'Back'" />
                         </RouterLink>
                         <div class="text-2xl font-bold text-gray-800">Customer Information</div>
@@ -54,7 +54,7 @@
 
                 <!-- Order Items Card -->
                 <div class="card flex flex-col w-full bg-white shadow-sm rounded-2xl border border-gray-100">
-                    <div class="font-semibold text-xl border-b pb-3 px-4 flex items-center gap-2 text-gray-800">📦 <span>Order Items</span></div>
+                    <div class="font-bold text-xl border-b pb-3 px-4 flex items-center gap-2 text-gray-800">📦 <span>Order Items</span></div>
                     <DataTable :value="orderItems" dataKey="materialid" class="rounded-table mt-4">
                         <Column field="itemno" header="Item No">
                             <template #body="{ data }">{{ formatItemNo(data.itemno) }}</template>
@@ -72,7 +72,7 @@
                         <Column field="qty" header="Quantity">
                             <template #body="{ data }">{{ parseInt(data.qty) }}</template>
                         </Column>
-                        <Column field="unitprice" header="Unit Price" class="text-right">
+                        <!-- <Column field="unitprice" header="Unit Price" class="text-right">
                             <template #body="{ data }">RM {{ parseFloat(data.unitprice || 0).toFixed(2) }}</template>
                             <template #footer>
                                 <div class="flex justify-start pr-2 font-bold text-gray-700">Grand Total</div>
@@ -83,8 +83,60 @@
                             <template #footer>
                                 <div class="flex justify-start pr-3 font-semibold text-blue-600">RM {{ totalAmount.toFixed(2) }}</div>
                             </template>
-                        </Column>
+                        </Column> -->
                     </DataTable>
+                </div>
+
+                <!-- SAP Error Response Card (only for FAILED status with sapErrorResponse) -->
+                <div v-if="orderStatusText === 'FAILED' && orderData.sapErrorResponse" class="card flex flex-col w-full">
+                    <div class="flex items-center justify-between border-b pb-3">
+                        <div class="text-2xl font-bold text-red-800">SAP Error Details</div>
+                        <!-- <Tag value="ERROR" severity="danger" /> -->
+                    </div>
+                    <div class="mt-4 p-4 bg-red-50 rounded-lg border border-red-200">
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                            <div>
+                                <span class="text-sm font-semibold text-gray-700">Error Code</span>
+                                <p class="text-lg font-medium text-red-600">{{ orderData.sapErrorResponse?.errorcode || '-' }}</p>
+                            </div>
+                            <div>
+                                <span class="text-sm font-semibold text-gray-700">Error Number</span>
+                                <p class="text-lg font-medium text-red-600">{{ orderData.sapErrorResponse?.errornumber || '-' }}</p>
+                            </div>
+                            <div class="md:col-span-2">
+                                <span class="text-sm font-semibold text-gray-700">Error Message</span>
+                                <p class="text-lg font-medium text-red-600">{{ orderData.sapErrorResponse?.message || '-' }}</p>
+                            </div>
+                        </div>
+                        
+                        <!-- Unfulfilled Items -->
+                        <div v-if="orderData.sapErrorResponse?.data?.unfulfilled_items" class="mb-4">
+                            <h4 class="font-semibold text-gray-700 mb-2">Unfulfilled Items:</h4>
+                            <div class="bg-white p-3 rounded border">
+                                <p class="text-red-600">
+                                    Material: {{ orderData.sapErrorResponse.data.unfulfilled_items.materialid }} - 
+                                    Qty: {{ orderData.sapErrorResponse.data.unfulfilled_items.qty }}
+                                </p>
+                            </div>
+                        </div>
+                        
+                        <!-- Error Result Set -->
+                        <div v-if="orderData.sapErrorResponse?.resultset && orderData.sapErrorResponse.resultset.length > 0">
+                            <h4 class="font-semibold text-gray-700 mb-2">Detailed Errors:</h4>
+                            <div class="space-y-2">
+                                <div v-for="(error, index) in orderData.sapErrorResponse.resultset" :key="index" 
+                                     class="bg-white p-3 rounded border border-red-200">
+                                    <div class="flex items-center gap-2">
+                                        <span class="px-2 py-1 bg-red-100 text-red-800 text-xs font-semibold rounded">
+                                            {{ error.type }}
+                                        </span>
+                                        <span class="text-sm font-medium">{{ error.id }} ({{ error.number }})</span>
+                                    </div>
+                                    <p class="mt-1 text-red-700">{{ error.message }}</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
 
@@ -117,7 +169,17 @@
                                 </tr>
                                 <tr class="border-b">
                                     <td class="px-4 py-2 font-medium">SO No.</td>
-                                    <td class="px-4 py-2 text-right font-medium">{{ orderData.so_no || '-' }}</td>
+                                    <td class="px-4 py-2 text-right font-medium">
+                                        <div class="flex items-center justify-end gap-2">
+                                            <span>{{ orderData.so_no || '-' }}</span>
+                                            <Button v-if="!orderData.so_no && orderStatusText === 'TIMEOUT'" 
+                                                    icon="pi pi-pencil"
+                                                    class="p-button-text p-button-info p-button-secondary text-sm" 
+                                                    size="small" 
+                                                    @click="openUpdateSODialog"
+                                                    v-tooltip="'Update SO Number'" />
+                                        </div>
+                                    </td>
                                 </tr>
                                 <tr class="border-b">
                                     <td class="px-4 py-2 font-medium">DO No.</td>
@@ -162,8 +224,15 @@
                                 <tr>
                                     <td colspan="2" class="px-2 py-2 text-right">
                                         <div class="flex justify-end gap-2">
-                                            <Button label="Return Order" class="p-button-danger text-sm !w-fit" @click="showReturnOrderDialog = true" :disabled="!canReturnOrder" />
-                                            <Button label="Pull SAP Update" class="text-sm !w-fit" @click="pullSAPUpdate" :loading="loadingSAP" />
+                                            <Button label="Void" 
+                                                    class="p-button-danger text-sm !w-fit" 
+                                                    @click="voidOrder" 
+                                                    :loading="loadingAction" />
+                                            <Button label="Process" 
+                                                    class="p-button-success text-sm !w-fit" 
+                                                    @click="processOrder" 
+                                                    :loading="loadingAction"
+                                                    :disabled="orderStatusText === 'FAILED' && !canProcessFailedOrder" />
                                         </div>
                                     </td>
                                 </tr>
@@ -204,181 +273,43 @@
                         </table>
                     </div>
                 </div>
-
-                <!-- Pickup Info Card (for LALAMOVE/SELFCOLLECT type) -->
-                <div v-if="orderData.deliveryType === 'LALAMOVE' || orderData.deliveryType === 'SELFCOLLECT'" class="card flex flex-col w-full">
-                    <div class="flex items-center justify-between border-b pb-3">
-                        <div class="text-2xl font-bold text-gray-800">Pickup Info</div>
-                        <div class="flex items-center gap-2">
-                            <Tag v-if="!hasPickupInfo" value="No Collector" severity="warning" />
-                            <!-- <Button v-if="hasPickupInfo" icon="pi pi-pencil" class="p-button-text p-button-secondary text-sm" size="small" @click="openUpdateDriverDialog" v-tooltip="'Update Driver Info'" /> -->
-                            <Button v-if="hasPickupInfo" label="Update Driver" icon="pi pi-pencil" class="p-button-primary text-xs" style="width: fit-content" @click="openUpdateDriverDialog" />
-                        </div>
-                    </div>
-
-                    <!-- When pickup detail exists -->
-                    <div v-if="hasPickupInfo" class="overflow-x-auto">
-                        <table class="w-full text-sm text-left text-gray-700">
-                            <tbody>
-                                <tr class="border-b even:bg-gray-50">
-                                    <td class="px-4 py-2 font-medium">Driver Name</td>
-                                    <td class="px-4 py-2 text-right font-semibold">{{ pickupDetail.driverName || '-' }}</td>
-                                </tr>
-                                <tr class="border-b even:bg-gray-50">
-                                    <td class="px-4 py-2 font-medium">Phone Number</td>
-                                    <td class="px-4 py-2 text-right font-semibold">{{ pickupDetail.driverPhoneNumber || '-' }}</td>
-                                </tr>
-                                <tr class="border-b even:bg-gray-50">
-                                    <td class="px-4 py-2 font-medium">Truck Plate</td>
-                                    <td class="px-4 py-2 text-right font-semibold">{{ pickupDetail.driverTruckPlate || '-' }}</td>
-                                </tr>
-                                <tr class="border-b even:bg-gray-50">
-                                    <td class="px-4 py-2 font-medium">Driver IC</td>
-                                    <td class="px-4 py-2 text-right font-semibold">{{ pickupDetail.driverIC || '-' }}</td>
-                                </tr>
-                                <tr class="border-b even:bg-gray-50">
-                                    <td class="px-4 py-2 font-medium">Pickup Date & Time</td>
-                                    <td class="px-4 py-2 text-right font-semibold">{{ formatDateTime(pickupDetail.pickup_datetime) || '-' }}</td>
-                                </tr>
-                            </tbody>
-                        </table>
-                    </div>
-
-                    <!-- When no pickup detail exists -->
-                    <div v-else class="p-6 text-center">
-                        <div class="text-gray-500 mb-4">
-                            <i class="pi pi-info-circle text-2xl mb-2"></i>
-                            <p class="text-lg font-medium">No collector information available</p>
-                        </div>
-                        <Button label="Add Driver" icon="pi pi-plus" class="p-button-primary" style="width: fit-content" @click="showAddDriverDialog = true" :disabled="loadingDriver" />
-                    </div>
-                </div>
             </div>
         </div>
 
-        <!-- Add Driver Dialog -->
-        <Dialog v-model:visible="showAddDriverDialog" header="Add Driver Information" modal :style="{ width: '30rem' }" :closable="false">
+        <!-- Update SO Number Dialog -->
+        <Dialog v-model:visible="showUpdateSODialog" header="Update SO Number" modal :style="{ width: '30rem' }" :closable="false">
             <div class="flex flex-col gap-4">
                 <div class="p-fluid">
-                    <label for="driverName" class="font-semibold">Driver Name <span class="text-red-500">*</span></label>
-                    <InputText id="driverName" v-model="driverForm.driverName" placeholder="Enter driver name" class="w-full" :class="{ 'p-invalid': driverFormSubmitted && !driverForm.driverName }" />
-                    <small v-if="driverFormSubmitted && !driverForm.driverName" class="p-error">Driver name is required.</small>
-                </div>
-
-                <div class="p-fluid">
-                    <label for="driverPhoneNumber" class="font-semibold">Phone Number <span class="text-red-500">*</span></label>
-                    <InputText id="driverPhoneNumber" v-model="driverForm.driverPhoneNumber" placeholder="Enter phone number" class="w-full" :class="{ 'p-invalid': driverFormSubmitted && !driverForm.driverPhoneNumber }" />
-                    <small v-if="driverFormSubmitted && !driverForm.driverPhoneNumber" class="p-error">Phone number is required.</small>
-                </div>
-
-                <div class="p-fluid">
-                    <label for="driverTruckPlate" class="font-semibold">Truck Plate No <span class="text-red-500">*</span></label>
-                    <InputText id="driverTruckPlate" v-model="driverForm.driverTruckPlate" placeholder="Enter truck plate number" class="w-full" :class="{ 'p-invalid': driverFormSubmitted && !driverForm.driverTruckPlate }" />
-                    <small v-if="driverFormSubmitted && !driverForm.driverTruckPlate" class="p-error">Truck plate number is required.</small>
-                </div>
-
-                <div class="p-fluid">
-                    <label for="driverIC" class="font-semibold">IC Number</label>
-                    <InputText id="driverIC" v-model="driverForm.driverIC" placeholder="Enter IC number (optional)" class="w-full" />
+                    <label for="soNumber" class="font-semibold">SO Number <span class="text-red-500">*</span></label>
+                    <InputText id="soNumber" v-model="soNumber" placeholder="Enter SO Number" class="w-full" :class="{ 'p-invalid': soNumberSubmitted && !soNumber }" />
+                    <small v-if="soNumberSubmitted && !soNumber" class="p-error">SO Number is required.</small>
+                    <small class="text-gray-500">Check with SAP if a successful order exists with the same order number.</small>
                 </div>
 
                 <div class="flex justify-end gap-2 mt-4">
-                    <Button label="Cancel" class="p-button-secondary" @click="cancelAddDriver" :disabled="loadingDriver" />
-                    <Button label="Submit" class="p-button-primary" @click="submitDriverInfo" :loading="loadingDriver" />
+                    <Button label="Cancel" class="p-button-secondary" @click="cancelUpdateSO" :disabled="loadingAction" />
+                    <Button label="Update & Continue" class="p-button-primary" @click="updateSONumber" :loading="loadingAction" />
                 </div>
             </div>
         </Dialog>
 
-        <!-- Update Driver Dialog -->
-        <Dialog v-model:visible="showUpdateDriverDialog" header="Update Driver Information" modal :style="{ width: '30rem' }" :closable="false">
+        <!-- Confirm Void Dialog -->
+        <Dialog v-model:visible="showVoidConfirmDialog" header="Void Order" modal :style="{ width: '30rem' }" :closable="false">
             <div class="flex flex-col gap-4">
                 <div class="p-fluid">
-                    <label for="updateDriverName" class="font-semibold">Driver Name <span class="text-red-500">*</span></label>
-                    <InputText id="updateDriverName" v-model="updateDriverForm.driverName" placeholder="Enter driver name" class="w-full" :class="{ 'p-invalid': updateDriverFormSubmitted && !updateDriverForm.driverName }" />
-                    <small v-if="updateDriverFormSubmitted && !updateDriverForm.driverName" class="p-error">Driver name is required.</small>
+                    <label for="voidReason" class="font-semibold">Void Reason <span class="text-red-500">*</span></label>
+                    <Dropdown id="voidReason" v-model="voidReason" :options="voidReasons" optionLabel="name" optionValue="code" placeholder="Select void reason" class="w-full" :class="{ 'p-invalid': voidReasonSubmitted && !voidReason }" />
+                    <small v-if="voidReasonSubmitted && !voidReason" class="p-error">Void reason is required.</small>
                 </div>
 
                 <div class="p-fluid">
-                    <label for="updateDriverPhoneNumber" class="font-semibold">Phone Number <span class="text-red-500">*</span></label>
-                    <InputText id="updateDriverPhoneNumber" v-model="updateDriverForm.driverPhoneNumber" placeholder="Enter phone number" class="w-full" :class="{ 'p-invalid': updateDriverFormSubmitted && !updateDriverForm.driverPhoneNumber }" />
-                    <small v-if="updateDriverFormSubmitted && !updateDriverForm.driverPhoneNumber" class="p-error">Phone number is required.</small>
-                </div>
-
-                <div class="p-fluid">
-                    <label for="updateDriverTruckPlate" class="font-semibold">Truck Plate No <span class="text-red-500">*</span></label>
-                    <InputText id="updateDriverTruckPlate" v-model="updateDriverForm.driverTruckPlate" placeholder="Enter truck plate number" class="w-full" :class="{ 'p-invalid': updateDriverFormSubmitted && !updateDriverForm.driverTruckPlate }" />
-                    <small v-if="updateDriverFormSubmitted && !updateDriverForm.driverTruckPlate" class="p-error">Truck plate number is required.</small>
-                </div>
-
-                <div class="p-fluid">
-                    <label for="updateDriverIC" class="font-semibold">IC Number</label>
-                    <InputText id="updateDriverIC" v-model="updateDriverForm.driverIC" placeholder="Enter IC number (optional)" class="w-full" />
+                    <label for="voidRemarks" class="font-semibold">Remarks</label>
+                    <Textarea id="voidRemarks" v-model="voidRemarks" rows="3" placeholder="Enter any additional remarks" class="w-full" />
                 </div>
 
                 <div class="flex justify-end gap-2 mt-4">
-                    <Button label="Cancel" class="p-button-secondary" @click="cancelUpdateDriver" :disabled="loadingDriver" />
-                    <Button label="Update" class="p-button-primary" @click="updateDriverInfo" :loading="loadingDriver" />
-                </div>
-            </div>
-        </Dialog>
-
-        <!-- Return Order Dialog -->
-        <Dialog v-model:visible="showReturnOrderDialog" header="Return Order" modal :style="{ width: '70rem' }" :closable="false">
-            <div class="flex flex-col gap-4">
-                <div class="p-fluid">
-                    <label for="returnReason" class="font-semibold">Return Reason <span class="text-red-500">*</span></label>
-                    <Dropdown id="returnReason" v-model="returnReason" :options="returnReasons" optionLabel="name" optionValue="code" placeholder="Select return reason" class="w-full" :class="{ 'p-invalid': !returnReason && returnFormSubmitted }" />
-                    <small v-if="!returnReason && returnFormSubmitted" class="p-error">Return reason is required.</small>
-                </div>
-
-                <div class="p-fluid">
-                    <label for="remarks" class="font-semibold">Remarks</label>
-                    <Textarea id="remarks" v-model="remarks" rows="3" placeholder="Enter any additional remarks" class="w-full" />
-                </div>
-
-                <div class="font-semibold">Select ZT02 Items to Return</div>
-                <div class="text-sm text-gray-600 mb-2">💡 <strong>Note:</strong> When you select a ZT02 item, any related ZT3F items with the same sales program will be automatically handled by the system.</div>
-
-                <DataTable :value="zt02Items" selectionMode="multiple" v-model:selection="selectedReturnItems" dataKey="materialid" class="rounded-table" @selection-change="onSelectionChange">
-                    <Column selectionMode="multiple" headerStyle="width: 3rem"></Column>
-                    <Column field="itemno" header="Item No">
-                        <template #body="{ data }">{{ formatItemNo(data.itemno) }}</template>
-                    </Column>
-                    <Column field="materialid" header="Material ID"></Column>
-                    <Column field="materialdescription" header="Material Description"></Column>
-                    <Column field="itemcategory" header="Item Category">
-                        <template #body="{ data }">
-                            <Tag :value="data.itemcategory" :severity="getCategorySeverity(data.itemcategory)" />
-                        </template>
-                    </Column>
-                    <Column field="salesProgram_programID" header="Sales Program">
-                        <template #body="{ data }">{{ data.salesProgram_programID || '-' }}</template>
-                    </Column>
-                    <Column field="qty" header="Available Qty">
-                        <template #body="{ data }">{{ parseInt(data.remainingQty) }}</template>
-                    </Column>
-                    <Column header="Return Qty">
-                        <template #body="{ data }">
-                            <InputNumber
-                                v-model="returnQuantities[data.materialid]"
-                                :min="0"
-                                :max="parseInt(data.qty)"
-                                showButtons
-                                class="w-full"
-                                :disabled="!isItemSelected(data.materialid)"
-                                :class="{ 'p-invalid': hasQuantityError(data.materialid) }"
-                            />
-                            <small v-if="hasQuantityError(data.materialid)" class="p-error">Quantity must be greater than 0</small>
-                        </template>
-                    </Column>
-                    <Column field="unitprice" header="Unit Price">
-                        <template #body="{ data }">RM {{ parseFloat(data.unitprice || 0).toFixed(2) }}</template>
-                    </Column>
-                </DataTable>
-
-                <div class="flex justify-end gap-2 mt-4">
-                    <Button label="Cancel" class="p-button-secondary" @click="cancelReturnOrder" :disabled="loadingReturn" />
-                    <Button label="Submit Return" class="p-button-primary" @click="submitReturnOrder" :loading="loadingReturn" />
+                    <Button label="Cancel" class="p-button-secondary" @click="showVoidConfirmDialog = false" :disabled="loadingAction" />
+                    <Button label="Confirm Void" class="p-button-danger" @click="confirmVoidOrder" :loading="loadingAction" />
                 </div>
             </div>
         </Dialog>
@@ -400,43 +331,24 @@ const orderData = ref({});
 const customerInfo = ref({});
 const shippingDetail = ref({});
 const deliveryInfo = ref({});
-const pickupDetail = ref({});
 const orderItems = ref([]);
-const loadingSAP = ref(false);
-const loadingReturn = ref(false);
-const showReturnOrderDialog = ref(false);
-const returnReason = ref('');
-const remarks = ref('');
-const selectedReturnItems = ref([]);
-const returnQuantities = ref({});
-const returnFormSubmitted = ref(false);
+const loadingAction = ref(false);
 
-// Driver form reactive data
-const showAddDriverDialog = ref(false);
-const loadingDriver = ref(false);
-const driverFormSubmitted = ref(false);
-const driverForm = ref({
-    driverName: '',
-    driverPhoneNumber: '',
-    driverTruckPlate: '',
-    driverIC: ''
-});
+// SO Number dialog
+const showUpdateSODialog = ref(false);
+const soNumber = ref('');
+const soNumberSubmitted = ref(false);
 
-// Add new reactive data for update driver dialog
-const showUpdateDriverDialog = ref(false);
-const updateDriverForm = ref({
-    driverName: '',
-    driverPhoneNumber: '',
-    driverTruckPlate: '',
-    driverIC: ''
-});
-const updateDriverFormSubmitted = ref(false);
-
-// Return reasons
-const returnReasons = ref([
-    { code: 'Wrong DOM', name: 'Wrong DOM' },
-    { code: 'Receive Wrong Item', name: 'Receive Wrong Item' },
-    { code: 'Delivered to wrong address', name: 'Delivered to wrong address' }
+// Void dialog
+const showVoidConfirmDialog = ref(false);
+const voidReason = ref('');
+const voidRemarks = ref('');
+const voidReasonSubmitted = ref(false);
+const voidReasons = ref([
+    { code: 'SAP_ORDER_NOT_FOUND', name: 'SAP Order Not Found' },
+    { code: 'CANCELLED_BY_CUSTOMER', name: 'Cancelled by Customer' },
+    { code: 'OUT_OF_STOCK', name: 'Out of Stock' },
+    { code: 'OTHER', name: 'Other' }
 ]);
 
 // Computed properties
@@ -445,29 +357,40 @@ const totalAmount = computed(() => {
 });
 
 const orderStatusText = computed(() => {
-    return orderData.value.orderstatus === 1 ? 'Complete' : 'Pending';
+    if (orderData.value.sapErrorResponse) {
+        return 'FAILED';
+    } else if (orderData.value.orderstatus === 0 && !orderData.value.so_no) {
+        return 'TIMEOUT';
+    } else if (orderData.value.orderstatus === 66) {
+        return 'COMPLETED';
+    } else {
+        return 'PENDING';
+    }
 });
 
 const orderStatusSeverity = computed(() => {
-    return orderData.value.orderstatus === 1 ? 'success' : 'warn';
-});
-
-const canReturnOrder = computed(() => {
-    const hasRemainingItems = orderData.value.remaining_return_items && orderData.value.remaining_return_items.length > 0;
-    return orderData.value.orderstatus === 1 && orderData.value.inv_no && hasRemainingItems;
-});
-
-// Filter only ZT02 items for return selection from remaining_return_items
-const zt02Items = computed(() => {
-    if (!orderData.value.remaining_return_items || orderData.value.remaining_return_items.length === 0) {
-        return [];
+    switch (orderStatusText.value) {
+        case 'FAILED': return 'danger';
+        case 'TIMEOUT': return 'warning';
+        case 'COMPLETED': return 'success';
+        default: return 'warn';
     }
-    return orderData.value.remaining_return_items.filter((item) => item.itemcategory === 'ZT02');
 });
 
-// Check if pickup info exists
-const hasPickupInfo = computed(() => {
-    return pickupDetail.value && pickupDetail.value.driverName;
+const canProcessFailedOrder = computed(() => {
+    // For failed orders, check if there's an error response
+    // and if it's related to insufficient stock or material issues
+    if (!orderData.value.sapErrorResponse) return false;
+    
+    const errorData = orderData.value.sapErrorResponse;
+    if (errorData.resultset) {
+        // Check if error is about insufficient stock
+        const hasStockError = errorData.resultset.some(error => 
+            error.message && error.message.includes('Insufficient stock')
+        );
+        return !hasStockError; // Can process if no stock error
+    }
+    return false;
 });
 
 // Formatting methods
@@ -498,282 +421,204 @@ const getCompanyName = (data) => {
     return [data.companyName1, data.companyName2, data.companyName3, data.companyName4].filter(Boolean).join(', ') || '-';
 };
 
-// Item category methods
-const mapItemCategory = (category) => {
-    if (!category) return 'ZR02';
-    const categoryMap = { ZT02: 'ZR02', ZT3F: 'ZR3F' };
-    return categoryMap[category] || category;
+// Order processing methods
+const openUpdateSODialog = () => {
+    showUpdateSODialog.value = true;
+    soNumber.value = orderData.value.so_no || '';
+    soNumberSubmitted.value = false;
 };
 
-const getCategorySeverity = (category) => {
-    const severityMap = { ZT02: 'success', ZT3F: 'info', ZR02: 'success', ZR3F: 'info' };
-    return severityMap[category] || 'warning';
+const cancelUpdateSO = () => {
+    showUpdateSODialog.value = false;
+    soNumber.value = '';
+    soNumberSubmitted.value = false;
 };
 
-// Return order selection logic
-const isItemSelected = (materialId) => {
-    return selectedReturnItems.value.some((item) => item.materialid === materialId);
-};
+const updateSONumber = async () => {
+    soNumberSubmitted.value = true;
+    if (!soNumber.value) return;
 
-const hasQuantityError = (materialId) => {
-    return isItemSelected(materialId) && (!returnQuantities.value[materialId] || returnQuantities.value[materialId] <= 0);
-};
-
-const onSelectionChange = (event) => {
-    const newlySelectedItems = event.value;
-    selectedReturnItems.value = newlySelectedItems;
-};
-
-// Driver form methods
-const cancelAddDriver = () => {
-    showAddDriverDialog.value = false;
-    resetDriverForm();
-};
-
-const resetDriverForm = () => {
-    driverForm.value = {
-        driverName: '',
-        driverPhoneNumber: '',
-        driverTruckPlate: '',
-        driverIC: ''
-    };
-    driverFormSubmitted.value = false;
-};
-
-const submitDriverInfo = async () => {
     try {
-        driverFormSubmitted.value = true;
-        loadingDriver.value = true;
+        loadingAction.value = true;
+        
+        // Update SO number in the order
+        const response = await api.postExtra(`order/update-so-number/${orderData.value.order_no}`, {
+            so_no: soNumber.value
+        });
 
-        // Validate required fields
-        if (!driverForm.value.driverName || !driverForm.value.driverPhoneNumber || !driverForm.value.driverTruckPlate) {
+        if (response.data.status === 1) {
             toast.add({
-                severity: 'warn',
-                summary: 'Warning',
-                detail: 'Please fill in all required fields',
+                severity: 'success',
+                summary: 'Success',
+                detail: 'SO Number updated successfully',
                 life: 3000
             });
-            loadingDriver.value = false;
-            return;
-        }
-
-        const payload = new URLSearchParams();
-        payload.append('driverName', driverForm.value.driverName);
-        payload.append('driverPhoneNum', driverForm.value.driverPhoneNumber);
-        payload.append('driverPlateNum', driverForm.value.driverTruckPlate);
-        if (driverForm.value.driverIC) {
-            payload.append('driverIC', driverForm.value.driverIC);
+            showUpdateSODialog.value = false;
+            await fetchOrderDetail();
         } else {
-            payload.append('driverIC', '');
+            toast.add({
+                severity: 'error',
+                summary: 'Error',
+                detail: response.data.message || 'Failed to update SO number',
+                life: 3000
+            });
         }
+    } catch (error) {
+        console.error('Error updating SO number:', error);
+        toast.add({
+            severity: 'error',
+            summary: 'Error',
+            detail: 'Failed to update SO number',
+            life: 3000
+        });
+    } finally {
+        loadingAction.value = false;
+    }
+};
 
-        const orderNo = route.params.orderNo;
-        console.log('Submitting driver info for order:', orderNo);
-        console.log('Driver payload:', Object.fromEntries(payload));
+const voidOrder = () => {
+    showVoidConfirmDialog.value = true;
+    voidReason.value = '';
+    voidRemarks.value = '';
+    voidReasonSubmitted.value = false;
+};
 
-        const response = await api.postExtra(`order/driver-information/${orderNo}`, payload, {
+const confirmVoidOrder = async () => {
+    voidReasonSubmitted.value = true;
+    if (!voidReason.value) return;
+
+    try {
+        loadingAction.value = true;
+        
+        const payload = new URLSearchParams();
+        payload.append('voidReason', voidReason.value);
+        payload.append('remarks', voidRemarks.value);
+
+        const response = await api.postExtra(`order/void-order/${orderData.value.order_no}`, payload, {
             headers: {
                 'Content-Type': 'application/x-www-form-urlencoded',
                 Accept: 'application/json'
             }
         });
 
-        console.log('Driver info response:', response.data);
-
         if (response.data.status === 1) {
             toast.add({
                 severity: 'success',
                 summary: 'Success',
-                detail: 'Driver information added successfully',
+                detail: 'Order voided successfully',
                 life: 3000
             });
-            showAddDriverDialog.value = false;
-            resetDriverForm();
-            // Refresh order details to show updated pickup info
-            await fetchOrderDetail();
+            showVoidConfirmDialog.value = false;
+            router.push('/om/listFailOrder');
         } else {
-            const errorMessage = response.data.error?.message || 'Failed to add driver information';
             toast.add({
                 severity: 'error',
                 summary: 'Error',
-                detail: errorMessage,
-                life: 5000
+                detail: response.data.message || 'Failed to void order',
+                life: 3000
             });
         }
     } catch (error) {
-        console.error('Error adding driver info:', error);
-        let errorMessage = 'Failed to add driver information';
-
-        if (error.response?.data?.error?.message) {
-            errorMessage = error.response.data.error.message;
-        } else if (error.response?.data?.message) {
-            errorMessage = error.response.data.message;
-        } else if (error.message) {
-            errorMessage = error.message;
-        }
-
+        console.error('Error voiding order:', error);
         toast.add({
             severity: 'error',
             summary: 'Error',
-            detail: errorMessage,
-            life: 5000
+            detail: 'Failed to void order',
+            life: 3000
         });
     } finally {
-        loadingDriver.value = false;
+        loadingAction.value = false;
     }
 };
 
-// Add methods for update driver functionality
-const openUpdateDriverDialog = () => {
-    showUpdateDriverDialog.value = true;
-    // Prefill the form with existing driver data
-    if (pickupDetail.value) {
-        updateDriverForm.value = {
-            driverName: pickupDetail.value.driverName || '',
-            driverPhoneNumber: pickupDetail.value.driverPhoneNumber || '',
-            driverTruckPlate: pickupDetail.value.driverTruckPlate || '',
-            driverIC: pickupDetail.value.driverIC || ''
-        };
-    }
-    updateDriverFormSubmitted.value = false;
-};
-
-const cancelUpdateDriver = () => {
-    showUpdateDriverDialog.value = false;
-    resetUpdateDriverForm();
-};
-
-const resetUpdateDriverForm = () => {
-    updateDriverForm.value = {
-        driverName: '',
-        driverPhoneNumber: '',
-        driverTruckPlate: '',
-        driverIC: ''
-    };
-    updateDriverFormSubmitted.value = false;
-};
-
-const updateDriverInfo = async () => {
+const processOrder = async () => {
     try {
-        updateDriverFormSubmitted.value = true;
-        loadingDriver.value = true;
-
-        // Validate required fields
-        if (!updateDriverForm.value.driverName || !updateDriverForm.value.driverPhoneNumber || !updateDriverForm.value.driverTruckPlate) {
-            toast.add({
-                severity: 'warn',
-                summary: 'Warning',
-                detail: 'Please fill in all required fields',
-                life: 3000
-            });
-            loadingDriver.value = false;
-            return;
-        }
-
-        const payload = new URLSearchParams();
-        payload.append('driverName', updateDriverForm.value.driverName);
-        payload.append('driverPhoneNum', updateDriverForm.value.driverPhoneNumber);
-        payload.append('driverPlateNum', updateDriverForm.value.driverTruckPlate);
-        if (updateDriverForm.value.driverIC) {
-            payload.append('driverIC', updateDriverForm.value.driverIC);
-        } else {
-            payload.append('driverIC', '');
-        }
-
-        const orderNo = route.params.orderNo;
-        const pickupId = pickupDetail.value.id;
-
-        console.log('Updating driver info for order:', orderNo, 'pickup ID:', pickupId);
-        console.log('Update driver payload:', Object.fromEntries(payload));
-
-        const response = await api.postExtra(`order/update-driver-information/${pickupId}`, payload, {
-            headers: {
-                'Content-Type': 'application/x-www-form-urlencoded',
-                Accept: 'application/json'
+        loadingAction.value = true;
+        
+        // For TIMEOUT status with SO number
+        if (orderStatusText.value === 'TIMEOUT') {
+            if (!orderData.value.so_no) {
+                toast.add({
+                    severity: 'warn',
+                    summary: 'Warning',
+                    detail: 'Please update SO number before processing',
+                    life: 3000
+                });
+                openUpdateSODialog();
+                loadingAction.value = false;
+                return;
             }
-        });
-
-        console.log('Update driver info response:', response.data);
-
-        if (response.data.status === 1) {
-            toast.add({
-                severity: 'success',
-                summary: 'Success',
-                detail: 'Driver information updated successfully',
-                life: 3000
-            });
-            showUpdateDriverDialog.value = false;
-            resetUpdateDriverForm();
-            // Refresh order details to show updated pickup info
-            await fetchOrderDetail();
-        } else {
-            const errorMessage = response.data.error?.message || 'Failed to update driver information';
-            toast.add({
-                severity: 'error',
-                summary: 'Error',
-                detail: errorMessage,
-                life: 5000
-            });
+            
+            // Use the SAP update API for timeout orders
+            const response = await api.get(`order/order-update/${orderData.value.order_no}`);
+            
+            if (response.data.status === 1) {
+                toast.add({
+                    severity: 'success',
+                    summary: 'Success',
+                    detail: 'Order processed successfully',
+                    life: 3000
+                });
+                await fetchOrderDetail();
+            } else {
+                toast.add({
+                    severity: 'error',
+                    summary: 'Error',
+                    detail: response.data.message || 'Failed to process order',
+                    life: 3000
+                });
+            }
+        }
+        // For FAILED status
+        else if (orderStatusText.value === 'FAILED') {
+            // Use the failed order update API
+            const response = await api.postExtra(`order/failed-order-update-sap/${orderData.value.order_no}`);
+            
+            if (response.data.status === 1) {
+                toast.add({
+                    severity: 'success',
+                    summary: 'Success',
+                    detail: 'Failed order processed successfully',
+                    life: 3000
+                });
+                await fetchOrderDetail();
+            } else {
+                toast.add({
+                    severity: 'error',
+                    summary: 'Error',
+                    detail: response.data.message || 'Failed to process order',
+                    life: 3000
+                });
+            }
         }
     } catch (error) {
-        console.error('Error updating driver info:', error);
-        let errorMessage = 'Failed to update driver information';
-
-        if (error.response?.data?.error?.message) {
-            errorMessage = error.response.data.error.message;
-        } else if (error.response?.data?.message) {
-            errorMessage = error.response.data.message;
-        } else if (error.message) {
-            errorMessage = error.message;
-        }
-
+        console.error('Error processing order:', error);
         toast.add({
             severity: 'error',
             summary: 'Error',
-            detail: errorMessage,
-            life: 5000
+            detail: 'Failed to process order',
+            life: 3000
         });
     } finally {
-        loadingDriver.value = false;
+        loadingAction.value = false;
     }
 };
-
-// Watch for selection changes
-watch(
-    selectedReturnItems,
-    (newSelection) => {
-        // Reset quantities for deselected items
-        Object.keys(returnQuantities.value).forEach((materialId) => {
-            if (!newSelection.some((item) => item.materialid === materialId)) {
-                delete returnQuantities.value[materialId];
-            }
-        });
-
-        // Initialize quantities for newly selected items
-        newSelection.forEach((item) => {
-            if (returnQuantities.value[item.materialid] === undefined) {
-                returnQuantities.value[item.materialid] = parseInt(item.qty) || 0;
-            }
-        });
-    },
-    { deep: true }
-);
 
 // API Calls
 const fetchOrderDetail = async () => {
     try {
         const orderNo = route.params.orderNo;
-        console.log('Fetching order details for:', orderNo);
-        const response = await api.get(`order/detailz-order/${orderNo}`);
-        console.log('Order detail response:', response.data);
+        console.log('Fetching failed order details for:', orderNo);
+        const response = await api.postExtra(`order/failed-order-detail/${orderNo}`);
+        console.log('Failed order detail response:', response.data);
 
-        if (response.data.status === 1 && response.data.admin_data.length > 0) {
-            const data = response.data.admin_data[0];
+        if (response.data.status === 1 && response.data.admin_data) {
+            const data = response.data.admin_data;
             orderData.value = data;
 
             // Process order items
-            if (Array.isArray(data.fullfill_order_array)) {
-                orderItems.value = data.fullfill_order_array.map((item) => ({
+            if (Array.isArray(data.order_array)) {
+                orderItems.value = data.order_array.map((item) => ({
                     ...item,
                     qty: parseInt(item.qty) || 0,
                     unitprice: parseFloat(item.unitprice) || 0,
@@ -784,7 +629,7 @@ const fetchOrderDetail = async () => {
             }
 
             // Process customer info
-            const etenInfo = data.etenInformation || {};
+            const etenInfo = data.eten_user || {};
             customerInfo.value = {
                 dealerName: etenInfo.companyName1 || '-',
                 signboard: etenInfo.signboardBrand || '-',
@@ -803,27 +648,24 @@ const fetchOrderDetail = async () => {
             };
 
             // Process shipping detail
-            if (Array.isArray(data.shippingDetail) && data.shippingDetail.length > 0) {
-                const validShippingDetails = data.shippingDetail.filter((item) => item !== null);
-                shippingDetail.value = validShippingDetails.length > 0 ? validShippingDetails[0] : {};
+            if (data.shipto_data) {
+                shippingDetail.value = data.shipto_data;
             } else {
                 shippingDetail.value = {};
             }
 
-            // Process delivery info
-            if (Array.isArray(data.scm_deliver_detail) && data.scm_deliver_detail.length > 0) {
-                const validDeliveryDetails = data.scm_deliver_detail.filter((item) => item !== null);
-                deliveryInfo.value = validDeliveryDetails.length > 0 ? validDeliveryDetails[0] : {};
-            } else {
-                deliveryInfo.value = {};
-            }
-
-            // Process pickup info
-            if (Array.isArray(data.scm_pickup_detail) && data.scm_pickup_detail.length > 0) {
-                const validPickupDetails = data.scm_pickup_detail.filter((item) => item !== null);
-                pickupDetail.value = validPickupDetails.length > 0 ? validPickupDetails[0] : {};
-            } else {
-                pickupDetail.value = {};
+            // Decode sapErrorResponse if it exists
+            if (data.sapErrorResponse) {
+                if (typeof data.sapErrorResponse === 'string') {
+                    try {
+                        orderData.value.sapErrorResponse = JSON.parse(data.sapErrorResponse);
+                    } catch (e) {
+                        console.error('Error parsing sapErrorResponse:', e);
+                        orderData.value.sapErrorResponse = null;
+                    }
+                } else {
+                    orderData.value.sapErrorResponse = data.sapErrorResponse;
+                }
             }
         } else {
             toast.add({ severity: 'error', summary: 'Error', detail: 'Invalid or empty order data', life: 3000 });
@@ -832,162 +674,6 @@ const fetchOrderDetail = async () => {
         console.error('Error fetching order details:', error);
         toast.add({ severity: 'error', summary: 'Error', detail: 'Failed to fetch order details', life: 3000 });
     }
-};
-
-const pullSAPUpdate = async () => {
-    try {
-        loadingSAP.value = true;
-        const orderNo = route.params.orderNo;
-        console.log('Pulling SAP update for order:', orderNo);
-        const response = await api.get(`order/order-update/${orderNo}`);
-        console.log('SAP update response:', response.data);
-
-        if (response.data.status === 1) {
-            toast.add({ severity: 'success', summary: 'Success', detail: 'SAP data updated successfully', life: 3000 });
-            await fetchOrderDetail();
-        } else {
-            toast.add({ severity: 'error', summary: 'Error', detail: response.data.message || 'Failed to update SAP data', life: 3000 });
-        }
-    } catch (error) {
-        console.error('Error pulling SAP update:', error);
-        toast.add({ severity: 'error', summary: 'Error', detail: 'Failed to update SAP data', life: 3000 });
-    } finally {
-        loadingSAP.value = false;
-    }
-};
-
-const submitReturnOrder = async () => {
-    try {
-        returnFormSubmitted.value = true;
-        loadingReturn.value = true;
-
-        // Validate return reason
-        if (!returnReason.value) {
-            toast.add({ severity: 'warn', summary: 'Warning', detail: 'Please select a return reason', life: 3000 });
-            loadingReturn.value = false;
-            return;
-        }
-
-        // Validate selected items
-        const returnItems = selectedReturnItems.value
-            .filter((item) => {
-                const quantity = returnQuantities.value[item.materialid];
-                return quantity !== undefined && quantity > 0;
-            })
-            .map((item) => {
-                const quantity = returnQuantities.value[item.materialid] || 0;
-                // Find the original item from remaining_return_items to get accurate data
-                const originalItem = orderData.value.remaining_return_items.find((remainingItem) => remainingItem.materialid === item.materialid);
-
-                return {
-                    materialid: item.materialid.trim(),
-                    itemcategory: mapItemCategory(item.itemcategory),
-                    qty: quantity.toString(),
-                    salesdoclineitem: originalItem?.itemno ? originalItem.itemno.toString().replace('0000', '') : '',
-                    plant: 'TSM',
-                    materialdescription: item.materialdescription || '',
-                    salesProgram_programID: item.salesProgram_programID || '',
-                    unitprice: parseFloat(item.unitprice || 0).toFixed(2)
-                };
-            });
-
-        if (returnItems.length === 0) {
-            toast.add({ severity: 'warn', summary: 'Warning', detail: 'Please select items and set return quantities greater than 0', life: 3000 });
-            loadingReturn.value = false;
-            return;
-        }
-
-        // Validate that quantities don't exceed available quantities from remaining_return_items
-        for (const returnItem of returnItems) {
-            const originalItem = orderData.value.remaining_return_items.find((item) => item.materialid === returnItem.materialid);
-            if (originalItem && parseFloat(returnItem.qty) > parseFloat(originalItem.qty)) {
-                toast.add({
-                    severity: 'error',
-                    summary: 'Error',
-                    detail: `Return quantity for ${returnItem.materialid} exceeds available quantity`,
-                    life: 3000
-                });
-                loadingReturn.value = false;
-                return;
-            }
-        }
-
-        const payload = new URLSearchParams();
-        payload.append('returnReason', returnReason.value);
-        payload.append('remarks', remarks.value);
-        payload.append('order_array', JSON.stringify(returnItems));
-
-        const orderNo = route.params.orderNo;
-        console.log('Submitting return order for:', orderNo);
-        console.log('Return payload:', {
-            returnReason: returnReason.value,
-            remarks: remarks.value,
-            order_array: returnItems
-        });
-
-        const response = await api.postExtra(`order/create-return-order/${orderNo}`, payload, {
-            headers: {
-                'Content-Type': 'application/x-www-form-urlencoded',
-                Accept: 'application/json'
-            }
-        });
-
-        console.log('Return order response:', response.data);
-
-        if (response.data.status === 1) {
-            const returnOrderNo = response.data.eten_data;
-            toast.add({
-                severity: 'success',
-                summary: 'Success',
-                detail: `Return order created: ${returnOrderNo}`,
-                life: 5000
-            });
-            showReturnOrderDialog.value = false;
-            resetReturnForm();
-            await fetchOrderDetail();
-        } else {
-            const errorMessage = response.data.error?.messageEnglish || response.data.messageEnglish || 'Failed to create return order';
-            toast.add({
-                severity: 'error',
-                summary: 'Error',
-                detail: errorMessage,
-                life: 5000
-            });
-        }
-    } catch (error) {
-        console.error('Error creating return order:', error);
-        let errorMessage = 'Failed to create return order';
-
-        if (error.response?.data?.error?.message) {
-            errorMessage = error.response.data.error.message;
-        } else if (error.response?.data?.message) {
-            errorMessage = error.response.data.message;
-        } else if (error.message) {
-            errorMessage = error.message;
-        }
-
-        toast.add({
-            severity: 'error',
-            summary: 'Error',
-            detail: errorMessage,
-            life: 5000
-        });
-    } finally {
-        loadingReturn.value = false;
-    }
-};
-
-const cancelReturnOrder = () => {
-    showReturnOrderDialog.value = false;
-    resetReturnForm();
-};
-
-const resetReturnForm = () => {
-    returnReason.value = '';
-    remarks.value = '';
-    selectedReturnItems.value = [];
-    returnQuantities.value = {};
-    returnFormSubmitted.value = false;
 };
 
 // Lifecycle
