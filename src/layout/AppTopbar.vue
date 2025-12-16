@@ -4,18 +4,19 @@ import api from '@/service/api';
 import { useRouter } from 'vue-router';
 import { useConfirm } from 'primevue/useconfirm';
 import { useToast } from 'primevue/usetoast';
-import { ref, onMounted,onUnmounted, computed } from 'vue';
+import { ref, onMounted, onUnmounted, computed, watch } from 'vue';
 import { useMenuStore } from '../store/menu';
 
 const menuStore = useMenuStore();
-const adminName = computed(() => menuStore.adminName); 
-const forceReset = computed(() => menuStore.forceReset); 
+const adminName = computed(() => menuStore.adminName);
+const forceReset = computed(() => menuStore.forceReset);
 const { toggleMenu } = useLayout();
 const router = useRouter();
 const confirm = useConfirm();
 const toast = useToast();
 const showSettingsMenu = ref(false);
 const showChangePasswordDialog = ref(false);
+const showForceResetDialog = ref(false);
 const loading = ref(false);
 
 // Password form data
@@ -25,7 +26,25 @@ const passwordForm = ref({
     new_password_confirmation: ''
 });
 
+// Watch for forceReset changes
+watch(
+    forceReset,
+    (newValue) => {
+        console.log('Force Reset changed:', newValue);
+        if (newValue === 1) {
+            // Show force reset dialog
+            showForceResetDialog.value = true;
+        }
+    },
+    { immediate: true }
+);
 
+// Initialize dialog on mount
+onMounted(() => {
+    if (forceReset.value === 1) {
+        showForceResetDialog.value = true;
+    }
+});
 
 const handleLogout = async () => {
     try {
@@ -76,7 +95,8 @@ const openChangePassword = () => {
     showSettingsMenu.value = false;
 };
 
-const changePassword = async () => {
+// Common password change function
+const changePassword = async (isForceReset = false) => {
     loading.value = true;
     try {
         const response = await api.post('change-password', passwordForm.value);
@@ -88,7 +108,26 @@ const changePassword = async () => {
                 detail: response.data.message || 'Password changed successfully',
                 life: 5000
             });
-            showChangePasswordDialog.value = false;
+
+            // Reset form
+            passwordForm.value = {
+                current_password: '',
+                new_password: '',
+                new_password_confirmation: ''
+            };
+
+            if (isForceReset) {
+                // For force reset, close dialog and auto logout
+                showForceResetDialog.value = false;
+
+                // Add a small delay before logout to show success message
+                setTimeout(() => {
+                    handleLogout();
+                }, 1500);
+            } else {
+                // For regular change, just close dialog
+                showChangePasswordDialog.value = false;
+            }
         }
     } catch (error) {
         console.error('Password change failed:', error);
@@ -105,16 +144,28 @@ const changePassword = async () => {
                 });
             });
         } else {
+            const errorMessage = error.response?.data?.message || 'Failed to change password';
             toast.add({
                 severity: 'error',
                 summary: 'Error',
-                detail: error.response?.data?.message || 'Failed to change password',
+                detail: errorMessage,
                 life: 5000
             });
+
+            // If current password is incorrect in force reset mode, show specific message
+            if (errorMessage.includes('Current password is incorrect') && isForceReset) {
+                // Keep the force reset dialog open
+                // No need to do anything else
+            }
         }
     } finally {
         loading.value = false;
     }
+};
+
+// Handle force reset password
+const handleForceReset = async () => {
+    await changePassword(true);
 };
 
 // Close settings menu when clicking outside
@@ -135,16 +186,22 @@ const removeClickOutsideListener = () => {
     document.removeEventListener('click', closeSettingsMenu);
 };
 
-// Handle escape key to close menu
+// Handle escape key to close menu - but not for force reset dialog
 const handleEscapeKey = (event) => {
-    if (event.key === 'Escape' && showSettingsMenu.value) {
-        showSettingsMenu.value = false;
+    if (event.key === 'Escape') {
+        if (showSettingsMenu.value) {
+            showSettingsMenu.value = false;
+        }
+        // Don't allow escape to close force reset dialog
+        if (showForceResetDialog.value && forceReset.value === 1) {
+            event.preventDefault();
+            event.stopPropagation();
+        }
     }
 };
 
 // Set up event listeners
 onMounted(() => {
-
     // Use setTimeout to avoid potential extension conflicts during initial load
     setTimeout(() => {
         setupClickOutsideListener();
@@ -214,7 +271,7 @@ onUnmounted(() => {
         </div>
     </div>
 
-    <!-- Change Password Dialog -->
+    <!-- Regular Change Password Dialog -->
     <Dialog v-model:visible="showChangePasswordDialog" modal header="Change Password" :style="{ width: '450px' }" :closable="!loading" :closeOnEscape="!loading" class="password-dialog">
         <div class="p-fluid">
             <div class="field mb-4">
@@ -237,7 +294,53 @@ onUnmounted(() => {
         <template #footer>
             <div class="flex justify-end gap-2 w-full">
                 <Button label="Cancel" icon="pi pi-times" class="p-button-text p-button-secondary" @click="showChangePasswordDialog = false" :disabled="loading" />
-                <Button label="Change Password" icon="pi pi-check" class="p-button-primary" @click="changePassword" :loading="loading" :disabled="loading" />
+                <Button label="Change Password" icon="pi pi-check" class="p-button-primary" @click="changePassword(false)" :loading="loading" :disabled="loading" />
+            </div>
+        </template>
+    </Dialog>
+
+    <!-- Force Reset Password Dialog -->
+    <Dialog v-model:visible="showForceResetDialog" modal :closable="false" :closeOnEscape="false" :dismissableMask="false" :showHeader="true" header="Reset Required Password" :style="{ width: '450px' }" class="force-reset-dialog">
+        <div class="force-reset-content">
+            <div class="flex items-center mb-4 p-3 bg-yellow-50 rounded-lg">
+                <i class="pi pi-exclamation-triangle text-yellow-600 text-xl mr-3"></i>
+                <div>
+                    <p class="text-sm font-medium text-yellow-800">Password Reset Required</p>
+                    <p class="text-xs text-yellow-700 mt-1">You must reset your password before continuing.</p>
+                </div>
+            </div>
+
+            <div class="p-fluid">
+                <div class="field mb-4">
+                    <label for="force_current_password" class="block text-sm font-medium text-gray-700 mb-2">Current Password</label>
+                    <Password id="force_current_password" v-model="passwordForm.current_password" :feedback="false" toggleMask class="w-full custom-password" :disabled="loading" inputClass="w-full" :inputStyle="{ padding: '0.75rem' }" />
+                </div>
+
+                <div class="field mb-4">
+                    <label for="force_new_password" class="block text-sm font-medium text-gray-700 mb-2">New Password</label>
+                    <Password id="force_new_password" v-model="passwordForm.new_password" toggleMask class="w-full custom-password" :disabled="loading" :feedback="true" inputClass="w-full" :inputStyle="{ padding: '0.75rem' }" />
+                    <small class="text-xs text-gray-500 mt-1 block">Must contain both letters and numbers, at least 8 characters.</small>
+                </div>
+
+                <div class="field mb-2">
+                    <label for="force_new_password_confirmation" class="block text-sm font-medium text-gray-700 mb-2">Confirm New Password</label>
+                    <Password
+                        id="force_new_password_confirmation"
+                        v-model="passwordForm.new_password_confirmation"
+                        :feedback="false"
+                        toggleMask
+                        class="w-full custom-password"
+                        :disabled="loading"
+                        inputClass="w-full"
+                        :inputStyle="{ padding: '0.75rem' }"
+                    />
+                </div>
+            </div>
+        </div>
+
+        <template #footer>
+            <div class="flex justify-end gap-2 w-full">
+                <Button label="Reset Password" icon="pi pi-check" class="p-button-primary" @click="handleForceReset" :loading="loading" :disabled="loading" />
             </div>
         </template>
     </Dialog>
@@ -308,19 +411,26 @@ onUnmounted(() => {
     background: rgba(255, 255, 255, 0.98);
 }
 
-:deep(.password-dialog) {
+:deep(.password-dialog),
+:deep(.force-reset-dialog) {
     border-radius: 12px;
     overflow: hidden;
     box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
 }
 
-:deep(.password-dialog .p-dialog-header) {
+:deep(.password-dialog .p-dialog-header),
+:deep(.force-reset-dialog .p-dialog-header) {
     background: linear-gradient(135deg, #1e293b 0%, #334155 100%);
     color: white;
     padding: 1.25rem 1.5rem;
 }
 
-:deep(.password-dialog .p-dialog-content) {
+:deep(.force-reset-dialog .p-dialog-header) {
+    background: linear-gradient(135deg, #d97706 0%, #b45309 100%);
+}
+
+:deep(.password-dialog .p-dialog-content),
+:deep(.force-reset-dialog .p-dialog-content) {
     padding: 1.5rem;
 }
 
@@ -393,5 +503,9 @@ onUnmounted(() => {
 
 :deep(.p-confirm-dialog .p-dialog-content) {
     padding: 1.5rem;
+}
+
+.force-reset-content {
+    position: relative;
 }
 </style>
