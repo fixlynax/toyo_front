@@ -15,11 +15,6 @@
                 <div class="w-8 h-8 rounded-full bg-blue-600 text-white flex items-center justify-center">2</div>
                 <div class="font-semibold">SAP Details</div>
             </div>
-            <div class="flex-1 border-t"></div>
-            <div class="flex items-center space-x-2" :class="etenResult ? 'opacity-100' : 'opacity-40'">
-                <div class="w-8 h-8 rounded-full bg-blue-600 text-white flex items-center justify-center">3</div>
-                <div class="font-semibold">ETEN Created</div>
-            </div>
         </div>
 
         <!-- Step 1: Form Inputs -->
@@ -86,99 +81,109 @@
             </div>
         </div>
 
+        <!-- Step 2: SAP Details Display -->
         <div v-if="sapDetails && sapDetails.admin_data && !isDuplicateOrder" class="flex flex-col w-full">
             <!-- Sales Order Details -->
-            <div class="card p-4">
-                <div class="text-xl font-bold text-primary-600 border-b pb-2 mb-4">📄 Sales Order Details</div>
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div>
-                        <label class="block font-bold text-gray-700">Customer Account</label>
-                        <p class="text-gray-900">{{ sapDetails.admin_data.custaccountno || 'N/A' }}</p>
-                    </div>
-                    <div>
-                        <label class="block font-bold text-gray-700">Ship To</label>
-                        <p class="text-gray-900">{{ sapDetails.admin_data.shipto || 'N/A' }}</p>
-                    </div>
-                    <div>
-                        <label class="block font-bold text-gray-700">SAP Order No</label>
-                        <p class="text-gray-900">{{ sapDetails.admin_data.saporderno || 'N/A' }}</p>
-                    </div>
-                    <div>
-                        <label class="block font-bold text-gray-700">ETEN Order No</label>
-                        <p class="text-green-600 font-semibold">{{ sapDetails.admin_data.etenorderno || 'N/A' }}</p>
-                    </div>
-                    <div>
-                        <label class="block font-bold text-gray-700">Order Description</label>
-                        <p class="text-gray-900">{{ sapDetails.admin_data.orderdesc || 'N/A' }}</p>
-                    </div>
-                </div>
-            </div>
-
-            <!-- SAP Information -->
-            <div class="card p-4">
-                <div class="text-xl font-bold text-primary-600 border-b pb-2 mb-4">ℹ️ Order Information</div>
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                    <div>
-                        <label class="block font-bold text-gray-700">Order Dates</label>
-                        <p class="text-gray-900">{{ formatDate(sapDetails.admin_data.orderdate) }}</p>
-                    </div>
-                    <div>
-                        <label class="block font-bold text-gray-700">Request Delivery Date</label>
-                        <p class="text-gray-900">{{ formatDate(sapDetails.admin_data.requestdeliverydate) }}</p>
-                    </div>
-                    <div>
-                        <label class="block font-bold text-gray-700">Sales Organization</label>
-                        <p class="text-gray-900">{{ sapDetails.admin_data.salesorg }}</p>
-                    </div>
-                    <div>
-                        <label class="block font-bold text-gray-700">Price Group</label>
-                        <p class="text-gray-900">{{ sapDetails.admin_data.pricegroup || '-' }}</p>
-                    </div>
-                    <div>
-                        <label class="block font-bold text-gray-700">Shipping Condition</label>
-
-                        <p class="text-gray-900">{{ sapDetails.admin_data.shippingcond || '-' }}</p>
-                    </div>
-                    <div>
-                        <label class="block font-bold text-gray-700">Storage Location</label>
-
-                        <p class="text-gray-900">{{ sapDetails.admin_data.storagelocation || '-' }}</p>
+            <div class="mt-6 border rounded-lg p-8 bg-gray-50">
+                <div class="card p-4">
+                    <div class="text-xl font-bold text-primary-600 border-b pb-2 mb-4">📄 Sales Order Details</div>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <label class="block font-bold text-gray-700">Customer Account</label>
+                            <p class="text-gray-900">{{ sapDetails.admin_data.custaccountno || 'N/A' }}</p>
+                        </div>
+                        <div>
+                            <label class="block font-bold text-gray-700">Ship To</label>
+                            <p class="text-gray-900">{{ sapDetails.admin_data.shipto || 'N/A' }}</p>
+                        </div>
+                        <div>
+                            <label class="block font-bold text-gray-700">SAP Order No</label>
+                            <p class="text-gray-900">{{ sapDetails.admin_data.saporderno || 'N/A' }}</p>
+                        </div>
+                        <div>
+                            <label class="block font-bold text-gray-700">ETEN Order No</label>
+                            <p class="text-green-600 font-semibold">{{ sapDetails.admin_data.etenorderno || 'N/A' }}</p>
+                        </div>
+                        <div>
+                            <label class="block font-bold text-gray-700">Order Description</label>
+                            <p class="text-gray-900">{{ sapDetails.admin_data.orderdesc || 'N/A' }}</p>
+                        </div>
                     </div>
                 </div>
-            </div>
 
-            <!-- Order Items -->
-            <div class="card p-4">
-                <div class="text-xl font-bold text-primary-600 border-b pb-2 mb-4">📦 Order Items ({{ sapItems.length }})</div>
-                <DataTable :value="sapItems" class="p-datatable-sm" stripedRows :paginator="sapItems.length > 5" :rows="5">
-                    <Column field="materialid" header="Material ID" />
-                    <Column field="qty" header="Quantity" />
-                    <Column field="unitprice" header="Unit Price">
-                        <template #body="{ data }">RM {{ formatCurrency(data.unitprice || 0) }}</template>
-                    </Column>
-                    <Column field="totalamount" header="Total Amount">
-                        <template #body="{ data }" class="text-right text-green-600 font-medium">RM {{ formatCurrency(data.totalamount || 0) }}</template>
-                    </Column>
-                </DataTable>
+                <!-- SAP Information -->
+                <div class="card p-4">
+                    <div class="text-xl font-bold text-primary-600 border-b pb-2 mb-4">ℹ️ Order Information</div>
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <div>
+                            <label class="block font-bold text-gray-700">Order Dates</label>
+                            <p class="text-gray-900">{{ formatDate(sapDetails.admin_data.orderdate) }}</p>
+                        </div>
+                        <div>
+                            <label class="block font-bold text-gray-700">Request Delivery Date</label>
+                            <p class="text-gray-900">{{ formatDate(sapDetails.admin_data.requestdeliverydate) }}</p>
+                        </div>
+                        <div>
+                            <label class="block font-bold text-gray-700">Sales Organization</label>
+                            <p class="text-gray-900">{{ sapDetails.admin_data.salesorg }}</p>
+                        </div>
+                        <div>
+                            <label class="block font-bold text-gray-700">Price Group</label>
+                            <p class="text-gray-900">{{ sapDetails.admin_data.pricegroup || '-' }}</p>
+                        </div>
+                        <div>
+                            <label class="block font-bold text-gray-700">Shipping Condition</label>
 
-                <div class="flex justify-end mt-4 text-lg font-bold text-primary-600">Total: RM {{ formatCurrency(calculateTotalItemsValue()) }}</div>
+                            <p class="text-gray-900">{{ sapDetails.admin_data.shippingcond || '-' }}</p>
+                        </div>
+                        <div>
+                            <label class="block font-bold text-gray-700">Storage Location</label>
+
+                            <p class="text-gray-900">{{ sapDetails.admin_data.storagelocation || '-' }}</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Order Items -->
+                <div class="card p-4">
+                    <div class="text-xl font-bold text-primary-600 border-b pb-2 mb-4">📦 Order Items ({{ sapItems.length }})</div>
+                    <DataTable :value="sapItems" class="p-datatable-sm" stripedRows :paginator="sapItems.length > 5" :rows="5">
+                        <Column field="materialid" header="Material ID" />
+                        <Column field="qty" header="Quantity" />
+                        <Column field="unitprice" header="Unit Price">
+                            <template #body="{ data }">RM {{ formatCurrency(data.unitprice || 0) }}</template>
+                        </Column>
+                        <Column field="totalamount" header="Total Amount">
+                            <template #body="{ data }" class="text-right text-green-600 font-medium">RM {{ formatCurrency(data.totalamount || 0) }}</template>
+                        </Column>
+                    </DataTable>
+
+                    <div class="flex justify-end mt-4 text-lg font-bold text-primary-600">Total: RM {{ formatCurrency(calculateTotalItemsValue()) }}</div>
+                </div>
             </div>
             <div class="mt-8 p-4 bg-green-50 border border-green-200 rounded-lg">
                 <div class="flex items-center">
                     <i class="pi pi-check-circle text-green-500 text-xl mr-3"></i>
                     <div class="flex-1">
-                        <div class="font-medium text-green-700">Ready to Create ETEN Order</div>
-                        <div class="text-green-600 text-sm mt-1">SAP details verified. Click "Create ETEN Order" to proceed.</div>
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-2 mt-2">
-                            <div class="text-green-600 text-sm"><span class="font-medium">Customer:</span> {{ sapDetails.admin_data.custaccountno }}</div>
-                            <div class="text-green-600 text-sm"><span class="font-medium">SAP Order:</span> {{ sapDetails.admin_data.saporderno }}</div>
-                            <div class="text-green-600 text-sm"><span class="font-medium">Order Desc:</span> {{ getOrderDescLabel(form.orderdesc) }}</div>
-                            <div class="text-green-600 text-sm"><span class="font-medium">Items:</span> {{ sapItems.length }} items</div>
+                        <div class="font-bold text-xl text-green-900">Ready to Create ETEN Order</div>
+                        <div class="text-black text-sm mt-1">SAP details verified. Click "Create ETEN Order" to proceed.</div>
+                        <div class="grid grid-cols-1 md:grid-cols-5 gap-2 mt-2">
+                            <div class="text-green-600 text-sm">
+                                <span class="font-medium">Customer:</span><span class="font-bold ml-2">{{ sapDetails.admin_data.custaccountno }}</span>
+                            </div>
+                            <div class="text-green-600 text-sm">
+                                <span class="font-medium">SAP Order:</span><span class="font-bold ml-2">{{ sapDetails.admin_data.saporderno }}</span>
+                            </div>
+                            <div class="text-green-600 text-sm">
+                                <span class="font-medium">Order Desc:</span><span class="font-bold ml-2">{{ getOrderDescLabel(form.orderdesc) }}</span>
+                            </div>
+                            <div class="text-green-600 text-sm">
+                                <span class="font-medium">Items:</span><span class="font-bold ml-2">{{ sapItems.length }}</span>
+                            </div>
+                            <div class="text-green-600 text-sm">
+                                <span class="font-medium">Total:</span><span class="font-bold ml-2">RM {{ formatCurrency(calculateTotalItemsValue()) }}</span>
+                            </div>
                         </div>
-                    </div>
-                    <div class="text-right">
-                        <div class="text-lg font-bold text-green-700">RM {{ formatCurrency(calculateTotalItemsValue()) }}</div>
-                        <div class="text-sm text-green-600">Total Value</div>
                     </div>
                 </div>
             </div>
@@ -214,113 +219,6 @@
                     severity="success"
                     :class="{ 'opacity-50': isDuplicateOrder }"
                 />
-            </div>
-        </div>
-
-        <!-- Step 3: ETEN Result -->
-        <div v-if="etenResult" class="mt-6 border rounded-lg p-6 bg-green-50">
-            <div class="flex items-center justify-between mb-6">
-                <div>
-                    <div class="font-bold text-xl text-green-800">ETEN Order Created Successfully!</div>
-                    <div class="text-green-600 text-sm mt-1">Order has been created and stock updated in the system</div>
-                </div>
-                <Badge value="COMPLETED" severity="success" />
-            </div>
-
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-                <div class="bg-white p-4 rounded-lg shadow-sm border border-green-100">
-                    <div class="text-sm text-gray-500 mb-1">ETEN Order No</div>
-                    <div class="font-semibold text-lg text-green-600">{{ etenResult.admin_data.order_no }}</div>
-                    <div class="text-xs text-gray-500 mt-1">Created at: {{ formatDateTime(etenResult.admin_data.created) }}</div>
-                </div>
-
-                <div class="bg-white p-4 rounded-lg shadow-sm border border-green-100">
-                    <div class="text-sm text-gray-500 mb-1">Customer Account</div>
-                    <div class="font-semibold text-lg">{{ etenResult.admin_data.custaccountno }}</div>
-                    <div class="text-xs text-gray-500 mt-1">Ship To: {{ etenResult.admin_data.shipto }}</div>
-                </div>
-
-                <div class="bg-white p-4 rounded-lg shadow-sm border border-green-100">
-                    <div class="text-sm text-gray-500 mb-1">SAP Reference</div>
-                    <div class="font-semibold text-lg">{{ etenResult.admin_data.so_no }}</div>
-                    <div class="text-xs text-gray-500 mt-1">SAP Order Type: {{ etenResult.admin_data.sapordertype }}</div>
-                </div>
-                <div class="bg-white p-4 rounded-lg shadow-sm border border-green-100">
-                    <div class="text-sm text-gray-500 mb-1">Order Description</div>
-                    <div class="font-semibold text-lg">{{ getOrderDescLabel(etenResult.admin_data.orderDesc) }}</div>
-                    <div class="text-xs text-gray-500 mt-1">{{ etenResult.admin_data.orderDesc || 'NORMAL' }}</div>
-                </div>
-            </div>
-
-            <!-- Financial Information -->
-            <div class="bg-white p-4 rounded-lg shadow-sm border border-green-100 mb-6">
-                <div class="text-sm text-gray-500 mb-1">Total Amount</div>
-                <div class="font-semibold text-2xl text-green-600">RM {{ formatCurrency(etenResult.admin_data.total || 0) }}</div>
-                <div class="text-sm text-gray-500 mt-1">Subtotal: RM {{ formatCurrency(etenResult.admin_data.subtotal || 0) }}</div>
-            </div>
-
-            <!-- Order Status Information -->
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-                <div class="bg-white p-3 rounded-lg border">
-                    <div class="text-sm text-gray-500 mb-1">Order Status</div>
-                    <Badge :value="getOrderStatus(etenResult.admin_data.orderstatus)" :severity="getOrderStatusSeverity(etenResult.admin_data.orderstatus)" />
-                </div>
-                <div class="bg-white p-3 rounded-lg border">
-                    <div class="text-sm text-gray-500 mb-1">Channel</div>
-                    <div class="font-medium">{{ etenResult.admin_data.channel || 'ADMIN' }}</div>
-                </div>
-                <div class="bg-white p-3 rounded-lg border">
-                    <div class="text-sm text-gray-500 mb-1">Storage Location</div>
-                    <div class="font-medium">{{ etenResult.admin_data.storagelocation || '-' }}</div>
-                </div>
-            </div>
-
-            <!-- Order Items Created -->
-            <div class="mt-4">
-                <div class="font-semibold text-lg mb-3 text-green-800 flex items-center">
-                    <i class="pi pi-box mr-2"></i>
-                    Items Created
-                </div>
-                <DataTable :value="etenItems" class="p-datatable-sm" stripedRows :paginator="etenItems.length > 5" :rows="5">
-                    <Column field="materialid" header="Material ID" style="min-width: 120px"></Column>
-                    <Column field="itemno" header="Line No" style="width: 80px"></Column>
-                    <Column field="quantity" header="Quantity" style="width: 100px">
-                        <template #body="{ data }">
-                            <span class="font-semibold">{{ data.qty || 0 }}</span>
-                        </template>
-                    </Column>
-                    <Column field="price" header="Unit Price" style="width: 120px">
-                        <template #body="{ data }">
-                            <div class="text-right">
-                                <div class="font-medium">RM {{ formatCurrency(data.unitprice || 0) }}</div>
-                            </div>
-                        </template>
-                    </Column>
-                    <Column field="total" header="Total Amount" style="width: 120px">
-                        <template #body="{ data }">
-                            <div class="text-right">
-                                <div class="font-medium text-green-600">RM {{ formatCurrency(data.totalamt || 0) }}</div>
-                            </div>
-                        </template>
-                    </Column>
-                    <Column field="category" header="Category" style="width: 100px">
-                        <template #body="{ data }">
-                            {{ data.itemcategory || 'N/A' }}
-                        </template>
-                    </Column>
-                </DataTable>
-            </div>
-
-            <!-- Success Message -->
-            <div class="mt-6 p-4 bg-green-100 border border-green-300 rounded-lg">
-                <div class="flex items-center">
-                    <i class="pi pi-check-circle text-green-600 text-2xl mr-3"></i>
-                    <div>
-                        <div class="font-bold text-green-800">Order Successfully Processed</div>
-                        <div class="text-green-700 mt-1">The ETEN order has been created, stock levels updated, and all necessary system records have been processed.</div>
-                        <div class="text-green-700 text-sm mt-1">Order Description: {{ getOrderDescLabel(etenResult.admin_data.orderDesc) }}</div>
-                    </div>
-                </div>
             </div>
         </div>
     </div>
@@ -491,37 +389,40 @@ const getOrderStatusSeverity = (statusCode) => {
     return severityMap[statusCode] || 'info';
 };
 
-// New helper function to format date as dd-mm-yyyy
+// Fixed: Format date as yyyy-mm-dd for MySQL
 const formatDateToDDMMYYYY = (dateString) => {
     if (!dateString) return '';
-    
+
     try {
         const date = new Date(dateString);
         if (isNaN(date.getTime())) {
-            // If dateString is already in dd-mm-yyyy format, return it as is
+            // If dateString is already in yyyy-mm-dd format, return it as is
             if (dateString.match(/^\d{4}-\d{2}-\d{2}$/)) {
                 return dateString;
             }
-            // Try to parse other formats
+            // Try to parse dd-mm-yyyy or dd/mm/yyyy formats
             const parts = dateString.split(/[-/]/);
             if (parts.length === 3) {
-                const day = parts[0].padStart(2, '0');
-                const month = parts[1].padStart(2, '0');
-                const year = parts[2];
-                return `${year}-${month}-${day}`;
+                // If format is dd-mm-yyyy or dd/mm/yyyy, convert to yyyy-mm-dd
+                if (parts[0].length === 2 && parts[1].length === 2 && parts[2].length === 4) {
+                    // dd-mm-yyyy format, convert to yyyy-mm-dd
+                    return `${parts[2]}-${parts[1]}-${parts[0]}`;
+                }
             }
             return dateString;
         }
-        
-        // Format date to dd-mm-yyyy
-        const day = String(date.getDate()).padStart(2, '0');
-        const month = String(date.getMonth() + 1).padStart(2, '0');
+
+        // Format date to yyyy-mm-dd (MySQL format)
         const year = date.getFullYear();
-        
-        return `${day}-${month}-${year}`;
+        const month = String(date.getMonth() + 1).padStart(2, '0');
+        const day = String(date.getDate()).padStart(2, '0');
+
+        return `${year}-${month}-${day}`;
     } catch (error) {
         console.error('Error formatting date:', error);
-        return dateString;
+        // Return current date as fallback
+        const today = new Date();
+        return `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
     }
 };
 
@@ -555,7 +456,7 @@ const checkSAPDetails = async () => {
         });
 
         sapDetails.value = response.data;
-        console.log('SAP Details Response : ',response.data);
+        console.log('SAP Details Response : ', response.data);
 
         if (response.data.status === 1) {
             toast.add({
@@ -665,17 +566,19 @@ const createETENOrder = () => {
 
                 // Create FormData object and append each field
                 const formData = new FormData();
-                
+
                 // Append all required fields
                 formData.append('custaccountno', sapData.custaccountno || form.value.custaccountno);
                 formData.append('salesorg', sapData.salesorg || 'TSM');
                 formData.append('distributionchannel', sapData.distributionchannel || '01');
                 formData.append('division', sapData.division || '00');
                 formData.append('pricegroup', sapData.pricegroup || '04');
-                // Format orderdate as dd-mm-yyyy and append
+                // Format orderdate as yyyy-mm-dd for MySQL
                 formData.append('orderdate', formatDateToDDMMYYYY(sapData.orderdate) || formatDateToDDMMYYYY(new Date().toISOString().split('T')[0]));
-                // Format requestdeliverydate as dd-mm-yyyy and append
+                // Format requestdeliverydate as yyyy-mm-dd for MySQL
                 formData.append('requestdeliverydate', formatDateToDDMMYYYY(sapData.requestdeliverydate) || formatDateToDDMMYYYY(new Date().toISOString().split('T')[0]));
+                // Add deliveryDate field as well since the backend expects it (based on the SQL error)
+                formData.append('deliveryDate', formatDateToDDMMYYYY(sapData.requestdeliverydate) || formatDateToDDMMYYYY(new Date().toISOString().split('T')[0]));
                 formData.append('orderdesc', form.value.orderdesc);
                 formData.append('ordertype', sapData.ordertype || 'ZCPO');
                 formData.append('orderno', form.value.orderno);
@@ -703,8 +606,7 @@ const createETENOrder = () => {
                 });
 
                 if (response.data.status === 1) {
-                    etenResult.value = response.data;
-
+                    // Show success toast
                     toast.add({
                         severity: 'success',
                         summary: 'Order Created',
@@ -712,7 +614,8 @@ const createETENOrder = () => {
                         life: 4000
                     });
 
-                    form.value.orderno = '';
+                    // Clear/reset all form data
+                    resetForm();
                 } else {
                     throw new Error(response.data.message || 'Failed to create order');
                 }
