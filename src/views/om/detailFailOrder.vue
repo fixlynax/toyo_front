@@ -72,7 +72,7 @@
                         <Column field="qty" header="Quantity">
                             <template #body="{ data }">{{ parseInt(data.qty) }}</template>
                         </Column>
-                        <Column field="unitprice" header="Unit Price" class="text-right">
+                        <!-- <Column field="unitprice" header="Unit Price" class="text-right">
                             <template #body="{ data }">RM {{ parseFloat(data.unitprice || 0).toFixed(2) }}</template>
                             <template #footer>
                                 <div class="flex justify-start pr-2 font-bold text-gray-700">Grand Total</div>
@@ -83,7 +83,7 @@
                             <template #footer>
                                 <div class="flex justify-start pr-3 font-semibold text-blue-600">RM {{ totalAmount.toFixed(2) }}</div>
                             </template>
-                        </Column>
+                        </Column> -->
                     </DataTable>
                 </div>
 
