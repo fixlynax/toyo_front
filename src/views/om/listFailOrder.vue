@@ -252,7 +252,7 @@ onBeforeMount(async () => {
 
 <template>
     <div class="card">
-        <div class="text-2xl font-bold text-gray-800 border-b pb-2">Failed Orders</div>
+        <div class="text-2xl font-bold text-gray-800 border-b pb-2 mb-4">Failed Orders</div>
 
         <div>
             <LoadingPage v-if="loading" :message="'Loading Failed Orders...'" :sub-message="'Fetching failed order list'" />
