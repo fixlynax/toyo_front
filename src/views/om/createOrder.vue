@@ -655,20 +655,20 @@
                         <div class="p-4">
                             <div class="space-y-2">
                                 <div class="flex justify-between">
-                                    <span>Total Order Items:</span>
-                                    <span>{{ selectedTyres.length }} Items</span>
+                                    <span>Total Items</span>
+                                    <span class="font-semibold">{{ totalLineItems }} items</span>
+                                </div>
+                                <div class="flex justify-between">
+                                    <span>Total Order Items</span>
+                                    <span class="font-semibold">{{ selectedTyres.length }} Items</span>
                                 </div>
                                 <div v-if="freeItems.length > 0" class="flex justify-between">
-                                    <span>Total Free Items:</span>
-                                    <span class="text-green-600">{{ freeItems.length }} Items</span>
+                                    <span>Total Free Items</span>
+                                    <span class="text-green-600 font-semibold">{{ freeItems.length }} Items</span>
                                 </div>
                                 <div class="flex justify-between">
-                                    <span>Total Items:</span>
-                                    <span>{{ totalLineItems }} items</span>
-                                </div>
-                                <div class="flex justify-between">
-                                    <span>Total Quantity:</span>
-                                    <span>{{ cartQuantity + freeItemsQuantity }} Units</span>
+                                    <span>Total Quantity</span>
+                                    <span class="font-semibold">{{ cartQuantity + freeItemsQuantity }} Units</span>
                                 </div>
                                 <div class="flex justify-between border-t pt-2">
                                     <span class="font-bold text-lg">Total Amount:</span>
