@@ -1294,6 +1294,25 @@ const isBackOrderScenario = (confirmResult) => {
     return hasUnfulfilled || hasFulfilled;
 };
 
+// Function to create empty order number
+const createEmptyOrderNo = async () => {
+    try {
+        console.log('Creating empty order number...');
+        const response = await api.post('order/createEmptyOrderNo-admin');
+        
+        if (response.data.status === 1) {
+            const orderNo = response.data.admin_data;
+            console.log('Generated order number:', orderNo);
+            return orderNo;
+        } else {
+            throw new Error('Failed to generate order number');
+        }
+    } catch (error) {
+        console.error('Error creating order number:', error);
+        throw new Error('Failed to create order number');
+    }
+};
+
 // Step Navigation
 const goToStep = async (step) => {
     if (step === 2) {
@@ -1498,7 +1517,6 @@ const addToCart = (tyre) => {
     checkSalesProgramAndPrice();
 };
 
-// API Calls
 // API Calls
 const fetchCustomers = async () => {
     loadingCustomers.value = true;
@@ -1955,11 +1973,31 @@ const placeOrder = async () => {
     processingOrder.value = true;
     showOrderDialog.value = true;
     orderStatus.value = 'processing';
-    orderMessage.value = 'Processing your order...';
+    orderMessage.value = 'Generating order number...';
     orderError.value = '';
     orderDetails.value = null;
 
     try {
+        // Step 0: Generate order number first
+        let orderNo;
+        try {
+            orderMessage.value = 'Generating order number...';
+            orderNo = await createEmptyOrderNo();
+            console.log('Generated order number for confirmation:', orderNo);
+        } catch (error) {
+            console.error('Failed to generate order number:', error);
+            orderStatus.value = 'error';
+            orderMessage.value = 'Failed to generate order number';
+            orderError.value = error.message || 'Unable to generate order number. Please try again.';
+            toast.add({
+                severity: 'error',
+                summary: 'Error',
+                detail: 'Failed to generate order number',
+                life: 2000
+            });
+            return;
+        }
+
         // Step 1: Add items to cart first
         orderMessage.value = 'Adding items to cart...';
         const addToCartResult = await addToCartAPI();
@@ -1977,11 +2015,11 @@ const placeOrder = async () => {
             // Prepare order array for confirmation
             const orderArray = addToCartResult.eten_data?.order_array || prepareOrderArrayForConfirmation();
 
-            // Step 2: Confirm the order
+            // Step 2: Confirm the order with the generated order number
             if (selectedOrderType.value === 'NORMAL') {
-                await processNormalOrder(cartRefNo, orderArray);
+                await processNormalOrder(cartRefNo, orderArray, orderNo);
             } else if (selectedOrderType.value === 'DIRECTSHIP') {
-                await processDirectShipOrder(cartRefNo, orderArray);
+                await processDirectShipOrder(cartRefNo, orderArray, orderNo);
             }
         } else {
             // Handle specific API errors
@@ -2097,23 +2135,31 @@ const prepareOrderArrayForConfirmation = () => {
     return orderArray;
 };
 
-// Process NORMAL Order
-const processNormalOrder = async (cartRefNo, orderArray) => {
+// Process NORMAL Order with order number parameter
+const processNormalOrder = async (cartRefNo, orderArray, orderNo) => {
     if (!cartRefNo) {
         throw new Error('Cart reference not found');
     }
 
-    const confirmResult = await confirmOrderAPI(cartRefNo, orderArray);
+    if (!orderNo) {
+        throw new Error('Order number is required');
+    }
+
+    const confirmResult = await confirmOrderAPI(cartRefNo, orderArray, orderNo);
     await handleOrderConfirmation(confirmResult, 'NORMAL');
 };
 
-// Process DIRECTSHIP Order
-const processDirectShipOrder = async (cartRefNo, orderArray) => {
+// Process DIRECTSHIP Order with order number parameter
+const processDirectShipOrder = async (cartRefNo, orderArray, orderNo) => {
     if (!cartRefNo) {
         throw new Error('Direct shipment cart reference not found');
     }
 
-    const confirmResult = await confirmOrderAPI(cartRefNo, orderArray);
+    if (!orderNo) {
+        throw new Error('Order number is required');
+    }
+
+    const confirmResult = await confirmOrderAPI(cartRefNo, orderArray, orderNo);
     await handleOrderConfirmation(confirmResult, 'DIRECTSHIP');
 };
 
@@ -2156,14 +2202,16 @@ const addToCartAPI = async (cartRefNo = null) => {
     return response.data;
 };
 
-// confirmOrderAPI with proper structure
-const confirmOrderAPI = async (cartRefNo, orderArray) => {
+// confirmOrderAPI with order number parameter
+const confirmOrderAPI = async (cartRefNo, orderArray, orderNo) => {
     try {
         console.log('Confirming order with array:', orderArray);
+        console.log('Order number:', orderNo);
 
         const response = await api.post(`order/confirm-order-admin/${cartRefNo}`, {
             order_array: JSON.stringify(orderArray),
-            order_remark: `Order created via admin interface - ${selectedOrderType.value}`
+            order_remark: `Order created via admin interface - ${selectedOrderType.value}`,
+            order_no: orderNo
         });
 
         return response.data;
@@ -2180,16 +2228,18 @@ const confirmOrderAPI = async (cartRefNo, orderArray) => {
     }
 };
 
-// confirmBackOrderAPI with proper structure
-const confirmBackOrderAPI = async (cartRefNo, orderArray, backorderArray) => {
+// confirmBackOrderAPI with order number parameter
+const confirmBackOrderAPI = async (cartRefNo, orderArray, backorderArray, orderNo) => {
     try {
         console.log('Confirming back order with arrays:', { orderArray, backorderArray });
+        console.log('Order number:', orderNo);
 
         // Prepare the payload exactly as shown in your API example
         const payload = {
             order_array: JSON.stringify(orderArray),
             backorder_array: JSON.stringify(backorderArray),
-            order_remark: `Order with back order created via admin interface - ${selectedOrderType.value}`
+            order_remark: `Order with back order created via admin interface - ${selectedOrderType.value}`,
+            order_no: orderNo
         };
 
         console.log('Back order payload:', payload);
@@ -2503,14 +2553,23 @@ const showManualBackOrderOption = () => {
     }
 };
 
-// Enhanced proceedWithBackOrder
+// Enhanced proceedWithBackOrder with order number generation
 const proceedWithBackOrder = async () => {
     showBackOrderDialog.value = false;
     showOrderDialog.value = true;
     orderStatus.value = 'processing';
-    orderMessage.value = 'Creating order with back order...';
+    orderMessage.value = 'Generating order number...';
 
     try {
+        // Generate order number first
+        let orderNo;
+        try {
+            orderNo = await createEmptyOrderNo();
+            console.log('Generated order number for back order:', orderNo);
+        } catch (error) {
+            throw new Error('Failed to generate order number: ' + error.message);
+        }
+
         // Prepare order array for fulfilled items
         const orderArray = fulfilledItems.value.map((item) => ({
             materialid: item.materialid,
@@ -2535,7 +2594,8 @@ const proceedWithBackOrder = async () => {
 
         console.log('Back order final payload:', {
             order_array: orderArray,
-            backorder_array: backorderArray
+            backorder_array: backorderArray,
+            order_no: orderNo
         });
 
         // Get or create cart reference
@@ -2553,7 +2613,7 @@ const proceedWithBackOrder = async () => {
             }
         }
 
-        const result = await confirmBackOrderAPI(cartRefNo, orderArray, backorderArray);
+        const result = await confirmBackOrderAPI(cartRefNo, orderArray, backorderArray, orderNo);
 
         if (result.status === 1) {
             orderStatus.value = 'success';
@@ -2596,14 +2656,23 @@ const proceedWithBackOrder = async () => {
     }
 };
 
-// proceedWithoutBackOrder with better salesprogramid handling
+// proceedWithoutBackOrder with order number generation
 const proceedWithoutBackOrder = async () => {
     showBackOrderDialog.value = false;
     showOrderDialog.value = true;
     orderStatus.value = 'processing';
-    orderMessage.value = 'Creating order without back order...';
+    orderMessage.value = 'Generating order number...';
 
     try {
+        // Generate order number first
+        let orderNo;
+        try {
+            orderNo = await createEmptyOrderNo();
+            console.log('Generated order number:', orderNo);
+        } catch (error) {
+            throw new Error('Failed to generate order number: ' + error.message);
+        }
+
         // Only process fulfilled items with salesprogramid
         const orderArray = fulfilledItems.value.map((item, index) => {
             // FIX: Ensure we get the salesprogramid properly
@@ -2645,7 +2714,7 @@ const proceedWithoutBackOrder = async () => {
             }
         }
 
-        const result = await confirmOrderAPI(cartRefNo, orderArray);
+        const result = await confirmOrderAPI(cartRefNo, orderArray, orderNo);
 
         if (result.status === 1) {
             orderStatus.value = 'success';
