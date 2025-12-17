@@ -339,7 +339,7 @@ const submitPickupUpdate = async () => {
             toast.add({ severity: 'success', summary: 'Updated', detail: 'Pickup date collecter information updated', life: 3000 });
             InitfetchData(); // refresh table
         } else {
-            toast.add({ severity: 'error', summary: 'Error', detail: res.data?.message || 'Failed', life: 3000 });
+            toast.add({ severity: 'error', summary: 'Error', detail: res.data?.message || 'Failed to update pickup information', life: 3000 });
         }
     } catch (err) {
         console.error(err);
@@ -379,10 +379,10 @@ const submitPickupUpdate2 = async () => {
         const res = await api.post('update-collect-time', payload);
 
         if (res.data?.status === 1) {
-            toast.add({ severity: 'success', summary: 'Updated', detail: 'Pickup date set to now', life: 3000 });
+            toast.add({ severity: 'success', summary: 'Updated', detail: 'Pickup date information updated', life: 3000 });
             InitfetchData(); // refresh table
         } else {
-            toast.add({ severity: 'error', summary: 'Error', detail: res.data?.message || 'Failed', life: 3000 });
+            toast.add({ severity: 'error', summary: 'Error', detail: res.data?.message || 'Failed to update pickup information', life: 3000 });
         }
     } catch (err) {
         console.error(err);
@@ -406,10 +406,10 @@ const promptUpdatePickup = (data) => {
                 const res = await api.post('update-collect-time', payload);
 
                 if (res.data?.status === 1) {
-                    toast.add({ severity: 'success', summary: 'Updated', detail: 'Pickup date set to now', life: 3000 });
+                    toast.add({ severity: 'success', summary: 'Updated', detail: 'Pickup date information updated', life: 3000 });
                     InitfetchData(); // refresh table
                 } else {
-                    toast.add({ severity: 'error', summary: 'Error', detail: res.data?.message || 'Failed', life: 3000 });
+                    toast.add({ severity: 'error', summary: 'Error', detail: res.data?.message || 'Failed to update pickup information', life: 3000 });
                 }
             } catch (err) {
                 console.error(err);
@@ -507,7 +507,6 @@ const InitfetchData = async () => {
             // response.data.status === 1 &&
             orderDelList.value = response.data.admin_data;
         } else {
-            console.error('API returned error or invalid data:', response.data);
             toast.add({ severity: 'error', summary: 'Error', detail: 'Failed to load data', life: 3000 });
         }
     } catch (error) {

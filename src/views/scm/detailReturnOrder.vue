@@ -393,10 +393,10 @@ const savePickup = async () => {
 
         const res = await api.post('update-pickup-return-order', payload);
         if (res.data?.status === 1) {
-            toast.add({ severity: 'success', summary: 'Updated', detail: 'Pickup date updated successfully', life: 3000 });
+            toast.add({ severity: 'success', summary: 'Updated', detail: 'Pickup date information updated', life: 3000 });
             InitfetchData(); // refresh table
         } else {
-            toast.add({ severity: 'error', summary: 'Error', detail: res.data?.error || 'Failed', life: 3000 });
+            toast.add({ severity: 'error', summary: 'Error', detail: res.data?.error || 'Failed to updated pickup information', life: 3000 });
         }
     } catch (err) {
         console.error(err);
@@ -423,10 +423,10 @@ const saveRecieve = async () => {
         };
         const res = await api.post('update-receive-return-order', payload);
         if (res.data?.status === 1) {
-            toast.add({ severity: 'success', summary: 'Updated', detail: 'Received date updated successfully', life: 3000 });
+            toast.add({ severity: 'success', summary: 'Updated', detail: 'Received date information updated', life: 3000 });
             InitfetchData(); // refresh table
         } else {
-            toast.add({ severity: 'error', summary: 'Error', detail: res.data?.admin_data[0].sap_error.error_message || 'Failed', life: 3000 });
+            toast.add({ severity: 'error', summary: 'Error', detail: res.data?.admin_data[0].sap_error.error_message || 'Failed to update received information', life: 3000 });
         }
     } catch (err) {
         console.error(err);
@@ -452,7 +452,6 @@ const InitfetchData = async () => {
             form.value.returnorderno = returnList.value.return_orderNo_ref;
             form2.value.returnorderno = returnList.value.return_orderNo_ref;
         } else {
-            console.error('API returned error or invalid data:', response.data);
             toast.add({ severity: 'error', summary: 'Error', detail: 'Failed to load data', life: 3000 });
         }
     } catch (error) {
@@ -541,7 +540,7 @@ const handleImport = async (event) => {
             toast.add({
                 severity: 'error',
                 summary: 'Import Failed',
-                detail: response.data.message || 'Server did not confirm success',
+                detail: response.data.message || 'Failed to import data',
                 life: 5000
             });
         }

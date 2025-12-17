@@ -273,7 +273,7 @@ const handleImport1 = async (event) => {
             toast.add({
                 severity: 'error',
                 summary: 'Import Failed',
-                detail: response.data.message || 'Server did not confirm success',
+                detail: response.data.message || 'Failed to import data',
                 life: 3000
             });
         }
@@ -318,7 +318,7 @@ const handleImport2 = async (event) => {
             toast.add({
                 severity: 'error',
                 summary: 'Import Failed',
-                detail: response.data.message || 'Server did not confirm success',
+                detail: response.data.message || 'Failed to import data',
                 life: 3000
             });
         }
@@ -372,7 +372,11 @@ const fetchData = async (body = null) => {
         listData.value = response.data.admin_data.sort((a, b) => {
                 return new Date(b.created) - new Date(a.created);
             }); // sort by raw Date
-        } else listData.value = [];
+        } 
+        else {
+            listData.value = [];
+            toast.add({ severity: 'error', summary: 'Error', detail: response.data.message || 'Failed to load data', life: 3000 });
+        }
     } catch (error) {
         console.error('Error fetching collection list:', error);
         listData.value = [];

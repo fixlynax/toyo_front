@@ -146,7 +146,6 @@ const InitfetchData = async () => {
             // response.data.status === 1 &&
             logisticList.value = response.data.admin_data;
         } else {
-            console.error('API returned error or invalid data:', response.data);
             toast.add({ severity: 'error', summary: 'Error', detail: 'Failed to load data', life: 3000 });
         }
     } catch (error) {

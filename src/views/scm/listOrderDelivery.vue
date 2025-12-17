@@ -429,7 +429,7 @@ const handleImport1 = async (event) => {
             toast.add({
                 severity: 'error',
                 summary: 'Import Failed',
-                detail: response.data.message || 'Server did not confirm success',
+                detail: response.data.message || 'Failed to import data',
                 life: 3000
             });
         }
@@ -475,7 +475,7 @@ const handleImport2 = async (event) => {
             toast.add({
                 severity: 'error',
                 summary: 'Import Failed',
-                detail: response.data.message || 'Server did not confirm success',
+                detail: response.data.message || 'Failed to import data',
                 life: 3000
             });
         }
@@ -528,13 +528,11 @@ const fetchData = async (body = null) => {
                 return new Date(b.created) - new Date(a.created);
             });
         } else {
-            console.error('API returned error or invalid data:', response.data);
-            orderDelList.value = [];
-            toast.add({ severity: 'error', summary: 'Error', detail: 'Failed to load data', life: 3000 });
+        orderDelList.value = [];
+            toast.add({ severity: 'error', summary: 'Error', detail: response.data.message || 'Failed to load data', life: 3000 });
         }
     } catch (error) {
         console.error('Error fetching product list:', error);
-        orderDelList.value = [];
         toast.add({ severity: 'error', summary: 'Error', detail: 'Failed to load data', life: 3000 });
     } finally {
         loading.value = false;

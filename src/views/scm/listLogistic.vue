@@ -167,10 +167,9 @@ const fetchData = async () => {
                 return new Date(b.created) - new Date(a.created);
             });
         } else {
-            console.error('API returned error or invalid data:', response.data);
             logisticList.value = [];
             filteredList.value = [];
-            toast.add({ severity: 'error', summary: 'Error', detail: 'Failed to load data', life: 3000 });
+            toast.add({ severity: 'error', summary: 'Error', detail: response.data.message || 'Failed to load data', life: 3000 });
         }
     } catch (error) {
         console.error('Error fetching data list:', error);
