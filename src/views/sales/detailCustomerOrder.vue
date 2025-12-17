@@ -624,7 +624,7 @@ const fetchOrderDetail = async () => {
                 phoneNumber: etenInfo.phoneNumber || '-',
                 mobileNumber: etenInfo.mobileNumber || '-',
                 email: etenInfo.emailAddress || '-',
-                addressLine1: etenInfo.addressLine1,
+                // addressLine1: etenInfo.addressLine1,
                 addressLine2: etenInfo.addressLine2,
                 addressLine3: etenInfo.addressLine3,
                 addressLine4: etenInfo.addressLine4,

@@ -307,7 +307,7 @@ const clearDealerFilter = () => {
 
 <template>
     <div class="card">
-        <div class="text-2xl font-bold text-gray-800 border-b pb-2">List Order</div>
+        <div class="text-2xl font-bold text-gray-800 border-b pb-2">Customer Order</div>
 
         <div>
             <TabMenu :model="statusTabs" v-model:activeIndex="activeTabIndex" class="mb-6" />

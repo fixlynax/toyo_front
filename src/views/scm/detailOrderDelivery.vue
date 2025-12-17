@@ -29,7 +29,7 @@
                         <div>
                             <span class="text-sm font-medium text-black-700">Location</span>
                             <p class="text-lg font-medium">
-                                {{ orderDelList.eten_user?.addressLine1 || '' }} {{ orderDelList.eten_user?.addressLine2 || '' }} {{ orderDelList.eten_user?.addressLine3 || '' }} {{ orderDelList.eten_user?.addressLine4 || '' }},
+                                {{ orderDelList.eten_user?.addressLine2 || '' }} {{ orderDelList.eten_user?.addressLine3 || '' }} {{ orderDelList.eten_user?.addressLine4 || '' }},
                                 {{ orderDelList.eten_user?.postcode || '' }} {{ orderDelList.eten_user?.city || '' }} {{ orderDelList.eten_user?.state || '' }}
                             </p>
                         </div>
@@ -214,7 +214,7 @@
                                 </tr>
                                 <tr class="border-b even:bg-gray-50">
                                     <td class="px-4 py-2 font-medium">Address</td>
-                                    <td class="px-4 py-2 text-right font-semibold">{{ orderDelList.shipto_data?.addressLine1 || '' }} {{ orderDelList.shipto_data?.addressLine2 || '' }} {{ orderDelList.shipto_data?.addressLine3 || '' }} {{ orderDelList.shipto_data?.addressLine4 || '' }},
+                                    <td class="px-4 py-2 text-right font-semibold">{{ orderDelList.shipto_data?.addressLine2 || '' }} {{ orderDelList.shipto_data?.addressLine3 || '' }} {{ orderDelList.shipto_data?.addressLine4 || '' }},
                                 {{ orderDelList.shipto_data?.postcode || '' }} {{ orderDelList.shipto_data?.city || '' }} {{ orderDelList.shipto_data?.state || '' }}</td>
                                 </tr>
                                 <tr class="border-b even:bg-gray-50">
