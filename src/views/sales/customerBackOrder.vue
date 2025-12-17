@@ -380,7 +380,7 @@ const getStatusSeverity = (data) => {
 
 <template>
     <div class="card flex flex-col w-full">
-        <div class="text-2xl font-bold text-gray-800 border-b pb-2">📦 List Back Order</div>
+        <div class="text-2xl font-bold text-gray-800 border-b pb-2">Customer Back Order</div>
         <TabMenu :model="statusTabs" v-model:activeIndex="activeTabIndex" class="mb-6" />
 
         <!-- Header with Search and Filters (Always shown) -->

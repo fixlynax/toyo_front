@@ -300,7 +300,7 @@ onBeforeMount(async () => {
 <template>
     <div class="card">
         <!-- Header -->
-        <div class="text-2xl font-bold text-gray-800 border-b pb-2">List Return Order</div>
+        <div class="text-2xl font-bold text-gray-800 border-b pb-2">Customer Return Order</div>
 
         <div>
             <TabMenu :model="statusTabs" v-model:activeIndex="activeTabIndex" class="mb-6" />

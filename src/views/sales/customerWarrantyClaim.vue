@@ -309,14 +309,14 @@ onMounted(async () => {
 
 <template>
     <div class="card">
-        <div class="text-2xl font-bold text-gray-800 border-b pb-2 mb-4">List Claim</div>
+        <div class="text-2xl font-bold text-gray-800 border-b pb-2 mb-4">Customer Warranty Claim</div>
 
         <!-- High-Level Claim Search (Above Tabs) -->
         <div class="mb-4 p-4 bg-blue-50 rounded-lg border border-blue-200">
             <div class="flex items-center justify-between mb-2">
                 <div class="flex items-center gap-2">
                     <i class="pi pi-search text-blue-500"></i>
-                    <span class="text-lg font-semibold text-gray-800">Claim Search</span>
+                    <span class="text-lg font-semibold text-gray-800">Warranty Claim Search</span>
                 </div>
                 <Badge value="Quick Access" severity="info" />
             </div>

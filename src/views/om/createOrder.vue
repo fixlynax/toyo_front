@@ -788,7 +788,7 @@
         </Dialog>
 
         <!-- Enhanced Back Order Confirmation Dialog -->
-        <Dialog v-model:visible="showBackOrderDialog" :style="{ width: '700px' }" header="Back Order Required" :modal="true" :closable="false">
+        <Dialog v-model:visible="showBackOrderDialog" :style="{ width: '700px' }" header="Back Order Required" :modal="true" :closable="true">
             <div class="flex flex-col gap-4">
                 <div class="flex items-center gap-3">
                     <i class="pi pi-exclamation-triangle text-yellow-500 text-2xl"></i>
@@ -1613,7 +1613,7 @@ const fetchShipToAddresses = async (custAccountNo) => {
                         id: shipto.id,
                         code: shipto.custAccountNo,
                         display: `${shipto.custAccountNo} - ${shipto.companyName1 || 'Ship To Address'}`,
-                        address1: shipto.addressLine1 || '',
+                        // address1: shipto.addressLine1 || '',
                         address2: shipto.addressLine2 || '',
                         address3: shipto.addressLine3 || '',
                         address4: shipto.addressLine4 || '',

@@ -11,21 +11,14 @@ const toast = useToast();
 const filters = ref({});
 const materialData = ref([]);
 const loading = ref(true);
-const selectedStorage = ref('TMJB'); // Default storage location
+const selectedStorage = ref(''); // Default storage location
 const exportLoading = ref(false);
 const visibleRows = ref([]);
 const selectedExportIds = ref(new Set());
+const storageLocations = ref([]); // Changed to ref, will be populated from API
+const loadingLocations = ref(true); // Added loading state for storage locations
 
-// 🟢 Hardcoded storage locations
-const storageLocations = [
-    { code: 'RETP', name: 'RETP' },
-    { code: 'RER', name: 'RER' },
-    { code: 'TMJB', name: 'TMJB' },
-    { code: 'TMSB', name: 'TMSB' },
-    { code: 'TMSA', name: 'TMSA' },
-    { code: 'TMSK', name: 'TMSK' },
-    { code: 'TMDS', name: 'TMDS' }
-];
+// 🟢 Removed hardcoded storage locations - will be fetched from API
 
 // 🟢 Filters
 function initFilters() {
@@ -43,8 +36,64 @@ const getStockStatus = (balance) => {
     return { label: 'In Stock', severity: 'success' };
 };
 
+// 🟢 Fetch Storage Locations from API
+const fetchStorageLocations = async () => {
+    try {
+        loadingLocations.value = true;
+        const response = await api.get('salesman/getStorageLocation');
+
+        if (response.data.status === 1 && Array.isArray(response.data.admin_data)) {
+            // Format the API response to match dropdown structure
+            storageLocations.value = response.data.admin_data
+                .filter((location) => location && location.trim() !== '') // Filter out empty/null values
+                .map((location) => ({
+                    code: location.trim(),
+                    name: location.trim()
+                }));
+
+            // Set default storage location to first available if exists
+            if (storageLocations.value.length > 0) {
+                selectedStorage.value = storageLocations.value[0].code;
+            } else {
+                toast.add({
+                    severity: 'warn',
+                    summary: 'No Storage Locations',
+                    detail: 'No storage locations configured for your account',
+                    life: 3000
+                });
+            }
+        } else {
+            storageLocations.value = [];
+            toast.add({
+                severity: 'warn',
+                summary: 'No Storage Data',
+                detail: 'No storage locations available',
+                life: 3000
+            });
+        }
+    } catch (error) {
+        console.error('Error fetching storage locations:', error);
+        storageLocations.value = [];
+        toast.add({
+            severity: 'error',
+            summary: 'Error',
+            detail: 'Failed to load storage locations',
+            life: 3000
+        });
+    } finally {
+        loadingLocations.value = false;
+    }
+};
+
 // 🟢 Fetch Material Stock Levels
 const fetchMaterialStock = async (storageLocation) => {
+    if (!storageLocation) {
+        materialData.value = [];
+        visibleRows.value = [];
+        loading.value = false;
+        return;
+    }
+
     try {
         loading.value = true;
         const response = await api.post('salesman/getMaterialStockLevel', {
@@ -87,37 +136,39 @@ const fetchMaterialStock = async (storageLocation) => {
                 isTWP: material.isTWP,
                 updated: material.updated,
                 // Stock level data
-                stock_level: material.stock_level ? {
-                    materialid: material.stock_level.materialid,
-                    storagelocation: material.stock_level.storagelocation,
-                    plant: material.stock_level.plant,
-                    stocklevelmaster: material.stock_level.stocklevelmaster,
-                    DOM: material.stock_level.DOM,
-                    stockBalance: material.stock_level.stockBalance ? parseFloat(material.stock_level.stockBalance) : 0,
-                    created: material.stock_level.created,
-                    updated: material.stock_level.updated
-                } : null
+                stock_level: material.stock_level
+                    ? {
+                          materialid: material.stock_level.materialid,
+                          storagelocation: material.stock_level.storagelocation,
+                          plant: material.stock_level.plant,
+                          stocklevelmaster: material.stock_level.stocklevelmaster,
+                          DOM: material.stock_level.DOM,
+                          stockBalance: material.stock_level.stockBalance ? parseFloat(material.stock_level.stockBalance) : 0,
+                          created: material.stock_level.created,
+                          updated: material.stock_level.updated
+                      }
+                    : null
             }));
             visibleRows.value = materialData.value;
         } else {
             materialData.value = [];
             visibleRows.value = [];
-            toast.add({ 
-                severity: 'warn', 
-                summary: 'No Data', 
-                detail: 'No stock data available for selected location', 
-                life: 3000 
+            toast.add({
+                severity: 'warn',
+                summary: 'No Data',
+                detail: 'No stock data available for selected location',
+                life: 3000
             });
         }
     } catch (error) {
         console.error('Error fetching material stock levels:', error);
         materialData.value = [];
         visibleRows.value = [];
-        toast.add({ 
-            severity: 'error', 
-            summary: 'Error', 
-            detail: 'Failed to load material stock levels', 
-            life: 3000 
+        toast.add({
+            severity: 'error',
+            summary: 'Error',
+            detail: 'Failed to load material stock levels',
+            life: 3000
         });
     } finally {
         loading.value = false;
@@ -138,14 +189,21 @@ const handleStorageChange = () => {
 // 🟢 Initial load
 onBeforeMount(async () => {
     initFilters();
-    await fetchMaterialStock(selectedStorage.value);
+    await fetchStorageLocations(); // First fetch storage locations
+    
+    // Only fetch material stock if we have a storage location selected
+    if (selectedStorage.value) {
+        await fetchMaterialStock(selectedStorage.value); // Then fetch stock data
+    } else {
+        loading.value = false; // Make sure loading is false if no storage selected
+    }
 });
 
 // 🟢 Parse stock level master JSON
 const parseStockLevelMaster = (stockLevelMaster) => {
     try {
         if (!stockLevelMaster) return [];
-        
+
         if (typeof stockLevelMaster === 'string') {
             const parsed = JSON.parse(stockLevelMaster);
             // Handle different structures
@@ -157,11 +215,11 @@ const parseStockLevelMaster = (stockLevelMaster) => {
                 return [parsed];
             }
         }
-        
+
         if (Array.isArray(stockLevelMaster)) {
             return stockLevelMaster;
         }
-        
+
         return [stockLevelMaster];
     } catch (error) {
         console.error('Error parsing stocklevelmaster:', error, stockLevelMaster);
@@ -185,11 +243,11 @@ const calculateTotalFromBatches = (stockLevelMaster) => {
 // 🟢 Format Date
 const formatDate = (dateString) => {
     if (!dateString) return '-';
-    
+
     try {
         const date = new Date(dateString);
         if (isNaN(date.getTime())) return '-';
-        
+
         return date.toLocaleDateString('en-MY', {
             year: 'numeric',
             month: '2-digit',
@@ -222,25 +280,25 @@ const getCurrentPrice = (material) => {
         { price: material.price04, validFrom: material.price04_validitystartdate, validTo: material.price_04_validityenddate },
         { price: material.price05, validFrom: material.price05_validitystartdate, validTo: material.price_05_validityenddate }
     ];
-    
+
     // Find the most recent price that is valid (not null and within validity period)
     for (const priceInfo of prices) {
         if (priceInfo.price && priceInfo.price !== '0.00' && priceInfo.price !== '0') {
             if (!priceInfo.validFrom) return priceInfo.price; // No start date, assume always valid
-            
+
             const validFrom = new Date(priceInfo.validFrom);
             let isValid = validFrom <= today;
-            
+
             // Check end date if exists
             if (priceInfo.validTo && priceInfo.validTo !== '9999-12-31') {
                 const validTo = new Date(priceInfo.validTo);
                 isValid = isValid && today <= validTo;
             }
-            
+
             if (isValid) return priceInfo.price;
         }
     }
-    
+
     return null;
 };
 
@@ -249,15 +307,15 @@ const handleExport = async () => {
     const idsArray = Array.from(selectedExportIds.value).map((id) => Number(id));
 
     if (idsArray.length === 0) {
-        toast.add({ 
-            severity: 'warn', 
-            summary: 'Warning', 
-            detail: 'Please select at least one row to export', 
-            life: 3000 
+        toast.add({
+            severity: 'warn',
+            summary: 'Warning',
+            detail: 'Please select at least one row to export',
+            life: 3000
         });
         return;
     }
-    
+
     try {
         exportLoading.value = true;
 
@@ -271,7 +329,7 @@ const handleExport = async () => {
                 }
             }
         );
-        
+
         const blob = new Blob([response.data], {
             type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
         });
@@ -285,20 +343,20 @@ const handleExport = async () => {
         document.body.removeChild(a);
         window.URL.revokeObjectURL(url);
 
-        toast.add({ 
-            severity: 'success', 
-            summary: 'Success', 
-            detail: 'Export completed successfully', 
-            life: 3000 
+        toast.add({
+            severity: 'success',
+            summary: 'Success',
+            detail: 'Export completed successfully',
+            life: 3000
         });
         selectedExportIds.value.clear();
     } catch (error) {
         console.error('Error exporting data:', error);
-        toast.add({ 
-            severity: 'error', 
-            summary: 'Error', 
-            detail: 'Failed to export data', 
-            life: 3000 
+        toast.add({
+            severity: 'error',
+            summary: 'Error',
+            detail: 'Failed to export data',
+            life: 3000
         });
     } finally {
         exportLoading.value = false;
@@ -320,10 +378,10 @@ const onTableFilter = (event) => {
 
 // 🟢 Toggle all visible rows
 const toggleSelectAll = () => {
-    const allIds = visibleRows.value.map(item => item.id);
+    const allIds = visibleRows.value.map((item) => item.id);
 
     if (isAllSelected()) {
-        selectedExportIds.value = new Set([...selectedExportIds.value].filter(id => !allIds.includes(id)));
+        selectedExportIds.value = new Set([...selectedExportIds.value].filter((id) => !allIds.includes(id)));
     } else {
         selectedExportIds.value = new Set([...selectedExportIds.value, ...allIds]);
     }
@@ -331,16 +389,16 @@ const toggleSelectAll = () => {
 
 // 🟢 Computed: are all visible rows selected?
 const isAllSelected = () => {
-    return visibleRows.value.length > 0 && visibleRows.value.every(item => selectedExportIds.value.has(item.id));
+    return visibleRows.value.length > 0 && visibleRows.value.every((item) => selectedExportIds.value.has(item.id));
 };
 
 // 🟢 Stock summary computed properties
 const stockSummary = computed(() => {
     const total = materialData.value.length;
-    const inStock = materialData.value.filter(m => m.stock_level?.stockBalance > 0).length;
-    const outOfStock = materialData.value.filter(m => !m.stock_level || m.stock_level.stockBalance <= 0).length;
-    const lowStock = materialData.value.filter(m => m.stock_level?.stockBalance > 0 && m.stock_level.stockBalance < 50).length;
-    
+    const inStock = materialData.value.filter((m) => m.stock_level?.stockBalance > 0).length;
+    const outOfStock = materialData.value.filter((m) => !m.stock_level || m.stock_level.stockBalance <= 0).length;
+    const lowStock = materialData.value.filter((m) => m.stock_level?.stockBalance > 0 && m.stock_level.stockBalance < 50).length;
+
     return { total, inStock, outOfStock, lowStock };
 });
 
@@ -354,10 +412,25 @@ const formatBoolean = (value) => {
     <div class="card">
         <div class="text-2xl font-bold text-gray-800 border-b pb-2 mb-4">Material Stock Level</div>
 
-        <LoadingPage v-if="loading" :message="'Loading Material Stock...'" :sub-message="'Fetching stock levels from warehouse'" />
+        <!-- Loading state for both storage locations and material data -->
+        <LoadingPage
+            v-if="loadingLocations || (loading && selectedStorage)"
+            :message="loadingLocations ? 'Loading Storage Locations...' : 'Loading Material Stock...'"
+            :sub-message="loadingLocations ? 'Fetching available storage locations' : 'Fetching stock levels from warehouse'"
+        />
 
+        <!-- Show message if no storage locations available -->
+        <div v-else-if="!loadingLocations && storageLocations.length === 0" class="text-center py-12">
+            <div class="flex flex-col items-center gap-4">
+                <i class="pi pi-warehouse text-5xl text-gray-300"></i>
+                <h3 class="text-xl font-medium text-gray-600">No Storage Locations</h3>
+                <p class="text-gray-500">No storage locations are configured for your account.</p>
+            </div>
+        </div>
+
+        <!-- Show DataTable when storage locations are loaded and one is selected -->
         <DataTable
-            v-if="!loading"
+            v-else-if="selectedStorage"
             :value="materialData"
             @filter="onTableFilter"
             :paginator="true"
@@ -369,7 +442,7 @@ const formatBoolean = (value) => {
             :rowHover="true"
             :filters="filters"
             filterDisplay="menu"
-            :globalFilterFields="['materialid', 'material', 'pattern_name', 'origin', 'sectionwidth', 'tireseries', 'rimdiameter', 'speedplyrating']"
+            :globalFilterFields="['materialid', 'material', 'pattern_name', 'origin', 'rimdiameter']"
             paginatorTemplate="CurrentPageReport FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink RowsPerPageDropdown"
             currentPageReportTemplate="Showing {first} to {last} of {totalRecords} entries"
             sortField="materialid"
@@ -386,20 +459,11 @@ const formatBoolean = (value) => {
                             </InputIcon>
                             <InputText v-model="filters['global'].value" placeholder="Quick Search by Material ID, Name, Pattern, etc." class="w-full" />
                         </IconField>
-                        
+
                         <!-- Storage Location Dropdown -->
                         <div class="flex items-center gap-2">
                             <span class="text-sm font-medium text-gray-700 whitespace-nowrap">Storage:</span>
-                            <Dropdown 
-                                v-model="selectedStorage" 
-                                :options="storageLocations" 
-                                optionLabel="name" 
-                                optionValue="code" 
-                                placeholder="Select Storage" 
-                                class="w-48" 
-                                :filter="true"
-                                @change="handleStorageChange"
-                            >
+                            <Dropdown v-model="selectedStorage" :options="storageLocations" optionLabel="name" optionValue="code" placeholder="Select Storage" class="w-48" :filter="true" @change="handleStorageChange">
                                 <template #option="slotProps">
                                     <div class="flex items-center gap-2">
                                         <i class="pi pi-warehouse text-blue-600"></i>
@@ -409,7 +473,7 @@ const formatBoolean = (value) => {
                                 <template #value="slotProps">
                                     <div v-if="slotProps.value" class="flex items-center gap-2">
                                         <i class="pi pi-warehouse text-blue-600"></i>
-                                        <span>{{ storageLocations.find(s => s.code === slotProps.value)?.name }}</span>
+                                        <span>{{ storageLocations.find((s) => s.code === slotProps.value)?.name }}</span>
                                     </div>
                                     <span v-else>{{ slotProps.placeholder }}</span>
                                 </template>
@@ -419,17 +483,8 @@ const formatBoolean = (value) => {
 
                     <!-- Right: Export Button & Stock Summary -->
                     <div class="flex items-center gap-4 ml-auto">
-                        
                         <!-- Export Button -->
-                        <Button 
-                            type="button" 
-                            label="Export" 
-                            icon="pi pi-file-export" 
-                            class="p-button-success" 
-                            :loading="exportLoading" 
-                            @click="handleExport" 
-                            :disabled="materialData.length === 0"
-                        />
+                        <Button type="button" label="Export" icon="pi pi-file-export" class="p-button-success" :loading="exportLoading" @click="handleExport" :disabled="materialData.length === 0" />
                     </div>
                 </div>
             </template>
@@ -460,7 +515,7 @@ const formatBoolean = (value) => {
                     </div>
                 </template>
             </Column>
-            
+
             <!-- Material ID & Name -->
             <Column field="materialid" header="Material" style="min-width: 8rem" sortable>
                 <template #body="{ data }">
@@ -483,34 +538,21 @@ const formatBoolean = (value) => {
                 </template>
             </Column>
 
+            <!-- Size Details -->
+            <Column header="Rim Diameter" style="min-width: 8rem" sortable :sort-field="'rimdiameter'">
+                <template #body="{ data }">
+                    <div class="flex flex-col leading-relaxed text-sm text-gray-700">
+                        <div class="flex items-center justify-between mb-2">
+                            <span class="font-semibold">{{ data.rimdiameter }}"</span>
+                        </div>
+                    </div>
+                </template>
+            </Column>
+
             <!-- Origin -->
             <Column field="origin" header="Origin" style="min-width: 3rem" sortable>
                 <template #body="{ data }">
                     {{ data.origin }}
-                </template>
-            </Column>
-
-            <!-- Size Details -->
-            <Column header="Size" style="min-width: 12rem" sortable :sort-field="'sectionwidth'">
-                <template #body="{ data }">
-                    <div class="flex flex-col leading-relaxed text-sm text-gray-700">
-                        <div class="flex items-center justify-between mb-2">
-                            <span class="text-gray-800 font-semibold">Section Width:</span>
-                            <span>{{ data.sectionwidth }}</span>
-                        </div>
-                        <div class="flex items-center justify-between mb-2">
-                            <span class="text-gray-800 font-semibold">Tyre Series:</span>
-                            <span>{{ data.tireseries }}</span>
-                        </div>
-                        <div class="flex items-center justify-between mb-2">
-                            <span class="text-gray-800 font-semibold">Rim Diameter:</span>
-                            <span>{{ data.rimdiameter }}"</span>
-                        </div>
-                        <div class="flex items-center justify-between mb-2">
-                            <span class="text-gray-800 font-semibold">Speed Rating:</span>
-                            <span>{{ data.speedplyrating }}</span>
-                        </div>
-                    </div>
                 </template>
             </Column>
 
@@ -522,17 +564,17 @@ const formatBoolean = (value) => {
                             <div class="flex items-center justify-between mb-2">
                                 <span class="text-gray-800 font-semibold">Balance:</span>
                                 <div class="flex items-center gap-2">
-                                    <span :class="{
-                                        'font-bold text-lg': true,
-                                        'text-green-600': data.stock_level.stockBalance > 50,
-                                        'text-yellow-600': data.stock_level.stockBalance > 0 && data.stock_level.stockBalance <= 50,
-                                        'text-red-600': data.stock_level.stockBalance <= 0
-                                    }">
+                                    <span
+                                        :class="{
+                                            'font-bold text-lg': true,
+                                            'text-green-600': data.stock_level.stockBalance > 50,
+                                            'text-yellow-600': data.stock_level.stockBalance > 0 && data.stock_level.stockBalance <= 50,
+                                            'text-red-600': data.stock_level.stockBalance <= 0
+                                        }"
+                                    >
                                         {{ data.stock_level.stockBalance || 0 }}
                                     </span>
-                                    <Tag :value="getStockStatus(data.stock_level.stockBalance).label" 
-                                         :severity="getStockStatus(data.stock_level.stockBalance).severity" 
-                                         class="text-xs" />
+                                    <Tag :value="getStockStatus(data.stock_level.stockBalance).label" :severity="getStockStatus(data.stock_level.stockBalance).severity" class="text-xs" />
                                 </div>
                             </div>
                             <div class="flex items-center justify-between mb-2">
@@ -559,120 +601,21 @@ const formatBoolean = (value) => {
                 </template>
             </Column>
 
-            <!-- Batch Details -->
-            <!-- <Column header="Batch Details" style="min-width: 12rem">
-                <template #body="{ data }">
-                    <template v-if="data.stock_level && data.stock_level.stocklevelmaster">
-                        <div class="max-h-32 overflow-y-auto pr-2">
-                            <div class="space-y-2">
-                                <div v-for="(batch, index) in parseStockLevelMaster(data.stock_level.stocklevelmaster)" 
-                                    :key="index"
-                                    class="p-2 bg-gray-50 rounded border border-gray-200">
-                                    <div class="flex justify-between items-center mb-1">
-                                        <span class="font-mono text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded">#{{ batch.batchno || `Batch ${index + 1}` }}</span>
-                                        <span class="font-bold">
-                                            {{ parseFloat(batch.stockbalance || batch.stockBalance || 0).toFixed(0) }} units
-                                        </span>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="text-xs text-gray-500 mt-2 text-center">
-                            {{ parseStockLevelMaster(data.stock_level.stocklevelmaster).length }} batch(es)
-                            • Total: {{ calculateTotalFromBatches(data.stock_level.stocklevelmaster) }}
-                        </div>
-                    </template>
-                    <template v-else>
-                        <div class="text-center text-gray-400 italic py-2">No batch details</div>
-                    </template>
-                </template>
-            </Column> -->
-
-            <!-- Price Information -->
-            <Column header="Price(RM)" style="min-width: 15rem">
-                <template #body="{ data }">
-                    <div class="flex flex-col leading-relaxed text-sm text-gray-700">      
-                        <div v-if="data.price01 && data.price01 !== '0.00'" class="flex items-center justify-between mb-2">
-                            <span class="text-gray-600">Price 1:</span>
-                            <span class="font-medium">{{ formatPrice(data.price01) }}</span>
-                        </div>
-                        
-                        <div v-if="data.price02 && data.price02 !== '0.00'" class="flex items-center justify-between mb-2">
-                            <span class="text-gray-600">Price 2:</span>
-                            <span class="font-medium">{{ formatPrice(data.price02) }}</span>
-                        </div>
-                        
-                        <div v-if="data.price03 && data.price03 !== '0.00'" class="flex items-center justify-between mb-2">
-                            <span class="text-gray-600">Price 3:</span>
-                            <span class="font-medium">{{ formatPrice(data.price03) }}</span>
-                        </div>
-                        
-                        <div v-if="data.price04 && data.price04 !== '0.00'" class="flex items-center justify-between mb-2">
-                            <span class="text-gray-600">Price 4:</span>
-                            <span class="font-medium">{{ formatPrice(data.price04) }}</span>
-                        </div>
-                        
-                        <div v-if="data.price05 && data.price05 !== '0.00'" class="flex items-center justify-between">
-                            <span class="text-gray-600">Price 5:</span>
-                            <span class="font-medium">{{ formatPrice(data.price05) }}</span>
-                        </div>
-                        
-                        <div v-if="!data.price01 && !data.price02 && !data.price03 && !data.price04 && !data.price05" 
-                             class="text-center text-gray-400 py-2">
-                            No price data
-                        </div>
-                    </div>
-                </template>
-            </Column>
-
-            <!-- Price Validity -->
-            <Column header="Valid" style="min-width: 8rem">
-                <template #body="{ data }">
-                    <div class="flex flex-col leading-relaxed text-sm text-gray-700">
-                        <div v-if="data.price01_validitystartdate" class="flex mb-2">
-                            <span >{{ formatDate(data.price01_validitystartdate) }} - {{ formatDate(data.price_01_validityenddate) }}</span>
-                        </div>
-                        <div v-if="data.price02_validitystartdate" class="flex mb-2">
-                            <span >{{ formatDate(data.price02_validitystartdate) }} - {{ formatDate(data.price_02_validityenddate) }}</span>
-                        </div>
-                        <div v-if="data.price03_validitystartdate" class="flex mb-2">
-                            <span >{{ formatDate(data.price03_validitystartdate) }} - {{ formatDate(data.price_03_validityenddate) }}</span>
-                        </div>
-                        <div v-if="data.price04_validitystartdate" class="flex mb-2">
-                            <span >{{ formatDate(data.price04_validitystartdate) }} - {{ formatDate(data.price_04_validityenddate) }}</span>
-                        </div>
-                        <div v-if="data.price05_validitystartdate" class="flex">
-                            <span >{{ formatDate(data.price05_validitystartdate) }} - {{ formatDate(data.price_05_validityenddate) }}</span>
-                        </div>
-                        <div v-if="!data.price01_validitystartdate && !data.price02_validitystartdate && !data.price03_validitystartdate && !data.price04_validitystartdate && !data.price05_validitystartdate" 
-                             class="text-center text-gray-400 text-xs py-1">
-                            No validity dates
-                        </div>
-                    </div>
-                </template>
-            </Column>
-
             <!-- Product Status -->
             <Column header="Status" style="min-width: 10rem">
                 <template #body="{ data }">
                     <div class="flex flex-col space-y-1">
                         <div class="flex items-center justify-between">
                             <span class="text-gray-600 text-sm">Sell:</span>
-                            <Tag :value="formatBoolean(data.isSell)" 
-                                 :severity="data.isSell ? 'info' : 'secondary'" 
-                                 class="text-xs" />
+                            <Tag :value="formatBoolean(data.isSell)" :severity="data.isSell ? 'info' : 'secondary'" class="text-xs" />
                         </div>
                         <div class="flex items-center justify-between">
                             <span class="text-gray-600 text-sm">Warranty:</span>
-                            <Tag :value="formatBoolean(data.isWarranty)" 
-                                 :severity="data.isWarranty ? 'info' : 'secondary'" 
-                                 class="text-xs" />
+                            <Tag :value="formatBoolean(data.isWarranty)" :severity="data.isWarranty ? 'info' : 'secondary'" class="text-xs" />
                         </div>
                         <div class="flex items-center justify-between">
                             <span class="text-gray-600 text-sm">TWP:</span>
-                            <Tag :value="formatBoolean(data.isTWP)" 
-                                 :severity="data.isTWP ? 'info' : 'secondary'" 
-                                 class="text-xs" />
+                            <Tag :value="formatBoolean(data.isTWP)" :severity="data.isTWP ? 'info' : 'secondary'" class="text-xs" />
                         </div>
                     </div>
                 </template>
@@ -687,9 +630,25 @@ const formatBoolean = (value) => {
                 </template>
             </Column>
         </DataTable>
+
+        <!-- Show placeholder if no storage is selected but locations are available -->
+        <div v-else class="text-center py-12">
+            <div class="flex flex-col items-center gap-4">
+                <i class="pi pi-warehouse text-5xl text-blue-300"></i>
+                <h3 class="text-xl font-medium text-gray-600">Select a Storage Location</h3>
+                <p class="text-gray-500">Please select a storage location from the dropdown above to view stock levels.</p>
+                <Dropdown v-model="selectedStorage" :options="storageLocations" optionLabel="name" optionValue="code" placeholder="Select Storage" class="w-64" :filter="true" @change="handleStorageChange">
+                    <template #option="slotProps">
+                        <div class="flex items-center gap-2">
+                            <i class="pi pi-warehouse text-blue-600"></i>
+                            <span>{{ slotProps.option.name }}</span>
+                        </div>
+                    </template>
+                </Dropdown>
+            </div>
+        </div>
     </div>
 </template>
-
 <style scoped>
 :deep(.rounded-table) {
     border-radius: 12px;
@@ -713,7 +672,7 @@ const formatBoolean = (value) => {
         font-weight: 600;
         color: #374151;
         border-bottom: 2px solid #e5e7eb;
-        
+
         &:first-child {
             border-top-left-radius: 12px;
         }
@@ -771,20 +730,20 @@ const formatBoolean = (value) => {
 /* Highlight row based on stock level */
 :deep(.p-datatable-tbody > tr) {
     transition: background-color 0.2s;
-    
+
     &:hover {
         background-color: #f9fafb !important;
     }
-    
+
     &[data-stock-balance] {
-        &[data-stock-balance="0"] {
+        &[data-stock-balance='0'] {
             background-color: #fef2f2 !important;
             &:hover {
                 background-color: #fee2e2 !important;
             }
         }
-        
-        &[data-stock-balance*="low"] {
+
+        &[data-stock-balance*='low'] {
             background-color: #fffbeb !important;
             &:hover {
                 background-color: #fef3c7 !important;

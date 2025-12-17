@@ -72,60 +72,43 @@
                         <Column field="qty" header="Quantity">
                             <template #body="{ data }">{{ parseInt(data.qty) }}</template>
                         </Column>
-                        <!-- <Column field="unitprice" header="Unit Price" class="text-right">
-                            <template #body="{ data }">RM {{ parseFloat(data.unitprice || 0).toFixed(2) }}</template>
-                            <template #footer>
-                                <div class="flex justify-start pr-2 font-bold text-gray-700">Grand Total</div>
-                            </template>
-                        </Column>
-                        <Column field="totalamt" header="Total Amount" class="text-right">
-                            <template #body="{ data }">RM {{ parseFloat(data.totalamt || 0).toFixed(2) }}</template>
-                            <template #footer>
-                                <div class="flex justify-start pr-3 font-semibold text-blue-600">RM {{ totalAmount.toFixed(2) }}</div>
-                            </template>
-                        </Column> -->
                     </DataTable>
                 </div>
 
                 <!-- SAP Error Response Card (only for FAILED status with sapErrorResponse) -->
                 <div v-if="orderStatusText === 'FAILED' && orderData.sapErrorResponse" class="card flex flex-col w-full">
                     <div class="flex items-center justify-between border-b pb-3">
-                        <div class="text-2xl font-bold text-red-800">SAP Error Details</div>
-                        <!-- <Tag value="ERROR" severity="danger" /> -->
+                        <div class="text-xl font-bold text-black">SAP Error Details</div>
                     </div>
                     <div class="mt-4 p-4 bg-red-50 rounded-lg border border-red-200">
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
                             <div>
-                                <span class="text-sm font-semibold text-gray-700">Error Code</span>
+                                <span class="text-sm font-semibold text-black">Error Code</span>
                                 <p class="text-lg font-medium text-red-600">{{ orderData.sapErrorResponse?.errorcode || '-' }}</p>
                             </div>
                             <div>
-                                <span class="text-sm font-semibold text-gray-700">Error Number</span>
+                                <span class="text-sm font-semibold text-black">Error Number</span>
                                 <p class="text-lg font-medium text-red-600">{{ orderData.sapErrorResponse?.errornumber || '-' }}</p>
                             </div>
                             <div class="md:col-span-2">
-                                <span class="text-sm font-semibold text-gray-700">Error Message</span>
+                                <span class="text-sm font-semibold text-black">Error Message</span>
                                 <p class="text-lg font-medium text-red-600">{{ orderData.sapErrorResponse?.message || '-' }}</p>
                             </div>
                         </div>
-                        
+
                         <!-- Unfulfilled Items -->
                         <div v-if="orderData.sapErrorResponse?.data?.unfulfilled_items" class="mb-4">
                             <h4 class="font-semibold text-gray-700 mb-2">Unfulfilled Items:</h4>
                             <div class="bg-white p-3 rounded border">
-                                <p class="text-red-600">
-                                    Material: {{ orderData.sapErrorResponse.data.unfulfilled_items.materialid }} - 
-                                    Qty: {{ orderData.sapErrorResponse.data.unfulfilled_items.qty }}
-                                </p>
+                                <p class="text-red-600">Material: {{ orderData.sapErrorResponse.data.unfulfilled_items.materialid }} - Qty: {{ orderData.sapErrorResponse.data.unfulfilled_items.qty }}</p>
                             </div>
                         </div>
-                        
+
                         <!-- Error Result Set -->
                         <div v-if="orderData.sapErrorResponse?.resultset && orderData.sapErrorResponse.resultset.length > 0">
                             <h4 class="font-semibold text-gray-700 mb-2">Detailed Errors:</h4>
                             <div class="space-y-2">
-                                <div v-for="(error, index) in orderData.sapErrorResponse.resultset" :key="index" 
-                                     class="bg-white p-3 rounded border border-red-200">
+                                <div v-for="(error, index) in orderData.sapErrorResponse.resultset" :key="index" class="bg-white p-3 rounded border border-red-200">
                                     <div class="flex items-center gap-2">
                                         <span class="px-2 py-1 bg-red-100 text-red-800 text-xs font-semibold rounded">
                                             {{ error.type }}
@@ -172,12 +155,14 @@
                                     <td class="px-4 py-2 text-right font-medium">
                                         <div class="flex items-center justify-end gap-2">
                                             <span>{{ orderData.so_no || '-' }}</span>
-                                            <Button v-if="!orderData.so_no && orderStatusText === 'TIMEOUT'" 
-                                                    icon="pi pi-pencil"
-                                                    class="p-button-text p-button-info p-button-secondary text-sm" 
-                                                    size="small" 
-                                                    @click="openUpdateSODialog"
-                                                    v-tooltip="'Update SO Number'" />
+                                            <Button
+                                                v-if="!orderData.so_no && orderStatusText === 'TIMEOUT'"
+                                                icon="pi pi-pencil"
+                                                class="p-button-text p-button-info p-button-secondary text-sm"
+                                                size="small"
+                                                @click="openUpdateSODialog"
+                                                v-tooltip="'Update SO Number'"
+                                            />
                                         </div>
                                     </td>
                                 </tr>
@@ -221,18 +206,20 @@
                                     <td class="px-4 py-2 font-medium">Created</td>
                                     <td class="px-4 py-2 text-right font-medium">{{ formatDateTime(orderData.created) || '-' }}</td>
                                 </tr>
-                                <tr>
+                                <!-- Only show buttons for TIMEOUT status -->
+                                <tr v-if="orderStatusText === 'TIMEOUT'">
                                     <td colspan="2" class="px-2 py-2 text-right">
                                         <div class="flex justify-end gap-2">
-                                            <Button label="Void" 
-                                                    class="p-button-danger text-sm !w-fit" 
-                                                    @click="voidOrder" 
-                                                    :loading="loadingAction" />
-                                            <Button label="Process" 
-                                                    class="p-button-success text-sm !w-fit" 
-                                                    @click="processOrder" 
-                                                    :loading="loadingAction"
-                                                    :disabled="orderStatusText === 'FAILED' && !canProcessFailedOrder" />
+                                            <Button label="Void" class="p-button-danger text-sm !w-fit" @click="showVoidToast" :disabled="loadingProcess" />
+                                            <Button label="Process" class="p-button-success text-sm !w-fit" @click="processOrder" :loading="loadingProcess" />
+                                        </div>
+                                    </td>
+                                </tr>
+                                <!-- Show status message for other statuses -->
+                                <tr v-else>
+                                    <td colspan="2" class="px-2 py-2 text-right">
+                                        <div class="text-sm text-gray-800 font-bold italic mt-2">
+                                            {{ getStatusMessage() }}
                                         </div>
                                     </td>
                                 </tr>
@@ -287,29 +274,8 @@
                 </div>
 
                 <div class="flex justify-end gap-2 mt-4">
-                    <Button label="Cancel" class="p-button-secondary" @click="cancelUpdateSO" :disabled="loadingAction" />
-                    <Button label="Update & Continue" class="p-button-primary" @click="updateSONumber" :loading="loadingAction" />
-                </div>
-            </div>
-        </Dialog>
-
-        <!-- Confirm Void Dialog -->
-        <Dialog v-model:visible="showVoidConfirmDialog" header="Void Order" modal :style="{ width: '30rem' }" :closable="false">
-            <div class="flex flex-col gap-4">
-                <div class="p-fluid">
-                    <label for="voidReason" class="font-semibold">Void Reason <span class="text-red-500">*</span></label>
-                    <Dropdown id="voidReason" v-model="voidReason" :options="voidReasons" optionLabel="name" optionValue="code" placeholder="Select void reason" class="w-full" :class="{ 'p-invalid': voidReasonSubmitted && !voidReason }" />
-                    <small v-if="voidReasonSubmitted && !voidReason" class="p-error">Void reason is required.</small>
-                </div>
-
-                <div class="p-fluid">
-                    <label for="voidRemarks" class="font-semibold">Remarks</label>
-                    <Textarea id="voidRemarks" v-model="voidRemarks" rows="3" placeholder="Enter any additional remarks" class="w-full" />
-                </div>
-
-                <div class="flex justify-end gap-2 mt-4">
-                    <Button label="Cancel" class="p-button-secondary" @click="showVoidConfirmDialog = false" :disabled="loadingAction" />
-                    <Button label="Confirm Void" class="p-button-danger" @click="confirmVoidOrder" :loading="loadingAction" />
+                    <Button label="Cancel" class="p-button-secondary" @click="cancelUpdateSO" :disabled="loadingUpdate" />
+                    <Button label="Update & Continue" class="p-button-primary" @click="updateSONumber" :loading="loadingUpdate" />
                 </div>
             </div>
         </Dialog>
@@ -317,7 +283,7 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted, watch } from 'vue';
+import { ref, computed, onMounted } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { useToast } from 'primevue/usetoast';
 import api from '@/service/api';
@@ -332,24 +298,13 @@ const customerInfo = ref({});
 const shippingDetail = ref({});
 const deliveryInfo = ref({});
 const orderItems = ref([]);
-const loadingAction = ref(false);
+const loadingProcess = ref(false);
+const loadingUpdate = ref(false);
 
 // SO Number dialog
 const showUpdateSODialog = ref(false);
 const soNumber = ref('');
 const soNumberSubmitted = ref(false);
-
-// Void dialog
-const showVoidConfirmDialog = ref(false);
-const voidReason = ref('');
-const voidRemarks = ref('');
-const voidReasonSubmitted = ref(false);
-const voidReasons = ref([
-    { code: 'SAP_ORDER_NOT_FOUND', name: 'SAP Order Not Found' },
-    { code: 'CANCELLED_BY_CUSTOMER', name: 'Cancelled by Customer' },
-    { code: 'OUT_OF_STOCK', name: 'Out of Stock' },
-    { code: 'OTHER', name: 'Other' }
-]);
 
 // Computed properties
 const totalAmount = computed(() => {
@@ -359,10 +314,10 @@ const totalAmount = computed(() => {
 const orderStatusText = computed(() => {
     if (orderData.value.sapErrorResponse) {
         return 'FAILED';
-    } else if (orderData.value.orderstatus === 0 && !orderData.value.so_no) {
+    } else if (orderData.value.orderstatus === 0 || !orderData.value.so_no) {
         return 'TIMEOUT';
     } else if (orderData.value.orderstatus === 66) {
-        return 'COMPLETED';
+        return 'PROCESSING';
     } else {
         return 'PENDING';
     }
@@ -370,27 +325,15 @@ const orderStatusText = computed(() => {
 
 const orderStatusSeverity = computed(() => {
     switch (orderStatusText.value) {
-        case 'FAILED': return 'danger';
-        case 'TIMEOUT': return 'warning';
-        case 'COMPLETED': return 'success';
-        default: return 'warn';
+        case 'FAILED':
+            return 'danger';
+        case 'TIMEOUT':
+            return 'warning';
+        case 'PROCESSING':
+            return 'success';
+        default:
+            return 'warn';
     }
-});
-
-const canProcessFailedOrder = computed(() => {
-    // For failed orders, check if there's an error response
-    // and if it's related to insufficient stock or material issues
-    if (!orderData.value.sapErrorResponse) return false;
-    
-    const errorData = orderData.value.sapErrorResponse;
-    if (errorData.resultset) {
-        // Check if error is about insufficient stock
-        const hasStockError = errorData.resultset.some(error => 
-            error.message && error.message.includes('Insufficient stock')
-        );
-        return !hasStockError; // Can process if no stock error
-    }
-    return false;
 });
 
 // Formatting methods
@@ -412,13 +355,27 @@ const formatItemNo = (itemNo) => {
 // Address methods
 const getFullAddress = (data) => {
     if (!data) return '-';
-    const addressParts = [data.addressLine1, data.addressLine2, data.addressLine3, data.addressLine4, data.city, data.state, data.postcode].filter((part) => part && part.trim() !== '');
+    const addressParts = [ data.addressLine2, data.addressLine3, data.addressLine4, data.city, data.state, data.postcode].filter((part) => part && part.trim() !== '');
     return addressParts.join('') || '-';
 };
 
 const getCompanyName = (data) => {
     if (!data) return '-';
     return [data.companyName1, data.companyName2, data.companyName3, data.companyName4].filter(Boolean).join(', ') || '-';
+};
+
+// Status message helper
+const getStatusMessage = () => {
+    switch (orderStatusText.value) {
+        case 'FAILED':
+            return 'This order has failed in SAP. Please check error details above.';
+        case 'PROCESSING':
+            return 'This order has been processing.';
+        case 'PENDING':
+            return 'This order is pending processing.';
+        default:
+            return 'No action required.';
+    }
 };
 
 // Order processing methods
@@ -439,10 +396,10 @@ const updateSONumber = async () => {
     if (!soNumber.value) return;
 
     try {
-        loadingAction.value = true;
-        
-        // Update SO number in the order
-        const response = await api.postExtra(`order/update-so-number/${orderData.value.order_no}`, {
+        loadingUpdate.value = true;
+
+        // Update SO number using the sonoFailedOrder API
+        const response = await api.postExtra(`order/failed-order-update-sono/${orderData.value.order_no}`, {
             so_no: soNumber.value
         });
 
@@ -472,124 +429,65 @@ const updateSONumber = async () => {
             life: 3000
         });
     } finally {
-        loadingAction.value = false;
+        loadingUpdate.value = false;
     }
 };
 
-const voidOrder = () => {
-    showVoidConfirmDialog.value = true;
-    voidReason.value = '';
-    voidRemarks.value = '';
-    voidReasonSubmitted.value = false;
+const showVoidToast = () => {
+    toast.add({
+        severity: 'info',
+        summary: 'Info',
+        detail: 'Void function is not yet implemented',
+        life: 3000
+    });
 };
 
-const confirmVoidOrder = async () => {
-    voidReasonSubmitted.value = true;
-    if (!voidReason.value) return;
-
+const processOrder = async () => {
     try {
-        loadingAction.value = true;
-        
-        const payload = new URLSearchParams();
-        payload.append('voidReason', voidReason.value);
-        payload.append('remarks', voidRemarks.value);
+        loadingProcess.value = true;
 
-        const response = await api.postExtra(`order/void-order/${orderData.value.order_no}`, payload, {
-            headers: {
-                'Content-Type': 'application/x-www-form-urlencoded',
-                Accept: 'application/json'
-            }
-        });
+        // Only process TIMEOUT orders
+        if (orderStatusText.value !== 'TIMEOUT') {
+            toast.add({
+                severity: 'warn',
+                summary: 'Warning',
+                detail: 'This action is only available for TIMEOUT orders',
+                life: 3000
+            });
+            loadingProcess.value = false;
+            return;
+        }
+
+        if (!orderData.value.so_no) {
+            toast.add({
+                severity: 'warn',
+                summary: 'Warning',
+                detail: 'Please update SO number before processing',
+                life: 3000
+            });
+            openUpdateSODialog();
+            loadingProcess.value = false;
+            return;
+        }
+
+        // Use the getSAPOrderStatus API for timeout orders
+        const response = await api.get(`order/order-update/${orderData.value.order_no}`);
 
         if (response.data.status === 1) {
             toast.add({
                 severity: 'success',
                 summary: 'Success',
-                detail: 'Order voided successfully',
+                detail: 'Order processed successfully',
                 life: 3000
             });
-            showVoidConfirmDialog.value = false;
-            router.push('/om/listFailOrder');
+            await fetchOrderDetail();
         } else {
             toast.add({
                 severity: 'error',
                 summary: 'Error',
-                detail: response.data.message || 'Failed to void order',
+                detail: response.data.message || 'Failed to process order',
                 life: 3000
             });
-        }
-    } catch (error) {
-        console.error('Error voiding order:', error);
-        toast.add({
-            severity: 'error',
-            summary: 'Error',
-            detail: 'Failed to void order',
-            life: 3000
-        });
-    } finally {
-        loadingAction.value = false;
-    }
-};
-
-const processOrder = async () => {
-    try {
-        loadingAction.value = true;
-        
-        // For TIMEOUT status with SO number
-        if (orderStatusText.value === 'TIMEOUT') {
-            if (!orderData.value.so_no) {
-                toast.add({
-                    severity: 'warn',
-                    summary: 'Warning',
-                    detail: 'Please update SO number before processing',
-                    life: 3000
-                });
-                openUpdateSODialog();
-                loadingAction.value = false;
-                return;
-            }
-            
-            // Use the SAP update API for timeout orders
-            const response = await api.get(`order/order-update/${orderData.value.order_no}`);
-            
-            if (response.data.status === 1) {
-                toast.add({
-                    severity: 'success',
-                    summary: 'Success',
-                    detail: 'Order processed successfully',
-                    life: 3000
-                });
-                await fetchOrderDetail();
-            } else {
-                toast.add({
-                    severity: 'error',
-                    summary: 'Error',
-                    detail: response.data.message || 'Failed to process order',
-                    life: 3000
-                });
-            }
-        }
-        // For FAILED status
-        else if (orderStatusText.value === 'FAILED') {
-            // Use the failed order update API
-            const response = await api.postExtra(`order/failed-order-update-sap/${orderData.value.order_no}`);
-            
-            if (response.data.status === 1) {
-                toast.add({
-                    severity: 'success',
-                    summary: 'Success',
-                    detail: 'Failed order processed successfully',
-                    life: 3000
-                });
-                await fetchOrderDetail();
-            } else {
-                toast.add({
-                    severity: 'error',
-                    summary: 'Error',
-                    detail: response.data.message || 'Failed to process order',
-                    life: 3000
-                });
-            }
         }
     } catch (error) {
         console.error('Error processing order:', error);
@@ -600,11 +498,11 @@ const processOrder = async () => {
             life: 3000
         });
     } finally {
-        loadingAction.value = false;
+        loadingProcess.value = false;
     }
 };
 
-// API Calls
+// API Calls - only using 3 specified APIs
 const fetchOrderDetail = async () => {
     try {
         const orderNo = route.params.orderNo;
@@ -638,7 +536,7 @@ const fetchOrderDetail = async () => {
                 phoneNumber: etenInfo.phoneNumber || '-',
                 mobileNumber: etenInfo.mobileNumber || '-',
                 email: etenInfo.emailAddress || '-',
-                addressLine1: etenInfo.addressLine1,
+                // addressLine1: etenInfo.addressLine1,
                 addressLine2: etenInfo.addressLine2,
                 addressLine3: etenInfo.addressLine3,
                 addressLine4: etenInfo.addressLine4,
