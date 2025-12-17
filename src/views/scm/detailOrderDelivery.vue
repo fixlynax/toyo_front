@@ -517,10 +517,10 @@ const saveSchedule = async () => {
         };
         const res = await api.post('update-schedule-order', payload);
         if (res.data?.status === 1) {
-            toast.add({ severity: 'success', summary: 'Updated', detail: 'Planned date updated successfully', life: 3000 });
+            toast.add({ severity: 'success', summary: 'Updated', detail: 'Planned date information updated', life: 3000 });
             InitfetchData(); // refresh table
         } else {
-            toast.add({ severity: 'error', summary: 'Error', detail: res.data?.error || 'Failed', life: 3000 });
+            toast.add({ severity: 'error', summary: 'Error', detail: res.data?.error || 'Failed to update planned information', life: 3000 });
         }
     } catch (err) {
         console.error(err);
@@ -557,10 +557,10 @@ const saveSchedule3 = async () => {
         };
         const res = await api.post('update-schedule-order', payload);
         if (res.data?.status === 1) {
-            toast.add({ severity: 'success', summary: 'Updated', detail: 'Planned date details updated successfully', life: 3000 });
+            toast.add({ severity: 'success', summary: 'Updated', detail: 'Planned date details information updated', life: 3000 });
             InitfetchData(); // refresh table
         } else {
-            toast.add({ severity: 'error', summary: 'Error', detail: res.data?.error || 'Failed', life: 3000 });
+            toast.add({ severity: 'error', summary: 'Error', detail: res.data?.error || 'Failed to update planned information', life: 3000 });
         }
     } catch (err) {
         console.error(err);
@@ -590,10 +590,10 @@ const saveDelivered = async () => {
         };
         const res = await api.post('update-delivered-order', payload);
         if (res.data?.status === 1) {
-            toast.add({ severity: 'success', summary: 'Updated', detail: 'Delivered date updated successfully', life: 3000 });
+            toast.add({ severity: 'success', summary: 'Updated', detail: 'Delivered date information updated', life: 3000 });
             InitfetchData(); // refresh table
         } else {
-            toast.add({ severity: 'error', summary: 'Error', detail: res.data?.error || 'Failed', life: 3000 });
+            toast.add({ severity: 'error', summary: 'Error', detail: res.data?.error || 'Failed to update delivered information', life: 3000 });
         }
     } catch (err) {
         console.error(err);
@@ -620,7 +620,6 @@ const InitfetchData = async () => {
             form2.value.orderno = orderDelList.value.order_no;
             form3.value.orderno = orderDelList.value.order_no;
         } else {
-            console.error('API returned error or invalid data:', response.data);
             toast.add({ severity: 'error', summary: 'Error', detail: 'Failed to load data', life: 3000 });
         }
     } catch (error) {

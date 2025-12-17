@@ -385,7 +385,7 @@ const handleImport = async (event) => {
             toast.add({
                 severity: 'error',
                 summary: 'Import Failed',
-                detail: response.data.message || 'Server did not confirm success',
+                detail: response.data.message || 'Failed to import data',
                 life: 3000
             });
         }
@@ -493,7 +493,7 @@ const submitPickupUpdate = async () => {
             toast.add({ severity: 'success', summary: 'Updated', detail: 'Pickup date collecter information updated', life: 3000 });
             fetchData(); // refresh table
         } else {
-            toast.add({ severity: 'error', summary: 'Error', detail: res.data?.message || 'Failed', life: 3000 });
+            toast.add({ severity: 'error', summary: 'Error', detail: res.data?.message || 'Failed to update pickup date information', life: 3000 });
         }
     } catch (err) {
         console.error(err);
@@ -533,10 +533,10 @@ const submitPickupUpdate2 = async () => {
         const res = await api.post('update-collect-time', payload);
 
         if (res.data?.status === 1) {
-            toast.add({ severity: 'success', summary: 'Updated', detail: 'Pickup date set to now', life: 3000 });
+            toast.add({ severity: 'success', summary: 'Updated', detail: 'Pickup date information updated', life: 3000 });
             fetchData(); // refresh table
         } else {
-            toast.add({ severity: 'error', summary: 'Error', detail: res.data?.message || 'Failed', life: 3000 });
+            toast.add({ severity: 'error', summary: 'Error', detail: res.data?.message || 'Failed to update pickup date information', life: 3000 });
         }
     } catch (err) {
         console.error(err);
@@ -560,10 +560,10 @@ const promptUpdatePickup = (data) => {
         const res = await api.post('update-collect-time', payload);
 
         if (res.data?.status === 1) {
-          toast.add({ severity: 'success', summary: 'Updated', detail: 'Pickup date set to now', life: 3000 });
+          toast.add({ severity: 'success', summary: 'Updated', detail: 'Pickup date information updated', life: 3000 });
           InitfetchData(); // refresh table
         } else {
-          toast.add({ severity: 'error', summary: 'Error', detail: res.data?.message || 'Failed', life: 3000 });
+          toast.add({ severity: 'error', summary: 'Error', detail: res.data?.message || 'Failed to update pickup date information', life: 3000 });
         }
       } catch (err) {
         console.error(err);
@@ -647,9 +647,8 @@ const fetchData = async (body = null) => {
                 return new Date(b.created) - new Date(a.created);
             });
         } else {
-            console.error('API returned error or invalid data:', response.data);
             orderDelList.value = [];
-            toast.add({ severity: 'error', summary: 'Error', detail: 'Failed to load data', life: 3000 });
+            toast.add({ severity: 'error', summary: 'Error', detail: response.data.message || 'Failed to load data', life: 3000 });
         }
     } catch (error) {
         console.error('Error fetching product list:', error);

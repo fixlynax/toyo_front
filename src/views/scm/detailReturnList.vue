@@ -216,12 +216,12 @@ const updateSchedule = async () => {
         const res = await api.post('update-schedule-warranty', payload);
 
         if (res.data?.status === 1) {
-            toast.add({ severity: 'success', summary: 'Updated', detail: 'Schedule updated successfully', life: 3000 });
+            toast.add({ severity: 'success', summary: 'Updated', detail: 'Schedule date information updated', life: 3000 });
             showScheduleModal.value = false;
             // optionally reload details
             await fetchData();
         } else {
-            toast.add({ severity: 'error', summary: 'Error', detail: res.data?.message || 'Failed', life: 3000 });
+            toast.add({ severity: 'error', summary: 'Error', detail: res.data?.message || 'Failed to update schedule information', life: 3000 });
         }
     } catch (err) {
         console.error(err);
@@ -256,12 +256,12 @@ const updateDelivered = async () => {
         const res = await api.post('update-delivered-warranty', payload);
 
         if (res.data?.status === 1) {
-            toast.add({ severity: 'success', summary: 'Updated', detail: 'Delivered info updated', life: 3000 });
+            toast.add({ severity: 'success', summary: 'Updated', detail: 'Delivered date information updated', life: 3000 });
             showDeliveredModal.value = false;
             // optionally reload details
             await fetchData();
         } else {
-            toast.add({ severity: 'error', summary: 'Error', detail: res.data?.message || 'Failed', life: 3000 });
+            toast.add({ severity: 'error', summary: 'Error', detail: res.data?.message || 'Failed to updated delivered information', life: 3000 });
         }
     } catch (err) {
         console.error(err);
@@ -280,7 +280,6 @@ const fetchData = async () => {
             form.value.warrantyno = listData.value.claim?.claim_ref_no || '';
             form2.value.warrantyno = listData.value.claim?.claim_ref_no || '';
         } else {
-            console.error('API returned error or invalid data:', response.data);
             toast.add({ severity: 'error', summary: 'Error', detail: 'Failed to load data', life: 3000 });
         }
     } catch (error) {
