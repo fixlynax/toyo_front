@@ -301,7 +301,14 @@
                 <!-- Header -->
                 <div class="flex items-center justify-between mb-5">
                     <div class="text-xl font-bold text-gray-900">🛒 Selected Products</div>
-                    <div class="text-2xl font-extrabold text-indigo-700">Total: RM {{ formatCurrency(cartTotal.toFixed(2)) }}</div>
+                    <div class="flex flex-col">
+                        <!-- <div class="text-xl font-extrabold text-grey-700">Total Quantity: {{ cartQuantity + freeItemsQuantity }}</div> -->
+                        <div class="flex items-center justify-between mb-2">
+                            <span class="w-30 text-xl font-bold text-black">Total Quantity:</span>
+                            <span class="text-xl font-bold text-indigo-700">{{ cartQuantity + freeItemsQuantity }}</span>
+                        </div>
+                        <div class="text-2xl font-extrabold text-indigo-700">Total: RM {{ formatCurrency(cartTotal.toFixed(2)) }}</div>
+                    </div>
                 </div>
 
                 <!-- Regular Items -->
@@ -404,7 +411,7 @@
 
                 <!-- Cart Summary -->
                 <div class="mt-6 p-4 bg-gray-50 rounded-lg">
-                    <div class="grid grid-cols-2 md:grid-cols-4 gap-4 text-center">
+                    <div class="grid grid-cols-2 md:grid-cols-3 gap-4 text-center">
                         <div>
                             <div class="text-sm text-gray-500">Order Items</div>
                             <div class="text-lg font-bold">{{ selectedTyres.length }}</div>
@@ -417,10 +424,10 @@
                             <div class="text-sm text-gray-500">Total Line Items</div>
                             <div class="text-lg font-bold text-purple-600">{{ totalLineItems }}</div>
                         </div>
-                        <div>
+                        <!-- <div>
                             <div class="text-sm text-gray-500">Total Amount</div>
                             <div class="text-lg font-bold text-blue-600">RM {{ formatCurrency(cartTotal.toFixed(2)) }}</div>
-                        </div>
+                        </div> -->
                     </div>
                     <div v-if="selectedOrderType === 'DIRECTSHIP'" class="mt-3 pt-3 border-t text-center">
                         <div class="text-sm text-gray-500">Total Container Volume</div>
@@ -588,22 +595,18 @@
                                     <span class="text-gray-600">Container Volume:</span>
                                     <span class="font-semibold">{{ containerCapacity }} units</span>
                                 </div>
-                                <div class="flex justify-between">
-                                    <span class="text-gray-600">Total Line Items:</span>
-                                    <span class="font-semibold">{{ totalLineItems }} items</span>
-                                </div>
                             </div>
                         </div>
 
                         <!-- Items Summary -->
                         <div class="p-4 border-b">
-                            <div class="font-semibold text-gray-700 mb-3">Items Summary ({{ totalLineItems }} items)</div>
+                            <div class="font-semibold text-gray-700 mb-3">Items Summary</div>
                             <div class="space-y-3">
                                 <!-- Regular Items -->
-                                <div v-for="item in selectedTyres" :key="item.id" class="flex justify-between items-center">
+                                <div v-for="item in selectedTyres" :key="item.id" class="flex justify-between items-center mb-2">
                                     <div class="flex-1">
-                                        <div class="font-medium text-sm">{{ item.material }}</div>
-                                        <div class="text-xs text-gray-500">
+                                        <div class="font-bold text-sm">{{ item.material }}</div>
+                                        <div class="text-xs font-semibold text-gray-500">
                                             Qty: {{ item.quantity }} × RM {{ formatCurrency(item.price.toFixed(2)) }}
                                             <!-- Enhanced back order indicators in review -->
                                             <span v-if="selectedOrderType === 'NORMAL' && item.stockBalance === 0" class="text-orange-600 font-semibold ml-2">(Back Order)</span>
@@ -616,14 +619,34 @@
                                     </div>
                                     <div class="font-semibold">RM {{ formatCurrency((item.price * item.quantity).toFixed(2)) }}</div>
                                 </div>
+                                <div class="space-y-2">
+                                    <div class="flex justify-between text-xs">
+                                        <span>Total Order Items</span>
+                                        <span>{{ selectedTyres.length }} Items</span>
+                                    </div>
+                                    <div v-if="freeItems.length > 0" class="flex justify-between text-xs">
+                                        <span>Total Order Quantity</span>
+                                        <span>{{ cartQuantity }} Units</span>
+                                    </div>
+                                </div>
 
                                 <!-- Free Items -->
                                 <div v-for="freeItem in freeItems" :key="freeItem.materialid" class="flex justify-between items-center border-t pt-2">
                                     <div class="flex-1">
-                                        <div class="font-medium text-sm text-green-700">{{ freeItem.material }}</div>
-                                        <div class="text-xs text-gray-500">Free Item × {{ freeItem.qty }}</div>
+                                        <div class="font-bold text-sm text-green-700">{{ freeItem.material }}</div>
+                                        <div class="text-xs font-semibold text-gray-500">Free Item × {{ freeItem.qty }}</div>
                                     </div>
                                     <div class="font-semibold text-green-600">FREE</div>
+                                </div>
+                                <div class="space-y-2">
+                                    <div class="flex justify-between text-xs">
+                                        <span>Total Free Items</span>
+                                        <span>{{ freeItems.length }} Items</span>
+                                    </div>
+                                    <div v-if="freeItems.length > 0" class="flex justify-between text-xs">
+                                        <span>Total Free Quantity</span>
+                                        <span>{{ freeItemsQuantity }} Units</span>
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -639,13 +662,13 @@
                                     <span>Total Free Items:</span>
                                     <span class="text-green-600">{{ freeItems.length }} Items</span>
                                 </div>
-                                <div class="flex justify-between border-t pt-2">
-                                    <span class="font-semibold">Total Line Items:</span>
-                                    <span class="font-semibold">{{ totalLineItems }} Items</span>
+                                <div class="flex justify-between">
+                                    <span>Total Items:</span>
+                                    <span>{{ totalLineItems }} items</span>
                                 </div>
-                                <div class="flex justify-between border-t pt-2">
-                                    <span class="font-semibold">Total Quantity:</span>
-                                    <span class="font-semibold">{{ cartQuantity + freeItemsQuantity }}</span>
+                                <div class="flex justify-between">
+                                    <span>Total Quantity:</span>
+                                    <span>{{ cartQuantity + freeItemsQuantity }} Units</span>
                                 </div>
                                 <div class="flex justify-between border-t pt-2">
                                     <span class="font-bold text-lg">Total Amount:</span>
