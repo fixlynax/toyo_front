@@ -93,7 +93,7 @@
 
                 <Column field="do_no" header="SAP DO No" style="min-width: 8rem" sortable>
                     <template #body="{ data }">
-                        <RouterLink :to="`/scm/detailOrderDelivery/${data.id}`" class="hover:underline font-bold text-primary">
+                        <RouterLink :to="`/scm/detailOrderDelivery/${data.orderID}`" class="hover:underline font-bold text-primary">
                             {{ data.do_no ? data.do_no : '-' }}
                         </RouterLink>
                     </template>
