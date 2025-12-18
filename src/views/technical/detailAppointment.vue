@@ -27,10 +27,11 @@ const fetchAppointmentDetail = async () => {
                 await loadSubmittedPhotos();
             }
         } else {
-            console.warn('Unexpected API response structure:', response.data);
+            toast.add({ severity: 'error', summary: 'Error', detail: 'Failed to load data', life: 3000 });
         }
     } catch (error) {
         console.error('Error fetching appointment detail:', error);
+        toast.add({ severity: 'error', summary: 'Error', detail: 'Failed to load data', life: 3000 });
     } finally {
         loading.value = false;
     }

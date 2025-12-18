@@ -184,8 +184,7 @@ const submitPattern = async () => {
         });
 
         if (response.data.status === 1) {
-            toast.add({severity: 'success',summary: 'Success',detail: 'Pattern created successfully',life: 3000});
-            // Redirect to list page after success
+            toast.add({severity: 'success',summary: 'Success',detail: 'New pattern created successfully',life: 3000});
             setTimeout(() => {
                 router.push('/technical/listPattern');
             }, 1000);

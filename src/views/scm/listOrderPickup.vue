@@ -561,7 +561,7 @@ const promptUpdatePickup = (data) => {
 
         if (res.data?.status === 1) {
           toast.add({ severity: 'success', summary: 'Updated', detail: 'Pickup date information updated', life: 3000 });
-          InitfetchData(); // refresh table
+          fetchData(); // refresh table
         } else {
           toast.add({ severity: 'error', summary: 'Error', detail: res.data?.message || 'Failed to update pickup date information', life: 3000 });
         }
