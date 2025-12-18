@@ -394,18 +394,11 @@ const submitCatalogue = async () => {
       toast.add({ severity: 'success', summary: 'Success', detail: 'Catalogue updated successfully', life: 3000 });
       router.push('/marketing/listCatalogue');
     } else {
-      const message = response.data.error
-        ? Object.values(response.data.error).flat().join(', ')
-        : 'Failed to update catalogue';
-      toast.add({ severity: 'error', summary: 'Error', detail: message, life: 4000 });
+      toast.add({ severity: 'error', summary: 'Error', detail: response.data.error || 'Failed to update catalogue', life: 4000 });
     }
   } catch (error) {
     console.error('API Error:', error);
-    const message =
-      error.response?.data?.message ||
-      Object.values(error.response?.data?.error || {}).flat().join(', ') ||
-      'Unexpected error occurred';
-    toast.add({ severity: 'error', summary: 'Error', detail: message, life: 4000 });
+      toast.add({ severity: 'error', summary: 'Error', detail: response.data.error || 'Failed to update catalogue', life: 4000 });
   } finally {
     loading.value = false;
   }

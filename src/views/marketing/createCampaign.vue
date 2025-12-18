@@ -318,7 +318,6 @@ const fetchCatalog = async () => {
             const processedItems = await processCatalogueImages(transformedItems);
             listPrize.value = processedItems;
         } else {
-            console.error('API returned status 0:', response.data);
             toast.add({
                 severity: 'error',
                 summary: 'Error',
@@ -581,32 +580,21 @@ for (let pair of formData.entries()) {
             });
             router.push('/marketing/listCampaign');
         } else {
-            console.error('Backend error:', response.data);
             toast.add({
                 severity: 'error',
                 summary: 'Error',
-                detail: response.data.messages ? Object.values(response.data.messages).flat().join(', ') : 'Failed to create campaign',
-                life: 5000
+                detail: response.data.messages || 'Failed to create campaign',
+                life: 3000
             });
         }
     } catch (error) {
         console.error('API Error:', error);
-        if (error.response?.data) {
-            console.error('Error response:', error.response.data);
-            toast.add({
+        toast.add({
                 severity: 'error',
                 summary: 'Error',
-                detail: error.response.data.messages ? Object.values(error.response.data.messages).flat().join(', ') : 'Something went wrong',
-                life: 5000
-            });
-        } else {
-            toast.add({
-                severity: 'error',
-                summary: 'Error',
-                detail: 'Network error or server unavailable',
+                detail: response.data.messages || 'Failed to create campaign',
                 life: 3000
             });
-        }
     } finally {
         loading.value = false;
     }

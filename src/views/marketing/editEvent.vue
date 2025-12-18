@@ -706,32 +706,21 @@ const submitEvent = async () => {
             });
             router.push(`/marketing/detailEvent/${eventId}`);
         } else {
-            console.error('Backend error:', response.data);
             toast.add({
                 severity: 'error',
                 summary: 'Error',
-                detail: response.data.messages ? Object.values(response.data.messages).flat().join(', ') : 'Failed to update event',
-                life: 5000
+                detail: response.data.messages ||'Failed to update event',
+                life: 3000
             });
         }
     } catch (error) {
         console.error('API Error:', error);
-        if (error.response?.data) {
-            console.error('Error response:', error.response.data);
-            toast.add({
+        toast.add({
                 severity: 'error',
                 summary: 'Error',
-                detail: error.response.data.messages ? Object.values(error.response.data.messages).flat().join(', ') : 'Something went wrong',
-                life: 5000
-            });
-        } else {
-            toast.add({
-                severity: 'error',
-                summary: 'Error',
-                detail: error.message || 'Network error or server unavailable',
+                detail: response.data.messages ||'Failed to update event',
                 life: 3000
             });
-        }
     } finally {
         loading.value = false;
     }

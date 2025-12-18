@@ -18,20 +18,7 @@
                 :filters="filters"
                 filterDisplay="menu"
                 class="rounded-table"
-                :globalFilterFields="[
-                    'do_no',
-                    'shipto_data.custAccountNo',
-                    'storagelocation',
-                    'shipto_data.companyName1',
-                    'shipto_data.companyName2',
-                    'shipto_data.city',
-                    'shipto_data.state',
-                    'deliveryDate',
-                    ,
-                    'scm_deliver_detail.scheduled_delivery_time',
-                    'scm_deliver_detail.delivered_datetime',
-                    'orderstatus'
-                ]"
+                :globalFilterFields="['do_no', 'created', 'customer_name', 'custAccountNo', 'customer_name', 'city', 'state', 'deliveryDate', 'orderDesc', 'scheduled_delivery_time', 'delivered_datetime', 'orderstatus']"
                 paginatorTemplate="CurrentPageReport FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink RowsPerPageDropdown"
                 currentPageReportTemplate="Showing {first} to {last} of {totalRecords} entries"
             >
@@ -94,7 +81,7 @@
 
                     <template #body="{ data }">
                         <div class="flex justify-center">
-                            <Checkbox :binary="true" :model-value="selectedExportIds.has(data.id)" @change="() => handleToggleExport(data.id)" />
+                            <Checkbox :binary="true" :model-value="selectedExportIds.has(data.orderID)" @change="() => handleToggleExport(data.orderID)" />
                         </div>
                     </template>
                 </Column>
@@ -106,16 +93,16 @@
 
                 <Column field="do_no" header="SAP DO No" style="min-width: 8rem" sortable>
                     <template #body="{ data }">
-                        <RouterLink :to="`/scm/detailOrderDelivery/${data.id}`" class="hover:underline font-bold text-primary">
+                        <RouterLink :to="`/scm/detailOrderDelivery/${data.orderID}`" class="hover:underline font-bold text-primary">
                             {{ data.do_no ? data.do_no : '-' }}
                         </RouterLink>
                     </template>
                 </Column>
-                <Column field="shipto_data.companyName1" header="Customer Name" style="min-width: 12rem" sortable>
+                <Column field="customer_name" header="Customer Name" style="min-width: 12rem" sortable>
                     <template #body="{ data }">
-                        <span class="font-bold">{{ ` ${data.shipto_data?.companyName1 || '-'} ${data.shipto_data?.companyName2 || ''} ` }}</span>
+                        <span class="font-bold">{{ ` ${data.customer_name || ''} ` }}</span>
                         <br />
-                        {{ data.shipto_data?.custAccountNo || '-' }}
+                        {{ data.custAccountNo || '-' }}
                     </template>
                 </Column>
 
@@ -125,14 +112,14 @@
                     </template>
                 </Column>
 
-                <Column field="shipto_data.city" header="City" style="min-width: 8rem" sortable>
+                <Column field="city" header="City" style="min-width: 8rem" sortable>
                     <template #body="{ data }">
-                        {{ data.shipto_data?.city?.replace(/,$/, '') }}
+                        {{ data.city?.replace(/,$/, '') }}
                     </template>
                 </Column>
-                <Column field="shipto_data.state" header="State" style="min-width: 8rem" sortable>
+                <Column field="state" header="State" style="min-width: 8rem" sortable>
                     <template #body="{ data }">
-                        {{ data.shipto_data?.state || '-' }}
+                        {{ data.state || '-' }}
                     </template>
                 </Column>
 
@@ -148,15 +135,15 @@
                     </template>
                 </Column>
 
-                <Column field="scm_deliver_detail.scheduled_delivery_time" header="Planned Date" style="min-width: 10rem" sortable>
+                <Column field="scheduled_delivery_time" header="Planned Date" style="min-width: 10rem" sortable>
                     <template #body="{ data }">
-                        {{ data.scm_deliver_detail?.scheduled_delivery_time ? formatDate(data.scm_deliver_detail.scheduled_delivery_time) : 'Not Assigned' }}
+                        {{ data.scheduled_delivery_time ? formatDate(data.scheduled_delivery_time) : 'Not Assigned' }}
                     </template>
                 </Column>
 
-                <Column field="scm_deliver_detail.delivered_datetime" header="Delivered Date" style="min-width: 10rem" sortable>
+                <Column field="delivered_datetime" header="Delivered Date" style="min-width: 10rem" sortable>
                     <template #body="{ data }">
-                        {{ data.scm_deliver_detail?.delivered_datetime ? formatDate(data.scm_deliver_detail.delivered_datetime) : 'Not Assigned' }}
+                        {{ data.delivered_datetime ? formatDate(data.delivered_datetime) : 'Not Assigned' }}
                     </template>
                 </Column>
 
@@ -255,11 +242,11 @@ const onTableFilter = (event) => {
 
 // Toggle all visible rows
 const toggleSelectAll = () => {
-    const allIds = visibleRows.value.map(item => item.id);
+    const allIds = visibleRows.value.map(item => item.orderID);
 
     if (isAllSelected()) {
         // Remove all visible IDs at once
-        selectedExportIds.value = new Set([...selectedExportIds.value].filter(id => !allIds.includes(id)));
+        selectedExportIds.value = new Set([...selectedExportIds.value].filter(orderID => !allIds.includes(orderID)));
     } else {
         // Add all visible IDs at once
         selectedExportIds.value = new Set([...selectedExportIds.value, ...allIds]);
@@ -556,24 +543,24 @@ const exportToExcel = () => {
         const baseRow = [
             `"${formatDate(data.created)}"`,
             `"${data.do_no || '-'}"`,
-            `"${data.shipto_data?.companyName1 || ''} ${data.shipto_data?.companyName2 || ''}"`,
-            `"${data.shipto_data?.custAccountNo || '-'}"`,
+            `"${data.customer_name || ''} "`,
+            `"${data.custAccountNo || '-'}"`,
             `"${data.storagelocation || '-'}"`,
-            `"${data.shipto_data?.city || '-'}"`,
-            `"${data.shipto_data?.state || '-'}"`,
+            `"${data.city || '-'}"`,
+            `"${data.state || '-'}"`,
             `"${data.orderDesc || '-'}"`,
-            `"${data.scm_deliver_detail?.driverName || '-'}"`,
-            `"${data.scm_deliver_detail?.driverIC || '-'}"`,
-            `"${data.scm_deliver_detail?.driverContactNo || '-'}"`,
-            `"${data.scm_deliver_detail?.driverPlateNo || '-'}"`,
+            `"${data.driverName || '-'}"`,
+            `"${data.driverIC || '-'}"`,
+            `"${data.driverContactNo || '-'}"`,
+            `"${data.driverPlateNo || '-'}"`,
             `"${formatDate(data.deliveryDate)}"`,
-            `"${data.scm_deliver_detail?.scheduled_delivery_time ? formatDate(data.scm_deliver_detail?.scheduled_delivery_time) : 'No date assigned'}"`,
-            `"${data.scm_deliver_detail?.delivered_datetime ? formatDate(data.scm_deliver_detail?.delivered_datetime) : 'No date assigned'}"`,
-            `"${getStatusLabel2(data.status) || '-'}"`
+            `"${data.scheduled_delivery_time ? formatDate(data.scheduled_delivery_time) : 'No date assigned'}"`,
+            `"${data.delivered_datetime ? formatDate(data.delivered_datetime) : 'No date assigned'}"`,
+            `"${getStatusLabel2(data.status) || '-'}"`,
         ];
 
             // FIX: prevent undefined forEach
-            (data.fullfill_order_array || []).forEach(item => {
+            (data.fullfill_items || []).forEach(item => {
                 csvData.push([
                     ...baseRow,
                     `"${item.itemno || '-'}"`,

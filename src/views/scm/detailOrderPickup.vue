@@ -228,6 +228,7 @@
     </Dialog>
     <Dialog v-model:visible="showIcDialog2" header="Pickup Confirmation" modal :style="{ width: '30rem' }">
         <div class="flex flex-col gap-3 w-full">
+            <div class="font-semibold">SAP DO No: {{ orderDelList.do_no || '-' }}</div>
             <div>
                 <label class="block mb-4 font-medium w-full">Please enter collector IC number to confirm</label>
                 <InputText v-model="icNo" placeholder="Enter IC No" maxlength="12" class="w-full" @keypress="handleIcInput" />
@@ -393,7 +394,7 @@ const submitPickupUpdate2 = async () => {
 };
 const promptUpdatePickup = (data) => {
     confirmation.require({
-        message: `Are you sure you want to confirm pickup for order ${data.order_no} ?`,
+        message: `Are you sure you want to confirm pickup for order ${data.do_no || '-'} ?`,
         header: 'Pickup Confirmation',
         icon: 'pi pi-exclamation-triangle',
         acceptLabel: 'Yes',

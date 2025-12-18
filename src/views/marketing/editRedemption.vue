@@ -348,7 +348,6 @@ const fetchRedemptionDetails = async () => {
             };
 
         } else {
-            console.error('API returned error or invalid data:', response.data);
             toast.add({ severity: 'error', summary: 'Error', detail: 'Failed to load redemption details', life: 3000 });
         }
     } catch (error) {
@@ -417,19 +416,11 @@ const saveChanges = async () => {
                 router.push(`/marketing/detailRedemption/${redemptionId}`);
             }, 1500);
         } else {
-            console.error('Failed to update redemption:', response.data);
-            toast.add({ severity: 'error', summary: 'Error', detail: 'Failed to update redemption details', life: 3000 });
+            toast.add({ severity: 'error', summary: 'Error', detail: response.data.error || 'Failed to update redemption details', life: 3000 });
         }
     } catch (error) {
         console.error('Error updating redemption:', error);
-        
-        // Handle validation errors
-        if (error.response && error.response.data && error.response.data.error) {
-            formErrors.value = error.response.data.error;
-            toast.add({ severity: 'error', summary: 'Validation Error', detail: 'Please check the form for errors', life: 3000 });
-        } else {
-            toast.add({ severity: 'error', summary: 'Error', detail: 'Failed to update redemption details', life: 3000 });
-        }
+        toast.add({ severity: 'error', summary: 'Error', detail: response.data.error || 'Failed to update redemption details', life: 3000 });
     } finally {
         processing.value = false;
     }
