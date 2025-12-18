@@ -57,11 +57,11 @@
                 <div>
                     <label class="block font-bold text-gray-700 mb-2">
                         Upload Sales Program Image
-                        <span class="text-xs bg-blue-100 text-blue-800 px-2 py-0.5 rounded-full">(Max file size: 2 MB)</span>
+                        <span class="text-xs bg-blue-100 text-blue-800 px-2 py-0.5 rounded-full">(Max file size: 1 MB)</span>
                     </label>
                     <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
                         <div>
-                            <FileUpload mode="basic" name="image" accept="image/*" :maxFileSize="2 * 1024 * 1024" customUpload @select="onImageSelect" @error="onUploadError" chooseLabel="Upload Program Image" class="w-full" />
+                            <FileUpload mode="basic" name="image" accept="image/*" :maxFileSize="1 * 1024 * 1024" customUpload @select="onImageSelect" @error="onUploadError" chooseLabel="Upload Program Image" class="w-full" />
                             <div v-if="imagePreview" class="mt-2">
                                 <img :src="imagePreview" alt="Preview" class="rounded-lg shadow-md object-cover w-full h-80" />
                                 <p class="text-xs text-gray-500 mt-1 text-center">File size: {{ formatFileSize(currentFileSize) }}</p>
@@ -449,7 +449,7 @@ import api from '@/service/api';
 const toast = useToast();
 
 // Constants
-const MAX_FILE_SIZE = 2 * 1024 * 1024; // 2MB in bytes
+const MAX_FILE_SIZE = 1 * 1024 * 1024; // 1MB in bytes
 
 const salesProgram = ref({
     programID: '',

@@ -1631,9 +1631,9 @@ const fetchWarrantyClaim = async () => {
                 reject_invoice_remarks: apiData.reject_invoice_remarks || [],
 
             };
-            await loadScrapImages();
-            await loadTireDeptImages();
-            await loadSubmittedPhotos();
+            loadScrapImages();
+            loadTireDeptImages();
+            loadSubmittedPhotos();
         } else {
             toast.add({ severity: 'error', summary: 'Error', detail: 'Failed to load warranty details', life: 3000 });
         }
@@ -1659,62 +1659,53 @@ const fetchRejectReasons = async () => {
     }
 };
 // Load scrap images
-const loadScrapImages = async () => {
-    const images = [];
-    const imageUrls = [warantyDetail.value.scrapPhotos.scrapImage1URL, warantyDetail.value.scrapPhotos.scrapImage2URL, warantyDetail.value.scrapPhotos.scrapImage3URL].filter((url) => url && url !== 'null' && url !== null);
+const loadScrapImages = () => {
+    const imageUrls = [
+        warantyDetail.value?.scrapPhotos?.scrapImage1URL,
+        warantyDetail.value?.scrapPhotos?.scrapImage2URL,
+        warantyDetail.value?.scrapPhotos?.scrapImage3URL
+    ].filter(url => typeof url === 'string' && url.trim() !== '' && url !== 'null');
 
-    for (const [index, url] of imageUrls.entries()) {
-        try {
-            const imageSrc = await api.getPrivateFile(url);
-            images.push({
-                itemImageSrc: imageSrc,
-                thumbnailImageSrc: imageSrc,
-                alt: `Scrap Image ${index + 1}`
-            });
-        } catch (err) {
-            console.error('Error loading scrap image:', err);
-            images.push({
-                itemImageSrc: '/placeholder-image.jpg',
-                thumbnailImageSrc: '/placeholder-image.jpg',
-                alt: `Scrap Image ${index + 1} - Failed to load`
-            });
-        }
-    }
-
-    scrapImages.value = images;
+    scrapImages.value = imageUrls.map((url, index) => ({
+        itemImageSrc: url,
+        thumbnailImageSrc: url,
+        alt: `Scrap Image ${index + 1}`
+    }));
 };
 
-const loadTireDeptImages = async () => {
-    const photos = warantyDetail.value.threadDepthPhotos;
-    const images = [];
+const loadTireDeptImages = () => {
+    const photos = warantyDetail.value?.threadDepthPhotos;
 
-    const imageUrls = [photos.threadDepthImage1URL, photos.threadDepthImage2URL, photos.threadDepthImage3URL, photos.threadDepthImage4URL, photos.threadDepthImage5URL, photos.threadDepthImage6URL].filter(
-        (url) => url && url !== 'null' && url !== null
-    );
-
-    for (const [index, url] of imageUrls.entries()) {
-        try {
-            const imageSrc = await api.getPrivateFile(url);
-            images.push({
-                itemImageSrc: imageSrc,
-                thumbnailImageSrc: imageSrc,
-                alt: `Tyre Depth ${index + 1}`
-            });
-        } catch (err) {
-            console.error('Error loading Tyre depth image:', err);
-            images.push({
-                itemImageSrc: '/placeholder-image.jpg',
-                thumbnailImageSrc: '/placeholder-image.jpg',
-                alt: `Tyre Depth ${index + 1} - Failed to load`
-            });
-        }
+    if (!photos) {
+        TireDepthImages.value = [];
+        return;
     }
 
-    TireDepthImages.value = images;
+    const imageUrls = [
+        photos.threadDepthImage1URL,
+        photos.threadDepthImage2URL,
+        photos.threadDepthImage3URL,
+        photos.threadDepthImage4URL,
+        photos.threadDepthImage5URL,
+        photos.threadDepthImage6URL
+    ].filter(url => typeof url === 'string' && url.trim() !== '' && url !== 'null');
+
+    TireDepthImages.value = imageUrls.map((url, index) => ({
+        itemImageSrc: url,
+        thumbnailImageSrc: url,
+        alt: `Tyre Depth ${index + 1}`
+    }));
 };
 
-const loadSubmittedPhotos = async () => {
+const loadSubmittedPhotos = () => {
     const photos = [];
+    const submitted = warantyDetail.value?.submittedphotos;
+
+    if (!submitted) {
+        submittedPhotos.value = [];
+        return;
+    }
+
     const photoTypes = [
         { key: 'mileageFileURL', label: 'Mileage' },
         { key: 'serialNoFileURL', label: 'Serial Number' },
@@ -1723,30 +1714,16 @@ const loadSubmittedPhotos = async () => {
     ];
 
     for (const photoType of photoTypes) {
-        const url = warantyDetail.value.submittedphotos[photoType.key];
-        if (url && url !== 'null' && url !== null) {
-            try {
-                const imageSrc = await api.getPrivateFile(url);
+        const url = submitted[photoType.key];
 
-                photos.push({
-                    type: photoType.key,
-                    label: photoType.label,
-                    url: url,
-                    imageSrc: imageSrc,
-                    alt: `${photoType.label} Photo`
-                });
-
-            } catch (error) {
-                console.error('Error loading submitted photo:', error);
-                // Create fallback image
-                photos.push({
-                    type: photoType.key,
-                    label: photoType.label,
-                    url: url,
-                    imageSrc: createFallbackImage(photoType.label),
-                    alt: `${photoType.label} Photo - Failed to load`
-                });
-            }
+        if (typeof url === 'string' && url.trim() !== '' && url !== 'null') {
+            photos.push({
+                type: photoType.key,
+                label: photoType.label,
+                url,
+                imageSrc: url,
+                alt: `${photoType.label} Photo`
+            });
         }
     }
 
@@ -2216,13 +2193,11 @@ const submitReimbursement = async () => {
 };
 
 const viewInvoice = async (url) => {
-    try {
-        const blobUrl = await api.getPrivateFile(url);
-        if (!blobUrl) return;
-        window.open(blobUrl, '_blank'); // opens preview in new tab
-    } catch (error) {
-        console.error('Failed to preview file:', error);
+     if (!url) {
+        console.warn('Invoice URL not found');
+        return;
     }
+    window.open(url, '_blank'); 
 };
 
 

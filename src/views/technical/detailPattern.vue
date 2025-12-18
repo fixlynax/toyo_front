@@ -195,8 +195,9 @@ const onImageSelect = (event) => {
     }
 
     // Validate file size (10MB limit)
-    if (file.size > 10 * 1024 * 1024) {
-        errors.value.image = 'File size must be less than 10MB';
+    if (file.size > 1024 * 1024) {
+        errors.value.image = 'File size must be less than 1MB';
+        toast.add({ severity: 'warn', summary: 'File too large', detail: 'Maximum file size allowed is 1MB', life: 3000 });
         return;
     }
 

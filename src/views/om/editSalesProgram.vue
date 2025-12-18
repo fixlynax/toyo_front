@@ -79,7 +79,7 @@
                     <div>
                         <label class="block font-bold text-gray-700 mb-2">
                             Sales Program Image
-                            <span class="text-xs bg-blue-100 text-blue-800 px-2 py-0.5 rounded-full">(Max file size: 2 MB)</span>
+                            <span class="text-xs bg-blue-100 text-blue-800 px-2 py-0.5 rounded-full">(Max file size: 1 MB)</span>
                         </label>
                         <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
                             <div>
@@ -504,7 +504,7 @@ const router = useRouter();
 const toast = useToast();
 
 // Constants
-const MAX_FILE_SIZE = 2 * 1024 * 1024; // 2MB in bytes
+const MAX_FILE_SIZE = 1 * 1024 * 1024; // 2MB in bytes
 
 const programId = ref(route.params.id);
 const loading = ref(false);
