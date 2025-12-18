@@ -133,7 +133,7 @@
 
                 <!-- Upload Images -->
                 <div>
-                    <label class="block font-bold text-gray-700 mb-2">Catalogue Images <span class="text-xs bg-blue-100 text-blue-800 px-2 py-0.5 rounded-full">1280 × 720 px (max 2MB)</span> </label>
+                    <label class="block font-bold text-gray-700 mb-2">Catalogue Images <span class="text-xs bg-blue-100 text-blue-800 px-2 py-0.5 rounded-full">1280 × 720 px (max 1MB)</span> </label>
                     <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
                         <div class="relative">
                             <FileUpload mode="basic" name="image1" accept="image/*" 
@@ -299,6 +299,10 @@ const formatDateForCalendar = (dateString) => {
 const onImageSelect = (event) => {
   const file = event.files[0];
   if (file) {
+     if (file.size > 1024 * 1024) {
+            toast.add({ severity: 'warn', summary: 'File too large', detail: 'Maximum file size allowed is 1MB', life: 3000 });
+            return;
+        }
     const reader = new FileReader();
     reader.onload = (e) => (catalogue.value.image1URL = e.target.result);
     reader.readAsDataURL(file);
