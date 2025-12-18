@@ -193,6 +193,7 @@ onMounted(fetchClaims);
                 :value="filteredList"
                 :paginator="true"
                 :rows="10"
+                :rowsPerPageOptions="[5, 10, 20]"
                 dataKey="id"
                 class="rounded-table"
                 removableSort=""
