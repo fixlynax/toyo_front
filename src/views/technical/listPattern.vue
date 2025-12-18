@@ -257,45 +257,6 @@ const handleImport = async (event) => {
     }
 };
 
-const processCatalogueImages = async (catalogueItems) => {
-    const processedItems = [];
-
-    for (const item of catalogueItems) {
-        const url = item.imageURL;
-
-        // Skip if no URL
-        if (!url) {
-            processedItems.push({ ...item, processedImageURL: '' });
-            continue;
-        }
-
-        // Skip calling private API if not private file
-        const isPrivate = url.includes('/private-file/');
-
-        if (!isPrivate) {
-            processedItems.push({ ...item, processedImageURL: url });
-            continue;
-        }
-
-        // Only here we call getPrivateFile()
-        try {
-            const blobUrl = await api.getPrivateFile(url);
-            processedItems.push({
-                ...item,
-                processedImageURL: blobUrl || url
-            });
-        } catch (err) {
-            console.error('Private image error:', err);
-            processedItems.push({
-                ...item,
-                processedImageURL: url
-            });
-        }
-    }
-
-    return processedItems;
-};
-
 const fetchData = async () => {
     try {
         loading.value = true;
@@ -310,16 +271,12 @@ const fetchData = async () => {
                 pattern_name: pattern.pattern_name,
                 imageURL: pattern.image_url,
                 created: pattern.created,
-                processedImageURL: null
+                processedImageURL: pattern.image_url
             }));
 
             // STEP 1: Show list instantly
             patterns.value = transformedItems;
 
-            // STEP 2: Load images IN BACKGROUND
-            processCatalogueImages(transformedItems).then((processed) => {
-                patterns.value = processed;
-            });
         } else {
             toast.add({ severity: 'error', summary: 'Error', detail: 'Failed to load data', life: 3000 });
             patterns.value = [];
