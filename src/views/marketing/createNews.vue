@@ -163,52 +163,18 @@ const onStartDateSelect = () => {
     }
 };
 
-// Validate image file
-const validateImageFile = (file) => {
-    // Check file size (2MB limit)
-    const maxSize = 2 * 1024 * 1024; // 2MB in bytes
-    if (file.size > maxSize) {
-        return {
-            valid: false,
-            message: `File size exceeds 2MB limit. Your file is ${formatFileSize(file.size)}`
-        };
-    }
 
-    // Check file type
-    const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/heif', 'image/heic'];
-    if (!allowedTypes.includes(file.type.toLowerCase())) {
-        return {
-            valid: false,
-            message: 'Invalid image type. Only PNG, JPG, JPEG, HEIF, HEIC are allowed'
-        };
-    }
-
-    return { valid: true, message: '' };
-};
 
 // Handle file selection and preview
 const onImageSelect = (event, field) => {
     const file = event.files[0];
-    if (file.size > 1024 * 1024) {
-        toast.add({ severity: 'warn', summary: 'File too large', detail: 'Maximum file size allowed is 1MB', life: 3000 });
-        return;
-    }
 
     if (!file) {
         imageErrors.value[field] = 'No file selected';
         return;
     }
-
-    // Validate the image
-    const validation = validateImageFile(file);
-    if (!validation.valid) {
-        imageErrors.value[field] = validation.message;
-        toast.add({
-            severity: 'error',
-            summary: 'Invalid Image',
-            detail: validation.message,
-            life: 3000
-        });
+      if (file.size > 1024 * 1024) {
+        toast.add({ severity: 'warn', summary: 'File too large', detail: 'Maximum file size allowed is 1MB', life: 3000 });
         return;
     }
 
@@ -361,16 +327,9 @@ const validateForm = () => {
         const file = news.value[field];
 
         if (file) {
-            const validation = validateImageFile(file);
-            if (!validation.valid) {
-                imageErrors.value[field] = validation.message;
-                toast.add({
-                    severity: 'error',
-                    summary: 'Invalid Image',
-                    detail: `Image ${i}: ${validation.message}`,
-                    life: 3000
-                });
-                return false;
+            if (file.size > 1024 * 1024) {
+                toast.add({ severity: 'warn', summary: 'File too large', detail: 'Maximum file size allowed is 1MB', life: 3000 });
+                return;
             }
         }
     }

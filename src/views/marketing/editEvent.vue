@@ -60,7 +60,7 @@
                     <div>
                         <label class="block font-bold text-gray-700 mb-2">
                             Event Images
-                            <span class="text-xs bg-blue-100 text-blue-800 px-2 py-0.5 rounded-full">1280 × 720 px (max 2MB)</span>
+                            <span class="text-xs bg-blue-100 text-blue-800 px-2 py-0.5 rounded-full">1280 × 720 px (max 1MB)</span>
                         </label>
                         <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
                             <div v-for="(img, index) in [1, 2, 3]" :key="index" class="relative">
@@ -102,17 +102,6 @@
                                     {{ imageErrors[`image${img}`] }}
                                 </div>
                             </div>
-                        </div>
-                        <!-- Image Requirements Info -->
-                        <div class="mt-3 text-sm text-gray-600 bg-gray-50 p-3 rounded-lg">
-                            <p class="font-medium mb-1">📝 Image Requirements:</p>
-                            <ul class="list-disc pl-5 space-y-1">
-                                <li>Maximum file size: 2MB per image</li>
-                                <li>Accepted formats: PNG, JPG, JPEG, HEIF, HEIC</li>
-                                <li>Recommended resolution: 1280 × 720 px</li>
-                                <li>Click "Change Image" to replace existing image</li>
-                                <li>Click the X button to remove an image</li>
-                            </ul>
                         </div>
                     </div>
 
@@ -287,28 +276,7 @@ const formatDate = (date) => {
     return `${day}-${month}-${year}`;
 };
 
-// Validate image file
-const validateImageFile = (file) => {
-    // Check file size (2MB limit)
-    const maxSize = 2 * 1024 * 1024; // 2MB in bytes
-    if (file.size > maxSize) {
-        return {
-            valid: false,
-            message: `File size exceeds 2MB limit. Your file is ${formatFileSize(file.size)}`
-        };
-    }
 
-    // Check file type
-    const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/heif', 'image/heic'];
-    if (!allowedTypes.includes(file.type.toLowerCase())) {
-        return {
-            valid: false,
-            message: 'Invalid image type. Only PNG, JPG, JPEG, HEIF, HEIC are allowed'
-        };
-    }
-
-    return { valid: true, message: '' };
-};
 
 // Format file size for display
 const formatFileSize = (bytes) => {
@@ -415,24 +383,13 @@ const removeQuestion = (index) => {
 const onImageSelect = (eventFile, fieldName) => {
     const file = eventFile.files[0];
     if (!file) {
-         if (file.size > 1024 * 1024) {
-            toast.add({ severity: 'warn', summary: 'File too large', detail: 'Maximum file size allowed is 1MB', life: 3000 });
-            return;
-        }
+
         imageErrors.value[fieldName] = 'No file selected';
         return;
     }
 
-    // Validate the image
-    const validation = validateImageFile(file);
-    if (!validation.valid) {
-        imageErrors.value[fieldName] = validation.message;
-        toast.add({
-            severity: 'error',
-            summary: 'Invalid Image',
-            detail: validation.message,
-            life: 3000
-        });
+    if (file.size > 1024 * 1024) {
+        toast.add({ severity: 'warn', summary: 'File too large', detail: 'Maximum file size allowed is 1MB', life: 3000 });
         return;
     }
 
@@ -557,17 +514,10 @@ const validateForm = () => {
         const file = imageFiles.value[field];
 
         if (file) {
-            const validation = validateImageFile(file);
-            if (!validation.valid) {
-                imageErrors.value[field] = validation.message;
-                toast.add({
-                    severity: 'error',
-                    summary: 'Invalid Image',
-                    detail: `${field}: ${validation.message}`,
-                    life: 3000
-                });
-                return false;
-            }
+            if (file.size > 1024 * 1024) {
+        toast.add({ severity: 'warn', summary: 'File too large', detail: 'Maximum file size allowed is 1MB', life: 3000 });
+        return;
+    }
         }
     }
 
