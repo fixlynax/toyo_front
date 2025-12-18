@@ -7,6 +7,7 @@
             :value="patterns"
             :paginator="true"
             :rows="10"
+            :rowsPerPageOptions="[5, 10, 20]"
             dataKey="pattern_id"
             removableSort
             class="rounded-table"
