@@ -94,8 +94,27 @@ const openChangePassword = () => {
     showSettingsMenu.value = false;
 };
 
+// Validate password and confirm password match
+const validatePasswordMatch = () => {
+    if (passwordForm.value.new_password !== passwordForm.value.new_password_confirmation) {
+        toast.add({
+            severity: 'error',
+            summary: 'Validation Error',
+            detail: 'New password and confirm password do not match.',
+            life: 5000
+        });
+        return false;
+    }
+    return true;
+};
+
 // Common password change function
 const changePassword = async (isForceReset = false) => {
+    // Validate password match before sending to API
+    if (!validatePasswordMatch()) {
+        return;
+    }
+
     loading.value = true;
     try {
         const response = await api.post('change-password', passwordForm.value);
@@ -116,46 +135,96 @@ const changePassword = async (isForceReset = false) => {
             };
 
             if (isForceReset) {
-                // For force reset, close dialog and auto logout
+                // For force reset, just close the dialog without logging out
                 showForceResetDialog.value = false;
 
-                // Add a small delay before logout to show success message
-                setTimeout(() => {
-                    handleLogout();
-                }, 1500);
+                // Update forceReset status in store (assuming you have a method to update it)
+                // If you have a method to update forceReset in store, call it here
+                // menuStore.updateForceReset(0);
+
+                // Reload the page or update user data to reflect the change
+                // Option 1: Reload the page
+                // window.location.reload();
+
+                // Option 2: Update store and continue (recommended)
+                // menuStore.setForceReset(0);
+
+                toast.add({
+                    severity: 'success',
+                    summary: 'Password Reset Complete',
+                    detail: 'Your password has been successfully reset. You can now continue using the application.',
+                    life: 5000
+                });
             } else {
                 // For regular change, just close dialog
                 showChangePasswordDialog.value = false;
             }
-        }
-    } catch (error) {
-        console.error('Password change failed:', error);
-
-        if (error.response?.data?.errors) {
-            // Show validation errors
-            const errors = error.response.data.errors;
-            Object.keys(errors).forEach((field) => {
-                toast.add({
-                    severity: 'error',
-                    summary: 'Validation Error',
-                    detail: errors[field][0],
-                    life: 5000
-                });
-            });
         } else {
-            const errorMessage = error.response?.data?.message || 'Failed to change password';
+            // Handle non-successful response (e.g., incorrect current password)
+            const errorMessage = response.data.message || 'Failed to change password';
             toast.add({
                 severity: 'error',
                 summary: 'Error',
                 detail: errorMessage,
                 life: 5000
             });
+        }
+    } catch (error) {
+        console.error('Password change failed:', error);
 
-            // If current password is incorrect in force reset mode, show specific message
-            if (errorMessage.includes('Current password is incorrect') && isForceReset) {
-                // Keep the force reset dialog open
-                // No need to do anything else
+        // Handle API error responses
+        if (error.response?.data) {
+            const responseData = error.response.data;
+
+            // Check if response has success: false and message (your API structure)
+            if (responseData.success === false && responseData.message) {
+                // Show the error message from API
+                toast.add({
+                    severity: 'error',
+                    summary: 'Error',
+                    detail: responseData.message,
+                    life: 5000
+                });
             }
+            // Handle validation errors (including password mismatch from API)
+            else if (responseData.errors) {
+                // Show validation errors
+                const errors = responseData.errors;
+                Object.keys(errors).forEach((field) => {
+                    toast.add({
+                        severity: 'error',
+                        summary: 'Validation Error',
+                        detail: errors[field][0],
+                        life: 5000
+                    });
+                });
+            }
+            // Handle other error formats
+            else if (responseData.message) {
+                toast.add({
+                    severity: 'error',
+                    summary: 'Error',
+                    detail: responseData.message,
+                    life: 5000
+                });
+            } else {
+                // Generic error
+                toast.add({
+                    severity: 'error',
+                    summary: 'Error',
+                    detail: 'Failed to change password. Please try again.',
+                    life: 5000
+                });
+            }
+        } else {
+            // Network or other errors
+            const errorMessage = error.message || 'Failed to change password';
+            toast.add({
+                severity: 'error',
+                summary: 'Error',
+                detail: errorMessage,
+                life: 5000
+            });
         }
     } finally {
         loading.value = false;
