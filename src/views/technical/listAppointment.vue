@@ -193,6 +193,7 @@ const getStatusColor = (status) => {
                 :value="filteredAppointments"
                 :paginator="true"
                 :rows="10"
+                :rowsPerPageOptions="[5, 10, 20]"
                 dataKey="id"
                 removableSort
                 class="rounded-table"
