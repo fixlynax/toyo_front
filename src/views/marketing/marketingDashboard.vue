@@ -21,7 +21,7 @@
                 <div class="bg-white p-4 rounded-lg shadow-sm border border-gray-200">
                     <div class="text-center">
                         <h3 class="text-gray-500 text-sm font-medium mb-2">Total TC Users</h3>
-                        <p class="text-3xl font-bold text-gray-800 mb-2">{{ apiData.admin_data.total_tc_users }}</p>
+                        <p class="text-3xl font-bold text-gray-800 mb-2">{{ apiData.total_tc_users }}</p>
                         <div class="text-xs text-gray-500">
                             <p>0 submitted - 0 pending</p>
                         </div>
@@ -32,7 +32,7 @@
                 <div class="bg-white p-4 rounded-lg shadow-sm border border-gray-200">
                     <div class="text-center">
                         <h3 class="text-gray-500 text-sm font-medium mb-2">Total Campaigns</h3>
-                        <p class="text-3xl font-bold text-gray-800 mb-2">{{ apiData.admin_data.total_campaign }}</p>
+                        <p class="text-3xl font-bold text-gray-800 mb-2">{{ apiData.total_campaign }}</p>
                         <div class="text-xs text-gray-500">
                             <p>0 submitted - 0 pending</p>
                         </div>
@@ -43,7 +43,7 @@
                 <div class="bg-white p-4 rounded-lg shadow-sm border border-gray-200">
                     <div class="text-center">
                         <h3 class="text-gray-500 text-sm font-medium mb-2">Total Redemptions</h3>
-                        <p class="text-3xl font-bold text-gray-800 mb-2">{{ apiData.admin_data.total_redemption }}</p>
+                        <p class="text-3xl font-bold text-gray-800 mb-2">{{ apiData.total_redemption }}</p>
                         <div class="text-xs text-gray-500">
                             <p>0 submitted - 0 pending</p>
                         </div>
@@ -54,7 +54,7 @@
                 <div class="bg-white p-4 rounded-lg shadow-sm border border-gray-200">
                     <div class="text-center">
                         <h3 class="text-gray-500 text-sm font-medium mb-2">Games Played</h3>
-                        <p class="text-3xl font-bold text-gray-800 mb-2">{{ apiData.admin_data.total_game_played }}</p>
+                        <p class="text-3xl font-bold text-gray-800 mb-2">{{ apiData.total_game_played }}</p>
                         <div class="text-xs text-gray-500">
                             <p>0 submitted - 0 pending</p>
                         </div>
@@ -68,21 +68,16 @@
 <!-- KEEPING ALL CODE BELOW EXACTLY THE SAME -->
 <script setup>
 import { ref, onMounted } from 'vue';
+import api from '@/service/api';
 
-const apiData = ref({
-    status: 0,
-    admin_data: {
-        total_tc_users: 0,
-        total_campaign: 0,
-        total_redemption: 0,
-        total_game_played: 0
-    }
-});
+const apiData = ref({});
+
+
 
 const loading = ref(true);
 
 // Simulate API call
-const fetchData = () => {
+const fetchData1 = () => {
     loading.value = true;
     
     setTimeout(() => {
@@ -98,6 +93,25 @@ const fetchData = () => {
         
         loading.value = false;
     }, 1000);
+};
+
+const fetchData = async () => {
+    try {
+        loading.value = true;
+        const response = await api.get(`marketingDashboard`);
+        if ( (response.data.admin_data)) {
+            // response.data.status === 1 &&
+            apiData.value = response.data.admin_data;
+        } else {
+            toast.add({ severity: 'error', summary: 'Error', detail: 'Failed to load data', life: 3000 });
+        }
+    } catch (error) {
+        console.error('Error fetching data list:', error);
+        apiData.value = [];
+        toast.add({ severity: 'error', summary: 'Error', detail: 'Failed to load data', life: 3000 });
+    } finally {
+        loading.value = false;
+    }
 };
 
 onMounted(() => {
