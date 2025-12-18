@@ -649,7 +649,8 @@ async function goNext() {
             dropdownAllowDirectShipment.value = noOption || dropdownYesNoValue.value[0];
 
             // Set default to "No" for Allow Own Collection
-            dropdownAllowOwnCollection.value = yesOption || dropdownYesNoValue.value[1];
+            // dropdownAllowOwnCollection.value = yesOption || dropdownYesNoValue.value[1];
+            dropdownAllowOwnCollection.value = noOption || dropdownYesNoValue.value[0];
 
             // Set default to "No" for Show On List
             dropdownShowOnList.value = yesOption || dropdownYesNoValue.value[1];
@@ -1142,21 +1143,21 @@ onMounted(() => {
                             <label for="shippingCond">Shipping Condition</label>
                             <InputText disabled id="shippingCond" type="text" v-model="form.shippingCond" />
                         </div>
-                        <div class="w-full">
-                            <label for="allowLalamove">Allow Lalamove</label>
+                        <!-- <div class="w-full">
+                            <label for="allowLalamove">Allow Lalamove</label> -->
                             <!-- This will show "No" by default -->
-                            <Dropdown v-model="dropdownYesNo" :options="dropdownYesNoValue" optionLabel="name" placeholder="Select Option" class="w-full" />
-                        </div>
-                        <div class="w-full">
-                            <label for="allowOwnCollection">Allow Own Collection</label>
+                            <!-- <Dropdown v-model="dropdownYesNo" :options="dropdownYesNoValue" optionLabel="name" placeholder="Select Option" class="w-full" />
+                        </div> -->
+                        <!-- <div class="w-full">
+                            <label for="allowOwnCollection">Allow Own Collection</label> -->
                             <!-- This will show "No" by default -->
-                            <Dropdown v-model="dropdownAllowOwnCollection" :options="dropdownYesNoValue" optionLabel="name" placeholder="Select Option" class="w-full" />
-                        </div>
-                        <div class="w-full">
-                            <label for="allowDirectShipment">Allow Direct Shipment</label>
+                            <!-- <Dropdown v-model="dropdownAllowOwnCollection" :options="dropdownYesNoValue" optionLabel="name" placeholder="Select Option" class="w-full" />
+                        </div> -->
+                        <!-- <div class="w-full">
+                            <label for="allowDirectShipment">Allow Direct Shipment</label> -->
                             <!-- This will show "No" by default -->
-                            <Dropdown v-model="dropdownAllowDirectShipment" :options="dropdownYesNoValue" optionLabel="name" placeholder="Select Option" class="w-full" />
-                        </div>
+                            <!-- <Dropdown v-model="dropdownAllowDirectShipment" :options="dropdownYesNoValue" optionLabel="name" placeholder="Select Option" class="w-full" />
+                        </div> -->
                     </div>
                 </div>
             </div>
