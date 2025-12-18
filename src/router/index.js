@@ -435,7 +435,7 @@ const router = createRouter({
                     path: 'marketing/listRedemption',
                     name: 'List-Redemption',
                     component: () => import('@/views/marketing/listRedemption.vue'),
-                    // meta: { permission: 'Redemption Management', access: 'view' }
+                    meta: { permission: 'Redemption Management', access: 'view' }
                 },
                 {
                     path: 'marketing/detailRedemption/:id',
