@@ -729,7 +729,7 @@ const processCampaignImages = async () => {
     for (const field of imageFields) {
         if (campaign.value[field] && typeof campaign.value[field] === 'string') {
             try {
-                const blobUrl = await api.getPrivateFile(campaign.value[field]);
+                const blobUrl =(campaign.value[field]);
                 if (blobUrl) {
                     campaign.value[field] = blobUrl;
                 }
@@ -746,7 +746,7 @@ const processPrizeImages = async () => {
     for (const prize of listPrize.value) {
         if (prize.imageURL && typeof prize.imageURL === 'string') {
             try {
-                const blobUrl = await api.getPrivateFile(prize.imageURL);
+                const blobUrl = (prize.imageURL);
                 if (blobUrl) {
                     prize.imageURL = blobUrl;
                 }

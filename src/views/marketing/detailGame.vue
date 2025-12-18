@@ -317,31 +317,14 @@ function formatPrizeType(type) {
     return typeMap[type] || type;
 }
 
-// Process private images using the API method
-const processPrivateImages = async () => {
-    const imageFields = ['image1URL', 'image2URL', 'image3URL'];
-
-    for (const field of imageFields) {
-        if (game.value[field] && typeof game.value[field] === 'string') {
-            try {
-                const blobUrl = await api.getPrivateFile(game.value[field]);
-                if (blobUrl) {
-                    game.value[field] = blobUrl;
-                }
-            } catch (error) {
-                console.error(`Error loading image ${field}:`, error);
-                // Keep the original URL if private file loading fails
-            }
-        }
-    }
-};
+;
 
 // Process prize catalog images
 const processPrizeImages = async () => {
     for (const prize of listPrize.value) {
         if (prize.imageURL && typeof prize.imageURL === 'string') {
             try {
-                const blobUrl = await api.getPrivateFile(prize.imageURL);
+                const blobUrl = (prize.imageURL);
                 if (blobUrl) {
                     prize.imageURL = blobUrl;
                 }
@@ -365,8 +348,7 @@ async function fetchGameDetails() {
             // Set game details
             game.value = adminData.game_details;
 
-            // Process game images
-            await processPrivateImages();
+            
 
             // Transform prizes data to match frontend structure
             listPrize.value = adminData.prizes.map((prize) => ({

@@ -50,7 +50,7 @@
                         </div>
 
                         <!-- Image -->
-                        <img :src="item.processedImageURL || 'https://via.placeholder.com/150x100?text=No+Image'" :alt="item.title" class="w-full h-full object-cover" @error="handleImageError" />
+                        <img :src="item.imageURL " :alt="item.title" class="w-full h-full object-cover" />
                     </div>
 
                     <!-- Bottom: Info Section -->
@@ -125,12 +125,10 @@ const fetchCatalogueItems = async () => {
                 ...item,
                 // Ensure imageURL is properly formatted
                 imageURL: item.imageURL || null,
-                // Initialize processedImageURL for private images
-                processedImageURL: null
+
             }));
 
-            // Process private images after fetching data
-            await processCatalogueImages();
+
         } else {
             toast.add({ severity: 'error', summary: 'Error', detail:response.data.message || 'Failed to load data', life: 3000 });
             catalogueItems.value = [];
@@ -144,29 +142,7 @@ const fetchCatalogueItems = async () => {
     }
 };
 
-const processCatalogueImages = async () => {
-    for (const item of catalogueItems.value) {
-        if (item.imageURL && typeof item.imageURL === 'string') {
-            try {
-                const blobUrl = await api.getPrivateFile(item.imageURL);
-                if (blobUrl) {
-                    // Use a different property to avoid conflicts
-                    item.processedImageURL = blobUrl;
-                } else {
-                    // Fallback to original URL if private file loading fails
-                    item.processedImageURL = item.imageURL;
-                }
-            } catch (error) {
-                console.error(`Error loading catalogue image for ${item.title}:`, error);
-                // Fallback to original URL or placeholder
-                item.processedImageURL = item.imageURL;
-            }
-        } else {
-            // No image URL, use placeholder
-            item.processedImageURL = 'https://via.placeholder.com/150x100?text=No+Image';
-        }
-    }
-};
+
 
 // Filter items based on active tab and search query
 const filteredItems = computed(() => {
@@ -248,10 +224,6 @@ const formatType = (type) => {
     return typeMap[type] || type;
 };
 
-const handleImageError = (event) => {
-    // Set a placeholder image when the image fails to load
-    event.target.src = 'https://via.placeholder.com/150x100?text=No+Image';
-};
 
 // Watch for tab changes to update the filtered items
 watch(activeTabIndex, () => {
