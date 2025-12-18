@@ -225,7 +225,7 @@ const updateSchedule = async () => {
         }
     } catch (err) {
         console.error(err);
-        toast.add({ severity: 'error', summary: 'Error', detail: 'API error', life: 3000 });
+        toast.add({ severity: 'error', summary: 'Error', detail: res.data?.message || 'Failed to update schedule information', life: 3000 });
     } finally {
         loadingSchedule.value = false;
     }
@@ -265,7 +265,7 @@ const updateDelivered = async () => {
         }
     } catch (err) {
         console.error(err);
-        toast.add({ severity: 'error', summary: 'Error', detail: 'API error', life: 3000 });
+        toast.add({ severity: 'error', summary: 'Error', detail: res.data?.message || 'Failed to updated delivered information', life: 3000 });
     } finally {
         loadingDelivered.value = false;
     }

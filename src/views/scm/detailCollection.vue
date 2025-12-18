@@ -205,11 +205,11 @@ const updateCTCDetails = async () => {
             // optionally reload data
             await fetchData();
         } else {
-            toast.add({ severity: 'error', summary: 'Error', detail: res.data?.message || 'Failed tp update ctc details', life: 3000 });
+            toast.add({ severity: 'error', summary: 'Error', detail: res.data?.message || 'Failed to update ctc details', life: 3000 });
         }
     } catch (err) {
         console.error(err);
-        toast.add({ severity: 'error', summary: 'Error', detail: 'API error', life: 3000 });
+        toast.add({ severity: 'error', summary: 'Error', detail: res.data?.message || 'Failed to update ctc details', life: 3000 });
     } finally {
         loadingUpdate.value = false;
     }

@@ -497,7 +497,7 @@ const submitPickupUpdate = async () => {
         }
     } catch (err) {
         console.error(err);
-        toast.add({ severity: 'error', summary: 'Error', detail: 'API error', life: 3000 });
+        toast.add({ severity: 'error', summary: 'Error', detail: res.data?.message || 'Failed to update pickup date information', life: 3000 });
     } finally {
         handleCloseDialog();
     }
@@ -540,7 +540,7 @@ const submitPickupUpdate2 = async () => {
         }
     } catch (err) {
         console.error(err);
-        toast.add({ severity: 'error', summary: 'Error', detail: 'API error', life: 3000 });
+        toast.add({ severity: 'error', summary: 'Error', detail: res.data?.message || 'Failed to update pickup date information', life: 3000 });
     } finally {
         handleCloseDialog2();
     }
@@ -567,7 +567,7 @@ const promptUpdatePickup = (data) => {
         }
       } catch (err) {
         console.error(err);
-        toast.add({ severity: 'error', summary: 'Error', detail: 'API error', life: 3000 });
+        toast.add({ severity: 'error', summary: 'Error', detail: res.data?.message || 'Failed to update pickup date information', life: 3000 });
       }
     },
     reject: () => {

@@ -524,7 +524,8 @@ const saveSchedule = async () => {
         }
     } catch (err) {
         console.error(err);
-        toast.add({ severity: 'error', summary: 'Error', detail: 'API error', life: 3000 });
+        toast.add({ severity: 'error', summary: 'Error', detail: res.data?.error || 'Failed to update planned information', life: 3000 });
+
     } finally {
         form.value.scheduleDate = null;
         form.value.drivername = '';
@@ -564,7 +565,7 @@ const saveSchedule3 = async () => {
         }
     } catch (err) {
         console.error(err);
-        toast.add({ severity: 'error', summary: 'Error', detail: 'API error', life: 3000 });
+        toast.add({ severity: 'error', summary: 'Error', detail: res.data?.error || 'Failed to update planned information', life: 3000 });
     } finally {
         loadingUpdate3.value = false;
         form3.value.scheduleDate = null;
@@ -597,7 +598,7 @@ const saveDelivered = async () => {
         }
     } catch (err) {
         console.error(err);
-        toast.add({ severity: 'error', summary: 'Error', detail: 'API error', life: 3000 });
+        toast.add({ severity: 'error', summary: 'Error', detail: res.data?.error || 'Failed to update delivered information', life: 3000 });
     } finally {
         openDialog2.value = false;
     }
