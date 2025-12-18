@@ -300,7 +300,7 @@ onBeforeMount(async () => {
 <template>
     <div class="card">
         <!-- Header -->
-        <div class="text-2xl font-bold text-gray-800 border-b pb-2">List Return Order</div>
+        <div class="text-2xl font-bold text-gray-800 border-b pb-2">Customer Return Order</div>
 
         <div>
             <TabMenu :model="statusTabs" v-model:activeIndex="activeTabIndex" class="mb-6" />
@@ -420,7 +420,7 @@ onBeforeMount(async () => {
                 <!-- Return Request No Column -->
                 <Column header="Return Req No." style="min-width: 8rem" sortable>
                     <template #body="{ data }">
-                        <RouterLink :to="`/om/detailCustomerReturnOrder/${data.returnRequestNo}`" class="hover:underline font-bold text-primary-400">
+                        <RouterLink :to="`/sales/detailCustomerReturnOrder/${data.returnRequestNo}`" class="hover:underline font-bold text-primary-400">
                             {{ data.returnRequestNo }}
                         </RouterLink>
                     </template>

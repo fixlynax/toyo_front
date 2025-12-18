@@ -249,7 +249,6 @@ const fetchRedemptionDetails = async () => {
             // Set campaign criteria if available
             campaignCriteria.value = response.data.admin_data.campaign_criteria || [];
         } else {
-            console.error('API returned error or invalid data:', response.data);
             toast.add({ severity: 'error', summary: 'Error', detail: 'Failed to load redemption details', life: 3000 });
         }
     } catch (error) {
@@ -260,100 +259,7 @@ const fetchRedemptionDetails = async () => {
     }
 };
 
-// Close dialog and reset form
-const closeRejectDialog = () => {
-    showRejectDialog.value = false;
-    rejectReason.value = '';
-    showValidationError.value = false;
-};
 
-// Reject submission handler
-const submitReject = async () => {
-    if (!rejectReason.value.trim()) {
-        showValidationError.value = true;
-        return;
-    }
-
-    processingAction.value = true;
-
-    try {
-        // API call to verify redemption with status 2 (Rejected)
-        const response = await api.post(`redeem/verify/${redemptionId}`, {
-            status: 2, // Rejected status
-            reject_reason: rejectReason.value // Required for status 2
-        });
-
-        if (response.data.status === 1) {
-            // Update local state
-            redemption.value.status = 2; // Rejected status
-            redemption.value.rejectedDate = new Date().toISOString();
-            redemption.value.rejectReason = rejectReason.value;
-
-            // Show success message
-            toast.add({ severity: 'success', summary: 'Success', detail: 'Redemption has been rejected successfully', life: 3000 });
-            
-            // Refresh data to get updated information from server
-            fetchRedemptionDetails();
-        } else {
-            console.error('Failed to reject redemption:', response.data);
-            toast.add({ severity: 'error', summary: 'Error', detail: 'Failed to reject redemption', life: 3000 });
-        }
-    } catch (error) {
-        console.error('Error rejecting redemption:', error);
-        toast.add({ severity: 'error', summary: 'Error', detail: 'Failed to reject redemption', life: 3000 });
-    } finally {
-        processingAction.value = false;
-        closeRejectDialog();
-    }
-};
-
-// Approve submission handler
-const submitApprove = async () => {
-    processingAction.value = true;
-
-    try {
-        // API call to verify redemption with status 1 (Approved)
-        const response = await api.post(`redeem/verify/${redemptionId}`, {
-            status: 1 // Approved status
-            // No reject_reason needed for approval
-        });
-
-        if (response.data.status === 1) {
-            // Update local state
-            redemption.value.status = 1; // Approved status
-            redemption.value.approvedDate = new Date().toISOString();
-
-            // Show success message
-            toast.add({ severity: 'success', summary: 'Success', detail: 'Redemption has been approved successfully', life: 3000 });
-            
-            // Refresh data to get updated information from server
-            fetchRedemptionDetails();
-        } else {
-            console.error('Failed to approve redemption:', response.data);
-            toast.add({ severity: 'error', summary: 'Error', detail: 'Failed to approve redemption', life: 3000 });
-        }
-    } catch (error) {
-        console.error('Error approving redemption:', error);
-        toast.add({ severity: 'error', summary: 'Error', detail: 'Failed to approve redemption', life: 3000 });
-    } finally {
-        processingAction.value = false;
-        showApproveDialog.value = false;
-    }
-};
-
-// Helper functions for status label
-const statusLabel = (status) => {
-    const statusMap = {
-        0: 'Pending',
-        1: 'Approved',
-        2: 'Rejected',
-        3: 'Processing',
-        4: 'Delivery',
-        5: 'Redeemed (Yet to Use)',
-        10: 'Completed'
-    };
-    return statusMap[status] || 'Unknown';
-};
 
 const statusSeverity = (status) => {
     const severityMap = {

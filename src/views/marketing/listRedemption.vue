@@ -133,11 +133,12 @@ onMounted(async () => {
                 status: redeem.status
             }));
         } else {
-            console.error('API returned error or invalid data:', response.data);
+            toast.add({ severity: 'error', summary: 'Error', detail:response.data.message || 'Failed to load data', life: 3000 });
             listData.value = [];
         }
     } catch (error) {
         console.error('Error fetching redeem list:', error);
+        toast.add({ severity: 'error', summary: 'Error', detail:response.data.message || 'Failed to load data', life: 3000 });
         listData.value = [];
     } finally {
         initialLoading.value = false;

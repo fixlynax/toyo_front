@@ -138,7 +138,6 @@ const fetchData = async () => {
                 return new Date(b.updated) - new Date(a.updated);
             });
         } else {
-            console.error('API returned error or invalid data:', response.data);
             ETAList.value = [];
             filteredList.value = [];
             toast.add({ severity: 'error', summary: 'Error', detail: 'Failed to load data', life: 3000 });
@@ -180,8 +179,10 @@ const fetchExportETA = async () => {
         a.click();
         document.body.removeChild(a);
         window.URL.revokeObjectURL(url);
+        toast.add({ severity: 'success', summary: 'Success', detail: 'Export completed', life: 3000 });
     } catch (err) {
         console.error('error fetching ETA export:', err);
+        toast.add({ severity: 'error', summary: 'Error', detail: 'Failed to export data', life: 3000 });
     } finally {
         loading.value = false;
         exportLoading.value = false;
@@ -216,7 +217,7 @@ const handleImport = async (event) => {
             toast.add({
                 severity: 'error',
                 summary: 'Import Failed',
-                detail: response.data.message || 'Server did not confirm success',
+                detail: response.data.message || 'Failed to import data',
                 life: 3000
             });
         }

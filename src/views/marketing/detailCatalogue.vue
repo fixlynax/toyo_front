@@ -1080,7 +1080,12 @@ const confirmSetPoint = async () => {
                 life: 3000
             });
         } else {
-            throw new Error('API returned unsuccessful status');
+            toast.add({
+            severity: 'error',
+            summary: 'Error',
+            detail: 'Failed to update cost redeem points',
+            life: 3000
+        });
         }
     } catch (error) {
         console.error('Error updating points:', error);

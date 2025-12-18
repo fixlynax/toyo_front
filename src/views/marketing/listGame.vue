@@ -139,11 +139,12 @@ onMounted(async () => {
                 endDate: game.endDate || '-'
             }));
         } else {
-            console.error('API returned error or invalid data:', response.data);
+            toast.add({ severity: 'error', summary: 'Error', detail:response.data.message || 'Failed to load data', life: 3000 });
             listData.value = [];
         }
     } catch (error) {
         console.error('Error fetching game list:', error);
+        toast.add({ severity: 'error', summary: 'Error', detail:response.data.message || 'Failed to load data', life: 3000 });
         listData.value = [];
     } finally {
         initialLoading.value = false;

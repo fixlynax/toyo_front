@@ -523,7 +523,7 @@ const getOrderStatusSeverity = (status) => {
 // Helper methods
 const formatAddress = (dealerShop) => {
     if (!dealerShop) return '-';
-    const addressParts = [dealerShop.addressLine1, dealerShop.addressLine2, dealerShop.addressLine3, dealerShop.addressLine4, dealerShop.city, dealerShop.state, dealerShop.postcode].filter((part) => part && part.trim() !== '');
+    const addressParts = [dealerShop.addressLine2, dealerShop.addressLine3, dealerShop.addressLine4, dealerShop.city, dealerShop.state, dealerShop.postcode].filter((part) => part && part.trim() !== '');
     return addressParts.join(' ') || '-';
 };
 

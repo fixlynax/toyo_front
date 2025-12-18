@@ -393,14 +393,14 @@ const savePickup = async () => {
 
         const res = await api.post('update-pickup-return-order', payload);
         if (res.data?.status === 1) {
-            toast.add({ severity: 'success', summary: 'Updated', detail: 'Pickup date updated successfully', life: 3000 });
+            toast.add({ severity: 'success', summary: 'Updated', detail: 'Pickup date information updated', life: 3000 });
             InitfetchData(); // refresh table
         } else {
-            toast.add({ severity: 'error', summary: 'Error', detail: res.data?.error || 'Failed', life: 3000 });
+            toast.add({ severity: 'error', summary: 'Error', detail: res.data?.error || 'Failed to updated pickup information', life: 3000 });
         }
     } catch (err) {
         console.error(err);
-        toast.add({ severity: 'error', summary: 'Error', detail: 'API error', life: 3000 });
+        toast.add({ severity: 'error', summary: 'Error', detail: res.data?.error || 'Failed to updated pickup information', life: 3000 });
     } finally {
         openDialog.value = false;
         loadingUpdate.value = false;
@@ -423,14 +423,14 @@ const saveRecieve = async () => {
         };
         const res = await api.post('update-receive-return-order', payload);
         if (res.data?.status === 1) {
-            toast.add({ severity: 'success', summary: 'Updated', detail: 'Received date updated successfully', life: 3000 });
+            toast.add({ severity: 'success', summary: 'Updated', detail: 'Received date information updated', life: 3000 });
             InitfetchData(); // refresh table
         } else {
-            toast.add({ severity: 'error', summary: 'Error', detail: res.data?.admin_data[0].sap_error.error_message || 'Failed', life: 3000 });
+            toast.add({ severity: 'error', summary: 'Error', detail: res.data?.admin_data[0].sap_error.error_message || 'Failed to update received information', life: 3000 });
         }
     } catch (err) {
         console.error(err);
-        toast.add({ severity: 'error', summary: 'Error', detail: 'API error', life: 3000 });
+        toast.add({ severity: 'error', summary: 'Error', detail: res.data?.admin_data[0].sap_error.error_message || 'Failed to update received information', life: 3000 });
     } finally {
         openDialog2.value = false;
         loadingUpdate2.value = false;
@@ -452,7 +452,6 @@ const InitfetchData = async () => {
             form.value.returnorderno = returnList.value.return_orderNo_ref;
             form2.value.returnorderno = returnList.value.return_orderNo_ref;
         } else {
-            console.error('API returned error or invalid data:', response.data);
             toast.add({ severity: 'error', summary: 'Error', detail: 'Failed to load data', life: 3000 });
         }
     } catch (error) {
@@ -476,86 +475,6 @@ function getStatusSeverity(status) {
             return 'secondary';
     }
 }
-const handleExport = async () => {
-    const idexport = Number(route.params.id);
-    try {
-        exportLoading.value = true;
-        const response = await api.postExtra(
-            'excel/exportsingle-scm-return-order-list',
-            { id: idexport },
-            {
-                responseType: 'blob',
-                headers: {
-                    'Content-Type': 'application/json'
-                }
-            }
-        );
-        const blob = new Blob([response.data], {
-            type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
-        });
-
-        const url = window.URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = `${returnList.value.return_orderNo_ref}_Order_Download.xlsx`;
-        document.body.appendChild(a);
-        a.click();
-        document.body.removeChild(a);
-        window.URL.revokeObjectURL(url);
-
-        toast.add({ severity: 'success', summary: 'Success', detail: 'Export completed', life: 3000 });
-    } catch (error) {
-        console.error('Error exporting data:', error);
-        toast.add({ severity: 'error', summary: 'Error', detail: 'Failed to export data', life: 3000 });
-    } finally {
-        exportLoading.value = false;
-    }
-};
-const handleImport = async (event) => {
-    const file = event.target.files[0];
-    if (!file) return;
-
-    try {
-        importLoading.value = true;
-
-        const formData = new FormData();
-        formData.append('return_order_excel', file);
-
-        const response = await api.postExtra('excel/importsingle-scm-return-order-list', formData, {
-            headers: {
-                'Content-Type': 'multipart/form-data'
-            }
-        });
-
-        if (response.data.status === 1) {
-            // Refresh data after import
-            await InitfetchData();
-
-            toast.add({
-                severity: 'success',
-                summary: 'Success',
-                detail: 'File imported successfully',
-                life: 3000
-            });
-        } else {
-            toast.add({
-                severity: 'error',
-                summary: 'Import Failed',
-                detail: response.data.message || 'Server did not confirm success',
-                life: 5000
-            });
-        }
-    } catch (error) {
-        console.error('Error importing data:', error);
-        toast.add({ severity: 'error', summary: 'Error', detail: 'Failed to import data', life: 3000 });
-    } finally {
-        importLoading.value = false;
-        // Reset file input
-        if (importInput.value) {
-            importInput.value.value = '';
-        }
-    }
-};
 onMounted(() => {
     InitfetchData();
 });

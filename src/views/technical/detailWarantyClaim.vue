@@ -1274,7 +1274,7 @@ const requestScrap = async () => {
             toast.add({
                 severity: 'success',
                 summary: 'Success',
-                detail: 'Scrapy request submitted successfully',
+                detail: 'Scrap request submitted successfully',
                 life: 3000
             });
             fetchWarrantyClaim();
@@ -1282,7 +1282,7 @@ const requestScrap = async () => {
             toast.add({
                 severity: 'error',
                 summary: 'Error',
-                detail: response.data.message || 'Failed to create claim details',
+                detail: response.data.message || 'Failed to submit scrap request',
                 life: 3000
             });
         }
@@ -1372,7 +1372,12 @@ const confirmCTCRequest = async () => {
             showCTCConfirmationDialog.value = false;
             await fetchWarrantyClaim(); // Refresh data to show CTC status
         } else {
-            throw new Error('CTC request failed');
+            toast.add({
+                severity: 'error',
+                summary: 'Error',
+                detail: 'Failed to request CTC. Please try again.',
+                life: 3000
+            });
         }
     } catch (error) {
         console.error('Error requesting CTC:', error);
@@ -1403,7 +1408,12 @@ const confirmCTCRequestReturn = async () => {
             showCTCConfirmationDialog.value = false;
             await fetchWarrantyClaim(); // Refresh data to show CTC status
         } else {
-            throw new Error('Return CTC request failed');
+            toast.add({
+                severity: 'error',
+                summary: 'Error',
+                detail: 'Failed to submit request Return CTC',
+                life: 3000
+            });
         }
     } catch (error) {
         console.error('Error requesting CTC:', error);
@@ -1437,41 +1447,6 @@ const formatDateTime = (dateString) => {
     });
 };
 
-// Scrap Approval Methods
-const approveScrap = async () => {
-    try {
-        loadingScrapAction.value = true;
-
-        // First, approve the scrap process
-        const response = await api.post('warranty_claim/approveScrap', {
-            claim_id: warantyDetail.value.id
-        });
-
-        if (response.data.status === 1) {
-            toast.add({
-                severity: 'success',
-                summary: 'Success',
-                detail: 'Scrap approved successfully',
-                life: 3000
-            });
-
-            // After scrap approval, check stock and proceed
-            await checkStockAndProceed();
-        } else {
-            throw new Error('Scrap approval failed');
-        }
-    } catch (error) {
-        console.error('Error approving scrap:', error);
-        toast.add({
-            severity: 'error',
-            summary: 'Error',
-            detail: 'Failed to approve scrap',
-            life: 3000
-        });
-    } finally {
-        loadingScrapAction.value = false;
-    }
-};
 
 const confirmation = useConfirm();
 
@@ -1660,10 +1635,10 @@ const fetchWarrantyClaim = async () => {
             await loadTireDeptImages();
             await loadSubmittedPhotos();
         } else {
-            error.value = 'Warranty claim not found.';
+            toast.add({ severity: 'error', summary: 'Error', detail: 'Failed to load warranty details', life: 3000 });
         }
     } catch (err) {
-        error.value = 'Failed to load warranty details.';
+        toast.add({ severity: 'error', summary: 'Error', detail: 'Failed to load warranty details', life: 3000 });
         console.error('Error fetching warranty details:', err);
     } finally {
         loading.value = false;
@@ -1679,6 +1654,7 @@ const fetchRejectReasons = async () => {
             rejectReasonsTypeB.value = response.data.admin_data.filter(item => item.type === "B");
         }
     } catch (error) {
+        toast.add({ severity: 'error', summary: 'Error', detail: 'Failed to load reject reasons', life: 3000 });
         console.error('Error fetching reject reasons:', error);
     }
 };
@@ -1761,7 +1737,7 @@ const loadSubmittedPhotos = async () => {
                 });
 
             } catch (error) {
-                console.error(`❌ Error loading ${photoType.label} photo:`, error);
+                console.error('Error loading submitted photo:', error);
                 // Create fallback image
                 photos.push({
                     type: photoType.key,
@@ -1858,7 +1834,12 @@ const rejectInvoice = async () => {
             });
             await fetchWarrantyClaim(); // Refresh data
         } else {
-            throw new Error(response.data.message || 'Invoice rejection failed');
+          toast.add({
+            severity: 'error',
+            summary: 'Error',
+            detail: err.response?.data?.message || 'Failed to reject invoice',
+            life: 3000
+        });
         }
     } catch (err) {
         console.error('Error rejecting invoice:', err);
@@ -1915,7 +1896,12 @@ const confirmRejectWarranty = async () => {
             await fetchWarrantyClaim();
             closeRejectDialog();
         } else {
-            throw new Error(response.data.message || 'Rejection failed');
+            toast.add({
+                severity: 'error',
+                summary: 'Error',
+                detail: err.response?.data?.message || 'Failed to reject warranty claim',
+                life: 3000
+            });
         }
     } catch (err) {
         console.error('Error rejecting warranty:', err);
@@ -1980,11 +1966,21 @@ const saveCTC = async () => {
         if (response.data.status === 1) {
             closeCTCDialog();
         } else {
-            console.error('Failed to create date:', response.data);
-            alert('Failed to create ctc. Please try again.');
+            toast.add({
+            severity: 'error',
+            summary: 'Error',
+            detail: err.response?.data?.message || 'Failed to create ctc',
+            life: 3000
+        });
         }
     } catch (error) {
         console.error('Error create ctc:', error);
+        toast.add({
+            severity: 'error',
+            summary: 'Error',
+            detail: err.response?.data?.message || 'Failed to create ctc',
+            life: 3000
+        });
     } finally {
         loading.value = false;
         closeCTCDialog();
@@ -2019,7 +2015,7 @@ const submitReplacement = async () => {
             toast.add({
                 severity: 'success',
                 summary: 'Success',
-                detail: replacementResponse.data.message || 'Replacement approved',
+                detail: replacementResponse.data.message || 'Replacement approved successfully',
                 life: 3000
             });
 
@@ -2078,7 +2074,7 @@ const checkPrice = async () => {
             toast.add({
                 severity: 'success',
                 summary: 'Success',
-                detail: 'Price Checking successfully',
+                detail: 'Price checking successfully',
                 life: 3000
             });
             
@@ -2086,7 +2082,7 @@ const checkPrice = async () => {
             toast.add({
                 severity: 'error',
                 summary: 'Error',
-                detail: checkingResponse.data.error || 'Failed to checking price for reimbursement',
+                detail: checkingResponse.data.error || 'Failed price checking for reimbursement',
                 life: 7000
             });
         }
@@ -2095,7 +2091,7 @@ const checkPrice = async () => {
         toast.add({
             severity: 'error',
             summary: 'Error',
-            detail: err.response?.data?.message || 'Failed to checking price for reimbursement',
+            detail: err.response?.data?.message || 'Failed price checking for reimbursement',
             life: 3000
         });
     } finally {
@@ -2143,7 +2139,7 @@ const checkTread = async () => {
             toast.add({
                 severity: 'error',
                 summary: 'Error',
-                detail: checkingResponse.data.error || 'Failed to checking worn and claim percent',
+                detail: checkingResponse.data.error || 'Failed checking worn and claim percent',
                 life: 7000
             });
         }
@@ -2152,7 +2148,7 @@ const checkTread = async () => {
         toast.add({
             severity: 'error',
             summary: 'Error',
-            detail: err.response?.data?.message || 'Failed to checking claim and percent',
+            detail: err.response?.data?.message || 'Failed checking claim and percent',
             life: 3000
         });
     } finally {
@@ -2229,26 +2225,6 @@ const viewInvoice = async (url) => {
     }
 };
 
-const downloadInvoice = async (url, filename = 'invoice.pdf') => {
-    try {
-        const blobUrl = await api.getPrivateFile(url);
-        if (!blobUrl) {
-            console.warn("Invalid blobUrl");
-            return;
-        }
-        const a = document.createElement('a');
-        a.href = blobUrl;
-        a.download = filename;
-        a.target = "_blank";
-        document.body.appendChild(a);
-        a.click();
-        a.remove();
-
-        setTimeout(() => URL.revokeObjectURL(blobUrl), 3000);
-    } catch (error) {
-        console.error('Failed to download file:', error);
-    }
-};
 
 // Helper functions
 const formatDate = (dateString) => {

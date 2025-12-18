@@ -311,7 +311,6 @@ const submitForm  = async () => {
         } else {
             toast.add({ severity: 'error', summary: 'Error', detail: 'Failed to create 3PL', life: 3000 });
         }
-        console.log(response);
     } catch (error) {
             console.error('Error submitting form:', error);
             toast.add({ severity: 'error', summary: 'Error', detail: 'Failed to create 3PL', life: 3000 });

@@ -253,7 +253,6 @@ const savePatternEdit = async () => {
                 'Content-Type': 'multipart/form-data'
             },
         });
-
             if (response.data.status === 1) {
                 toast.add({ severity: 'success', summary: 'Successfull', detail: 'Pattern has been updated', life: 3000 });
                 editPatternDialog.value = false;
@@ -328,11 +327,12 @@ const fetchdata = async () => {
             const processedItem = await processCatalogueImages(response.data.material_pattern);
             patterns.value = processedItem;
         } else {
-            console.error('API returned error or invalid data:', response.data);
+            toast.add({ severity: 'error', summary: 'Error', detail: 'Failed to load data', life: 3000 });
             patterns.value = [];
         }
     } catch (error) {
         console.error('Error fetching Pattern list:', error);
+        toast.add({ severity: 'error', summary: 'Error', detail: 'Failed to load data', life: 3000 });
         patterns.value = [];
     } finally {
         loading.value = false;

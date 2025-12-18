@@ -132,22 +132,12 @@ const fetchCatalogueItems = async () => {
             // Process private images after fetching data
             await processCatalogueImages();
         } else {
-            error.value = 'Failed to load catalogue items: Invalid response format';
+            toast.add({ severity: 'error', summary: 'Error', detail:response.data.message || 'Failed to load data', life: 3000 });
             catalogueItems.value = [];
         }
     } catch (err) {
         console.error('Error fetching catalogue items:', err);
-        if (err.response?.status === 401) {
-            error.value = 'Unauthorized access. Please login again.';
-        } else if (err.response?.status === 403) {
-            error.value = 'Access denied. You do not have permission to view catalogue items.';
-        } else if (err.response?.status >= 500) {
-            error.value = 'Server error. Please try again later.';
-        } else if (err.code === 'NETWORK_ERROR') {
-            error.value = 'Network error. Please check your connection.';
-        } else {
-            error.value = 'Failed to load catalogue items. Please try again.';
-        }
+        toast.add({ severity: 'error', summary: 'Error', detail:response.data.message || 'Failed to load data', life: 3000 });
         catalogueItems.value = [];
     } finally {
         loading.value = false;

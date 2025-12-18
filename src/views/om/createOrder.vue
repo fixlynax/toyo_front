@@ -301,7 +301,14 @@
                 <!-- Header -->
                 <div class="flex items-center justify-between mb-5">
                     <div class="text-xl font-bold text-gray-900">🛒 Selected Products</div>
-                    <div class="text-2xl font-extrabold text-indigo-700">Total: RM {{ formatCurrency(cartTotal.toFixed(2)) }}</div>
+                    <div class="flex flex-col">
+                        <!-- <div class="text-xl font-extrabold text-grey-700">Total Quantity: {{ cartQuantity + freeItemsQuantity }}</div> -->
+                        <div class="flex items-center justify-between mb-2">
+                            <span class="w-30 text-xl font-bold text-black">Total Quantity:</span>
+                            <span class="text-xl font-bold text-indigo-700">{{ cartQuantity + freeItemsQuantity }}</span>
+                        </div>
+                        <div class="text-2xl font-extrabold text-indigo-700">Total: RM {{ formatCurrency(cartTotal.toFixed(2)) }}</div>
+                    </div>
                 </div>
 
                 <!-- Regular Items -->
@@ -404,7 +411,7 @@
 
                 <!-- Cart Summary -->
                 <div class="mt-6 p-4 bg-gray-50 rounded-lg">
-                    <div class="grid grid-cols-2 md:grid-cols-4 gap-4 text-center">
+                    <div class="grid grid-cols-2 md:grid-cols-3 gap-4 text-center">
                         <div>
                             <div class="text-sm text-gray-500">Order Items</div>
                             <div class="text-lg font-bold">{{ selectedTyres.length }}</div>
@@ -417,10 +424,10 @@
                             <div class="text-sm text-gray-500">Total Line Items</div>
                             <div class="text-lg font-bold text-purple-600">{{ totalLineItems }}</div>
                         </div>
-                        <div>
+                        <!-- <div>
                             <div class="text-sm text-gray-500">Total Amount</div>
                             <div class="text-lg font-bold text-blue-600">RM {{ formatCurrency(cartTotal.toFixed(2)) }}</div>
-                        </div>
+                        </div> -->
                     </div>
                     <div v-if="selectedOrderType === 'DIRECTSHIP'" class="mt-3 pt-3 border-t text-center">
                         <div class="text-sm text-gray-500">Total Container Volume</div>
@@ -588,22 +595,18 @@
                                     <span class="text-gray-600">Container Volume:</span>
                                     <span class="font-semibold">{{ containerCapacity }} units</span>
                                 </div>
-                                <div class="flex justify-between">
-                                    <span class="text-gray-600">Total Line Items:</span>
-                                    <span class="font-semibold">{{ totalLineItems }} items</span>
-                                </div>
                             </div>
                         </div>
 
                         <!-- Items Summary -->
                         <div class="p-4 border-b">
-                            <div class="font-semibold text-gray-700 mb-3">Items Summary ({{ totalLineItems }} items)</div>
+                            <div class="font-semibold text-gray-700 mb-3">Items Summary</div>
                             <div class="space-y-3">
                                 <!-- Regular Items -->
-                                <div v-for="item in selectedTyres" :key="item.id" class="flex justify-between items-center">
+                                <div v-for="item in selectedTyres" :key="item.id" class="flex justify-between items-center mb-2">
                                     <div class="flex-1">
-                                        <div class="font-medium text-sm">{{ item.material }}</div>
-                                        <div class="text-xs text-gray-500">
+                                        <div class="font-bold text-sm">{{ item.material }}</div>
+                                        <div class="text-xs font-semibold text-gray-500">
                                             Qty: {{ item.quantity }} × RM {{ formatCurrency(item.price.toFixed(2)) }}
                                             <!-- Enhanced back order indicators in review -->
                                             <span v-if="selectedOrderType === 'NORMAL' && item.stockBalance === 0" class="text-orange-600 font-semibold ml-2">(Back Order)</span>
@@ -616,14 +619,34 @@
                                     </div>
                                     <div class="font-semibold">RM {{ formatCurrency((item.price * item.quantity).toFixed(2)) }}</div>
                                 </div>
+                                <div class="space-y-2">
+                                    <div class="flex justify-between text-xs">
+                                        <span>Total Order Items</span>
+                                        <span>{{ selectedTyres.length }} Items</span>
+                                    </div>
+                                    <div v-if="freeItems.length > 0" class="flex justify-between text-xs">
+                                        <span>Total Order Quantity</span>
+                                        <span>{{ cartQuantity }} Units</span>
+                                    </div>
+                                </div>
 
                                 <!-- Free Items -->
                                 <div v-for="freeItem in freeItems" :key="freeItem.materialid" class="flex justify-between items-center border-t pt-2">
                                     <div class="flex-1">
-                                        <div class="font-medium text-sm text-green-700">{{ freeItem.material }}</div>
-                                        <div class="text-xs text-gray-500">Free Item × {{ freeItem.qty }}</div>
+                                        <div class="font-bold text-sm text-green-700">{{ freeItem.material }}</div>
+                                        <div class="text-xs font-semibold text-gray-500">Free Item × {{ freeItem.qty }}</div>
                                     </div>
                                     <div class="font-semibold text-green-600">FREE</div>
+                                </div>
+                                <div class="space-y-2">
+                                    <div class="flex justify-between text-xs">
+                                        <span>Total Free Items</span>
+                                        <span>{{ freeItems.length }} Items</span>
+                                    </div>
+                                    <div v-if="freeItems.length > 0" class="flex justify-between text-xs">
+                                        <span>Total Free Quantity</span>
+                                        <span>{{ freeItemsQuantity }} Units</span>
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -632,20 +655,20 @@
                         <div class="p-4">
                             <div class="space-y-2">
                                 <div class="flex justify-between">
-                                    <span>Total Order Items:</span>
-                                    <span>{{ selectedTyres.length }} Items</span>
+                                    <span>Total Items</span>
+                                    <span class="font-semibold">{{ totalLineItems }} items</span>
+                                </div>
+                                <div class="flex justify-between">
+                                    <span>Total Order Items</span>
+                                    <span class="font-semibold">{{ selectedTyres.length }} Items</span>
                                 </div>
                                 <div v-if="freeItems.length > 0" class="flex justify-between">
-                                    <span>Total Free Items:</span>
-                                    <span class="text-green-600">{{ freeItems.length }} Items</span>
+                                    <span>Total Free Items</span>
+                                    <span class="text-green-600 font-semibold">{{ freeItems.length }} Items</span>
                                 </div>
-                                <div class="flex justify-between border-t pt-2">
-                                    <span class="font-semibold">Total Line Items:</span>
-                                    <span class="font-semibold">{{ totalLineItems }} Items</span>
-                                </div>
-                                <div class="flex justify-between border-t pt-2">
-                                    <span class="font-semibold">Total Quantity:</span>
-                                    <span class="font-semibold">{{ cartQuantity + freeItemsQuantity }}</span>
+                                <div class="flex justify-between">
+                                    <span>Total Quantity</span>
+                                    <span class="font-semibold">{{ cartQuantity + freeItemsQuantity }} Units</span>
                                 </div>
                                 <div class="flex justify-between border-t pt-2">
                                     <span class="font-bold text-lg">Total Amount:</span>
@@ -788,7 +811,7 @@
         </Dialog>
 
         <!-- Enhanced Back Order Confirmation Dialog -->
-        <Dialog v-model:visible="showBackOrderDialog" :style="{ width: '700px' }" header="Back Order Required" :modal="true" :closable="false">
+        <Dialog v-model:visible="showBackOrderDialog" :style="{ width: '700px' }" header="Back Order Required" :modal="true" :closable="true">
             <div class="flex flex-col gap-4">
                 <div class="flex items-center gap-3">
                     <i class="pi pi-exclamation-triangle text-yellow-500 text-2xl"></i>
@@ -1271,6 +1294,25 @@ const isBackOrderScenario = (confirmResult) => {
     return hasUnfulfilled || hasFulfilled;
 };
 
+// Function to create empty order number
+const createEmptyOrderNo = async () => {
+    try {
+        console.log('Creating empty order number...');
+        const response = await api.post('order/createEmptyOrderNo-admin');
+        
+        if (response.data.status === 1) {
+            const orderNo = response.data.admin_data;
+            console.log('Generated order number:', orderNo);
+            return orderNo;
+        } else {
+            throw new Error('Failed to generate order number');
+        }
+    } catch (error) {
+        console.error('Error creating order number:', error);
+        throw new Error('Failed to create order number');
+    }
+};
+
 // Step Navigation
 const goToStep = async (step) => {
     if (step === 2) {
@@ -1476,7 +1518,6 @@ const addToCart = (tyre) => {
 };
 
 // API Calls
-// API Calls
 const fetchCustomers = async () => {
     loadingCustomers.value = true;
     try {
@@ -1613,7 +1654,7 @@ const fetchShipToAddresses = async (custAccountNo) => {
                         id: shipto.id,
                         code: shipto.custAccountNo,
                         display: `${shipto.custAccountNo} - ${shipto.companyName1 || 'Ship To Address'}`,
-                        address1: shipto.addressLine1 || '',
+                        // address1: shipto.addressLine1 || '',
                         address2: shipto.addressLine2 || '',
                         address3: shipto.addressLine3 || '',
                         address4: shipto.addressLine4 || '',
@@ -1932,11 +1973,31 @@ const placeOrder = async () => {
     processingOrder.value = true;
     showOrderDialog.value = true;
     orderStatus.value = 'processing';
-    orderMessage.value = 'Processing your order...';
+    orderMessage.value = 'Generating order number...';
     orderError.value = '';
     orderDetails.value = null;
 
     try {
+        // Step 0: Generate order number first
+        let orderNo;
+        try {
+            orderMessage.value = 'Generating order number...';
+            orderNo = await createEmptyOrderNo();
+            console.log('Generated order number for confirmation:', orderNo);
+        } catch (error) {
+            console.error('Failed to generate order number:', error);
+            orderStatus.value = 'error';
+            orderMessage.value = 'Failed to generate order number';
+            orderError.value = error.message || 'Unable to generate order number. Please try again.';
+            toast.add({
+                severity: 'error',
+                summary: 'Error',
+                detail: 'Failed to generate order number',
+                life: 2000
+            });
+            return;
+        }
+
         // Step 1: Add items to cart first
         orderMessage.value = 'Adding items to cart...';
         const addToCartResult = await addToCartAPI();
@@ -1954,11 +2015,11 @@ const placeOrder = async () => {
             // Prepare order array for confirmation
             const orderArray = addToCartResult.eten_data?.order_array || prepareOrderArrayForConfirmation();
 
-            // Step 2: Confirm the order
+            // Step 2: Confirm the order with the generated order number
             if (selectedOrderType.value === 'NORMAL') {
-                await processNormalOrder(cartRefNo, orderArray);
+                await processNormalOrder(cartRefNo, orderArray, orderNo);
             } else if (selectedOrderType.value === 'DIRECTSHIP') {
-                await processDirectShipOrder(cartRefNo, orderArray);
+                await processDirectShipOrder(cartRefNo, orderArray, orderNo);
             }
         } else {
             // Handle specific API errors
@@ -2074,23 +2135,31 @@ const prepareOrderArrayForConfirmation = () => {
     return orderArray;
 };
 
-// Process NORMAL Order
-const processNormalOrder = async (cartRefNo, orderArray) => {
+// Process NORMAL Order with order number parameter
+const processNormalOrder = async (cartRefNo, orderArray, orderNo) => {
     if (!cartRefNo) {
         throw new Error('Cart reference not found');
     }
 
-    const confirmResult = await confirmOrderAPI(cartRefNo, orderArray);
+    if (!orderNo) {
+        throw new Error('Order number is required');
+    }
+
+    const confirmResult = await confirmOrderAPI(cartRefNo, orderArray, orderNo);
     await handleOrderConfirmation(confirmResult, 'NORMAL');
 };
 
-// Process DIRECTSHIP Order
-const processDirectShipOrder = async (cartRefNo, orderArray) => {
+// Process DIRECTSHIP Order with order number parameter
+const processDirectShipOrder = async (cartRefNo, orderArray, orderNo) => {
     if (!cartRefNo) {
         throw new Error('Direct shipment cart reference not found');
     }
 
-    const confirmResult = await confirmOrderAPI(cartRefNo, orderArray);
+    if (!orderNo) {
+        throw new Error('Order number is required');
+    }
+
+    const confirmResult = await confirmOrderAPI(cartRefNo, orderArray, orderNo);
     await handleOrderConfirmation(confirmResult, 'DIRECTSHIP');
 };
 
@@ -2133,14 +2202,16 @@ const addToCartAPI = async (cartRefNo = null) => {
     return response.data;
 };
 
-// confirmOrderAPI with proper structure
-const confirmOrderAPI = async (cartRefNo, orderArray) => {
+// confirmOrderAPI with order number parameter
+const confirmOrderAPI = async (cartRefNo, orderArray, orderNo) => {
     try {
         console.log('Confirming order with array:', orderArray);
+        console.log('Order number:', orderNo);
 
         const response = await api.post(`order/confirm-order-admin/${cartRefNo}`, {
             order_array: JSON.stringify(orderArray),
-            order_remark: `Order created via admin interface - ${selectedOrderType.value}`
+            order_remark: `Order created via admin interface - ${selectedOrderType.value}`,
+            order_no: orderNo
         });
 
         return response.data;
@@ -2157,16 +2228,18 @@ const confirmOrderAPI = async (cartRefNo, orderArray) => {
     }
 };
 
-// confirmBackOrderAPI with proper structure
-const confirmBackOrderAPI = async (cartRefNo, orderArray, backorderArray) => {
+// confirmBackOrderAPI with order number parameter
+const confirmBackOrderAPI = async (cartRefNo, orderArray, backorderArray, orderNo) => {
     try {
         console.log('Confirming back order with arrays:', { orderArray, backorderArray });
+        console.log('Order number:', orderNo);
 
         // Prepare the payload exactly as shown in your API example
         const payload = {
             order_array: JSON.stringify(orderArray),
             backorder_array: JSON.stringify(backorderArray),
-            order_remark: `Order with back order created via admin interface - ${selectedOrderType.value}`
+            order_remark: `Order with back order created via admin interface - ${selectedOrderType.value}`,
+            order_no: orderNo
         };
 
         console.log('Back order payload:', payload);
@@ -2480,14 +2553,23 @@ const showManualBackOrderOption = () => {
     }
 };
 
-// Enhanced proceedWithBackOrder
+// Enhanced proceedWithBackOrder with order number generation
 const proceedWithBackOrder = async () => {
     showBackOrderDialog.value = false;
     showOrderDialog.value = true;
     orderStatus.value = 'processing';
-    orderMessage.value = 'Creating order with back order...';
+    orderMessage.value = 'Generating order number...';
 
     try {
+        // Generate order number first
+        let orderNo;
+        try {
+            orderNo = await createEmptyOrderNo();
+            console.log('Generated order number for back order:', orderNo);
+        } catch (error) {
+            throw new Error('Failed to generate order number: ' + error.message);
+        }
+
         // Prepare order array for fulfilled items
         const orderArray = fulfilledItems.value.map((item) => ({
             materialid: item.materialid,
@@ -2512,7 +2594,8 @@ const proceedWithBackOrder = async () => {
 
         console.log('Back order final payload:', {
             order_array: orderArray,
-            backorder_array: backorderArray
+            backorder_array: backorderArray,
+            order_no: orderNo
         });
 
         // Get or create cart reference
@@ -2530,7 +2613,7 @@ const proceedWithBackOrder = async () => {
             }
         }
 
-        const result = await confirmBackOrderAPI(cartRefNo, orderArray, backorderArray);
+        const result = await confirmBackOrderAPI(cartRefNo, orderArray, backorderArray, orderNo);
 
         if (result.status === 1) {
             orderStatus.value = 'success';
@@ -2573,14 +2656,23 @@ const proceedWithBackOrder = async () => {
     }
 };
 
-// proceedWithoutBackOrder with better salesprogramid handling
+// proceedWithoutBackOrder with order number generation
 const proceedWithoutBackOrder = async () => {
     showBackOrderDialog.value = false;
     showOrderDialog.value = true;
     orderStatus.value = 'processing';
-    orderMessage.value = 'Creating order without back order...';
+    orderMessage.value = 'Generating order number...';
 
     try {
+        // Generate order number first
+        let orderNo;
+        try {
+            orderNo = await createEmptyOrderNo();
+            console.log('Generated order number:', orderNo);
+        } catch (error) {
+            throw new Error('Failed to generate order number: ' + error.message);
+        }
+
         // Only process fulfilled items with salesprogramid
         const orderArray = fulfilledItems.value.map((item, index) => {
             // FIX: Ensure we get the salesprogramid properly
@@ -2622,7 +2714,7 @@ const proceedWithoutBackOrder = async () => {
             }
         }
 
-        const result = await confirmOrderAPI(cartRefNo, orderArray);
+        const result = await confirmOrderAPI(cartRefNo, orderArray, orderNo);
 
         if (result.status === 1) {
             orderStatus.value = 'success';

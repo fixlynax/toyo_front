@@ -29,7 +29,7 @@
                         <div>
                             <span class="text-sm font-medium text-black-700">Location</span>
                             <p class="text-lg font-medium">
-                                {{ orderDelList.eten_user?.addressLine1 || '' }} {{ orderDelList.eten_user?.addressLine2 || '' }} {{ orderDelList.eten_user?.addressLine3 || '' }} {{ orderDelList.eten_user?.addressLine4 || '' }},
+                                {{ orderDelList.eten_user?.addressLine2 || '' }} {{ orderDelList.eten_user?.addressLine3 || '' }} {{ orderDelList.eten_user?.addressLine4 || '' }},
                                 {{ orderDelList.eten_user?.postcode || '' }} {{ orderDelList.eten_user?.city || '' }} {{ orderDelList.eten_user?.state || '' }}
                             </p>
                         </div>
@@ -214,7 +214,7 @@
                                 </tr>
                                 <tr class="border-b even:bg-gray-50">
                                     <td class="px-4 py-2 font-medium">Address</td>
-                                    <td class="px-4 py-2 text-right font-semibold">{{ orderDelList.shipto_data?.addressLine1 || '' }} {{ orderDelList.shipto_data?.addressLine2 || '' }} {{ orderDelList.shipto_data?.addressLine3 || '' }} {{ orderDelList.shipto_data?.addressLine4 || '' }},
+                                    <td class="px-4 py-2 text-right font-semibold">{{ orderDelList.shipto_data?.addressLine2 || '' }} {{ orderDelList.shipto_data?.addressLine3 || '' }} {{ orderDelList.shipto_data?.addressLine4 || '' }},
                                 {{ orderDelList.shipto_data?.postcode || '' }} {{ orderDelList.shipto_data?.city || '' }} {{ orderDelList.shipto_data?.state || '' }}</td>
                                 </tr>
                                 <tr class="border-b even:bg-gray-50">
@@ -517,14 +517,15 @@ const saveSchedule = async () => {
         };
         const res = await api.post('update-schedule-order', payload);
         if (res.data?.status === 1) {
-            toast.add({ severity: 'success', summary: 'Updated', detail: 'Planned date updated successfully', life: 3000 });
+            toast.add({ severity: 'success', summary: 'Updated', detail: 'Planned date information updated', life: 3000 });
             InitfetchData(); // refresh table
         } else {
-            toast.add({ severity: 'error', summary: 'Error', detail: res.data?.error || 'Failed', life: 3000 });
+            toast.add({ severity: 'error', summary: 'Error', detail: res.data?.error || 'Failed to update planned information', life: 3000 });
         }
     } catch (err) {
         console.error(err);
-        toast.add({ severity: 'error', summary: 'Error', detail: 'API error', life: 3000 });
+        toast.add({ severity: 'error', summary: 'Error', detail: res.data?.error || 'Failed to update planned information', life: 3000 });
+
     } finally {
         form.value.scheduleDate = null;
         form.value.drivername = '';
@@ -557,14 +558,14 @@ const saveSchedule3 = async () => {
         };
         const res = await api.post('update-schedule-order', payload);
         if (res.data?.status === 1) {
-            toast.add({ severity: 'success', summary: 'Updated', detail: 'Planned date details updated successfully', life: 3000 });
+            toast.add({ severity: 'success', summary: 'Updated', detail: 'Planned date details information updated', life: 3000 });
             InitfetchData(); // refresh table
         } else {
-            toast.add({ severity: 'error', summary: 'Error', detail: res.data?.error || 'Failed', life: 3000 });
+            toast.add({ severity: 'error', summary: 'Error', detail: res.data?.error || 'Failed to update planned information', life: 3000 });
         }
     } catch (err) {
         console.error(err);
-        toast.add({ severity: 'error', summary: 'Error', detail: 'API error', life: 3000 });
+        toast.add({ severity: 'error', summary: 'Error', detail: res.data?.error || 'Failed to update planned information', life: 3000 });
     } finally {
         loadingUpdate3.value = false;
         form3.value.scheduleDate = null;
@@ -590,14 +591,14 @@ const saveDelivered = async () => {
         };
         const res = await api.post('update-delivered-order', payload);
         if (res.data?.status === 1) {
-            toast.add({ severity: 'success', summary: 'Updated', detail: 'Delivered date updated successfully', life: 3000 });
+            toast.add({ severity: 'success', summary: 'Updated', detail: 'Delivered date information updated', life: 3000 });
             InitfetchData(); // refresh table
         } else {
-            toast.add({ severity: 'error', summary: 'Error', detail: res.data?.error || 'Failed', life: 3000 });
+            toast.add({ severity: 'error', summary: 'Error', detail: res.data?.error || 'Failed to update delivered information', life: 3000 });
         }
     } catch (err) {
         console.error(err);
-        toast.add({ severity: 'error', summary: 'Error', detail: 'API error', life: 3000 });
+        toast.add({ severity: 'error', summary: 'Error', detail: res.data?.error || 'Failed to update delivered information', life: 3000 });
     } finally {
         openDialog2.value = false;
     }
@@ -620,7 +621,6 @@ const InitfetchData = async () => {
             form2.value.orderno = orderDelList.value.order_no;
             form3.value.orderno = orderDelList.value.order_no;
         } else {
-            console.error('API returned error or invalid data:', response.data);
             toast.add({ severity: 'error', summary: 'Error', detail: 'Failed to load data', life: 3000 });
         }
     } catch (error) {

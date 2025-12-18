@@ -82,9 +82,11 @@ const fetchClaims = async () => {
                 stage: item.stage || '-'
             }));
         } else {
+            toast.add({ severity: 'error', summary: 'Error', detail: 'Failed to load data', life: 3000 });
             listData.value = [];
         }
     } catch (error) {
+        toast.add({ severity: 'error', summary: 'Error', detail: 'Failed to load data', life: 3000 });
         console.error('Error fetching claims:', error);
         listData.value = [];
     } finally {

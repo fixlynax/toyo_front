@@ -205,11 +205,11 @@ const updateCTCDetails = async () => {
             // optionally reload data
             await fetchData();
         } else {
-            toast.add({ severity: 'error', summary: 'Error', detail: res.data?.message || 'Failed', life: 3000 });
+            toast.add({ severity: 'error', summary: 'Error', detail: res.data?.message || 'Failed to update ctc details', life: 3000 });
         }
     } catch (err) {
         console.error(err);
-        toast.add({ severity: 'error', summary: 'Error', detail: 'API error', life: 3000 });
+        toast.add({ severity: 'error', summary: 'Error', detail: res.data?.message || 'Failed to update ctc details', life: 3000 });
     } finally {
         loadingUpdate.value = false;
     }
@@ -222,7 +222,6 @@ const fetchData = async () => {
         if ( (response.data.admin_data)) {
             listData.value = response.data.admin_data;
         } else {
-            console.error('API returned error or invalid data:', response.data);
             toast.add({ severity: 'error', summary: 'Error', detail: 'Failed to load data', life: 3000 });
         }
     } catch (error) {

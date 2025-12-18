@@ -116,8 +116,10 @@ const fetchExport = async () => {
         a.click();
         document.body.removeChild(a);
         window.URL.revokeObjectURL(url);
+        toast.add({ severity: 'success', summary: 'Success', detail: 'Export completed', life: 3000 });
     } catch (err) {
-        console.error('error fetching OE Tyre export:', err);
+        console.error('error fetching Size Code export:', err);
+        toast.add({ severity: 'error', summary: 'Error', detail: 'Failed to export data', life: 3000 });
     } finally {
         loading.value = false;
     }
@@ -156,7 +158,7 @@ const handleImport = async (event) => {
             toast.add({
                 severity: 'error',
                 summary: 'Import Failed',
-                detail: response.data.error || 'Server did not confirm success',
+                detail: response.data.error || 'Failed to import data',
                 life: 3000
             });
         }
@@ -194,11 +196,12 @@ const fetchData = async () => {
                 updated_formatted: formatDate(item.updated)
             }));
         } else {
-            console.error('API returned error or invalid data:', response.data);
+            toast.add({ severity: 'error', summary: 'Error', detail: response.data.message || 'Failed to load data', life: 3000 });
             size_codes.value = [];
         }
     } catch (error) {
-        console.error('Error fetching OE list:', error);
+        console.error('Error fetching Size Code list:', error);
+        toast.add({ severity: 'error', summary: 'Error', detail: response.data.message || 'Failed to load data', life: 3000 });
         size_codes.value = [];
     } finally {
         loading.value = false;

@@ -528,30 +528,12 @@ const updateNews = async () => {
             });
             router.push(`/marketing/detailNews/${id}`);
         } else {
-            // Handle backend validation errors
-            if (response.data.error) {
-                const errors = response.data.error;
-                let errorMessage = 'Failed to update news. ';
-
-                if (typeof errors === 'object') {
-                    const errorList = Object.values(errors).flat();
-                    errorMessage += errorList.join(', ');
-                }
-
-                toast.add({
-                    severity: 'error',
-                    summary: 'Validation Error',
-                    detail: errorMessage,
-                    life: 5000
-                });
-            } else {
-                toast.add({
-                    severity: 'error',
-                    summary: 'Error',
-                    detail: 'Failed to update news.',
-                    life: 3000
-                });
-            }
+            toast.add({
+                severity: 'error',
+                summary: 'Error',
+                detail: response.data.error || 'Failed to update news.',
+                life: 3000
+            });
         }
     } catch (err) {
         console.error('Error updating news:', err);

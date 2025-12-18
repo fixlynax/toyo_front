@@ -1,6 +1,6 @@
 <template>
     <div class="card">
-        <div class="text-2xl font-bold text-gray-800 border-b pb-2 mb-6">List Customer</div>
+        <div class="text-2xl font-bold text-gray-800 border-b pb-2 mb-6">Customer List</div>
 
         <!-- Use your custom LoadingPage component for initial load -->
         <LoadingPage v-if="loading" :message="'Loading Customer List...'" :sub-message="'Fetching your Customer list'" />

@@ -282,7 +282,6 @@ const fetchData = async () => {
                 updatingSell: false
             }));
         } else {
-            console.error('API returned error or invalid data:', response.data);
             tyres.value = [];
             toast.add({ severity: 'error', summary: 'Error', detail: 'Failed to load data', life: 3000 });
         }
@@ -307,7 +306,7 @@ const handleMaterial = async () => {
             toast.add({
                 severity: 'success',
                 summary: 'Material Updated',
-                detail: `Material master updated successfully. ${updatedCount} records processed.`,
+                detail: `Material information updated successfully records processed.`,
                 life: 5000
             });
 
@@ -315,9 +314,9 @@ const handleMaterial = async () => {
             await fetchData();
         } else {
             toast.add({
-                severity: 'warn',
-                summary: 'Material Update',
-                detail: response.data.message || 'Material update completed with warnings',
+                severity: 'error',
+                summary: 'Material Error',
+                detail: response.data.message || 'Material information failed to update',
                 life: 5000
             });
         }
@@ -326,7 +325,7 @@ const handleMaterial = async () => {
         toast.add({
             severity: 'error',
             summary: 'Update Failed',
-            detail: 'Failed to update material master',
+            detail: 'Failed to update material information',
             life: 3000
         });
     } finally {
@@ -344,7 +343,7 @@ const handleStockLevel = async () => {
             toast.add({
                 severity: 'success',
                 summary: 'Stock Level Updated',
-                detail: 'Stock levels updated successfully',
+                detail: 'Stock information updated successfully',
                 life: 5000
             });
 
@@ -352,18 +351,18 @@ const handleStockLevel = async () => {
             await fetchData();
         } else {
             toast.add({
-                severity: 'warn',
-                summary: 'Stock Level Update',
-                detail: response.data.message || 'Stock level update completed with warnings',
+                severity: 'Error',
+                summary: 'Stock Error',
+                detail: response.data.message || 'Stock information failed to update',
                 life: 5000
             });
         }
     } catch (error) {
-        console.error('Error updating stock level:', error);
+        console.error('Error updating stock information:', error);
         toast.add({
             severity: 'error',
             summary: 'Update Failed',
-            detail: 'Failed to update stock levels',
+            detail: 'Failed to update stock information',
             life: 3000
         });
     } finally {
@@ -538,7 +537,7 @@ const handleImport = async (event) => {
             toast.add({
                 severity: 'error',
                 summary: 'Import Failed',
-                detail: response.data.error || 'Server did not confirm success',
+                detail: response.data.error || 'Failed to import data',
                 life: 3000
             });
         }
@@ -559,14 +558,6 @@ const handleImport = async (event) => {
 onMounted(() => {
     fetchData();
 });
-
-const getOverallStatusLabel = (deleted) => {
-    return deleted ? 'Inactive' : 'Active';
-};
-
-const getOverallStatusSeverity = (deleted) => {
-    return deleted ? 'danger' : 'success';
-};
 
 function formatDate(dateString) {
     if (!dateString) return '-';

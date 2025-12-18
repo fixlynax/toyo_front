@@ -442,7 +442,7 @@ const getCustomerName = () => {
 
 const getAddress = () => {
     const parts = [];
-    if (form.value.addressLine1) parts.push(form.value.addressLine1);
+    // if (form.value.addressLine1) parts.push(form.value.addressLine1);
     if (form.value.addressLine2) parts.push(form.value.addressLine2);
     if (form.value.addressLine3) parts.push(form.value.addressLine3);
     if (form.value.addressLine4) parts.push(form.value.addressLine4);
@@ -460,7 +460,7 @@ const getShipToCustomerName = (data) => {
 
 const getShipToAddress = (data) => {
     const parts = [];
-    if (data.addressLine1) parts.push(data.addressLine1);
+    // if (data.addressLine1) parts.push(data.addressLine1);
     if (data.addressLine2) parts.push(data.addressLine2);
     if (data.addressLine3) parts.push(data.addressLine3);
     if (data.addressLine4) parts.push(data.addressLine4);

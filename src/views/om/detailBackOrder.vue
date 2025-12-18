@@ -387,7 +387,7 @@ const formatCompanyName = (shippingDetail) => {
 const formatAddress = (shippingDetail) => {
     if (!shippingDetail) return '-';
 
-    const addressParts = [shippingDetail.addressLine1, shippingDetail.addressLine2, shippingDetail.addressLine3, shippingDetail.addressLine4, shippingDetail.postcode, shippingDetail.city, shippingDetail.state].filter(
+    const addressParts = [shippingDetail.addressLine2, shippingDetail.addressLine3, shippingDetail.addressLine4, shippingDetail.postcode, shippingDetail.city, shippingDetail.state].filter(
         (part) => part && part.trim() !== ''
     );
 

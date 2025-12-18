@@ -271,7 +271,6 @@ const fetchMemberDetail = async () => {
             };
 
         } else {
-            console.error('API returned error or invalid data:', response.data);
             showToast('error', 'Error', 'Failed to load user details');
         }
     } catch (error) {

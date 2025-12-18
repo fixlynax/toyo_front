@@ -519,28 +519,18 @@ const submitEvent = async () => {
             toast.add({
                 severity: 'error',
                 summary: 'Error',
-                detail: response.data.messages ? Object.values(response.data.messages).flat().join(', ') : 'Failed to create event',
+                detail: response.data.messages || 'Failed to create event',
                 life: 5000
             });
         }
     } catch (error) {
         console.error('API Error:', error);
-        if (error.response?.data) {
-            console.error('Error response:', error.response.data);
-            toast.add({
+        toast.add({
                 severity: 'error',
                 summary: 'Error',
-                detail: error.response.data.messages ? Object.values(error.response.data.messages).flat().join(', ') : 'Something went wrong',
+                detail: response.data.messages || 'Failed to create event',
                 life: 5000
             });
-        } else {
-            toast.add({
-                severity: 'error',
-                summary: 'Error',
-                detail: 'Network error or server unavailable',
-                life: 3000
-            });
-        }
     } finally {
         loading.value = false;
     }

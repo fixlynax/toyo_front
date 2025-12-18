@@ -378,7 +378,7 @@ const fetchMaterialExceptions = async () => {
                       id: d.id,
                       label: `${d.companyName1} ${d.companyName2 || ''}`.trim(),
                       custAccountNo: d.custAccountNo || '',
-                      address: `${d.addressLine1 || ''} ${d.addressLine2 || ''} ${d.addressLine3 || ''} ${d.addressLine4 || ''}`.trim(),
+                      address: `${d.addressLine2 || ''} ${d.addressLine3 || ''} ${d.addressLine4 || ''}`.trim(),
                       group: d.state || 'Unknown'
                   }))
                 : [];

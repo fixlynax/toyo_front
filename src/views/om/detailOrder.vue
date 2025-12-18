@@ -489,7 +489,7 @@ const formatItemNo = (itemNo) => {
 // Address methods
 const getFullAddress = (data) => {
     if (!data) return '-';
-    const addressParts = [data.addressLine1, data.addressLine2, data.addressLine3, data.addressLine4, data.city, data.state, data.postcode].filter((part) => part && part.trim() !== '');
+    const addressParts = [data.addressLine2, data.addressLine3, data.addressLine4, data.city, data.state, data.postcode].filter((part) => part && part.trim() !== '');
     return addressParts.join('') || '-';
 };
 
@@ -793,7 +793,7 @@ const fetchOrderDetail = async () => {
                 phoneNumber: etenInfo.phoneNumber || '-',
                 mobileNumber: etenInfo.mobileNumber || '-',
                 email: etenInfo.emailAddress || '-',
-                addressLine1: etenInfo.addressLine1,
+                // addressLine1: etenInfo.addressLine1,
                 addressLine2: etenInfo.addressLine2,
                 addressLine3: etenInfo.addressLine3,
                 addressLine4: etenInfo.addressLine4,
