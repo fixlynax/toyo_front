@@ -861,8 +861,8 @@
                 </div>
             </div>
             <template #footer>
-                <Button label="Proceed With Back Order" icon="pi pi-shopping-cart" @click="proceedWithBackOrder" class="p-button-primary" />
-                <Button label="Proceed Without Back Order" icon="pi pi-check" @click="proceedWithoutBackOrder" class="p-button-success" />
+                <Button label="Proceed With Back Order" icon="pi pi-shopping-cart" @click="proceedWithBackOrder" class="p-button-warning" />
+                <Button label="Proceed Without Back Order" icon="pi pi-check" @click="proceedWithoutBackOrder" class="p-button-primary" />
             </template>
         </Dialog>
 
