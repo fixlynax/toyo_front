@@ -492,11 +492,11 @@ const fetchCatalog = async () => {
                 purpose: item.purpose,
                 totalqty: item.totalqty,
                 availableqty: item.availableqty,
-                processedImageURL: null
+                processedImageURL: item.imageURL
             }));
 
-            const processedItems = await processCatalogueImages(transformedItems);
-            listPrize.value = processedItems;
+
+            listPrize.value = transformedItems;
         }
     } catch (error) {
         console.error('Error fetching catalog:', error);
@@ -515,7 +515,7 @@ const processCampaignImages = async () => {
     for (const field of imageFields) {
         if (campaign.value[field] && typeof campaign.value[field] === 'string') {
             try {
-                const blobUrl = await api.getPrivateFile(campaign.value[field]);
+                const blobUrl = (campaign.value[field]);
                 if (blobUrl) {
                     campaign.value[field] = blobUrl;
                 }
@@ -530,7 +530,7 @@ const processPrizeImages = async () => {
     for (const reward of rewards.value) {
         if (reward.selected && reward.selected.processedImageURL && typeof reward.selected.processedImageURL === 'string') {
             try {
-                const blobUrl = await api.getPrivateFile(reward.selected.processedImageURL);
+                const blobUrl = (reward.selected.processedImageURL);
                 if (blobUrl) {
                     reward.selected.processedImageURL = blobUrl;
                 }
@@ -547,7 +547,7 @@ const processCatalogueImages = async (catalogueItems) => {
     for (const item of catalogueItems) {
         if (item.imageURL && typeof item.imageURL === 'string') {
             try {
-                const blobUrl = await api.getPrivateFile(item.imageURL);
+                const blobUrl = (item.imageURL);
                 if (blobUrl) {
                     processedItems.push({
                         ...item,

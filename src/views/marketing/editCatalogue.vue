@@ -259,7 +259,7 @@ const fetchCatalogueDetails = async () => {
       // Process image URL
       if (data.imageURL) {
         try {
-          const blobUrl = await api.getPrivateFile(data.imageURL);
+          const blobUrl = (data.imageURL);
           catalogue.value.image1URL = blobUrl;
         } catch (error) {
           console.error('Error loading catalogue image:', error);

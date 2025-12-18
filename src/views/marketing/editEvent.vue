@@ -367,8 +367,6 @@ const fetchEventDetails = async () => {
                 }));
             }
 
-            // Process private images
-            await processPrivateImages();
         } else {
             toast.add({
                 severity: 'error',
@@ -390,23 +388,6 @@ const fetchEventDetails = async () => {
     }
 };
 
-// Process private images
-const processPrivateImages = async () => {
-    const imageFields = ['image1URL', 'image2URL', 'image3URL'];
-
-    for (const field of imageFields) {
-        if (event.value[field] && typeof event.value[field] === 'string') {
-            try {
-                const blobUrl = await api.getPrivateFile(event.value[field]);
-                if (blobUrl) {
-                    event.value[field] = blobUrl;
-                }
-            } catch (error) {
-                console.error(`Error loading image ${field}:`, error);
-            }
-        }
-    }
-};
 
 // Parse date string to Date object
 const parseDate = (dateString) => {

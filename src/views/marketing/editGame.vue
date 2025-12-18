@@ -258,7 +258,7 @@ const processCatalogueImages = async (catalogueItems) => {
     for (const item of catalogueItems) {
         if (item.imageURL && typeof item.imageURL === 'string') {
             try {
-                const blobUrl = await api.getPrivateFile(item.imageURL);
+                const blobUrl = (item.imageURL);
                 if (blobUrl) {
                     processedItems.push({
                         ...item,
@@ -355,7 +355,7 @@ const fetchGameDetails = async () => {
                 for (const field of imageFields) {
                     if (gameDetails[field] && typeof gameDetails[field] === 'string') {
                         try {
-                            const blobUrl = await api.getPrivateFile(gameDetails[field]);
+                            const blobUrl = (gameDetails[field]);
                             if (blobUrl) {
                                 gameDetails[field] = blobUrl;
                             }

@@ -240,17 +240,14 @@ const fetchNewsDetails = async () => {
 
             // Load images
             const imageFields = ['image1URL', 'image2URL', 'image3URL'];
+
             for (const field of imageFields) {
-                if (data[field]) {
-                    try {
-                        const imageUrl = await fetchPrivateImage(data[field]);
-                        previewImages.value[field] = imageUrl;
-                        originalImages.value[field] = data[field];
-                        currentImages.value[field] = data[field];
-                    } catch (e) {
-                        console.error(`Error loading ${field}:`, e);
-                        imageErrors.value[field.replace('URL', '')] = 'Failed to load image';
-                    }
+                const url = data[field];
+
+                if (url && url !== 'null') {
+                    previewImages.value[field] = url; // direct use
+                    originalImages.value[field] = url;
+                    currentImages.value[field] = url;
                 }
             }
         } else {
