@@ -316,7 +316,7 @@ onBeforeMount(async () => {
                 <Column header="Order No" style="min-width: 9rem" sortable>
                     <template #body="{ data }">
                         <div class="flex flex-col">
-                            <RouterLink :to="`/om/detailFailOrder/${data.orderNo}`" class="hover:underline font-bold text-primary-400">
+                            <RouterLink :to="`/om/detailFailOrder/${data.id}`" class="hover:underline font-bold text-primary-400">
                                 {{ data.orderNo || '-' }}
                             </RouterLink>
                         </div>
