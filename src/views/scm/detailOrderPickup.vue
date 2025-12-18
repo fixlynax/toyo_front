@@ -339,11 +339,11 @@ const submitPickupUpdate = async () => {
             toast.add({ severity: 'success', summary: 'Updated', detail: 'Pickup date collecter information updated', life: 3000 });
             InitfetchData(); // refresh table
         } else {
-            toast.add({ severity: 'error', summary: 'Error', detail: res.data?.message || 'Failed to update pickup information', life: 3000 });
+            toast.add({ severity: 'error', summary: 'Error', detail: res.data?.message || 'Failed to update pickup date information', life: 3000 });
         }
     } catch (err) {
         console.error(err);
-        toast.add({ severity: 'error', summary: 'Error', detail: 'API error', life: 3000 });
+        toast.add({ severity: 'error', summary: 'Error', detail: res.data?.message || 'Failed to update pickup date information', life: 3000 });
     } finally {
         handleCloseDialog();
     }
@@ -382,11 +382,11 @@ const submitPickupUpdate2 = async () => {
             toast.add({ severity: 'success', summary: 'Updated', detail: 'Pickup date information updated', life: 3000 });
             InitfetchData(); // refresh table
         } else {
-            toast.add({ severity: 'error', summary: 'Error', detail: res.data?.message || 'Failed to update pickup information', life: 3000 });
+            toast.add({ severity: 'error', summary: 'Error', detail: res.data?.message || 'Failed to update pickup date information', life: 3000 });
         }
     } catch (err) {
         console.error(err);
-        toast.add({ severity: 'error', summary: 'Error', detail: 'API error', life: 3000 });
+        toast.add({ severity: 'error', summary: 'Error', detail: res.data?.message || 'Failed to update pickup date information', life: 3000 });
     } finally {
         handleCloseDialog2();
     }
@@ -409,11 +409,11 @@ const promptUpdatePickup = (data) => {
                     toast.add({ severity: 'success', summary: 'Updated', detail: 'Pickup date information updated', life: 3000 });
                     InitfetchData(); // refresh table
                 } else {
-                    toast.add({ severity: 'error', summary: 'Error', detail: res.data?.message || 'Failed to update pickup information', life: 3000 });
+                    toast.add({ severity: 'error', summary: 'Error', detail: res.data?.message || 'Failed to update pickup date information', life: 3000 });
                 }
             } catch (err) {
                 console.error(err);
-                toast.add({ severity: 'error', summary: 'Error', detail: 'API error', life: 3000 });
+                toast.add({ severity: 'error', summary: 'Error', detail: res.data?.message || 'Failed to update pickup date information', life: 3000 });
             }
         },
         reject: () => {
