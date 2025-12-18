@@ -297,12 +297,11 @@ const downloadEmptyTemplate = async () => {
     });
   } catch (error) {
     console.error('Download Error:', error);
-    const message = error.response?.data?.message || 'Failed to download template';
     toast.add({ 
       severity: 'error', 
       summary: 'Error', 
-      detail: message, 
-      life: 4000 
+      detail: response.data.messages || 'Failed to download template', 
+      life: 3000 
     });
   } finally {
     downloadingTemplate.value = false;
@@ -404,18 +403,11 @@ const submitCatalogue = async () => {
       toast.add({ severity: 'success', summary: 'Success', detail: 'Catalogue created successfully', life: 3000 });
       router.push('/marketing/listCatalogue');
     } else {
-      const message = response.data.error
-        ? Object.values(response.data.error).flat().join(', ')
-        : 'Failed to create catalogue';
-      toast.add({ severity: 'error', summary: 'Error', detail: message, life: 4000 });
+      toast.add({ severity: 'error', summary: 'Error', detail: response.data.error || 'Failed to create catalogue', life: 3000 });
     }
   } catch (error) {
     console.error('API Error:', error);
-    const message =
-      error.response?.data?.message ||
-      Object.values(error.response?.data?.error || {}).flat().join(', ') ||
-      'Unexpected error occurred';
-    toast.add({ severity: 'error', summary: 'Error', detail: message, life: 4000 });
+      toast.add({ severity: 'error', summary: 'Error', detail: response.data.error || 'Failed to create catalogue', life: 3000 });
   } finally {
     loading.value = false;
   }

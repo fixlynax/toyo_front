@@ -442,28 +442,12 @@ const handleSave = async (isPublish) => {
         console.error('Save error:', error);
 
         // Handle specific error cases
-        if (error.response?.status === 413) {
-            toast.add({
-                severity: 'error',
-                summary: 'File Too Large',
-                detail: 'Total image size exceeds server limit',
-                life: 3000
-            });
-        } else if (error.response?.status === 422) {
-            toast.add({
-                severity: 'error',
-                summary: 'Validation Error',
-                detail: 'Please check your form inputs',
-                life: 3000
-            });
-        } else {
-            toast.add({
+        toast.add({
                 severity: 'error',
                 summary: 'Error',
-                detail: 'Something went wrong while saving news',
+                detail: response.data.error?.message || 'Failed to save news',
                 life: 3000
             });
-        }
     } finally {
         loading.value = false;
     }

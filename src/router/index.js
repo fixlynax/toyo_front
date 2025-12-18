@@ -389,18 +389,18 @@ const router = createRouter({
                     // meta: { permission: 'Campaign Management', access: 'create' },
                     props: true
                 },
-                {
-                    path: 'marketing/inviteDealer',
-                    name: 'Invite-Dealer',
-                    component: () => import('@/views/marketing/inviteDealer.vue')
-                    // meta: { permission: 'Campaign Management', access: 'create' },
-                },
-                {
-                    path: 'marketing/detailParticipant',
-                    name: 'Detail-Participant',
-                    component: () => import('@/views/marketing/detailParticipant.vue')
-                    // meta: { permission: 'Campaign Management', access: 'create' },
-                },
+                // {
+                //     path: 'marketing/inviteDealer',
+                //     name: 'Invite-Dealer',
+                //     component: () => import('@/views/marketing/inviteDealer.vue')
+                //     // meta: { permission: 'Campaign Management', access: 'create' },
+                // },
+                // {
+                //     path: 'marketing/detailParticipant',
+                //     name: 'Detail-Participant',
+                //     component: () => import('@/views/marketing/detailParticipant.vue')
+                //     // meta: { permission: 'Campaign Management', access: 'create' },
+                // },
 
                 // Games
                 {
@@ -435,7 +435,7 @@ const router = createRouter({
                     path: 'marketing/listRedemption',
                     name: 'List-Redemption',
                     component: () => import('@/views/marketing/listRedemption.vue'),
-                    meta: { permission: 'Redemption Management', access: 'view' }
+                    // meta: { permission: 'Redemption Management', access: 'view' }
                 },
                 {
                     path: 'marketing/detailRedemption/:id',
