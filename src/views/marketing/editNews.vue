@@ -58,14 +58,12 @@
                                 mode="basic"
                                 :name="`image${img}`"
                                 accept="image/*"
-                                :maxFileSize="2 * 1024 * 1024"
                                 customUpload
                                 @select="onImageSelect($event, `image${img}`)"
                                 @remove="() => removeImage(`image${img}`)"
                                 @error="onUploadError"
                                 :chooseLabel="`Change Image ${img}`"
                                 class="w-full"
-                                :invalidFileSizeMessage="`File size exceeds 2MB limit`"
                                 :invalidFileTypeMessage="`Invalid image type. Only PNG, JPG, JPEG, HEIF, HEIC are allowed`"
                             />
                             <!-- Image Preview Area -->
@@ -312,6 +310,10 @@ const validateDates = () => {
 const onImageSelect = (event, fieldName) => {
     const file = event.files[0];
     if (!file) {
+         if (file.size > 1024 * 1024) {
+            toast.add({ severity: 'warn', summary: 'File too large', detail: 'Maximum file size allowed is 1MB', life: 3000 });
+            return;
+        }
         imageErrors.value[fieldName] = 'No file selected';
         return;
     }

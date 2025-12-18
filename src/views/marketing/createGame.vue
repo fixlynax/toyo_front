@@ -66,7 +66,7 @@
 
                 <!-- Upload Images -->
                 <div>
-                    <label class="block font-bold text-gray-700 mb-2">Upload Game Images <span class="text-xs bg-blue-100 text-blue-800 px-2 py-0.5 rounded-full">1280 × 720 px (max 2MB)</span> </label>
+                    <label class="block font-bold text-gray-700 mb-2">Upload Game Images <span class="text-xs bg-blue-100 text-blue-800 px-2 py-0.5 rounded-full">1280 × 720 px (max 1MB)</span> </label>
                     <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
                         <div>
                             <FileUpload mode="basic" name="image1" accept="image/*" customUpload @select="onImageSelect($event, 'image1')" chooseLabel="Upload Image 1" class="w-full" />
@@ -235,46 +235,7 @@ const errors = ref({});
 // 🎁 Prize List Dropdown Data
 const listPrize = ref([]);
 
-// Process private images using the API method
-const processCatalogueImages = async (catalogueItems) => {
-    const processedItems = [];
 
-    for (const item of catalogueItems) {
-        if (item.imageURL && typeof item.imageURL === 'string') {
-            try {
-                const blobUrl = await api.getPrivateFile(item.imageURL);
-                if (blobUrl) {
-                    processedItems.push({
-                        ...item,
-                        processedImageURL: blobUrl
-                    });
-                } else {
-                    // Fallback to original URL if private file loading fails
-                    processedItems.push({
-                        ...item,
-                        processedImageURL: item.imageURL
-                    });
-                    console.warn('Failed to process private image, using original:', item.imageURL);
-                }
-            } catch (error) {
-                console.error(`Error loading catalogue image for ${item.prizeName}:`, error);
-                // Fallback to original URL
-                processedItems.push({
-                    ...item,
-                    processedImageURL: item.imageURL
-                });
-            }
-        } else {
-            // No image URL, use placeholder
-            processedItems.push({
-                ...item,
-                processedImageURL: 'https://via.placeholder.com/150x100?text=No+Image'
-            });
-        }
-    }
-
-    return processedItems;
-};
 
 // Image event handlers
 const onImageLoad = (event) => {
@@ -317,12 +278,11 @@ const fetchCatalog = async () => {
                 description: item.description,
                 valueAmount: item.valueAmount,
                 valueType: item.valueType,
-                processedImageURL: null // Will be populated by processCatalogueImages
+                processedImageURL: item.imageURL // Will be populated by processCatalogueImages
             }));
 
-            // Process private images
-            const processedItems = await processCatalogueImages(transformedItems);
-            listPrize.value = processedItems;
+            
+            listPrize.value = transformedItems;
 
         } else {
             toast.add({
@@ -364,6 +324,10 @@ const removePrize = (index) => {
 
 const onImageSelect = (eventFile, field) => {
     const file = eventFile.files[0];
+    if (file.size > 1024 * 1024) {
+        toast.add({ severity: 'warn', summary: 'File too large', detail: 'Maximum file size allowed is 1MB', life: 3000 });
+        return;
+    }
     if (file) {
         // Store the file for upload
         imageFiles.value[field] = file;

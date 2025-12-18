@@ -75,7 +75,7 @@
 
                 <!-- Upload Images -->
                 <div v-if="!loading">
-                    <label class="block font-bold text-gray-700 mb-2">Campaign Images <span class="text-xs bg-blue-100 text-blue-800 px-2 py-0.5 rounded-full">1280 × 720 px (max 2MB)</span> </label>
+                    <label class="block font-bold text-gray-700 mb-2">Campaign Images <span class="text-xs bg-blue-100 text-blue-800 px-2 py-0.5 rounded-full">1280 × 720 px (max 1MB)</span> </label>
                     <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
                         <div v-for="(field, idx) in ['image1Path', 'image2Path', 'image3Path']" :key="idx" class="relative">
                             <FileUpload mode="basic" :name="field" accept="image/*" customUpload @select="onImageSelect($event, field)" :chooseLabel="`Change Image ${idx + 1}`" class="w-full" />
@@ -324,14 +324,8 @@ const onImageSelect = (event, field) => {
     const file = event.files[0];
 
     if (file) {
-        // ✅ Check file size 2MB limit
-        if (file.size > 2 * 1024 * 1024) {
-            toast.add({
-                severity: 'warn',
-                summary: 'File too large',
-                detail: 'Maximum file size allowed is 2MB.',
-                life: 3000
-            });
+        if (file.size > 1024 * 1024) {
+            toast.add({ severity: 'warn', summary: 'File too large', detail: 'Maximum file size allowed is 1MB', life: 3000 });
             return;
         }
 

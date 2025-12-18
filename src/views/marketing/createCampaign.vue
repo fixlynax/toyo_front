@@ -64,7 +64,7 @@
 
                 <!-- Upload Images -->
                 <div>
-                    <label class="block font-bold text-gray-700 mb-2">Upload Campaign Images <span class="text-xs bg-blue-100 text-blue-800 px-2 py-0.5 rounded-full">1280 × 720 px (max 2MB)</span> </label>
+                    <label class="block font-bold text-gray-700 mb-2">Upload Campaign Images <span class="text-xs bg-blue-100 text-blue-800 px-2 py-0.5 rounded-full">1280 × 720 px (max 1MB)</span> </label>
                     <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
                         <div v-for="(field, idx) in ['image1', 'image2', 'image3']" :key="idx">
                             <FileUpload mode="basic" :name="field" accept="image/*" customUpload @select="onImageSelect($event, field)" :chooseLabel="`Upload Image ${idx + 1}`" class="w-full" />
@@ -311,12 +311,10 @@ const fetchCatalog = async () => {
                 purpose: item.purpose,
                 totalqty: item.totalqty,
                 availableqty: item.availableqty,
-                processedImageURL: null
+                processedImageURL: item.imageURL
             }));
 
-            // Process private images
-            const processedItems = await processCatalogueImages(transformedItems);
-            listPrize.value = processedItems;
+            listPrize.value = transformedItems;
         } else {
             toast.add({
                 severity: 'error',
@@ -336,42 +334,7 @@ const fetchCatalog = async () => {
     }
 };
 
-// Process private images using the API method
-const processCatalogueImages = async (catalogueItems) => {
-    const processedItems = [];
 
-    for (const item of catalogueItems) {
-        if (item.imageURL && typeof item.imageURL === 'string') {
-            try {
-                const blobUrl = await api.getPrivateFile(item.imageURL);
-                if (blobUrl) {
-                    processedItems.push({
-                        ...item,
-                        processedImageURL: blobUrl
-                    });
-                } else {
-                    processedItems.push({
-                        ...item,
-                        processedImageURL: item.imageURL
-                    });
-                }
-            } catch (error) {
-                console.error(`Error loading catalogue image for ${item.title}:`, error);
-                processedItems.push({
-                    ...item,
-                    processedImageURL: item.imageURL
-                });
-            }
-        } else {
-            processedItems.push({
-                ...item,
-                processedImageURL: 'https://via.placeholder.com/150x100?text=No+Image'
-            });
-        }
-    }
-
-    return processedItems;
-};
 
 // Criteria management
 const addCriteria = () =>
@@ -394,6 +357,10 @@ const removeReward = (index) => rewards.value.splice(index, 1);
 // Image upload
 const onImageSelect = (event, field) => {
     const file = event.files[0];
+        if (file.size > 1024 * 1024) {
+        toast.add({ severity: 'warn', summary: 'File too large', detail: 'Maximum file size allowed is 1MB', life: 3000 });
+        return;
+    }
     if (file) {
         // Store the file for upload
         imageFiles.value[field] = file;

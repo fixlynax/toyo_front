@@ -56,7 +56,7 @@
                     <div>
                         <label class="block font-bold text-gray-700 mb-2">
                             Upload Event Image
-                            <span class="text-xs bg-blue-100 text-blue-800 px-2 py-0.5 rounded-full">1280 × 720 px (max 2MB)</span>
+                            <span class="text-xs bg-blue-100 text-blue-800 px-2 py-0.5 rounded-full">1280 × 720 px (max 1MB)</span>
                         </label>
                         <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
                             <div v-for="n in 3" :key="n">
@@ -64,14 +64,12 @@
                                     mode="basic"
                                     :name="`image${n}`"
                                     accept="image/*"
-                                    :maxFileSize="2 * 1024 * 1024"
                                     customUpload
                                     @select="(e) => onImageSelect(e, `image${n}`)"
                                     @remove="() => onImageRemove(`image${n}`)"
                                     @error="onUploadError"
                                     :chooseLabel="`Upload Image ${n}`"
                                     class="w-full"
-                                    :invalidFileSizeMessage="`File size exceeds 2MB limit`"
                                     :invalidFileTypeMessage="`Invalid image type. Only PNG, JPG, JPEG, HEIF, HEIC are allowed`"
                                 />
                                 <!-- Image Preview with Remove Button -->
@@ -279,6 +277,10 @@ const validateImageFile = (file) => {
 // Handle image selection
 const onImageSelect = (eventFile, fieldName) => {
     const file = eventFile.files[0];
+      if (file.size > 1024 * 1024) {
+        toast.add({ severity: 'warn', summary: 'File too large', detail: 'Maximum file size allowed is 1MB', life: 3000 });
+        return;
+    }
     if (!file) {
         imageErrors.value[fieldName] = 'No file selected';
         return;
