@@ -198,7 +198,11 @@
                             <tbody>
                                 <tr class="border-b">
                                     <td class="px-4 py-2 font-medium">Order No</td>
-                                    <td class="px-4 py-2 text-right font-semibold text-primary">{{ orderData.order_no || '-' }}</td>
+                                    <td class="px-4 py-2 text-right font-bold text-primary">{{ orderData.order_no || '-' }}</td>
+                                </tr>
+                                <tr class="border-b">
+                                    <td class="px-4 py-2 font-medium">Channel</td>
+                                    <td class="px-4 py-2 text-right font-bold">{{ orderData.channel || '-' }}</td>
                                 </tr>
                                 <tr class="border-b">
                                     <td class="px-4 py-2 font-medium">Order Type</td>
