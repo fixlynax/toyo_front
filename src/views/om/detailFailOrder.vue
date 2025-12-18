@@ -54,7 +54,7 @@
 
                 <!-- Order Items Card -->
                 <div class="card flex flex-col w-full bg-white shadow-sm rounded-2xl border border-gray-100">
-                    <div class="font-bold text-xl border-b pb-3 px-4 flex items-center gap-2 text-gray-800">📦 <span>Order Items</span></div>
+                    <div class="font-bold text-2xl border-b pb-3 px-4 flex items-center text-gray-800"><span>Order Items</span></div>
                     <DataTable :value="orderItems" dataKey="materialid" class="rounded-table mt-4">
                         <Column field="itemno" header="Item No">
                             <template #body="{ data }">{{ formatItemNo(data.itemno) }}</template>
@@ -78,7 +78,7 @@
                 <!-- SAP Error Response Card (only for FAILED status with sapErrorResponse) -->
                 <div v-if="orderStatusText === 'FAILED' && orderData.sapErrorResponse" class="card flex flex-col w-full">
                     <div class="flex items-center justify-between border-b pb-3">
-                        <div class="text-xl font-bold text-black">SAP Error Details</div>
+                        <div class="text-2xl font-bold text-black">SAP Error Details</div>
                     </div>
                     <div class="mt-4 p-4 bg-red-50 rounded-lg border border-red-200">
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
