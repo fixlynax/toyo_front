@@ -201,6 +201,10 @@
                         <table class="w-full text-sm text-left text-gray-700">
                             <tbody>
                                 <tr class="border-b">
+                                    <td class="px-4 py-2 font-medium">Channel</td>
+                                    <td class="px-4 py-2 text-right font-bold">{{ order.channel }}</td>
+                                </tr>
+                                <tr class="border-b">
                                     <td class="px-4 py-2 font-medium">Customer Condition Group</td>
                                     <td class="px-4 py-2 text-right">{{ order.customerCondGrp }}</td>
                                 </tr>

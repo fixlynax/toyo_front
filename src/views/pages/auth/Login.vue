@@ -3,6 +3,7 @@ import { ref } from 'vue';
 import { useRouter } from 'vue-router';
 import api from '@/service/api';
 import { useToast } from 'primevue/usetoast';
+import { useMenuStore } from '@/store/menu';
 
 const router = useRouter();
 const toast = useToast();
@@ -32,7 +33,8 @@ const handleLogin = async () => {
                 detail: 'Welcome back! Redirecting...',
                 life: 3000
             });
-
+            const menuStore = useMenuStore();
+            await menuStore.loadMenuAndPermissions();
             setTimeout(() => router.push('/'), 1000);
         } else {
             toast.add({

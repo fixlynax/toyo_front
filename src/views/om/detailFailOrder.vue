@@ -156,7 +156,7 @@
                                         <div class="flex items-center justify-end gap-2">
                                             <span>{{ orderData.so_no || '-' }}</span>
                                             <Button
-                                                v-if="!orderData.so_no && orderStatusText === 'TIMEOUT'"
+                                                v-if="!orderData.so_no || orderStatusText === 'TIMEOUT'"
                                                 icon="pi pi-pencil"
                                                 class="p-button-text p-button-info p-button-secondary text-sm"
                                                 size="small"
