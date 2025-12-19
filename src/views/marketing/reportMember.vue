@@ -34,7 +34,7 @@
 
                     <!-- Action Buttons -->
                     <div class="flex justify-end gap-4 mt-6">
-                        <Button label="Clear Filters" class="p-button-outlined p-button-secondary" @click="clearFilters" />
+                        <Button label="Clear Filters" class="p-button-primary" @click="clearFilters" />
                         <Button label="Export Excel" icon="pi pi-file-excel" class="p-button-success" @click="exportExcel" :loading="exportLoading" :disabled="!filters.years || filters.years.length === 0" />
                     </div>
                 </div>
@@ -44,9 +44,6 @@
 
 <script setup>
 import api from '@/service/api';
-import Dropdown from 'primevue/dropdown';
-import MultiSelect from 'primevue/multiselect';
-import Checkbox from 'primevue/checkbox'; // ✅ Import Checkbox
 import Toast from 'primevue/toast';
 import { useToast } from 'primevue/usetoast';
 import { onMounted, reactive, ref, watch } from 'vue';
@@ -84,14 +81,17 @@ const exportLoading = ref(false);
 const loadingData = ref(false);
 
 // ✅ Year Options
-const yearOptions = ref([
-    { label: '2025', value: '2025' },
-    { label: '2024', value: '2024' },
-    { label: '2023', value: '2023' },
-    { label: '2022', value: '2022' },
-    { label: '2021', value: '2021' },
-    { label: '2020', value: '2020' }
-]);
+const yearOptions = ref([]);
+
+const generateYearOptions = (yearsBack = 10) => {
+    const currentYear = new Date().getFullYear();
+    const years = [];
+    for (let i = 0; i < yearsBack; i++) {
+        const year = currentYear - i;
+        years.push({ label: year.toString(), value: year.toString() });
+    }
+    yearOptions.value = years;
+};
 
 // ✅ Month Options (for birthday report)
 const monthOptions = ref([
@@ -120,41 +120,6 @@ const showToast = (severity, summary, detail, life = 3000) => {
     });
 };
 
-// ✅ Get Report Column Header
-const getReportColumnHeader = () => {
-    return selectedReport.value.columnHeader || selectedReport.value.label;
-};
-
-// ✅ Get Month Label
-const getMonthLabel = (monthValue) => {
-    const month = monthOptions.value.find((m) => m.value === monthValue);
-    return month ? month.label : 'All Months';
-};
-
-// ✅ Get Total Records
-const getTotalRecords = () => {
-    if (reportData.value.length === 0) return 0;
-    
-    const totalRow = reportData.value.find(row => 
-        row.label && row.label.toLowerCase().includes('total') ||
-        row.label && row.label.toLowerCase().includes('grand')
-    );
-    
-    if (totalRow && filters.years.length > 0) {
-        const year = filters.years[0];
-        return totalRow[year] || 0;
-    }
-    
-    if (filters.years.length > 0) {
-        const year = filters.years[0];
-        return reportData.value.reduce((sum, row) => {
-            const value = parseFloat(row[year]) || 0;
-            return sum + value;
-        }, 0);
-    }
-    
-    return 0;
-};
 
 // ✅ Clear Filters - Reset includeDeleted to false
 const clearFilters = () => {
@@ -215,7 +180,6 @@ const fetchReportData = async () => {
             return;
         }
 
-        console.log('📊 Fetching preview from:', endpoint, 'with:', requestBody);
         
         // For preview, use regular post (JSON response)
         const response = await api.post(endpoint, requestBody);
@@ -256,8 +220,6 @@ const exportExcel = async () => {
             return;
         }
 
-        console.log('📤 Exporting Excel from:', endpoint);
-        console.log('Request Body:', JSON.stringify(requestBody, null, 2));
 
         // Try with stringified years (like returnCollection does)
         const alternativeBody = {
@@ -279,14 +241,11 @@ const exportExcel = async () => {
             }
         }
 
-        console.log('Alternative Body:', alternativeBody);
-
         // Try different approaches sequentially
         let response;
         
         // Approach 1: Try with stringified years (like returnCollection)
         try {
-            console.log('Trying Approach 1: Stringified years');
             response = await api.postExtra(
                 endpoint, 
                 alternativeBody,
@@ -297,9 +256,7 @@ const exportExcel = async () => {
                     }
                 }
             );
-            console.log('Approach 1 succeeded');
         } catch (error1) {
-            console.log('Approach 1 failed, trying Approach 2...');
             
             // Approach 2: Try with original request body
             response = await api.postExtra(
@@ -312,7 +269,6 @@ const exportExcel = async () => {
                     }
                 }
             );
-            console.log('Approach 2 succeeded');
         }
 
         // Verify we got a blob response
@@ -321,11 +277,8 @@ const exportExcel = async () => {
         }
 
         // Check content type
-        const contentType = response.headers['content-type'] || 
-                           response.data.type || 
-                           'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet';
+        const contentType = response.headers['content-type'] || response.data.type || 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet';
         
-        console.log('Response Content-Type:', contentType);
         
         // Create blob
         const blob = new Blob([response.data], { type: contentType });
@@ -407,7 +360,6 @@ const exportExcel = async () => {
         }
         
         // Try one more approach with FormData
-        console.log('Trying FormData approach as last resort...');
         await tryFormDataApproach();
     } finally {
         exportLoading.value = false;
@@ -435,10 +387,7 @@ const tryFormDataApproach = async () => {
             if (filters.expiryTo !== null) {
                 formData.append('expiryTo', filters.expiryTo.toString());
             }
-        }
-        
-        console.log('Trying FormData with:', Object.fromEntries(formData.entries()));
-        
+        }        
         const response = await api.postExtra(
             endpoint,
             formData,
@@ -469,57 +418,6 @@ const tryFormDataApproach = async () => {
     }
 };
 
-// ✅ DEBUG FUNCTION: Test API directly
-const testApiManually = async () => {
-    console.log('🧪 Testing API manually...');
-    
-    try {
-        // Test with include_deleted parameter
-        const testBody = { 
-            years: ['2024'],
-            include_deleted: 1 
-        };
-        
-        // Test 1: Regular POST (should work for preview)
-        const previewResponse = await api.post('report/gender-report', testBody);
-        console.log('✅ Preview POST success:', previewResponse.data);
-        
-        // Test 2: postExtra with blob
-        console.log('Testing postExtra with blob...');
-        const exportResponse = await api.postExtra(
-            'report/gender-report',
-            testBody,
-            {
-                responseType: 'blob',
-                headers: { 'Content-Type': 'application/json' }
-            }
-        );
-        
-        console.log('✅ postExtra response received');
-        console.log('Response type:', typeof exportResponse.data);
-        console.log('Is Blob?', exportResponse.data instanceof Blob);
-        console.log('Headers:', exportResponse.headers);
-        
-        // Try to read the blob
-        if (exportResponse.data instanceof Blob) {
-            const text = await exportResponse.data.text();
-            console.log('Blob first 500 chars:', text.substring(0, 500));
-            
-            // Check if it's actually HTML error page
-            if (text.includes('<!DOCTYPE') || text.includes('<html')) {
-                console.error('⚠️ Server returned HTML error page instead of Excel');
-                showToast('error', 'Server Error', 'Server returned HTML error. Check server logs.');
-            }
-        }
-        
-    } catch (error) {
-        console.error('❌ Manual test failed:', error);
-        if (error.response) {
-            console.error('Response data:', error.response.data);
-        }
-    }
-};
-
 // Watch for filter changes
 let debounceTimer = null;
 watch(
@@ -528,36 +426,17 @@ watch(
         if (debounceTimer) {
             clearTimeout(debounceTimer);
         }
-        
-        // Uncomment if you want to auto-fetch when filters change
-        // debounceTimer = setTimeout(() => {
-        //     if (filters.years && filters.years.length > 0) {
-        //         fetchReportData();
-        //     } else {
-        //         reportData.value = [];
-        //     }
-        // }, 500);
     },
     { deep: true }
 );
 
 // Initialize
 onMounted(() => {
-    // Set default to current year
+    generateYearOptions(5); 
     const currentYear = new Date().getFullYear().toString();
     filters.years = [currentYear];
     filters.includeDeleted = false; // ✅ Default to false
     
-    // Uncomment for initial fetch
-    // setTimeout(() => {
-    //     if (filters.years.length > 0) {
-    //         fetchReportData();
-    //     }
-    // }, 300);
-    
-    // Add test button to window for debugging
-    window.testReportApi = testApiManually;
-    console.log('🔧 Debug: Call testReportApi() in console to test API manually');
 });
 </script>
 
