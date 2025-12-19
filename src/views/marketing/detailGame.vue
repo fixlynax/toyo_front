@@ -10,7 +10,7 @@
                             <RouterLink to="/marketing/listGame">
                                 <Button icon="pi pi-arrow-left" class="p-button-text p-button-secondary text-xl" size="big" v-tooltip="'Back'" />
                             </RouterLink>
-                            <div class="text-2xl font-bold text-gray-800">Game Details</div>
+                            <div class="text-2xl font-bold text-gray-800">Game Management Details</div>
                         </div>
 
                         <div class="inline-flex items-center gap-2">
@@ -59,7 +59,7 @@
                 <!-- Prize Info -->
                 <div class="card flex flex-col w-full relative">
                     <div class="flex items-center justify-between border-b pb-2 mb-2">
-                        <div class="text-2xl font-bold text-gray-800">🎁 Prize Info</div>
+                        <div class="text-2xl font-bold text-gray-800">Prize Info</div>
                     </div>
 
                     <DataTable :value="listPrize" :paginator="true" :rows="7" dataKey="id" :rowHover="true" responsiveLayout="scroll" class="text-sm">
@@ -108,7 +108,7 @@
                 <!-- Advance Info -->
                 <div class="card flex flex-col w-full">
                     <div class="flex items-center justify-between border-b pb-2 mb-2">
-                        <div class="text-2xl font-bold text-gray-800">ℹ️ Advance Info</div>
+                        <div class="text-2xl font-bold text-gray-800">Advance Info</div>
                         <Tag :value="game.status === 1 ? 'Active' : 'Inactive'" :severity="game.status === 1 ? 'success' : 'danger'" />
                     </div>
 
@@ -172,7 +172,7 @@
 
                 <div class="card flex flex-col w-full">
                     <div class="flex items-center justify-between border-b pb-3 mb-4">
-                        <div class="text-2xl font-bold text-gray-800">👨🏻‍💻 Participant List</div>
+                        <div class="text-2xl font-bold text-gray-800">Participant List</div>
                         <Button icon="pi pi-file-export" label="Export" style="width: fit-content" class="p-button-danger p-button-sm" @click="exportParticipants" />
                     </div>
                     <DataTable :value="participants" :paginator="true" :rows="7" dataKey="memberCode" :rowHover="true" responsiveLayout="scroll" class="text-sm">

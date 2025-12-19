@@ -3,7 +3,7 @@
         <div class="text-2xl font-bold text-gray-800 border-b pb-2 mb-6">Warranty Registration List</div>
 
         <!-- Show LoadingPage only during initial page load -->
-        <LoadingPage v-if="initialLoading" :message="'Loading Warrantys...'" :sub-message="'Fetching Warranty data'" />
+        <LoadingPage v-if="initialLoading" :message="'Loading Warranty Registration Details...'" :sub-message="'Fetching Warranty data'" />
 
         <!-- Show content area when not in initial loading -->
         <div v-else>

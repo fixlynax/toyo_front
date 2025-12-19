@@ -6,7 +6,7 @@
             <!-- Header -->
             <div class="card flex flex-col gap-6 w-full">
                 <!-- Title -->
-                <div class="text-2xl font-bold text-gray-800 border-b pb-2 mb-4">{{ selectedReport.label }}</div>
+                <div class="text-2xl font-bold text-gray-800 border-b pb-2 mb-4">Member Report ({{ selectedReport.label }})</div>
 
                 <!-- Filters Section -->
                 <div>

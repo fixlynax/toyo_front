@@ -22,7 +22,7 @@
                             <RouterLink to="/marketing/listNews">
                                 <Button icon="pi pi-arrow-left" class="p-button-text p-button-secondary text-xl" size="big" v-tooltip="'Back'" />
                             </RouterLink>
-                            <div class="text-2xl font-bold text-gray-800">Details News</div>
+                            <div class="text-2xl font-bold text-gray-800">News Management List</div>
                         </div>
                         <div class="inline-flex items-center gap-2">
                             <RouterLink :to="`/marketing/editNews/${news.id}`">
@@ -62,7 +62,7 @@
             <div class="md:w-1/3 flex flex-col">
                 <div class="card flex flex-col w-full">
                     <div class="flex items-center justify-between border-b pb-2 mb-2">
-                        <div class="text-2xl font-bold text-gray-800">ℹ️ Advance Info</div>
+                        <div class="text-2xl font-bold text-gray-800">Advance Info</div>
                         <Tag :value="statusLabel(news.status)" :severity="statusSeverity(news.status)" />
                     </div>
 

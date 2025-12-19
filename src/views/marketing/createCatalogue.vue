@@ -3,7 +3,12 @@
         <div class="flex flex-col md:flex-row gap-8">
             <div class="card flex flex-col gap-6 w-full">
                 <!-- Header -->
-                <div class="text-2xl font-bold text-gray-800 border-b pb-2">Create Catalogue</div>
+                 <div class="flex items-center justify-between border-b pb-2">
+                      <div class="flex items-center gap-3">
+                        <Button icon="pi pi-arrow-left" class="p-button-text p-button-secondary" @click="$router.back()" />
+                        <div class="text-2xl font-bold text-gray-800 border-b pb-2">Create Catalogue</div>
+                      </div>
+                </div>
 
                 <!-- Type & Is Birthday -->
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4 md:col-span-2">
@@ -148,8 +153,7 @@
                 </div>
 
                 <!-- Point Configuration for All Types -->
-                <div class="card flex flex-col gap-6 w-full mt-8">
-                    <div class="text-xl font-bold text-gray-800 border-b pb-2">🏆 Point Configuration *</div>
+                    <div class="text-xl font-bold text-gray-800 border-b pb-2">Point Configuration *</div>
                     <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
                         <div>
                             <label class="block font-bold text-gray-700 mb-1">Silver *</label>
@@ -167,7 +171,6 @@
                             <small v-if="errors.point3" class="text-red-500">{{ errors.point3 }}</small>
                         </div>
                     </div>
-                </div>
                 
                 <!-- Submit Buttons for non-survey items -->
                 <div  class="flex justify-end mt-8 gap-2">

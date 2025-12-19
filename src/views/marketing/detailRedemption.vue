@@ -11,7 +11,7 @@
                             <RouterLink to="/marketing/listRedemption"> 
                                 <Button icon="pi pi-arrow-left font-bold" class="p-button-text p-button-secondary text-xl" size="big" v-tooltip="'Back'" /> 
                             </RouterLink>
-                            <div class="text-2xl font-bold text-gray-800">🎁 Details Redemption</div>
+                            <div class="text-2xl font-bold text-gray-800">Redemption Management Details</div>
                         </div>
 
                         <!-- Right Section: Edit & Delete Buttons -->
@@ -53,7 +53,7 @@
                 <div class="card flex flex-col gap-6 w-full" v-if="!loading">
                     <!-- Header Section -->
                     <div class="flex items-center justify-between border-b pb-2">
-                        <h2 class="text-2xl font-bold text-gray-800">🚚 Shipping Details</h2>
+                        <h2 class="text-2xl font-bold text-gray-800">Shipping Details</h2>
                     </div>
 
                     <!-- Shipping Info -->
