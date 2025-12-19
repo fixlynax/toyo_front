@@ -167,7 +167,7 @@ onMounted(fetchClaims);
 
 <template>
     <div class="card">
-        <div class="text-2xl font-bold text-gray-800 border-b pb-2">List Claim</div>
+        <div class="text-2xl font-bold text-gray-800 border-b pb-2">Warranty Claim List</div>
 
         <!-- Custom Tabs with Counts -->
         <div class="border-gray-200 mb-4">
