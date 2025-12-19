@@ -189,9 +189,9 @@ const fetchNewsDetails = async () => {
             news.value = response.data.admin_data;
 
             // Fetch images requiring authentication
-            imageSrcs.value.image1 = await fetchPrivateImage(news.value.image1URL);
-            imageSrcs.value.image2 = await fetchPrivateImage(news.value.image2URL);
-            imageSrcs.value.image3 = await fetchPrivateImage(news.value.image3URL);
+            imageSrcs.value.image1 = (news.value.image1URL);
+            imageSrcs.value.image2 = (news.value.image2URL);
+            imageSrcs.value.image3 = (news.value.image3URL);
         } else {
             error.value = 'News not found.';
         }
@@ -252,16 +252,7 @@ const statusSeverity = (status) => {
     return 'secondary';
 };
 
-// Function to fetch private images
-const fetchPrivateImage = async (url) => {
-    if (!url) return null;
-    try {
-        return await api.getPrivateFile(url);
-    } catch (error) {
-        console.error('Error loading image:', error);
-        return null;
-    }
-};
+
 
 // Confirm before delete
 const confirmDelete = () => {

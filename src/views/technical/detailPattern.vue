@@ -18,8 +18,8 @@
                         <div class="pb-3">
                             <p class="text-sm font-bold text-gray-700 mb-2">Pattern Image</p>
                             <img 
-                            v-if="patterns && patterns.processedImageURL"
-                            :src="getImagePath(patterns.processedImageURL)" 
+                            v-if="patterns && patterns.image_url"
+                            :src="(patterns.image_url)" 
                             alt="Pattern Image" 
                             class="rounded-lg shadow-md object-cover h-60" 
                             />
@@ -93,13 +93,11 @@
                             mode="basic" 
                             name="image_url" 
                             accept="image/*" 
-                            :maxFileSize="10000000"
                             :auto="true"
                             :chooseLabel="formHolder.image_url ? 'Change Image' : 'Upload Image'" 
                             class="w-full" 
                             @select="onImageSelect"
                             @remove="removeImage"
-                            :invalidFileSizeMessage="'File size should be less than 10MB'"
                         />
                         <small v-if="errors.image" class="text-red-500">{{ errors.image }}</small>
 
@@ -195,8 +193,9 @@ const onImageSelect = (event) => {
     }
 
     // Validate file size (10MB limit)
-    if (file.size > 10 * 1024 * 1024) {
-        errors.value.image = 'File size must be less than 10MB';
+    if (file.size > 1024 * 1024) {
+        errors.value.image = 'File size must be less than 1MB';
+        toast.add({ severity: 'warn', summary: 'File too large', detail: 'Maximum file size allowed is 1MB', life: 3000 });
         return;
     }
 
@@ -289,33 +288,6 @@ const deletePattern = async () => {
     }
 };
 
-const processCatalogueImages = async (item) => {
-    if (item.image_url && typeof item.image_url === 'string') {
-        try {
-            const blobUrl = await api.getPrivateFile(item.image_url); // call your function
-            return {
-                ...item,
-                processedImageURL: blobUrl || `/${item.image_url}` // fallback to public path
-            };
-        } catch (error) {
-            console.error(`Error loading catalogue image for ${item.pattern_name}:`, error);
-            return {
-                ...item,
-                processedImageURL: `/${item.image_url}`
-            };
-        }
-    } else {
-        return {
-            ...item,
-            processedImageURL: ''
-        };
-    }
-};
-
-const getImagePath = (path) => {
-    if (!path) return '';
-    return path.replace(/^public\//, '/');
-};
 const fetchdata = async () => {
     try {
         loading.value = true;
@@ -323,9 +295,7 @@ const fetchdata = async () => {
         const response = await api.get(`patternDetail/${id}`);
 
         if (response.data.status === 1 && (response.data.material_pattern)) {
-
-            const processedItem = await processCatalogueImages(response.data.material_pattern);
-            patterns.value = processedItem;
+            patterns.value = response.data.material_pattern;
         } else {
             toast.add({ severity: 'error', summary: 'Error', detail: 'Failed to load data', life: 3000 });
             patterns.value = [];

@@ -363,8 +363,7 @@ const fetchEventDetails = async () => {
                 participants.value = (eventData.participants || []).filter((p) => p && typeof p === 'object');
             }
 
-            // Process private images
-            await processPrivateImages();
+
         } else {
             toast.add({
                 severity: 'error',
@@ -386,24 +385,6 @@ const fetchEventDetails = async () => {
     }
 };
 
-// Process private images using the API method
-const processPrivateImages = async () => {
-    const imageFields = ['image1URL', 'image2URL', 'image3URL'];
-
-    for (const field of imageFields) {
-        if (event.value[field] && typeof event.value[field] === 'string') {
-            try {
-                const blobUrl = await api.getPrivateFile(event.value[field]);
-                if (blobUrl) {
-                    event.value[field] = blobUrl;
-                }
-            } catch (error) {
-                console.error(`Error loading image ${field}:`, error);
-                // Keep the original URL if private file loading fails
-            }
-        }
-    }
-};
 
 onMounted(() => {
     fetchEventDetails();

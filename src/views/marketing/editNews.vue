@@ -50,7 +50,7 @@
                 <div>
                     <label class="block font-bold text-gray-700 mb-2">
                         News Images
-                        <span class="text-xs bg-blue-100 text-blue-800 px-2 py-0.5 rounded-full">1280 × 720 px (max 2MB)</span>
+                        <span class="text-xs bg-blue-100 text-blue-800 px-2 py-0.5 rounded-full">1280 × 720 px (max 1MB)</span>
                     </label>
                     <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
                         <div v-for="(img, index) in [1, 2, 3]" :key="index" class="relative">
@@ -58,14 +58,12 @@
                                 mode="basic"
                                 :name="`image${img}`"
                                 accept="image/*"
-                                :maxFileSize="2 * 1024 * 1024"
                                 customUpload
                                 @select="onImageSelect($event, `image${img}`)"
                                 @remove="() => removeImage(`image${img}`)"
                                 @error="onUploadError"
                                 :chooseLabel="`Change Image ${img}`"
                                 class="w-full"
-                                :invalidFileSizeMessage="`File size exceeds 2MB limit`"
                                 :invalidFileTypeMessage="`Invalid image type. Only PNG, JPG, JPEG, HEIF, HEIC are allowed`"
                             />
                             <!-- Image Preview Area -->
@@ -193,28 +191,7 @@ const parseDMY = (str) => {
     return new Date(year, month - 1, day);
 };
 
-// Validate image file
-const validateImageFile = (file) => {
-    // Check file size (2MB limit)
-    const maxSize = 2 * 1024 * 1024; // 2MB in bytes
-    if (file.size > maxSize) {
-        return {
-            valid: false,
-            message: `File size exceeds 2MB limit. Your file is ${formatFileSize(file.size)}`
-        };
-    }
 
-    // Check file type
-    const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/heif', 'image/heic'];
-    if (!allowedTypes.includes(file.type.toLowerCase())) {
-        return {
-            valid: false,
-            message: 'Invalid image type. Only PNG, JPG, JPEG, HEIF, HEIC are allowed'
-        };
-    }
-
-    return { valid: true, message: '' };
-};
 
 // Format file size for display
 const formatFileSize = (bytes) => {
@@ -240,17 +217,14 @@ const fetchNewsDetails = async () => {
 
             // Load images
             const imageFields = ['image1URL', 'image2URL', 'image3URL'];
+
             for (const field of imageFields) {
-                if (data[field]) {
-                    try {
-                        const imageUrl = await fetchPrivateImage(data[field]);
-                        previewImages.value[field] = imageUrl;
-                        originalImages.value[field] = data[field];
-                        currentImages.value[field] = data[field];
-                    } catch (e) {
-                        console.error(`Error loading ${field}:`, e);
-                        imageErrors.value[field.replace('URL', '')] = 'Failed to load image';
-                    }
+                const url = data[field];
+
+                if (url && url !== 'null') {
+                    previewImages.value[field] = url; // direct use
+                    originalImages.value[field] = url;
+                    currentImages.value[field] = url;
                 }
             }
         } else {
@@ -314,23 +288,16 @@ const validateDates = () => {
 
 const onImageSelect = (event, fieldName) => {
     const file = event.files[0];
-    if (!file) {
+    if (!file) {         
         imageErrors.value[fieldName] = 'No file selected';
         return;
     }
 
-    // Validate the image
-    const validation = validateImageFile(file);
-    if (!validation.valid) {
-        imageErrors.value[fieldName] = validation.message;
-        toast.add({
-            severity: 'error',
-            summary: 'Invalid Image',
-            detail: validation.message,
-            life: 3000
-        });
-        return;
-    }
+    if (file.size > 1024 * 1024) {
+            toast.add({ severity: 'warn', summary: 'File too large', detail: 'Maximum file size allowed is 1MB', life: 3000 });
+            return;
+        }
+   
 
     // Clear any previous errors
     imageErrors.value[fieldName] = '';
@@ -456,17 +423,10 @@ const validateForm = () => {
         const file = imageFiles.value[field];
 
         if (file) {
-            const validation = validateImageFile(file);
-            if (!validation.valid) {
-                imageErrors.value[field] = validation.message;
-                toast.add({
-                    severity: 'error',
-                    summary: 'Invalid Image',
-                    detail: `${field}: ${validation.message}`,
-                    life: 3000
-                });
-                return false;
-            }
+            if (file.size > 1024 * 1024) {
+            toast.add({ severity: 'warn', summary: 'File too large', detail: 'Maximum file size allowed is 1MB', life: 3000 });
+            return;
+        }
         }
     }
 

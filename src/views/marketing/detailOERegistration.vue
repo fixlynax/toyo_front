@@ -199,8 +199,7 @@ const fetchWarrantyDetails = async () => {
         if (response.data.status === 1) {
             Warranty.value = response.data.admin_data;
 
-            // Process private images
-            await processPrivateImages();
+
         } else {
             toast.add({
                 severity: 'error',
@@ -222,26 +221,7 @@ const fetchWarrantyDetails = async () => {
     }
 };
 
-// Process private images using the API method
-const processPrivateImages = async () => {
-    const imageFields = ['mileageImage', 'registrationCard'];
 
-    for (const field of imageFields) {
-        const currentUrl = Warranty.value.warranty_info[field];
-        if (currentUrl && typeof currentUrl === 'string') {
-            try {
-                const blobUrl = await api.getPrivateFile(currentUrl);
-                if (blobUrl) {
-                    Warranty.value.warranty_info[field] = blobUrl; // <-- update the correct place
-                }
-            } catch (error) {
-                console.error(`Error loading image ${field}:`, error);
-            }
-        }
-    }
-
-    console.log('Processed Warranty with images:', { ...Warranty.value });
-};
 
 function formatDate(dateString) {
     if (!dateString) return '';

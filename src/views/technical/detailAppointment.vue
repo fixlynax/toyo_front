@@ -38,7 +38,7 @@ const fetchAppointmentDetail = async () => {
 };
 
 // Load submitted photos using the same method as reference code
-const loadSubmittedPhotos = async () => {
+const loadSubmittedPhotos = () => {
     const photos = [];
     const photoTypes = [
         { key: 'mileageFileURL', label: 'Mileage' },
@@ -48,35 +48,22 @@ const loadSubmittedPhotos = async () => {
     ];
 
     for (const photoType of photoTypes) {
-        const url = appointment.value.submitted_photos[photoType.key];
-        if (url && url !== 'null' && url !== null) {
-            try {
-                const imageSrc = await api.getPrivateFile(url);
+        const url = appointment.value?.submitted_photos?.[photoType.key];
 
-                photos.push({
-                    type: photoType.key,
-                    label: photoType.label,
-                    url: url,
-                    imageSrc: imageSrc,
-                    alt: `${photoType.label} Photo`
-                });
-
-            } catch (error) {
-                console.error(`❌ Error loading ${photoType.label} photo:`, error);
-                // Create fallback image
-                photos.push({
-                    type: photoType.key,
-                    label: photoType.label,
-                    url: url,
-                    imageSrc: createFallbackImage(photoType.label),
-                    alt: `${photoType.label} Photo - Failed to load`
-                });
-            }
+        if (url && url !== 'null') {
+            photos.push({
+                type: photoType.key,
+                label: photoType.label,
+                url: url,
+                imageSrc: url, // ✅ use directly
+                alt: `${photoType.label} Photo`
+            });
         }
     }
 
     submittedPhotos.value = photos;
 };
+
 
 // Create a blank image data URL for fallback
 const createFallbackImage = (text) => {

@@ -339,7 +339,7 @@
                     <div class="flex justify-end mt-8">
                         <div class="flex justify-end">
                             <!-- In template, bind to a local ref instead -->
-                            <ToggleButton v-model="localStatus" @change="toggleCatalogStatus" onLabel="Active" offLabel="Inactive" onIcon="pi pi-check" offIcon="pi pi-times" class="w-30" />
+                            <ToggleButton @change="toggleCatalogStatus" onLabel="Active" offLabel="Inactive" onIcon="pi pi-check" offIcon="pi pi-times" class="w-30" />
                         </div>
                     </div>
                 </div>
@@ -491,14 +491,14 @@ const fetchCatalogueDetails = async () => {
             // Process image URL
             if (catalogue.value.imageURL) {
                 try {
-                    const blobUrl = await api.getPrivateFile(catalogue.value.imageURL);
+                    const blobUrl = (catalogue.value.imageURL);
                     processedImageURL.value = blobUrl;
                 } catch (error) {
                     console.error('Error loading catalogue image:', error);
                     processedImageURL.value = catalogue.value.imageURL;
                 }
             } else {
-                processedImageURL.value = 'https://via.placeholder.com/300x200?text=No+Image';
+                processedImageURL.value ;
             }
 
             // Initialize point values for dialog
@@ -1098,26 +1098,26 @@ const confirmSetPoint = async () => {
     }
 };
 
-const toggleStatus = async (newStatus) => {
-    try {
-        // API call to update status would go here
-        catalogue.value.status = newStatus;
+// const toggleStatus = async (newStatus) => {
+//     try {
+//         // API call to update status would go here
+//         catalogue.value.status = newStatus;
 
-        toast.add({
-            severity: 'success',
-            summary: 'Success',
-            detail: `Catalogue ${newStatus === 1 ? 'activated' : 'inactivated'} successfully`,
-            life: 3000
-        });
-    } catch (error) {
-        toast.add({
-            severity: 'error',
-            summary: 'Error',
-            detail: 'Failed to update catalogue status',
-            life: 3000
-        });
-    }
-};
+//         toast.add({
+//             severity: 'success',
+//             summary: 'Success',
+//             detail: `Catalogue ${newStatus === 1 ? 'activated' : 'inactivated'} successfully`,
+//             life: 3000
+//         });
+//     } catch (error) {
+//         toast.add({
+//             severity: 'error',
+//             summary: 'Error',
+//             detail: 'Failed to update catalogue status',
+//             life: 3000
+//         });
+//     }
+// };
 </script>
 
 <style scoped>

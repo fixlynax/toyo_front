@@ -114,7 +114,6 @@
                             <div class="bg-gray-100 px-4 py-2 border-b">
                                 <div class="flex justify-between items-center">
                                     <h5 class="font-semibold text-gray-700">{{ groupName }}</h5>
-                                    <!-- <span class="text-xs text-gray-500 bg-white px-2 py-1 rounded"> {{ groupPermissions.length }} permission(s) </span> -->
                                     <div class="flex gap-3 text-sm">
                                         <span class="flex items-center">
                                             <span class="w-3 h-3 bg-blue-500 rounded-full mr-1"></span>
@@ -313,20 +312,8 @@ const editForm = ref({
 // Permission states
 const editPermissionState = reactive({});
 
-// Function group mapping
-const functionGroupMap = {
-    1: 'Marketing',
-    2: 'OM',
-    3: 'IT & Administration',
-    4: 'Credit Control',
-    5: 'SCM',
-    6: 'OM Report',
-    7: 'Technical',
-    9: 'Members',
-    10: 'Member Reports',
-    13: 'Product',
-    15: 'Maintenance'
-};
+// Function group mapping - Now fully dynamic from API
+const functionGroupMap = ref({});
 
 // Permission groups (will be populated from API)
 const permissionGroups = ref([]);
@@ -361,10 +348,24 @@ const groupPermissionsByCategory = (permissions) => {
     permissions.forEach((permission) => {
         // Try to get the group name from function_group_id in permission data
         let groupName = 'General';
-        if (permission.function_group_id && functionGroupMap[permission.function_group_id]) {
-            groupName = functionGroupMap[permission.function_group_id];
-        } else if (permission.function_group_name) {
+        
+        // Check if permission has function_group_id and it exists in functionGroupMap
+        if (permission.function_group_id && functionGroupMap.value[permission.function_group_id]) {
+            groupName = functionGroupMap.value[permission.function_group_id];
+        } 
+        // Fallback to checking function_group_name
+        else if (permission.function_group_name) {
             groupName = permission.function_group_name;
+        }
+        // If we have a function_id, look it up in permissionGroups
+        else if (permission.function_id) {
+            // Find which group this function belongs to
+            const foundGroup = permissionGroups.value.find(group => 
+                group.functions.some(func => func.id === permission.function_id)
+            );
+            if (foundGroup) {
+                groupName = foundGroup.group_name;
+            }
         }
 
         if (!grouped[groupName]) {
@@ -385,40 +386,65 @@ const groupPermissionsByCategory = (permissions) => {
     return sortedGroups;
 };
 
-// Fetch permissions from API
+// Fetch permissions from API - UPDATED TO USE NEW API
 const fetchPermissions = async () => {
     try {
-        const response = await api.get('admin/list-function');
+        // Use the new API endpoint for function groups with functions
+        const response = await api.get('admin/list-function-group');
 
         if (response.data && Array.isArray(response.data)) {
-            const functions = response.data;
+            // Build functionGroupMap dynamically from API response
+            const newFunctionGroupMap = {};
+            const newPermissionGroups = [];
 
-            // Group functions by function_group_id
-            const groupedFunctions = {};
-
-            functions.forEach((func) => {
-                if (!groupedFunctions[func.function_group_id]) {
-                    groupedFunctions[func.function_group_id] = [];
+            response.data.forEach(group => {
+                // Only include groups with status = 1 (active)
+                if (group.status === 1) {
+                    // Add to functionGroupMap
+                    newFunctionGroupMap[group.id] = group.name;
+                    
+                    // Add to permissionGroups for edit dialog
+                    newPermissionGroups.push({
+                        group_id: group.id,
+                        group_name: group.name,
+                        functions: group.functions
+                            ? group.functions
+                                .filter(func => func.status === 1) // Only active functions
+                                .map(func => ({
+                                    id: func.id,
+                                    name: func.name,
+                                    description: func.description || '',
+                                    sort: func.sort || 0,
+                                    function_group_id: func.function_group_id || group.id,
+                                    code: func.code,
+                                    icon: func.icon,
+                                    is_sales_person: func.is_sales_person || 0
+                                }))
+                                .sort((a, b) => a.sort - b.sort) // Sort by sort order
+                            : []
+                    });
                 }
-                groupedFunctions[func.function_group_id].push(func);
             });
 
-            // Convert to permissionGroups format
-            permissionGroups.value = Object.entries(groupedFunctions).map(([groupId, functions]) => ({
-                group_id: parseInt(groupId),
-                group_name: functionGroupMap[groupId] || `Group ${groupId}`,
-                functions: functions.sort((a, b) => a.sort - b.sort)
-            }));
-
-            // Sort groups by group_id for consistent display
-            permissionGroups.value.sort((a, b) => a.group_id - b.group_id);
+            // Update functionGroupMap ref with data from API
+            functionGroupMap.value = newFunctionGroupMap;
+            
+            // Set permissionGroups, filtering out empty groups
+            permissionGroups.value = newPermissionGroups.filter(group => group.functions.length > 0);
+            
+            // Sort groups by sort order from API
+            permissionGroups.value.sort((a, b) => {
+                const groupA = response.data.find(g => g.id === a.group_id);
+                const groupB = response.data.find(g => g.id === b.group_id);
+                return (groupA?.sort || 0) - (groupB?.sort || 0);
+            });
         }
     } catch (err) {
-        console.error('Error fetching permissions from admin/list-function:', err);
+        console.error('Error fetching function groups from admin/list-function-group:', err);
         toast.add({
             severity: 'error',
             summary: 'Error',
-            detail: 'Failed to load permissions',
+            detail: 'Failed to load function groups',
             life: 4000
         });
     }

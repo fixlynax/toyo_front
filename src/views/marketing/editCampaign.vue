@@ -75,7 +75,7 @@
 
                 <!-- Upload Images -->
                 <div v-if="!loading">
-                    <label class="block font-bold text-gray-700 mb-2">Campaign Images <span class="text-xs bg-blue-100 text-blue-800 px-2 py-0.5 rounded-full">1280 × 720 px (max 2MB)</span> </label>
+                    <label class="block font-bold text-gray-700 mb-2">Campaign Images <span class="text-xs bg-blue-100 text-blue-800 px-2 py-0.5 rounded-full">1280 × 720 px (max 1MB)</span> </label>
                     <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
                         <div v-for="(field, idx) in ['image1Path', 'image2Path', 'image3Path']" :key="idx" class="relative">
                             <FileUpload mode="basic" :name="field" accept="image/*" customUpload @select="onImageSelect($event, field)" :chooseLabel="`Change Image ${idx + 1}`" class="w-full" />
@@ -324,14 +324,8 @@ const onImageSelect = (event, field) => {
     const file = event.files[0];
 
     if (file) {
-        // ✅ Check file size 2MB limit
-        if (file.size > 2 * 1024 * 1024) {
-            toast.add({
-                severity: 'warn',
-                summary: 'File too large',
-                detail: 'Maximum file size allowed is 2MB.',
-                life: 3000
-            });
+        if (file.size > 1024 * 1024) {
+            toast.add({ severity: 'warn', summary: 'File too large', detail: 'Maximum file size allowed is 1MB', life: 3000 });
             return;
         }
 
@@ -492,11 +486,11 @@ const fetchCatalog = async () => {
                 purpose: item.purpose,
                 totalqty: item.totalqty,
                 availableqty: item.availableqty,
-                processedImageURL: null
+                processedImageURL: item.imageURL
             }));
 
-            const processedItems = await processCatalogueImages(transformedItems);
-            listPrize.value = processedItems;
+
+            listPrize.value = transformedItems;
         }
     } catch (error) {
         console.error('Error fetching catalog:', error);
@@ -515,7 +509,7 @@ const processCampaignImages = async () => {
     for (const field of imageFields) {
         if (campaign.value[field] && typeof campaign.value[field] === 'string') {
             try {
-                const blobUrl = await api.getPrivateFile(campaign.value[field]);
+                const blobUrl = (campaign.value[field]);
                 if (blobUrl) {
                     campaign.value[field] = blobUrl;
                 }
@@ -530,7 +524,7 @@ const processPrizeImages = async () => {
     for (const reward of rewards.value) {
         if (reward.selected && reward.selected.processedImageURL && typeof reward.selected.processedImageURL === 'string') {
             try {
-                const blobUrl = await api.getPrivateFile(reward.selected.processedImageURL);
+                const blobUrl = (reward.selected.processedImageURL);
                 if (blobUrl) {
                     reward.selected.processedImageURL = blobUrl;
                 }
@@ -547,7 +541,7 @@ const processCatalogueImages = async (catalogueItems) => {
     for (const item of catalogueItems) {
         if (item.imageURL && typeof item.imageURL === 'string') {
             try {
-                const blobUrl = await api.getPrivateFile(item.imageURL);
+                const blobUrl = (item.imageURL);
                 if (blobUrl) {
                     processedItems.push({
                         ...item,
