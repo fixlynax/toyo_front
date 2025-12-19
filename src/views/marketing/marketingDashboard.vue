@@ -1,5 +1,5 @@
 <template>
-    <div class="p-6 bg-gray-50 min-h-screen">
+    <div class="p-6 bg-gray-50 ">
         <!-- Header -->
         <div class="mb-6">
             <h1 class="text-2xl font-bold text-gray-800 mb-2">Marketing Dashboard</h1>
@@ -23,7 +23,6 @@
                         <h3 class="text-gray-500 text-sm font-medium mb-2">Total TC Users</h3>
                         <p class="text-3xl font-bold text-gray-800 mb-2">{{ apiData.total_tc_users }}</p>
                         <div class="text-xs text-gray-500">
-                            <p>0 submitted - 0 pending</p>
                         </div>
                     </div>
                 </div>
@@ -34,7 +33,6 @@
                         <h3 class="text-gray-500 text-sm font-medium mb-2">Total Campaigns</h3>
                         <p class="text-3xl font-bold text-gray-800 mb-2">{{ apiData.total_campaign }}</p>
                         <div class="text-xs text-gray-500">
-                            <p>0 submitted - 0 pending</p>
                         </div>
                     </div>
                 </div>
@@ -45,7 +43,6 @@
                         <h3 class="text-gray-500 text-sm font-medium mb-2">Total Redemptions</h3>
                         <p class="text-3xl font-bold text-gray-800 mb-2">{{ apiData.total_redemption }}</p>
                         <div class="text-xs text-gray-500">
-                            <p>0 submitted - 0 pending</p>
                         </div>
                     </div>
                 </div>
@@ -56,7 +53,6 @@
                         <h3 class="text-gray-500 text-sm font-medium mb-2">Games Played</h3>
                         <p class="text-3xl font-bold text-gray-800 mb-2">{{ apiData.total_game_played }}</p>
                         <div class="text-xs text-gray-500">
-                            <p>0 submitted - 0 pending</p>
                         </div>
                     </div>
                 </div>
