@@ -1,6 +1,6 @@
 <template>
     <div class="card">
-        <div class="text-2xl font-bold text-gray-800 border-b pb-2">List Return Order</div>
+        <div class="text-2xl font-bold text-gray-800 border-b pb-2">Return Order Collection List</div>
         <LoadingPage v-if="loading" message="Loading Return Order Details..." />
         <div v-else>
             <TabMenu :model="statusTabs" v-model:activeIndex="activeTabIndex" class="mb-4" />

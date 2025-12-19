@@ -3,7 +3,7 @@
         <div class="flex flex-col md:flex-row gap-8">
             <div class="card flex flex-col gap-6 w-full">
                 <!-- Header -->
-                <div class="text-2xl font-bold text-gray-800 border-b pb-2">Create Logistic</div>
+                <div class="text-2xl font-bold text-gray-800 border-b pb-2">Create 3PL Account</div>
                 <!-- Contact Details -->
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>

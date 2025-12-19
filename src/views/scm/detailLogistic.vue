@@ -9,7 +9,7 @@
           <div class="flex items-center justify-between w-full">
             <div class="flex items-center gap-3">
                 <Button icon="pi pi-arrow-left" class="p-button-text p-button-secondary" @click="$router.back()" />
-                <div class="text-2xl font-bold text-gray-800">Logistic Details</div>
+                <div class="text-2xl font-bold text-gray-800">3PL Account Details</div>
             </div>
            <RouterLink v-if="canUpdate" :to="`/scm/editLogistic/${logisticList.id}`">
                 <Button type="button" label="Edit" />
