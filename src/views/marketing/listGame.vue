@@ -1,9 +1,9 @@
 <template>
     <div class="card">
-        <div class="text-2xl font-bold text-gray-800 border-b pb-2 mb-6">List Game</div>
+        <div class="text-2xl font-bold text-gray-800 border-b pb-2 mb-6">Game Management List</div>
 
         <!-- Show LoadingPage only during initial page load -->
-        <LoadingPage v-if="initialLoading" :message="'Loading Games...'" :sub-message="'Fetching game data'" />
+        <LoadingPage v-if="initialLoading" :message="'Loading Game Management Details...'" :sub-message="'Fetching game data'" />
 
         <!-- Show content area when not in initial loading -->
         <div v-else>

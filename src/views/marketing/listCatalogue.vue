@@ -2,7 +2,7 @@
     <Fluid>
         <div class="card">
             <!-- Page Title -->
-            <div class="text-2xl font-bold text-gray-800 border-b pb-2 mb-4">List Catalogue</div>
+            <div class="text-2xl font-bold text-gray-800 border-b pb-2 mb-4">Reward Catalogue List</div>
 
             <div class="flex items-center justify-between gap-4 w-full flex-wrap mb-6">
                 <!-- Left: Search Field + Cog Button -->

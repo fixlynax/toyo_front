@@ -9,12 +9,10 @@ export const useMenuStore = defineStore('menu', {
     role: '',
     isManager: 0,
     forceReset : 0,
-    hasFetched: false, // NEW FLAG
   }),
   actions: {
     // Fetch menu and permissions from API
     async loadMenuAndPermissions() {
-      if (this.hasFetched) return;
       const { adminName, menu, permissions, role, isManager, forceReset } = await fetchNavigation();
       this.adminName = adminName;
       this.menu = menu;
@@ -22,7 +20,6 @@ export const useMenuStore = defineStore('menu', {
       this.role = role;
       this.isManager = isManager;
       this.forceReset = forceReset;
-      this.hasFetched = true;
     },
     // Can the user view this function?
     canView(funcName) {
@@ -45,7 +42,6 @@ export const useMenuStore = defineStore('menu', {
       this.role = '';
       this.isManager = 0;
       this.forceReset = 0;
-      this.hasFetched = false;
     }
   },
    persist: true 

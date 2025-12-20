@@ -1,6 +1,6 @@
 <template>
     <div class="card">
-        <div class="text-2xl font-bold text-gray-800 border-b pb-2 mb-4">List Tread Depth</div>
+        <div class="text-2xl font-bold text-gray-800 border-b pb-2 mb-4">Tread Depth List</div>
 
         <DataTable
             :value="tread_depths"

@@ -10,7 +10,7 @@
                             <RouterLink to="/marketing/listCampaign">
                                 <Button icon="pi pi-arrow-left" class="p-button-text p-button-secondary text-xl" size="big" v-tooltip="'Back'" />
                             </RouterLink>
-                            <div class="text-2xl font-bold text-gray-800">Campaign Details</div>
+                            <div class="text-2xl font-bold text-gray-800">Campaign Management Details</div>
                         </div>
                         <div class="inline-flex items-center gap-2">
                             <!-- Edit Event -->
@@ -65,7 +65,7 @@
 
                 <div class="card flex flex-col w-full relative">
                     <div class="flex items-center justify-between border-b pb-2 mb-2">
-                        <div class="text-2xl font-bold text-gray-800">🎁 Prize Info</div>
+                        <div class="text-2xl font-bold text-gray-800">Prize Info</div>
                     </div>
 
                     <DataTable :value="listPrize" :paginator="true" :rows="7" dataKey="id" :rowHover="true" responsiveLayout="scroll" class="text-sm" :loading="tableLoading">
@@ -122,7 +122,7 @@
                 <!-- Advance Info -->
                 <div class="card flex flex-col w-full">
                     <div class="flex items-center justify-between border-b pb-2 mb-2">
-                        <div class="text-2xl font-bold text-gray-800">ℹ️ Advance Info</div>
+                        <div class="text-2xl font-bold text-gray-800">Advance Info</div>
                         <Tag :value="campaign.status === 1 ? 'Active' : 'Inactive'" :severity="campaign.status === 1 ? 'success' : 'danger'" />
                     </div>
 
@@ -180,7 +180,7 @@
                 <div class="card flex flex-col w-full">
                     <!-- Header with Invite Button -->
                     <div class="flex items-center justify-between border-b pb-2 mb-2">
-                        <div class="text-2xl font-bold text-gray-800">🚩 Participating Dealer</div>
+                        <div class="text-2xl font-bold text-gray-800">Participating Dealer</div>
                         <Button 
                             label="Assign Dealer" 
                             icon="pi pi-user-plus" 
@@ -232,7 +232,7 @@
 
                 <div class="card flex flex-col w-full">
                     <div class="flex items-center justify-between border-b pb-2 mb-2">
-                        <div class="text-2xl font-bold text-gray-800">🚩 Criteria</div>
+                        <div class="text-2xl font-bold text-gray-800">Criteria</div>
                     </div>
 
                     <DataTable :value="criteria" :paginator="true" :rows="3" dataKey="id" :rowHover="true" responsiveLayout="scroll" class="text-sm">

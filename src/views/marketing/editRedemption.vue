@@ -7,9 +7,12 @@
                 <LoadingPage v-if="loading" :message="'Loading Redemption Details...'" />
 
                 <!-- Redemption Details (Read-only) -->
-                <div class="card flex flex-col gap-6 w-full" v-if="!loading">
+                <div class="card flex flex-col gap-3 w-full" v-if="!loading">
                     <div class="flex items-center justify-between border-b pb-2">
-                        <h2 class="text-2xl font-bold text-gray-800">🎁 Redemption Details</h2>
+                        <div class="flex items-center gap-3">
+                            <Button icon="pi pi-arrow-left" class="p-button-text p-button-secondary" @click="$router.back()" />
+                            <div class="text-2xl font-bold text-gray-800">Redemption Details</div>
+                        </div>
                     </div>
 
                     <div class="mt-2 grid grid-cols-2 gap-4">
@@ -35,7 +38,7 @@
                 <!-- Shipping Details (Editable) -->
                 <div class="card flex flex-col gap-6 w-full" v-if="!loading">
                     <div class="flex items-center justify-between border-b pb-2">
-                        <h2 class="text-2xl font-bold text-gray-800">🚚 Edit Shipping Details</h2>
+                        <h2 class="text-2xl font-bold text-gray-800">Edit Shipping Details</h2>
                     </div>
 
                     <div class="grid grid-cols-4 gap-4">

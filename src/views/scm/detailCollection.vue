@@ -8,7 +8,7 @@
                     <RouterLink to="/scm/listCollection">
                         <Button icon="pi pi-arrow-left" class="p-button-text p-button-secondary text-xl" v-tooltip="'Back'" />
                     </RouterLink>
-                    <div class="text-2xl font-bold text-gray-800">CTC Details</div>
+                    <div class="text-2xl font-bold text-gray-800">CTC Collection Details</div>
                 </div>
 
                 <!-- CUSTOMER INFO -->

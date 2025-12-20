@@ -671,7 +671,7 @@ onMounted(async () => {
 
 <template>
     <div class="card">
-        <div class="text-2xl font-bold text-gray-800 border-b pb-2"> CTC List Collection</div>
+        <div class="text-2xl font-bold text-gray-800 border-b pb-2"> CTC Collection List </div>
         <LoadingPage v-if="loading" message="Loading CTC Collection Details..." />
         <div v-else>
             <TabMenu :model="statusTabs" v-model:activeIndex="activeTabIndex" class="mb-4" />

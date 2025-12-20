@@ -3,7 +3,12 @@
         <!-- 🎯 Create Campaign -->
         <div class="flex flex-col md:flex-row gap-8">
             <div class="card flex flex-col gap-6 w-full">
-                <div class="text-2xl font-bold text-gray-800 border-b pb-2">Create Campaign</div>
+                <div class="flex items-center justify-between border-b pb-2">
+                      <div class="flex items-center gap-3">
+                        <Button icon="pi pi-arrow-left" class="p-button-text p-button-secondary" @click="$router.back()" />
+                        <div class="text-2xl font-bold text-gray-800 border-b pb-2">Create Campaign</div>
+                      </div>
+                </div>
 
                 <!-- Campaign Form -->
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -79,7 +84,7 @@
         <!-- 💎 Point Section -->
         <div class="card flex flex-col w-full mt-8">
             <div class="flex items-center justify-between border-b pb-2 mb-4">
-                <div class="text-xl font-bold text-gray-800">💎 Point Configuration</div>
+                <div class="text-xl font-bold text-gray-800">Point Configuration</div>
             </div>
 
             <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -104,7 +109,7 @@
         <!-- 📋 Criteria Section -->
         <div class="card flex flex-col w-full mt-8">
             <div class="flex items-center justify-between border-b pb-2 mb-4">
-                <div class="text-xl font-bold text-gray-800">📋 Criteria</div>
+                <div class="text-xl font-bold text-gray-800">Criteria</div>
             </div>
 
             <div v-if="criterias.length > 0" class="space-y-4">
@@ -149,7 +154,7 @@
         <!-- 🏆 Reward Section -->
         <div class="card flex flex-col w-full mt-8">
             <div class="flex items-center justify-between border-b pb-2 mb-4">
-                <div class="text-xl font-bold text-gray-800">🏆 Reward Section</div>
+                <div class="text-xl font-bold text-gray-800">Reward Section</div>
             </div>
 
             <div v-if="rewards.length > 0" class="space-y-4">

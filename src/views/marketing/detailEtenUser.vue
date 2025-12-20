@@ -476,7 +476,6 @@ const fetchMemberDetail = async () => {
                 point_transactions: userData.point_transactions || []
             };
 
-            console.log('Loaded user data:', memberDetail.value);
         } else {
             console.error('API returned error:', response.data);
             showToast('error', 'Error', 'Failed to load user details');
