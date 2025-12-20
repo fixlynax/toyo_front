@@ -2146,7 +2146,7 @@ const processNormalOrder = async (cartRefNo, orderArray, orderNo) => {
     }
 
     const confirmResult = await confirmOrderAPI(cartRefNo, orderArray, orderNo);
-    await handleOrderConfirmation(confirmResult, 'NORMAL');
+    await handleOrderConfirmation(confirmResult, 'NORMAL',orderArray);
 };
 
 // Process DIRECTSHIP Order with order number parameter
@@ -2160,7 +2160,7 @@ const processDirectShipOrder = async (cartRefNo, orderArray, orderNo) => {
     }
 
     const confirmResult = await confirmOrderAPI(cartRefNo, orderArray, orderNo);
-    await handleOrderConfirmation(confirmResult, 'DIRECTSHIP');
+    await handleOrderConfirmation(confirmResult, 'DIRECTSHIP',orderArray);
 };
 
 // addToCartAPI with proper structure for backend
@@ -2230,7 +2230,6 @@ const confirmOrderAPI = async (cartRefNo, orderArray, orderNo) => {
 
 // confirmBackOrderAPI with order number parameter
 const confirmBackOrderAPI = async (cartRefNo, orderArray, backorderArray, orderNo) => {
-    try {
         console.log('Confirming back order with arrays:', { orderArray, backorderArray });
         console.log('Order number:', orderNo);
 
@@ -2243,6 +2242,7 @@ const confirmBackOrderAPI = async (cartRefNo, orderArray, backorderArray, orderN
         };
 
         console.log('Back order payload:', payload);
+    try {
 
         const response = await api.post(`order/confirm-backorder-admin/${cartRefNo}`, payload);
         return response.data;
@@ -2253,8 +2253,7 @@ const confirmBackOrderAPI = async (cartRefNo, orderArray, backorderArray, orderN
 };
 
 // Enhanced handleOrderConfirmation with proper back order detection
-const handleOrderConfirmation = async (confirmResult, orderType) => {
-    console.log('Order confirmation result:', confirmResult);
+const handleOrderConfirmation = async (confirmResult, orderType, orderArray) => {
 
     if (confirmResult.status === 1) {
         // Order successful
@@ -2282,7 +2281,7 @@ const handleOrderConfirmation = async (confirmResult, orderType) => {
         const hasBackOrderItems = confirmResult.eten_data?.some?.((data) => data.unfulfilled_items?.length > 0 && data.unfulfilled_items[0]?.materialid?.trim());
 
         if (hasBackOrderItems) {
-            await handleBackOrderScenario(confirmResult, orderType);
+            await handleBackOrderScenario(confirmResult, orderType, orderArray);
         } else {
             // General error case
             const errorMessage = extractSAPMessage(confirmResult);
@@ -2314,8 +2313,7 @@ const handleOrderConfirmation = async (confirmResult, orderType) => {
 };
 
 // Enhanced handleBackOrderScenario
-const handleBackOrderScenario = async (confirmResult, orderType) => {
-    console.log('Handling back order scenario:', confirmResult);
+const handleBackOrderScenario = async (confirmResult, orderType , orderArray) => {
 
     const backOrderData = Array.isArray(confirmResult.eten_data) ? confirmResult.eten_data[0] : confirmResult.eten_data;
 
@@ -2324,16 +2322,9 @@ const handleBackOrderScenario = async (confirmResult, orderType) => {
         .filter((item) => item.materialid && item.materialid.trim() !== '')
         .map((item) => {
             // Find the original item to get salesprogramid
-            const originalItem = selectedTyres.value.find((t) => t.materialid === item.materialid) || tyres.value.find((t) => t.materialid === item.materialid);
-
+            const originalItemProgram = orderArray.find(t => t.materialid === item.materialid);
             return {
-                materialid: item.materialid.trim(),
-                itemno: parseInt(item.itemno) || 0,
-                itemcategory: item.itemcategory || 'ZT02',
-                plant: 'TSM',
-                qty: parseFloat(item.qty || 0),
-                price: parseFloat(item.price || getMaterialPrice(item.materialid)),
-                salesprogramid: originalItem?.salesprogramid || null,
+                ...originalItemProgram, 
                 accepted_qty: parseFloat(item.qty || 0),
                 requested_qty: selectedTyres.value.find((t) => t.materialid === item.materialid)?.quantity || parseFloat(item.qty || 0)
             };
@@ -2344,17 +2335,16 @@ const handleBackOrderScenario = async (confirmResult, orderType) => {
         .filter((item) => item.materialid && item.materialid.trim() !== '')
         .map((item) => {
             const originalItem = selectedTyres.value.find((t) => t.materialid === item.materialid);
+            const originalItemProgram = orderArray.find(t => t.materialid === item.materialid);
             const requestedQty = originalItem ? originalItem.quantity : parseFloat(item.requested_qty || 0);
             const acceptedQty = processedFulfilled.find((f) => f.materialid === item.materialid)?.accepted_qty || 0;
             const backorderQty = requestedQty - acceptedQty;
 
-            return {
-                materialid: item.materialid.trim(),
+            return {  
+                ...originalItemProgram, 
                 requested_qty: requestedQty,
                 accepted_qty: acceptedQty,
                 backorder_qty: backorderQty,
-                price: getMaterialPrice(item.materialid),
-                salesprogramid: originalItem?.salesprogramid || null
             };
         });
 
@@ -2576,20 +2566,20 @@ const proceedWithBackOrder = async () => {
             itemno: item.itemno || 10,
             itemcategory: item.itemcategory || 'ZT02',
             plant: item.plant || 'TSM',
-            qty: item.accepted_qty.toString(),
+            qty: item.qty.toString(),
             price: item.price.toString(),
-            salesprogramid: item.salesprogramid || null
+            salesprogramid: item.salesprogramid || ""
         }));
-
+        
         // Prepare backorder array
-        const backorderArray = unfulfilledItems.value.map((item, index) => ({
+        const backorderArray = unfulfilledItems.value.map((item) => ({
             materialid: item.materialid,
-            itemno: (orderArray.length + index + 1) * 10, // Continue item numbers
-            itemcategory: 'ZT02', // Default for back order items
-            plant: 'TSM',
-            qty: item.backorder_qty.toString(),
+            itemno: item.itemno || 10,
+            itemcategory: item.itemcategory ||'ZT02', // Default for back order items
+            plant: item.plant || 'TSM',
+            qty: item.qty.toString(),
             price: item.price.toString(),
-            salesprogramid: item.salesprogramid || null
+            salesprogramid: item.salesprogramid || ""
         }));
 
         console.log('Back order final payload:', {
