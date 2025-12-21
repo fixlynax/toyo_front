@@ -5,69 +5,13 @@
             <div class="md:w-2/3 flex flex-col">
                 <div class="card flex flex-col w-full">
                     <div class="flex items-center justify-between border-b pb-2">
-                        <div class="flex items-center gap-3">
+                        <div class="flex items-center gap-2">
                             <Button icon="pi pi-arrow-left" class="p-button-text p-button-secondary" @click="$router.back()" />
                             <div class="text-2xl font-bold text-gray-800">Return Order Collection Details</div>
                         </div>
                     </div>
+                    <div class="font-bold text-xl border-b pb-2 mt-2">Customer Details</div>
 
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm text-gray-700 mb-4 mt-4">
-                        <div>
-                            <span class="block text-sm text-black-700">Return Ref No.</span>
-                            <span class="text-lg font-medium">{{ returnList.return_orderNo_ref }}</span>
-                        </div>
-                        <div>
-                            <span class="block text-sm text-black-700">SAP Return No.</span>
-                            <span class="text-lg font-medium">{{ returnList.delivery_information?.sapreturndeliveryno ?? '-' }}</span>
-                        </div>
-                    </div>
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm text-gray-700">
-                        <div>
-                            <span class="block text-sm text-black-700">Status</span>
-                            <Tag :value="returnList.delivery_status" :severity="getStatusSeverity(returnList.delivery_status)" />
-                        </div>
-                        <div>
-                            <span class="block text-sm text-black-700">Reason</span>
-                            <p class="font-medium text-lg">{{ `(${returnList.reason_code}) ${returnList.reason_message}` }}</p>
-                        </div>
-                    </div>
-                    <div class="mt-6 mb-4">
-                        <!-- <div class="font-semibold text-xl border-b pb-3 px-4 flex items-center gap-2 text-gray-800 mb-4"><span>Return Order Item</span></div> -->
-                        <DataTable :value="returnList.return_order_array" :rows="10" dataKey="" :rowHover="true" class="rounded-table">
-                            <Column field="materialid" header="Material ID" style="min-width: 10rem">
-                                <template #body="{ data }">
-                                    {{ data?.materialid || '-' }}
-                                </template>
-                            </Column>
-                            <Column field="materialdescription" header="Description" style="min-width: 10rem">
-                                <template #body="{ data }">
-                                    {{ data?.materialdescription || '-' }}
-                                </template>
-                            </Column>
-                            <Column field="itemcategory" header="Category" style="min-width: 12rem">
-                                <template #body="{ data }">
-                                    {{ data.itemcategory }}
-                                </template>
-                            </Column>
-                            <Column field="plant" header="Plant" style="min-width: 8rem">
-                                <template #body="{ data }">
-                                    {{ data.plant }}
-                                </template>
-                            </Column>
-                            <Column field="quantity" header="Quantity" style="min-width: 8rem">
-                                <template #body="{ data }">
-                                    {{ data.qty }}
-                                </template>
-                            </Column>
-                        </DataTable>
-                    </div>
-                </div>
-                <div class="card flex flex-col w-full">
-                    <div class="flex items-center justify-between border-b pb-2">
-                        <div class="flex items-center gap-3">
-                            <div class="text-2xl font-bold text-gray-800">Customer Details</div>
-                        </div>
-                    </div>
                     <div class="grid grid-cols-1 md:grid-cols-2 mt-6 mb-4">
                         <div>
                             <span class="block text-sm text-black-700">Company Name</span>
@@ -77,7 +21,7 @@
                             <span class="block text-sm text-black-700">Account Number</span>
                             <span class="text-lg font-medium">{{ returnList.dealer.dealer_shop.custAccountNo }}</span>
                         </div>
-                    </div>
+  y                  </div>
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm text-gray-700">
                         <div>
                             <span class="block text-sm text-black-700">Member Code</span>
@@ -109,13 +53,71 @@
                         </div>
                     </div>
                 </div>
+                <div class="card flex flex-col w-full">
+                    <div class="flex items-center justify-between border-b pb-2">
+                        <div class="flex items-center gap-3">
+                            <div class="text-2xl font-bold text-gray-800">Return Order Item</div>
+                        </div>
+                    </div>
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm text-gray-700 mb-4 mt-4">
+                        <div>
+                            <span class="block text-sm text-black-700">Return Ref No.</span>
+                            <span class="text-lg font-medium">{{ returnList.return_orderNo_ref }}</span>
+                        </div>
+                        <div>
+                            <span class="block text-sm text-black-700">SAP Return No.</span>
+                            <span class="text-lg font-medium">{{ returnList.sapreturnno ?? '-' }}</span>
+                        </div>
+                    </div>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm text-gray-700">
+                        <div>
+                            <span class="block text-sm text-black-700">Status</span>
+                            <Tag :value="returnList.delivery_status" :severity="getStatusSeverity(returnList.delivery_status)" />
+                        </div>
+                        <div>
+                            <span class="block text-sm text-black-700">Reason</span>
+                            <p class="font-medium text-lg">{{ `(${returnList.reason_code}) ${returnList.reason_message}` }}</p>
+                        </div>
+                    </div>
+                    <div class="mt-6 mb-4">
+                        <!-- <div class="font-semibold text-xl border-b pb-3 px-4 flex items-center gap-2 text-gray-800 mb-4"><span>Return Order Item</span></div> -->
+                        <DataTable :value="returnList.return_order_array" :rows="10" dataKey="" :rowHover="true" class="rounded-table">
+                            <Column field="materialid" header="Material ID" style="min-width: 10rem">
+                                <template #body="{ data }">
+                                    {{ data?.materialid || '-' }}
+                                </template>
+                            </Column>
+                            <Column field="materialdescription" header="Description" style="min-width: 10rem">
+                                <template #body="{ data }">
+                                    {{ data?.materialdescription || '-' }}
+                                </template>
+                            </Column>
+                            <Column field="itemcategory" header="Item Category" style="min-width: 12rem">
+                                <template #body="{ data }">
+                                    {{ data.itemcategory }}
+                                </template>
+                            </Column>
+                            <Column field="plant" header="Plant" style="min-width: 8rem">
+                                <template #body="{ data }">
+                                    {{ data.plant }}
+                                </template>
+                            </Column>
+                            <Column field="quantity" header="Quantity" style="min-width: 8rem">
+                                <template #body="{ data }">
+                                    {{ data.qty }}
+                                </template>
+                            </Column>
+                        </DataTable>
+                    </div>
+                </div>
             </div>
 
             <!-- RIGHT SIDE -->
             <div class="md:w-1/3 flex flex-col">
                 <div class="card flex flex-col w-full">
-                    <div class="flex items-center justify-between border-b pb-3 mb-4">
-                        <div class="text-2xl font-bold text-gray-800">Advance Information</div>
+                    <div class="flex items-center justify-between border-b pb-3 ">
+                        <div class="text-2xl font-bold text-gray-800">Order Info</div>
                         <Tag :value="returnList.delivery_status" :severity="getStatusSeverity(returnList.delivery_status)" />
                     </div>
 
@@ -124,11 +126,11 @@
                             <tbody>
                                 <tr class="border-b">
                                     <td class="px-4 py-2 font-medium">Order No</td>
-                                    <td class="px-4 py-2 text-right">{{ returnList.order_data.order_no || '-' }}</td>
+                                    <td class="px-4 py-2 text-right font-bold text-primary">{{ returnList.order_data.order_no || '-' }}</td>
                                 </tr>
                                 <tr class="border-b">
-                                    <td class="px-4 py-2 font-medium">Remarks</td>
-                                    <td class="px-4 py-2 text-right">{{ returnList.order_data.orderReceiveRemarks || '-' }}</td>
+                                    <td class="px-4 py-2 font-medium">Order Remark</td>
+                                    <td class="px-4 py-2 text-right font-bold text-primary">{{ returnList.remarks || '-' }}</td>
                                 </tr>
                                 <tr class="border-b">
                                     <td class="px-4 py-2 font-medium">Type</td>
@@ -172,11 +174,11 @@
                         </div>
                     </div>
                 </div>
-                <div class="card flex flex-col gap-6 w-full">
-                    <div class="flex items-center gap-2 border-b">
+                <div class="card flex flex-col w-full">
+                    <div class="flex items-center gap-2 border-b pb-2">
                         <div class="text-2xl font-bold text-gray-800">Driver Details</div>
                     </div>
-                    <div class="grid grid-cols-2 gap-4">
+                    <div class="grid grid-cols-1 md:grid-cols-2 mt-6 mb-4">
                         <div>
                             <span class="text-sm font-bold text-black-700">Driver</span>
                             <p lass="text-lg font-medium">{{ returnList.delivery_information?.driverName ? returnList.delivery_information.driverName : 'Not Assigned' }}</p>
