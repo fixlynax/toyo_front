@@ -1,6 +1,6 @@
 <template>
     <div class="card">
-        <div class="text-2xl font-bold text-gray-800 border-b pb-2 mb-4">List Size Code</div>
+        <div class="text-2xl font-bold text-gray-800 border-b pb-2 mb-4">Size Code List</div>
 
         <DataTable
             :value="size_codes"

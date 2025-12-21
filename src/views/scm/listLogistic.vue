@@ -1,6 +1,6 @@
 <template>
     <div class="card">
-        <div class="text-2xl font-bold text-gray-800 border-b pb-2 mb-3">List Logistic</div>
+        <div class="text-2xl font-bold text-gray-800 border-b pb-2 mb-3">3PL Account List</div>
         <LoadingPage v-if="loading" message="Loading 3PL Details..." />
         <div v-else>
             <DataTable

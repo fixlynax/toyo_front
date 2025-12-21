@@ -765,7 +765,7 @@ async function handleSubmit() {
             toast.add({
                 severity: 'success',
                 summary: 'Success',
-                detail: 'Dealer created successfully! An activation SMS has been sent to the master user.',
+                detail: 'Dealer created successfully! An activation Email has been sent to the master user.',
                 life: 5000
             });
             localStorage.removeItem('etenFormData');

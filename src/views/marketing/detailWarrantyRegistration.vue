@@ -116,7 +116,7 @@
                 <!-- Advance Info -->
                 <div class="card flex flex-col w-full">
                     <div class="flex items-center justify-between border-b pb-2 mb-2">
-                        <div class="text-2xl font-bold text-gray-800">ℹ️ User Details</div>
+                        <div class="text-2xl font-bold text-gray-800">User Details</div>
                     </div>
 
                     <div class="overflow-x-auto">
@@ -148,7 +148,7 @@
                 </div>
                 <div class="card flex flex-col w-full">
                     <div class="flex items-center justify-between border-b pb-2 mb-4">
-                        <div class="text-2xl font-bold text-gray-800">ℹ️ Invoice Details</div>
+                        <div class="text-2xl font-bold text-gray-800">Invoice Details</div>
                     </div>
 
                     <div class="flex-1">

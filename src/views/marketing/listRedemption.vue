@@ -1,9 +1,9 @@
 <template>
     <div class="card">
-        <div class="text-2xl font-bold text-gray-800 border-b pb-2 mb-6">List Redemption</div>
+        <div class="text-2xl font-bold text-gray-800 border-b pb-2 mb-6">Redemption Management List</div>
 
         <!-- Show LoadingPage only during initial page load -->
-        <LoadingPage v-if="initialLoading" :message="'Loading Redemptions...'" :sub-message="'Fetching redemption data'" />
+        <LoadingPage v-if="initialLoading" :message="'Loading Redemption Management Details...'" :sub-message="'Fetching redemption data'" />
 
         <!-- Show content area when not in initial loading -->
         <div v-else>

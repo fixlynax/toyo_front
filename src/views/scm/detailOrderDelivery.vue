@@ -2,7 +2,7 @@
     <Fluid>
         <div class="flex flex-col md:flex-row gap-8">
             <div class="md:w-2/3 flex flex-col">
-                <div class="card flex flex-col gap-6 w-full">
+                <div class="card flex flex-col w-full">
                     <div class="flex items-center gap-2 border-b">
                         <RouterLink to="/scm/listOrderDelivery">
                             <Button icon="pi pi-arrow-left font-bold" class="p-button-text p-button-secondary text-xl" size="big" v-tooltip="'Back'" />
@@ -11,7 +11,7 @@
                     </div>
 
                     <div class="font-bold text-xl border-b pb-2 mt-2">Customer Details</div>
-                    <div class="grid grid-cols-2 gap-4">
+                    <div class="grid grid-cols-1 md:grid-cols-2 mt-6 mb-4">
                         <div>
                             <span class="text-sm font-medium text-black-700">Customer Name</span>
                             <p class="text-lg font-medium">
@@ -91,8 +91,8 @@
 
             <div class="md:w-1/3 flex flex-col">
                 <div class="card flex flex-col w-full">
-                    <div class="flex items-center justify-between border-b pb-3 mb-4">
-                        <div class="text-2xl font-bold text-gray-800">Advance Info</div>
+                    <div class="flex items-center justify-between border-b pb-3 ">
+                        <div class="text-2xl font-bold text-gray-800">Order Info</div>
                         <Tag :value="getOrderStatusText2(orderDelList.status)" :severity="getOrderStatusSeverity2(orderDelList.status)" />
                     </div>
 

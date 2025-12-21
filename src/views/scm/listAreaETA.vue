@@ -1,6 +1,6 @@
 <template>
     <div class="card">
-        <div class="text-2xl font-bold text-gray-800 border-b pb-2 mb-4">List of SCM ETA</div>
+        <div class="text-2xl font-bold text-gray-800 border-b pb-2 mb-4">Area ETA List</div>
         <LoadingPage v-if="loading" message="Loading Area ETA Details..." />
         <div v-else>
             <DataTable

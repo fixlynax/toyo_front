@@ -142,7 +142,7 @@
                             <template #body="{ data }">
                                 {{ data.materialid }} <br />
                                 {{ data.materialdescription }}
-                                <span class="block text-xs text-gray-500">SP: {{ data.salesprogramid || '-' }} </span>
+                                <span v-if="data.salesprogramid" class="block text-xs text-gray-500">SP: {{ data.salesprogramid }}</span>
                                 <!-- <Tag v-if="data.itemcategory === 'ZR3F'" value="ZR3F" severity="warning" size="small" class="mt-1" /> -->
                             </template>
                         </Column>
@@ -236,10 +236,10 @@
                                     <td class="px-4 py-2 font-medium">Storage Location</td>
                                     <td class="px-4 py-2 text-right font-semibold">{{ orderData.storagelocation || '-' }}</td>
                                 </tr>
-                                <tr class="border-b">
+                                <!-- <tr class="border-b">
                                     <td class="px-4 py-2 font-medium">Delivery Status</td>
                                     <td class="px-4 py-2 text-right font-semibold">{{ getDeliveryStatusText(order.delivery_status) }}</td>
-                                </tr>
+                                </tr> -->
                                 <tr class="border-b">
                                     <td class="px-4 py-2 font-medium">Created</td>
                                     <td class="px-4 py-2 text-right font-semibold">{{ formatDate(order.created) || '-' }}</td>
@@ -305,13 +305,13 @@
                         </template>
                     </Column>
 
-                    <Column header="Status" style="width: 100px">
+                    <!-- <Column header="Status" style="width: 100px">
                         <template #body="{ data }">
                             <span v-if="data.removed" class="px-2 py-1 bg-red-100 text-red-800 text-xs rounded-full">Removed</span>
                             <span v-else-if="data.qty !== data.originalQty" class="px-2 py-1 bg-blue-100 text-blue-800 text-xs rounded-full">Modified</span>
                             <span v-else class="px-2 py-1 bg-gray-100 text-gray-800 text-xs rounded-full">No Change</span>
                         </template>
-                    </Column>
+                    </Column> -->
 
                     <Column header="Actions" style="width: 120px">
                         <template #body="{ data }">
@@ -320,14 +320,14 @@
 
                                 <Button v-if="data.removed" icon="pi pi-undo" severity="secondary" text rounded @click="restoreZR3FItem(data)" v-tooltip="'Restore item'" />
                             </div>
-                            <div v-else class="text-center text-gray-400">
+                            <div v-else class="text-left text-gray-400">
                                 <i class="pi pi-lock"></i>
                             </div>
                         </template>
                     </Column>
                 </DataTable>
 
-                <div class="mt-6 p-3 bg-blue-50 border border-blue-200 rounded-md">
+                <!-- <div class="mt-6 p-3 bg-blue-50 border border-blue-200 rounded-md">
                     <div class="flex justify-between items-center">
                         <div>
                             <p class="text-sm font-medium text-blue-800">Total ZR3F Items: {{ zr3fItemCount }} ({{ editableZR3FItems.length }} editable)</p>
@@ -344,7 +344,7 @@
                             <p class="text-sm text-gray-600">Click "Proceed" to approve with changes</p>
                         </div>
                     </div>
-                </div>
+                </div> -->
             </div>
 
             <template #footer>

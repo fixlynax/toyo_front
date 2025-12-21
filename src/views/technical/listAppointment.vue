@@ -179,10 +179,10 @@ const getStatusColor = (status) => {
 
 <template>
     <div class="card">
-        <div class="text-2xl font-bold text-gray-800 border-b pb-2">List Appointment</div>
+        <div class="text-2xl font-bold text-gray-800 border-b pb-2">Appointment List</div>
 
         <!-- Show loading only -->
-        <LoadingPage v-if="loading" message="Loading Appointments..." />
+        <LoadingPage v-if="loading" message="Loading Appointments Deatils..." />
 
         <!-- Show table only when not loading -->
         <template v-else>

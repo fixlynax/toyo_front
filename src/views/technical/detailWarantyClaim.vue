@@ -1,7 +1,7 @@
 <template>
     <!-- Loading State -->
     <!-- <div v-if="loading" class="text-center py-20 text-gray-500 text-lg w-full">Loading warranty details...</div> -->
-    <LoadingPage v-if="loading" :message="'Loading Details Warranty Claim...'" />
+    <LoadingPage v-if="loading" :message="'Loading Warranty Claim Details...'" />
 
     <!-- Error State -->
     <div v-else-if="error" class="text-center py-20 text-red-500 text-lg w-full">
@@ -17,7 +17,7 @@
                 <div class="flex items-center justify-between border-b pb-2">
                     <div class="flex items-center gap-3">
                         <Button icon="pi pi-arrow-left" class="p-button-text p-button-secondary" @click="$router.back()" />
-                        <div class="text-2xl font-bold text-gray-800">Warranty Details</div>
+                        <div class="text-2xl font-bold text-gray-800">Warranty Claim Details</div>
                         <Button v-if="(warantyDetail.status ==6 || warantyDetail.status ==5)"
                         label="Download Report"
                         icon="pi pi-print" 

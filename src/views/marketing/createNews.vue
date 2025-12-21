@@ -3,7 +3,12 @@
         <div class="flex flex-col md:flex-row gap-8">
             <div class="card flex flex-col gap-6 w-full">
                 <!-- Header -->
-                <div class="text-2xl font-bold text-gray-800 border-b pb-2">Create News</div>
+                <div class="flex items-center justify-between border-b pb-2">
+                    <div class="flex items-center gap-3">
+                    <Button icon="pi pi-arrow-left" class="p-button-text p-button-secondary" @click="$router.back()" />
+                    <div class="text-2xl font-bold text-gray-800 border-b pb-2">Create News</div>
+                    </div>
+                </div>
 
                 <!-- News Form -->
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
