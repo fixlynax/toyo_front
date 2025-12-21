@@ -120,6 +120,10 @@
                                     <td class="px-4 py-2 text-right font-medium">{{ orderData.orderDesc || '-' }}</td>
                                 </tr>
                                 <tr class="border-b">
+                                    <td class="px-4 py-2 font-medium">Order SAP Type</td>
+                                    <td class="px-4 py-2 text-right font-medium">{{ orderData.sapordertype || '-' }}</td>
+                                </tr>
+                                <tr class="border-b">
                                     <td class="px-4 py-2 font-medium">SO No.</td>
                                     <td class="px-4 py-2 text-right font-medium">{{ orderData.so_no || '-' }}</td>
                                 </tr>
