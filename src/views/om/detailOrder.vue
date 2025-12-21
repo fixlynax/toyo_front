@@ -63,7 +63,7 @@
                             <template #body="{ data }">
                                 {{ data.materialid }}<br />
                                 {{ data.materialdescription }}
-                                <span class="block text-xs text-gray-500">SP: {{ data.salesprogramid || '-' }} </span>
+                                <span v-if="data.salesprogramid" class="block text-xs text-gray-500">SP: {{ data.salesprogramid || '-' }} </span>
                             </template>
                         </Column>
                         <Column field="itemcategory" header="Item Category">

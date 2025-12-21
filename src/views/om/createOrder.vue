@@ -830,7 +830,8 @@
                                 <div class="text-xs text-gray-600">{{ item.materialid }}</div>
                             </div>
                             <div class="text-right">
-                                <div class="text-green-600 font-semibold">Qty: {{ item.accepted_qty }}</div>
+                                <div class="text-green-600 text-sm font-semibold">Quantity: {{ parseInt(item.qty) }}</div>
+                                <div class="text-xs text-gray-500">{{ item.itemcategory === 'ZT3F' ? 'FREE ITEM' : 'Regular Item' }}</div>
                             </div>
                         </div>
                     </div>
@@ -847,9 +848,9 @@
                             </div>
                             <div class="text-right">
                                 <div class="text-sm">
-                                    <span class="text-gray-600">Requested: {{ item.requested_qty }}</span> | <span class="text-green-600">Accepted: {{ item.accepted_qty }}</span> |
-                                    <span class="text-orange-600">Back Order: {{ item.backorder_qty }}</span>
+                                    <span class="text-orange-600">Quantity: {{ parseInt(item.qty) }}</span>
                                 </div>
+                                <div class="text-xs text-gray-500">{{ item.itemcategory === 'ZT3F' ? 'FREE ITEM' : 'Regular Item' }}</div>
                             </div>
                         </div>
                     </div>
@@ -1251,14 +1252,18 @@ const getMaxQuantity = (tyre) => {
 
 // Helper to get material names for display
 const getMaterialName = (materialid) => {
+    // Check in tyres list first
     const material = tyres.value.find((t) => t.materialid === materialid) || selectedTyres.value.find((t) => t.materialid === materialid);
-    return material ? material.material : materialid;
-};
 
-// Helper to get material price
-const getMaterialPrice = (materialid) => {
-    const material = tyres.value.find((t) => t.materialid === materialid) || selectedTyres.value.find((t) => t.materialid === materialid);
-    return material ? material.price : 0;
+    // If not found, check in free items (ZT3F)
+    if (!material && freeItems.value.length > 0) {
+        const freeItem = freeItems.value.find((f) => f.materialid === materialid);
+        if (freeItem) {
+            return freeItem.material;
+        }
+    }
+
+    return material ? material.material : materialid;
 };
 
 // Helper function to extract SAP message
@@ -1299,7 +1304,7 @@ const createEmptyOrderNo = async () => {
     try {
         console.log('Creating empty order number...');
         const response = await api.post('order/createEmptyOrderNo-admin');
-        
+
         if (response.data.status === 1) {
             const orderNo = response.data.admin_data;
             console.log('Generated order number:', orderNo);
@@ -2146,7 +2151,7 @@ const processNormalOrder = async (cartRefNo, orderArray, orderNo) => {
     }
 
     const confirmResult = await confirmOrderAPI(cartRefNo, orderArray, orderNo);
-    await handleOrderConfirmation(confirmResult, 'NORMAL',orderArray);
+    await handleOrderConfirmation(confirmResult, 'NORMAL', orderArray);
 };
 
 // Process DIRECTSHIP Order with order number parameter
@@ -2160,7 +2165,7 @@ const processDirectShipOrder = async (cartRefNo, orderArray, orderNo) => {
     }
 
     const confirmResult = await confirmOrderAPI(cartRefNo, orderArray, orderNo);
-    await handleOrderConfirmation(confirmResult, 'DIRECTSHIP',orderArray);
+    await handleOrderConfirmation(confirmResult, 'DIRECTSHIP', orderArray);
 };
 
 // addToCartAPI with proper structure for backend
@@ -2230,20 +2235,19 @@ const confirmOrderAPI = async (cartRefNo, orderArray, orderNo) => {
 
 // confirmBackOrderAPI with order number parameter
 const confirmBackOrderAPI = async (cartRefNo, orderArray, backorderArray, orderNo) => {
-        console.log('Confirming back order with arrays:', { orderArray, backorderArray });
-        console.log('Order number:', orderNo);
+    console.log('Confirming back order with arrays:', { orderArray, backorderArray });
+    console.log('Order number:', orderNo);
 
-        // Prepare the payload exactly as shown in your API example
-        const payload = {
-            order_array: JSON.stringify(orderArray),
-            backorder_array: JSON.stringify(backorderArray),
-            order_remark: `Order with back order created via admin interface - ${selectedOrderType.value}`,
-            order_no: orderNo
-        };
+    // Prepare the payload exactly as shown in your API example
+    const payload = {
+        order_array: JSON.stringify(orderArray),
+        backorder_array: JSON.stringify(backorderArray),
+        order_remark: `Order with back order created via admin interface - ${selectedOrderType.value}`,
+        order_no: orderNo
+    };
 
-        console.log('Back order payload:', payload);
+    console.log('Back order payload:', payload);
     try {
-
         const response = await api.post(`order/confirm-backorder-admin/${cartRefNo}`, payload);
         return response.data;
     } catch (error) {
@@ -2254,7 +2258,6 @@ const confirmBackOrderAPI = async (cartRefNo, orderArray, backorderArray, orderN
 
 // Enhanced handleOrderConfirmation with proper back order detection
 const handleOrderConfirmation = async (confirmResult, orderType, orderArray) => {
-
     if (confirmResult.status === 1) {
         // Order successful
         orderStatus.value = 'success';
@@ -2312,52 +2315,21 @@ const handleOrderConfirmation = async (confirmResult, orderType, orderArray) => 
     }
 };
 
-// Enhanced handleBackOrderScenario
-const handleBackOrderScenario = async (confirmResult, orderType , orderArray) => {
-
+// Enhanced handleBackOrderScenario to use direct payload from API
+const handleBackOrderScenario = async (confirmResult, orderType, orderArray) => {
     const backOrderData = Array.isArray(confirmResult.eten_data) ? confirmResult.eten_data[0] : confirmResult.eten_data;
 
-    // Process fulfilled items
-    const processedFulfilled = (backOrderData?.fulfilled_items || [])
-        .filter((item) => item.materialid && item.materialid.trim() !== '')
-        .map((item) => {
-            // Find the original item to get salesprogramid
-            const originalItemProgram = orderArray.find(t => t.materialid === item.materialid);
-            return {
-                ...originalItemProgram, 
-                accepted_qty: parseFloat(item.qty || 0),
-                requested_qty: selectedTyres.value.find((t) => t.materialid === item.materialid)?.quantity || parseFloat(item.qty || 0)
-            };
-        });
+    // Directly use the payload from API without processing
+    fulfilledItems.value = backOrderData?.fulfilled_items || [];
+    unfulfilledItems.value = backOrderData?.unfulfilled_items || [];
 
-    // Process unfulfilled items
-    const processedUnfulfilled = (backOrderData?.unfulfilled_items || [])
-        .filter((item) => item.materialid && item.materialid.trim() !== '')
-        .map((item) => {
-            const originalItem = selectedTyres.value.find((t) => t.materialid === item.materialid);
-            const originalItemProgram = orderArray.find(t => t.materialid === item.materialid);
-            const requestedQty = originalItem ? originalItem.quantity : parseFloat(item.requested_qty || 0);
-            const acceptedQty = processedFulfilled.find((f) => f.materialid === item.materialid)?.accepted_qty || 0;
-            const backorderQty = requestedQty - acceptedQty;
-
-            return {  
-                ...originalItemProgram, 
-                requested_qty: requestedQty,
-                accepted_qty: acceptedQty,
-                backorder_qty: backorderQty,
-            };
-        });
-
-    fulfilledItems.value = processedFulfilled;
-    unfulfilledItems.value = processedUnfulfilled;
-
-    console.log('Processed back order items:', {
+    console.log('Processed back order items from API:', {
         fulfilled: fulfilledItems.value,
         unfulfilled: unfulfilledItems.value
     });
 
     // Show back order dialog if we have any unfulfilled items
-    if (processedUnfulfilled.length > 0) {
+    if (unfulfilledItems.value.length > 0) {
         showBackOrderDialog.value = true;
         showOrderDialog.value = false;
         orderMessage.value = 'Processing partial fulfillment...';
@@ -2368,7 +2340,7 @@ const handleBackOrderScenario = async (confirmResult, orderType , orderArray) =>
             detail: 'Some items require back order. Please review the options.',
             life: 2000
         });
-    } else if (processedFulfilled.length > 0) {
+    } else if (fulfilledItems.value.length > 0) {
         // All items fulfilled
         orderStatus.value = 'success';
         orderMessage.value = 'Order created successfully!';
@@ -2491,32 +2463,42 @@ const showManualBackOrderOption = () => {
             manualFulfilled.push({
                 materialid: item.materialid,
                 material: item.material,
-                accepted_qty: item.quantity,
-                requested_qty: item.quantity
+                qty: item.quantity,
+                price: item.price,
+                itemcategory: item.itemcategory,
+                plant: item.plant,
+                salesprogramid: item.salesprogramid
             });
         } else if (item.stockBalance > 0) {
             // Partial fulfillment
             manualFulfilled.push({
                 materialid: item.materialid,
                 material: item.material,
-                accepted_qty: item.stockBalance,
-                requested_qty: item.quantity
+                qty: item.stockBalance,
+                price: item.price,
+                itemcategory: item.itemcategory,
+                plant: item.plant,
+                salesprogramid: item.salesprogramid
             });
             manualUnfulfilled.push({
                 materialid: item.materialid,
                 material: item.material,
-                requested_qty: item.quantity,
-                accepted_qty: item.stockBalance,
-                backorder_qty: item.quantity - item.stockBalance
+                qty: item.quantity - item.stockBalance,
+                price: item.price,
+                itemcategory: item.itemcategory,
+                plant: item.plant,
+                salesprogramid: item.salesprogramid
             });
         } else {
             // Complete back order
             manualUnfulfilled.push({
                 materialid: item.materialid,
                 material: item.material,
-                requested_qty: item.quantity,
-                accepted_qty: 0,
-                backorder_qty: item.quantity
+                qty: item.quantity,
+                price: item.price,
+                itemcategory: item.itemcategory,
+                plant: item.plant,
+                salesprogramid: item.salesprogramid
             });
         }
     });
@@ -2543,7 +2525,7 @@ const showManualBackOrderOption = () => {
     }
 };
 
-// Enhanced proceedWithBackOrder with order number generation
+// Enhanced proceedWithBackOrder to use direct payload
 const proceedWithBackOrder = async () => {
     showBackOrderDialog.value = false;
     showOrderDialog.value = true;
@@ -2560,7 +2542,7 @@ const proceedWithBackOrder = async () => {
             throw new Error('Failed to generate order number: ' + error.message);
         }
 
-        // Prepare order array for fulfilled items
+        // Use the direct payload from API (fulfilled_items as order_array)
         const orderArray = fulfilledItems.value.map((item) => ({
             materialid: item.materialid,
             itemno: item.itemno || 10,
@@ -2568,18 +2550,18 @@ const proceedWithBackOrder = async () => {
             plant: item.plant || 'TSM',
             qty: item.qty.toString(),
             price: item.price.toString(),
-            salesprogramid: item.salesprogramid || ""
+            salesprogramid: item.salesprogramid || ''
         }));
-        
-        // Prepare backorder array
+
+        // Use the direct payload from API (unfulfilled_items as backorder_array)
         const backorderArray = unfulfilledItems.value.map((item) => ({
             materialid: item.materialid,
             itemno: item.itemno || 10,
-            itemcategory: item.itemcategory ||'ZT02', // Default for back order items
+            itemcategory: item.itemcategory || 'ZT02',
             plant: item.plant || 'TSM',
             qty: item.qty.toString(),
             price: item.price.toString(),
-            salesprogramid: item.salesprogramid || ""
+            salesprogramid: item.salesprogramid || ''
         }));
 
         console.log('Back order final payload:', {
@@ -2646,7 +2628,7 @@ const proceedWithBackOrder = async () => {
     }
 };
 
-// proceedWithoutBackOrder with order number generation
+// Enhanced proceedWithoutBackOrder to use direct payload
 const proceedWithoutBackOrder = async () => {
     showBackOrderDialog.value = false;
     showOrderDialog.value = true;
@@ -2663,26 +2645,16 @@ const proceedWithoutBackOrder = async () => {
             throw new Error('Failed to generate order number: ' + error.message);
         }
 
-        // Only process fulfilled items with salesprogramid
-        const orderArray = fulfilledItems.value.map((item, index) => {
-            // FIX: Ensure we get the salesprogramid properly
-            let salesprogramid = item.salesprogramid;
-            if (!salesprogramid) {
-                // Fallback: try to find in tyres list
-                const tyreFromList = tyres.value.find((t) => t.materialid === item.materialid);
-                salesprogramid = tyreFromList?.salesprogramid || null;
-            }
-
-            return {
-                materialid: item.materialid,
-                itemno: String((index + 1) * 10).padStart(5, '0'),
-                itemcategory: item.itemcategory || 'ZT02',
-                plant: item.plant || 'TSM',
-                qty: item.accepted_qty.toString(),
-                price: item.price.toString(),
-                salesprogramid: salesprogramid // FIX: Include salesprogramid properly
-            };
-        });
+        // Only process fulfilled items - use direct payload from API
+        const orderArray = fulfilledItems.value.map((item) => ({
+            materialid: item.materialid,
+            itemno: item.itemno || 10,
+            itemcategory: item.itemcategory || 'ZT02',
+            plant: item.plant || 'TSM',
+            qty: item.qty.toString(),
+            price: item.price.toString(),
+            salesprogramid: item.salesprogramid || ''
+        }));
 
         if (orderArray.length === 0) {
             throw new Error('No items available for order');
@@ -2753,7 +2725,7 @@ const viewOrderDetails = () => {
 };
 
 const viewBackOrderDetails = () => {
-    if (orderDetails.value?.orderRefNo) {
+    if (orderDetails.value?.backOrderRefNo) {
         router.push(`/om/detailBackOrder/${orderDetails.value.backOrderRefNo}`);
     }
     closeOrderDialog();
