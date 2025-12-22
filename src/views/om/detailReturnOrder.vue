@@ -66,8 +66,18 @@
                     </div>
                     <div class="grid grid-cols-2 gap-4 mt-4">
                         <div>
+                            <span class="text-sm text-gray-500">Return Remark</span>
+                            <p class="text-lg font-medium">{{ order.remarks || '-' }}</p>
+                        </div>
+                        <div>
+                            <span class="text-sm text-gray-500">Return Delivery No.</span>
+                            <p class="text-lg font-bold">{{ order.creditnoteno || '-' }}</p>
+                        </div>
+                    </div>
+                    <div class="grid grid-cols-2 gap-4 mt-4">
+                        <div>
                             <span class="text-sm text-gray-500">Return Code</span>
-                            <p class="text-lg font-semibold">{{ order.reason_code || '-' }}</p>
+                            <p class="text-lg font-medium">{{ order.reason_code || '-' }}</p>
                         </div>
                         <div>
                             <span class="text-sm text-gray-500">Return Reason</span>
@@ -123,11 +133,6 @@
                                     </div>
                                 </div>
                             </div>
-                        </div>
-
-                        <div>
-                            <span class="text-sm text-gray-500">Return Remark</span>
-                            <p class="text-lg font-medium">{{ order.remarks || '-' }}</p>
                         </div>
                     </div>
 
@@ -190,7 +195,7 @@
                 <div class="card flex flex-col w-full">
                     <div class="flex items-center justify-between border-b pb-3 mb-4">
                         <div class="text-2xl font-bold text-gray-800">Order Info</div>
-                        <Tag :value="getOrderStatusText(order.orderstatus)" :severity="getOrderStatusSeverity(order.orderstatus)" />
+                        <Tag :value="getOrderStatusText(order.orderstatus, order.creditnoteno)" :severity="getOrderStatusSeverity(order.orderstatus, order.creditnoteno)" />
                     </div>
 
                     <div class="overflow-x-auto">
@@ -315,12 +320,12 @@
 
                     <Column header="Actions" style="width: 120px">
                         <template #body="{ data }">
-                            <div v-if="data.itemcategory === 'ZR3F'">
+                            <div v-if="data.itemcategory === 'ZR3F'" class="text-center">
                                 <Button v-if="!data.removed" icon="pi pi-trash" severity="danger" text rounded @click="removeZR3FItem(data)" v-tooltip="'Remove item'" />
 
                                 <Button v-if="data.removed" icon="pi pi-undo" severity="secondary" text rounded @click="restoreZR3FItem(data)" v-tooltip="'Restore item'" />
                             </div>
-                            <div v-else class="text-left text-gray-400">
+                            <div v-else class="text-center text-gray-400">
                                 <i class="pi pi-lock"></i>
                             </div>
                         </template>
@@ -488,7 +493,12 @@ const getDeliveryStatusText = (status) => {
     return statusMap[status?.toUpperCase()] || status || '-';
 };
 
-const getOrderStatusText = (status) => {
+const getOrderStatusText = (status, creditnoteno) => {
+    // Check for the new condition: status = 9 and creditnoteno = null
+    if (status === 9 && (creditnoteno === null || creditnoteno === undefined || creditnoteno === '')) {
+        return 'Return Received';
+    }
+
     const statusMap = {
         0: 'Pending',
         1: 'Approved',
@@ -499,7 +509,12 @@ const getOrderStatusText = (status) => {
     return statusMap[status] || `Status: ${status}`;
 };
 
-const getOrderStatusSeverity = (status) => {
+const getOrderStatusSeverity = (status, creditnoteno) => {
+    // Check for the new condition: status = 9 and creditnoteno = null
+    if (status === 9 && (creditnoteno === null || creditnoteno === undefined || creditnoteno === '')) {
+        return 'info'; // Using 'info' severity for Return Received status
+    }
+
     const severityMap = {
         0: 'warn',
         1: 'success',

@@ -16,7 +16,7 @@
         </div>
 
         <!-- Loading State -->
-        <LoadingPage v-if="loading" :message="'Loading Account Detail Data...'" :sub-message="'Fetching account detail information'" />
+        <LoadingPage v-if="loading" :message="'Loading Account Details Data...'" :sub-message="'Fetching account details information'" />
 
         <!-- Data Table -->
         <DataTable
@@ -98,7 +98,7 @@
                     </template>
                     <template v-else>
                         <i class="pi pi-file-excel text-4xl mb-2"></i>
-                        <div>No account detail records found in the selected date range.</div>
+                        <div>No account details records found in the selected date range.</div>
                         <Button label="Clear Filter" icon="pi pi-times" class="p-button-text p-button-sm mt-2" @click="clearDateRange" />
                     </template>
                 </div>
@@ -109,7 +109,7 @@
             <Column field="sortableDate" header="Document Date Time" style="min-width: 12rem" sortable>
                 <template #body="{ data }">
                     <span class="font-medium">{{ data.docsDate }}</span>
-                    <div class="text-xs text-gray-500">{{ formatDateForDisplay(data.docsDate) }}</div>
+                    <!-- <div class="text-xs text-gray-500">{{ formatDateForDisplay(data.docsDate) }}</div> -->
                 </template>
             </Column>
 

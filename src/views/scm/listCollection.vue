@@ -275,7 +275,7 @@ const handleImport1 = async (event) => {
                 life: 3000
             });
             } else {
-            importErrors.value = response.data.admin_data || [];
+            importErrors.value = response.data.not_updated_records || [];
             if (importErrors.value.length > 0) {
                 showImportErrorHandle1.value = true;
                 showImportErrorDialog.value = true;
@@ -325,7 +325,7 @@ const handleImport2 = async (event) => {
                 life: 3000
             });
             } else {
-            importErrors.value = response.data.admin_data || [];
+            importErrors.value = response.data.not_updated_records || [];
             if (importErrors.value.length > 0) {
                 showImportErrorHandle2.value = true;
                 showImportErrorDialog.value = true;
@@ -851,7 +851,7 @@ onMounted(async () => {
             </DataTable>
         </div>
     </div>
-        <Dialog
+    <Dialog
         v-model:visible="showImportErrorDialog"
         header="Import Errors"
         modal
@@ -869,16 +869,26 @@ onMounted(async () => {
                 class="p-3 border rounded"
             >
                 <div class="font-semibold">
-                    Warranty Order No: {{ item.warranty_order_no }}
+                    Warranty Order No: {{ item.claim_no }}
                 </div>
-                <div v-if="showImportErrorHandle1" class="text-sm text-gray-600">
-                    Collect Date: {{ item.collect_date_raw || 'Not Assigned' }}
+                <div v-if="showImportErrorHandle1" >
+                    <div class="text-sm text-gray-600">
+                        Request CTC Date: {{ item.request_ctc_date || 'Not Assigned' }}
+                    </div>
+                    <div class="text-sm text-gray-600">
+                        Collect Date: {{ item.collect_date || 'Not Assigned' }}
+                    </div>
                 </div>
-                <div v-if="showImportErrorHandle2" class="text-sm text-gray-600">
-                    Receive Date: {{ item.reachWH_raw || 'Not Assigned' }}
+                <div v-if="showImportErrorHandle2" >
+                    <div class="text-sm text-gray-600">
+                        Collect Date: {{ item.collect_datetime || 'Not Assigned' }}
+                    </div>
+                    <div  class="text-sm text-gray-600">
+                        Receive Date: {{ item.reach_warehouse || 'Not Assigned' }}
+                    </div>
                 </div>
                 <div class="text-red-600 mt-2">
-                    {{ item.error }}
+                    {{ item.reason }}
                 </div>
             </div>
         </div>

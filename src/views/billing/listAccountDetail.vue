@@ -16,7 +16,7 @@
         </div>
 
         <!-- Loading State -->
-        <LoadingPage v-if="loading" :message="'Loading Account Detail Data...'" :sub-message="'Fetching account detail information'" />
+        <LoadingPage v-if="loading" :message="'Loading Account Details Data...'" :sub-message="'Fetching account details information'" />
 
         <!-- Data Table -->
         <DataTable
@@ -133,7 +133,7 @@
             <Column field="sortableDate" header="Document Date Time" style="min-width: 12rem" sortable>
                 <template #body="{ data }">
                     <span class="font-medium">{{ data.docsDate }}</span>
-                    <div class="text-xs text-gray-500">{{ formatDateForDisplay(data.docsDate) }}</div>
+                    <!-- <div class="text-xs text-gray-500">{{ formatDateForDisplay(data.docsDate) }}</div> -->
                 </template>
             </Column>
 
