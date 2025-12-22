@@ -1169,7 +1169,7 @@ onMounted(() => {
 
                     <div class="flex flex-col md:flex-row gap-4">
                         <div class="w-full">
-                            <label for="showOnList">Show On List</label>
+                            <label for="showOnList">Show In T-Care</label>
                             <!-- This will show "No" by default -->
                             <Dropdown v-model="dropdownShowOnList" :options="dropdownYesNoValue" optionLabel="name" placeholder="Select Option" class="w-full" />
                         </div>
