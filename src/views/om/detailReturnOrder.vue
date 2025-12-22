@@ -66,8 +66,18 @@
                     </div>
                     <div class="grid grid-cols-2 gap-4 mt-4">
                         <div>
+                            <span class="text-sm text-gray-500">Return Remark</span>
+                            <p class="text-lg font-medium">{{ order.remarks || '-' }}</p>
+                        </div>
+                        <div>
+                            <span class="text-sm text-gray-500">Return Delivery No.</span>
+                            <p class="text-lg font-bold">{{ order.creditnoteno || '-' }}</p>
+                        </div>
+                    </div>
+                    <div class="grid grid-cols-2 gap-4 mt-4">
+                        <div>
                             <span class="text-sm text-gray-500">Return Code</span>
-                            <p class="text-lg font-semibold">{{ order.reason_code || '-' }}</p>
+                            <p class="text-lg font-medium">{{ order.reason_code || '-' }}</p>
                         </div>
                         <div>
                             <span class="text-sm text-gray-500">Return Reason</span>
@@ -123,11 +133,6 @@
                                     </div>
                                 </div>
                             </div>
-                        </div>
-
-                        <div>
-                            <span class="text-sm text-gray-500">Return Remark</span>
-                            <p class="text-lg font-medium">{{ order.remarks || '-' }}</p>
                         </div>
                     </div>
 
