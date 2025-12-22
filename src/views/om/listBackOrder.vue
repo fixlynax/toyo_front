@@ -16,9 +16,21 @@ const filters = ref({
     global: { value: null, matchMode: FilterMatchMode.CONTAINS }
 });
 
+// 🟢 Helper function to get default date range for Completed tab (last 7 days)
+const getDefaultDateRangeForCompleted = () => {
+    const endDate = new Date();
+    const startDate = new Date();
+    startDate.setDate(startDate.getDate() - 7); // 7 days ago
+    
+    return {
+        start: startDate,
+        end: endDate
+    };
+};
+
 const statusTabs = [
     { label: 'Pending', status: 0, type: 'PENDING', requiresDateRange: false, initialLoad: true },
-    { label: 'Completed', status: 1, type: 'COMPLETED', requiresDateRange: true, initialLoad: false },
+    { label: 'Completed', status: 1, type: 'COMPLETED', requiresDateRange: true, initialLoad: true }, // Changed initialLoad to true
     { label: 'Cancelled', status: 9, type: 'CANCELLED', requiresDateRange: true, initialLoad: false },
     { label: 'Expired', status: '', type: 'EXPIRED', requiresDateRange: true, initialLoad: false }
 ];
@@ -27,14 +39,17 @@ const statusTabs = [
 const currentTab = computed(() => statusTabs[activeTabIndex.value]);
 const currentTabLabel = computed(() => currentTab.value?.label || '');
 const showDateRangeFilter = computed(() => currentTab.value?.requiresDateRange || false);
+const isCompletedTab = computed(() => currentTab.value?.type === 'COMPLETED');
+const isCancelledTab = computed(() => currentTab.value?.type === 'CANCELLED');
+const isExpiredTab = computed(() => currentTab.value?.type === 'EXPIRED');
 
-const fetchBackOrders = async () => {
+const fetchBackOrders = async (useDefaultRange = false) => {
     try {
         const selectedTab = currentTab.value;
         if (!selectedTab) return;
 
-        // For tabs requiring date range and initialLoad is false, don't fetch until date range is set
-        if (selectedTab.requiresDateRange && !selectedTab.initialLoad && !hasDateFilterApplied.value) {
+        // For Cancelled and Expired tabs (requires date range and initialLoad is false), don't fetch until date range is set
+        if ((isCancelledTab.value || isExpiredTab.value) && !selectedTab.initialLoad && !hasDateFilterApplied.value) {
             listData.value = [];
             filteredList.value = [];
             loading.value = false;
@@ -44,16 +59,31 @@ const fetchBackOrders = async () => {
         const formData = new FormData();
         formData.append('type', selectedTab.type);
 
-        // Add date range if applied
-        if (hasDateFilterApplied.value && dateRange.value[0] && dateRange.value[1]) {
+        // Add date range if applied or if it's Completed tab with default range
+        if (hasDateFilterApplied.value || (isCompletedTab.value && useDefaultRange)) {
             // Format dates for backend (d/m/Y format)
             const formatDateForBackend = (date) => {
                 const d = new Date(date);
                 return `${d.getDate().toString().padStart(2, '0')}/${(d.getMonth() + 1).toString().padStart(2, '0')}/${d.getFullYear()}`;
             };
 
-            const dateRangeString = `${formatDateForBackend(dateRange.value[0])} - ${formatDateForBackend(dateRange.value[1])}`;
-            formData.append('date_range', dateRangeString);
+            let startDate, endDate;
+            
+            if (hasDateFilterApplied.value && dateRange.value[0] && dateRange.value[1]) {
+                // Use user-selected date range
+                startDate = dateRange.value[0];
+                endDate = dateRange.value[1];
+            } else if (isCompletedTab.value && useDefaultRange) {
+                // Use default 7-day range for Completed tab
+                const defaultRange = getDefaultDateRangeForCompleted();
+                startDate = defaultRange.start;
+                endDate = defaultRange.end;
+            }
+
+            if (startDate && endDate) {
+                const dateRangeString = `${formatDateForBackend(startDate)} - ${formatDateForBackend(endDate)}`;
+                formData.append('date_range', dateRangeString);
+            }
         }
 
         loading.value = true;
@@ -92,12 +122,18 @@ const fetchBackOrders = async () => {
 };
 
 onMounted(async () => {
-    // For tabs that don't require initial load, don't fetch until date range is set
-    if (currentTab.value?.requiresDateRange && !currentTab.value?.initialLoad) {
+    // Handle initial load based on tab
+    if (isCompletedTab.value) {
+        // For Completed tab, fetch last 7 days by default
+        await fetchBackOrders(true);
+    } else if (isCancelledTab.value || isExpiredTab.value) {
+        // For Cancelled and Expired tabs, don't fetch until date range is set
         loading.value = false;
         return;
+    } else {
+        // For Pending tab, fetch all data
+        await fetchBackOrders();
     }
-    await fetchBackOrders();
 });
 
 // Watch tab changes
@@ -108,12 +144,17 @@ watch(activeTabIndex, (newIndex, oldIndex) => {
     dateRange.value = [null, null];
     hasDateFilterApplied.value = false;
 
-    // Clear data when switching to tabs that require date range and don't have initial load
-    if (selectedTab?.requiresDateRange && !selectedTab?.initialLoad) {
+    // Handle data loading based on tab type
+    if (isCompletedTab.value) {
+        // For Completed tab, fetch last 7 days by default
+        fetchBackOrders(true);
+    } else if (isCancelledTab.value || isExpiredTab.value) {
+        // For Cancelled and Expired tabs, clear data (requires date range)
         listData.value = [];
         filteredList.value = [];
         loading.value = false;
     } else {
+        // For Pending tab, fetch all data
         fetchBackOrders();
     }
 });
@@ -130,12 +171,18 @@ watch(
             fetchBackOrders();
         } else if (newRange[0] === null && newRange[1] === null && hasDateFilterApplied.value) {
             // Clear data if date range is cleared
-            listData.value = [];
-            filteredList.value = [];
             hasDateFilterApplied.value = false;
 
-            // Reload data for tabs that have initialLoad
-            if (selectedTab?.initialLoad) {
+            // Reload data based on tab type
+            if (isCompletedTab.value) {
+                // For Completed tab, reload last 7 days
+                fetchBackOrders(true);
+            } else if (isCancelledTab.value || isExpiredTab.value) {
+                // For Cancelled and Expired tabs, clear data
+                listData.value = [];
+                filteredList.value = [];
+            } else {
+                // For Pending tab, reload all data
                 fetchBackOrders();
             }
         }
@@ -175,12 +222,16 @@ const clearDateRange = () => {
     dateRange.value = [null, null];
     hasDateFilterApplied.value = false;
 
-    // Clear data for tabs that don't have initial load
-    if (!currentTab.value?.initialLoad) {
+    // Reload data based on current tab
+    if (isCompletedTab.value) {
+        // For Completed tab, reload last 7 days
+        fetchBackOrders(true);
+    } else if (isCancelledTab.value || isExpiredTab.value) {
+        // For Cancelled and Expired tabs, clear data
         listData.value = [];
         filteredList.value = [];
     } else {
-        // Reload data for tabs that have initial load
+        // For Pending tab, reload all data
         fetchBackOrders();
     }
 };
@@ -324,29 +375,32 @@ const getStatusSeverity = (data) => {
                             </div>
                             <Button v-if="dateRange[0] || dateRange[1]" icon="pi pi-times" class="p-button-text p-button-sm" @click="clearDateRange" title="Clear date filter" />
                         </div>
-                        <!-- Conditional message for tabs that require date range but don't have initial load -->
-                        <div v-if="showDateRangeFilter && !currentTab?.initialLoad && !hasDateFilterApplied" class="text-sm text-blue-600 italic">Please select a date range to view {{ currentTabLabel }} orders</div>
-                        <!-- <div v-else-if="dateRange[0] && dateRange[1]" class="text-sm text-gray-600">Showing {{ filteredList.length }} orders from {{ formatDate(dateRange[0]) }} to {{ formatDate(dateRange[1]) }}</div> -->
+                        <!-- Conditional messages for different tabs -->
+                        <div v-if="isCancelledTab && !hasDateFilterApplied" class="text-sm text-blue-600 italic">Please select a date range to view {{ currentTabLabel }} orders</div>
+                        <div v-if="isExpiredTab && !hasDateFilterApplied" class="text-sm text-blue-600 italic">Please select a date range to view {{ currentTabLabel }} orders</div>
+                        <div v-if="isCompletedTab && !hasDateFilterApplied" class="text-sm text-blue-600 italic">
+                            Showing last 7 days of {{ currentTabLabel }} orders. Use date range to filter further.
+                        </div>
                     </div>
                 </div>
             </template>
 
             <template #empty>
                 <div class="text-center py-4 text-gray-500">
-                    <template v-if="showDateRangeFilter && !currentTab?.initialLoad && !hasDateFilterApplied">
+                    <template v-if="(isCancelledTab || isExpiredTab) && !hasDateFilterApplied">
                         <div class="flex flex-col items-center gap-2">
                             <i class="pi pi-calendar text-3xl text-blue-400"></i>
                             <span class="text-lg">Select a date range to view {{ currentTabLabel }} orders</span>
                             <span class="text-sm text-gray-400">Choose both start and end dates to filter results</span>
                         </div>
                     </template>
-                    <template v-else-if="showDateRangeFilter && hasDateFilterApplied && (!dateRange[0] || !dateRange[1])">
+                    <template v-else-if="hasDateFilterApplied && (!dateRange[0] || !dateRange[1])">
                         <div class="flex flex-col items-center gap-2">
                             <i class="pi pi-exclamation-circle text-3xl text-yellow-400"></i>
                             <span class="text-lg">Please select both start and end dates</span>
                         </div>
                     </template>
-                    <template v-else-if="showDateFilterApplied && hasDateFilterApplied"> No {{ currentTabLabel }} orders found in the selected date range. </template>
+                    <template v-else-if="hasDateFilterApplied"> No {{ currentTabLabel }} orders found in the selected date range. </template>
                     <template v-else> No back orders found. </template>
                 </div>
             </template>
