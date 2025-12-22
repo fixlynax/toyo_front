@@ -223,6 +223,11 @@ const formatDate = (dateString) => {
     });
 };
 
+const formatDateTime = (dateString) => {
+    if (!dateString) return '-';
+    return new Date(dateString).toLocaleString('en-MY');
+};
+
 // 🟢 Clear Date Range
 const clearDateRange = () => {
     dateRange.value = [null, null];
@@ -316,7 +321,7 @@ const clearDateRange = () => {
 
                 <!-- ... Rest of the columns remain the same ... -->
                 <Column field="created" header="Created Date" style="min-width: 8rem" sortable>
-                    <template #body="{ data }">{{ formatDate(data.created) }}</template>
+                    <template #body="{ data }">{{ formatDateTime(data.created) }}</template>
                 </Column>
 
                 <Column header="Order No" style="min-width: 10rem" sortable>
