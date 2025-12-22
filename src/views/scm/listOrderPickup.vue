@@ -223,6 +223,43 @@
             <Button label="Confirm" @click="submitPickupUpdate2" />
         </template>
     </Dialog>
+        <Dialog
+        v-model:visible="showImportErrorDialog"
+        header="Import Errors"
+        modal
+        :style="{ width: '700px' }"
+        @hide="handleCloseErrorModal"
+    >
+        <div v-if="importErrors.length === 0" class="text-gray-500">
+            No error details available.
+        </div>
+
+        <div v-else class="flex flex-col gap-4">
+            <div
+                v-for="(item, index) in importErrors"
+                :key="index"
+                class="p-3 border rounded"
+            >
+                <div class="font-semibold">
+                    DO No: {{ item.do_no }}
+                </div>
+                <div class="text-sm text-gray-600">
+                    Collecter IC: {{ item.collector_ic || 'Not Assigned' }}
+                </div>
+                <div class="text-red-600 mt-2">
+                    {{ item.error }}
+                </div>
+            </div>
+        </div>
+
+        <template #footer>
+            <Button
+                label="Close"
+                icon="pi pi-times"
+                @click="handleCloseErrorModal()"
+            />
+        </template>
+    </Dialog>
 </template>
 
 <script setup>
@@ -258,6 +295,8 @@ const dateRange = ref([null, null]);
 const exportLoading = ref(false);
 const importLoading = ref(false);
 const importInput = ref();
+const  importErrors = ref([]);
+const showImportErrorDialog = ref(false);
 
 const selectedExportIds = ref(new Set());
 const visibleRows = ref(orderDelList.value);
@@ -382,6 +421,10 @@ const handleImport = async (event) => {
                 life: 3000
             });
         } else {
+            importErrors.value = response.data.admin_data || [];
+            if (importErrors.value.length > 0) {
+                showImportErrorDialog.value = true;
+            }
             toast.add({
                 severity: 'error',
                 summary: 'Import Failed',
@@ -400,7 +443,10 @@ const handleImport = async (event) => {
         }
     }
 };
-
+const handleCloseErrorModal = () => {
+    importErrors.value = [];
+    showImportErrorDialog.value = false; // optional, v-model handles it
+};
 watch(activeTabIndex, () => {
     const tab = statusTabs[activeTabIndex.value];
     if (tab.submitLabel === 'COMPLETED') {
