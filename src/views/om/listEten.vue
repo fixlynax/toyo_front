@@ -68,6 +68,7 @@
             >
 
             <Column field="companyName1" header="Company Name" style="min-width: 8rem" />
+            <Column field="salesOffice" header="Sales Office" style="min-width: 8rem; text-align: center;" />
 
             <Column field="location" header="Location" style="min-width: 8rem">
                 <template #body="{ data }"> {{ data.city }}{{ data.state }} </template>
@@ -126,10 +127,11 @@ onMounted(async () => {
 
                 return {
                     id: shop.id,
-                    memberCode: shop.memberCode || 'Untitled',
+                    memberCode: shop.memberCode || '-',
                     custAccountNo: shop.custAccountNo,
                     companyName1: shop.companyName1,
                     companyName2: shop.companyName2,
+                    salesOffice: shop.salesOffice || '-',
                     city: shop.city,
                     state: shop.state,
                     phoneNumber: shop.phoneNumber || '-',

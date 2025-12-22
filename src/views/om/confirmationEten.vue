@@ -301,7 +301,7 @@
 
                 <div class="flex flex-col md:flex-row gap-4">
                     <div class="w-full">
-                        <span class="text-sm text-gray-500">Show On List</span>
+                        <span class="text-sm text-gray-500">Show In T-Care</span>
                         <p class="text-lg font-medium">{{ form.showOnList === '1' ? 'Yes' : 'No' }}</p>
                     </div>
                     <div class="w-full">

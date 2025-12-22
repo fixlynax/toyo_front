@@ -858,7 +858,8 @@ onMounted(() => {
                     <div class="flex-1">
                         <div class="flex items-center gap-2 mb-1">
                             <label for="accountNo" class="font-medium">Account No.</label>
-                            <i class="pi pi-info-circle cursor-pointer font-bold" v-tooltip="'SAP account number for the dealer. Must be exactly 10 characters. Main branch ends with 00, sub-branch ends with other digits.'"></i>
+                            <i class="pi pi-info-circle cursor-pointer font-bold" v-tooltip="'SAP account number for the customer. Must be exactly 10 characters.'"></i>
+                            <!-- Main branch ends with 00, sub-branch ends with other digits. -->
                         </div>
                         <InputText v-model="accountNo" id="accountNo" type="text" class="w-full" placeholder="Enter 10-digit SAP account number" maxlength="10" @input="handleAccountNoInput" />
                     </div>
