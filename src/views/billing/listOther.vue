@@ -144,7 +144,7 @@
             <Column field="sortableDate" header="Document Date" style="min-width: 8rem" sortable>
                 <template #body="{ data }">
                     <span class="font-medium">{{ data.docsDate }}</span>
-                    <div class="text-xs text-gray-500">{{ formatDateForDisplay(data.docsDate) }}</div>
+                    <!-- <div class="text-xs text-gray-500">{{ formatDateForDisplay(data.docsDate) }}</div> -->
                 </template>
             </Column>
 
