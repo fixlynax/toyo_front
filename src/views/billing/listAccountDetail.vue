@@ -16,7 +16,7 @@
         </div>
 
         <!-- Loading State -->
-        <LoadingPage v-if="loading" :message="'Loading Account Detail Data...'" :sub-message="'Fetching account detail information'" />
+        <LoadingPage v-if="loading" :message="'Loading Account Details Data...'" :sub-message="'Fetching account details information'" />
 
         <!-- Data Table -->
         <DataTable

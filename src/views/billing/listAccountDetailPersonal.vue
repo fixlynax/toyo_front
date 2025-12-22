@@ -11,13 +11,13 @@
         <div v-if="error" class="p-4 mb-4 text-red-700 bg-red-100 rounded-lg border border-red-200">
             <div class="flex items-center">
                 <i class="pi pi-exclamation-triangle mr-2"></i>
-                <span>Error loading account detail data: {{ error }}</span>
+                <span>Error loading account details data: {{ error }}</span>
             </div>
             <Button label="Try Again" icon="pi pi-refresh" class="p-button-text p-button-sm mt-2" @click="refreshData" />
         </div>
 
         <!-- Loading State -->
-        <LoadingPage v-if="loading" :message="'Loading Account Detail Data...'" :sub-message="'Fetching account detail information'" />
+        <LoadingPage v-if="loading" :message="'Loading Account Details Data...'" :sub-message="'Fetching account details information'" />
 
         <!-- Data Table -->
         <DataTable
@@ -81,7 +81,7 @@
                     <template v-if="!hasDateFilterApplied">
                         <div class="flex flex-col items-center gap-2">
                             <i class="pi pi-calendar text-3xl text-blue-400"></i>
-                            <span class="text-lg">Select a date range to view account details</span>
+                            <span class="text-lg">Select a date range to view account</span>
                             <span class="text-sm text-gray-400">Choose both start and end dates to load data</span>
                         </div>
                     </template>
@@ -93,7 +93,7 @@
                     </template>
                     <template v-else>
                         <i class="pi pi-file-excel text-4xl mb-2"></i>
-                        <div>No account detail records found in the selected date range.</div>
+                        <div>No account details records found in the selected date range.</div>
                         <Button label="Clear Filter" icon="pi pi-times" class="p-button-text p-button-sm mt-2" @click="clearDateRange" />
                     </template>
                 </div>
