@@ -18,7 +18,7 @@
                 :filters="filters"
                 filterDisplay="menu"
                 class="rounded-table"
-                :globalFilterFields="['do_no', 'created', 'customer_name', 'custAccountNo', 'customer_name', 'city', 'state', 'deliveryDate', 'orderDesc', 'scheduled_delivery_time', 'delivered_datetime', 'orderstatus']"
+                :globalFilterFields="['do_no', 'created', 'customer_name', 'custAccountNo', 'storagelocation', 'customer_name', 'city', 'state', 'deliveryDate', 'orderDesc', 'scheduled_delivery_time', 'delivered_datetime', 'orderstatus']"
                 paginatorTemplate="CurrentPageReport FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink RowsPerPageDropdown"
                 currentPageReportTemplate="Showing {first} to {last} of {totalRecords} entries"
             >
