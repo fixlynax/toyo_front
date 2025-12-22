@@ -8,10 +8,10 @@
                 <!-- Filters Section -->
                 <div>
                     <div class="grid grid-cols-1 md:grid-cols-5 gap-4">
-                        <!-- Customer Account -->
+                        <!-- Customer Account (Input Text) -->
                         <div>
                             <label class="block font-bold text-gray-700 mb-2">Customer Account</label>
-                            <Dropdown v-model="filters.custAccountNo" :options="customerOptions" optionLabel="label" optionValue="value" placeholder="Select Customer Account" class="w-full" />
+                            <InputText v-model="filters.custAccountNo" placeholder="Enter Account Number" class="w-full" />
                         </div>
 
                         <!-- Order Type -->
@@ -32,7 +32,7 @@
                             <Calendar v-model="filters.enddate" dateFormat="yy-mm-dd" placeholder="Select End Date" class="w-full" />
                         </div>
 
-                        <!-- Status -->
+                        <!-- Status (Single Select Dropdown) -->
                         <div>
                             <label class="block font-bold text-gray-700 mb-2">Status</label>
                             <Dropdown v-model="filters.status" :options="statusOptions" optionLabel="label" optionValue="value" placeholder="Select Status" class="w-full" />
@@ -51,8 +51,9 @@
 </template>
 
 <script setup>
-import { ref, reactive, onMounted } from 'vue';
+import { ref, reactive } from 'vue';
 import api from '@/service/api';
+import InputText from 'primevue/inputtext';
 
 // ✅ Filters
 const filters = reactive({
@@ -60,14 +61,11 @@ const filters = reactive({
     orderType: null,
     startdate: null,
     enddate: null,
-    status: null
+    status: null // Single value for status
 });
 
 // ✅ Loading states
 const exportLoading = ref(false);
-
-// ✅ Data
-const customerOptions = ref([]);
 
 // ✅ Order Type Options
 const orderTypeOptions = [
@@ -77,7 +75,7 @@ const orderTypeOptions = [
     { label: 'OWN', value: 'OWN' }
 ];
 
-// ✅ Status Options based on API data
+// ✅ Status Options - Single select dropdown
 const statusOptions = [
     { label: 'All Status', value: null },
     { label: 'Pending', value: 0 },
@@ -85,38 +83,6 @@ const statusOptions = [
     { label: 'Delivery', value: 77 },
     { label: 'Completed', value: 1 }
 ];
-
-// ✅ Generate customer options from order data
-const generateCustomerOptions = async () => {
-    try {
-        const response = await api.get('order/list-order-report'); // You might need to create this endpoint
-        if (response.data.status === 1) {
-            const orderData = response.data.data;
-            const customers = new Map();
-
-            orderData.forEach((item) => {
-                const custAccountNo = item.custaccountno;
-                const companyName = item.companyName || 'Unknown Customer';
-
-                if (custAccountNo && !customers.has(custAccountNo)) {
-                    customers.set(custAccountNo, {
-                        label: `${companyName} (${custAccountNo})`,
-                        value: custAccountNo
-                    });
-                }
-            });
-
-            // Convert to array and sort by label
-            customerOptions.value = Array.from(customers.values()).sort((a, b) => a.label.localeCompare(b.label));
-
-            // Add "All Customers" option at the beginning
-            customerOptions.value.unshift({ label: 'All Customers', value: null });
-        }
-    } catch (error) {
-        console.error('Error fetching customer options:', error);
-        customerOptions.value = [{ label: 'All Customers', value: null }];
-    }
-};
 
 // ✅ Clear Filters
 const clearFilters = () => {
@@ -133,7 +99,7 @@ const exportExcel = async () => {
     try {
         // Prepare filters for export
         const exportFilters = {
-            custAccountNo: filters.custAccountNo,
+            custAccountNo: filters.custAccountNo?.trim() || null,
             orderType: filters.orderType,
             status: filters.status,
             startdate: filters.startdate,
@@ -152,9 +118,11 @@ const exportExcel = async () => {
         const link = document.createElement('a');
 
         // Generate filename based on filters
-        const custaccno = filters.custAccountNo || 'ALL';
+        const custaccno = filters.custAccountNo?.trim() || 'ALL';
         const orderType = filters.orderType || 'ALL';
-        const filename = `${custaccno}_${orderType}_OMS-Order_Report.xlsx`;
+        const status = filters.status !== null ? getStatusLabel(filters.status) : 'ALL_STATUS';
+
+        const filename = `${custaccno}_${orderType}_${status}_OMS-Order_Report.xlsx`;
 
         link.href = url;
         link.setAttribute('download', filename);
@@ -170,14 +138,16 @@ const exportExcel = async () => {
     }
 };
 
-// ✅ Load initial data when component mounts
-onMounted(() => {
-    generateCustomerOptions();
-});
+// ✅ Helper function to get status label for filename
+const getStatusLabel = (statusValue) => {
+    const statusOption = statusOptions.find((option) => option.value === statusValue);
+    return statusOption ? statusOption.label.toUpperCase().replace(/\s+/g, '_') : 'UNKNOWN';
+};
 </script>
 
 <style scoped>
-:deep(.p-dropdown) {
+:deep(.p-dropdown),
+:deep(.p-inputtext) {
     width: 100%;
 }
 
