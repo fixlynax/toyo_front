@@ -940,8 +940,8 @@ const validateForm = () => {
     const startDate = new Date(salesProgram.value.startdate);
     const endDate = new Date(salesProgram.value.enddate);
 
-    if (endDate <= startDate) {
-        showError('End date must be after start date');
+    if (endDate < startDate) {
+        showError('End date must be on or after start date'); // Updated message
         return false;
     }
 
