@@ -305,7 +305,8 @@
                         <!-- <div class="text-xl font-extrabold text-grey-700">Total Quantity: {{ cartQuantity + freeItemsQuantity }}</div> -->
                         <div class="flex items-center justify-between mb-2">
                             <span class="w-30 text-xl font-bold text-black">Total Quantity:</span>
-                            <span class="text-xl font-bold text-indigo-700">{{ cartQuantity }}</span>
+                            <!-- <span class="text-xl font-bold text-indigo-700">{{ cartQuantity + freeItemsQuantity }}</span> -->
+                             <span class="text-xl font-bold text-indigo-700">{{ cartQuantity }}</span>
                         </div>
                         <div class="text-2xl font-extrabold text-indigo-700">Total: RM {{ formatCurrency(cartTotal.toFixed(2)) }}</div>
                     </div>
