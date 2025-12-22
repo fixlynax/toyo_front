@@ -34,11 +34,11 @@
 
                         <!-- Content -->
                         <div v-else class="grid grid-cols-1 gap-4 mt-4">
-                            <img :src="salesProgram.imageUrl" :alt="salesProgram.title" class="rounded-xl shadow-sm object-cover w-full h-80" @error="handleImageError" v-if="salesProgram.imageUrl && !imageLoading" />
+                            <img :src="salesProgram.image" :alt="salesProgram.title" class="rounded-xl shadow-sm object-cover w-full h-80" @error="handleImageError" v-if="salesProgram.image && !imageLoading" />
                             <div v-if="imageLoading" class="rounded-xl shadow-sm w-full h-80 bg-gray-200 flex items-center justify-center">
                                 <i class="pi pi-spin pi-spinner text-4xl text-gray-400"></i>
                             </div>
-                            <div v-else-if="!salesProgram.imageUrl" class="rounded-xl shadow-sm w-full h-80 bg-gray-200 flex items-center justify-center">
+                            <div v-else-if="!salesProgram.image" class="rounded-xl shadow-sm w-full h-80 bg-gray-200 flex items-center justify-center">
                                 <i class="pi pi-image text-4xl text-gray-400"></i>
                             </div>
                         </div>
@@ -236,43 +236,20 @@ const imageLoading = ref(false);
 const salesProgram = ref({});
 const criteriaList = ref([]);
 
-// Enhanced image processing function
+// Simplified image processing - just direct URL
 const processPrivateImages = async (programData) => {
-    // If no image or image is null, set placeholder and return
+    // If no image or image is null, set placeholder
     if (!programData || !programData.image) {
         programData.imageUrl = 'https://via.placeholder.com/800x400?text=No+Image+Available';
-        return programData;
-    }
-
-    const imageUrl = programData.image;
-
-    // If it's already a blob URL or data URL, return as is
-    if (imageUrl.startsWith('blob:') || imageUrl.startsWith('data:')) {
-        programData.imageUrl = imageUrl;
-        return programData;
-    }
-
-    // Use getPrivateFile to load the image
-    try {
-        imageLoading.value = true;
-        console.log('Processing private image:', imageUrl);
-        const blobUrl = await api.getPrivateFile(imageUrl);
-        if (blobUrl) {
-            programData.imageUrl = blobUrl;
-        } else {
-            programData.imageUrl = 'https://via.placeholder.com/800x400?text=Image+Not+Found';
-        }
-    } catch (error) {
-        console.error('Error loading private image:', error);
-        programData.imageUrl = 'https://via.placeholder.com/800x400?text=Image+Not+Found';
-    } finally {
-        imageLoading.value = false;
+    } else {
+        // Use image URL directly without API call
+        programData.imageUrl = programData.image;
     }
 
     return programData;
 };
 
-// Enhanced image error handler
+// Image error handler
 const handleImageError = (event) => {
     console.warn('Image failed to load:', event.target.src);
     event.target.src = 'https://via.placeholder.com/800x400?text=Image+Not+Found';
@@ -293,7 +270,7 @@ const fetchSalesProgram = async () => {
 
         let programData = response.data.admin_data[0];
 
-        // Process images BEFORE setting the reactive data
+        // Process images (simple direct URL assignment)
         programData = await processPrivateImages(programData);
 
         // Now set the reactive data
@@ -355,10 +332,8 @@ onMounted(() => {
     fetchSalesProgram();
 });
 
-// Clean up blob URLs to prevent memory leaks
+// No need to clean up blob URLs since we're not creating them
 onUnmounted(() => {
-    if (salesProgram.value.imageUrl && salesProgram.value.imageUrl.startsWith('blob:')) {
-        URL.revokeObjectURL(salesProgram.value.imageUrl);
-    }
+    // Removed blob URL cleanup as we're not using getPrivateFile anymore
 });
 </script>

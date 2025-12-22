@@ -387,6 +387,10 @@ const showEditDialog = ref(false);
 const editableItems = ref([]);
 const originalItems = ref([]);
 
+// Image handling variables
+const imageLoading = ref(false);
+const imageError = ref(false);
+
 // Check if there are ZR3F items
 const hasZR3FItems = computed(() => {
     return returnOrderArray.value.some((item) => item.itemcategory === 'ZR3F');
@@ -506,24 +510,6 @@ const getOrderStatusSeverity = (status) => {
     return severityMap[status] || 'secondary';
 };
 
-// const getActionStatusLabel = (status) => {
-//     const actionMap = {
-//         1: 'Approved',
-//         2: 'Rejected',
-//         9: 'Completed'
-//     };
-//     return actionMap[status] || '';
-// };
-
-// const getActionStatusSeverity = (status) => {
-//     const severityMap = {
-//         1: 'success',
-//         2: 'danger',
-//         9: 'success'
-//     };
-//     return severityMap[status] || 'secondary';
-// };
-
 // Helper methods
 const formatAddress = (dealerShop) => {
     if (!dealerShop) return '-';
@@ -556,13 +542,10 @@ const showToast = (severity, summary, detail) => {
     });
 };
 
-// Add these to your reactive variables
-const imageLoading = ref(false);
-const imageError = ref(false);
-
-// Add these methods to your script
+// Image handling methods
 const handleImageLoad = () => {
     imageLoading.value = false;
+    imageError.value = false;
 };
 
 const handleImageError = () => {
@@ -570,26 +553,25 @@ const handleImageError = () => {
     imageError.value = true;
 };
 
-// Update your processPrivateImage function
+// Simplified image processing - no API call
 const processPrivateImage = async () => {
     if (order.value.imageURL && typeof order.value.imageURL === 'string') {
         try {
             imageLoading.value = true;
             imageError.value = false;
 
-            // Check if it's a private file URL that needs processing
-            if (order.value.imageURL.includes('private')) {
-                const blobUrl = await api.getPrivateFile(order.value.imageURL);
-                if (blobUrl) {
-                    order.value.imageURL = blobUrl;
-                }
-            }
+            // Directly use the image URL without API processing
+            // The image URL will be used as-is in the template
+            console.log('Using direct image URL:', order.value.imageURL);
         } catch (error) {
-            console.error('Error loading return image:', error);
+            console.error('Error processing image:', error);
             imageError.value = true;
         } finally {
             imageLoading.value = false;
         }
+    } else {
+        // No image URL, set loading to false
+        imageLoading.value = false;
     }
 };
 
@@ -600,7 +582,7 @@ const fetchReturnOrderDetail = async () => {
         error.value = null;
 
         const response = await api.get(`order/detail-return-order/${returnOrderNo}`);
-            console.log('Order Data:', orderData.value);
+        console.log('Order Data:', orderData.value);
 
         if (response.data.status === 1 && response.data.admin_data && response.data.admin_data.length > 0) {
             const orderDataResponse = response.data.admin_data[0];
@@ -610,14 +592,14 @@ const fetchReturnOrderDetail = async () => {
             orderDelivery.value = orderDataResponse.delivery_information || {};
             returnOrderArray.value = orderDataResponse.return_order_array || [];
 
-            // Process the return image if it exists
+            // Process the return image (simplified - no API call)
             await processPrivateImage();
 
             console.log('Order Data:', orderData.value);
             console.log('Return Items:', returnOrderArray.value);
             console.log('Has ZR3F items:', hasZR3FItems.value);
 
-            console.log('imageURL after processing:', order.value.imageURL);
+            console.log('imageURL:', order.value.imageURL);
         } else {
             error.value = 'No data found for this return order';
             showToast('error', 'Error', error.value);
