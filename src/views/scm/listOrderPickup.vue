@@ -20,6 +20,7 @@
                 class="rounded-table"
                 :globalFilterFields="[
                     'do_no',
+                    'orderDate',
                     'eten_user.custAccountNo',
                     'eten_user.companyName1',
                     'eten_user.companyName2',
@@ -91,11 +92,11 @@
                         </div>
                     </template>
                 </Column>
-                <Column field="created" header="Created On" style="min-width: 8rem" sortable>
+                <Column field="orderDate" header="Created On" style="min-width: 8rem" sortable>
                     <template #body="{ data }">
-                        {{ formatDate(data?.created) ?? '-' }}
+                        {{ formatDate(data?.orderDate) ?? '-' }}
                         <br/>
-                        {{ formatTime(data?.created) ?? '-' }}
+                        {{ formatTime(data?.orderDate) ?? '-' }}
                     </template>
                 </Column>
 
@@ -687,7 +688,7 @@ const fetchData = async (body = null) => {
         const response = await api.postExtra('order-pickup/list', payload);
         if (response.data.status === 1 && Array.isArray(response.data.admin_data)) {
             orderDelList.value = response.data.admin_data.sort((a, b) => {
-                return new Date(b.created) - new Date(a.created);
+                return new Date(b.orderDate) - new Date(a.orderDate);
             });
         } else {
             orderDelList.value = [];
@@ -716,7 +717,7 @@ const exportToExcel = () => {
 
         // Prepare data rows
         const csvData = rowsToExport.map((data) => [
-            `"${formatDate(data.created)} ${formatTime(data.created)}"`,
+            `"${formatDate(data.orderDate)} ${formatTime(data.orderDate)}"`,
             `"${data.do_no || '-'}"`,
             `"${data.eten_user?.companyName1} ${data.eten_user?.companyName2} ${data.eten_user?.companyName3} ${data.eten_user?.companyName4}"`,
             `"${data.eten_user?.custAccountNo || '-'}"`,

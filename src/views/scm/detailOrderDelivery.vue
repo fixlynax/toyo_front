@@ -153,7 +153,7 @@
                                 </tr>
                                 <tr>
                                     <td class="px-4 py-2 font-medium">Created On</td>
-                                    <td class="px-4 py-2 text-right">{{ formatDate(orderDelList.created) }} <br> {{ formatTime(orderDelList.created) }}</td>
+                                    <td class="px-4 py-2 text-right">{{ formatDate(orderDelList.orderDate) }} <br> {{ formatTime(orderDelList.orderDate) }}</td>
                                 </tr>
                             </tbody>
                         </table>
@@ -236,7 +236,7 @@
     <Dialog header="Update Planned Information" v-model:visible="openDialog" modal :style="{ width: '50rem' }">
         <div class="flex flex-col gap-3">
             <!-- Schedule Date -->
-            <Calendar v-model="form.scheduleDate" dateFormat="yy-mm-dd" placeholder="Select Planned Date" :minDate="new Date()" />
+            <Calendar v-model="form.scheduleDate" dateFormat="yy-mm-dd" placeholder="Select Planned Date" :minDate="orderCreatedDate"  />
             <div class="grid md:grid-cols-2 gap-4">
                 <div>
                     <label class="block mb-2 font-medium w-full">Driver IC Number</label>
@@ -268,7 +268,7 @@
 
     <Dialog header="Update Delivered Date" v-model:visible="openDialog2" modal :style="{ width: '400px' }">
         <div class="flex flex-col gap-3">
-            <Calendar v-model="form2.delivereddate" dateFormat="yy-mm-dd" placeholder="Select Delivered Date" :maxDate="new Date()" />
+            <Calendar v-model="form2.delivereddate" dateFormat="yy-mm-dd" placeholder="Select Delivered Date" :minDate="orderCreatedDate"  :maxDate="new Date()" />
 
             <!-- <Calendar
           v-model="form2.deliverytime"
@@ -287,7 +287,7 @@
     <Dialog header="Update Planned Information" v-model:visible="openDialog3" modal :style="{ width: '50rem' }">
         <div class="flex flex-col gap-3">
             <!-- Schedule Date -->
-            <Calendar v-model="form3.scheduleDate" dateFormat="yy-mm-dd" placeholder="Select Planned Date" :minDate="new Date()" />
+            <Calendar v-model="form3.scheduleDate" dateFormat="yy-mm-dd" placeholder="Select Planned Date" :minDate="orderCreatedDate"  />
             <div class="grid md:grid-cols-2 gap-4">
                 <div>
                     <label class="block mb-2 font-medium w-full">Driver IC Number</label>
@@ -419,6 +419,7 @@ const loadingUpdate = ref(false);
 const loadingUpdate2 = ref(false);
 const loadingUpdate3 = ref(false);
 const openDialog3 = ref(false);
+const orderCreatedDate = ref(null);
 const openDialogFn = () => {
     if (orderDelList.value.deliveryDate) {
         form.value.scheduleDate = new Date(orderDelList.value.deliveryDate);
@@ -614,6 +615,12 @@ const InitfetchData = async () => {
             form.value.orderno = orderDelList.value.order_no;
             form2.value.orderno = orderDelList.value.order_no;
             form3.value.orderno = orderDelList.value.order_no;
+            if (orderDelList.value.orderDate) {
+                orderCreatedDate.value = new Date(orderDelList.value.orderDate);
+            }
+                        console.log('orderDelList.value.orderDate')
+
+            console.log(orderDelList.value.orderDate)
         } else {
             toast.add({ severity: 'error', summary: 'Error', detail: 'Failed to load data', life: 3000 });
         }
