@@ -91,7 +91,7 @@
                     <template v-else-if="hasDateFilterApplied && (!dateRange[0] || !dateRange[1])">
                         <div class="flex flex-col items-center gap-2">
                             <i class="pi pi-exclamation-circle text-3xl text-yellow-400"></i>
-                            <span class="text-lg">Please select both start and end dates</span>
+                            <!-- <span class="text-lg">Please select both start and end dates</span> -->
                         </div>
                     </template>
                     <template v-else>

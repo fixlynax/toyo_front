@@ -104,9 +104,11 @@
                         </div>
                     </template>
                 </Column>
-                <Column field="created" header="Create Date" style="min-width: 8rem" sortable>
+                <Column field="created" header="Created On" style="min-width: 8rem" sortable>
                     <template #body="{ data }">
                         {{ formatDate(data?.created) ?? '-' }}
+                        <br/>
+                        {{ formatTime(data?.created) ?? '-' }}
                     </template>
                 </Column>
 
@@ -332,18 +334,12 @@ function formatDate(dateString) {
         day: '2-digit',
     });
     }
-function formatTime(timeString) {
-    if (!timeString) return '';
-    const [hours, minutes, seconds] = timeString.split(':');
-    const date = new Date();
-    date.setHours(hours, minutes, seconds);
-    return date.toLocaleTimeString('en-MY', {
-        hour: '2-digit',
-        minute: '2-digit',
-        second: '2-digit',
-        hour12: true,
-    });
-    }
+function formatTime(dateTimeString) {
+    if (!dateTimeString) return '';
+    const [, timePart] = dateTimeString.split(' ');
+
+    return timePart; // already in 24-hour format: HH:mm:ss
+}
 function formatDateFull(dateString) {
     if (!dateString) return '';
     const date = new Date(dateString);
@@ -849,12 +845,17 @@ const exportToExcel = () => {
 
     try {
         // Create worksheet data
-        const headers = ['Date', 'Ref No', 'Delivery Date', 'Delivered Date', 'Status'];
+        const headers = ['Created On', 'Ref No', 'Customer Name', 'Customer Acc No', 'Storage Location', 'City', 'State', 'Delivery Date', 'Delivered Date', 'Status'];
         
         // Prepare data rows
         const csvData = rowsToExport.map(data => [
-            `"${formatDate(data.created)}"`,
+            `"${formatDate(data.created)} ${formatTime(data.created)}"`,
             `"${data.claimRefno || '-'}"`,
+            `"${data.custname || '-'}"`,
+            `"${data.custaccountno || '-'}"`,
+            `"${data.storagelocation || '-'}"`,
+            `"${data.city?.replace(/,$/, '') || '-'}"`,
+            `"${data.state || '-'}"`,
             `"${data.scheduleDeliveryDate ? formatDate(data.scheduleDeliveryDate) : 'Not Assigned'}"`,
             `"${data.deliveryDate ? formatDate(data.deliveryDate) : 'Not Assigned'}"`,
             `"${getStatusText(data.status) || '-'}"`,

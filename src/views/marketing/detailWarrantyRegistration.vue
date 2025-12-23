@@ -230,15 +230,12 @@ const fetchWarrantyDetails = async () => {
         loading.value = false;
     }
 };
-const viewInvoice = async (url) => {
-    try {
-        const blobUrl = await api.getPrivateFile(url);
-        if (!blobUrl) return;
-        window.open(blobUrl, '_blank'); // opens preview in new tab
-    } catch (error) {
-        console.error('Failed to preview file:', error);
-    }
+
+const viewInvoice = (url) => {
+    if (!url || url === '-') return;
+    window.open(url, '_blank');
 };
+
 // Process private images using the API method
 const processPrivateImages = async () => {
     const imageFields = ['image1URL', 'image2URL', 'image3URL'];

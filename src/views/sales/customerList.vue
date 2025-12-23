@@ -156,12 +156,12 @@ onMounted(async () => {
 
             listData.value = transformedData;
 
-            toast.add({
-                severity: 'success',
-                summary: 'Data Loaded',
-                detail: `Loaded ${transformedData.length} customer records`,
-                life: 2000
-            });
+            // toast.add({
+            //     severity: 'success',
+            //     summary: 'Data Loaded',
+            //     detail: `Loaded ${transformedData.length} customer records`,
+            //     life: 2000
+            // });
         } else {
             toast.add({
                 severity: 'warn',
