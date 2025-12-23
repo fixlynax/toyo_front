@@ -18,7 +18,7 @@
                 :filters="filters"
                 filterDisplay="menu"
                 class="rounded-table"
-                :globalFilterFields="['do_no','order_no', 'created', 'customer_name', 'custAccountNo', 'storagelocation', 'customer_name', 'city', 'state', 'deliveryDate', 'orderDesc', 'scheduled_delivery_time', 'delivered_datetime', 'orderstatus']"
+                :globalFilterFields="['do_no','order_no', 'orderDate', 'customer_name', 'custAccountNo', 'storagelocation', 'customer_name', 'city', 'state', 'deliveryDate', 'orderDesc', 'scheduled_delivery_time', 'delivered_datetime', 'orderstatus']"
                 paginatorTemplate="CurrentPageReport FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink RowsPerPageDropdown"
                 currentPageReportTemplate="Showing {first} to {last} of {totalRecords} entries"
             >
@@ -85,11 +85,11 @@
                         </div>
                     </template>
                 </Column>
-                <Column field="created" header="Created On" style="min-width: 8rem" sortable>
+                <Column field="orderDate" header="Created On" style="min-width: 8rem" sortable>
                     <template #body="{ data }">
-                        {{ formatDate(data?.created) ?? '-' }}
+                        {{ formatDate(data?.orderDate) ?? '-' }}
                         <br/>
-                        {{ formatTime(data?.created) ?? '-' }}
+                        {{ formatTime(data?.orderDate) ?? '-' }}
                     </template>
                 </Column>
                 <Column field="order_no" header="Ref No" style="min-width: 8rem" sortable>
@@ -572,7 +572,7 @@ const fetchData = async (body = null) => {
         const response = await api.postExtra('order-delivery/list', payload);
         if (response.data.status === 1 && Array.isArray(response.data.admin_data)) {
             orderDelList.value = response.data.admin_data.sort((a, b) => {
-                return new Date(b.created) - new Date(a.created);
+                return new Date(b.orderDate) - new Date(a.orderDate);
             });
         } else {
         orderDelList.value = [];
@@ -601,7 +601,7 @@ const exportToExcel = () => {
 
     rowsToExport.forEach(data => {
         const baseRow = [
-            `"${formatDate(data.created)} ${formatTime(data.created)}"`,
+            `"${formatDate(data.orderDate)} ${formatTime(data.orderDate)}"`,
             `"${data.order_no || '-'}"`,
             `"${data.do_no || '-'}"`,
             `"${data.customer_name || ''} "`,
