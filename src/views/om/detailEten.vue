@@ -390,7 +390,7 @@
                         <!-- Finance Document -->
                         <div class="flex items-center justify-between px-2 mt-2">
                             <div class="flex items-center gap-2 text-gray-700">
-                                <i class="pi pi-folder text-orange-500"></i>
+                                <i class="pi pi-file-plus text-orange-500"></i>
                                 <span>Others</span>
                             </div>
                             <RouterLink :to="`/billing/listOtherPersonal/${form.custAccountNo}`"> <Button label="Go" size="small" /> </RouterLink>
