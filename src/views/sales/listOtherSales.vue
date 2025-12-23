@@ -1,6 +1,5 @@
 <template>
     <div class="card">
-        <Toast />
 
         <div class="flex justify-between items-center mb-4">
             <div class="text-2xl font-bold text-black">Others</div>

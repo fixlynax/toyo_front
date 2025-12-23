@@ -1,6 +1,5 @@
 <template>
     <Fluid>
-        <Toast />
         <div class="flex flex-col md:flex-row gap-8">
             <div class="md:w-2/3">
                 <!-- Header -->

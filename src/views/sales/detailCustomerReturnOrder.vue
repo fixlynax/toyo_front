@@ -192,7 +192,6 @@
             </div>
         </div>
 
-        <Toast />
     </Fluid>
 </template>
 

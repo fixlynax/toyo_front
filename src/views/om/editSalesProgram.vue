@@ -1,6 +1,5 @@
 <template>
     <Fluid>
-        <Toast />
         <div class="flex flex-col md:flex-row gap-8">
             <div class="card flex flex-col gap-6 w-full">
                 <!-- Header -->
@@ -111,6 +110,11 @@
                                         <i class="pi pi-image text-4xl text-gray-400"></i>
                                     </div>
                                 </div>
+                            </div>
+
+                            <div class="md:col-start-3">
+                                <label class="block font-bold text-gray-700">Status</label>
+                                <Dropdown v-model="salesProgram.status" :options="statusOptions" optionLabel="label" optionValue="value" class="w-full" placeholder="Select Status" />
                             </div>
                         </div>
                     </div>
@@ -512,17 +516,17 @@ const submitting = ref(false);
 const imageLoading = ref(false);
 const loadingMaterials = ref(false);
 
-// Sales Program Data
+// Sales Program Data - REMOVED DEFAULT VALUES FOR showSP AND status
 const salesProgram = ref({
     programID: '',
-    showSP: 1,
+    // showSP: 1,  // REMOVED - will be set from API
     pricegroup: '06',
     type: 'FOC',
     programName: '',
     desc: '',
     startdate: '',
     enddate: '',
-    status: 1,
+    // status: 1,  // REMOVED - will be set from API
     image: '' // Changed from imageUrl to image
 });
 
@@ -544,6 +548,11 @@ const programItem = ref({
 const showOptions = ref([
     { label: 'Yes', value: 1 },
     { label: 'No', value: 0 }
+]);
+
+const statusOptions = ref([
+    { label: 'Active', value: 1 },
+    { label: 'Inactive', value: 0 }
 ]);
 
 // API Data
@@ -645,7 +654,7 @@ const processPrivateImages = async (programData) => {
     return programData;
 };
 
-// Fetch sales program data
+// Fetch sales program data - UPDATED WITH PROPER MAPPING
 const fetchSalesProgram = async () => {
     loading.value = true;
     error.value = false;
@@ -653,25 +662,45 @@ const fetchSalesProgram = async () => {
     try {
         const response = await api.get(`sales-program/detail-sales-program/${programId.value}`);
 
+        console.log('API Response:', response.data);
+
         if (response.data.status === 1 && response.data.admin_data.length > 0) {
             let programData = response.data.admin_data[0];
+
+            // Debug log the received data
+            console.log('Program data from API:', {
+                programid: programData.programid,
+                showSP: programData.showSP,
+                status: programData.status,
+                title: programData.title,
+                startDate: programData.startDate,
+                endDate: programData.endDate
+            });
 
             // Process image (simplified - no API call)
             programData = await processPrivateImages(programData);
 
-            // Map API data to form structure
+            // Map API data to form structure - IMPORTANT: Use the actual values from API
             salesProgram.value = {
                 programID: programData.programid,
-                showSP: programData.showSP,
-                pricegroup: programData.pricegroup,
-                type: programData.type,
-                programName: programData.title,
-                desc: programData.desc,
-                startdate: new Date(programData.startDate),
-                enddate: new Date(programData.endDate),
-                status: programData.status,
-                image: programData.image // Directly use image URL
+                // Use the actual value from API, default to 1 if null/undefined
+                showSP: programData.showSP !== null && programData.showSP !== undefined ? programData.showSP : 1,
+                pricegroup: programData.pricegroup || '06',
+                type: programData.type || 'FOC',
+                programName: programData.title || '',
+                desc: programData.desc || '',
+                startdate: programData.startDate ? new Date(programData.startDate) : '',
+                enddate: programData.endDate ? new Date(programData.endDate) : '',
+                // Use the actual value from API, default to 1 if null/undefined
+                status: programData.status !== null && programData.status !== undefined ? programData.status : 1,
+                image: programData.image || '' // Directly use image URL
             };
+
+            // Debug log the mapped values
+            console.log('Mapped salesProgram values:', {
+                showSP: salesProgram.value.showSP,
+                status: salesProgram.value.status
+            });
 
             // Load FOC criteria data
             if (programData.type === 'FOC') {
@@ -1130,6 +1159,12 @@ const validateForm = () => {
         return false;
     }
 
+    // Add status validation
+    if (salesProgram.value.status === undefined || salesProgram.value.status === null) {
+        showError('Please select status (Active/Inactive)');
+        return false;
+    }
+
     // Validate dates - Compare only date portion (without time)
     const startDate = new Date(salesProgram.value.startdate);
     const endDate = new Date(salesProgram.value.enddate);
@@ -1175,7 +1210,7 @@ const validateForm = () => {
     return true;
 };
 
-// Submit Form for Update - FIXED VERSION
+// Submit Form for Update - FIXED VERSION WITH PROPER VALUE HANDLING
 const submitForm = async () => {
     if (!validateForm()) {
         return;
@@ -1199,13 +1234,21 @@ const submitForm = async () => {
         // Basic sales program fields
         formData.append('programID', salesProgram.value.programID);
         formData.append('pricegroup', salesProgram.value.pricegroup || '06');
-        formData.append('showSP', salesProgram.value.showSP || 1);
+        // Make sure these are using the actual values from the form
+        formData.append('showSP', salesProgram.value.showSP !== null && salesProgram.value.showSP !== undefined ? salesProgram.value.showSP : 1);
         formData.append('type', salesProgram.value.type || 'FOC');
         formData.append('programName', salesProgram.value.programName || '');
         formData.append('desc', salesProgram.value.desc || '');
         formData.append('startdate', formatDate(salesProgram.value.startdate));
         formData.append('enddate', formatDate(salesProgram.value.enddate));
-        formData.append('status', salesProgram.value.status || 1);
+        // Make sure status is using the actual value from the form
+        formData.append('status', salesProgram.value.status !== null && salesProgram.value.status !== undefined ? salesProgram.value.status : 1);
+
+        // Debug what's being sent
+        console.log('Sending values:', {
+            showSP: salesProgram.value.showSP,
+            status: salesProgram.value.status
+        });
 
         // Append image if changed
         if (imageFile.value) {
