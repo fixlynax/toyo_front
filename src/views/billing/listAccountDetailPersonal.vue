@@ -81,14 +81,14 @@
                     <template v-if="!hasDateFilterApplied">
                         <div class="flex flex-col items-center gap-2">
                             <i class="pi pi-calendar text-3xl text-blue-400"></i>
-                            <span class="text-lg">Select a date range to view account</span>
+                            <span class="text-lg">Select a date range to view</span>
                             <span class="text-sm text-gray-400">Choose both start and end dates to load data</span>
                         </div>
                     </template>
                     <template v-else-if="hasDateFilterApplied && (!dateRange[0] || !dateRange[1])">
                         <div class="flex flex-col items-center gap-2">
                             <i class="pi pi-exclamation-circle text-3xl text-yellow-400"></i>
-                            <span class="text-lg">Please select both start and end dates</span>
+                            <!-- <span class="text-lg">Please select both start and end dates</span> -->
                         </div>
                     </template>
                     <template v-else>
