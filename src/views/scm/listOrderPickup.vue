@@ -301,7 +301,8 @@ const  importErrors = ref([]);
 const showImportErrorDialog = ref(false);
 
 const selectedExportIds = ref(new Set());
-const visibleRows = ref(orderDelList.value);
+const visibleRows = computed(() => orderDelList.value);
+
 const formatDateDMY = (date) => {
     const d = new Date(date);
     const day = String(d.getDate()).padStart(2, '0');

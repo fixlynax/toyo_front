@@ -125,9 +125,11 @@
                         {{ data.delivery_information?.receive_datetime ? formatDate(data.delivery_information.receive_datetime) : 'No date assigned' }}
                     </template>
                 </Column>
-                <Column field="return_order_array.length" header="Return Items" style="min-width: 8rem; text-align: center" sortable>
+                <Column field="return_order_array.length" header="Return Items Qty" style="min-width: 8rem; text-align: center" sortable>
                     <template #body="{ data }">
-                        {{ data.return_order_array?.length || 0 }}
+                        {{
+                            data.return_order_array?.reduce((total, item) => total + Number(item.qty || 0),0) || 0
+                        }}
                     </template>
                 </Column>
                 <Column field="delivery_status" header="Status" style="min-width: 8rem">
@@ -206,7 +208,8 @@ const showImportErrorHandle1 = ref(false);
 const showImportErrorHandle2 = ref(false);
 
 const selectedExportIds = ref(new Set());
-const visibleRows = ref(returnList.value);
+const visibleRows = computed(() => returnList.value);
+
 const activeTabIndex = ref(0);
 const dateRange = ref([null, null]);
 
@@ -538,7 +541,7 @@ const exportToExcel = () => {
 
     try {
         // Create worksheet data
-        const headers = ['Ref No', 'Ship-To', 'Ship-To Acc No', 'Storage Location', 'City', 'State', 'Pickup Date', 'Receive Date', 'Return Items', 'Status'];
+        const headers = ['Ref No', 'Ship-To', 'Ship-To Acc No', 'Storage Location', 'City', 'State', 'Pickup Date', 'Receive Date', 'Return Items Qty', 'Status'];
 
         // Prepare data rows
         const csvData = rowsToExport.map((data) => [
@@ -550,7 +553,7 @@ const exportToExcel = () => {
             `"${data.state || '-'}"`,
             `"${data.delivery_information?.pickup_datetime ? formatDate(data.delivery_information.pickup_datetime) : 'No date assigned'}"`,
             `"${data.delivery_information?.receive_datetime ? formatDate(data.delivery_information.receive_datetime) : 'No date assigned'}"`,
-            `"${data.return_order_array?.length || 0}"`,
+            `"${data.return_order_array?.reduce((total, item) => total + Number(item.qty || 0),0) || 0}"`,
             `"${data.delivery_status || '-'}"`
         ]);
 

@@ -234,7 +234,7 @@ const selectedExportIds = ref(new Set());
 const loading = ref(true);
 const orderDelList = ref([]);
 const dateRange = ref([null, null]);
-const visibleRows = ref(orderDelList.value);
+const visibleRows = computed(() => orderDelList.value);
 
 const formatDateDMY = (date) => {
     const d = new Date(date);
