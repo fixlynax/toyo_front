@@ -73,7 +73,7 @@
                             </div>
                             <Button v-if="dateRange[0] || dateRange[1]" icon="pi pi-times" class="p-button-text p-button-sm" @click="clearDateRange" title="Clear date filter" />
                         </div>
-                        <div v-if="!hasDateFilterApplied" class="text-sm text-blue-600 italic">Select a date range to filter billing documents</div>
+                        <!-- <div v-if="!hasDateFilterApplied" class="text-sm text-blue-600 italic">Select a date range to filter billing documents</div> -->
                     </div>
                 </div>
             </template>

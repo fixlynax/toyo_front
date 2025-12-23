@@ -519,12 +519,12 @@ const loadFilteredData = async () => {
             filterMessage += ` for account: ${accountFilterValue}`;
         }
 
-        toast.add({
-            severity: 'success',
-            summary: 'Filter Applied',
-            detail: filterMessage,
-            life: 3000
-        });
+        // toast.add({
+        //     severity: 'success',
+        //     summary: 'Filter Applied',
+        //     detail: filterMessage,
+        //     life: 3000
+        // });
     } catch (err) {
         console.error('Failed to load filtered data:', err);
         error.value = err.message;
