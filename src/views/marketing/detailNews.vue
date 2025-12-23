@@ -1,7 +1,5 @@
 <template>
     <Fluid>
-        <!-- Toast and ConfirmDialog -->
-        <Toast />
 
         <!-- Loading State -->
         <div v-if="loading" class="text-center py-20 text-gray-500 text-lg">Loading news details...</div>

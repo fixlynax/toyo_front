@@ -358,7 +358,6 @@
             </template>
         </Dialog>
 
-        <Toast />
     </Fluid>
 </template>
 

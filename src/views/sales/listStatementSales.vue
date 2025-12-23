@@ -1,6 +1,5 @@
 <template>
     <div class="card">
-        <Toast />
 
         <div class="flex justify-between items-center mb-4">
             <div class="text-2xl font-bold text-black">Statement</div>
@@ -153,7 +152,6 @@
             <Column field="sortableDate" header="Document Date" style="min-width: 8rem" sortable>
                 <template #body="{ data }">
                     <span class="font-medium">{{ data.docsDate }}</span>
-                    <!-- <div class="text-xs text-gray-500">{{ formatDateForDisplay(data.docsDate) }}</div> -->
                 </template>
             </Column>
 
@@ -240,22 +238,21 @@ const getCurrentMonthDateRange = () => {
     return [startDate, endDate];
 };
 
-// 🟢 Helper function to get min and max selectable dates (24 months range)
-const getMinMaxSelectableDates = () => {
+// 🟢 Computed min and max selectable dates (allow future dates)
+const minSelectableDate = computed(() => {
     const today = new Date();
-    const maxDate = new Date(today); // Today as max date
     const minDate = new Date(today);
     minDate.setMonth(today.getMonth() - 24); // 24 months ago as min date
-    
-    return {
-        minDate,
-        maxDate
-    };
-};
+    return minDate;
+});
 
-// 🟢 Computed min and max selectable dates (24 months range)
-const minSelectableDate = computed(() => getMinMaxSelectableDates().minDate);
-const maxSelectableDate = computed(() => getMinMaxSelectableDates().maxDate);
+// Allow future dates (extend up to 1 year in future)
+const maxSelectableDate = computed(() => {
+    const today = new Date();
+    const maxDate = new Date(today);
+    maxDate.setFullYear(today.getFullYear() + 1); // Allow up to 1 year in future
+    return maxDate;
+});
 
 // 🟢 API service functions for Statement
 const StatementService = {
@@ -458,7 +455,7 @@ const onEndDateSelect = () => {
     }
 };
 
-// 🟢 Apply Filter Button Handler
+// 🟢 Apply Filter Button Handler (MODIFIED)
 const applyFilter = async () => {
     // Validate date range - either both dates or none
     if ((dateRange.value[0] && !dateRange.value[1]) || (!dateRange.value[0] && dateRange.value[1])) {
@@ -495,13 +492,13 @@ const applyFilter = async () => {
         }
     }
 
-    // Validate date range is within 24 months
+    // Validate date range (MODIFIED - allow future dates)
     if (dateRange.value[0] && dateRange.value[1]) {
         const startDate = new Date(dateRange.value[0]);
         const endDate = new Date(dateRange.value[1]);
         const today = new Date();
         
-        // Check if start date is within 24 months
+        // Check if start date is within 24 months in the past
         const twentyFourMonthsAgo = new Date(today);
         twentyFourMonthsAgo.setMonth(today.getMonth() - 24);
         
@@ -515,12 +512,26 @@ const applyFilter = async () => {
             return;
         }
         
-        // Check if end date is in the future
-        if (endDate > today) {
+        // Check if end date is within 1 year in the future (extended from original)
+        const oneYearFromNow = new Date(today);
+        oneYearFromNow.setFullYear(today.getFullYear() + 1);
+        
+        if (endDate > oneYearFromNow) {
             toast.add({
                 severity: 'error',
                 summary: 'Invalid Date Range',
-                detail: 'End date cannot be in the future',
+                detail: 'End date cannot be more than 1 year in the future',
+                life: 3000
+            });
+            return;
+        }
+        
+        // Check if start date is before end date
+        if (startDate > endDate) {
+            toast.add({
+                severity: 'error',
+                summary: 'Invalid Date Range',
+                detail: 'Start date must be before end date',
                 life: 3000
             });
             return;
@@ -545,14 +556,14 @@ const applyFilter = async () => {
     try {
         // If no dates but has account filter, use default date range (current month)
         if (!dateRange.value[0] && !dateRange.value[1] && customerAccountFilter.value) {
-            // Apply default date range
+            // Apply default date range (current month)
             const defaultDates = getCurrentMonthDateRange();
             dateRange.value = [defaultDates[0], defaultDates[1]];
         }
         
         // If no dates and no account filter, use default date range (current month)
         if (!dateRange.value[0] && !dateRange.value[1] && !customerAccountFilter.value) {
-            // Apply default date range
+            // Apply default date range (current month)
             const defaultDates = getCurrentMonthDateRange();
             dateRange.value = [defaultDates[0], defaultDates[1]];
         }
@@ -598,20 +609,6 @@ const loadFilteredData = async () => {
             return b.sortableDate.localeCompare(a.sortableDate);
         });
 
-        // let filterMessage = `Showing statements`;
-        // if (dateRange.value[0] && dateRange.value[1]) {
-        //     filterMessage += ` from ${formatDateForDisplay(dateRange.value[0])} to ${formatDateForDisplay(dateRange.value[1])}`;
-        // }
-        // if (accountFilterValue) {
-        //     filterMessage += ` for account: ${accountFilterValue}`;
-        // }
-
-        // toast.add({
-        //     severity: 'success',
-        //     summary: 'Filter Applied',
-        //     detail: filterMessage,
-        //     life: 3000
-        // });
     } catch (err) {
         console.error('Failed to load filtered data:', err);
         error.value = err.message;
@@ -875,7 +872,7 @@ const refreshData = async () => {
 
 // 🟢 Clear Date Range
 const clearDateRange = () => {
-    // Instead of clearing to null, reset to default date range (current month)
+    // Reset to default date range (current month)
     const defaultDates = getCurrentMonthDateRange();
     dateRange.value = [defaultDates[0], defaultDates[1]];
     customerAccountFilter.value = '';
@@ -886,7 +883,7 @@ const clearDateRange = () => {
     toast.add({
         severity: 'info',
         summary: 'Filter Reset',
-        detail: 'Date filter has been reset to default (current month).',
+        detail: 'Date filter has been reset to current month.',
         life: 3000
     });
 };

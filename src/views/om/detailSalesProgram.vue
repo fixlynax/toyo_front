@@ -1,9 +1,6 @@
 <template>
     <Fluid>
         <div class="flex flex-col gap-8">
-            <!-- Toast Notification -->
-            <Toast />
-
             <!-- TOP SECTION: Detail Event + Advance Info -->
             <div class="flex flex-col md:flex-row gap-8">
                 <!-- LEFT SIDE (2/3) -->
@@ -74,12 +71,12 @@
                                 <tbody>
                                     <tr class="border-b">
                                         <td class="px-4 py-2 font-medium">Program No</td>
-                                        <td class="px-4 py-2 text-right font-semibold">{{ salesProgram.programid }}</td>
+                                        <td class="px-4 py-2 text-right font-bold text-primary">{{ salesProgram.programid }}</td>
                                     </tr>
                                     <tr class="border-b">
                                         <td class="px-4 py-2 font-medium">Type</td>
                                         <td class="px-4 py-2 text-right">
-                                            <span class="px-2 py-1 bg-blue-100 text-blue-800 rounded-full text-xs font-medium">
+                                            <span class="px-2 py-1 bg-blue-100 text-blue-800 rounded-full text-xs font-semibold">
                                                 {{ salesProgram.type }}
                                             </span>
                                         </td>
@@ -90,7 +87,7 @@
                                     </tr>
                                     <tr class="border-b">
                                         <td class="px-4 py-2 font-medium">Availability</td>
-                                        <td class="px-4 py-2 text-right">{{ salesProgram.showSP === 1 ? 'Yes' : 'No' }}</td>
+                                        <td class="px-4 py-2 text-right font-semibold">{{ salesProgram.showSP === 1 ? 'Yes' : 'No' }}</td>
                                     </tr>
                                     <tr class="border-b">
                                         <td class="px-4 py-2 font-medium">Created</td>
