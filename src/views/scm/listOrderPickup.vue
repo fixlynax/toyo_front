@@ -711,7 +711,7 @@ const exportToExcel = () => {
 
     try {
         // Create worksheet data
-        const headers = ['Created', 'SAP DO No', 'Customer Name', 'Customer Acc No', 'Storage Location', 'City', 'State', 'Driver IC', 'Collecter Name', 'Collecter IC', 'Collecter Contact No', 'Collecter Truck Plate', 'Type', 'Pickup Date', 'Status'];
+        const headers = ['Created On', 'SAP DO No', 'Customer Name', 'Customer Acc No', 'Storage Location', 'City', 'State', 'Driver IC', 'Collecter Name', 'Collecter IC', 'Collecter Contact No', 'Collecter Truck Plate', 'Type', 'Pickup Date', 'Status'];
 
         // Prepare data rows
         const csvData = rowsToExport.map((data) => [
