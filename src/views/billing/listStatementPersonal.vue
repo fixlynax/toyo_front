@@ -73,7 +73,7 @@
                             </div>
                             <Button v-if="dateRange[0] || dateRange[1]" icon="pi pi-times" class="p-button-text p-button-sm" @click="clearDateRange" title="Clear date filter" />
                         </div>
-                        <div v-if="!hasDateFilterApplied" class="text-sm text-blue-600 italic">Select a date range to filter statements</div>
+                        <!-- <div v-if="!hasDateFilterApplied" class="text-sm text-blue-600 italic">Select a date range to filter statements</div> -->
                     </div>
                 </div>
             </template>
@@ -389,12 +389,12 @@ const loadFilteredData = async () => {
         listData.value = await StatementService.getStatementList(dateRange.value[0], dateRange.value[1]);
         hasDateFilterApplied.value = true;
 
-        toast.add({
-            severity: 'success',
-            summary: 'Filter Applied',
-            detail: `Showing statements from ${formatDateForDisplay(dateRange.value[0])} to ${formatDateForDisplay(dateRange.value[1])}`,
-            life: 3000
-        });
+        // toast.add({
+        //     severity: 'success',
+        //     summary: 'Filter Applied',
+        //     detail: `Showing statements from ${formatDateForDisplay(dateRange.value[0])} to ${formatDateForDisplay(dateRange.value[1])}`,
+        //     life: 3000
+        // });
     } catch (err) {
         console.error('Failed to load filtered data:', err);
         error.value = err.message;
