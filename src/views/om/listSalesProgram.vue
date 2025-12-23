@@ -10,16 +10,26 @@ const loading = ref(true);
 
 // Helper function to determine status based on period
 const getStatusFromPeriod = (startDate, endDate) => {
+    // Create dates at the start of the day for comparison
     const now = new Date();
+    const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+    
     const start = new Date(startDate);
+    const startAtDay = new Date(start.getFullYear(), start.getMonth(), start.getDate());
+    
     const end = new Date(endDate);
+    const endAtDay = new Date(end.getFullYear(), end.getMonth(), end.getDate());
+    
+    // Adjust end date to include the full end day (until midnight of next day)
+    const endAtDayAdjusted = new Date(endAtDay);
+    endAtDayAdjusted.setDate(endAtDayAdjusted.getDate() + 1);
 
-    if (now < start) {
+    if (today < startAtDay) {
         return { label: 'Upcoming', severity: 'info' };
-    } else if (now >= start && now <= end) {
+    } else if (today >= startAtDay && today < endAtDayAdjusted) {
         return { label: 'Active', severity: 'success' };
     } else {
-        return { label: 'Unactive', severity: 'danger' };
+        return { label: 'Inactive', severity: 'danger' };
     }
 };
 

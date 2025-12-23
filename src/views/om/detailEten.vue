@@ -105,8 +105,8 @@
                             <Column header="Address" style="min-width: 13rem">
                                 <template #body="{ data }">
                                     {{ getShipToAddress(data) || '' }}<br />
-                                    {{ data.city }} {{ data.state }} {{ data.postcode }}<br />
-                                    {{ data.country }}
+                                    {{ data.city }} {{ data.state }}<br />
+                                    {{ data.postcode }} {{ data.country }}
                                 </template>
                                 <template #filterapply="slotProps"></template>
                                 <template #filterclear="slotProps"></template>

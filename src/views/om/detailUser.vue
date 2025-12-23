@@ -55,11 +55,11 @@
                         <div class="flex flex-col md:flex-row gap-4">
                             <div class="w-full">
                                 <span class="text-xm font-bold text-black-700">Member Since</span>
-                                <p class="text-lg font-medium">{{ formatDate(memberDetail.memberSince) }}</p>
+                                <p class="text-lg font-medium">{{ formatDate(memberDetail.memberSince) || 'N/A' }}</p>
                             </div>
                             <div class="w-full">
                                 <span class="text-xm font-bold text-black-700">Last Login</span>
-                                <p class="text-lg font-medium">{{ formatDateTime(memberDetail.lastLogin) }}</p>
+                                <p class="text-lg font-medium">{{ formatDateTime(memberDetail.lastLogin) || 'N/A' }}</p>
                             </div>
                         </div>
 
@@ -73,7 +73,7 @@
                             <div class="w-full">
                                 <span class="text-xm font-bold text-black-700">Activated Date</span>
                                 <div class="text-lg font-medium">
-                                      <p class="text-lg font-medium">{{ formatDateTime(memberDetail.activated) }}</p>
+                                      <p class="text-lg font-medium">{{ formatDateTime(memberDetail.activated) || 'N/A'}}</p>
                                 </div>
                             </div>
                         </div>

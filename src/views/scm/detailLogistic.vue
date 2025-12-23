@@ -9,7 +9,7 @@
           <div class="flex items-center justify-between w-full">
             <div class="flex items-center gap-3">
                 <Button icon="pi pi-arrow-left" class="p-button-text p-button-secondary" @click="$router.back()" />
-                <div class="text-2xl font-bold text-gray-800">Logistic Details</div>
+                <div class="text-2xl font-bold text-gray-800">3PL Account Details</div>
             </div>
            <RouterLink v-if="canUpdate" :to="`/scm/editLogistic/${logisticList.id}`">
                 <Button type="button" label="Edit" />
@@ -66,8 +66,8 @@
                   <td class="px-4 py-2 text-right">{{ logisticList.emailaddress }}</td>
                 </tr>
                 <tr class="border-b">
-                  <td class="px-4 py-2 font-medium">Created Date</td>
-                  <td class="px-4 py-2 text-right">{{ formatDate(logisticList.created) }}</td>
+                  <td class="px-4 py-2 font-medium">Created On</td>
+                  <td class="px-4 py-2 text-right">{{ formatDate(logisticList.created) }} {{ formatTime(logisticList.created) }}</td>
                 </tr>
                 <tr class="border-b">
                   <td class="px-4 py-2 font-medium">Last Login Date</td>
@@ -112,18 +112,12 @@ function formatDate(dateString) {
         day: '2-digit',
     });
     }
-function formatTime(timeString) {
-    if (!timeString) return '';
-    const [hours, minutes, seconds] = timeString.split(':');
-    const date = new Date();
-    date.setHours(hours, minutes, seconds);
-    return date.toLocaleTimeString('en-MY', {
-        hour: '2-digit',
-        minute: '2-digit',
-        second: '2-digit',
-        hour12: true,
-    });
-    }
+function formatTime(dateTimeString) {
+    if (!dateTimeString) return '';
+    const [, timePart] = dateTimeString.split(' ');
+
+    return timePart; // already in 24-hour format: HH:mm:ss
+}
 function formatDateFull(dateString) {
     if (!dateString) return '';
     const date = new Date(dateString);

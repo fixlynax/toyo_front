@@ -4,7 +4,12 @@
             <div class="flex flex-col w-full">
                 <!-- Edit Event Card -->
                 <div class="card flex flex-col gap-6 w-full">
-                    <div class="text-2xl font-bold text-gray-800 border-b pb-2">Edit Event</div>
+                    <div class="flex items-center justify-between border-b pb-2">
+                      <div class="flex items-center gap-3">
+                        <Button icon="pi pi-arrow-left" class="p-button-text p-button-secondary" @click="$router.back()" />
+                        <div class="text-2xl font-bold text-gray-800 border-b pb-2">Edit Event</div>
+                      </div>
+                    </div>
 
                     <!-- Event Form -->
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -118,11 +123,11 @@
 
                 <!-- Survey Configuration -->
                 <div v-if="event.isSurvey === 'Yes'" class="card flex flex-col gap-6 w-full">
-                    <div class="text-2xl font-bold text-gray-800 border-b pb-2">📝 Survey Configuration</div>
+                    <div class="text-2xl font-bold text-gray-800 border-b pb-2">Survey Configuration</div>
 
                     <!-- Point Setting -->
                     <div class="mt-4">
-                        <div class="text-xl font-bold text-gray-800 border-b pb-2 mb-4">🏆 Point Setting</div>
+                        <div class="text-xl font-bold text-gray-800 border-b pb-2 mb-4">Point Setting</div>
                         <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
                             <div>
                                 <label class="block font-bold text-gray-700 mb-1">Silver</label>
@@ -141,7 +146,7 @@
 
                     <!-- Survey Questions -->
                     <div class="mt-8">
-                        <div class="text-xl font-bold text-gray-800 border-b pb-2 mb-4">📝 Survey Questions</div>
+                        <div class="text-xl font-bold text-gray-800 border-b pb-2 mb-4">Survey Questions</div>
 
                         <div v-if="questions.length > 0" class="space-y-4">
                             <div v-for="(q, index) in questions" :key="index" class="border rounded-lg p-4 shadow-sm bg-gray-50">

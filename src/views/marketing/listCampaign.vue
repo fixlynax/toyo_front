@@ -1,9 +1,9 @@
 <template>
     <div class="card">
-        <div class="text-2xl font-bold text-gray-800 border-b pb-2 mb-6">List Campaign</div>
+        <div class="text-2xl font-bold text-gray-800 border-b pb-2 mb-6">Campaign Management List </div>
 
         <!-- Show LoadingPage only during initial page load -->
-        <LoadingPage v-if="initialLoading" :message="'Loading Campaigns...'" :sub-message="'Fetching campaign data'" />
+        <LoadingPage v-if="initialLoading" :message="'Loading Campaign Management Details...'" :sub-message="'Fetching campaign data'" />
 
         <!-- Show content area when not in initial loading -->
         <div v-else>

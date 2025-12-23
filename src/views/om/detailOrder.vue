@@ -63,7 +63,7 @@
                             <template #body="{ data }">
                                 {{ data.materialid }}<br />
                                 {{ data.materialdescription }}
-                                <span class="block text-xs text-gray-500">SP: {{ data.salesprogramid || '-' }} </span>
+                                <span v-if="data.salesprogramid" class="block text-xs text-gray-500">SP: {{ data.salesprogramid || '-' }} </span>
                             </template>
                         </Column>
                         <Column field="itemcategory" header="Item Category">
@@ -120,6 +120,10 @@
                                     <td class="px-4 py-2 text-right font-medium">{{ orderData.orderDesc || '-' }}</td>
                                 </tr>
                                 <tr class="border-b">
+                                    <td class="px-4 py-2 font-medium">Order SAP Type</td>
+                                    <td class="px-4 py-2 text-right font-medium">{{ orderData.sapordertype || '-' }}</td>
+                                </tr>
+                                <tr class="border-b">
                                     <td class="px-4 py-2 font-medium">SO No.</td>
                                     <td class="px-4 py-2 text-right font-medium">{{ orderData.so_no || '-' }}</td>
                                 </tr>
@@ -131,10 +135,10 @@
                                     <td class="px-4 py-2 font-medium">Invoice No</td>
                                     <td class="px-4 py-2 text-right font-medium">{{ orderData.inv_no || '-' }}</td>
                                 </tr>
-                                <tr class="border-b">
+                                <!-- <tr class="border-b">
                                     <td class="px-4 py-2 font-medium">Price Group</td>
                                     <td class="px-4 py-2 text-right font-medium">{{ orderData.pricegroup || '-' }}</td>
-                                </tr>
+                                </tr> -->
                                 <tr class="border-b">
                                     <td class="px-4 py-2 font-medium">Customer Group</td>
                                     <td class="px-4 py-2 text-right font-medium">{{ orderData.customerCondGrp || '-' }}</td>
@@ -149,15 +153,15 @@
                                 </tr>
                                 <tr class="border-b">
                                     <td class="px-4 py-2 font-medium">ETA Date</td>
-                                    <td class="px-4 py-2 text-right font-medium">{{ formatDateTime(orderData.deliveryDate) || '-' }}</td>
+                                    <td class="px-4 py-2 text-right font-medium">{{ formatDate(orderData.deliveryDate) || '-' }}</td>
                                 </tr>
                                 <tr class="border-b">
                                     <td class="px-4 py-2 font-medium">Planned Date</td>
-                                    <td class="px-4 py-2 text-right font-medium">{{ formatDateTime(deliveryInfo.scheduled_delivery_time) || '-' }}</td>
+                                    <td class="px-4 py-2 text-right font-medium">{{ formatDate(deliveryInfo.scheduled_delivery_time) || '-' }}</td>
                                 </tr>
                                 <tr class="border-b">
                                     <td class="px-4 py-2 font-medium">Delivered Date</td>
-                                    <td class="px-4 py-2 text-right font-medium">{{ formatDateTime(deliveryInfo.delivered_datetime) || '-' }}</td>
+                                    <td class="px-4 py-2 text-right font-medium">{{ formatDate(deliveryInfo.delivered_datetime) || '-' }}</td>
                                 </tr>
                                 <tr class="border-b">
                                     <td class="px-4 py-2 font-medium">Created</td>
@@ -177,7 +181,8 @@
                 </div>
 
                 <!-- Shipping Info Card (for DELIVER type) -->
-                <div v-if="orderData.deliveryType === 'DELIVER'" class="card flex flex-col w-full">
+                <!-- <div v-if="orderData.deliveryType === 'DELIVER'" class="card flex flex-col w-full"> -->
+                <div class="card flex flex-col w-full">
                     <div class="flex items-center justify-between border-b pb-3">
                         <div class="text-2xl font-bold text-gray-800">Shipping Info</div>
                     </div>
@@ -210,13 +215,14 @@
                 </div>
 
                 <!-- Pickup Info Card (for LALAMOVE/SELFCOLLECT type) -->
-                <div v-if="orderData.deliveryType === 'LALAMOVE' || orderData.deliveryType === 'SELFCOLLECT'" class="card flex flex-col w-full">
+                <!-- <div v-if="orderData.deliveryType === 'LALAMOVE' || orderData.deliveryType === 'SELFCOLLECT'" class="card flex flex-col w-full"> -->
+                <div class="card flex flex-col w-full">
                     <div class="flex items-center justify-between border-b pb-3">
                         <div class="text-2xl font-bold text-gray-800">Pickup Info</div>
                         <div class="flex items-center gap-2">
                             <Tag v-if="!hasPickupInfo" value="No Collector" severity="warning" />
                             <!-- <Button v-if="hasPickupInfo" icon="pi pi-pencil" class="p-button-text p-button-secondary text-sm" size="small" @click="openUpdateDriverDialog" v-tooltip="'Update Driver Info'" /> -->
-                            <Button v-if="hasPickupInfo" label="Update Driver" icon="pi pi-pencil" class="p-button-primary text-xs" style="width: fit-content" @click="openUpdateDriverDialog" />
+                            <!-- <Button v-if="hasPickupInfo" label="Update Driver" icon="pi pi-pencil" class="p-button-primary text-xs" style="width: fit-content" @click="openUpdateDriverDialog" /> -->
                         </div>
                     </div>
 
@@ -254,7 +260,7 @@
                             <i class="pi pi-info-circle text-2xl mb-2"></i>
                             <p class="text-lg font-medium">No collector information available</p>
                         </div>
-                        <Button label="Add Driver" icon="pi pi-plus" class="p-button-primary" style="width: fit-content" @click="showAddDriverDialog = true" :disabled="loadingDriver" />
+                        <Button v-if="hasPickupInfo" label="Add Driver" icon="pi pi-plus" class="p-button-primary" style="width: fit-content" @click="showAddDriverDialog = true" :disabled="loadingDriver" />
                     </div>
                 </div>
             </div>

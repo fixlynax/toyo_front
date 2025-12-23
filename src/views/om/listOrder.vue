@@ -31,7 +31,7 @@ const statusMap = {
 const statusTabs = [
     { label: 'Processing', status: 66, requiresDateRange: false, initialLoad: true },
     { label: 'Delivery', status: 77, requiresDateRange: false, initialLoad: true },
-    { label: 'Completed', status: 1, requiresDateRange: true, initialLoad: false }
+    { label: 'Completed', status: 1, requiresDateRange: true, initialLoad: true } // Changed initialLoad to true
 ];
 const activeTabIndex = ref(0);
 
@@ -39,8 +39,20 @@ const activeTabIndex = ref(0);
 const currentTab = computed(() => statusTabs[activeTabIndex.value]);
 const currentTabLabel = computed(() => currentTab.value?.label || '');
 
+// 🟢 Helper function to get date range for Completed tab (last 7 days)
+const getDefaultDateRangeForCompleted = () => {
+    const endDate = new Date();
+    const startDate = new Date();
+    startDate.setDate(startDate.getDate() - 7); // 7 days ago
+    
+    return {
+        start: startDate,
+        end: endDate
+    };
+};
+
 // 🟢 Fetch Orders
-const fetchOrders = async (status = null, dateFilter = false) => {
+const fetchOrders = async (status = null, dateFilter = false, useDefaultRange = false) => {
     try {
         loading.value = true;
         const statusMapping = { 66: 'PROCESSING', 77: 'DELIVERY', 1: 'COMPLETE' };
@@ -49,15 +61,29 @@ const fetchOrders = async (status = null, dateFilter = false) => {
         // Prepare request data
         const requestData = { tabs };
 
-        // Add date range if applied
-        if (dateFilter && dateRange.value[0] && dateRange.value[1]) {
-            // Format dates for backend (assuming backend expects d/m/Y format)
+        // Add date range if applied or if it's Completed tab with default range
+        if (dateFilter || (status === 1 && useDefaultRange)) {
             const formatDateForBackend = (date) => {
                 const d = new Date(date);
                 return `${d.getDate().toString().padStart(2, '0')}/${(d.getMonth() + 1).toString().padStart(2, '0')}/${d.getFullYear()}`;
             };
 
-            requestData.date_range = `${formatDateForBackend(dateRange.value[0])} - ${formatDateForBackend(dateRange.value[1])}`;
+            let startDate, endDate;
+            
+            if (dateFilter && dateRange.value[0] && dateRange.value[1]) {
+                // Use user-selected date range
+                startDate = dateRange.value[0];
+                endDate = dateRange.value[1];
+            } else if (status === 1 && useDefaultRange) {
+                // Use default 7-day range for Completed tab
+                const defaultRange = getDefaultDateRangeForCompleted();
+                startDate = defaultRange.start;
+                endDate = defaultRange.end;
+            }
+
+            if (startDate && endDate) {
+                requestData.date_range = `${formatDateForBackend(startDate)} - ${formatDateForBackend(endDate)}`;
+            }
         }
 
         const response = await api.post('order/list-order', requestData);
@@ -104,11 +130,12 @@ watch(activeTabIndex, (newIndex) => {
     dateRange.value = [null, null];
     hasDateFilterApplied.value = false;
 
-    // Clear data when switching to Completed tab
-    if (selectedTab?.requiresDateRange && !selectedTab?.initialLoad) {
-        listData.value = [];
-        loading.value = false;
+    // Always fetch data when switching tabs
+    if (selectedTab?.status === 1) {
+        // For Completed tab, fetch last 7 days by default
+        fetchOrders(selectedTab.status, false, true);
     } else {
+        // For other tabs, fetch all data
         fetchOrders(selectedTab?.status, false);
     }
 });
@@ -126,13 +153,14 @@ watch(
         } else if (newRange[0] === null && newRange[1] === null && hasDateFilterApplied.value) {
             // Handle clearing date range
             hasDateFilterApplied.value = false;
-
-            // For tabs with initial load, reload all data
-            if (selectedTab?.initialLoad) {
-                fetchOrders(selectedTab.status, false);
+            
+            // Reload data based on tab
+            if (selectedTab?.status === 1) {
+                // For Completed tab, reload last 7 days
+                fetchOrders(selectedTab.status, false, true);
             } else {
-                // For Completed tab, clear data
-                listData.value = [];
+                // For other tabs, reload all data
+                fetchOrders(selectedTab.status, false);
             }
         }
     },
@@ -144,10 +172,10 @@ onBeforeMount(async () => {
     initFilters1();
     const selectedTab = statusTabs[activeTabIndex.value];
 
-    // Don't fetch for Completed tab on initial load
-    if (selectedTab?.requiresDateRange && !selectedTab?.initialLoad) {
-        loading.value = false;
-        listData.value = [];
+    // Always fetch data on initial load
+    if (selectedTab?.status === 1) {
+        // For Completed tab, fetch last 7 days by default
+        await fetchOrders(selectedTab.status, false, true);
     } else {
         await fetchOrders(selectedTab?.status);
     }
@@ -156,12 +184,8 @@ onBeforeMount(async () => {
 // 🟢 Computed - Filter orders by status and date range
 const filteredOrders = computed(() => {
     const selectedTab = currentTab.value;
-
-    // For Completed tab without date filter, return empty array
-    if (selectedTab?.requiresDateRange && !selectedTab?.initialLoad && !hasDateFilterApplied.value) {
-        return [];
-    }
-
+    
+    // Filter by status
     let filtered = listData.value.filter((order) => order.orderStatus === selectedTab?.status);
 
     // Apply date range filter when date filter is applied
@@ -199,16 +223,23 @@ const formatDate = (dateString) => {
     });
 };
 
+const formatDateTime = (dateString) => {
+    if (!dateString) return '-';
+    return new Date(dateString).toLocaleString('en-MY');
+};
+
 // 🟢 Clear Date Range
 const clearDateRange = () => {
     dateRange.value = [null, null];
     hasDateFilterApplied.value = false;
 
-    // Reload data for tabs with initial load, clear for Completed tab
-    if (currentTab.value?.initialLoad) {
-        fetchOrders(currentTab.value.status, false);
+    // Reload data based on current tab
+    if (currentTab.value?.status === 1) {
+        // For Completed tab, reload last 7 days
+        fetchOrders(currentTab.value.status, false, true);
     } else {
-        listData.value = [];
+        // For other tabs, reload all data
+        fetchOrders(currentTab.value.status, false);
     }
 };
 </script>
@@ -267,22 +298,17 @@ const clearDateRange = () => {
                                 </div>
                                 <Button v-if="dateRange[0] || dateRange[1]" icon="pi pi-times" class="p-button-text p-button-sm" @click="clearDateRange" title="Clear date filter" />
                             </div>
-                            <!-- Show message only for Completed tab without date filter -->
-                            <div v-if="currentTab?.requiresDateRange && !currentTab?.initialLoad && !hasDateFilterApplied" class="text-sm text-blue-600 italic">Please select a date range to view {{ currentTabLabel }} orders</div>
+                            <!-- Show message for Completed tab showing default range -->
+                            <div v-if="currentTab?.status === 1 && !hasDateFilterApplied" class="text-sm text-blue-600 italic">
+                                Showing last 7 days of {{ currentTabLabel }} orders. Use date range to filter further.
+                            </div>
                         </div>
                     </div>
                 </template>
 
                 <template #empty>
                     <div class="text-center py-4 text-gray-500">
-                        <template v-if="currentTab?.requiresDateRange && !currentTab?.initialLoad && !hasDateFilterApplied">
-                            <div class="flex flex-col items-center gap-2">
-                                <i class="pi pi-calendar text-3xl text-blue-400"></i>
-                                <span class="text-lg">Select a date range to view {{ currentTabLabel }} orders</span>
-                                <span class="text-sm text-gray-400">Choose both start and end dates to filter results</span>
-                            </div>
-                        </template>
-                        <template v-else-if="hasDateFilterApplied && (!dateRange[0] || !dateRange[1])">
+                        <template v-if="hasDateFilterApplied && (!dateRange[0] || !dateRange[1])">
                             <div class="flex flex-col items-center gap-2">
                                 <i class="pi pi-exclamation-circle text-3xl text-yellow-400"></i>
                                 <span class="text-lg">Please select both start and end dates</span>
@@ -295,7 +321,7 @@ const clearDateRange = () => {
 
                 <!-- ... Rest of the columns remain the same ... -->
                 <Column field="created" header="Created Date" style="min-width: 8rem" sortable>
-                    <template #body="{ data }">{{ formatDate(data.created) }}</template>
+                    <template #body="{ data }">{{ formatDateTime(data.created) }}</template>
                 </Column>
 
                 <Column header="Order No" style="min-width: 10rem" sortable>

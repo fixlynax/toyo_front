@@ -18,7 +18,7 @@
                 :filters="filters"
                 filterDisplay="menu"
                 class="rounded-table"
-                :globalFilterFields="['do_no', 'created', 'customer_name', 'custAccountNo', 'customer_name', 'city', 'state', 'deliveryDate', 'orderDesc', 'scheduled_delivery_time', 'delivered_datetime', 'orderstatus']"
+                :globalFilterFields="['do_no', 'created', 'customer_name', 'custAccountNo', 'storagelocation', 'customer_name', 'city', 'state', 'deliveryDate', 'orderDesc', 'scheduled_delivery_time', 'delivered_datetime', 'orderstatus']"
                 paginatorTemplate="CurrentPageReport FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink RowsPerPageDropdown"
                 currentPageReportTemplate="Showing {first} to {last} of {totalRecords} entries"
             >
@@ -85,12 +85,18 @@
                         </div>
                     </template>
                 </Column>
-                <Column field="created" header="Create Date" style="min-width: 8rem" sortable>
+                <Column field="created" header="Created On" style="min-width: 8rem" sortable>
                     <template #body="{ data }">
-                        {{ formatDate(data.created) }}
+                        {{ formatDate(data?.created) ?? '-' }}
+                        <br/>
+                        {{ formatTime(data?.created) ?? '-' }}
                     </template>
                 </Column>
-
+                <Column field="order_no" header="Ref No" style="min-width: 8rem" sortable>
+                    <template #body="{ data }">
+                        {{ data.order_no }}
+                    </template>
+                </Column>
                 <Column field="do_no" header="SAP DO No" style="min-width: 8rem" sortable>
                     <template #body="{ data }">
                         <RouterLink :to="`/scm/detailOrderDelivery/${data.orderID}`" class="hover:underline font-bold text-primary">
@@ -155,6 +161,46 @@
             </DataTable>
         </div>
     </div>
+        <Dialog
+        v-model:visible="showImportErrorDialog"
+        header="Import Errors"
+        modal
+        :style="{ width: '700px' }"
+        @hide="handleCloseErrorModal"
+    >
+        <div v-if="importErrors.length === 0" class="text-gray-500">
+            No error details available.
+        </div>
+
+        <div v-else class="flex flex-col gap-4">
+            <div
+                v-for="(item, index) in importErrors"
+                :key="index"
+                class="p-3 border rounded"
+            >
+                <div class="font-semibold">
+                    DO No: {{ item.do_no }}
+                </div>
+                <div  v-if="showImportErrorHandle1" class="text-sm text-gray-600">
+                    Schedule Date: {{ item.scheduled_date_raw || 'Not Assigned' }}
+                </div>
+                <div  v-if="showImportErrorHandle2" class="text-sm text-gray-600">
+                    Delivered Date: {{ item.delivered_date_raw || 'Not Assigned' }}
+                </div>
+                <div class="text-red-600 mt-2">
+                    {{ item.error }}
+                </div>
+            </div>
+        </div>
+
+        <template #footer>
+            <Button
+                label="Close"
+                icon="pi pi-times"
+                @click="handleCloseErrorModal()"
+            />
+        </template>
+    </Dialog>
 </template>
 
 <script setup>
@@ -176,6 +222,10 @@ const exportLoading2 = ref(false);
 const importLoading2 = ref(false);
 const importInput1 = ref();
 const importInput2 = ref();
+const importErrors = ref([]);
+const showImportErrorDialog = ref(false);
+const showImportErrorHandle1 = ref(false);
+const showImportErrorHandle2 = ref(false);
 
 // Data variables
 const activeTabIndex = ref(0);
@@ -271,17 +321,11 @@ function formatDate(dateString) {
         day: '2-digit'
     });
 }
-function formatTime(timeString) {
-    if (!timeString) return '';
-    const [hours, minutes, seconds] = timeString.split(':');
-    const date = new Date();
-    date.setHours(hours, minutes, seconds);
-    return date.toLocaleTimeString('en-MY', {
-        hour: '2-digit',
-        minute: '2-digit',
-        second: '2-digit',
-        hour12: true
-    });
+function formatTime(dateTimeString) {
+    if (!dateTimeString) return '';
+    const [, timePart] = dateTimeString.split(' ');
+
+    return timePart; // already in 24-hour format: HH:mm:ss
 }
 function formatDateFull(dateString) {
     if (!dateString) return '';
@@ -413,6 +457,11 @@ const handleImport1 = async (event) => {
                 life: 3000
             });
         } else {
+            importErrors.value = response.data.admin_data || [];
+            if (importErrors.value.length > 0) {
+                showImportErrorHandle1.value = true;
+                showImportErrorDialog.value = true;
+            }
             toast.add({
                 severity: 'error',
                 summary: 'Import Failed',
@@ -459,6 +508,11 @@ const handleImport2 = async (event) => {
                 life: 3000
             });
         } else {
+            importErrors.value = response.data.admin_data || [];
+            if (importErrors.value.length > 0) {
+                showImportErrorHandle2.value = true;
+                showImportErrorDialog.value = true;
+            }
             toast.add({
                 severity: 'error',
                 summary: 'Import Failed',
@@ -476,6 +530,12 @@ const handleImport2 = async (event) => {
             importInput2.value.value = '';
         }
     }
+};
+const handleCloseErrorModal = () => {
+    importErrors.value = [];
+    showImportErrorHandle1.value = false;
+    showImportErrorHandle2.value = false;
+    showImportErrorDialog.value = false; // optional, v-model handles it
 };
 const applyFilter = () => {
     const tab = statusTabs[activeTabIndex.value];
@@ -535,13 +595,14 @@ const exportToExcel = () => {
     }
 
     try {
-    const headers = ['Created', 'SAP DO No', 'Customer Name', 'Customer Acc No', 'Storage Location','City', 'State', 'Order Type', 'Driver Name', 'Driver IC', 'Driver Contact','Driver Truck Plate', 'Eta Date', 'Planned Date', 'Delivered Date', 'Status','Item No','Pattern Name', 'Description', 'Qty'];
+    const headers = ['Created', 'Ref No', 'SAP DO No', 'Customer Name', 'Customer Acc No', 'Storage Location','City', 'State', 'Order Type', 'Driver Name', 'Driver IC', 'Driver Contact','Driver Truck Plate', 'Eta Date', 'Planned Date', 'Delivered Date', 'Status','Item No','Pattern Name', 'Description', 'Qty'];
 
     const csvData = [];
 
     rowsToExport.forEach(data => {
         const baseRow = [
-            `"${formatDate(data.created)}"`,
+            `"${formatDate(data.created)} ${formatTime(data.created)}"`,
+            `"${data.order_no || '-'}"`,
             `"${data.do_no || '-'}"`,
             `"${data.customer_name || ''} "`,
             `"${data.custAccountNo || '-'}"`,

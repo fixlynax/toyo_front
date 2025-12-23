@@ -1,9 +1,9 @@
 <template>
     <div class="card">
-        <div class="text-2xl font-bold text-gray-800 border-b pb-2 mb-6">List Event</div>
+        <div class="text-2xl font-bold text-gray-800 border-b pb-2 mb-6">Events Management List</div>
 
         <!-- Show LoadingPage only during initial page load -->
-        <LoadingPage v-if="initialLoading" :message="'Loading Events...'" :sub-message="'Fetching event data'" />
+        <LoadingPage v-if="initialLoading" :message="'Loading Events Management Details...'" :sub-message="'Fetching event data'" />
 
         <!-- Show content area when not in initial loading -->
         <div v-else>

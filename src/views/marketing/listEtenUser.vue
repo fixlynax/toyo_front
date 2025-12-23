@@ -1,9 +1,9 @@
 <template>
     <div class="card">
-        <div class="text-2xl font-bold text-gray-800 border-b pb-2">List User</div>
+        <div class="text-2xl font-bold text-gray-800 border-b pb-2">Member List</div>
 
         <!-- Show LoadingPage only during initial page load -->
-        <LoadingPage v-if="initialLoading" :message="'Loading Users...'" :sub-message="'Fetching user data'" />
+        <LoadingPage v-if="initialLoading" :message="'Loading Member Details...'" :sub-message="'Fetching user data'" />
 
         <!-- Show content area when not in initial loading -->
         <div v-else>

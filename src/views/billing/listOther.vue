@@ -121,7 +121,7 @@
                     <template v-if="!hasDateFilterApplied">
                         <div class="flex flex-col items-center gap-2">
                             <i class="pi pi-calendar text-3xl text-blue-400"></i>
-                            <span class="text-lg">Select a date range to view other files</span>
+                            <span class="text-lg">Select a date range to view</span>
                             <span class="text-sm text-gray-400">Choose both start and end dates to load data</span>
                         </div>
                     </template>
@@ -144,7 +144,7 @@
             <Column field="sortableDate" header="Document Date" style="min-width: 8rem" sortable>
                 <template #body="{ data }">
                     <span class="font-medium">{{ data.docsDate }}</span>
-                    <div class="text-xs text-gray-500">{{ formatDateForDisplay(data.docsDate) }}</div>
+                    <!-- <div class="text-xs text-gray-500">{{ formatDateForDisplay(data.docsDate) }}</div> -->
                 </template>
             </Column>
 

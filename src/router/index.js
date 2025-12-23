@@ -236,6 +236,11 @@ const router = createRouter({
                     name: 'Report-Own-Collection',
                     component: () => import('@/views/om/reportOwnCollection.vue')
                 },
+                {
+                    path: 'om/reportOrder',
+                    name: 'Report-Order',
+                    component: () => import('@/views/om/reportOrder.vue')
+                },
 
                 // Sales Program
                 {

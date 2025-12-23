@@ -66,8 +66,18 @@
                     </div>
                     <div class="grid grid-cols-2 gap-4 mt-4">
                         <div>
+                            <span class="text-sm text-gray-500">Return Remark</span>
+                            <p class="text-lg font-medium">{{ order.remarks || '-' }}</p>
+                        </div>
+                        <div>
+                            <span class="text-sm text-gray-500">Return Delivery No.</span>
+                            <p class="text-lg font-bold">{{ order.creditnoteno || '-' }}</p>
+                        </div>
+                    </div>
+                    <div class="grid grid-cols-2 gap-4 mt-4">
+                        <div>
                             <span class="text-sm text-gray-500">Return Code</span>
-                            <p class="text-lg font-semibold">{{ order.reason_code || '-' }}</p>
+                            <p class="text-lg font-medium">{{ order.reason_code || '-' }}</p>
                         </div>
                         <div>
                             <span class="text-sm text-gray-500">Return Reason</span>
@@ -124,11 +134,6 @@
                                 </div>
                             </div>
                         </div>
-
-                        <div>
-                            <span class="text-sm text-gray-500">Return Remark</span>
-                            <p class="text-lg font-medium">{{ order.remarks || '-' }}</p>
-                        </div>
                     </div>
 
                     <!-- Table -->
@@ -142,7 +147,7 @@
                             <template #body="{ data }">
                                 {{ data.materialid }} <br />
                                 {{ data.materialdescription }}
-                                <span class="block text-xs text-gray-500">SP: {{ data.salesprogramid || '-' }} </span>
+                                <span v-if="data.salesprogramid" class="block text-xs text-gray-500">SP: {{ data.salesprogramid }}</span>
                                 <!-- <Tag v-if="data.itemcategory === 'ZR3F'" value="ZR3F" severity="warning" size="small" class="mt-1" /> -->
                             </template>
                         </Column>
@@ -190,7 +195,7 @@
                 <div class="card flex flex-col w-full">
                     <div class="flex items-center justify-between border-b pb-3 mb-4">
                         <div class="text-2xl font-bold text-gray-800">Order Info</div>
-                        <Tag :value="getOrderStatusText(order.orderstatus)" :severity="getOrderStatusSeverity(order.orderstatus)" />
+                        <Tag :value="getOrderStatusText(order.orderstatus, order.creditnoteno)" :severity="getOrderStatusSeverity(order.orderstatus, order.creditnoteno)" />
                     </div>
 
                     <div class="overflow-x-auto">
@@ -236,10 +241,10 @@
                                     <td class="px-4 py-2 font-medium">Storage Location</td>
                                     <td class="px-4 py-2 text-right font-semibold">{{ orderData.storagelocation || '-' }}</td>
                                 </tr>
-                                <tr class="border-b">
+                                <!-- <tr class="border-b">
                                     <td class="px-4 py-2 font-medium">Delivery Status</td>
                                     <td class="px-4 py-2 text-right font-semibold">{{ getDeliveryStatusText(order.delivery_status) }}</td>
-                                </tr>
+                                </tr> -->
                                 <tr class="border-b">
                                     <td class="px-4 py-2 font-medium">Created</td>
                                     <td class="px-4 py-2 text-right font-semibold">{{ formatDate(order.created) || '-' }}</td>
@@ -305,17 +310,17 @@
                         </template>
                     </Column>
 
-                    <Column header="Status" style="width: 100px">
+                    <!-- <Column header="Status" style="width: 100px">
                         <template #body="{ data }">
                             <span v-if="data.removed" class="px-2 py-1 bg-red-100 text-red-800 text-xs rounded-full">Removed</span>
                             <span v-else-if="data.qty !== data.originalQty" class="px-2 py-1 bg-blue-100 text-blue-800 text-xs rounded-full">Modified</span>
                             <span v-else class="px-2 py-1 bg-gray-100 text-gray-800 text-xs rounded-full">No Change</span>
                         </template>
-                    </Column>
+                    </Column> -->
 
                     <Column header="Actions" style="width: 120px">
                         <template #body="{ data }">
-                            <div v-if="data.itemcategory === 'ZR3F'">
+                            <div v-if="data.itemcategory === 'ZR3F'" class="text-center">
                                 <Button v-if="!data.removed" icon="pi pi-trash" severity="danger" text rounded @click="removeZR3FItem(data)" v-tooltip="'Remove item'" />
 
                                 <Button v-if="data.removed" icon="pi pi-undo" severity="secondary" text rounded @click="restoreZR3FItem(data)" v-tooltip="'Restore item'" />
@@ -327,7 +332,7 @@
                     </Column>
                 </DataTable>
 
-                <div class="mt-6 p-3 bg-blue-50 border border-blue-200 rounded-md">
+                <!-- <div class="mt-6 p-3 bg-blue-50 border border-blue-200 rounded-md">
                     <div class="flex justify-between items-center">
                         <div>
                             <p class="text-sm font-medium text-blue-800">Total ZR3F Items: {{ zr3fItemCount }} ({{ editableZR3FItems.length }} editable)</p>
@@ -344,7 +349,7 @@
                             <p class="text-sm text-gray-600">Click "Proceed" to approve with changes</p>
                         </div>
                     </div>
-                </div>
+                </div> -->
             </div>
 
             <template #footer>
@@ -386,6 +391,10 @@ const error = ref(null);
 const showEditDialog = ref(false);
 const editableItems = ref([]);
 const originalItems = ref([]);
+
+// Image handling variables
+const imageLoading = ref(false);
+const imageError = ref(false);
 
 // Check if there are ZR3F items
 const hasZR3FItems = computed(() => {
@@ -484,7 +493,12 @@ const getDeliveryStatusText = (status) => {
     return statusMap[status?.toUpperCase()] || status || '-';
 };
 
-const getOrderStatusText = (status) => {
+const getOrderStatusText = (status, creditnoteno) => {
+    // Check for the new condition: status = 9 and creditnoteno = null
+    if (status === 9 && (creditnoteno === null || creditnoteno === undefined || creditnoteno === '')) {
+        return 'Return Received';
+    }
+
     const statusMap = {
         0: 'Pending',
         1: 'Approved',
@@ -495,7 +509,12 @@ const getOrderStatusText = (status) => {
     return statusMap[status] || `Status: ${status}`;
 };
 
-const getOrderStatusSeverity = (status) => {
+const getOrderStatusSeverity = (status, creditnoteno) => {
+    // Check for the new condition: status = 9 and creditnoteno = null
+    if (status === 9 && (creditnoteno === null || creditnoteno === undefined || creditnoteno === '')) {
+        return 'info'; // Using 'info' severity for Return Received status
+    }
+
     const severityMap = {
         0: 'warn',
         1: 'success',
@@ -505,24 +524,6 @@ const getOrderStatusSeverity = (status) => {
     };
     return severityMap[status] || 'secondary';
 };
-
-// const getActionStatusLabel = (status) => {
-//     const actionMap = {
-//         1: 'Approved',
-//         2: 'Rejected',
-//         9: 'Completed'
-//     };
-//     return actionMap[status] || '';
-// };
-
-// const getActionStatusSeverity = (status) => {
-//     const severityMap = {
-//         1: 'success',
-//         2: 'danger',
-//         9: 'success'
-//     };
-//     return severityMap[status] || 'secondary';
-// };
 
 // Helper methods
 const formatAddress = (dealerShop) => {
@@ -556,13 +557,10 @@ const showToast = (severity, summary, detail) => {
     });
 };
 
-// Add these to your reactive variables
-const imageLoading = ref(false);
-const imageError = ref(false);
-
-// Add these methods to your script
+// Image handling methods
 const handleImageLoad = () => {
     imageLoading.value = false;
+    imageError.value = false;
 };
 
 const handleImageError = () => {
@@ -570,26 +568,25 @@ const handleImageError = () => {
     imageError.value = true;
 };
 
-// Update your processPrivateImage function
+// Simplified image processing - no API call
 const processPrivateImage = async () => {
     if (order.value.imageURL && typeof order.value.imageURL === 'string') {
         try {
             imageLoading.value = true;
             imageError.value = false;
 
-            // Check if it's a private file URL that needs processing
-            if (order.value.imageURL.includes('private')) {
-                const blobUrl = await api.getPrivateFile(order.value.imageURL);
-                if (blobUrl) {
-                    order.value.imageURL = blobUrl;
-                }
-            }
+            // Directly use the image URL without API processing
+            // The image URL will be used as-is in the template
+            console.log('Using direct image URL:', order.value.imageURL);
         } catch (error) {
-            console.error('Error loading return image:', error);
+            console.error('Error processing image:', error);
             imageError.value = true;
         } finally {
             imageLoading.value = false;
         }
+    } else {
+        // No image URL, set loading to false
+        imageLoading.value = false;
     }
 };
 
@@ -600,7 +597,7 @@ const fetchReturnOrderDetail = async () => {
         error.value = null;
 
         const response = await api.get(`order/detail-return-order/${returnOrderNo}`);
-            console.log('Order Data:', orderData.value);
+        console.log('Order Data:', orderData.value);
 
         if (response.data.status === 1 && response.data.admin_data && response.data.admin_data.length > 0) {
             const orderDataResponse = response.data.admin_data[0];
@@ -610,14 +607,14 @@ const fetchReturnOrderDetail = async () => {
             orderDelivery.value = orderDataResponse.delivery_information || {};
             returnOrderArray.value = orderDataResponse.return_order_array || [];
 
-            // Process the return image if it exists
+            // Process the return image (simplified - no API call)
             await processPrivateImage();
 
             console.log('Order Data:', orderData.value);
             console.log('Return Items:', returnOrderArray.value);
             console.log('Has ZR3F items:', hasZR3FItems.value);
 
-            console.log('imageURL after processing:', order.value.imageURL);
+            console.log('imageURL:', order.value.imageURL);
         } else {
             error.value = 'No data found for this return order';
             showToast('error', 'Error', error.value);

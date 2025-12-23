@@ -10,7 +10,7 @@
                             <RouterLink to="/marketing/listCatalogue">
                                 <Button icon="pi pi-arrow-left font-bold" class="p-button-text p-button-secondary text-xl" v-tooltip="'Back'" />
                             </RouterLink>
-                            <div class="text-2xl font-bold text-gray-800">Details Catalogue</div>
+                            <div class="text-2xl font-bold text-gray-800">Reward Catalogue Details </div>
                         </div>
 
                         <!-- Edit & Delete Buttons -->
@@ -117,7 +117,7 @@
                             <RouterLink to="/marketing/listCatalogue">
                                 <Button icon="pi pi-arrow-left font-bold" class="p-button-text p-button-secondary text-xl" v-tooltip="'Back'" />
                             </RouterLink>
-                            <div class="text-2xl font-bold text-gray-800">Details Catalogue</div>
+                            <div class="text-2xl font-bold text-gray-800">Reward Catalogue Details </div>
                         </div>
 
                         <!-- Edit & Delete Buttons -->
@@ -181,7 +181,7 @@
                             <RouterLink to="/marketing/listCatalogue">
                                 <Button icon="pi pi-arrow-left font-bold" class="p-button-text p-button-secondary text-xl" v-tooltip="'Back'" />
                             </RouterLink>
-                            <div class="text-2xl font-bold text-gray-800">Details Catalogue</div>
+                            <div class="text-2xl font-bold text-gray-800">Reward Catalogue Details </div>
                         </div>
 
                         <!-- Edit & Delete Buttons -->
@@ -273,7 +273,7 @@
                     <!-- Header -->
                     <div class="flex items-center justify-between border-b pb-3 mb-4">
                         <div class="flex items-center gap-3">
-                            <div class="text-2xl font-bold text-gray-800">👨🏻‍💻 Redemption List</div>
+                            <div class="text-2xl font-bold text-gray-800">Redemption List</div>
                         </div>
 
                         <!-- Export Button -->
@@ -310,7 +310,7 @@
                 <div class="card flex flex-col w-full">
                     <!-- Header -->
                     <div class="flex items-center justify-between border-b pb-2 mb-2">
-                        <div class="text-2xl font-bold text-gray-800">ℹ️ Details Info</div>
+                        <div class="text-2xl font-bold text-gray-800">ℹDetails Info</div>
                         <Tag :value="statusLabel(catalogue.status)" :severity="statusSeverity(catalogue.status)" />
                     </div>
 
@@ -347,7 +347,7 @@
                 <!-- Advance Info -->
                 <div class="card flex flex-col w-full mt-6">
                     <div class="flex items-center justify-between border-b pb-2 mb-2">
-                        <div class="text-2xl font-bold text-gray-800">ℹ️ Advance Info</div>
+                        <div class="text-2xl font-bold text-gray-800">Advance Info</div>
                     </div>
 
                     <div class="overflow-x-auto">

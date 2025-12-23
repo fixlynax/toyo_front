@@ -2,7 +2,7 @@
     <Fluid>
         <div class="flex flex-col md:flex-row gap-8">
             <div class="md:w-2/3 flex flex-col">
-                <div class="card flex flex-col gap-6 w-full">
+                <div class="card flex flex-col w-full">
                     <div class="flex items-center gap-2 border-b">
                         <RouterLink to="/scm/listOrderDelivery">
                             <Button icon="pi pi-arrow-left font-bold" class="p-button-text p-button-secondary text-xl" size="big" v-tooltip="'Back'" />
@@ -11,7 +11,7 @@
                     </div>
 
                     <div class="font-bold text-xl border-b pb-2 mt-2">Customer Details</div>
-                    <div class="grid grid-cols-2 gap-4">
+                    <div class="grid grid-cols-1 md:grid-cols-2 mt-6 mb-4">
                         <div>
                             <span class="text-sm font-medium text-black-700">Customer Name</span>
                             <p class="text-lg font-medium">
@@ -91,8 +91,8 @@
 
             <div class="md:w-1/3 flex flex-col">
                 <div class="card flex flex-col w-full">
-                    <div class="flex items-center justify-between border-b pb-3 mb-4">
-                        <div class="text-2xl font-bold text-gray-800">Advance Info</div>
+                    <div class="flex items-center justify-between border-b pb-3 ">
+                        <div class="text-2xl font-bold text-gray-800">Order Info</div>
                         <Tag :value="getOrderStatusText2(orderDelList.status)" :severity="getOrderStatusSeverity2(orderDelList.status)" />
                     </div>
 
@@ -152,8 +152,8 @@
                                     <td class="px-4 py-2 text-right">{{ orderDelList?.scm_deliver_detail?.delivered_datetime ? formatDate(orderDelList.scm_deliver_detail.delivered_datetime) : 'Not Assigned' }}</td>
                                 </tr>
                                 <tr>
-                                    <td class="px-4 py-2 font-medium">Created</td>
-                                    <td class="px-4 py-2 text-right">{{ formatDate(orderDelList.created) }}</td>
+                                    <td class="px-4 py-2 font-medium">Created On</td>
+                                    <td class="px-4 py-2 text-right">{{ formatDate(orderDelList.created) }} <br> {{ formatTime(orderDelList.created) }}</td>
                                 </tr>
                             </tbody>
                         </table>
@@ -354,17 +354,11 @@ function formatDate(dateString) {
         day: '2-digit'
     });
 }
-function formatTime(timeString) {
-    if (!timeString) return '';
-    const [hours, minutes, seconds] = timeString.split(':');
-    const date = new Date();
-    date.setHours(hours, minutes, seconds);
-    return date.toLocaleTimeString('en-MY', {
-        hour: '2-digit',
-        minute: '2-digit',
-        second: '2-digit',
-        hour12: true
-    });
+function formatTime(dateTimeString) {
+    if (!dateTimeString) return '';
+    const [, timePart] = dateTimeString.split(' ');
+
+    return timePart; // already in 24-hour format: HH:mm:ss
 }
 function formatDateFull(dateString) {
     if (!dateString) return '';

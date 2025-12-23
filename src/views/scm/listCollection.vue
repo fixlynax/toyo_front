@@ -23,6 +23,11 @@ const importInput1 = ref();
 const importInput2 = ref();
 const visibleRows = ref(listData.value);
 
+const importErrors = ref([]);
+const showImportErrorDialog = ref(false);
+const showImportErrorHandle1 = ref(false);
+const showImportErrorHandle2 = ref(false);
+
 // Data variables
 const activeTabIndex = ref(0);
 const dateRange = ref([null, null]);
@@ -131,17 +136,11 @@ function formatDate(dateString) {
     day: '2-digit',
   });
 }
-function formatTime(timeString) {
-  if (!timeString) return '';
-  const [hours, minutes, seconds] = timeString.split(':');
-  const date = new Date();
-  date.setHours(hours, minutes, seconds);
-  return date.toLocaleTimeString('en-MY', {
-    hour: '2-digit',
-    minute: '2-digit',
-    second: '2-digit',
-    hour12: true,
-  });
+function formatTime(dateTimeString) {
+    if (!dateTimeString) return '';
+    const [, timePart] = dateTimeString.split(' ');
+
+    return timePart; // already in 24-hour format: HH:mm:ss
 }
 function formatDateFull(dateString) {
   if (!dateString) return '';
@@ -270,6 +269,11 @@ const handleImport1 = async (event) => {
                 life: 3000
             });
             } else {
+            importErrors.value = response.data.not_updated_records || [];
+            if (importErrors.value.length > 0) {
+                showImportErrorHandle1.value = true;
+                showImportErrorDialog.value = true;
+            }
             toast.add({
                 severity: 'error',
                 summary: 'Import Failed',
@@ -315,6 +319,11 @@ const handleImport2 = async (event) => {
                 life: 3000
             });
             } else {
+            importErrors.value = response.data.not_updated_records || [];
+            if (importErrors.value.length > 0) {
+                showImportErrorHandle2.value = true;
+                showImportErrorDialog.value = true;
+            }
             toast.add({
                 severity: 'error',
                 summary: 'Import Failed',
@@ -630,12 +639,17 @@ const exportToExcel = () => {
 
     try {
         // Create worksheet data
-        const headers = ['Date', 'Ref No', 'Collect Date', 'Receive Date', 'Status'];
+        const headers = ['Created On', 'Ref No', 'Customer Name', 'Customer Acc No', 'Storage Location', 'City', 'State', 'Collect Date', 'Receive Date', 'Status'];
         
         // Prepare data rows
         const csvData = rowsToExport.map(data => [
-            `"${formatDate(data.created)}"`,
+            `"${formatDate(data.created)} ${formatTime(data.created)}"`,
             `"${data.claimRefno || '-'}"`,
+            `"${data?.custname  || '-'}"`,
+            `"${data?.storagelocation  || '-'}"`,
+            `"${data?.custaccountno  || '-'}"`,
+            `"${data?.city.replace(/,$/, '')  || '-'}"`,
+            `"${data?.state  || '-'}"`,
             `"${data.collectDate ? formatDate(data.collectDate) : 'Not Assigned'}"`,
             `"${data.reachWH ? formatDate(data.reachWH) : 'Not Assigned'}"`,
             `"${getStatusText(data.status) || '-'}"`,
@@ -671,7 +685,7 @@ onMounted(async () => {
 
 <template>
     <div class="card">
-        <div class="text-2xl font-bold text-gray-800 border-b pb-2"> CTC List Collection</div>
+        <div class="text-2xl font-bold text-gray-800 border-b pb-2"> CTC Collection List </div>
         <LoadingPage v-if="loading" message="Loading CTC Collection Details..." />
         <div v-else>
             <TabMenu :model="statusTabs" v-model:activeIndex="activeTabIndex" class="mb-4" />
@@ -773,9 +787,11 @@ onMounted(async () => {
                         </div>
                     </template>
                 </Column>
-                <Column field="created" header="Create Date" style="min-width: 8rem" sortable>
+                <Column field="created" header="Created On" style="min-width: 8rem" sortable>
                     <template #body="{ data }">
-                        {{ formatDate(data.created) }}
+                        {{ formatDate(data?.created) ?? '-' }}
+                        <br/>
+                        {{ formatTime(data?.created) ?? '-' }}
                     </template>
                 </Column>
                 <Column field="claimRefno" header="Ref No" style="min-width: 8rem" sortable>
@@ -836,6 +852,56 @@ onMounted(async () => {
             </DataTable>
         </div>
     </div>
+    <Dialog
+        v-model:visible="showImportErrorDialog"
+        header="Import Errors"
+        modal
+        :style="{ width: '700px' }"
+        @hide="handleCloseErrorModal"
+    >
+        <div v-if="importErrors.length === 0" class="text-gray-500">
+            No error details available.
+        </div>
+
+        <div v-else class="flex flex-col gap-4">
+            <div
+                v-for="(item, index) in importErrors"
+                :key="index"
+                class="p-3 border rounded"
+            >
+                <div class="font-semibold">
+                    Warranty Order No: {{ item.claim_no }}
+                </div>
+                <div v-if="showImportErrorHandle1" >
+                    <div class="text-sm text-gray-600">
+                        Request CTC Date: {{ item.request_ctc_date || 'Not Assigned' }}
+                    </div>
+                    <div class="text-sm text-gray-600">
+                        Collect Date: {{ item.collect_date || 'Not Assigned' }}
+                    </div>
+                </div>
+                <div v-if="showImportErrorHandle2" >
+                    <div class="text-sm text-gray-600">
+                        Collect Date: {{ item.collect_datetime || 'Not Assigned' }}
+                    </div>
+                    <div  class="text-sm text-gray-600">
+                        Receive Date: {{ item.reach_warehouse || 'Not Assigned' }}
+                    </div>
+                </div>
+                <div class="text-red-600 mt-2">
+                    {{ item.reason }}
+                </div>
+            </div>
+        </div>
+
+        <template #footer>
+            <Button
+                label="Close"
+                icon="pi pi-times"
+                @click="handleCloseErrorModal()"
+            />
+        </template>
+    </Dialog>
 </template>
 <style scoped>
 :deep(.rounded-table) {

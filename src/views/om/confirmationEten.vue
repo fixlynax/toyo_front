@@ -301,7 +301,7 @@
 
                 <div class="flex flex-col md:flex-row gap-4">
                     <div class="w-full">
-                        <span class="text-sm text-gray-500">Show On List</span>
+                        <span class="text-sm text-gray-500">Show In T-Care</span>
                         <p class="text-lg font-medium">{{ form.showOnList === '1' ? 'Yes' : 'No' }}</p>
                     </div>
                     <div class="w-full">
@@ -765,7 +765,7 @@ async function handleSubmit() {
             toast.add({
                 severity: 'success',
                 summary: 'Success',
-                detail: 'Dealer created successfully! An activation SMS has been sent to the master user.',
+                detail: 'Dealer created successfully! An activation Email has been sent to the master user.',
                 life: 5000
             });
             localStorage.removeItem('etenFormData');

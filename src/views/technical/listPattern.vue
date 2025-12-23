@@ -1,6 +1,6 @@
 <template>
     <div class="card">
-        <div class="text-2xl font-bold text-gray-800 border-b pb-2 mb-4">List Pattern</div>
+        <div class="text-2xl font-bold text-gray-800 border-b pb-2 mb-4">Pattern List</div>
 
         <DataTable
             v-model:expandedRows="expandedRows"
@@ -48,7 +48,15 @@
 
             <template #empty> No data found. </template>
             <template #loading> Loading data. Please wait... </template>
-
+            <Column field="created" header="Created On" style="min-width: 10rem" sortable>
+                <template #body="{ data }">
+                    <span>
+                        {{ formatDate(data.created) }} 
+                        <br/>
+                        {{ formatTime(data?.created) ?? '-' }}
+                    </span>
+                </template>
+            </Column>
             <Column field="processedImageURL" header="Image" style="min-width: 8rem; text-align: center">
                 <template #body="{ data }">
                     <img
@@ -65,26 +73,21 @@
             <Column field="pattern_code" header="Pattern Code" style="min-width: 8rem" sortable>
                 <template #body="{ data }">
                     <RouterLink :to="`/technical/detailPattern/${data.pattern_id}`" class="hover:underline font-bold text-primary-400">
-                        <span class="font-semibold ml-1">{{ data.pattern_code }}</span>
+                        <span>{{ data.pattern_code }}</span>
                     </RouterLink>
                 </template>
             </Column>
             <Column field="mfg_code" header="MFG Code" style="min-width: 8rem" sortable>
                 <template #body="{ data }">
-                    <span class="font-semibold ml-1">{{ data.mfg_code || '-' }}</span>
+                    <span>{{ data.mfg_code || '-' }}</span>
                 </template>
             </Column>
             <Column field="pattern_name" header="Pattern Name" style="min-width: 8rem" sortable>
                 <template #body="{ data }">
-                    <span class="font-semibold ml-1">{{ data.pattern_name || '-' }}</span>
+                    <span>{{ data.pattern_name || '-' }}</span>
                 </template>
             </Column>
 
-            <Column field="created" header="Created Date" style="min-width: 10rem" sortable>
-                <template #body="{ data }">
-                    <span class="text-gray-600">{{ formatDate(data.created) }}</span>
-                </template>
-            </Column>
         </DataTable>
 
         <!-- ✅ Image Preview Dialog -->
@@ -145,7 +148,12 @@ function formatDate(dateString) {
         day: '2-digit'
     });
 }
+function formatTime(dateTimeString) {
+    if (!dateTimeString) return '';
+    const [, timePart] = dateTimeString.split(' ');
 
+    return timePart; // already in 24-hour format: HH:mm:ss
+}
 // Export function to CSV
 const exportToCSV = () => {
     if (patterns.value.length === 0) {

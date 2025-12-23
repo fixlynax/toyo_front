@@ -1,9 +1,9 @@
 <template>
     <div class="card">
-        <div class="text-2xl font-bold text-gray-800 border-b pb-2 mb-6">List News</div>
+        <div class="text-2xl font-bold text-gray-800 border-b pb-2 mb-6">News Management List</div>
 
         <!-- Show LoadingPage only during initial page load -->
-        <LoadingPage v-if="initialLoading" :message="'Loading News...'" :sub-message="'Fetching list announcements'" />
+        <LoadingPage v-if="initialLoading" :message="'Loading News Management Details...'" :sub-message="'Fetching list news'" />
 
         <!-- Show content area when not in initial loading -->
         <div v-else>

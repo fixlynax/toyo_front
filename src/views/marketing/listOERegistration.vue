@@ -3,7 +3,7 @@
         <div class="text-2xl font-bold text-gray-800 border-b pb-2 mb-6">OE Registration List</div>
 
         <!-- Show LoadingPage only during initial page load -->
-        <LoadingPage v-if="initialLoading" :message="'Loading OEs...'" :sub-message="'Fetching OE data'" />
+        <LoadingPage v-if="initialLoading" :message="'Loading OE Registration Details...'" :sub-message="'Fetching OE data'" />
 
         <!-- Show content area when not in initial loading -->
         <div v-else>

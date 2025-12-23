@@ -101,10 +101,10 @@
                                         <span class="ml-2 text-gray-600">Loading image...</span>
                                     </div>
                                     <!-- Show image preview or existing image -->
-                                    <div v-else-if="imagePreview || salesProgram.imageUrl">
-                                        <img :src="imagePreview || salesProgram.imageUrl" alt="Program Image" class="rounded-lg shadow-md object-cover w-full h-80" @error="handleImageError" @load="handleImageLoad" />
+                                    <div v-else-if="imagePreview || salesProgram.image">
+                                        <img :src="imagePreview || salesProgram.image" alt="Program Image" class="rounded-lg shadow-md object-cover w-full h-80" @error="handleImageError" @load="handleImageLoad" />
                                         <p v-if="currentFileSize" class="text-xs text-gray-500 mt-1 text-center">File size: {{ formatFileSize(currentFileSize) }}</p>
-                                        <p v-else-if="salesProgram.imageUrl && !imageFile" class="text-xs text-gray-500 mt-1 text-center">Existing image</p>
+                                        <p v-else-if="salesProgram.image && !imageFile" class="text-xs text-gray-500 mt-1 text-center">Existing image</p>
                                     </div>
                                     <!-- Show placeholder when no image -->
                                     <div v-else class="rounded-lg shadow-md w-full h-80 bg-gray-200 flex items-center justify-center">
@@ -475,7 +475,6 @@
                     </div>
                 </div>
             </div>
-
             <template #footer>
                 <div class="flex justify-between items-center w-full">
                     <div class="text-sm text-gray-600">
@@ -504,7 +503,7 @@ const router = useRouter();
 const toast = useToast();
 
 // Constants
-const MAX_FILE_SIZE = 1 * 1024 * 1024; // 2MB in bytes
+const MAX_FILE_SIZE = 1 * 1024 * 1024; // 1MB in bytes
 
 const programId = ref(route.params.id);
 const loading = ref(false);
@@ -524,7 +523,7 @@ const salesProgram = ref({
     startdate: '',
     enddate: '',
     status: 1,
-    imageUrl: ''
+    image: '' // Changed from imageUrl to image
 });
 
 const imageFile = ref(null);
@@ -633,43 +632,15 @@ const clearMaterialSearch = () => {
     applyMaterialFilter();
 };
 
-// Process private images using the API method
+// Simplified image processing - just direct URL
 const processPrivateImages = async (programData) => {
+    // If no image or image is null, return as-is
     if (!programData || !programData.image) {
         return programData;
     }
 
-    const imageUrl = programData.image;
-
-    // If it's already a blob URL or data URL, return as is
-    if (imageUrl.startsWith('blob:') || imageUrl.startsWith('data:')) {
-        programData.imageUrl = imageUrl;
-        return programData;
-    }
-
-    // Use getPrivateFile to load the image
-    try {
-        imageLoading.value = true;
-        console.log('Processing private image for edit:', imageUrl);
-        const blobUrl = await api.getPrivateFile(imageUrl);
-        if (blobUrl) {
-            programData.imageUrl = blobUrl;
-            console.log('Image processed successfully');
-        } else {
-            console.warn('getPrivateFile returned null/undefined');
-            programData.imageUrl = '';
-        }
-    } catch (error) {
-        console.error('Error loading private image in edit:', error);
-        // Fallback strategies
-        if (imageUrl.includes('salesprogramphotos')) {
-            programData.imageUrl = `${window.location.origin}/${imageUrl}`;
-        } else {
-            programData.imageUrl = '';
-        }
-    } finally {
-        imageLoading.value = false;
-    }
+    // Directly use the image URL without processing
+    console.log('Using direct image URL:', programData.image);
 
     return programData;
 };
@@ -685,7 +656,7 @@ const fetchSalesProgram = async () => {
         if (response.data.status === 1 && response.data.admin_data.length > 0) {
             let programData = response.data.admin_data[0];
 
-            // Process image first using getPrivateFile
+            // Process image (simplified - no API call)
             programData = await processPrivateImages(programData);
 
             // Map API data to form structure
@@ -699,7 +670,7 @@ const fetchSalesProgram = async () => {
                 startdate: new Date(programData.startDate),
                 enddate: new Date(programData.endDate),
                 status: programData.status,
-                imageUrl: programData.imageUrl
+                image: programData.image // Directly use image URL
             };
 
             // Load FOC criteria data
@@ -1018,8 +989,6 @@ const onImageSelect = (event) => {
         const reader = new FileReader();
         reader.onload = (e) => {
             imagePreview.value = e.target.result;
-            // Clear the existing image URL when new file is selected
-            salesProgram.value.imageUrl = '';
         };
         reader.readAsDataURL(file);
 
@@ -1030,7 +999,7 @@ const onImageSelect = (event) => {
 const handleImageError = (event) => {
     console.warn('Image failed to load:', event.target.src);
     event.target.src = '';
-    salesProgram.value.imageUrl = '';
+    salesProgram.value.image = '';
 };
 
 const handleImageLoad = () => {
@@ -1149,7 +1118,7 @@ const loadFreeMaterials = async () => {
     }
 };
 
-// Form Validation
+// Form Validation - FIXED DATE VALIDATION
 const validateForm = () => {
     if (!salesProgram.value.programName) {
         showError('Please enter Program Title');
@@ -1161,12 +1130,17 @@ const validateForm = () => {
         return false;
     }
 
-    // Validate dates
+    // Validate dates - Compare only date portion (without time)
     const startDate = new Date(salesProgram.value.startdate);
     const endDate = new Date(salesProgram.value.enddate);
 
-    if (endDate <= startDate) {
-        showError('End date must be after start date');
+    // Set both to start of day to ignore time differences
+    const startDateOnly = new Date(startDate.getFullYear(), startDate.getMonth(), startDate.getDate());
+    const endDateOnly = new Date(endDate.getFullYear(), endDate.getMonth(), endDate.getDate());
+
+    // Only reject if end date is strictly before start date
+    if (endDateOnly < startDateOnly) {
+        showError('End date must be on or after start date');
         return false;
     }
 
@@ -1201,7 +1175,7 @@ const validateForm = () => {
     return true;
 };
 
-// Submit Form for Update
+// Submit Form for Update - FIXED VERSION
 const submitForm = async () => {
     if (!validateForm()) {
         return;
@@ -1214,26 +1188,31 @@ const submitForm = async () => {
         const spFOCArray = programItem.value.buyMaterials.map((material) => ({
             id: material.id || null, // Include ID for existing records, null for new ones
             materialid: material.materialid,
-            status: material.status
+            status: material.status || 1 // Ensure status is always set
         }));
 
         console.log('Generated spFOC_array:', JSON.stringify(spFOCArray, null, 2));
 
-        // Prepare FormData
+        // Prepare FormData with correct field names matching backend
         const formData = new FormData();
 
-        formData.append('pricegroup', salesProgram.value.pricegroup);
-        formData.append('showSP', salesProgram.value.showSP);
-        formData.append('type', salesProgram.value.type);
-        formData.append('programName', salesProgram.value.programName);
-        formData.append('desc', salesProgram.value.desc);
+        // Basic sales program fields
+        formData.append('programID', salesProgram.value.programID);
+        formData.append('pricegroup', salesProgram.value.pricegroup || '06');
+        formData.append('showSP', salesProgram.value.showSP || 1);
+        formData.append('type', salesProgram.value.type || 'FOC');
+        formData.append('programName', salesProgram.value.programName || '');
+        formData.append('desc', salesProgram.value.desc || '');
         formData.append('startdate', formatDate(salesProgram.value.startdate));
         formData.append('enddate', formatDate(salesProgram.value.enddate));
-        formData.append('status', salesProgram.value.status);
+        formData.append('status', salesProgram.value.status || 1);
 
         // Append image if changed
         if (imageFile.value) {
             formData.append('image', imageFile.value);
+        } else if (salesProgram.value.image) {
+            // If no new image but existing image, we need to keep it
+            // The backend will handle keeping the existing image
         }
 
         // For FOC programs, append criteria data
@@ -1241,33 +1220,72 @@ const submitForm = async () => {
             // Append spFOC_array as a JSON string
             formData.append('spFOC_array', JSON.stringify(spFOCArray));
 
-            // Append individual fields
+            // Append FOC-specific fields with correct field names
             formData.append('freematerialid', programItem.value.selectedFreeMaterial || '');
-            formData.append('freematerialdesc', programItem.value.freeMaterialData?.material || '');
-            formData.append('buyQty', programItem.value.buyQty);
-            formData.append('freeQty', programItem.value.freeQty);
+
+            // Get free material description
+            let freeMaterialDesc = '';
+            if (programItem.value.freeMaterialData) {
+                freeMaterialDesc = programItem.value.freeMaterialData.material || '';
+            } else if (programItem.value.selectedFreeMaterial) {
+                const freeMat = freeMaterialOptions.value.find((m) => m.materialid === programItem.value.selectedFreeMaterial);
+                freeMaterialDesc = freeMat?.material || '';
+            }
+            formData.append('freematerialdesc', freeMaterialDesc);
+
+            formData.append('buyQty', programItem.value.buyQty || 1);
+            formData.append('freeQty', programItem.value.freeQty || 1);
             formData.append('freeQuota', programItem.value.freeQuota || '');
         }
 
         console.log('Updating sales program:', salesProgram.value.programID);
+        console.log('FormData entries:');
+        for (let [key, value] of formData.entries()) {
+            console.log(key, value);
+        }
 
         const response = await api.postExtra(`sales-program/update-sales-program/${salesProgram.value.programID}`, formData, {
-            headers: { 'Content-Type': 'multipart/form-data' }
+            headers: {
+                'Content-Type': 'multipart/form-data',
+                Accept: 'application/json'
+            }
         });
+
+        console.log('Update response:', response.data);
 
         if (response.data.status === 1) {
             console.log('Sales program updated successfully');
             showSuccess('Sales program updated successfully!');
+
+            // Redirect after a short delay
             setTimeout(() => {
                 router.push('/om/detailSalesProgram/' + salesProgram.value.programID);
             }, 1500);
         } else {
-            console.error('Error updating sales program:', response.data.error);
-            showError('Error updating sales program: ' + (response.data.error?.message || 'Unknown error'));
+            console.error('Error updating sales program:', response.data);
+
+            // Extract error message
+            let errorMessage = 'Error updating sales program';
+            if (response.data.error?.message) {
+                errorMessage = response.data.error.message;
+            } else if (response.data.message) {
+                errorMessage = response.data.message;
+            }
+
+            showError(errorMessage);
         }
     } catch (error) {
         console.error('Error submitting form:', error);
-        showError('Error submitting form: ' + (error.message || 'Please try again'));
+
+        // Extract error message from response if available
+        let errorMessage = 'Error submitting form: ' + (error.message || 'Please try again');
+        if (error.response?.data?.error?.message) {
+            errorMessage = error.response.data.error.message;
+        } else if (error.response?.data?.message) {
+            errorMessage = error.response.data.message;
+        }
+
+        showError(errorMessage);
     } finally {
         submitting.value = false;
     }
@@ -1283,11 +1301,9 @@ const formatDate = (date) => {
     return `${year}-${month}-${day}`;
 };
 
-// Clean up blob URLs when component unmounts
+// No need for blob URL cleanup since we're not using getPrivateFile
 onUnmounted(() => {
-    if (salesProgram.value.imageUrl && salesProgram.value.imageUrl.startsWith('blob:')) {
-        URL.revokeObjectURL(salesProgram.value.imageUrl);
-    }
+    // Removed blob URL cleanup as we're not using getPrivateFile anymore
 });
 
 // Load initial data
