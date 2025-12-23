@@ -143,8 +143,8 @@
                                     <td class="px-4 py-2 text-right">{{ orderDelList.driverInformation?.pickup_datetime ? formatDate(orderDelList.driverInformation.pickup_datetime) : 'Not Assigned' }}</td>
                                 </tr>
                                 <tr>
-                                    <td class="px-4 py-2 font-medium">Created</td>
-                                    <td class="px-4 py-2 text-right">{{ formatDate(orderDelList.created) || '-' }}</td>
+                                    <td class="px-4 py-2 font-medium">Created On</td>
+                                    <td class="px-4 py-2 text-right">{{ formatDate(orderDelList.created) || '-' }} {{ formatTime(orderDelList.created) || '-' }}</td>
                                 </tr>
                             </tbody>
                         </table>
@@ -435,17 +435,11 @@ function formatDate(dateString) {
         day: '2-digit'
     });
 }
-function formatTime(timeString) {
-    if (!timeString) return '';
-    const [hours, minutes, seconds] = timeString.split(':');
-    const date = new Date();
-    date.setHours(hours, minutes, seconds);
-    return date.toLocaleTimeString('en-MY', {
-        hour: '2-digit',
-        minute: '2-digit',
-        second: '2-digit',
-        hour12: true
-    });
+function formatTime(dateTimeString) {
+    if (!dateTimeString) return '';
+    const [, timePart] = dateTimeString.split(' ');
+
+    return timePart; // already in 24-hour format: HH:mm:ss
 }
 function formatDateFull(dateString) {
     if (!dateString) return '';
