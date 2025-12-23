@@ -92,7 +92,11 @@
                         {{ formatTime(data?.created) ?? '-' }}
                     </template>
                 </Column>
-
+                <Column field="order_no" header="Ref No" style="min-width: 8rem" sortable>
+                    <template #body="{ data }">
+                        {{ data.order_no }}
+                    </template>
+                </Column>
                 <Column field="do_no" header="SAP DO No" style="min-width: 8rem" sortable>
                     <template #body="{ data }">
                         <RouterLink :to="`/scm/detailOrderDelivery/${data.orderID}`" class="hover:underline font-bold text-primary">
@@ -591,13 +595,14 @@ const exportToExcel = () => {
     }
 
     try {
-    const headers = ['Created', 'SAP DO No', 'Customer Name', 'Customer Acc No', 'Storage Location','City', 'State', 'Order Type', 'Driver Name', 'Driver IC', 'Driver Contact','Driver Truck Plate', 'Eta Date', 'Planned Date', 'Delivered Date', 'Status','Item No','Pattern Name', 'Description', 'Qty'];
+    const headers = ['Created', 'Ref No', 'SAP DO No', 'Customer Name', 'Customer Acc No', 'Storage Location','City', 'State', 'Order Type', 'Driver Name', 'Driver IC', 'Driver Contact','Driver Truck Plate', 'Eta Date', 'Planned Date', 'Delivered Date', 'Status','Item No','Pattern Name', 'Description', 'Qty'];
 
     const csvData = [];
 
     rowsToExport.forEach(data => {
         const baseRow = [
             `"${formatDate(data.created)} ${formatTime(data.created)}"`,
+            `"${data.order_no || '-'}"`,
             `"${data.do_no || '-'}"`,
             `"${data.customer_name || ''} "`,
             `"${data.custAccountNo || '-'}"`,
