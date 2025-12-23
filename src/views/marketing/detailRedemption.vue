@@ -145,8 +145,6 @@
             </div>
         </div>
 
-        <!-- Toast Component for notifications -->
-        <Toast />
     </Fluid>
 </template>
 

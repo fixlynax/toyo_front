@@ -243,8 +243,7 @@ const collectionList = ref([]);
 
 const activeTabIndex = ref(0);
 const dateRange = ref([null, null]);
-const visibleRows = ref(collectionList.value);
-
+const visibleRows = computed(() => collectionList.value);
 const formatDateDMY = (date) => {
   const d = new Date(date);
   const day = String(d.getDate()).padStart(2, "0");

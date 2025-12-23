@@ -8,29 +8,42 @@ const filters1 = ref(null);
 const listData = ref([]);
 const loading = ref(true);
 
-// Helper function to determine status based on period
-const getStatusFromPeriod = (startDate, endDate) => {
+// UPDATED Helper function to determine status based on period AND original status
+const getStatusFromPeriod = (startDate, endDate, originalStatus) => {
     // Create dates at the start of the day for comparison
     const now = new Date();
     const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-    
+
     const start = new Date(startDate);
     const startAtDay = new Date(start.getFullYear(), start.getMonth(), start.getDate());
-    
+
     const end = new Date(endDate);
     const endAtDay = new Date(end.getFullYear(), end.getMonth(), end.getDate());
-    
+
     // Adjust end date to include the full end day (until midnight of next day)
     const endAtDayAdjusted = new Date(endAtDay);
     endAtDayAdjusted.setDate(endAtDayAdjusted.getDate() + 1);
 
-    if (today < startAtDay) {
-        return { label: 'Upcoming', severity: 'info' };
-    } else if (today >= startAtDay && today < endAtDayAdjusted) {
-        return { label: 'Active', severity: 'success' };
-    } else {
+    // UPDATED LOGIC BASED ON REQUIREMENTS:
+    // 1. If originalStatus is 0 (inactive), always return Inactive
+    // 2. If originalStatus is 1 (active), check dates
+    if (originalStatus === 0) {
         return { label: 'Inactive', severity: 'danger' };
     }
+
+    // Only check dates if originalStatus is 1
+    if (originalStatus === 1) {
+        if (today < startAtDay) {
+            return { label: 'Upcoming', severity: 'info' };
+        } else if (today >= startAtDay && today < endAtDayAdjusted) {
+            return { label: 'Active', severity: 'success' };
+        } else {
+            return { label: 'Inactive', severity: 'danger' };
+        }
+    }
+
+    // Fallback - if originalStatus is neither 0 nor 1
+    return { label: 'Inactive', severity: 'danger' };
 };
 
 function initFilters1() {
@@ -50,8 +63,12 @@ onBeforeMount(async () => {
 
         if (response.data.status === 1 && Array.isArray(response.data.admin_data)) {
             listData.value = response.data.admin_data.map((sales) => {
-                // Determine status based on period
-                const periodStatus = getStatusFromPeriod(sales.startDate, sales.endDate);
+                // UPDATED: Pass original status to getStatusFromPeriod
+                const periodStatus = getStatusFromPeriod(
+                    sales.startDate,
+                    sales.endDate,
+                    sales.status // Pass the original status from API
+                );
 
                 return {
                     id: sales.id,
@@ -60,7 +77,7 @@ onBeforeMount(async () => {
                     startDate: sales.startDate,
                     endDate: sales.endDate,
                     freeQuota: sales.freeQuota || '-',
-                    // Use the period-based status instead of API status
+                    // Use the combined status (period + originalStatus)
                     status: periodStatus,
                     created: sales.created,
                     // Keep original status if needed for other purposes
@@ -147,7 +164,7 @@ onBeforeMount(async () => {
             </Column>
             <Column field="freeQuota" header="Quota" style="min-width: 12rem" />
 
-            <!-- Status (now based on period) -->
+            <!-- Status (now based on period AND original status) -->
             <Column header="Status" style="min-width: 8rem">
                 <template #body="{ data }">
                     <Tag :value="data.status.label" :severity="data.status.severity" />

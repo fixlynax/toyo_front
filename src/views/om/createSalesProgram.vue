@@ -1,6 +1,5 @@
 <template>
     <Fluid>
-        <Toast />
         <div class="flex flex-col md:flex-row gap-8">
             <div class="card flex flex-col gap-6 w-full">
                 <!-- Header -->
@@ -66,6 +65,11 @@
                                 <img :src="imagePreview" alt="Preview" class="rounded-lg shadow-md object-cover w-full h-80" />
                                 <p class="text-xs text-gray-500 mt-1 text-center">File size: {{ formatFileSize(currentFileSize) }}</p>
                             </div>
+                        </div>
+
+                        <div class="md:col-start-3">
+                            <label class="block font-bold text-gray-700">Status</label>
+                            <Dropdown v-model="salesProgram.status" :options="statusOptions" optionLabel="label" optionValue="value" class="w-full" placeholder="Select Status" />
                         </div>
                     </div>
                 </div>
@@ -453,14 +457,14 @@ const MAX_FILE_SIZE = 1 * 1024 * 1024; // 1MB in bytes
 
 const salesProgram = ref({
     programID: '',
-    showSP: 1,
+    showSP: null, // Changed from 1 to null to force user selection
     pricegroup: '06',
     type: 'FOC',
     programName: '',
     desc: '',
     startdate: '',
     enddate: '',
-    status: 1
+    status: null // Changed from 1 to null to force user selection
 });
 
 const imageFile = ref(null);
@@ -501,6 +505,12 @@ const materialFilter = ref({
     selectedRims: [], // Changed from selectedRim to selectedRims (array)
     availableRims: []
 });
+
+// Add this
+const statusOptions = ref([
+    { label: 'Active', value: 1 },
+    { label: 'Inactive', value: 0 }
+]);
 
 const showOptions = ref([
     { label: 'Yes', value: 1 },
@@ -921,8 +931,9 @@ const validateForm = () => {
         return false;
     }
 
-    if (!salesProgram.value.showSP) {
-        showError('Please enter Sales Program ID');
+    // Fixed: Check if showSP is selected (not just truthy)
+    if (salesProgram.value.showSP === undefined || salesProgram.value.showSP === null) {
+        showError('Please select Show Sales Program option');
         return false;
     }
 
@@ -936,19 +947,26 @@ const validateForm = () => {
         return false;
     }
 
+    // Add status validation - improved check
+    if (salesProgram.value.status === undefined || salesProgram.value.status === null) {
+        showError('Please select status (Active/Inactive)');
+        return false;
+    }
+
     // Validate dates
     const startDate = new Date(salesProgram.value.startdate);
     const endDate = new Date(salesProgram.value.enddate);
 
     if (endDate < startDate) {
-        showError('End date must be on or after start date'); // Updated message
+        showError('End date must be on or after start date');
         return false;
     }
 
-    // if (!imageFile.value) {
-    //     showError('Please upload an image');
-    //     return false;
-    // }
+    // Validate image - check if image is required
+    if (!imageFile.value) {
+        showError('Please upload an image');
+        return false;
+    }
 
     // Validate image file size
     const imageValidation = validateImageFile(imageFile.value);
@@ -996,14 +1014,16 @@ const submitForm = async () => {
         const formData = new FormData();
 
         formData.append('programID', salesProgram.value.programID);
-        formData.append('showSP', salesProgram.value.showSP);
+        // Ensure showSP has a value
+        formData.append('showSP', salesProgram.value.showSP !== null && salesProgram.value.showSP !== undefined ? salesProgram.value.showSP : 1);
         formData.append('pricegroup', salesProgram.value.pricegroup);
         formData.append('type', salesProgram.value.type);
         formData.append('programName', salesProgram.value.programName);
         formData.append('desc', salesProgram.value.desc);
         formData.append('startdate', formatDate(salesProgram.value.startdate));
         formData.append('enddate', formatDate(salesProgram.value.enddate));
-        formData.append('status', salesProgram.value.status);
+        // Ensure status has a value
+        formData.append('status', salesProgram.value.status !== null && salesProgram.value.status !== undefined ? salesProgram.value.status : 1);
         formData.append('image', imageFile.value);
 
         // ✅ Append spFOC_array as a JSON string
@@ -1024,6 +1044,7 @@ const submitForm = async () => {
             desc: salesProgram.value.desc,
             startdate: formatDate(salesProgram.value.startdate),
             enddate: formatDate(salesProgram.value.enddate),
+            status: salesProgram.value.status, // Log the status
             spFOC_array: JSON.stringify(spFOCArray),
             freematerialid: programItem.value.selectedFreeMaterial,
             freematerialdesc: programItem.value.freeMaterialData?.material,
@@ -1031,7 +1052,6 @@ const submitForm = async () => {
             freeQty: programItem.value.freeQty,
             freeQuota: programItem.value.freeQuota,
             imageFile: imageFile.value?.name || 'N/A',
-            status: salesProgram.value.status,
             type: salesProgram.value.type
         });
 

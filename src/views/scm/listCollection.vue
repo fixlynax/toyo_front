@@ -21,7 +21,7 @@ const exportLoading2 = ref(false);
 const importLoading2 = ref(false);
 const importInput1 = ref();
 const importInput2 = ref();
-const visibleRows = ref(listData.value);
+const visibleRows = computed(() => listData.value);
 
 const importErrors = ref([]);
 const showImportErrorDialog = ref(false);

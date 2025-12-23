@@ -109,8 +109,6 @@
             </template>
         </Dialog>
 
-        <!-- Toast Container -->
-        <Toast />
     </Fluid>
 </template>
 
