@@ -673,20 +673,20 @@ const loadFilteredData = async () => {
             return b.sortableDate.localeCompare(a.sortableDate);
         });
 
-        let filterMessage = `Showing other files`;
-        if (dateRange.value[0] && dateRange.value[1]) {
-            filterMessage += ` from ${formatDateForDisplay(dateRange.value[0])} to ${formatDateForDisplay(dateRange.value[1])}`;
-        }
-        if (accountFilterValue) {
-            filterMessage += ` for account: ${accountFilterValue}`;
-        }
+        // let filterMessage = `Showing other files`;
+        // if (dateRange.value[0] && dateRange.value[1]) {
+        //     filterMessage += ` from ${formatDateForDisplay(dateRange.value[0])} to ${formatDateForDisplay(dateRange.value[1])}`;
+        // }
+        // if (accountFilterValue) {
+        //     filterMessage += ` for account: ${accountFilterValue}`;
+        // }
 
-        toast.add({
-            severity: 'success',
-            summary: 'Filter Applied',
-            detail: filterMessage,
-            life: 3000
-        });
+        // toast.add({
+        //     severity: 'success',
+        //     summary: 'Filter Applied',
+        //     detail: filterMessage,
+        //     life: 3000
+        // });
     } catch (err) {
         console.error('Failed to load filtered data:', err);
         error.value = err.message;
