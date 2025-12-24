@@ -762,7 +762,7 @@ const generateReport = (report) => {
         </head>
         <body>
 
-            <div class="top-header"><img src="/demo/images/toyo_logo.png" alt="Logo" style="height: 25px; object-fit: contain" /></div>
+            <div class="top-header"><img src="/etenadmin/demo/images/toyo_logo.png" alt="Logo" style="height: 25px; object-fit: contain" /></div>
             <div class="company-info">
                 Toyo Tyre Sales And Marketing Malaysia Sdn Bhd <span class="sub-company-info">(Company No: 201501002742 (1128074 - X) )</span><br>
             </div>

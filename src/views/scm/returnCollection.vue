@@ -752,7 +752,7 @@ const generateReport = (report) => {
         </head>
         <body>
 
-            <div class="header-logo"><img src="/demo/images/toyo_logo.png" alt="Logo" style="height: 25px; object-fit: contain"/></div>
+            <div class="header-logo"><img src="/etenadmin/demo/images/toyo_logo.png" alt="Logo" style="height: 25px; object-fit: contain"/></div>
             <div class="sub-header">Toyo Tyre Sales And Marketing Malaysia Sdn Bhd <span class="sub-company-info">(Company No: 201501002742 (1128074 - X) )</span></div>
 
             <div class="title-box">CLAIM TIRE COLLECTION <span style="color:red;">(RETURN)</span></div>
