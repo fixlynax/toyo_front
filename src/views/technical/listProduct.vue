@@ -15,7 +15,28 @@
             :loading="loading"
             :filters="filters"
             filterDisplay="menu"
-            :globalFilterFields="['materialid', 'pattern', 'origin', 'sectionwidth', 'tireseries', 'rimdiameter', 'speedplyrating', 'status']"
+            :globalFilterFields="[
+            'materialid',
+            'pattern',
+            'origin',
+            'sectionwidth',
+            'tireseries',
+            'rimdiameter',
+            'speedplyrating',
+
+            'price01_validitystartdate',
+            'price_01_validityenddate',
+            'price02_validitystartdate',
+            'price_02_validityenddate',
+            'price03_validitystartdate',
+            'price_03_validityenddate',
+            'price04_validitystartdate',
+            'price_04_validityenddate',
+            'price05_validitystartdate',
+            'price_05_validityenddate',
+
+            'status'
+            ]"
             paginatorTemplate="CurrentPageReport FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink RowsPerPageDropdown"
             currentPageReportTemplate="Showing {first} to {last} of {totalRecords} entries"
         >
@@ -184,23 +205,23 @@
                 </template>
             </Column>
 
-            <Column field="valid" header="Valid" style="min-width: 15rem">
+            <Column header="Valid" style="min-width: 15rem">
                 <template #body="{ data }">
                     <div class="flex flex-col leading-relaxed text-sm text-gray-700">
                         <div class="flex">
-                            <span >{{ formatDate(data.price01_validitystartdate) }} - {{ formatDate(data.price_01_validityenddate) }}</span>
+                            <span >{{ data.price01_validitystartdate }} - {{ data.price_01_validityenddate }}</span>
                         </div>
                         <div class="flex">
-                            <span >{{ formatDate(data.price02_validitystartdate) }} - {{formatDate(data.price_02_validityenddate) }}</span>
+                            <span >{{ data.price02_validitystartdate }} - {{data.price_02_validityenddate }}</span>
                         </div>
                         <div class="flex">
-                            <span>{{ formatDate(data.price03_validitystartdate) }} - {{ formatDate(data.price_03_validityenddate) }}</span>
+                            <span>{{ data.price03_validitystartdate }} - {{ data.price_03_validityenddate }}</span>
                         </div>
                         <div class="flex">
-                            <span >{{ formatDate(data.price04_validitystartdate) }} - {{ formatDate(data.price_04_validityenddate) }}</span>
+                            <span >{{ data.price04_validitystartdate }} - {{ data.price_04_validityenddate }}</span>
                         </div>
                         <div class="flex">
-                            <span >{{ formatDate(data.price05_validitystartdate) }} - {{ formatDate(data.price_05_validityenddate) }}</span>
+                            <span >{{ data.price05_validitystartdate }} - {{ data.price_05_validityenddate }}</span>
                         </div>
                     </div>
                 </template>
@@ -269,16 +290,16 @@ const fetchData = async () => {
                 price03: product.price03,
                 price04: product.price04,
                 price05: product.price05,
-                price01_validitystartdate: product.price01_validitystartdate,
-                price_01_validityenddate: product.price_01_validityenddate,
-                price02_validitystartdate: product.price02_validitystartdate,
-                price_02_validityenddate: product.price_02_validityenddate,
-                price03_validitystartdate: product.price03_validitystartdate,
-                price_03_validityenddate: product.price_03_validityenddate,
-                price04_validitystartdate: product.price04_validitystartdate,
-                price_04_validityenddate: product.price_04_validityenddate,
-                price05_validitystartdate: product.price05_validitystartdate,
-                price_05_validityenddate: product.price_05_validityenddate,
+                price01_validitystartdate: formatDate(product.price01_validitystartdate),
+                price_01_validityenddate: formatDate(product.price_01_validityenddate),
+                price02_validitystartdate: formatDate(product.price02_validitystartdate),
+                price_02_validityenddate: formatDate(product.price_02_validityenddate),
+                price03_validitystartdate: formatDate(product.price03_validitystartdate),
+                price_03_validityenddate: formatDate(product.price_03_validityenddate),
+                price04_validitystartdate: formatDate(product.price04_validitystartdate),
+                price_04_validityenddate: formatDate(product.price_04_validityenddate),
+                price05_validitystartdate: formatDate(product.price05_validitystartdate),
+                price_05_validityenddate: formatDate(product.price_05_validityenddate),
                 updatingSell: false
             }));
         } else {
@@ -560,11 +581,11 @@ onMounted(() => {
 });
 
 function formatDate(dateString) {
-    if (!dateString) return '-';
+    if (!dateString) return '';
 
     const date = new Date(dateString); // Works for ISO, YYYY-MM-DD, YYYY-MM-DDTHH
 
-    if (isNaN(date)) return '-';
+    if (isNaN(date)) return '';
 
     return date.toLocaleDateString('en-MY', {
         year: 'numeric',

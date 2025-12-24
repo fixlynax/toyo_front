@@ -88,7 +88,7 @@
                 </Column>
                 <Column field="sapDateSearch" header="Create On" style="min-width: 8rem" sortable>
                     <template #body="{ data }">
-                        {{ formatDate(data.sapDateSearch) ?? '-' }}
+                        {{ data.sapDateSearch ?? '-' }}
                         <br/>
                         {{ data.sapTimeSearch ?? '-' }}
                     </template>
@@ -144,7 +144,7 @@
                         <Tag :value="data.delivery_status" :severity="getStatusSeverity(data.delivery_status)" />
                     </template>
                 </Column>
-                <!-- <Column v-if="statusTabs[activeTabIndex]?.label !== 'New' && canUpdate" field="report" header="Report" style="min-width: 8rem">
+                <Column v-if="statusTabs[activeTabIndex]?.label !== 'New' && canUpdate" field="report" header="Report" style="min-width: 8rem">
                     <template #body="{ data }">
                         <Button 
                             icon="pi pi-print" 
@@ -153,7 +153,7 @@
                             tooltip="Print Report"
                             />
                     </template>
-                </Column> -->
+                </Column>
             </DataTable>
         </div>
     </div>
@@ -562,9 +562,10 @@ const fetchData = async (body = null) => {
 const fetchReport = async (id) => {
     try {
         loading.value = true;
-        const response = await api.get(`warrantyReport/ctc/${id}`);
-        if (response.data.status === 1) {
-            generateReport(response.data.report_data);
+        const response = await api.get(`excel-return-order-detail/${id}`);
+        console.log(response)
+        if (response.data.status == 1) {
+            generateReport(response.data.admin_data);
         }
         else{
         toast.add({
@@ -659,6 +660,14 @@ function getStatusSeverity(status) {
     }
 }
 const generateReport = (report) => {
+    const itemRows = (report.return_order_array || []).map((item, index) => `
+        <tr>
+            <td>${index + 1}</td>
+            <td>${item.materialid || '-'}</td>
+            <td>${item.materialdescription || '-'}</td>
+            <td>${item.qty || '-'}</td>
+        </tr>
+    `).join('');
     const printWindow = window.open('', '_blank');
     printWindow.document.write(`
         <html>
@@ -734,7 +743,7 @@ const generateReport = (report) => {
                 .signature-box {
                     page-break-inside: avoid;
                     break-inside: avoid;
-                    height: 180px;
+                    height: 150px;
                     width: 30%;
                     border: 1px solid #000;
                     padding: 10px;
@@ -755,7 +764,7 @@ const generateReport = (report) => {
 
             <div class="top-header"><img src="/demo/images/toyo_logo.png" alt="Logo" style="height: 25px; object-fit: contain" /></div>
             <div class="company-info">
-                Toyo Tyre Sales And Marketing Malaysia Sdn Bhd<br>
+                Toyo Tyre Sales And Marketing Malaysia Sdn Bhd <span class="sub-company-info">(Company No: 201501002742 (1128074 - X) )</span><br>
             </div>
             <hr style="border-width: 3px ;color: black;">
             <div class="sub-company-info">
@@ -767,19 +776,23 @@ const generateReport = (report) => {
 
             <table class="small-table">
                 <tr>
-                    <td><strong>CUSTOMER :</strong> ${ '-'}</td>
-                    <td><strong>BRANCH :</strong> ${'-'}</td>
+                    <td><strong>CUSTOMER :</strong> ${ report.dealerName ||  '-'}</td>
+                    <td><strong>BRANCH :</strong> ${ report.shiptoName ||  '-'}</td>
                     <td><strong>TYRE RETURN FORM</strong></td>
                 </tr>
                 <tr>
                     <td>
                         <strong>PAY TO :</strong><br>
-
+                        ${ report.dealerAddress ||  '-'}
+                         <br>
+                        ${report.dealerPhoneNum ||  '-'}<br>
                     </td>
 
                     <td>
                         <strong>SHIP TO :</strong><br>
-
+                        ${ report.shiptoAddress ||  '-'}
+                         <br>
+                        ${report.shiptoMobileNum ||  '-'}<br>
                     </td>
 
                     <td>
@@ -787,12 +800,22 @@ const generateReport = (report) => {
                             <tr>
                                 <td style="border:0;width: 100px;">REF NO</td>
                                 <td style="border:0; width:10px;">:</td>
-                                <td style="border:0;">${ '-'}</td>
+                                <td style="border:0;">${ report.return_orderNo_ref ||  '-'}</td>
                             </tr>
                             <tr>
                                 <td style="border:0;">DOC DATE</td>
                                 <td style="border:0;">:</td>
-                                <td style="border:0;">${'-'}</td>
+                                <td style="border:0;">${ formatDate(report.sap_timestamp) || '-'} &nbsp; ${ formatTime(report.sap_timestamp) || ''}</td>
+                            </tr>
+                            <tr>
+                                <td style="border:0;width:115px;">RETURN REASON</td>
+                                <td style="border:0;">:</td>
+                                <td style="border:0;">${ report.reason_message ||  '-'}</td>
+                            </tr>
+                            <tr>
+                                <td style="border:0;width:115px;">RETURN REMARKS</td>
+                                <td style="border:0;">:</td>
+                                <td style="border:0;">${ report.remarks ||  '-'}</td>
                             </tr>
                         </table>
                     </td>
@@ -806,41 +829,34 @@ const generateReport = (report) => {
                     <th>No</th>
                     <th>Material ID</th>
                     <th>Material Description</th>
-                    <th>Return Reason</th>
+                    <th>Qty</th>
                 </tr>
 
-                <tr>
-                    <td>1</td>
-                    <td>${'-'}</td>
-                    <td>${ '-'}</td>
-                    <td>${ '-'}</td>
-                </tr>
+                ${ itemRows || `<tr><td colspan="3">-</td></tr>` }
             </table>
 
             <div class="signature-section">
 
                 <div class="signature-box">
                     <strong>DELIVERY INFO</strong><br>
-                    ${ ''}<br><br>
-                    <div>TRUCK NO : ${ ''}</div><br>
-                    <div>DRIVER NAME :${ ''}</div><br>
-                    <div>DRIVER IC :${ ''}</div><br>
+                    <br><br>
+                    <div>TRUCK NO : ${ report.delivery?.driverPlateNo ||  '-'}</div><br>
+                    <div>DRIVER NAME : ${ report.delivery?.driverName ||  '-'}</div><br>
+                    <div>DRIVER IC :${ report.delivery?.driverIC ||  '-'}</div><br>
                 </div>
 
                 <div class="signature-box">
-                    <strong>ACKNOWLADGE BY DEALER</strong><br>
-                    ${ ''}<br><br>
-                    <div>NAME :  ${ ''}</div><br>
-                    <div>DATE : ${ ''}</div><br>
-                    <div class="signature-line">Signature</div>
+                    <strong>ACKNOWLEDGED BY DEALER</strong><br>
+                    <br><br>
+                    <div>NAME :</div><br>
+                    <div>DATE :</div><br>
                 </div>
                             
                 <div class="signature-box">
                     <strong>RECEIVED BY WHS</strong><br>
-                    ${ ''}<br><br>
-                    <div>NAME :  ${ ''}</div><br>
-                    <div>DATE : ${ ''}</div><br>
-                    <div class="signature-line">Signature</div>
+                    <br><br>
+                    <div>NAME : </div><br>
+                    <div>DATE : </div><br>
                 </div>
 
             </div>
@@ -852,8 +868,8 @@ const generateReport = (report) => {
     printWindow.document.close();
 
     printWindow.onload = () => {
-        // printWindow.print();
-        // printWindow.close();
+        printWindow.print();
+        printWindow.close();
     };
 };
 </script>
