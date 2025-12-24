@@ -43,9 +43,11 @@ const fetchAppointments = async () => {
                 id: item.id,
                 appointmentCode: item.appointmentCode,
                 requestDate: item.appointmentRequestDate,
+                searchRequestDate: formatDate(item.appointmentRequestDate) ,
                 requestSession: item.appointmentRequestSession,
                 appointmentDate: item.appointmentDate,
                 appointmentTime: item.appointmentTime,
+                searchAppoinmentDate: formatDate(item.appointmentDate) ,
                 dealerShop: item.dealerShop,
                 dealerCustAccountNo: item.dealerCustAccountNo,
                 status: item.status,
@@ -83,7 +85,7 @@ const exportToExcel = () => {
         }
 
         // Define headers
-        const headers = ['Appointment Code', 'Dealer Shop', 'Dealer Account No', 'Customer Name', 'Customer Phone', 'Request Date', 'Request Session', 'Appointment Date', 'Appointment Time', 'Status'];
+        const headers = ['Appointment Code', 'Customer Info', 'Customer Acc', 'Consumer Name', 'Consumer Phone', 'Request Date', 'Request Session', 'Appointment Date', 'Appointment Time', 'Status'];
 
         // Prepare CSV content
         let csvContent = headers.join(',') + '\n';
@@ -96,9 +98,9 @@ const exportToExcel = () => {
                 `"${appointment.dealerCustAccountNo || ''}"`,
                 `"${appointment.customerName || ''}"`,
                 `"${appointment.customerPhone || ''}"`,
-                `"${appointment.requestDate || ''}"`,
-                `"${appointment.requestSession || ''}"`,
-                `"${appointment.appointmentDate || ''}"`,
+                `"${appointment.searchRequestDate || 'Not Request'}"`,
+                `"${appointment.requestSession || 'Not Request'}"`,
+                `"${appointment.searchAppoinmentDate || 'Not Scheduled'}"`,
                 `"${appointment.appointmentTime || ''}"`,
                 `"${appointment.statusString || ''}"`
             ];
@@ -135,6 +137,12 @@ function formatDate(dateString) {
         month: '2-digit',
         day: '2-digit'
     });
+}
+function formatTime(dateTimeString) {
+    if (!dateTimeString) return '';
+    const [, timePart] = dateTimeString.split(' ');
+
+    return timePart; // already in 24-hour format: HH:mm:ss
 }
 function formatDateFull(dateString) {
     if (!dateString) return '';
@@ -200,7 +208,7 @@ const getStatusColor = (status) => {
                 :rowHover="true"
                 :filters="filters"
                 filterDisplay="menu"
-                :globalFilterFields="['appointmentCode', 'dealerShop', 'dealerCustAccountNo', 'customerName', 'customerPhone', 'requestDate', 'requestSession', 'appointmentTime', 'appointmentDate', 'statusString']"
+                :globalFilterFields="['appointmentCode', 'dealerShop', 'dealerCustAccountNo', 'customerName', 'customerPhone', 'searchRequestDate', 'requestSession', 'appointmentTime', 'searchAppoinmentDate', 'statusString']"
                 paginatorTemplate="CurrentPageReport FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink RowsPerPageDropdown"
                 currentPageReportTemplate="Showing {first} to {last} of {totalRecords} entries"
             >
@@ -260,9 +268,9 @@ const getStatusColor = (status) => {
                     </template>
                 </Column>
 
-                <Column field="requestDate" header="Request Date" style="min-width: 10rem" sortable>
+                <Column field="searchRequestDate" header="Request Date" style="min-width: 10rem" sortable>
                     <template #body="{ data }">
-                        {{ formatDate(data.requestDate) || 'Not Request' }}
+                        {{ data.searchRequestDate || 'Not Request' }}
                     </template>
                 </Column>
 
@@ -272,9 +280,11 @@ const getStatusColor = (status) => {
                     </template>
                 </Column>
 
-                <Column field="appointmentDate" header="Scheduled Date/Time" style="min-width: 12rem" sortable>
+                <Column field="searchAppoinmentDate" header="Scheduled Date/Time" style="min-width: 12rem" sortable>
                     <template #body="{ data }">
-                        {{ formatDateFull(data?.appointmentDate && data?.appointmentTime ? `${data.appointmentDate} ${data.appointmentTime}` : null) || 'Not Scheduled' }}
+                        {{ data.searchAppoinmentDate || 'Not Scheduled' }}
+                        <br/>
+                        {{ data.appointmentTime || '' }}
                     </template>
                 </Column>
 
