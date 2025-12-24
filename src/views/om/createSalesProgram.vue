@@ -446,11 +446,12 @@
 
 <script setup>
 import { ref, onMounted, watch, computed } from 'vue';
-import { RouterLink } from 'vue-router';
+import { RouterLink, useRouter } from 'vue-router';
 import { useToast } from 'primevue/usetoast';
 import api from '@/service/api';
 
 const toast = useToast();
+const router = useRouter();
 
 // Constants
 const MAX_FILE_SIZE = 1 * 1024 * 1024; // 1MB in bytes
@@ -477,7 +478,7 @@ const loadingMaterials = ref(false);
 const programItem = ref({
     buyQty: 1,
     freeQty: 1,
-    freeQuota: null,
+    freeQuota: 1,
     buyMaterials: [],
     selectedFreeMaterial: null,
     freeMaterialData: null,
@@ -995,6 +996,7 @@ const validateForm = () => {
 };
 
 const submitForm = async () => {
+    
     if (!validateForm()) {
         return;
     }
@@ -1062,7 +1064,7 @@ const submitForm = async () => {
         if (response.data.status === 1) {
             showSuccess('Sales program created successfully!');
             setTimeout(() => {
-                window.location.href = 'om/listSalesProgram';
+                router.push('/om/listSalesProgram');
             }, 1500);
         } else {
             showError('Error creating sales program: ' + (response.data.error?.message || 'Unknown error'));
@@ -1092,7 +1094,7 @@ watch(
         programItem.value = {
             buyQty: 1,
             freeQty: 1,
-            freeQuota: null,
+            freeQuota: 1,
             buyMaterials: [],
             selectedFreeMaterial: null,
             freeMaterialData: null,
