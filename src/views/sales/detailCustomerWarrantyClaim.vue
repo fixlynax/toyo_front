@@ -2319,7 +2319,7 @@ const generateReport = (report) => {
 
             <div class="top-header"><img src="/demo/images/toyo_logo.png" alt="Logo" style="height: 25px; object-fit: contain"/></div>
             <div class="company-info">
-                Toyo Tyre Sales And Marketing Malaysia Sdn Bhd<br>
+                Toyo Tyre Sales And Marketing Malaysia Sdn Bhd <span class="sub-company-info">(Company No: 201501002742 (1128074 - X) )</span><br>
             </div>
             <hr style="border-width: 3px ;color: black;">
             <div class="sub-company-info">
@@ -2338,27 +2338,27 @@ const generateReport = (report) => {
                 <tr>
                     <td>
                         <strong>PAY TO :</strong><br>
-                        ${report.customer.companyName}<br>
+                        ${report.customer.companyName || '-'}<br>
                         ${[
                             report.customer.companyAddress1,
                             report.customer.companyAddress2,
                             report.customer.companyAddress3,
                             report.customer.companyAddress4
                         ].filter(x => x && x.trim() !== "").join("<br>")}<br>
-                        ${report.customer.phoneNo}<br>
+                        ${report.customer.phoneNo || '-'}<br>
 
                     </td>
 
                     <td>
                         <strong>SHIP TO :</strong><br>
-                        ${report.branch.companyName}<br>
+                        ${report.branch.companyName || '-'}<br>
                         ${[
                             report.branch.companyAddress1,
                             report.branch.companyAddress2,
                             report.branch.companyAddress3,
                             report.branch.companyAddress4
                         ].filter(x => x && x.trim() !== "").join("<br>")}<br>
-                        ${report.branch.phoneNo}<br>
+                        ${report.branch.phoneNo || '-'}<br>
                     </td>
 
                     <td>
@@ -2415,10 +2415,11 @@ const generateReport = (report) => {
             <div class="note-wrapper">
                 <div class="note-box">
                     <strong>NOTE</strong><br>
-                    WE HAVE EXAMINED THE ABOVE ITEMS AND THE ABOVE CONCESSIONS HAS/HAVE BEEN GRANTED.
-                    CHEQUE WILL BE SENT TO YOU IN DUE COURSE. N.A. MEANS “NO ALLOWANCE”, BECAUSE TYRE/TUBE IS EITHER OVERAGE,
-                    ACCIDENTALLY DAMAGED OR DEEMED NON-DEFECTIVE. IN SUCH INSTANCE, THESE TYRES/TUBES ARE RETURNED TO YOU.
-                    WHEN AN ALLOWANCE IS GRANTED, THESE TYRES/TUBES BECOME THE PROPERTY OF TOYO TYRE.
+                    WE HAVE EXAMINED THE ABOVE ITEMS AND THE ABOVE CONCESSIONS HAS/HAVE BEEN GRANTED. 
+                    A BANK TRANFER WILL BE SENT TO YOU IN DUE COURSE. N.A. MEANS "NO ALLOWANCE", 
+                    BECAUSE TYRE IS EITHER OVERAGE, ACCIDENTALLY DAMAGED OR DEEMEDNON-DEFECTIVE. 
+                    IN SUCH INSTANCE, THESE TYRES ARE RETURNED TO YOU. WHEN AN ALLOWANCE 
+                    IS GRANTED, THESE TYRES BECOME THE PROPERTY OF TOYO TYRE.
                 </div>
             </div>
 

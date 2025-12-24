@@ -546,7 +546,7 @@ const generateReport = (report) => {
         <body>
 
             <div class="header-logo"><img src="/demo/images/toyo_logo.png" alt="Logo" style="height: 25px; object-fit: contain"/></div>
-            <div class="sub-header">Toyo Tyre Sales And Marketing Malaysia Sdn Bhd</div>
+            <div class="sub-header">Toyo Tyre Sales And Marketing Malaysia Sdn Bhd <span class="sub-company-info">(Company No: 201501002742 (1128074 - X) )</span></div>
 
             <div class="title-box">CLAIM TIRE COLLECTION</div>
 
@@ -560,10 +560,11 @@ const generateReport = (report) => {
                 </div>
 
                 <div class="right-box">
-                    <strong>CTC No:</strong> ${report.claim_no}<br><br>
+                    <strong>CTC No:</strong> ${report.claim_no || '-'}<br><br>
+                    <strong>CLAIM STATUS:</strong> CTC COLLECTION <br><br>
                     <strong>Dealer Name & Address:</strong><br>
-                    ${report.dealerName}<br>
-                    ${report.dealerAddress.replace(/\n/g, "<br>")}
+                    ${report.dealerName || '-'}<br>
+                    ${report.dealerAddress.replace(/\n/g, "<br>") || '-'}
                 </div>
             </div>
 
@@ -592,13 +593,14 @@ const generateReport = (report) => {
 
                     <!-- LEFT SIDE -->
                     <div class="store-left">
-                        <strong>ACKNOWLEDGMENT OF RECEIPT</strong><br>
-                        This is to acknowledge receipt of the above item for claim. As soon as 
-                        these have been examined, you will be informed of our findings. Please note 
-                        that in order that a proper examination may be carried out, it is necessary 
-                        to cut the tyre and it is understood that we have your permission to do and 
-                        that no further claim will be made on us should the item/s be rejected by 
-                        the TYRE ADJUSTMENT COMMITTEE.
+                        <strong>NOTE</strong><br>
+                        PLEASE NOTE
+                        THAT THE TYRE HAS BEEN COLLECTED FOR INSPECTION AS PART OF THE CLAIM
+                        ASSESSMENT PROCESS. THE TYRE WILL BE EXAMINED TO ASSESS COMPLIANCE WITH
+                        MANUFACTURER AND POLICY GUIDELINES. THIS PROCESS IS CARRIED OUT IN ACCORDANCE
+                        WITH THE APPLICABLE TERMS AND CONDITIONS OF THE CLAIM. THE INSPECTION FINDINGS
+                        WILL DETERMINE CLAIM ELIGIBILITY, AND THE TYRE MAY NOT BE RETURNED IF THE TYRE IS
+                        DEEMED CLAIMABLE.
                     </div>
 
                     <!-- RIGHT SIDE -->
