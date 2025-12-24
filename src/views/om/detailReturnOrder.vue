@@ -61,17 +61,17 @@
                         </div>
                         <div>
                             <span class="text-sm text-gray-500">SAP Return No.</span>
-                            <p class="text-lg font-bold">{{ order.sapreturnno || '-' }}</p>
+                            <p class="text-lg font-semibold">{{ order.sapreturnno || '-' }}</p>
                         </div>
                     </div>
                     <div class="grid grid-cols-2 gap-4 mt-4">
                         <div>
-                            <span class="text-sm text-gray-500">Return Remark</span>
-                            <p class="text-lg font-medium">{{ order.remarks || '-' }}</p>
+                            <span class="text-sm text-gray-500">Return Delivery No.</span>
+                            <p class="text-lg font-semibold">{{ order.creditnoteno || '-' }}</p>
                         </div>
                         <div>
-                            <span class="text-sm text-gray-500">Return Delivery No.</span>
-                            <p class="text-lg font-bold">{{ order.creditnoteno || '-' }}</p>
+                            <span class="text-sm text-gray-500">Credit Note No.</span>
+                            <p class="text-lg font-semibold">{{ order.creditnoteno || '-' }}</p>
                         </div>
                     </div>
                     <div class="grid grid-cols-2 gap-4 mt-4">
@@ -133,6 +133,10 @@
                                     </div>
                                 </div>
                             </div>
+                        </div>
+                        <div>
+                            <span class="text-sm text-gray-500">Return Remark</span>
+                            <p class="text-lg font-medium">{{ order.remarks || '-' }}</p>
                         </div>
                     </div>
 
