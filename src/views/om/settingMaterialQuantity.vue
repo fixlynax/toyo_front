@@ -158,6 +158,7 @@ const showImportResult = ref(false);
 
 const dealerList = ref([]);
 const selectedDealer = ref(null);
+const selectedDealerData = ref(null); // NEW: Store the full dealer data
 const materialList = ref([]);
 const importResult = ref({});
 
@@ -166,17 +167,26 @@ const filters = ref({
 });
 
 const dealerOptions = computed(() => {
-    return dealerList.value.map((dealer) => ({
-        label: `${dealer.shop.companyName1} (${dealer.shop.custAccountNo})`,
-        value: dealer.shop.id,
-        data: dealer
-    }));
+    return dealerList.value.map((dealer) => {
+        // Debug log to check structure
+        console.log('Dealer item:', dealer);
+
+        // Get shop data (it could be direct or nested)
+        const shopData = dealer.shop || dealer;
+
+        return {
+            label: `${shopData.companyName1} (${shopData.custAccountNo})`,
+            value: shopData.id, // This should be the shop ID
+            data: dealer // Store the full dealer data
+        };
+    });
 });
 
 const getSelectedDealerName = () => {
-    if (!selectedDealer.value) return '';
-    const dealer = dealerList.value.find((d) => d.shop.id === selectedDealer.value);
-    return dealer ? dealer.shop.companyName1 : '';
+    if (!selectedDealer.value || !selectedDealerData.value) return '';
+
+    const shopData = selectedDealerData.value.shop || selectedDealerData.value;
+    return shopData.companyName1 || '';
 };
 
 const fetchDealers = async () => {
@@ -187,13 +197,23 @@ const fetchDealers = async () => {
         });
 
         if (response.data.status === 1) {
-            dealerList.value = Object.values(response.data.admin_data);
-            // toast.add({
-            //     severity: 'success',
-            //     summary: 'Success',
-            //     detail: `Loaded ${dealerList.value.length} dealers`,
-            //     life: 3000
-            // });
+            // Handle both response structures
+            let dealers = response.data.admin_data;
+
+            // If admin_data is an object (original structure), convert to array
+            if (dealers && typeof dealers === 'object' && !Array.isArray(dealers)) {
+                dealers = Object.values(dealers);
+            }
+
+            // Ensure we have an array
+            dealerList.value = Array.isArray(dealers) ? dealers : [];
+
+            console.log('Dealers loaded:', dealerList.value.length, 'items');
+            if (dealerList.value.length > 0) {
+                console.log('First dealer full data:', dealerList.value[0]);
+                console.log('First dealer shop ID:', dealerList.value[0].shop?.id || dealerList.value[0].id);
+                console.log('First dealer custAccountNo:', dealerList.value[0].shop?.custAccountNo || dealerList.value[0].custAccountNo);
+            }
         } else {
             dealerList.value = [];
             toast.add({
@@ -221,23 +241,52 @@ const fetchDealers = async () => {
 const onDealerChange = async () => {
     if (!selectedDealer.value) {
         materialList.value = [];
+        selectedDealerData.value = null;
         return;
+    }
+
+    // Find and store the selected dealer data
+    selectedDealerData.value = dealerList.value.find((dealer) => {
+        const shopData = dealer.shop || dealer;
+        return shopData.id === selectedDealer.value;
+    });
+
+    console.log('Selected dealer ID:', selectedDealer.value);
+    console.log('Selected dealer data:', selectedDealerData.value);
+
+    if (selectedDealerData.value) {
+        const shopData = selectedDealerData.value.shop || selectedDealerData.value;
+        console.log('Shop ID to use:', shopData.id);
+        console.log('CustAccountNo:', shopData.custAccountNo);
     }
 
     await fetchMaterials();
 };
 
 const fetchMaterials = async () => {
-    if (!selectedDealer.value) return;
+    if (!selectedDealer.value || !selectedDealerData.value) return;
 
     try {
         loadingMaterials.value = true;
         tableLoading.value = true;
 
+        const shopData = selectedDealerData.value.shop || selectedDealerData.value;
+        console.log('Fetching materials for dealer:', {
+            selectedDealerId: selectedDealer.value,
+            shopId: shopData.id,
+            custAccountNo: shopData.custAccountNo
+        });
+
+        // Use the shop ID that we stored
         const response = await api.get(`maintenance/getEtenMaterial/${selectedDealer.value}`);
+
+        console.log('API Response:', response.data);
 
         if (response.data.status === 1) {
             materialList.value = response.data.admin_data;
+            console.log('Materials loaded:', materialList.value.length, 'items');
+            console.log('Materials data:', materialList.value);
+
             toast.add({
                 severity: 'success',
                 summary: 'Success',
@@ -246,6 +295,7 @@ const fetchMaterials = async () => {
             });
         } else {
             materialList.value = [];
+            console.log('No materials found or API error:', response.data);
             toast.add({
                 severity: 'warn',
                 summary: 'Warning',
@@ -255,6 +305,7 @@ const fetchMaterials = async () => {
         }
     } catch (error) {
         console.error('Error fetching materials:', error);
+        console.error('Error details:', error.response?.data || error.message);
         materialList.value = [];
         toast.add({
             severity: 'error',
@@ -269,7 +320,7 @@ const fetchMaterials = async () => {
 };
 
 const exportMaterials = async () => {
-    if (!selectedDealer.value) {
+    if (!selectedDealer.value || !selectedDealerData.value) {
         toast.add({
             severity: 'warn',
             summary: 'Warning',
@@ -294,8 +345,8 @@ const exportMaterials = async () => {
         const a = document.createElement('a');
         a.href = url;
 
-        const dealer = dealerList.value.find((d) => d.shop.id === selectedDealer.value);
-        const dealerName = dealer ? dealer.shop.custAccountNo : 'materials';
+        const shopData = selectedDealerData.value.shop || selectedDealerData.value;
+        const dealerName = shopData.custAccountNo || 'materials';
         a.download = `${dealerName}_material_list.xlsx`;
 
         document.body.appendChild(a);
@@ -405,6 +456,7 @@ const handleImportComplete = async () => {
 
 const clearDealerSelection = () => {
     selectedDealer.value = null;
+    selectedDealerData.value = null;
     materialList.value = [];
 };
 
