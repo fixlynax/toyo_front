@@ -625,7 +625,8 @@ const dropdownYesNoValue = ref<DropdownOption[]>([
 
 const dropdownAccountTypeValue = ref<DropdownOption[]>([
     { name: 'Retailer', code: 'Retailer' },
-    { name: 'Wholesaler', code: 'Wholesaler' }
+    { name: 'Wholesaler', code: 'Wholesaler' },
+    { name: 'Retailer/Wholesaler', code: 'Retailer/Wholesaler' }
 ]);
 
 // Dropdown v-model bindings

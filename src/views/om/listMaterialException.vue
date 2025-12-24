@@ -2,7 +2,7 @@
     <Fluid>
         <div class="flex flex-col md:flex-row gap-8">
             <div class="card flex flex-col gap-6 w-full">
-                <div class="text-2xl font-bold text-gray-800 border-b pb-2 mb-1">List Material Exception</div>
+                <div class="text-2xl font-bold text-gray-800 border-b pb-2">List Material Exception</div>
 
                 <LoadingPage v-if="loading" :message="'Loading Material Exception...'" :sub-message="'Fetching your Material Exception list'" />
 
@@ -116,7 +116,7 @@
                                 </Column>
                                 <Column header="Address" style="min-width: 20rem">
                                     <template #body="{ data: dealer }">
-                                        <div class="text-sm text-gray-600">{{ dealer.address }}</div>
+                                        <div class="text-sm text-gray-600">{{ dealer.address || '-' }}</div>
                                     </template>
                                 </Column>
                             </DataTable>

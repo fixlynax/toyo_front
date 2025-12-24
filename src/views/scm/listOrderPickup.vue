@@ -20,7 +20,8 @@
                 class="rounded-table"
                 :globalFilterFields="[
                     'do_no',
-                    'orderDate',
+                    'orderDateSearch',
+                    'orderTimeSearch',
                     'eten_user.custAccountNo',
                     'eten_user.companyName1',
                     'eten_user.companyName2',
@@ -30,6 +31,7 @@
                     'eten_user.city',
                     'eten_user.state',
                     'deliveryType',
+                    'pickupDateSearch',
                     'status'
                 ]"
                 paginatorTemplate="CurrentPageReport FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink RowsPerPageDropdown"
@@ -92,11 +94,11 @@
                         </div>
                     </template>
                 </Column>
-                <Column field="orderDate" header="Created On" style="min-width: 8rem" sortable>
+                <Column field="orderDateSearch" header="Created On" style="min-width: 8rem" sortable>
                     <template #body="{ data }">
-                        {{ formatDate(data?.orderDate) ?? '-' }}
+                        {{ data.orderDateSearch?? '-' }}
                         <br/>
-                        {{ formatTime(data?.orderDate) ?? '-' }}
+                        {{ data.orderTimeSearch?? '-' }}
                     </template>
                 </Column>
 
@@ -155,9 +157,9 @@
                         {{ data.deliveryType === 'SELFCOLLECT' ? 'OWNCOLLECT' : data.deliveryType }}
                     </template>
                 </Column>
-                <Column field="driverInformation.pickup_datetime" header="Pickup Date" style="min-width: 10rem" sortable>
+                <Column field="pickupDateSearch" header="Pickup Date" style="min-width: 10rem" sortable>
                     <template #body="{ data }">
-                        {{ data.driverInformation?.pickup_datetime ? formatDate(data.driverInformation.pickup_datetime) : 'Not Assigned' }}
+                        {{ data.pickupDateSearch || 'Not Assigned' }}
                     </template>
                 </Column>
                 <Column field="status" header="Status" style="min-width: 10rem">
@@ -302,7 +304,10 @@ const  importErrors = ref([]);
 const showImportErrorDialog = ref(false);
 
 const selectedExportIds = ref(new Set());
-const visibleRows = computed(() => orderDelList.value);
+const visibleRows = ref([]);
+watch(orderDelList, (newVal) => {
+    orderDelList.value = newVal;
+}, { immediate: true });
 
 const formatDateDMY = (date) => {
     const d = new Date(date);
@@ -687,9 +692,15 @@ const fetchData = async (body = null) => {
         };
         const response = await api.postExtra('order-pickup/list', payload);
         if (response.data.status === 1 && Array.isArray(response.data.admin_data)) {
-            orderDelList.value = response.data.admin_data.sort((a, b) => {
-                return new Date(b.orderDate) - new Date(a.orderDate);
-            });
+              orderDelList.value = response.data.admin_data
+            .map(order => ({
+                ...order,
+
+                orderDateSearch: formatDate(order.orderDate),
+                orderTimeSearch: formatTime(order.orderDate),
+                pickupDateSearch: formatDate(order.driverInformation?.pickup_datetime)
+            }))
+            .sort((a, b) => new Date(b.orderDate) - new Date(a.orderDate));
         } else {
             orderDelList.value = [];
             toast.add({ severity: 'error', summary: 'Error', detail: response.data.message || 'Failed to load data', life: 3000 });
@@ -717,7 +728,7 @@ const exportToExcel = () => {
 
         // Prepare data rows
         const csvData = rowsToExport.map((data) => [
-            `"${formatDate(data.orderDate)} ${formatTime(data.orderDate)}"`,
+            `"${data.orderDateSearch} ${data.orderTimeSearch}"`,
             `"${data.do_no || '-'}"`,
             `"${data.eten_user?.companyName1} ${data.eten_user?.companyName2} ${data.eten_user?.companyName3} ${data.eten_user?.companyName4}"`,
             `"${data.eten_user?.custAccountNo || '-'}"`,
@@ -730,7 +741,7 @@ const exportToExcel = () => {
             `"${data.driverInformation?.driverPhoneNumber || '-'}"`,
             `"${data.driverInformation?.driverTruckPlate || '-'}"`,
             `"${data.deliveryType || '-'}"`,
-            `"${data.driverInformation?.pickup_datetime ? formatDate(data.driverInformation?.pickup_datetime) : 'No date assigned'}"`,
+            `"${data.pickupDateSearch || 'No date assigned'}"`,
             `"${getStatusLabel2(data.status) || '-'}"`
         ]);
 

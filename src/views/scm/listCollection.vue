@@ -21,8 +21,10 @@ const exportLoading2 = ref(false);
 const importLoading2 = ref(false);
 const importInput1 = ref();
 const importInput2 = ref();
-const visibleRows = computed(() => listData.value);
-
+const visibleRows = ref([]);
+watch(listData, (newVal) => {
+    listData.value = newVal;
+}, { immediate: true });
 const importErrors = ref([]);
 const showImportErrorDialog = ref(false);
 const showImportErrorHandle1 = ref(false);
@@ -377,10 +379,16 @@ const fetchData = async (body = null) => {
         };
         const response = await api.postExtra('collection/list',payload);
         if (response.data.status === 1) {
-            
-        listData.value = response.data.admin_data.sort((a, b) => {
-                return new Date(b.created) - new Date(a.created);
-            }); // sort by raw Date
+              listData.value = response.data.admin_data
+            .map(collect => ({
+                ...collect,
+
+                createDateSearch: formatDate(collect.created),
+                createTimeSearch: formatTime(collect.created),
+                collectDateSearch: formatDate(collect.collectDate),
+                receiveDateSearch: formatDate(collect.reachWH),
+            }))
+            .sort((a, b) => new Date(b.created) - new Date(a.created));
         } 
         else {
             listData.value = [];
@@ -643,15 +651,15 @@ const exportToExcel = () => {
         
         // Prepare data rows
         const csvData = rowsToExport.map(data => [
-            `"${formatDate(data.created)} ${formatTime(data.created)}"`,
+            `"${data.createDateSearch} ${data.createTimeSearch}"`,
             `"${data.claimRefno || '-'}"`,
             `"${data?.custname  || '-'}"`,
             `"${data?.storagelocation  || '-'}"`,
             `"${data?.custaccountno  || '-'}"`,
             `"${data?.city.replace(/,$/, '')  || '-'}"`,
             `"${data?.state  || '-'}"`,
-            `"${data.collectDate ? formatDate(data.collectDate) : 'Not Assigned'}"`,
-            `"${data.reachWH ? formatDate(data.reachWH) : 'Not Assigned'}"`,
+            `"${data.collectDateSearch || 'Not Assigned'}"`,
+            `"${data.receiveDateSearch || 'Not Assigned'}"`,
             `"${getStatusText(data.status) || '-'}"`,
         ]);
 
@@ -703,7 +711,7 @@ onMounted(async () => {
                 :loading="loading"
                 :filters="filters"
                 filterDisplay="menu"
-                :globalFilterFields="['claimRefno', 'created', 'custname', 'custaccountno','city','storagelocation','state', 'collectDate', 'collectTime', 'status']"
+                :globalFilterFields="['claimRefno', 'createDateSearch', 'createTimeSearch', 'custname', 'custaccountno','city','storagelocation','state', 'collectDateSearch', 'receiveDateSearch', 'status']"
                 paginatorTemplate="CurrentPageReport FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink RowsPerPageDropdown"
                 currentPageReportTemplate="Showing {first} to {last} of {totalRecords} entries"
             >
@@ -787,11 +795,11 @@ onMounted(async () => {
                         </div>
                     </template>
                 </Column>
-                <Column field="created" header="Created On" style="min-width: 8rem" sortable>
+                <Column field="createDateSearch" header="Created On" style="min-width: 8rem" sortable>
                     <template #body="{ data }">
-                        {{ formatDate(data?.created) ?? '-' }}
+                        {{ data.createDateSearch ?? '-' }}
                         <br/>
-                        {{ formatTime(data?.created) ?? '-' }}
+                        {{ data.createTimeSearch ?? '-' }}
                     </template>
                 </Column>
                 <Column field="claimRefno" header="Ref No" style="min-width: 8rem" sortable>
@@ -823,14 +831,14 @@ onMounted(async () => {
                         {{ data?.state ?? '-' }}
                     </template>
                 </Column>
-                <Column field="collectDate" header="Collect Date" style="min-width: 10rem" sortable>
+                <Column field="collectDateSearch" header="Collect Date" style="min-width: 10rem" sortable>
                     <template #body="{ data }">
-                        {{ data.collectDate ? formatDate(data.collectDate) : 'Not Assigned'}}
+                        {{ data.collectDateSearch || 'Not Assigned'}}
                     </template>
                 </Column>
-                <Column field="reachWH" header="Receive Date" style="min-width: 10rem" sortable>
+                <Column field="receiveDateSearch" header="Receive Date" style="min-width: 10rem" sortable>
                     <template #body="{ data }">
-                        {{ data.reachWH ? formatDate(data.reachWH) : 'Not Assigned' }}
+                        {{ data.receiveDateSearch || 'Not Assigned' }}
                     </template>
                 </Column>
 

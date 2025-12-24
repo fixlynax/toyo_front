@@ -300,6 +300,12 @@ const router = createRouter({
                     component: () => import('@/views/om/listContainer.vue'),
                     meta: { permission: 'Maintenance Mode', access: 'view' }
                 },
+                {
+                    path: 'om/settingMaterialQuantity',
+                    name: 'Setting-Material-Quantity',
+                    component: () => import('@/views/om/settingMaterialQuantity.vue'),
+                    meta: { permission: 'Maintenance Mode', access: 'view' }
+                },
 
                 // ===============================
                 // MARKETING

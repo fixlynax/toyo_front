@@ -18,7 +18,7 @@
                 :filters="filters"
                 filterDisplay="menu"
                 class="rounded-table"
-                :globalFilterFields="['do_no','order_no', 'orderDate', 'customer_name', 'custAccountNo', 'storagelocation', 'customer_name', 'city', 'state', 'deliveryDate', 'orderDesc', 'scheduled_delivery_time', 'delivered_datetime', 'orderstatus']"
+                :globalFilterFields="['do_no','order_no', 'orderDateSearch', 'orderTimeSearch', 'customer_name', 'custAccountNo', 'storagelocation', 'customer_name', 'city', 'state', 'etaDateSearch', 'orderDesc', 'plannedDateSearch', 'deliveredDateSearch', 'orderstatus']"
                 paginatorTemplate="CurrentPageReport FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink RowsPerPageDropdown"
                 currentPageReportTemplate="Showing {first} to {last} of {totalRecords} entries"
             >
@@ -85,11 +85,11 @@
                         </div>
                     </template>
                 </Column>
-                <Column field="orderDate" header="Created On" style="min-width: 8rem" sortable>
+                <Column field="orderDateSearch" header="Created On" style="min-width: 8rem" sortable>
                     <template #body="{ data }">
-                        {{ formatDate(data?.orderDate) ?? '-' }}
+                        {{ data.orderDateSearch ?? '-' }}
                         <br/>
-                        {{ formatTime(data?.orderDate) ?? '-' }}
+                        {{ data.orderTimeSearch ?? '-' }}
                     </template>
                 </Column>
                 <Column field="order_no" header="Ref No" style="min-width: 8rem" sortable>
@@ -135,21 +135,21 @@
                     </template>
                 </Column>
 
-                <Column field="deliveryDate" header="ETA Date" style="min-width: 10rem" sortable>
+                <Column field="etaDateSearch" header="ETA Date" style="min-width: 10rem" sortable>
                     <template #body="{ data }">
-                        {{ data.deliveryDate ? formatDate(data.deliveryDate) : 'Not Assigned' }}
+                        {{ data.etaDateSearch || 'Not Assigned' }}
                     </template>
                 </Column>
 
-                <Column field="scheduled_delivery_time" header="Planned Date" style="min-width: 10rem" sortable>
+                <Column field="plannedDateSearch" header="Planned Date" style="min-width: 10rem" sortable>
                     <template #body="{ data }">
-                        {{ data.scheduled_delivery_time ? formatDate(data.scheduled_delivery_time) : 'Not Assigned' }}
+                        {{ data.plannedDateSearch || 'Not Assigned' }}
                     </template>
                 </Column>
 
-                <Column field="delivered_datetime" header="Delivered Date" style="min-width: 10rem" sortable>
+                <Column field="deliveredDateSearch" header="Delivered Date" style="min-width: 10rem" sortable>
                     <template #body="{ data }">
-                        {{ data.delivered_datetime ? formatDate(data.delivered_datetime) : 'Not Assigned' }}
+                        {{ data.deliveredDateSearch || 'Not Assigned' }}
                     </template>
                 </Column>
 
@@ -234,7 +234,10 @@ const selectedExportIds = ref(new Set());
 const loading = ref(true);
 const orderDelList = ref([]);
 const dateRange = ref([null, null]);
-const visibleRows = computed(() => orderDelList.value);
+const visibleRows = ref([]);
+watch(orderDelList, (newVal) => {
+    orderDelList.value = newVal;
+}, { immediate: true });
 
 const formatDateDMY = (date) => {
     const d = new Date(date);
@@ -571,9 +574,17 @@ const fetchData = async (body = null) => {
         };
         const response = await api.postExtra('order-delivery/list', payload);
         if (response.data.status === 1 && Array.isArray(response.data.admin_data)) {
-            orderDelList.value = response.data.admin_data.sort((a, b) => {
-                return new Date(b.orderDate) - new Date(a.orderDate);
-            });
+             orderDelList.value = response.data.admin_data
+            .map(order => ({
+                ...order,
+
+                orderDateSearch: formatDate(order.orderDate),
+                orderTimeSearch: formatTime(order.orderDate),
+                etaDateSearch: formatDate(order.deliveryDate),
+                plannedDateSearch: formatDate(order.scheduled_delivery_time),
+                deliveredDateSearch: formatDate(order.delivered_datetime)
+            }))
+            .sort((a, b) => new Date(b.orderDate) - new Date(a.orderDate));
         } else {
         orderDelList.value = [];
             toast.add({ severity: 'error', summary: 'Error', detail: response.data.message || 'Failed to load data', life: 3000 });
@@ -601,7 +612,7 @@ const exportToExcel = () => {
 
     rowsToExport.forEach(data => {
         const baseRow = [
-            `"${formatDate(data.orderDate)} ${formatTime(data.orderDate)}"`,
+            `"${data.orderDateSearch} ${data.orderTimeSearch}"`,
             `"${data.order_no || '-'}"`,
             `"${data.do_no || '-'}"`,
             `"${data.customer_name || ''} "`,
@@ -614,9 +625,9 @@ const exportToExcel = () => {
             `"${data.driverIC || '-'}"`,
             `"${data.driverContactNo || '-'}"`,
             `"${data.driverPlateNo || '-'}"`,
-            `"${formatDate(data.deliveryDate)}"`,
-            `"${data.scheduled_delivery_time ? formatDate(data.scheduled_delivery_time) : 'No date assigned'}"`,
-            `"${data.delivered_datetime ? formatDate(data.delivered_datetime) : 'No date assigned'}"`,
+            `"${data.etaDateSearch}"`,
+            `"${data.plannedDateSearch || 'No date assigned'}"`,
+            `"${data.deliveredDateSearch || 'No date assigned'}"`,
             `"${getStatusLabel2(data.status) || '-'}"`,
         ];
 
