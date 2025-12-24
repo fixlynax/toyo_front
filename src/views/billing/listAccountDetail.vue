@@ -1,6 +1,5 @@
 <template>
     <div class="card">
-
         <div class="flex justify-between items-center mb-4">
             <div class="text-2xl font-bold text-black">Account Details</div>
         </div>
@@ -65,17 +64,7 @@
                         <!-- Customer Account No. Filter -->
                         <div class="flex items-center gap-2">
                             <span class="text-sm font-medium text-gray-700">Customer Account No.:</span>
-                            <InputNumber 
-                                v-model="customerAccountFilter" 
-                                placeholder="Filter by account no." 
-                                class="w-50" 
-                                :disabled="loading"
-                                :useGrouping="false"
-                                :maxFractionDigits="0"
-                                :min="0"
-                                :max="9999999999"
-                                inputId="customer-account-filter"
-                            />
+                            <InputNumber v-model="customerAccountFilter" placeholder="Filter by account no." class="w-50" :disabled="loading" :useGrouping="false" :maxFractionDigits="0" :min="0" :max="9999999999" inputId="customer-account-filter" />
                             <Button v-if="customerAccountFilter" icon="pi pi-times" class="p-button-text p-button-sm" @click="clearCustomerAccountFilter" title="Clear account filter" />
                         </div>
 
@@ -89,13 +78,13 @@
                             </div>
                             <Button v-if="dateRange[0] || dateRange[1]" icon="pi pi-times" class="p-button-text p-button-sm" @click="clearDateRange" title="Clear date filter" />
                         </div>
-                        
+
                         <!-- Filter Button -->
-                        <Button 
-                            icon="pi pi-filter" 
-                            label="Filter" 
-                            class="p-button-primary p-button-sm" 
-                            @click="applyFilter" 
+                        <Button
+                            icon="pi pi-filter"
+                            label="Filter"
+                            class="p-button-primary p-button-sm"
+                            @click="applyFilter"
                             :disabled="loading || (!dateRange[0] && !dateRange[1] && !customerAccountFilter)"
                             :loading="filterLoading"
                             v-tooltip="'Apply date and account number filters'"
@@ -427,7 +416,7 @@ const applyFilter = async () => {
             });
             return;
         }
-        
+
         if (accountStr.length > 10) {
             toast.add({
                 severity: 'error',
@@ -440,7 +429,7 @@ const applyFilter = async () => {
     }
 
     filterLoading.value = true;
-    
+
     try {
         // If no dates but has account filter, we need to show warning
         if (!dateRange.value[0] && !dateRange.value[1] && customerAccountFilter.value) {
@@ -452,13 +441,13 @@ const applyFilter = async () => {
             });
             return;
         }
-        
+
         // If no dates and no account filter, show empty state
         if (!dateRange.value[0] && !dateRange.value[1] && !customerAccountFilter.value) {
             hasDateFilterApplied.value = false;
             listData.value = [];
             selectedFiles.value = [];
-            
+
             toast.add({
                 severity: 'info',
                 summary: 'Filter Cleared',
@@ -470,7 +459,6 @@ const applyFilter = async () => {
 
         // Load data with filters
         await loadFilteredData();
-        
     } catch (error) {
         console.error('Filter application failed:', error);
         toast.add({
