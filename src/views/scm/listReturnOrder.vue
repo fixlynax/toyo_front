@@ -868,8 +868,8 @@ const generateReport = (report) => {
     printWindow.document.close();
 
     printWindow.onload = () => {
-        // printWindow.print();
-        // printWindow.close();
+        printWindow.print();
+        printWindow.close();
     };
 };
 </script>
