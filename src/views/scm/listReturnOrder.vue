@@ -17,7 +17,7 @@
                 :filters="filters"
                 class="rounded-table"
                 filterDisplay="menu"
-                :globalFilterFields="['return_orderNo_ref', 'custaccountno', 'storageLocation', 'city', 'dealerName', 'delivery_status', 'created']"
+                :globalFilterFields="['sapDateSearch','sapTimeSearch','return_orderNo_ref', 'custaccountno', 'storageLocation', 'city', 'dealerName', 'delivery_status', 'pickupDateSearch', 'receiveDateSearch']"
                 paginatorTemplate="CurrentPageReport FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink RowsPerPageDropdown"
                 currentPageReportTemplate="Showing {first} to {last} of {totalRecords} entries"
             >
@@ -86,6 +86,13 @@
                         </div>
                     </template>
                 </Column>
+                <Column field="sapDateSearch" header="Create On" style="min-width: 8rem" sortable>
+                    <template #body="{ data }">
+                        {{ formatDate(data.sapDateSearch) ?? '-' }}
+                        <br/>
+                        {{ data.sapTimeSearch ?? '-' }}
+                    </template>
+                </Column>
                 <Column field="return_orderNo_ref" header="Ref No" dataType="date" style="min-width: 8rem" sortable>
                     <template #body="{ data }">
                         <RouterLink :to="`/scm/detailReturnOrder/${data.id}`" class="hover:underline font-bold text-primary-400">
@@ -115,14 +122,14 @@
                         {{ data?.state ?? '-' }}
                     </template>
                 </Column>
-                <Column field="pickup_datetime" header="Pickup Date" style="min-width: 10rem" sortable>
+                <Column field="pickupDateSearch" header="Pickup Date" style="min-width: 10rem" sortable>
                     <template #body="{ data }">
-                        {{ data.delivery_information?.pickup_datetime ? formatDate(data.delivery_information.pickup_datetime) : 'No date assigned' }}
+                        {{ data.pickupDateSearch || 'No date assigned' }}
                     </template>
                 </Column>
-                <Column field="receive_datetime" header="Receiving Date" style="min-width: 10rem" sortable>
+                <Column field="receiveDateSearch" header="Receiving Date" style="min-width: 10rem" sortable>
                     <template #body="{ data }">
-                        {{ data.delivery_information?.receive_datetime ? formatDate(data.delivery_information.receive_datetime) : 'No date assigned' }}
+                        {{ data.receiveDateSearch || 'No date assigned' }}
                     </template>
                 </Column>
                 <Column field="return_order_array.length" header="Return Items Qty" style="min-width: 8rem; text-align: center" sortable>
@@ -516,9 +523,17 @@ const fetchData = async (body = null) => {
         const response = await api.postExtra('scm-return-order-list', payload);
         // console.log('API Response:', response.data);
         if (response.data.status === 1 && Array.isArray(response.data.admin_data)) {
-            returnList.value = response.data.admin_data.sort((a, b) => {
-                return new Date(b.created) - new Date(a.created);
-            });
+
+            returnList.value = response.data.admin_data
+            .map(collectReturn => ({
+                ...collectReturn,
+
+                sapDateSearch: formatDate(collectReturn.sap_timestamp),
+                sapTimeSearch: formatTime(collectReturn.sap_timestamp),
+                pickupDateSearch: formatDate(collectReturn.delivery_information?.pickup_datetime),
+                receiveDateSearch: formatDate(collectReturn.delivery_information?.receive_datetime),
+            }))
+            .sort((a, b) => new Date(b.sap_timestamp) - new Date(a.sap_timestamp));
         } else {
             returnList.value = [];
             toast.add({ severity: 'error', summary: 'Error', detail: response.data.message || 'Failed to load data', life: 3000 });
@@ -541,18 +556,19 @@ const exportToExcel = () => {
 
     try {
         // Create worksheet data
-        const headers = ['Ref No', 'Ship-To', 'Ship-To Acc No', 'Storage Location', 'City', 'State', 'Pickup Date', 'Receive Date', 'Return Items Qty', 'Status'];
+        const headers = ['Created On','Ref No', 'Ship-To', 'Ship-To Acc No', 'Storage Location', 'City', 'State', 'Pickup Date', 'Receive Date', 'Return Items Qty', 'Status'];
 
         // Prepare data rows
         const csvData = rowsToExport.map((data) => [
+            `"${data.sapDateSearch} ${data.sapTimeSearch}"`,
             `"${data.return_orderNo_ref || '-'}"`,
             `"${data.dealerName || '-'}"`,
             `"${data.custaccountno || '-'}"`,
             `"${data.storageLocation || '-'}"`,
             `"${data.city || '-'}"`,
             `"${data.state || '-'}"`,
-            `"${data.delivery_information?.pickup_datetime ? formatDate(data.delivery_information.pickup_datetime) : 'No date assigned'}"`,
-            `"${data.delivery_information?.receive_datetime ? formatDate(data.delivery_information.receive_datetime) : 'No date assigned'}"`,
+            `"${data.pickupDateSearch || 'No date assigned'}"`,
+            `"${data.receiveDateSearch || 'No date assigned'}"`,
             `"${data.return_order_array?.reduce((total, item) => total + Number(item.qty || 0),0) || 0}"`,
             `"${data.delivery_status || '-'}"`
         ]);
@@ -590,7 +606,12 @@ function formatDate(dateString) {
         day: '2-digit'
     });
 }
+function formatTime(dateTimeString) {
+    if (!dateTimeString) return '';
+    const [, timePart] = dateTimeString.split(' ');
 
+    return timePart; // already in 24-hour format: HH:mm:ss
+}
 function getStatusSeverity(status) {
     switch (status) {
         case 'PENDING':
