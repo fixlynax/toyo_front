@@ -206,8 +206,8 @@
                                     <td class="px-4 py-2 text-right font-bold text-primary">{{ orderData.order_no || '-' }}</td>
                                 </tr>
                                 <tr class="border-b">
-                                    <td class="px-4 py-2 font-medium">Channel</td>
-                                    <td class="px-4 py-2 text-right font-bold">{{ orderData.channel || '-' }}</td>
+                                    <td class="px-4 py-2 font-medium">Return Channel</td>
+                                    <td class="px-4 py-2 text-right font-bold">{{ order.channel || '-' }}</td>
                                 </tr>
                                 <tr class="border-b">
                                     <td class="px-4 py-2 font-medium">Order Type</td>
