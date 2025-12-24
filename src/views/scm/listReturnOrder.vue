@@ -144,6 +144,16 @@
                         <Tag :value="data.delivery_status" :severity="getStatusSeverity(data.delivery_status)" />
                     </template>
                 </Column>
+                <!-- <Column v-if="statusTabs[activeTabIndex]?.label !== 'New' && canUpdate" field="report" header="Report" style="min-width: 8rem">
+                    <template #body="{ data }">
+                        <Button 
+                            icon="pi pi-print" 
+                            class="p-button-text p-button-sm" 
+                            @click="fetchReport(data.id)" 
+                            tooltip="Print Report"
+                            />
+                    </template>
+                </Column> -->
             </DataTable>
         </div>
     </div>
@@ -549,6 +559,27 @@ const fetchData = async (body = null) => {
         loading.value = false;
     }
 };
+const fetchReport = async (id) => {
+    try {
+        loading.value = true;
+        const response = await api.get(`warrantyReport/ctc/${id}`);
+        if (response.data.status === 1) {
+            generateReport(response.data.report_data);
+        }
+        else{
+        toast.add({
+            severity: 'error',
+            summary: 'Failed',
+            detail: response.data.message || 'Failed to fetch report',
+            life: 3000
+        });
+        }
+    } catch (error) {
+        console.error('Error fetching report:', error);
+    } finally {
+        loading.value = false;
+    }
+}
 const exportToExcel = () => {
     const rowsToExport = visibleRows.value || [];
 
@@ -627,6 +658,204 @@ function getStatusSeverity(status) {
             return 'secondary';
     }
 }
+const generateReport = (report) => {
+    const printWindow = window.open('', '_blank');
+    printWindow.document.write(`
+        <html>
+        <head>
+            <title>Tyre Return Form</title>
+            <style>
+                body { 
+                    font-family: Arial, 
+                    sans-serif; font-size: 13px; 
+                    padding: 20px; color: #000; 
+                }
+
+                .top-header {                     
+                    font-size: 32px;
+                    font-weight: 900;
+                    color: #d69c00;
+                    margin-bottom: 10px; 
+                }
+                .company-info { 
+                    font-size: 14px;
+                    margin-top: 5px;
+                    margin-bottom: 5px;
+                    font-weight:bold;
+                }
+                .sub-company-info { 
+                    font-size: 10px;
+                    margin-top: 5px;
+                    margin-bottom: 5px;
+                }
+
+                table { 
+                    width: 100%;
+                    border-collapse: collapse; 
+                    font-size: 12px; 
+                }
+                th, td { 
+                    border: 1px solid #000; 
+                    padding: 6px; 
+                }
+                .small-table td { 
+                    padding: 4px;
+                }
+                .small-table td table td {
+                    padding: 2px;
+                }
+                .item-table td { 
+                 text-align: center;
+                }
+                .section-title { 
+                    margin-top: 20px; 
+                    font-weight: bold; 
+                }
+                .note-wrapper {
+                    padding-top: 20px; 
+                }
+                .note-box {
+                    page-break-inside: avoid;
+                    break-inside: avoid;
+                    border: 1px solid #000;
+                    padding: 10px;
+                    font-size: 12px;
+                    text-align: justify;
+                    line-height: 1.4;
+                }
+                .signature-section {
+                    page-break-inside: avoid;
+                    break-inside: avoid;
+                    // margin-top: 20px;
+                    display: flex;
+                    padding-top: 20px;
+                    justify-content: space-between;
+                }
+                .signature-box {
+                    page-break-inside: avoid;
+                    break-inside: avoid;
+                    height: 180px;
+                    width: 30%;
+                    border: 1px solid #000;
+                    padding: 10px;
+                    font-size: 12px;
+                    display: flex;
+                    flex-direction: column;   /* stack items vertically */
+                }
+                .signature-line {
+                    margin-top: auto;         /* pushes signature to bottom */
+                    border-top: 1px solid #000;
+                    width: 100%;
+                    padding-top: 5px;
+                    text-align: center;
+                }
+            </style>
+        </head>
+        <body>
+
+            <div class="top-header"><img src="/demo/images/toyo_logo.png" alt="Logo" style="height: 25px; object-fit: contain" /></div>
+            <div class="company-info">
+                Toyo Tyre Sales And Marketing Malaysia Sdn Bhd<br>
+            </div>
+            <hr style="border-width: 3px ;color: black;">
+            <div class="sub-company-info">
+                Level 2, Wisma Comcor, No.37, Jalan Pulas UH6, Section U1, Temasya Industrial Park, 40150 Shah Alam, Selangor Darul Ehsan, Malaysia
+            </div>
+            <div class="sub-company-info">
+                Tel: +603-5569 3788 &nbsp; | &nbsp; Fax: +603-5569 3809
+            </div>
+
+            <table class="small-table">
+                <tr>
+                    <td><strong>CUSTOMER :</strong> ${ '-'}</td>
+                    <td><strong>BRANCH :</strong> ${'-'}</td>
+                    <td><strong>TYRE RETURN FORM</strong></td>
+                </tr>
+                <tr>
+                    <td>
+                        <strong>PAY TO :</strong><br>
+
+                    </td>
+
+                    <td>
+                        <strong>SHIP TO :</strong><br>
+
+                    </td>
+
+                    <td>
+                        <table style="border:0;">
+                            <tr>
+                                <td style="border:0;width: 100px;">REF NO</td>
+                                <td style="border:0; width:10px;">:</td>
+                                <td style="border:0;">${ '-'}</td>
+                            </tr>
+                            <tr>
+                                <td style="border:0;">DOC DATE</td>
+                                <td style="border:0;">:</td>
+                                <td style="border:0;">${'-'}</td>
+                            </tr>
+                        </table>
+                    </td>
+                </tr>
+            </table>
+
+            <br>
+
+            <table class="item-table">
+                <tr>
+                    <th>No</th>
+                    <th>Material ID</th>
+                    <th>Material Description</th>
+                    <th>Return Reason</th>
+                </tr>
+
+                <tr>
+                    <td>1</td>
+                    <td>${'-'}</td>
+                    <td>${ '-'}</td>
+                    <td>${ '-'}</td>
+                </tr>
+            </table>
+
+            <div class="signature-section">
+
+                <div class="signature-box">
+                    <strong>DELIVERY INFO</strong><br>
+                    ${ ''}<br><br>
+                    <div>TRUCK NO : ${ ''}</div><br>
+                    <div>DRIVER NAME :${ ''}</div><br>
+                    <div>DRIVER IC :${ ''}</div><br>
+                </div>
+
+                <div class="signature-box">
+                    <strong>ACKNOWLADGE BY DEALER</strong><br>
+                    ${ ''}<br><br>
+                    <div>NAME :  ${ ''}</div><br>
+                    <div>DATE : ${ ''}</div><br>
+                    <div class="signature-line">Signature</div>
+                </div>
+                            
+                <div class="signature-box">
+                    <strong>RECEIVED BY WHS</strong><br>
+                    ${ ''}<br><br>
+                    <div>NAME :  ${ ''}</div><br>
+                    <div>DATE : ${ ''}</div><br>
+                    <div class="signature-line">Signature</div>
+                </div>
+
+            </div>
+
+        </body>
+        </html>
+    `);
+
+    printWindow.document.close();
+
+    printWindow.onload = () => {
+        // printWindow.print();
+        // printWindow.close();
+    };
+};
 </script>
 
 <style scoped>
