@@ -17,7 +17,7 @@
                 :loading="loading"
                 :filters="filters"
                 filterDisplay="menu"
-                :globalFilterFields="['claimRefno', 'created', 'custname', 'custaccountno','city','storagelocation','state', 'deliveryDate', 'scheduleDeliveryDate', 'status', 'deliveryDate']"
+                :globalFilterFields="['claimRefno', 'createDateSearch', 'createTimeSearch', 'custname', 'custaccountno','city','storagelocation','state', 'deliveryDateSearch', 'deliveredDateSearch', 'status', 'deliveryDate']"
                 paginatorTemplate="CurrentPageReport FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink RowsPerPageDropdown"
                 currentPageReportTemplate="Showing {first} to {last} of {totalRecords} entries"
             >
@@ -104,11 +104,11 @@
                         </div>
                     </template>
                 </Column>
-                <Column field="created" header="Created On" style="min-width: 8rem" sortable>
+                <Column field="createDateSearch" header="Created On" style="min-width: 8rem" sortable>
                     <template #body="{ data }">
-                        {{ formatDate(data?.created) ?? '-' }}
+                        {{ data.createDateSearch ?? '-' }}
                         <br/>
-                        {{ formatTime(data?.created) ?? '-' }}
+                        {{ data.createTimeSearch ?? '-' }}
                     </template>
                 </Column>
 
@@ -141,14 +141,14 @@
                         {{ data?.state ?? '-' }}
                     </template>
                 </Column>
-                <Column field="scheduleDeliveryDate" header="Delivery Date" style="min-width: 8rem" sortable>
+                <Column field="deliveryDateSearch" header="Delivery Date" style="min-width: 8rem" sortable>
                     <template #body="{ data }">
-                        {{ data.scheduleDeliveryDate ? formatDate(data.scheduleDeliveryDate) : 'Not Assigned' }}
+                        {{ data.deliveryDateSearch || 'Not Assigned' }}
                     </template>
                 </Column>
-                <Column field="deliveryDate" header="Delivered Date" style="min-width: 8rem" sortable>
+                <Column field="deliveredDateSearch" header="Delivered Date" style="min-width: 8rem" sortable>
                     <template #body="{ data }">
-                        {{ data.deliveryDate ? formatDate(data.deliveryDate) : 'Not Assigned'}}
+                        {{ data.deliveredDateSearch || 'Not Assigned'}}
                     </template>
                 </Column>
                 <Column field="action" header="Status" style="min-width: 6rem">
@@ -243,7 +243,10 @@ const collectionList = ref([]);
 
 const activeTabIndex = ref(0);
 const dateRange = ref([null, null]);
-const visibleRows = computed(() => collectionList.value);
+const visibleRows = ref([]);
+watch(collectionList, (newVal) => {
+    collectionList.value = newVal;
+}, { immediate: true });
 const formatDateDMY = (date) => {
   const d = new Date(date);
   const day = String(d.getDate()).padStart(2, "0");
@@ -581,9 +584,17 @@ const fetchData = async (body = null) => {
         };
         const response = await api.postExtra('return/list',payload);
         if (response.data.status === 1 && Array.isArray(response.data.admin_data)) {
-                    collectionList.value = response.data.admin_data.sort((a, b) => {
-                return new Date(b.created) - new Date(a.created);
-            });
+             collectionList.value = response.data.admin_data
+            .map(collect => ({
+                ...collect,
+
+                createDateSearch: formatDate(collect.created),
+                createTimeSearch: formatTime(collect.created),
+                deliveryDateSearch: formatDate(collect.scheduleDeliveryDate),
+                deliveredDateSearch: formatDate(collect.deliveryDate),
+            }))
+            .sort((a, b) => new Date(b.created) - new Date(a.created));
+
         } else {
             collectionList.value = [];
             toast.add({ severity: 'error', summary: 'Error', detail: response.data.message || 'Failed to load data', life: 3000 });
@@ -848,15 +859,15 @@ const exportToExcel = () => {
         
         // Prepare data rows
         const csvData = rowsToExport.map(data => [
-            `"${formatDate(data.created)} ${formatTime(data.created)}"`,
+            `"${data.createDateSearch} ${data.createTimeSearch}"`,
             `"${data.claimRefno || '-'}"`,
             `"${data.custname || '-'}"`,
             `"${data.custaccountno || '-'}"`,
             `"${data.storagelocation || '-'}"`,
             `"${data.city?.replace(/,$/, '') || '-'}"`,
             `"${data.state || '-'}"`,
-            `"${data.scheduleDeliveryDate ? formatDate(data.scheduleDeliveryDate) : 'Not Assigned'}"`,
-            `"${data.deliveryDate ? formatDate(data.deliveryDate) : 'Not Assigned'}"`,
+            `"${data.deliveryDateSearch || 'Not Assigned'}"`,
+            `"${data.deliveredDateSearch || 'Not Assigned'}"`,
             `"${getStatusText(data.status) || '-'}"`,
         ]);
 
