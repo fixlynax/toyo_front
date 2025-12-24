@@ -215,8 +215,11 @@ const showImportErrorHandle1 = ref(false);
 const showImportErrorHandle2 = ref(false);
 
 const selectedExportIds = ref(new Set());
-const visibleRows = computed(() => returnList.value);
-
+const visibleRows = ref([]);
+watch(returnList, (newVal) => {
+    returnList.value = newVal;
+}, { immediate: true });
+ 
 const activeTabIndex = ref(0);
 const dateRange = ref([null, null]);
 
