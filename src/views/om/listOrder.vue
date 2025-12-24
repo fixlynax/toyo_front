@@ -44,7 +44,7 @@ const getDefaultDateRangeForCompleted = () => {
     const endDate = new Date();
     const startDate = new Date();
     startDate.setDate(startDate.getDate() - 7); // 7 days ago
-    
+
     return {
         start: startDate,
         end: endDate
@@ -69,7 +69,7 @@ const fetchOrders = async (status = null, dateFilter = false, useDefaultRange = 
             };
 
             let startDate, endDate;
-            
+
             if (dateFilter && dateRange.value[0] && dateRange.value[1]) {
                 // Use user-selected date range
                 startDate = dateRange.value[0];
@@ -102,7 +102,7 @@ const fetchOrders = async (status = null, dateFilter = false, useDefaultRange = 
                 soNo: order.so_no,
                 doNo: order.do_no,
                 invoiceNo: order.inv_no,
-                created: order.created,
+                orderDate: order.orderDate, // Changed from created to orderDate
                 orderStatus: order.orderstatus,
                 subtotal: order.subtotal,
                 total: order.total,
@@ -153,7 +153,7 @@ watch(
         } else if (newRange[0] === null && newRange[1] === null && hasDateFilterApplied.value) {
             // Handle clearing date range
             hasDateFilterApplied.value = false;
-            
+
             // Reload data based on tab
             if (selectedTab?.status === 1) {
                 // For Completed tab, reload last 7 days
@@ -184,16 +184,16 @@ onBeforeMount(async () => {
 // 🟢 Computed - Filter orders by status and date range
 const filteredOrders = computed(() => {
     const selectedTab = currentTab.value;
-    
+
     // Filter by status
     let filtered = listData.value.filter((order) => order.orderStatus === selectedTab?.status);
 
     // Apply date range filter when date filter is applied
     if (hasDateFilterApplied.value && dateRange.value[0] && dateRange.value[1]) {
         filtered = filtered.filter((order) => {
-            if (!order.created) return false;
+            if (!order.orderDate) return false; // Changed from order.created
 
-            const orderDate = new Date(order.created);
+            const orderDate = new Date(order.orderDate); // Changed from order.created
             orderDate.setHours(0, 0, 0, 0); // Normalize time to start of day
 
             const startDate = dateRange.value[0] ? new Date(dateRange.value[0]) : null;
@@ -262,10 +262,10 @@ const clearDateRange = () => {
                 :filters="filters1"
                 :rowsPerPageOptions="[10, 20, 50, 100]"
                 filterDisplay="menu"
-                :globalFilterFields="['orderNo', 'custAccountNo', 'companyName', 'shipToAccountNo', 'created', 'orderType', 'deliveryType', 'invoiceNo', 'doNo', 'soNo']"
+                :globalFilterFields="['orderNo', 'custAccountNo', 'companyName', 'shipToAccountNo', 'orderDate', 'orderType', 'deliveryType', 'invoiceNo', 'doNo', 'soNo']"
                 class="rounded-table"
                 removableSort
-                sortField="created"
+                sortField="orderDate"
                 :sortOrder="-1"
                 currentPageReportTemplate="Showing {first} to {last} of {totalRecords} entries"
                 paginatorTemplate="CurrentPageReport FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink RowsPerPageDropdown"
@@ -299,9 +299,7 @@ const clearDateRange = () => {
                                 <Button v-if="dateRange[0] || dateRange[1]" icon="pi pi-times" class="p-button-text p-button-sm" @click="clearDateRange" title="Clear date filter" />
                             </div>
                             <!-- Show message for Completed tab showing default range -->
-                            <div v-if="currentTab?.status === 1 && !hasDateFilterApplied" class="text-sm text-blue-600 italic">
-                                Showing last 7 days of {{ currentTabLabel }} orders. Use date range to filter further.
-                            </div>
+                            <div v-if="currentTab?.status === 1 && !hasDateFilterApplied" class="text-sm text-blue-600 italic">Showing last 7 days of {{ currentTabLabel }} orders. Use date range to filter further.</div>
                         </div>
                     </div>
                 </template>
@@ -319,9 +317,9 @@ const clearDateRange = () => {
                     </div>
                 </template>
 
-                <!-- ... Rest of the columns remain the same ... -->
-                <Column field="created" header="Created Date" style="min-width: 8rem" sortable>
-                    <template #body="{ data }">{{ formatDateTime(data.created) }}</template>
+                <!-- Changed from created to orderDate -->
+                <Column field="orderDate" header="Created Date" style="min-width: 8rem" sortable>
+                    <template #body="{ data }">{{ formatDateTime(data.orderDate) }}</template>
                 </Column>
 
                 <Column header="Order No" style="min-width: 10rem" sortable>

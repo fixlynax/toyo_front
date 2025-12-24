@@ -258,6 +258,11 @@ const model = ref([
                         label: 'Directship Container',
                         icon: 'pi pi-fw pi-box',
                         to: '/om/listContainer'
+                    },
+                    {
+                        label: 'Setting Material Quantity',
+                        icon: 'pi pi-fw pi-cart-arrow-down',
+                        to: '/om/settingMaterialQuantity'
                     }
                 ]
             }

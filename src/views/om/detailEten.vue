@@ -307,7 +307,7 @@
                                     </td>
                                 </tr>
                                 <tr class="border-b">
-                                    <td class="px-4 py-2 font-medium">Show on List</td>
+                                    <td class="px-4 py-2 font-medium">Show In T-Care</td>
                                     <td class="px-4 py-2 text-right">
                                         {{ form.showOnList == 1 ? 'Yes' : 'No' }}
                                     </td>

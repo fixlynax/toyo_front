@@ -456,7 +456,7 @@
                             </div>
                         </div>
 
-                    <div v-if="warantyDetail.status_string  =='Pending Manager Approval' && scrapImages && canUpdate && forceReset" class="flex justify-end gap-2 mt-4 pt-4 border-t">
+                    <div v-if="warantyDetail.status_string  =='Pending Manager Approval' && scrapImages && canUpdate && isManager" class="flex justify-end gap-2 mt-4 pt-4 border-t">
                         <Button label="Approve Scrap" class="p-button-success" size="small" @click="Approve" icon="pi pi-check" />
                         <Button label="Reject Scrap" class="p-button-warn" size="small" @click="rejectScrap" icon="pi pi-times" />
                         <Button label="Reject Claim" class="p-button-danger" size="small" @click="showRejectDialog = true" icon="pi pi-times" />
@@ -566,7 +566,7 @@
                         <p>{{ warantyDetail.reimbursement?.sapClaimNo ? warantyDetail.reimbursement.sapClaimNo : 'Pending Invoice Approval' }}</p>
                     </div>
                 </div>
-                <div v-if="(warantyDetail.status_string  !== 'Pending Customer Invoice') && warantyDetail.reimbursement && warantyDetail.status !=5 && canUpdate && forceReset" class="flex justify-end gap-2 mt-4">
+                <div v-if="(warantyDetail.status_string  !== 'Pending Customer Invoice') && warantyDetail.reimbursement && warantyDetail.status !=5 && canUpdate && isManager" class="flex justify-end gap-2 mt-4">
                     <Button label="Approve Invoice" class="p-button-success" size="small" @click="approveInvoice" :loading="approvingInvoice" icon="pi pi-check" />
                     <Button label="Reject Invoice" class="p-button-warn" size="small" @click="rejectInvoiceDialog" icon="pi pi-times" />
                     <!-- <Button label="Reject Claim" class="p-button-danger" size="small" @click="showRejectDialog = true" icon="pi pi-times" /> -->
@@ -907,7 +907,7 @@ import { useMenuStore } from '@/store/menu';
 const menuStore = useMenuStore();
 const canUpdate = computed(() => menuStore.canWrite('Warranty Claim'));
 const denyAccess = computed(() => menuStore.canTest('Warranty Claim'));
-const forceReset = computed(() => menuStore.forceReset);
+const isManager = computed(() => menuStore.isManager);
 
 const route = useRoute();
 const toast = useToast();
@@ -2134,6 +2134,15 @@ const checkTread = async () => {
     }
 };
 const submitReimbursement = async () => {
+    if (checkingPriceResult.value.price == 0) {
+        toast.add({
+            severity: 'error',
+            summary: 'Error',
+            detail: 'Reimbursement price cannot be zero. Please enter a valid amount.',
+            life: 3000
+        });
+        return;
+    }
     if (!selectedMaterial.value) {
         toast.add({
             severity: 'error',
