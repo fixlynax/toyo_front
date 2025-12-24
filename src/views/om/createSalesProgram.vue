@@ -1062,7 +1062,7 @@ const submitForm = async () => {
         if (response.data.status === 1) {
             showSuccess('Sales program created successfully!');
             setTimeout(() => {
-                window.location.href = '/om/listSalesProgram';
+                window.location.href = 'om/listSalesProgram';
             }, 1500);
         } else {
             showError('Error creating sales program: ' + (response.data.error?.message || 'Unknown error'));

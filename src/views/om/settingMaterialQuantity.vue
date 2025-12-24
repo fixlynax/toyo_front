@@ -96,12 +96,6 @@
                             </div>
                         </template>
                     </Column>
-
-                    <Column header="Actions" style="min-width: 10rem">
-                        <template #body="{ data }">
-                            <Button icon="pi pi-pencil" class="p-button-text p-button-sm" @click="editMaterial(data)" title="Edit quantity" />
-                        </template>
-                    </Column>
                 </DataTable>
             </div>
 
@@ -407,15 +401,6 @@ const handleImport = async (event) => {
 const handleImportComplete = async () => {
     showImportResult.value = false;
     await fetchMaterials();
-};
-
-const editMaterial = (material) => {
-    toast.add({
-        severity: 'info',
-        summary: 'Edit Material',
-        detail: `Editing ${material.material_id}`,
-        life: 3000
-    });
 };
 
 const clearDealerSelection = () => {
