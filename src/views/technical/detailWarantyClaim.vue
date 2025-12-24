@@ -2134,6 +2134,15 @@ const checkTread = async () => {
     }
 };
 const submitReimbursement = async () => {
+    if (checkingPriceResult.value.price == 0) {
+        toast.add({
+            severity: 'error',
+            summary: 'Error',
+            detail: 'Reimbursement price cannot be zero. Please enter a valid amount.',
+            life: 3000
+        });
+        return;
+    }
     if (!selectedMaterial.value) {
         toast.add({
             severity: 'error',
