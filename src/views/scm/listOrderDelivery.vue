@@ -305,7 +305,7 @@ const toggleSelectAll = () => {
 
 // Computed: are all visible rows selected?
 const isAllSelected = () => {
-    return visibleRows.value.length > 0 && visibleRows.value.every(item => selectedExportIds.value.has(item.id));
+    return visibleRows.value.length > 0 && visibleRows.value.every(item => selectedExportIds.value.has(item.orderID));
 };
 
 onMounted(async () => {
