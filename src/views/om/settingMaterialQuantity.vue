@@ -288,7 +288,7 @@ const exportMaterials = async () => {
     try {
         exportLoading.value = true;
 
-        const response = await api.get(`maintenance/exportEtenMaterial/${selectedDealer.value}`, {
+        const response = await api.getDownload(`maintenance/exportEtenMaterial/${selectedDealer.value}`, {
             responseType: 'arraybuffer'
         });
 
