@@ -21,7 +21,7 @@
                             <span class="block text-sm text-black-700">Account Number</span>
                             <span class="text-lg font-medium">{{ returnList.dealer.dealer_shop.custAccountNo }}</span>
                         </div>
-  y                  </div>
+                    </div>
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm text-gray-700">
                         <div>
                             <span class="block text-sm text-black-700">Member Code</span>
