@@ -785,14 +785,14 @@ const generateReport = (report) => {
                         <strong>PAY TO :</strong><br>
                         ${ report.dealerAddress ||  '-'}
                          <br>
-                        ${report.dealerPhoneNum}<br>
+                        ${report.dealerPhoneNum ||  '-'}<br>
                     </td>
 
                     <td>
                         <strong>SHIP TO :</strong><br>
                         ${ report.shiptoAddress ||  '-'}
                          <br>
-                        ${report.shiptoMobileNum}<br>
+                        ${report.shiptoMobileNum ||  '-'}<br>
                     </td>
 
                     <td>
@@ -800,7 +800,7 @@ const generateReport = (report) => {
                             <tr>
                                 <td style="border:0;width: 100px;">REF NO</td>
                                 <td style="border:0; width:10px;">:</td>
-                                <td style="border:0;">${ report.reason_message ||  '-'}</td>
+                                <td style="border:0;">${ report.return_orderNo_ref ||  '-'}</td>
                             </tr>
                             <tr>
                                 <td style="border:0;">DOC DATE</td>
@@ -841,7 +841,7 @@ const generateReport = (report) => {
                     <strong>DELIVERY INFO</strong><br>
                     <br><br>
                     <div>TRUCK NO : ${ report.delivery?.driverPlateNo ||  '-'}</div><br>
-                    <div>DRIVER NAME :${ report.delivery?.driverName ||  '-'}</div><br>
+                    <div>DRIVER NAME : ${ report.delivery?.driverName ||  '-'}</div><br>
                     <div>DRIVER IC :${ report.delivery?.driverIC ||  '-'}</div><br>
                 </div>
 
