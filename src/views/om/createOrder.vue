@@ -199,6 +199,25 @@
                 </div>
             </div>
 
+            <!-- Max Quantity Warning -->
+            <div v-if="hasMaxQtyViolations" class="mt-4 p-4 bg-red-50 border border-red-200 rounded-lg">
+                <div class="flex items-center gap-2">
+                    <i class="pi pi-exclamation-triangle text-red-500"></i>
+                    <span class="font-semibold text-red-700">Maximum Order Quantity Warning</span>
+                </div>
+                <div class="text-sm text-red-600 mt-1">
+                    The following items exceed the maximum allowed quantity per month:
+                    <ul class="mt-1 list-disc list-inside ml-2">
+                        <li v-for="item in exceedsMaxQtyItems" :key="item.materialid">
+                            {{ item.material }}: {{ item.quantity }} units (Max allowed: {{ item.max_allowed }})
+                        </li>
+                    </ul>
+                    <div class="mt-2 text-xs text-red-700 font-semibold">
+                        Note: Please reduce quantities to within the allowed limits before proceeding.
+                    </div>
+                </div>
+            </div>
+
             <!-- Monthly Limit Warning -->
             <div v-if="hasMonthlyLimitViolations" class="mt-4 p-4 bg-orange-50 border border-orange-200 rounded-lg">
                 <div class="flex items-center gap-2">
@@ -289,7 +308,10 @@
                                 icon="pi pi-shopping-cart"
                                 class="p-button-primary p-button-sm"
                                 @click="addToCart(data)"
-                                :disabled="isInCart(data) || (selectedOrderType === 'DIRECTSHIP' && (data.stockBalance === 0 || containerCapacity >= maxContainerCapacity)) || exceedsItemLimit"
+                                :disabled="isInCart(data) || 
+                                          (selectedOrderType === 'DIRECTSHIP' && (data.stockBalance === 0 || containerCapacity >= maxContainerCapacity)) || 
+                                          exceedsItemLimit ||
+                                          (selectedOrderType === 'NORMAL' && data.max_qty_remaining === 0)"
                             />
                         </div>
                     </template>
@@ -345,7 +367,7 @@
                                     <InputNumber
                                         v-model="data.quantity"
                                         :min="getMinQuantity()"
-                                        :max="getMaxQuantity(data)"
+                                        :max="data.remaining_qty || 50"
                                         :showButtons="true"
                                         buttonLayout="horizontal"
                                         incrementButtonClass="p-button-text p-button-sm"
@@ -356,6 +378,10 @@
                                         @update:modelValue="onQuantityChange(data)"
                                         :class="{ 'border-orange-500': selectedOrderType === 'NORMAL' && data.quantity > 50 }"
                                     />
+                                    <!-- Show max quantity information -->
+                                    <div v-if="selectedOrderType === 'NORMAL'" class="text-xs text-gray-500">
+                                        <!-- Max: {{ data.max_qty || 50 }} | Ordered: {{ data.bought_qty || 0 }} | Remaining: {{ data.remaining_qty || 50 }} -->
+                                    </div>
                                     <!-- Show monthly limit warning if applicable -->
                                     <div v-if="selectedOrderType === 'NORMAL' && data.quantity > 50" class="flex items-center gap-1 text-orange-600 text-xs">
                                         <i class="pi pi-exclamation-triangle text-xs"></i>
@@ -452,6 +478,15 @@
                     You have {{ totalLineItems }} line items in your cart ({{ selectedTyres.length }} order items + {{ freeItems.length }} free items). Maximum allowed per order is 10 line items. Please remove {{ totalLineItems - 10 }} item(s) to
                     proceed.
                 </div>
+            </div>
+
+            <!-- Max Quantity Warning (Bottom) -->
+            <div v-if="hasMaxQtyViolations" class="mt-4 p-4 bg-red-50 border border-red-200 rounded-lg">
+                <div class="flex items-center gap-2">
+                    <i class="pi pi-exclamation-triangle text-red-500"></i>
+                    <span class="font-semibold text-red-700">Maximum Quantity Warning</span>
+                </div>
+                <div class="text-sm text-red-600 mt-1">Some items in your cart exceed the maximum allowed quantity per month. Please reduce quantities before proceeding to checkout.</div>
             </div>
 
             <!-- Monthly Limit Warning (Bottom) -->
@@ -616,6 +651,10 @@
                                             </span>
                                             <!-- Monthly limit warning in review -->
                                             <span v-if="selectedOrderType === 'NORMAL' && item.quantity > 50" class="text-red-600 font-semibold ml-2">⚠️ Exceeds monthly limit</span>
+                                            <!-- Max quantity info -->
+                                            <!-- <span v-if="selectedOrderType === 'NORMAL'" class="text-blue-600 font-semibold ml-2">
+                                                (Max: {{ item.max_qty || 50 }}, Ordered: {{ item.bought_qty || 0 }}, Remaining: {{ item.remaining_qty || 50 }})
+                                            </span> -->
                                         </div>
                                     </div>
                                     <div class="font-semibold">RM {{ formatCurrency((item.price * item.quantity).toFixed(2)) }}</div>
@@ -703,6 +742,20 @@
                                     <span v-if="item.stockBalance === 0">Complete back order ({{ item.quantity }} units)</span>
                                     <span v-else>Partial back order ({{ item.stockBalance }} available, {{ item.quantity - item.stockBalance }} back ordered)</span>
                                 </li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <!-- Max Quantity Notice -->
+                    <div v-if="selectedOrderType === 'NORMAL' && hasMaxQtyViolations" class="mt-4 p-4 bg-red-50 border border-red-200 rounded-lg">
+                        <div class="flex items-center gap-2">
+                            <i class="pi pi-exclamation-triangle text-red-500"></i>
+                            <span class="font-semibold text-red-700">Maximum Quantity Warning</span>
+                        </div>
+                        <div class="text-sm text-red-600 mt-1">
+                            Some items exceed the maximum allowed quantity per month. The order may be rejected by the system.
+                            <ul class="mt-1 list-disc list-inside ml-2">
+                                <li v-for="item in exceedsMaxQtyItems" :key="item.materialid">{{ item.material }}: {{ item.quantity }} units (Max allowed: {{ item.max_allowed }})</li>
                             </ul>
                         </div>
                     </div>
@@ -1077,7 +1130,7 @@ const exceedsItemLimit = computed(() => {
     return totalLineItems.value > 10;
 });
 
-// NEW: Check for 50-unit monthly limit violations
+// Check for 50-unit monthly limit violations
 const exceedsMonthlyLimitItems = computed(() => {
     if (selectedOrderType.value !== 'NORMAL') return [];
 
@@ -1098,6 +1151,29 @@ const exceedsMonthlyLimitItems = computed(() => {
 });
 
 const hasMonthlyLimitViolations = computed(() => exceedsMonthlyLimitItems.value.length > 0);
+
+// Check for max quantity violations
+const exceedsMaxQtyItems = computed(() => {
+    if (selectedOrderType.value !== 'NORMAL') return [];
+
+    const exceededItems = [];
+
+    selectedTyres.value.forEach((item) => {
+        if (item.quantity > (item.remaining_qty || 50)) {
+            exceededItems.push({
+                materialid: item.materialid,
+                material: item.material,
+                quantity: item.quantity,
+                max_allowed: item.remaining_qty || 50,
+                monthly_limit: 50
+            });
+        }
+    });
+
+    return exceededItems;
+});
+
+const hasMaxQtyViolations = computed(() => exceedsMaxQtyItems.value.length > 0);
 
 // Risk Category Validation
 const canProceedWithRiskA = computed(() => {
@@ -1121,6 +1197,7 @@ const canProceedToStep3 = computed(() => {
     const hasItems = selectedTyres.value.length > 0;
     const priceValid = !selectedTyres.value.some((item) => !item.price || item.price <= 0);
     const withinItemLimit = !exceedsItemLimit.value; // Check if within 10 line items limit
+    const withinMaxQty = !hasMaxQtyViolations.value; // Check if within material-specific max quantities
 
     // Stock validation differs by order type
     let stockValid = true;
@@ -1138,7 +1215,7 @@ const canProceedToStep3 = computed(() => {
         containerValid = containerCapacity.value >= minContainerCapacity.value && containerCapacity.value <= maxContainerCapacity.value;
     }
 
-    return hasItems && stockValid && priceValid && containerValid && withinItemLimit;
+    return hasItems && stockValid && priceValid && containerValid && withinItemLimit && withinMaxQty;
 });
 
 const canPlaceOrder = computed(() => {
@@ -1241,10 +1318,14 @@ const getMinQuantity = () => {
 };
 
 // Helper function to get maximum quantity based on stock, order type, and monthly limit
-const getMaxQuantity = (tyre) => {
+const getMaxQuantity = async (tyre) => {
     if (selectedOrderType.value === 'NORMAL') {
-        // For NORMAL orders, maximum is 50 per month regardless of stock
-        return 50;
+        // For NORMAL orders, check material-specific max quantity
+        const maxQtyData = await checkMaxOrderQty(tyre.materialid);
+        const materialMax = maxQtyData.remaining_qty;
+        
+        // Also apply the 50-unit monthly limit (whichever is smaller)
+        return Math.min(materialMax, 50);
     } else {
         // For DIRECTSHIP or other order types, use stock balance as limit
         return Math.min(tyre.stockBalance || 0, 999);
@@ -1316,6 +1397,31 @@ const createEmptyOrderNo = async () => {
     } catch (error) {
         console.error('Error creating order number:', error);
         throw new Error('Failed to create order number');
+    }
+};
+
+// Check Maximum Order Quantity for a material
+const checkMaxOrderQty = async (materialid) => {
+    if (!selectedCustomer.value || !materialid) {
+        return { max_qty: 50, bought_qty: 0, remaining_qty: 50 }; // Default values
+    }
+
+    try {
+        const response = await api.post('order/checkMaxOrderQty', {
+            custaccountno: selectedCustomer.value.code,
+            materialid: materialid
+        });
+
+        if (response.data.status === 1) {
+            return response.data.eten_data;
+        } else {
+            // Return default values if API fails
+            console.warn('Max order quantity check failed:', response.data.error);
+            return { max_qty: 50, bought_qty: 0, remaining_qty: 50 };
+        }
+    } catch (error) {
+        console.error('Error checking max order quantity:', error);
+        return { max_qty: 50, bought_qty: 0, remaining_qty: 50 }; // Default fallback
     }
 };
 
@@ -1444,8 +1550,8 @@ const checkSalesProgramAndPrice = async () => {
     }
 };
 
-// UPDATED: Add to Cart function with 10-line-item limit and monthly limit toast warnings
-const addToCart = (tyre) => {
+// UPDATED: Add to Cart function with 10-line-item limit, monthly limit, and max order quantity check
+const addToCart = async (tyre) => {
     // Check 10-line-item limit first
     if (totalLineItems.value >= 10) {
         toast.add({
@@ -1457,7 +1563,24 @@ const addToCart = (tyre) => {
         return;
     }
 
+    // Check max order quantity for the material
+    const maxQtyData = await checkMaxOrderQty(tyre.materialid);
+    
+    // Check if we can add this item (consider existing quantity if already in cart)
     const existing = selectedTyres.value.find((t) => t.id === tyre.id);
+    const currentQty = existing ? existing.quantity : 0;
+    const proposedQty = currentQty + 1;
+    
+    if (proposedQty > maxQtyData.remaining_qty) {
+        toast.add({
+            severity: 'warn',
+            summary: 'Maximum Order Quantity Reached',
+            detail: `${tyre.material} has a maximum of ${maxQtyData.max_qty} units per month. Already ordered: ${maxQtyData.bought_qty}, remaining: ${maxQtyData.remaining_qty}.`,
+            life: 3000
+        });
+        return;
+    }
+
     if (existing) {
         // Check if increasing quantity would exceed monthly limit for NORMAL orders
         if (selectedOrderType.value === 'NORMAL' && existing.quantity + 1 > 50) {
@@ -1491,7 +1614,10 @@ const addToCart = (tyre) => {
     } else {
         selectedTyres.value.push({
             ...tyre,
-            quantity: 1
+            quantity: 1,
+            max_qty: maxQtyData.max_qty,
+            bought_qty: maxQtyData.bought_qty,
+            remaining_qty: maxQtyData.remaining_qty
         });
 
         // Show appropriate message based on stock availability
@@ -1940,8 +2066,28 @@ const removeFromCart = (tyre) => {
 
 const isInCart = (tyre) => selectedTyres.value.some((t) => t.id === tyre.id);
 
-// UPDATED: onQuantityChange with monthly limit toast warnings
-const onQuantityChange = (item) => {
+// UPDATED: onQuantityChange with monthly limit and max order quantity validations
+const onQuantityChange = async (item) => {
+    // Check max order quantity for the material
+    const maxQtyData = await checkMaxOrderQty(item.materialid);
+    
+    // Update the item with latest max quantity data
+    item.max_qty = maxQtyData.max_qty;
+    item.bought_qty = maxQtyData.bought_qty;
+    item.remaining_qty = maxQtyData.remaining_qty;
+    
+    // Validate against remaining quantity
+    if (item.quantity > maxQtyData.remaining_qty) {
+        toast.add({
+            severity: 'error',
+            summary: 'Maximum Quantity Exceeded',
+            detail: `Cannot exceed ${maxQtyData.remaining_qty} remaining units for ${item.material}.`,
+            life: 2000
+        });
+        item.quantity = Math.max(1, maxQtyData.remaining_qty);
+        return;
+    }
+    
     // Check monthly limit for NORMAL orders
     if (selectedOrderType.value === 'NORMAL' && item.quantity > 50) {
         toast.add({
