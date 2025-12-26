@@ -2741,7 +2741,7 @@ const proceedWithBackOrder = async () => {
             const etenData = result.eten_data;
             orderDetails.value = {
                 orderRefNo: etenData.orderRefNo || etenData.orderno,
-                backOrderRefNo: etenData.backOrderRefNo || etenData.backorderno,
+                backOrderRefNo: Array.isArray(etenData.backOrderRefNo) ? etenData.backOrderRefNo.join(', '): etenData.backOrderRefNo || etenData.backorderno,
                 cartRefNo: cartRefNo
             };
 
