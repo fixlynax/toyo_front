@@ -15,8 +15,8 @@
                         </template>
                     </Column>
                     <Column field="currentVer" header="Current Version" sortable></Column>
-                    <Column field="newVer" header="New Version"></Column>
-                    <Column field="link" header="Link">
+                    <Column field="newVer" header="New Version" sortable></Column>
+                    <Column field="link" header="Link" sortable>
                         <template #body="{ data }">
                             <a v-if="data.link" :href="data.link" target="_blank" class="text-blue-600 hover:underline">
                                 {{ truncateText(data.link, 30) }}
