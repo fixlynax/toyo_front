@@ -797,7 +797,7 @@ onMounted(async () => {
                         </div>
                     </template>
                 </Column>
-                <Column field="createDateSearch" header="Created On" style="min-width: 8rem" sortable>
+                <Column field="created" header="Created On" style="min-width: 8rem" sortable>
                     <template #body="{ data }">
                         {{ data.createDateSearch ?? '-' }}
                         <br/>
