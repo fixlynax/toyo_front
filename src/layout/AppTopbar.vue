@@ -137,7 +137,7 @@ const changePassword = async (isForceReset = false) => {
             if (isForceReset) {
                 // For force reset, just close the dialog without logging out
                 showForceResetDialog.value = false;
-
+                menuStore.setForceReset(0);
                 // Update forceReset status in store (assuming you have a method to update it)
                 // If you have a method to update forceReset in store, call it here
                 // menuStore.updateForceReset(0);
