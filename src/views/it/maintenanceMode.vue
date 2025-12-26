@@ -9,14 +9,14 @@
                 </div>
 
                 <DataTable :value="versionList" :loading="loading" class="rounded-table">
-                    <Column field="type" header="Type">
+                    <Column field="type" header="Type" sortable>
                         <template #body="{ data }">
                             <span class="font-medium">{{ getTypeLabel(data.type) }}</span>
                         </template>
                     </Column>
-                    <Column field="currentVer" header="Current Version"></Column>
-                    <Column field="newVer" header="New Version"></Column>
-                    <Column field="link" header="Link">
+                    <Column field="currentVer" header="Current Version" sortable></Column>
+                    <Column field="newVer" header="New Version" sortable></Column>
+                    <Column field="link" header="Link" sortable>
                         <template #body="{ data }">
                             <a v-if="data.link" :href="data.link" target="_blank" class="text-blue-600 hover:underline">
                                 {{ truncateText(data.link, 30) }}
@@ -24,17 +24,17 @@
                             <span v-else class="text-gray-400">-</span>
                         </template>
                     </Column>
-                    <Column field="isForce" header="Force Update">
+                    <Column field="isForce" header="Force Update" sortable>
                         <template #body="{ data }">
                             <Tag :value="data.isForce ? 'Yes' : 'No'" :severity="data.isForce ? 'danger' : 'success'" />
                         </template>
                     </Column>
-                    <Column field="isMaintainence" header="Maintenance">
+                    <Column field="isMaintainence" header="Maintenance" sortable>
                         <template #body="{ data }">
                             <Tag :value="data.isMaintainence ? 'Yes' : 'No'" :severity="data.isMaintainence ? 'warning' : 'info'" />
                         </template>
                     </Column>
-                    <Column header="Actions" style="width: 120px">
+                    <Column header="Actions" style="width: 120px" >
                         <template #body="{ data }">
                             <div class="flex gap-2">
                                 <Button icon="pi pi-eye" class="p-button-rounded p-button-text p-button-sm" @click="viewMaintenanceMsg(data)" v-tooltip="'View Maintenance Message'" />

@@ -44,7 +44,7 @@
 
             <Column :expander="true" headerStyle="width: 3rem" />
 
-            <Column field="function" header="Function" style="min-width: 8rem">
+            <Column field="function" header="Function" style="min-width: 8rem" sortable>
                 <template #body="{ data }">
                     <div class="flex items-center">
                         <span class="font-semibold text-gray-800">{{ data.function }}</span>
@@ -52,13 +52,13 @@
                 </template>
             </Column>
 
-            <Column field="platform" header="Platform" style="min-width: 8rem">
+            <Column field="platform" header="Platform" style="min-width: 8rem" sortable>
                 <template #body="{ data }">
                     <Badge value="TC" severity="info" class="font-medium" />
                 </template>
             </Column>
 
-            <Column field="shippingPoint" header="Shipping Point" style="min-width: 10rem">
+            <Column field="shippingPoint" header="Shipping Point" style="min-width: 10rem" sortable>
                 <template #body="{ data }">
                     <div class="flex items-center">
                         <i class="pi pi-map-marker text-gray-400 mr-2"></i>
@@ -67,7 +67,7 @@
                 </template>
             </Column>
 
-            <Column header="Timeline" style="min-width: 10rem">
+            <Column header="Timeline" style="min-width: 10rem" sortable>
                 <template #body="{ data }">
                     <div class="space-y-1">
                         <div class="flex items-start">

@@ -54,7 +54,7 @@
                 <!-- Expand/Collapse Column -->
                 <Column :expander="true" headerStyle="width: 3rem" />
 
-                <Column field="username" header="Username & Role" style="min-width: 12rem">
+                <Column field="username" header="Username & Role" style="min-width: 12rem" sortable>
                     <template #body="{ data }">
                         <div class="flex flex-col gap-1">
                             <span class="font-bold text-primary-400">{{ data.username }}</span>
@@ -66,43 +66,43 @@
                     </template>
                 </Column>
 
-                <Column field="full_name" header="Full Name" style="min-width: 12rem">
+                <Column field="full_name" header="Full Name" style="min-width: 12rem" sortable>
                     <template #body="{ data }">
                         <span>{{ data.first_name }} {{ data.last_name }}</span>
                     </template>
                 </Column>
 
-                <Column field="mobilephone" header="Mobile No" style="min-width: 12rem">
+                <Column field="mobilephone" header="Mobile No" style="min-width: 12rem" sortable>
                     <template #body="{ data }">
                         {{ data.mobilephone || '-' }}
                     </template>
                 </Column>
 
-                <Column field="email" header="Email Address" style="min-width: 12rem">
+                <Column field="email" header="Email Address" style="min-width: 12rem" sortable>
                     <template #body="{ data }">
                         {{ data.email || '-' }}
                     </template>
                 </Column>
 
-                <Column field="role.name" header="User Role" style="min-width: 12rem">
+                <Column field="role.name" header="User Role" style="min-width: 12rem" sortable>
                     <template #body="{ data }">
                         <span>{{ data.role?.name || '-' }}</span>
                     </template>
                 </Column>
 
-                <Column field="created" header="Created" style="min-width: 12rem">
+                <Column field="created" header="Created" style="min-width: 12rem" sortable>
                     <template #body="{ data }">
                         {{ formatDate(data.created) }}
                     </template>
                 </Column>
 
-                <Column field="last_login" header="Last Login" style="min-width: 12rem">
+                <Column field="last_login" header="Last Login" style="min-width: 12rem" sortable>
                     <template #body="{ data }">
                         {{ formatDate(data.last_login) }}
                     </template>
                 </Column>
 
-                <Column header="Status" style="min-width: 6rem">
+                <Column header="Status" style="min-width: 6rem" sortable>
                     <template #body="{ data }">
                         <Tag :severity="data.status === 1 ? 'success' : 'danger'" :value="data.status === 1 ? 'Active' : 'Inactive'" />
                     </template>
