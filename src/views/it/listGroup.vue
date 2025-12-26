@@ -54,13 +54,13 @@
             <!-- Expand/Collapse Column -->
             <Column :expander="true" headerStyle="width: 3rem" />
 
-            <Column field="usergroup" header="User Role" style="min-width: 20rem" class="font-bold text-primary-400">
+            <Column field="usergroup" header="User Role" style="min-width: 20rem" class="font-bold text-primary-400"sortable>
                 <template #body="{ data }">
                     <span class="font-bold">{{ data.usergroup }}</span>
                 </template>
             </Column>
 
-            <Column field="description" header="Description" style="min-width: 25rem">
+            <Column field="description" header="Description" style="min-width: 25rem" sortable>
                 <template #body="{ data }">
                     <span :class="{ 'text-gray-500 italic': !data.description }">
                         {{ data.description || 'No Description' }}
@@ -68,7 +68,7 @@
                 </template>
             </Column>
 
-            <Column header="Total Function" style="min-width: 25rem">
+            <Column field="permissionCount" header="Total Function" style="min-width: 25rem" sortable>
                 <template #body="{ data }">
                     <span :class="data.permissions && data.permissions.length > 0 ? '' : 'text-red-500'">
                         {{ data.permissions && data.permissions.length > 0 ? data.permissions.length : 'No Permission' }}
@@ -76,19 +76,19 @@
                 </template>
             </Column>
 
-            <Column field="is_super_admin" header="Super Admin" style="min-width: 8rem">
+            <Column field="is_super_admin" header="Super Admin" style="min-width: 8rem" sortable>
                 <template #body="{ data }">
                     <Tag :value="data.is_super_admin ? 'Yes' : 'No'" :severity="data.is_super_admin ? 'info' : 'secondary'" />
                 </template>
             </Column>
 
-            <Column field="is_sales_person" header="Sales Person" style="min-width: 8rem">
+            <Column field="is_sales_person" header="Sales Person" style="min-width: 8rem" sortable>
                 <template #body="{ data }">
                     <Tag :value="data.is_sales_person ? 'Yes' : 'No'" :severity="data.is_sales_person ? 'warning' : 'secondary'" />
                 </template>
             </Column>
 
-            <Column field="statusUser" header="Status" style="min-width: 6rem">
+            <Column field="statusUser" header="Status" style="min-width: 6rem" sortable>
                 <template #body="{ data }">
                     <Tag :value="data.statusUser === 1 ? 'Active' : 'Inactive'" :severity="data.statusUser === 1 ? 'success' : 'danger'" />
                 </template>
@@ -469,7 +469,8 @@ const fetchGroups = async (showLoading = true) => {
                 is_sales_person: group.is_sales_person,
                 statusUser: group.status ? 1 : 0,
                 permissions: group.permissions || [],
-                created: group.created
+                created: group.created,
+                permissionCount: group.permissions ? group.permissions.length : 0
             }));
         } else {
             console.error('Unexpected API response structure:', res.data);

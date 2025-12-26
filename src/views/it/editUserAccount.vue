@@ -673,31 +673,31 @@ const validateForm = () => {
     }
 
     // Sales Office validation
-    if (form.value.salesOffice && Array.isArray(form.value.salesOffice) && form.value.salesOffice.length > 0) {
-        const salesOfficeStr = form.value.salesOffice.join(',');
-        if (salesOfficeStr.length > 300) {
-            errors.salesOffice = 'Sales office selection exceeds maximum length';
-            isValid = false;
-        }
-    }
+    // if (form.value.salesOffice && Array.isArray(form.value.salesOffice) && form.value.salesOffice.length > 0) {
+    //     const salesOfficeStr = form.value.salesOffice.join(',');
+    //     if (salesOfficeStr.length > 300) {
+    //         errors.salesOffice = 'Sales office selection exceeds maximum length';
+    //         isValid = false;
+    //     }
+    // }
 
     // Sales District validation
-    if (form.value.salesDistrict && Array.isArray(form.value.salesDistrict) && form.value.salesDistrict.length > 0) {
-        const salesDistrictStr = form.value.salesDistrict.join(',');
-        if (salesDistrictStr.length > 300) {
-            errors.salesDistrict = 'Sales district selection exceeds maximum length';
-            isValid = false;
-        }
-    }
+    // if (form.value.salesDistrict && Array.isArray(form.value.salesDistrict) && form.value.salesDistrict.length > 0) {
+    //     const salesDistrictStr = form.value.salesDistrict.join(',');
+    //     if (salesDistrictStr.length > 300) {
+    //         errors.salesDistrict = 'Sales district selection exceeds maximum length';
+    //         isValid = false;
+    //     }
+    // }
 
     // Storage Location validation
-    if (form.value.storageLocation && Array.isArray(form.value.storageLocation) && form.value.storageLocation.length > 0) {
-        const storageLocationStr = form.value.storageLocation.join(',');
-        if (storageLocationStr.length > 1000) {
-            errors.storageLocation = 'Storage location selection exceeds maximum length';
-            isValid = false;
-        }
-    }
+    // if (form.value.storageLocation && Array.isArray(form.value.storageLocation) && form.value.storageLocation.length > 0) {
+    //     const storageLocationStr = form.value.storageLocation.join(',');
+    //     if (storageLocationStr.length > 1000) {
+    //         errors.storageLocation = 'Storage location selection exceeds maximum length';
+    //         isValid = false;
+    //     }
+    // }
 
     return isValid;
 };

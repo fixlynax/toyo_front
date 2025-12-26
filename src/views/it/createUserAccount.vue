@@ -209,10 +209,10 @@
 </template>
 
 <script setup>
-import { ref, reactive, onMounted, computed } from 'vue';
-import { useRouter } from 'vue-router';
-import { useToast } from 'primevue/usetoast';
 import api from '@/service/api';
+import { useToast } from 'primevue/usetoast';
+import { computed, onMounted, reactive, ref } from 'vue';
+import { useRouter } from 'vue-router';
 
 const router = useRouter();
 const toast = useToast();
@@ -503,34 +503,34 @@ const validateForm = () => {
     }
 
     // Sales Office validation (optional but format check)
-    if (form.value.salesOffice && Array.isArray(form.value.salesOffice) && form.value.salesOffice.length > 0) {
-        // Convert array to string for length validation
-        const salesOfficeStr = form.value.salesOffice.join(',');
-        if (salesOfficeStr.length > 300) {
-            errors.salesOffice = 'Sales office selection exceeds maximum length';
-            isValid = false;
-        }
-    }
+    // if (form.value.salesOffice && Array.isArray(form.value.salesOffice) && form.value.salesOffice.length > 0) {
+    //     // Convert array to string for length validation
+    //     const salesOfficeStr = form.value.salesOffice.join(',');
+    //     if (salesOfficeStr.length > 300) {
+    //         errors.salesOffice = 'Sales office selection exceeds maximum length';
+    //         isValid = false;
+    //     }
+    // }
 
-    // Sales District validation (optional but format check)
-    if (form.value.salesDistrict && Array.isArray(form.value.salesDistrict) && form.value.salesDistrict.length > 0) {
-        // Convert array to string for length validation
-        const salesDistrictStr = form.value.salesDistrict.join(',');
-        if (salesDistrictStr.length > 300) {
-            errors.salesDistrict = 'Sales district selection exceeds maximum length';
-            isValid = false;
-        }
-    }
+    // // Sales District validation (optional but format check)
+    // if (form.value.salesDistrict && Array.isArray(form.value.salesDistrict) && form.value.salesDistrict.length > 0) {
+    //     // Convert array to string for length validation
+    //     const salesDistrictStr = form.value.salesDistrict.join(',');
+    //     if (salesDistrictStr.length > 300) {
+    //         errors.salesDistrict = 'Sales district selection exceeds maximum length';
+    //         isValid = false;
+    //     }
+    // }
 
     // Storage Location validation (optional but format check)
-    if (form.value.storageLocation && Array.isArray(form.value.storageLocation) && form.value.storageLocation.length > 0) {
-        // Convert array to string for length validation
-        const storageLocationStr = form.value.storageLocation.join(',');
-        if (storageLocationStr.length > 1000) {
-            errors.storageLocation = 'Storage location selection exceeds maximum length';
-            isValid = false;
-        }
-    }
+    // if (form.value.storageLocation && Array.isArray(form.value.storageLocation) && form.value.storageLocation.length > 0) {
+    //     // Convert array to string for length validation
+    //     const storageLocationStr = form.value.storageLocation.join(',');
+    //     if (storageLocationStr.length > 100) {
+    //         errors.storageLocation = 'Storage location selection exceeds maximum length';
+    //         isValid = false;
+    //     }
+    // }
 
     return isValid;
 };
