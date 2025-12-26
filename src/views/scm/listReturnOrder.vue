@@ -86,7 +86,7 @@
                         </div>
                     </template>
                 </Column>
-                <Column field="sapDateSearch" header="Create On" style="min-width: 8rem" sortable>
+                <Column field="sapDateSearch" header="Created On" style="min-width: 8rem" sortable>
                     <template #body="{ data }">
                         {{ data.sapDateSearch ?? '-' }}
                         <br/>

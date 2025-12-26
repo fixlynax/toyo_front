@@ -69,6 +69,10 @@
                             <span class="text-sm text-gray-500">Credit Note No.</span>
                             <p class="text-lg font-semibold">{{ order.creditnoteno || '-' }}</p>
                         </div>
+                        <div>
+                            <span class="text-sm text-gray-500">Return Delivery No.</span>
+                            <p class="text-lg font-semibold">{{ orderDelivery.sapreturndeliveryno || '-' }}</p>
+                        </div>
                     </div>
                     <div class="grid grid-cols-2 gap-4 mt-4">
                         <div>
