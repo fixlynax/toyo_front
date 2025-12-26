@@ -746,7 +746,7 @@ const loadProgramCriteria = async (programData) => {
     if (programData.salesProgramFOC && programData.salesProgramFOC.length > 0) {
         // Wait for buy materials data to be loaded
         if (allBuyMaterialsData.value.length === 0) {
-            await loadBuyMaterialsData();
+            await loadBuyPatterns();
         }
 
         // Map FOC criteria to material details
@@ -780,8 +780,6 @@ const openMaterialPopup = async () => {
     loadingMaterials.value = true;
 
     try {
-        // Load buy materials data for filtering
-        await loadBuyMaterialsData();
         // Show all materials initially
         filteredMaterials.value = [...allBuyMaterialsData.value];
 
@@ -1052,6 +1050,7 @@ const loadBuyPatterns = async () => {
         if (response.data.status === 1) {
             const patternsData = response.data.admin_data;
             const patterns = [];
+            const materials = [];
 
             for (const [patternCode, patternNamesData] of Object.entries(patternsData)) {
                 for (const [patternName, rimData] of Object.entries(patternNamesData)) {
@@ -1068,9 +1067,23 @@ const loadBuyPatterns = async () => {
                         patternName: patternName,
                         rimSizes: rimSizes
                     });
+                    for (const [rimDiameter, materialDescriptions] of Object.entries(rimData)) {
+                        materialDescriptions.forEach((materialDesc) => {
+                            const [materialid, material, sectionwidth] = materialDesc.split('|').map((item) => item.trim());
+
+                            materials.push({
+                                materialid: materialid,
+                                material: material,
+                                pattern: patternCode,
+                                patternDisplay: `${patternCode} - ${patternName}`, // Add display format
+                                rimdiameter: parseFloat(rimDiameter),
+                                sectionwidth: sectionwidth
+                            });
+                        });
+                    }
                 }
             }
-
+            allBuyMaterialsData.value = materials;
             // Remove duplicates by pattern code (keep first occurrence)
             const uniquePatterns = patterns.filter((pattern, index, self) => index === self.findIndex((p) => p.value === pattern.value));
 
@@ -1084,49 +1097,6 @@ const loadBuyPatterns = async () => {
     }
 };
 
-// Updated loadBuyMaterialsData function to include patternDisplay
-const loadBuyMaterialsData = async () => {
-    try {
-        const response = await api.get('criteria-selection');
-
-        if (response.data.status === 1) {
-            const patternsData = response.data.admin_data;
-            const materials = [];
-
-            // Convert the nested structure to a flat array of materials
-            for (const [patternCode, patternNamesData] of Object.entries(patternsData)) {
-                for (const [patternName, rimData] of Object.entries(patternNamesData)) {
-                    for (const [rimDiameter, materialDescriptions] of Object.entries(rimData)) {
-                        materialDescriptions.forEach((materialDesc) => {
-                            const [materialid, material] = materialDesc.split('|').map((item) => item.trim());
-
-                            materials.push({
-                                materialid: materialid,
-                                material: material,
-                                pattern: patternCode,
-                                patternDisplay: `${patternCode} - ${patternName}`, // Add display format
-                                rimdiameter: parseFloat(rimDiameter),
-                                sectionwidth: extractSectionWidth(material)
-                            });
-                        });
-                    }
-                }
-            }
-
-            allBuyMaterialsData.value = materials;
-        }
-    } catch (error) {
-        console.error('Error loading buy materials data:', error);
-        showError('Failed to load buy materials data');
-        throw error;
-    }
-};
-
-// Helper function to extract section width from material description
-const extractSectionWidth = (materialDesc) => {
-    const match = materialDesc.match(/(\d+)\/\d+\s+R/);
-    return match ? parseInt(match[1]) : null;
-};
 
 // API Functions for Free Materials (using list-material API with SALESPROGRAM type)
 const loadFreeMaterials = async () => {
@@ -1358,7 +1328,7 @@ onMounted(() => {
     }
 
     // Load all necessary data
-    Promise.all([loadBuyPatterns(), loadFreeMaterials(), loadBuyMaterialsData(), fetchSalesProgram()]).catch((error) => {
+    Promise.all([loadBuyPatterns(), loadFreeMaterials(), fetchSalesProgram()]).catch((error) => {
         console.error('Error loading initial data:', error);
         showError('Failed to load required data');
     });
