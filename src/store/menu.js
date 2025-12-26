@@ -35,6 +35,9 @@ export const useMenuStore = defineStore('menu', {
     canTest(funcName) {
       return false;
     },
+    setForceReset(value) {
+          this.forceReset = value;
+      },
     reset() {
       this.menu = [];
       this.permissions = [];
