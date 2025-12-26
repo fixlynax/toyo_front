@@ -69,6 +69,10 @@
                             <span class="block text-sm text-black-700">SAP Return No.</span>
                             <span class="text-lg font-medium">{{ returnList.sapreturnno ?? '-' }}</span>
                         </div>
+                        <div>
+                            <span class="block text-sm text-black-700">Return Delivery No.</span>
+                            <p class="text-lg font-medium">{{ returnList.delivery_information?.sapreturndeliveryno || '-' }}</p>
+                        </div>
                     </div>
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm text-gray-700">
                         <div>
