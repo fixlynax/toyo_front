@@ -1318,19 +1318,19 @@ const getMinQuantity = () => {
 };
 
 // Helper function to get maximum quantity based on stock, order type, and monthly limit
-const getMaxQuantity = async (tyre) => {
-    if (selectedOrderType.value === 'NORMAL') {
-        // For NORMAL orders, check material-specific max quantity
-        const maxQtyData = await checkMaxOrderQty(tyre.materialid);
-        const materialMax = maxQtyData.remaining_qty;
+// const getMaxQuantity = async (tyre) => {
+//     if (selectedOrderType.value === 'NORMAL') {
+//         // For NORMAL orders, check material-specific max quantity
+//         const maxQtyData = await checkMaxOrderQty(tyre.materialid);
+//         const materialMax = maxQtyData.remaining_qty;
         
-        // Also apply the 50-unit monthly limit (whichever is smaller)
-        return Math.min(materialMax, 50);
-    } else {
-        // For DIRECTSHIP or other order types, use stock balance as limit
-        return Math.min(tyre.stockBalance || 0, 999);
-    }
-};
+//         // Also apply the 50-unit monthly limit (whichever is smaller)
+//         return Math.min(materialMax, 50);
+//     } else {
+//         // For DIRECTSHIP or other order types, use stock balance as limit
+//         return Math.min(tyre.stockBalance || 0, 999);
+//     }
+// };
 
 // Helper to get material names for display
 const getMaterialName = (materialid) => {
@@ -1401,29 +1401,29 @@ const createEmptyOrderNo = async () => {
 };
 
 // Check Maximum Order Quantity for a material
-const checkMaxOrderQty = async (materialid) => {
-    if (!selectedCustomer.value || !materialid) {
-        return { max_qty: 50, bought_qty: 0, remaining_qty: 50 }; // Default values
-    }
+// const checkMaxOrderQty = async (materialid) => {
+//     if (!selectedCustomer.value || !materialid) {
+//         return { max_qty: 50, bought_qty: 0, remaining_qty: 50 }; // Default values
+//     }
 
-    try {
-        const response = await api.post('order/checkMaxOrderQty', {
-            custaccountno: selectedCustomer.value.code,
-            materialid: materialid
-        });
+//     try {
+//         const response = await api.post('order/checkMaxOrderQty', {
+//             custaccountno: selectedCustomer.value.code,
+//             materialid: materialid
+//         });
 
-        if (response.data.status === 1) {
-            return response.data.eten_data;
-        } else {
-            // Return default values if API fails
-            console.warn('Max order quantity check failed:', response.data.error);
-            return { max_qty: 50, bought_qty: 0, remaining_qty: 50 };
-        }
-    } catch (error) {
-        console.error('Error checking max order quantity:', error);
-        return { max_qty: 50, bought_qty: 0, remaining_qty: 50 }; // Default fallback
-    }
-};
+//         if (response.data.status === 1) {
+//             return response.data.eten_data;
+//         } else {
+//             // Return default values if API fails
+//             console.warn('Max order quantity check failed:', response.data.error);
+//             return { max_qty: 50, bought_qty: 0, remaining_qty: 50 };
+//         }
+//     } catch (error) {
+//         console.error('Error checking max order quantity:', error);
+//         return { max_qty: 50, bought_qty: 0, remaining_qty: 50 }; // Default fallback
+//     }
+// };
 
 // Step Navigation
 const goToStep = async (step) => {
@@ -1564,22 +1564,22 @@ const addToCart = async (tyre) => {
     }
 
     // Check max order quantity for the material
-    const maxQtyData = await checkMaxOrderQty(tyre.materialid);
+    // const maxQtyData = await checkMaxOrderQty(tyre.materialid);
     
     // Check if we can add this item (consider existing quantity if already in cart)
     const existing = selectedTyres.value.find((t) => t.id === tyre.id);
     const currentQty = existing ? existing.quantity : 0;
     const proposedQty = currentQty + 1;
     
-    if (proposedQty > maxQtyData.remaining_qty) {
-        toast.add({
-            severity: 'warn',
-            summary: 'Maximum Order Quantity Reached',
-            detail: `${tyre.material} has a maximum of ${maxQtyData.max_qty} units per month. Already ordered: ${maxQtyData.bought_qty}, remaining: ${maxQtyData.remaining_qty}.`,
-            life: 3000
-        });
-        return;
-    }
+    // if (proposedQty > maxQtyData.remaining_qty) {
+    //     toast.add({
+    //         severity: 'warn',
+    //         summary: 'Maximum Order Quantity Reached',
+    //         detail: `${tyre.material} has a maximum of ${maxQtyData.max_qty} units per month. Already ordered: ${maxQtyData.bought_qty}, remaining: ${maxQtyData.remaining_qty}.`,
+    //         life: 3000
+    //     });
+    //     return;
+    // }
 
     if (existing) {
         // Check if increasing quantity would exceed monthly limit for NORMAL orders
@@ -1615,9 +1615,9 @@ const addToCart = async (tyre) => {
         selectedTyres.value.push({
             ...tyre,
             quantity: 1,
-            max_qty: maxQtyData.max_qty,
-            bought_qty: maxQtyData.bought_qty,
-            remaining_qty: maxQtyData.remaining_qty
+            // max_qty: maxQtyData.max_qty,
+            // bought_qty: maxQtyData.bought_qty,
+            // remaining_qty: maxQtyData.remaining_qty
         });
 
         // Show appropriate message based on stock availability
@@ -2069,39 +2069,39 @@ const isInCart = (tyre) => selectedTyres.value.some((t) => t.id === tyre.id);
 // UPDATED: onQuantityChange with monthly limit and max order quantity validations
 const onQuantityChange = async (item) => {
     // Check max order quantity for the material
-    const maxQtyData = await checkMaxOrderQty(item.materialid);
+    // const maxQtyData = await checkMaxOrderQty(item.materialid);
     
     // Update the item with latest max quantity data
-    item.max_qty = maxQtyData.max_qty;
-    item.bought_qty = maxQtyData.bought_qty;
-    item.remaining_qty = maxQtyData.remaining_qty;
+    // item.max_qty = maxQtyData.max_qty;
+    // item.bought_qty = maxQtyData.bought_qty;
+    // item.remaining_qty = maxQtyData.remaining_qty;
     
-    // Validate against remaining quantity
-    if (item.quantity > maxQtyData.remaining_qty) {
-        toast.add({
-            severity: 'error',
-            summary: 'Maximum Quantity Exceeded',
-            detail: `Cannot exceed ${maxQtyData.remaining_qty} remaining units for ${item.material}.`,
-            life: 2000
-        });
-        item.quantity = Math.max(1, maxQtyData.remaining_qty);
-        return;
-    }
+    // // Validate against remaining quantity
+    // if (item.quantity > maxQtyData.remaining_qty) {
+    //     toast.add({
+    //         severity: 'error',
+    //         summary: 'Maximum Quantity Exceeded',
+    //         detail: `Cannot exceed ${maxQtyData.remaining_qty} remaining units for ${item.material}.`,
+    //         life: 2000
+    //     });
+    //     item.quantity = Math.max(1, maxQtyData.remaining_qty);
+    //     return;
+    // }
     
-    // Check monthly limit for NORMAL orders
-    if (selectedOrderType.value === 'NORMAL' && item.quantity > 50) {
-        toast.add({
-            severity: 'warn',
-            summary: 'Monthly Limit Warning',
-            detail: `Maximum 50 units per month for ${item.material}. You've selected ${item.quantity} units.`,
-            life: 4000
-        });
-    }
+    // // Check monthly limit for NORMAL orders
+    // if (selectedOrderType.value === 'NORMAL' && item.quantity > 50) {
+    //     toast.add({
+    //         severity: 'warn',
+    //         summary: 'Monthly Limit Warning',
+    //         detail: `Maximum 50 units per month for ${item.material}. You've selected ${item.quantity} units.`,
+    //         life: 4000
+    //     });
+    // }
 
     // Check sales program and price when quantity changes
-    if (selectedTyres.value.length > 0) {
-        checkSalesProgramAndPrice();
-    }
+    // if (selectedTyres.value.length > 0) {
+    //     checkSalesProgramAndPrice();
+    // }
 };
 
 const onColumnFilter = (field, value) => {
@@ -3000,17 +3000,17 @@ watch(selectedCustomer, (newCustomer) => {
     }
 });
 
-watch(
-    selectedTyres,
-    (newCart) => {
-        if (newCart.length > 0) {
-            checkSalesProgramAndPrice();
-        } else {
-            freeItems.value = [];
-        }
-    },
-    { deep: true }
-);
+// watch(
+//     selectedTyres,
+//     (newCart) => {
+//         if (newCart.length > 0) {
+//             checkSalesProgramAndPrice();
+//         } else {
+//             freeItems.value = [];
+//         }
+//     },
+//     { deep: true }
+// );
 
 // Initialize
 onMounted(() => {
