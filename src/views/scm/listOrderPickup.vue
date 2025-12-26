@@ -94,7 +94,7 @@
                         </div>
                     </template>
                 </Column>
-                <Column field="orderDateSearch" header="Created On" style="min-width: 8rem" sortable>
+                <Column field="orderDate" header="Created On" style="min-width: 8rem" sortable>
                     <template #body="{ data }">
                         {{ data.orderDateSearch?? '-' }}
                         <br/>
