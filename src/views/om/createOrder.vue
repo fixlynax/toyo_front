@@ -1006,7 +1006,7 @@ const currentCartRefNo = ref('');
 const unfulfilledItems = ref([]);
 const fulfilledItems = ref([]);
 const availableCredit = ref(0);
-
+const RunningOrderNo = ref(null);
 // Options
 const customerOptions = ref([]);
 const orderTypeOptions = computed(() => {
@@ -2130,12 +2130,10 @@ const placeOrder = async () => {
     orderDetails.value = null;
 
     try {
-        // Step 0: Generate order number first
-        let orderNo;
         try {
             orderMessage.value = 'Generating order number...';
-            orderNo = await createEmptyOrderNo();
-            console.log('Generated order number for confirmation:', orderNo);
+            RunningOrderNo.value = await createEmptyOrderNo();
+            console.log('Generated order number for confirmation:', RunningOrderNo.value);
         } catch (error) {
             console.error('Failed to generate order number:', error);
             orderStatus.value = 'error';
@@ -2169,9 +2167,9 @@ const placeOrder = async () => {
 
             // Step 2: Confirm the order with the generated order number
             if (selectedOrderType.value === 'NORMAL') {
-                await processNormalOrder(cartRefNo, orderArray, orderNo);
+                await processNormalOrder(cartRefNo, orderArray, RunningOrderNo.value);
             } else if (selectedOrderType.value === 'DIRECTSHIP') {
-                await processDirectShipOrder(cartRefNo, orderArray, orderNo);
+                await processDirectShipOrder(cartRefNo, orderArray, RunningOrderNo.value);
             }
         } else {
             // Handle specific API errors
@@ -2680,14 +2678,7 @@ const proceedWithBackOrder = async () => {
     orderMessage.value = 'Generating order number...';
 
     try {
-        // Generate order number first
-        let orderNo;
-        try {
-            orderNo = await createEmptyOrderNo();
-            console.log('Generated order number for back order:', orderNo);
-        } catch (error) {
-            throw new Error('Failed to generate order number: ' + error.message);
-        }
+        // console.log(RunningOrderNo.value)
 
         // Use the direct payload from API (fulfilled_items as order_array)
         const orderArray = fulfilledItems.value.map((item) => ({
@@ -2714,7 +2705,7 @@ const proceedWithBackOrder = async () => {
         console.log('Back order final payload:', {
             order_array: orderArray,
             backorder_array: backorderArray,
-            order_no: orderNo
+            order_no: RunningOrderNo.value
         });
 
         // Get or create cart reference
@@ -2732,7 +2723,7 @@ const proceedWithBackOrder = async () => {
             }
         }
 
-        const result = await confirmBackOrderAPI(cartRefNo, orderArray, backorderArray, orderNo);
+        const result = await confirmBackOrderAPI(cartRefNo, orderArray, backorderArray, RunningOrderNo.value);
 
         if (result.status === 1) {
             orderStatus.value = 'success';
@@ -2783,14 +2774,7 @@ const proceedWithoutBackOrder = async () => {
     orderMessage.value = 'Generating order number...';
 
     try {
-        // Generate order number first
-        let orderNo;
-        try {
-            orderNo = await createEmptyOrderNo();
-            console.log('Generated order number:', orderNo);
-        } catch (error) {
-            throw new Error('Failed to generate order number: ' + error.message);
-        }
+        // console.log(RunningOrderNo.value)
 
         // Only process fulfilled items - use direct payload from API
         const orderArray = fulfilledItems.value.map((item) => ({
@@ -2823,7 +2807,7 @@ const proceedWithoutBackOrder = async () => {
             }
         }
 
-        const result = await confirmOrderAPI(cartRefNo, orderArray, orderNo);
+        const result = await confirmOrderAPI(cartRefNo, orderArray, RunningOrderNo.value);
 
         if (result.status === 1) {
             orderStatus.value = 'success';
