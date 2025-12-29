@@ -559,6 +559,17 @@ const submitPickupUpdate = async () => {
 };
 
 const confirmUpdatePickup2 = (data) => {
+    
+    if (!data?.driverInformation) {
+        toast.add({
+            severity: 'warn',
+            summary: 'Missing Information',
+            detail: 'Missing collector information, unable to proceed for collection.',
+            life: 3000
+        });
+        return;
+    }
+    
     selectedData = data;
     icNo.value = '';
     showIcDialog2.value = true;
