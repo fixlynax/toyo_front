@@ -30,10 +30,10 @@
                             </IconField>
                         </div>
                         <!-- Right: Export & Batch Buttons -->
-                        <div class="flex items-center gap-2 ml-auto" v-if="canUpdate">
-                            <Button type="button" label="Export" icon="pi pi-file-export" class="p-button" @click="fetchExportETA" :loading="exportLoading" />
-                            <Button type="button" label="Bulk Update" icon="pi pi-file-import" class="p-button" @click="importInput?.click()" :loading="importLoading" />
-                            <input ref="importInput" type="file" accept=".xlsx,.xls" style="display: none" @change="handleImport" />
+                        <div class="flex items-center gap-2 ml-auto">
+                            <Button type="button" label="Export" icon="pi pi-file-export" class="p-button-success" @click="fetchExportETA" :loading="exportLoading" />
+                            <Button v-if="canUpdate" type="button" label="Bulk Update" icon="pi pi-file-import" class="p-button" @click="importInput?.click()" :loading="importLoading" />
+                            <input  v-if="canUpdate" ref="importInput" type="file" accept=".xlsx,.xls" style="display: none" @change="handleImport" />
                         </div>
                     </div>
                 </template>
