@@ -1064,7 +1064,7 @@ const router = createRouter({
                     component: () => import('@/views/pages/Empty.vue')
                 },
                 {
-                    path: 'unauthorized_test',
+                    path: 'unauthorized',
                     name: 'unauthorize',
                     component: () => import('@/views/pages/Empty.vue')
                 }
@@ -1111,8 +1111,8 @@ router.beforeEach(async (to, from, next) => {
         // Check route permissions
         const { permission, access, role } = to.meta;
         if (permission) {
-            if (!menuStore.canView(permission)) return next('/unauthorized_test');
-            if (access === 'write' && !menuStore.canWrite(permission)) return next('/unauthorized_test');
+            if (!menuStore.canView(permission)) return next('/unauthorized');
+            if (access === 'write' && !menuStore.canWrite(permission)) return next('/unauthorized');
         }
         // Redirect if login based on role
         if (relativePath === '/auth/login' || to.path === '/') {
