@@ -1,6 +1,6 @@
 <template>
     <div class="card">
-        <div class="text-2xl font-bold text-gray-800 border-b pb-2 mb-4">Email Settings</div>
+        <div class="text-2xl font-bold text-gray-800 border-b pb-2 mb-4">Email Setting</div>
 
         <DataTable 
             :value="listData" 
@@ -67,7 +67,7 @@
                 </template>
             </Column>
 
-            <Column header="Timeline" style="min-width: 10rem" sortable>
+            <Column header="Timestamp" style="min-width: 10rem" sortable>
                 <template #body="{ data }">
                     <div class="space-y-1">
                         <div class="flex items-start">
