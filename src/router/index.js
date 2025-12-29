@@ -225,8 +225,8 @@ const router = createRouter({
                 {
                     path: 'om/reportBackOrder',
                     name: 'Report-Back-Order',
-                    component: () => import('@/views/om/reportBackOrder.vue')
-                    // meta: { permission: 'Back Order Report', access: 'view' }
+                    component: () => import('@/views/om/reportBackOrder.vue'),
+                    meta: { permission: 'Report Back Order', access: 'view' }
                 },
                 {
                     path: 'om/reportDirectShipment',
@@ -243,8 +243,8 @@ const router = createRouter({
                 {
                     path: 'om/reportOrder',
                     name: 'Report-Order',
-                    component: () => import('@/views/om/reportOrder.vue')
-                    // meta: { permission: 'Order Report', access: 'view' }
+                    component: () => import('@/views/om/reportOrder.vue'),
+                    meta: { permission: 'Report Order', access: 'view' }
                 },
 
                 // Sales Program
