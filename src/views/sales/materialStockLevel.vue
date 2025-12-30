@@ -240,88 +240,26 @@ const calculateTotalFromBatches = (stockLevelMaster) => {
     }
 };
 
-// 🟢 Format Date
-const formatDate = (dateString) => {
+// 🟢 Format Date Time
+const formatDateTime = (dateString) => {
     if (!dateString) return '-';
 
     try {
         const date = new Date(dateString);
         if (isNaN(date.getTime())) return '-';
 
-        return date.toLocaleDateString('en-MY', {
+        return date.toLocaleString('en-MY', {
             year: 'numeric',
             month: '2-digit',
-            day: '2-digit'
+            day: '2-digit',
+            hour: '2-digit',
+            minute: '2-digit',
+            hour12: true
         });
     } catch (error) {
         console.error('Error formatting date:', error);
         return '-';
     }
-};
-
-function formatDateTime(dateTimeString) {
-    if (!dateTimeString) return '';
-
-    const [datePart, timePart] = dateTimeString.split(' ');
-    if (!datePart) return '';
-
-    // DD-MM-YYYY
-    const [day, month, year] = datePart.split('-');
-    const date = new Date(`${year}-${month}-${day}T${timePart}`);
-
-    if (isNaN(date.getTime())) return '';
-
-    return date.toLocaleString('en-MY', {
-        year: 'numeric',
-        month: '2-digit',
-        day: '2-digit',
-        hour: '2-digit',
-        minute: '2-digit',
-        second: '2-digit'
-    });
-}
-
-// 🟢 Format Price
-const formatPrice = (price) => {
-    if (!price || price === '0.00' || price === '0') return '-';
-    try {
-        return `RM ${parseFloat(price).toFixed(2)}`;
-    } catch (error) {
-        console.error('Error formatting price:', error);
-        return '-';
-    }
-};
-
-// 🟢 Get current price (latest valid price)
-const getCurrentPrice = (material) => {
-    const today = new Date();
-    const prices = [
-        { price: material.price01, validFrom: material.price01_validitystartdate, validTo: material.price_01_validityenddate },
-        { price: material.price02, validFrom: material.price02_validitystartdate, validTo: material.price_02_validityenddate },
-        { price: material.price03, validFrom: material.price03_validitystartdate, validTo: material.price_03_validityenddate },
-        { price: material.price04, validFrom: material.price04_validitystartdate, validTo: material.price_04_validityenddate },
-        { price: material.price05, validFrom: material.price05_validitystartdate, validTo: material.price_05_validityenddate }
-    ];
-
-    // Find the most recent price that is valid (not null and within validity period)
-    for (const priceInfo of prices) {
-        if (priceInfo.price && priceInfo.price !== '0.00' && priceInfo.price !== '0') {
-            if (!priceInfo.validFrom) return priceInfo.price; // No start date, assume always valid
-
-            const validFrom = new Date(priceInfo.validFrom);
-            let isValid = validFrom <= today;
-
-            // Check end date if exists
-            if (priceInfo.validTo && priceInfo.validTo !== '9999-12-31') {
-                const validTo = new Date(priceInfo.validTo);
-                isValid = isValid && today <= validTo;
-            }
-
-            if (isValid) return priceInfo.price;
-        }
-    }
-
-    return null;
 };
 
 // 🟢 Export function
