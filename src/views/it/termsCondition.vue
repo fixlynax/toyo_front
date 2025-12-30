@@ -1,6 +1,6 @@
 <template>
     <Fluid>
-        <div class="flex flex-col gap-8">
+        <div class="flex flex-col">
             <!-- Terms & Conditions Section -->
             <div class="card flex flex-col gap-6 w-full">
                 <!-- Header -->
@@ -14,7 +14,7 @@
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <!-- Care T&C -->
                     <div class="md:col-span-2 flex flex-col gap-1">
-                        <label class="block text-sm font-bold text-gray-700 mb-1 flex items-center gap-2">
+                        <label class="block text-xm font-bold text-gray-700 mb-1 flex items-center gap-2">
                             Care T&C
                             <!-- <span class="text-xs font-normal text-gray-500">(Rich text editor supported)</span> -->
                         </label>
@@ -38,7 +38,7 @@
 
                     <!-- ETEN T&C -->
                     <div class="md:col-span-2 flex flex-col gap-1">
-                        <label class="block text-sm font-bold text-gray-700 mb-1 flex items-center gap-2">
+                        <label class="block text-xm font-bold text-gray-700 mb-1 flex items-center gap-2">
                             ETEN T&C
                             <!-- <span class="text-xs font-normal text-gray-500">(Rich text editor supported)</span> -->
                         </label>
@@ -85,7 +85,7 @@
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <!-- Care Policy -->
                     <div class="md:col-span-2 flex flex-col gap-1">
-                        <label class="block text-sm font-bold text-gray-700 mb-1 flex items-center gap-2">
+                        <label class="block text-xm font-bold text-gray-700 mb-1 flex items-center gap-2">
                             Care Privacy Policy
                             <!-- <span class="text-xs font-normal text-gray-500">(Rich text editor supported)</span> -->
                         </label>
@@ -109,7 +109,7 @@
 
                     <!-- ETEN Policy -->
                     <div class="md:col-span-2 flex flex-col gap-1">
-                        <label class="block text-sm font-bold text-gray-700 mb-1 flex items-center gap-2">
+                        <label class="block text-xm font-bold text-gray-700 mb-1 flex items-center gap-2">
                             ETEN Privacy Policy
                             <!-- <span class="text-xs font-normal text-gray-500">(Rich text editor supported)</span> -->
                         </label>
