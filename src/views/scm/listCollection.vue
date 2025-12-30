@@ -705,7 +705,7 @@ onMounted(async () => {
                 @filter="onTableFilter"
                 :paginator="true"
                 :rows="10"
-                :rowsPerPageOptions="[5, 10, 20, 50, 100]"
+                :rowsPerPageOptions="[10, 20, 50, 100]"
                 dataKey="id"
                 removableSort
                 class="rounded-table"

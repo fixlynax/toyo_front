@@ -6,7 +6,7 @@
             :value="tyres"
             :paginator="true"
             :rows="10"
-            :rowsPerPageOptions="[5, 10, 20]"
+            :rowsPerPageOptions="[10, 20, 50, 100]"
             dataKey="id"
             removableSort
             class="rounded-table"
