@@ -10,6 +10,10 @@
     "dependencies": {
         "@primeuix/themes": "^1.0.0",
         "@primevue/themes": "^4.3.9",
+        "@tiptap/extension-placeholder": "^3.14.0",
+        "@tiptap/extension-underline": "^3.14.0",
+        "@tiptap/starter-kit": "^3.14.0",
+        "@tiptap/vue-3": "^3.14.0",
         "axion": "^0.1.0",
         "axios": "^1.13.2",
         "chart.js": "^4.1.1",

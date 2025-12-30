@@ -1,6 +1,6 @@
 <template>
     <Fluid>
-        <div class="flex flex-col">
+        <div class="flex flex-col gap-8">
             <!-- Terms & Conditions Section -->
             <div class="card flex flex-col gap-6 w-full">
                 <!-- Header -->
@@ -14,19 +14,49 @@
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <!-- Care T&C -->
                     <div class="md:col-span-2 flex flex-col gap-1">
-                        <label class="block text-sm font-bold text-gray-700 mb-1 flex items-center gap-2">Care T&C</label>
+                        <label class="block text-sm font-bold text-gray-700 mb-1 flex items-center gap-2">
+                            Care T&C
+                            <!-- <span class="text-xs font-normal text-gray-500">(Rich text editor supported)</span> -->
+                        </label>
                         <div class="flex items-start gap-2">
-                            <Textarea v-model="form.careTnc" placeholder="Enter Care Terms & Conditions" rows="6" class="flex-1" :disabled="loading" />
-                            <Button icon="pi pi-history" class="p-button-sm p-button-secondary" @click="showLog.careTnc = true" tooltip="View Log History" :disabled="loading" />
+                            <div class="flex-1">
+                                <TipTapEditor 
+                                    v-model="form.careTnc" 
+                                    :placeholder="'Enter Care Terms & Conditions'" 
+                                    :disabled="loading"
+                                />
+                            </div>
+                            <Button 
+                                icon="pi pi-history" 
+                                class="p-button-sm p-button-secondary h-fit" 
+                                @click="showLog.careTnc = true" 
+                                tooltip="View Log History" 
+                                :disabled="loading" 
+                            />
                         </div>
                     </div>
 
                     <!-- ETEN T&C -->
                     <div class="md:col-span-2 flex flex-col gap-1">
-                        <label class="block text-sm font-bold text-gray-700 mb-1 flex items-center gap-2">ETEN T&C</label>
+                        <label class="block text-sm font-bold text-gray-700 mb-1 flex items-center gap-2">
+                            ETEN T&C
+                            <!-- <span class="text-xs font-normal text-gray-500">(Rich text editor supported)</span> -->
+                        </label>
                         <div class="flex items-start gap-2">
-                            <Textarea v-model="form.etenTnc" placeholder="Enter ETEN Terms & Conditions" rows="6" class="flex-1" :disabled="loading" />
-                            <Button icon="pi pi-history" class="p-button-sm p-button-secondary" @click="showLog.etenTnc = true" tooltip="View Log History" :disabled="loading" />
+                            <div class="flex-1">
+                                <TipTapEditor 
+                                    v-model="form.etenTnc" 
+                                    :placeholder="'Enter ETEN Terms & Conditions'" 
+                                    :disabled="loading"
+                                />
+                            </div>
+                            <Button 
+                                icon="pi pi-history" 
+                                class="p-button-sm p-button-secondary h-fit" 
+                                @click="showLog.etenTnc = true" 
+                                tooltip="View Log History" 
+                                :disabled="loading" 
+                            />
                         </div>
                     </div>
                 </div>
@@ -55,10 +85,25 @@
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <!-- Care Policy -->
                     <div class="md:col-span-2 flex flex-col gap-1">
-                        <label class="block text-sm font-bold text-gray-700 mb-1 flex items-center gap-2">Care Privacy Policy</label>
+                        <label class="block text-sm font-bold text-gray-700 mb-1 flex items-center gap-2">
+                            Care Privacy Policy
+                            <!-- <span class="text-xs font-normal text-gray-500">(Rich text editor supported)</span> -->
+                        </label>
                         <div class="flex items-start gap-2">
-                            <Textarea v-model="form.carePolicy" placeholder="Enter Care Privacy Policy" rows="6" class="flex-1" :disabled="loadingPolicy" />
-                            <Button icon="pi pi-history" class="p-button-sm p-button-secondary" @click="showPolicyLog.carePolicy = true" tooltip="View Log History" :disabled="loadingPolicy" />
+                            <div class="flex-1">
+                                <TipTapEditor 
+                                    v-model="form.carePolicy" 
+                                    :placeholder="'Enter Care Privacy Policy'" 
+                                    :disabled="loadingPolicy"
+                                />
+                            </div>
+                            <Button 
+                                icon="pi pi-history" 
+                                class="p-button-sm p-button-secondary h-fit" 
+                                @click="showPolicyLog.carePolicy = true" 
+                                tooltip="View Log History" 
+                                :disabled="loadingPolicy" 
+                            />
                         </div>
                     </div>
 
@@ -66,10 +111,23 @@
                     <div class="md:col-span-2 flex flex-col gap-1">
                         <label class="block text-sm font-bold text-gray-700 mb-1 flex items-center gap-2">
                             ETEN Privacy Policy
+                            <!-- <span class="text-xs font-normal text-gray-500">(Rich text editor supported)</span> -->
                         </label>
                         <div class="flex items-start gap-2">
-                            <Textarea v-model="form.etenPolicy" placeholder="Enter ETEN Privacy Policy" rows="6" class="flex-1" :disabled="loadingPolicy" />
-                            <Button icon="pi pi-history" class="p-button-sm p-button-secondary" @click="showPolicyLog.etenPolicy = true" tooltip="View Log History" :disabled="loadingPolicy" />
+                            <div class="flex-1">
+                                <TipTapEditor 
+                                    v-model="form.etenPolicy" 
+                                    :placeholder="'Enter ETEN Privacy Policy'" 
+                                    :disabled="loadingPolicy"
+                                />
+                            </div>
+                            <Button 
+                                icon="pi pi-history" 
+                                class="p-button-sm p-button-secondary h-fit" 
+                                @click="showPolicyLog.etenPolicy = true" 
+                                tooltip="View Log History" 
+                                :disabled="loadingPolicy" 
+                            />
                         </div>
                     </div>
                 </div>
@@ -100,7 +158,9 @@
                             <i class="pi pi-user mr-2"></i>{{ log.updatedByName }}
                         </div>
                     </div>
-                    <div class="text-sm text-gray-700 whitespace-pre-wrap p-3 bg-white rounded border">{{ log.tnc }}</div>
+                    <div class="text-sm text-gray-700 p-3 bg-white rounded border">
+                        <div v-html="log.tnc" class="tiptap-content"></div>
+                    </div>
                 </div>
             </div>
         </Dialog>
@@ -119,7 +179,9 @@
                             <i class="pi pi-user mr-2"></i>{{ log.updatedByName }}
                         </div>
                     </div>
-                    <div class="text-sm text-gray-700 whitespace-pre-wrap p-3 bg-white rounded border">{{ log.tnc }}</div>
+                    <div class="text-sm text-gray-700 p-3 bg-white rounded border">
+                        <div v-html="log.tnc" class="tiptap-content"></div>
+                    </div>
                 </div>
             </div>
         </Dialog>
@@ -138,7 +200,9 @@
                             <i class="pi pi-user mr-2"></i>{{ log.updatedByName }}
                         </div>
                     </div>
-                    <div class="text-sm text-gray-700 whitespace-pre-wrap p-3 bg-white rounded border">{{ log.policy }}</div>
+                    <div class="text-sm text-gray-700 p-3 bg-white rounded border">
+                        <div v-html="log.policy" class="tiptap-content"></div>
+                    </div>
                 </div>
             </div>
         </Dialog>
@@ -157,7 +221,9 @@
                             <i class="pi pi-user mr-2"></i>{{ log.updatedByName }}
                         </div>
                     </div>
-                    <div class="text-sm text-gray-700 whitespace-pre-wrap p-3 bg-white rounded border">{{ log.policy }}</div>
+                    <div class="text-sm text-gray-700 p-3 bg-white rounded border">
+                        <div v-html="log.policy" class="tiptap-content"></div>
+                    </div>
                 </div>
             </div>
         </Dialog>
@@ -169,8 +235,8 @@ import { ref, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
 import { useToast } from 'primevue/usetoast';
 import Button from 'primevue/button';
-import Textarea from 'primevue/textarea';
 import Dialog from 'primevue/dialog';
+import TipTapEditor from '@/components/TipTapEditor.vue';
 import api from '@/service/api';
 
 const router = useRouter();
@@ -236,11 +302,11 @@ const fetchTncData = async () => {
             form.value.careTnc = response.data.last_care_tnc || '';
         }
 
-        if (!form.value.careTnc) {
+        if (!form.value.careTnc && !form.value.etenTnc) {
             toast.add({
                 severity: 'info',
                 summary: 'Info',
-                detail: 'Enter Care T&C and click Update',
+                detail: 'Enter T&C and click Update',
                 life: 3000
             });
         }
@@ -309,7 +375,18 @@ const cancel = () => {
 };
 
 const submitTncForm = async () => {
-    if (form.value.careTnc.trim() === '' && form.value.etenTnc.trim() === '') {
+    // Helper function to check if content is empty (handles HTML content)
+    const isEmptyHtmlContent = (html) => {
+        if (!html) return true;
+        // Remove all HTML tags and check if there's actual text
+        const text = html.replace(/<[^>]*>/g, '').trim();
+        return text === '';
+    };
+
+    const careTncEmpty = isEmptyHtmlContent(form.value.careTnc);
+    const etenTncEmpty = isEmptyHtmlContent(form.value.etenTnc);
+
+    if (careTncEmpty && etenTncEmpty) {
         toast.add({
             severity: 'warn',
             summary: 'Required',
@@ -359,7 +436,18 @@ const submitTncForm = async () => {
 };
 
 const submitPolicyForm = async () => {
-    if (form.value.carePolicy.trim() === '' && form.value.etenPolicy.trim() === '') {
+    // Helper function to check if content is empty (handles HTML content)
+    const isEmptyHtmlContent = (html) => {
+        if (!html) return true;
+        // Remove all HTML tags and check if there's actual text
+        const text = html.replace(/<[^>]*>/g, '').trim();
+        return text === '';
+    };
+
+    const carePolicyEmpty = isEmptyHtmlContent(form.value.carePolicy);
+    const etenPolicyEmpty = isEmptyHtmlContent(form.value.etenPolicy);
+
+    if (carePolicyEmpty && etenPolicyEmpty) {
         toast.add({
             severity: 'warn',
             summary: 'Required',
@@ -408,3 +496,39 @@ const submitPolicyForm = async () => {
     }
 };
 </script>
+
+<style scoped>
+.card {
+    @apply bg-white rounded-lg shadow-sm p-6;
+}
+
+/* Additional styles for the tiptap content display */
+.tiptap-content {
+    line-height: 1.6;
+}
+
+.tiptap-content p {
+    margin-bottom: 1em;
+}
+
+.tiptap-content h1,
+.tiptap-content h2,
+.tiptap-content h3 {
+    margin: 1em 0 0.5em 0;
+    font-weight: bold;
+}
+
+.tiptap-content h1 { font-size: 1.5em; }
+.tiptap-content h2 { font-size: 1.25em; }
+.tiptap-content h3 { font-size: 1.1em; }
+
+.tiptap-content ul,
+.tiptap-content ol {
+    padding-left: 1.5em;
+    margin: 0.5em 0;
+}
+
+.tiptap-content li {
+    margin: 0.25em 0;
+}
+</style>
