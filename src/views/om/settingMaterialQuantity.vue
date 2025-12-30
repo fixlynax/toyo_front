@@ -22,7 +22,7 @@
                     :value="materialList"
                     :paginator="true"
                     :rows="10"
-                    :rowsPerPageOptions="[5, 10, 20, 50]"
+                    :rowsPerPageOptions="[10, 20, 50, 100]"
                     dataKey="material_id"
                     removableSort
                     :rowHover="true"

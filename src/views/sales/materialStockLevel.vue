@@ -259,6 +259,28 @@ const formatDate = (dateString) => {
     }
 };
 
+function formatDateTime(dateTimeString) {
+    if (!dateTimeString) return '';
+
+    const [datePart, timePart] = dateTimeString.split(' ');
+    if (!datePart) return '';
+
+    // DD-MM-YYYY
+    const [day, month, year] = datePart.split('-');
+    const date = new Date(`${year}-${month}-${day}T${timePart}`);
+
+    if (isNaN(date.getTime())) return '';
+
+    return date.toLocaleString('en-MY', {
+        year: 'numeric',
+        month: '2-digit',
+        day: '2-digit',
+        hour: '2-digit',
+        minute: '2-digit',
+        second: '2-digit'
+    });
+}
+
 // 🟢 Format Price
 const formatPrice = (price) => {
     if (!price || price === '0.00' || price === '0') return '-';
@@ -591,7 +613,7 @@ const formatBoolean = (value) => {
                             </div>
                             <div class="flex items-center justify-between mb-2">
                                 <span class="w-20 text-gray-600">Updated:</span>
-                                <span class="font-medium text-xs">{{ formatDate(data.stock_level.updated) }}</span>
+                                <span class="font-medium text-xs">{{ formatDateTime(data.stock_level.updated) }}</span>
                             </div>
                         </div>
                     </template>
@@ -625,7 +647,7 @@ const formatBoolean = (value) => {
             <Column field="updated" header="Updated" style="min-width: 8rem" sortable>
                 <template #body="{ data }">
                     <div class="text-sm">
-                        {{ formatDate(data.updated) }}
+                        {{ formatDateTime(data.updated) }}
                     </div>
                 </template>
             </Column>
