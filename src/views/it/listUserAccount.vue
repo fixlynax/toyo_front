@@ -18,7 +18,7 @@
                 :filters="filters"
                 :paginator="true"
                 :rows="10"
-                :rowsPerPageOptions="[10, 25, 50, 100]"
+                :rowsPerPageOptions="[10, 20, 50, 100]"
                 v-model:expandedRows="expandedRows"
                 dataKey="id"
                 filterDisplay="menu"
