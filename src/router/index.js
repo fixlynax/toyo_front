@@ -853,7 +853,7 @@ const router = createRouter({
                     path: 'sales/materialStockLevel',
                     name: 'Material-Stock-Level',
                     component: () => import('@/views/sales/materialStockLevel.vue'),
-                    meta: { permission: 'Material Stock Level', access: 'view' }
+                    meta: { permission: 'Material Stock Balance', access: 'view' }
                 },
 
                 // ===============================
