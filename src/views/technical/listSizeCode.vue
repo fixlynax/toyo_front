@@ -6,7 +6,7 @@
             :value="size_codes"
             :paginator="true"
             :rows="10"
-            :rowsPerPageOptions="[5, 10, 20]"
+            :rowsPerPageOptions="[10, 20, 50, 100]"
             dataKey="size_code_id"
             removableSort
             class="rounded-table"
