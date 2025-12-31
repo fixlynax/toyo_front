@@ -238,7 +238,7 @@ const router = createRouter({
                     path: 'om/reportOwnCollection',
                     name: 'Report-Own-Collection',
                     component: () => import('@/views/om/reportOwnCollection.vue'),
-                    meta: { permission: 'Own Collection ', access: 'view' }
+                    meta: { permission: 'Own Collection', access: 'view' }
                 },
                 {
                     path: 'om/reportOrder',
