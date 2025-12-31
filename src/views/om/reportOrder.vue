@@ -88,13 +88,17 @@ const statusOptions = [
     { label: 'Completed', value: 1 }
 ];
 
-// ✅ Generate customer options from order data
+// ✅ Generate customer options from list_dealer API with ORDER tab (SHOP ONLY - NO SUB BRANCHES)
 const generateCustomerOptions = async () => {
     loadingCustomers.value = true;
     try {
-        const response = await api.get('order/list-order-report');
+        // Use list_dealer API with tabs: ORDER parameter
+        const response = await api.post('list_dealer', {
+            tabs: 'ORDER'
+        });
+        
         if (response.data.status === 1) {
-            const orderData = response.data.admin_data;
+            const dealerData = response.data.admin_data;
             const customers = new Map();
 
             // Add "All Customers" option at the beginning
@@ -103,18 +107,29 @@ const generateCustomerOptions = async () => {
                 value: null
             });
 
-            orderData.forEach((item) => {
-                const custAccountNo = item.custaccountno;
-                // Or cleaner version:
-                const companyNameParts = [item.companyName1, item.companyName2, item.companyName3, item.companyName4].filter(Boolean); // Remove empty/null parts
-
-                const companyName = companyNameParts.join(' ').trim() || 'Unknown Customer';
-
-                if (custAccountNo && !customers.has(custAccountNo)) {
-                    customers.set(custAccountNo, {
-                        label: `${companyName} (${custAccountNo})`,
-                        value: custAccountNo
-                    });
+            // Process only MAIN SHOPS (no sub-branches)
+            Object.keys(dealerData).forEach((custAccountNo) => {
+                const dealer = dealerData[custAccountNo];
+                const shop = dealer.shop;
+                
+                // Only include shops that are main branches (eten_userID should be 0 for main branches)
+                if (shop && custAccountNo && shop.eten_userID === 0) {
+                    // Build company name from companyName1-4 fields
+                    const companyNameParts = [
+                        shop.companyName1, 
+                        shop.companyName2, 
+                        shop.companyName3, 
+                        shop.companyName4
+                    ].filter(Boolean);
+                    
+                    const companyName = companyNameParts.join(' ').trim() || 'Unknown Customer';
+                    
+                    if (!customers.has(custAccountNo)) {
+                        customers.set(custAccountNo, {
+                            label: `${companyName} (${custAccountNo})`,
+                            value: custAccountNo
+                        });
+                    }
                 }
             });
 
