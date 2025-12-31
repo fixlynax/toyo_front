@@ -16,7 +16,7 @@
 
                         <!-- Right Section: Edit & Delete Buttons -->
                         <div class="inline-flex items-center gap-2">
-                            <RouterLink :to="`/marketing/editRedemption/${redemptionId}`">
+                            <RouterLink v-if="canUpdate" :to="`/marketing/editRedemption/${redemptionId}`">
                                 <Button label="Edit" class="p-button-info" size="small" />
                             </RouterLink>
                         </div>
@@ -149,13 +149,18 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue';
+import { ref, onMounted, computed } from 'vue';
 import { useRoute } from 'vue-router';
 import Dialog from 'primevue/dialog';
 import Toast from 'primevue/toast';
 import { useToast } from 'primevue/usetoast';
 import api from '@/service/api';
 import LoadingPage from '@/components/LoadingPage.vue';
+import { useMenuStore } from '@/store/menu';
+ 
+const menuStore = useMenuStore();
+const canUpdate = computed(() => menuStore.canWrite('Redemption Management'));
+const denyAccess = computed(() => menuStore.canTest('Redemption Management'));
 
 const route = useRoute();
 const toast = useToast();

@@ -26,7 +26,7 @@
                                 </div>
 
                                 <!-- Edit Button -->
-                                <RouterLink :to="`/marketing/editEtenUser/${memberId}`">
+                                <RouterLink v-if="canUpdate" :to="`/marketing/editEtenUser/${memberId}`">
                                     <Button type="button" label="Edit" />
                                 </RouterLink>
                             </div>
@@ -221,7 +221,7 @@
                                 <tr>
                                     <td class="px-4 py-2 font-medium">Account Status</td>
                                     <td class="px-2 py-2 text-right">
-                                        <Button
+                                        <Button v-if="canUpdate"
                                             :label="memberDetail.status === 1 ? 'Deactivate' : 'Activate'"
                                             :severity="memberDetail.status === 1 ? 'danger' : 'success'"
                                             size="small"
@@ -371,6 +371,11 @@ import { useRoute } from 'vue-router';
 import { useToast } from 'primevue/usetoast';
 import api from '@/service/api';
 import LoadingPage from '@/components/LoadingPage.vue';
+import { useMenuStore } from '@/store/menu';
+ 
+const menuStore = useMenuStore();
+const canUpdate = computed(() => menuStore.canWrite('Member List'));
+const denyAccess = computed(() => menuStore.canTest('Member List'));
 
 const route = useRoute();
 const toast = useToast();

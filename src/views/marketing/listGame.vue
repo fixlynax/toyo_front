@@ -37,7 +37,7 @@
                         </div>
 
                         <!-- Right: Create Game Button -->
-                        <RouterLink to="/marketing/CreateGame">
+                        <RouterLink v-if="canUpdate" to="/marketing/CreateGame">
                             <Button type="button" label="Create" />
                         </RouterLink>
                     </div>
@@ -103,10 +103,16 @@
 </template>
 
 <script setup>
-import { onMounted, ref } from 'vue';
+import { onMounted, ref, computed } from 'vue';
 import api from '@/service/api';
 import { FilterMatchMode } from '@primevue/core/api';
 import LoadingPage from '@/components/LoadingPage.vue';
+import { useMenuStore } from '@/store/menu';
+ 
+const menuStore = useMenuStore();
+const canUpdate = computed(() => menuStore.canWrite('Game Management'));
+const denyAccess = computed(() => menuStore.canTest('Game Management'));
+
 
 // Data variables
 const listData = ref([]);

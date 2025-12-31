@@ -23,10 +23,10 @@
                             <div class="text-2xl font-bold text-gray-800">News Management List</div>
                         </div>
                         <div class="inline-flex items-center gap-2">
-                            <RouterLink :to="`/marketing/editNews/${news.id}`">
+                            <RouterLink v-if="canUpdate" :to="`/marketing/editNews/${news.id}`">
                                 <Button label="Edit" class="p-button-info" size="small" />
                             </RouterLink>
-                            <Button label="Delete" class="p-button-danger" size="small" @click="confirmDelete" />
+                            <Button v-if="canUpdate" label="Delete" class="p-button-danger" size="small" @click="confirmDelete" />
                         </div>
                     </div>
 
@@ -86,7 +86,7 @@
                                 </tr>
                                 <tr>
                                     <td class="px-4 py-2 font-medium"></td>
-                                    <td class="py-4 text-right">
+                                    <td class="py-4 text-right" v-if="canUpdate">
                                         <div class="flex justify-end">
                                             <ToggleButton
                                                 v-model="newsStatus"
@@ -122,6 +122,11 @@ import { useRoute, useRouter } from 'vue-router';
 import { useConfirm } from 'primevue/useconfirm';
 import { useToast } from 'primevue/usetoast';
 import api from '@/service/api';
+import { useMenuStore } from '@/store/menu';
+ 
+const menuStore = useMenuStore();
+const canUpdate = computed(() => menuStore.canWrite('News Management'));
+const denyAccess = computed(() => menuStore.canTest('News Management'));
 
 const route = useRoute();
 const router = useRouter();

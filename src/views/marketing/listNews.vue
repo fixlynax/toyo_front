@@ -37,7 +37,7 @@
                         </div>
 
                         <!-- Right: Create News Button -->
-                        <RouterLink to="/marketing/createNews">
+                        <RouterLink v-if="canUpdate" to="/marketing/createNews">
                             <Button type="button" label="Create" />
                         </RouterLink>
                     </div>
@@ -99,10 +99,15 @@
 </template>
 
 <script setup>
-import { onMounted, ref } from 'vue';
+import { onMounted, ref, computed } from 'vue';
 import api from '@/service/api';
 import { FilterMatchMode } from '@primevue/core/api';
 import LoadingPage from '@/components/LoadingPage.vue';
+import { useMenuStore } from '@/store/menu';
+ 
+const menuStore = useMenuStore();
+const canUpdate = computed(() => menuStore.canWrite('News Management'));
+const denyAccess = computed(() => menuStore.canTest('News Management'));
 
 // Data variables
 const listData = ref([]);

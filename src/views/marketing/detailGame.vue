@@ -15,12 +15,12 @@
 
                         <div class="inline-flex items-center gap-2">
                             <!-- Edit Event -->
-                            <RouterLink :to="`/marketing/editGame/${gameId}`">
+                            <RouterLink v-if="canUpdate" :to="`/marketing/editGame/${gameId}`">
                                 <Button label="Edit" class="p-button-info" size="small" />
                             </RouterLink>
 
                             <!-- Delete Event -->
-                            <Button label="Delete" class="p-button-danger" size="small" @click="confirmDelete" />
+                            <Button v-if="canUpdate" label="Delete" class="p-button-danger" size="small" @click="confirmDelete" />
                         </div>
                     </div>
 
@@ -149,9 +149,9 @@
 
                                 <tr>
                                     <td class="px-4 py-2 font-medium"></td>
-                                    <td class="py-4 text-right">
+                                    <td class="py-4 text-right" v-if="canUpdate">
                                         <div class="flex justify-end">
-                                            <ToggleButton
+                                            <ToggleButton 
                                                 v-model="gameStatus"
                                                 :modelValue="game.status === 1"
                                                 @change="toggleGameStatus"
@@ -224,6 +224,11 @@ import { useToast } from 'primevue/usetoast';
 import { useConfirm } from 'primevue/useconfirm';
 import QrcodeVue from 'qrcode.vue';
 import api from '@/service/api';
+import { useMenuStore } from '@/store/menu';
+ 
+const menuStore = useMenuStore();
+const canUpdate = computed(() => menuStore.canWrite('Game Management'));
+const denyAccess = computed(() => menuStore.canTest('Game Management'));
 
 const route = useRoute();
 const router = useRouter();
