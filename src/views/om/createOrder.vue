@@ -2000,7 +2000,7 @@ const exportExcel = async () => {
     }
 
     try {
-        const response = await api.get(`order/download-excel-cart/${currentCartRefNo.value}`, {
+        const response = await api.getDownload(`order/download-excel-cart/${currentCartRefNo.value}`, {
             responseType: 'blob'
         });
 
@@ -2099,9 +2099,9 @@ const onQuantityChange = async (item) => {
     // }
 
     // Check sales program and price when quantity changes
-    // if (selectedTyres.value.length > 0) {
-    //     checkSalesProgramAndPrice();
-    // }
+    if (selectedTyres.value.length > 0) {
+        checkSalesProgramAndPrice();
+    }
 };
 
 const onColumnFilter = (field, value) => {
@@ -2984,17 +2984,17 @@ watch(selectedCustomer, (newCustomer) => {
     }
 });
 
-// watch(
-//     selectedTyres,
-//     (newCart) => {
-//         if (newCart.length > 0) {
-//             checkSalesProgramAndPrice();
-//         } else {
-//             freeItems.value = [];
-//         }
-//     },
-//     { deep: true }
-// );
+watch(
+    selectedTyres,
+    (newCart) => {
+        if (newCart.length > 0) {
+            checkSalesProgramAndPrice();
+        } else {
+            freeItems.value = [];
+        }
+    },
+    { deep: true }
+);
 
 // Initialize
 onMounted(() => {
