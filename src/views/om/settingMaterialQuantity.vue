@@ -7,10 +7,8 @@
         <div v-else>
             <div class="p-4 mb-4 bg-gray-50 rounded-lg">
                 <div class="flex items-center gap-4 flex-wrap">
-                    <div class="flex-1 min-w-[300px]">
-                        <label class="block text-sm font-medium text-gray-700 mb-1">Select Dealer</label>
+                    <div class="flex-1">
                         <Dropdown v-model="selectedDealer" :options="dealerOptions" optionLabel="label" optionValue="value" placeholder="Select a dealer" class="w-full" :loading="loadingDealers" :disabled="loadingDealers" @change="onDealerChange" />
-                        <div v-if="selectedDealer" class="mt-2 text-sm text-gray-600">Selected: {{ getSelectedDealerName() }}</div>
                     </div>
 
                     <div v-if="selectedDealer" class="flex items-end gap-2">
@@ -24,7 +22,7 @@
                     :value="materialList"
                     :paginator="true"
                     :rows="10"
-                    :rowsPerPageOptions="[5, 10, 20, 50]"
+                    :rowsPerPageOptions="[10, 20, 50, 100]"
                     dataKey="material_id"
                     removableSort
                     :rowHover="true"
@@ -48,10 +46,10 @@
                             </div>
 
                             <div class="flex items-center gap-2 ml-auto">
-                                <Button type="button" label="Export Excel" icon="pi pi-file-export" class="p-button-success" @click="exportMaterials" :loading="exportLoading" :disabled="!selectedDealer || materialList.length === 0" />
-                                <Button type="button" label="Bulk Update" icon="pi pi-file-import" class="p-button-help" @click="triggerImport" :loading="importLoading" :disabled="!selectedDealer" />
+                                <Button type="button" label="Export Excel" icon="pi pi-file-export" class="p-button-success" @click="exportMaterials" :loading="exportLoading" />
+                                <Button type="button" label="Bulk Update" icon="pi pi-file-import" class="p-button-primary" @click="triggerImport" :loading="importLoading" :disabled="!selectedDealer" />
                                 <input ref="importFileInput" type="file" accept=".xlsx,.xls,.csv" style="display: none" @change="handleImport" />
-                                <Button type="button" label="Refresh" icon="pi pi-refresh" class="p-button-secondary" @click="fetchMaterials" :loading="tableLoading" />
+                                <Button type="button" icon="pi pi-refresh" class="p-button-secondary" @click="fetchMaterials" :loading="tableLoading" />
                             </div>
                         </div>
                     </template>
@@ -493,10 +491,10 @@ onMounted(async () => {
         color: #374151;
 
         &:first-child {
-            border-top-left-radius: 12px;
+            border-top-left-radius: 0;
         }
         &:last-child {
-            border-top-right-radius: 12px;
+            border-top-right-radius: 0;
         }
     }
 

@@ -8,10 +8,10 @@
                 <!-- Filters Section -->
                 <div>
                     <div class="grid grid-cols-1 md:grid-cols-5 gap-4">
-                        <!-- Customer Account (Input Text) -->
+                        <!-- Customer Account (Dropdown) -->
                         <div>
                             <label class="block font-bold text-gray-700 mb-2">Customer Account</label>
-                            <InputText v-model="filters.custAccountNo" placeholder="Enter Account Number" class="w-full" />
+                            <Dropdown v-model="filters.custAccountNo" :options="customerOptions" optionLabel="label" optionValue="value" placeholder="Select Customer Account" class="w-full" filter showClear />
                         </div>
 
                         <!-- Order Type -->
@@ -51,7 +51,7 @@
 </template>
 
 <script setup>
-import { ref, reactive } from 'vue';
+import { ref, reactive, onMounted } from 'vue';
 import api from '@/service/api';
 import InputText from 'primevue/inputtext';
 
@@ -61,11 +61,15 @@ const filters = reactive({
     orderType: null,
     startdate: null,
     enddate: null,
-    status: null // Single value for status
+    status: null
 });
 
 // ✅ Loading states
 const exportLoading = ref(false);
+const loadingCustomers = ref(false);
+
+// ✅ Data
+const customerOptions = ref([]);
 
 // ✅ Order Type Options
 const orderTypeOptions = [
@@ -84,6 +88,58 @@ const statusOptions = [
     { label: 'Completed', value: 1 }
 ];
 
+// ✅ Generate customer options from order data
+const generateCustomerOptions = async () => {
+    loadingCustomers.value = true;
+    try {
+        const response = await api.get('order/list-order-report');
+        if (response.data.status === 1) {
+            const orderData = response.data.admin_data;
+            const customers = new Map();
+
+            // Add "All Customers" option at the beginning
+            customers.set('all', {
+                label: 'All Customers',
+                value: null
+            });
+
+            orderData.forEach((item) => {
+                const custAccountNo = item.custaccountno;
+                // Or cleaner version:
+                const companyNameParts = [item.companyName1, item.companyName2, item.companyName3, item.companyName4].filter(Boolean); // Remove empty/null parts
+
+                const companyName = companyNameParts.join(' ').trim() || 'Unknown Customer';
+
+                if (custAccountNo && !customers.has(custAccountNo)) {
+                    customers.set(custAccountNo, {
+                        label: `${companyName} (${custAccountNo})`,
+                        value: custAccountNo
+                    });
+                }
+            });
+
+            // Convert to array and sort by label (keeping "All Customers" first)
+            const customerArray = Array.from(customers.values());
+            customerArray.sort((a, b) => {
+                if (a.value === null) return -1; // Keep "All Customers" first
+                if (b.value === null) return 1;
+                return a.label.localeCompare(b.label);
+            });
+
+            customerOptions.value = customerArray;
+        }
+    } catch (error) {
+        console.error('Error fetching customer options:', error);
+        // Fallback options if API fails
+        customerOptions.value = [
+            { label: 'All Customers', value: null },
+            { label: 'Error loading customers', value: 'error', disabled: true }
+        ];
+    } finally {
+        loadingCustomers.value = false;
+    }
+};
+
 // ✅ Clear Filters
 const clearFilters = () => {
     filters.custAccountNo = null;
@@ -99,7 +155,7 @@ const exportExcel = async () => {
     try {
         // Prepare filters for export
         const exportFilters = {
-            custAccountNo: filters.custAccountNo?.trim() || null,
+            custAccountNo: filters.custAccountNo,
             orderType: filters.orderType,
             status: filters.status,
             startdate: filters.startdate,
@@ -118,7 +174,7 @@ const exportExcel = async () => {
         const link = document.createElement('a');
 
         // Generate filename based on filters
-        const custaccno = filters.custAccountNo?.trim() || 'ALL';
+        const custaccno = filters.custAccountNo || 'ALL';
         const orderType = filters.orderType || 'ALL';
         const status = filters.status !== null ? getStatusLabel(filters.status) : 'ALL_STATUS';
 
@@ -143,6 +199,11 @@ const getStatusLabel = (statusValue) => {
     const statusOption = statusOptions.find((option) => option.value === statusValue);
     return statusOption ? statusOption.label.toUpperCase().replace(/\s+/g, '_') : 'UNKNOWN';
 };
+
+// ✅ Load initial data when component mounts
+onMounted(() => {
+    generateCustomerOptions();
+});
 </script>
 
 <style scoped>

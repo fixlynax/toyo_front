@@ -11,7 +11,7 @@
                     :value="materialExceptions"
                     :paginator="true"
                     :rows="10"
-                    :rowsPerPageOptions="[10, 25, 50, 100]"
+                    :rowsPerPageOptions="[10, 20, 50, 100]"
                     dataKey="id"
                     :rowHover="true"
                     :filters="filters"

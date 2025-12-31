@@ -7,7 +7,7 @@
             @filter="onTableFilter"
             :paginator="true"
             :rows="10"
-            :rowsPerPageOptions="[5, 10, 20]"
+            :rowsPerPageOptions="[10, 20, 50, 100]"
             dataKey="materialid"
             removableSort
             class="rounded-table"
@@ -72,7 +72,7 @@
                         /> -->
                         <Button type="button" label="Export" icon="pi pi-file-export" class="p-button-success" :loading="exportLoading" @click="handleExport" />
                         <Button v-if="canUpdate" type="button" label="Import" icon="pi pi-file-import" class="p-button" @click="importInput?.click()" :loading="importLoading" />
-                        <input ref="importInput" type="file" accept=".xlsx,.xls" style="display: none" @change="handleImport" />
+                        <input  v-if="canUpdate" ref="importInput" type="file" accept=".xlsx,.xls" style="display: none" @change="handleImport" />
                         <!-- <Button 
                         type="button" 
                         icon="pi pi-refresh" 

@@ -6,7 +6,7 @@
             :value="size_codes"
             :paginator="true"
             :rows="10"
-            :rowsPerPageOptions="[5, 10, 20]"
+            :rowsPerPageOptions="[10, 20, 50, 100]"
             dataKey="size_code_id"
             removableSort
             class="rounded-table"
@@ -33,8 +33,8 @@
                     <!-- Right: Export & Batch Buttons -->
                     <div class="flex items-center gap-2 ml-auto">
                         <Button type="button" label="Export" icon="pi pi-file-export" class="p-button-success" @click="fetchExport" />
-                        <Button type="button" label="Import" icon="pi pi-file-import" class="p-button" @click="importInput?.click()" :loading="importLoading" />
-                        <input ref="importInput" type="file" accept=".xlsx,.xls" style="display: none" @change="handleImport" />
+                        <Button v-if="canUpdate" type="button" label="Import" icon="pi pi-file-import" class="p-button" @click="importInput?.click()" :loading="importLoading" />
+                        <input v-if="canUpdate" ref="importInput" type="file" accept=".xlsx,.xls" style="display: none" @change="handleImport" />
                     </div>
                 </div>
             </template>
@@ -77,11 +77,11 @@ import { FilterMatchMode } from '@primevue/core/api';
 import api from '@/service/api';
 import { useRouter } from 'vue-router';
 import { useToast } from 'primevue/usetoast';
-// import { useMenuStore } from '@/store/menu';
+import { useMenuStore } from '@/store/menu';
 
-// const menuStore = useMenuStore();
-// const canUpdate = computed(() => menuStore.canWrite('OE Tire LIst'));
-// const denyAccess = computed(() => menuStore.canTest('OE Tire LIst'));
+const menuStore = useMenuStore();
+const canUpdate = computed(() => menuStore.canWrite('Size Code List'));
+const denyAccess = computed(() => menuStore.canTest('Size Code List'));
 
 const toast = useToast();
 
