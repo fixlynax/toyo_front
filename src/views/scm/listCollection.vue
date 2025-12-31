@@ -401,6 +401,12 @@ const fetchData = async (body = null) => {
         loading.value = false;
     }
 }
+const handleCloseErrorModal = () => {
+    importErrors.value = [];
+    showImportErrorHandle1.value = false;
+    showImportErrorHandle2.value = false;
+    showImportErrorDialog.value = false; // optional, v-model handles it
+};
 const fetchReport = async (id) => {
     try {
         loading.value = true;
