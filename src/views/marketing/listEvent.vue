@@ -37,7 +37,7 @@
                         </div>
 
                         <!-- Right: Create Event Button -->
-                        <RouterLink to="/marketing/createEvent">
+                        <RouterLink v-if="canUpdate" to="/marketing/createEvent">
                             <Button type="button" label="Create" />
                         </RouterLink>
                     </div>
@@ -96,11 +96,15 @@
 </template>
 
 <script setup>
-import { onMounted, ref } from 'vue';
+import { onMounted, ref, computed } from 'vue';
 import api from '@/service/api';
 import { FilterMatchMode } from '@primevue/core/api';
 import LoadingPage from '@/components/LoadingPage.vue';
-
+import { useMenuStore } from '@/store/menu';
+ 
+const menuStore = useMenuStore();
+const canUpdate = computed(() => menuStore.canWrite('Event Management'));
+const denyAccess = computed(() => menuStore.canTest('Event Management'));
 // Data variables
 const listData = ref([]);
 const initialLoading = ref(true); // For initial page load

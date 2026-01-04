@@ -51,6 +51,7 @@ const filters = reactive({
 
 // ✅ Loading states
 const exportLoading = ref(false);
+const loadingCustomers = ref(false);
 
 // ✅ Data
 const customerOptions = ref([]);
@@ -65,35 +66,58 @@ const statusOptions = [
     { label: 'Completed', value: 1 }
 ];
 
-// ✅ Generate customer options from shipment data
+// ✅ Generate customer options from list_dealer API with ORDER tab (SHOP ONLY)
 const generateCustomerOptions = async () => {
+    loadingCustomers.value = true;
     try {
-        const response = await api.get('order/list-ds-report');
+        // Use list_dealer API with tabs: ORDER parameter
+        const response = await api.post('list_dealer', {
+            tabs: 'ORDER'
+        });
+        
         if (response.data.status === 1) {
-            const shipmentData = response.data.admin_data;
+            const dealerData = response.data.admin_data;
             const customers = new Map();
 
-            shipmentData.forEach((item) => {
-                const custAccountNo = item.custaccountno;
-                const dealerName = item.dealerName || 'Unknown Dealer';
-
-                if (custAccountNo && !customers.has(custAccountNo)) {
-                    customers.set(custAccountNo, {
-                        label: `${dealerName} (${custAccountNo})`,
-                        value: custAccountNo
-                    });
+            // Process only MAIN SHOPS (no sub-branches)
+            Object.keys(dealerData).forEach((custAccountNo) => {
+                const dealer = dealerData[custAccountNo];
+                const shop = dealer.shop;
+                
+                // Only include shops that are main branches (eten_userID should be 0 for main branches)
+                if (shop && custAccountNo && shop.eten_userID === 0) {
+                    // Build company name from companyName1-4 fields
+                    const companyNameParts = [
+                        shop.companyName1, 
+                        shop.companyName2, 
+                        shop.companyName3, 
+                        shop.companyName4
+                    ].filter(Boolean);
+                    
+                    const companyName = companyNameParts.join(' ').trim() || 'Unknown Dealer';
+                    
+                    if (!customers.has(custAccountNo)) {
+                        customers.set(custAccountNo, {
+                            label: `${companyName} (${custAccountNo})`,
+                            value: custAccountNo
+                        });
+                    }
                 }
             });
 
             // Convert to array and sort by label
-            customerOptions.value = Array.from(customers.values()).sort((a, b) => a.label.localeCompare(b.label));
+            const customerArray = Array.from(customers.values()).sort((a, b) => a.label.localeCompare(b.label));
 
             // Add "All Customers" option at the beginning
-            customerOptions.value.unshift({ label: 'All Customers', value: null });
+            customerArray.unshift({ label: 'All Customers', value: null });
+
+            customerOptions.value = customerArray;
         }
     } catch (error) {
         console.error('Error fetching customer options:', error);
         customerOptions.value = [{ label: 'All Customers', value: null }];
+    } finally {
+        loadingCustomers.value = false;
     }
 };
 

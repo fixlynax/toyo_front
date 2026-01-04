@@ -17,7 +17,7 @@
                 </div>
 
                 <!-- Right: Create Button -->
-                <RouterLink to="/marketing/createCatalogue">
+                <RouterLink v-if="canUpdate" to="/marketing/createCatalogue">
                     <Button type="button" label="Create" />
                 </RouterLink>
             </div>
@@ -93,6 +93,11 @@
 import { ref, computed, onMounted, watch } from 'vue';
 import api from '@/service/api';
 import LoadingPage from '@/components/LoadingPage.vue';
+import { useMenuStore } from '@/store/menu';
+ 
+const menuStore = useMenuStore();
+const canUpdate = computed(() => menuStore.canWrite('Reward Catalogue'));
+const denyAccess = computed(() => menuStore.canTest('Reward Catalogue'));
 
 // Reactive data
 const searchQuery = ref('');

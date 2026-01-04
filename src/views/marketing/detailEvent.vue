@@ -14,12 +14,12 @@
                         </div>
                         <div class="inline-flex items-center gap-2">
                             <!-- Edit Event -->
-                            <RouterLink :to="`/marketing/editEvent/${eventId}`">
+                            <RouterLink v-if="canUpdate" :to="`/marketing/editEvent/${eventId}`">
                                 <Button label="Edit" class="p-button-info" size="small" />
                             </RouterLink>
 
                             <!-- Delete Event -->
-                            <Button label="Delete" class="p-button-danger" size="small" @click="confirmDelete" />
+                            <Button v-if="canUpdate" label="Delete" class="p-button-danger" size="small" @click="confirmDelete" />
                         </div>
                     </div>
 
@@ -154,7 +154,7 @@
                                     <td class="px-4 py-2 font-medium"></td>
                                     <td class="py-4 text-right">
                                         <div class="flex justify-end">
-                                            <ToggleButton v-model="eventStatus" @change="toggleEventStatus" onLabel="Inactive" offLabel="Active" onIcon="pi pi-times" offIcon="pi pi-check" class="w-30" />
+                                            <ToggleButton v-if="canUpdate" v-model="eventStatus" @change="toggleEventStatus" onLabel="Inactive" offLabel="Active" onIcon="pi pi-times" offIcon="pi pi-check" class="w-30" />
                                         </div>
                                     </td>
                                 </tr>
@@ -195,6 +195,11 @@ import { useRoute, useRouter } from 'vue-router';
 import { useToast } from 'primevue/usetoast';
 import { useConfirm } from 'primevue/useconfirm'; // Added
 import api from '@/service/api';
+import { useMenuStore } from '@/store/menu';
+ 
+const menuStore = useMenuStore();
+const canUpdate = computed(() => menuStore.canWrite('Event Management'));
+const denyAccess = computed(() => menuStore.canTest('Event Management'));
 
 const route = useRoute();
 const router = useRouter();

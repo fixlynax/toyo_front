@@ -15,10 +15,10 @@
 
                         <!-- Edit & Delete Buttons -->
                         <div class="flex items-center gap-2">
-                            <RouterLink :to="`/marketing/editCatalogue/${catalogue.id}`">
+                            <RouterLink v-if="canUpdate" :to="`/marketing/editCatalogue/${catalogue.id}`">
                                 <Button label="Edit" class="p-button-info" size="small" />
                             </RouterLink>
-                            <Button label="Delete" class="p-button-danger" size="small" @click="confirmDelete" />
+                            <Button v-if="canUpdate" label="Delete" class="p-button-danger" size="small" @click="confirmDelete" />
                         </div>
                     </div>
 
@@ -49,7 +49,7 @@
                                     <!-- <Button icon="pi pi-plus" class="p-button-text text-green-600 w-10 h-10 flex items-center justify-center" v-tooltip="'Add PIN'" @click="addPin" />
                                     <Button icon="pi pi-minus" class="p-button-text text-yellow-600 w-10 h-10 flex items-center justify-center" v-tooltip="'Remove PIN'" @click="removePin" /> -->
                                     <Button icon="pi pi-file-export" label="Export" v-tooltip="'Export PIN List'" @click="downloadEmptyTemplate" :loading="downloadingTemplate" />
-                                    <Button icon="pi pi-file-import" label="Import" v-tooltip="'Import PIN List'" @click="importPinList" />
+                                    <Button v-if="canUpdate" icon="pi pi-file-import" label="Import" v-tooltip="'Import PIN List'" @click="importPinList" />
                                 </div>
                             </div>
                         </template>
@@ -80,7 +80,7 @@
                             </template>
                         </Column>
                         <!-- Actions -->
-                        <Column header="Actions" style="min-width: 4rem; text-align: center">
+                        <Column v-if="canUpdate" header="Actions" style="min-width: 4rem; text-align: center">
                             <template #body="{ data }">
                                 <!-- Update the button bindings -->
                                 <Button icon="pi pi-trash" class="p-button-text p-button-danger" @click="removeListPin(data)" :loading="deletingPinId === data.id" :disabled="deletingPinId === data.id" />
@@ -89,7 +89,7 @@
                     </DataTable>
 
                     <!-- Set Point Button -->
-                    <div class="flex flex-row items-center gap-2 mt-4">
+                    <div v-if="canUpdate" class="flex flex-row items-center gap-2 mt-4">
                         <Button label="Set Cost Redeem" class="p-button" size="small" style="width: auto" @click="showSetDialog = true" />
                     </div>
 
@@ -122,10 +122,10 @@
 
                         <!-- Edit & Delete Buttons -->
                         <div class="flex items-center gap-2">
-                            <RouterLink :to="`/marketing/editCatalogue/${catalogue.id}`">
+                            <RouterLink v-if="canUpdate" :to="`/marketing/editCatalogue/${catalogue.id}`">
                                 <Button label="Edit" class="p-button-info" size="small" />
                             </RouterLink>
-                            <Button label="Delete" class="p-button-danger" size="small" @click="confirmDelete" />
+                            <Button v-if="canUpdate" label="Delete" class="p-button-danger" size="small" @click="confirmDelete" />
                         </div>
                     </div>
 
@@ -153,7 +153,7 @@
                     </div>
 
                     <!-- Set Point Button -->
-                    <div class="flex flex-row items-center gap-2 mt-4">
+                    <div v-if="canUpdate" class="flex flex-row items-center gap-2 mt-4">
                         <Button label="Set Cost Redeem" class="p-button" size="small" style="width: auto" @click="showSetDialog = true" />
                     </div>
 
@@ -186,10 +186,10 @@
 
                         <!-- Edit & Delete Buttons -->
                         <div class="flex items-center gap-2">
-                            <RouterLink :to="`/marketing/editCatalogue/${catalogue.id}`">
+                            <RouterLink v-if="canUpdate" :to="`/marketing/editCatalogue/${catalogue.id}`">
                                 <Button label="Edit" class="p-button-info" size="small" />
                             </RouterLink>
-                            <Button label="Delete" class="p-button-danger" size="small" @click="confirmDelete" />
+                            <Button v-if="canUpdate" label="Delete" class="p-button-danger" size="small" @click="confirmDelete" />
                         </div>
                     </div>
 
@@ -215,8 +215,8 @@
 
                         <!-- Action Buttons -->
                         <div class="flex gap-4 mt-4 md:mt-0">
-                            <Button icon="pi pi-plus" label="Add" class="p-button-success" @click="showAddDialog = true" />
-                            <Button icon="pi pi-minus" label="Remove" class="p-button-warning" @click="showRemoveDialog = true" />
+                            <Button v-if="canUpdate" icon="pi pi-plus" label="Add" class="p-button-success" @click="showAddDialog = true" />
+                            <Button v-if="canUpdate" icon="pi pi-minus" label="Remove" class="p-button-warning" @click="showRemoveDialog = true" />
                         </div>
                     </div>
 
@@ -248,7 +248,7 @@
                     </Dialog>
 
                     <!-- Set Point Button -->
-                    <div class="flex flex-row items-center gap-2 mt-4">
+                    <div v-if="canUpdate" class="flex flex-row items-center gap-2 mt-4">
                         <Button label="Set Cost Redeem" class="p-button" size="small" style="width: auto" @click="showSetDialog = true" />
                     </div>
 
@@ -316,7 +316,7 @@
 
                     <!-- Catalogue Images -->
                     <div class="grid grid-cols-1 md:grid-cols-1 gap-4 mt-4">
-                        <img :src="processedImageURL" :alt="catalogue.title" class="rounded-xl shadow-sm object-cover w-full h-48" @error="handleImageError" />
+                        <img :src="processedImageURL" :alt="catalogue.title" class="rounded-xl shadow-sm object-cover w-full h-48" />
                     </div>
 
                     <!-- Catalogue Info -->
@@ -339,7 +339,7 @@
                     <div class="flex justify-end mt-8">
                         <div class="flex justify-end">
                             <!-- In template, bind to a local ref instead -->
-                            <ToggleButton @change="toggleCatalogStatus" onLabel="Active" offLabel="Inactive" onIcon="pi pi-check" offIcon="pi pi-times" class="w-30" />
+                            <ToggleButton v-if="canUpdate" @change="toggleCatalogStatus" onLabel="Active" offLabel="Inactive" onIcon="pi pi-check" offIcon="pi pi-times" class="w-30" />
                         </div>
                     </div>
                 </div>
@@ -410,6 +410,12 @@ import { useRoute, useRouter } from 'vue-router';
 import { useToast } from 'primevue/usetoast';
 import { useConfirm } from 'primevue/useconfirm';
 import api from '@/service/api';
+import { useMenuStore } from '@/store/menu';
+ 
+const menuStore = useMenuStore();
+const canUpdate = computed(() => menuStore.canWrite('Reward Catalogue'));
+const denyAccess = computed(() => menuStore.canTest('Reward Catalogue'));
+
 
 const route = useRoute();
 const router = useRouter();
@@ -639,9 +645,7 @@ const statusSeverity = (status) => {
     return 'secondary';
 };
 
-const handleImageError = (event) => {
-    event.target.src = 'https://via.placeholder.com/300x200?text=No+Image';
-};
+
 
 const toggleCatalogStatus = async () => {
     try {

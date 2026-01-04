@@ -65,6 +65,7 @@ const filters = reactive({
 
 // ✅ Loading states
 const exportLoading = ref(false);
+const loadingCustomers = ref(false);
 
 // ✅ Data
 const customerOptions = ref([]);
@@ -78,35 +79,58 @@ const statusOptions = [
     { label: 'Cancelled', value: 9 }
 ];
 
-// ✅ Generate customer options from back order data
+// ✅ Generate customer options from list_dealer API with ORDER tab (SHOP ONLY)
 const generateCustomerOptions = async () => {
+    loadingCustomers.value = true;
     try {
-        const response = await api.get('order/list-back-order-report');
+        // Use list_dealer API with tabs: ORDER parameter
+        const response = await api.post('list_dealer', {
+            tabs: 'ORDER'
+        });
+        
         if (response.data.status === 1) {
-            const backOrderData = response.data.admin_data;
+            const dealerData = response.data.admin_data;
             const customers = new Map();
 
-            backOrderData.forEach((item) => {
-                const custAccountNo = item.custaccountno;
-                const companyName = item.companyName || 'Unknown Customer';
-
-                if (custAccountNo && !customers.has(custAccountNo)) {
-                    customers.set(custAccountNo, {
-                        label: `${companyName} (${custAccountNo})`,
-                        value: custAccountNo
-                    });
+            // Process only MAIN SHOPS (no sub-branches)
+            Object.keys(dealerData).forEach((custAccountNo) => {
+                const dealer = dealerData[custAccountNo];
+                const shop = dealer.shop;
+                
+                // Only include shops that are main branches (eten_userID should be 0 for main branches)
+                if (shop && custAccountNo && shop.eten_userID === 0) {
+                    // Build company name from companyName1-4 fields
+                    const companyNameParts = [
+                        shop.companyName1, 
+                        shop.companyName2, 
+                        shop.companyName3, 
+                        shop.companyName4
+                    ].filter(Boolean);
+                    
+                    const companyName = companyNameParts.join(' ').trim() || 'Unknown Customer';
+                    
+                    if (!customers.has(custAccountNo)) {
+                        customers.set(custAccountNo, {
+                            label: `${companyName} (${custAccountNo})`,
+                            value: custAccountNo
+                        });
+                    }
                 }
             });
 
             // Convert to array and sort by label
-            customerOptions.value = Array.from(customers.values()).sort((a, b) => a.label.localeCompare(b.label));
+            const customerArray = Array.from(customers.values()).sort((a, b) => a.label.localeCompare(b.label));
 
             // Add "All Customers" option at the beginning
-            customerOptions.value.unshift({ label: 'All Customers', value: null });
+            customerArray.unshift({ label: 'All Customers', value: null });
+
+            customerOptions.value = customerArray;
         }
     } catch (error) {
         console.error('Error fetching customer options:', error);
         customerOptions.value = [{ label: 'All Customers', value: null }];
+    } finally {
+        loadingCustomers.value = false;
     }
 };
 
@@ -159,23 +183,28 @@ const clearFilters = () => {
 const exportExcel = async () => {
     exportLoading.value = true;
     try {
-        // Prepare filters for export
+        // Prepare filters for export - ensure dates are in correct format (yy-mm-dd)
         const exportFilters = {
             custAccountNo: filters.custAccountNo,
             status: filters.status,
-            startdate: filters.startdate,
-            enddate: filters.enddate,
+            startdate: filters.startdate ? formatDateForAPI(filters.startdate) : null,
+            enddate: filters.enddate ? formatDateForAPI(filters.enddate) : null,
             material: filters.material
         };
+
+        console.log('Export filters:', exportFilters); // Debug log
 
         const response = await api.postExtra('report/excel-back-order', exportFilters, {
             responseType: 'blob'
         });
 
+        // Check if response is blob
+        if (!response.data || !(response.data instanceof Blob)) {
+            throw new Error('Invalid response from server');
+        }
+
         // Create blob and download
-        const blob = new Blob([response.data], {
-            type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
-        });
+        const blob = response.data;
         const url = window.URL.createObjectURL(blob);
         const link = document.createElement('a');
 
@@ -189,13 +218,30 @@ const exportExcel = async () => {
         document.body.appendChild(link);
         link.click();
         link.remove();
-        window.URL.revokeObjectURL(url);
+        
+        // Clean up
+        setTimeout(() => {
+            window.URL.revokeObjectURL(url);
+        }, 100);
+        
     } catch (error) {
         console.error('Error exporting Excel:', error);
         alert('Failed to export Excel file. Please try again.');
     } finally {
         exportLoading.value = false;
     }
+};
+
+// ✅ Helper function to format date for API (yy-mm-dd)
+const formatDateForAPI = (date) => {
+    if (!date) return null;
+    
+    const d = new Date(date);
+    const year = d.getFullYear();
+    const month = String(d.getMonth() + 1).padStart(2, '0');
+    const day = String(d.getDate()).padStart(2, '0');
+    
+    return `${year}-${month}-${day}`;
 };
 
 // ✅ Load initial data when component mounts

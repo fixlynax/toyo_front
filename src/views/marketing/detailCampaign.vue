@@ -14,12 +14,12 @@
                         </div>
                         <div class="inline-flex items-center gap-2">
                             <!-- Edit Event -->
-                            <RouterLink :to="`/marketing/editCampaign/${campaignId}`">
+                            <RouterLink v-if="canUpdate" :to="`/marketing/editCampaign/${campaignId}`">
                                 <Button label="Edit" class="p-button-info" size="small" />
                             </RouterLink>
 
                             <!-- Delete Event -->
-                            <Button label="Delete" class="p-button-danger" size="small" @click="confirmDelete" />
+                            <Button v-if="canUpdate" label="Delete" class="p-button-danger" size="small" @click="confirmDelete" />
                         </div>
                     </div>
 
@@ -167,7 +167,7 @@
                                     <td class="px-4 py-2 font-medium"></td>
                                     <td class="py-4 text-right">
                                         <div class="flex justify-end">
-                                           <ToggleButton v-model="campaignStatus" @change="toggleCampaignStatus" onLabel="Inactive" offLabel="Active" onIcon="pi pi-times" offIcon="pi pi-check" class="w-30" />
+                                           <ToggleButton v-if="canUpdate"v-model="campaignStatus" @change="toggleCampaignStatus" onLabel="Inactive" offLabel="Active" onIcon="pi pi-times" offIcon="pi pi-check" class="w-30" />
                                         </div>
                                     </td>
                                 </tr>
@@ -181,7 +181,7 @@
                     <!-- Header with Invite Button -->
                     <div class="flex items-center justify-between border-b pb-2 mb-2">
                         <div class="text-2xl font-bold text-gray-800">Participating Dealer</div>
-                        <Button 
+                        <Button v-if="canUpdate"
                             label="Assign Dealer" 
                             icon="pi pi-user-plus" 
                             style="width: fit-content" 
@@ -216,7 +216,7 @@
                         <Column field="signboardType" header="Signboard Type" style="min-width: 6rem"></Column>
 
                         <!-- Actions -->
-                        <Column header="Actions" style="min-width: 4rem; text-align: center">
+                        <Column v-if="canUpdate" header="Actions" style="min-width: 4rem; text-align: center">
                             <template #body="{ data }">
                                 <Button 
                                     icon="pi pi-trash" 
@@ -325,6 +325,11 @@ import { useRoute, useRouter } from 'vue-router';
 import { useToast } from 'primevue/usetoast';
 import { useConfirm } from 'primevue/useconfirm';
 import api from '@/service/api';
+import { useMenuStore } from '@/store/menu';
+ 
+const menuStore = useMenuStore();
+const canUpdate = computed(() => menuStore.canWrite('Campaign Management'));
+const denyAccess = computed(() => menuStore.canTest('Campaign Management'));
 
 const route = useRoute();
 const router = useRouter();

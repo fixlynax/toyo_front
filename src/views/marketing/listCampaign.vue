@@ -40,8 +40,8 @@
                         </div>
 
                         <!-- Right: Create Campaign Button -->
-                        <RouterLink to="/marketing/createCampaign">
-                            <Button type="button" label="Create" />
+                        <RouterLink v-if="canUpdate" to="/marketing/createCampaign">
+                            <Button  type="button" label="Create" />
                         </RouterLink>
                     </div>
                 </template>
@@ -96,10 +96,15 @@
 </template>
 
 <script setup>
-import { onMounted, ref } from 'vue';
+import { onMounted, ref, computed } from 'vue';
 import { FilterMatchMode } from '@primevue/core/api';
 import api from '@/service/api';
 import LoadingPage from '@/components/LoadingPage.vue';
+import { useMenuStore } from '@/store/menu';
+ 
+const menuStore = useMenuStore();
+const canUpdate = computed(() => menuStore.canWrite('Campaign Management'));
+const denyAccess = computed(() => menuStore.canTest('Campaign Management'));
 
 // Data variables
 const listData = ref([]);

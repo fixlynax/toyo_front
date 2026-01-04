@@ -427,6 +427,11 @@ const model = ref([
                         label: 'Terms & Conditions',
                         icon: 'pi pi-fw pi-file',
                         to: '/it/termsCondition'
+                    },
+                    {
+                        label: 'Email Sender Setting',
+                        icon: 'pi pi-fw pi-envelope-open',
+                        to: '/it/emailSenderSetting'
                     }
                 ]
             }
