@@ -89,12 +89,12 @@
                     </DataTable>
 
                     <!-- Set Point Button -->
-                    <div v-if="canUpdate" class="flex flex-row items-center gap-2 mt-4">
+                    <!-- <div v-if="canUpdate" class="flex flex-row items-center gap-2 mt-4">
                         <Button label="Set Cost Redeem" class="p-button" size="small" style="width: auto" @click="showSetDialog = true" />
-                    </div>
+                    </div> -->
 
                     <!-- Set Point Dialog -->
-                    <Dialog v-model:visible="showSetDialog" header="Set Cost Redeem" modal class="w-96">
+                    <!-- <Dialog v-model:visible="showSetDialog" header="Set Cost Redeem" modal class="w-96">
                         <div class="flex flex-col gap-3">
                             <label for="silverpoint" class="font-medium">Silver Point</label>
                             <InputNumber v-model="silverPoint" id="silverpoint" showButtons />
@@ -107,7 +107,7 @@
                                 <Button label="Confirm" class="p-button-success" @click="confirmSetPoint" />
                             </div>
                         </div>
-                    </Dialog>
+                    </Dialog> -->
                 </div>
 
                 <div v-else-if="catalogue.type === 'EVOUCHER'" class="card flex flex-col w-full">
@@ -153,12 +153,12 @@
                     </div>
 
                     <!-- Set Point Button -->
-                    <div v-if="canUpdate" class="flex flex-row items-center gap-2 mt-4">
+                    <!-- <div v-if="canUpdate" class="flex flex-row items-center gap-2 mt-4">
                         <Button label="Set Cost Redeem" class="p-button" size="small" style="width: auto" @click="showSetDialog = true" />
-                    </div>
+                    </div> -->
 
                     <!-- Set Point Dialog -->
-                    <Dialog v-model:visible="showSetDialog" header="Set Cost Redeem" modal class="w-96">
+                    <!-- <Dialog v-model:visible="showSetDialog" header="Set Cost Redeem" modal class="w-96">
                         <div class="flex flex-col gap-3">
                             <label for="silverpoint" class="font-medium">Silver Point</label>
                             <InputNumber v-model="silverPoint" id="silverpoint" showButtons :min="0" />
@@ -171,7 +171,7 @@
                                 <Button label="Confirm" class="p-button-success" @click="confirmSetPoint" />
                             </div>
                         </div>
-                    </Dialog>
+                    </Dialog> -->
                 </div>
 
                 <div v-else-if="catalogue.type === 'ITEM'" class="card flex flex-col w-full">
@@ -248,12 +248,12 @@
                     </Dialog>
 
                     <!-- Set Point Button -->
-                    <div v-if="canUpdate" class="flex flex-row items-center gap-2 mt-4">
+                    <!-- <div v-if="canUpdate" class="flex flex-row items-center gap-2 mt-4">
                         <Button label="Set Cost Redeem" class="p-button" size="small" style="width: auto" @click="showSetDialog = true" />
-                    </div>
+                    </div> -->
 
                     <!-- Set Point Dialog -->
-                    <Dialog v-model:visible="showSetDialog" header="Set Cost Redeem" modal class="w-96">
+                    <!-- <Dialog v-model:visible="showSetDialog" header="Set Cost Redeem" modal class="w-96">
                         <div class="flex flex-col gap-3">
                             <label for="silverpoint" class="font-medium">Silver Point</label>
                             <InputNumber v-model="silverPoint" id="silverpoint" showButtons :min="0" />
@@ -266,7 +266,7 @@
                                 <Button label="Confirm" class="p-button-success" @click="confirmSetPoint" />
                             </div>
                         </div>
-                    </Dialog>
+                    </Dialog> -->
                 </div>
 
                 <div class="card flex flex-col w-full mt-8">
@@ -310,7 +310,7 @@
                 <div class="card flex flex-col w-full">
                     <!-- Header -->
                     <div class="flex items-center justify-between border-b pb-2 mb-2">
-                        <div class="text-2xl font-bold text-gray-800">ℹDetails Info</div>
+                        <div class="text-2xl font-bold text-gray-800">Details Info</div>
                         <Tag :value="statusLabel(catalogue.status)" :severity="statusSeverity(catalogue.status)" />
                     </div>
 
@@ -322,6 +322,7 @@
                     <!-- Catalogue Info -->
                     <div class="mt-4">
                         <h1 class="text-2xl font-bold text-gray-800">{{ catalogue.title }}</h1>
+                        <span class="block text-sm font-bold text-black-700 mb-1">Description</span>
                         <p class="text-lg font-medium text-gray-600 mt-2">{{ catalogue.description }}</p>
                     </div>
 
@@ -337,10 +338,9 @@
                     </div>
 
                     <div class="flex justify-end mt-8">
-                        <div class="flex justify-end">
-                            <!-- In template, bind to a local ref instead -->
-                            <ToggleButton v-if="canUpdate" @change="toggleCatalogStatus" onLabel="Active" offLabel="Inactive" onIcon="pi pi-check" offIcon="pi pi-times" class="w-30" />
-                        </div>
+                        <!-- <div class="flex justify-end">
+                            <ToggleButton v-if="canUpdate" @change="toggleCatalogStatus" onLabel="Inactive" offLabel="Active" offIcon="pi pi-check" onIcon="pi pi-times" class="w-30" />
+                        </div> -->
                     </div>
                 </div>
 
@@ -690,7 +690,7 @@ const toggleCatalogStatus = async () => {
 // DELETE FUNCTIONALITY - Integrated with API
 const confirmDelete = () => {
     confirm.require({
-        message: 'Are you sure you want to delete this Catalogue?',
+        message: 'Are you sure you want to delete this Reward?',
         header: 'Confirm Delete',
         icon: 'pi pi-exclamation-triangle',
         acceptLabel: 'Yes, Delete',
