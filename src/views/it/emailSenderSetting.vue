@@ -345,7 +345,7 @@ const isValidEmail = (email) => {
 
 const openTestEmailDialog = () => {
     // Pre-fill with sender email as a suggestion
-    testEmailAddress.value = form.email_address || '';
+    // testEmailAddress.value = form.email_address || '';
     showTestEmailDialog.value = true;
 };
 
