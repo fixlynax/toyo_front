@@ -762,6 +762,12 @@ const router = createRouter({
                     component: () => import('@/views/it/termsCondition.vue'),
                     meta: { permission: 'Terms & Conditions', access: 'view' }
                 },
+                {
+                    path: 'it/emailSenderSetting',
+                    name: 'Email-Sender-Setting',
+                    component: () => import('@/views/it/emailSenderSetting.vue'),
+                    // meta: { permission: 'Email Sender Setting', access: 'view' }
+                },
 
                 // ===============================
                 // SALES
