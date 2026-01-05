@@ -167,7 +167,7 @@
                                     <td class="px-4 py-2 font-medium"></td>
                                     <td class="py-4 text-right">
                                         <div class="flex justify-end">
-                                           <ToggleButton v-if="canUpdate"v-model="campaignStatus" @change="toggleCampaignStatus" onLabel="Inactive" offLabel="Active" onIcon="pi pi-times" offIcon="pi pi-check" class="w-30" />
+                                           <ToggleButton v-if="canUpdate"v-model="campaignStatus" @change="toggleCampaignStatus" onLabel="Active" offLabel="Inactive" onIcon="pi pi-times" offIcon="pi pi-check" class="w-30" />
                                         </div>
                                     </td>
                                 </tr>

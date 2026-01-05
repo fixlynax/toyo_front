@@ -222,12 +222,12 @@
                                     <td class="px-4 py-2 font-medium">Account Status</td>
                                     <td class="px-2 py-2 text-right">
                                         <Button v-if="canUpdate"
-                                            :label="memberDetail.status === 1 ? 'Deactivate' : 'Activate'"
-                                            :severity="memberDetail.status === 1 ? 'danger' : 'success'"
+                                            :label="memberDetail.status === 0 ? 'Inactive' : 'Active'"
+                                            :severity="memberDetail.status === 0 ? 'danger' : 'success'"
                                             size="small"
                                             @click="toggleStatus"
                                             :disabled="loadingAction"
-                                            :icon="memberDetail.status === 1 ? 'pi pi-ban' : 'pi pi-check'"
+                                            :icon="memberDetail.status === 0 ? 'pi pi-ban' : 'pi pi-check'"
                                         />
                                     </td>
                                 </tr>

@@ -80,19 +80,19 @@
                         <small v-if="errors.title" class="text-red-500">{{ errors.title }}</small>
                     </div>
 
+                     <div >
+                      <label class="block font-bold text-gray-700 mb-1">Status *</label>
+                            <!-- In template, bind to a local ref instead -->
+                            <ToggleButton v-model="catalogStatus" @change="toggleCatalogStatus" onLabel="Inactive" offLabel="Active" offIcon="pi pi-check" onIcon="pi pi-times" class="w-30" />
+                    </div>
+
                     <!-- SKU - Only for ITEM type -->
                     <div v-if="catalogue.type === 'ITEM'">
                         <label class="block font-bold text-gray-700 mb-1">SKU *</label>
                         <InputText v-model="catalogue.sku" class="w-full" />
                         <small v-if="errors.sku" class="text-red-500">{{ errors.sku }}</small>
                     </div>
-                    <div v-else>
-                        <!-- Hidden spacer to maintain layout -->
-                        <div class="invisible">
-                            <label class="block font-bold text-gray-700 mb-1">SKU</label>
-                            <InputText class="w-full" />
-                        </div>
-                    </div>
+
 
                     <!-- Description -->
                     <div class="md:col-span-2">
@@ -136,19 +136,27 @@
 
                 <!-- Upload Images -->
                 <div>
-                    <label class="block font-bold text-gray-700 mb-2">Catalogue Images <span class="text-xs bg-blue-100 text-blue-800 px-2 py-0.5 rounded-full">1280 × 720 px (max 1MB)</span> </label>
+                                      <label class="block font-bold text-gray-700 mb-2">Current Immage</label>
                     <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
                         <div class="relative">
-                            <FileUpload mode="basic" name="image1" accept="image/*" 
-                                @select="onImageSelect" 
-                                chooseLabel="Change Image" class="w-full" />
                             <div v-if="catalogue.image1URL" class="relative mt-2">
                                 <img :src="catalogue.image1URL" alt="Preview 1" class="rounded-lg shadow-md object-cover w-full h-80" />
                                 <button @click="removeImage" class="absolute top-2 right-2 bg-red-500 text-white px-2 py-1 rounded-full hover:bg-red-600" title="Remove Image">&times;</button>
                             </div>
                         </div>
                     </div>
+                    <label class="block font-bold text-gray-700 mb-2  mt-4">Upload Catalogue Images <span class="text-xs bg-blue-100 text-blue-800 px-2 py-0.5 rounded-full">1280 × 720 px (max 1MB)</span> </label>
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <div class="relative">
+                            <FileUpload mode="basic" name="image1" accept="image/*" 
+                                @select="onImageSelect" 
+                                chooseLabel="Change Image" class="w-full" />
+                        </div>
+                    </div>
+
                 </div>
+
+                
 
                 <!-- Submit Buttons -->
                 <div class="flex justify-end mt-8 gap-2">
@@ -165,7 +173,7 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from 'vue';
+import { ref, computed, watch, onMounted } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { useToast } from 'primevue/usetoast';
 import api from '@/service/api';
@@ -175,7 +183,7 @@ const router = useRouter();
 const toast = useToast();
 const loading = ref(false);
 const errors = ref({});
-
+const catalogStatus = ref(false)
 // Dropdown options
 const typeOptions = [
   { label: 'E-Wallet', value: 'EWALLET' },
@@ -257,8 +265,9 @@ const fetchCatalogueDetails = async () => {
         point2: data.point2 || 0,
         point3: data.point3 || 0,
         image1URL: '',
+        status: data.status || 0,
       };
-
+        catalogStatus.value = catalogue.value.status === 0 
       // Process image URL
       if (data.imageURL) {
         try {
@@ -349,6 +358,47 @@ const validateFields = () => {
 
   return Object.keys(errors.value).length === 0;
 };
+
+const toggleCatalogStatus = async () => {
+    try {
+        const catalogueId = catalogue.value.id; // Get the ID from catalogue ref
+
+        // Determine the new status (toggle current status)
+        const newStatus = catalogStatus.value ? 0 : 1
+
+        const response = await api.put(`catalog/toggleInactive/${catalogueId}`, {
+            status: newStatus
+        });
+
+        if (response.data.status === 1) {
+            // Update local catalogue status
+            catalogue.value.status = newStatus;
+
+            toast.add({
+                severity: 'success',
+                summary: 'Success',
+                detail: `Catalogue ${newStatus === 1 ? 'activated' : 'deactivated'} successfully`,
+                life: 3000
+            });
+        } else {
+            toast.add({
+                severity: 'error',
+                summary: 'Error',
+                detail: 'Failed to update catalogue status',
+                life: 3000
+            });
+        }
+    } catch (error) {
+        console.error('Error updating catalogue status:', error);
+        toast.add({
+            severity: 'error',
+            summary: 'Error',
+            detail: 'Failed to update catalogue status',
+            life: 3000
+        });
+    }
+};
+
 
 /* Submit using FormData with append */
 const submitCatalogue = async () => {
