@@ -10,51 +10,53 @@
 
             <!-- Email Sender Form -->
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <!-- Email Username -->
+                <!-- Sender Name -->
                 <div class="flex flex-col gap-1">
-                    <label class="block text-xm font-bold text-gray-700 mb-1"> Email Username </label>
-                    <InputText v-model="form.email_username" placeholder="Enter SMTP username" :disabled="loading" class="w-full" />
-                </div>
-
-                <!-- Email Address -->
-                <div class="flex flex-col gap-1">
-                    <label class="block text-xm font-bold text-gray-700 mb-1"> Email Address </label>
-                    <InputText v-model="form.email_address" placeholder="Enter sender email address" :disabled="loading" class="w-full" type="email" />
-                </div>
-
-                <!-- Email Password (Optional) -->
-                <div class="flex flex-col gap-1">
-                    <label class="block text-xm font-bold text-gray-700 mb-1">
-                        Password
-                        <span class="text-xs font-normal text-gray-500">(Leave empty to keep current)</span>
-                    </label>
-                    <Password v-model="form.email_password" placeholder="Enter SMTP password (optional)" :disabled="loading" class="w-full" :feedback="false" toggleMask />
-                </div>
-
-                <!-- Email Name -->
-                <div class="flex flex-col gap-1">
-                    <label class="block text-xm font-bold text-gray-700 mb-1"> Email Name </label>
+                    <label class="block text-xm font-bold text-gray-700 mb-1">Sender Name</label>
                     <InputText v-model="form.email_name" placeholder="Enter sender display name" :disabled="loading" class="w-full" />
                 </div>
 
-                <!-- Email Port -->
+                <!-- Sender Email -->
                 <div class="flex flex-col gap-1">
-                    <label class="block text-xm font-bold text-gray-700 mb-1"> Email Port </label>
+                    <label class="block text-xm font-bold text-gray-700 mb-1">Sender Email</label>
+                    <InputText v-model="form.email_address" placeholder="Enter sender email address" :disabled="loading" class="w-full" type="email" />
+                </div>
+
+                <!-- Outgoing SMTP Server -->
+                <div class="flex flex-col gap-1">
+                    <label class="block text-xm font-bold text-gray-700 mb-1">Outgoing SMTP Server</label>
+                    <InputText v-model="form.smtp_server" placeholder="Enter SMTP server address" :disabled="loading" class="w-full" />
+                </div>
+
+                <!-- Outgoing Port No -->
+                <div class="flex flex-col gap-1">
+                    <label class="block text-xm font-bold text-gray-700 mb-1">Outgoing Port No</label>
                     <InputNumber v-model="form.email_port" placeholder="Enter SMTP port" :disabled="loading" class="w-full" :min="1" :max="65535" />
+                </div>
+
+                <!-- Username -->
+                <div class="flex flex-col gap-1">
+                    <label class="block text-xm font-bold text-gray-700 mb-1">Username</label>
+                    <InputText v-model="form.email_username" placeholder="Enter SMTP username" :disabled="loading" class="w-full" />
+                </div>
+
+                <!-- Password (Required) -->
+                <div class="flex flex-col gap-1">
+                    <label class="block text-xm font-bold text-gray-700 mb-1">Password</label>
+                    <Password v-model="form.email_password" placeholder="Enter SMTP password" :disabled="loading" class="w-full" :feedback="false" toggleMask />
                 </div>
             </div>
 
-            <!-- Password Update Info -->
-            <div v-if="form.email_password" class="p-4 border border-amber-200 bg-amber-50 rounded-md">
+            <!-- Password Required Info -->
+            <div class="p-4 border border-amber-200 bg-amber-50 rounded-md">
                 <div class="flex items-start gap-3">
                     <i class="pi pi-info-circle text-amber-600 mt-0.5"></i>
                     <div>
-                        <div class="font-semibold text-amber-800">Password Update Notice</div>
-                        <div class="text-sm text-amber-700 mt-1">You are updating the SMTP password.</div>
+                        <div class="font-semibold text-amber-800">Reminder</div>
                         <ul class="text-sm text-amber-700 mt-1 list-disc list-inside space-y-1">
-                            <li>Keep a record of the new password</li>
-                            <li>Test email sending after updating</li>
-                            <li>Leaving password empty will keep the current password</li>
+                            <li>Password field is now required and cannot be empty</li>
+                            <li>Always provide the SMTP password when updating settings</li>
+                            <li>Keep a secure record of the password</li>
                         </ul>
                     </div>
                 </div>
@@ -62,20 +64,8 @@
 
             <!-- Current Settings Display (Read-only) -->
             <div v-if="currentSettings" class="mt-4 p-4 border rounded-md bg-gray-50">
-                <div class="text-sm font-semibold text-gray-700 mb-2">Current Environment Settings (Read-only):</div>
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-3 text-xm">
-                    <div class="flex justify-between">
-                        <span class="text-gray-600">Mail Type:</span>
-                        <span class="font-bold">{{ currentSettings.mailType }}</span>
-                    </div>
-                    <div class="flex justify-between">
-                        <span class="text-gray-600">Mail Host:</span>
-                        <span class="font-bold">{{ currentSettings.mailHost }}</span>
-                    </div>
-                    <div class="flex justify-between">
-                        <span class="text-gray-600">Mail Encryption:</span>
-                        <span class="font-bold">{{ currentSettings.mailEncryption }}</span>
-                    </div>
+                <div class="text-sm font-semibold text-gray-700 mb-2">Current Settings (Read-only):</div>
+                <div class="grid grid-cols-1 md:grid-cols-1 gap-3 text-xm">
                     <div class="flex justify-between">
                         <span class="text-gray-600">Last Updated:</span>
                         <span class="font-bold">{{ formatDate(currentSettings.created) }}</span>
@@ -85,11 +75,11 @@
 
             <!-- Action Buttons -->
             <div class="flex justify-end gap-4 pt-4">
-                <div class="w-32">
-                    <Button label="Reset" class="w-full p-button-secondary" @click="resetForm" :disabled="loading" />
+                <div class="w-40">
+                    <Button label="Send Test Email" class="w-full p-button-secondary" @click="openTestEmailDialog" :disabled="loading" />
                 </div>
                 <div class="w-40">
-                    <Button label="Update Settings" class="w-full p-button-warning" @click="submitForm" :loading="loading" />
+                    <Button label="Update" class="w-full p-button-warning" @click="submitForm" :loading="loading" />
                 </div>
             </div>
         </div>
@@ -101,13 +91,26 @@
                     <i class="pi pi-check-circle text-green-500 text-2xl"></i>
                     <div class="text-lg font-semibold">Settings Updated!</div>
                 </div>
-                <div class="text-gray-600">
-                    Email settings have been updated.
-                    <span v-if="form.email_password"> Password has been updated.</span>
-                    <span v-else> Password remains unchanged.</span>
-                </div>
+                <div class="text-gray-600">Email settings have been updated successfully.</div>
                 <div class="flex justify-end gap-2">
                     <Button label="OK" class="p-button-primary" @click="handleSuccessClose" />
+                </div>
+            </div>
+        </Dialog>
+
+        <!-- Test Email Success Dialog -->
+        <Dialog header="Test Email Sent" v-model:visible="showTestEmailSuccessDialog" :modal="true" :closable="true" :style="{ width: '500px', 'max-width': '90vw' }">
+            <div class="flex flex-col gap-4">
+                <div class="flex items-center gap-3">
+                    <i class="pi pi-check-circle text-green-500 text-2xl"></i>
+                    <div class="text-lg font-semibold">Test Email Sent!</div>
+                </div>
+                <div class="text-gray-600">
+                    Test email has been sent to <strong>{{ testEmailAddress }}</strong
+                    >. Please check the inbox to verify the email settings.
+                </div>
+                <div class="flex justify-end gap-2">
+                    <Button label="OK" class="p-button-primary" @click="showTestEmailSuccessDialog = false" />
                 </div>
             </div>
         </Dialog>
@@ -119,14 +122,33 @@
                     <i class="pi pi-exclamation-triangle text-amber-500 text-2xl"></i>
                     <div class="text-lg font-semibold text-amber-700">Confirm Update</div>
                 </div>
-                <div class="text-gray-700">
-                    You are about to update email settings.
-                    <span v-if="form.email_password"> This includes updating the password.</span>
-                    <span v-else> The password will remain unchanged.</span>
-                </div>
+                <div class="text-gray-700">You are about to update email settings. This will replace all current settings including the password.</div>
                 <div class="flex justify-end gap-2">
                     <Button label="Cancel" class="p-button-secondary" @click="showConfirmDialog = false" />
-                    <Button label="Yes, Update" class="p-button-warning" @click="confirmUpdate" />
+                    <Button label="Update" class="p-button-warning" @click="confirmUpdate" />
+                </div>
+            </div>
+        </Dialog>
+
+        <!-- Send Test Email Dialog -->
+        <Dialog header="Send Test Email" v-model:visible="showTestEmailDialog" :modal="true" :closable="true" :style="{ width: '500px', 'max-width': '90vw' }">
+            <div class="flex flex-col gap-4">
+                <div class="mb-2">
+                    <label class="block text-sm font-bold text-gray-700 mb-1">Recipient Email Address</label>
+                    <InputText v-model="testEmailAddress" placeholder="Enter email address to send test" class="w-full" type="email" @keyup.enter="sendTestEmail" />
+                    <div class="text-xs text-gray-500 mt-1">Enter the email address where you want to send the test email</div>
+                </div>
+
+                <div class="p-4 border border-blue-100 bg-blue-50 rounded-md">
+                    <div class="flex items-start gap-3">
+                        <i class="pi pi-info-circle text-blue-600 mt-0.5"></i>
+                        <div class="text-sm text-blue-700"><strong>Note:</strong> This will send a test email using the current email settings. Make sure to save your settings first if you've made any changes.</div>
+                    </div>
+                </div>
+
+                <div class="flex justify-end gap-2">
+                    <Button label="Cancel" class="p-button-secondary" @click="showTestEmailDialog = false" />
+                    <Button label="Send Test Email" class="p-button-primary" @click="sendTestEmail" :loading="sendingTestEmail" :disabled="!isValidTestEmail" />
                 </div>
             </div>
         </Dialog>
@@ -134,7 +156,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted, reactive } from 'vue';
+import { ref, onMounted, reactive, computed } from 'vue';
 import { useToast } from 'primevue/usetoast';
 import InputText from 'primevue/inputtext';
 import Password from 'primevue/password';
@@ -150,18 +172,27 @@ const form = reactive({
     email_password: '',
     email_address: '',
     email_name: '',
-    email_port: null
+    email_port: null,
+    smtp_server: ''
 });
 
 const initialForm = ref({});
 const currentSettings = ref(null);
 const loading = ref(false);
+const sendingTestEmail = ref(false);
 const showSuccessDialog = ref(false);
 const showConfirmDialog = ref(false);
+const showTestEmailSuccessDialog = ref(false);
+const showTestEmailDialog = ref(false);
+const testEmailAddress = ref('');
+
+const isValidTestEmail = computed(() => {
+    return testEmailAddress.value && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(testEmailAddress.value);
+});
 
 const formatDate = (dateString) => {
     if (!dateString) return 'N/A';
-    return new Date(dateString).toLocaleString('en-GB', {
+    return new Date(dateString).toLocaleString('en-MY', {
         year: 'numeric',
         month: '2-digit',
         day: '2-digit',
@@ -187,14 +218,16 @@ const fetchEmailSettings = async () => {
             form.email_address = response.data.admin_data.mailAddress || '';
             form.email_name = response.data.admin_data.mailName || '';
             form.email_port = response.data.admin_data.mailPort ? parseInt(response.data.admin_data.mailPort) : null;
-            form.email_password = ''; // Always empty on load
+            form.smtp_server = response.data.admin_data.mailHost || '';
+            form.email_password = ''; // Always empty on load for security
 
-            // Store initial values for reset functionality
+            // Store initial values
             initialForm.value = {
                 email_username: response.data.admin_data.mailUsername || '',
                 email_address: response.data.admin_data.mailAddress || '',
                 email_name: response.data.admin_data.mailName || '',
-                email_port: response.data.admin_data.mailPort ? parseInt(response.data.admin_data.mailPort) : null
+                email_port: response.data.admin_data.mailPort ? parseInt(response.data.admin_data.mailPort) : null,
+                smtp_server: response.data.admin_data.mailHost || ''
             };
 
             toast.add({
@@ -225,8 +258,28 @@ const fetchEmailSettings = async () => {
 };
 
 const validateForm = () => {
-    // Validate email address if provided
-    if (form.email_address && !isValidEmail(form.email_address)) {
+    // Validate required fields
+    if (!form.email_name?.trim()) {
+        toast.add({
+            severity: 'warn',
+            summary: 'Required',
+            detail: 'Sender Name is required',
+            life: 3000
+        });
+        return false;
+    }
+
+    if (!form.email_address?.trim()) {
+        toast.add({
+            severity: 'warn',
+            summary: 'Required',
+            detail: 'Sender Email is required',
+            life: 3000
+        });
+        return false;
+    }
+
+    if (!isValidEmail(form.email_address)) {
         toast.add({
             severity: 'warn',
             summary: 'Invalid',
@@ -236,12 +289,52 @@ const validateForm = () => {
         return false;
     }
 
-    // Validate port number if provided
-    if (form.email_port && (form.email_port < 1 || form.email_port > 65535)) {
+    if (!form.smtp_server?.trim()) {
+        toast.add({
+            severity: 'warn',
+            summary: 'Required',
+            detail: 'Outgoing SMTP Server is required',
+            life: 3000
+        });
+        return false;
+    }
+
+    if (!form.email_port) {
+        toast.add({
+            severity: 'warn',
+            summary: 'Required',
+            detail: 'Outgoing Port No is required',
+            life: 3000
+        });
+        return false;
+    }
+
+    if (form.email_port < 1 || form.email_port > 65535) {
         toast.add({
             severity: 'warn',
             summary: 'Invalid',
             detail: 'Port number must be between 1 and 65535',
+            life: 3000
+        });
+        return false;
+    }
+
+    if (!form.email_username?.trim()) {
+        toast.add({
+            severity: 'warn',
+            summary: 'Required',
+            detail: 'Username is required',
+            life: 3000
+        });
+        return false;
+    }
+
+    // Password is now required
+    if (!form.email_password?.trim()) {
+        toast.add({
+            severity: 'warn',
+            summary: 'Required',
+            detail: 'Password is required',
             life: 3000
         });
         return false;
@@ -255,20 +348,75 @@ const isValidEmail = (email) => {
     return emailRegex.test(email);
 };
 
-const resetForm = () => {
-    // Reset form to initial values
-    form.email_username = initialForm.value.email_username || '';
-    form.email_address = initialForm.value.email_address || '';
-    form.email_name = initialForm.value.email_name || '';
-    form.email_port = initialForm.value.email_port || null;
-    form.email_password = '';
+const openTestEmailDialog = () => {
+    // Pre-fill with sender email as a suggestion
+    testEmailAddress.value = form.email_address || '';
+    showTestEmailDialog.value = true;
+};
 
-    toast.add({
-        severity: 'info',
-        summary: 'Reset',
-        detail: 'All changes have been reset',
-        life: 2000
-    });
+const sendTestEmail = async () => {
+    if (!testEmailAddress.value?.trim()) {
+        toast.add({
+            severity: 'warn',
+            summary: 'Required',
+            detail: 'Please enter an email address',
+            life: 3000
+        });
+        return;
+    }
+
+    if (!isValidEmail(testEmailAddress.value)) {
+        toast.add({
+            severity: 'warn',
+            summary: 'Invalid',
+            detail: 'Please enter a valid email address',
+            life: 3000
+        });
+        return;
+    }
+
+    sendingTestEmail.value = true;
+    showTestEmailDialog.value = false;
+
+    try {
+        const response = await api.post('email-sender/send-test', {
+            email: testEmailAddress.value
+        });
+
+        if (response.data.status === 1) {
+            showTestEmailSuccessDialog.value = true;
+            toast.add({
+                severity: 'success',
+                summary: 'Success',
+                detail: `Test email sent to ${testEmailAddress.value}`,
+                life: 3000
+            });
+        } else {
+            throw new Error(response.data.error || 'Failed to send test email');
+        }
+    } catch (error) {
+        console.error('Error sending test email:', error);
+
+        let errorMessage = 'Failed to send test email';
+        if (error.response?.data?.error) {
+            if (typeof error.response.data.error === 'object') {
+                errorMessage = Object.values(error.response.data.error).flat().join(', ');
+            } else {
+                errorMessage = error.response.data.error;
+            }
+        } else if (error.message) {
+            errorMessage = error.message;
+        }
+
+        toast.add({
+            severity: 'error',
+            summary: 'Error',
+            detail: errorMessage,
+            life: 3000
+        });
+    } finally {
+        sendingTestEmail.value = false;
+    }
 };
 
 const submitForm = async () => {
@@ -276,7 +424,7 @@ const submitForm = async () => {
         return;
     }
 
-    // Show confirmation dialog for any update
+    // Show confirmation dialog for update
     showConfirmDialog.value = true;
 };
 
@@ -296,13 +444,15 @@ const updateEmailSettings = async () => {
     });
 
     try {
-        // Send password field - if empty, send as empty string
+        // Send all required fields including password
         const payload = {
-            email_username: form.email_username || '',
-            email_address: form.email_address || '',
-            email_name: form.email_name || '',
-            email_port: form.email_port || '',
-            email_password: form.email_password || '' // Send empty string if no new password
+            email_username: form.email_username.trim(),
+            email_password: form.email_password.trim(),
+            email_address: form.email_address.trim(),
+            email_name: form.email_name.trim(),
+            email_port: form.email_port
+            // Note: smtp_server is not in the current API payload
+            // You may need to adjust the API to accept this field
         };
 
         const response = await api.post('email-sender/new', payload);
@@ -318,11 +468,9 @@ const updateEmailSettings = async () => {
                 email_username: form.email_username,
                 email_address: form.email_address,
                 email_name: form.email_name,
-                email_port: form.email_port
+                email_port: form.email_port,
+                smtp_server: form.smtp_server
             };
-
-            // Clear password field after successful save
-            form.email_password = '';
 
             toast.add({
                 severity: 'success',
