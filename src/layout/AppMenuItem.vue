@@ -66,6 +66,11 @@ function itemClick(event, item) {
 function checkActiveRoute(item) {
     return route.path === item.to;
 }
+const closeMenu = () => {
+    layoutState.overlayMenuActive = false;
+    layoutState.staticMenuMobileActive = false;
+    layoutState.staticMenuDesktopInactive = true;
+};
 </script>
 
 <template>
@@ -82,7 +87,7 @@ function checkActiveRoute(item) {
             <i class="pi pi-fw pi-angle-down layout-submenu-toggler" v-if="item.items"></i>
         </router-link>
         <Transition v-if="item.items && item.visible !== false" name="layout-submenu">
-            <ul v-show="root ? true : isActiveMenu" class="layout-submenu">
+            <ul v-show="root ? true : isActiveMenu" class="layout-submenu" @click.stop="closeMenu">
                 <app-menu-item v-for="(child, i) in item.items" :key="child" :index="i" :item="child" :parentItemKey="itemKey" :root="false"></app-menu-item>
             </ul>
         </Transition>
