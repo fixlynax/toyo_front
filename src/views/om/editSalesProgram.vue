@@ -583,7 +583,6 @@ const statusOptions = ref([
 // Storage Location Options
 const storageLocationOptions = ref([
     { label: 'RETP', value: 'RETP' },
-    { label: 'RER', value: 'RER' },
     { label: 'TMJB', value: 'TMJB' },
     { label: 'TMSB', value: 'TMSB' },
     { label: 'TMSA', value: 'TMSA' },
