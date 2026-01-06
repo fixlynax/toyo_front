@@ -4,6 +4,9 @@ import { FilterMatchMode } from '@primevue/core/api';
 import api from '@/service/api';
 import { RouterLink } from 'vue-router';
 import LoadingPage from '@/components/LoadingPage.vue';
+import { useToast } from 'primevue/usetoast';
+
+const toast = useToast();
 
 const listData = ref([]);
 const filteredList = ref([]);
@@ -11,6 +14,9 @@ const loading = ref(true);
 const activeTabIndex = ref(0);
 const dateRange = ref([null, null]);
 const hasDateFilterApplied = ref(false);
+const selectedBackOrders = ref([]);
+const bulkCancelLoading = ref(false);
+const showCancelDialog = ref(false); // New: Dialog visibility
 
 const filters = ref({
     global: { value: null, matchMode: FilterMatchMode.CONTAINS }
@@ -30,7 +36,7 @@ const getDefaultDateRangeForCompleted = () => {
 
 const statusTabs = [
     { label: 'Pending', status: 0, type: 'PENDING', requiresDateRange: false, initialLoad: true },
-    { label: 'Completed', status: 1, type: 'COMPLETED', requiresDateRange: true, initialLoad: true }, // Changed initialLoad to true
+    { label: 'Completed', status: 1, type: 'COMPLETED', requiresDateRange: true, initialLoad: true },
     { label: 'Cancelled', status: 9, type: 'CANCELLED', requiresDateRange: true, initialLoad: false },
     { label: 'Expired', status: '', type: 'EXPIRED', requiresDateRange: true, initialLoad: false }
 ];
@@ -42,11 +48,88 @@ const showDateRangeFilter = computed(() => currentTab.value?.requiresDateRange |
 const isCompletedTab = computed(() => currentTab.value?.type === 'COMPLETED');
 const isCancelledTab = computed(() => currentTab.value?.type === 'CANCELLED');
 const isExpiredTab = computed(() => currentTab.value?.type === 'EXPIRED');
+const isPendingTab = computed(() => currentTab.value?.type === 'PENDING');
+const showSelection = computed(() => isPendingTab.value); // New: Show selection column only for Pending tab
+
+// New: Show confirmation dialog
+const confirmBulkCancel = () => {
+    if (selectedBackOrders.value.length === 0) {
+        toast.add({
+            severity: 'warn',
+            summary: 'No Selection',
+            detail: 'Please select at least one back order to cancel.',
+            life: 3000
+        });
+        return;
+    }
+    showCancelDialog.value = true;
+};
+
+// New: Handle bulk cancel from dialog
+const handleBulkCancel = async () => {
+    try {
+        bulkCancelLoading.value = true;
+        
+        // Prepare data in the required format: [{"id":331},{"id":332}]
+        const backorderData = selectedBackOrders.value.map(order => ({ id: order.id }));
+        
+        const response = await api.post('order/cancel-backorder', {
+            backorder_id: JSON.stringify(backorderData)
+        });
+
+        if (response.data.status === 1) {
+            // Show success toast
+            toast.add({
+                severity: 'success',
+                summary: 'Success',
+                detail: `Successfully cancelled ${selectedBackOrders.value.length} back order(s)`,
+                life: 5000
+            });
+            
+            // Close dialog
+            showCancelDialog.value = false;
+            
+            // Clear selection
+            selectedBackOrders.value = [];
+            
+            // Refresh the data
+            await fetchBackOrders();
+        } else {
+            throw new Error('Failed to cancel back orders');
+        }
+    } catch (error) {
+        console.error('Error cancelling back orders:', error);
+        toast.add({
+            severity: 'error',
+            summary: 'Error',
+            detail: 'Failed to cancel back orders. Please try again.',
+            life: 5000
+        });
+    } finally {
+        bulkCancelLoading.value = false;
+    }
+};
+
+// Clear selection
+const clearSelection = () => {
+    selectedBackOrders.value = [];
+    toast.add({
+        severity: 'info',
+        summary: 'Selection Cleared',
+        detail: 'All selected back orders have been cleared.',
+        life: 3000
+    });
+};
 
 const fetchBackOrders = async (useDefaultRange = false) => {
     try {
         const selectedTab = currentTab.value;
         if (!selectedTab) return;
+
+        // Clear selection when fetching new data
+        if (selectedBackOrders.value.length > 0) {
+            selectedBackOrders.value = [];
+        }
 
         // For Cancelled and Expired tabs (requires date range and initialLoad is false), don't fetch until date range is set
         if ((isCancelledTab.value || isExpiredTab.value) && !selectedTab.initialLoad && !hasDateFilterApplied.value) {
@@ -116,6 +199,12 @@ const fetchBackOrders = async (useDefaultRange = false) => {
         listData.value = [];
         filteredList.value = [];
         console.error('Error fetching back orders:', error);
+        toast.add({
+            severity: 'error',
+            summary: 'Error',
+            detail: 'Failed to fetch back orders. Please try again.',
+            life: 5000
+        });
     } finally {
         loading.value = false;
     }
@@ -143,6 +232,11 @@ watch(activeTabIndex, (newIndex, oldIndex) => {
     // Reset date range when changing tabs
     dateRange.value = [null, null];
     hasDateFilterApplied.value = false;
+    
+    // Clear selection when changing tabs
+    if (selectedBackOrders.value.length > 0) {
+        selectedBackOrders.value = [];
+    }
 
     // Handle data loading based on tab type
     if (isCompletedTab.value) {
@@ -348,10 +442,12 @@ const getStatusSeverity = (data) => {
             currentPageReportTemplate="Showing {first} to {last} of {totalRecords} entries"
             paginatorTemplate="CurrentPageReport FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink RowsPerPageDropdown"
             class="rounded-table"
+            v-model:selection="selectedBackOrders"
+            :selectionMode="showSelection ? 'multiple' : null"
         >
             <template #header>
                 <div class="flex flex-col gap-4 w-full">
-                    <!-- Top Row: Search -->
+                    <!-- Top Row: Search and Bulk Cancel Button (only for Pending tab) -->
                     <div class="flex items-center justify-between gap-4 w-full flex-wrap">
                         <div class="flex items-center gap-2 w-full max-w-md">
                             <IconField class="flex-1">
@@ -360,7 +456,33 @@ const getStatusSeverity = (data) => {
                                 </InputIcon>
                                 <InputText v-model="filters['global'].value" placeholder="Quick Search" class="w-full" />
                             </IconField>
-                            <!-- <Button type="button" icon="pi pi-cog" class="p-button" /> -->
+                        </div>
+                        
+                        <!-- Bulk Cancel Section (only shown for Pending tab) -->
+                        <div v-if="isPendingTab" class="flex items-center gap-4 flex-wrap">
+                            <!-- Selected count badge -->
+                            <div v-if="selectedBackOrders.length > 0" class="flex items-center gap-2">
+                                <span class="text-sm font-medium text-gray-700">
+                                    {{ selectedBackOrders.length }} back order(s) selected
+                                </span>
+                                <Button 
+                                    icon="pi pi-times" 
+                                    class="p-button-text p-button-sm text-gray-500 hover:text-red-500" 
+                                    @click="clearSelection"
+                                    title="Clear selection"
+                                />
+                            </div>
+                            
+                            <!-- Bulk Cancel Button -->
+                            <Button 
+                                label="Bulk Cancel" 
+                                icon="pi pi-times" 
+                                :disabled="selectedBackOrders.length === 0 || bulkCancelLoading"
+                                :loading="bulkCancelLoading"
+                                class="p-button-danger"
+                                @click="confirmBulkCancel"
+                                :title="selectedBackOrders.length === 0 ? 'Select back orders to cancel' : `Cancel ${selectedBackOrders.length} selected back order(s)`"
+                            />
                         </div>
                     </div>
 
@@ -404,6 +526,9 @@ const getStatusSeverity = (data) => {
                     <template v-else> No back orders found. </template>
                 </div>
             </template>
+
+            <!-- Selection Column (only for Pending tab) -->
+            <Column v-if="showSelection" selectionMode="multiple" headerStyle="width: 3rem"></Column>
 
             <Column field="createdDate" header="Created Date" style="min-width: 8rem" sortable>
                 <template #body="{ data }">
@@ -456,6 +581,57 @@ const getStatusSeverity = (data) => {
                 </template>
             </Column>
         </DataTable>
+
+        <!-- Confirmation Dialog -->
+        <Dialog 
+            v-model:visible="showCancelDialog" 
+            modal 
+            header="Confirm Bulk Cancel" 
+            :style="{ width: '450px' }"
+            :draggable="false"
+        >
+            <div class="flex flex-col gap-4">
+                <div class="flex items-center gap-3">
+                    <i class="pi pi-exclamation-triangle text-2xl text-yellow-500"></i>
+                    <div>
+                        <p class="font-semibold text-gray-800">Are you sure you want to cancel {{ selectedBackOrders.length }} selected back order(s)?</p>
+                        <p class="text-sm text-gray-600 mt-1">This action cannot be undone. Cancellation emails will be sent to customers.</p>
+                    </div>
+                </div>
+                
+                <div v-if="selectedBackOrders.length > 0" class="mt-2 p-3 bg-gray-50 rounded-md max-h-32 overflow-y-auto">
+                    <p class="text-sm font-medium text-gray-700 mb-2">Selected Back Orders:</p>
+                    <ul class="text-sm text-gray-600">
+                        <li v-for="(order, index) in selectedBackOrders.slice(0, 5)" :key="order.id" class="py-1 border-b border-gray-200 last:border-0">
+                            {{ index + 1 }}. {{ order.orderNo }} - {{ order.customerName }}
+                        </li>
+                        <li v-if="selectedBackOrders.length > 5" class="py-1 text-gray-500 italic">
+                            ... and {{ selectedBackOrders.length - 5 }} more
+                        </li>
+                    </ul>
+                </div>
+            </div>
+            
+            <template #footer>
+                <div class="flex justify-end gap-2">
+                    <Button 
+                        label="Cancel" 
+                        icon="pi pi-times" 
+                        class="p-button-text" 
+                        @click="showCancelDialog = false"
+                        :disabled="bulkCancelLoading"
+                    />
+                    <Button 
+                        label="Confirm Cancel" 
+                        icon="pi pi-check" 
+                        class="p-button-danger" 
+                        @click="handleBulkCancel"
+                        :loading="bulkCancelLoading"
+                        :disabled="bulkCancelLoading"
+                    />
+                </div>
+            </template>
+        </Dialog>
     </div>
 </template>
 
@@ -538,5 +714,19 @@ const getStatusSeverity = (data) => {
         border-bottom-left-radius: 12px;
         border-bottom-right-radius: 12px;
     }
+}
+
+/* Selection column styling */
+:deep(.p-datatable .p-checkbox .p-checkbox-box) {
+    border-radius: 4px;
+}
+
+:deep(.p-datatable .p-checkbox.p-highlight .p-checkbox-box) {
+    background-color: #ef4444;
+    border-color: #ef4444;
+}
+
+:deep(.p-datatable .p-checkbox:not(.p-disabled).p-focus .p-checkbox-box) {
+    box-shadow: 0 0 0 2px rgba(239, 68, 68, 0.2);
 }
 </style>
