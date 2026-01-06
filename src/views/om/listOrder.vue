@@ -323,7 +323,7 @@ const clearDateRange = () => {
                     <template #body="{ data }">{{ formatDateTime(data.created) }}</template>
                 </Column>
 
-                <Column header="Order No" style="min-width: 10rem" sortable>
+                <Column field="orderNo" header="Order No" style="min-width: 10rem" sortable :sort-field="(data) => data.orderNo || ''">
                     <template #body="{ data }">
                         <RouterLink :to="`/om/detailOrder/${data.orderNo}`" class="hover:underline font-bold text-primary-400">
                             {{ data.orderNo || '-' }}
