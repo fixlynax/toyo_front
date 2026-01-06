@@ -103,6 +103,7 @@ const fetchOrders = async (status = null, dateFilter = false, useDefaultRange = 
                 doNo: order.do_no,
                 invoiceNo: order.inv_no,
                 orderDate: order.orderDate, // Changed from created to orderDate
+                created: order.created,
                 orderStatus: order.orderstatus,
                 subtotal: order.subtotal,
                 total: order.total,
@@ -319,7 +320,7 @@ const clearDateRange = () => {
 
                 <!-- Changed from created to orderDate -->
                 <Column field="orderDate" header="Created Date" style="min-width: 8rem" sortable>
-                    <template #body="{ data }">{{ formatDateTime(data.orderDate) }}</template>
+                    <template #body="{ data }">{{ formatDateTime(data.created) }}</template>
                 </Column>
 
                 <Column header="Order No" style="min-width: 10rem" sortable>
