@@ -67,7 +67,33 @@
                             </div>
                         </div>
 
-                        <div class="md:col-start-3">
+                        <!-- Storage Location MultiSelect -->
+                        <div>
+                            <label class="block font-bold text-gray-700">Storage Location</label>
+                            <MultiSelect
+                                v-model="salesProgram.storageLocation"
+                                :options="storageLocationOptions"
+                                optionLabel="label"
+                                optionValue="value"
+                                placeholder="Select Storage Locations"
+                                class="w-full"
+                                :filter="true"
+                                display="chip"
+                            >
+                                <template #value="slotProps">
+                                    <div v-if="slotProps.value && slotProps.value.length > 0" class="flex flex-wrap gap-1">
+                                        <span v-for="location in getSelectedStorageLabels(slotProps.value)" :key="location.value" class="bg-purple-100 text-purple-800 text-xs px-2 py-1 rounded">
+                                            {{ location.label }}
+                                        </span>
+                                    </div>
+                                    <span v-else>
+                                        {{ slotProps.placeholder }}
+                                    </span>
+                                </template>
+                            </MultiSelect>
+                        </div>
+
+                        <div>
                             <label class="block font-bold text-gray-700">Status</label>
                             <Dropdown v-model="salesProgram.status" :options="statusOptions" optionLabel="label" optionValue="value" class="w-full" placeholder="Select Status" />
                         </div>
@@ -458,14 +484,15 @@ const MAX_FILE_SIZE = 1 * 1024 * 1024; // 1MB in bytes
 
 const salesProgram = ref({
     programID: '',
-    showSP: null, // Changed from 1 to null to force user selection
+    showSP: null,
     pricegroup: '06',
     type: 'FOC',
     programName: '',
     desc: '',
     startdate: '',
     enddate: '',
-    status: null // Changed from 1 to null to force user selection
+    storageLocation: [], // Added storage location
+    status: null
 });
 
 const imageFile = ref(null);
@@ -502,12 +529,12 @@ const materialSearch = ref('');
 
 // Material Filter - Updated for multi-select
 const materialFilter = ref({
-    selectedPatterns: [], // Changed from selectedPattern to selectedPatterns (array)
-    selectedRims: [], // Changed from selectedRim to selectedRims (array)
+    selectedPatterns: [],
+    selectedRims: [],
     availableRims: []
 });
 
-// Add this
+// Options
 const statusOptions = ref([
     { label: 'Active', value: 1 },
     { label: 'Inactive', value: 0 }
@@ -516,6 +543,17 @@ const statusOptions = ref([
 const showOptions = ref([
     { label: 'Yes', value: 1 },
     { label: 'No', value: 0 }
+]);
+
+// Storage Location Options
+const storageLocationOptions = ref([
+    { label: 'RETP', value: 'RETP' },
+    { label: 'RER', value: 'RER' },
+    { label: 'TMJB', value: 'TMJB' },
+    { label: 'TMSB', value: 'TMSB' },
+    { label: 'TMSA', value: 'TMSA' },
+    { label: 'TMSK', value: 'TMSK' },
+    { label: 'TMDS', value: 'TMDS' }
 ]);
 
 // Computed
@@ -565,6 +603,17 @@ const getSelectedPatternLabels = (selectedPatternValues) => {
         return {
             value: patternValue,
             label: pattern ? pattern.label : patternValue
+        };
+    });
+};
+
+// Helper function to get selected storage labels
+const getSelectedStorageLabels = (selectedStorageValues) => {
+    return selectedStorageValues.map((storageValue) => {
+        const location = storageLocationOptions.value.find((s) => s.value === storageValue);
+        return {
+            value: storageValue,
+            label: location ? location.label : storageValue
         };
     });
 };
@@ -902,7 +951,6 @@ const validateForm = () => {
         return false;
     }
 
-    // Fixed: Check if showSP is selected (not just truthy)
     if (salesProgram.value.showSP === undefined || salesProgram.value.showSP === null) {
         showError('Please select Show Sales Program option');
         return false;
@@ -918,7 +966,12 @@ const validateForm = () => {
         return false;
     }
 
-    // Add status validation - improved check
+    // Add storage location validation
+    if (!salesProgram.value.storageLocation || salesProgram.value.storageLocation.length === 0) {
+        showError('Please select at least one storage location');
+        return false;
+    }
+
     if (salesProgram.value.status === undefined || salesProgram.value.status === null) {
         showError('Please select status (Active/Inactive)');
         return false;
@@ -966,7 +1019,6 @@ const validateForm = () => {
 };
 
 const submitForm = async () => {
-    
     if (!validateForm()) {
         return;
     }
@@ -986,7 +1038,6 @@ const submitForm = async () => {
         const formData = new FormData();
 
         formData.append('programID', salesProgram.value.programID);
-        // Ensure showSP has a value
         formData.append('showSP', salesProgram.value.showSP !== null && salesProgram.value.showSP !== undefined ? salesProgram.value.showSP : 1);
         formData.append('pricegroup', salesProgram.value.pricegroup);
         formData.append('type', salesProgram.value.type);
@@ -994,7 +1045,14 @@ const submitForm = async () => {
         formData.append('desc', salesProgram.value.desc);
         formData.append('startdate', formatDate(salesProgram.value.startdate));
         formData.append('enddate', formatDate(salesProgram.value.enddate));
-        // Ensure status has a value
+        
+        // Add storageLocation to formData
+        if (salesProgram.value.storageLocation && salesProgram.value.storageLocation.length > 0) {
+            formData.append('storageLocation', JSON.stringify(salesProgram.value.storageLocation));
+        } else {
+            formData.append('storageLocation', JSON.stringify([]));
+        }
+        
         formData.append('status', salesProgram.value.status !== null && salesProgram.value.status !== undefined ? salesProgram.value.status : 1);
         formData.append('image', imageFile.value);
 
@@ -1016,7 +1074,8 @@ const submitForm = async () => {
             desc: salesProgram.value.desc,
             startdate: formatDate(salesProgram.value.startdate),
             enddate: formatDate(salesProgram.value.enddate),
-            status: salesProgram.value.status, // Log the status
+            storageLocation: salesProgram.value.storageLocation,
+            status: salesProgram.value.status,
             spFOC_array: JSON.stringify(spFOCArray),
             freematerialid: programItem.value.selectedFreeMaterial,
             freematerialdesc: programItem.value.freeMaterialData?.material,
