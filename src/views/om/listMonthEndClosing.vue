@@ -30,6 +30,7 @@
                     class="rounded-table"
                     currentPageReportTemplate="Showing {first} to {last} of {totalRecords} entries"
                     paginatorTemplate="CurrentPageReport FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink RowsPerPageDropdown"
+                    :rowClass="rowClass"
                 >
                     <template #header>
                         <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 w-full">
@@ -364,6 +365,22 @@ const isDialogFormValid = computed(() => {
     return currentDate.closingDate !== null && currentDate.closingTime !== null && currentDate.status !== null;
 });
 
+// Function to check if a row is the current month
+const isCurrentMonth = (rowData) => {
+    const currentDate = new Date();
+    const currentYear = currentDate.getFullYear();
+    const currentMonth = currentDate.getMonth(); // 0-indexed (0 = January)
+    
+    const rowDate = new Date(rowData.monthYear);
+    return rowDate.getFullYear() === currentYear && 
+           rowDate.getMonth() === currentMonth;
+};
+
+// Row class function for highlighting current month
+const rowClass = (data) => {
+    return isCurrentMonth(data) ? 'current-month-row' : '';
+};
+
 // Watch for monthYear changes to set default closing date and time
 watch(
     () => newDate.monthYear,
@@ -692,5 +709,22 @@ onMounted(async () => {
         border-bottom-left-radius: 12px;
         border-bottom-right-radius: 12px;
     }
+}
+
+:deep(.current-month-row) {
+    background-color: #e3f2fd !important; /* Light blue background */
+    border-left: 4px solid #1976d2 !important; /* Primary blue left border */
+}
+
+:deep(.current-month-row:hover) {
+    background-color: #bbdefb !important; /* Slightly darker blue on hover */
+}
+
+:deep(.p-datatable .current-month-row td) {
+    font-weight: bold; /* Make text bolder */
+}
+
+:deep(.p-datatable .current-month-row .font-semibold) {
+    color: #0d47a1 !important; /* Dark blue text color for better contrast */
 }
 </style>
