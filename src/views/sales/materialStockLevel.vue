@@ -30,10 +30,9 @@ function initFilters() {
 // 🟢 Status indicators for stock levels
 const getStockStatus = (balance) => {
     const stock = parseFloat(balance);
-    if (stock <= 0) return { label: 'Out of Stock', severity: 'danger' };
-    if (stock < 50) return { label: 'Low Stock', severity: 'warning' };
-    if (stock < 100) return { label: 'Limited', severity: 'info' };
-    return { label: 'In Stock', severity: 'success' };
+    if (stock <= 0) return { label: 'No Stock', severity: 'danger' };
+    if (stock < 10) return { label: 'Low Stock', severity: 'warn' };
+    return { label: 'Available', severity: 'success' };
 };
 
 // 🟢 Fetch Storage Locations from API
@@ -527,8 +526,8 @@ const formatBoolean = (value) => {
                                     <span
                                         :class="{
                                             'font-bold text-lg': true,
-                                            'text-green-600': data.stock_level.stockBalance > 50,
-                                            'text-yellow-600': data.stock_level.stockBalance > 0 && data.stock_level.stockBalance <= 50,
+                                            'text-green-600': data.stock_level.stockBalance > 10,
+                                            'text-yellow-600': data.stock_level.stockBalance > 0 && data.stock_level.stockBalance <= 10,
                                             'text-red-600': data.stock_level.stockBalance <= 0
                                         }"
                                     >
