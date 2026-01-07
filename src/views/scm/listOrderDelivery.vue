@@ -577,7 +577,7 @@ const fetchData = async (body = null) => {
              orderDelList.value = response.data.admin_data
             .map(order => ({
                 ...order,
-
+                orderDesc: order.orderDesc === 'Back Order'? 'Normal': order.orderDesc,
                 orderDateSearch: formatDate(order.orderDate),
                 orderTimeSearch: formatTime(order.orderDate),
                 etaDateSearch: formatDate(order.deliveryDate),

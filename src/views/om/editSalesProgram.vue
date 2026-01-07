@@ -112,7 +112,33 @@
                                 </div>
                             </div>
 
-                            <div class="md:col-start-3">
+                            <!-- Storage Location MultiSelect -->
+                            <div>
+                                <label class="block font-bold text-gray-700">Storage Location</label>
+                                <MultiSelect
+                                    v-model="salesProgram.storageLocation"
+                                    :options="storageLocationOptions"
+                                    optionLabel="label"
+                                    optionValue="value"
+                                    placeholder="Select Storage Locations"
+                                    class="w-full"
+                                    :filter="true"
+                                    display="chip"
+                                >
+                                    <template #value="slotProps">
+                                        <div v-if="slotProps.value && slotProps.value.length > 0" class="flex flex-wrap gap-1">
+                                            <span v-for="location in getSelectedStorageLabels(slotProps.value)" :key="location.value" class="bg-purple-100 text-purple-800 text-xs px-2 py-1 rounded">
+                                                {{ location.label }}
+                                            </span>
+                                        </div>
+                                        <span v-else>
+                                            {{ slotProps.placeholder }}
+                                        </span>
+                                    </template>
+                                </MultiSelect>
+                            </div>
+
+                            <div>
                                 <label class="block font-bold text-gray-700">Status</label>
                                 <Dropdown v-model="salesProgram.status" :options="statusOptions" optionLabel="label" optionValue="value" class="w-full" placeholder="Select Status" />
                             </div>
@@ -516,18 +542,17 @@ const submitting = ref(false);
 const imageLoading = ref(false);
 const loadingMaterials = ref(false);
 
-// Sales Program Data - REMOVED DEFAULT VALUES FOR showSP AND status
+// Sales Program Data
 const salesProgram = ref({
     programID: '',
-    // showSP: 1,  // REMOVED - will be set from API
     pricegroup: '06',
     type: 'FOC',
     programName: '',
     desc: '',
     startdate: '',
     enddate: '',
-    // status: 1,  // REMOVED - will be set from API
-    image: '' // Changed from imageUrl to image
+    storageLocation: [], // Added storage location
+    image: ''
 });
 
 const imageFile = ref(null);
@@ -555,6 +580,16 @@ const statusOptions = ref([
     { label: 'Inactive', value: 0 }
 ]);
 
+// Storage Location Options
+const storageLocationOptions = ref([
+    { label: 'RETP', value: 'RETP' },
+    { label: 'TMJB', value: 'TMJB' },
+    { label: 'TMSB', value: 'TMSB' },
+    { label: 'TMSA', value: 'TMSA' },
+    { label: 'TMSK', value: 'TMSK' },
+    { label: 'TMDS', value: 'TMDS' }
+]);
+
 // API Data
 const buyPatternOptions = ref([]);
 const freeMaterialOptions = ref([]);
@@ -575,8 +610,8 @@ const originalSelection = ref([]);
 
 // Material Filter - Updated for multi-select
 const materialFilter = ref({
-    selectedPatterns: [], // Changed from selectedPattern to selectedPatterns (array)
-    selectedRims: [], // Changed from selectedRim to selectedRims (array)
+    selectedPatterns: [],
+    selectedRims: [],
     availableRims: []
 });
 
@@ -590,6 +625,17 @@ const getSelectedPatternLabels = (selectedPatternValues) => {
         return {
             value: patternValue,
             label: pattern ? pattern.label : patternValue
+        };
+    });
+};
+
+// Helper function to get selected storage labels
+const getSelectedStorageLabels = (selectedStorageValues) => {
+    return selectedStorageValues.map((storageValue) => {
+        const location = storageLocationOptions.value.find((s) => s.value === storageValue);
+        return {
+            value: storageValue,
+            label: location ? location.label : storageValue
         };
     });
 };
@@ -674,16 +720,22 @@ const fetchSalesProgram = async () => {
                 status: programData.status,
                 title: programData.title,
                 startDate: programData.startDate,
-                endDate: programData.endDate
+                endDate: programData.endDate,
+                storageLocation: programData.storageLocation
             });
 
             // Process image (simplified - no API call)
             programData = await processPrivateImages(programData);
 
-            // Map API data to form structure - IMPORTANT: Use the actual values from API
+            // Process storageLocation - convert from comma-separated string to array
+            let storageLocationArray = [];
+            if (programData.storageLocation) {
+                storageLocationArray = programData.storageLocation.split(',').map(loc => loc.trim()).filter(loc => loc);
+            }
+
+            // Map API data to form structure
             salesProgram.value = {
                 programID: programData.programid,
-                // Use the actual value from API, default to 1 if null/undefined
                 showSP: programData.showSP !== null && programData.showSP !== undefined ? programData.showSP : 1,
                 pricegroup: programData.pricegroup || '06',
                 type: programData.type || 'FOC',
@@ -691,15 +743,16 @@ const fetchSalesProgram = async () => {
                 desc: programData.desc || '',
                 startdate: programData.startDate ? new Date(programData.startDate) : '',
                 enddate: programData.endDate ? new Date(programData.endDate) : '',
-                // Use the actual value from API, default to 1 if null/undefined
+                storageLocation: storageLocationArray, // Set storage location as array
                 status: programData.status !== null && programData.status !== undefined ? programData.status : 1,
-                image: programData.image || '' // Directly use image URL
+                image: programData.image || ''
             };
 
             // Debug log the mapped values
             console.log('Mapped salesProgram values:', {
                 showSP: salesProgram.value.showSP,
-                status: salesProgram.value.status
+                status: salesProgram.value.status,
+                storageLocation: salesProgram.value.storageLocation
             });
 
             // Load FOC criteria data
@@ -1117,7 +1170,7 @@ const loadFreeMaterials = async () => {
     }
 };
 
-// Form Validation - FIXED DATE VALIDATION
+// Form Validation
 const validateForm = () => {
     if (!salesProgram.value.programName) {
         showError('Please enter Program Title');
@@ -1126,6 +1179,12 @@ const validateForm = () => {
 
     if (!salesProgram.value.startdate || !salesProgram.value.enddate) {
         showError('Please select both Start Date and End Date');
+        return false;
+    }
+
+    // Add storage location validation
+    if (!salesProgram.value.storageLocation || salesProgram.value.storageLocation.length === 0) {
+        showError('Please select at least one storage location');
         return false;
     }
 
@@ -1180,7 +1239,7 @@ const validateForm = () => {
     return true;
 };
 
-// Submit Form for Update - FIXED VERSION WITH PROPER VALUE HANDLING
+// Submit Form for Update
 const submitForm = async () => {
     if (!validateForm()) {
         return;
@@ -1213,11 +1272,19 @@ const submitForm = async () => {
         formData.append('enddate', formatDate(salesProgram.value.enddate));
         // Make sure status is using the actual value from the form
         formData.append('status', salesProgram.value.status !== null && salesProgram.value.status !== undefined ? salesProgram.value.status : 1);
+        
+        // Add storageLocation to formData
+        if (salesProgram.value.storageLocation && salesProgram.value.storageLocation.length > 0) {
+            formData.append('storageLocation', JSON.stringify(salesProgram.value.storageLocation));
+        } else {
+            formData.append('storageLocation', JSON.stringify([]));
+        }
 
         // Debug what's being sent
         console.log('Sending values:', {
             showSP: salesProgram.value.showSP,
-            status: salesProgram.value.status
+            status: salesProgram.value.status,
+            storageLocation: salesProgram.value.storageLocation
         });
 
         // Append image if changed
