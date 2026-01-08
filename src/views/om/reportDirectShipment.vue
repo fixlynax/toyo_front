@@ -28,9 +28,13 @@
                     </div>
 
                     <!-- Action Buttons -->
-                    <div class="flex justify-end gap-4 mt-4">
-                        <Button label="Clear Filters" class="p-button-outlined p-button-secondary" @click="clearFilters" />
-                        <Button label="Export Excel" icon="pi pi-file-excel" class="p-button-success" @click="exportExcel" :loading="exportLoading" :disabled="!filters.period" />
+                    <div class="flex justify-end">
+                        <div class="flex gap-4 mt-4">
+                            <div style="width: 250px">
+                                <Button label="Clear Filters" class="p-button-outlined p-button-secondary" @click="clearFilters" />
+                            </div>
+                            <Button label="Export Excel" icon="pi pi-file-excel" class="p-button-success" @click="exportExcel" :loading="exportLoading" :disabled="!filters.period" />
+                        </div>
                     </div>
                 </div>
             </div>
@@ -74,7 +78,7 @@ const generateCustomerOptions = async () => {
         const response = await api.post('list_dealer', {
             tabs: 'ORDER'
         });
-        
+
         if (response.data.status === 1) {
             const dealerData = response.data.admin_data;
             const customers = new Map();
@@ -83,19 +87,14 @@ const generateCustomerOptions = async () => {
             Object.keys(dealerData).forEach((custAccountNo) => {
                 const dealer = dealerData[custAccountNo];
                 const shop = dealer.shop;
-                
+
                 // Only include shops that are main branches (eten_userID should be 0 for main branches)
                 if (shop && custAccountNo && shop.eten_userID === 0) {
                     // Build company name from companyName1-4 fields
-                    const companyNameParts = [
-                        shop.companyName1, 
-                        shop.companyName2, 
-                        shop.companyName3, 
-                        shop.companyName4
-                    ].filter(Boolean);
-                    
+                    const companyNameParts = [shop.companyName1, shop.companyName2, shop.companyName3, shop.companyName4].filter(Boolean);
+
                     const companyName = companyNameParts.join(' ').trim() || 'Unknown Dealer';
-                    
+
                     if (!customers.has(custAccountNo)) {
                         customers.set(custAccountNo, {
                             label: `${companyName} (${custAccountNo})`,

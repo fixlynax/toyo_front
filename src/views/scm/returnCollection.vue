@@ -478,7 +478,7 @@ const handleImport1 = async (event) => {
             toast.add({
                 severity: 'error',
                 summary: 'Import Failed',
-                detail: response.data.error || 'Failed to import data',
+                detail: response.data.message || 'Failed to import data',
                 life: 3000
             });
         }

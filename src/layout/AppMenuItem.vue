@@ -50,8 +50,8 @@ function itemClick(event, item) {
         return;
     }
 
-    if ((item.to || item.url) && (layoutState.staticMenuMobileActive || layoutState.overlayMenuActive)) {
-        toggleMenu();
+    if ((item.to || item.url) && !item.items) {
+        closeMenu(); 
     }
 
     if (item.command) {
@@ -66,6 +66,11 @@ function itemClick(event, item) {
 function checkActiveRoute(item) {
     return route.path === item.to;
 }
+const closeMenu = () => {
+    layoutState.overlayMenuActive = false;
+    layoutState.staticMenuMobileActive = false;
+    layoutState.staticMenuDesktopInactive = true;
+};
 </script>
 
 <template>

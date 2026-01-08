@@ -3,63 +3,38 @@
         <div class="flex flex-col gap-8">
             <!-- Header -->
             <div class="card flex flex-col gap-6 w-full">
-                <div class="text-2xl font-bold text-gray-800 border-b pb-2 mb-4">
-                    Report Own Collection
-                </div>
-                
+                <div class="text-2xl font-bold text-gray-800 border-b pb-2 mb-4">Report Own Collection</div>
+
                 <!-- Filters Section -->
                 <div>
                     <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
                         <!-- Customer Account -->
                         <div>
                             <label class="block font-bold text-gray-700 mb-2">Customer Account</label>
-                            <Dropdown 
-                                v-model="filters.custAccountNo" 
-                                :options="customerOptions" 
-                                optionLabel="label" 
-                                optionValue="value" 
-                                placeholder="Select Customer Account" 
-                                class="w-full" 
-                            />
+                            <Dropdown v-model="filters.custAccountNo" :options="customerOptions" optionLabel="label" optionValue="value" placeholder="Select Customer Account" class="w-full" />
                         </div>
 
                         <!-- Start Date -->
                         <div>
                             <label class="block font-bold text-gray-700 mb-2">Start Date</label>
-                            <Calendar 
-                                v-model="filters.startdate" 
-                                dateFormat="yy-mm-dd" 
-                                placeholder="Select Start Date" 
-                                class="w-full" 
-                            />
+                            <Calendar v-model="filters.startdate" dateFormat="yy-mm-dd" placeholder="Select Start Date" class="w-full" />
                         </div>
 
                         <!-- End Date -->
                         <div>
                             <label class="block font-bold text-gray-700 mb-2">End Date</label>
-                            <Calendar 
-                                v-model="filters.enddate" 
-                                dateFormat="yy-mm-dd" 
-                                placeholder="Select End Date" 
-                                class="w-full" 
-                            />
+                            <Calendar v-model="filters.enddate" dateFormat="yy-mm-dd" placeholder="Select End Date" class="w-full" />
                         </div>
                     </div>
 
                     <!-- Action Buttons -->
-                    <div class="flex justify-end gap-4 mt-4">
-                        <Button 
-                            label="Clear Filters" 
-                            class="p-button-outlined p-button-secondary" 
-                            @click="clearFilters" 
-                        />
-                        <Button 
-                            label="Export Excel" 
-                            icon="pi pi-file-excel" 
-                            class="p-button-success" 
-                            @click="exportExcel" 
-                            :loading="exportLoading" 
-                        />
+                    <div class="flex justify-end">
+                        <div class="flex gap-4 mt-4">
+                            <div style="width: 250px">
+                                <Button label="Clear Filters" class="p-button-outlined p-button-secondary" @click="clearFilters" />
+                            </div>
+                            <Button label="Export Excel" icon="pi pi-file-excel" class="p-button-success" @click="exportExcel" :loading="exportLoading" />
+                        </div>
                     </div>
                 </div>
             </div>
@@ -93,7 +68,7 @@ const generateCustomerOptions = async () => {
         const response = await api.post('list_dealer', {
             tabs: 'ORDER'
         });
-        
+
         if (response.data.status === 1) {
             const dealerData = response.data.admin_data;
             const customers = new Map();
@@ -102,19 +77,14 @@ const generateCustomerOptions = async () => {
             Object.keys(dealerData).forEach((custAccountNo) => {
                 const dealer = dealerData[custAccountNo];
                 const shop = dealer.shop;
-                
+
                 // Only include shops that are main branches (eten_userID should be 0 for main branches)
                 if (shop && custAccountNo && shop.eten_userID === 0) {
                     // Build company name from companyName1-4 fields
-                    const companyNameParts = [
-                        shop.companyName1, 
-                        shop.companyName2, 
-                        shop.companyName3, 
-                        shop.companyName4
-                    ].filter(Boolean);
-                    
+                    const companyNameParts = [shop.companyName1, shop.companyName2, shop.companyName3, shop.companyName4].filter(Boolean);
+
                     const companyName = companyNameParts.join(' ').trim() || 'Unknown Customer';
-                    
+
                     if (!customers.has(custAccountNo)) {
                         customers.set(custAccountNo, {
                             label: `${companyName} (${custAccountNo})`,

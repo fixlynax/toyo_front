@@ -113,7 +113,7 @@
                                 </tr>
                                 <tr class="border-b">
                                     <td class="px-4 py-2 font-medium">Order Description</td>
-                                    <td class="px-4 py-2 text-right font-medium">{{ orderDelList.orderDesc || '-' }}</td>
+                                    <td class="px-4 py-2 text-right font-medium">{{orderDelList?.orderDesc === 'Back Order' ? 'NORMAL': (orderDelList?.orderDesc || '-')}}</td>
                                 </tr>
                                 <tr class="border-b">
                                     <td class="px-4 py-2 font-medium">SO No</td>

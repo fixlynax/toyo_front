@@ -35,7 +35,7 @@
                         </div>
                         <div>
                             <label class="block font-bold text-gray-700 mb-2">Status</label>
-                            <Dropdown v-model="form.status":options="statusCode" optionLabel="label"optionValue="value"placeholder="Select State" class="w-full"/>
+                            <Dropdown v-model="form.status":options="statusCode" optionLabel="label"optionValue="value"placeholder="Select Status" class="w-full"/>
                         </div>
                     </div>
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -282,7 +282,7 @@ const InitfetchData = async () => {
                 phoneno: logisticList.value.phoneno || '',
                 contactperson: logisticList.value.contactperson || '',
                 mobileno: logisticList.value.mobileno || '',
-                status: logisticList.value.status || '',
+                status: logisticList.value.status || 0,
                 storage_list: logisticList.value.storageLocationList
                     ? logisticList.value.storageLocationList.split(',')
                     : []
