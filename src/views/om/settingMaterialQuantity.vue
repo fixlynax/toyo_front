@@ -550,7 +550,7 @@ const handleImport = async (event) => {
     try {
         importLoading.value = true;
 
-        const formData = new FormData();
+        const formData = new FormData(); 
         formData.append('excel_file', file);
         // You might want to pass dealer IDs in the import request too
         formData.append('dealer_ids', JSON.stringify(selectedDealers.value));
