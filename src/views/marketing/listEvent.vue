@@ -103,8 +103,8 @@ import LoadingPage from '@/components/LoadingPage.vue';
 import { useMenuStore } from '@/store/menu';
  
 const menuStore = useMenuStore();
-const canUpdate = computed(() => menuStore.canWrite('Event Management'));
-const denyAccess = computed(() => menuStore.canTest('Event Management'));
+const canUpdate = computed(() => menuStore.canWrite('Events Management'));
+const denyAccess = computed(() => menuStore.canTest('Events Management'));
 // Data variables
 const listData = ref([]);
 const initialLoading = ref(true); // For initial page load
