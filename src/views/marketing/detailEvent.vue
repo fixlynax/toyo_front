@@ -198,8 +198,8 @@ import api from '@/service/api';
 import { useMenuStore } from '@/store/menu';
  
 const menuStore = useMenuStore();
-const canUpdate = computed(() => menuStore.canWrite('Event Management'));
-const denyAccess = computed(() => menuStore.canTest('Event Management'));
+const canUpdate = computed(() => menuStore.canWrite('Events Management'));
+const denyAccess = computed(() => menuStore.canTest('Events Management'));
 
 const route = useRoute();
 const router = useRouter();

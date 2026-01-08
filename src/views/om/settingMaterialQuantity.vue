@@ -5,32 +5,108 @@
         <LoadingPage v-if="globalLoading" message="Loading..." />
 
         <div v-else>
+            <!-- Dealer and Material Selection -->
             <div class="p-4 mb-4 bg-gray-50 rounded-lg">
-                <div class="flex items-center gap-4 flex-wrap">
-                    <div class="flex-1">
-                        <Dropdown v-model="selectedDealer" :options="dealerOptions" optionLabel="label" optionValue="value" placeholder="Select a dealer" class="w-full" :loading="loadingDealers" :disabled="loadingDealers" @change="onDealerChange" />
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                    <!-- Dealer Multi-Select -->
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Select Dealers</label>
+                        <MultiSelect
+                            v-model="selectedDealers"
+                            :options="dealerOptions"
+                            optionLabel="label"
+                            optionValue="value"
+                            :placeholder="loadingDealers ? 'Loading dealers...' : 'Select dealers'"
+                            display="chip"
+                            :loading="loadingDealers"
+                            :disabled="loadingDealers"
+                            class="w-full"
+                            :maxSelectedLabels="3"
+                            @change="onSelectionChange"
+                        >
+                            <template #value="slotProps">
+                                <div v-if="slotProps.value && slotProps.value.length">
+                                    <Chip v-for="dealer in getSelectedDealerNames(slotProps.value)" :key="dealer.value" :label="dealer.label" class="mr-2 mb-1" />
+                                </div>
+                                <span v-else>{{ slotProps.placeholder }}</span>
+                            </template>
+                        </MultiSelect>
+                        <div v-if="selectedDealers.length > 0" class="mt-2 text-sm text-gray-500">
+                            Selected: {{ selectedDealers.length }} dealer(s)
+                        </div>
                     </div>
 
-                    <div v-if="selectedDealer" class="flex items-end gap-2">
-                        <Button label="Clear Selection" icon="pi pi-times" severity="secondary" @click="clearDealerSelection" />
+                    <!-- Material Multi-Select -->
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Select Materials</label>
+                        <MultiSelect
+                            v-model="selectedMaterials"
+                            :options="materialOptions"
+                            optionLabel="label"
+                            optionValue="value"
+                            placeholder="Select materials"
+                            display="chip"
+                            :loading="loadingMaterialsList"
+                            :disabled="loadingMaterialsList || !materialsLoaded"
+                            class="w-full"
+                            :maxSelectedLabels="3"
+                            @change="onSelectionChange"
+                        >
+                            <template #value="slotProps">
+                                <div v-if="slotProps.value && slotProps.value.length">
+                                    <Chip v-for="material in getSelectedMaterialNames(slotProps.value)" :key="material.value" :label="material.label" class="mr-2 mb-1" />
+                                </div>
+                                <span v-else>{{ slotProps.placeholder }}</span>
+                            </template>
+                        </MultiSelect>
+                        <div v-if="selectedMaterials.length > 0" class="mt-2 text-sm text-gray-500">
+                            Selected: {{ selectedMaterials.length }} material(s)
+                        </div>
+                        <div v-else class="mt-2 text-sm text-gray-500">
+                            Leave empty to select all materials
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Action Buttons -->
+                <div class="flex items-center justify-between mt-4 pt-4 border-t">
+                    <div class="flex items-center gap-2">
+                        <Button 
+                            label="Clear All Selections" 
+                            icon="pi pi-times" 
+                            severity="secondary" 
+                            @click="clearAllSelections"
+                            :disabled="!hasSelections"
+                        />
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <Button 
+                            label="Load Materials" 
+                            icon="pi pi-search" 
+                            class="p-button-primary"
+                            @click="fetchEtenMaterials"
+                            :loading="tableLoading"
+                            :disabled="!canLoadMaterials"
+                        />
                     </div>
                 </div>
             </div>
 
-            <div v-if="selectedDealer && !loadingMaterials">
+            <!-- Results Table -->
+            <div v-if="showResults && !loadingEtenMaterials">
                 <DataTable
                     :value="materialList"
                     :paginator="true"
                     :rows="10"
                     :rowsPerPageOptions="[10, 20, 50, 100]"
-                    dataKey="material_id"
+                    dataKey="id"
                     removableSort
                     :rowHover="true"
                     :loading="tableLoading"
                     :filters="filters"
                     filterDisplay="menu"
                     class="rounded-table"
-                    :globalFilterFields="['pattern_name', 'material_id', 'material_desc']"
+                    :globalFilterFields="['pattern_name', 'material_id', 'material_desc', 'eten_name', 'custAccountNo']"
                     paginatorTemplate="CurrentPageReport FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink RowsPerPageDropdown"
                     currentPageReportTemplate="Showing {first} to {last} of {totalRecords} entries"
                 >
@@ -41,15 +117,15 @@
                                     <InputIcon>
                                         <i class="pi pi-search" />
                                     </InputIcon>
-                                    <InputText v-model="filters['global'].value" placeholder="Search by pattern, material ID, or description" class="w-full" />
+                                    <InputText v-model="filters['global'].value" placeholder="Search by pattern, material ID, description, or dealer" class="w-full" />
                                 </IconField>
                             </div>
 
                             <div class="flex items-center gap-2 ml-auto">
-                                <Button type="button" label="Export Excel" icon="pi pi-file-export" class="p-button-success" @click="exportMaterials" :loading="exportLoading" />
-                                <Button type="button" label="Bulk Update" icon="pi pi-file-import" class="p-button-primary" @click="triggerImport" :loading="importLoading" :disabled="!selectedDealer" />
+                                <Button type="button" label="Export Excel" icon="pi pi-file-export" class="p-button-success" @click="exportMaterials" :loading="exportLoading" :disabled="!canExport" />
+                                <Button type="button" label="Bulk Update" icon="pi pi-file-import" class="p-button-primary" @click="triggerImport" :loading="importLoading" :disabled="!canImport" />
                                 <input ref="importFileInput" type="file" accept=".xlsx,.xls,.csv" style="display: none" @change="handleImport" />
-                                <Button type="button" icon="pi pi-refresh" class="p-button-secondary" @click="fetchMaterials" :loading="tableLoading" />
+                                <Button type="button" icon="pi pi-refresh" class="p-button-secondary" @click="fetchEtenMaterials" :loading="tableLoading" :disabled="!canLoadMaterials" />
                             </div>
                         </div>
                     </template>
@@ -57,7 +133,7 @@
                     <template #empty>
                         <div class="text-center py-8 text-gray-500">
                             <i class="pi pi-inbox text-4xl mb-2"></i>
-                            <p>No material data found for selected dealer.</p>
+                            <p>No material data found for selected criteria.</p>
                         </div>
                     </template>
 
@@ -67,6 +143,15 @@
                             <p class="mt-2">Loading material data...</p>
                         </div>
                     </template>
+
+                    <Column field="eten_name" header="Dealer" style="min-width: 15rem" sortable>
+                        <template #body="{ data }">
+                            <div>
+                                <div class="font-medium">{{ data.eten_name }}</div>
+                                <div class="text-xs text-gray-500">{{ data.custAccountNo }}</div>
+                            </div>
+                        </template>
+                    </Column>
 
                     <Column field="pattern_name" header="Pattern" style="min-width: 12rem" sortable>
                         <template #body="{ data }">
@@ -81,29 +166,45 @@
 
                     <Column field="material_desc" header="Description" style="min-width: 15rem" sortable />
 
-                    <Column field="max_qty" header="Max Quantity" style="min-width: 8rem" sortable>
+                    <Column field="normal_qty" header="Normal Qty" style="min-width: 8rem" sortable>
                         <template #body="{ data }">
                             <div
                                 class="font-semibold"
                                 :class="{
-                                    'text-green-600': data.max_qty > 0,
-                                    'text-gray-400': data.max_qty === 0
+                                    'text-green-600': data.normal_qty !== 'Not Set' && data.normal_qty > 0,
+                                    'text-gray-400': data.normal_qty === 'Not Set' || data.normal_qty === 0
                                 }"
                             >
-                                {{ data.max_qty || 0 }}
+                                {{ data.normal_qty }}
+                            </div>
+                        </template>
+                    </Column>
+
+                    <Column field="ds_qty" header="DS Qty" style="min-width: 8rem" sortable>
+                        <template #body="{ data }">
+                            <div
+                                class="font-semibold"
+                                :class="{
+                                    'text-blue-600': data.ds_qty !== 'Not Set' && data.ds_qty > 0,
+                                    'text-gray-400': data.ds_qty === 'Not Set' || data.ds_qty === 0
+                                }"
+                            >
+                                {{ data.ds_qty }}
                             </div>
                         </template>
                     </Column>
                 </DataTable>
             </div>
 
-            <div v-else-if="!selectedDealer && !loadingMaterials" class="text-center py-12 bg-gray-50 rounded-lg">
-                <i class="pi pi-users text-5xl text-gray-300 mb-4"></i>
-                <h3 class="text-xl font-semibold text-gray-600 mb-2">Select a Dealer</h3>
-                <p class="text-gray-500 mb-4">Please select a dealer from the dropdown above to view and manage their materials.</p>
+            <!-- Initial State -->
+            <div v-else-if="!showResults && !loadingEtenMaterials" class="text-center py-12 bg-gray-50 rounded-lg">
+                <i class="pi pi-search text-5xl text-gray-300 mb-4"></i>
+                <h3 class="text-xl font-semibold text-gray-600 mb-2">Select Criteria</h3>
+                <p class="text-gray-500 mb-4">Please select at least one dealer and click "Load Materials" to view data.</p>
             </div>
         </div>
 
+        <!-- Import Result Dialog -->
         <Dialog v-model:visible="showImportResult" header="Import Results" :modal="true" :style="{ width: '600px' }">
             <div class="p-4">
                 <div class="mb-4">
@@ -148,15 +249,20 @@ const canUpdate = computed(() => menuStore.canWrite('Material Management'));
 
 const globalLoading = ref(false);
 const loadingDealers = ref(false);
-const loadingMaterials = ref(false);
+const loadingMaterialsList = ref(false);
+const loadingEtenMaterials = ref(false);
 const tableLoading = ref(false);
 const exportLoading = ref(false);
 const importLoading = ref(false);
 const showImportResult = ref(false);
+const showResults = ref(false);
+const materialsLoaded = ref(false);
 
 const dealerList = ref([]);
-const selectedDealer = ref(null);
-const selectedDealerData = ref(null); // NEW: Store the full dealer data
+const materialListData = ref([]); // From list-material API
+const selectedDealers = ref([]);
+const selectedMaterials = ref([]);
+const selectedDealersData = ref([]);
 const materialList = ref([]);
 const importResult = ref({});
 
@@ -166,25 +272,51 @@ const filters = ref({
 
 const dealerOptions = computed(() => {
     return dealerList.value.map((dealer) => {
-        // Debug log to check structure
-        console.log('Dealer item:', dealer);
-
-        // Get shop data (it could be direct or nested)
         const shopData = dealer.shop || dealer;
-
         return {
             label: `${shopData.companyName1} (${shopData.custAccountNo})`,
-            value: shopData.id, // This should be the shop ID
-            data: dealer // Store the full dealer data
+            value: shopData.id,
+            data: dealer
         };
     });
 });
 
-const getSelectedDealerName = () => {
-    if (!selectedDealer.value || !selectedDealerData.value) return '';
+const materialOptions = computed(() => {
+    return materialListData.value.map((material) => ({
+        label: `${material.materialid} - ${material.material}`,
+        value: material.materialid,
+        data: material
+    }));
+});
 
-    const shopData = selectedDealerData.value.shop || selectedDealerData.value;
-    return shopData.companyName1 || '';
+const hasSelections = computed(() => {
+    return selectedDealers.value.length > 0 || selectedMaterials.value.length > 0;
+});
+
+const canLoadMaterials = computed(() => {
+    return selectedDealers.value.length > 0;
+});
+
+const canExport = computed(() => {
+    return selectedDealers.value.length > 0 && materialList.value.length > 0;
+});
+
+const canImport = computed(() => {
+    return selectedDealers.value.length > 0;
+});
+
+const getSelectedDealerNames = (dealerIds) => {
+    return dealerIds.map(id => {
+        const dealer = dealerOptions.value.find(d => d.value === id);
+        return dealer || { label: 'Unknown', value: id };
+    });
+};
+
+const getSelectedMaterialNames = (materialIds) => {
+    return materialIds.map(id => {
+        const material = materialOptions.value.find(m => m.value === id);
+        return material || { label: id, value: id };
+    });
 };
 
 const fetchDealers = async () => {
@@ -195,23 +327,11 @@ const fetchDealers = async () => {
         });
 
         if (response.data.status === 1) {
-            // Handle both response structures
             let dealers = response.data.admin_data;
-
-            // If admin_data is an object (original structure), convert to array
             if (dealers && typeof dealers === 'object' && !Array.isArray(dealers)) {
                 dealers = Object.values(dealers);
             }
-
-            // Ensure we have an array
             dealerList.value = Array.isArray(dealers) ? dealers : [];
-
-            console.log('Dealers loaded:', dealerList.value.length, 'items');
-            if (dealerList.value.length > 0) {
-                console.log('First dealer full data:', dealerList.value[0]);
-                console.log('First dealer shop ID:', dealerList.value[0].shop?.id || dealerList.value[0].id);
-                console.log('First dealer custAccountNo:', dealerList.value[0].shop?.custAccountNo || dealerList.value[0].custAccountNo);
-            }
         } else {
             dealerList.value = [];
             toast.add({
@@ -232,79 +352,31 @@ const fetchDealers = async () => {
         });
     } finally {
         loadingDealers.value = false;
-        globalLoading.value = false;
     }
 };
 
-const onDealerChange = async () => {
-    if (!selectedDealer.value) {
-        materialList.value = [];
-        selectedDealerData.value = null;
-        return;
-    }
-
-    // Find and store the selected dealer data
-    selectedDealerData.value = dealerList.value.find((dealer) => {
-        const shopData = dealer.shop || dealer;
-        return shopData.id === selectedDealer.value;
-    });
-
-    console.log('Selected dealer ID:', selectedDealer.value);
-    console.log('Selected dealer data:', selectedDealerData.value);
-
-    if (selectedDealerData.value) {
-        const shopData = selectedDealerData.value.shop || selectedDealerData.value;
-        console.log('Shop ID to use:', shopData.id);
-        console.log('CustAccountNo:', shopData.custAccountNo);
-    }
-
-    await fetchMaterials();
-};
-
-const fetchMaterials = async () => {
-    if (!selectedDealer.value || !selectedDealerData.value) return;
-
+const fetchMaterialList = async () => {
     try {
-        loadingMaterials.value = true;
-        tableLoading.value = true;
-
-        const shopData = selectedDealerData.value.shop || selectedDealerData.value;
-        console.log('Fetching materials for dealer:', {
-            selectedDealerId: selectedDealer.value,
-            shopId: shopData.id,
-            custAccountNo: shopData.custAccountNo
+        loadingMaterialsList.value = true;
+        const response = await api.post('list-material', {
+            type: 'SETMAX'
         });
 
-        // Use the shop ID that we stored
-        const response = await api.get(`maintenance/getEtenMaterial/${selectedDealer.value}`);
-
-        console.log('API Response:', response.data);
-
         if (response.data.status === 1) {
-            materialList.value = response.data.admin_data;
-            console.log('Materials loaded:', materialList.value.length, 'items');
-            console.log('Materials data:', materialList.value);
-
-            toast.add({
-                severity: 'success',
-                summary: 'Success',
-                detail: `Loaded ${materialList.value.length} materials`,
-                life: 3000
-            });
+            materialListData.value = response.data.admin_data || [];
+            materialsLoaded.value = true;
         } else {
-            materialList.value = [];
-            console.log('No materials found or API error:', response.data);
+            materialListData.value = [];
             toast.add({
                 severity: 'warn',
                 summary: 'Warning',
-                detail: 'No materials found for this dealer',
+                detail: 'No materials found',
                 life: 3000
             });
         }
     } catch (error) {
         console.error('Error fetching materials:', error);
-        console.error('Error details:', error.response?.data || error.message);
-        materialList.value = [];
+        materialListData.value = [];
         toast.add({
             severity: 'error',
             summary: 'Error',
@@ -312,17 +384,85 @@ const fetchMaterials = async () => {
             life: 3000
         });
     } finally {
-        loadingMaterials.value = false;
+        loadingMaterialsList.value = false;
+        globalLoading.value = false;
+    }
+};
+
+const onSelectionChange = () => {
+    showResults.value = false;
+    materialList.value = [];
+};
+
+const fetchEtenMaterials = async () => {
+    if (!selectedDealers.value.length) {
+        toast.add({
+            severity: 'warn',
+            summary: 'Warning',
+            detail: 'Please select at least one dealer',
+            life: 3000
+        });
+        return;
+    }
+
+    try {
+        loadingEtenMaterials.value = true;
+        tableLoading.value = true;
+
+        // Prepare request data
+        const requestData = {
+            ids: selectedDealers.value
+        };
+
+        // Only add materialid if materials are selected
+        if (selectedMaterials.value.length > 0) {
+            requestData.materialid = selectedMaterials.value;
+        }
+
+        const response = await api.post('maintenance/getEtenMaterial', requestData);
+
+        if (response.data.status === 1) {
+            materialList.value = response.data.admin_data;
+            showResults.value = true;
+            
+            toast.add({
+                severity: 'success',
+                summary: 'Success',
+                detail: `Loaded ${materialList.value.length} material records`,
+                life: 3000
+            });
+        } else {
+            materialList.value = [];
+            showResults.value = true;
+            toast.add({
+                severity: 'warn',
+                summary: 'Warning',
+                detail: response.data.error || 'No materials found for selected criteria',
+                life: 3000
+            });
+        }
+    } catch (error) {
+        console.error('Error fetching ETEN materials:', error);
+        materialList.value = [];
+        showResults.value = false;
+        toast.add({
+            severity: 'error',
+            summary: 'Error',
+            detail: 'Failed to load materials',
+            life: 3000
+        });
+    } finally {
+        loadingEtenMaterials.value = false;
         tableLoading.value = false;
     }
 };
 
 const exportMaterials = async () => {
-    if (!selectedDealer.value || !selectedDealerData.value) {
+    if (!selectedDealers.value.length) {
         toast.add({
             severity: 'warn',
             summary: 'Warning',
-            detail: 'Please select a dealer first',
+            detail: 'Please select at least one dealer',
             life: 3000
         });
         return;
@@ -331,8 +471,18 @@ const exportMaterials = async () => {
     try {
         exportLoading.value = true;
 
-        const response = await api.getDownload(`maintenance/exportEtenMaterial/${selectedDealer.value}`, {
-            responseType: 'arraybuffer'
+        // Prepare request data
+        const requestData = {
+            ids: selectedDealers.value
+        };
+
+        // Only add materialid if materials are selected
+        if (selectedMaterials.value.length > 0) {
+            requestData.materialid = selectedMaterials.value;
+        }
+
+        const response = await api.postExtra('maintenance/exportEtenMaterial', requestData, {
+            responseType: 'blob'
         });
 
         const blob = new Blob([response.data], {
@@ -342,11 +492,7 @@ const exportMaterials = async () => {
         const url = window.URL.createObjectURL(blob);
         const a = document.createElement('a');
         a.href = url;
-
-        const shopData = selectedDealerData.value.shop || selectedDealerData.value;
-        const dealerName = shopData.custAccountNo || 'materials';
-        a.download = `${dealerName}_material_list.xlsx`;
-
+        a.download = `eten_materials_${new Date().getTime()}.xlsx`;
         document.body.appendChild(a);
         a.click();
         document.body.removeChild(a);
@@ -372,11 +518,11 @@ const exportMaterials = async () => {
 };
 
 const triggerImport = () => {
-    if (!selectedDealer.value) {
+    if (!selectedDealers.value.length) {
         toast.add({
             severity: 'warn',
             summary: 'Warning',
-            detail: 'Please select a dealer first',
+            detail: 'Please select at least one dealer first',
             life: 3000
         });
         return;
@@ -391,11 +537,11 @@ const handleImport = async (event) => {
     const file = event.target.files[0];
     if (!file) return;
 
-    if (!selectedDealer.value) {
+    if (!selectedDealers.value.length) {
         toast.add({
             severity: 'error',
             summary: 'Error',
-            detail: 'No dealer selected',
+            detail: 'No dealers selected',
             life: 3000
         });
         return;
@@ -404,10 +550,12 @@ const handleImport = async (event) => {
     try {
         importLoading.value = true;
 
-        const formData = new FormData();
+        const formData = new FormData(); 
         formData.append('excel_file', file);
+        // You might want to pass dealer IDs in the import request too
+        formData.append('dealer_ids', JSON.stringify(selectedDealers.value));
 
-        const response = await api.postExtra(`maintenance/importEtenMaterial/${selectedDealer.value}`, formData, {
+        const response = await api.postExtra('maintenance/importEtenMaterial', formData, {
             headers: {
                 'Content-Type': 'multipart/form-data'
             }
@@ -449,22 +597,26 @@ const handleImport = async (event) => {
 
 const handleImportComplete = async () => {
     showImportResult.value = false;
-    await fetchMaterials();
+    await fetchEtenMaterials();
 };
 
-const clearDealerSelection = () => {
-    selectedDealer.value = null;
-    selectedDealerData.value = null;
+const clearAllSelections = () => {
+    selectedDealers.value = [];
+    selectedMaterials.value = [];
+    selectedDealersData.value = [];
     materialList.value = [];
+    showResults.value = false;
 };
 
 onMounted(async () => {
     globalLoading.value = true;
-    await fetchDealers();
+    await Promise.all([fetchDealers(), fetchMaterialList()]);
+    globalLoading.value = false;
 });
 </script>
 
 <style scoped>
+/* Keep your existing styles, they work well */
 :deep(.rounded-table) {
     border-radius: 12px;
     overflow: hidden;

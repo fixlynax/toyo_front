@@ -40,9 +40,13 @@
                     </div>
 
                     <!-- Action Buttons -->
-                    <div class="flex justify-end gap-4 mt-4">
-                        <Button label="Clear Filters" class="p-button-outlined p-button-secondary" @click="clearFilters" />
-                        <Button label="Export Excel" icon="pi pi-file-excel" class="p-button-success" @click="exportExcel" :loading="exportLoading" />
+                    <div class="flex justify-end">
+                        <div class="flex gap-4 mt-4">
+                            <div style="width: 250px">
+                                <Button label="Clear Filters" class="p-button-outlined p-button-secondary" @click="clearFilters" />
+                            </div>
+                            <Button label="Export Excel" icon="pi pi-file-excel" class="p-button-success" @click="exportExcel" :loading="exportLoading" />
+                        </div>
                     </div>
                 </div>
             </div>
@@ -87,7 +91,7 @@ const generateCustomerOptions = async () => {
         const response = await api.post('list_dealer', {
             tabs: 'ORDER'
         });
-        
+
         if (response.data.status === 1) {
             const dealerData = response.data.admin_data;
             const customers = new Map();
@@ -96,19 +100,14 @@ const generateCustomerOptions = async () => {
             Object.keys(dealerData).forEach((custAccountNo) => {
                 const dealer = dealerData[custAccountNo];
                 const shop = dealer.shop;
-                
+
                 // Only include shops that are main branches (eten_userID should be 0 for main branches)
                 if (shop && custAccountNo && shop.eten_userID === 0) {
                     // Build company name from companyName1-4 fields
-                    const companyNameParts = [
-                        shop.companyName1, 
-                        shop.companyName2, 
-                        shop.companyName3, 
-                        shop.companyName4
-                    ].filter(Boolean);
-                    
+                    const companyNameParts = [shop.companyName1, shop.companyName2, shop.companyName3, shop.companyName4].filter(Boolean);
+
                     const companyName = companyNameParts.join(' ').trim() || 'Unknown Customer';
-                    
+
                     if (!customers.has(custAccountNo)) {
                         customers.set(custAccountNo, {
                             label: `${companyName} (${custAccountNo})`,
@@ -218,12 +217,11 @@ const exportExcel = async () => {
         document.body.appendChild(link);
         link.click();
         link.remove();
-        
+
         // Clean up
         setTimeout(() => {
             window.URL.revokeObjectURL(url);
         }, 100);
-        
     } catch (error) {
         console.error('Error exporting Excel:', error);
         alert('Failed to export Excel file. Please try again.');
@@ -235,12 +233,12 @@ const exportExcel = async () => {
 // ✅ Helper function to format date for API (yy-mm-dd)
 const formatDateForAPI = (date) => {
     if (!date) return null;
-    
+
     const d = new Date(date);
     const year = d.getFullYear();
     const month = String(d.getMonth() + 1).padStart(2, '0');
     const day = String(d.getDate()).padStart(2, '0');
-    
+
     return `${year}-${month}-${day}`;
 };
 
