@@ -24,6 +24,14 @@
                             <span class="block text-lg font-bold text-black-700">Registered Date</span>
                             <p class="text-lg font-medium">{{ formatDateOnly(Warranty.warranty_info?.date_registered || '-' )}}</p>
                         </div>
+                        <div class="mt-6">
+                            <span class="block text-lg font-bold text-black-700">TWP</span>
+                            <Tag :value="Warranty.warranty_info?.isTWP === 1 ? 'Yes' : 'No'" :severity="getOverallStatusSeverity(Warranty.warranty_info?.isTWP)" />
+                        </div>
+                        <div class="mt-6">
+                            <span class="block text-lg font-bold text-black-700">Expiry Date</span>
+                             <p class="text-lg font-medium">{{ formatDateOnly2(Warranty.warranty_info?.expiredDate || '-' ) }}</p>
+                        </div>
                         <div class="grid grid-cols-1 md:grid-cols-1 gap-4">
                             <div v-if="Warranty.warranty_info?.registrationCard" class="rounded-xl overflow-hidden shadow-sm bg-gray-100 mb-6">
                                 <span class="block text-lg font-bold text-black-800 mb-3 text-center">Registration Card</span>
@@ -183,6 +191,9 @@ const WarrantyId = route.params.id;
 const loading = ref(true);
 // Removed: const deleteDialog = ref(false);
 
+const getOverallStatusSeverity = (status) => {
+    return status === 1 ? 'success' : 'danger';
+};
 // Warranty data
 
 const surveyQuestions = ref([]);
@@ -248,6 +259,14 @@ function formatDateOnly(dateString) {
     return `${day}/${month}/${year}`;
 }
 
+function formatDateOnly2(dateString) {
+    if (!dateString) return '';
+
+    const [day, month, year] = dateString.split('-');
+    if (!day || !month || !year) return '';
+
+    return `${day.padStart(2, '0')}/${month.padStart(2, '0')}/${year}`;
+}
 onMounted(() => {
     fetchWarrantyDetails();
 });
