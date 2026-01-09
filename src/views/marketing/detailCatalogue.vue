@@ -11,6 +11,7 @@
                                 <Button icon="pi pi-arrow-left font-bold" class="p-button-text p-button-secondary text-xl" v-tooltip="'Back'" />
                             </RouterLink>
                             <div class="text-2xl font-bold text-gray-800">Reward Catalogue Details </div>
+                        <Button icon="pi pi-download" label="Export Report" style="width: fit-content" class="p-button-primary p-button-sm" @click="fetchExport" />
                         </div>
 
                         <!-- Edit & Delete Buttons -->
@@ -118,6 +119,8 @@
                                 <Button icon="pi pi-arrow-left font-bold" class="p-button-text p-button-secondary text-xl" v-tooltip="'Back'" />
                             </RouterLink>
                             <div class="text-2xl font-bold text-gray-800">Reward Catalogue Details </div>
+                        <Button icon="pi pi-download" label="Export Report" style="width: fit-content" class="p-button-primary p-button-sm" @click="fetchExport" />
+
                         </div>
 
                         <!-- Edit & Delete Buttons -->
@@ -182,6 +185,7 @@
                                 <Button icon="pi pi-arrow-left font-bold" class="p-button-text p-button-secondary text-xl" v-tooltip="'Back'" />
                             </RouterLink>
                             <div class="text-2xl font-bold text-gray-800">Reward Catalogue Details </div>
+                        <Button icon="pi pi-download" label="Export Report" style="width: fit-content" class="p-button-primary p-button-sm" @click="fetchExport" />
                         </div>
 
                         <!-- Edit & Delete Buttons -->
@@ -615,6 +619,48 @@ const formatType = (type) => {
     };
     return typeMap[type] || type;
 };
+
+const fetchExport = async () => {
+    try {
+        exportLoading.value = true;
+        const catalogueId = route.params.id;
+
+         const response = await api.getDownload(
+            `excel/export-catalog-history/${catalogueId}`,
+            { responseType: 'arraybuffer' }
+        );
+
+        const blob = new Blob([response.data], {
+            type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+        });
+
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = 'CatalogDetails_Report.xlsx';
+        a.click();
+        URL.revokeObjectURL(url);
+
+        toast.add({
+            severity: 'success',
+            summary: 'Success',
+            detail: 'Export completed',
+            life: 3000
+        });
+
+    } catch (error) {
+        console.error('Export error:', error);
+        toast.add({
+            severity: 'error',
+            summary: 'Error',
+            detail: 'Export failed',
+            life: 3000
+        });
+    } finally {
+        exportLoading.value = false;
+    }
+};
+
 
 const formatValueType = (valueType) => {
     const typeMap = {

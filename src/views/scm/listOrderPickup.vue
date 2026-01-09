@@ -20,8 +20,8 @@
                 class="rounded-table"
                 :globalFilterFields="[
                     'do_no',
-                    'orderDateSearch',
-                    'orderTimeSearch',
+                    'createdDateSearch',
+                    'createdTimeSearch',
                     'eten_user.custAccountNo',
                     'eten_user.companyName1',
                     'eten_user.companyName2',
@@ -94,11 +94,11 @@
                         </div>
                     </template>
                 </Column>
-                <Column field="orderDate" header="Created On" style="min-width: 8rem" sortable>
+                <Column field="created" header="Created On" style="min-width: 8rem" sortable>
                     <template #body="{ data }">
-                        {{ data.orderDateSearch?? '-' }}
+                        {{ data.createdDateSearch?? '-' }}
                         <br/>
-                        {{ data.orderTimeSearch?? '-' }}
+                        {{ data.createdTimeSearch?? '-' }}
                     </template>
                 </Column>
 
@@ -707,11 +707,11 @@ const fetchData = async (body = null) => {
             .map(order => ({
                 ...order,
 
-                orderDateSearch: formatDate(order.orderDate),
-                orderTimeSearch: formatTime(order.orderDate),
+                createdDateSearch: formatDate(order.created),
+                createdTimeSearch: formatTime(order.created),
                 pickupDateSearch: formatDate(order.driverInformation?.pickup_datetime)
             }))
-            .sort((a, b) => new Date(b.orderDate) - new Date(a.orderDate));
+            .sort((a, b) => new Date(b.created) - new Date(a.created));
         } else {
             orderDelList.value = [];
             toast.add({ severity: 'error', summary: 'Error', detail: response.data.message || 'Failed to load data', life: 3000 });
@@ -739,7 +739,7 @@ const exportToExcel = () => {
 
         // Prepare data rows
         const csvData = rowsToExport.map((data) => [
-            `"${data.orderDateSearch} ${data.orderTimeSearch}"`,
+            `"${data.createdDateSearch} ${data.createdTimeSearch}"`,
             `"${data.do_no || '-'}"`,
             `"${data.eten_user?.companyName1} ${data.eten_user?.companyName2} ${data.eten_user?.companyName3} ${data.eten_user?.companyName4}"`,
             `"${data.eten_user?.custAccountNo || '-'}"`,

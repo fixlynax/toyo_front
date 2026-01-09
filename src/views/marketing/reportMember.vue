@@ -23,12 +23,12 @@
                         </div>
                     </div>
 
-                    <!-- ✅ Include Deleted Users Checkbox -->
-                    <div class="flex items-center gap-2 mt-6">
-                        <Checkbox v-model="filters.includeDeleted" inputId="includeDeleted" :binary="true" />
-                        <label for="includeDeleted" class="text-gray-700 cursor-pointer">Include Deleted Users</label>
-                    </div>
-                </div>
+                     <!-- ✅ Include Deleted Users Checkbox -->
+                            <!-- <div class="flex items-center gap-2 mt-6">
+                                <Checkbox v-model="filters.includeDeleted" inputId="includeDeleted" :binary="true" />
+                                <label for="includeDeleted" class="text-gray-700 cursor-pointer">Include Deleted Users</label>
+                            </div> -->
+                        </div>
 
                 <!-- Action Buttons -->
                 <div class="flex justify-end gap-4 mt-6">
