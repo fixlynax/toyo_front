@@ -33,7 +33,7 @@
                             <div style="width: 250px">
                                 <Button label="Clear Filters" class="p-button-outlined p-button-secondary" @click="clearFilters" />
                             </div>
-                            <Button label="Export Excel" icon="pi pi-file-excel" class="p-button-success" @click="exportExcel" :loading="exportLoading" :disabled="!filters.period" />
+                            <Button label="Export" icon="pi pi-file-excel" class="p-button-success" @click="exportExcel" :loading="exportLoading" :disabled="!filters.period" />
                         </div>
                     </div>
                 </div>
@@ -43,8 +43,8 @@
 </template>
 
 <script setup>
-import { ref, reactive, onMounted } from 'vue';
 import api from '@/service/api';
+import { onMounted, reactive, ref } from 'vue';
 
 // ✅ Filters
 const filters = reactive({
@@ -184,7 +184,7 @@ const exportExcel = async () => {
         window.URL.revokeObjectURL(url);
     } catch (error) {
         console.error('Error exporting Excel:', error);
-        alert('Failed to export Excel file. Please try again.');
+        alert('Failed to export file. Please try again.');
     } finally {
         exportLoading.value = false;
     }
