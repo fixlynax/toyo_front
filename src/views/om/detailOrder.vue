@@ -163,6 +163,10 @@
                                     <td class="px-4 py-2 font-medium">Created</td>
                                     <td class="px-4 py-2 text-right font-medium">{{ formatDateTime(orderData.created) || '-' }}</td>
                                 </tr>
+                                <tr class="border-b">
+                                    <td class="px-4 py-2 font-medium">Created By</td>
+                                    <td class="px-4 py-2 text-right font-medium">{{ orderData.placeOrderBy || '-' }}</td>
+                                </tr>
                                 <tr>
                                     <td colspan="2" class="px-2 py-2 text-right">
                                         <div class="flex justify-end gap-2">
