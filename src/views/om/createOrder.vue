@@ -136,7 +136,7 @@
                     <Button label="Width" icon="pi pi-filter" @click="widthPanel.toggle($event)" />
                     <!-- Excel Import/Export for DIRECTSHIP -->
                     <Button v-if="selectedOrderType === 'DIRECTSHIP'" label="Import Excel" icon="pi pi-upload" class="p-button-success" @click="importExcel" />
-                    <Button v-if="selectedOrderType === 'DIRECTSHIP' && selectedTyres.length > 0" label="Export Excel" icon="pi pi-download" class="p-button-help" @click="exportExcel" />
+                    <Button v-if="selectedOrderType === 'DIRECTSHIP' && selectedTyres.length > 0" label="Export" icon="pi pi-download" class="p-button-help" @click="exportExcel" />
                 </div>
             </div>
 
@@ -2014,7 +2014,7 @@ const exportExcel = async () => {
         toast.add({ severity: 'success', summary: 'Success', detail: 'Excel file downloaded successfully', life: 2000 });
     } catch (error) {
         console.error('Error exporting Excel:', error);
-        toast.add({ severity: 'error', summary: 'Error', detail: 'Failed to export Excel file', life: 2000 });
+        toast.add({ severity: 'error', summary: 'Error', detail: 'Failed to export file', life: 2000 });
     }
 };
 
