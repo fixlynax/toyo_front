@@ -153,7 +153,7 @@
                                 </tr>
                                 <tr>
                                     <td class="px-4 py-2 font-medium">Created On</td>
-                                    <td class="px-4 py-2 text-right">{{ formatDate(orderDelList.orderDate) }} <br> {{ formatTime(orderDelList.orderDate) }}</td>
+                                    <td class="px-4 py-2 text-right">{{ formatDate(orderDelList.created) }} <br> {{ formatTime(orderDelList.created) }}</td>
                                 </tr>
                             </tbody>
                         </table>
@@ -618,9 +618,6 @@ const InitfetchData = async () => {
             if (orderDelList.value.orderDate) {
                 orderCreatedDate.value = new Date(orderDelList.value.orderDate);
             }
-                        console.log('orderDelList.value.orderDate')
-
-            console.log(orderDelList.value.orderDate)
         } else {
             toast.add({ severity: 'error', summary: 'Error', detail: 'Failed to load data', life: 3000 });
         }

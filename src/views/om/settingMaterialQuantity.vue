@@ -31,9 +31,7 @@
                                 <span v-else>{{ slotProps.placeholder }}</span>
                             </template>
                         </MultiSelect>
-                        <div v-if="selectedDealers.length > 0" class="mt-2 text-sm text-gray-500">
-                            Selected: {{ selectedDealers.length }} dealer(s)
-                        </div>
+                        <div v-if="selectedDealers.length > 0" class="mt-2 text-sm text-gray-500">Selected: {{ selectedDealers.length }} dealer(s)</div>
                     </div>
 
                     <!-- Material Multi-Select -->
@@ -59,35 +57,18 @@
                                 <span v-else>{{ slotProps.placeholder }}</span>
                             </template>
                         </MultiSelect>
-                        <div v-if="selectedMaterials.length > 0" class="mt-2 text-sm text-gray-500">
-                            Selected: {{ selectedMaterials.length }} material(s)
-                        </div>
-                        <div v-else class="mt-2 text-sm text-gray-500">
-                            Leave empty to select all materials
-                        </div>
+                        <div v-if="selectedMaterials.length > 0" class="mt-2 text-sm text-gray-500">Selected: {{ selectedMaterials.length }} material(s)</div>
+                        <div v-else class="mt-2 text-sm text-gray-500">Leave empty to select all materials</div>
                     </div>
                 </div>
 
                 <!-- Action Buttons -->
                 <div class="flex items-center justify-between mt-4 pt-4 border-t">
                     <div class="flex items-center gap-2">
-                        <Button 
-                            label="Clear All Selections" 
-                            icon="pi pi-times" 
-                            severity="secondary" 
-                            @click="clearAllSelections"
-                            :disabled="!hasSelections"
-                        />
+                        <Button label="Clear All Selections" icon="pi pi-times" severity="secondary" @click="clearAllSelections" :disabled="!hasSelections" />
                     </div>
                     <div class="flex items-center gap-2">
-                        <Button 
-                            label="Load Materials" 
-                            icon="pi pi-search" 
-                            class="p-button-primary"
-                            @click="fetchEtenMaterials"
-                            :loading="tableLoading"
-                            :disabled="!canLoadMaterials"
-                        />
+                        <Button label="Load Materials" icon="pi pi-search" class="p-button-primary" @click="fetchEtenMaterials" :loading="tableLoading" :disabled="!canLoadMaterials" />
                     </div>
                 </div>
             </div>
@@ -122,7 +103,7 @@
                             </div>
 
                             <div class="flex items-center gap-2 ml-auto">
-                                <Button type="button" label="Export Excel" icon="pi pi-file-export" class="p-button-success" @click="exportMaterials" :loading="exportLoading" :disabled="!canExport" />
+                                <Button type="button" label="Export" icon="pi pi-file-export" class="p-button-success" @click="exportMaterials" :loading="exportLoading" :disabled="!canExport" />
                                 <Button type="button" label="Bulk Update" icon="pi pi-file-import" class="p-button-primary" @click="triggerImport" :loading="importLoading" :disabled="!canImport" />
                                 <input ref="importFileInput" type="file" accept=".xlsx,.xls,.csv" style="display: none" @change="handleImport" />
                                 <Button type="button" icon="pi pi-refresh" class="p-button-secondary" @click="fetchEtenMaterials" :loading="tableLoading" :disabled="!canLoadMaterials" />
@@ -234,12 +215,12 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted, watch } from 'vue';
-import { FilterMatchMode } from '@primevue/core/api';
-import api from '@/service/api';
 import LoadingPage from '@/components/LoadingPage.vue';
-import { useToast } from 'primevue/usetoast';
+import api from '@/service/api';
 import { useMenuStore } from '@/store/menu';
+import { FilterMatchMode } from '@primevue/core/api';
+import { useToast } from 'primevue/usetoast';
+import { computed, onMounted, ref } from 'vue';
 
 const toast = useToast();
 const menuStore = useMenuStore();
@@ -306,15 +287,15 @@ const canImport = computed(() => {
 });
 
 const getSelectedDealerNames = (dealerIds) => {
-    return dealerIds.map(id => {
-        const dealer = dealerOptions.value.find(d => d.value === id);
+    return dealerIds.map((id) => {
+        const dealer = dealerOptions.value.find((d) => d.value === id);
         return dealer || { label: 'Unknown', value: id };
     });
 };
 
 const getSelectedMaterialNames = (materialIds) => {
-    return materialIds.map(id => {
-        const material = materialOptions.value.find(m => m.value === id);
+    return materialIds.map((id) => {
+        const material = materialOptions.value.find((m) => m.value === id);
         return material || { label: id, value: id };
     });
 };
@@ -424,7 +405,7 @@ const fetchEtenMaterials = async () => {
         if (response.data.status === 1) {
             materialList.value = response.data.admin_data;
             showResults.value = true;
-            
+
             toast.add({
                 severity: 'success',
                 summary: 'Success',
@@ -550,7 +531,7 @@ const handleImport = async (event) => {
     try {
         importLoading.value = true;
 
-        const formData = new FormData(); 
+        const formData = new FormData();
         formData.append('excel_file', file);
         // You might want to pass dealer IDs in the import request too
         formData.append('dealer_ids', JSON.stringify(selectedDealers.value));

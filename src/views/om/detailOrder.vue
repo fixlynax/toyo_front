@@ -113,10 +113,6 @@
                                 </tr>
                                 <tr class="border-b">
                                     <td class="px-4 py-2 font-medium">Order Type</td>
-                                    <td class="px-4 py-2 text-right font-medium">{{ orderData.deliveryType || '-' }}</td>
-                                </tr>
-                                <tr class="border-b">
-                                    <td class="px-4 py-2 font-medium">Order Description</td>
                                     <td class="px-4 py-2 text-right font-medium">{{ orderData.orderDesc || '-' }}</td>
                                 </tr>
                                 <tr class="border-b">
@@ -166,6 +162,10 @@
                                 <tr class="border-b">
                                     <td class="px-4 py-2 font-medium">Created</td>
                                     <td class="px-4 py-2 text-right font-medium">{{ formatDateTime(orderData.created) || '-' }}</td>
+                                </tr>
+                                <tr class="border-b">
+                                    <td class="px-4 py-2 font-medium">Created By</td>
+                                    <td class="px-4 py-2 text-right font-medium">{{ orderData.placeOrderBy || '-' }}</td>
                                 </tr>
                                 <tr>
                                     <td colspan="2" class="px-2 py-2 text-right">

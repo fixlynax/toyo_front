@@ -1,6 +1,5 @@
 <template>
     <Fluid>
-
         <div class="flex flex-col gap-8">
             <!-- Header -->
             <div class="card flex flex-col gap-6 w-full">
@@ -31,19 +30,18 @@
                             </div> -->
                         </div>
 
-                    <!-- Action Buttons -->
-                    <div class="flex justify-end gap-4 mt-6">
-                        <Button label="Clear Filters" class="p-button-primary" @click="clearFilters" />
-                        <Button label="Export Excel" icon="pi pi-file-excel" class="p-button-success" @click="exportExcel" :loading="exportLoading" :disabled="!filters.years || filters.years.length === 0" />
-                    </div>
+                <!-- Action Buttons -->
+                <div class="flex justify-end gap-4 mt-6">
+                    <Button label="Clear Filters" class="p-button-primary" @click="clearFilters" />
+                    <Button label="Export" icon="pi pi-file-excel" class="p-button-success" @click="exportExcel" :loading="exportLoading" :disabled="!filters.years || filters.years.length === 0" />
                 </div>
             </div>
+        </div>
     </Fluid>
 </template>
 
 <script setup>
 import api from '@/service/api';
-import Toast from 'primevue/toast';
 import { useToast } from 'primevue/usetoast';
 import { onMounted, reactive, ref, watch } from 'vue';
 
@@ -119,7 +117,6 @@ const showToast = (severity, summary, detail, life = 3000) => {
     });
 };
 
-
 // ✅ Clear Filters - Reset includeDeleted to false
 const clearFilters = () => {
     filters.years = [];
@@ -143,12 +140,12 @@ const prepareRequestBody = () => {
         years: filters.years,
         include_deleted: filters.includeDeleted ? 1 : 0 // ✅ Add include_deleted parameter
     };
-    
+
     // Add additional filters
     if (selectedReport.value.value === 'by-birthday' && filters.month) {
         requestBody.month = filters.month;
     }
-    
+
     if (selectedReport.value.value === 'point-expiry') {
         if (filters.expiryFrom !== null && filters.expiryFrom !== undefined) {
             requestBody.expiryFrom = filters.expiryFrom;
@@ -157,7 +154,7 @@ const prepareRequestBody = () => {
             requestBody.expiryTo = filters.expiryTo;
         }
     }
-    
+
     return requestBody;
 };
 
@@ -169,20 +166,19 @@ const fetchReportData = async () => {
     }
 
     loadingData.value = true;
-    
+
     try {
         const endpoint = selectedReport.value.apiEndpoint;
         const requestBody = prepareRequestBody();
-        
+
         if (!requestBody) {
             loadingData.value = false;
             return;
         }
 
-        
         // For preview, use regular post (JSON response)
         const response = await api.post(endpoint, requestBody);
-        
+
         // Process response
         if (response.data && response.data.status === 1) {
             const data = response.data.data || response.data.report_data || response.data;
@@ -213,24 +209,23 @@ const exportExcel = async () => {
     try {
         const endpoint = selectedReport.value.apiEndpoint;
         const requestBody = prepareRequestBody();
-        
+
         if (!requestBody) {
             exportLoading.value = false;
             return;
         }
-
 
         // Try with stringified years (like returnCollection does)
         const alternativeBody = {
             years: JSON.stringify(filters.years),
             include_deleted: filters.includeDeleted ? 1 : 0 // ✅ Add include_deleted
         };
-        
+
         // Copy other filters
         if (selectedReport.value.value === 'by-birthday' && filters.month) {
             alternativeBody.month = filters.month;
         }
-        
+
         if (selectedReport.value.value === 'point-expiry') {
             if (filters.expiryFrom !== null) {
                 alternativeBody.expiryFrom = filters.expiryFrom;
@@ -242,32 +237,23 @@ const exportExcel = async () => {
 
         // Try different approaches sequentially
         let response;
-        
+
         // Approach 1: Try with stringified years (like returnCollection)
         try {
-            response = await api.postExtra(
-                endpoint, 
-                alternativeBody,
-                {
-                    responseType: 'blob',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    }
+            response = await api.postExtra(endpoint, alternativeBody, {
+                responseType: 'blob',
+                headers: {
+                    'Content-Type': 'application/json'
                 }
-            );
+            });
         } catch (error1) {
-            
             // Approach 2: Try with original request body
-            response = await api.postExtra(
-                endpoint, 
-                requestBody,
-                {
-                    responseType: 'blob',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    }
+            response = await api.postExtra(endpoint, requestBody, {
+                responseType: 'blob',
+                headers: {
+                    'Content-Type': 'application/json'
                 }
-            );
+            });
         }
 
         // Verify we got a blob response
@@ -277,21 +263,20 @@ const exportExcel = async () => {
 
         // Check content type
         const contentType = response.headers['content-type'] || response.data.type || 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet';
-        
-        
+
         // Create blob
         const blob = new Blob([response.data], { type: contentType });
 
         // Generate download URL
         const url = window.URL.createObjectURL(blob);
         const a = document.createElement('a');
-        
+
         // Generate filename with include_deleted indicator
         const timestamp = new Date().toISOString().split('T')[0];
         const reportName = selectedReport.value.label.replace(/\s+/g, '_');
         const yearsStr = filters.years.join('_');
         const deletedIndicator = filters.includeDeleted ? '_with_deleted' : '_active_only';
-        
+
         // Try to get filename from Content-Disposition header
         let filename = `${reportName}_${yearsStr}${deletedIndicator}_${timestamp}.xlsx`;
         const contentDisposition = response.headers['content-disposition'];
@@ -301,34 +286,33 @@ const exportExcel = async () => {
                 filename = decodeURIComponent(filenameMatch[1]);
             }
         }
-        
+
         a.href = url;
         a.download = filename;
         document.body.appendChild(a);
         a.click();
         document.body.removeChild(a);
-        
+
         // Cleanup
         setTimeout(() => {
             window.URL.revokeObjectURL(url);
         }, 100);
 
         showToast('success', 'Export Successful', `${filename} downloaded successfully!`);
-        
     } catch (error) {
         console.error('❌ Export Error Details:', error);
-        
+
         // Enhanced error logging
         if (error.response) {
             console.error('Error Status:', error.response.status);
             console.error('Error Headers:', error.response.headers);
-            
+
             // Try to read error message from blob if it's a blob
             if (error.response.data instanceof Blob) {
                 try {
                     const errorText = await error.response.data.text();
                     console.error('Error Blob Content:', errorText);
-                    
+
                     // Try to parse as JSON
                     try {
                         const errorJson = JSON.parse(errorText);
@@ -345,9 +329,7 @@ const exportExcel = async () => {
             } else {
                 // Regular error response
                 console.error('Error Data:', error.response.data);
-                const errorMsg = error.response.data?.message || 
-                               error.response.data?.error || 
-                               `Server error: ${error.response.status}`;
+                const errorMsg = error.response.data?.message || error.response.data?.error || `Server error: ${error.response.status}`;
                 showToast('error', 'Export Failed', errorMsg);
             }
         } else if (error.request) {
@@ -357,7 +339,7 @@ const exportExcel = async () => {
             console.error('Request setup error:', error.message);
             showToast('error', 'Export Error', error.message || 'Failed to export');
         }
-        
+
         // Try one more approach with FormData
         await tryFormDataApproach();
     } finally {
@@ -370,15 +352,15 @@ const tryFormDataApproach = async () => {
     try {
         const endpoint = selectedReport.value.apiEndpoint;
         const formData = new FormData();
-        
+
         // Append data as FormData
         formData.append('years', filters.years.join(','));
         formData.append('include_deleted', filters.includeDeleted ? '1' : '0'); // ✅ Add include_deleted
-        
+
         if (selectedReport.value.value === 'by-birthday' && filters.month) {
             formData.append('month', filters.month);
         }
-        
+
         if (selectedReport.value.value === 'point-expiry') {
             if (filters.expiryFrom !== null) {
                 formData.append('expiryFrom', filters.expiryFrom.toString());
@@ -386,30 +368,26 @@ const tryFormDataApproach = async () => {
             if (filters.expiryTo !== null) {
                 formData.append('expiryTo', filters.expiryTo.toString());
             }
-        }        
-        const response = await api.postExtra(
-            endpoint,
-            formData,
-            {
-                responseType: 'blob',
-                headers: {
-                    'Content-Type': 'multipart/form-data'
-                }
+        }
+        const response = await api.postExtra(endpoint, formData, {
+            responseType: 'blob',
+            headers: {
+                'Content-Type': 'multipart/form-data'
             }
-        );
-        
+        });
+
         if (response.data instanceof Blob) {
-            const blob = new Blob([response.data], { 
-                type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' 
+            const blob = new Blob([response.data], {
+                type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
             });
-            
+
             const url = window.URL.createObjectURL(blob);
             const a = document.createElement('a');
             a.href = url;
             const deletedIndicator = filters.includeDeleted ? '_with_deleted' : '_active_only';
             a.download = `${selectedReport.value.label}_${filters.years.join('_')}${deletedIndicator}.xlsx`;
             a.click();
-            
+
             showToast('success', 'Export Successful (FormData)', 'File downloaded using FormData');
         }
     } catch (formDataError) {
@@ -431,11 +409,10 @@ watch(
 
 // Initialize
 onMounted(() => {
-    generateYearOptions(5); 
+    generateYearOptions(5);
     const currentYear = new Date().getFullYear().toString();
     filters.years = [currentYear];
     filters.includeDeleted = false; // ✅ Default to false
-    
 });
 </script>
 
