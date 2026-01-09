@@ -17,16 +17,22 @@
                 </div>
 
                 <!-- Right: Create Button -->
-                <RouterLink v-if="canUpdate" to="/marketing/createCatalogue">
-                    <Button type="button" label="Create" />
-                </RouterLink>
+                <div class="flex items-center gap-2 ml-auto"></div>
+                <div>
+                    <Button type="button" label="Report" icon="pi pi-file-export" class="p-button-success" :loading="exportLoading" @click="fetchExport" />
+                </div>
+                <div>
+                    <RouterLink v-if="canUpdate" to="/marketing/createCatalogue">
+                        <Button type="button" label="Create" />
+                    </RouterLink>
+                </div>
             </div>
 
             <!-- Tab Menu for filtering by purpose -->
             <TabMenu :model="purposeTabs" v-model:activeIndex="activeTabIndex" class="mb-4 border-b" />
 
             <!-- Use your custom LoadingPage component -->
-        <LoadingPage v-if="loading" :sub-message="'Loading Catalogue Item'" class="mt-8"/>
+            <LoadingPage v-if="loading" :sub-message="'Loading Catalogue Item'" class="mt-8" />
 
             <div v-else-if="error" class="text-center py-8 text-red-500">
                 <i class="pi pi-exclamation-triangle text-2xl mb-2"></i>
@@ -50,7 +56,7 @@
                         </div>
 
                         <!-- Image -->
-                        <img :src="item.imageURL " :alt="item.title" class="w-full h-full object-cover" />
+                        <img :src="item.imageURL" :alt="item.title" class="w-full h-full object-cover" />
                     </div>
 
                     <!-- Bottom: Info Section -->
@@ -82,9 +88,7 @@
                 </RouterLink>
             </div>
 
-            <div v-if="!loading && !error && filteredItems.length === 0" class="text-center py-8 text-gray-500">
-                No catalogue items found {{ activeTabIndex > 0 ? `for ${purposeTabs[activeTabIndex].label}` : '' }}.
-            </div>
+            <div v-if="!loading && !error && filteredItems.length === 0" class="text-center py-8 text-gray-500">No catalogue items found {{ activeTabIndex > 0 ? `for ${purposeTabs[activeTabIndex].label}` : '' }}.</div>
         </div>
     </Fluid>
 </template>
@@ -94,7 +98,8 @@ import { ref, computed, onMounted, watch } from 'vue';
 import api from '@/service/api';
 import LoadingPage from '@/components/LoadingPage.vue';
 import { useMenuStore } from '@/store/menu';
- 
+import { useToast } from 'primevue/usetoast';
+
 const menuStore = useMenuStore();
 const canUpdate = computed(() => menuStore.canWrite('Reward Catalogue'));
 const denyAccess = computed(() => menuStore.canTest('Reward Catalogue'));
@@ -104,6 +109,9 @@ const searchQuery = ref('');
 const catalogueItems = ref([]);
 const loading = ref(false);
 const error = ref('');
+const toast = useToast();
+const exportLoading = ref(false);
+
 
 // Tab Menu Configuration
 const purposeTabs = [
@@ -129,24 +137,74 @@ const fetchCatalogueItems = async () => {
             catalogueItems.value = response.data.admin_data.map((item) => ({
                 ...item,
                 // Ensure imageURL is properly formatted
-                imageURL: item.imageURL || null,
-
+                imageURL: item.imageURL || null
             }));
-
-
         } else {
-            toast.add({ severity: 'error', summary: 'Error', detail:response.data.message || 'Failed to load data', life: 3000 });
+            toast.add({ severity: 'error', summary: 'Error', detail: response.data.message || 'Failed to load data', life: 3000 });
             catalogueItems.value = [];
         }
     } catch (err) {
         console.error('Error fetching catalogue items:', err);
-        toast.add({ severity: 'error', summary: 'Error', detail:response.data.message || 'Failed to load data', life: 3000 });
+        toast.add({ severity: 'error', summary: 'Error', detail: response.data.message || 'Failed to load data', life: 3000 });
         catalogueItems.value = [];
     } finally {
         loading.value = false;
     }
 };
 
+const fetchExport = async () => {
+    try {
+        exportLoading.value = true;
+
+        // get selected tab purpose
+        const selectedPurpose = purposeTabs[activeTabIndex.value].purpose;
+
+        // filter items based on tab
+        const filteredItems = selectedPurpose
+            ? catalogueItems.value.filter(
+                  item => item.purpose === selectedPurpose
+              )
+            : catalogueItems.value; // "All" tab
+
+        const body = {
+            catalog_ids: JSON.stringify(filteredItems.map(item => item.id))
+        };
+
+        const response = await api.postExtra(
+            'excel/export-availableQty-catalog',
+            body,
+            { responseType: 'arraybuffer' }
+        );
+
+        const blob = new Blob([response.data], {
+            type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+        });
+
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = 'Catalog_Report.xlsx';
+        a.click();
+        URL.revokeObjectURL(url);
+
+        toast.add({
+            severity: 'success',
+            summary: 'Success',
+            detail: 'Export completed',
+            life: 3000
+        });
+    } catch (error) {
+        console.error('Export error:', error);
+        toast.add({
+            severity: 'error',
+            summary: 'Error',
+            detail: 'Export failed',
+            life: 3000
+        });
+    } finally {
+        exportLoading.value = false;
+    }
+};
 
 
 // Filter items based on active tab and search query
@@ -156,18 +214,13 @@ const filteredItems = computed(() => {
     // Filter by active tab (purpose)
     const activeTab = purposeTabs[activeTabIndex.value];
     if (activeTab.purpose) {
-        filtered = filtered.filter(item => item.purpose === activeTab.purpose);
+        filtered = filtered.filter((item) => item.purpose === activeTab.purpose);
     }
 
     // Filter by search query
     if (searchQuery.value) {
         const query = searchQuery.value.toLowerCase();
-        filtered = filtered.filter((item) => 
-            item.title?.toLowerCase().includes(query) || 
-            item.type?.toLowerCase().includes(query) || 
-            item.purpose?.toLowerCase().includes(query) || 
-            item.description?.toLowerCase().includes(query)
-        );
+        filtered = filtered.filter((item) => item.title?.toLowerCase().includes(query) || item.type?.toLowerCase().includes(query) || item.purpose?.toLowerCase().includes(query) || item.description?.toLowerCase().includes(query));
     }
 
     return filtered;
@@ -229,7 +282,6 @@ const formatType = (type) => {
     return typeMap[type] || type;
 };
 
-
 // Watch for tab changes to update the filtered items
 watch(activeTabIndex, () => {
     // The computed property filteredItems will automatically update
@@ -257,7 +309,3 @@ watch(activeTabIndex, () => {
     background-color: rgba(var(--primary-color-rgb), 0.05);
 }
 </style>
-
-
-
-
