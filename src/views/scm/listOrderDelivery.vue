@@ -18,7 +18,7 @@
                 :filters="filters"
                 filterDisplay="menu"
                 class="rounded-table"
-                :globalFilterFields="['do_no','order_no', 'orderDateSearch', 'orderTimeSearch', 'customer_name', 'custAccountNo', 'storagelocation', 'customer_name', 'city', 'state', 'etaDateSearch', 'orderDesc', 'plannedDateSearch', 'deliveredDateSearch', 'orderstatus']"
+                :globalFilterFields="['do_no','order_no', 'createdDateSearch', 'createdTimeSearch', 'customer_name', 'custAccountNo', 'storagelocation', 'customer_name', 'city', 'state', 'etaDateSearch', 'orderDesc', 'plannedDateSearch', 'deliveredDateSearch', 'orderstatus']"
                 paginatorTemplate="CurrentPageReport FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink RowsPerPageDropdown"
                 currentPageReportTemplate="Showing {first} to {last} of {totalRecords} entries"
             >
@@ -85,11 +85,11 @@
                         </div>
                     </template>
                 </Column>
-                <Column field="orderDate" header="Created On" style="min-width: 8rem" sortable>
+                <Column field="created" header="Created On" style="min-width: 8rem" sortable>
                     <template #body="{ data }">
-                        {{ data.orderDateSearch ?? '-' }}
+                        {{ data.createdDateSearch ?? '-' }}
                         <br/>
-                        {{ data.orderTimeSearch ?? '-' }}
+                        {{ data.createdTimeSearch ?? '-' }}
                     </template>
                 </Column>
                 <Column field="order_no" header="Ref No" style="min-width: 8rem" sortable>
@@ -578,13 +578,13 @@ const fetchData = async (body = null) => {
             .map(order => ({
                 ...order,
                 orderDesc: order.orderDesc === 'Back Order'? 'NORMAL': order.orderDesc,
-                orderDateSearch: formatDate(order.orderDate),
-                orderTimeSearch: formatTime(order.orderDate),
+                createdDateSearch: formatDate(order.created),
+                createdTimeSearch: formatTime(order.created),
                 etaDateSearch: formatDate(order.deliveryDate),
                 plannedDateSearch: formatDate(order.scheduled_delivery_time),
                 deliveredDateSearch: formatDate(order.delivered_datetime)
             }))
-            .sort((a, b) => new Date(b.orderDate) - new Date(a.orderDate));
+            .sort((a, b) => new Date(b.created) - new Date(a.created));
         } else {
         orderDelList.value = [];
             toast.add({ severity: 'error', summary: 'Error', detail: response.data.message || 'Failed to load data', life: 3000 });
@@ -612,7 +612,7 @@ const exportToExcel = () => {
 
     rowsToExport.forEach(data => {
         const baseRow = [
-            `"${data.orderDateSearch} ${data.orderTimeSearch}"`,
+            `"${data.createdDateSearch} ${data.createdTimeSearch}"`,
             `"${data.order_no || '-'}"`,
             `"${data.do_no || '-'}"`,
             `"${data.customer_name || ''} "`,
