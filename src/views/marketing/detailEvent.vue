@@ -68,7 +68,7 @@
                 <div class="card flex flex-col w-full" v-if="event.isSurvey === 'Yes' && surveyQuestions.length > 0">
                     <div class="flex items-center justify-between border-b pb-2 mb-2">
                         <div class="text-2xl font-bold text-gray-800">📋 Survey Info</div>
-                        <!-- <Button icon="pi pi-download" label="Report" style="width: fit-content" class="p-button-danger p-button-sm" /> -->
+                        <Button icon="pi pi-download" label="Report" style="width: fit-content" class="p-button-danger p-button-sm" @click="fetchExport" />
                     </div>
 
                     <div class="space-y-6">
@@ -383,6 +383,46 @@ const fetchEventDetails = async () => {
             severity: 'error',
             summary: 'Error',
             detail: 'Failed to load event details',
+            life: 3000
+        });
+    } finally {
+        loading.value = false;
+    }
+};
+
+const fetchExport = async () => {
+    try {
+        loading.value = true;
+
+        const response = await api.getDownload(
+            `excel/survey/${eventId}`,
+            { responseType: 'arraybuffer' }
+        );
+
+        const blob = new Blob([response.data], {
+            type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+        });
+
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = 'Survey_Report.xlsx';
+        a.click();
+        URL.revokeObjectURL(url);
+
+        toast.add({
+            severity: 'success',
+            summary: 'Success',
+            detail: 'Export completed',
+            life: 3000
+        });
+
+    } catch (error) {
+        console.error('Export error:', error);
+        toast.add({
+            severity: 'error',
+            summary: 'Error',
+            detail: 'Export failed',
             life: 3000
         });
     } finally {
