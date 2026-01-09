@@ -26,8 +26,8 @@
                             <p class="text-lg font-medium">{{ formatDateOnly(Warranty.warranty_info?.date_registered || '-' ) }}</p>
                         </div>
                         <div class="mt-6">
-                            <span class="block text-lg font-bold text-black-700">TWP</span>
-                            <Tag :value="Warranty.warranty_info?.isTWP === 1 ? 'Yes' : 'No'" :severity="getOverallStatusSeverity(Warranty.warranty_info?.isTWP)" />
+                            <span class="block text-lg font-bold text-black-700">Warranty</span>
+                            <p class="text-lg font-medium">{{Warranty.warranty_info?.isTWP === 1 ? 'TWP' : 'Normal'}}</p>
                         </div>
                         <div class="mt-6">
                             <span class="block text-lg font-bold text-black-700">Expiry Date</span>
@@ -199,9 +199,7 @@ const Warranty = ref([]);
 const WarrantyId = route.params.id;
 const loading = ref(true);
 // Removed: const deleteDialog = ref(false);
-const getOverallStatusSeverity = (status) => {
-    return status === 1 ? 'success' : 'danger';
-};
+
 // Warranty data
 
 const surveyQuestions = ref([]);
