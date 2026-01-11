@@ -24,6 +24,9 @@
                             :maxSelectedLabels="3"
                             @change="onSelectionChange"
                             :selectAll="false"
+                            :filter="true"
+                            filterPlaceholder="Search customers..."
+                            :showToggleAll="false"
                         >
                             <template #value="slotProps">
                                 <div v-if="slotProps.value && slotProps.value.length">
@@ -51,6 +54,8 @@
                             :maxSelectedLabels="3"
                             @change="onSelectionChange"
                             @selectall-change="onSelectAllMaterials"
+                            :filter="true"
+                            filterPlaceholder="Search materials..."
                         >
                             <template #value="slotProps">
                                 <div v-if="slotProps.value && slotProps.value.length">
