@@ -4,7 +4,7 @@
             <!-- Header -->
             <div class="card flex flex-col gap-6 w-full">
                 <!-- Title -->
-                <div class="text-2xl font-bold text-gray-800 border-b pb-2 mb-4">Member Report ({{ selectedReport.label }})</div>
+                <div class="text-2xl font-bold text-gray-800 border-b pb-2 mb-4">Campaign Report ({{ selectedReport.label }})</div>
 
                 <!-- Filters Section -->
                 <div>
@@ -50,12 +50,10 @@ const toast = useToast();
 
 // ✅ Report Types with API endpoint mapping
 const reportTypes = ref([
-    { label: 'T-Care by Gender', value: 'by-gender', apiEndpoint: 'report/gender-report', columnHeader: 'Gender' },
-    { label: 'T-Care by Race', value: 'by-race', apiEndpoint: 'report/race-report', columnHeader: 'Race' },
-    { label: 'T-Care by State', value: 'by-state', apiEndpoint: 'report/state-report', columnHeader: 'State' },
-    { label: 'T-Care by Age', value: 'by-age', apiEndpoint: 'report/age-report', columnHeader: 'Age Group' },
-    { label: 'T-Care by Birthday', value: 'by-birthday', apiEndpoint: 'report/birthMonth-report', columnHeader: 'Birth Month' },
-    { label: 'T-Care Point Expiry', value: 'point-expiry', apiEndpoint: 'report/pointExpiry-report', columnHeader: 'Month' }
+    { label: 'Tire Pattern', value: 'by-pattern', apiEndpoint: 'report/tirepattern-report', columnHeader: 'Gender' },
+    { label: 'Tire Size', value: 'by-size', apiEndpoint: 'report/tiresize-report', columnHeader: 'Race' },
+    { label: 'Vehicle Brand', value: 'by-brand', apiEndpoint: 'report/vehiclebrand-report', columnHeader: 'State' },
+    { label: 'Vehicle Type', value: 'by-type', apiEndpoint: 'report/vehicletype-report', columnHeader: 'Age Group' }
 ]);
 
 // ✅ Selected Report

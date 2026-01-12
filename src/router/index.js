@@ -574,6 +574,12 @@ const router = createRouter({
                     meta: { permission: 'Member Report', access: 'view' }
                 },
                 {
+                    path: 'marketing/campaignReport',
+                    name: 'Campaign-Report',
+                    component: () => import('@/views/marketing/campaignReport.vue'),
+                    // meta: { permission: 'Campaign Report', access: 'view' }
+                },
+                {
                     path: 'marketing/reportReferral',
                     name: 'Report-Referral',
                     component: () => import('@/views/marketing/reportReferral.vue'),
