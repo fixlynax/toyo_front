@@ -644,9 +644,18 @@ function formatDate(dateString) {
 function formatTime(dateTimeString) {
     if (!dateTimeString) return '';
     const [, timePart] = dateTimeString.split(' ');
+    if (!timePart) return '';
 
-    return timePart; // already in 24-hour format: HH:mm:ss
+    let [hours, minutes, seconds] = timePart.split(':');
+    hours = parseInt(hours, 10);
+
+    const ampm = hours >= 12 ? 'PM' : 'AM';
+    hours = hours % 12;
+    hours = hours === 0 ? 12 : hours;
+
+    return `${hours}:${minutes}:${seconds} ${ampm}`;
 }
+
 function getStatusSeverity(status) {
     switch (status) {
         case 'PENDING':
