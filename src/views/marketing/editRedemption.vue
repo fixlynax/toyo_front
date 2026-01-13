@@ -11,26 +11,26 @@
                     <div class="flex items-center justify-between border-b pb-2">
                         <div class="flex items-center gap-3">
                             <Button icon="pi pi-arrow-left" class="p-button-text p-button-secondary" @click="$router.back()" />
-                            <div class="text-2xl font-bold text-gray-800">Redemption Details</div>
+                            <div class="text-2xl font-bold text-gray-800">Edit Redemption</div>
                         </div>
                     </div>
 
                     <div class="mt-2 grid grid-cols-2 gap-4">
                         <div>
                             <span class="block text-sm font-bold text-gray-700">Recipient</span>
-                            <p class="text-lg font-medium">{{ redemption.recipientName || 'N/A' }}</p>
+                            <p class="text-lg font-medium">{{ redemption.redeem_item?.recipient || redemption.redeem_item?.recipientName || 'N/A' }}</p>
                         </div>
                         <div>
                             <span class="block text-sm font-bold text-gray-700">Contact</span>
-                            <p class="text-lg text-gray-500">{{ redemption.contactNumber || 'N/A' }}</p>
+                            <p class="text-lg text-gray-500">{{ redemption.redeem_item?.contact || redemption.redeem_item?.contactNumber || 'N/A' }}</p>
                         </div>
                         <div>
                             <span class="block text-sm font-bold text-gray-700">Redeemed Item</span>
-                            <p class="text-lg text-gray-500">{{ redemption.itemName || 'N/A' }}</p>
+                            <p class="text-lg text-gray-500">{{ redemption.type || 'N/A' }}</p>
                         </div>
                         <div>
                             <span class="block text-sm font-bold text-gray-700">Approved By</span>
-                            <p class="text-lg text-gray-500">{{ redemption.approvedBy || 'N/A' }} ({{ redemption.adminID || 'N/A' }})</p>
+                            <p class="text-lg text-gray-500">{{ redemption.redeem_item?.approvedBy || 'N/A' }} ({{ redemption.adminID || 'N/A' }})</p>
                         </div>
                     </div>
                 </div>
@@ -46,7 +46,7 @@
                         <div class="col-span-4">
                             <label class="block text-gray-700 font-semibold">Shipping Date <span class="text-red-500">*</span></label>
                             <Calendar 
-                                v-model="form.shippedDate" 
+                                v-model="form.ship_date" 
                                 class="w-full" 
                                 placeholder="Select Shipping Date" 
                                 dateFormat="dd-mm-yy"
@@ -58,28 +58,26 @@
 
                         <!-- Recipient Name -->
                         <div class="col-span-2">
-                            <label class="block text-gray-700 font-semibold">Recipient <span class="text-red-500">*</span></label>
+                            <label class="block text-gray-700 font-semibold">Recipient</label>
                             <InputText 
                                 v-model="form.recipient" 
                                 type="text" 
                                 class="w-full" 
                                 :class="{ 'p-invalid': formErrors.recipient }"
-                                placeholder="Recipient Name" 
-                                disabled 
+                                placeholder="Recipient Name"
                             />
                             <small v-if="formErrors.recipient" class="p-error">{{ formErrors.recipient[0] }}</small>
                         </div>
 
                         <!-- Contact Number -->
                         <div class="col-span-2">
-                            <label class="block text-gray-700 font-semibold">Contact <span class="text-red-500">*</span></label>
+                            <label class="block text-gray-700 font-semibold">Contact</label>
                             <InputText 
                                 v-model="form.contact" 
                                 type="text" 
                                 class="w-full" 
                                 :class="{ 'p-invalid': formErrors.contact }"
-                                placeholder="Contact Number" 
-                                disabled 
+                                placeholder="Contact Number"
                             />
                             <small v-if="formErrors.contact" class="p-error">{{ formErrors.contact[0] }}</small>
                         </div>
@@ -112,78 +110,74 @@
 
                         <!-- Address Line 1 -->
                         <div class="col-span-4">
-                            <label class="block text-gray-700 font-semibold">Address Line 1 <span class="text-red-500">*</span></label>
+                            <label class="block text-gray-700 font-semibold">Address Line 1</label>
                             <InputText 
-                                v-model="form.address_line_1" 
+                                v-model="form.address1" 
                                 type="text" 
                                 class="w-full" 
-                                :class="{ 'p-invalid': formErrors.address_line_1 }"
+                                :class="{ 'p-invalid': formErrors.address1 }"
                                 placeholder="Street Address" 
-                                disabled 
                             />
-                            <small v-if="formErrors.address_line_1" class="p-error">{{ formErrors.address_line_1[0] }}</small>
+                            <small v-if="formErrors.address1" class="p-error">{{ formErrors.address1[0] }}</small>
                         </div>
 
                         <!-- Address Line 2 -->
                         <div class="col-span-4">
                             <label class="block text-gray-700 font-semibold">Address Line 2</label>
                             <InputText 
-                                v-model="form.address_line_2" 
+                                v-model="form.address2" 
                                 type="text" 
                                 class="w-full" 
+                                :class="{ 'p-invalid': formErrors.address2 }"
                                 placeholder="Apartment, Suite, etc. (optional)" 
-                                disabled 
                             />
+                            <small v-if="formErrors.address2" class="p-error">{{ formErrors.address2[0] }}</small>
                         </div>
 
                         <!-- City & State -->
                         <div class="col-span-2">
-                            <label class="block text-gray-700 font-semibold">City <span class="text-red-500">*</span></label>
+                            <label class="block text-gray-700 font-semibold">City</label>
                             <InputText 
                                 v-model="form.city" 
                                 type="text" 
                                 class="w-full" 
                                 :class="{ 'p-invalid': formErrors.city }"
                                 placeholder="City" 
-                                disabled 
                             />
                             <small v-if="formErrors.city" class="p-error">{{ formErrors.city[0] }}</small>
                         </div>
                         <div class="col-span-2">
-                            <label class="block text-gray-700 font-semibold">State <span class="text-red-500">*</span></label>
+                            <label class="block text-gray-700 font-semibold">State</label>
                             <InputText 
                                 v-model="form.state" 
                                 type="text" 
                                 class="w-full" 
                                 :class="{ 'p-invalid': formErrors.state }"
                                 placeholder="State" 
-                                disabled 
                             />
                             <small v-if="formErrors.state" class="p-error">{{ formErrors.state[0] }}</small>
                         </div>
 
                         <!-- Postcode & Country -->
                         <div class="col-span-2">
-                            <label class="block text-gray-700 font-semibold">Postcode <span class="text-red-500">*</span></label>
+                            <label class="block text-gray-700 font-semibold">Postcode</label>
                             <InputText 
                                 v-model="form.postcode" 
                                 type="text" 
                                 class="w-full" 
                                 :class="{ 'p-invalid': formErrors.postcode }"
                                 placeholder="Postcode" 
-                                disabled 
                             />
                             <small v-if="formErrors.postcode" class="p-error">{{ formErrors.postcode[0] }}</small>
                         </div>
                         <div class="col-span-2">
-                            <label class="block text-gray-700 font-semibold">Country <span class="text-red-500">*</span></label>
+                            <label class="block text-gray-700 font-semibold">Country</label>
                             <InputText 
                                 v-model="form.country" 
                                 type="text" 
                                 class="w-full" 
                                 :class="{ 'p-invalid': formErrors.country }"
                                 placeholder="Country"
-                                disabled 
                             />
                             <small v-if="formErrors.country" class="p-error">{{ formErrors.country[0] }}</small>
                         </div>
@@ -207,12 +201,11 @@
                 </div>
             </div>
 
-     
+            <!-- Right Sidebar -->
             <div class="md:w-1/3 flex flex-col" v-if="!loading">
                 <div class="card flex flex-col w-full">
                     <div class="flex items-center justify-between border-b pb-2 mb-2">
                         <h2 class="text-2xl font-bold text-gray-800">Advance Info</h2>
-                        <!-- <Tag :value="statusLabel(redemption.status)" :severity="statusSeverity(redemption.status)" /> -->
                     </div>
 
                     <div class="overflow-x-auto">
@@ -223,16 +216,32 @@
                                     <td class="px-4 py-2 text-right">{{ redemption.refno || 'N/A' }}</td>
                                 </tr>
                                 <tr class="border-b">
+                                    <td class="px-4 py-2 font-medium">Member Code</td>
+                                    <td class="px-4 py-2 text-right">{{ redemption.user?.memberCode || 'N/A' }}</td>
+                                </tr>
+                                <tr class="border-b">
                                     <td class="px-4 py-2 font-medium">Member Level</td>
                                     <td class="px-4 py-2 text-right">{{ redemption.memberLevel || 'N/A' }}</td>
                                 </tr>
                                 <tr class="border-b">
                                     <td class="px-4 py-2 font-medium">Redeem Date</td>
-                                    <td class="px-4 py-2 text-right">{{ formatDate(redemption.redemptionDate) }}</td>
+                                    <td class="px-4 py-2 text-right">{{ formatDate(redemption.created) }}</td>
                                 </tr>
                                 <tr class="border-b">
-                                    <td class="px-4 py-2 font-medium">Created</td>
-                                    <td class="px-4 py-2 text-right">{{ formatDate(redemption.created) }}</td>
+                                    <td class="px-4 py-2 font-medium">Verified Date</td>
+                                    <td class="px-4 py-2 text-right">{{ formatDate(redemption.redeem_item?.verifiedDate) }}</td>
+                                </tr>
+                                <tr class="border-b" v-if="redemption.status === 1">
+                                    <td class="px-4 py-2 font-medium">Approved Date</td>
+                                    <td class="px-4 py-2 text-right">{{ formatDate(redemption.verifiedDate) }}</td>
+                                </tr>
+                                <tr class="border-b">
+                                    <td class="px-4 py-2 font-medium">Points Used</td>
+                                    <td class="px-4 py-2 text-right">{{ redemption.point || 0 }}</td>
+                                </tr>
+                                <tr class="border-b">
+                                    <td class="px-4 py-2 font-medium">Quantity</td>
+                                    <td class="px-4 py-2 text-right">{{ redemption.qty || 0 }}</td>
                                 </tr>
                             </tbody>
                         </table>
@@ -240,7 +249,6 @@
                 </div>
             </div>
         </div>
-
     </Fluid>
 </template>
 
@@ -250,6 +258,10 @@ import { useRouter, useRoute } from 'vue-router';
 import { useToast } from 'primevue/usetoast';
 import api from '@/service/api';
 import LoadingPage from '@/components/LoadingPage.vue';
+
+// PrimeVue Components
+import Calendar from 'primevue/calendar';
+import InputText from 'primevue/inputtext';
 
 const router = useRouter();
 const route = useRoute();
@@ -264,23 +276,31 @@ const redemption = ref({
     id: null,
     refno: '',
     memberLevel: '',
-    recipientName: '',
-    contactNumber: '',
-    addLine1: '',
-    addLine2: '',
-    addCity: '',
-    addState: '',
-    addPostcode: '',
-    addCountry: '',
-    itemName: '',
-    redemptionDate: '',
-    courierName: '',
-    trackingNumber: '',
-    ship_date: '',
+    type: '',
     adminID: '',
-    approvedBy: '',
     status: 0,
-    created: ''
+    created: '',
+    point: 0,
+    qty: 0,
+    verifiedDate: null,
+    user: {
+        memberCode: ''
+    },
+    redeem_item: {
+        recipient: '',
+        contact: '',
+        approvedBy: '',
+        verifiedDate: '',
+        courier: '',
+        tracking_no: '',
+        ship_date: '',
+        address1: '',
+        address2: '',
+        city: '',
+        state: '',
+        postcode: '',
+        country: ''
+    }
 });
 
 // Form data for editing (matching API requirements)
@@ -288,10 +308,10 @@ const form = ref({
     recipient: '',
     contact: '',
     courier: '',
-    shippedDate: null,
+    ship_date: null,
     tracking_no: '',
-    address_line_1: '',
-    address_line_2: '',
+    address1: '',
+    address2: '',
     city: '',
     state: '',
     postcode: '',
@@ -304,7 +324,10 @@ const formErrors = ref({});
 const fetchRedemptionDetails = async () => {
     try {
         loading.value = true;
-        const response = await api.get(`redeem/item/${redemptionId}`);
+        
+        // Add timestamp to prevent caching
+        const timestamp = Date.now();
+        const response = await api.get(`redeem/item/${redemptionId}?_t=${timestamp}`);
 
         if (response.data.status === 1 && response.data.admin_data) {
             const redemptionData = response.data.admin_data.redemption_details;
@@ -314,40 +337,35 @@ const fetchRedemptionDetails = async () => {
                 id: redemptionData.id,
                 refno: redemptionData.refno,
                 memberLevel: redemptionData.memberLevel,
-                recipientName: redemptionData.recipientName,
-                contactNumber: redemptionData.contactNumber,
-                addLine1: redemptionData.addLine1,
-                addLine2: redemptionData.addLine2,
-                addCity: redemptionData.addCity,
-                addState: redemptionData.addState,
-                addPostcode: redemptionData.addPostcode,
-                addCountry: redemptionData.addCountry,
-                itemName: redemptionData.redeem_item,
-                redemptionDate: redemptionData.created,
-                courierName: redemptionData.courierName,
-                trackingNumber: redemptionData.trackingNumber,
-                shippedDate: redemptionData.ship_date,
+                type: redemptionData.type,
                 adminID: redemptionData.adminID,
-                approvedBy: redemptionData.approvedBy,
                 status: redemptionData.status,
-                created: redemptionData.created
+                created: redemptionData.created,
+                point: redemptionData.point,
+                qty: redemptionData.qty,
+                verifiedDate: redemptionData.verifiedDate,
+                user: redemptionData.user || {},
+                redeem_item: redemptionData.redeem_item || {}
             };
 
-            // Pre-fill form with existing data
+            // Pre-fill form with existing data - using new field names
+            const redeemItem = redemption.value.redeem_item;
             form.value = {
-                recipient: redemptionData.recipientName || '',
-                contact: redemptionData.contactNumber || '',
-                courier: redemptionData.courierName || '',
-                shippedDate: redemptionData.ship_date ? parseDate(redemptionData.ship_date) : null,
-                tracking_no: redemptionData.trackingNumber || '',
-                address_line_1: redemptionData.addLine1 || '',
-                address_line_2: redemptionData.addLine2 || '',
-                city: redemptionData.addCity || '',
-                state: redemptionData.addState || '',
-                postcode: redemptionData.addPostcode || '',
-                country: redemptionData.addCountry || ''
+                recipient: redeemItem.recipientName || '',
+                contact:  redeemItem.contactNumber || '',
+                courier: redeemItem.courierName || '',
+                ship_date: redeemItem.shippedDate ? parseDate(redeemItem.shippedDate) : null,
+                tracking_no: redeemItem.trackingNumber || '',
+                address1: redeemItem.addLine1 || '',
+                address2: redeemItem.address2 || redeemItem.addLine2 || '',
+                city: redeemItem.addCity || '',
+                state:  redeemItem.addState || '',
+                postcode: redeemItem.addPostcode || '',
+                country:redeemItem.addCountry || ''
             };
 
+            console.log('Form data populated:', form.value);
+            
         } else {
             toast.add({ severity: 'error', summary: 'Error', detail: 'Failed to load redemption details', life: 3000 });
         }
@@ -382,25 +400,25 @@ const saveChanges = async () => {
 
     try {
         // Format date to dd-mm-yyyy
-        const formattedDate = form.value.shippedDate 
-            ? formatDateForAPI(form.value.shippedDate)
+        const formattedDate = form.value.ship_date 
+            ? formatDateForAPI(form.value.ship_date)
             : '';
 
-        // Debug log
-        console.log('Form date value:', form.value.shippedDate);
-        console.log('Formatted date:', formattedDate);
+        console.log('Sending update with data:', form.value);
 
-        // Create FormData and append all fields
+        // Create FormData and append all fields - using consistent field names
         const formData = new FormData();
         formData.append('courier', form.value.courier);
-        formData.append('ship_date', formattedDate); // Use formatted date string
+        formData.append('ship_date', formattedDate);
         formData.append('tracking_no', form.value.tracking_no);
-        
-
-        // Debug: Log all form data
-        for (let [key, value] of formData.entries()) {
-            console.log(`${key}:`, value);
-        }
+        formData.append('address1', form.value.address1);
+        formData.append('address2', form.value.address2);
+        formData.append('city', form.value.city);
+        formData.append('state', form.value.state);
+        formData.append('postcode', form.value.postcode);
+        formData.append('country', form.value.country);
+        formData.append('recipient', form.value.recipient);
+        formData.append('contact', form.value.contact);
 
         // Send update request
         const response = await api.post(`redeem/edit/${redemptionId}`, formData, {
@@ -409,19 +427,49 @@ const saveChanges = async () => {
             }
         });
 
+        console.log('Update API Response:', response.data);
+
         if (response.data.status === 1) {
-            toast.add({ severity: 'success', summary: 'Success', detail: 'Shipping details updated successfully!', life: 3000 });
+            toast.add({ 
+                severity: 'success', 
+                summary: 'Success', 
+                detail: 'Shipping details updated successfully!', 
+                life: 3000 
+            });
             
-            // Redirect to detail page after successful update
+            // Give API time to process, then redirect
             setTimeout(() => {
-                router.push(`/marketing/detailRedemption/${redemptionId}`);
+                router.push(`/marketing/detailRedemption/${redemptionId}?refresh=${Date.now()}`);
             }, 1500);
         } else {
-            toast.add({ severity: 'error', summary: 'Error', detail: response.data.error || 'Failed to update redemption details', life: 3000 });
+            toast.add({ 
+                severity: 'error', 
+                summary: 'Error', 
+                detail: response.data.message || response.data.error || 'Failed to update redemption details', 
+                life: 3000 
+            });
         }
     } catch (error) {
         console.error('Error updating redemption:', error);
-        toast.add({ severity: 'error', summary: 'Error', detail: response.data.error || 'Failed to update redemption details', life: 3000 });
+        console.error('Error response:', error.response?.data);
+        
+        // Handle validation errors from API
+        if (error.response && error.response.data && error.response.data.errors) {
+            formErrors.value = error.response.data.errors;
+            toast.add({ 
+                severity: 'error', 
+                summary: 'Validation Error', 
+                detail: 'Please check the form for errors', 
+                life: 3000 
+            });
+        } else {
+            toast.add({ 
+                severity: 'error', 
+                summary: 'Error', 
+                detail: error.response?.data?.message || 'Failed to update redemption details', 
+                life: 3000 
+            });
+        }
     } finally {
         processing.value = false;
     }
@@ -482,33 +530,6 @@ const formatDate = (dateString) => {
         console.error('Error formatting date:', error);
         return dateString;
     }
-};
-
-// Status Helpers
-const statusLabel = (status) => {
-    const statusMap = {
-        0: 'Pending',
-        1: 'Approved',
-        2: 'Rejected',
-        3: 'Processing',
-        4: 'Delivery',
-        5: 'Redeemed (Yet to Use)',
-        10: 'Completed'
-    };
-    return statusMap[status] || 'Unknown';
-};
-
-const statusSeverity = (status) => {
-    const severityMap = {
-        0: 'warning',
-        1: 'success',
-        2: 'danger',
-        3: 'info',
-        4: 'primary',
-        5: 'secondary',
-        10: 'success'
-    };
-    return severityMap[status] || 'secondary';
 };
 
 // Fetch data when component mounts

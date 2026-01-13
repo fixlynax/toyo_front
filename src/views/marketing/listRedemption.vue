@@ -7,8 +7,14 @@
 
         <!-- Show content area when not in initial loading -->
         <div v-else>
+            <TabView v-model:activeIndex="activeTab" class="mb-4">
+                <TabPanel header="All" />
+                <TabPanel header="Voucher" />
+                <TabPanel header="Item" />
+            </TabView>
+
             <DataTable
-                :value="listData"
+                :value="filteredData"
                 :paginator="true"
                 :rows="10"
                 :rowsPerPageOptions="[10, 20, 50, 100]"
@@ -23,7 +29,6 @@
                 currentPageReportTemplate="Showing {first} to {last} of {totalRecords} entries"
                 paginatorTemplate="CurrentPageReport FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink RowsPerPageDropdown"
             >
-
                 <template #header>
                     <div class="flex items-center justify-between gap-4 w-full flex-wrap">
                         <!-- Left: Search Field + Cog Button -->
@@ -88,6 +93,12 @@
                     </template>
                 </Column>
 
+                <Column field="itemStatus" header="Item Status" style="min-width: 6rem">
+                    <template #body="{ data }">
+                        {{ data.itemStatus }}
+                    </template>
+                </Column>
+
                 <Column field="status" header="Status" style="min-width: 6rem">
                     <template #body="{ data }">
                         <Tag :value="getOverallStatusLabel(data.status)" :severity="getOverallStatusSeverity(data.status)" />
@@ -99,15 +110,28 @@
 </template>
 
 <script setup>
-import { onMounted, ref } from 'vue';
+import { onMounted, ref, computed } from 'vue';
 import { FilterMatchMode } from '@primevue/core/api';
 import api from '@/service/api';
 import LoadingPage from '@/components/LoadingPage.vue';
+import TabView from 'primevue/tabview';
+import TabPanel from 'primevue/tabpanel';
 
 // Data variables
 const listData = ref([]);
 const initialLoading = ref(true); // For initial page load
 const tableLoading = ref(false); // For table operations
+const activeTab = ref(0); // 0=All, 1=Voucher, 2=Item
+
+const filteredData = computed(() => {
+    if (activeTab.value === 1) {
+        return listData.value.filter((i) => i.itemType === 'VOUCHER');
+    }
+    if (activeTab.value === 2) {
+        return listData.value.filter((i) => i.itemType === 'ITEM');
+    }
+    return listData.value;
+});
 
 // Filters for quick search
 const filters = ref({
@@ -121,7 +145,6 @@ onMounted(async () => {
 
         const response = await api.get('redeem/list');
 
-
         if (response.data.status === 1 && Array.isArray(response.data.admin_data)) {
             listData.value = response.data.admin_data.map((redeem) => ({
                 id: redeem.id,
@@ -130,15 +153,17 @@ onMounted(async () => {
                 itemName: redeem.redeem_item || 'N/A',
                 quantity: redeem.quantity || 0,
                 redemptionDate: redeem.redeem_date || 'N/A',
+                itemStatus: redeem.item_status || 'N/A',
+                itemType: redeem.type || 'N/A',
                 status: redeem.status
             }));
         } else {
-            toast.add({ severity: 'error', summary: 'Error', detail:response.data.message || 'Failed to load data', life: 3000 });
+            toast.add({ severity: 'error', summary: 'Error', detail: response.data.message || 'Failed to load data', life: 3000 });
             listData.value = [];
         }
     } catch (error) {
         console.error('Error fetching redeem list:', error);
-        toast.add({ severity: 'error', summary: 'Error', detail:response.data.message || 'Failed to load data', life: 3000 });
+        toast.add({ severity: 'error', summary: 'Error', detail: response.data.message || 'Failed to load data', life: 3000 });
         listData.value = [];
     } finally {
         initialLoading.value = false;
@@ -172,8 +197,7 @@ function formatDate(dateString) {
     // Detect DD-MM-YYYY
     else if (/^\d{2}-\d{2}-\d{4}$/.test(dateString)) {
         [day, month, year] = dateString.split('-');
-    } 
-    else {
+    } else {
         return ''; // unknown format
     }
 
@@ -187,27 +211,24 @@ function formatDate(dateString) {
         day: '2-digit'
     });
 }
-
-
 </script>
 
 <style scoped>
-
 :deep(.rounded-table) {
     border-radius: 12px;
     overflow: hidden;
     border: 1px solid #e5e7eb;
-    
+
     .p-datatable-header {
         border-top-left-radius: 12px;
         border-top-right-radius: 12px;
     }
-    
+
     .p-paginator-bottom {
         border-bottom-left-radius: 12px;
         border-bottom-right-radius: 12px;
     }
-    
+
     .p-datatable-thead > tr > th {
         &:first-child {
             border-top-left-radius: 12px;
@@ -216,7 +237,7 @@ function formatDate(dateString) {
             border-top-right-radius: 12px;
         }
     }
-    
+
     .p-datatable-tbody > tr:last-child > td {
         &:first-child {
             border-bottom-left-radius: 0;
@@ -225,7 +246,7 @@ function formatDate(dateString) {
             border-bottom-right-radius: 0;
         }
     }
-    
+
     .p-datatable-tbody > tr.p-datatable-emptymessage > td {
         border-bottom-left-radius: 12px;
         border-bottom-right-radius: 12px;
