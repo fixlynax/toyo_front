@@ -189,6 +189,11 @@ const formatDate = (dateString) => {
         .split(',')[0]; // Get only date part
 };
 
+const formatDateTime = (dateString) => {
+    if (!dateString) return '-';
+    return new Date(dateString).toLocaleString('en-MY');
+};
+
 // 🟢 Get Status Severity
 const getStatusSeverity = (status) => {
     switch (status) {
@@ -309,8 +314,8 @@ onBeforeMount(async () => {
                 </template>
 
                 <!-- Regular Columns -->
-                <Column field="created" header="Created Date" style="min-width: 7rem" sortable>
-                    <template #body="{ data }">{{ formatDate(data.created) }}</template>
+                <Column field="created" header="Created On" style="min-width: 7rem" sortable>
+                    <template #body="{ data }">{{ formatDateTime(data.created) }}</template>
                 </Column>
 
                 <Column header="Order No" style="min-width: 9rem" sortable>
