@@ -23,10 +23,9 @@
                             class="w-full"
                             :maxSelectedLabels="3"
                             @change="onSelectionChange"
-                            :selectAll="false"
                             :filter="true"
                             filterPlaceholder="Search customers..."
-                            :showToggleAll="false"
+                            :showToggleAll="true"
                         >
                             <template #value="slotProps">
                                 <div v-if="slotProps.value && slotProps.value.length">
@@ -56,6 +55,7 @@
                             @selectall-change="onSelectAllMaterials"
                             :filter="true"
                             filterPlaceholder="Search materials..."
+                            :showToggleAll="false"
                         >
                             <template #value="slotProps">
                                 <div v-if="slotProps.value && slotProps.value.length">
@@ -73,7 +73,6 @@
                             <span v-if="isAllMaterialsSelected">All materials selected</span>
                             <span v-else>Selected: {{ selectedMaterials.length }} material(s)</span>
                         </div>
-                        <div v-else class="mt-2 text-sm text-gray-500">Leave empty to select all materials</div>
                     </div>
                 </div>
 
@@ -163,6 +162,14 @@
                     <Column field="material_desc" header="Description" style="min-width: 15rem" sortable />
 
                     <Column field="normal_qty" header="Normal Qty" style="min-width: 8rem" sortable>
+                        <template #header>
+                            <div class="flex items-center">
+                                <i 
+                                    class="pi pi-info-circle cursor-pointer font-bold hover:text-blue-700"
+                                    v-tooltip="'Normal Qty is max qty per customer per month'"
+                                ></i>
+                            </div>
+                        </template>
                         <template #body="{ data }">
                             <div
                                 class="font-semibold"
@@ -177,6 +184,14 @@
                     </Column>
 
                     <Column field="ds_qty" header="DS Qty" style="min-width: 8rem" sortable>
+                        <template #header>
+                            <div class="flex items-center">
+                                <i 
+                                    class="pi pi-info-circle cursor-pointer font-bold hover:text-blue-700"
+                                    v-tooltip="'DS Qty is max qty per customer per container'"
+                                ></i>
+                            </div>
+                        </template>
                         <template #body="{ data }">
                             <div
                                 class="font-semibold"
@@ -231,11 +246,33 @@
                         <Column field="custAccountNo" header="Customer Account"></Column>
                         <Column field="materialid" header="Material ID"></Column>
                         <Column field="normalQty" header="Normal Qty">
+                            <template #header>
+                                <div class="flex items-center gap-1">
+                                    <span>Normal Qty</span>
+                                    <Button
+                                        type="button"
+                                        icon="pi pi-info-circle"
+                                        class="p-button-text p-button-sm p-button-rounded p-button-plain"
+                                        v-tooltip="'Normal Qty is max qty per customer per month'"
+                                    />
+                                </div>
+                            </template>
                             <template #body="{ data }">
                                 <span :class="{ 'text-green-600': data.normalQty }">{{ data.normalQty || '-' }}</span>
                             </template>
                         </Column>
                         <Column field="dsQty" header="DS Qty">
+                            <template #header>
+                                <div class="flex items-center gap-1">
+                                    <span>DS Qty</span>
+                                    <Button
+                                        type="button"
+                                        icon="pi pi-info-circle"
+                                        class="p-button-text p-button-sm p-button-rounded p-button-plain"
+                                        v-tooltip="'DS Qty is max qty per customer per container'"
+                                    />
+                                </div>
+                            </template>
                             <template #body="{ data }">
                                 <span :class="{ 'text-blue-600': data.dsQty }">{{ data.dsQty || '-' }}</span>
                             </template>
