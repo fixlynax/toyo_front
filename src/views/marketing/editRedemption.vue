@@ -435,7 +435,7 @@ const saveChanges = async () => {
         }
 
         // Send update request
-        const response = await api.post(`redeem/edit/${redemptionId}`, formData, {
+        const response = await api.postExtra(`redeem/edit/${redemptionId}`, formData, {
             headers: {
                 'Content-Type': 'multipart/form-data'
             }
