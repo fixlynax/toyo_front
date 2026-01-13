@@ -143,6 +143,18 @@
                                     <td class="px-4 py-2 text-right font-semibold text-primary">{{ orderData.order_no || '-' }}</td>
                                 </tr>
                                 <tr class="border-b">
+                                    <td class="px-4 py-2 font-medium">Order No</td>
+                                    <td class="px-4 py-2 text-right font-bold text-primary">{{ orderData.order_no || '-' }}</td>
+                                </tr>
+                                <tr class="border-b">
+                                    <td class="px-4 py-2 font-medium">Return Channel</td>
+                                    <td class="px-4 py-2 text-right font-bold">{{ order.channel || '-' }}</td>
+                                </tr>
+                                <tr class="border-b">
+                                    <td class="px-4 py-2 font-medium">Order Type</td>
+                                    <td class="px-4 py-2 text-right font-semibold">{{ orderData.orderDesc || '-' }}</td>
+                                </tr>
+                                <tr class="border-b">
                                     <td class="px-4 py-2 font-medium">SO No</td>
                                     <td class="px-4 py-2 text-right font-semibold">{{ orderData.so_no || '-' }}</td>
                                 </tr>
@@ -166,10 +178,10 @@
                                     <td class="px-4 py-2 font-medium">Storage Location</td>
                                     <td class="px-4 py-2 text-right font-semibold">{{ orderData.storagelocation || '-' }}</td>
                                 </tr>
-                                <tr class="border-b">
+                                <!-- <tr class="border-b">
                                     <td class="px-4 py-2 font-medium">Delivery Status</td>
                                     <td class="px-4 py-2 text-right font-semibold">{{ getDeliveryStatusText(order.delivery_status) }}</td>
-                                </tr>
+                                </tr> -->
                                 <tr>
                                     <td class="px-4 py-2 font-medium">Created</td>
                                     <td class="px-4 py-2 text-right font-semibold">{{ formatDate(order.created) || '-' }}</td>
