@@ -149,9 +149,13 @@
                         <div class="text-xl font-bold text-gray-800 border-b pb-2 mb-4">Survey Questions</div>
 
                         <div v-if="questions.length > 0" class="space-y-4">
-                            <div v-for="(q, index) in questions" :key="index" class="border rounded-lg p-4 shadow-sm bg-gray-50">
+                            <div v-for="(q, index) in questions" :key="q.id || `new-${index}`" class="border rounded-lg p-4 shadow-sm bg-gray-50">
                                 <div class="flex items-center justify-between mb-2">
-                                    <label class="font-semibold text-gray-800"> Question {{ index + 1 }} </label>
+                                    <label class="font-semibold text-gray-800">
+                                        Question {{ index + 1 }}
+                                        <span v-if="!q.id" class="text-xs bg-green-100 text-green-800 px-2 py-0.5 rounded-full ml-2">New</span>
+                                        <span v-else class="text-xs bg-blue-100 text-blue-800 px-2 py-0.5 rounded-full ml-2">Existing</span>
+                                    </label>
                                     <Button icon="pi pi-trash" class="p-button-danger p-button-text p-button-sm" @click="removeQuestion(index)" />
                                 </div>
 
@@ -161,8 +165,8 @@
                                 <!-- Answer Inputs -->
                                 <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
                                     <FloatLabel v-for="(ans, i) in q.answers" :key="i" variant="on" class="w-full">
-                                        <InputText :id="`answer-${index}-${i}`" v-model="q.answers[i]" class="w-full" />
-                                        <label :for="`answer-${index}-${i}`">Answer {{ i + 1 }}</label>
+                                        <InputText :id="`answer-${q.id || index}-${i}`" v-model="q.answers[i]" class="w-full" />
+                                        <label :for="`answer-${q.id || index}-${i}`">Answer {{ i + 1 }}</label>
                                     </FloatLabel>
                                 </div>
                             </div>
@@ -281,8 +285,6 @@ const formatDate = (date) => {
     return `${day}-${month}-${year}`;
 };
 
-
-
 // Format file size for display
 const formatFileSize = (bytes) => {
     if (bytes === 0) return '0 Bytes';
@@ -329,10 +331,11 @@ const fetchEventDetails = async () => {
                 image3URL: eventData.image3URL
             };
 
-            // Handle survey questions
+            // Handle survey questions with IDs
             if (eventData.survey_questions && eventData.survey_questions.length) {
                 const rawQuestions = eventData.survey_questions[0];
                 questions.value = rawQuestions.map((q) => ({
+                    id: q.id, // Store the ID for updates
                     question: q.question || '',
                     answers: [q.answer1 || '', q.answer2 || '', q.answer3 || '']
                 }));
@@ -359,7 +362,6 @@ const fetchEventDetails = async () => {
     }
 };
 
-
 // Parse date string to Date object
 const parseDate = (dateString) => {
     if (!dateString) return null;
@@ -374,6 +376,7 @@ const parseDate = (dateString) => {
 const addQuestion = () => {
     if (questions.value.length < 20) {
         questions.value.push({
+            id: null, // null for new questions
             question: '',
             answers: ['', '', '']
         });
@@ -388,7 +391,6 @@ const removeQuestion = (index) => {
 const onImageSelect = (eventFile, fieldName) => {
     const file = eventFile.files[0];
     if (!file) {
-
         imageErrors.value[fieldName] = 'No file selected';
         return;
     }
@@ -520,15 +522,17 @@ const validateForm = () => {
 
         if (file) {
             if (file.size > 1024 * 1024) {
-        toast.add({ severity: 'warn', summary: 'File too large', detail: 'Maximum file size allowed is 1MB', life: 3000 });
-        return;
-    }
+                toast.add({ severity: 'warn', summary: 'File too large', detail: 'Maximum file size allowed is 1MB', life: 3000 });
+                return false;
+            }
         }
     }
 
     // Survey-specific validation
     if (event.value.isSurvey === 'Yes') {
-        if (event.value.point1 === null || event.value.point1 === undefined || event.value.point2 === null || event.value.point2 === undefined || event.value.point3 === null || event.value.point3 === undefined) {
+        if (event.value.point1 === null || event.value.point1 === undefined || 
+            event.value.point2 === null || event.value.point2 === undefined || 
+            event.value.point3 === null || event.value.point3 === undefined) {
             toast.add({
                 severity: 'warn',
                 summary: 'Validation',
@@ -549,7 +553,10 @@ const validateForm = () => {
         }
 
         for (let q of questions.value) {
-            if (!q.question || q.question.trim() === '' || !q.answers[0] || q.answers[0].trim() === '' || !q.answers[1] || q.answers[1].trim() === '' || !q.answers[2] || q.answers[2].trim() === '') {
+            if (!q.question || q.question.trim() === '' || 
+                !q.answers[0] || q.answers[0].trim() === '' || 
+                !q.answers[1] || q.answers[1].trim() === '' || 
+                !q.answers[2] || q.answers[2].trim() === '') {
                 toast.add({
                     severity: 'warn',
                     summary: 'Validation',
@@ -596,13 +603,16 @@ const submitEvent = async () => {
             formData.append('point2', event.value.point2?.toString() || '0');
             formData.append('point3', event.value.point3?.toString() || '0');
 
-            // Append survey questions
+            // Prepare survey questions with IDs
             const surveyQuestions = questions.value.map((q) => ({
+                id: q.id, // Include ID for existing questions, null for new ones
                 question: q.question || '',
                 answer1: q.answers[0] || '',
                 answer2: q.answers[1] || '',
-                answer3: q.answers[2] || ''
+                answer3: q.answers[2] || '',
+                correctAnswer: null // Set correctAnswer to null as requested
             }));
+            
             formData.append('survey_questions', JSON.stringify(surveyQuestions));
         } else {
             formData.append('point1', '0');
@@ -647,18 +657,18 @@ const submitEvent = async () => {
             toast.add({
                 severity: 'error',
                 summary: 'Error',
-                detail: response.data.messages ||'Failed to update event',
+                detail: response.data.messages || 'Failed to update event',
                 life: 3000
             });
         }
     } catch (error) {
         console.error('API Error:', error);
         toast.add({
-                severity: 'error',
-                summary: 'Error',
-                detail: response.data.messages ||'Failed to update event',
-                life: 3000
-            });
+            severity: 'error',
+            summary: 'Error',
+            detail: 'Failed to update event',
+            life: 3000
+        });
     } finally {
         loading.value = false;
     }
