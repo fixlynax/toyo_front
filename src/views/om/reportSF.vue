@@ -3,7 +3,7 @@
         <div class="flex flex-col gap-8">
             <!-- Header -->
             <div class="card flex flex-col gap-6 w-full">
-                <div class="text-2xl font-bold text-gray-800 border-b pb-2 mb-4">Sales Forecast Report</div>
+                <div class="text-2xl font-bold text-gray-800 border-b pb-2 mb-4">Report Sales Forecast</div>
 
                 <!-- Filters Section -->
                 <div>
