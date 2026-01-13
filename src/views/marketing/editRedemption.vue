@@ -1,12 +1,12 @@
 <template>
     <Fluid>
         <div class="flex flex-col md:flex-row gap-8">
-            <div class="md:w-2/3 flex flex-col gap-2">
+            <div class="md:w-2/3 flex flex-col">
                 <!-- Loading State -->
                 <LoadingPage v-if="loading" :message="'Loading Redemption Details...'" />
 
                 <!-- Redemption Details (Read-only) -->
-                <div class="card flex flex-col gap-3 w-full" v-if="!loading">
+                <div class="card flex flex-col gap-2 w-full" v-if="!loading">
                     <div class="flex items-center justify-between border-b pb-2">
                         <div class="flex items-center gap-3">
                             <Button icon="pi pi-arrow-left" class="p-button-text p-button-secondary" @click="$router.back()" />
@@ -17,35 +17,37 @@
                     <div class="mt-2 grid grid-cols-2 gap-4">
                         <div>
                             <span class="block text-sm font-bold text-gray-700">Recipient</span>
-                            <p class="text-lg font-medium">{{ redemption.redeem_item?.recipientName || redemption.redeem_item?.recipient || 'N/A' }}</p>
+                            <p class="text-xm font-medium">{{ redemption.redeem_item?.recipientName || redemption.redeem_item?.recipient || 'N/A' }}</p>
                         </div>
                         <div>
                             <span class="block text-sm font-bold text-gray-700">Contact</span>
-                            <p class="text-lg text-gray-500">{{ redemption.redeem_item?.contactNumber || redemption.redeem_item?.contact || 'N/A' }}</p>
+                            <p class="text-xm text-gray-500">{{ redemption.redeem_item?.contactNumber || redemption.redeem_item?.contact || 'N/A' }}</p>
                         </div>
                         <div>
                             <span class="block text-sm font-bold text-gray-700">Redeemed Item</span>
-                            <p class="text-lg text-gray-500">{{ redemption.type || 'N/A' }}</p>
+                            <p class="text-xm text-gray-500">{{ redemption.type || 'N/A' }}</p>
                         </div>
                         <div>
                             <span class="block text-sm font-bold text-gray-700">Approved By</span>
-                            <p class="text-lg text-gray-500">{{ redemption.redeem_item?.approvedBy || 'N/A' }} ({{ redemption.adminID || 'N/A' }})</p>
+                            <p class="text-xm text-gray-500">{{ redemption.redeem_item?.approvedBy || 'N/A' }} ({{ redemption.adminID || 'N/A' }})</p>
                         </div>
                     </div>
                 </div>
 
                 <!-- Shipping Details (Editable) -->
-                <div class="card flex flex-col gap-6 w-full" v-if="!loading">
+                <div class="card flex flex-col gap-4 w-full" v-if="!loading">
                     <div class="flex items-center justify-between border-b pb-2">
                         <h2 class="text-2xl font-bold text-gray-800">Edit Shipping Details</h2>
+                        <div v-if="isShippingDisabled" class="text-sm text-orange-600 font-medium bg-orange-50 px-3 py-1 rounded">Shipping details (Shipping Date, Courier, Tracking No) are read-only for Pending/Rejected status</div>
                     </div>
 
                     <div class="grid grid-cols-4 gap-4">
                         <!-- Shipping Date -->
                         <div class="col-span-4">
-                            <label class="block text-gray-700 font-semibold">Shipping Date <span class="text-red-500">*</span></label>
-                            <DatePicker v-model="form.ship_date" class="w-full" placeholder="Select Shipping Date" dateFormat="dd-mm-yy" :class="{ 'p-invalid': formErrors.ship_date }" showIcon />
-                            <small v-if="formErrors.ship_date" class="p-error">{{ formErrors.ship_date[0] }}</small>
+                            <label class="block text-gray-700 font-semibold">Shipping Date</label>
+                            <DatePicker v-model="form.ship_date" class="w-full" placeholder="Select Shipping Date" dateFormat="dd-mm-yy" :class="{ 'p-invalid': formErrors.ship_date }" showIcon :disabled="isShippingDisabled" />
+                            <!-- <small v-if="formErrors.ship_date" class="p-error">{{ formErrors.ship_date[0] }}</small> -->
+                            <small v-if="isShippingDisabled" class="text-gray-500 italic">This field cannot be modified for current status</small>
                         </div>
 
                         <!-- Recipient Name -->
@@ -64,16 +66,18 @@
 
                         <!-- Courier Name -->
                         <div class="col-span-2">
-                            <label class="block text-gray-700 font-semibold">Courier <span class="text-red-500">*</span></label>
-                            <InputText v-model="form.courier" type="text" class="w-full" :class="{ 'p-invalid': formErrors.courier }" placeholder="Courier Name" />
-                            <small v-if="formErrors.courier" class="p-error">{{ formErrors.courier[0] }}</small>
+                            <label class="block text-gray-700 font-semibold">Courier</label>
+                            <InputText v-model="form.courier" type="text" class="w-full" :class="{ 'p-invalid': formErrors.courier }" placeholder="Courier Name" :disabled="isShippingDisabled" />
+                            <!-- <small v-if="formErrors.courier" class="p-error">{{ formErrors.courier[0] }}</small> -->
+                            <small v-if="isShippingDisabled" class="text-gray-500 italic">This field cannot be modified for current status</small>
                         </div>
 
                         <!-- Tracking Number -->
                         <div class="col-span-2">
-                            <label class="block text-gray-700 font-semibold">Tracking No <span class="text-red-500">*</span></label>
-                            <InputText v-model="form.tracking_no" type="text" class="w-full" :class="{ 'p-invalid': formErrors.tracking_no }" placeholder="Tracking Number" />
-                            <small v-if="formErrors.tracking_no" class="p-error">{{ formErrors.tracking_no[0] }}</small>
+                            <label class="block text-gray-700 font-semibold">Tracking No</label>
+                            <InputText v-model="form.tracking_no" type="text" class="w-full" :class="{ 'p-invalid': formErrors.tracking_no }" placeholder="Tracking Number" :disabled="isShippingDisabled" />
+                            <!-- <small v-if="formErrors.tracking_no" class="p-error">{{ formErrors.tracking_no[0] }}</small> -->
+                            <small v-if="isShippingDisabled" class="text-gray-500 italic">This field cannot be modified for current status</small>
                         </div>
 
                         <!-- Address Line 1 -->
@@ -151,15 +155,15 @@
                                 </tr>
                                 <tr class="border-b">
                                     <td class="px-4 py-2 font-medium">Redeem Date</td>
-                                    <td class="px-4 py-2 text-right">{{ formatDate(redemption.created) }}</td>
+                                    <td class="px-4 py-2 text-right">{{ formatDateTime(redemption.created) }}</td>
                                 </tr>
                                 <tr class="border-b">
                                     <td class="px-4 py-2 font-medium">Verified Date</td>
-                                    <td class="px-4 py-2 text-right">{{ formatDate(redemption.redeem_item?.verifiedDate) }}</td>
+                                    <td class="px-4 py-2 text-right">{{ formatDateTime(redemption.redeem_item?.verifiedDate) }}</td>
                                 </tr>
                                 <tr class="border-b" v-if="redemption.status === 1">
                                     <td class="px-4 py-2 font-medium">Approved Date</td>
-                                    <td class="px-4 py-2 text-right">{{ formatDate(redemption.verifiedDate) }}</td>
+                                    <td class="px-4 py-2 text-right">{{ formatDateTime(redemption.verifiedDate) }}</td>
                                 </tr>
                                 <tr class="border-b">
                                     <td class="px-4 py-2 font-medium">Points Used</td>
@@ -168,6 +172,12 @@
                                 <tr class="border-b">
                                     <td class="px-4 py-2 font-medium">Quantity</td>
                                     <td class="px-4 py-2 text-right">{{ redemption.qty || 0 }}</td>
+                                </tr>
+                                <tr class="border-b">
+                                    <td class="px-4 py-2 font-medium">Status</td>
+                                    <td class="px-4 py-2 text-right">
+                                        <span :class="statusClass">{{ statusText }}</span>
+                                    </td>
                                 </tr>
                             </tbody>
                         </table>
@@ -179,7 +189,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue';
+import { ref, onMounted, computed } from 'vue';
 import { useRouter, useRoute } from 'vue-router';
 import { useToast } from 'primevue/usetoast';
 import api from '@/service/api';
@@ -246,6 +256,37 @@ const form = ref({
 
 const formErrors = ref({});
 
+// Computed properties for status
+const isShippingDisabled = computed(() => {
+    return redemption.value.status === 0 || redemption.value.status === 2;
+});
+
+const statusText = computed(() => {
+    switch (redemption.value.status) {
+        case 0:
+            return 'Pending';
+        case 1:
+            return 'Approved';
+        case 2:
+            return 'Rejected';
+        default:
+            return 'Unknown';
+    }
+});
+
+const statusClass = computed(() => {
+    switch (redemption.value.status) {
+        case 0:
+            return 'text-yellow-600 font-semibold';
+        case 1:
+            return 'text-green-600 font-semibold';
+        case 2:
+            return 'text-red-600 font-semibold';
+        default:
+            return 'text-gray-600';
+    }
+});
+
 // Fetch redemption details from API
 const fetchRedemptionDetails = async () => {
     try {
@@ -294,6 +335,8 @@ const fetchRedemptionDetails = async () => {
 
             console.log('Form data populated:', form.value);
             console.log('Redeem item data:', redeemItem);
+            console.log('Redemption status:', redemption.value.status);
+            console.log('Shipping disabled:', isShippingDisabled.value);
         } else {
             toast.add({
                 severity: 'error',
@@ -327,7 +370,7 @@ const parseDate = (dateStr) => {
                 if (parts[0].length === 4) {
                     const [year, month, day] = parts;
                     return new Date(`${year}-${month}-${day}`);
-                } 
+                }
                 // If it looks like d-m-Y (from frontend)
                 else if (parts[2].length === 4) {
                     const [day, month, year] = parts;
@@ -349,43 +392,33 @@ const saveChanges = async () => {
     formErrors.value = {};
 
     try {
-        // Validate required fields
-        if (!form.value.courier || !form.value.tracking_no || !form.value.ship_date) {
-            toast.add({
-                severity: 'error',
-                summary: 'Validation Error',
-                detail: 'Please fill in all required fields',
-                life: 3000
-            });
-            processing.value = false;
-            return;
-        }
+        // Format date to dd-mm-yyyy for API if date exists
+        let formattedDate = '';
+        if (form.value.ship_date) {
+            formattedDate = formatDateForAPI(form.value.ship_date);
 
-        // Format date to dd-mm-yyyy for API
-        const formattedDate = formatDateForAPI(form.value.ship_date);
-        
-        if (!formattedDate) {
-            toast.add({
-                severity: 'error',
-                summary: 'Validation Error',
-                detail: 'Invalid shipping date format',
-                life: 3000
-            });
-            processing.value = false;
-            return;
+            if (!formattedDate) {
+                toast.add({
+                    severity: 'error',
+                    summary: 'Validation Error',
+                    detail: 'Invalid shipping date format',
+                    life: 3000
+                });
+                processing.value = false;
+                return;
+            }
         }
 
         console.log('Sending update with data:', form.value);
 
         // Create FormData with field names matching API expectations
         const formData = new FormData();
-        
-        // Required fields
-        formData.append('courier', form.value.courier.trim());
-        formData.append('tracking_no', form.value.tracking_no.trim());
-        formData.append('ship_date', formattedDate);
-        
-        // Optional fields - only append if they have values
+
+        // All fields are optional - only append if they have values
+        if (form.value.courier) formData.append('courier', form.value.courier.trim());
+        if (form.value.tracking_no) formData.append('tracking_no', form.value.tracking_no.trim());
+        if (form.value.ship_date) formData.append('ship_date', formattedDate);
+
         if (form.value.recipient) formData.append('recipient', form.value.recipient.trim());
         if (form.value.contact) formData.append('contact', form.value.contact.trim());
         if (form.value.address1) formData.append('address1', form.value.address1.trim());
@@ -411,13 +444,13 @@ const saveChanges = async () => {
         console.log('Update API Response:', response.data);
 
         if (response.data.status === 1) {
-            toast.add({ 
-                severity: 'success', 
-                summary: 'Success', 
-                detail: response.data.message || 'Shipping details updated successfully!', 
-                life: 3000 
+            toast.add({
+                severity: 'success',
+                summary: 'Success',
+                detail: response.data.message || 'Shipping details updated successfully!',
+                life: 3000
             });
-            
+
             // Redirect back to detail page with cache busting
             setTimeout(() => {
                 router.push(`/marketing/detailRedemption/${redemptionId}?refresh=${Date.now()}`);
@@ -426,39 +459,39 @@ const saveChanges = async () => {
             // Handle API validation errors
             if (response.data.error) {
                 formErrors.value = response.data.error;
-                toast.add({ 
-                    severity: 'error', 
-                    summary: 'Validation Error', 
-                    detail: 'Please check the form for errors', 
-                    life: 3000 
+                toast.add({
+                    severity: 'error',
+                    summary: 'Validation Error',
+                    detail: 'Please check the form for errors',
+                    life: 3000
                 });
             } else {
-                toast.add({ 
-                    severity: 'error', 
-                    summary: 'Error', 
-                    detail: response.data.message || 'Failed to update redemption details', 
-                    life: 3000 
+                toast.add({
+                    severity: 'error',
+                    summary: 'Error',
+                    detail: response.data.message || 'Failed to update redemption details',
+                    life: 3000
                 });
             }
         }
     } catch (error) {
         console.error('Error updating redemption:', error);
-        
+
         // Handle validation errors from API
         if (error.response && error.response.data && error.response.data.error) {
             formErrors.value = error.response.data.error;
-            toast.add({ 
-                severity: 'error', 
-                summary: 'Validation Error', 
-                detail: 'Please check the form for errors', 
-                life: 3000 
+            toast.add({
+                severity: 'error',
+                summary: 'Validation Error',
+                detail: 'Please check the form for errors',
+                life: 3000
             });
         } else {
-            toast.add({ 
-                severity: 'error', 
-                summary: 'Error', 
-                detail: error.response?.data?.message || 'Failed to update redemption details', 
-                life: 3000 
+            toast.add({
+                severity: 'error',
+                summary: 'Error',
+                detail: error.response?.data?.message || 'Failed to update redemption details',
+                life: 3000
             });
         }
     } finally {
@@ -521,6 +554,11 @@ const formatDate = (dateString) => {
         console.error('Error formatting date:', error);
         return dateString;
     }
+};
+
+const formatDateTime = (dateString) => {
+    if (!dateString) return '-';
+    return new Date(dateString).toLocaleString('en-MY');
 };
 
 // Fetch data when component mounts
