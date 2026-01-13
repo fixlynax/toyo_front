@@ -1,7 +1,6 @@
 <template>
     <Fluid>
         <div class="flex flex-col md:flex-row gap-8">
-           
             <div class="md:w-2/3 flex flex-col gap-2">
                 <!-- Loading State -->
                 <LoadingPage v-if="loading" :message="'Loading Redemption Details...'" />
@@ -18,11 +17,11 @@
                     <div class="mt-2 grid grid-cols-2 gap-4">
                         <div>
                             <span class="block text-sm font-bold text-gray-700">Recipient</span>
-                            <p class="text-lg font-medium">{{ redemption.redeem_item?.recipient || redemption.redeem_item?.recipientName || 'N/A' }}</p>
+                            <p class="text-lg font-medium">{{ redemption.redeem_item?.recipientName || redemption.redeem_item?.recipient || 'N/A' }}</p>
                         </div>
                         <div>
                             <span class="block text-sm font-bold text-gray-700">Contact</span>
-                            <p class="text-lg text-gray-500">{{ redemption.redeem_item?.contact || redemption.redeem_item?.contactNumber || 'N/A' }}</p>
+                            <p class="text-lg text-gray-500">{{ redemption.redeem_item?.contactNumber || redemption.redeem_item?.contact || 'N/A' }}</p>
                         </div>
                         <div>
                             <span class="block text-sm font-bold text-gray-700">Redeemed Item</span>
@@ -45,140 +44,73 @@
                         <!-- Shipping Date -->
                         <div class="col-span-4">
                             <label class="block text-gray-700 font-semibold">Shipping Date <span class="text-red-500">*</span></label>
-                            <Calendar 
-                                v-model="form.ship_date" 
-                                class="w-full" 
-                                placeholder="Select Shipping Date" 
-                                dateFormat="dd-mm-yy"
-                                :class="{ 'p-invalid': formErrors.ship_date }"
-                                showIcon
-                            />
+                            <DatePicker v-model="form.ship_date" class="w-full" placeholder="Select Shipping Date" dateFormat="dd-mm-yy" :class="{ 'p-invalid': formErrors.ship_date }" showIcon />
                             <small v-if="formErrors.ship_date" class="p-error">{{ formErrors.ship_date[0] }}</small>
                         </div>
 
                         <!-- Recipient Name -->
                         <div class="col-span-2">
                             <label class="block text-gray-700 font-semibold">Recipient</label>
-                            <InputText 
-                                v-model="form.recipient" 
-                                type="text" 
-                                class="w-full" 
-                                :class="{ 'p-invalid': formErrors.recipient }"
-                                placeholder="Recipient Name"
-                            />
+                            <InputText v-model="form.recipient" type="text" class="w-full" :class="{ 'p-invalid': formErrors.recipient }" placeholder="Recipient Name" />
                             <small v-if="formErrors.recipient" class="p-error">{{ formErrors.recipient[0] }}</small>
                         </div>
 
                         <!-- Contact Number -->
                         <div class="col-span-2">
                             <label class="block text-gray-700 font-semibold">Contact</label>
-                            <InputText 
-                                v-model="form.contact" 
-                                type="text" 
-                                class="w-full" 
-                                :class="{ 'p-invalid': formErrors.contact }"
-                                placeholder="Contact Number"
-                            />
+                            <InputText v-model="form.contact" type="text" class="w-full" :class="{ 'p-invalid': formErrors.contact }" placeholder="Contact Number" />
                             <small v-if="formErrors.contact" class="p-error">{{ formErrors.contact[0] }}</small>
                         </div>
 
                         <!-- Courier Name -->
                         <div class="col-span-2">
                             <label class="block text-gray-700 font-semibold">Courier <span class="text-red-500">*</span></label>
-                            <InputText 
-                                v-model="form.courier" 
-                                type="text" 
-                                class="w-full" 
-                                :class="{ 'p-invalid': formErrors.courier }"
-                                placeholder="Courier Name" 
-                            />
+                            <InputText v-model="form.courier" type="text" class="w-full" :class="{ 'p-invalid': formErrors.courier }" placeholder="Courier Name" />
                             <small v-if="formErrors.courier" class="p-error">{{ formErrors.courier[0] }}</small>
                         </div>
 
                         <!-- Tracking Number -->
                         <div class="col-span-2">
                             <label class="block text-gray-700 font-semibold">Tracking No <span class="text-red-500">*</span></label>
-                            <InputText 
-                                v-model="form.tracking_no" 
-                                type="text" 
-                                class="w-full" 
-                                :class="{ 'p-invalid': formErrors.tracking_no }"
-                                placeholder="Tracking Number" 
-                            />
+                            <InputText v-model="form.tracking_no" type="text" class="w-full" :class="{ 'p-invalid': formErrors.tracking_no }" placeholder="Tracking Number" />
                             <small v-if="formErrors.tracking_no" class="p-error">{{ formErrors.tracking_no[0] }}</small>
                         </div>
 
                         <!-- Address Line 1 -->
                         <div class="col-span-4">
                             <label class="block text-gray-700 font-semibold">Address Line 1</label>
-                            <InputText 
-                                v-model="form.address1" 
-                                type="text" 
-                                class="w-full" 
-                                :class="{ 'p-invalid': formErrors.address1 }"
-                                placeholder="Street Address" 
-                            />
+                            <InputText v-model="form.address1" type="text" class="w-full" :class="{ 'p-invalid': formErrors.address1 }" placeholder="Street Address" />
                             <small v-if="formErrors.address1" class="p-error">{{ formErrors.address1[0] }}</small>
                         </div>
 
                         <!-- Address Line 2 -->
                         <div class="col-span-4">
                             <label class="block text-gray-700 font-semibold">Address Line 2</label>
-                            <InputText 
-                                v-model="form.address2" 
-                                type="text" 
-                                class="w-full" 
-                                :class="{ 'p-invalid': formErrors.address2 }"
-                                placeholder="Apartment, Suite, etc. (optional)" 
-                            />
+                            <InputText v-model="form.address2" type="text" class="w-full" :class="{ 'p-invalid': formErrors.address2 }" placeholder="Apartment, Suite, etc. (optional)" />
                             <small v-if="formErrors.address2" class="p-error">{{ formErrors.address2[0] }}</small>
                         </div>
 
                         <!-- City & State -->
                         <div class="col-span-2">
                             <label class="block text-gray-700 font-semibold">City</label>
-                            <InputText 
-                                v-model="form.city" 
-                                type="text" 
-                                class="w-full" 
-                                :class="{ 'p-invalid': formErrors.city }"
-                                placeholder="City" 
-                            />
+                            <InputText v-model="form.city" type="text" class="w-full" :class="{ 'p-invalid': formErrors.city }" placeholder="City" />
                             <small v-if="formErrors.city" class="p-error">{{ formErrors.city[0] }}</small>
                         </div>
                         <div class="col-span-2">
                             <label class="block text-gray-700 font-semibold">State</label>
-                            <InputText 
-                                v-model="form.state" 
-                                type="text" 
-                                class="w-full" 
-                                :class="{ 'p-invalid': formErrors.state }"
-                                placeholder="State" 
-                            />
+                            <InputText v-model="form.state" type="text" class="w-full" :class="{ 'p-invalid': formErrors.state }" placeholder="State" />
                             <small v-if="formErrors.state" class="p-error">{{ formErrors.state[0] }}</small>
                         </div>
 
                         <!-- Postcode & Country -->
                         <div class="col-span-2">
                             <label class="block text-gray-700 font-semibold">Postcode</label>
-                            <InputText 
-                                v-model="form.postcode" 
-                                type="text" 
-                                class="w-full" 
-                                :class="{ 'p-invalid': formErrors.postcode }"
-                                placeholder="Postcode" 
-                            />
+                            <InputText v-model="form.postcode" type="text" class="w-full" :class="{ 'p-invalid': formErrors.postcode }" placeholder="Postcode" />
                             <small v-if="formErrors.postcode" class="p-error">{{ formErrors.postcode[0] }}</small>
                         </div>
                         <div class="col-span-2">
                             <label class="block text-gray-700 font-semibold">Country</label>
-                            <InputText 
-                                v-model="form.country" 
-                                type="text" 
-                                class="w-full" 
-                                :class="{ 'p-invalid': formErrors.country }"
-                                placeholder="Country"
-                            />
+                            <InputText v-model="form.country" type="text" class="w-full" :class="{ 'p-invalid': formErrors.country }" placeholder="Country" />
                             <small v-if="formErrors.country" class="p-error">{{ formErrors.country[0] }}</small>
                         </div>
                     </div>
@@ -189,13 +121,7 @@
                             <Button label="Cancel" class="p-button-secondary" :disabled="processing" />
                         </RouterLink>
                         <div>
-                            <Button 
-                                label="Update" 
-                                class="p-button-success" 
-                                @click="saveChanges" 
-                                :disabled="processing"
-                                :loading="processing"
-                            />
+                            <Button label="Update" class="p-button-success" @click="saveChanges" :disabled="processing" :loading="processing" />
                         </div>
                     </div>
                 </div>
@@ -260,7 +186,7 @@ import api from '@/service/api';
 import LoadingPage from '@/components/LoadingPage.vue';
 
 // PrimeVue Components
-import Calendar from 'primevue/calendar';
+import DatePicker from 'primevue/calendar';
 import InputText from 'primevue/inputtext';
 
 const router = useRouter();
@@ -287,19 +213,19 @@ const redemption = ref({
         memberCode: ''
     },
     redeem_item: {
-        recipient: '',
-        contact: '',
+        recipientName: '',
+        contactNumber: '',
         approvedBy: '',
         verifiedDate: '',
-        courier: '',
-        tracking_no: '',
-        ship_date: '',
-        address1: '',
-        address2: '',
-        city: '',
-        state: '',
-        postcode: '',
-        country: ''
+        courierName: '',
+        trackingNumber: '',
+        shippedDate: '',
+        addLine1: '',
+        addLine2: '',
+        addCity: '',
+        addState: '',
+        addPostcode: '',
+        addCountry: ''
     }
 });
 
@@ -324,14 +250,14 @@ const formErrors = ref({});
 const fetchRedemptionDetails = async () => {
     try {
         loading.value = true;
-        
+
         // Add timestamp to prevent caching
         const timestamp = Date.now();
         const response = await api.get(`redeem/item/${redemptionId}?_t=${timestamp}`);
 
         if (response.data.status === 1 && response.data.admin_data) {
             const redemptionData = response.data.admin_data.redemption_details;
-            
+
             // Map API data to component structure
             redemption.value = {
                 id: redemptionData.id,
@@ -348,30 +274,42 @@ const fetchRedemptionDetails = async () => {
                 redeem_item: redemptionData.redeem_item || {}
             };
 
-            // Pre-fill form with existing data - using new field names
-            const redeemItem = redemption.value.redeem_item;
+            // Fix: Check if redeem_item exists before using it
+            const redeemItem = redemption.value.redeem_item || {};
+
+            // Pre-fill form with existing data
             form.value = {
                 recipient: redeemItem.recipientName || '',
-                contact:  redeemItem.contactNumber || '',
+                contact: redeemItem.contactNumber || '',
                 courier: redeemItem.courierName || '',
                 ship_date: redeemItem.shippedDate ? parseDate(redeemItem.shippedDate) : null,
                 tracking_no: redeemItem.trackingNumber || '',
                 address1: redeemItem.addLine1 || '',
-                address2: redeemItem.address2 || redeemItem.addLine2 || '',
+                address2: redeemItem.addLine2 || '',
                 city: redeemItem.addCity || '',
-                state:  redeemItem.addState || '',
+                state: redeemItem.addState || '',
                 postcode: redeemItem.addPostcode || '',
-                country:redeemItem.addCountry || ''
+                country: redeemItem.addCountry || ''
             };
 
             console.log('Form data populated:', form.value);
-            
+            console.log('Redeem item data:', redeemItem);
         } else {
-            toast.add({ severity: 'error', summary: 'Error', detail: 'Failed to load redemption details', life: 3000 });
+            toast.add({
+                severity: 'error',
+                summary: 'Error',
+                detail: response.data.message || 'Failed to load redemption details',
+                life: 3000
+            });
         }
     } catch (error) {
         console.error('Error fetching redemption details:', error);
-        toast.add({ severity: 'error', summary: 'Error', detail: 'Failed to load redemption details', life: 3000 });
+        toast.add({
+            severity: 'error',
+            summary: 'Error',
+            detail: 'Failed to load redemption details',
+            life: 3000
+        });
     } finally {
         loading.value = false;
     }
@@ -382,10 +320,22 @@ const parseDate = (dateStr) => {
     try {
         // Handle different date formats
         if (dateStr.includes('-')) {
-            const [day, month, year] = dateStr.split('-');
-            return new Date(`${year}-${month}-${day}`);
+            // Handle database format (Y-m-d) or frontend format (d-m-Y)
+            const parts = dateStr.split('-');
+            if (parts.length === 3) {
+                // If it looks like Y-m-d (from database)
+                if (parts[0].length === 4) {
+                    const [year, month, day] = parts;
+                    return new Date(`${year}-${month}-${day}`);
+                } 
+                // If it looks like d-m-Y (from frontend)
+                else if (parts[2].length === 4) {
+                    const [day, month, year] = parts;
+                    return new Date(`${year}-${month}-${day}`);
+                }
+            }
         }
-        // If it's already in ISO format or other format
+        // If it's already in ISO format
         return new Date(dateStr);
     } catch (error) {
         console.error('Error parsing date:', error);
@@ -399,26 +349,57 @@ const saveChanges = async () => {
     formErrors.value = {};
 
     try {
-        // Format date to dd-mm-yyyy
-        const formattedDate = form.value.ship_date 
-            ? formatDateForAPI(form.value.ship_date)
-            : '';
+        // Validate required fields
+        if (!form.value.courier || !form.value.tracking_no || !form.value.ship_date) {
+            toast.add({
+                severity: 'error',
+                summary: 'Validation Error',
+                detail: 'Please fill in all required fields',
+                life: 3000
+            });
+            processing.value = false;
+            return;
+        }
+
+        // Format date to dd-mm-yyyy for API
+        const formattedDate = formatDateForAPI(form.value.ship_date);
+        
+        if (!formattedDate) {
+            toast.add({
+                severity: 'error',
+                summary: 'Validation Error',
+                detail: 'Invalid shipping date format',
+                life: 3000
+            });
+            processing.value = false;
+            return;
+        }
 
         console.log('Sending update with data:', form.value);
 
-        // Create FormData and append all fields - using consistent field names
+        // Create FormData with field names matching API expectations
         const formData = new FormData();
-        formData.append('courier', form.value.courier);
+        
+        // Required fields
+        formData.append('courier', form.value.courier.trim());
+        formData.append('tracking_no', form.value.tracking_no.trim());
         formData.append('ship_date', formattedDate);
-        formData.append('tracking_no', form.value.tracking_no);
-        formData.append('address1', form.value.address1);
-        formData.append('address2', form.value.address2);
-        formData.append('city', form.value.city);
-        formData.append('state', form.value.state);
-        formData.append('postcode', form.value.postcode);
-        formData.append('country', form.value.country);
-        formData.append('recipient', form.value.recipient);
-        formData.append('contact', form.value.contact);
+        
+        // Optional fields - only append if they have values
+        if (form.value.recipient) formData.append('recipient', form.value.recipient.trim());
+        if (form.value.contact) formData.append('contact', form.value.contact.trim());
+        if (form.value.address1) formData.append('address1', form.value.address1.trim());
+        if (form.value.address2) formData.append('address2', form.value.address2.trim());
+        if (form.value.city) formData.append('city', form.value.city.trim());
+        if (form.value.state) formData.append('state', form.value.state.trim());
+        if (form.value.postcode) formData.append('postcode', form.value.postcode.trim());
+        if (form.value.country) formData.append('country', form.value.country.trim());
+
+        // Debug: log what's being sent
+        console.log('FormData being sent:');
+        for (let [key, value] of formData.entries()) {
+            console.log(`${key}: ${value}`);
+        }
 
         // Send update request
         const response = await api.post(`redeem/edit/${redemptionId}`, formData, {
@@ -433,29 +414,39 @@ const saveChanges = async () => {
             toast.add({ 
                 severity: 'success', 
                 summary: 'Success', 
-                detail: 'Shipping details updated successfully!', 
+                detail: response.data.message || 'Shipping details updated successfully!', 
                 life: 3000 
             });
             
-            // Give API time to process, then redirect
+            // Redirect back to detail page with cache busting
             setTimeout(() => {
                 router.push(`/marketing/detailRedemption/${redemptionId}?refresh=${Date.now()}`);
             }, 1500);
         } else {
-            toast.add({ 
-                severity: 'error', 
-                summary: 'Error', 
-                detail: response.data.message || response.data.error || 'Failed to update redemption details', 
-                life: 3000 
-            });
+            // Handle API validation errors
+            if (response.data.error) {
+                formErrors.value = response.data.error;
+                toast.add({ 
+                    severity: 'error', 
+                    summary: 'Validation Error', 
+                    detail: 'Please check the form for errors', 
+                    life: 3000 
+                });
+            } else {
+                toast.add({ 
+                    severity: 'error', 
+                    summary: 'Error', 
+                    detail: response.data.message || 'Failed to update redemption details', 
+                    life: 3000 
+                });
+            }
         }
     } catch (error) {
         console.error('Error updating redemption:', error);
-        console.error('Error response:', error.response?.data);
         
         // Handle validation errors from API
-        if (error.response && error.response.data && error.response.data.errors) {
-            formErrors.value = error.response.data.errors;
+        if (error.response && error.response.data && error.response.data.error) {
+            formErrors.value = error.response.data.error;
             toast.add({ 
                 severity: 'error', 
                 summary: 'Validation Error', 
@@ -478,21 +469,21 @@ const saveChanges = async () => {
 // Format date for API (dd-mm-yyyy)
 const formatDateForAPI = (date) => {
     if (!date) return '';
-    
+
     try {
         // Handle both Date objects and strings
         const d = date instanceof Date ? date : new Date(date);
-        
+
         // Check if date is valid
         if (isNaN(d.getTime())) {
             console.error('Invalid date:', date);
             return '';
         }
-        
+
         const day = String(d.getDate()).padStart(2, '0');
         const month = String(d.getMonth() + 1).padStart(2, '0');
         const year = d.getFullYear();
-        
+
         return `${day}-${month}-${year}`;
     } catch (error) {
         console.error('Error formatting date for API:', error);
@@ -503,7 +494,7 @@ const formatDateForAPI = (date) => {
 // Format date for display
 const formatDate = (dateString) => {
     if (!dateString) return 'N/A';
-    
+
     try {
         const date = new Date(dateString);
         if (isNaN(date.getTime())) {
