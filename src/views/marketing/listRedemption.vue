@@ -24,7 +24,7 @@
                 :loading="tableLoading"
                 :filters="filters"
                 filterDisplay="menu"
-                :globalFilterFields="['refno', 'memberName', 'recipientName', 'itemName', 'quantity', 'redemptionDate', 'status']"
+                :globalFilterFields="['refno', 'recipientName', 'itemName', 'quantity', 'redemptionDate', 'status']"
                 class="rounded-table"
                 currentPageReportTemplate="Showing {first} to {last} of {totalRecords} entries"
                 paginatorTemplate="CurrentPageReport FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink RowsPerPageDropdown"
@@ -42,10 +42,11 @@
                             <!-- <Button type="button" icon="pi pi-cog" class="p-button" /> -->
                         </div>
 
-                        <!-- Right: Export & Template Buttons -->
-                        <div class="flex items-center gap-2 ml-auto">
-                            <!-- <Button type="button" label="Update" icon="pi pi-sync" class="p-button-success" />
-                            <Button type="button" label="Template" icon="pi pi-download" class="p-button-danger" /> -->
+                        <!-- Right: Export & Import Buttons (Item tab only) -->
+                        <div class="flex items-center gap-2 ml-auto" v-if="activeTab === 2">
+                            <Button type="button" label="Export" icon="pi pi-file-export" class="p-button-success" :loading="exportLoading1" @click="handleExport" />
+                            <Button type="button" label="Bulk Update" icon="pi pi-file-import" :loading="importLoading1" @click="fileInput?.click()" />
+                            <input ref="fileInput" type="file" class="hidden" accept=".xlsx,.xls" @change="handleImport" />
                         </div>
                     </div>
                 </template>
@@ -60,6 +61,20 @@
                         <p class="mt-2 text-gray-600">Loading redemption data...</p>
                     </div>
                 </template>
+
+                <Column v-if="activeTab === 2" header="Export All" style="min-width: 8rem">
+                    <template #header>
+                        <div class="flex justify-center">
+                            <Checkbox :key="filteredData.length" binary :model-value="isAllSelected()" @change="toggleSelectAll" />
+                        </div>
+                    </template>
+
+                    <template #body="{ data }">
+                        <div class="flex justify-center">
+                            <Checkbox binary :model-value="selectedExportIds.has(data.id)" @change="handleToggleExport(data.id)" />
+                        </div>
+                    </template>
+                </Column>
 
                 <Column field="refno" header="Ref No" sortable style="min-width: 8rem">
                     <template #body="{ data }">
@@ -116,12 +131,18 @@ import api from '@/service/api';
 import LoadingPage from '@/components/LoadingPage.vue';
 import TabView from 'primevue/tabview';
 import TabPanel from 'primevue/tabpanel';
+import { useToast } from 'primevue/usetoast';
+import * as XLSX from 'xlsx';
 
 // Data variables
 const listData = ref([]);
 const initialLoading = ref(true); // For initial page load
 const tableLoading = ref(false); // For table operations
 const activeTab = ref(0); // 0=All, 1=Voucher, 2=Item
+const exportLoading1 = ref(false);
+const importLoading1 = ref(false);
+const fileInput = ref(null); // use this everywhere
+const toast = useToast();
 
 const filteredData = computed(() => {
     if (activeTab.value === 1) {
@@ -171,6 +192,28 @@ onMounted(async () => {
     }
 });
 
+const fetchData = async () => {
+    try {
+        tableLoading.value = true;
+        const response = await api.get('redeem/list');
+        if (response.data.status === 1 && Array.isArray(response.data.admin_data)) {
+            listData.value = response.data.admin_data.map((redeem) => ({
+                id: redeem.id,
+                refno: redeem.ref_no || 'N/A',
+                recipientName: redeem.member_name || 'N/A',
+                itemName: redeem.redeem_item || 'N/A',
+                quantity: redeem.quantity || 0,
+                redemptionDate: redeem.redeem_date || 'N/A',
+                itemStatus: redeem.item_status || 'N/A',
+                itemType: redeem.type || 'N/A',
+                status: redeem.status
+            }));
+        }
+    } finally {
+        tableLoading.value = false;
+    }
+};
+
 const getOverallStatusLabel = (status) => {
     if (status === 0) return 'Pending';
     if (status === 1) return 'Approved';
@@ -185,32 +228,224 @@ const getOverallStatusSeverity = (status) => {
     return 'secondary';
 };
 
+const selectedExportIds = ref(new Set());
+
+const handleToggleExport = (id) => {
+    if (selectedExportIds.value.has(id)) {
+        selectedExportIds.value.delete(id);
+    } else {
+        selectedExportIds.value.add(id);
+    }
+};
+
+const toggleSelectAll = () => {
+    if (isAllSelected()) {
+        selectedExportIds.value.clear();
+    } else {
+        filteredData.value.forEach((row) => {
+            selectedExportIds.value.add(row.id);
+        });
+    }
+};
+
+const isAllSelected = () => {
+    return filteredData.value.length > 0 && filteredData.value.every((row) => selectedExportIds.value.has(row.id));
+};
+
 function formatDate(dateString) {
     if (!dateString) return '';
 
-    let day, month, year;
+    let date;
 
-    // Detect YYYY-MM-DD
-    if (/^\d{4}-\d{2}-\d{2}$/.test(dateString)) {
-        [year, month, day] = dateString.split('-');
+    // If the string contains a space (e.g., "2026-01-14 00:00:00"), take only the first part
+    if (dateString.includes(' ')) {
+        dateString = dateString.split(' ')[0];
     }
-    // Detect DD-MM-YYYY
-    else if (/^\d{2}-\d{2}-\d{4}$/.test(dateString)) {
-        [day, month, year] = dateString.split('-');
+
+    // Try to parse YYYY-MM-DD
+    const parts = dateString.split('-');
+    if (parts.length === 3) {
+        const [year, month, day] = parts.map(Number);
+        date = new Date(year, month - 1, day);
     } else {
-        return ''; // unknown format
+        // Fallback: try Date constructor
+        date = new Date(dateString);
     }
-
-    const date = new Date(`${year}-${month}-${day}`);
 
     if (isNaN(date.getTime())) return '';
 
-    return date.toLocaleDateString('en-MY', {
-        year: 'numeric',
-        month: '2-digit',
-        day: '2-digit'
-    });
+    // Return DD/M/YYYY format
+    const day = date.getDate();
+    const month = date.getMonth() + 1;
+    const year = date.getFullYear();
+    return `${day}/${month}/${year}`;
 }
+
+const handleExport = async () => {
+    const idsArray = Array.from(selectedExportIds.value).map((id) => Number(id));
+
+    if (idsArray.length === 0) {
+        alert('Please select at least one row.');
+        return;
+    }
+
+    try {
+        exportLoading1.value = true;
+
+        const formData = new FormData();
+        formData.append('redeem_ids', JSON.stringify(idsArray)); // like Postman: [3,4]
+
+        const response = await api.postExtra('excel/export-redemption-delivery', formData, {
+            responseType: 'blob',
+            headers: {
+                'Content-Type': 'multipart/form-data'
+            }
+        });
+
+        const blob = new Blob([response.data], {
+            type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+        });
+
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = 'Redemption_Item.xlsx';
+        a.click();
+        window.URL.revokeObjectURL(url);
+
+        toast.add({ severity: 'success', summary: 'Success', detail: 'Export completed', life: 3000 });
+        selectedExportIds.value.clear();
+    } catch (error) {
+        console.error('Error exporting data:', error);
+        toast.add({ severity: 'error', summary: 'Error', detail: 'Failed to export data', life: 3000 });
+    } finally {
+        exportLoading1.value = false;
+    }
+};
+
+const handleImport = async (event) => {
+    if (activeTab.value !== 2) {
+        toast.add({
+            severity: 'warn',
+            summary: 'Not Allowed',
+            detail: 'You can only import data in the Item tab.',
+            life: 3000
+        });
+        if (fileInput.value) fileInput.value.value = '';
+        return;
+    }
+
+    const file = event.target.files[0];
+    if (!file) return;
+
+    if (!file.name.match(/\.(xlsx|xls)$/i)) {
+        toast.add({
+            severity: 'error',
+            summary: 'Invalid File',
+            detail: 'Please upload a valid Excel file (.xlsx or .xls)',
+            life: 3000
+        });
+        return;
+    }
+
+    try {
+        importLoading1.value = true;
+
+        // Read Excel file
+        const data = await file.arrayBuffer();
+        const workbook = XLSX.read(data);
+        const sheet = workbook.Sheets[workbook.SheetNames[0]];
+        const rows = XLSX.utils.sheet_to_json(sheet);
+
+        // Preprocess rows: rename Shipped Date → scheduled_date
+        const processedRows = rows.map((row) => {
+            // Extract shipped date and format to YYYY-MM-DD
+            let dateStr = row['Shipped Date (YYYY/MM/DD)'] || row['Shipped Date'] || null;
+            let formattedDate = '';
+
+            if (dateStr) {
+                const d = new Date(dateStr);
+                if (!isNaN(d)) {
+                    const year = d.getFullYear();
+                    const month = String(d.getMonth() + 1).padStart(2, '0');
+                    const day = String(d.getDate()).padStart(2, '0');
+                    formattedDate = `${year}-${month}-${day}`;
+                }
+            }
+
+            return {
+                ...row,
+                scheduled_date: formattedDate
+            };
+        });
+
+        // Validate: check that scheduled_date exists for all rows
+        const invalidRows = processedRows.filter((r) => !r.scheduled_date);
+        if (invalidRows.length > 0) {
+            toast.add({
+                severity: 'warn',
+                summary: 'Invalid File',
+                detail: `${invalidRows.length} row(s) missing valid Scheduled Date`,
+                life: 5000
+            });
+            return;
+        }
+
+        // Convert back to a new Excel file to send to backend
+        const newSheet = XLSX.utils.json_to_sheet(processedRows);
+        const newWorkbook = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(newWorkbook, newSheet, 'Sheet1');
+        const newFileData = XLSX.write(newWorkbook, { bookType: 'xlsx', type: 'array' });
+        const newFile = new Blob([newFileData], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+
+        // Prepare FormData
+        const formData = new FormData();
+        formData.append('redeem_excel', newFile, file.name);
+
+        // Send to backend
+        const response = await api.postExtra('excel/import-redemption-delivery', formData, { headers: { 'Content-Type': 'multipart/form-data' } });
+
+        if (response.data.status === 1) {
+            await fetchData();
+            toast.add({
+                severity: 'success',
+                summary: 'Success',
+                detail: response.data.message || 'File imported successfully',
+                life: 3000
+            });
+        } else {
+            let errorMessage = response.data.message || 'Import failed';
+            if (Array.isArray(response.data.admin_data)) {
+                const errorDetails = response.data.admin_data.map((r) => `${r.redeem_no}: ${r.error}`).join('<br>');
+
+                toast.add({
+                    severity: 'error',
+                    summary: 'Import Failed',
+                    detail: `${errorMessage}<br><br><strong>Error Details:</strong><br>${errorDetails}`,
+                    life: 8000
+                });
+            } else {
+                toast.add({
+                    severity: 'error',
+                    summary: 'Error',
+                    detail: errorMessage,
+                    life: 5000
+                });
+            }
+        }
+    } catch (error) {
+        let errorDetail = error.response?.data?.message || error.message || 'Import failed';
+        toast.add({
+            severity: 'error',
+            summary: 'Error',
+            detail: errorDetail,
+            life: 5000
+        });
+    } finally {
+        importLoading1.value = false;
+        if (fileInput.value) fileInput.value.value = '';
+    }
+};
 </script>
 
 <style scoped>
