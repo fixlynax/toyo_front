@@ -105,6 +105,11 @@ const formatDate = (dateString) => {
     });
 };
 
+const formatDateTime = (dateString) => {
+    if (!dateString) return '-';
+    return new Date(dateString).toLocaleString('en-MY');
+};
+
 // 🟢 Fetch return orders based on tab
 const fetchReturnOrders = async (tabStatus = 'PENDING', useDefaultRange = false) => {
     loading.value = true;
@@ -355,9 +360,9 @@ onBeforeMount(() => {
                 </template>
 
                 <!-- Created Date Column -->
-                <Column header="Created Date" style="min-width: 8rem" sortable>
+                <Column header="Created On" style="min-width: 8rem" sortable>
                     <template #body="{ data }">
-                        {{ formatDate(data.createdDate) }}
+                        {{ formatDateTime(data.createdDate) }}
                     </template>
                 </Column>
 
