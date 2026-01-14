@@ -212,16 +212,16 @@
                                     <td class="px-4 py-2 text-right">{{ order.storagelocation || '-' }}</td>
                                 </tr>
                                 <tr class="border-b">
-                                    <td class="px-4 py-2 font-medium">Created</td>
-                                    <td class="px-4 py-2 text-right">{{ formatDate(order.created) }}</td>
+                                    <td class="px-4 py-2 font-medium">Created On</td>
+                                    <td class="px-4 py-2 text-right">{{ formatDateTime(order.created) }}</td>
                                 </tr>
                                 <tr class="border-b">
-                                    <td class="px-4 py-2 font-medium">Modified</td>
-                                    <td class="px-4 py-2 text-right">{{ formatDate(order.modified) }}</td>
+                                    <td class="px-4 py-2 font-medium">Modified On</td>
+                                    <td class="px-4 py-2 text-right">{{ formatDateTime(order.modified) }}</td>
                                 </tr>
                                 <tr>
-                                    <td class="px-4 py-2 font-medium">Expiry</td>
-                                    <td class="px-4 py-2 text-right">{{ formatDate(order.expiry) }}</td>
+                                    <td class="px-4 py-2 font-medium">Expiry On</td>
+                                    <td class="px-4 py-2 text-right">{{ formatDateTime(order.expiry) }}</td>
                                 </tr>
                                 <tr class="border-t">
                                     <td class="px-4 py-2 font-medium">Total Orders</td>
@@ -468,6 +468,11 @@ const formatDate = (dateString) => {
         month: 'short',
         day: 'numeric'
     });
+};
+
+const formatDateTime = (dateString) => {
+    if (!dateString) return '-';
+    return new Date(dateString).toLocaleString('en-MY');
 };
 
 // Computed properties

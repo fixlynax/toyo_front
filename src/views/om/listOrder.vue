@@ -319,7 +319,7 @@ const clearDateRange = () => {
                 </template>
 
                 <!-- Changed from created to orderDate -->
-                <Column field="orderDate" header="Created Date" style="min-width: 8rem" sortable>
+                <Column field="orderDate" header="Created On" style="min-width: 8rem" sortable>
                     <template #body="{ data }">{{ formatDateTime(data.created) }}</template>
                 </Column>
 

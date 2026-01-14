@@ -31,24 +31,75 @@
                         <div class="mt-2 grid grid-cols-2 gap-4">
                             <div>
                                 <span class="block text-sm font-bold text-gray-700">Recipient</span>
-                                <p class="text-lg font-medium">{{ redemption.recipientName || 'N/A' }}</p>
+                                <p class="text-lg font-medium">{{ redemption.redeem_item?.recipientName || 'N/A' }}</p>
                             </div>
                             <div>
                                 <span class="block text-sm font-bold text-gray-700">Contact</span>
-                                <p class="text-lg text-gray-500">{{ redemption.contactNumber || 'N/A' }}</p>
+                                <p class="text-lg text-gray-500">{{ redemption.redeem_item?.contactNumber || 'N/A' }}</p>
                             </div>
                             <div>
                                 <span class="block text-sm font-bold text-gray-700">Redeemed Item</span>
-                                <p class="text-lg text-gray-500">{{ redemption.itemName || 'N/A' }}</p>
+                                <p class="text-lg text-gray-500">{{ redemption.type || 'N/A' }}</p>
                             </div>
                             <div>
                                 <span class="block text-sm font-bold text-gray-700">Approved By</span>
-                                <p class="text-lg text-gray-500">{{ redemption.approvedBy || 'N/A' }} ({{ redemption.adminID || 'N/A' }})</p>
+                                <p class="text-lg text-gray-500">{{ redemption.redeem_item?.approvedBy || 'N/A' }} ({{ redemption.adminID || 'N/A' }})</p>
                             </div>
                         </div>
                     </div>
                 </div>
 
+                <!-- Shipping Details -->
+                <div class="card flex flex-col gap-6 w-full" v-if="!loading">
+                    <!-- Header Section -->
+                    <div class="flex items-center justify-between border-b pb-2">
+                        <h2 class="text-2xl font-bold text-gray-800">User Details</h2>
+                    </div>
+
+                    <!-- Shipping Info -->
+                    <div class="grid grid-cols-4 gap-2 text-sm">
+                        <div class="col-span-2">
+                            <span class="text-sm font-bold text-gray-700">Name</span>
+                            <p class="text-lg font-medium">{{ redemption.user?.firstName || 'N/A' }} {{ redemption.user?.lastName || 'N/A' }}</p>
+                        </div>
+                        <div class="col-span-2">
+                            <span class="text-sm font-bold text-gray-700">Contact</span>
+                            <p class="text-lg font-medium">{{ redemption.user?.countryCode || 'N/A' }} {{ redemption.user?.mobileNumber || 'N/A' }}</p>
+                        </div>
+                        <div class="col-span-2">
+                            <span class="text-sm font-bold text-gray-700">Email Address</span>
+                            <p class="text-lg font-medium">{{ redemption.user?.emailAddress || 'Not Assigned' }}</p>
+                        </div>
+                        <div class="col-span-2">
+                            <span class="text-sm font-bold text-gray-700">Gender</span>
+                            <p class="text-lg font-medium">{{ redemption.user?.gender || 'Not Assigned' }}</p>
+                        </div>
+                         <div class="col-span-2">
+                            <span class="text-sm font-bold text-gray-700">Date of Birth</span>
+                            <p class="text-lg font-medium">{{ redemption.user?.dob || 'Not Assigned' }}</p>
+                        </div>
+                        <div class="col-span-2">
+                            <span class="text-sm font-bold text-gray-700">Race</span>
+                            <p class="text-lg font-medium">{{ redemption.user?.race || 'Not Assigned' }}</p>
+                        </div>
+                         <div class="col-span-2">
+                            <span class="text-sm font-bold text-gray-700">Address</span>
+                            <p class="text-lg font-medium">{{ redemption.user?.address1 || 'Not Assigned' }}</p>
+                        </div>
+                        <div class="col-span-2">
+                            <span class="text-sm font-bold text-gray-700">city</span>
+                            <p class="text-lg font-medium">{{ redemption.user?.city || 'Not Assigned' }}</p>
+                        </div>
+                         <div class="col-span-2">
+                            <span class="text-sm font-bold text-gray-700">State</span>
+                            <p class="text-lg font-medium">{{ redemption.user?.state || 'Not Assigned' }}</p>
+                        </div>
+                        <div class="col-span-2">
+                            <span class="text-sm font-bold text-gray-700">Postcode</span>
+                            <p class="text-lg font-medium">{{ redemption.user?.postcode || 'Not Assigned' }}</p>
+                        </div>
+                    </div>
+                </div>
                 <!-- Shipping Details -->
                 <div class="card flex flex-col gap-6 w-full" v-if="!loading">
                     <!-- Header Section -->
@@ -60,28 +111,28 @@
                     <div class="grid grid-cols-4 gap-2 text-sm">
                         <div class="col-span-4">
                             <span class="text-sm font-bold text-gray-700">Shipping Date</span>
-                            <p class="text-lg font-medium">{{ redemption.shippedDate || 'Not Shipped' }}</p>
+                            <p class="text-lg font-medium">{{ redemption.redeem_item?.shippedDate || 'Not Shipped' }}</p>
                         </div>
                         <div class="col-span-2">
-                            <span class="text-sm font-bold text-gray-700">Recipient</span>
-                            <p class="text-lg font-medium">{{ redemption.recipientName || 'N/A' }}</p>
+                            <span class="block text-sm font-bold text-gray-700">Recipient</span>
+                            <p class="text-lg font-medium">{{ redemption.redeem_item?.recipientName || 'N/A' }}</p>
                         </div>
                         <div class="col-span-2">
-                            <span class="text-sm font-bold text-gray-700">Contact</span>
-                            <p class="text-lg font-medium">{{ redemption.contactNumber || 'N/A' }}</p>
+                            <span class="block text-sm font-bold text-gray-700">Contact</span>
+                            <p class="text-lg font-medium">{{ redemption.redeem_item?.contactNumber || 'N/A' }}</p>
                         </div>
                         <div class="col-span-2">
-                            <span class="text-sm font-bold text-gray-700">Courier</span>
-                            <p class="text-lg font-medium">{{ redemption.courierName || 'Not Assigned' }}</p>
+                            <span class="block text-sm font-bold text-gray-700">Courier</span>
+                            <p class="text-lg font-medium">{{ redemption.redeem_item?.courierName || 'Not Assigned' }}</p>
                         </div>
                         <div class="col-span-2">
-                            <span class="text-sm font-bold text-gray-700">Tracking No</span>
-                            <p class="text-lg font-medium">{{ redemption.trackingNumber || 'Not Assigned' }}</p>
+                            <span class="block text-sm font-bold text-gray-700">Tracking No</span>
+                            <p class="text-lg font-medium">{{ redemption.redeem_item?.trackingNumber || 'Not Assigned' }}</p>
                         </div>
                         <div class="col-span-4">
                             <span class="text-sm font-bold text-gray-700">Delivery Location</span>
                             <p class="text-lg font-medium">
-                                {{ [redemption.addLine1, redemption.addLine2, redemption.addCity, redemption.addState, redemption.addPostcode, redemption.addCountry]
+                                {{ [redemption.redeem_item?.addLine1, redemption.redeem_item?.addLine2, redemption.redeem_item?.addCity, redemption.redeem_item?.addState, redemption.redeem_item?.addPostcode, redemption.redeem_item?.addCountry]
                                     .filter(Boolean).join(', ') || 'No address provided' }}
                             </p>
                         </div>
@@ -108,7 +159,7 @@
                                 </tr>
                                 <tr class="border-b">
                                     <td class="px-4 py-2 font-medium">Member Code</td>
-                                    <td class="px-4 py-2 text-right">{{ redemption.tc_member_code || 'N/A' }}</td>
+                                    <td class="px-4 py-2 text-right">{{ redemption.user?.memberCode || 'N/A' }}</td>
                                 </tr>
                                 <tr class="border-b">
                                     <td class="px-4 py-2 font-medium">Member Level</td>
@@ -120,7 +171,7 @@
                                 </tr>
                                 <tr class="border-b">
                                     <td class="px-4 py-2 font-medium">Verified Date</td>
-                                    <td class="px-4 py-2 text-right">{{ formatDate(redemption.verifiedDate) }}</td>
+                                    <td class="px-4 py-2 text-right">{{ formatDate(redemption.redeem_item?.verifiedDate) }}</td>
                                 </tr>
                                 <tr class="border-b" v-if="redemption.status === 1">
                                     <td class="px-4 py-2 font-medium">Approved Date</td>
@@ -132,11 +183,11 @@
                                 </tr>
                                 <tr class="border-b">
                                     <td class="px-4 py-2 font-medium">Points Used</td>
-                                    <td class="px-4 py-2 text-right">{{ redemption.totalPoint || 0 }}</td>
+                                    <td class="px-4 py-2 text-right">{{ redemption.point || 0 }}</td>
                                 </tr>
                                 <tr class="border-b">
                                     <td class="px-4 py-2 font-medium">Quantity</td>
-                                    <td class="px-4 py-2 text-right">{{ redemption.quantity || 0 }}</td>
+                                    <td class="px-4 py-2 text-right">{{ redemption.qty || 0 }}</td>
                                 </tr>
                             </tbody>
                         </table>
@@ -149,7 +200,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted, computed } from 'vue';
+import { ref, onMounted, computed, watch, onActivated } from 'vue';
 import { useRoute } from 'vue-router';
 import Dialog from 'primevue/dialog';
 import Toast from 'primevue/toast';
@@ -173,84 +224,26 @@ const showValidationError = ref(false);
 const loading = ref(true);
 const processingAction = ref(false);
 
-const redemption = ref({
-    id: null,
-    refno: '',
-    tc_userID: '',
-    memberLevel: '',
-    recipientName: '',
-    contactNumber: '',
-    addLine1: '',
-    addLine2: '',
-    addCity: '',
-    addState: '',
-    addPostcode: '',
-    addCountry: '',
-    totalPoint: 0,
-    itemName: '',
-    quantity: 0,
-    redemptionDate: '',
-    courierName: '',
-    trackingNumber: '',
-    shippedDate: '',
-    status: 0,
-    adminID: '',
-    approvedBy: '',
-    verifiedDate: '',
-    created: '',
-    deleted: false,
-    approvedDate: null,
-    rejectedDate: null,
-    rejectReason: null,
-    tc_member_code: ''
-});
+const redemption = ref({});
 
-const campaignCriteria = ref([]);
-
-// Fetch redemption details from API
-const fetchRedemptionDetails = async () => {
+// Fetch redemption details from API with cache prevention
+const fetchRedemptionDetails = async (forceRefresh = false) => {
     try {
         loading.value = true;
-        const response = await api.get(`redeem/item/${redemptionId}`);
+        
+        // Add timestamp to prevent browser caching
+        const timestamp = Date.now();
+        const response = await api.get(`redeem/item/${redemptionId}?_t=${timestamp}`);
 
         if (response.data.status === 1 && response.data.admin_data) {
             const redemptionData = response.data.admin_data.redemption_details;
             
             // Map API data to component structure
-            redemption.value = {
-                id: redemptionData.id,
-                refno: redemptionData.refno,
-                tc_userID: redemptionData.tc_userID,
-                memberLevel: redemptionData.memberLevel,
-                recipientName: redemptionData.recipientName,
-                contactNumber: redemptionData.contactNumber,
-                addLine1: redemptionData.addLine1,
-                addLine2: redemptionData.addLine2,
-                addCity: redemptionData.addCity,
-                addState: redemptionData.addState,
-                addPostcode: redemptionData.addPostcode,
-                addCountry: redemptionData.addCountry,
-                totalPoint: redemptionData.totalPoint,
-                itemName: redemptionData.redeem_item,
-                quantity: redemptionData.quantity,
-                redemptionDate: redemptionData.created,
-                courierName: redemptionData.courierName,
-                trackingNumber: redemptionData.trackingNumber,
-                shippedDate: redemptionData.shippedDate,
-                status: redemptionData.status,
-                adminID: redemptionData.adminID,
-                approvedBy: redemptionData.approvedBy,
-                verifiedDate: redemptionData.verifiedDate,
-                created: redemptionData.created,
-                deleted: redemptionData.deleted,
-                approvedDate: redemptionData.approvedDate,
-                rejectedDate: redemptionData.rejectedDate,
-                rejectReason: redemptionData.rejectReason,
-                tc_member_code: redemptionData.tc_member_code
-            };
-
-            // Set campaign criteria if available
-            campaignCriteria.value = response.data.admin_data.campaign_criteria || [];
+            redemption.value = response.data.admin_data.redemption_details;
+            
+            // Debug log to check data structure
+            console.log('Fetched redemption data:', redemption.value);
+            console.log('Shipping details:', redemption.value.redeem_item);
         } else {
             toast.add({ severity: 'error', summary: 'Error', detail: 'Failed to load redemption details', life: 3000 });
         }
@@ -262,7 +255,21 @@ const fetchRedemptionDetails = async () => {
     }
 };
 
+// Watch for route changes to refresh data
+watch(
+    () => route.query.t,
+    (newTimestamp) => {
+        if (newTimestamp) {
+            // Refresh data when timestamp query parameter changes
+            fetchRedemptionDetails(true);
+        }
+    }
+);
 
+// Refresh when component is activated (comes back into view)
+onActivated(() => {
+    fetchRedemptionDetails();
+});
 
 const statusSeverity = (status) => {
     const severityMap = {

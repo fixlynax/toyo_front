@@ -3,7 +3,7 @@
         <div class="flex flex-col">
             <!-- Header -->
             <div class="card flex flex-col gap-6 w-full">
-                <div class="text-2xl font-bold text-gray-800 border-b pb-2 mb-4">Direct Shipment Summary</div>
+                <div class="text-2xl font-bold text-gray-800 border-b pb-2 mb-4">Report Direct Shipment</div>
 
                 <!-- Filters Section -->
                 <div>

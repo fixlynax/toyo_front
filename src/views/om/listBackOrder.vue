@@ -376,6 +376,11 @@ const formatDate = (dateString) => {
     });
 };
 
+const formatDateTime = (dateString) => {
+    if (!dateString) return '-';
+    return new Date(dateString).toLocaleString('en-MY');
+};
+
 const getStatusLabel = (data) => {
     // Check if order is expired (today >= Back Order Expiry) and not completed/cancelled
     if (data.expiry) {
@@ -530,9 +535,9 @@ const getStatusSeverity = (data) => {
             <!-- Selection Column (only for Pending tab) -->
             <Column v-if="showSelection" selectionMode="multiple" headerStyle="width: 3rem"></Column>
 
-            <Column field="createdDate" header="Created Date" style="min-width: 8rem" sortable>
+            <Column field="createdDate" header="Created On" style="min-width: 8rem" sortable>
                 <template #body="{ data }">
-                    {{ formatDate(data.created) }}
+                    {{ formatDateTime(data.created) }}
                 </template>
             </Column>
 

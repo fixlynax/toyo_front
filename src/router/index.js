@@ -211,7 +211,7 @@ const router = createRouter({
                     path: 'om/detailFailOrder/:orderNo',
                     name: 'Detail-Fail-Order',
                     component: () => import('@/views/om/detailFailOrder.vue'),
-                    meta: { permission: 'Order', access: 'view' },
+                    meta: { permission: 'Fail Order', access: 'view' },
                     props: true
                 },
 
@@ -220,7 +220,7 @@ const router = createRouter({
                     path: 'om/reportSF',
                     name: 'Report-Sales-Forecast',
                     component: () => import('@/views/om/reportSF.vue'),
-                    meta: { permission: 'Sales Forecast', access: 'view' }  
+                    meta: { permission: 'Report Sales Forecast', access: 'view' }  
                 },
                 {
                     path: 'om/reportBackOrder',
@@ -238,13 +238,13 @@ const router = createRouter({
                     path: 'om/reportDirectShipment',
                     name: 'Report-Direct-Shipment',
                     component: () => import('@/views/om/reportDirectShipment.vue'),
-                    meta: { permission: 'Direct Shipment', access: 'view' }
+                    meta: { permission: 'Report Direct Shipment', access: 'view' }
                 },
                 {
                     path: 'om/reportOwnCollection',
                     name: 'Report-Own-Collection',
                     component: () => import('@/views/om/reportOwnCollection.vue'),
-                    meta: { permission: 'Own Collection', access: 'view' }
+                    meta: { permission: 'Report Own Collection', access: 'view' }
                 },
                 {
                     path: 'om/reportOrder',
@@ -564,6 +564,13 @@ const router = createRouter({
                     component: () => import('@/views/marketing/detailOERegistration.vue'),
                     meta: { permission: 'Events Management', access: 'view' },
                     props: true
+                },
+                // Tire
+                {
+                    path: 'marketing/listTire',
+                    name: 'List-Tire',
+                    component: () => import('@/views/marketing/listTire.vue'),
+                    // meta: { permission: 'Tire Management', access: 'view' }
                 },
 
                 // Report

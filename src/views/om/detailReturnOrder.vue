@@ -246,8 +246,8 @@
                                     <td class="px-4 py-2 text-right font-semibold">{{ getDeliveryStatusText(order.delivery_status) }}</td>
                                 </tr> -->
                                 <tr class="border-b">
-                                    <td class="px-4 py-2 font-medium">Created</td>
-                                    <td class="px-4 py-2 text-right font-semibold">{{ formatDate(order.created) || '-' }}</td>
+                                    <td class="px-4 py-2 font-medium">Created On</td>
+                                    <td class="px-4 py-2 text-right font-semibold">{{ formatDateTime(order.created) || '-' }}</td>
                                 </tr>
                             </tbody>
                         </table>
@@ -525,13 +525,9 @@ const formatAddress = (dealerShop) => {
     return addressParts.join(' ') || '-';
 };
 
-const formatDate = (dateString) => {
+const formatDateTime = (dateString) => {
     if (!dateString) return '-';
-    return new Date(dateString).toLocaleDateString('en-MY', {
-        year: 'numeric',
-        month: 'short',
-        day: 'numeric'
-    });
+    return new Date(dateString).toLocaleString('en-MY');
 };
 
 // Method to format item number for display
