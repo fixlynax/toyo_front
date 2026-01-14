@@ -232,7 +232,7 @@ const router = createRouter({
                     path: 'om/reportReturnOrder',
                     name: 'Report-Return-Order',
                     component: () => import('@/views/om/reportReturnOrder.vue'),
-                    // meta: { permission: 'Report Return Order', access: 'view' }
+                    meta: { permission: 'Return Order', access: 'view' }
                 },
                 {
                     path: 'om/reportDirectShipment',
@@ -250,7 +250,7 @@ const router = createRouter({
                     path: 'om/reportOrder',
                     name: 'Report-Order',
                     component: () => import('@/views/om/reportOrder.vue'),
-                    meta: { permission: 'Report Order', access: 'view' }
+                    meta: { permission: 'Order', access: 'view' }
                 },
 
                 // Sales Program
@@ -316,7 +316,7 @@ const router = createRouter({
                     path: 'om/settingMaterialQuantity',
                     name: 'Setting-Material-Quantity',
                     component: () => import('@/views/om/settingMaterialQuantity.vue'),
-                    meta: { permission: 'Maintenance Mode', access: 'view' }
+                    meta: { permission: 'Material Quantity Setting', access: 'view' }
                 },
 
                 // ===============================
