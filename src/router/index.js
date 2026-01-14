@@ -570,7 +570,7 @@ const router = createRouter({
                     path: 'marketing/listTire',
                     name: 'List-Tire',
                     component: () => import('@/views/marketing/listTire.vue'),
-                    // meta: { permission: 'Tire Management', access: 'view' }
+                    meta: { permission: 'Tyre List', access: 'view' }
                 },
 
                 // Report
