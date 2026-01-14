@@ -20,7 +20,7 @@
                 :loading="tableLoading"
                 :filters="filters"
                 filterDisplay="menu"
-                :globalFilterFields="['gameNo', 'gameName', 'title', 'type', 'publishDate', 'status']"
+                :globalFilterFields="['custAccountNo', 'shopName', 'regionName', 'areaName', 'address', 'created', 'updated']"
                 class="rounded-table"
                 currentPageReportTemplate="Showing {first} to {last} of {totalRecords} entries"
                 paginatorTemplate="CurrentPageReport FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink RowsPerPageDropdown"
@@ -59,29 +59,9 @@
                 </template>
 
                 <!-- Export All Checkbox Column (EXACTLY like reference code) -->
-                <Column header="Export All" style="min-width: 8rem">
-                    <template #header>
-                        <div class="flex justify-center">
-                            <Checkbox 
-                                :binary="true" 
-                                :model-value="isAllSelected()" 
-                                @change="() => toggleSelectAll()" 
-                            />
-                        </div>
-                    </template>
 
-                    <template #body="{ data }">
-                        <div class="flex justify-center">
-                            <Checkbox 
-                                :binary="true" 
-                                :model-value="selectedExportIds.has(data.id)" 
-                                @change="() => handleToggleExport(data.id)" 
-                            />
-                        </div>
-                    </template>
-                </Column>
 
-                <Column field="custAccountNo" header="Customer Account No" style="min-width: 6rem" sortable="">
+                <Column field="custAccountNo" header="Account No" style="min-width: 8rem" sortable>
                     <template #body="{ data }">
                         <RouterLink :to="`/marketing/detailGame/${data.id}`" class="hover:underline font-bold text-primary-400">
                             {{ data.custAccountNo }}
@@ -89,42 +69,37 @@
                     </template>
                 </Column>
 
-                <Column field="shopName" header="Shop Name" style="min-width: 8rem">
+                <Column field="shopName" header="Shop Name" style="min-width: 8rem" sortable>
                     <template #body="{ data }">
                         {{ data.shopName }}
                     </template>
                 </Column>
 
-                <Column field="regionName" header="Region Area" style="min-width: 6rem">
+                <Column field="regionName" header="Region Area" style="min-width: 8rem" sortable>
                     <template #body="{ data }">
-                        {{ data.regionName }},{{ data.AreaName }}
+                        {{ data.regionName }},{{ data.areaName }}
                     </template>
                 </Column>
 
                 
-                <Column field="address" header="Address" style="min-width: 8rem" sortable>
+                <Column field="address" header="Address" style="min-width: 10rem" sortable>
                     <template #body="{ data }">
                         {{ data.address }}
                     </template>
                 </Column>
 
-                <Column field="created" header="Created" style="min-width: 10rem">
+                <Column field="created" header="Created" style="min-width: 10rem" sortable>
                     <template #body="{ data }">
                         {{ formatDateTime(data.created) }}
                     </template>
                 </Column>
 
-                <Column field="updated" header="Updated" style="min-width: 10rem">
+                <Column field="updated" header="Updated" style="min-width: 10rem" sortable>
                     <template #body="{ data }">
                         {{ formatDateTime(data.updated) }}
                     </template>
                 </Column>
                 
-                <Column field="status" header="Status" style="min-width: 8rem">
-                    <template #body="{ data }">
-                        <Tag :value="data.status === 1 ? 'Active' : 'Inactive'" :severity="getOverallStatusSeverity(data.status)" />
-                    </template>
-                </Column>
             </DataTable>
         </div>
     </div>
@@ -137,21 +112,17 @@ import { FilterMatchMode } from '@primevue/core/api';
 import LoadingPage from '@/components/LoadingPage.vue';
 import { useMenuStore } from '@/store/menu';
 import { useToast } from 'primevue/usetoast';
-import * as XLSX from 'xlsx';
 const importLoading1 = ref(false);
 const importFileInput = ref();
 const toast = useToast();
 const menuStore = useMenuStore();
-const canUpdate = computed(() => menuStore.canWrite('Game Management'));
-const denyAccess = computed(() => menuStore.canTest('Game Management'));
+
 
 // Data variables (EXACTLY like reference code)
 const listData = ref([]);
 const initialLoading = ref(true);
 const tableLoading = ref(false);
-const exportLoading = ref(false);
 const selectedExportIds = ref(new Set()); // Using Set like reference code
-const visibleRows = ref([]); // For tracking filtered rows
 const exportLoading1 = ref(false);
 
 // Filters
@@ -159,10 +130,7 @@ const filters = ref({
     global: { value: null, matchMode: FilterMatchMode.CONTAINS }
 });
 
-// EXACTLY like reference code
-const onTableFilter = (event) => {
-    visibleRows.value = event.filteredValue || listData.value;
-};
+
 
 onMounted(async () => {
     try {
@@ -172,18 +140,8 @@ onMounted(async () => {
         const response = await api.get('tire-shop');
 
         if (response.data.status === 1 && Array.isArray(response.data.admin_data)) {
-            listData.value = response.data.admin_data.map((tire) => ({
-                id: tire.id,
-                custAccountNo: tire.custAccountNo || 'N/A',
-                shopName: tire.shopName || 'Untitled',
-                regionName: tire.regionName || 'N/A',
-                regionName: tire.areaName || 'N/A',
-                address: tire.address,
-                contactNo: tire.contactNo || 'No Participants',
-                created: tire.created || '-',
-                updated: tire.updated || '-'
-            }));
-            visibleRows.value = [...listData.value]; // Initialize visible rows
+            listData.value = response.data.admin_data
+
         } else {
             toast.add({ 
                 severity: 'error', 
@@ -192,7 +150,6 @@ onMounted(async () => {
                 life: 3000 
             });
             listData.value = [];
-            visibleRows.value = [];
         }
     } catch (error) {
         console.error('Error fetching game list:', error);
@@ -203,16 +160,12 @@ onMounted(async () => {
             life: 3000 
         });
         listData.value = [];
-        visibleRows.value = [];
     } finally {
         initialLoading.value = false;
         tableLoading.value = false;
     }
 });
 
-const getOverallStatusSeverity = (status) => {
-    return status === 1 ? 'success' : 'danger';
-};
 
 function formatDateTime(dateTimeString) {
     if (!dateTimeString) return '-';
@@ -232,17 +185,10 @@ function formatDateTime(dateTimeString) {
         minute: '2-digit',
         second: '2-digit',
         hour12: true
-    });
+    }).toUpperCase();
 }
 
-// EXACTLY like reference code - handle individual checkbox toggle
-const handleToggleExport = (id) => {
-    if (selectedExportIds.value.has(id)) {
-        selectedExportIds.value.delete(id);
-    } else {
-        selectedExportIds.value.add(id);
-    }
-};
+
 
 const handleExport = async () => {
 
@@ -327,23 +273,6 @@ const handleImport = async (event) => {
     }
 };
 
-// EXACTLY like reference code - toggle all visible rows
-const toggleSelectAll = () => {
-    const allIds = visibleRows.value.map(item => item.id);
-
-    if (isAllSelected()) {
-        // Remove all visible IDs at once (EXACTLY like reference code)
-        selectedExportIds.value = new Set([...selectedExportIds.value].filter(id => !allIds.includes(id)));
-    } else {
-        // Add all visible IDs at once (EXACTLY like reference code)
-        selectedExportIds.value = new Set([...selectedExportIds.value, ...allIds]);
-    }
-};
-
-// EXACTLY like reference code - check if all visible rows are selected
-const isAllSelected = () => {
-    return visibleRows.value.length > 0 && visibleRows.value.every(item => selectedExportIds.value.has(item.id));
-};
 
 
 </script>
