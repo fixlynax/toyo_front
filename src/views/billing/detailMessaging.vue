@@ -173,14 +173,15 @@ const mockMessages = {
     }
 };
 
-const  = (dateString) => {
+const formatDate = (dateString) => {
     const date = new Date(dateString);
     return date.toLocaleDateString('en-US', {
         year: 'numeric',
         month: 'short',
-        day: 'numeric'
+        day: '2-digit'
     });
 };
+
 
 const goBack = () => {
     router.push('/om/listMessaging'); // Adjust this path to your list page route
