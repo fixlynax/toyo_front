@@ -226,7 +226,22 @@ const formatDate = (dateString) => {
 
 const formatDateTime = (dateString) => {
     if (!dateString) return '-';
-    return new Date(dateString).toLocaleString('en-MY');
+    
+    const date = new Date(dateString);
+    const options = {
+        day: '2-digit',
+        month: '2-digit',
+        year: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit',
+        second: '2-digit',
+        hour12: true
+    };
+    
+    let formatted = date.toLocaleString('en-MY', options);
+    
+    // Convert AM/PM to uppercase regardless of case
+    return formatted.replace(/\b(am|pm)\b/gi, (match) => match.toUpperCase());
 };
 
 // 🟢 Clear Date Range
@@ -344,7 +359,7 @@ const clearDateRange = () => {
                         <span v-else-if="data.orderType === 'Directship'">DS</span>
                         <span v-else-if="data.orderType === 'Own'">OWN USE</span>
                         <span v-else-if="data.orderType === 'Warranty'">WARRANTY</span>
-                        <span v-else-if="data.orderType === 'Back Order'">BACK ORDER</span>
+                        <span v-else-if="data.orderType === 'Back Order'">NORMAL</span>
                         <span v-else>{{ data.orderType || data.sapOrderType || '-' }}</span>
                     </template>
                 </Column>

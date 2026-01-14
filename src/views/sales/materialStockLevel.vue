@@ -242,23 +242,22 @@ const calculateTotalFromBatches = (stockLevelMaster) => {
 // 🟢 Format Date Time
 const formatDateTime = (dateString) => {
     if (!dateString) return '-';
-
-    try {
-        const date = new Date(dateString);
-        if (isNaN(date.getTime())) return '-';
-
-        return date.toLocaleString('en-MY', {
-            year: 'numeric',
-            month: '2-digit',
-            day: '2-digit',
-            hour: '2-digit',
-            minute: '2-digit',
-            hour12: true
-        });
-    } catch (error) {
-        console.error('Error formatting date:', error);
-        return '-';
-    }
+    
+    const date = new Date(dateString);
+    const options = {
+        day: '2-digit',
+        month: '2-digit',
+        year: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit',
+        second: '2-digit',
+        hour12: true
+    };
+    
+    let formatted = date.toLocaleString('en-MY', options);
+    
+    // Convert AM/PM to uppercase regardless of case
+    return formatted.replace(/\b(am|pm)\b/gi, (match) => match.toUpperCase());
 };
 
 // 🟢 Export function

@@ -360,13 +360,15 @@ export default {
 
         formatDate(date) {
             if (!date) return '-';
-            return new Date(date).toLocaleString('en-MY', {
+            const formatted = new Date(date).toLocaleString('en-MY', {
                 year: 'numeric',
                 month: 'short',
                 day: 'numeric',
                 hour: '2-digit',
-                minute: '2-digit'
+                minute: '2-digit',
+                hour12: true
             });
+            return formatted.replace(/\b(am|pm)\b/gi, (match) => match.toUpperCase());
         },
 
         formatDateForApi(date) {

@@ -72,7 +72,7 @@
                     </template>
                 </Column>
 
-                <Column field="mobilephone" header="Mobile No" style="min-width: 12rem" sortable>
+                <Column field="mobilephone" header="Mobile No" style="min-width: 10rem" sortable>
                     <template #body="{ data }">
                         {{ data.mobilephone || '-' }}
                     </template>
@@ -90,7 +90,7 @@
                     </template>
                 </Column>
 
-                <Column field="created" header="Created" style="min-width: 12rem" sortable>
+                <Column field="created" header="Created On" style="min-width: 12rem" sortable>
                     <template #body="{ data }">
                         {{ formatDate(data.created) }}
                     </template>
@@ -251,16 +251,25 @@ const filters = ref({
 });
 
 // Helper functions
-function formatDate(dateString) {
+const formatDate = (dateString) => {
     if (!dateString) return '-';
-
-    try {
-        const date = new Date(dateString);
-        return date.toLocaleDateString('en-GB');
-    } catch {
-        return '-';
-    }
-}
+    
+    const date = new Date(dateString);
+    const options = {
+        day: '2-digit',
+        month: '2-digit',
+        year: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit',
+        second: '2-digit',
+        hour12: true
+    };
+    
+    let formatted = date.toLocaleString('en-MY', options);
+    
+    // Convert AM/PM to uppercase regardless of case
+    return formatted.replace(/\b(am|pm)\b/gi, (match) => match.toUpperCase());
+};
 
 const getPermissionCount = (permissions, type) => {
     if (!permissions) return 0;
