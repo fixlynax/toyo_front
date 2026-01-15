@@ -1,6 +1,6 @@
 <template>
     <Fluid>
-        <div class="flex flex-col">
+        <div class="flex flex-col gap-6">
             <!-- Terms & Conditions Section -->
             <div class="card flex flex-col gap-6 w-full">
                 <!-- Header -->
@@ -10,56 +10,158 @@
                     </div>
                 </div>
 
-                <!-- T&C Form -->
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <!-- Care T&C -->
-                    <div class="md:col-span-2 flex flex-col gap-1">
-                        <label class="block text-xm font-bold text-gray-700 mb-1 flex items-center gap-2">
-                            Care T&C
-                            <!-- <span class="text-xs font-normal text-gray-500">(Rich text editor supported)</span> -->
-                        </label>
-                        <div class="flex items-start gap-2">
-                            <div class="flex-1">
-                                <TipTapEditor 
-                                    v-model="form.careTnc" 
-                                    :placeholder="'Enter Care Terms & Conditions'" 
-                                    :disabled="loading"
-                                />
+                <!-- Language Tabs -->
+                <TabView v-model:activeIndex="activeTncTab">
+                    <TabPanel header="English">
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 pt-4">
+                            <!-- T-Care English -->
+                            <div class="md:col-span-2 flex flex-col gap-1">
+                                <label class="block text-xm font-bold text-gray-700 mb-1 flex items-center gap-2">
+                                    T-Care
+                                </label>
+                                <div class="flex items-start gap-2">
+                                    <div class="flex-1">
+                                        <TipTapEditor 
+                                            v-model="form.careTnc.en" 
+                                            :placeholder="'Enter Care Terms & Conditions (English)'" 
+                                            :disabled="loading"
+                                        />
+                                    </div>
+                                    <Button 
+                                        icon="pi pi-history" 
+                                        class="p-button-sm p-button-secondary h-fit" 
+                                        @click="showLog.careTnc = true" 
+                                        tooltip="View Log History" 
+                                        :disabled="loading" 
+                                    />
+                                </div>
                             </div>
-                            <Button 
-                                icon="pi pi-history" 
-                                class="p-button-sm p-button-secondary h-fit" 
-                                @click="showLog.careTnc = true" 
-                                tooltip="View Log History" 
-                                :disabled="loading" 
-                            />
-                        </div>
-                    </div>
 
-                    <!-- ETEN T&C -->
-                    <div class="md:col-span-2 flex flex-col gap-1">
-                        <label class="block text-xm font-bold text-gray-700 mb-1 flex items-center gap-2">
-                            ETEN T&C
-                            <!-- <span class="text-xs font-normal text-gray-500">(Rich text editor supported)</span> -->
-                        </label>
-                        <div class="flex items-start gap-2">
-                            <div class="flex-1">
-                                <TipTapEditor 
-                                    v-model="form.etenTnc" 
-                                    :placeholder="'Enter ETEN Terms & Conditions'" 
-                                    :disabled="loading"
-                                />
+                            <!-- eTEN English -->
+                            <div class="md:col-span-2 flex flex-col gap-1">
+                                <label class="block text-xm font-bold text-gray-700 mb-1 flex items-center gap-2">
+                                    eTEN
+                                </label>
+                                <div class="flex items-start gap-2">
+                                    <div class="flex-1">
+                                        <TipTapEditor 
+                                            v-model="form.etenTnc.en" 
+                                            :placeholder="'Enter ETEN Terms & Conditions (English)'" 
+                                            :disabled="loading"
+                                        />
+                                    </div>
+                                    <Button 
+                                        icon="pi pi-history" 
+                                        class="p-button-sm p-button-secondary h-fit" 
+                                        @click="showLog.etenTnc = true" 
+                                        tooltip="View Log History" 
+                                        :disabled="loading" 
+                                    />
+                                </div>
                             </div>
-                            <Button 
-                                icon="pi pi-history" 
-                                class="p-button-sm p-button-secondary h-fit" 
-                                @click="showLog.etenTnc = true" 
-                                tooltip="View Log History" 
-                                :disabled="loading" 
-                            />
                         </div>
-                    </div>
-                </div>
+                    </TabPanel>
+                    
+                    <TabPanel header="Bahasa Malaysia">
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 pt-4">
+                            <!-- T-Care Malay -->
+                            <div class="md:col-span-2 flex flex-col gap-1">
+                                <label class="block text-xm font-bold text-gray-700 mb-1 flex items-center gap-2">
+                                    T-Care
+                                </label>
+                                <div class="flex items-start gap-2">
+                                    <div class="flex-1">
+                                        <TipTapEditor 
+                                            v-model="form.careTnc.bm" 
+                                            :placeholder="'Masukkan Terma & Syarat Care (Bahasa Malaysia)'" 
+                                            :disabled="loading"
+                                        />
+                                    </div>
+                                    <Button 
+                                        icon="pi pi-history" 
+                                        class="p-button-sm p-button-secondary h-fit" 
+                                        @click="showLog.careTnc = true" 
+                                        tooltip="View Log History" 
+                                        :disabled="loading" 
+                                    />
+                                </div>
+                            </div>
+
+                            <!-- eTEN Malay -->
+                            <div class="md:col-span-2 flex flex-col gap-1">
+                                <label class="block text-xm font-bold text-gray-700 mb-1 flex items-center gap-2">
+                                    eTEN
+                                </label>
+                                <div class="flex items-start gap-2">
+                                    <div class="flex-1">
+                                        <TipTapEditor 
+                                            v-model="form.etenTnc.bm" 
+                                            :placeholder="'Masukkan Terma & Syarat ETEN (Bahasa Malaysia)'" 
+                                            :disabled="loading"
+                                        />
+                                    </div>
+                                    <Button 
+                                        icon="pi pi-history" 
+                                        class="p-button-sm p-button-secondary h-fit" 
+                                        @click="showLog.etenTnc = true" 
+                                        tooltip="View Log History" 
+                                        :disabled="loading" 
+                                    />
+                                </div>
+                            </div>
+                        </div>
+                    </TabPanel>
+                    
+                    <TabPanel header="中文">
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 pt-4">
+                            <!-- T-Care Chinese -->
+                            <div class="md:col-span-2 flex flex-col gap-1">
+                                <label class="block text-xm font-bold text-gray-700 mb-1 flex items-center gap-2">
+                                    T-Care
+                                </label>
+                                <div class="flex items-start gap-2">
+                                    <div class="flex-1">
+                                        <TipTapEditor 
+                                            v-model="form.careTnc.cn" 
+                                            :placeholder="'输入Care条款与条件 (中文)'" 
+                                            :disabled="loading"
+                                        />
+                                    </div>
+                                    <Button 
+                                        icon="pi pi-history" 
+                                        class="p-button-sm p-button-secondary h-fit" 
+                                        @click="showLog.careTnc = true" 
+                                        tooltip="View Log History" 
+                                        :disabled="loading" 
+                                    />
+                                </div>
+                            </div>
+
+                            <!-- eTEN Chinese -->
+                            <div class="md:col-span-2 flex flex-col gap-1">
+                                <label class="block text-xm font-bold text-gray-700 mb-1 flex items-center gap-2">
+                                    eTEN
+                                </label>
+                                <div class="flex items-start gap-2">
+                                    <div class="flex-1">
+                                        <TipTapEditor 
+                                            v-model="form.etenTnc.cn" 
+                                            :placeholder="'输入ETEN条款与条件 (中文)'" 
+                                            :disabled="loading"
+                                        />
+                                    </div>
+                                    <Button 
+                                        icon="pi pi-history" 
+                                        class="p-button-sm p-button-secondary h-fit" 
+                                        @click="showLog.etenTnc = true" 
+                                        tooltip="View Log History" 
+                                        :disabled="loading" 
+                                    />
+                                </div>
+                            </div>
+                        </div>
+                    </TabPanel>
+                </TabView>
 
                 <!-- Action Buttons for T&C -->
                 <div class="flex justify-end gap-4 pt-4">
@@ -81,56 +183,158 @@
                     </div>
                 </div>
 
-                <!-- Policy Form -->
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <!-- Care Policy -->
-                    <div class="md:col-span-2 flex flex-col gap-1">
-                        <label class="block text-xm font-bold text-gray-700 mb-1 flex items-center gap-2">
-                            Care Privacy Policy
-                            <!-- <span class="text-xs font-normal text-gray-500">(Rich text editor supported)</span> -->
-                        </label>
-                        <div class="flex items-start gap-2">
-                            <div class="flex-1">
-                                <TipTapEditor 
-                                    v-model="form.carePolicy" 
-                                    :placeholder="'Enter Care Privacy Policy'" 
-                                    :disabled="loadingPolicy"
-                                />
+                <!-- Language Tabs -->
+                <TabView v-model:activeIndex="activePolicyTab">
+                    <TabPanel header="English">
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 pt-4">
+                            <!-- Care Policy English -->
+                            <div class="md:col-span-2 flex flex-col gap-1">
+                                <label class="block text-xm font-bold text-gray-700 mb-1 flex items-center gap-2">
+                                    T-Care
+                                </label>
+                                <div class="flex items-start gap-2">
+                                    <div class="flex-1">
+                                        <TipTapEditor 
+                                            v-model="form.carePolicy.en" 
+                                            :placeholder="'Enter T-Care (English)'" 
+                                            :disabled="loadingPolicy"
+                                        />
+                                    </div>
+                                    <Button 
+                                        icon="pi pi-history" 
+                                        class="p-button-sm p-button-secondary h-fit" 
+                                        @click="showPolicyLog.carePolicy = true" 
+                                        tooltip="View Log History" 
+                                        :disabled="loadingPolicy" 
+                                    />
+                                </div>
                             </div>
-                            <Button 
-                                icon="pi pi-history" 
-                                class="p-button-sm p-button-secondary h-fit" 
-                                @click="showPolicyLog.carePolicy = true" 
-                                tooltip="View Log History" 
-                                :disabled="loadingPolicy" 
-                            />
-                        </div>
-                    </div>
 
-                    <!-- ETEN Policy -->
-                    <div class="md:col-span-2 flex flex-col gap-1">
-                        <label class="block text-xm font-bold text-gray-700 mb-1 flex items-center gap-2">
-                            ETEN Privacy Policy
-                            <!-- <span class="text-xs font-normal text-gray-500">(Rich text editor supported)</span> -->
-                        </label>
-                        <div class="flex items-start gap-2">
-                            <div class="flex-1">
-                                <TipTapEditor 
-                                    v-model="form.etenPolicy" 
-                                    :placeholder="'Enter ETEN Privacy Policy'" 
-                                    :disabled="loadingPolicy"
-                                />
+                            <!-- ETEN Policy English -->
+                            <div class="md:col-span-2 flex flex-col gap-1">
+                                <label class="block text-xm font-bold text-gray-700 mb-1 flex items-center gap-2">
+                                    eTEN
+                                </label>
+                                <div class="flex items-start gap-2">
+                                    <div class="flex-1">
+                                        <TipTapEditor 
+                                            v-model="form.etenPolicy.en" 
+                                            :placeholder="'Enter eTEN (English)'" 
+                                            :disabled="loadingPolicy"
+                                        />
+                                    </div>
+                                    <Button 
+                                        icon="pi pi-history" 
+                                        class="p-button-sm p-button-secondary h-fit" 
+                                        @click="showPolicyLog.etenPolicy = true" 
+                                        tooltip="View Log History" 
+                                        :disabled="loadingPolicy" 
+                                    />
+                                </div>
                             </div>
-                            <Button 
-                                icon="pi pi-history" 
-                                class="p-button-sm p-button-secondary h-fit" 
-                                @click="showPolicyLog.etenPolicy = true" 
-                                tooltip="View Log History" 
-                                :disabled="loadingPolicy" 
-                            />
                         </div>
-                    </div>
-                </div>
+                    </TabPanel>
+                    
+                    <TabPanel header="Bahasa Malaysia">
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 pt-4">
+                            <!-- Care Policy Malay -->
+                            <div class="md:col-span-2 flex flex-col gap-1">
+                                <label class="block text-xm font-bold text-gray-700 mb-1 flex items-center gap-2">
+                                    T-Care
+                                </label>
+                                <div class="flex items-start gap-2">
+                                    <div class="flex-1">
+                                        <TipTapEditor 
+                                            v-model="form.carePolicy.bm" 
+                                            :placeholder="'Masukkan Dasar Privasi Care (Bahasa Malaysia)'" 
+                                            :disabled="loadingPolicy"
+                                        />
+                                    </div>
+                                    <Button 
+                                        icon="pi pi-history" 
+                                        class="p-button-sm p-button-secondary h-fit" 
+                                        @click="showPolicyLog.carePolicy = true" 
+                                        tooltip="View Log History" 
+                                        :disabled="loadingPolicy" 
+                                    />
+                                </div>
+                            </div>
+
+                            <!-- ETEN Policy Malay -->
+                            <div class="md:col-span-2 flex flex-col gap-1">
+                                <label class="block text-xm font-bold text-gray-700 mb-1 flex items-center gap-2">
+                                    eTEN
+                                </label>
+                                <div class="flex items-start gap-2">
+                                    <div class="flex-1">
+                                        <TipTapEditor 
+                                            v-model="form.etenPolicy.bm" 
+                                            :placeholder="'Masukkan Dasar Privasi ETEN (Bahasa Malaysia)'" 
+                                            :disabled="loadingPolicy"
+                                        />
+                                    </div>
+                                    <Button 
+                                        icon="pi pi-history" 
+                                        class="p-button-sm p-button-secondary h-fit" 
+                                        @click="showPolicyLog.etenPolicy = true" 
+                                        tooltip="View Log History" 
+                                        :disabled="loadingPolicy" 
+                                    />
+                                </div>
+                            </div>
+                        </div>
+                    </TabPanel>
+                    
+                    <TabPanel header="中文">
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 pt-4">
+                            <!-- Care Policy Chinese -->
+                            <div class="md:col-span-2 flex flex-col gap-1">
+                                <label class="block text-xm font-bold text-gray-700 mb-1 flex items-center gap-2">
+                                    T-Care
+                                </label>
+                                <div class="flex items-start gap-2">
+                                    <div class="flex-1">
+                                        <TipTapEditor 
+                                            v-model="form.carePolicy.cn" 
+                                            :placeholder="'输入Care隐私政策 (中文)'" 
+                                            :disabled="loadingPolicy"
+                                        />
+                                    </div>
+                                    <Button 
+                                        icon="pi pi-history" 
+                                        class="p-button-sm p-button-secondary h-fit" 
+                                        @click="showPolicyLog.carePolicy = true" 
+                                        tooltip="View Log History" 
+                                        :disabled="loadingPolicy" 
+                                    />
+                                </div>
+                            </div>
+
+                            <!-- ETEN Policy Chinese -->
+                            <div class="md:col-span-2 flex flex-col gap-1">
+                                <label class="block text-xm font-bold text-gray-700 mb-1 flex items-center gap-2">
+                                    eTEN
+                                </label>
+                                <div class="flex items-start gap-2">
+                                    <div class="flex-1">
+                                        <TipTapEditor 
+                                            v-model="form.etenPolicy.cn" 
+                                            :placeholder="'输入ETEN隐私政策 (中文)'" 
+                                            :disabled="loadingPolicy"
+                                        />
+                                    </div>
+                                    <Button 
+                                        icon="pi pi-history" 
+                                        class="p-button-sm p-button-secondary h-fit" 
+                                        @click="showPolicyLog.etenPolicy = true" 
+                                        tooltip="View Log History" 
+                                        :disabled="loadingPolicy" 
+                                    />
+                                </div>
+                            </div>
+                        </div>
+                    </TabPanel>
+                </TabView>
 
                 <!-- Action Buttons for Policy -->
                 <div class="flex justify-end gap-4 pt-4">
@@ -144,88 +348,256 @@
             </div>
         </div>
 
-        <!-- Log History Modal for Care T&C -->
-        <Dialog header="Care T&C Log History" v-model:visible="showLog.careTnc" :modal="true" :closable="true" :style="{ width: '700px', 'max-width': '90vw' }">
-            <div class="flex flex-col gap-3">
-                <div v-if="logHistory.careTnc.length === 0" class="p-3 text-center text-gray-500">No log history available</div>
-                <div v-for="(log, index) in logHistory.careTnc" :key="index" class="p-4 border rounded-md bg-gray-50 hover:bg-gray-100 transition-colors">
-                    <div class="flex justify-between items-start mb-2">
-                        <div class="text-sm text-gray-600">
-                            <i class="pi pi-calendar mr-2"></i>{{ formatDate(log.created) }}
-                            <span v-if="log.deleted" class="text-red-500 ml-2">(Deleted)</span>
-                        </div>
-                        <div class="text-sm text-gray-600">
-                            <i class="pi pi-user mr-2"></i>{{ log.updatedByName }}
+        <!-- Log History Modal for T-Care -->
+        <Dialog header="T-Care Log History" v-model:visible="showLog.careTnc" :modal="true" :closable="true" :style="{ width: '700px', 'max-width': '90vw' }">
+            <TabView>
+                <TabPanel header="English">
+                    <div class="flex flex-col gap-3">
+                        <div v-if="logHistory.careTnc.length === 0" class="p-3 text-center text-gray-500">No log history available</div>
+                        <div v-for="(log, index) in logHistory.careTnc" :key="index" class="p-4 border rounded-md bg-gray-50 hover:bg-gray-100 transition-colors">
+                            <div class="flex justify-between items-start mb-2">
+                                <div class="text-sm text-gray-600">
+                                    <i class="pi pi-calendar mr-2"></i>{{ formatDate(log.created) }}
+                                    <span v-if="log.deleted" class="text-red-500 ml-2">(Deleted)</span>
+                                </div>
+                                <div class="text-sm text-gray-600">
+                                    <i class="pi pi-user mr-2"></i>{{ log.updatedByName }}
+                                </div>
+                            </div>
+                            <div class="text-sm text-gray-700 p-3 bg-white rounded border">
+                                <div v-html="log.tnc" class="tiptap-content"></div>
+                            </div>
                         </div>
                     </div>
-                    <div class="text-sm text-gray-700 p-3 bg-white rounded border">
-                        <div v-html="log.tnc" class="tiptap-content"></div>
+                </TabPanel>
+                <TabPanel header="Bahasa Malaysia">
+                    <div class="flex flex-col gap-3">
+                        <div v-if="logHistory.careTnc.length === 0" class="p-3 text-center text-gray-500">Tiada sejarah log tersedia</div>
+                        <div v-for="(log, index) in logHistory.careTnc" :key="index" class="p-4 border rounded-md bg-gray-50 hover:bg-gray-100 transition-colors">
+                            <div class="flex justify-between items-start mb-2">
+                                <div class="text-sm text-gray-600">
+                                    <i class="pi pi-calendar mr-2"></i>{{ formatDate(log.created) }}
+                                    <span v-if="log.deleted" class="text-red-500 ml-2">(Dihapus)</span>
+                                </div>
+                                <div class="text-sm text-gray-600">
+                                    <i class="pi pi-user mr-2"></i>{{ log.updatedByName }}
+                                </div>
+                            </div>
+                            <div class="text-sm text-gray-700 p-3 bg-white rounded border">
+                                <div v-html="log.tnc_bm" class="tiptap-content"></div>
+                            </div>
+                        </div>
                     </div>
-                </div>
-            </div>
+                </TabPanel>
+                <TabPanel header="中文">
+                    <div class="flex flex-col gap-3">
+                        <div v-if="logHistory.careTnc.length === 0" class="p-3 text-center text-gray-500">没有可用的历史记录</div>
+                        <div v-for="(log, index) in logHistory.careTnc" :key="index" class="p-4 border rounded-md bg-gray-50 hover:bg-gray-100 transition-colors">
+                            <div class="flex justify-between items-start mb-2">
+                                <div class="text-sm text-gray-600">
+                                    <i class="pi pi-calendar mr-2"></i>{{ formatDate(log.created) }}
+                                    <span v-if="log.deleted" class="text-red-500 ml-2">(已删除)</span>
+                                </div>
+                                <div class="text-sm text-gray-600">
+                                    <i class="pi pi-user mr-2"></i>{{ log.updatedByName }}
+                                </div>
+                            </div>
+                            <div class="text-sm text-gray-700 p-3 bg-white rounded border">
+                                <div v-html="log.tnc_cn" class="tiptap-content"></div>
+                            </div>
+                        </div>
+                    </div>
+                </TabPanel>
+            </TabView>
         </Dialog>
 
-        <!-- Log History Modal for ETEN T&C -->
-        <Dialog header="ETEN T&C Log History" v-model:visible="showLog.etenTnc" :modal="true" :closable="true" :style="{ width: '700px', 'max-width': '90vw' }">
-            <div class="flex flex-col gap-3">
-                <div v-if="logHistory.etenTnc.length === 0" class="p-3 text-center text-gray-500">No log history available</div>
-                <div v-for="(log, index) in logHistory.etenTnc" :key="index" class="p-4 border rounded-md bg-gray-50 hover:bg-gray-100 transition-colors">
-                    <div class="flex justify-between items-start mb-2">
-                        <div class="text-sm text-gray-600">
-                            <i class="pi pi-calendar mr-2"></i>{{ formatDate(log.created) }}
-                            <span v-if="log.deleted" class="text-red-500 ml-2">(Deleted)</span>
-                        </div>
-                        <div class="text-sm text-gray-600">
-                            <i class="pi pi-user mr-2"></i>{{ log.updatedByName }}
+        <!-- Log History Modal for eTEN -->
+        <Dialog header="eTEN Log History" v-model:visible="showLog.etenTnc" :modal="true" :closable="true" :style="{ width: '700px', 'max-width': '90vw' }">
+            <TabView>
+                <TabPanel header="English">
+                    <div class="flex flex-col gap-3">
+                        <div v-if="logHistory.etenTnc.length === 0" class="p-3 text-center text-gray-500">No log history available</div>
+                        <div v-for="(log, index) in logHistory.etenTnc" :key="index" class="p-4 border rounded-md bg-gray-50 hover:bg-gray-100 transition-colors">
+                            <div class="flex justify-between items-start mb-2">
+                                <div class="text-sm text-gray-600">
+                                    <i class="pi pi-calendar mr-2"></i>{{ formatDate(log.created) }}
+                                    <span v-if="log.deleted" class="text-red-500 ml-2">(Deleted)</span>
+                                </div>
+                                <div class="text-sm text-gray-600">
+                                    <i class="pi pi-user mr-2"></i>{{ log.updatedByName }}
+                                </div>
+                            </div>
+                            <div class="text-sm text-gray-700 p-3 bg-white rounded border">
+                                <div v-html="log.tnc" class="tiptap-content"></div>
+                            </div>
                         </div>
                     </div>
-                    <div class="text-sm text-gray-700 p-3 bg-white rounded border">
-                        <div v-html="log.tnc" class="tiptap-content"></div>
+                </TabPanel>
+                <TabPanel header="Bahasa Malaysia">
+                    <div class="flex flex-col gap-3">
+                        <div v-if="logHistory.etenTnc.length === 0" class="p-3 text-center text-gray-500">Tiada sejarah log tersedia</div>
+                        <div v-for="(log, index) in logHistory.etenTnc" :key="index" class="p-4 border rounded-md bg-gray-50 hover:bg-gray-100 transition-colors">
+                            <div class="flex justify-between items-start mb-2">
+                                <div class="text-sm text-gray-600">
+                                    <i class="pi pi-calendar mr-2"></i>{{ formatDate(log.created) }}
+                                    <span v-if="log.deleted" class="text-red-500 ml-2">(Dihapus)</span>
+                                </div>
+                                <div class="text-sm text-gray-600">
+                                    <i class="pi pi-user mr-2"></i>{{ log.updatedByName }}
+                                </div>
+                            </div>
+                            <div class="text-sm text-gray-700 p-3 bg-white rounded border">
+                                <div v-html="log.tnc_bm" class="tiptap-content"></div>
+                            </div>
+                        </div>
                     </div>
-                </div>
-            </div>
+                </TabPanel>
+                <TabPanel header="中文">
+                    <div class="flex flex-col gap-3">
+                        <div v-if="logHistory.etenTnc.length === 0" class="p-3 text-center text-gray-500">没有可用的历史记录</div>
+                        <div v-for="(log, index) in logHistory.etenTnc" :key="index" class="p-4 border rounded-md bg-gray-50 hover:bg-gray-100 transition-colors">
+                            <div class="flex justify-between items-start mb-2">
+                                <div class="text-sm text-gray-600">
+                                    <i class="pi pi-calendar mr-2"></i>{{ formatDate(log.created) }}
+                                    <span v-if="log.deleted" class="text-red-500 ml-2">(已删除)</span>
+                                </div>
+                                <div class="text-sm text-gray-600">
+                                    <i class="pi pi-user mr-2"></i>{{ log.updatedByName }}
+                                </div>
+                            </div>
+                            <div class="text-sm text-gray-700 p-3 bg-white rounded border">
+                                <div v-html="log.tnc_cn" class="tiptap-content"></div>
+                            </div>
+                        </div>
+                    </div>
+                </TabPanel>
+            </TabView>
         </Dialog>
 
         <!-- Log History Modal for Care Policy -->
-        <Dialog header="Care Privacy Policy Log History" v-model:visible="showPolicyLog.carePolicy" :modal="true" :closable="true" :style="{ width: '700px', 'max-width': '90vw' }">
-            <div class="flex flex-col gap-3">
-                <div v-if="policyHistory.carePolicy.length === 0" class="p-3 text-center text-gray-500">No log history available</div>
-                <div v-for="(log, index) in policyHistory.carePolicy" :key="index" class="p-4 border rounded-md bg-gray-50 hover:bg-gray-100 transition-colors">
-                    <div class="flex justify-between items-start mb-2">
-                        <div class="text-sm text-gray-600">
-                            <i class="pi pi-calendar mr-2"></i>{{ formatDate(log.created) }}
-                            <span v-if="log.deleted" class="text-red-500 ml-2">(Deleted)</span>
-                        </div>
-                        <div class="text-sm text-gray-600">
-                            <i class="pi pi-user mr-2"></i>{{ log.updatedByName }}
+        <Dialog header="T-Care Log History" v-model:visible="showPolicyLog.carePolicy" :modal="true" :closable="true" :style="{ width: '700px', 'max-width': '90vw' }">
+            <TabView>
+                <TabPanel header="English">
+                    <div class="flex flex-col gap-3">
+                        <div v-if="policyHistory.carePolicy.length === 0" class="p-3 text-center text-gray-500">No log history available</div>
+                        <div v-for="(log, index) in policyHistory.carePolicy" :key="index" class="p-4 border rounded-md bg-gray-50 hover:bg-gray-100 transition-colors">
+                            <div class="flex justify-between items-start mb-2">
+                                <div class="text-sm text-gray-600">
+                                    <i class="pi pi-calendar mr-2"></i>{{ formatDate(log.created) }}
+                                    <span v-if="log.deleted" class="text-red-500 ml-2">(Deleted)</span>
+                                </div>
+                                <div class="text-sm text-gray-600">
+                                    <i class="pi pi-user mr-2"></i>{{ log.updatedByName }}
+                                </div>
+                            </div>
+                            <div class="text-sm text-gray-700 p-3 bg-white rounded border">
+                                <div v-html="log.policy" class="tiptap-content"></div>
+                            </div>
                         </div>
                     </div>
-                    <div class="text-sm text-gray-700 p-3 bg-white rounded border">
-                        <div v-html="log.policy" class="tiptap-content"></div>
+                </TabPanel>
+                <TabPanel header="Bahasa Malaysia">
+                    <div class="flex flex-col gap-3">
+                        <div v-if="policyHistory.carePolicy.length === 0" class="p-3 text-center text-gray-500">Tiada sejarah log tersedia</div>
+                        <div v-for="(log, index) in policyHistory.carePolicy" :key="index" class="p-4 border rounded-md bg-gray-50 hover:bg-gray-100 transition-colors">
+                            <div class="flex justify-between items-start mb-2">
+                                <div class="text-sm text-gray-600">
+                                    <i class="pi pi-calendar mr-2"></i>{{ formatDate(log.created) }}
+                                    <span v-if="log.deleted" class="text-red-500 ml-2">(Dihapus)</span>
+                                </div>
+                                <div class="text-sm text-gray-600">
+                                    <i class="pi pi-user mr-2"></i>{{ log.updatedByName }}
+                                </div>
+                            </div>
+                            <div class="text-sm text-gray-700 p-3 bg-white rounded border">
+                                <div v-html="log.policy_bm" class="tiptap-content"></div>
+                            </div>
+                        </div>
                     </div>
-                </div>
-            </div>
+                </TabPanel>
+                <TabPanel header="中文">
+                    <div class="flex flex-col gap-3">
+                        <div v-if="policyHistory.carePolicy.length === 0" class="p-3 text-center text-gray-500">没有可用的历史记录</div>
+                        <div v-for="(log, index) in policyHistory.carePolicy" :key="index" class="p-4 border rounded-md bg-gray-50 hover:bg-gray-100 transition-colors">
+                            <div class="flex justify-between items-start mb-2">
+                                <div class="text-sm text-gray-600">
+                                    <i class="pi pi-calendar mr-2"></i>{{ formatDate(log.created) }}
+                                    <span v-if="log.deleted" class="text-red-500 ml-2">(已删除)</span>
+                                </div>
+                                <div class="text-sm text-gray-600">
+                                    <i class="pi pi-user mr-2"></i>{{ log.updatedByName }}
+                                </div>
+                            </div>
+                            <div class="text-sm text-gray-700 p-3 bg-white rounded border">
+                                <div v-html="log.policy_cn" class="tiptap-content"></div>
+                            </div>
+                        </div>
+                    </div>
+                </TabPanel>
+            </TabView>
         </Dialog>
 
         <!-- Log History Modal for ETEN Policy -->
-        <Dialog header="ETEN Privacy Policy Log History" v-model:visible="showPolicyLog.etenPolicy" :modal="true" :closable="true" :style="{ width: '700px', 'max-width': '90vw' }">
-            <div class="flex flex-col gap-3">
-                <div v-if="policyHistory.etenPolicy.length === 0" class="p-3 text-center text-gray-500">No log history available</div>
-                <div v-for="(log, index) in policyHistory.etenPolicy" :key="index" class="p-4 border rounded-md bg-gray-50 hover:bg-gray-100 transition-colors">
-                    <div class="flex justify-between items-start mb-2">
-                        <div class="text-sm text-gray-600">
-                            <i class="pi pi-calendar mr-2"></i>{{ formatDate(log.created) }}
-                            <span v-if="log.deleted" class="text-red-500 ml-2">(Deleted)</span>
-                        </div>
-                        <div class="text-sm text-gray-600">
-                            <i class="pi pi-user mr-2"></i>{{ log.updatedByName }}
+        <Dialog header="eTEN Log History" v-model:visible="showPolicyLog.etenPolicy" :modal="true" :closable="true" :style="{ width: '700px', 'max-width': '90vw' }">
+            <TabView>
+                <TabPanel header="English">
+                    <div class="flex flex-col gap-3">
+                        <div v-if="policyHistory.etenPolicy.length === 0" class="p-3 text-center text-gray-500">No log history available</div>
+                        <div v-for="(log, index) in policyHistory.etenPolicy" :key="index" class="p-4 border rounded-md bg-gray-50 hover:bg-gray-100 transition-colors">
+                            <div class="flex justify-between items-start mb-2">
+                                <div class="text-sm text-gray-600">
+                                    <i class="pi pi-calendar mr-2"></i>{{ formatDate(log.created) }}
+                                    <span v-if="log.deleted" class="text-red-500 ml-2">(Deleted)</span>
+                                </div>
+                                <div class="text-sm text-gray-600">
+                                    <i class="pi pi-user mr-2"></i>{{ log.updatedByName }}
+                                </div>
+                            </div>
+                            <div class="text-sm text-gray-700 p-3 bg-white rounded border">
+                                <div v-html="log.policy" class="tiptap-content"></div>
+                            </div>
                         </div>
                     </div>
-                    <div class="text-sm text-gray-700 p-3 bg-white rounded border">
-                        <div v-html="log.policy" class="tiptap-content"></div>
+                </TabPanel>
+                <TabPanel header="Bahasa Malaysia">
+                    <div class="flex flex-col gap-3">
+                        <div v-if="policyHistory.etenPolicy.length === 0" class="p-3 text-center text-gray-500">Tiada sejarah log tersedia</div>
+                        <div v-for="(log, index) in policyHistory.etenPolicy" :key="index" class="p-4 border rounded-md bg-gray-50 hover:bg-gray-100 transition-colors">
+                            <div class="flex justify-between items-start mb-2">
+                                <div class="text-sm text-gray-600">
+                                    <i class="pi pi-calendar mr-2"></i>{{ formatDate(log.created) }}
+                                    <span v-if="log.deleted" class="text-red-500 ml-2">(Dihapus)</span>
+                                </div>
+                                <div class="text-sm text-gray-600">
+                                    <i class="pi pi-user mr-2"></i>{{ log.updatedByName }}
+                                </div>
+                            </div>
+                            <div class="text-sm text-gray-700 p-3 bg-white rounded border">
+                                <div v-html="log.policy_bm" class="tiptap-content"></div>
+                            </div>
+                        </div>
                     </div>
-                </div>
-            </div>
+                </TabPanel>
+                <TabPanel header="中文">
+                    <div class="flex flex-col gap-3">
+                        <div v-if="policyHistory.etenPolicy.length === 0" class="p-3 text-center text-gray-500">没有可用的历史记录</div>
+                        <div v-for="(log, index) in policyHistory.etenPolicy" :key="index" class="p-4 border rounded-md bg-gray-50 hover:bg-gray-100 transition-colors">
+                            <div class="flex justify-between items-start mb-2">
+                                <div class="text-sm text-gray-600">
+                                    <i class="pi pi-calendar mr-2"></i>{{ formatDate(log.created) }}
+                                    <span v-if="log.deleted" class="text-red-500 ml-2">(已删除)</span>
+                                </div>
+                                <div class="text-sm text-gray-600">
+                                    <i class="pi pi-user mr-2"></i>{{ log.updatedByName }}
+                                </div>
+                            </div>
+                            <div class="text-sm text-gray-700 p-3 bg-white rounded border">
+                                <div v-html="log.policy_cn" class="tiptap-content"></div>
+                            </div>
+                        </div>
+                    </div>
+                </TabPanel>
+            </TabView>
         </Dialog>
     </Fluid>
 </template>
@@ -236,17 +608,40 @@ import { useRouter } from 'vue-router';
 import { useToast } from 'primevue/usetoast';
 import Button from 'primevue/button';
 import Dialog from 'primevue/dialog';
+import TabView from 'primevue/tabview';
+import TabPanel from 'primevue/tabpanel';
 import TipTapEditor from '@/components/TipTapEditor.vue';
 import api from '@/service/api';
 
 const router = useRouter();
 const toast = useToast();
 
+// Add active tab indices
+const activeTncTab = ref(0);
+const activePolicyTab = ref(0);
+
+// Update form structure to support multiple languages
 const form = ref({
-    careTnc: '',
-    etenTnc: '',
-    carePolicy: '',
-    etenPolicy: ''
+    careTnc: {
+        en: '',
+        bm: '',
+        cn: ''
+    },
+    etenTnc: {
+        en: '',
+        bm: '',
+        cn: ''
+    },
+    carePolicy: {
+        en: '',
+        bm: '',
+        cn: ''
+    },
+    etenPolicy: {
+        en: '',
+        bm: '',
+        cn: ''
+    }
 });
 
 const loading = ref(false);
@@ -303,19 +698,38 @@ const fetchTncData = async () => {
 
         if (response.data.history_eten) {
             logHistory.value.etenTnc = response.data.history_eten;
-            form.value.etenTnc = response.data.last_eten_tnc || '';
+            const lastEtenTnc = response.data.last_eten_tnc;
+            if (lastEtenTnc) {
+                form.value.etenTnc.en = lastEtenTnc.tnc || '';
+                form.value.etenTnc.bm = lastEtenTnc.tnc_bm || '';
+                form.value.etenTnc.cn = lastEtenTnc.tnc_cn || '';
+            }
         }
 
         if (response.data.history_care) {
             logHistory.value.careTnc = response.data.history_care;
-            form.value.careTnc = response.data.last_care_tnc || '';
+            const lastCareTnc = response.data.last_care_tnc;
+            if (lastCareTnc) {
+                form.value.careTnc.en = lastCareTnc.tnc || '';
+                form.value.careTnc.bm = lastCareTnc.tnc_bm || '';
+                form.value.careTnc.cn = lastCareTnc.tnc_cn || '';
+            }
         }
 
-        if (!form.value.careTnc && !form.value.etenTnc) {
+        // Check if all fields are empty
+        const allTncEmpty = 
+            (!form.value.careTnc.en || form.value.careTnc.en.trim() === '') &&
+            (!form.value.careTnc.bm || form.value.careTnc.bm.trim() === '') &&
+            (!form.value.careTnc.cn || form.value.careTnc.cn.trim() === '') &&
+            (!form.value.etenTnc.en || form.value.etenTnc.en.trim() === '') &&
+            (!form.value.etenTnc.bm || form.value.etenTnc.bm.trim() === '') &&
+            (!form.value.etenTnc.cn || form.value.etenTnc.cn.trim() === '');
+
+        if (allTncEmpty) {
             toast.add({
                 severity: 'info',
                 summary: 'Info',
-                detail: 'Enter T&C and click Update',
+                detail: 'Enter T&C in at least one language and click Update',
                 life: 3000
             });
         }
@@ -346,12 +760,22 @@ const fetchPolicyData = async () => {
 
         if (response.data.history_eten) {
             policyHistory.value.etenPolicy = response.data.history_eten;
-            form.value.etenPolicy = response.data.last_eten_policy || '';
+            const lastEtenPolicy = response.data.last_eten_policy;
+            if (lastEtenPolicy) {
+                form.value.etenPolicy.en = lastEtenPolicy.policy || '';
+                form.value.etenPolicy.bm = lastEtenPolicy.policy_bm || '';
+                form.value.etenPolicy.cn = lastEtenPolicy.policy_cn || '';
+            }
         }
 
         if (response.data.history_care) {
             policyHistory.value.carePolicy = response.data.history_care;
-            form.value.carePolicy = response.data.last_care_policy || '';
+            const lastCarePolicy = response.data.last_care_policy;
+            if (lastCarePolicy) {
+                form.value.carePolicy.en = lastCarePolicy.policy || '';
+                form.value.carePolicy.bm = lastCarePolicy.policy_bm || '';
+                form.value.carePolicy.cn = lastCarePolicy.policy_cn || '';
+            }
         }
 
         toast.add({
@@ -384,22 +808,28 @@ const cancel = () => {
 };
 
 const submitTncForm = async () => {
-    // Helper function to check if content is empty (handles HTML content)
+    // Check if any content exists in any language for either app
     const isEmptyHtmlContent = (html) => {
         if (!html) return true;
-        // Remove all HTML tags and check if there's actual text
         const text = html.replace(/<[^>]*>/g, '').trim();
         return text === '';
     };
 
-    const careTncEmpty = isEmptyHtmlContent(form.value.careTnc);
-    const etenTncEmpty = isEmptyHtmlContent(form.value.etenTnc);
+    const careTncEmpty = 
+        isEmptyHtmlContent(form.value.careTnc.en) && 
+        isEmptyHtmlContent(form.value.careTnc.bm) && 
+        isEmptyHtmlContent(form.value.careTnc.cn);
+    
+    const etenTncEmpty = 
+        isEmptyHtmlContent(form.value.etenTnc.en) && 
+        isEmptyHtmlContent(form.value.etenTnc.bm) && 
+        isEmptyHtmlContent(form.value.etenTnc.cn);
 
     if (careTncEmpty && etenTncEmpty) {
         toast.add({
             severity: 'warn',
             summary: 'Required',
-            detail: 'At least one T&C must be filled',
+            detail: 'At least one T&C must be filled in any language',
             life: 3000
         });
         return;
@@ -415,8 +845,12 @@ const submitTncForm = async () => {
 
     try {
         const response = await api.post('admin/updateTNC', {
-            eten_tnc_text: form.value.etenTnc || null,
-            care_tnc_text: form.value.careTnc || null
+            eten_tnc_text: form.value.etenTnc.en || null,
+            eten_tnc_text_bm: form.value.etenTnc.bm || null,
+            eten_tnc_text_cn: form.value.etenTnc.cn || null,
+            care_tnc_text: form.value.careTnc.en || null,
+            care_tnc_text_bm: form.value.careTnc.bm || null,
+            care_tnc_text_cn: form.value.careTnc.cn || null
         });
 
         if (response.data.status === 1) {
@@ -445,22 +879,28 @@ const submitTncForm = async () => {
 };
 
 const submitPolicyForm = async () => {
-    // Helper function to check if content is empty (handles HTML content)
+    // Check if any content exists in any language for either app
     const isEmptyHtmlContent = (html) => {
         if (!html) return true;
-        // Remove all HTML tags and check if there's actual text
         const text = html.replace(/<[^>]*>/g, '').trim();
         return text === '';
     };
 
-    const carePolicyEmpty = isEmptyHtmlContent(form.value.carePolicy);
-    const etenPolicyEmpty = isEmptyHtmlContent(form.value.etenPolicy);
+    const carePolicyEmpty = 
+        isEmptyHtmlContent(form.value.carePolicy.en) && 
+        isEmptyHtmlContent(form.value.carePolicy.bm) && 
+        isEmptyHtmlContent(form.value.carePolicy.cn);
+    
+    const etenPolicyEmpty = 
+        isEmptyHtmlContent(form.value.etenPolicy.en) && 
+        isEmptyHtmlContent(form.value.etenPolicy.bm) && 
+        isEmptyHtmlContent(form.value.etenPolicy.cn);
 
     if (carePolicyEmpty && etenPolicyEmpty) {
         toast.add({
             severity: 'warn',
             summary: 'Required',
-            detail: 'At least one Privacy Policy must be filled',
+            detail: 'At least one Privacy Policy must be filled in any language',
             life: 3000
         });
         return;
@@ -476,8 +916,12 @@ const submitPolicyForm = async () => {
 
     try {
         const response = await api.post('admin/updatePolicy', {
-            eten_policy_text: form.value.etenPolicy || null,
-            care_policy_text: form.value.carePolicy || null
+            eten_policy_text: form.value.etenPolicy.en || null,
+            eten_policy_text_bm: form.value.etenPolicy.bm || null,
+            eten_policy_text_cn: form.value.etenPolicy.cn || null,
+            care_policy_text: form.value.carePolicy.en || null,
+            care_policy_text_bm: form.value.carePolicy.bm || null,
+            care_policy_text_cn: form.value.carePolicy.cn || null
         });
 
         if (response.data.status === 1) {
@@ -539,5 +983,10 @@ const submitPolicyForm = async () => {
 
 .tiptap-content li {
     margin: 0.25em 0;
+}
+
+/* Style for PrimeVue tabs */
+.p-tabview-panels {
+    padding: 1rem 0 0 0;
 }
 </style>
