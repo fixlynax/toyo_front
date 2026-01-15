@@ -28,7 +28,7 @@
                             </div>
 
                             <RouterLink :to="`/om/editEtenUser/${memberId}`">
-                                <Button type="button" label="Edit" />
+                                <Button v-if="canUpdate" type="button" label="Edit" />
                             </RouterLink>
                         </div>
 
@@ -134,7 +134,7 @@
                         <div class="text-2xl font-bold text-gray-800">Devices</div>
                         <div class="flex justify-end">
                             <RouterLink :to="`/om/manageDevices/${memberId}`">
-                                <Button label="Manage All Devices" icon="pi pi-tablet" size="small" class="!py-1 !px-3 text-sm" />
+                                <Button v-if="canUpdate" label="Manage All Devices" icon="pi pi-tablet" size="small" class="!py-1 !px-3 text-sm" />
                             </RouterLink>
                         </div>
                     </div>
@@ -181,6 +181,10 @@ import { useRoute } from 'vue-router';
 import api from '@/service/api';
 import ProgressSpinner from 'primevue/progressspinner';
 import { useToast } from 'primevue/usetoast';
+import { useMenuStore } from '@/store/menu';
+
+const menuStore = useMenuStore();
+const canUpdate = computed(() => menuStore.canWrite('Customer'));
 
 const route = useRoute();
 const toast = useToast();

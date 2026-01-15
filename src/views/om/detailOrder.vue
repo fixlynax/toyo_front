@@ -170,8 +170,8 @@
                                 <tr>
                                     <td colspan="2" class="px-2 py-2 text-right">
                                         <div class="flex justify-end gap-2">
-                                            <Button label="Return Order" class="p-button-danger text-sm !w-fit" @click="showReturnOrderDialog = true" :disabled="!canReturnOrder" />
-                                            <Button label="Pull SAP Update" class="text-sm !w-fit" @click="pullSAPUpdate" :loading="loadingSAP" />
+                                            <Button v-if="canUpdate" label="Return Order" class="p-button-danger text-sm !w-fit" @click="showReturnOrderDialog = true" :disabled="!canReturnOrder" />
+                                            <Button v-if="canUpdate" label="Pull SAP Update" class="text-sm !w-fit" @click="pullSAPUpdate" :loading="loadingSAP" />
                                         </div>
                                     </td>
                                 </tr>
@@ -260,7 +260,7 @@
                             <i class="pi pi-info-circle text-2xl mb-2"></i>
                             <p class="text-lg font-medium">No collector information available</p>
                         </div>
-                        <Button v-if="hasPickupInfo" label="Add Driver" icon="pi pi-plus" class="p-button-primary" style="width: fit-content" @click="showAddDriverDialog = true" :disabled="loadingDriver" />
+                        <Button v-if="hasPickupInfo && canUpdate" label="Add Driver" icon="pi pi-plus" class="p-button-primary" style="width: fit-content" @click="showAddDriverDialog = true" :disabled="loadingDriver" />
                     </div>
                 </div>
             </div>
@@ -400,10 +400,14 @@ import { ref, computed, onMounted, watch } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { useToast } from 'primevue/usetoast';
 import api from '@/service/api';
+import { useMenuStore } from '@/store/menu';
 
 const toast = useToast();
 const route = useRoute();
 const router = useRouter();
+
+const menuStore = useMenuStore();
+const canUpdate = computed(() => menuStore.canWrite('Order'));
 
 // Reactive data
 const orderData = ref({});

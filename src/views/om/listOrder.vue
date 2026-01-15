@@ -4,6 +4,7 @@ import { FilterMatchMode, FilterOperator } from '@primevue/core/api';
 import { onBeforeMount, ref, computed, watch } from 'vue';
 import { RouterLink } from 'vue-router';
 import LoadingPage from '@/components/LoadingPage.vue';
+import { useMenuStore } from '@/store/menu';
 
 // 🟢 State
 const filters1 = ref({});
@@ -11,6 +12,8 @@ const listData = ref([]);
 const loading = ref(true);
 const dateRange = ref([null, null]); // [startDate, endDate]
 const hasDateFilterApplied = ref(false); // New flag to track if date filter is applied
+const menuStore = useMenuStore();
+const canUpdate = computed(() => menuStore.canWrite('Order'));
 
 // 🟢 Filters
 function initFilters1() {
@@ -298,7 +301,7 @@ const clearDateRange = () => {
                             </div>
                             <div>
                                 <RouterLink to="/om/createOrder">
-                                    <Button label="Create" icon="pi pi-plus" class="p-button-primary" />
+                                    <Button v-if="canUpdate" label="Create" icon="pi pi-plus" class="p-button-primary" />
                                 </RouterLink>
                             </div>
                         </div>

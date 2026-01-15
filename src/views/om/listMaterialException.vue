@@ -34,7 +34,7 @@
                                 <!-- <Button type="button" icon="pi pi-cog" class="p-button" /> -->
                             </div>
                             <div>
-                                <Button label="Create" icon="pi pi-plus" class="p-button-primary" @click="openAddDialog" />
+                                <Button v-if="canUpdate" label="Create" icon="pi pi-plus" class="p-button-primary" @click="openAddDialog" />
                             </div>
                         </div>
                     </template>
@@ -92,7 +92,7 @@
                         </template>
                     </Column>
 
-                    <Column header="Actions" style="min-width: 10rem">
+                    <Column v-if="canUpdate" header="Action" style="min-width: 10rem">
                         <template #body="{ data }">
                             <div class="flex gap-1">
                                 <Button icon="pi pi-pencil" class="p-button-info p-button-text p-button-sm" v-tooltip="'Edit'" @click="editException(data)" />
@@ -195,6 +195,10 @@ import { FilterMatchMode } from '@primevue/core/api';
 import { useToast } from 'primevue/usetoast';
 import api from '@/service/api';
 import LoadingPage from '@/components/LoadingPage.vue';
+import { useMenuStore } from '@/store/menu';
+
+const menuStore = useMenuStore();
+const canUpdate = computed(() => menuStore.canWrite('Maintenance Mode'));
 
 const toast = useToast();
 const loading = ref(false);
