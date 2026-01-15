@@ -137,12 +137,12 @@
                                     <td class="px-4 py-2 text-right font-bold text-primary">{{ returnList.remarks || '-' }}</td>
                                 </tr>
                                 <tr class="border-b">
-                                    <td class="px-4 py-2 font-medium">Type</td>
+                                    <td class="px-4 py-2 font-medium">Delivery Type</td>
                                     <td class="px-4 py-2 text-right">{{ returnList.order_data.deliveryType || '-' }}</td>
                                 </tr>
                                 <tr class="border-b">
-                                    <td class="px-4 py-2 font-medium">Description</td>
-                                    <td class="px-4 py-2 text-right">{{ returnList?.order_data?.orderDesc === 'Back Order' ? 'NORMAL': (returnList?.order_data?.orderDesc.toUpperCase() || '-') }}</td>
+                                    <td class="px-4 py-2 font-medium">Order Type</td>
+                                    <td class="px-4 py-2 text-right">{{ returnList?.order_data?.orderDesc ? (returnList.order_data.orderDesc === 'Back Order' ? 'NORMAL' : returnList.order_data.orderDesc.toUpperCase()) : '-' }}</td>
                                 </tr>
                                 <tr class="border-b">
                                     <td class="px-4 py-2 font-medium">SO No</td>

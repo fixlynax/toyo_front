@@ -139,7 +139,7 @@
                                     <td class="px-4 py-2 text-right">{{ orderDelList?.driverInformation?.collectorIC ? orderDelList.driverInformation.collectorIC : 'Not Assigned' }}</td>
                                 </tr>
                                 <tr class="border-b">
-                                    <td class="px-4 py-2 font-medium">Pickup</td>
+                                    <td class="px-4 py-2 font-medium">Pickup Date</td>
                                     <td class="px-4 py-2 text-right">{{ orderDelList.driverInformation?.pickup_datetime ? formatDate(orderDelList.driverInformation.pickup_datetime) : 'Not Assigned' }}</td>
                                 </tr>
                                 <tr>
