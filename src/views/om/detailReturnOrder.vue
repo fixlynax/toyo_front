@@ -255,9 +255,9 @@
 
                     <!-- Action Buttons -->
                     <div class="flex justify-end mt-4 gap-2" v-if="order.orderstatus === 0">
-                        <Button label="Reject" severity="danger" size="small" @click="showRejectDialog = true"/>
+                        <Button style="width: 30%" v-if="canUpdate" label="Reject" severity="danger" size="small" @click="showRejectDialog = true"/>
                         <!-- @click="onRejectReturnOrder"  -->
-                        <Button label="Approve" severity="success" size="small" @click="openEditPopup" :loading="loadingAction === 'approve'" />
+                        <Button style="width: 30%" v-if="canUpdate" label="Approve" severity="success" size="small" @click="openEditPopup" :loading="loadingAction === 'approve'" />
                     </div>
                 </div>
             </div>
@@ -352,13 +352,12 @@ import { ref, onMounted, computed, reactive } from 'vue';
 import { useRoute } from 'vue-router';
 import { useToast } from 'primevue/usetoast';
 import api from '@/service/api';
-import Dialog from 'primevue/dialog';
-import InputNumber from 'primevue/inputnumber';
-import Tag from 'primevue/tag';
-import Button from 'primevue/button';
-import DataTable from 'primevue/datatable';
-import Column from 'primevue/column';
 import { useConfirm } from 'primevue';
+import { useMenuStore } from '@/store/menu';
+
+const menuStore = useMenuStore();
+const canUpdate = computed(() => menuStore.canWrite('Return Order'));
+
 const confirmation = useConfirm();
 const route = useRoute();
 const toast = useToast();

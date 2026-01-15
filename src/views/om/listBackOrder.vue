@@ -5,6 +5,10 @@ import api from '@/service/api';
 import { RouterLink } from 'vue-router';
 import LoadingPage from '@/components/LoadingPage.vue';
 import { useToast } from 'primevue/usetoast';
+import { useMenuStore } from '@/store/menu';
+
+const menuStore = useMenuStore();
+const canUpdate = computed(() => menuStore.canWrite('Back Order'));
 
 const toast = useToast();
 
@@ -495,6 +499,7 @@ const getStatusSeverity = (data) => {
                             
                             <!-- Bulk Cancel Button -->
                             <Button 
+                                v-if="canUpdate"
                                 label="Bulk Cancel" 
                                 icon="pi pi-times" 
                                 :disabled="selectedBackOrders.length === 0 || bulkCancelLoading"

@@ -118,7 +118,7 @@
 
                             <div class="flex items-center gap-2 ml-auto">
                                 <Button type="button" label="Export" icon="pi pi-file-export" class="p-button-success" @click="exportMaterials" :loading="exportLoading" :disabled="!canExport" />
-                                <Button type="button" label="Bulk Update" icon="pi pi-file-import" class="p-button-primary" @click="triggerImport" :loading="importLoading" :disabled="!canImport" />
+                                <Button v-if="canUpdate" type="button" label="Bulk Update" icon="pi pi-file-import" class="p-button-primary" @click="triggerImport" :loading="importLoading" :disabled="!canImport" />
                                 <input ref="importFileInput" type="file" accept=".xlsx,.xls,.csv" style="display: none" @change="handleImport" />
                                 <Button type="button" icon="pi pi-refresh" class="p-button-secondary" @click="fetchEtenMaterials" :loading="tableLoading" :disabled="!canLoadMaterials" />
                             </div>
@@ -304,7 +304,7 @@ const toast = useToast();
 const menuStore = useMenuStore();
 const importFileInput = ref();
 
-const canUpdate = computed(() => menuStore.canWrite('Material Management'));
+const canUpdate = computed(() => menuStore.canWrite('Material Quantity Setting'));
 
 const globalLoading = ref(false);
 const loadingDealers = ref(false);

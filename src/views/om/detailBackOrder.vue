@@ -238,8 +238,8 @@
                     </div>
 
                     <div class="flex justify-end mt-4 gap-2">
-                        <Button label="Cancel Back-Order" severity="danger" size="small" class="!w-fit" @click="confirmCancelBackOrder" :disabled="!canCancelBackOrder" :loading="cancelling" />
-                        <Button label="Process Back-Order" severity="success" size="small" class="!w-fit" @click="processBackOrder(1)" :disabled="!canProcessBackOrder" :loading="processing" />
+                        <Button v-if="canUpdate" label="Cancel Back-Order" severity="danger" size="small" class="!w-fit" @click="confirmCancelBackOrder" :disabled="!canCancelBackOrder" :loading="cancelling" />
+                        <Button v-if="canUpdate" label="Process Back-Order" severity="success" size="small" class="!w-fit" @click="processBackOrder(1)" :disabled="!canProcessBackOrder" :loading="processing" />
                     </div>
                 </div>
 
@@ -312,6 +312,10 @@ import { useRoute } from 'vue-router';
 import { useToast } from 'primevue/usetoast';
 import { useConfirm } from 'primevue/useconfirm';
 import api from '@/service/api';
+import { useMenuStore } from '@/store/menu';
+
+const menuStore = useMenuStore();
+const canUpdate = computed(() => menuStore.canWrite('Back Order'));
 
 const route = useRoute();
 const toast = useToast();

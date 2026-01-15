@@ -156,7 +156,7 @@
                                         <div class="flex items-center justify-end gap-2">
                                             <span>{{ orderData.so_no || '-' }}</span>
                                             <Button
-                                                v-if="!orderData.so_no || orderStatusText === 'TIMEOUT'"
+                                                v-if="!orderData.so_no || orderStatusText === 'TIMEOUT' && canUpdate"
                                                 icon="pi pi-pencil"
                                                 class="p-button-text p-button-info p-button-secondary text-sm"
                                                 size="small"
@@ -210,8 +210,8 @@
                                 <tr v-if="orderStatusText === 'TIMEOUT'">
                                     <td colspan="2" class="px-2 py-2 text-right">
                                         <div class="flex justify-end gap-2">
-                                            <Button label="Void" class="p-button-danger text-sm !w-fit" @click="showVoidToast" :disabled="loadingProcess" />
-                                            <Button label="Process" class="p-button-success text-sm !w-fit" @click="processOrder" :loading="loadingProcess" />
+                                            <Button v-if="canUpdate" label="Void" class="p-button-danger text-sm !w-fit" @click="showVoidToast" :disabled="loadingProcess" />
+                                            <Button v-if="canUpdate" label="Process" class="p-button-success text-sm !w-fit" @click="processOrder" :loading="loadingProcess" />
                                         </div>
                                     </td>
                                 </tr>
@@ -286,11 +286,15 @@
 import { ref, computed, onMounted } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { useToast } from 'primevue/usetoast';
+import { useMenuStore } from '@/store/menu';
 import api from '@/service/api';
 
 const toast = useToast();
 const route = useRoute();
 const router = useRouter();
+
+const menuStore = useMenuStore();
+const canUpdate = computed(() => menuStore.canWrite('Fail Order'));
 
 // Reactive data
 const orderData = ref({});
@@ -370,7 +374,7 @@ const formatItemNo = (itemNo) => {
 // Address methods
 const getFullAddress = (data) => {
     if (!data) return '-';
-    const addressParts = [ data.addressLine2, data.addressLine3, data.addressLine4, data.city, data.state, data.postcode].filter((part) => part && part.trim() !== '');
+    const addressParts = [ data.addressLine2, data.addressLine3, data.addressLine4, data.city, data.postcode, data.state].filter((part) => part && part.trim() !== '');
     return addressParts.join('') || '-';
 };
 

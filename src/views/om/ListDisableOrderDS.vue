@@ -80,7 +80,7 @@
             </Column>
 
             <!-- ⚙️ Actions -->
-            <Column header="Actions" style="min-width: 10rem" bodyClass="text-center">
+            <Column v-if="canUpdate" header="Action" style="min-width: 10rem" bodyClass="text-center">
                 <template #body="{ data }">
                     <div class="flex justify-left gap-2">
                         <Button icon="pi pi-pencil" class="p-button-text p-button-info p-button-sm" v-tooltip="'Edit'" @click="editItem(data)" />
@@ -264,6 +264,11 @@
 <script>
 import api from '@/service/api';
 import LoadingPage from '@/components/LoadingPage.vue';
+import { computed } from 'vue';
+import { useMenuStore } from '@/store/menu';
+
+const menuStore = useMenuStore();
+const canUpdate = computed(() => menuStore.canWrite('Maintenance Mode'));
 
 export default {
     name: 'ListPageLayout',

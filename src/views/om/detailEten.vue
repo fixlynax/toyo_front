@@ -17,13 +17,13 @@
 
                             <!-- RIGHT SIDE -->
                             <div class="flex items-center gap-2">
-                                <Button @click="pullSAPData" :loading="loadingPullSAP" :disabled="loadingPullSAP" icon="pi pi-refresh" class="p-button-info" style="width: 70px">
+                                <Button v-if="canUpdate" @click="pullSAPData" :loading="loadingPullSAP" :disabled="loadingPullSAP" icon="pi pi-refresh" class="p-button-info" style="width: 70px">
                                     <span v-if="loadingPullSAP">Pulling SAP...</span>
                                     <span v-else>Pull SAP</span>
                                 </Button>
 
                                 <RouterLink :to="`/om/editEten/${form.custAccountNo}`">
-                                    <Button icon="pi pi-pencil" class="p-button-warning" v-tooltip="'Edit'" />
+                                    <Button v-if="canUpdate" icon="pi pi-pencil" class="p-button-warning" v-tooltip="'Edit'" />
                                 </RouterLink>
                             </div>
                         </div>
@@ -137,7 +137,7 @@
                                         <InputText v-model="userSearchTerm" placeholder="Search users..." class="p-inputtext-sm" @input="onUserSearch" />
                                     </IconField>
                                 <RouterLink :to="`/om/createUserEten/${form.custAccountNo}`">
-                                    <Button label="Create" class="p-button-info" size="small" />
+                                    <Button v-if="canUpdate" label="Create" class="p-button-info" size="small" />
                                 </RouterLink>
                             </div>
                         </div>
@@ -407,6 +407,10 @@ import api from '@/service/api';
 import { useToast } from 'primevue/usetoast';
 import { onMounted, ref, watch, computed } from 'vue';
 import { useRoute } from 'vue-router';
+import { useMenuStore } from '@/store/menu';
+
+const menuStore = useMenuStore();
+const canUpdate = computed(() => menuStore.canWrite('Customer'));
 
 const toast = useToast();
 const route = useRoute();
