@@ -121,7 +121,7 @@ const fetchOrders = async (status = null, dateFilter = false, mainAccountNo = nu
                 custAccountNo: order.custaccountno,
                 companyName: order.dealerName,
                 sapOrderType: order.sapordertype,
-                orderType: order.orderDesc,
+                orderType:order.orderDesc === 'Back Order'? 'NORMAL': order.orderDesc?.toUpperCase(),
                 deliveryType: order.deliveryType,
                 shipToAccountNo: order.shiptoCustAccNo,
                 deliveryDate: order.deliveryDate,
@@ -457,12 +457,7 @@ const clearDealerFilter = () => {
 
                 <Column field="orderType" header="Order Type" style="min-width: 7rem" sortable>
                     <template #body="{ data }">
-                        <span v-if="data.orderType === 'Normal'">NORMAL</span>
-                        <span v-else-if="data.orderType === 'Directship'">DS</span>
-                        <span v-else-if="data.orderType === 'Own'">OWN USE</span>
-                        <span v-else-if="data.orderType === 'Warranty'">WARRANTY</span>
-                        <span v-else-if="data.orderType === 'Back Order'">NORMAL</span>
-                        <span v-else>{{ data.orderType || data.sapOrderType || '-' }}</span>
+                        <span>{{ data.orderType || data.sapOrderType || '-' }}</span>
                     </template>
                 </Column>
 

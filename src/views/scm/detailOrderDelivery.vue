@@ -107,13 +107,13 @@
                                     <td class="px-4 py-2 font-medium">Order Remark</td>
                                     <td class="px-4 py-2 text-right font-bold text-primary">{{ orderDelList.order_remarks || '-' }}</td>
                                 </tr>
-                                <tr class="border-b">
+                                <!-- <tr class="border-b">
                                     <td class="px-4 py-2 font-medium">Order Type</td>
                                     <td class="px-4 py-2 text-right font-medium">{{ orderDelList.deliveryType || '-' }}</td>
-                                </tr>
+                                </tr> -->
                                 <tr class="border-b">
-                                    <td class="px-4 py-2 font-medium">Order Description</td>
-                                    <td class="px-4 py-2 text-right font-medium">{{orderDelList?.orderDesc === 'Back Order' ? 'NORMAL': (orderDelList?.orderDesc || '-')}}</td>
+                                    <td class="px-4 py-2 font-medium">Order Type</td>
+                                    <td class="px-4 py-2 text-right font-medium">{{orderDelList?.orderDesc === 'Back Order' ? 'NORMAL': (orderDelList?.orderDesc.toUpperCase() || '-')}}</td>
                                 </tr>
                                 <tr class="border-b">
                                     <td class="px-4 py-2 font-medium">SO No</td>
@@ -153,7 +153,7 @@
                                 </tr>
                                 <tr>
                                     <td class="px-4 py-2 font-medium">Created On</td>
-                                    <td class="px-4 py-2 text-right">{{ formatDate(orderDelList.created) }} <br> {{ formatTime(orderDelList.created) }}</td>
+                                    <td class="px-4 py-2 text-right">{{ formatDate(orderDelList.created) }} {{ formatTime(orderDelList.created) }}</td>
                                 </tr>
                             </tbody>
                         </table>

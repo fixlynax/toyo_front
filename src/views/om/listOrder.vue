@@ -98,7 +98,7 @@ const fetchOrders = async (status = null, dateFilter = false, useDefaultRange = 
                 custAccountNo: order.custaccountno,
                 companyName: order.dealerName,
                 sapOrderType: order.sapordertype,
-                orderType: order.orderDesc,
+                orderType: order.orderDesc === 'Back Order'? 'NORMAL': order.orderDesc,
                 deliveryType: order.deliveryType,
                 shipToAccountNo: order.shiptoCustAccNo,
                 deliveryDate: order.deliveryDate,
