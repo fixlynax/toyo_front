@@ -113,7 +113,16 @@
                                 </tr>
                                 <tr class="border-b">
                                     <td class="px-4 py-2 font-medium">Order Type</td>
-                                    <td class="px-4 py-2 text-right font-medium">{{ orderData.orderDesc || '-' }}</td>
+                                    <td class="px-4 py-2 text-right font-medium">
+                                        <span v-if="orderData.orderDesc === 'NORMAL'">NORMAL</span>
+                                        <span v-else-if="orderData.orderDesc === 'DIRECTSHIP'">DS</span>
+                                        <span v-else-if="orderData.orderDesc === 'OWN'">OWN USE</span>
+                                        <span v-else-if="orderData.orderDesc === 'Warranty'">WARRANTY</span>
+                                        <span v-else-if="orderData.orderDesc === 'Back Order'">NORMAL</span>
+                                        <span v-else>
+                                            {{ orderData.orderDesc || orderData.orderDesc || '-' }}
+                                        </span>
+                                    </td>
                                 </tr>
                                 <tr class="border-b">
                                     <td class="px-4 py-2 font-medium">Order SAP Type</td>
