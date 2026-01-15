@@ -579,7 +579,7 @@ const getFulfillmentItems = (fulfillOrder) => {
 const getBackOrderStatusText = (status) => {
     const statusMap = {
         0: 'In Progress',
-        1: 'Complete',
+        1: 'Completed',
         9: 'Cancelled'
     };
     return statusMap[status] || 'Unknown';

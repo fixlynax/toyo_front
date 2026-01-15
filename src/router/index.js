@@ -785,7 +785,7 @@ const router = createRouter({
                     path: 'it/emailSenderSetting',
                     name: 'Email-Sender-Setting',
                     component: () => import('@/views/it/emailSenderSetting.vue'),
-                    // meta: { permission: 'Email Sender Setting', access: 'view' }
+                    meta: { permission: 'Email Sender Setting', access: 'view' }
                 },
 
                 // ===============================

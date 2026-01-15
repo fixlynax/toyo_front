@@ -215,7 +215,16 @@
                                 </tr>
                                 <tr class="border-b">
                                     <td class="px-4 py-2 font-medium">Order Type</td>
-                                    <td class="px-4 py-2 text-right font-semibold">{{ orderData.orderDesc || '-' }}</td>
+                                    <td class="px-4 py-2 text-right font-semibold">
+                                        <span v-if="orderData.orderDesc === 'NORMAL'">NORMAL</span>
+                                        <span v-else-if="orderData.orderDesc === 'DIRECTSHIP'">DS</span>
+                                        <span v-else-if="orderData.orderDesc === 'OWN'">OWN USE</span>
+                                        <span v-else-if="orderData.orderDesc === 'Warranty'">WARRANTY</span>
+                                        <span v-else-if="orderData.orderDesc === 'Back Order'">NORMAL</span>
+                                        <span v-else>
+                                            {{ orderData.orderDesc || orderData.orderDesc || '-' }}
+                                        </span>
+                                    </td>
                                 </tr>
                                 <tr class="border-b">
                                     <td class="px-4 py-2 font-medium">SO No</td>
@@ -255,7 +264,7 @@
 
                     <!-- Action Buttons -->
                     <div class="flex justify-end mt-4 gap-2" v-if="order.orderstatus === 0">
-                        <Button style="width: 30%" v-if="canUpdate" label="Reject" severity="danger" size="small" @click="showRejectDialog = true"/>
+                        <Button style="width: 30%" v-if="canUpdate" label="Reject" severity="danger" size="small" @click="showRejectDialog = true" />
                         <!-- @click="onRejectReturnOrder"  -->
                         <Button style="width: 30%" v-if="canUpdate" label="Approve" severity="success" size="small" @click="openEditPopup" :loading="loadingAction === 'approve'" />
                     </div>
@@ -324,8 +333,6 @@
                         </template>
                     </Column>
                 </DataTable>
-
-
             </div>
 
             <template #footer>
@@ -336,12 +343,12 @@
         <Dialog v-model:visible="showRejectDialog" header="Reject Return Order" :modal="true" class="p-fluid" :style="{ width: '40rem' }">
             <div class="field">
                 <label class="block font-bold text-gray-700 mb-1">Rejection Remarks *</label>
-                <InputText v-model="rejectRemarks.remarks" class="w-full"/>
+                <InputText v-model="rejectRemarks.remarks" class="w-full" />
             </div>
 
             <template #footer>
                 <Button label="Cancel" icon="pi pi-times" class="p-button-text" @click="closeRejectDialog" :disabled="rejecting" />
-                <Button label="Reject Return Order" icon="pi pi-times-circle" class="p-button-danger" @click="onRejectReturnOrder" :loading="loadingAction === 'reject'"   />
+                <Button label="Reject Return Order" icon="pi pi-times-circle" class="p-button-danger" @click="onRejectReturnOrder" :loading="loadingAction === 'reject'" />
             </template>
         </Dialog>
     </Fluid>
@@ -371,7 +378,7 @@ const returnOrderArray = ref([]);
 const loading = ref(true);
 const loadingAction = ref(null);
 const error = ref(null);
-const rejectRemarks = reactive({remarks: '',});
+const rejectRemarks = reactive({ remarks: '' });
 const showRejectDialog = ref(false);
 const rejecting = ref(false);
 
@@ -526,7 +533,7 @@ const formatAddress = (dealerShop) => {
 
 const formatDateTime = (dateString) => {
     if (!dateString) return '-';
-    
+
     const date = new Date(dateString);
     const options = {
         day: '2-digit',
@@ -537,9 +544,9 @@ const formatDateTime = (dateString) => {
         second: '2-digit',
         hour12: true
     };
-    
+
     let formatted = date.toLocaleString('en-MY', options);
-    
+
     // Convert AM/PM to uppercase regardless of case
     return formatted.replace(/\b(am|pm)\b/gi, (match) => match.toUpperCase());
 };
@@ -627,7 +634,6 @@ const openEditPopup = () => {
     // Check for ZR3F items directly from the array
     const hasZR3F = returnOrderArray.value.some((item) => item.itemcategory === 'ZR3F');
 
-
     if (!hasZR3F) {
         // If no ZR3F items, proceed directly to approval
         onApproveReturnOrder();
@@ -709,14 +715,12 @@ const proceedWithApproval = async () => {
             payload.append('return_order_array', JSON.stringify(originalArray));
         }
 
-
         const response = await api.postExtra(`order/update-return-order/${returnOrderNo}`, payload, {
             headers: {
                 'Content-Type': 'application/x-www-form-urlencoded',
                 Accept: 'application/json'
             }
         });
-
 
         if (response.data.status === 1) {
             const message = hasChanges ? 'Return order approved successfully with modifications!' : 'Return order approved successfully!';
@@ -793,64 +797,87 @@ const proceedWithApproval = async () => {
 // ✅ Modified onApproveReturnOrder (for no ZR3F items)
 const onApproveReturnOrder = async () => {
     confirmation.require({
-    message: `Are you sure you want to approve return order for ${order.value.return_orderNo_ref || '-'} ?`,
-    header: 'Confirm Return Order',
-    icon: 'pi pi-exclamation-triangle',
-    acceptLabel: 'Yes',
-    rejectLabel: 'No',
-    accept: async () => {
-        try {
-            loadingAction.value = 'approve';
+        message: `Are you sure you want to approve return order for ${order.value.return_orderNo_ref || '-'} ?`,
+        header: 'Confirm Return Order',
+        icon: 'pi pi-exclamation-triangle',
+        acceptLabel: 'Yes',
+        rejectLabel: 'No',
+        accept: async () => {
+            try {
+                loadingAction.value = 'approve';
 
-            // Prepare payload - when no ZR3F items, we still need to send the return_order_array
-            const payload = new URLSearchParams();
-            payload.append('status', '1');
+                // Prepare payload - when no ZR3F items, we still need to send the return_order_array
+                const payload = new URLSearchParams();
+                payload.append('status', '1');
 
-            // Send the original array when there are no ZR3F items
-            const originalArray = returnOrderArray.value.map((item) => ({
-                materialid: item.materialid,
-                salesdoclineitem: item.salesdoclineitem || item.itemno,
-                itemcategory: item.itemcategory,
-                plant: item.plant,
-                qty: item.qty.toString()
-            }));
+                // Send the original array when there are no ZR3F items
+                const originalArray = returnOrderArray.value.map((item) => ({
+                    materialid: item.materialid,
+                    salesdoclineitem: item.salesdoclineitem || item.itemno,
+                    itemcategory: item.itemcategory,
+                    plant: item.plant,
+                    qty: item.qty.toString()
+                }));
 
-            payload.append('return_order_array', JSON.stringify(originalArray));
+                payload.append('return_order_array', JSON.stringify(originalArray));
 
+                const response = await api.postExtra(`order/update-return-order/${returnOrderNo}`, payload, {
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded',
+                        Accept: 'application/json'
+                    }
+                });
 
-            const response = await api.postExtra(`order/update-return-order/${returnOrderNo}`, payload, {
-                headers: {
-                    'Content-Type': 'application/x-www-form-urlencoded',
-                    Accept: 'application/json'
+                if (response.data.status === 1) {
+                    showToast('success', 'Success', 'Return order approved successfully!');
+                    order.value.orderstatus = 1;
+
+                    if (response.data.admin_data) {
+                        Object.assign(order.value, response.data.admin_data);
+                    }
+
+                    // Update local data
+                    await fetchReturnOrderDetail();
+                } else {
+                    const errorData = response.data.error;
+                    let errorMessage = 'Failed to approve return order';
+                    let sapError = null;
+
+                    if (errorData) {
+                        errorMessage = errorData.message || errorData.code || errorMessage;
+                        if (errorMessage.includes('SAP') || errorMessage.includes('sap')) {
+                            sapError = errorMessage;
+                        }
+                    } else if (response.data.message) {
+                        errorMessage = response.data.message;
+                        if (errorMessage.includes('SAP') || errorMessage.includes('sap')) {
+                            sapError = errorMessage;
+                        }
+                    }
+
+                    if (sapError) {
+                        showToast('error', 'SAP Error', sapError);
+                    } else {
+                        showToast('error', 'Error', errorMessage);
+                    }
                 }
-            });
-
-
-            if (response.data.status === 1) {
-                showToast('success', 'Success', 'Return order approved successfully!');
-                order.value.orderstatus = 1;
-
-                if (response.data.admin_data) {
-                    Object.assign(order.value, response.data.admin_data);
-                }
-
-                // Update local data
-                await fetchReturnOrderDetail();
-            } else {
-                const errorData = response.data.error;
+            } catch (err) {
+                console.error('Approve error:', err);
                 let errorMessage = 'Failed to approve return order';
                 let sapError = null;
 
-                if (errorData) {
-                    errorMessage = errorData.message || errorData.code || errorMessage;
+                if (err.response?.data?.error?.message) {
+                    errorMessage = err.response.data.error.message;
                     if (errorMessage.includes('SAP') || errorMessage.includes('sap')) {
                         sapError = errorMessage;
                     }
-                } else if (response.data.message) {
-                    errorMessage = response.data.message;
+                } else if (err.response?.data?.message) {
+                    errorMessage = err.response.data.message;
                     if (errorMessage.includes('SAP') || errorMessage.includes('sap')) {
                         sapError = errorMessage;
                     }
+                } else if (err.message) {
+                    errorMessage = err.message;
                 }
 
                 if (sapError) {
@@ -858,40 +885,14 @@ const onApproveReturnOrder = async () => {
                 } else {
                     showToast('error', 'Error', errorMessage);
                 }
+            } finally {
+                loadingAction.value = null;
             }
-        } catch (err) {
-            console.error('Approve error:', err);
-            let errorMessage = 'Failed to approve return order';
-            let sapError = null;
-
-            if (err.response?.data?.error?.message) {
-                errorMessage = err.response.data.error.message;
-                if (errorMessage.includes('SAP') || errorMessage.includes('sap')) {
-                    sapError = errorMessage;
-                }
-            } else if (err.response?.data?.message) {
-                errorMessage = err.response.data.message;
-                if (errorMessage.includes('SAP') || errorMessage.includes('sap')) {
-                    sapError = errorMessage;
-                }
-            } else if (err.message) {
-                errorMessage = err.message;
-            }
-
-            if (sapError) {
-                showToast('error', 'SAP Error', sapError);
-            } else {
-                showToast('error', 'Error', errorMessage);
-            }
-        } finally {
-            loadingAction.value = null;
+        },
+        reject: () => {
+            // optional action on cancel
         }
-    },
-    reject: () => {
-      // optional action on cancel
-    }
-  });
-   
+    });
 };
 
 // ✅ Fixed Reject return order
@@ -921,14 +922,12 @@ const onRejectReturnOrder = async () => {
         payload.append('reject_remarks', rejectRemarks.remarks);
         payload.append('return_order_array', JSON.stringify(originalArray));
 
-
         const response = await api.postExtra(`order/update-return-order/${returnOrderNo}`, payload, {
             headers: {
                 'Content-Type': 'application/x-www-form-urlencoded',
                 Accept: 'application/json'
             }
         });
-
 
         if (response.data.status === 1) {
             showToast('success', 'Success', 'Return order rejected successfully!');

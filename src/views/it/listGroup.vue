@@ -39,7 +39,7 @@
 
                     <!-- Right: Create Group Button -->
                     <RouterLink to="/it/createGroup">
-                        <Button type="button" label="Create" icon="pi pi-plus" />
+                        <Button v-if="canUpdate" type="button" label="Create" icon="pi pi-plus" />
                     </RouterLink>
                 </div>
             </template>
@@ -94,7 +94,7 @@
                 </template>
             </Column>
 
-            <Column header="Actions" style="min-width: 10rem">
+            <Column v-if="canUpdate" header="Action" style="min-width: 10rem">
                 <template #body="{ data }">
                     <div class="flex gap-2">
                         <Button icon="pi pi-pencil" class="p-button-text p-button-sm" :class="data.is_super_admin ? 'p-button-secondary' : 'p-button-info'" @click="editGroup(data)" :disabled="data.is_super_admin" />
@@ -278,6 +278,10 @@ import { useToast } from 'primevue/usetoast';
 import { FilterMatchMode } from '@primevue/core/api';
 import api from '@/service/api';
 import LoadingPage from '@/components/LoadingPage.vue';
+import { useMenuStore } from '@/store/menu';
+
+const menuStore = useMenuStore();
+const canUpdate = computed(() => menuStore.canWrite('User Role'));
 
 const router = useRouter();
 const toast = useToast();

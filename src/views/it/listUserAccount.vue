@@ -39,7 +39,7 @@
                         </div>
 
                         <RouterLink to="/it/createUserAccount">
-                            <Button type="button" label="Create" icon="pi pi-plus" />
+                            <Button v-if="canUpdate" type="button" label="Create" icon="pi pi-plus" />
                         </RouterLink>
                     </div>
                 </template>
@@ -108,7 +108,7 @@
                     </template>
                 </Column>
 
-                <Column header="Action" style="min-width: 12rem">
+                <Column v-if="canUpdate" header="Action" style="min-width: 12rem">
                     <template #body="{ data }">
                         <div class="flex gap-2">
                             <Button icon="pi pi-pencil" class="p-button-text p-button-info p-button-sm" @click="editUser(data)" />
@@ -210,12 +210,16 @@
 </template>
 
 <script setup>
-import { onMounted, ref, reactive } from 'vue';
+import { onMounted, ref, computed } from 'vue';
 import { useRouter } from 'vue-router';
 import { FilterMatchMode } from '@primevue/core/api';
 import { useToast } from 'primevue/usetoast';
 import api from '@/service/api';
 import LoadingPage from '@/components/LoadingPage.vue';
+import { useMenuStore } from '@/store/menu';
+
+const menuStore = useMenuStore();
+const canUpdate = computed(() => menuStore.canWrite('User Account'));
 
 const router = useRouter();
 const toast = useToast();

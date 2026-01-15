@@ -142,7 +142,7 @@
                                 </tr>
                                 <tr class="border-b">
                                     <td class="px-4 py-2 font-medium">Description</td>
-                                    <td class="px-4 py-2 text-right">{{ returnList.order_data.orderDesc || '-' }}</td>
+                                    <td class="px-4 py-2 text-right">{{ returnList?.order_data?.orderDesc === 'Back Order' ? 'NORMAL': (returnList?.order_data?.orderDesc.toUpperCase() || '-') }}</td>
                                 </tr>
                                 <tr class="border-b">
                                     <td class="px-4 py-2 font-medium">SO No</td>
@@ -319,19 +319,25 @@ const returnList = ref({
     order_data: {}
 });
 const loading = ref(true);
-function formatDateTime(dateString) {
-    if (!dateString) return '';
+const formatDateTime = (dateString) => {
+    if (!dateString) return '-';
+    
     const date = new Date(dateString);
-    return date.toLocaleString('en-MY', {
-        year: 'numeric',
-        month: '2-digit',
+    const options = {
         day: '2-digit',
+        month: '2-digit',
+        year: 'numeric',
         hour: '2-digit',
         minute: '2-digit',
         second: '2-digit',
         hour12: true
-    });
-}
+    };
+    
+    let formatted = date.toLocaleString('en-MY', options);
+    
+    // Convert AM/PM to uppercase regardless of case
+    return formatted.replace(/\b(am|pm)\b/gi, (match) => match.toUpperCase());
+};
 function formatDate(dateString) {
     if (!dateString) return '';
     const date = new Date(dateString);

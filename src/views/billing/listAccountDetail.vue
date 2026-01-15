@@ -47,7 +47,6 @@
                         </div>
                         <div class="flex gap-2">
                             <Button
-                                v-if="canUpdate"
                                 icon="pi pi-download"
                                 label="Download Selected"
                                 class="p-button p-button-sm"
@@ -183,10 +182,10 @@ import api from '@/service/api';
 import { FilterMatchMode, FilterOperator } from '@primevue/core/api';
 import LoadingPage from '@/components/LoadingPage.vue';
 import { useToast } from 'primevue/usetoast';
-import { useMenuStore } from '@/store/menu';
-
-const menuStore = useMenuStore();
-const canUpdate = computed(() => menuStore.canWrite('Account Details'));
+import Calendar from 'primevue/calendar';
+import Button from 'primevue/button';
+import InputText from 'primevue/inputtext';
+import InputNumber from 'primevue/inputnumber';
 
 const toast = useToast();
 
