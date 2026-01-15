@@ -88,7 +88,7 @@
                 </template>
             </Column>
 
-            <Column header="Actions" style="width: 100px">
+            <Column v-if="canUpdate" header="Action" style="width: 100px">
                 <template #body="{ data }">
                     <div class="flex gap-2">
                         <Button v-if="editingId === data.id" icon="pi pi-check" class="p-button-text p-button-success p-button-sm" @click="saveSetting(data)" title="Save" />
@@ -189,6 +189,11 @@
 import api from '@/service/api';
 import { useToast } from 'primevue/usetoast';
 import Badge from 'primevue/badge';
+import { computed } from 'vue';
+import { useMenuStore } from '@/store/menu';
+
+const menuStore = useMenuStore();
+const canUpdate = computed(() => menuStore.canWrite('Email Setting'));
 
 export default {
     name: 'MailSettingList',
