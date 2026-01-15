@@ -179,9 +179,9 @@ const importErrors = ref([]);
 const showImportErrorDialog = ref(false);
 const showImportErrorHandle = ref(false);
 const statusTabs = [
-    { label: 'New'},
-    { label: 'Pending'},
-    { label: 'Completed'}
+    { label: 'All'},
+    { label: 'Voucher'},
+    { label: 'Item'}
 ];
 const filteredData = computed(() => {
     if (activeTab.value === 1) {
