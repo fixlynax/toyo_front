@@ -103,11 +103,11 @@
                                     <td class="px-4 py-2 text-right font-bold text-primary">{{ orderDelList.order_remarks || '-' }}</td>
                                 </tr>
                                 <tr class="border-b">
-                                    <td class="px-4 py-2 font-medium">Order Type</td>
+                                    <td class="px-4 py-2 font-medium">Pickup Type</td>
                                     <td class="px-4 py-2 text-right font-medium">{{ orderDelList.deliveryType === 'SELFCOLLECT' ? 'OWNCOLLECT' : orderDelList.deliveryType}}</td>
                                 </tr>
                                 <tr class="border-b">
-                                    <td class="px-4 py-2 font-medium">Order Description</td>
+                                    <td class="px-4 py-2 font-medium">Order Type</td>
                                     <td class="px-4 py-2 text-right font-medium">{{ orderDelList.orderDesc || '-' }}</td>
                                 </tr>
                                 <tr class="border-b">
