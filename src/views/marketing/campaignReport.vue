@@ -415,10 +415,6 @@ onMounted(() => {
 </script>
 
 <style scoped>
-/* Styles remain the same */
-</style>
-
-<style scoped>
 :deep(.p-multiselect),
 :deep(.p-dropdown),
 :deep(.p-inputnumber) {
