@@ -105,13 +105,13 @@
                     </DataTable>
                 </div>
 
-                 <div class="card flex flex-col w-full">
+                <div class="card flex flex-col w-full">
                     <!-- Header with Invite Button -->
                     <div class="flex items-center justify-between border-b pb-2 mb-2">
                         <div class="text-2xl font-bold text-gray-800">Participating Dealer</div>
                         <div class="inline-flex items-center gap-2">
-                        <Button v-if="canUpdate" label="Report" style="width: fit-content" class="p-button-sm p-button-danger" :loading="exportLoading" @click="fetchExport" :disabled="exportLoading" />
-                        <Button v-if="canUpdate" label="Assign Dealer" icon="pi pi-user-plus" style="width: fit-content" class="p-button-sm p-button-success" @click="openInviteDealerDialog" />
+                            <Button v-if="canUpdate" label="Report" style="width: fit-content" class="p-button-sm p-button-danger" :loading="exportLoading" @click="fetchExport" :disabled="exportLoading" />
+                            <Button v-if="canUpdate" label="Assign Dealer" icon="pi pi-user-plus" style="width: fit-content" class="p-button-sm p-button-success" @click="openInviteDealerDialog" />
                         </div>
                     </div>
 
@@ -845,23 +845,6 @@ const generateYearOptions = (yearsBack = 10) => {
     yearOptions.value = years;
 };
 
-// ✅ Month Options (for birthday report)
-const monthOptions = ref([
-    { label: 'All Months', value: null },
-    { label: 'January', value: '1' },
-    { label: 'February', value: '2' },
-    { label: 'March', value: '3' },
-    { label: 'April', value: '4' },
-    { label: 'May', value: '5' },
-    { label: 'June', value: '6' },
-    { label: 'July', value: '7' },
-    { label: 'August', value: '8' },
-    { label: 'September', value: '9' },
-    { label: 'October', value: '10' },
-    { label: 'November', value: '11' },
-    { label: 'December', value: '12' }
-]);
-
 // ✅ Show Toast Notification
 const showToast = (severity, summary, detail, life = 3000) => {
     toast.add({
@@ -923,12 +906,16 @@ const exportExcel = async () => {
         // Try different approaches sequentially
         let response;
 
-        response = await api.postExtra(endpoint,{}, {
-            responseType: 'blob',
-            headers: {
-                'Content-Type': 'application/json'
+        response = await api.postExtra(
+            endpoint,
+            {},
+            {
+                responseType: 'blob',
+                headers: {
+                    'Content-Type': 'application/json'
+                }
             }
-        });
+        );
 
         // Check content type
         const contentType = response.headers['content-type'] || response.data.type || 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet';
@@ -940,14 +927,16 @@ const exportExcel = async () => {
         const url = window.URL.createObjectURL(blob);
         const a = document.createElement('a');
 
-        // Generate filename with include_deleted indicator
         const timestamp = new Date().toISOString().split('T')[0];
-        const reportName = selectedReport.value.label.replace(/\s+/g, '_');
-        const yearsStr = filters.years.join('_');
-        const deletedIndicator = filters.includeDeleted ? '_with_deleted' : '_active_only';
 
-        // Try to get filename from Content-Disposition header
-        let filename = `${reportName}_${yearsStr}${deletedIndicator}_${timestamp}.xlsx`;
+        const campaignNo = campaign.value.campaignNo || 'Campaign';
+        const title = campaign.value.title || 'Report';
+
+        // Optional: clean title for filename
+        const safeTitle = title.replace(/[^\w\d]+/g, '_');
+
+        let filename = `${campaignNo}_${safeTitle}_${timestamp}.xlsx`;
+        campaign.value;
         const contentDisposition = response.headers['content-disposition'];
         if (contentDisposition) {
             const filenameMatch = contentDisposition.match(/filename\*?=["']?([^"']+)["']?/i);
@@ -976,8 +965,6 @@ const exportExcel = async () => {
     }
 };
 
-
-
 // Watch for filter changes
 let debounceTimer = null;
 watch(
@@ -994,11 +981,16 @@ const fetchExport = async () => {
     try {
         loading.value = true;
 
-        const response = await api.postExtra(
-            `report/dealer-report-campaign/${campaignId}`,{},
-            { responseType: 'arraybuffer' }
-        );
+        const response = await api.postExtra(`report/dealer-report-campaign/${campaignId}`, {}, { responseType: 'arraybuffer' });
+        const timestamp = new Date().toISOString().split('T')[0];
 
+        const campaignNo = campaign.value.campaignNo || 'Campaign';
+        const title = campaign.value.title || 'Report';
+
+        // Optional: clean title for filename
+        const safeTitle = title.replace(/[^\w\d]+/g, '_');
+
+        let filename = `${campaignNo}_${safeTitle}_${timestamp}.xlsx`;
         const blob = new Blob([response.data], {
             type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
         });
@@ -1006,7 +998,7 @@ const fetchExport = async () => {
         const url = URL.createObjectURL(blob);
         const a = document.createElement('a');
         a.href = url;
-        a.download = 'ParticipantDealer_Report';
+        a.download = filename;
         a.click();
         URL.revokeObjectURL(url);
 
@@ -1016,7 +1008,6 @@ const fetchExport = async () => {
             detail: 'Export completed',
             life: 3000
         });
-
     } catch (error) {
         console.error('Export error:', error);
         toast.add({
