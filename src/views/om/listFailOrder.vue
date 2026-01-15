@@ -233,7 +233,7 @@ const getOrderTypeLabel = (orderType) => {
         case 'Warranty':
             return 'WARRANTY';
         case 'Back Order':
-            return 'BACK ORDER';
+            return 'NORMAL';
         default:
             return orderType || '-';
     }
