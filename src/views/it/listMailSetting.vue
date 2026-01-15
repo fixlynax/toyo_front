@@ -88,7 +88,7 @@
                 </template>
             </Column>
 
-            <Column v-if="canUpdate" header="Action" style="width: 100px">
+            <Column header="Action" style="width: 100px">
                 <template #body="{ data }">
                     <div class="flex gap-2">
                         <Button v-if="editingId === data.id" icon="pi pi-check" class="p-button-text p-button-success p-button-sm" @click="saveSetting(data)" title="Save" />

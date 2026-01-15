@@ -8,7 +8,7 @@
                     <div class="flex items-center justify-between border-b pb-2">
                         <div class="flex items-center gap-3">
                             <RouterLink to="/marketing/listCampaign">
-                                <Button icon="pi pi-arrow-left" class="p-button-text p-button-secondary text-xl" size="big" v-tooltip="'Back'" />
+                                <Button icon="pi pi-arrow-left" class="p-button-text p-button-secondary text-xl" v-tooltip="'Back'" />
                             </RouterLink>
                             <div class="text-2xl font-bold text-gray-800">Campaign Management Details</div>
                         </div>
@@ -102,15 +102,53 @@
                                 <div>{{ data.prizeWon }} / {{ data.prizeQuota }}</div>
                             </template>
                         </Column>
-
-                        <!-- Action Column -->
-                        <!-- <Column header="Action" style="min-width: 6rem">
-                            <template #body="{ data }">
-                                <Button icon="pi pi-pencil" class="p-button-text p-button-info" @click="openEditDialog(data)" />
-                            </template>
-                        </Column> -->
                     </DataTable>
                 </div>
+
+                <div class="card flex flex-col w-full">
+                    <!-- Header with Invite Button -->
+                    <div class="flex items-center justify-between border-b pb-2 mb-2">
+                        <div class="text-2xl font-bold text-gray-800">Participating Dealer</div>
+                        <div class="inline-flex items-center gap-2">
+                            <Button v-if="canUpdate" label="Report" style="width: fit-content" class="p-button-sm p-button-danger" :loading="exportLoading" @click="fetchExport" :disabled="exportLoading" />
+                            <Button v-if="canUpdate" label="Assign Dealer" icon="pi pi-user-plus" style="width: fit-content" class="p-button-sm p-button-success" @click="openInviteDealerDialog" />
+                        </div>
+                    </div>
+
+                    <DataTable :value="dealerList" :paginator="true" :rows="3" dataKey="id" :rowHover="true" responsiveLayout="scroll" class="text-sm">
+                        <template #empty>
+                            <div class="text-center py-8 text-gray-500">No dealers invited yet.</div>
+                        </template>
+
+                        <!-- Title + ID -->
+                        <Column header="Name" style="min-width: 8rem">
+                            <template #body="{ data }">
+                                <div class="flex flex-col">
+                                    <span class="font-bold text-gray-800">{{ data.companyName }}</span>
+                                    <span class="text-gray-600 text-xm mt-2">🔧 {{ data.memberCode || data.custAccountNo }}</span>
+                                </div>
+                            </template>
+                        </Column>
+
+                        <!-- State -->
+                        <Column header="State" style="min-width: 6rem">
+                            <template #body="{ data }">
+                                <span class="text-gray-800">{{ data.state }}</span>
+                            </template>
+                        </Column>
+
+                        <!-- Signboard Type -->
+                        <Column field="signboardType" header="Signboard Type" style="min-width: 6rem"></Column>
+
+                        <!-- Actions -->
+                        <Column v-if="canUpdate" header="Actions" style="min-width: 4rem; text-align: center">
+                            <template #body="{ data }">
+                                <Button icon="pi pi-trash" class="p-button-text p-button-danger" @click="removeDealer(data)" :loading="deletingDealerId === data.id" :disabled="deletingDealerId === data.id" />
+                            </template>
+                        </Column>
+                    </DataTable>
+                </div>
+
                 <div class="flex flex-col gap-8">
                     <!-- Header -->
                     <div class="card flex flex-col gap-6 w-full">
@@ -201,47 +239,6 @@
                             </tbody>
                         </table>
                     </div>
-                </div>
-
-                <div class="card flex flex-col w-full">
-                    <!-- Header with Invite Button -->
-                    <div class="flex items-center justify-between border-b pb-2 mb-2">
-                        <div class="text-2xl font-bold text-gray-800">Participating Dealer</div>
-                        <Button v-if="canUpdate" label="Assign Dealer" icon="pi pi-user-plus" style="width: fit-content" class="p-button-sm p-button-success" @click="openInviteDealerDialog" />
-                    </div>
-
-                    <DataTable :value="dealerList" :paginator="true" :rows="3" dataKey="id" :rowHover="true" responsiveLayout="scroll" class="text-sm">
-                        <template #empty>
-                            <div class="text-center py-8 text-gray-500">No dealers invited yet.</div>
-                        </template>
-
-                        <!-- Title + ID -->
-                        <Column header="Name" style="min-width: 8rem">
-                            <template #body="{ data }">
-                                <div class="flex flex-col">
-                                    <span class="font-bold text-gray-800">{{ data.companyName }}</span>
-                                    <span class="text-gray-600 text-xm mt-2">🔧 {{ data.memberCode || data.custAccountNo }}</span>
-                                </div>
-                            </template>
-                        </Column>
-
-                        <!-- State -->
-                        <Column header="State" style="min-width: 6rem">
-                            <template #body="{ data }">
-                                <span class="text-gray-800">{{ data.state }}</span>
-                            </template>
-                        </Column>
-
-                        <!-- Signboard Type -->
-                        <Column field="signboardType" header="Signboard Type" style="min-width: 6rem"></Column>
-
-                        <!-- Actions -->
-                        <Column v-if="canUpdate" header="Actions" style="min-width: 4rem; text-align: center">
-                            <template #body="{ data }">
-                                <Button icon="pi pi-trash" class="p-button-text p-button-danger" @click="removeDealer(data)" :loading="deletingDealerId === data.id" :disabled="deletingDealerId === data.id" />
-                            </template>
-                        </Column>
-                    </DataTable>
                 </div>
 
                 <div class="card flex flex-col w-full">
@@ -848,23 +845,6 @@ const generateYearOptions = (yearsBack = 10) => {
     yearOptions.value = years;
 };
 
-// ✅ Month Options (for birthday report)
-const monthOptions = ref([
-    { label: 'All Months', value: null },
-    { label: 'January', value: '1' },
-    { label: 'February', value: '2' },
-    { label: 'March', value: '3' },
-    { label: 'April', value: '4' },
-    { label: 'May', value: '5' },
-    { label: 'June', value: '6' },
-    { label: 'July', value: '7' },
-    { label: 'August', value: '8' },
-    { label: 'September', value: '9' },
-    { label: 'October', value: '10' },
-    { label: 'November', value: '11' },
-    { label: 'December', value: '12' }
-]);
-
 // ✅ Show Toast Notification
 const showToast = (severity, summary, detail, life = 3000) => {
     toast.add({
@@ -926,12 +906,16 @@ const exportExcel = async () => {
         // Try different approaches sequentially
         let response;
 
-        response = await api.postExtra(endpoint,{}, {
-            responseType: 'blob',
-            headers: {
-                'Content-Type': 'application/json'
+        response = await api.postExtra(
+            endpoint,
+            {},
+            {
+                responseType: 'blob',
+                headers: {
+                    'Content-Type': 'application/json'
+                }
             }
-        });
+        );
 
         // Check content type
         const contentType = response.headers['content-type'] || response.data.type || 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet';
@@ -943,14 +927,16 @@ const exportExcel = async () => {
         const url = window.URL.createObjectURL(blob);
         const a = document.createElement('a');
 
-        // Generate filename with include_deleted indicator
         const timestamp = new Date().toISOString().split('T')[0];
-        const reportName = selectedReport.value.label.replace(/\s+/g, '_');
-        const yearsStr = filters.years.join('_');
-        const deletedIndicator = filters.includeDeleted ? '_with_deleted' : '_active_only';
 
-        // Try to get filename from Content-Disposition header
-        let filename = `${reportName}_${yearsStr}${deletedIndicator}_${timestamp}.xlsx`;
+        const campaignNo = campaign.value.campaignNo || 'Campaign';
+        const title = campaign.value.title || 'Report';
+
+        // Optional: clean title for filename
+        const safeTitle = title.replace(/[^\w\d]+/g, '_');
+
+        let filename = `${campaignNo}_${safeTitle}_${timestamp}.xlsx`;
+        campaign.value;
         const contentDisposition = response.headers['content-disposition'];
         if (contentDisposition) {
             const filenameMatch = contentDisposition.match(/filename\*?=["']?([^"']+)["']?/i);
@@ -979,8 +965,6 @@ const exportExcel = async () => {
     }
 };
 
-
-
 // Watch for filter changes
 let debounceTimer = null;
 watch(
@@ -992,6 +976,50 @@ watch(
     },
     { deep: true }
 );
+
+const fetchExport = async () => {
+    try {
+        loading.value = true;
+
+        const response = await api.postExtra(`report/dealer-report-campaign/${campaignId}`, {}, { responseType: 'arraybuffer' });
+        const timestamp = new Date().toISOString().split('T')[0];
+
+        const campaignNo = campaign.value.campaignNo || 'Campaign';
+        const title = campaign.value.title || 'Report';
+
+        // Optional: clean title for filename
+        const safeTitle = title.replace(/[^\w\d]+/g, '_');
+
+        let filename = `${campaignNo}_${safeTitle}_${timestamp}.xlsx`;
+        const blob = new Blob([response.data], {
+            type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+        });
+
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = filename;
+        a.click();
+        URL.revokeObjectURL(url);
+
+        toast.add({
+            severity: 'success',
+            summary: 'Success',
+            detail: 'Export completed',
+            life: 3000
+        });
+    } catch (error) {
+        console.error('Export error:', error);
+        toast.add({
+            severity: 'error',
+            summary: 'Error',
+            detail: 'Export failed',
+            life: 3000
+        });
+    } finally {
+        loading.value = false;
+    }
+};
 </script>
 
 <style scoped>
@@ -999,10 +1027,6 @@ watch(
 :deep(.p-dropdown),
 :deep(.p-inputnumber) {
     width: 100%;
-}
-
-:deep(.p-button) {
-    min-width: 120px;
 }
 
 :deep(.p-button:disabled) {

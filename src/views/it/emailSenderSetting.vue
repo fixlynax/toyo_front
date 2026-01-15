@@ -147,8 +147,8 @@
                 </div>
 
                 <div class="flex justify-end gap-2">
-                    <Button v-if="canUpdate" label="Cancel" class="p-button-secondary" @click="showTestEmailDialog = false" />
-                    <Button v-if="canUpdate" label="Send Test Email" class="p-button-primary" @click="sendTestEmail" :loading="sendingTestEmail" :disabled="!isValidTestEmail" />
+                    <Button label="Cancel" class="p-button-secondary" @click="showTestEmailDialog = false" />
+                    <Button label="Send Test Email" class="p-button-primary" @click="sendTestEmail" :loading="sendingTestEmail" :disabled="!isValidTestEmail" />
                 </div>
             </div>
         </Dialog>
