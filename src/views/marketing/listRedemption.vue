@@ -7,12 +7,7 @@
 
         <!-- Show content area when not in initial loading -->
         <div v-else>
-            <TabView v-model:activeIndex="activeTab" class="mb-4">
-                <TabPanel header="All" />
-                <TabPanel header="Voucher" />
-                <TabPanel header="Item" />
-            </TabView>
-
+        <TabMenu :model="statusTabs" v-model:activeIndex="activeTab" class="mb-4" />
             <DataTable
                 :value="filteredData"
                 :paginator="true"
@@ -24,7 +19,7 @@
                 :loading="tableLoading"
                 :filters="filters"
                 filterDisplay="menu"
-                :globalFilterFields="['refno', 'recipientName', 'itemName', 'quantity', 'redemptionDate', 'status']"
+                :globalFilterFields="['ref_no', 'redeem_date', 'item_status', 'quantity', 'member_name', 'item_status', 'status']"
                 class="rounded-table"
                 currentPageReportTemplate="Showing {first} to {last} of {totalRecords} entries"
                 paginatorTemplate="CurrentPageReport FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink RowsPerPageDropdown"
@@ -76,45 +71,45 @@
                     </template>
                 </Column>
 
-                <Column field="refno" header="Ref No" sortable style="min-width: 8rem">
+                <Column field="ref_no" header="Ref No" sortable style="min-width: 8rem" >
                     <template #body="{ data }">
                         <RouterLink :to="`/marketing/detailRedemption/${data.id}`" class="hover:underline font-bold text-primary-400">
-                            {{ data.refno }}
+                            {{ data.ref_no || '-' }}
                         </RouterLink>
                     </template>
                 </Column>
 
-                <Column field="memberName" header="Member Name" style="min-width: 6rem">
+                <Column field="member_name" header="Member Name" style="min-width: 6rem" sortable>
                     <template #body="{ data }">
-                        {{ data.recipientName }}
+                        {{ data.member_name }}
                     </template>
                 </Column>
 
-                <Column field="itemName" header="Item Name" style="min-width: 6rem">
+                <Column field="item_status" header="Item Name" style="min-width: 6rem" sortable>
                     <template #body="{ data }">
-                        {{ data.itemName }}
+                        {{ data.item_status }}
                     </template>
                 </Column>
 
-                <Column field="quantity" header="Quantity" style="min-width: 6rem">
+                <Column field="quantity" header="Quantity" style="min-width: 6rem" sortable>
                     <template #body="{ data }">
                         {{ data.quantity }}
                     </template>
                 </Column>
 
-                <Column field="redemptionDate" header="Redemption Date" style="min-width: 6rem">
+                <Column field="redeem_date" header="Redemption Date" style="min-width: 6rem" sortable>
                     <template #body="{ data }">
-                        {{ formatDate(data.redemptionDate) }}
+                        {{ formatDate(data.redeem_date) }}
                     </template>
                 </Column>
 
-                <Column field="itemStatus" header="Item Status" style="min-width: 6rem">
+                <Column field="item_status" header="Item Status" style="min-width: 6rem" sortable>
                     <template #body="{ data }">
-                        {{ data.itemStatus }}
+                        {{ data.item_status }}
                     </template>
                 </Column>
 
-                <Column field="status" header="Status" style="min-width: 6rem">
+                <Column field="status" header="Status" style="min-width: 6rem" sortable>
                     <template #body="{ data }">
                         <Tag :value="getOverallStatusLabel(data.status)" :severity="getOverallStatusSeverity(data.status)" />
                     </template>
@@ -122,6 +117,45 @@
             </DataTable>
         </div>
     </div>
+        <Dialog
+        v-model:visible="showImportErrorDialog"
+        header="Import Errors"
+        modal
+        :style="{ width: '700px' }"
+        @hide="handleCloseErrorModal"
+    >
+        <div v-if="importErrors.length === 0" class="text-gray-500">
+            No error details available.
+        </div>
+
+        <div v-else class="flex flex-col gap-4">
+            <div
+                v-for="(item, index) in importErrors"
+                :key="index"
+                class="p-3 border rounded"
+            >
+                <div class="font-semibold">
+                     Redeem No: {{ item.redeem_no }}
+                </div>
+                <div v-if="showImportErrorHandle1" >
+                    <div class="text-sm text-gray-600">
+                        Error: {{ item.error || '-' }}
+                    </div>
+                </div>
+                <div class="text-red-600 mt-2">
+                    {{ item.reason }}
+                </div>
+            </div>
+        </div>
+
+        <template #footer>
+            <Button
+                label="Close"
+                icon="pi pi-times"
+                @click="handleCloseErrorModal()"
+            />
+        </template>
+    </Dialog>
 </template>
 
 <script setup>
@@ -129,8 +163,6 @@ import { onMounted, ref, computed } from 'vue';
 import { FilterMatchMode } from '@primevue/core/api';
 import api from '@/service/api';
 import LoadingPage from '@/components/LoadingPage.vue';
-import TabView from 'primevue/tabview';
-import TabPanel from 'primevue/tabpanel';
 import { useToast } from 'primevue/usetoast';
 import * as XLSX from 'xlsx';
 
@@ -143,13 +175,20 @@ const exportLoading1 = ref(false);
 const importLoading1 = ref(false);
 const fileInput = ref(null); // use this everywhere
 const toast = useToast();
-
+const importErrors = ref([]);
+const showImportErrorDialog = ref(false);
+const showImportErrorHandle = ref(false);
+const statusTabs = [
+    { label: 'All'},
+    { label: 'Voucher'},
+    { label: 'Item'}
+];
 const filteredData = computed(() => {
     if (activeTab.value === 1) {
-        return listData.value.filter((i) => i.itemType === 'VOUCHER');
+        return listData.value.filter((i) => i.type === 'VOUCHER');
     }
     if (activeTab.value === 2) {
-        return listData.value.filter((i) => i.itemType === 'ITEM');
+        return listData.value.filter((i) => i.type === 'ITEM');
     }
     return listData.value;
 });
@@ -160,6 +199,10 @@ const filters = ref({
 });
 
 onMounted(async () => {
+    await fetchData();
+});
+
+const fetchData = async () => {
     try {
         initialLoading.value = true;
         tableLoading.value = true;
@@ -167,17 +210,7 @@ onMounted(async () => {
         const response = await api.get('redeem/list');
 
         if (response.data.status === 1 && Array.isArray(response.data.admin_data)) {
-            listData.value = response.data.admin_data.map((redeem) => ({
-                id: redeem.id,
-                refno: redeem.ref_no || 'N/A',
-                recipientName: redeem.member_name || 'N/A',
-                itemName: redeem.redeem_item || 'N/A',
-                quantity: redeem.quantity || 0,
-                redemptionDate: redeem.redeem_date || 'N/A',
-                itemStatus: redeem.item_status || 'N/A',
-                itemType: redeem.type || 'N/A',
-                status: redeem.status
-            }));
+            listData.value = response.data.admin_data;
         } else {
             toast.add({ severity: 'error', summary: 'Error', detail: response.data.message || 'Failed to load data', life: 3000 });
             listData.value = [];
@@ -188,28 +221,6 @@ onMounted(async () => {
         listData.value = [];
     } finally {
         initialLoading.value = false;
-        tableLoading.value = false;
-    }
-});
-
-const fetchData = async () => {
-    try {
-        tableLoading.value = true;
-        const response = await api.get('redeem/list');
-        if (response.data.status === 1 && Array.isArray(response.data.admin_data)) {
-            listData.value = response.data.admin_data.map((redeem) => ({
-                id: redeem.id,
-                refno: redeem.ref_no || 'N/A',
-                recipientName: redeem.member_name || 'N/A',
-                itemName: redeem.redeem_item || 'N/A',
-                quantity: redeem.quantity || 0,
-                redemptionDate: redeem.redeem_date || 'N/A',
-                itemStatus: redeem.item_status || 'N/A',
-                itemType: redeem.type || 'N/A',
-                status: redeem.status
-            }));
-        }
-    } finally {
         tableLoading.value = false;
     }
 };
@@ -254,31 +265,12 @@ const isAllSelected = () => {
 
 function formatDate(dateString) {
     if (!dateString) return '';
-
-    let date;
-
-    // If the string contains a space (e.g., "2026-01-14 00:00:00"), take only the first part
-    if (dateString.includes(' ')) {
-        dateString = dateString.split(' ')[0];
-    }
-
-    // Try to parse YYYY-MM-DD
-    const parts = dateString.split('-');
-    if (parts.length === 3) {
-        const [year, month, day] = parts.map(Number);
-        date = new Date(year, month - 1, day);
-    } else {
-        // Fallback: try Date constructor
-        date = new Date(dateString);
-    }
-
-    if (isNaN(date.getTime())) return '';
-
-    // Return DD/M/YYYY format
-    const day = date.getDate();
-    const month = date.getMonth() + 1;
-    const year = date.getFullYear();
-    return `${day}/${month}/${year}`;
+    const date = new Date(dateString);
+    return date.toLocaleString('en-MY', {
+        year: 'numeric',
+        month: '2-digit',
+        day: '2-digit'
+    });
 }
 
 const handleExport = async () => {
@@ -350,101 +342,45 @@ const handleImport = async (event) => {
 
     try {
         importLoading1.value = true;
-
-        // Read Excel file
-        const data = await file.arrayBuffer();
-        const workbook = XLSX.read(data);
-        const sheet = workbook.Sheets[workbook.SheetNames[0]];
-        const rows = XLSX.utils.sheet_to_json(sheet);
-
-        // Preprocess rows: rename Shipped Date → scheduled_date
-        const processedRows = rows.map((row) => {
-            // Extract shipped date and format to YYYY-MM-DD
-            let dateStr = row['Shipped Date (YYYY/MM/DD)'] || row['Shipped Date'] || null;
-            let formattedDate = '';
-
-            if (dateStr) {
-                const d = new Date(dateStr);
-                if (!isNaN(d)) {
-                    const year = d.getFullYear();
-                    const month = String(d.getMonth() + 1).padStart(2, '0');
-                    const day = String(d.getDate()).padStart(2, '0');
-                    formattedDate = `${year}-${month}-${day}`;
-                }
-            }
-
-            return {
-                ...row,
-                scheduled_date: formattedDate
-            };
-        });
-
-        // Validate: check that scheduled_date exists for all rows
-        const invalidRows = processedRows.filter((r) => !r.scheduled_date);
-        if (invalidRows.length > 0) {
-            toast.add({
-                severity: 'warn',
-                summary: 'Invalid File',
-                detail: `${invalidRows.length} row(s) missing valid Scheduled Date`,
-                life: 5000
-            });
-            return;
-        }
-
-        // Convert back to a new Excel file to send to backend
-        const newSheet = XLSX.utils.json_to_sheet(processedRows);
-        const newWorkbook = XLSX.utils.book_new();
-        XLSX.utils.book_append_sheet(newWorkbook, newSheet, 'Sheet1');
-        const newFileData = XLSX.write(newWorkbook, { bookType: 'xlsx', type: 'array' });
-        const newFile = new Blob([newFileData], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
-
-        // Prepare FormData
         const formData = new FormData();
-        formData.append('redeem_excel', newFile, file.name);
+        formData.append('redeem_excel', file);
 
         // Send to backend
         const response = await api.postExtra('excel/import-redemption-delivery', formData, { headers: { 'Content-Type': 'multipart/form-data' } });
 
         if (response.data.status === 1) {
-            await fetchData();
             toast.add({
                 severity: 'success',
                 summary: 'Success',
                 detail: response.data.message || 'File imported successfully',
                 life: 3000
             });
+            await fetchData();
         } else {
-            let errorMessage = response.data.message || 'Import failed';
-            if (Array.isArray(response.data.admin_data)) {
-                const errorDetails = response.data.admin_data.map((r) => `${r.redeem_no}: ${r.error}`).join('<br>');
-
-                toast.add({
-                    severity: 'error',
-                    summary: 'Import Failed',
-                    detail: `${errorMessage}<br><br><strong>Error Details:</strong><br>${errorDetails}`,
-                    life: 8000
-                });
-            } else {
-                toast.add({
-                    severity: 'error',
-                    summary: 'Error',
-                    detail: errorMessage,
-                    life: 5000
-                });
+            importErrors.value = response.data.admin_data || [];
+            if (importErrors.value.length > 0) {
+                showImportErrorHandle.value = true;
+                showImportErrorDialog.value = true;
             }
+            toast.add({
+                severity: 'error',
+                summary: 'Import Failed',
+                detail: response.data.message || 'Failed to import data',
+                life: 3000
+            });
         }
     } catch (error) {
-        let errorDetail = error.response?.data?.message || error.message || 'Import failed';
-        toast.add({
-            severity: 'error',
-            summary: 'Error',
-            detail: errorDetail,
-            life: 5000
-        });
+        console.error('Error importing data:', error);
+        toast.add({ severity: 'error', summary: 'Error', detail: 'Failed to import data', life: 3000 });
     } finally {
         importLoading1.value = false;
         if (fileInput.value) fileInput.value.value = '';
     }
+};
+const handleCloseErrorModal = () => {
+    importErrors.value = [];
+    showImportErrorHandle.value = false;
+    showImportErrorDialog.value = false; // optional, v-model handles it
 };
 </script>
 
