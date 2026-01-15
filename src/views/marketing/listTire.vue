@@ -133,7 +133,10 @@ const filters = ref({
 
 
 onMounted(async () => {
-    try {
+    await fetchTire();
+});
+const fetchTire = async () => {
+   try {
         initialLoading.value = true;
         tableLoading.value = true;
 
@@ -164,8 +167,7 @@ onMounted(async () => {
         initialLoading.value = false;
         tableLoading.value = false;
     }
-});
-
+}
 
 function formatDateTime(dateTimeString) {
     if (!dateTimeString) return '-';
@@ -249,6 +251,7 @@ const handleImport = async (event) => {
                 detail: `Imported ${response.data.saved_count} records successfully (${response.data.saved_count}/${response.data.total_count})`,
                 life: 5000
             });
+            await fetchTire();
         } else {
             toast.add({
                 severity: 'error',
