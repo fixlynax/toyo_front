@@ -197,7 +197,7 @@ const router = createRouter({
                     path: 'om/createReturnOrder',
                     name: 'Create-Return-Order',
                     component: () => import('@/views/om/createReturnOrder.vue'),
-                    meta: { permission: 'Return Order', access: 'create' }
+                    meta: { permission: 'Return Order', access: 'write' }
                 },
 
                 //Failed Order
@@ -271,7 +271,7 @@ const router = createRouter({
                     path: 'om/createSalesProgram',
                     name: 'Create-Sales-Program',
                     component: () => import('@/views/om/createSalesProgram.vue'),
-                    meta: { permission: 'Sales Program', access: 'create' }
+                    meta: { permission: 'Sales Program', access: 'write' }
                 },
                 {
                     path: 'om/editSalesProgram/:id',
@@ -339,7 +339,7 @@ const router = createRouter({
                     path: 'marketing/createNews',
                     name: 'Create-News',
                     component: () => import('@/views/marketing/createNews.vue'),
-                    meta: { permission: 'News Management', access: 'create' }
+                    meta: { permission: 'News Management', access: 'write' }
                 },
                 {
                     path: 'marketing/detailNews/:id',
@@ -352,7 +352,7 @@ const router = createRouter({
                     path: 'marketing/editNews/:id',
                     name: 'Edit-News',
                     component: () => import('@/views/marketing/editNews.vue'),
-                    meta: { permission: 'News Management', access: 'create' },
+                    meta: { permission: 'News Management', access: 'write' },
                     props: true
                 },
 
@@ -367,7 +367,7 @@ const router = createRouter({
                     path: 'marketing/createEvent',
                     name: 'Create-Event',
                     component: () => import('@/views/marketing/createEvent.vue'),
-                    meta: { permission: 'Events Management', access: 'create' }
+                    meta: { permission: 'Events Management', access: 'write' }
                 },
                 {
                     path: 'marketing/detailEvent/:id',
@@ -380,7 +380,7 @@ const router = createRouter({
                     path: 'marketing/editEvent/:id',
                     name: 'Edit-Event',
                     component: () => import('@/views/marketing/editEvent.vue'),
-                    meta: { permission: 'Events Management', access: 'create' },
+                    meta: { permission: 'Events Management', access: 'write' },
                     props: true
                 },
 
@@ -395,33 +395,33 @@ const router = createRouter({
                     path: 'marketing/detailCampaign/:id',
                     name: 'Detail-Campaign',
                     component: () => import('@/views/marketing/detailCampaign.vue'),
-                    meta: { permission: 'Campaign Management', access: 'create' },
+                    meta: { permission: 'Campaign Management', access: 'write' },
                     props: true
                 },
                 {
                     path: 'marketing/createCampaign',
                     name: 'Create-Campaign',
                     component: () => import('@/views/marketing/createCampaign.vue'),
-                    meta: { permission: 'Campaign Management', access: 'create' }
+                    meta: { permission: 'Campaign Management', access: 'write' }
                 },
                 {
                     path: 'marketing/editCampaign/:id',
                     name: 'Edit-Campaign',
                     component: () => import('@/views/marketing/editCampaign.vue'),
-                    meta: { permission: 'Campaign Management', access: 'create' },
+                    meta: { permission: 'Campaign Management', access: 'write' },
                     props: true
                 },
                 // {
                 //     path: 'marketing/inviteDealer',
                 //     name: 'Invite-Dealer',
                 //     component: () => import('@/views/marketing/inviteDealer.vue')
-                //     // meta: { permission: 'Campaign Management', access: 'create' },
+                //     // meta: { permission: 'Campaign Management', access: 'write' },
                 // },
                 // {
                 //     path: 'marketing/detailParticipant',
                 //     name: 'Detail-Participant',
                 //     component: () => import('@/views/marketing/detailParticipant.vue')
-                //     // meta: { permission: 'Campaign Management', access: 'create' },
+                //     // meta: { permission: 'Campaign Management', access: 'write' },
                 // },
 
                 // Games
@@ -442,13 +442,13 @@ const router = createRouter({
                     path: 'marketing/createGame',
                     name: 'Create-Game',
                     component: () => import('@/views/marketing/createGame.vue'),
-                    meta: { permission: 'Game Management', access: 'create' }
+                    meta: { permission: 'Game Management', access: 'write' }
                 },
                 {
                     path: 'marketing/editGame/:id',
                     name: 'Edit-Game',
                     component: () => import('@/views/marketing/editGame.vue'),
-                    meta: { permission: 'Game Management', access: 'create' },
+                    meta: { permission: 'Game Management', access: 'write' },
                     props: true
                 },
 
@@ -470,7 +470,7 @@ const router = createRouter({
                     path: 'marketing/editRedemption/:id',
                     name: 'Edit-Redemption',
                     component: () => import('@/views/marketing/editRedemption.vue'),
-                    meta: { permission: 'Redemption Management', access: 'create' },
+                    meta: { permission: 'Redemption Management', access: 'write' },
                     props: true
                 },
 
@@ -491,14 +491,14 @@ const router = createRouter({
                     path: 'marketing/detailEtenUser/:id',
                     name: 'Detail-Member',
                     component: () => import('@/views/marketing/detailEtenUser.vue'),
-                    meta: { permission: 'Member List', access: 'create' },
+                    meta: { permission: 'Member List', access: 'write' },
                     props: true
                 },
                 {
                     path: 'marketing/editEtenUser/:id',
                     name: 'Edit-Member',
                     component: () => import('@/views/marketing/editEtenUser.vue'),
-                    meta: { permission: 'Member List', access: 'create' },
+                    meta: { permission: 'Member List', access: 'write' },
                     props: true
                 },
                 {
@@ -526,14 +526,14 @@ const router = createRouter({
                     path: 'marketing/editCatalogue/:id',
                     name: 'Edit-Catalogue',
                     component: () => import('@/views/marketing/editCatalogue.vue'),
-                    meta: { permission: 'Reward Catalogue', access: 'create' },
+                    meta: { permission: 'Reward Catalogue', access: 'write' },
                     props: true
                 },
                 {
                     path: 'marketing/createCatalogue',
                     name: 'Create-Catalogue',
                     component: () => import('@/views/marketing/createCatalogue.vue'),
-                    meta: { permission: 'Reward Catalogue', access: 'create' }
+                    meta: { permission: 'Reward Catalogue', access: 'write' }
                 },
 
                 // Warranty Registration
@@ -667,7 +667,7 @@ const router = createRouter({
                     path: 'technical/createPattern',
                     name: 'Create-Pattern',
                     component: () => import('@/views/technical/createPattern.vue'),
-                    meta: { permission: 'Pattern List', access: 'create' }
+                    meta: { permission: 'Pattern List', access: 'write' }
                 },
                 {
                     path: 'technical/listVehicleModel',
@@ -719,13 +719,13 @@ const router = createRouter({
                     path: 'it/createGroup',
                     name: 'Create-Group',
                     component: () => import('@/views/it/createGroup.vue'),
-                    meta: { permission: 'User Role', access: 'create' }
+                    meta: { permission: 'User Role', access: 'write' }
                 },
                 {
                     path: 'it/editGroup',
                     name: 'Edit-Group',
                     component: () => import('@/views/it/editGroup.vue'),
-                    meta: { permission: 'User Role', access: 'create' }
+                    meta: { permission: 'User Role', access: 'write' }
                 },
 
                 // Admin - User Accounts
@@ -739,13 +739,13 @@ const router = createRouter({
                     path: 'it/createUserAccount',
                     name: 'Create-User-Account',
                     component: () => import('@/views/it/createUserAccount.vue'),
-                    meta: { permission: 'User Account', access: 'create' }
+                    meta: { permission: 'User Account', access: 'write' }
                 },
                 {
                     path: 'it/editUserAccount/:id',
                     name: 'Edit-User-Account',
                     component: () => import('@/views/it/editUserAccount.vue'),
-                    meta: { permission: 'User Account', access: 'create' },
+                    meta: { permission: 'User Account', access: 'write' },
                     props: true
                 },
                 // Settings
@@ -766,14 +766,14 @@ const router = createRouter({
                     path: 'it/createMail',
                     name: 'Create-Mail',
                     component: () => import('@/views/it/createMail.vue'),
-                    meta: { permission: 'Email Setting', access: 'create' },
+                    meta: { permission: 'Email Setting', access: 'write' },
 
                 },
                 {
                     path: 'it/editMailSetting',
                     name: 'Edit-Mail',
                     component: () => import('@/views/it/editMailSetting.vue'),
-                    meta: { permission: 'Email Setting', access: 'create' },
+                    meta: { permission: 'Email Setting', access: 'write' },
                 },
                 {
                     path: 'it/termsCondition',
@@ -1115,13 +1115,13 @@ const router = createRouter({
                     path: 'scm/createlogistic',
                     name: 'Create-Logistic',
                     component: () => import('@/views/scm/createlogistic.vue'),
-                    meta: { permission: '3PL Account', access: 'create' }
+                    meta: { permission: '3PL Account', access: 'write' }
                 },
                 {
                     path: 'scm/editLogistic/:id',
                     name: 'Edit-Logistic',
                     component: () => import('@/views/scm/editLogistic.vue'),
-                    meta: { permission: '3PL Account', access: 'create' },
+                    meta: { permission: '3PL Account', access: 'write' },
                     props: true
                 },
 
