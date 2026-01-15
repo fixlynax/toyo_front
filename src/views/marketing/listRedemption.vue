@@ -24,7 +24,7 @@
                 :loading="tableLoading"
                 :filters="filters"
                 filterDisplay="menu"
-                :globalFilterFields="['refno', 'recipientName', 'itemName', 'quantity', 'redemptionDate', 'status']"
+                :globalFilterFields="['ref_no', 'redeem_date', 'item_status', 'quantity', 'member_name', 'item_status', 'status']"
                 class="rounded-table"
                 currentPageReportTemplate="Showing {first} to {last} of {totalRecords} entries"
                 paginatorTemplate="CurrentPageReport FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink RowsPerPageDropdown"
@@ -76,45 +76,45 @@
                     </template>
                 </Column>
 
-                <Column field="refno" header="Ref No" sortable style="min-width: 8rem">
+                <Column field="ref_no" header="Ref No" sortable style="min-width: 8rem" >
                     <template #body="{ data }">
                         <RouterLink :to="`/marketing/detailRedemption/${data.id}`" class="hover:underline font-bold text-primary-400">
-                            {{ data.refno }}
+                            {{ data.ref_no || '-' }}
                         </RouterLink>
                     </template>
                 </Column>
 
-                <Column field="memberName" header="Member Name" style="min-width: 6rem">
+                <Column field="member_name" header="Member Name" style="min-width: 6rem" sortable>
                     <template #body="{ data }">
-                        {{ data.recipientName }}
+                        {{ data.member_name }}
                     </template>
                 </Column>
 
-                <Column field="itemName" header="Item Name" style="min-width: 6rem">
+                <Column field="item_status" header="Item Name" style="min-width: 6rem" sortable>
                     <template #body="{ data }">
-                        {{ data.itemName }}
+                        {{ data.item_status }}
                     </template>
                 </Column>
 
-                <Column field="quantity" header="Quantity" style="min-width: 6rem">
+                <Column field="quantity" header="Quantity" style="min-width: 6rem" sortable>
                     <template #body="{ data }">
                         {{ data.quantity }}
                     </template>
                 </Column>
 
-                <Column field="redemptionDate" header="Redemption Date" style="min-width: 6rem">
+                <Column field="redeem_date" header="Redemption Date" style="min-width: 6rem" sortable>
                     <template #body="{ data }">
-                        {{ formatDate(data.redemptionDate) }}
+                        {{ formatDate(data.redeem_date) }}
                     </template>
                 </Column>
 
-                <Column field="itemStatus" header="Item Status" style="min-width: 6rem">
+                <Column field="item_status" header="Item Status" style="min-width: 6rem" sortable>
                     <template #body="{ data }">
-                        {{ data.itemStatus }}
+                        {{ data.item_status }}
                     </template>
                 </Column>
 
-                <Column field="status" header="Status" style="min-width: 6rem">
+                <Column field="status" header="Status" style="min-width: 6rem" sortable>
                     <template #body="{ data }">
                         <Tag :value="getOverallStatusLabel(data.status)" :severity="getOverallStatusSeverity(data.status)" />
                     </template>
@@ -160,6 +160,10 @@ const filters = ref({
 });
 
 onMounted(async () => {
+    await fetchData();
+});
+
+const fetchData = async () => {
     try {
         initialLoading.value = true;
         tableLoading.value = true;
@@ -167,17 +171,7 @@ onMounted(async () => {
         const response = await api.get('redeem/list');
 
         if (response.data.status === 1 && Array.isArray(response.data.admin_data)) {
-            listData.value = response.data.admin_data.map((redeem) => ({
-                id: redeem.id,
-                refno: redeem.ref_no || 'N/A',
-                recipientName: redeem.member_name || 'N/A',
-                itemName: redeem.redeem_item || 'N/A',
-                quantity: redeem.quantity || 0,
-                redemptionDate: redeem.redeem_date || 'N/A',
-                itemStatus: redeem.item_status || 'N/A',
-                itemType: redeem.type || 'N/A',
-                status: redeem.status
-            }));
+            listData.value = response.data.admin_data;
         } else {
             toast.add({ severity: 'error', summary: 'Error', detail: response.data.message || 'Failed to load data', life: 3000 });
             listData.value = [];
@@ -188,28 +182,6 @@ onMounted(async () => {
         listData.value = [];
     } finally {
         initialLoading.value = false;
-        tableLoading.value = false;
-    }
-});
-
-const fetchData = async () => {
-    try {
-        tableLoading.value = true;
-        const response = await api.get('redeem/list');
-        if (response.data.status === 1 && Array.isArray(response.data.admin_data)) {
-            listData.value = response.data.admin_data.map((redeem) => ({
-                id: redeem.id,
-                refno: redeem.ref_no || 'N/A',
-                recipientName: redeem.member_name || 'N/A',
-                itemName: redeem.redeem_item || 'N/A',
-                quantity: redeem.quantity || 0,
-                redemptionDate: redeem.redeem_date || 'N/A',
-                itemStatus: redeem.item_status || 'N/A',
-                itemType: redeem.type || 'N/A',
-                status: redeem.status
-            }));
-        }
-    } finally {
         tableLoading.value = false;
     }
 };
@@ -254,31 +226,12 @@ const isAllSelected = () => {
 
 function formatDate(dateString) {
     if (!dateString) return '';
-
-    let date;
-
-    // If the string contains a space (e.g., "2026-01-14 00:00:00"), take only the first part
-    if (dateString.includes(' ')) {
-        dateString = dateString.split(' ')[0];
-    }
-
-    // Try to parse YYYY-MM-DD
-    const parts = dateString.split('-');
-    if (parts.length === 3) {
-        const [year, month, day] = parts.map(Number);
-        date = new Date(year, month - 1, day);
-    } else {
-        // Fallback: try Date constructor
-        date = new Date(dateString);
-    }
-
-    if (isNaN(date.getTime())) return '';
-
-    // Return DD/M/YYYY format
-    const day = date.getDate();
-    const month = date.getMonth() + 1;
-    const year = date.getFullYear();
-    return `${day}/${month}/${year}`;
+    const date = new Date(dateString);
+    return date.toLocaleString('en-MY', {
+        year: 'numeric',
+        month: '2-digit',
+        day: '2-digit'
+    });
 }
 
 const handleExport = async () => {
