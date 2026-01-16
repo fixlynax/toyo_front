@@ -14,9 +14,9 @@
                         </div>
                         <div class="inline-flex items-center gap-2">
                             <!-- Edit Event -->
-                             <div>
-                            <Button v-if="canUpdate" label="Report" style="width: fit-content" class="p-button-sm p-button-success" :loading="exportLoading" @click="fetchExport1" :disabled="exportLoading" />
-                             </div>
+                            <div>
+                                <Button v-if="canUpdate" label="Report" style="width: fit-content" class="p-button-sm p-button-success" :loading="exportLoading" @click="fetchExport1" :disabled="exportLoading" />
+                            </div>
                             <RouterLink v-if="canUpdate" :to="`/marketing/editCampaign/${campaignId}`">
                                 <Button label="Edit" class="p-button-info" size="small" />
                             </RouterLink>
@@ -129,6 +129,18 @@
                                 <div class="flex flex-col">
                                     <span class="font-bold text-gray-800">{{ data.companyName }}</span>
                                     <span class="text-gray-600 text-xm mt-2">🔧 {{ data.memberCode || data.custAccountNo }}</span>
+                                </div>
+                            </template>
+                        </Column>
+
+                        <!-- Total Participant -->
+                        <Column header="Total Participant" style="min-width: 6rem">
+                            <template #body="{ data }">
+                                <div v-if="data.totalParticipants > 0">
+                                    <Button @click="showTcMembers(data)" class="p-button-text p-button-primary font-bold text-blue-600 hover:text-blue-800 p-0" :label="data.totalParticipants.toString()" v-tooltip="'Click to view TC Members'" />
+                                </div>
+                                <div v-else style="text-align: center;">
+                                    <span class="text-gray-400" >0</span>
                                 </div>
                             </template>
                         </Column>
@@ -315,6 +327,42 @@
                 </div>
             </div>
         </Dialog>
+
+        <!-- TC Members Dialog -->
+        <Dialog v-model:visible="tcMembersDialogVisible" modal :header="'TC Members - ' + selectedDealerName + '(' + selectedDealerCode + ')'" :style="{ width: '1000px' }">
+            <div class="flex flex-col gap-4">
+                <DataTable :value="selectedDealerMembers" :paginator="true" :rows="5" dataKey="id" :rowHover="true" responsiveLayout="scroll" class="text-sm">
+                    <template #empty>
+                        <div class="text-center py-8 text-gray-500">No TC members found for this dealer.</div>
+                    </template>
+
+                    <!-- Member Code -->
+                    <Column field="member_code" header="Member Code" style="min-width: 8rem" sortable>
+                        <template #body="{ data }">
+                            <span class="font-medium text-gray-800">{{ data.member_code }}</span>
+                        </template>
+                    </Column>
+
+                    <!-- Full Name -->
+                    <Column field="full_name" header="Full Name" style="min-width: 10rem" sortable></Column>
+
+                    <!-- Email -->
+                    <Column field="email" header="Email" style="min-width: 12rem" sortable >
+                        <template #body="{ data }">
+                            <a :href="'mailto:' + data.email" >
+                                {{ data.email }}
+                            </a>
+                        </template>
+                    </Column>
+
+                    <!-- Phone -->
+                    <Column field="phone" header="Phone" style="min-width: 10rem" sortable></Column>
+
+                     <!-- Member Level -->
+                    <Column field="member_level" header="Member Level" style="min-width: 10rem" sortable></Column>
+                </DataTable>
+            </div>
+        </Dialog>
     </Fluid>
 </template>
 
@@ -334,12 +382,16 @@ const route = useRoute();
 const router = useRouter();
 const toast = useToast();
 const confirm = useConfirm();
-
 const campaignId = route.params.id;
 const loading = ref(true);
 const tableLoading = ref(false);
 const inviteLoading = ref(false);
 const deletingDealerId = ref(null); // Add this at the top with other refs
+// Add near your other refs
+const tcMembersDialogVisible = ref(false);
+const selectedDealerMembers = ref([]);
+const selectedDealerName = ref('');
+const selectedDealerCode = ref('');
 
 // Reactive data
 const hoverPrize = ref(null);
@@ -348,6 +400,32 @@ const selectedPrize = ref(null);
 const inviteDealerDialogVisible = ref(false);
 const selectedDealers = ref([]);
 const availableDealers = ref([]);
+
+// Function to show TC members in dialog
+const showTcMembers = (dealer) => {
+    selectedDealerMembers.value = dealer.tc_members || [];
+    selectedDealerName.value = dealer.companyName;
+    selectedDealerCode.value = dealer.custAccountNo;
+    tcMembersDialogVisible.value = true;
+};
+
+// Function to get severity color for member level
+const getMemberLevelSeverity = (level) => {
+    const levelMap = {
+        PLATINUM: 'success',
+        GOLD: 'warning',
+        SILVER: 'secondary',
+        BRONZE: 'info'
+    };
+    return levelMap[level] || 'info';
+};
+
+// Function to handle click on total participants
+const handleTotalParticipantsClick = (dealer) => {
+    if (dealer.totalParticipants > 0) {
+        showTcMembers(dealer);
+    }
+};
 
 // Main data structures
 const campaign = ref({
@@ -672,14 +750,17 @@ const fetchCampaignDetails = async () => {
             }
 
             // Set dealer list
+            // In fetchCampaignDetails function, update the dealer list mapping:
             if (Array.isArray(data.participate_dealer)) {
                 dealerList.value = data.participate_dealer.map((dealer) => ({
                     id: dealer.id,
-                    companyName: dealer.companyName,
+                    companyName: dealer.shopName || dealer.companyName, // Use shopName from API
                     memberCode: dealer.memberCode,
                     custAccountNo: dealer.custAccountNo,
-                    state: 'Unknown', // You might need to get this from another API
-                    signboardType: 'N/A' // Default value
+                    state: dealer.regionName, // Use regionName as state
+                    signboardType: 'N/A', // Default value
+                    tc_members: dealer.tc_members || [], // Store the tc_members array
+                    totalParticipants: dealer.tc_members ? dealer.tc_members.length : 0 // Calculate total
                 }));
             }
 
