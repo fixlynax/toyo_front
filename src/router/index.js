@@ -220,7 +220,7 @@ const router = createRouter({
                     path: 'om/reportSF',
                     name: 'Report-Sales-Forecast',
                     component: () => import('@/views/om/reportSF.vue'),
-                    meta: { permission: 'Report Sales Forecast', access: 'view' }  
+                    meta: { permission: 'Sales Forecast', access: 'view' }  
                 },
                 {
                     path: 'om/reportBackOrder',
@@ -238,13 +238,13 @@ const router = createRouter({
                     path: 'om/reportDirectShipment',
                     name: 'Report-Direct-Shipment',
                     component: () => import('@/views/om/reportDirectShipment.vue'),
-                    meta: { permission: 'Report Direct Shipment', access: 'view' }
+                    meta: { permission: 'Direct Shipment', access: 'view' }
                 },
                 {
                     path: 'om/reportOwnCollection',
                     name: 'Report-Own-Collection',
                     component: () => import('@/views/om/reportOwnCollection.vue'),
-                    meta: { permission: 'Report Own Collection', access: 'view' }
+                    meta: { permission: 'Own Collection', access: 'view' }
                 },
                 {
                     path: 'om/reportOrder',
