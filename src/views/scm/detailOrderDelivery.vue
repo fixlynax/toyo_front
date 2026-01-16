@@ -104,16 +104,16 @@
                                     <td class="px-4 py-2 text-right font-bold text-primary">{{ orderDelList.order_no || '-' }}</td>
                                 </tr>
                                 <tr class="border-b">
-                                    <td class="px-4 py-2 font-medium">Order Remark</td>
+                                    <td class="px-4 py-2 font-medium w-1/3">Order Remark</td>
                                     <td class="px-4 py-2 text-right font-bold text-primary">{{ orderDelList.order_remarks || '-' }}</td>
                                 </tr>
-                                <!-- <tr class="border-b">
-                                    <td class="px-4 py-2 font-medium">Order Type</td>
+                                <tr class="border-b">
+                                    <td class="px-4 py-2 font-medium">Delivery Type</td>
                                     <td class="px-4 py-2 text-right font-medium">{{ orderDelList.deliveryType || '-' }}</td>
-                                </tr> -->
+                                </tr>
                                 <tr class="border-b">
                                     <td class="px-4 py-2 font-medium">Order Type</td>
-                                    <td class="px-4 py-2 text-right font-medium">{{orderDelList?.orderDesc === 'Back Order' ? 'NORMAL': (orderDelList?.orderDesc.toUpperCase() || '-')}}</td>
+                                    <td class="px-4 py-2 text-right font-medium">{{ orderDelList?.orderDesc ? (orderDelList.orderDesc === 'Back Order' ? 'NORMAL' : orderDelList.orderDesc.toUpperCase()) : '-' }}</td>
                                 </tr>
                                 <tr class="border-b">
                                     <td class="px-4 py-2 font-medium">SO No</td>
