@@ -14,6 +14,9 @@
                         </div>
                         <div class="inline-flex items-center gap-2">
                             <!-- Edit Event -->
+                             <div>
+                            <Button v-if="canUpdate" label="Report" style="width: fit-content" class="p-button-sm p-button-success" :loading="exportLoading" @click="fetchExport1" :disabled="exportLoading" />
+                             </div>
                             <RouterLink v-if="canUpdate" :to="`/marketing/editCampaign/${campaignId}`">
                                 <Button label="Edit" class="p-button-info" size="small" />
                             </RouterLink>
@@ -982,6 +985,50 @@ const fetchExport = async () => {
         loading.value = true;
 
         const response = await api.postExtra(`report/dealer-report-campaign/${campaignId}`, {}, { responseType: 'arraybuffer' });
+        const timestamp = new Date().toISOString().split('T')[0];
+
+        const campaignNo = campaign.value.campaignNo || 'Campaign';
+        const title = campaign.value.title || 'Report';
+
+        // Optional: clean title for filename
+        const safeTitle = title.replace(/[^\w\d]+/g, '_');
+
+        let filename = `${campaignNo}_${safeTitle}_${timestamp}.xlsx`;
+        const blob = new Blob([response.data], {
+            type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+        });
+
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = filename;
+        a.click();
+        URL.revokeObjectURL(url);
+
+        toast.add({
+            severity: 'success',
+            summary: 'Success',
+            detail: 'Export completed',
+            life: 3000
+        });
+    } catch (error) {
+        console.error('Export error:', error);
+        toast.add({
+            severity: 'error',
+            summary: 'Error',
+            detail: 'Export failed',
+            life: 3000
+        });
+    } finally {
+        loading.value = false;
+    }
+};
+
+const fetchExport1 = async () => {
+    try {
+        loading.value = true;
+
+        const response = await api.postExtra(`report/campaign-detail/${campaignId}`, {}, { responseType: 'arraybuffer' });
         const timestamp = new Date().toISOString().split('T')[0];
 
         const campaignNo = campaign.value.campaignNo || 'Campaign';
