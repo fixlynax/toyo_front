@@ -156,7 +156,7 @@
                                     <td class="px-4 py-2 font-medium">Inv No</td>
                                     <td class="px-4 py-2 text-right">{{ returnList.order_data.inv_no || '-' }}</td>
                                 </tr>
-                                <tr>
+                                <tr class="border-b">
                                     <td class="px-4 py-2 font-medium">SAP Created</td>
                                     <td class="px-4 py-2 text-right">{{ formatDateTime(returnList.sap_timestamp) }}</td>
                                 </tr>
