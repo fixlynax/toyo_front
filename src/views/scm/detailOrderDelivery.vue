@@ -152,6 +152,10 @@
                                     <td class="px-4 py-2 text-right">{{ orderDelList?.scm_deliver_detail?.delivered_datetime ? formatDate(orderDelList.scm_deliver_detail.delivered_datetime) : 'Not Assigned' }}</td>
                                 </tr>
                                 <tr>
+                                    <td class="px-4 py-2 font-medium">Order Date</td>
+                                    <td class="px-4 py-2 text-right">{{ formatDate(orderDelList.orderDate) }}</td>
+                                </tr>
+                                <tr>
                                     <td class="px-4 py-2 font-medium">Created On</td>
                                     <td class="px-4 py-2 text-right">{{ formatDate(orderDelList.created) }} {{ formatTime(orderDelList.created) }}</td>
                                 </tr>
