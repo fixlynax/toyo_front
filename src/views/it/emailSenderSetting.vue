@@ -75,9 +75,7 @@
 
             <!-- Action Buttons -->
             <div class="flex justify-end gap-4 pt-4">
-                <div class="w-40">
-                    <Button label="Send Test Email" class="w-full p-button-secondary" @click="openTestEmailDialog" :disabled="loading" />
-                </div>
+                <!-- Send Test Email button removed from here -->
                 <div class="w-40">
                     <Button label="Update" class="w-full p-button-warning" @click="submitForm" :loading="loading" />
                 </div>
@@ -93,6 +91,8 @@
                 </div>
                 <div class="text-gray-600">Email settings have been updated successfully.</div>
                 <div class="flex justify-end gap-2">
+                    <!-- Send Test Email button added here -->
+                    <Button label="Send Test Email" class="p-button-secondary" @click="openTestEmailDialog" :disabled="loading" />
                     <Button label="OK" class="p-button-primary" @click="handleSuccessClose" />
                 </div>
             </div>
@@ -357,6 +357,8 @@ const isValidEmail = (email) => {
 };
 
 const openTestEmailDialog = () => {
+    // Close the success dialog first
+    showSuccessDialog.value = false;
     // Pre-fill with sender email as a suggestion
     // testEmailAddress.value = form.email_address || '';
     showTestEmailDialog.value = true;
