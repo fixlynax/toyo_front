@@ -76,7 +76,7 @@
                 </template>
             </Column>
 
-            <Column field="is_super_admin" header="Super Admin" style="min-width: 8rem" sortable>
+            <!-- <Column field="is_super_admin" header="Super Admin" style="min-width: 8rem" sortable>
                 <template #body="{ data }">
                     <Tag :value="data.is_super_admin ? 'Yes' : 'No'" :severity="data.is_super_admin ? 'info' : 'secondary'" />
                 </template>
@@ -86,7 +86,7 @@
                 <template #body="{ data }">
                     <Tag :value="data.is_sales_person ? 'Yes' : 'No'" :severity="data.is_sales_person ? 'warning' : 'secondary'" />
                 </template>
-            </Column>
+            </Column> -->
 
             <Column field="statusUser" header="Status" style="min-width: 6rem" sortable>
                 <template #body="{ data }">

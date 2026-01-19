@@ -294,6 +294,12 @@ const router = createRouter({
                     meta: { permission: 'Maintenance Mode', access: 'view' }
                 },
                 {
+                    path: 'om/storageLocationMaintenance',
+                    name: 'Storage-Location-Maintenance',
+                    component: () => import('@/views/om/storageLocationMaintenance.vue'),
+                    meta: { permission: 'Maintenance Mode', access: 'view' }
+                },
+                {
                     path: 'om/listMonthEndClosing',
                     name: 'Month-End-Closing',
                     component: () => import('@/views/om/listMonthEndClosing.vue'),
