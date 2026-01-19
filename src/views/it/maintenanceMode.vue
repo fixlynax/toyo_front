@@ -87,8 +87,8 @@
                 </div>
 
                 <div>
-                    <label class="block text-sm font-bold text-gray-700 mb-2">Reason for Update *</label>
-                    <InputText v-model="updateDialog.reason" class="w-full" placeholder="Enter reason for update" />
+                    <label class="block text-sm font-bold text-gray-700 mb-2">Reason for Update</label>
+                    <InputText v-model="updateDialog.reason" class="w-full" placeholder="Enter reason for update (optional)" />
                 </div>
             </div>
 
@@ -287,22 +287,12 @@ const closeUpdateDialog = () => {
 };
 
 const updateVersion = async () => {
-    if (!updateDialog.value.reason.trim()) {
-        toast.add({
-            severity: 'warn',
-            summary: 'Warning',
-            detail: 'Please enter a reason for update',
-            life: 3000
-        });
-        return;
-    }
-
     updating.value = true;
     try {
         const payload = {
             type: updateDialog.value.data.type,
             adminID: 1, // TODO: Replace with actual admin ID from auth
-            reason: updateDialog.value.reason,
+            reason: updateDialog.value.reason.trim() || '', // Optional field, allow empty
             currentVer: updateDialog.value.data.currentVer || '',
             newVer: updateDialog.value.data.newVer || '',
             link: updateDialog.value.data.link || '',

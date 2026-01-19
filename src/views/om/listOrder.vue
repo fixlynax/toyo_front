@@ -98,7 +98,7 @@ const fetchOrders = async (status = null, dateFilter = false, useDefaultRange = 
                 custAccountNo: order.custaccountno,
                 companyName: order.dealerName,
                 sapOrderType: order.sapordertype,
-                orderType: order.orderDesc === 'Back Order'? 'NORMAL': order.orderDesc,
+                orderType: order.orderDesc === 'Back Order' ? 'NORMAL' : order.orderDesc,
                 deliveryType: order.deliveryType,
                 shipToAccountNo: order.shiptoCustAccNo,
                 deliveryDate: order.deliveryDate,
@@ -229,7 +229,7 @@ const formatDate = (dateString) => {
 
 const formatDateTime = (dateString) => {
     if (!dateString) return '-';
-    
+
     const date = new Date(dateString);
     const options = {
         day: '2-digit',
@@ -240,9 +240,9 @@ const formatDateTime = (dateString) => {
         second: '2-digit',
         hour12: true
     };
-    
+
     let formatted = date.toLocaleString('en-MY', options);
-    
+
     // Convert AM/PM to uppercase regardless of case
     return formatted.replace(/\b(am|pm)\b/gi, (match) => match.toUpperCase());
 };
@@ -281,10 +281,10 @@ const clearDateRange = () => {
                 :filters="filters1"
                 :rowsPerPageOptions="[10, 20, 50, 100]"
                 filterDisplay="menu"
-                :globalFilterFields="['orderNo', 'custAccountNo', 'companyName', 'shipToAccountNo', 'orderDate', 'orderType', 'deliveryType', 'invoiceNo', 'doNo', 'soNo']"
+                :globalFilterFields="['orderNo', 'custAccountNo', 'companyName', 'shipToAccountNo', 'created', 'orderType', 'deliveryType', 'invoiceNo', 'doNo', 'soNo']"
                 class="rounded-table"
                 removableSort
-                sortField="orderDate"
+                sortField="created"
                 :sortOrder="-1"
                 currentPageReportTemplate="Showing {first} to {last} of {totalRecords} entries"
                 paginatorTemplate="CurrentPageReport FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink RowsPerPageDropdown"
@@ -336,8 +336,8 @@ const clearDateRange = () => {
                     </div>
                 </template>
 
-                <!-- Changed from created to orderDate -->
-                <Column field="orderDate" header="Created On" style="min-width: 8rem" sortable>
+                <!-- Fixed Column: Sort by 'created' field -->
+                <Column field="created" header="Created On" style="min-width: 8rem" sortable>
                     <template #body="{ data }">{{ formatDateTime(data.created) }}</template>
                 </Column>
 

@@ -357,7 +357,8 @@ const validateForm = () => {
 
     // Module validation for non-master users
     if (form.value.isMaster === 0) {
-        if (!form.value.mod_warranty && !form.value.mod_order && !form.value.mod_billing && !form.value.mod_sale && !form.value.mod_order_placing) {
+        // if (!form.value.mod_warranty && !form.value.mod_order && !form.value.mod_billing && !form.value.mod_sale && !form.value.mod_order_placing) {
+        if (!form.value.mod_warranty && !form.value.mod_order && !form.value.mod_billing && !form.value.mod_sale) {
             errors.value.modules = 'Please select at least one module for non-master users';
         }
 
@@ -391,7 +392,7 @@ const createFormData = () => {
     formData.append('mod_order', form.value.isMaster === 1 ? 1 : form.value.mod_order ? 1 : 0);
     formData.append('mod_billing', form.value.isMaster === 1 ? 1 : form.value.mod_billing ? 1 : 0);
     formData.append('mod_sale', form.value.isMaster === 1 ? 1 : form.value.mod_sale ? 1 : 0);
-    formData.append('mod_order_placing', form.value.isMaster === 1 ? 1 : form.value.mod_order_placing ? 1 : 0);
+    // formData.append('mod_order_placing', form.value.isMaster === 1 ? 1 : form.value.mod_order_placing ? 1 : 0);
 
     // Always send these modules but set values based on isMaster
     // They are not shown in UI but required by API
