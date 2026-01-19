@@ -1,9 +1,9 @@
 <script setup>
+import LoadingPage from '@/components/LoadingPage.vue';
 import api from '@/service/api';
 import { FilterMatchMode } from '@primevue/core/api';
-import { onBeforeMount, ref, computed } from 'vue';
-import LoadingPage from '@/components/LoadingPage.vue';
 import { useToast } from 'primevue/usetoast';
+import { computed, onBeforeMount, ref } from 'vue';
 
 const toast = useToast();
 
@@ -30,7 +30,7 @@ function initFilters() {
 // 🟢 Status indicators for stock levels
 const getStockStatus = (balance) => {
     const stock = parseFloat(balance);
-    if (stock <= 0) return { label: 'No Stock', severity: 'danger' };
+    if (stock <= 0) return { label: 'Out Of Stock', severity: 'danger' };
     if (stock < 10) return { label: 'Low Stock', severity: 'warn' };
     return { label: 'Available', severity: 'success' };
 };
@@ -155,7 +155,7 @@ const fetchMaterialStock = async (storageLocation) => {
             toast.add({
                 severity: 'warn',
                 summary: 'No Data',
-                detail: 'No stock data available for selected location',
+                detail: 'Out Of Stock data available for selected location',
                 life: 3000
             });
         }
@@ -189,7 +189,7 @@ const handleStorageChange = () => {
 onBeforeMount(async () => {
     initFilters();
     await fetchStorageLocations(); // First fetch storage locations
-    
+
     // Only fetch material stock if we have a storage location selected
     if (selectedStorage.value) {
         await fetchMaterialStock(selectedStorage.value); // Then fetch stock data
@@ -242,23 +242,22 @@ const calculateTotalFromBatches = (stockLevelMaster) => {
 // 🟢 Format Date Time
 const formatDateTime = (dateString) => {
     if (!dateString) return '-';
-
-    try {
-        const date = new Date(dateString);
-        if (isNaN(date.getTime())) return '-';
-
-        return date.toLocaleString('en-MY', {
-            year: 'numeric',
-            month: '2-digit',
-            day: '2-digit',
-            hour: '2-digit',
-            minute: '2-digit',
-            hour12: true
-        });
-    } catch (error) {
-        console.error('Error formatting date:', error);
-        return '-';
-    }
+    
+    const date = new Date(dateString);
+    const options = {
+        day: '2-digit',
+        month: '2-digit',
+        year: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit',
+        second: '2-digit',
+        hour12: true
+    };
+    
+    let formatted = date.toLocaleString('en-MY', options);
+    
+    // Convert AM/PM to uppercase regardless of case
+    return formatted.replace(/\b(am|pm)\b/gi, (match) => match.toUpperCase());
 };
 
 // 🟢 Export function
@@ -453,7 +452,7 @@ const formatBoolean = (value) => {
                     <div class="flex flex-col items-center gap-2">
                         <i class="pi pi-box text-3xl text-blue-400"></i>
                         <span class="text-lg">No materials found</span>
-                        <span class="text-sm text-gray-400">No stock data available for {{ selectedStorage }}</span>
+                        <span class="text-sm text-gray-400">Out Of Stock data available for {{ selectedStorage }}</span>
                     </div>
                 </div>
             </template>
@@ -555,7 +554,7 @@ const formatBoolean = (value) => {
                         </div>
                     </template>
                     <template v-else>
-                        <div class="text-center text-gray-400 italic py-2">No stock data</div>
+                        <div class="text-center text-gray-400 italic py-2">Out Of Stock data</div>
                     </template>
                 </template>
             </Column>

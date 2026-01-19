@@ -3,39 +3,59 @@
         <div class="flex flex-col gap-8">
             <!-- Header -->
             <div class="card flex flex-col gap-6 w-full">
-                <div class="text-2xl font-bold text-gray-800 border-b pb-2 mb-4">Report Back Order</div>
+                <div class="text-2xl font-bold text-gray-800 border-b pb-2 mb-4">Report Return Order</div>
 
                 <!-- Filters Section -->
                 <div>
-                    <div class="grid grid-cols-1 md:grid-cols-5 gap-4">
+                    <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
                         <!-- Customer Account -->
                         <div>
                             <label class="block font-bold text-gray-700 mb-2">Customer Account</label>
-                            <Dropdown v-model="filters.custAccountNo" :options="customerOptions" optionLabel="label" optionValue="value" placeholder="Select Customer Account" class="w-full" />
+                            <Dropdown 
+                                v-model="filters.custAccountNo" 
+                                :options="customerOptions" 
+                                optionLabel="label" 
+                                optionValue="value" 
+                                placeholder="Select Customer Account" 
+                                class="w-full"
+                                :loading="loadingCustomers"
+                                :disabled="loadingCustomers"
+                            />
                         </div>
 
                         <!-- Start Date -->
                         <div>
                             <label class="block font-bold text-gray-700 mb-2">Start Date</label>
-                            <Calendar v-model="filters.startdate" dateFormat="yy-mm-dd" placeholder="Select Start Date" class="w-full" />
+                            <Calendar 
+                                v-model="filters.startdate" 
+                                dateFormat="yy-mm-dd" 
+                                placeholder="Select Start Date" 
+                                class="w-full" 
+                            />
                         </div>
 
                         <!-- End Date -->
                         <div>
                             <label class="block font-bold text-gray-700 mb-2">End Date</label>
-                            <Calendar v-model="filters.enddate" dateFormat="yy-mm-dd" placeholder="Select End Date" class="w-full" />
+                            <Calendar 
+                                v-model="filters.enddate" 
+                                dateFormat="yy-mm-dd" 
+                                placeholder="Select End Date" 
+                                class="w-full" 
+                            />
                         </div>
 
                         <!-- Status -->
                         <div>
                             <label class="block font-bold text-gray-700 mb-2">Status</label>
-                            <Dropdown v-model="filters.status" :options="statusOptions" optionLabel="label" optionValue="value" placeholder="Select Status" class="w-full" />
-                        </div>
-
-                        <!-- Material -->
-                        <div>
-                            <label class="block font-bold text-gray-700 mb-2">Material</label>
-                            <Dropdown v-model="filters.material" :options="materialOptions" optionLabel="label" optionValue="value" placeholder="Select Material" class="w-full" />
+                            <Dropdown 
+                                v-model="filters.status" 
+                                :options="statusOptions" 
+                                optionLabel="label" 
+                                optionValue="value" 
+                                placeholder="Select Status" 
+                                class="w-full" 
+                            />
                         </div>
                     </div>
 
@@ -43,9 +63,19 @@
                     <div class="flex justify-end">
                         <div class="flex gap-4 mt-4">
                             <div style="width: 250px">
-                                <Button label="Clear Filters" class="p-button-outlined p-button-secondary" @click="clearFilters" />
+                                <Button 
+                                    label="Clear Filters" 
+                                    class="p-button-outlined p-button-secondary" 
+                                    @click="clearFilters" 
+                                />
                             </div>
-                            <Button label="Export" icon="pi pi-file-excel" class="p-button-success" @click="exportExcel" :loading="exportLoading" />
+                            <Button 
+                                label="Export" 
+                                icon="pi pi-file-excel" 
+                                class="p-button-success" 
+                                @click="exportExcel" 
+                                :loading="exportLoading" 
+                            />
                         </div>
                     </div>
                 </div>
@@ -63,8 +93,7 @@ const filters = reactive({
     custAccountNo: null,
     startdate: null,
     enddate: null,
-    status: null,
-    material: null
+    status: null
 });
 
 // ✅ Loading states
@@ -73,14 +102,15 @@ const loadingCustomers = ref(false);
 
 // ✅ Data
 const customerOptions = ref([]);
-const materialOptions = ref([]);
 
 // ✅ Status Options based on API data
 const statusOptions = [
     { label: 'All Status', value: null },
     { label: 'Pending', value: 0 },
-    { label: 'Completed', value: 1 },
-    { label: 'Cancelled', value: 9 }
+    { label: 'Approved', value: 1 },
+    { label: 'Rejected', value: 2 },
+    { label: 'Pending Collection', value: 77 },
+    { label: 'Completed', value: 9 }
 ];
 
 // ✅ Generate customer options from list_dealer API with ORDER tab (SHOP ONLY)
@@ -133,49 +163,12 @@ const generateCustomerOptions = async () => {
     }
 };
 
-// ✅ Generate material options from back order data
-const generateMaterialOptions = async () => {
-    try {
-        const response = await api.get('order/list-back-order-report');
-        if (response.data.status === 1) {
-            const backOrderData = response.data.admin_data;
-            const materials = new Map();
-
-            backOrderData.forEach((item) => {
-                if (item.backorderitem && Array.isArray(item.backorderitem)) {
-                    item.backorderitem.forEach((backorderItem) => {
-                        const materialID = backorderItem.materialID;
-                        const materialName = backorderItem.material || 'Unknown Material';
-
-                        if (materialID && !materials.has(materialID)) {
-                            materials.set(materialID, {
-                                label: `${materialName} (${materialID})`,
-                                value: materialID
-                            });
-                        }
-                    });
-                }
-            });
-
-            // Convert to array and sort by label
-            materialOptions.value = Array.from(materials.values()).sort((a, b) => a.label.localeCompare(b.label));
-
-            // Add "All Materials" option at the beginning
-            materialOptions.value.unshift({ label: 'All Materials', value: null });
-        }
-    } catch (error) {
-        console.error('Error fetching material options:', error);
-        materialOptions.value = [{ label: 'All Materials', value: null }];
-    }
-};
-
 // ✅ Clear Filters
 const clearFilters = () => {
     filters.custAccountNo = null;
     filters.startdate = null;
     filters.enddate = null;
     filters.status = null;
-    filters.material = null;
 };
 
 // ✅ Export to Excel
@@ -187,13 +180,13 @@ const exportExcel = async () => {
             custAccountNo: filters.custAccountNo,
             status: filters.status,
             startdate: filters.startdate ? formatDateForAPI(filters.startdate) : null,
-            enddate: filters.enddate ? formatDateForAPI(filters.enddate) : null,
-            material: filters.material
+            enddate: filters.enddate ? formatDateForAPI(filters.enddate) : null
         };
 
         console.log('Export filters:', exportFilters); // Debug log
 
-        const response = await api.postExtra('report/excel-back-order', exportFilters, {
+        // Use the correct endpoint for return order report
+        const response = await api.postExtra('report/excel-return-order', exportFilters, {
             responseType: 'blob'
         });
 
@@ -209,8 +202,9 @@ const exportExcel = async () => {
 
         // Generate filename based on filters
         const custaccno = filters.custAccountNo || 'ALL';
-        const material = filters.material || 'ALL';
-        const filename = `${custaccno}_${material}_OMS-Back_Order_Report.xlsx`;
+        const statusValue = filters.status !== null ? filters.status.toString() : 'ALL';
+        const statusLabel = statusOptions.find(opt => opt.value === filters.status)?.label || 'ALL';
+        const filename = `${custaccno}_${statusLabel.replace(/\s+/g, '_')}_OMS-Return_Order_List_Data.xlsx`;
 
         link.href = url;
         link.setAttribute('download', filename);
@@ -245,7 +239,6 @@ const formatDateForAPI = (date) => {
 // ✅ Load initial data when component mounts
 onMounted(() => {
     generateCustomerOptions();
-    generateMaterialOptions();
 });
 </script>
 

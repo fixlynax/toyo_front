@@ -4,7 +4,7 @@
             <div class="md:w-2/3 flex flex-col">
                 <div class="card flex flex-col gap-6 w-full">
                     <div class="flex items-center gap-2 border-b">
-                        <RouterLink to="/sales/customerReturnOrder">
+                        <RouterLink to="/om/listReturnOrder">
                             <Button icon="pi pi-arrow-left font-bold" class="p-button-text p-button-secondary text-xl" size="big" v-tooltip="'Back'" />
                         </RouterLink>
                         <div class="text-2xl font-bold text-gray-800">Customer Information</div>
@@ -61,19 +61,85 @@
                         </div>
                         <div>
                             <span class="text-sm text-gray-500">SAP Return No.</span>
-                            <p class="text-lg font-bold">{{ order.sapreturnno || '-' }}</p>
+                            <p class="text-lg font-semibold">{{ order.sapreturnno || '-' }}</p>
+                        </div>
+                    </div>
+                    <div class="grid grid-cols-2 gap-4 mt-4">
+                        <div>
+                            <span class="text-sm text-gray-500">Credit Note No.</span>
+                            <p class="text-lg font-semibold">{{ order.creditnoteno || '-' }}</p>
+                        </div>
+                        <div>
+                            <span class="text-sm text-gray-500">Return Delivery No.</span>
+                            <p class="text-lg font-semibold">{{ orderDelivery.sapreturndeliveryno || '-' }}</p>
                         </div>
                     </div>
                     <div class="grid grid-cols-2 gap-4 mt-4">
                         <div>
                             <span class="text-sm text-gray-500">Return Code</span>
-                            <p class="text-lg font-semibold">{{ order.reason_code || '-' }}</p>
+                            <p class="text-lg font-medium">{{ order.reason_code || '-' }}</p>
                         </div>
                         <div>
                             <span class="text-sm text-gray-500">Return Reason</span>
                             <p class="text-lg font-medium">{{ order.reason_message || '-' }}</p>
                         </div>
                     </div>
+
+                    <div class="grid grid-cols-2 gap-4 mt-4">
+                        <div>
+                            <span class="text-sm text-gray-500">Return Image</span>
+
+                            <!-- Image Display -->
+                            <div v-if="order.imageURL" class="mt-2">
+                                <div class="rounded-xl overflow-hidden shadow-sm bg-gray-100 relative min-h-[12rem]">
+                                    <!-- Loading State -->
+                                    <div v-if="imageLoading" class="absolute inset-0 flex items-center justify-center">
+                                        <div class="text-center">
+                                            <i class="pi pi-spin pi-spinner text-3xl text-primary mb-2"></i>
+                                            <p class="text-sm text-gray-600">Loading image...</p>
+                                        </div>
+                                    </div>
+
+                                    <!-- Error State -->
+                                    <div v-else-if="imageError" class="absolute inset-0 flex items-center justify-center bg-gray-100">
+                                        <div class="text-center p-4">
+                                            <i class="pi pi-image text-4xl text-gray-400 mb-2"></i>
+                                            <p class="text-gray-500 text-sm">Failed to load image</p>
+                                            <p class="text-xs text-gray-400 mt-1">URL: {{ order.imageURL.substring(0, 50) }}...</p>
+                                        </div>
+                                    </div>
+
+                                    <!-- Image -->
+                                    <a :href="order.imageURL" target="_blank" rel="noopener noreferrer" class="block">
+                                        <img
+                                            :src="order.imageURL"
+                                            alt="Return Image"
+                                            class="w-full h-48 object-cover hover:scale-105 transition-transform duration-300 cursor-pointer"
+                                            :class="{ 'opacity-0': imageLoading || imageError }"
+                                            @load="handleImageLoad"
+                                            @error="handleImageError"
+                                        />
+                                    </a>
+                                </div>
+                                <p class="text-xs text-gray-500 mt-1 text-center">Click image to view full size</p>
+                            </div>
+
+                            <!-- No Image State -->
+                            <div v-else class="mt-2">
+                                <div class="rounded-xl overflow-hidden shadow-sm bg-gray-100 h-48 flex items-center justify-center">
+                                    <div class="text-center">
+                                        <i class="pi pi-image text-4xl text-gray-300 mb-2"></i>
+                                        <p class="text-gray-400">No image available</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div>
+                            <span class="text-sm text-gray-500">Return Remark</span>
+                            <p class="text-lg font-medium">{{ order.remarks || '-' }}</p>
+                        </div>
+                    </div>
+
                     <!-- Table -->
                     <DataTable :value="returnOrderArray" dataKey="materialid" class="rounded-table mt-6">
                         <Column field="itemno" header="Item No">
@@ -85,7 +151,7 @@
                             <template #body="{ data }">
                                 {{ data.materialid }} <br />
                                 {{ data.materialdescription }}
-                                <span class="block text-xs text-gray-500">SP: {{ data.salesprogramid || '-' }} </span>
+                                <span v-if="data.salesprogramid" class="block text-xs text-gray-500">SP: {{ data.salesprogramid }}</span>
                             </template>
                         </Column>
 
@@ -131,8 +197,8 @@
             <div class="md:w-1/3 flex flex-col">
                 <div class="card flex flex-col w-full">
                     <div class="flex items-center justify-between border-b pb-3 mb-4">
-                        <div class="text-2xl font-bold text-gray-800">Advance Info</div>
-                        <Tag :value="getOrderStatusText(order.orderstatus)" :severity="getOrderStatusSeverity(order.orderstatus)" />
+                        <div class="text-2xl font-bold text-gray-800">Order Info</div>
+                        <Tag :value="getOrderStatusText(order.orderstatus, order.creditnoteno)" :severity="getOrderStatusSeverity(order.orderstatus, order.creditnoteno)" />
                     </div>
 
                     <div class="overflow-x-auto">
@@ -140,8 +206,26 @@
                             <tbody>
                                 <tr class="border-b">
                                     <td class="px-4 py-2 font-medium">Order No</td>
-                                    <td class="px-4 py-2 text-right font-semibold text-primary">{{ orderData.order_no || '-' }}</td>
+                                    <td class="px-4 py-2 text-right font-bold text-primary">{{ orderData.order_no || '-' }}</td>
                                 </tr>
+                                <tr class="border-b">
+                                    <td class="px-4 py-2 font-medium">Return Channel</td>
+                                    <td class="px-4 py-2 text-right font-bold">{{ order.channel || '-' }}</td>
+                                </tr>
+                                <tr class="border-b">
+                                    <td class="px-4 py-2 font-medium">Order Type</td>
+                                    <td class="px-4 py-2 text-right font-semibold">
+                                        <span v-if="orderData.orderDesc === 'NORMAL'">NORMAL</span>
+                                        <span v-else-if="orderData.orderDesc === 'DIRECTSHIP'">DS</span>
+                                        <span v-else-if="orderData.orderDesc === 'OWN'">OWN USE</span>
+                                        <span v-else-if="orderData.orderDesc === 'Warranty'">WARRANTY</span>
+                                        <span v-else-if="orderData.orderDesc === 'Back Order'">NORMAL</span>
+                                        <span v-else>
+                                            {{ orderData.orderDesc || orderData.orderDesc || '-' }}
+                                        </span>
+                                    </td>
+                                </tr>
+
                                 <tr class="border-b">
                                     <td class="px-4 py-2 font-medium">SO No</td>
                                     <td class="px-4 py-2 text-right font-semibold">{{ orderData.so_no || '-' }}</td>
@@ -167,39 +251,27 @@
                                     <td class="px-4 py-2 text-right font-semibold">{{ orderData.storagelocation || '-' }}</td>
                                 </tr>
                                 <tr class="border-b">
-                                    <td class="px-4 py-2 font-medium">Delivery Status</td>
-                                    <td class="px-4 py-2 text-right font-semibold">{{ getDeliveryStatusText(order.delivery_status) }}</td>
-                                </tr>
-                                <tr>
-                                    <td class="px-4 py-2 font-medium">Created</td>
-                                    <td class="px-4 py-2 text-right font-semibold">{{ formatDate(order.created) || '-' }}</td>
+                                    <td class="px-4 py-2 font-medium">Created On</td>
+                                    <td class="px-4 py-2 text-right font-semibold">{{ formatDateTime(order.created) || '-' }}</td>
                                 </tr>
                             </tbody>
                         </table>
                     </div>
-
-                    <!-- Action Buttons -->
-                    <!-- <div class="flex justify-end mt-4 gap-2" v-if="order.orderstatus === 0">
-                        <Button label="Reject" severity="danger" size="small" @click="onRejectReturnOrder" :loading="loadingAction === 'reject'" />
-                        <Button label="Approve" severity="success" size="small" @click="onApproveReturnOrder" :loading="loadingAction === 'approve'" />
-                    </div> -->
-
-                    <!-- Status Labels after action -->
-                    <!-- <div class="flex justify-end mt-4">
-                        <Tag :value="getActionStatusLabel(order.orderstatus)" :severity="getActionStatusSeverity(order.orderstatus)" />
-                    </div> -->
                 </div>
             </div>
         </div>
-
     </Fluid>
 </template>
 
 <script setup>
-import { ref, onMounted, watch, computed } from 'vue';
+import { ref, onMounted, computed } from 'vue';
 import { useRoute } from 'vue-router';
 import { useToast } from 'primevue/usetoast';
 import api from '@/service/api';
+import Tag from 'primevue/tag';
+import Button from 'primevue/button';
+import DataTable from 'primevue/datatable';
+import Column from 'primevue/column';
 
 const route = useRoute();
 const toast = useToast();
@@ -211,8 +283,11 @@ const orderData = ref({});
 const orderDelivery = ref({});
 const returnOrderArray = ref([]);
 const loading = ref(true);
-const loadingAction = ref(null);
 const error = ref(null);
+
+// Image handling variables
+const imageLoading = ref(false);
+const imageError = ref(false);
 
 // ✅ Enhanced price mapping functions
 const getItemPrice = (item) => {
@@ -248,12 +323,6 @@ const getItemPrice = (item) => {
     return 0;
 };
 
-// Helper to format item number for comparison (remove leading zeros)
-const formatItemNoForComparison = (itemNo) => {
-    if (!itemNo) return '';
-    return itemNo.toString().replace(/^0+/, '');
-};
-
 // Method to calculate item total
 const calculateItemTotal = (item) => {
     const qty = parseInt(item.qty) || 0;
@@ -281,7 +350,12 @@ const getDeliveryStatusText = (status) => {
     return statusMap[status?.toUpperCase()] || status || '-';
 };
 
-const getOrderStatusText = (status) => {
+const getOrderStatusText = (status, creditnoteno) => {
+    // Check for the new condition: status = 9 and creditnoteno = null
+    if (status === 9 && (creditnoteno === null || creditnoteno === undefined || creditnoteno === '')) {
+        return 'Return Received';
+    }
+
     const statusMap = {
         0: 'Pending',
         1: 'Approved',
@@ -292,30 +366,17 @@ const getOrderStatusText = (status) => {
     return statusMap[status] || `Status: ${status}`;
 };
 
-const getOrderStatusSeverity = (status) => {
+const getOrderStatusSeverity = (status, creditnoteno) => {
+    // Check for the new condition: status = 9 and creditnoteno = null
+    if (status === 9 && (creditnoteno === null || creditnoteno === undefined || creditnoteno === '')) {
+        return 'info'; // Using 'info' severity for Return Received status
+    }
+
     const severityMap = {
         0: 'warn',
         1: 'success',
         2: 'danger',
         77: 'warn',
-        9: 'success'
-    };
-    return severityMap[status] || 'secondary';
-};
-
-const getActionStatusLabel = (status) => {
-    const actionMap = {
-        1: 'Approved',
-        2: 'Rejected',
-        9: 'Completed'
-    };
-    return actionMap[status] || '';
-};
-
-const getActionStatusSeverity = (status) => {
-    const severityMap = {
-        1: 'success',
-        2: 'danger',
         9: 'success'
     };
     return severityMap[status] || 'secondary';
@@ -328,13 +389,24 @@ const formatAddress = (dealerShop) => {
     return addressParts.join(' ') || '-';
 };
 
-const formatDate = (dateString) => {
+const formatDateTime = (dateString) => {
     if (!dateString) return '-';
-    return new Date(dateString).toLocaleDateString('en-MY', {
+
+    const date = new Date(dateString);
+    const options = {
+        day: '2-digit',
+        month: '2-digit',
         year: 'numeric',
-        month: 'short',
-        day: 'numeric'
-    });
+        hour: '2-digit',
+        minute: '2-digit',
+        second: '2-digit',
+        hour12: true
+    };
+
+    let formatted = date.toLocaleString('en-MY', options);
+
+    // Convert AM/PM to uppercase regardless of case
+    return formatted.replace(/\b(am|pm)\b/gi, (match) => match.toUpperCase());
 };
 
 // Method to format item number for display
@@ -353,6 +425,38 @@ const showToast = (severity, summary, detail) => {
     });
 };
 
+// Image handling methods
+const handleImageLoad = () => {
+    imageLoading.value = false;
+    imageError.value = false;
+};
+
+const handleImageError = () => {
+    imageLoading.value = false;
+    imageError.value = true;
+};
+
+// Simplified image processing - no API call
+const processPrivateImage = async () => {
+    if (order.value.imageURL && typeof order.value.imageURL === 'string') {
+        try {
+            imageLoading.value = true;
+            imageError.value = false;
+
+            // Directly use the image URL without API processing
+            // The image URL will be used as-is in the template
+        } catch (error) {
+            console.error('Error processing image:', error);
+            imageError.value = true;
+        } finally {
+            imageLoading.value = false;
+        }
+    } else {
+        // No image URL, set loading to false
+        imageLoading.value = false;
+    }
+};
+
 // Fetch order details
 const fetchReturnOrderDetail = async () => {
     try {
@@ -369,17 +473,8 @@ const fetchReturnOrderDetail = async () => {
             orderDelivery.value = orderDataResponse.delivery_information || {};
             returnOrderArray.value = orderDataResponse.return_order_array || [];
 
-            console.log('Order Data:', orderData.value);
-            console.log('Return Items:', returnOrderArray.value);
-            console.log('Fullfill Order Array:', orderData.value.fullfill_order_array);
-
-            // Log price mapping for debugging
-            returnOrderArray.value.forEach((item) => {
-                const price = getItemPrice(item);
-                const total = calculateItemTotal(item);
-                console.log(`Item ${item.materialid}: Qty=${item.qty}, Price=${price}, Total=${total}`);
-            });
-            console.log('Subtotal:', subtotal.value);
+            // Process the return image (simplified - no API call)
+            await processPrivateImage();
         } else {
             error.value = 'No data found for this return order';
             showToast('error', 'Error', error.value);
@@ -389,124 +484,6 @@ const fetchReturnOrderDetail = async () => {
         showToast('error', 'Error', 'Failed to load return order details');
     } finally {
         loading.value = false;
-    }
-};
-
-// ✅ Fixed Approve return order
-const onApproveReturnOrder = async () => {
-    try {
-        loadingAction.value = 'approve';
-
-        // Use URLSearchParams instead of FormData for application/x-www-form-urlencoded
-        const payload = new URLSearchParams();
-        payload.append('status', '1'); // 1 = Approved
-
-        console.log('Approving return order:', returnOrderNo);
-        console.log('Payload:', { status: '1' });
-
-        const response = await api.postExtra(`order/update-return-order/${returnOrderNo}`, payload, {
-            headers: {
-                'Content-Type': 'application/x-www-form-urlencoded',
-                Accept: 'application/json'
-            }
-        });
-
-        console.log('Approve response:', response.data);
-
-        if (response.data.status === 1) {
-            showToast('success', 'Success', 'Return order approved successfully!');
-            // ✅ Instantly update local status (no need to refetch)
-            order.value.orderstatus = 1;
-            // Also update the order object with response data if available
-            if (response.data.admin_data) {
-                Object.assign(order.value, response.data.admin_data);
-            }
-        } else {
-            const errorData = response.data.error;
-            let errorMessage = 'Failed to approve return order';
-
-            if (errorData) {
-                errorMessage = errorData.message || errorData.code || errorMessage;
-            } else if (response.data.message) {
-                errorMessage = response.data.message;
-            }
-
-            showToast('error', 'Error', errorMessage);
-        }
-    } catch (err) {
-        console.error('Approve error:', err);
-        let errorMessage = 'Failed to approve return order';
-
-        if (err.response?.data?.error?.message) {
-            errorMessage = err.response.data.error.message;
-        } else if (err.response?.data?.message) {
-            errorMessage = err.response.data.message;
-        } else if (err.message) {
-            errorMessage = err.message;
-        }
-
-        showToast('error', 'Error', errorMessage);
-    } finally {
-        loadingAction.value = null;
-    }
-};
-
-// ✅ Fixed Reject return order
-const onRejectReturnOrder = async () => {
-    try {
-        loadingAction.value = 'reject';
-
-        // Use URLSearchParams instead of FormData for application/x-www-form-urlencoded
-        const payload = new URLSearchParams();
-        payload.append('status', '2'); // 2 = Rejected
-
-        console.log('Rejecting return order:', returnOrderNo);
-        console.log('Payload:', { status: '2' });
-
-        const response = await api.postExtra(`order/update-return-order/${returnOrderNo}`, payload, {
-            headers: {
-                'Content-Type': 'application/x-www-form-urlencoded',
-                Accept: 'application/json'
-            }
-        });
-
-        console.log('Reject response:', response.data);
-
-        if (response.data.status === 1) {
-            showToast('success', 'Success', 'Return order rejected successfully!');
-            // ✅ Instantly update local status
-            order.value.orderstatus = 2;
-            // Also update the order object with response data if available
-            if (response.data.admin_data) {
-                Object.assign(order.value, response.data.admin_data);
-            }
-        } else {
-            const errorData = response.data.error;
-            let errorMessage = 'Failed to reject return order';
-
-            if (errorData) {
-                errorMessage = errorData.message || errorData.code || errorMessage;
-            } else if (response.data.message) {
-                errorMessage = response.data.message;
-            }
-
-            showToast('error', 'Error', errorMessage);
-        }
-    } catch (err) {
-        console.error('Reject error:', err);
-        let errorMessage = 'Failed to reject return order';
-
-        if (err.response?.data?.error?.message) {
-            errorMessage = err.response.data.error.message;
-        } else if (err.response?.data?.message) {
-            errorMessage = err.response.data.message;
-        } else if (err.message) {
-            errorMessage = err.message;
-        }
-
-        showToast('error', 'Error', errorMessage);
-    } finally {
-        loadingAction.value = null;
     }
 };
 

@@ -121,7 +121,7 @@ const fetchOrders = async (status = null, dateFilter = false, mainAccountNo = nu
                 custAccountNo: order.custaccountno,
                 companyName: order.dealerName,
                 sapOrderType: order.sapordertype,
-                orderType: order.orderDesc,
+                orderType:order.orderDesc === 'Back Order'? 'NORMAL': order.orderDesc?.toUpperCase(),
                 deliveryType: order.deliveryType,
                 shipToAccountNo: order.shiptoCustAccNo,
                 deliveryDate: order.deliveryDate,
@@ -281,6 +281,26 @@ const formatDate = (dateString) => {
     });
 };
 
+const formatDateTime = (dateString) => {
+    if (!dateString) return '-';
+    
+    const date = new Date(dateString);
+    const options = {
+        day: '2-digit',
+        month: '2-digit',
+        year: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit',
+        second: '2-digit',
+        hour12: true
+    };
+    
+    let formatted = date.toLocaleString('en-MY', options);
+    
+    // Convert AM/PM to uppercase regardless of case
+    return formatted.replace(/\b(am|pm)\b/gi, (match) => match.toUpperCase());
+};
+
 // 🟢 Clear Date Range
 const clearDateRange = () => {
     dateRange.value = [null, null];
@@ -416,8 +436,8 @@ const clearDealerFilter = () => {
                 </template>
 
                 <!-- Columns -->
-                <Column field="created" header="Created Date" style="min-width: 8rem" sortable>
-                    <template #body="{ data }">{{ formatDate(data.created) }}</template>
+                <Column field="created" header="Created On" style="min-width: 8rem" sortable>
+                    <template #body="{ data }">{{ formatDateTime(data.created) }}</template>
                 </Column>
 
                 <Column header="Order No" style="min-width: 10rem" sortable>
@@ -437,12 +457,7 @@ const clearDealerFilter = () => {
 
                 <Column field="orderType" header="Order Type" style="min-width: 7rem" sortable>
                     <template #body="{ data }">
-                        <span v-if="data.orderType === 'Normal'">NORMAL</span>
-                        <span v-else-if="data.orderType === 'Directship'">DS</span>
-                        <span v-else-if="data.orderType === 'Own'">OWN USE</span>
-                        <span v-else-if="data.orderType === 'Warranty'">WARRANTY</span>
-                        <span v-else-if="data.orderType === 'Back Order'">BACK ORDER</span>
-                        <span v-else>{{ data.orderType || data.sapOrderType || '-' }}</span>
+                        <span>{{ data.orderType || data.sapOrderType || '-' }}</span>
                     </template>
                 </Column>
 

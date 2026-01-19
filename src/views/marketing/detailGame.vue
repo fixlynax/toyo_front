@@ -173,7 +173,7 @@
                 <div class="card flex flex-col w-full">
                     <div class="flex items-center justify-between border-b pb-3 mb-4">
                         <div class="text-2xl font-bold text-gray-800">Participant List</div>
-                        <Button icon="pi pi-file-export" label="Export" style="width: fit-content" class="p-button-danger p-button-sm" @click="exportParticipants" />
+                       <Button icon="pi pi-download" label="Report" style="width: fit-content" class="p-button-danger p-button-sm" @click="fetchExport" />
                     </div>
                     <DataTable :value="participants" :paginator="true" :rows="7" dataKey="memberCode" :rowHover="true" responsiveLayout="scroll" class="text-sm">
                         <!-- User Column -->
@@ -477,26 +477,45 @@ const confirmDelete = () => {
     });
 };
 
-// Export participants
-async function exportParticipants() {
+const fetchExport = async () => {
     try {
-        // Implement export functionality
+        loading.value = true;
+
+        const response = await api.getDownload(
+            `excel/game-detail/${gameId}`,
+            { responseType: 'arraybuffer' }
+        );
+
+        const blob = new Blob([response.data], {
+            type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+        });
+
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = 'Game_Report.xlsx';
+        a.click();
+        URL.revokeObjectURL(url);
+
         toast.add({
-            severity: 'info',
-            summary: 'Info',
-            detail: 'Export functionality to be implemented',
+            severity: 'success',
+            summary: 'Success',
+            detail: 'Export completed',
             life: 3000
         });
+
     } catch (error) {
-        console.error('Error exporting participants:', error);
+        console.error('Export error:', error);
         toast.add({
             severity: 'error',
             summary: 'Error',
-            detail: 'Error exporting participants',
+            detail: 'Export failed',
             life: 3000
         });
+    } finally {
+        loading.value = false;
     }
-}
+};
 
 // Download QR code
 function downloadQRCode() {

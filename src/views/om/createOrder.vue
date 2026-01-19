@@ -136,7 +136,7 @@
                     <Button label="Width" icon="pi pi-filter" @click="widthPanel.toggle($event)" />
                     <!-- Excel Import/Export for DIRECTSHIP -->
                     <Button v-if="selectedOrderType === 'DIRECTSHIP'" label="Import Excel" icon="pi pi-upload" class="p-button-success" @click="importExcel" />
-                    <Button v-if="selectedOrderType === 'DIRECTSHIP' && selectedTyres.length > 0" label="Export Excel" icon="pi pi-download" class="p-button-help" @click="exportExcel" />
+                    <Button v-if="selectedOrderType === 'DIRECTSHIP' && selectedTyres.length > 0" label="Export" icon="pi pi-download" class="p-button-help" @click="exportExcel" />
                 </div>
             </div>
 
@@ -208,13 +208,9 @@
                 <div class="text-sm text-red-600 mt-1">
                     The following items exceed the maximum allowed quantity per month:
                     <ul class="mt-1 list-disc list-inside ml-2">
-                        <li v-for="item in exceedsMaxQtyItems" :key="item.materialid">
-                            {{ item.material }}: {{ item.quantity }} units (Max allowed: {{ item.max_allowed }})
-                        </li>
+                        <li v-for="item in exceedsMaxQtyItems" :key="item.materialid">{{ item.material }}: {{ item.quantity }} units (Max allowed: {{ item.max_allowed }})</li>
                     </ul>
-                    <div class="mt-2 text-xs text-red-700 font-semibold">
-                        Note: Please reduce quantities to within the allowed limits before proceeding.
-                    </div>
+                    <div class="mt-2 text-xs text-red-700 font-semibold">Note: Please reduce quantities to within the allowed limits before proceeding.</div>
                 </div>
             </div>
 
@@ -308,10 +304,12 @@
                                 icon="pi pi-shopping-cart"
                                 class="p-button-primary p-button-sm"
                                 @click="addToCart(data)"
-                                :disabled="isInCart(data) || 
-                                          (selectedOrderType === 'DIRECTSHIP' && (data.stockBalance === 0 || containerCapacity >= maxContainerCapacity)) || 
-                                          exceedsItemLimit ||
-                                          (selectedOrderType === 'NORMAL' && data.max_qty_remaining === 0)"
+                                :disabled="
+                                    isInCart(data) ||
+                                    (selectedOrderType === 'DIRECTSHIP' && (data.stockBalance === 0 || containerCapacity >= maxContainerCapacity)) ||
+                                    exceedsItemLimit ||
+                                    (selectedOrderType === 'NORMAL' && data.max_qty_remaining === 0)
+                                "
                             />
                         </div>
                     </template>
@@ -328,7 +326,7 @@
                         <div class="flex items-center justify-between mb-2">
                             <span class="w-30 text-xl font-bold text-black">Total Quantity:</span>
                             <!-- <span class="text-xl font-bold text-indigo-700">{{ cartQuantity + freeItemsQuantity }}</span> -->
-                             <span class="text-xl font-bold text-indigo-700">{{ cartQuantity }}</span>
+                            <span class="text-xl font-bold text-indigo-700">{{ cartQuantity }}</span>
                         </div>
                         <div class="text-2xl font-extrabold text-indigo-700">Total: RM {{ formatCurrency(cartTotal.toFixed(2)) }}</div>
                     </div>
@@ -940,10 +938,10 @@
 </template>
 
 <script setup>
-import { ref, computed, watch, onMounted } from 'vue';
-import { useRouter } from 'vue-router';
-import { useToast } from 'primevue/usetoast';
 import api from '@/service/api';
+import { useToast } from 'primevue/usetoast';
+import { computed, onMounted, ref, watch } from 'vue';
+import { useRouter } from 'vue-router';
 
 const router = useRouter();
 const toast = useToast();
@@ -1244,7 +1242,7 @@ const hasBackOrderItems = computed(() => {
 
     return selectedTyres.value.some(
         (item) =>
-            item.stockBalance === 0 || // No stock at all
+            item.stockBalance === 0 || // Out Of Stock at all
             item.quantity > item.stockBalance // Order quantity exceeds available stock
     );
 });
@@ -1323,7 +1321,7 @@ const getMinQuantity = () => {
 //         // For NORMAL orders, check material-specific max quantity
 //         const maxQtyData = await checkMaxOrderQty(tyre.materialid);
 //         const materialMax = maxQtyData.remaining_qty;
-        
+
 //         // Also apply the 50-unit monthly limit (whichever is smaller)
 //         return Math.min(materialMax, 50);
 //     } else {
@@ -1565,12 +1563,12 @@ const addToCart = async (tyre) => {
 
     // Check max order quantity for the material
     // const maxQtyData = await checkMaxOrderQty(tyre.materialid);
-    
+
     // Check if we can add this item (consider existing quantity if already in cart)
     const existing = selectedTyres.value.find((t) => t.id === tyre.id);
     const currentQty = existing ? existing.quantity : 0;
     const proposedQty = currentQty + 1;
-    
+
     // if (proposedQty > maxQtyData.remaining_qty) {
     //     toast.add({
     //         severity: 'warn',
@@ -1614,7 +1612,7 @@ const addToCart = async (tyre) => {
     } else {
         selectedTyres.value.push({
             ...tyre,
-            quantity: 1,
+            quantity: 1
             // max_qty: maxQtyData.max_qty,
             // bought_qty: maxQtyData.bought_qty,
             // remaining_qty: maxQtyData.remaining_qty
@@ -1853,7 +1851,7 @@ const fetchMaterials = async (custAccountNo) => {
                     const stockBalance = material.stock_quantity || 0;
 
                     // Determine stock level display
-                    let stockLevel = 'No Stock';
+                    let stockLevel = 'Out Of Stock';
                     let colorCode = '#C62828'; // red
 
                     if (stockBalance > 10) {
@@ -2016,7 +2014,7 @@ const exportExcel = async () => {
         toast.add({ severity: 'success', summary: 'Success', detail: 'Excel file downloaded successfully', life: 2000 });
     } catch (error) {
         console.error('Error exporting Excel:', error);
-        toast.add({ severity: 'error', summary: 'Error', detail: 'Failed to export Excel file', life: 2000 });
+        toast.add({ severity: 'error', summary: 'Error', detail: 'Failed to export file', life: 2000 });
     }
 };
 
@@ -2070,12 +2068,12 @@ const isInCart = (tyre) => selectedTyres.value.some((t) => t.id === tyre.id);
 const onQuantityChange = async (item) => {
     // Check max order quantity for the material
     // const maxQtyData = await checkMaxOrderQty(item.materialid);
-    
+
     // Update the item with latest max quantity data
     // item.max_qty = maxQtyData.max_qty;
     // item.bought_qty = maxQtyData.bought_qty;
     // item.remaining_qty = maxQtyData.remaining_qty;
-    
+
     // // Validate against remaining quantity
     // if (item.quantity > maxQtyData.remaining_qty) {
     //     toast.add({
@@ -2087,7 +2085,7 @@ const onQuantityChange = async (item) => {
     //     item.quantity = Math.max(1, maxQtyData.remaining_qty);
     //     return;
     // }
-    
+
     // // Check monthly limit for NORMAL orders
     // if (selectedOrderType.value === 'NORMAL' && item.quantity > 50) {
     //     toast.add({
@@ -2732,7 +2730,7 @@ const proceedWithBackOrder = async () => {
             const etenData = result.eten_data;
             orderDetails.value = {
                 orderRefNo: etenData.orderRefNo || etenData.orderno,
-                backOrderRefNo: Array.isArray(etenData.backOrderRefNo) ? etenData.backOrderRefNo.join(', '): etenData.backOrderRefNo || etenData.backorderno,
+                backOrderRefNo: Array.isArray(etenData.backOrderRefNo) ? etenData.backOrderRefNo.join(', ') : etenData.backOrderRefNo || etenData.backorderno,
                 cartRefNo: cartRefNo
             };
 

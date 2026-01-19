@@ -34,7 +34,7 @@
                             <Tag :value="data.isMaintainence ? 'Yes' : 'No'" :severity="data.isMaintainence ? 'warning' : 'info'" />
                         </template>
                     </Column>
-                    <Column header="Actions" style="width: 120px" >
+                    <Column v-if="canUpdate" header="Action" style="width: 120px" >
                         <template #body="{ data }">
                             <div class="flex gap-2">
                                 <Button icon="pi pi-eye" class="p-button-rounded p-button-text p-button-sm" @click="viewMaintenanceMsg(data)" v-tooltip="'View Maintenance Message'" />
@@ -120,10 +120,14 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue';
+import { ref, onMounted, computed } from 'vue';
 import { useRouter } from 'vue-router';
 import api from '@/service/api';
 import { useToast } from 'primevue/usetoast';
+import { useMenuStore } from '@/store/menu';
+
+const menuStore = useMenuStore();
+const canUpdate = computed(() => menuStore.canWrite('Maintenance Mode'));
 
 
 const router = useRouter();

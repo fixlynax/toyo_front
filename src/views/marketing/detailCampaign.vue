@@ -8,12 +8,15 @@
                     <div class="flex items-center justify-between border-b pb-2">
                         <div class="flex items-center gap-3">
                             <RouterLink to="/marketing/listCampaign">
-                                <Button icon="pi pi-arrow-left" class="p-button-text p-button-secondary text-xl" size="big" v-tooltip="'Back'" />
+                                <Button icon="pi pi-arrow-left" class="p-button-text p-button-secondary text-xl" v-tooltip="'Back'" />
                             </RouterLink>
                             <div class="text-2xl font-bold text-gray-800">Campaign Management Details</div>
                         </div>
                         <div class="inline-flex items-center gap-2">
                             <!-- Edit Event -->
+                            <div>
+                                <Button v-if="canUpdate" label="Report" style="width: fit-content" class="p-button-sm p-button-success" :loading="exportLoading" @click="fetchExport1" :disabled="exportLoading" />
+                            </div>
                             <RouterLink v-if="canUpdate" :to="`/marketing/editCampaign/${campaignId}`">
                                 <Button label="Edit" class="p-button-info" size="small" />
                             </RouterLink>
@@ -72,16 +75,12 @@
                         <template #empty>
                             <div class="text-center py-8 text-gray-500">No prizes found for this campaign.</div>
                         </template>
-                        
+
                         <!-- Prize Column -->
                         <Column header="Prize" style="min-width: 10rem">
                             <template #body="{ data }">
                                 <div class="flex items-center gap-3 relative group" @mouseenter="hoverPrize = data.id" @mouseleave="hoverPrize = null">
-                                    <img 
-                                        :src="data.imageURL" 
-                                        alt="Prize" 
-                                        class="w-36 h-24 rounded-lg object-cover border" 
-                                    />
+                                    <img :src="data.imageURL" alt="Prize" class="w-36 h-24 rounded-lg object-cover border" />
                                     <div class="flex flex-col">
                                         <span class="font-bold text-gray-800">{{ data.prizeName }}</span>
                                         <span class="text-gray-600 text-xs">{{ data.prizeType }}</span>
@@ -106,14 +105,95 @@
                                 <div>{{ data.prizeWon }} / {{ data.prizeQuota }}</div>
                             </template>
                         </Column>
-
-                        <!-- Action Column -->
-                        <!-- <Column header="Action" style="min-width: 6rem">
-                            <template #body="{ data }">
-                                <Button icon="pi pi-pencil" class="p-button-text p-button-info" @click="openEditDialog(data)" />
-                            </template>
-                        </Column> -->
                     </DataTable>
+                </div>
+
+                <div class="card flex flex-col w-full">
+                    <!-- Header with Invite Button -->
+                    <div class="flex items-center justify-between border-b pb-2 mb-2">
+                        <div class="text-2xl font-bold text-gray-800">Participating Dealer</div>
+                        <div class="inline-flex items-center gap-2">
+                            <Button v-if="canUpdate" label="Report" style="width: fit-content" class="p-button-sm p-button-danger" :loading="exportLoading" @click="fetchExport" :disabled="exportLoading" />
+                            <Button v-if="canUpdate" label="Assign Dealer" icon="pi pi-user-plus" style="width: fit-content" class="p-button-sm p-button-success" @click="openInviteDealerDialog" />
+                        </div>
+                    </div>
+
+                    <DataTable :value="dealerList" :paginator="true" :rows="3" dataKey="id" :rowHover="true" responsiveLayout="scroll" class="text-sm">
+                        <template #empty>
+                            <div class="text-center py-8 text-gray-500">No dealers invited yet.</div>
+                        </template>
+
+                        <!-- Title + ID -->
+                        <Column header="Name" style="min-width: 8rem">
+                            <template #body="{ data }">
+                                <div class="flex flex-col">
+                                    <span class="font-bold text-gray-800">{{ data.companyName }}</span>
+                                    <span class="text-gray-600 text-xm mt-2">🔧 {{ data.memberCode || data.custAccountNo }}</span>
+                                </div>
+                            </template>
+                        </Column>
+
+                        <!-- Total Participant -->
+                        <Column header="Total Participant" style="min-width: 6rem">
+                            <template #body="{ data }">
+                                <div v-if="data.totalParticipants > 0">
+                                    <Button @click="showTcMembers(data)" class="p-button-text p-button-primary font-bold text-blue-600 hover:text-blue-800 p-0" :label="data.totalParticipants.toString()" v-tooltip="'Click to view TC Members'" />
+                                </div>
+                                <div v-else style="text-align: center;">
+                                    <span class="text-gray-400" >0</span>
+                                </div>
+                            </template>
+                        </Column>
+
+                        <!-- State -->
+                        <Column header="State" style="min-width: 6rem">
+                            <template #body="{ data }">
+                                <span class="text-gray-800">{{ data.state }}</span>
+                            </template>
+                        </Column>
+
+                        <!-- Signboard Type -->
+                        <Column field="signboardType" header="Signboard Type" style="min-width: 6rem"></Column>
+
+                        <!-- Actions -->
+                        <Column v-if="canUpdate" header="Actions" style="min-width: 4rem; text-align: center">
+                            <template #body="{ data }">
+                                <Button icon="pi pi-trash" class="p-button-text p-button-danger" @click="removeDealer(data)" :loading="deletingDealerId === data.id" :disabled="deletingDealerId === data.id" />
+                            </template>
+                        </Column>
+                    </DataTable>
+                </div>
+
+                <div class="flex flex-col gap-8">
+                    <!-- Header -->
+                    <div class="card flex flex-col gap-6 w-full">
+                        <!-- Title -->
+                        <div class="text-2xl font-bold text-gray-800 border-b pb-2 mb-4">Campaign Report ({{ selectedReport.label }})</div>
+
+                        <!-- Filters Section -->
+                        <div>
+                            <!-- Main Filters Row -->
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <!-- Report Type -->
+                                <div>
+                                    <label class="block font-bold text-gray-700 mb-2">Report Type</label>
+                                    <Dropdown v-model="selectedReport" :options="reportTypes" optionLabel="label" placeholder="Select Report Type" class="w-full" />
+                                </div>
+                            </div>
+
+                            <!-- ✅ Include Deleted Users Checkbox -->
+                            <!-- <div class="flex items-center gap-2 mt-6">
+                                <Checkbox v-model="filters.includeDeleted" inputId="includeDeleted" :binary="true" />
+                                <label for="includeDeleted" class="text-gray-700 cursor-pointer">Include Deleted Users</label>
+                            </div> -->
+                        </div>
+
+                        <!-- Action Buttons -->
+                        <div class="flex justify-end gap-4 mt-6">
+                            <Button label="Clear Filters" class="p-button-primary" @click="clearFilters" />
+                            <Button label="Export" icon="pi pi-file-excel" class="p-button-success" @click="exportExcel" :loading="exportLoading" :disabled="!filters.years || filters.years.length === 0" />
+                        </div>
+                    </div>
                 </div>
             </div>
 
@@ -167,67 +247,13 @@
                                     <td class="px-4 py-2 font-medium"></td>
                                     <td class="py-4 text-right">
                                         <div class="flex justify-end">
-                                           <ToggleButton v-if="canUpdate"v-model="campaignStatus" @change="toggleCampaignStatus" onLabel="Active" offLabel="Inactive" onIcon="pi pi-times" offIcon="pi pi-check" class="w-30" />
+                                            <ToggleButton v-if="canUpdate" v-model="campaignStatus" @change="toggleCampaignStatus" onLabel="Active" offLabel="Inactive" onIcon="pi pi-times" offIcon="pi pi-check" class="w-30" />
                                         </div>
                                     </td>
                                 </tr>
                             </tbody>
                         </table>
                     </div>
-                </div>
-
-
-                <div class="card flex flex-col w-full">
-                    <!-- Header with Invite Button -->
-                    <div class="flex items-center justify-between border-b pb-2 mb-2">
-                        <div class="text-2xl font-bold text-gray-800">Participating Dealer</div>
-                        <Button v-if="canUpdate"
-                            label="Assign Dealer" 
-                            icon="pi pi-user-plus" 
-                            style="width: fit-content" 
-                            class="p-button-sm p-button-success" 
-                            @click="openInviteDealerDialog"
-                        />
-                    </div>
-
-                    <DataTable :value="dealerList" :paginator="true" :rows="3" dataKey="id" :rowHover="true" responsiveLayout="scroll" class="text-sm">
-                        <template #empty>
-                            <div class="text-center py-8 text-gray-500">No dealers invited yet.</div>
-                        </template>
-                        
-                        <!-- Title + ID -->
-                        <Column header="Name" style="min-width: 8rem">
-                            <template #body="{ data }">
-                                <div class="flex flex-col">
-                                    <span class="font-bold text-gray-800">{{ data.companyName }}</span>
-                                    <span class="text-gray-600 text-xm mt-2">🔧 {{ data.memberCode || data.custAccountNo }}</span>
-                                </div>
-                            </template>
-                        </Column>
-
-                        <!-- State -->
-                        <Column header="State" style="min-width: 6rem">
-                            <template #body="{ data }">
-                                <span class="text-gray-800">{{ data.state }}</span>
-                            </template>
-                        </Column>
-
-                        <!-- Signboard Type -->
-                        <Column field="signboardType" header="Signboard Type" style="min-width: 6rem"></Column>
-
-                        <!-- Actions -->
-                        <Column v-if="canUpdate" header="Actions" style="min-width: 4rem; text-align: center">
-                            <template #body="{ data }">
-                                <Button 
-                                    icon="pi pi-trash" 
-                                    class="p-button-text p-button-danger" 
-                                    @click="removeDealer(data)"
-                                    :loading="deletingDealerId === data.id"
-                                    :disabled="deletingDealerId === data.id"
-                                />
-                            </template>
-                        </Column>
-                    </DataTable>
                 </div>
 
                 <div class="card flex flex-col w-full">
@@ -239,7 +265,7 @@
                         <template #empty>
                             <div class="text-center py-8 text-gray-500">No criteria set for this campaign.</div>
                         </template>
-                        
+
                         <!-- Title + Type in one column -->
                         <Column header="Name" style="min-width: 8rem">
                             <template #body="{ data }">
@@ -276,20 +302,14 @@
         <!-- Invite Dealer Dialog -->
         <Dialog v-model:visible="inviteDealerDialogVisible" modal header="Invite Dealers" :style="{ width: '500px' }">
             <div class="flex flex-col gap-4">
-                <div class="text-gray-700">
-                    Select dealers to invite to this campaign. Note: Previously invited dealers will also need to be included.
-                </div>
-                
+                <div class="text-gray-700">Select dealers to invite to this campaign. Note: Previously invited dealers will also need to be included.</div>
+
                 <!-- Dealer Selection -->
                 <div class="flex flex-col gap-2">
                     <label class="font-medium text-gray-700">Available Dealers:</label>
                     <div class="max-h-60 overflow-y-auto border rounded p-2">
                         <div v-for="dealer in availableDealers" :key="dealer.id" class="flex items-center gap-3 p-2 hover:bg-gray-50 rounded">
-                            <Checkbox 
-                                v-model="selectedDealers" 
-                                :value="dealer.id" 
-                                :inputId="`dealer-${dealer.id}`" 
-                            />
+                            <Checkbox v-model="selectedDealers" :value="dealer.id" :inputId="`dealer-${dealer.id}`" />
                             <label :for="`dealer-${dealer.id}`" class="cursor-pointer flex-1">
                                 <div class="font-medium">{{ dealer.companyName }}</div>
                                 <div class="text-sm text-gray-500">{{ dealer.memberCode || dealer.custAccountNo }}</div>
@@ -299,34 +319,61 @@
                 </div>
 
                 <div class="flex justify-between items-center mt-4">
-                    <div class="text-sm text-gray-600">
-                        Selected: {{ selectedDealers.length }} dealers
-                    </div>
+                    <div class="text-sm text-gray-600">Selected: {{ selectedDealers.length }} dealers</div>
                     <div class="flex gap-2">
                         <Button label="Cancel" class="p-button-text" @click="closeInviteDealerDialog" />
-                        <Button 
-                            label="Invite" 
-                            icon="pi pi-user-plus" 
-                            class="p-button-success" 
-                            @click="inviteDealers" 
-                            :loading="inviteLoading"
-                            :disabled="selectedDealers.length === 0"
-                        />
+                        <Button label="Invite" icon="pi pi-user-plus" class="p-button-success" @click="inviteDealers" :loading="inviteLoading" :disabled="selectedDealers.length === 0" />
                     </div>
                 </div>
+            </div>
+        </Dialog>
+
+        <!-- TC Members Dialog -->
+        <Dialog v-model:visible="tcMembersDialogVisible" modal :header="'TC Members - ' + selectedDealerName + '(' + selectedDealerCode + ')'" :style="{ width: '1000px' }">
+            <div class="flex flex-col gap-4">
+                <DataTable :value="selectedDealerMembers" :paginator="true" :rows="5" dataKey="id" :rowHover="true" responsiveLayout="scroll" class="text-sm">
+                    <template #empty>
+                        <div class="text-center py-8 text-gray-500">No TC members found for this dealer.</div>
+                    </template>
+
+                    <!-- Member Code -->
+                    <Column field="member_code" header="Member Code" style="min-width: 8rem" sortable>
+                        <template #body="{ data }">
+                            <span class="font-medium text-gray-800">{{ data.member_code }}</span>
+                        </template>
+                    </Column>
+
+                    <!-- Full Name -->
+                    <Column field="full_name" header="Full Name" style="min-width: 10rem" sortable></Column>
+
+                    <!-- Email -->
+                    <Column field="email" header="Email" style="min-width: 12rem" sortable >
+                        <template #body="{ data }">
+                            <a :href="'mailto:' + data.email" >
+                                {{ data.email }}
+                            </a>
+                        </template>
+                    </Column>
+
+                    <!-- Phone -->
+                    <Column field="phone" header="Phone" style="min-width: 10rem" sortable></Column>
+
+                     <!-- Member Level -->
+                    <Column field="member_level" header="Member Level" style="min-width: 10rem" sortable></Column>
+                </DataTable>
             </div>
         </Dialog>
     </Fluid>
 </template>
 
 <script setup>
-import { ref, onMounted, computed } from 'vue';
+import { ref, onMounted, computed, reactive, watch } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { useToast } from 'primevue/usetoast';
 import { useConfirm } from 'primevue/useconfirm';
 import api from '@/service/api';
 import { useMenuStore } from '@/store/menu';
- 
+
 const menuStore = useMenuStore();
 const canUpdate = computed(() => menuStore.canWrite('Campaign Management'));
 const denyAccess = computed(() => menuStore.canTest('Campaign Management'));
@@ -335,12 +382,16 @@ const route = useRoute();
 const router = useRouter();
 const toast = useToast();
 const confirm = useConfirm();
-
 const campaignId = route.params.id;
 const loading = ref(true);
 const tableLoading = ref(false);
 const inviteLoading = ref(false);
 const deletingDealerId = ref(null); // Add this at the top with other refs
+// Add near your other refs
+const tcMembersDialogVisible = ref(false);
+const selectedDealerMembers = ref([]);
+const selectedDealerName = ref('');
+const selectedDealerCode = ref('');
 
 // Reactive data
 const hoverPrize = ref(null);
@@ -349,6 +400,32 @@ const selectedPrize = ref(null);
 const inviteDealerDialogVisible = ref(false);
 const selectedDealers = ref([]);
 const availableDealers = ref([]);
+
+// Function to show TC members in dialog
+const showTcMembers = (dealer) => {
+    selectedDealerMembers.value = dealer.tc_members || [];
+    selectedDealerName.value = dealer.companyName;
+    selectedDealerCode.value = dealer.custAccountNo;
+    tcMembersDialogVisible.value = true;
+};
+
+// Function to get severity color for member level
+const getMemberLevelSeverity = (level) => {
+    const levelMap = {
+        PLATINUM: 'success',
+        GOLD: 'warning',
+        SILVER: 'secondary',
+        BRONZE: 'info'
+    };
+    return levelMap[level] || 'info';
+};
+
+// Function to handle click on total participants
+const handleTotalParticipantsClick = (dealer) => {
+    if (dealer.totalParticipants > 0) {
+        showTcMembers(dealer);
+    }
+};
 
 // Main data structures
 const campaign = ref({
@@ -440,10 +517,10 @@ const openInviteDealerDialog = async () => {
     try {
         // Load available dealers (you might need to fetch this from an API)
         await loadAvailableDealers();
-        
+
         // Pre-select already invited dealers
-        selectedDealers.value = dealerList.value.map(dealer => dealer.id);
-        
+        selectedDealers.value = dealerList.value.map((dealer) => dealer.id);
+
         inviteDealerDialogVisible.value = true;
     } catch (error) {
         console.error('Error opening invite dealer dialog:', error);
@@ -470,7 +547,7 @@ const loadAvailableDealers = async () => {
         { id: 7, companyName: 'SINWUFU ENTERPRISE SDN. BHD.', memberCode: null, custAccountNo: '6080100900' },
         { id: 11, companyName: 'MATANG SDN BHD', memberCode: null, custAccountNo: '6027002600' },
         { id: 3, companyName: 'Dealer Three', memberCode: 'DLR003', custAccountNo: 'ACC003' },
-        { id: 4, companyName: 'Dealer Four', memberCode: 'DLR004', custAccountNo: 'ACC004' },
+        { id: 4, companyName: 'Dealer Four', memberCode: 'DLR004', custAccountNo: 'ACC004' }
     ];
 };
 
@@ -494,7 +571,7 @@ const inviteDealers = async () => {
                 detail: 'Dealers invited successfully',
                 life: 3000
             });
-            
+
             // Refresh the dealer list
             await fetchCampaignDetails();
             closeInviteDealerDialog();
@@ -536,15 +613,15 @@ const removeDealer = async (dealer) => {
 
                 // OPTION 1: If your API service has a removeDealerFromCampaign method
                 // const result = await api.removeDealerFromCampaign(campaignId, dealer.id);
-                
+
                 // OPTION 2: Direct API call (use this if Option 1 doesn't work)
                 const formData = new FormData();
                 formData.append('dealerID', dealer.id);
                 formData.append('campaignID', campaignId);
-                
+
                 const response = await api.post('campaign/removeDealer', formData, {
                     headers: {
-                        'Content-Type': 'application/x-www-form-urlencoded',
+                        'Content-Type': 'application/x-www-form-urlencoded'
                     }
                 });
 
@@ -554,7 +631,7 @@ const removeDealer = async (dealer) => {
                 if (result.status === 1) {
                     // Remove from local list only if API succeeds
                     dealerList.value = dealerList.value.filter((d) => d.id !== dealer.id);
-                    
+
                     // Show success message
                     toast.add({
                         severity: 'success',
@@ -567,7 +644,7 @@ const removeDealer = async (dealer) => {
                 }
             } catch (error) {
                 console.error('Error removing dealer:', error);
-                
+
                 // Show error message
                 toast.add({
                     severity: 'error',
@@ -604,7 +681,7 @@ const confirmDelete = () => {
             try {
                 // Replace with your actual delete API endpoint
                 const response = await api.put(`campaign/delete/${campaign.value.id}`);
-                
+
                 if (response.data.status === 1) {
                     toast.add({
                         severity: 'success',
@@ -652,7 +729,7 @@ const fetchCampaignDetails = async () => {
 
         if (response.data.status === 1 && response.data.admin_data) {
             const data = response.data.admin_data;
-            
+
             // Set campaign details
             if (data.campaign_details) {
                 campaign.value = {
@@ -666,27 +743,30 @@ const fetchCampaignDetails = async () => {
 
             // Set criteria
             if (Array.isArray(data.criteria)) {
-                criteria.value = data.criteria.map(item => ({
+                criteria.value = data.criteria.map((item) => ({
                     ...item,
                     type: 'Tire' // Default type as per your structure
                 }));
             }
 
             // Set dealer list
+            // In fetchCampaignDetails function, update the dealer list mapping:
             if (Array.isArray(data.participate_dealer)) {
-                dealerList.value = data.participate_dealer.map(dealer => ({
+                dealerList.value = data.participate_dealer.map((dealer) => ({
                     id: dealer.id,
-                    companyName: dealer.companyName,
+                    companyName: dealer.shopName || dealer.companyName, // Use shopName from API
                     memberCode: dealer.memberCode,
                     custAccountNo: dealer.custAccountNo,
-                    state: 'Unknown', // You might need to get this from another API
-                    signboardType: 'N/A' // Default value
+                    state: dealer.regionName, // Use regionName as state
+                    signboardType: 'N/A', // Default value
+                    tc_members: dealer.tc_members || [], // Store the tc_members array
+                    totalParticipants: dealer.tc_members ? dealer.tc_members.length : 0 // Calculate total
                 }));
             }
 
             // Set prize list from reward_option
             if (Array.isArray(data.reward_option)) {
-                listPrize.value = data.reward_option.map(reward => {
+                listPrize.value = data.reward_option.map((reward) => {
                     const catalog = reward.catalog;
                     return {
                         id: reward.id,
@@ -703,7 +783,6 @@ const fetchCampaignDetails = async () => {
                 // Process private images for prize photos
                 await processPrizeImages();
             }
-
         } else {
             console.error('API returned error or invalid data:', response.data);
             toast.add({
@@ -734,7 +813,7 @@ const processCampaignImages = async () => {
     for (const field of imageFields) {
         if (campaign.value[field] && typeof campaign.value[field] === 'string') {
             try {
-                const blobUrl =(campaign.value[field]);
+                const blobUrl = campaign.value[field];
                 if (blobUrl) {
                     campaign.value[field] = blobUrl;
                 }
@@ -751,7 +830,7 @@ const processPrizeImages = async () => {
     for (const prize of listPrize.value) {
         if (prize.imageURL && typeof prize.imageURL === 'string') {
             try {
-                const blobUrl = (prize.imageURL);
+                const blobUrl = prize.imageURL;
                 if (blobUrl) {
                     prize.imageURL = blobUrl;
                 }
@@ -766,10 +845,10 @@ const processPrizeImages = async () => {
 // Helper functions
 const mapPrizeType = (apiType) => {
     const typeMap = {
-        'EWALLET': 'E-Wallet',
-        'EVOUCHER': 'E-Voucher',
-        'ITEM': 'Item',
-        'POINT': 'Point'
+        EWALLET: 'E-Wallet',
+        EVOUCHER: 'E-Voucher',
+        ITEM: 'Item',
+        POINT: 'Point'
     };
     return typeMap[apiType] || apiType;
 };
@@ -788,14 +867,14 @@ function savePrizeEdit() {
 }
 
 function approveParticipant(participant) {
-    const target = participants.value.find(p => p.id === participant.id);
+    const target = participants.value.find((p) => p.id === participant.id);
     if (target) {
         target.status = 'Approved';
     }
 }
 
 function rejectParticipant(participant) {
-    const target = participants.value.find(p => p.id === participant.id);
+    const target = participants.value.find((p) => p.id === participant.id);
     if (target) {
         target.status = 'Rejected';
     }
@@ -804,5 +883,335 @@ function rejectParticipant(participant) {
 // Lifecycle
 onMounted(() => {
     fetchCampaignDetails();
+    generateYearOptions(5);
+    const currentYear = new Date().getFullYear().toString();
+    filters.years = [currentYear];
+    filters.includeDeleted = false; // ✅ Default to false
 });
+
+// ✅ Report Types with API endpoint mapping
+const reportTypes = ref([
+    { label: 'Tire Pattern', value: 'by-pattern', apiEndpoint: 'report/tirepattern-report-campaign', columnHeader: 'Pattern' },
+    { label: 'Tire Size', value: 'by-size', apiEndpoint: 'report/tiresize-report-campaign', columnHeader: 'Size' },
+    { label: 'Vehicle Brand', value: 'by-brand', apiEndpoint: 'report/vehiclebrand-report-campaign', columnHeader: 'Brand' },
+    { label: 'Vehicle Type', value: 'by-type', apiEndpoint: 'report/vehicletype-report-campaign', columnHeader: 'Type' }
+]);
+
+// ✅ Selected Report
+const selectedReport = ref(reportTypes.value[0]);
+
+// ✅ Filters - Add includeDeleted with default value
+const filters = reactive({
+    years: [],
+    month: null,
+    expiryFrom: null,
+    expiryTo: null,
+    includeDeleted: false // ✅ Default to false (0)
+});
+
+// ✅ Report Data
+const reportData = ref([]);
+
+// ✅ Loading states
+const exportLoading = ref(false);
+const loadingData = ref(false);
+
+// ✅ Year Options
+const yearOptions = ref([]);
+
+const generateYearOptions = (yearsBack = 10) => {
+    const currentYear = new Date().getFullYear();
+    const years = [];
+    for (let i = 0; i < yearsBack; i++) {
+        const year = currentYear - i;
+        years.push({ label: year.toString(), value: year.toString() });
+    }
+    yearOptions.value = years;
+};
+
+// ✅ Show Toast Notification
+const showToast = (severity, summary, detail, life = 3000) => {
+    toast.add({
+        severity,
+        summary,
+        detail,
+        life
+    });
+};
+
+// ✅ Clear Filters - Reset includeDeleted to false
+const clearFilters = () => {
+    filters.years = [];
+    filters.month = null;
+    filters.expiryFrom = null;
+    filters.expiryTo = null;
+    filters.includeDeleted = false; // ✅ Reset to false
+    reportData.value = [];
+
+    showToast('info', 'Filters Cleared', 'All filters have been reset to default values.');
+};
+
+// ✅ Prepare JSON Body for API - Add include_deleted parameter
+const prepareRequestBody = () => {
+    if (!filters.years || filters.years.length === 0) {
+        showToast('warn', 'Years Required', 'Please select at least one year.');
+        return null;
+    }
+
+    const requestBody = {
+        years: filters.years,
+        include_deleted: filters.includeDeleted ? 1 : 0 // ✅ Add include_deleted parameter
+    };
+
+    // Add additional filters
+    if (selectedReport.value.value === 'by-birthday' && filters.month) {
+        requestBody.month = filters.month;
+    }
+
+    if (selectedReport.value.value === 'point-expiry') {
+        if (filters.expiryFrom !== null && filters.expiryFrom !== undefined) {
+            requestBody.expiryFrom = filters.expiryFrom;
+        }
+        if (filters.expiryTo !== null && filters.expiryTo !== undefined) {
+            requestBody.expiryTo = filters.expiryTo;
+        }
+    }
+
+    return requestBody;
+};
+
+// ✅ EXPORT TO EXCEL - Updated to include include_deleted parameter
+const exportExcel = async () => {
+    exportLoading.value = true;
+
+    try {
+        const endpoint = `${selectedReport.value.apiEndpoint}/${campaignId}`;
+
+        // Try different approaches sequentially
+        let response;
+
+        response = await api.postExtra(
+            endpoint,
+            {},
+            {
+                responseType: 'blob',
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            }
+        );
+
+        // Check content type
+        const contentType = response.headers['content-type'] || response.data.type || 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet';
+
+        // Create blob
+        const blob = new Blob([response.data], { type: contentType });
+
+        // Generate download URL
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+
+        const timestamp = new Date().toISOString().split('T')[0];
+
+        const campaignNo = campaign.value.campaignNo || 'Campaign';
+        const title = campaign.value.title || 'Report';
+
+        // Optional: clean title for filename
+        const safeTitle = title.replace(/[^\w\d]+/g, '_');
+
+        let filename = `${campaignNo}_${safeTitle}_${timestamp}.xlsx`;
+        campaign.value;
+        const contentDisposition = response.headers['content-disposition'];
+        if (contentDisposition) {
+            const filenameMatch = contentDisposition.match(/filename\*?=["']?([^"']+)["']?/i);
+            if (filenameMatch && filenameMatch[1]) {
+                filename = decodeURIComponent(filenameMatch[1]);
+            }
+        }
+
+        a.href = url;
+        a.download = filename;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+
+        // Cleanup
+        setTimeout(() => {
+            window.URL.revokeObjectURL(url);
+        }, 100);
+
+        showToast('success', 'Export Successful', `${filename} downloaded successfully!`);
+    } catch (error) {
+        console.error('❌ Export Error Details:', error);
+        showToast('error', 'Export Error', error.message || 'Failed to export');
+    } finally {
+        exportLoading.value = false;
+    }
+};
+
+// Watch for filter changes
+let debounceTimer = null;
+watch(
+    () => [selectedReport.value, filters.years, filters.month, filters.expiryFrom, filters.expiryTo, filters.includeDeleted], // ✅ Add includeDeleted to watch
+    () => {
+        if (debounceTimer) {
+            clearTimeout(debounceTimer);
+        }
+    },
+    { deep: true }
+);
+
+const fetchExport = async () => {
+    try {
+        loading.value = true;
+
+        const response = await api.postExtra(`report/dealer-report-campaign/${campaignId}`, {}, { responseType: 'arraybuffer' });
+        const timestamp = new Date().toISOString().split('T')[0];
+
+        const campaignNo = campaign.value.campaignNo || 'Campaign';
+        const title = campaign.value.title || 'Report';
+
+        // Optional: clean title for filename
+        const safeTitle = title.replace(/[^\w\d]+/g, '_');
+
+        let filename = `${campaignNo}_${safeTitle}_${timestamp}.xlsx`;
+        const blob = new Blob([response.data], {
+            type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+        });
+
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = filename;
+        a.click();
+        URL.revokeObjectURL(url);
+
+        toast.add({
+            severity: 'success',
+            summary: 'Success',
+            detail: 'Export completed',
+            life: 3000
+        });
+    } catch (error) {
+        console.error('Export error:', error);
+        toast.add({
+            severity: 'error',
+            summary: 'Error',
+            detail: 'Export failed',
+            life: 3000
+        });
+    } finally {
+        loading.value = false;
+    }
+};
+
+const fetchExport1 = async () => {
+    try {
+        loading.value = true;
+
+        const response = await api.postExtra(`report/campaign-detail/${campaignId}`, {}, { responseType: 'arraybuffer' });
+        const timestamp = new Date().toISOString().split('T')[0];
+
+        const campaignNo = campaign.value.campaignNo || 'Campaign';
+        const title = campaign.value.title || 'Report';
+
+        // Optional: clean title for filename
+        const safeTitle = title.replace(/[^\w\d]+/g, '_');
+
+        let filename = `${campaignNo}_${safeTitle}_${timestamp}.xlsx`;
+        const blob = new Blob([response.data], {
+            type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+        });
+
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = filename;
+        a.click();
+        URL.revokeObjectURL(url);
+
+        toast.add({
+            severity: 'success',
+            summary: 'Success',
+            detail: 'Export completed',
+            life: 3000
+        });
+    } catch (error) {
+        console.error('Export error:', error);
+        toast.add({
+            severity: 'error',
+            summary: 'Error',
+            detail: 'Export failed',
+            life: 3000
+        });
+    } finally {
+        loading.value = false;
+    }
+};
 </script>
+
+<style scoped>
+:deep(.p-multiselect),
+:deep(.p-dropdown),
+:deep(.p-inputnumber) {
+    width: 100%;
+}
+
+:deep(.p-button:disabled) {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+/* Custom styling for the multi-select chips */
+:deep(.p-multiselect-chip .p-multiselect-token) {
+    background-color: #e2e8f0;
+    color: #1e293b;
+    font-weight: 500;
+}
+
+/* Toast positioning */
+:deep(.p-toast) {
+    z-index: 1000;
+}
+
+/* Table styling */
+table {
+    border-collapse: collapse;
+    width: 100%;
+}
+
+th,
+td {
+    padding: 8px 12px;
+    border: 1px solid #e5e7eb;
+}
+
+thead {
+    background-color: #f9fafb;
+}
+
+tbody tr:hover {
+    background-color: #f3f4f6;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .grid-cols-1.md\:grid-cols-2 {
+        grid-template-columns: 1fr;
+    }
+
+    .flex.gap-2 {
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+
+    table {
+        font-size: 14px;
+    }
+
+    th,
+    td {
+        padding: 6px 8px;
+    }
+}
+</style>

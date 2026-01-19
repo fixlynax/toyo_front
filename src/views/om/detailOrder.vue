@@ -113,11 +113,16 @@
                                 </tr>
                                 <tr class="border-b">
                                     <td class="px-4 py-2 font-medium">Order Type</td>
-                                    <td class="px-4 py-2 text-right font-medium">{{ orderData.deliveryType || '-' }}</td>
-                                </tr>
-                                <tr class="border-b">
-                                    <td class="px-4 py-2 font-medium">Order Description</td>
-                                    <td class="px-4 py-2 text-right font-medium">{{ orderData.orderDesc || '-' }}</td>
+                                    <td class="px-4 py-2 text-right font-medium">
+                                        <span v-if="orderData.orderDesc === 'NORMAL'">NORMAL</span>
+                                        <span v-else-if="orderData.orderDesc === 'DIRECTSHIP'">DS</span>
+                                        <span v-else-if="orderData.orderDesc === 'OWN'">OWN USE</span>
+                                        <span v-else-if="orderData.orderDesc === 'Warranty'">WARRANTY</span>
+                                        <span v-else-if="orderData.orderDesc === 'Back Order'">NORMAL</span>
+                                        <span v-else>
+                                            {{ orderData.orderDesc || orderData.orderDesc || '-' }}
+                                        </span>
+                                    </td>
                                 </tr>
                                 <tr class="border-b">
                                     <td class="px-4 py-2 font-medium">Order SAP Type</td>
@@ -153,25 +158,29 @@
                                 </tr>
                                 <tr class="border-b">
                                     <td class="px-4 py-2 font-medium">ETA Date</td>
-                                    <td class="px-4 py-2 text-right font-medium">{{ formatDate(orderData.deliveryDate) || '-' }}</td>
+                                    <td class="px-4 py-2 text-right font-medium">{{ formatDateTime(orderData.deliveryDate) || '-' }}</td>
                                 </tr>
                                 <tr class="border-b">
                                     <td class="px-4 py-2 font-medium">Planned Date</td>
-                                    <td class="px-4 py-2 text-right font-medium">{{ formatDate(deliveryInfo.scheduled_delivery_time) || '-' }}</td>
+                                    <td class="px-4 py-2 text-right font-medium">{{ formatDateTime(deliveryInfo.scheduled_delivery_time) || '-' }}</td>
                                 </tr>
                                 <tr class="border-b">
                                     <td class="px-4 py-2 font-medium">Delivered Date</td>
-                                    <td class="px-4 py-2 text-right font-medium">{{ formatDate(deliveryInfo.delivered_datetime) || '-' }}</td>
+                                    <td class="px-4 py-2 text-right font-medium">{{ formatDateTime(deliveryInfo.delivered_datetime) || '-' }}</td>
                                 </tr>
                                 <tr class="border-b">
-                                    <td class="px-4 py-2 font-medium">Created</td>
+                                    <td class="px-4 py-2 font-medium">Created On</td>
                                     <td class="px-4 py-2 text-right font-medium">{{ formatDateTime(orderData.created) || '-' }}</td>
+                                </tr>
+                                <tr class="border-b">
+                                    <td class="px-4 py-2 font-medium">Created By</td>
+                                    <td class="px-4 py-2 text-right font-medium">{{ orderData.placeOrderBy || '-' }}</td>
                                 </tr>
                                 <tr>
                                     <td colspan="2" class="px-2 py-2 text-right">
                                         <div class="flex justify-end gap-2">
-                                            <Button label="Return Order" class="p-button-danger text-sm !w-fit" @click="showReturnOrderDialog = true" :disabled="!canReturnOrder" />
-                                            <Button label="Pull SAP Update" class="text-sm !w-fit" @click="pullSAPUpdate" :loading="loadingSAP" />
+                                            <Button v-if="canUpdate" label="Return Order" class="p-button-danger text-sm !w-fit" @click="showReturnOrderDialog = true" :disabled="!canReturnOrder" />
+                                            <Button v-if="canUpdate" label="Pull SAP Update" class="text-sm !w-fit" @click="pullSAPUpdate" :loading="loadingSAP" />
                                         </div>
                                     </td>
                                 </tr>
@@ -260,7 +269,7 @@
                             <i class="pi pi-info-circle text-2xl mb-2"></i>
                             <p class="text-lg font-medium">No collector information available</p>
                         </div>
-                        <Button v-if="hasPickupInfo" label="Add Driver" icon="pi pi-plus" class="p-button-primary" style="width: fit-content" @click="showAddDriverDialog = true" :disabled="loadingDriver" />
+                        <Button v-if="hasPickupInfo && canUpdate" label="Add Driver" icon="pi pi-plus" class="p-button-primary" style="width: fit-content" @click="showAddDriverDialog = true" :disabled="loadingDriver" />
                     </div>
                 </div>
             </div>
@@ -400,10 +409,14 @@ import { ref, computed, onMounted, watch } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { useToast } from 'primevue/usetoast';
 import api from '@/service/api';
+import { useMenuStore } from '@/store/menu';
 
 const toast = useToast();
 const route = useRoute();
 const router = useRouter();
+
+const menuStore = useMenuStore();
+const canUpdate = computed(() => menuStore.canWrite('Order'));
 
 // Reactive data
 const orderData = ref({});
@@ -488,7 +501,22 @@ const formatDate = (dateString) => {
 
 const formatDateTime = (dateString) => {
     if (!dateString) return '-';
-    return new Date(dateString).toLocaleString('en-MY');
+    
+    const date = new Date(dateString);
+    const options = {
+        day: '2-digit',
+        month: '2-digit',
+        year: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit',
+        second: '2-digit',
+        hour12: true
+    };
+    
+    let formatted = date.toLocaleString('en-MY', options);
+    
+    // Convert AM/PM to uppercase regardless of case
+    return formatted.replace(/\b(am|pm)\b/gi, (match) => match.toUpperCase());
 };
 
 const formatItemNo = (itemNo) => {

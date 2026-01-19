@@ -150,10 +150,16 @@
                                                 <span class="block text-xm font-medium text-gray-500">Warranty Certificate No</span>
                                                 <p class="text-base font-semibold text-gray-800">{{ cert.warrantyCertNo }}</p>
                                             </div>
+                                            <div>
+                                                <span class="block text-xm font-medium text-gray-500">Expiry Date</span>
+                                                <p class="text-base font-semibold text-gray-800">{{ cert.expiredDate }}</p>
+                                            </div>
                                             <div class="flex items-center gap-3">
                                                 <div>
-                                                    <span class="block text-xm font-medium text-gray-500">Type</span>
                                                     <Tag :value="cert.type" :severity="cert.type === 'NORMAL' ? 'success' : 'warning'" size="small" />
+                                                </div>
+                                                <div>
+                                                    <Tag v-if="Number(cert.isTWP) === 1" value="TWP" severity="info" />
                                                 </div>
                                             </div>
                                         </div>
@@ -221,7 +227,8 @@
                                 <tr>
                                     <td class="px-4 py-2 font-medium">Account Status</td>
                                     <td class="px-2 py-2 text-right">
-                                        <Button v-if="canUpdate"
+                                        <Button
+                                            v-if="canUpdate"
                                             :label="memberDetail.status === 0 ? 'Inactive' : 'Active'"
                                             :severity="memberDetail.status === 0 ? 'danger' : 'success'"
                                             size="small"
@@ -249,7 +256,7 @@
                         <div v-if="!memberDetail.point_transactions || memberDetail.point_transactions.length === 0" class="text-center py-4 text-gray-500">No point transactions available</div>
 
                         <!-- Display limited transactions (first 5) -->
-                        <div v-else class="p-4 space-y-4">
+                        <div v-else class="space-y-4">
                             <div class="flex justify-between items-center mb-2">
                                 <div class="text-sm font-medium">Recent Transactions</div>
                                 <Button v-if="memberDetail.point_transactions.length > 5" label="View All" icon="pi pi-eye" class="p-button-text p-button-sm" @click="showAllTransactions = true" />
@@ -273,7 +280,7 @@
                                     </div>
 
                                     <!-- Second Row: Description -->
-                                    <div class="mt-3 pt-3 border-t border-gray-100">
+                                    <div class="border-t border-gray-100">
                                         <div class="space-y-1">
                                             <span class="block text-xs font-medium text-gray-500">Description</span>
                                             <span class="text-sm text-gray-700">{{ transaction.desc || '-' }}</span>
@@ -372,7 +379,7 @@ import { useToast } from 'primevue/usetoast';
 import api from '@/service/api';
 import LoadingPage from '@/components/LoadingPage.vue';
 import { useMenuStore } from '@/store/menu';
- 
+
 const menuStore = useMenuStore();
 const canUpdate = computed(() => menuStore.canWrite('Member List'));
 const denyAccess = computed(() => menuStore.canTest('Member List'));
@@ -479,7 +486,6 @@ const fetchMemberDetail = async () => {
                 warrantyCerts: userData.warrantyCerts || [],
                 point_transactions: userData.point_transactions || []
             };
-
         } else {
             console.error('API returned error:', response.data);
             showToast('error', 'Error', 'Failed to load user details');

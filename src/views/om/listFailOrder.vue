@@ -189,6 +189,26 @@ const formatDate = (dateString) => {
         .split(',')[0]; // Get only date part
 };
 
+const formatDateTime = (dateString) => {
+    if (!dateString) return '-';
+    
+    const date = new Date(dateString);
+    const options = {
+        day: '2-digit',
+        month: '2-digit',
+        year: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit',
+        second: '2-digit',
+        hour12: true
+    };
+    
+    let formatted = date.toLocaleString('en-MY', options);
+    
+    // Convert AM/PM to uppercase regardless of case
+    return formatted.replace(/\b(am|pm)\b/gi, (match) => match.toUpperCase());
+};
+
 // 🟢 Get Status Severity
 const getStatusSeverity = (status) => {
     switch (status) {
@@ -213,7 +233,7 @@ const getOrderTypeLabel = (orderType) => {
         case 'Warranty':
             return 'WARRANTY';
         case 'Back Order':
-            return 'BACK ORDER';
+            return 'NORMAL';
         default:
             return orderType || '-';
     }
@@ -252,7 +272,7 @@ onBeforeMount(async () => {
 
 <template>
     <div class="card">
-        <div class="text-2xl font-bold text-gray-800 border-b pb-2 mb-4">Failed Orders</div>
+        <div class="text-2xl font-bold text-gray-800 border-b pb-2 mb-4">Failed Order</div>
 
         <div>
             <LoadingPage v-if="loading" :message="'Loading Failed Orders...'" :sub-message="'Fetching failed order list'" />
@@ -309,8 +329,8 @@ onBeforeMount(async () => {
                 </template>
 
                 <!-- Regular Columns -->
-                <Column field="created" header="Created Date" style="min-width: 7rem" sortable>
-                    <template #body="{ data }">{{ formatDate(data.created) }}</template>
+                <Column field="created" header="Created On" style="min-width: 7rem" sortable>
+                    <template #body="{ data }">{{ formatDateTime(data.created) }}</template>
                 </Column>
 
                 <Column header="Order No" style="min-width: 9rem" sortable>

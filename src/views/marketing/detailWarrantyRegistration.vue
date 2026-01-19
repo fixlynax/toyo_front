@@ -25,6 +25,14 @@
                             <span class="block text-lg font-bold text-black-700">Registered Date</span>
                             <p class="text-lg font-medium">{{ formatDateOnly(Warranty.warranty_info?.date_registered || '-' ) }}</p>
                         </div>
+                        <div class="mt-6">
+                            <span class="block text-lg font-bold text-black-700">Warranty</span>
+                            <p class="text-lg font-medium">{{Warranty.warranty_info?.isTWP === 1 ? 'TWP' : 'Normal'}}</p>
+                        </div>
+                        <div class="mt-6">
+                            <span class="block text-lg font-bold text-black-700">Expiry Date</span>
+                            <p class="text-lg font-medium">{{ formatDateOnly2(Warranty.warranty_info?.expiredDate || '-' ) }}</p>
+                        </div>
                     </div>
                 </div>
 
@@ -281,6 +289,14 @@ function formatDateOnly(dateString) {
     const year = date.getFullYear();
 
     return `${day}/${month}/${year}`;
+}
+function formatDateOnly2(dateString) {
+    if (!dateString) return '';
+
+    const [day, month, year] = dateString.split('-');
+    if (!day || !month || !year) return '';
+
+    return `${day.padStart(2, '0')}/${month.padStart(2, '0')}/${year}`;
 }
 
 onMounted(() => {

@@ -4,6 +4,7 @@ import { FilterMatchMode, FilterOperator } from '@primevue/core/api';
 import { onBeforeMount, ref, computed, watch } from 'vue';
 import { RouterLink } from 'vue-router';
 import LoadingPage from '@/components/LoadingPage.vue';
+import { useMenuStore } from '@/store/menu';
 
 // 🟢 State
 const filters1 = ref({});
@@ -11,6 +12,8 @@ const listData = ref([]);
 const loading = ref(true);
 const dateRange = ref([null, null]); // [startDate, endDate]
 const hasDateFilterApplied = ref(false); // New flag to track if date filter is applied
+const menuStore = useMenuStore();
+const canUpdate = computed(() => menuStore.canWrite('Order'));
 
 // 🟢 Filters
 function initFilters1() {
@@ -95,7 +98,7 @@ const fetchOrders = async (status = null, dateFilter = false, useDefaultRange = 
                 custAccountNo: order.custaccountno,
                 companyName: order.dealerName,
                 sapOrderType: order.sapordertype,
-                orderType: order.orderDesc,
+                orderType: order.orderDesc === 'Back Order'? 'NORMAL': order.orderDesc,
                 deliveryType: order.deliveryType,
                 shipToAccountNo: order.shiptoCustAccNo,
                 deliveryDate: order.deliveryDate,
@@ -226,7 +229,22 @@ const formatDate = (dateString) => {
 
 const formatDateTime = (dateString) => {
     if (!dateString) return '-';
-    return new Date(dateString).toLocaleString('en-MY');
+    
+    const date = new Date(dateString);
+    const options = {
+        day: '2-digit',
+        month: '2-digit',
+        year: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit',
+        second: '2-digit',
+        hour12: true
+    };
+    
+    let formatted = date.toLocaleString('en-MY', options);
+    
+    // Convert AM/PM to uppercase regardless of case
+    return formatted.replace(/\b(am|pm)\b/gi, (match) => match.toUpperCase());
 };
 
 // 🟢 Clear Date Range
@@ -283,7 +301,7 @@ const clearDateRange = () => {
                             </div>
                             <div>
                                 <RouterLink to="/om/createOrder">
-                                    <Button label="Create" icon="pi pi-plus" class="p-button-primary" />
+                                    <Button v-if="canUpdate" label="Create" icon="pi pi-plus" class="p-button-primary" />
                                 </RouterLink>
                             </div>
                         </div>
@@ -319,7 +337,7 @@ const clearDateRange = () => {
                 </template>
 
                 <!-- Changed from created to orderDate -->
-                <Column field="orderDate" header="Created Date" style="min-width: 8rem" sortable>
+                <Column field="orderDate" header="Created On" style="min-width: 8rem" sortable>
                     <template #body="{ data }">{{ formatDateTime(data.created) }}</template>
                 </Column>
 
@@ -344,7 +362,7 @@ const clearDateRange = () => {
                         <span v-else-if="data.orderType === 'Directship'">DS</span>
                         <span v-else-if="data.orderType === 'Own'">OWN USE</span>
                         <span v-else-if="data.orderType === 'Warranty'">WARRANTY</span>
-                        <span v-else-if="data.orderType === 'Back Order'">BACK ORDER</span>
+                        <span v-else-if="data.orderType === 'Back Order'">NORMAL</span>
                         <span v-else>{{ data.orderType || data.sapOrderType || '-' }}</span>
                     </template>
                 </Column>

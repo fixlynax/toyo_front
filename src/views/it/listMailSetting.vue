@@ -2,23 +2,22 @@
     <div class="card">
         <div class="text-2xl font-bold text-gray-800 border-b pb-2 mb-4">Email Setting</div>
 
-        <DataTable 
-            :value="listData" 
-            :paginator="true" 
-            :rows="10" 
+        <DataTable
+            :value="listData"
+            :paginator="true"
+            :rows="10"
             :rowsPerPageOptions="[10, 20, 50, 100]"
-            dataKey="id" 
-            :rowHover="true" 
-            :loading="loading" 
-            :filters="filters1" 
-            filterDisplay="menu" 
-            :expandedRows="expandedRows" 
-            @row-toggle="onRowToggle" 
-            class=" rounded-table"
+            dataKey="id"
+            :rowHover="true"
+            :loading="loading"
+            :filters="filters1"
+            filterDisplay="menu"
+            :expandedRows="expandedRows"
+            @row-toggle="onRowToggle"
+            class="rounded-table"
             currentPageReportTemplate="Showing {first} to {last} of {totalRecords} entries"
             paginatorTemplate="CurrentPageReport FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink RowsPerPageDropdown"
         >
-        
             <template #header>
                 <div class="flex items-center justify-between gap-4 w-full flex-wrap">
                     <div class="flex items-center gap-2 w-full max-w-md">
@@ -74,7 +73,7 @@
                         <div class="flex items-start">
                             <i class="pi pi-calendar-plus text-green-500 mt-1 mr-2 text-sm"></i>
                             <div>
-                                <div class="text-xs text-gray-500">Created</div>
+                                <div class="text-xs text-gray-500">Created On</div>
                                 <div class="text-sm font-medium text-gray-800">{{ formatDate(data.created) }}</div>
                             </div>
                         </div>
@@ -89,7 +88,7 @@
                 </template>
             </Column>
 
-            <Column header="Actions" style="width: 100px">
+            <Column header="Action" style="width: 100px">
                 <template #body="{ data }">
                     <div class="flex gap-2">
                         <Button v-if="editingId === data.id" icon="pi pi-check" class="p-button-text p-button-success p-button-sm" @click="saveSetting(data)" title="Save" />
@@ -142,17 +141,20 @@
                     </div>
 
                     <!-- Read-only Email List -->
-                    <DataTable 
-                        v-else :value="getEmailData(data.emails)" 
-                        :paginator="true" :rows="5" 
-                        :rowsPerPageOptions="[5, 10, 20, 25, 50]" 
-                        dataKey="email" 
-                        :rowHover="true" 
-                        responsiveLayout="scroll" 
-                        class="rounded-table" 
+                    <DataTable
+                        v-else
+                        :value="getEmailData(data.emails)"
+                        :paginator="true"
+                        :rows="5"
+                        :rowsPerPageOptions="[5, 10, 20, 25, 50]"
+                        dataKey="email"
+                        :rowHover="true"
+                        responsiveLayout="scroll"
+                        class="rounded-table"
                         :alwaysShowPaginator="false"
                         currentPageReportTemplate="Showing {first} to {last} of {totalRecords} entries"
-                        paginatorTemplate="CurrentPageReport FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink RowsPerPageDropdown">
+                        paginatorTemplate="CurrentPageReport FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink RowsPerPageDropdown"
+                    >
                         <Column header="Email Address" style="min-width: 20rem">
                             <template #body="{ data }">
                                 <div class="flex items-center">
@@ -187,6 +189,11 @@
 import api from '@/service/api';
 import { useToast } from 'primevue/usetoast';
 import Badge from 'primevue/badge';
+import { computed } from 'vue';
+import { useMenuStore } from '@/store/menu';
+
+const menuStore = useMenuStore();
+const canUpdate = computed(() => menuStore.canWrite('Email Setting'));
 
 export default {
     name: 'MailSettingList',
@@ -431,14 +438,18 @@ export default {
                 const date = new Date(dateStr);
                 if (isNaN(date.getTime())) return '-';
 
-                return new Intl.DateTimeFormat('en-GB', {
+                // Use hour12: true to get AM/PM format
+                const formatted = new Intl.DateTimeFormat('en-GB', {
                     year: 'numeric',
                     month: 'short',
                     day: '2-digit',
                     hour: '2-digit',
                     minute: '2-digit',
-                    hour12: false
+                    hour12: true // Changed from false to true
                 }).format(date);
+
+                // Convert am/pm to uppercase
+                return formatted.replace(/\b(am|pm)\b/gi, (match) => match.toUpperCase());
             } catch (error) {
                 return '-';
             }

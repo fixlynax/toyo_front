@@ -3,6 +3,10 @@ import api from '@/service/api';
 import { FilterMatchMode, FilterOperator } from '@primevue/core/api';
 import { onBeforeMount, ref, computed } from 'vue';
 import LoadingPage from '@/components/LoadingPage.vue';
+import { useMenuStore } from '@/store/menu';
+
+const menuStore = useMenuStore();
+const canUpdate = computed(() => menuStore.canWrite('Sales Program'));
 
 const filters1 = ref(null);
 const listData = ref([]);
@@ -137,7 +141,7 @@ onBeforeMount(async () => {
 
                     <!-- Create Button -->
                     <RouterLink to="/om/createSalesProgram">
-                        <Button type="button" label="Create" icon="pi pi-plus" class="p-button" />
+                        <Button v-if="canUpdate" type="button" label="Create" icon="pi pi-plus" class="p-button" />
                     </RouterLink>
                 </div>
             </template>

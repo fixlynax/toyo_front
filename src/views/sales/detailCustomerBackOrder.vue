@@ -212,16 +212,16 @@
                                     <td class="px-4 py-2 text-right">{{ order.storagelocation || '-' }}</td>
                                 </tr>
                                 <tr class="border-b">
-                                    <td class="px-4 py-2 font-medium">Created</td>
-                                    <td class="px-4 py-2 text-right">{{ formatDate(order.created) }}</td>
+                                    <td class="px-4 py-2 font-medium">Created On</td>
+                                    <td class="px-4 py-2 text-right">{{ formatDateTime(order.created) }}</td>
                                 </tr>
                                 <tr class="border-b">
-                                    <td class="px-4 py-2 font-medium">Modified</td>
-                                    <td class="px-4 py-2 text-right">{{ formatDate(order.modified) }}</td>
+                                    <td class="px-4 py-2 font-medium">Modified On</td>
+                                    <td class="px-4 py-2 text-right">{{ formatDateTime(order.modified) }}</td>
                                 </tr>
                                 <tr>
-                                    <td class="px-4 py-2 font-medium">Expiry</td>
-                                    <td class="px-4 py-2 text-right">{{ formatDate(order.expiry) }}</td>
+                                    <td class="px-4 py-2 font-medium">Expiry On</td>
+                                    <td class="px-4 py-2 text-right">{{ formatDateTime(order.expiry) }}</td>
                                 </tr>
                                 <tr class="border-t">
                                     <td class="px-4 py-2 font-medium">Total Orders</td>
@@ -470,6 +470,26 @@ const formatDate = (dateString) => {
     });
 };
 
+const formatDateTime = (dateString) => {
+    if (!dateString) return '-';
+    
+    const date = new Date(dateString);
+    const options = {
+        day: '2-digit',
+        month: '2-digit',
+        year: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit',
+        second: '2-digit',
+        hour12: true
+    };
+    
+    let formatted = date.toLocaleString('en-MY', options);
+    
+    // Convert AM/PM to uppercase regardless of case
+    return formatted.replace(/\b(am|pm)\b/gi, (match) => match.toUpperCase());
+};
+
 // Computed properties
 const backOrderItems = computed(() => {
     return order.value.backorder_array || [];
@@ -559,7 +579,7 @@ const getFulfillmentItems = (fulfillOrder) => {
 const getBackOrderStatusText = (status) => {
     const statusMap = {
         0: 'In Progress',
-        1: 'Complete',
+        1: 'Completed',
         9: 'Cancelled'
     };
     return statusMap[status] || 'Unknown';

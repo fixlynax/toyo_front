@@ -5,7 +5,7 @@
                 <!-- Header with Create Button -->
                 <div class="flex justify-between items-center border-b pb-2">
                     <div class="text-2xl font-bold text-gray-800">Month End Closing</div>
-                    <Button label="Create" icon="pi pi-plus" class="p-button-primary" @click="openCreateDialog" style="width: fit-content" />
+                    <Button v-if="canUpdate" label="Create" icon="pi pi-plus" class="p-button-primary" @click="openCreateDialog" style="width: fit-content" />
                 </div>
 
                 <!-- 🟢 Only show LoadingPage during initial load, hide DataTable completely -->
@@ -96,7 +96,7 @@
                         </template>
                     </Column>
 
-                    <Column header="Actions" style="min-width: 8rem">
+                    <Column v-if="canUpdate" header="Action" style="min-width: 8rem">
                         <template #body="{ data }">
                             <div class="flex gap-1">
                                 <Button icon="pi pi-pencil" class="p-button-info p-button-text p-button-sm" v-tooltip="'Edit'" @click="editDate(data)" />
@@ -252,6 +252,10 @@ import api from '@/service/api';
 import LoadingPage from '@/components/LoadingPage.vue';
 import { FilterMatchMode } from '@primevue/core/api';
 import { useToast } from 'primevue/usetoast';
+import { useMenuStore } from '@/store/menu';
+
+const menuStore = useMenuStore();
+const canUpdate = computed(() => menuStore.canWrite('Maintenance Mode'));
 
 const toast = useToast();
 

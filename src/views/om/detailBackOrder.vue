@@ -217,16 +217,16 @@
                                     <td class="px-4 py-2 text-right">{{ order.storagelocation || '-' }}</td>
                                 </tr>
                                 <tr class="border-b">
-                                    <td class="px-4 py-2 font-medium">Created</td>
-                                    <td class="px-4 py-2 text-right">{{ formatDate(order.created) }}</td>
+                                    <td class="px-4 py-2 font-medium">Created On</td>
+                                    <td class="px-4 py-2 text-right">{{ formatDateTime(order.created) }}</td>
                                 </tr>
                                 <tr class="border-b">
-                                    <td class="px-4 py-2 font-medium">Modified</td>
-                                    <td class="px-4 py-2 text-right">{{ formatDate(order.modified) }}</td>
+                                    <td class="px-4 py-2 font-medium">Modified On</td>
+                                    <td class="px-4 py-2 text-right">{{ formatDateTime(order.modified) }}</td>
                                 </tr>
                                 <tr>
-                                    <td class="px-4 py-2 font-medium">Expiry</td>
-                                    <td class="px-4 py-2 text-right">{{ formatDate(order.expiry) }}</td>
+                                    <td class="px-4 py-2 font-medium">Expiry On</td>
+                                    <td class="px-4 py-2 text-right">{{ formatDateTime(order.expiry) }}</td>
                                 </tr>
                                 <!-- Modified: Total Orders based on orders with SO number -->
                                 <tr class="border-t">
@@ -238,8 +238,8 @@
                     </div>
 
                     <div class="flex justify-end mt-4 gap-2">
-                        <Button label="Cancel Back-Order" severity="danger" size="small" class="!w-fit" @click="confirmCancelBackOrder" :disabled="!canCancelBackOrder" :loading="cancelling" />
-                        <Button label="Process Back-Order" severity="success" size="small" class="!w-fit" @click="processBackOrder(1)" :disabled="!canProcessBackOrder" :loading="processing" />
+                        <Button v-if="canUpdate" label="Cancel Back-Order" severity="danger" size="small" class="!w-fit" @click="confirmCancelBackOrder" :disabled="!canCancelBackOrder" :loading="cancelling" />
+                        <Button v-if="canUpdate" label="Process Back-Order" severity="success" size="small" class="!w-fit" @click="processBackOrder(1)" :disabled="!canProcessBackOrder" :loading="processing" />
                     </div>
                 </div>
 
@@ -312,6 +312,10 @@ import { useRoute } from 'vue-router';
 import { useToast } from 'primevue/usetoast';
 import { useConfirm } from 'primevue/useconfirm';
 import api from '@/service/api';
+import { useMenuStore } from '@/store/menu';
+
+const menuStore = useMenuStore();
+const canUpdate = computed(() => menuStore.canWrite('Back Order'));
 
 const route = useRoute();
 const toast = useToast();
@@ -489,6 +493,26 @@ const formatDate = (dateString) => {
     });
 };
 
+const formatDateTime = (dateString) => {
+    if (!dateString) return '-';
+    
+    const date = new Date(dateString);
+    const options = {
+        day: '2-digit',
+        month: '2-digit',
+        year: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit',
+        second: '2-digit',
+        hour12: true
+    };
+    
+    let formatted = date.toLocaleString('en-MY', options);
+    
+    // Convert AM/PM to uppercase regardless of case
+    return formatted.replace(/\b(am|pm)\b/gi, (match) => match.toUpperCase());
+};
+
 // Computed properties
 const backOrderItems = computed(() => {
     return order.value.backorder_array || [];
@@ -579,7 +603,7 @@ const getFulfillmentItems = (fulfillOrder) => {
 const getBackOrderStatusText = (status) => {
     const statusMap = {
         0: 'In Progress',
-        1: 'Complete',
+        1: 'Completed',
         9: 'Cancelled'
     };
     return statusMap[status] || 'Unknown';

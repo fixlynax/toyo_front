@@ -124,6 +124,26 @@ const formatDate = (dateString) => {
     });
 };
 
+const formatDateTime = (dateString) => {
+    if (!dateString) return '-';
+    
+    const date = new Date(dateString);
+    const options = {
+        day: '2-digit',
+        month: '2-digit',
+        year: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit',
+        second: '2-digit',
+        hour12: true
+    };
+    
+    let formatted = date.toLocaleString('en-MY', options);
+    
+    // Convert AM/PM to uppercase regardless of case
+    return formatted.replace(/\b(am|pm)\b/gi, (match) => match.toUpperCase());
+};
+
 // 🟢 Fetch return orders based on tab
 const fetchReturnOrders = async (tabStatus = 'PENDING', mainAccountNo = null) => {
     loading.value = true;
@@ -411,9 +431,9 @@ onBeforeMount(async () => {
                 </template>
 
                 <!-- Created Date Column -->
-                <Column header="Created Date" style="min-width: 8rem" sortable>
+                <Column header="Created On" style="min-width: 8rem" sortable>
                     <template #body="{ data }">
-                        {{ formatDate(data.createdDate) }}
+                        {{ formatDateTime(data.createdDate) }}
                     </template>
                 </Column>
 

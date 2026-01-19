@@ -79,7 +79,7 @@
             </Column>
 
             <!-- ⚙️ Actions -->
-            <Column header="Actions" style="min-width: 10rem" bodyClass="text-center">
+            <Column v-if="canUpdate" header="Action" style="min-width: 10rem" bodyClass="text-center">
                 <template #body="{ data }">
                     <div class="flex justify-left gap-2">
                         <Button icon="pi pi-pencil" class="p-button-text p-button-info p-button-sm" v-tooltip="'Edit'" @click="editItem(data)" />
@@ -285,6 +285,11 @@
 <script>
 import api from '@/service/api';
 import LoadingPage from '@/components/LoadingPage.vue';
+import { useMenuStore } from '@/store/menu';
+import { computed } from 'vue';
+
+const menuStore = useMenuStore();
+const canUpdate = computed(() => menuStore.canWrite('Maintenance Mode'));
 
 export default {
     name: 'ListPageLayout',
@@ -360,13 +365,15 @@ export default {
 
         formatDate(date) {
             if (!date) return '-';
-            return new Date(date).toLocaleString('en-MY', {
+            const formatted = new Date(date).toLocaleString('en-MY', {
                 year: 'numeric',
                 month: 'short',
                 day: 'numeric',
                 hour: '2-digit',
-                minute: '2-digit'
+                minute: '2-digit',
+                hour12: true
             });
+            return formatted.replace(/\b(am|pm)\b/gi, (match) => match.toUpperCase());
         },
 
         formatDateForApi(date) {

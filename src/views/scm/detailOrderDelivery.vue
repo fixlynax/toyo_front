@@ -104,16 +104,16 @@
                                     <td class="px-4 py-2 text-right font-bold text-primary">{{ orderDelList.order_no || '-' }}</td>
                                 </tr>
                                 <tr class="border-b">
-                                    <td class="px-4 py-2 font-medium">Order Remark</td>
+                                    <td class="px-4 py-2 font-medium w-1/3">Order Remark</td>
                                     <td class="px-4 py-2 text-right font-bold text-primary">{{ orderDelList.order_remarks || '-' }}</td>
                                 </tr>
                                 <tr class="border-b">
-                                    <td class="px-4 py-2 font-medium">Order Type</td>
+                                    <td class="px-4 py-2 font-medium">Delivery Type</td>
                                     <td class="px-4 py-2 text-right font-medium">{{ orderDelList.deliveryType || '-' }}</td>
                                 </tr>
                                 <tr class="border-b">
-                                    <td class="px-4 py-2 font-medium">Order Description</td>
-                                    <td class="px-4 py-2 text-right font-medium">{{orderDelList?.orderDesc === 'Back Order' ? 'NORMAL': (orderDelList?.orderDesc || '-')}}</td>
+                                    <td class="px-4 py-2 font-medium">Order Type</td>
+                                    <td class="px-4 py-2 text-right font-medium">{{ orderDelList?.orderDesc ? (orderDelList.orderDesc === 'Back Order' ? 'NORMAL' : orderDelList.orderDesc.toUpperCase()) : '-' }}</td>
                                 </tr>
                                 <tr class="border-b">
                                     <td class="px-4 py-2 font-medium">SO No</td>
@@ -152,8 +152,12 @@
                                     <td class="px-4 py-2 text-right">{{ orderDelList?.scm_deliver_detail?.delivered_datetime ? formatDate(orderDelList.scm_deliver_detail.delivered_datetime) : 'Not Assigned' }}</td>
                                 </tr>
                                 <tr>
+                                    <td class="px-4 py-2 font-medium">Order Date</td>
+                                    <td class="px-4 py-2 text-right">{{ formatDate(orderDelList.orderDate) }}</td>
+                                </tr>
+                                <tr>
                                     <td class="px-4 py-2 font-medium">Created On</td>
-                                    <td class="px-4 py-2 text-right">{{ formatDate(orderDelList.orderDate) }} <br> {{ formatTime(orderDelList.orderDate) }}</td>
+                                    <td class="px-4 py-2 text-right">{{ formatDate(orderDelList.created) }} {{ formatTime(orderDelList.created) }}</td>
                                 </tr>
                             </tbody>
                         </table>
@@ -357,9 +361,18 @@ function formatDate(dateString) {
 function formatTime(dateTimeString) {
     if (!dateTimeString) return '';
     const [, timePart] = dateTimeString.split(' ');
+    if (!timePart) return '';
 
-    return timePart; // already in 24-hour format: HH:mm:ss
+    let [hours, minutes, seconds] = timePart.split(':');
+    hours = parseInt(hours, 10);
+
+    const ampm = hours >= 12 ? 'PM' : 'AM';
+    hours = hours % 12;
+    hours = hours === 0 ? 12 : hours;
+
+    return `${hours}:${minutes}:${seconds} ${ampm}`;
 }
+
 function formatDateFull(dateString) {
     if (!dateString) return '';
     const date = new Date(dateString);
@@ -618,9 +631,6 @@ const InitfetchData = async () => {
             if (orderDelList.value.orderDate) {
                 orderCreatedDate.value = new Date(orderDelList.value.orderDate);
             }
-                        console.log('orderDelList.value.orderDate')
-
-            console.log(orderDelList.value.orderDate)
         } else {
             toast.add({ severity: 'error', summary: 'Error', detail: 'Failed to load data', life: 3000 });
         }

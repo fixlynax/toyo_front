@@ -2,12 +2,7 @@
     <div class="card">
         <div class="flex items-center justify-between mb-6">
             <div class="text-2xl font-bold text-gray-800">Message Details</div>
-            <Button 
-                label="Back to List" 
-                icon="pi pi-arrow-left" 
-                class="p-button-secondary" 
-                @click="goBack" 
-            />
+            <Button label="Back to List" icon="pi pi-arrow-left" class="p-button-secondary" @click="goBack" />
         </div>
 
         <div v-if="loading" class="text-center py-8">
@@ -41,7 +36,7 @@
             <!-- Dealers Section -->
             <div class="border-t pt-6">
                 <div class="flex items-center justify-between mb-4">
-                    <h3 class="text-lg font-semibold text-gray-800">Dealers List </h3>
+                    <h3 class="text-lg font-semibold text-gray-800">Dealers List</h3>
                 </div>
 
                 <DataTable :value="message.dealers" class="p-datatable-sm" :rowHover="true">
@@ -50,7 +45,7 @@
                             <div class="font-mono text-md">{{ data.custAccountNo }}</div>
                         </template>
                     </Column>
-                    
+
                     <Column field="companyName1" header="Dealer Name" style="min-width: 200px">
                         <template #body="{ data }">
                             <div class="font-medium">{{ data.companyName1 }}</div>
@@ -183,9 +178,10 @@ const formatDate = (dateString) => {
     return date.toLocaleDateString('en-US', {
         year: 'numeric',
         month: 'short',
-        day: 'numeric'
+        day: '2-digit'
     });
 };
+
 
 const goBack = () => {
     router.push('/om/listMessaging'); // Adjust this path to your list page route
@@ -193,17 +189,17 @@ const goBack = () => {
 
 const fetchMessageDetails = async (messageId) => {
     loading.value = true;
-    
+
     // Simulate API call delay
     await new Promise(resolve => setTimeout(resolve, 500));
-    
+
     // Replace this with your actual API call
     // const response = await messagingService.getMessageById(messageId);
     // message.value = response.data;
-    
+
     // Using mock data for demonstration
     message.value = mockMessages[messageId] || null;
-    
+
     loading.value = false;
 };
 

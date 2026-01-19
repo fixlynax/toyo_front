@@ -119,7 +119,7 @@
         <div class="flex flex-col gap-4">
             
             <div v-if="listData.status === 0"  >
-                <label class="font-medium">Collect Date & Time</label>
+                <label class="font-medium">Collect Date</label>
                 <InputText 
                     type="date" 
                     v-model="form.collectDatetime"
@@ -128,7 +128,7 @@
             </div>
 
             <div v-if="listData.status === 1"  >
-                <label class="font-medium">Reach WH Date & Time</label>
+                <label class="font-medium">Reach WH Date</label>
                 <InputText 
                     type="date" 
                     v-model="form.reachWHDatetime"
@@ -262,18 +262,21 @@ function formatDate(dateString) {
     day: '2-digit',
   });
 }
-function formatTime(timeString) {
-  if (!timeString) return '';
-  const [hours, minutes, seconds] = timeString.split(':');
-  const date = new Date();
-  date.setHours(hours, minutes, seconds);
-  return date.toLocaleTimeString('en-MY', {
-    hour: '2-digit',
-    minute: '2-digit',
-    second: '2-digit',
-    hour12: true,
-  });
+function formatTime(dateTimeString) {
+    if (!dateTimeString) return '';
+    const [, timePart] = dateTimeString.split(' ');
+    if (!timePart) return '';
+
+    let [hours, minutes, seconds] = timePart.split(':');
+    hours = parseInt(hours, 10);
+
+    const ampm = hours >= 12 ? 'PM' : 'AM';
+    hours = hours % 12;
+    hours = hours === 0 ? 12 : hours;
+
+    return `${hours}:${minutes}:${seconds} ${ampm}`;
 }
+
 function formatDateFull(dateString) {
   if (!dateString) return '';
   const date = new Date(dateString);

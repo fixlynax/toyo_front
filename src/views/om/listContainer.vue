@@ -45,7 +45,7 @@
 
                 <!-- Action Buttons -->
                 <div class="flex justify-end mt-4">
-                    <Button label="Edit Container Sizes" icon="pi pi-pencil" class="p-button-primary" @click="openEditModal" :disabled="loading" />
+                    <Button v-if="canUpdate" label="Edit Container Size" icon="pi pi-pencil" class="p-button-primary" @click="openEditModal" :disabled="loading" />
                 </div>
             </div>
         </div>
@@ -108,7 +108,6 @@
                 <Button :label="updating ? 'Updating...' : 'Update Limits'" icon="pi pi-check" class="p-button-primary" :disabled="!isFormValid || updating" @click="updateContainerSizes" />
             </template>
         </Dialog>
-
     </Fluid>
 </template>
 
@@ -117,6 +116,11 @@ import { ref, reactive, computed, onMounted } from 'vue';
 import { useToast } from 'primevue/usetoast';
 import api from '@/service/api';
 import LoadingPage from '@/components/LoadingPage.vue';
+import { useMenuStore } from '@/store/menu';
+
+const menuStore = useMenuStore();
+const canUpdate = computed(() => menuStore.canWrite('Maintenance Mode'));
+
 
 const toast = useToast();
 const loading = ref(false);

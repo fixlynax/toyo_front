@@ -1,6 +1,6 @@
 <template>
     <div class="card">
-        <div class="text-2xl font-bold text-gray-800 border-b pb-2 mb-6">Campaign Management List </div>
+        <div class="text-2xl font-bold text-gray-800 border-b pb-2 mb-6">Campaign Management List</div>
 
         <!-- Show LoadingPage only during initial page load -->
         <LoadingPage v-if="initialLoading" :message="'Loading Campaign Management Details...'" :sub-message="'Fetching campaign data'" />
@@ -8,6 +8,7 @@
         <!-- Show content area when not in initial loading -->
         <div v-else>
             <DataTable
+                @filter="onFilter"
                 :value="listData"
                 :paginator="true"
                 :rows="10"
@@ -40,9 +41,14 @@
                         </div>
 
                         <!-- Right: Create Campaign Button -->
-                        <RouterLink v-if="canUpdate" to="/marketing/createCampaign">
-                            <Button  type="button" label="Create" />
-                        </RouterLink>
+                        <div class="flex items-center gap-2 ml-auto">
+                            <!-- Single Export Button (like in reference code - green success button) -->
+                            <Button type="button" label="Export" icon="pi pi-file-export" class="p-button-success" :loading="exportLoading" @click="handleExport" :disabled="exportLoading" />
+
+                            <RouterLink v-if="canUpdate" to="/marketing/CreateGame">
+                                <Button type="button" label="Create" />
+                            </RouterLink>
+                        </div>
                     </div>
                 </template>
 
@@ -56,6 +62,21 @@
                         <p class="mt-2 text-gray-600">Loading campaign data...</p>
                     </div>
                 </template>
+
+                <!-- Export All Checkbox Column (EXACTLY like reference code) -->
+                <Column header="Export All" style="min-width: 8rem">
+                    <template #header>
+                        <div class="flex justify-center">
+                            <Checkbox :binary="true" :model-value="isAllSelected()" @change="() => toggleSelectAll()" />
+                        </div>
+                    </template>
+
+                    <template #body="{ data }">
+                        <div class="flex justify-center">
+                            <Checkbox :binary="true" :model-value="selectedExportIds.has(data.id)" @change="() => handleToggleExport(data.id)" />
+                        </div>
+                    </template>
+                </Column>
 
                 <Column field="campaignNo" header="Campaign No" style="min-width: 8rem" sortable>
                     <template #body="{ data }">
@@ -76,7 +97,7 @@
                 </Column>
 
                 <Column field="period" header="Period" style="min-width: 8rem">
-                    <template #body="{ data }"> {{ formatDate(data.startDate) }} - {{formatDate(data.endDate) }} </template>
+                    <template #body="{ data }"> {{ formatDate(data.startDate) }} - {{ formatDate(data.endDate) }} </template>
                 </Column>
 
                 <Column field="totalSub" header="Total Sub" style="min-width: 6rem" sortable>
@@ -101,7 +122,8 @@ import { FilterMatchMode } from '@primevue/core/api';
 import api from '@/service/api';
 import LoadingPage from '@/components/LoadingPage.vue';
 import { useMenuStore } from '@/store/menu';
- 
+import { useToast } from 'primevue/usetoast';
+
 const menuStore = useMenuStore();
 const canUpdate = computed(() => menuStore.canWrite('Campaign Management'));
 const denyAccess = computed(() => menuStore.canTest('Campaign Management'));
@@ -110,11 +132,19 @@ const denyAccess = computed(() => menuStore.canTest('Campaign Management'));
 const listData = ref([]);
 const initialLoading = ref(true); // For initial page load
 const tableLoading = ref(false); // For table operations
+const exportLoading = ref(false);
+const toast = useToast();
+const visibleRows = ref([]); // For tracking filtered rows
+const selectedExportIds = ref(new Set());
 
 // Filters for quick search
 const filters = ref({
     global: { value: null, matchMode: FilterMatchMode.CONTAINS }
 });
+
+const onFilter = (e) => {
+    visibleRows.value = e.filteredValue || listData.value;
+};
 
 onMounted(async () => {
     try {
@@ -122,7 +152,6 @@ onMounted(async () => {
         tableLoading.value = true;
 
         const response = await api.get('campaign/campaignList');
-
 
         if (response.data.status === 1 && Array.isArray(response.data.admin_data)) {
             listData.value = response.data.admin_data.map((campaign) => ({
@@ -136,12 +165,12 @@ onMounted(async () => {
                 status: campaign.status
             }));
         } else {
-            toast.add({ severity: 'error', summary: 'Error', detail:response.data.message || 'Failed to load data', life: 3000 });
+            toast.add({ severity: 'error', summary: 'Error', detail: response.data.message || 'Failed to load data', life: 3000 });
             listData.value = [];
         }
     } catch (error) {
         console.error('Error fetching campaign list:', error);
-        toast.add({ severity: 'error', summary: 'Error', detail:response.data.message || 'Failed to load data', life: 3000 });
+        toast.add({ severity: 'error', summary: 'Error', detail: response.data.message || 'Failed to load data', life: 3000 });
         listData.value = [];
     } finally {
         initialLoading.value = false;
@@ -165,9 +194,76 @@ function formatDate(dateString) {
     });
 }
 
-
 const getOverallStatusSeverity = (status) => {
     return status === 1 ? 'success' : 'danger';
+};
+
+const handleExport = async () => {
+        const idsArray = Array.from(selectedExportIds.value).map(id => Number(id));
+
+    if (idsArray.length === 0) {
+        alert('Please select at least one row.');
+        return;
+    }
+    try {
+        exportLoading.value = true;
+        
+            const response = await api.postExtra(
+            'report/campaign',{ campaign_ids: JSON.stringify(idsArray) },
+        {
+            responseType: 'blob',
+            headers: {
+            'Content-Type': 'application/json',
+            }
+        }
+        );
+        const blob = new Blob([response.data], { 
+        type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' 
+        });
+
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = 'CampaignList_Download.xlsx';
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        window.URL.revokeObjectURL(url);
+
+        toast.add({ severity: 'success', summary: 'Success', detail: 'Export completed', life: 3000 });
+        selectedExportIds.value.clear();
+    } catch (error) {
+        console.error('Error exporting data:', error);
+        toast.add({ severity: 'error', summary: 'Error', detail: 'Failed to export data', life: 3000 });
+    } finally {
+        exportLoading.value = false;
+    }
+};
+// EXACTLY like reference code - toggle all visible rows
+const toggleSelectAll = () => {
+    const allIds = visibleRows.value.map((item) => item.id);
+
+    if (isAllSelected()) {
+        // Remove all visible IDs at once (EXACTLY like reference code)
+        selectedExportIds.value = new Set([...selectedExportIds.value].filter((id) => !allIds.includes(id)));
+    } else {
+        // Add all visible IDs at once (EXACTLY like reference code)
+        selectedExportIds.value = new Set([...selectedExportIds.value, ...allIds]);
+    }
+};
+
+// EXACTLY like reference code - check if all visible rows are selected
+const isAllSelected = () => {
+    return visibleRows.value.length > 0 && visibleRows.value.every((item) => selectedExportIds.value.has(item.id));
+};
+
+// EXACTLY like reference code - handle individual checkbox toggle
+const handleToggleExport = (id) => {
+    if (selectedExportIds.value.has(id)) {
+        selectedExportIds.value.delete(id);
+    } else {
+        selectedExportIds.value.add(id);
+    }
 };
 </script>
 

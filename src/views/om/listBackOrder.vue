@@ -5,6 +5,10 @@ import api from '@/service/api';
 import { RouterLink } from 'vue-router';
 import LoadingPage from '@/components/LoadingPage.vue';
 import { useToast } from 'primevue/usetoast';
+import { useMenuStore } from '@/store/menu';
+
+const menuStore = useMenuStore();
+const canUpdate = computed(() => menuStore.canWrite('Back Order'));
 
 const toast = useToast();
 
@@ -376,6 +380,26 @@ const formatDate = (dateString) => {
     });
 };
 
+const formatDateTime = (dateString) => {
+    if (!dateString) return '-';
+    
+    const date = new Date(dateString);
+    const options = {
+        day: '2-digit',
+        month: '2-digit',
+        year: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit',
+        second: '2-digit',
+        hour12: true
+    };
+    
+    let formatted = date.toLocaleString('en-MY', options);
+    
+    // Convert AM/PM to uppercase regardless of case
+    return formatted.replace(/\b(am|pm)\b/gi, (match) => match.toUpperCase());
+};
+
 const getStatusLabel = (data) => {
     // Check if order is expired (today >= Back Order Expiry) and not completed/cancelled
     if (data.expiry) {
@@ -475,6 +499,7 @@ const getStatusSeverity = (data) => {
                             
                             <!-- Bulk Cancel Button -->
                             <Button 
+                                v-if="canUpdate"
                                 label="Bulk Cancel" 
                                 icon="pi pi-times" 
                                 :disabled="selectedBackOrders.length === 0 || bulkCancelLoading"
@@ -530,9 +555,9 @@ const getStatusSeverity = (data) => {
             <!-- Selection Column (only for Pending tab) -->
             <Column v-if="showSelection" selectionMode="multiple" headerStyle="width: 3rem"></Column>
 
-            <Column field="createdDate" header="Created Date" style="min-width: 8rem" sortable>
+            <Column field="createdDate" header="Created On" style="min-width: 8rem" sortable>
                 <template #body="{ data }">
-                    {{ formatDate(data.created) }}
+                    {{ formatDateTime(data.created) }}
                 </template>
             </Column>
 

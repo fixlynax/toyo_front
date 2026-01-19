@@ -208,6 +208,11 @@ const model = ref([
                         to: '/om/reportBackOrder'
                     },
                     {
+                        label: 'Return Order',
+                        icon: 'pi pi-fw pi-reply',
+                        to: '/om/reportReturnOrder'
+                    },
+                    {
                         label: 'Order',
                         icon: 'pi pi-fw pi-shopping-cart',
                         to: '/om/reportOrder'

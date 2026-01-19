@@ -39,7 +39,7 @@
                         </div>
 
                         <RouterLink to="/it/createUserAccount">
-                            <Button type="button" label="Create" icon="pi pi-plus" />
+                            <Button v-if="canUpdate" type="button" label="Create" icon="pi pi-plus" />
                         </RouterLink>
                     </div>
                 </template>
@@ -72,7 +72,7 @@
                     </template>
                 </Column>
 
-                <Column field="mobilephone" header="Mobile No" style="min-width: 12rem" sortable>
+                <Column field="mobilephone" header="Mobile No" style="min-width: 10rem" sortable>
                     <template #body="{ data }">
                         {{ data.mobilephone || '-' }}
                     </template>
@@ -90,7 +90,7 @@
                     </template>
                 </Column>
 
-                <Column field="created" header="Created" style="min-width: 12rem" sortable>
+                <Column field="created" header="Created On" style="min-width: 12rem" sortable>
                     <template #body="{ data }">
                         {{ formatDate(data.created) }}
                     </template>
@@ -108,7 +108,7 @@
                     </template>
                 </Column>
 
-                <Column header="Action" style="min-width: 12rem">
+                <Column v-if="canUpdate" header="Action" style="min-width: 12rem">
                     <template #body="{ data }">
                         <div class="flex gap-2">
                             <Button icon="pi pi-pencil" class="p-button-text p-button-info p-button-sm" @click="editUser(data)" />
@@ -210,12 +210,16 @@
 </template>
 
 <script setup>
-import { onMounted, ref, reactive } from 'vue';
+import { onMounted, ref, computed } from 'vue';
 import { useRouter } from 'vue-router';
 import { FilterMatchMode } from '@primevue/core/api';
 import { useToast } from 'primevue/usetoast';
 import api from '@/service/api';
 import LoadingPage from '@/components/LoadingPage.vue';
+import { useMenuStore } from '@/store/menu';
+
+const menuStore = useMenuStore();
+const canUpdate = computed(() => menuStore.canWrite('User Account'));
 
 const router = useRouter();
 const toast = useToast();
@@ -251,16 +255,25 @@ const filters = ref({
 });
 
 // Helper functions
-function formatDate(dateString) {
+const formatDate = (dateString) => {
     if (!dateString) return '-';
-
-    try {
-        const date = new Date(dateString);
-        return date.toLocaleDateString('en-GB');
-    } catch {
-        return '-';
-    }
-}
+    
+    const date = new Date(dateString);
+    const options = {
+        day: '2-digit',
+        month: '2-digit',
+        year: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit',
+        second: '2-digit',
+        hour12: true
+    };
+    
+    let formatted = date.toLocaleString('en-MY', options);
+    
+    // Convert AM/PM to uppercase regardless of case
+    return formatted.replace(/\b(am|pm)\b/gi, (match) => match.toUpperCase());
+};
 
 const getPermissionCount = (permissions, type) => {
     if (!permissions) return 0;

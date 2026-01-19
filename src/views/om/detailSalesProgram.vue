@@ -15,7 +15,7 @@
                             </div>
                             <div class="inline-flex items-center gap-2">
                                 <RouterLink :to="`/om/editSalesProgram/${programId}`">
-                                    <Button label="Edit" class="p-button-info" size="small" />
+                                    <Button v-if="canUpdate" label="Edit" class="p-button-info" size="medium"/>
                                 </RouterLink>
                             </div>
                         </div>
@@ -124,7 +124,7 @@
                 <div class="flex items-center justify-between border-b pb-4 mb-6">
                     <div class="flex items-center gap-3">
                         <div>
-                            <div class="text-2xl font-bold text-black-800">🎯 FOC Promotion Criteria</div>
+                            <div class="text-2xl font-bold text-black-800">FOC Promotion Criteria</div>
                         </div>
                     </div>
                     <!-- <div class="flex items-center gap-3">
@@ -197,7 +197,7 @@
                 <div class="border border-black-200 rounded-xl p-5 pt-6">
                     <div class="flex items-center justify-between mb-6">
                         <div>
-                            <h3 class="text-xl font-bold text-black-800">🎨 Eligible Materials</h3>
+                            <h3 class="text-xl font-bold text-black-800">Eligible Materials</h3>
                             <p class="text-sm text-black-600 mt-1">Materials that qualify for this promotion</p>
                         </div>
                         <Tag :value="`${criteriaList.length} materials`" severity="info" />
@@ -235,11 +235,15 @@
 </template>
 
 <script setup>
-import { ref, onMounted, onUnmounted } from 'vue';
+import { ref, onMounted, onUnmounted, computed } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { useToast } from 'primevue/usetoast';
 import api from '@/service/api';
 import LoadingPage from '@/components/LoadingPage.vue';
+import { useMenuStore } from '@/store/menu';
+
+const menuStore = useMenuStore();
+const canUpdate = computed(() => menuStore.canWrite('Sales Program'));
 
 const route = useRoute();
 const router = useRouter();

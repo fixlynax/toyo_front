@@ -76,21 +76,30 @@
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <!-- Only showing the two modules that API accepts -->
                         <div class="flex items-center">
-                            <Checkbox v-model="form.mod_warranty" :inputId="'mod_warranty'" :binary="true" class="mr-3" />
-                            <label for="mod_warranty" class="text-gray-700 cursor-pointer"> Warranty Management </label>
+                            <Checkbox v-model="form.mod_order" :inputId="'mod_order'" :binary="true" class="mr-3" />
+                            <label for="mod_order" class="text-gray-700 cursor-pointer"> Order Approval </label>
                         </div>
                         <div class="flex items-center">
-                            <Checkbox v-model="form.mod_order" :inputId="'mod_order'" :binary="true" class="mr-3" />
-                            <label for="mod_order" class="text-gray-700 cursor-pointer"> Order Management </label>
+                            <Checkbox v-model="form.mod_order_placing" :inputId="'mod_order_placing'" :binary="true" class="mr-3" :disabled="!form.mod_order" />
+                            <label for="mod_order_placing" class="text-gray-700 cursor-pointer" :class="{ 'opacity-60': !form.mod_order }">
+                                Order Placing
+                                <span v-if="!form.mod_order" class="text-xs text-blue-600 ml-1"> (requires Order Approval) </span>
+                            </label>
+                        </div>
+                        <div class="flex items-center">
+                            <Checkbox v-model="form.mod_warranty" :inputId="'mod_warranty'" :binary="true" class="mr-3" />
+                            <label for="mod_warranty" class="text-gray-700 cursor-pointer"> Warranty </label>
+                        </div>
+                        <div class="flex items-center">
+                            <Checkbox v-model="form.mod_billing" :inputId="'mod_billing'" :binary="true" class="mr-3" />
+                            <label for="mod_billing" class="text-gray-700 cursor-pointer"> Billing </label>
+                        </div>
+                        <div class="flex items-center">
+                            <Checkbox v-model="form.mod_sale" :inputId="'mod_sale'" :binary="true" class="mr-3" />
+                            <label for="mod_sale" class="text-gray-700 cursor-pointer"> Sales Forecast </label>
                         </div>
                     </div>
                     <small class="text-red-500 text-sm mt-2" v-if="errors.modules"> <i class="pi pi-exclamation-circle mr-1"></i>{{ errors.modules }} </small>
-                    <div class="mt-4 p-3 bg-blue-50 rounded border border-blue-200">
-                        <div class="flex items-center gap-2 text-blue-700">
-                            <i class="pi pi-info-circle"></i>
-                            <span class="text-sm">Select modules that this user should have access to</span>
-                        </div>
-                    </div>
                     <div class="flex flex-col md:flex-row justify-end gap-3 mt-6">
                         <Button label="Cancel" icon="pi pi-times" class="p-button-outlined p-button-secondary" style="width: fit-content" @click="handleCancel" :disabled="loading" />
                         <Button label="Create User" icon="pi pi-check" style="width: fit-content" @click="handleSubmit" :loading="loading" />
@@ -132,7 +141,7 @@ const route = useRoute();
 const loading = ref(false);
 
 const countryCodes = ref([
-    { label: '(+60) Malaysia', value: '60' },
+    { label: '(+60) Malaysia', value: '60' }
     // { label: 'Singapore (+65)', value: '65' }
 ]);
 
@@ -151,6 +160,9 @@ const form = ref({
     shiptoID: null,
     mod_warranty: false,
     mod_order: false,
+    mod_billing: false,
+    mod_sale: false,
+    mod_order_placing: false,
     isMaster: 0
 });
 
@@ -161,6 +173,11 @@ const isFormModified = computed(() => {
     return form.value.first_name || form.value.last_name || form.value.email || form.value.mobileNum;
 });
 
+// Computed property to check invalid module selection
+const hasInvalidModuleSelection = computed(() => {
+    return form.value.mod_order_placing && !form.value.mod_order;
+});
+
 // Watch for isMaster changes to handle module access
 watch(
     () => form.value.isMaster,
@@ -169,6 +186,36 @@ watch(
             // If master user, enable all available modules
             form.value.mod_warranty = true;
             form.value.mod_order = true;
+            form.value.mod_billing = true;
+            form.value.mod_sale = true;
+            form.value.mod_order_placing = true;
+        } else {
+            // If switching from master to non-master, ensure order placing dependency is maintained
+            if (form.value.mod_order_placing && !form.value.mod_order) {
+                form.value.mod_order = true;
+            }
+        }
+    }
+);
+
+// Watch for mod_order_placing changes to enforce dependency
+watch(
+    () => form.value.mod_order_placing,
+    (newValue) => {
+        if (newValue && !form.value.mod_order) {
+            // If order placing is selected but order is not selected, automatically select it
+            form.value.mod_order = true;
+        }
+    }
+);
+
+// Watch for mod_order changes to handle dependency
+watch(
+    () => form.value.mod_order,
+    (newValue) => {
+        if (!newValue && form.value.mod_order_placing) {
+            // If order is deselected while order placing is selected, deselect order placing
+            form.value.mod_order_placing = false;
         }
     }
 );
@@ -217,8 +264,15 @@ const validateForm = () => {
     }
 
     // Module validation for non-master users
-    if (form.value.isMaster === 0 && !form.value.mod_warranty && !form.value.mod_order) {
-        errors.value.modules = 'Please select at least one module for non-master users';
+    if (form.value.isMaster === 0) {
+        if (!form.value.mod_warranty && !form.value.mod_order && !form.value.mod_billing && !form.value.mod_sale && !form.value.mod_order_placing) {
+            errors.value.modules = 'Please select at least one module for non-master users';
+        }
+
+        // NEW VALIDATION: If order placing is selected, order must also be selected
+        if (form.value.mod_order_placing && !form.value.mod_order) {
+            errors.value.modules = 'Order Management must be selected when Order Placing Management is selected';
+        }
     }
 
     console.log('Validation errors:', errors.value);
@@ -241,6 +295,9 @@ const createFormData = () => {
     // Append module permissions (only the two that API accepts)
     formData.append('mod_warranty', form.value.isMaster === 1 ? 1 : form.value.mod_warranty ? 1 : 0);
     formData.append('mod_order', form.value.isMaster === 1 ? 1 : form.value.mod_order ? 1 : 0);
+    formData.append('mod_billing', form.value.isMaster === 1 ? 1 : form.value.mod_billing ? 1 : 0);
+    formData.append('mod_sale', form.value.isMaster === 1 ? 1 : form.value.mod_sale ? 1 : 0);
+    formData.append('mod_order_placing', form.value.isMaster === 1 ? 1 : form.value.mod_order_placing ? 1 : 0);
 
     return formData;
 };

@@ -308,15 +308,7 @@ const submitForm  = async () => {
 
             // ✅ Show dialog
             passwordDialogVisible.value = true;
-        } else {
-            toast.add({ severity: 'error', summary: 'Error', detail: 'Failed to create 3PL', life: 3000 });
-        }
-    } catch (error) {
-            console.error('Error submitting form:', error);
-            toast.add({ severity: 'error', summary: 'Error', detail: 'Failed to create 3PL', life: 3000 });
-    } finally {
-        loading.value = false;
-        Object.assign(form, {
+                Object.assign(form, {
             username: '',
             companyname: '',
             addressline1: '',
@@ -331,6 +323,24 @@ const submitForm  = async () => {
             status: '',
             storage_list: []
         });
+        } else {
+                let errorMessage = 'Failed to create 3PL';
+
+        if (response.data.error) {
+            const firstKey = Object.keys(response.data.error)[0];
+            if (firstKey && response.data.error[firstKey]?.length) {
+                errorMessage = response.data.error[firstKey][0];
+            }
+        }
+         toast.add({ severity: 'error', summary: 'Error', detail: errorMessage, life: 3000 });
+
+        }
+    } catch (error) {
+            console.error('Error submitting form:', error);
+            toast.add({ severity: 'error', summary: 'Error', detail: 'Failed to create 3PL', life: 3000 });
+    } finally {
+        loading.value = false;
+
     }
 
 };

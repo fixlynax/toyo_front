@@ -143,12 +143,25 @@
                                     <td class="px-4 py-2 text-right font-bold text-primary">{{ orderData.order_remarks || '-' }}</td>
                                 </tr>
                                 <tr class="border-b">
-                                    <td class="px-4 py-2 font-medium">Order Type</td>
-                                    <td class="px-4 py-2 text-right font-medium">{{ orderData.deliveryType || '-' }}</td>
+                                    <td class="px-4 py-2 font-medium">Channel</td>
+                                    <td class="px-4 py-2 text-right font-bold">{{ orderData.channel || '-' }}</td>
                                 </tr>
                                 <tr class="border-b">
-                                    <td class="px-4 py-2 font-medium">Order Description</td>
-                                    <td class="px-4 py-2 text-right font-medium">{{ orderData.orderDesc || '-' }}</td>
+                                    <td class="px-4 py-2 font-medium">Order Type</td>
+                                    <td class="px-4 py-2 text-right font-medium">
+                                        <span v-if="orderData.orderDesc === 'NORMAL'">NORMAL</span>
+                                        <span v-else-if="orderData.orderDesc === 'DIRECTSHIP'">DS</span>
+                                        <span v-else-if="orderData.orderDesc === 'OWN'">OWN USE</span>
+                                        <span v-else-if="orderData.orderDesc === 'Warranty'">WARRANTY</span>
+                                        <span v-else-if="orderData.orderDesc === 'Back Order'">NORMAL</span>
+                                        <span v-else>
+                                            {{ orderData.orderDesc || orderData.orderDesc || '-' }}
+                                        </span>
+                                    </td>
+                                </tr>
+                                <tr class="border-b">
+                                    <td class="px-4 py-2 font-medium">Order SAP Type</td>
+                                    <td class="px-4 py-2 text-right font-medium">{{ orderData.sapordertype || '-' }}</td>
                                 </tr>
                                 <tr class="border-b">
                                     <td class="px-4 py-2 font-medium">SO No.</td>
@@ -156,7 +169,7 @@
                                         <div class="flex items-center justify-end gap-2">
                                             <span>{{ orderData.so_no || '-' }}</span>
                                             <Button
-                                                v-if="!orderData.so_no || orderStatusText === 'TIMEOUT'"
+                                                v-if="!orderData.so_no || orderStatusText === 'TIMEOUT' && canUpdate"
                                                 icon="pi pi-pencil"
                                                 class="p-button-text p-button-info p-button-secondary text-sm"
                                                 size="small"
@@ -173,10 +186,6 @@
                                 <tr class="border-b">
                                     <td class="px-4 py-2 font-medium">Invoice No</td>
                                     <td class="px-4 py-2 text-right font-medium">{{ orderData.inv_no || '-' }}</td>
-                                </tr>
-                                <tr class="border-b">
-                                    <td class="px-4 py-2 font-medium">Price Group</td>
-                                    <td class="px-4 py-2 text-right font-medium">{{ orderData.pricegroup || '-' }}</td>
                                 </tr>
                                 <tr class="border-b">
                                     <td class="px-4 py-2 font-medium">Customer Group</td>
@@ -203,15 +212,15 @@
                                     <td class="px-4 py-2 text-right font-medium">{{ formatDateTime(deliveryInfo.delivered_datetime) || '-' }}</td>
                                 </tr>
                                 <tr class="border-b">
-                                    <td class="px-4 py-2 font-medium">Created</td>
+                                    <td class="px-4 py-2 font-medium">Created On</td>
                                     <td class="px-4 py-2 text-right font-medium">{{ formatDateTime(orderData.created) || '-' }}</td>
                                 </tr>
                                 <!-- Only show buttons for TIMEOUT status -->
                                 <tr v-if="orderStatusText === 'TIMEOUT'">
                                     <td colspan="2" class="px-2 py-2 text-right">
                                         <div class="flex justify-end gap-2">
-                                            <Button label="Void" class="p-button-danger text-sm !w-fit" @click="showVoidToast" :disabled="loadingProcess" />
-                                            <Button label="Process" class="p-button-success text-sm !w-fit" @click="processOrder" :loading="loadingProcess" />
+                                            <Button v-if="canUpdate" label="Void" class="p-button-danger text-sm !w-fit" @click="showVoidToast" :disabled="loadingProcess" />
+                                            <Button v-if="canUpdate" label="Process" class="p-button-success text-sm !w-fit" @click="processOrder" :loading="loadingProcess" />
                                         </div>
                                     </td>
                                 </tr>
@@ -286,11 +295,15 @@
 import { ref, computed, onMounted } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { useToast } from 'primevue/usetoast';
+import { useMenuStore } from '@/store/menu';
 import api from '@/service/api';
 
 const toast = useToast();
 const route = useRoute();
 const router = useRouter();
+
+const menuStore = useMenuStore();
+const canUpdate = computed(() => menuStore.canWrite('Fail Order'));
 
 // Reactive data
 const orderData = ref({});
@@ -344,7 +357,22 @@ const formatDate = (dateString) => {
 
 const formatDateTime = (dateString) => {
     if (!dateString) return '-';
-    return new Date(dateString).toLocaleString('en-MY');
+    
+    const date = new Date(dateString);
+    const options = {
+        day: '2-digit',
+        month: '2-digit',
+        year: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit',
+        second: '2-digit',
+        hour12: true
+    };
+    
+    let formatted = date.toLocaleString('en-MY', options);
+    
+    // Convert AM/PM to uppercase regardless of case
+    return formatted.replace(/\b(am|pm)\b/gi, (match) => match.toUpperCase());
 };
 
 const formatItemNo = (itemNo) => {
@@ -355,7 +383,7 @@ const formatItemNo = (itemNo) => {
 // Address methods
 const getFullAddress = (data) => {
     if (!data) return '-';
-    const addressParts = [ data.addressLine2, data.addressLine3, data.addressLine4, data.city, data.state, data.postcode].filter((part) => part && part.trim() !== '');
+    const addressParts = [ data.addressLine2, data.addressLine3, data.addressLine4, data.city, data.postcode, data.state].filter((part) => part && part.trim() !== '');
     return addressParts.join('') || '-';
 };
 

@@ -36,7 +36,7 @@
                         <!-- <Button type="button" label="Bulk Update" @click="fetchData" /> -->
                         <!-- Right: Create Customer Button -->
                         <RouterLink to="/om/createEten">
-                            <Button type="button" label="Create" icon="pi pi-plus" />
+                            <Button v-if="canUpdate" type="button" label="Create" icon="pi pi-plus" />
                         </RouterLink>
                     </div>
                 </div>
@@ -88,12 +88,16 @@
 </template>
 
 <script setup>
-import { onMounted, ref } from 'vue';
+import { onMounted, ref, computed } from 'vue';
 import { FilterMatchMode } from '@primevue/core/api';
 import api from '@/service/api';
 import LoadingPage from '@/components/LoadingPage.vue';
 import { useRouter } from 'vue-router';
 import { useToast } from 'primevue/usetoast';
+import { useMenuStore } from '@/store/menu';
+
+const menuStore = useMenuStore();
+const canUpdate = computed(() => menuStore.canWrite('Maintenance Mode'));
 
 const toast = useToast();
 const router = useRouter();

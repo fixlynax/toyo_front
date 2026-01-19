@@ -41,7 +41,7 @@
                             </div>
 
                             <div>
-                                <Button label="Export" icon="pi pi-upload" class="p-button-success" :loading="exportLoading" @click="exportToExcel" />
+                                 <Button type="button" label="Export" icon="pi pi-file-export" class="p-button-success" :loading="exportLoading" @click="handleExport" :disabled="exportLoading" />
                             </div>
                         </div>
 
@@ -74,6 +74,21 @@
                         <p class="mt-2 text-gray-600">Loading Warranty data...</p>
                     </div>
                 </template>
+
+                <!-- Export All Checkbox Column (EXACTLY like reference code) -->
+                <Column header="Export All" style="min-width: 8rem">
+                    <template #header>
+                        <div class="flex justify-center">
+                            <Checkbox :binary="true" :model-value="isAllSelected()" @change="() => toggleSelectAll()" />
+                        </div>
+                    </template>
+
+                    <template #body="{ data }">
+                        <div class="flex justify-center">
+                            <Checkbox :binary="true" :model-value="selectedExportIds.has(data.id)" @change="() => handleToggleExport(data.id)" />
+                        </div>
+                    </template>
+                </Column>
 
                 <Column field="warranty_cert_no" header="Warranty Cert No" style="min-width: 8rem" sortable>
                     <template #body="{ data }">
@@ -151,6 +166,8 @@ import { FilterMatchMode } from '@primevue/core/api';
 import LoadingPage from '@/components/LoadingPage.vue';
 import Button from 'primevue/button';
 import ProgressSpinner from 'primevue/progressspinner';
+import { useToast } from 'primevue/usetoast';
+
 
 // 🟢 State Management
 const listData = ref([]);
@@ -166,6 +183,10 @@ const formatDateDMY = (date) => {
     const year = d.getFullYear();
     return `${day}/${month}/${year}`;
 };
+const visibleRows = ref([]); // For tracking filtered rows
+const selectedExportIds = ref(new Set());
+const toast = useToast();
+
 
 // 🟢 Filters
 const filters = ref({
@@ -284,52 +305,74 @@ const getOverallStatusSeverity = (status) => {
 };
 
 
-const exportToExcel = () => {
-    if (listData.value.length === 0) {
-        toast.add({ severity: 'warn', summary: 'Warning', detail: 'No data to export', life: 3000 });
+const handleExport = async () => {
+        const idsArray = Array.from(selectedExportIds.value).map(id => Number(id));
+
+    if (idsArray.length === 0) {
+        alert('Please select at least one row.');
         return;
     }
-
     try {
-        // Create worksheet data
-        const headers = ['Warranty Cert No', 'Invoice No', 'TC Member Code','TC Member Name', 'MFG', 'Size', 'Spec', 'Week', 'Registered Date', 'Status'];
+        exportLoading.value = true;
+        
+            const response = await api.postExtra(
+            'excel/export-warranty-registration',{ warrantyreg_ids: JSON.stringify(idsArray) },
+        {
+            responseType: 'blob',
+            headers: {
+            'Content-Type': 'application/json',
+            }
+        }
+        );
+        const blob = new Blob([response.data], { 
+        type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' 
+        });
 
-        // Prepare data rows
-        const csvData = listData.value.map((warranty) => [
-             `"${warranty.warranty_cert_no || ''}"`,
-                `"${warranty.invoice_no || ''}"`,
-                `"${warranty.member_code || ''}"`,
-                `"${warranty.full_name || ''}"`,
-                `"${warranty.mfgcode  || ''}"`,
-                `"${warranty.tyresize || ''}"`,
-                `"${warranty.tyrespec || ''}"`,
-                `"${warranty.weekcode || ''}"`,
-                `"${warranty.registered_on || ''}"`,
-                `"${warranty.status || ''}"`
-        ]);
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = 'WarrantyRegList_Download.xlsx';
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        window.URL.revokeObjectURL(url);
 
-        // Combine headers and data
-        const csvContent = [headers.join(','), ...csvData.map((row) => row.join(','))].join('\n');
-
-        // Create and download the file
-        const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-        const link = document.createElement('a');
-        const url = URL.createObjectURL(blob);
-
-        link.setAttribute('href', url);
-        link.setAttribute('download', `Waranty_Registration_List_${new Date().toISOString().split('T')[0]}.csv`);
-        link.style.visibility = 'hidden';
-
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
-
-        URL.revokeObjectURL(url);
+        toast.add({ severity: 'success', summary: 'Success', detail: 'Export completed', life: 3000 });
+        selectedExportIds.value.clear();
     } catch (error) {
-        console.error('Error exporting to Excel:', error);
+        console.error('Error exporting data:', error);
+        toast.add({ severity: 'error', summary: 'Error', detail: 'Failed to export data', life: 3000 });
+    } finally {
+        exportLoading.value = false;
     }
 };
 
+// EXACTLY like reference code - toggle all visible rows
+const toggleSelectAll = () => {
+    const allIds = visibleRows.value.map((item) => item.id);
+
+    if (isAllSelected()) {
+        // Remove all visible IDs at once (EXACTLY like reference code)
+        selectedExportIds.value = new Set([...selectedExportIds.value].filter((id) => !allIds.includes(id)));
+    } else {
+        // Add all visible IDs at once (EXACTLY like reference code)
+        selectedExportIds.value = new Set([...selectedExportIds.value, ...allIds]);
+    }
+};
+
+// EXACTLY like reference code - check if all visible rows are selected
+const isAllSelected = () => {
+    return visibleRows.value.length > 0 && visibleRows.value.every((item) => selectedExportIds.value.has(item.id));
+};
+
+// EXACTLY like reference code - handle individual checkbox toggle
+const handleToggleExport = (id) => {
+    if (selectedExportIds.value.has(id)) {
+        selectedExportIds.value.delete(id);
+    } else {
+        selectedExportIds.value.add(id);
+    }
+};
 </script>
 
 <style scoped lang="scss">

@@ -103,11 +103,11 @@
                                     <td class="px-4 py-2 text-right font-bold text-primary">{{ orderDelList.order_remarks || '-' }}</td>
                                 </tr>
                                 <tr class="border-b">
-                                    <td class="px-4 py-2 font-medium">Order Type</td>
+                                    <td class="px-4 py-2 font-medium">Pickup Type</td>
                                     <td class="px-4 py-2 text-right font-medium">{{ orderDelList.deliveryType === 'SELFCOLLECT' ? 'OWNCOLLECT' : orderDelList.deliveryType}}</td>
                                 </tr>
                                 <tr class="border-b">
-                                    <td class="px-4 py-2 font-medium">Order Description</td>
+                                    <td class="px-4 py-2 font-medium">Order Type</td>
                                     <td class="px-4 py-2 text-right font-medium">{{ orderDelList.orderDesc || '-' }}</td>
                                 </tr>
                                 <tr class="border-b">
@@ -139,7 +139,7 @@
                                     <td class="px-4 py-2 text-right">{{ orderDelList?.driverInformation?.collectorIC ? orderDelList.driverInformation.collectorIC : 'Not Assigned' }}</td>
                                 </tr>
                                 <tr class="border-b">
-                                    <td class="px-4 py-2 font-medium">Pickup</td>
+                                    <td class="px-4 py-2 font-medium">Pickup Date</td>
                                     <td class="px-4 py-2 text-right">{{ orderDelList.driverInformation?.pickup_datetime ? formatDate(orderDelList.driverInformation.pickup_datetime) : 'Not Assigned' }}</td>
                                 </tr>
                                 <tr>
@@ -438,9 +438,18 @@ function formatDate(dateString) {
 function formatTime(dateTimeString) {
     if (!dateTimeString) return '';
     const [, timePart] = dateTimeString.split(' ');
+    if (!timePart) return '';
 
-    return timePart; // already in 24-hour format: HH:mm:ss
+    let [hours, minutes, seconds] = timePart.split(':');
+    hours = parseInt(hours, 10);
+
+    const ampm = hours >= 12 ? 'PM' : 'AM';
+    hours = hours % 12;
+    hours = hours === 0 ? 12 : hours;
+
+    return `${hours}:${minutes}:${seconds} ${ampm}`;
 }
+
 function formatDateFull(dateString) {
     if (!dateString) return '';
     const date = new Date(dateString);
