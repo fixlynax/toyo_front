@@ -76,19 +76,19 @@
                 </template>
 
                 <!-- Export All Checkbox Column (EXACTLY like reference code) -->
-                <Column header="Export All" style="min-width: 8rem">
+                <!-- <Column header="Export All" style="min-width: 8rem">
                     <template #header>
                         <div class="flex justify-center">
                             <Checkbox :binary="true" :model-value="isAllSelected()" @change="() => toggleSelectAll()" />
                         </div>
-                    </template>
+                    </template> -->
 
-                    <template #body="{ data }">
+                    <!-- <template #body="{ data }">
                         <div class="flex justify-center">
                             <Checkbox :binary="true" :model-value="selectedExportIds.has(data.id)" @change="() => handleToggleExport(data.id)" />
                         </div>
                     </template>
-                </Column>
+                </Column> -->
 
                 <Column field="warranty_cert_no" header="Warranty Cert No" style="min-width: 8rem" sortable>
                     <template #body="{ data }">
@@ -182,6 +182,13 @@ const formatDateDMY = (date) => {
     const month = String(d.getMonth() + 1).padStart(2, '0');
     const year = d.getFullYear();
     return `${day}/${month}/${year}`;
+};
+const formatDateYMD = (date) => {
+    const d = new Date(date);
+    const day = String(d.getDate()).padStart(2, '0');
+    const month = String(d.getMonth() + 1).padStart(2, '0');
+    const year = d.getFullYear();
+    return `${year}-${month}-${day}`;
 };
 const visibleRows = ref([]); // For tracking filtered rows
 const selectedExportIds = ref(new Set());
@@ -306,73 +313,76 @@ const getOverallStatusSeverity = (status) => {
 
 
 const handleExport = async () => {
-        const idsArray = Array.from(selectedExportIds.value).map(id => Number(id));
+    const startDate = dateRange.value?.[0];
+    const endDate = dateRange.value?.[1];
 
-    if (idsArray.length === 0) {
-        alert('Please select at least one row.');
+    if (!startDate || !endDate) {
+        toast.add({
+            severity: 'warn',
+            summary: 'Date Required',
+            detail: 'Please select both start and end date to export.',
+            life: 3000
+        });
         return;
     }
+            const payload = {
+            startDate: formatDateYMD(startDate),
+            endDate: formatDateYMD(endDate)
+        };
+
     try {
         exportLoading.value = true;
-        
-            const response = await api.postExtra(
-            'excel/export-warranty-registration',{ warrantyreg_ids: JSON.stringify(idsArray) },
-        {
-            responseType: 'blob',
-            headers: {
-            'Content-Type': 'application/json',
-            }
-        }
-        );
-        const blob = new Blob([response.data], { 
-        type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' 
+        loading.value = true;
+
+        const response = await api.postExtra('excel/export-warranty-registration', payload, { responseType: 'arraybuffer' });
+
+        const blob = new Blob([response.data], {
+            type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
         });
 
-        const url = window.URL.createObjectURL(blob);
+        const url = URL.createObjectURL(blob);
         const a = document.createElement('a');
         a.href = url;
-        a.download = 'WarrantyRegList_Download.xlsx';
-        document.body.appendChild(a);
+        a.download = 'WarrantyRegistration_Report.xlsx';
         a.click();
-        document.body.removeChild(a);
-        window.URL.revokeObjectURL(url);
+        URL.revokeObjectURL(url);
 
         toast.add({ severity: 'success', summary: 'Success', detail: 'Export completed', life: 3000 });
-        selectedExportIds.value.clear();
-    } catch (error) {
-        console.error('Error exporting data:', error);
-        toast.add({ severity: 'error', summary: 'Error', detail: 'Failed to export data', life: 3000 });
+    } catch {
+        toast.add({ severity: 'error', summary: 'Error', detail: 'Export failed', life: 3000 });
     } finally {
+        loading.value = false;
         exportLoading.value = false;
+
     }
 };
 
 // EXACTLY like reference code - toggle all visible rows
-const toggleSelectAll = () => {
-    const allIds = visibleRows.value.map((item) => item.id);
+// const toggleSelectAll = () => {
+//     const allIds = visibleRows.value.map((item) => item.id);
 
-    if (isAllSelected()) {
-        // Remove all visible IDs at once (EXACTLY like reference code)
-        selectedExportIds.value = new Set([...selectedExportIds.value].filter((id) => !allIds.includes(id)));
-    } else {
-        // Add all visible IDs at once (EXACTLY like reference code)
-        selectedExportIds.value = new Set([...selectedExportIds.value, ...allIds]);
-    }
-};
+//     if (isAllSelected()) {
+//         // Remove all visible IDs at once (EXACTLY like reference code)
+//         selectedExportIds.value = new Set([...selectedExportIds.value].filter((id) => !allIds.includes(id)));
+//     } else {
+//         // Add all visible IDs at once (EXACTLY like reference code)
+//         selectedExportIds.value = new Set([...selectedExportIds.value, ...allIds]);
+//     }
+// };
 
 // EXACTLY like reference code - check if all visible rows are selected
-const isAllSelected = () => {
-    return visibleRows.value.length > 0 && visibleRows.value.every((item) => selectedExportIds.value.has(item.id));
-};
+// const isAllSelected = () => {
+//     return visibleRows.value.length > 0 && visibleRows.value.every((item) => selectedExportIds.value.has(item.id));
+// };
 
 // EXACTLY like reference code - handle individual checkbox toggle
-const handleToggleExport = (id) => {
-    if (selectedExportIds.value.has(id)) {
-        selectedExportIds.value.delete(id);
-    } else {
-        selectedExportIds.value.add(id);
-    }
-};
+// const handleToggleExport = (id) => {
+//     if (selectedExportIds.value.has(id)) {
+//         selectedExportIds.value.delete(id);
+//     } else {
+//         selectedExportIds.value.add(id);
+//     }
+// };
 </script>
 
 <style scoped lang="scss">
