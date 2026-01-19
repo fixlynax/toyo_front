@@ -192,9 +192,6 @@ import Badge from 'primevue/badge';
 import { computed } from 'vue';
 import { useMenuStore } from '@/store/menu';
 
-const menuStore = useMenuStore();
-const canUpdate = computed(() => menuStore.canWrite('Email Setting'));
-
 export default {
     name: 'MailSettingList',
     components: {
@@ -216,6 +213,12 @@ export default {
             newTag: '',
             emailObjects: []
         };
+    },
+     computed: {
+    canUpdate() {
+            const menuStore = useMenuStore();
+            return menuStore.canWrite('Email Setting');
+        }
     },
     methods: {
         async loadData() {
