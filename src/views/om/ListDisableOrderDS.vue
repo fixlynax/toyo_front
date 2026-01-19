@@ -299,6 +299,10 @@ export default {
     computed: {
         minDate() {
             return new Date();
+        },        
+        canUpdate() {
+            const menuStore = useMenuStore();
+            return menuStore.canWrite('Maintenance Mode');
         }
     },
 
