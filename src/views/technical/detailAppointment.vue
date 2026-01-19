@@ -1,12 +1,39 @@
 <script setup>
-import { ref, onMounted, computed } from 'vue';
+import { ref, onMounted, computed, reactive } from 'vue';
 import api from '@/service/api';
 import { useRoute } from 'vue-router';
 import Button from 'primevue/button';
 import Dialog from 'primevue/dialog';
+import { useToast } from 'primevue/usetoast';
+
+import { useMenuStore } from '@/store/menu';
+import { useConfirm } from 'primevue';
+
+const menuStore = useMenuStore();
+const canUpdate = computed(() => menuStore.canWrite('Appointment'));
+const denyAccess = computed(() => menuStore.canTest('Appointment'));
+const confirmation = useConfirm();
+const toast = useToast();
+
+const rejectAppointment = ref(false);
+const approveAppointment = ref(false);
+
+const showRejectDialogAppoinment = ref(false);
+const showApproveDialogAppoinment = ref(false);
+
+const showRejectAppointment = reactive({
+    remarks: '',
+});
+const today = ref(new Date());
+const showApproveAppointment = reactive({
+    appDate: null,
+    appTime: null,
+    dealerId: null,
+});
 
 const route = useRoute();
 const appointment = ref({});
+const dealerSelect = ref({});
 const loading = ref(true);
 const activeImage = ref(null);
 const activeImageType = ref('');
@@ -36,6 +63,31 @@ const fetchAppointmentDetail = async () => {
         loading.value = false;
     }
 };
+
+const fetchDealer = async () => {
+    try {
+        const response = await api.post(`list_dealer`);
+    
+        if (response.data.status === 1) {
+            dealerSelect.value = response.data.admin_data;
+        } else {
+            toast.add({ severity: 'error', summary: 'Error', detail: 'Failed to load data', life: 3000 });
+        }
+    } catch (error) {
+        console.error('Error fetching dealer detail:', error);
+        toast.add({ severity: 'error', summary: 'Error', detail: 'Failed to load data', life: 3000 });
+    } finally {
+        loading.value = false;
+    }
+};
+
+const dealerOptions = computed(() => {
+    return Object.values(dealerSelect.value).map(item => ({
+        label: `${item.shop.companyName1} (${item.shop.custAccountNo})`,
+        value: item.shop.id,          // ✅ SHOP ID
+        raw: item                      // optional (full data)
+    }));
+});
 
 // Load submitted photos using the same method as reference code
 const loadSubmittedPhotos = () => {
@@ -135,6 +187,24 @@ function formatDate(dateString) {
     day: '2-digit',
   });
 }
+const formatDateSubmission = (date) => {
+    if (!date) return null;
+
+    const d = new Date(date);
+    return d.toISOString().split('T')[0];
+};
+const formatTimeSubmission = (time) => {
+    if (!time) return null;
+
+    const d = new Date(time);
+    let hours = d.getHours();
+    const minutes = d.getMinutes().toString().padStart(2, '0');
+    const ampm = hours >= 12 ? 'pm' : 'am';
+
+    hours = hours % 12 || 12; // convert 0 → 12
+
+    return `${hours}:${minutes}${ampm}`;
+};
 function formatDateFull(dateString) {
   if (!dateString) return '';
   const date = new Date(dateString);
@@ -171,7 +241,147 @@ const getPhotoByType = (type) => {
 // Fetch data when component mounts
 onMounted(() => {
     fetchAppointmentDetail();
+    fetchDealer();
 });
+
+const rejectAppointmentDialog = () => {
+    showRejectDialogAppoinment.value = true;
+    showRejectAppointment.remarks = '';
+};
+const closerejectAppointmentDialog = () => {
+    showRejectDialogAppoinment.value = false;
+    showRejectAppointment.remarks = '';
+};
+
+const approveAppointmentDialog = () => {
+    showApproveDialogAppoinment.value = true;
+    showApproveAppointment.appDate = null;
+    showApproveAppointment.appTime = null;
+    showApproveAppointment.dealerId = null;
+};
+const closeapproveAppointmentDialog = () => {
+    showApproveDialogAppoinment.value = false;
+    showApproveAppointment.appDate = null;
+    showApproveAppointment.appTime = null;
+    showApproveAppointment.dealerId = null;
+};
+
+const rejectApp = async () => {
+        if (!showRejectAppointment.remarks) {
+        toast.add({
+            severity: 'error',
+            summary: 'Error',
+            detail: 'Rejection Reason missing',
+            life: 4000
+        });
+        return;
+    }
+
+    try {
+        rejectAppointment.value = true;
+        const response = await api.post(`appointment/update`, 
+        {
+            appointmentID: route.params.id,
+            status: 2,
+            rejectReason: showRejectAppointment.remarks,
+        });
+        if (response.data.status === 1) {
+            toast.add({
+                severity: 'success',
+                summary: 'Success',
+                detail: 'Appointment rejected successfully',
+                life: 3000
+            });
+            await fetchAppointmentDetail(); // Refresh data
+        } else {
+          toast.add({
+            severity: 'error',
+            summary: 'Error',
+            detail: response?.data?.message || 'Failed to reject appointment',
+            life: 3000
+        });
+        }
+    } catch (err) {
+        console.error('Error rejecting appoinment:', err);
+        toast.add({
+            severity: 'error',
+            summary: 'Error',
+            detail: err.response?.data?.message || 'Failed to reject appoinment',
+            life: 3000
+        });
+    } finally {
+        rejectAppointment.value = false;
+        closerejectAppointmentDialog();
+    }
+};
+
+const approveApp = async () => {
+      if (!showApproveAppointment.appDate) {
+        toast.add({
+            severity: 'error',
+            summary: 'Error',
+            detail: 'Appointmen Date is missing',
+            life: 4000
+        });
+        return;
+    }
+    if (!showApproveAppointment.appTime) {
+        toast.add({
+            severity: 'error',
+            summary: 'Error',
+            detail: 'Appointmen Time is missing',
+            life: 4000
+        });
+        return;
+    }
+    if (!showApproveAppointment.dealerId) {
+        toast.add({
+            severity: 'error',
+            summary: 'Error',
+            detail: 'Please select a dealer',
+            life: 4000
+        });
+        return;
+    }
+    try {
+        approveAppointment.value = true;
+        const response = await api.post(`appointment/update`, 
+        {
+            appointmentID: route.params.id,
+            status: 1,
+            appointmentTime: formatTimeSubmission(showApproveAppointment.appTime),
+            appointmentDate: formatDateSubmission(showApproveAppointment.appDate),
+            dealerID: showApproveAppointment.dealerId,
+        });
+        if (response.data.status === 1) {
+            toast.add({
+                severity: 'success',
+                summary: 'Success',
+                detail: 'Appointment aproved successfully',
+                life: 3000
+            });
+            await fetchAppointmentDetail(); // Refresh data
+        } else {
+          toast.add({
+            severity: 'error',
+            summary: 'Error',
+            detail: response?.data?.message || 'Failed to aproved appointment',
+            life: 3000
+        });
+        }
+    } catch (err) {
+        console.error('Error rejecting appoinment:', err);
+        toast.add({
+            severity: 'error',
+            summary: 'Error',
+            detail: err.response?.data?.message || 'Failed to aproved appoinment',
+            life: 3000
+        });
+    } finally {
+        approveAppointment.value = false;
+        closeapproveAppointmentDialog();
+    }
+};
 </script>
 
 <template>
@@ -381,6 +591,16 @@ onMounted(() => {
                     </div>
                 </div>
             </div>
+            <div class="card w-full" v-if="appointment?.warrantyReg?.isTWP === 1 && appointment?.appointment_info?.status === 0 && canUpdate ">
+                <div class="flex items-center justify-between border-b pb-2 mb-4">
+                    <div class="text-2xl font-bold text-gray-800">Update Appoinment Details</div>
+                </div>
+
+                    <div class="flex justify-start gap-2 mt-4">
+                        <Button label="Approve " @click="approveAppointmentDialog" class="p-button-success w-full" size="small" icon="pi pi-check" />
+                        <Button label="Reject " @click="rejectAppointmentDialog" class="p-button-danger w-full" size="small" icon="pi pi-times" />
+                    </div>
+            </div>
         </div>
     </div>
 
@@ -398,7 +618,41 @@ onMounted(() => {
             </div>
         </template>
     </Dialog>
+    <Dialog v-model:visible="showRejectDialogAppoinment" header="Reject Appointment" :modal="true" class="p-fluid" :style="{ width: '40rem' }">
+        <div class="field">
+            <label class="block font-bold text-gray-700 mb-2">Rejection Reason*</label>
+            <InputText v-model="showRejectAppointment.remarks" class="w-full"/>
+        </div>
+        <template #footer>
+            <Button label="Cancel" icon="pi pi-times" class="p-button-text" @click="closerejectAppointmentDialog" :disabled="rejectAppointment" />
+            <Button label="Reject" icon="pi pi-times-circle" class="p-button-danger" @click="rejectApp" :loading="rejectAppointment" :disabled="rejectAppointment" />
+        </template>
+    </Dialog>
 
+    <Dialog v-model:visible="showApproveDialogAppoinment" header="Approve Appointment" :modal="true" class="p-fluid" :style="{ width: '40rem' }">
+            <!-- Date selection -->
+             <div class="flex flex-col gap-3">
+                <div>
+                    <label for="appDate" class="block mb-2 font-medium w-full">Appointment Date</label>
+                    <Calendar id="appDate"v-model="showApproveAppointment.appDate" dateFormat="dd/mm/yy" :min-date="today" class="w-full" showIcon/>
+                </div>
+                <div>
+                    <label for="appTime" class="block mb-2 font-medium w-full">Appointment Time</label>
+                    <Calendar id="appTime"v-model="showApproveAppointment.appTime"timeOnly hourFormat="12" class="w-full"/>
+                </div>
+                <div>
+                    <label for="appTime" class="block mb-2 font-medium w-full">Dealer Selection</label>
+                    <Dropdown v-model="showApproveAppointment.dealerId" :options="dealerOptions" optionLabel="label"  optionValue="value" placeholder="Select Dealer"class="w-full"/>
+                </div>
+             </div>
+        <div class="field">
+
+        </div>
+        <template #footer>
+            <Button label="Cancel" icon="pi pi-times" class="p-button-text" @click="closeapproveAppointmentDialog" :disabled="approveAppointment" />
+            <Button label="Approve" icon="pi pi-check"  class="p-button-success" @click="approveApp" :loading="approveAppointment" :disabled="approveAppointment" />
+        </template>
+    </Dialog>
     <!-- Loading State -->
     <div v-if="loading" class="text-center py-8 text-gray-500">Loading appointment details...</div>
 

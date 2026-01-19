@@ -129,6 +129,7 @@
                         <div class="text-center py-8 text-gray-500">
                             <i class="pi pi-inbox text-4xl mb-2"></i>
                             <p>No material data found for selected criteria.</p>
+                            <p class="text-sm mt-1">You can still export or import data using the buttons above.</p>
                         </div>
                     </template>
 
@@ -361,7 +362,7 @@ const canLoadMaterials = computed(() => {
 });
 
 const canExport = computed(() => {
-    return selectedDealers.value.length > 0 && materialList.value.length > 0;
+    return selectedDealers.value.length > 0;
 });
 
 const canImport = computed(() => {
@@ -454,10 +455,8 @@ const fetchMaterialList = async () => {
 
 const onSelectAllMaterials = (event) => {
     if (event.checked) {
-        // When select all is checked, select all material IDs
         selectedMaterials.value = materialOptions.value.map((m) => m.value);
     } else {
-        // When select all is unchecked, clear all selections
         selectedMaterials.value = [];
     }
 };
@@ -482,12 +481,10 @@ const fetchEtenMaterials = async () => {
         loadingEtenMaterials.value = true;
         tableLoading.value = true;
 
-        // Prepare request data
         const requestData = {
             ids: selectedDealers.value
         };
 
-        // Only add materialid if materials are selected
         if (selectedMaterials.value.length > 0) {
             requestData.materialid = selectedMaterials.value;
         }
@@ -495,7 +492,6 @@ const fetchEtenMaterials = async () => {
         const response = await api.post('maintenance/getEtenMaterial', requestData);
 
         if (response.data.status === 1) {
-            // The API returns data in admin_data field for this endpoint
             materialList.value = response.data.admin_data || [];
             showResults.value = true;
 
@@ -510,7 +506,7 @@ const fetchEtenMaterials = async () => {
             showResults.value = true;
             toast.add({
                 severity: 'warn',
-                summary: 'Warning',
+                summary: 'Information',
                 detail: response.data.error || 'No materials found for selected criteria',
                 life: 3000
             });
@@ -518,7 +514,7 @@ const fetchEtenMaterials = async () => {
     } catch (error) {
         console.error('Error fetching ETEN materials:', error);
         materialList.value = [];
-        showResults.value = false;
+        showResults.value = true;
         toast.add({
             severity: 'error',
             summary: 'Error',
@@ -545,12 +541,10 @@ const exportMaterials = async () => {
     try {
         exportLoading.value = true;
 
-        // Prepare request data
         const requestData = {
             ids: selectedDealers.value
         };
 
-        // Only add materialid if materials are selected
         if (selectedMaterials.value.length > 0) {
             requestData.materialid = selectedMaterials.value;
         }
@@ -559,7 +553,6 @@ const exportMaterials = async () => {
             responseType: 'blob'
         });
 
-        // Check if the response is an error JSON
         if (response.data.type && response.data.type === 'application/json') {
             const reader = new FileReader();
             reader.onload = () => {
@@ -641,7 +634,6 @@ const handleImport = async (event) => {
 
         const formData = new FormData();
         formData.append('excel_file', file);
-        // Note: Removed dealer_ids as API doesn't expect it
 
         const response = await api.postExtra('maintenance/importEtenMaterial', formData, {
             headers: {
@@ -704,7 +696,6 @@ onMounted(async () => {
 </script>
 
 <style scoped>
-/* Keep your existing styles, they work well */
 :deep(.rounded-table) {
     border-radius: 12px;
     overflow: hidden;

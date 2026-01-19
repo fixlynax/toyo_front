@@ -91,17 +91,25 @@
 
                     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-4">
                         <!-- Permission Item -->
+
                         <div class="flex items-center justify-between p-4 border rounded-xl hover:bg-gray-50 dark:hover:bg-gray-800 transition">
-                            <span class="font-medium text-gray-700 dark:text-gray-200">Warranty</span>
-                            <span :class="memberDetail.allow_warranty === 1 ? 'bg-green-100 text-green-700 px-3 py-1 rounded-full text-sm font-semibold' : 'bg-red-100 text-red-700 px-3 py-1 rounded-full text-sm font-semibold'">
-                                {{ memberDetail.allow_warranty === 1 ? 'Allowed' : 'Restricted' }}
+                            <span class="font-medium text-gray-700 dark:text-gray-200">Order Approval</span>
+                            <span :class="memberDetail.allow_order === 1 ? 'bg-green-100 text-green-700 px-3 py-1 rounded-full text-sm font-semibold' : 'bg-red-100 text-red-700 px-3 py-1 rounded-full text-sm font-semibold'">
+                                {{ memberDetail.allow_order === 1 ? 'Allowed' : 'Restricted' }}
                             </span>
                         </div>
 
                         <div class="flex items-center justify-between p-4 border rounded-xl hover:bg-gray-50 dark:hover:bg-gray-800 transition">
-                            <span class="font-medium text-gray-700 dark:text-gray-200">Order</span>
-                            <span :class="memberDetail.allow_order === 1 ? 'bg-green-100 text-green-700 px-3 py-1 rounded-full text-sm font-semibold' : 'bg-red-100 text-red-700 px-3 py-1 rounded-full text-sm font-semibold'">
-                                {{ memberDetail.allow_order === 1 ? 'Allowed' : 'Restricted' }}
+                            <span class="font-medium text-gray-700 dark:text-gray-200">Order Placing</span>
+                            <span :class="memberDetail.allow_order_placing === 1 ? 'bg-green-100 text-green-700 px-3 py-1 rounded-full text-sm font-semibold' : 'bg-red-100 text-red-700 px-3 py-1 rounded-full text-sm font-semibold'">
+                                {{ memberDetail.allow_order_placing === 1 ? 'Allowed' : 'Restricted' }}
+                            </span>
+                        </div>
+
+                        <div class="flex items-center justify-between p-4 border rounded-xl hover:bg-gray-50 dark:hover:bg-gray-800 transition">
+                            <span class="font-medium text-gray-700 dark:text-gray-200">Warranty</span>
+                            <span :class="memberDetail.allow_warranty === 1 ? 'bg-green-100 text-green-700 px-3 py-1 rounded-full text-sm font-semibold' : 'bg-red-100 text-red-700 px-3 py-1 rounded-full text-sm font-semibold'">
+                                {{ memberDetail.allow_warranty === 1 ? 'Allowed' : 'Restricted' }}
                             </span>
                         </div>
 
@@ -113,16 +121,16 @@
                         </div>
 
                         <div class="flex items-center justify-between p-4 border rounded-xl hover:bg-gray-50 dark:hover:bg-gray-800 transition">
-                            <span class="font-medium text-gray-700 dark:text-gray-200">Sales</span>
-                            <span :class="memberDetail.allow_sale === 1 ? 'bg-green-100 text-green-700 px-3 py-1 rounded-full text-sm font-semibold' : 'bg-red-100 text-red-700 px-3 py-1 rounded-full text-sm font-semibold'">
-                                {{ memberDetail.allow_sale === 1 ? 'Allowed' : 'Restricted' }}
+                            <span class="font-medium text-gray-700 dark:text-gray-200">User Management</span>
+                            <span :class="memberDetail.allow_user === 1 ? 'bg-green-100 text-green-700 px-3 py-1 rounded-full text-sm font-semibold' : 'bg-red-100 text-red-700 px-3 py-1 rounded-full text-sm font-semibold'">
+                                {{ memberDetail.allow_user === 1 ? 'Allowed' : 'Restricted' }}
                             </span>
                         </div>
 
                         <div class="flex items-center justify-between p-4 border rounded-xl hover:bg-gray-50 dark:hover:bg-gray-800 transition">
-                            <span class="font-medium text-gray-700 dark:text-gray-200">User Management</span>
-                            <span :class="memberDetail.allow_user === 1 ? 'bg-green-100 text-green-700 px-3 py-1 rounded-full text-sm font-semibold' : 'bg-red-100 text-red-700 px-3 py-1 rounded-full text-sm font-semibold'">
-                                {{ memberDetail.allow_user === 1 ? 'Allowed' : 'Restricted' }}
+                            <span class="font-medium text-gray-700 dark:text-gray-200">Sales Forecast</span>
+                            <span :class="memberDetail.allow_sale === 1 ? 'bg-green-100 text-green-700 px-3 py-1 rounded-full text-sm font-semibold' : 'bg-red-100 text-red-700 px-3 py-1 rounded-full text-sm font-semibold'">
+                                {{ memberDetail.allow_sale === 1 ? 'Allowed' : 'Restricted' }}
                             </span>
                         </div>
                     </div>
@@ -249,6 +257,7 @@ const fetchMemberDetail = async () => {
                 activated: userData.activated || 1,
                 allow_warranty: userData.allow_warranty || 0,
                 allow_order: userData.allow_order || 0,
+                allow_order_placing: userData.allow_order_placing || 0,
                 allow_billing: userData.allow_billing || 0,
                 allow_sale: userData.allow_sale || 0,
                 allow_user: userData.allow_user || 0

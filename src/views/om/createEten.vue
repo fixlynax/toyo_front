@@ -298,20 +298,25 @@ watch(accountNo, (newVal) => {
     }
 });
 
-// NEW: Function to handle account number input with 10 character limit
-function handleAccountNoInput(event: Event) {
+// NEW: Function to handle phone number input with "6" prefix
+function handlePhoneNoInput(event: Event) {
     const input = event.target as HTMLInputElement;
     let value = input.value;
 
     // Remove any non-digit characters
     value = value.replace(/\D/g, '');
 
-    // Limit to 10 characters
-    if (value.length > 10) {
-        value = value.substring(0, 10);
+    // Ensure it starts with 6
+    if (!value.startsWith('6')) {
+        value = '6' + value.replace(/^6+/, ''); // Add 6 at the beginning and remove any leading 6s to avoid duplicates
     }
 
-    accountNo.value = value;
+    // Limit to reasonable length (e.g., 15 characters including the initial 6)
+    if (value.length > 15) {
+        value = value.substring(0, 15);
+    }
+
+    form.value.phoneno = value;
 }
 
 // Helper functions - UPDATED: All SAP fields should be disabled regardless of value
@@ -1147,18 +1152,18 @@ onMounted(() => {
                         </div>
                         <!-- <div class="w-full">
                             <label for="allowLalamove">Allow Lalamove</label> -->
-                            <!-- This will show "No" by default -->
-                            <!-- <Dropdown v-model="dropdownYesNo" :options="dropdownYesNoValue" optionLabel="name" placeholder="Select Option" class="w-full" />
+                        <!-- This will show "No" by default -->
+                        <!-- <Dropdown v-model="dropdownYesNo" :options="dropdownYesNoValue" optionLabel="name" placeholder="Select Option" class="w-full" />
                         </div> -->
                         <!-- <div class="w-full">
                             <label for="allowOwnCollection">Allow Own Collection</label> -->
-                            <!-- This will show "No" by default -->
-                            <!-- <Dropdown v-model="dropdownAllowOwnCollection" :options="dropdownYesNoValue" optionLabel="name" placeholder="Select Option" class="w-full" />
+                        <!-- This will show "No" by default -->
+                        <!-- <Dropdown v-model="dropdownAllowOwnCollection" :options="dropdownYesNoValue" optionLabel="name" placeholder="Select Option" class="w-full" />
                         </div> -->
                         <!-- <div class="w-full">
                             <label for="allowDirectShipment">Allow Direct Shipment</label> -->
-                            <!-- This will show "No" by default -->
-                            <!-- <Dropdown v-model="dropdownAllowDirectShipment" :options="dropdownYesNoValue" optionLabel="name" placeholder="Select Option" class="w-full" />
+                        <!-- This will show "No" by default -->
+                        <!-- <Dropdown v-model="dropdownAllowDirectShipment" :options="dropdownYesNoValue" optionLabel="name" placeholder="Select Option" class="w-full" />
                         </div> -->
                     </div>
                 </div>
@@ -1306,7 +1311,8 @@ onMounted(() => {
                         </div>
                         <div>
                             <label for="phoneno" class="required">Phone No</label>
-                            <InputText id="phoneno" type="text" v-model="form.phoneno" required />
+                            <InputText id="phoneno" type="text" v-model="form.phoneno" @input="handlePhoneNoInput" placeholder="6" required />
+                            <small class="text-gray-500">Must start with 6 and contain only numbers</small>
                         </div>
                     </div>
 

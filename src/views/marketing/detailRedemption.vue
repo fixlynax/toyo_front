@@ -280,7 +280,7 @@ const rejectRedeem = async () => {
 
     try {
         rejectingRedeem.value = true;
-        const response = await api.post(`redeem/verify/${redemption.value.id}`, 
+        const response = await api.post(`redeem/verify/${redemption.value.redeem_item.id}`, 
         {
             reject_reason: rejectRedemptionRemarks.remarks,
             status: 2,
@@ -325,7 +325,7 @@ const approveRedeemDialog = () => {
     accept: async () => {
       try {
      
-        const res = await api.post(`redeem/verify/${redemption.value.id}`, 
+        const res = await api.post(`redeem/verify/${redemption.value.redeem_item.id}`, 
         {
             status: 1,
         });

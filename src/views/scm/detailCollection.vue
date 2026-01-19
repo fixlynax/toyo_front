@@ -119,7 +119,7 @@
         <div class="flex flex-col gap-4">
             
             <div v-if="listData.status === 0"  >
-                <label class="font-medium">Collect Date & Time</label>
+                <label class="font-medium">Collect Date</label>
                 <InputText 
                     type="date" 
                     v-model="form.collectDatetime"
@@ -128,7 +128,7 @@
             </div>
 
             <div v-if="listData.status === 1"  >
-                <label class="font-medium">Reach WH Date & Time</label>
+                <label class="font-medium">Reach WH Date</label>
                 <InputText 
                     type="date" 
                     v-model="form.reachWHDatetime"

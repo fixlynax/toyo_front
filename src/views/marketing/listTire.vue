@@ -20,7 +20,7 @@
                 :loading="tableLoading"
                 :filters="filters"
                 filterDisplay="menu"
-                :globalFilterFields="['custAccountNo', 'shopName', 'regionName', 'areaName', 'address', 'created', 'updated']"
+                :globalFilterFields="['custAccountNo', 'shopName', 'regionName', 'areaName', 'address', 'channel', 'signboardType', 'created', 'updated']"
                 class="rounded-table"
                 currentPageReportTemplate="Showing {first} to {last} of {totalRecords} entries"
                 paginatorTemplate="CurrentPageReport FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink RowsPerPageDropdown"
@@ -85,6 +85,18 @@
                 <Column field="address" header="Address" style="min-width: 10rem" sortable>
                     <template #body="{ data }">
                         {{ data.address }}
+                    </template>
+                </Column>
+
+                <Column field="signboardType" header="SignBoard Type" style="min-width: 10rem" sortable>
+                    <template #body="{ data }">
+                        {{ data.signboardType }}
+                    </template>
+                </Column>
+
+                <Column field="channel" header="Channel" style="min-width: 10rem" sortable>
+                    <template #body="{ data }">
+                        {{ data.channel }}
                     </template>
                 </Column>
 
