@@ -953,20 +953,20 @@ const router = createRouter({
                     path: 'billing/listOther',
                     name: 'List-Other',
                     component: () => import('@/views/billing/listOther.vue'),
-                    meta: { permission: 'Other', access: 'view' } 
+                    meta: { permission: 'Others', access: 'view' } 
                 },
                 {
                     path: 'billing/listOtherPersonal/:custAccNo',
                     name: 'List-Other-Personal',
                     component: () => import('@/views/billing/listOtherPersonal.vue'),
-                    meta: { permission: 'Other', access: 'view' },
+                    meta: { permission: 'Others', access: 'view' },
                     props: true
                 },
                 {
                     path: 'sales/listOtherSales',
                     name: 'List-Other-Sales',
                     component: () => import('@/views/sales/listOtherSales.vue'),
-                    meta: { permission: 'Other', access: 'view' }
+                    meta: { permission: 'Others', access: 'view' }
                 },
 
                 // Statements
