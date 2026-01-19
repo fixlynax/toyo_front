@@ -269,7 +269,12 @@ const sapItems = computed(() => {
         return items;
     }
 
-    return [items];
+    // If it's a single object, wrap it in an array
+    if (typeof items === 'object' && items !== null) {
+        return [items];
+    }
+
+    return [];
 });
 
 const etenItems = computed(() => {
@@ -352,7 +357,7 @@ const formatDate = (dateString) => {
 
 const formatDateTime = (dateString) => {
     if (!dateString) return '-';
-    
+
     const date = new Date(dateString);
     const options = {
         day: '2-digit',
@@ -363,9 +368,9 @@ const formatDateTime = (dateString) => {
         second: '2-digit',
         hour12: true
     };
-    
+
     let formatted = date.toLocaleString('en-MY', options);
-    
+
     // Convert AM/PM to uppercase regardless of case
     return formatted.replace(/\b(am|pm)\b/gi, (match) => match.toUpperCase());
 };
@@ -534,6 +539,46 @@ const createETENOrder = () => {
         return;
     }
 
+    // Check if order_items exists and is valid
+    const sapData = sapDetails.value.admin_data;
+    if (!sapData.order_items) {
+        toast.add({
+            severity: 'error',
+            summary: 'No Order Items',
+            detail: 'No order items found in SAP data. Cannot create order.',
+            life: 4000
+        });
+        return;
+    }
+
+    // Ensure order_items is an array
+    let orderItems = sapData.order_items;
+    if (!Array.isArray(orderItems)) {
+        // If it's a single object, convert to array
+        if (typeof orderItems === 'object' && orderItems !== null) {
+            orderItems = [orderItems];
+        } else {
+            toast.add({
+                severity: 'error',
+                summary: 'Invalid Order Items',
+                detail: 'Order items data is invalid. Please check SAP data.',
+                life: 4000
+            });
+            return;
+        }
+    }
+
+    // Check if there are any order items
+    if (orderItems.length === 0) {
+        toast.add({
+            severity: 'error',
+            summary: 'Empty Order',
+            detail: 'Order has no items. Cannot create empty order.',
+            life: 4000
+        });
+        return;
+    }
+
     const getConfirmMessage = () => {
         return `Confirm\n
         Order: ${form.value.orderno}\n`;
@@ -552,10 +597,10 @@ const createETENOrder = () => {
             loading.value.orderCreate = true;
 
             try {
-                const sapData = sapDetails.value.admin_data;
                 const sapOrderArray = [];
 
-                sapData.order_items.forEach((item, index) => {
+                // Now use the validated orderItems array
+                orderItems.forEach((item, index) => {
                     sapOrderArray.push({
                         materialid: item.materialid || '',
                         lineno: item.lineno || (index + 1).toString().padStart(4, '0'),
