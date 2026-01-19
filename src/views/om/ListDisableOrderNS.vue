@@ -285,9 +285,11 @@
 <script>
 import api from '@/service/api';
 import LoadingPage from '@/components/LoadingPage.vue';
-import { computed } from 'vue';
 import { useMenuStore } from '@/store/menu';
+import { computed } from 'vue';
 
+const menuStore = useMenuStore();
+const canUpdate = computed(() => menuStore.canWrite('Maintenance Mode'));
 
 export default {
     name: 'ListPageLayout',
@@ -331,10 +333,6 @@ export default {
     computed: {
         minDate() {
             return new Date();
-        },
-    canUpdate() {
-            const menuStore = useMenuStore();
-            return menuStore.canWrite('Maintenance Mode');
         }
     },
 
