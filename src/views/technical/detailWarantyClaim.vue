@@ -2489,9 +2489,10 @@ const generateReport = (report) => {
                 </div>
                             
                 <div class="signature-box">
-                    <strong>DEALER RECEIVED BY</strong><br>
-                    NAME : <br>
-                    <div class="signature-line">Signature</div>
+                    <strong>DEALER RECEIVED BY</strong><br><br><br>
+                    <div>NAME : </div><br>
+                    <div>DATE : </div><br>
+                    <div class="signature-line">Customer's Chop and Signature</div>
                 </div>
 
             </div>
