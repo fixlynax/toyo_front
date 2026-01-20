@@ -11,14 +11,14 @@
                 <DataTable :value="versionList" :loading="loading" class="rounded-table">
                     <Column field="type" header="Type" sortable>
                         <template #body="{ data }">
-                            <span class="font-medium">{{ getTypeLabel(data.type) }}</span>
+                            <span class="font-bold">{{ getTypeLabel(data.type) }}</span>
                         </template>
                     </Column>
-                    <Column field="currentVer" header="Current Version" sortable></Column>
-                    <Column field="newVer" header="New Version" sortable></Column>
+                    <Column field="currentVer" class="font-bold" header="Current Version" sortable></Column>
+                    <Column field="newVer" class="font-bold" header="New Version" sortable></Column>
                     <Column field="link" header="Link" sortable>
                         <template #body="{ data }">
-                            <a v-if="data.link" :href="data.link" target="_blank" class="text-blue-600 hover:underline">
+                            <a v-if="data.link" :href="data.link" target="_blank" class="text-blue-600 hover:underline font-medium">
                                 {{ truncateText(data.link, 30) }}
                             </a>
                             <span v-else class="text-gray-400">-</span>
