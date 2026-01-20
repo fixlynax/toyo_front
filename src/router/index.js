@@ -654,7 +654,7 @@ const router = createRouter({
                     path: 'technical/listOETire',
                     name: 'List-OE-Tire',
                     component: () => import('@/views/technical/listOETire.vue'),
-                    meta: { permission: 'OE Tire LIst', access: 'view' }
+                    meta: { permission: 'OE Tyre List', access: 'view' }
                 },
                 {
                     path: 'technical/listPattern',

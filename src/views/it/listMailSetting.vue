@@ -102,7 +102,7 @@
                 </template>
             </Column>
 
-            <Column header="Action" style="width: 120px">
+            <Column v-if="canUpdate" header="Action" style="width: 120px">
                 <template #body="{ data }">
                     <div class="flex gap-2">
                         <Button 
@@ -110,7 +110,6 @@
                             class="p-button-text p-button-primary p-button-sm" 
                             @click="editSetting(data)" 
                             title="Edit" 
-                            :disabled="!canUpdate"
                         />
                     </div>
                 </template>

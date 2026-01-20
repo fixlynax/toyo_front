@@ -192,7 +192,7 @@
                                 </template>
                             </Column>
 
-                            <Column header="Activation Code" style="min-width: 8rem">
+                            <Column v-if="canUpdate" header="Activation Code" style="min-width: 8rem">
                                 <template #body="{ data }">
                                     <Button v-if="data.activated === null" icon="pi pi-send" label="Send" style="width: fit-content" class="p-button-info p-button-sm" @click="sendActivationCode(data)" />
                                     <label v-else>-</label>

@@ -100,8 +100,8 @@ import { useToast } from 'primevue/usetoast';
 import { useMenuStore } from '@/store/menu';
 
 const menuStore = useMenuStore();
-const canUpdate = computed(() => menuStore.canWrite('OE Tire LIst'));
-const denyAccess = computed(() => menuStore.canTest('OE Tire LIst'));
+const canUpdate = computed(() => menuStore.canWrite('OE Tyre List'));
+const denyAccess = computed(() => menuStore.canTest('OE Tyre List'));
 
 const toast = useToast();
 

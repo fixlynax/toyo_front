@@ -13,37 +13,37 @@
                 <!-- Sender Name -->
                 <div class="flex flex-col gap-1">
                     <label class="block text-xm font-bold text-gray-700 mb-1">Sender Name</label>
-                    <InputText v-model="form.email_name" placeholder="Enter sender display name" :disabled="loading" class="w-full" />
+                    <InputText v-model="form.email_name" placeholder="Enter sender display name" :disabled="loading || !canUpdate" class="w-full" />
                 </div>
 
                 <!-- Sender Email -->
                 <div class="flex flex-col gap-1">
                     <label class="block text-xm font-bold text-gray-700 mb-1">Sender Email</label>
-                    <InputText v-model="form.email_address" placeholder="Enter sender email address" :disabled="loading" class="w-full" type="email" />
+                    <InputText v-model="form.email_address" placeholder="Enter sender email address" :disabled="loading || !canUpdate" class="w-full" type="email" />
                 </div>
 
                 <!-- Outgoing SMTP Server -->
                 <div class="flex flex-col gap-1">
                     <label class="block text-xm font-bold text-gray-700 mb-1">Outgoing SMTP Server</label>
-                    <InputText v-model="form.smtp_server" placeholder="Enter SMTP server address" :disabled="loading" class="w-full" />
+                    <InputText v-model="form.smtp_server" placeholder="Enter SMTP server address" :disabled="loading || !canUpdate" class="w-full" />
                 </div>
 
                 <!-- Outgoing Port No -->
                 <div class="flex flex-col gap-1">
                     <label class="block text-xm font-bold text-gray-700 mb-1">Outgoing Port No</label>
-                    <InputNumber v-model="form.email_port" placeholder="Enter SMTP port" :disabled="loading" class="w-full" :min="1" :max="65535" />
+                    <InputNumber v-model="form.email_port" placeholder="Enter SMTP port" :disabled="loading || !canUpdate" class="w-full" :min="1" :max="65535" />
                 </div>
 
                 <!-- Username -->
                 <div class="flex flex-col gap-1">
                     <label class="block text-xm font-bold text-gray-700 mb-1">Username</label>
-                    <InputText v-model="form.email_username" placeholder="Enter SMTP username" :disabled="loading" class="w-full" />
+                    <InputText v-model="form.email_username" placeholder="Enter SMTP username" :disabled="loading || !canUpdate" class="w-full" />
                 </div>
 
                 <!-- Password (Required) -->
                 <div class="flex flex-col gap-1">
                     <label class="block text-xm font-bold text-gray-700 mb-1">Password</label>
-                    <Password v-model="form.email_password" placeholder="Enter SMTP password" :disabled="loading" class="w-full" :feedback="false" toggleMask />
+                    <Password v-model="form.email_password" placeholder="Enter SMTP password" :disabled="loading || !canUpdate" class="w-full" :feedback="false" toggleMask />
                 </div>
             </div>
 
@@ -74,7 +74,7 @@
             </div>
 
             <!-- Action Buttons -->
-            <div class="flex justify-end gap-4 pt-4">
+            <div v-if="canUpdate" class="flex justify-end gap-4 pt-4">
                 <!-- Send Test Email button removed from here -->
                 <div class="w-40">
                     <Button label="Update" class="w-full p-button-warning" @click="submitForm" :loading="loading" />
