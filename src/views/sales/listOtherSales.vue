@@ -59,7 +59,7 @@
                                 v-tooltip="selectedFiles.length > 0 ? `Download ${selectedFiles.length} selected files` : 'Select files to download'"
                             />
                             <Button icon="pi pi-refresh" class="p-button-info p-button-sm" @click="refreshData" :disabled="loading" v-tooltip="'Refresh data'" />
-                            <Button type="button" icon="pi pi-upload" label="Upload" class="p-button-info p-button-sm" @click="handleUploadClick" :loading="uploadLoading" :disabled="uploadLoading" />
+                            <!-- <Button type="button" icon="pi pi-upload" label="Upload" class="p-button-info p-button-sm" @click="handleUploadClick" :loading="uploadLoading" :disabled="uploadLoading" /> -->
                             <i
                                 class="pi pi-info-circle cursor-pointer font-bold text-primary-400 text-lg mr-1"
                                 v-tooltip="{
@@ -886,9 +886,9 @@ const handleBulkDownload = async () => {
 };
 
 // 🟢 Handle Upload
-const handleUploadClick = () => {
-    fileInputRef.value?.click();
-};
+//const handleUploadClick = () => {
+   // fileInputRef.value?.click();
+//};
 
 const handleFileUpload = async (event) => {
     const files = Array.from(event.target.files);
