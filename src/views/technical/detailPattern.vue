@@ -1,7 +1,6 @@
 <template>
     <Fluid>
         <div class="flex flex-col md:flex-row gap-8">
-            <div class=" flex flex-col gap-6">
                 <!-- Tyre Specifications -->
                 <div class="card flex flex-col gap-6 w-full">
                     <div class="flex items-center justify-between border-b pb-2">
@@ -47,7 +46,6 @@
                         </template>
                     </div>
                 </div>
-            </div>
 
         </div>
     </Fluid>
