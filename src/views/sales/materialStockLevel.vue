@@ -457,7 +457,7 @@ const calculateBatchTotal = computed(() => {
 
                         <!-- Storage Location Dropdown -->
                         <div class="flex items-center gap-2">
-                            <span class="text-sm font-medium text-gray-700 whitespace-nowrap">Storage:</span>
+                            <span class="text-xm font-medium text-gray-700 whitespace-nowrap">Storage:</span>
                             <Dropdown v-model="selectedStorage" :options="storageLocations" optionLabel="name" optionValue="code" placeholder="Select Storage" class="w-48" :filter="true" @change="handleStorageChange">
                                 <template #option="slotProps">
                                     <div class="flex items-center gap-2">
@@ -489,7 +489,7 @@ const calculateBatchTotal = computed(() => {
                     <div class="flex flex-col items-center gap-2">
                         <i class="pi pi-box text-3xl text-blue-400"></i>
                         <span class="text-lg">No materials found</span>
-                        <span class="text-sm text-gray-400">Out Of Stock data available for {{ selectedStorage }}</span>
+                        <span class="text-xm text-gray-400">Out Of Stock data available for {{ selectedStorage }}</span>
                     </div>
                 </div>
             </template>
@@ -516,9 +516,9 @@ const calculateBatchTotal = computed(() => {
                 <template #body="{ data }">
                     <div class="flex flex-col">
                         <!-- Top -->
-                        <div class="font-semibold text-blue-600">{{ data.materialid }}</div>
+                        <div class="font-bold text-xm text-black">{{ data.material }}</div>
                         <!-- Bottom -->
-                        <div class="text-gray-600 text-sm truncate max-w-xs">{{ data.material }}</div>
+                        <div class="text-gray-600 text-xm truncate max-w-xs font-medium">{{ data.materialid }}</div>
                     </div>
                 </template>
             </Column>
@@ -528,7 +528,7 @@ const calculateBatchTotal = computed(() => {
                 <template #body="{ data }">
                     <div class="flex flex-col">
                         <div class="font-medium">{{ data.pattern }}</div>
-                        <div class="text-gray-600 text-sm">{{ data.pattern_name }}</div>
+                        <div class="text-gray-600 text-xm">{{ data.pattern_name }}</div>
                     </div>
                 </template>
             </Column>
@@ -536,7 +536,7 @@ const calculateBatchTotal = computed(() => {
             <!-- Size Details -->
             <Column header="Rim Diameter" style="min-width: 8rem" sortable :sort-field="'rimdiameter'">
                 <template #body="{ data }">
-                    <div class="flex flex-col leading-relaxed text-sm text-gray-700">
+                    <div class="flex flex-col leading-relaxed text-xm text-gray-700">
                         <div class="flex items-center justify-between mb-2">
                             <span class="font-semibold">{{ data.rimdiameter }}"</span>
                         </div>
@@ -555,7 +555,7 @@ const calculateBatchTotal = computed(() => {
             <Column header="Stock Info" style="min-width: 14rem">
                 <template #body="{ data }">
                     <template v-if="data.stock_level">
-                        <div class="flex flex-col leading-relaxed text-sm text-gray-700">
+                        <div class="flex flex-col leading-relaxed text-xm text-gray-700">
                             <div class="flex items-center justify-between mb-2">
                                 <span class="text-gray-800 font-semibold">Balance:</span>
                                 <div class="flex items-center gap-2">
@@ -603,15 +603,15 @@ const calculateBatchTotal = computed(() => {
                 <template #body="{ data }">
                     <div class="flex flex-col space-y-1">
                         <div class="flex items-center justify-between">
-                            <span class="text-gray-600 text-sm">Sell:</span>
+                            <span class="text-gray-600 text-xm">Sell:</span>
                             <Tag :value="formatBoolean(data.isSell)" :severity="data.isSell ? 'info' : 'secondary'" class="text-xs" />
                         </div>
                         <div class="flex items-center justify-between">
-                            <span class="text-gray-600 text-sm">Warranty:</span>
+                            <span class="text-gray-600 text-xm">Warranty:</span>
                             <Tag :value="formatBoolean(data.isWarranty)" :severity="data.isWarranty ? 'info' : 'secondary'" class="text-xs" />
                         </div>
                         <div class="flex items-center justify-between">
-                            <span class="text-gray-600 text-sm">TWP:</span>
+                            <span class="text-gray-600 text-xm">TWP:</span>
                             <Tag :value="formatBoolean(data.isTWP)" :severity="data.isTWP ? 'info' : 'secondary'" class="text-xs" />
                         </div>
                     </div>
@@ -621,7 +621,7 @@ const calculateBatchTotal = computed(() => {
             <!-- Last Updated -->
             <Column field="updated" header="Updated" style="min-width: 8rem" sortable>
                 <template #body="{ data }">
-                    <div class="text-sm">
+                    <div class="text-xm">
                         {{ formatDateTime(data.updated) }}
                     </div>
                 </template>
@@ -652,11 +652,11 @@ const calculateBatchTotal = computed(() => {
                 <div class="bg-blue-50 p-3 rounded-lg mb-4">
                     <div class="flex items-center justify-between">
                         <div>
-                            <span class="text-sm text-gray-600">Total Quantity:</span>
+                            <span class="text-xm text-gray-600">Total Quantity:</span>
                             <span class="ml-2 text-xl font-bold text-blue-700">{{ calculateBatchTotal }}</span>
                         </div>
                         <div>
-                            <span class="text-sm text-gray-600">Number of Batches:</span>
+                            <span class="text-xm text-gray-600">Number of Batches:</span>
                             <span class="ml-2 text-lg font-semibold text-gray-700">{{ stockBatchDetails.length }}</span>
                         </div>
                     </div>
