@@ -267,8 +267,6 @@ import LoadingPage from '@/components/LoadingPage.vue';
 import { computed } from 'vue';
 import { useMenuStore } from '@/store/menu';
 
-const menuStore = useMenuStore();
-const canUpdate = computed(() => menuStore.canWrite('Maintenance Mode'));
 
 export default {
     name: 'ListPageLayout',
@@ -302,7 +300,7 @@ export default {
         },        
         canUpdate() {
             const menuStore = useMenuStore();
-            return menuStore.canWrite('Maintenance Mode');
+            return menuStore.canWrite('TMDS Location');
         }
     },
 
