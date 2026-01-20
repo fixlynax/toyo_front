@@ -144,7 +144,7 @@
                         <Tag :value="data.delivery_status" :severity="getStatusSeverity(data.delivery_status)" />
                     </template>
                 </Column>
-                <Column v-if="statusTabs[activeTabIndex]?.label !== 'New' && canUpdate" field="report" header="Report" style="min-width: 8rem">
+                <Column v-if="canUpdate" field="report" header="Report" style="min-width: 8rem">
                     <template #body="{ data }">
                         <Button 
                             icon="pi pi-print" 
