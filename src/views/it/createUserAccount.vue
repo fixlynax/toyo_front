@@ -340,10 +340,8 @@ const fetchUserRoles = async () => {
 
         if (response.data.status === 1) {
             userRoleOptions.value = response.data.data.map((role) => ({
-                label: `${role.name}${role.is_super_admin ? ' (Super Admin)' : ''}${role.is_sales_person ? ' (Sales Person)' : ''}`,
-                value: role.id,
-                is_super_admin: role.is_super_admin,
-                is_sales_person: role.is_sales_person
+                label: role.name,
+                value: role.id
             }));
         } else {
             toast.add({

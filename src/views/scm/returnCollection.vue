@@ -692,6 +692,13 @@ const generateReport = (report) => {
                     width: 250px;
                     font-size: 12px;
                 }
+                .signature-line-new {
+                    margin-top: auto;         /* pushes signature to bottom */
+                    border-top: 1px solid #000;
+                    width: 100%;
+                    padding-top: 5px;
+                    text-align: center;
+                }
                 .dealer-line {
                     margin-top: 5px;
                 }
@@ -715,7 +722,7 @@ const generateReport = (report) => {
                 /* NEW STYLES FOR STORE USE SECTION */
                 .store-use-container {
                     border: 1px solid #000;
-                    margin-top: 30px;
+                    margin-top: 20px;
                 }
                 .store-use-header {
                     border-bottom: 1px solid #000;
@@ -799,7 +806,6 @@ const generateReport = (report) => {
                     <td>${report.remarks || "-"}</td>
                 </tr>
             </table>
-            <br>
 
             <!-- FOR STORE USE SECTION -->
             <div class="store-use-container">
@@ -828,6 +834,8 @@ const generateReport = (report) => {
                             <strong>Branch Asst / Storehand</strong><br><br>
                             <div>Name: </div> <br>
                             <div>Date: </div> <br>
+                            <br><br><br><br>
+                            <div class="signature-line-new">Customer's Chop and Signature</div>
                         </div>
 
                         <div class="separator"></div>

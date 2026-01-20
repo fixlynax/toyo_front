@@ -74,7 +74,7 @@
                 <div class="card flex flex-col w-full">
                     <div class="flex items-center justify-between border-b pb-2 mb-4">
                         <div class="text-2xl font-bold text-gray-800">Tyre Detail</div>
-                        <Button label="Update Tyre Details" class="p-button-info" size="small" @click="openEditTier" v-if="warantyDetail.status !== 6 && warantyDetail.status !== 5 && warantyDetail.status_string !== 'Pending Customer Invoice'"/>
+                        <Button label="Update Tyre Details" class="p-button-info" size="small" @click="openEditTier" v-if="warantyDetail.status !== 6 && warantyDetail.status !== 5 && warantyDetail.status_string !== 'Pending Customer Invoice' && canUpdate"/>
                     </div>
                     <div :class="['grid',  'gap-4', 'mb-2', warantyDetail.tire_info?.plateSerialAdmin ? 'grid-cols-2 md:grid-cols-5' : 'grid-cols-2 md:grid-cols-4']">
                         <div>
@@ -2489,9 +2489,10 @@ const generateReport = (report) => {
                 </div>
                             
                 <div class="signature-box">
-                    <strong>DEALER RECEIVED BY</strong><br>
-                    NAME : <br>
-                    <div class="signature-line">Signature</div>
+                    <strong>DEALER RECEIVED BY</strong><br><br><br>
+                    <div>NAME : </div><br>
+                    <div>DATE : </div><br>
+                    <div class="signature-line">Customer's Chop and Signature</div>
                 </div>
 
             </div>

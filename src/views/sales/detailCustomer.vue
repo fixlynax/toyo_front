@@ -177,7 +177,7 @@
                                 </template>
                             </Column>
 
-                            <Column header="Activation Code" style="min-width: 8rem">
+                            <Column v-if="canUpdate" header="Activation Code" style="min-width: 8rem">
                                 <template #body="{ data }">
                                     <Button v-if="data.activated === null" icon="pi pi-send" label="Send" style="width: fit-content" class="p-button-info p-button-sm" @click="sendActivationCode(data)" />
                                     <label v-else>-</label>
@@ -392,7 +392,9 @@ import api from '@/service/api';
 import { useToast } from 'primevue/usetoast';
 import { onMounted, ref, watch, computed } from 'vue';
 import { useRoute } from 'vue-router';
-
+import { useMenuStore } from '@/store/menu';
+const menuStore = useMenuStore();
+const canUpdate = computed(() => menuStore.canWrite('Customer List'));
 const toast = useToast();
 const route = useRoute();
 

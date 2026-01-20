@@ -144,7 +144,6 @@ const editor = useEditor({
                 levels: [1, 2, 3]
             }
         }),
-        Underline,
         Placeholder.configure({
             placeholder: props.placeholder
         })

@@ -19,7 +19,7 @@
                                 <label class="block text-xm font-bold text-gray-700 mb-1 flex items-center gap-2"> T-Care </label>
                                 <div class="flex items-start gap-2">
                                     <div class="flex-1">
-                                        <TipTapEditor v-model="form.careTnc.en" :placeholder="'Enter Care Terms & Conditions (English)'" :disabled="loading" @update:modelValue="handleTncChange" />
+                                        <TipTapEditor v-model="form.careTnc.en" :placeholder="'Enter Care Terms & Conditions (English)'" :disabled="loading || !canUpdate" @update:modelValue="handleTncChange" />
                                     </div>
                                     <Button icon="pi pi-history" class="p-button-sm h-fit" @click="showLog.careTnc = true" tooltip="View Log History" :disabled="loading" />
                                 </div>
@@ -30,7 +30,7 @@
                                 <label class="block text-xm font-bold text-gray-700 mb-1 flex items-center gap-2"> eTEN </label>
                                 <div class="flex items-start gap-2">
                                     <div class="flex-1">
-                                        <TipTapEditor v-model="form.etenTnc.en" :placeholder="'Enter ETEN Terms & Conditions (English)'" :disabled="loading" @update:modelValue="handleTncChange" />
+                                        <TipTapEditor v-model="form.etenTnc.en" :placeholder="'Enter ETEN Terms & Conditions (English)'" :disabled="loading || !canUpdate" @update:modelValue="handleTncChange" />
                                     </div>
                                     <Button icon="pi pi-history" class="p-button-sm h-fit" @click="showLog.etenTnc = true" tooltip="View Log History" :disabled="loading" />
                                 </div>
@@ -45,7 +45,7 @@
                                 <label class="block text-xm font-bold text-gray-700 mb-1 flex items-center gap-2"> T-Care </label>
                                 <div class="flex items-start gap-2">
                                     <div class="flex-1">
-                                        <TipTapEditor v-model="form.careTnc.bm" :placeholder="'Masukkan Terma & Syarat Care (Bahasa Malaysia)'" :disabled="loading" @update:modelValue="handleTncChange" />
+                                        <TipTapEditor v-model="form.careTnc.bm" :placeholder="'Masukkan Terma & Syarat Care (Bahasa Malaysia)'" :disabled="loading || !canUpdate" @update:modelValue="handleTncChange" />
                                     </div>
                                     <Button icon="pi pi-history" class="p-button-sm h-fit" @click="showLog.careTnc = true" tooltip="View Log History" :disabled="loading" />
                                 </div>
@@ -56,7 +56,7 @@
                                 <label class="block text-xm font-bold text-gray-700 mb-1 flex items-center gap-2"> eTEN </label>
                                 <div class="flex items-start gap-2">
                                     <div class="flex-1">
-                                        <TipTapEditor v-model="form.etenTnc.bm" :placeholder="'Masukkan Terma & Syarat ETEN (Bahasa Malaysia)'" :disabled="loading" @update:modelValue="handleTncChange" />
+                                        <TipTapEditor v-model="form.etenTnc.bm" :placeholder="'Masukkan Terma & Syarat ETEN (Bahasa Malaysia)'" :disabled="loading || !canUpdate" @update:modelValue="handleTncChange" />
                                     </div>
                                     <Button icon="pi pi-history" class="p-button-sm h-fit" @click="showLog.etenTnc = true" tooltip="View Log History" :disabled="loading" />
                                 </div>
@@ -71,7 +71,7 @@
                                 <label class="block text-xm font-bold text-gray-700 mb-1 flex items-center gap-2"> T-Care </label>
                                 <div class="flex items-start gap-2">
                                     <div class="flex-1">
-                                        <TipTapEditor v-model="form.careTnc.cn" :placeholder="'输入Care条款与条件 (中文)'" :disabled="loading" @update:modelValue="handleTncChange" />
+                                        <TipTapEditor v-model="form.careTnc.cn" :placeholder="'输入Care条款与条件 (中文)'" :disabled="loading || !canUpdate" @update:modelValue="handleTncChange" />
                                     </div>
                                     <Button icon="pi pi-history" class="p-button-sm h-fit" @click="showLog.careTnc = true" tooltip="View Log History" :disabled="loading" />
                                 </div>
@@ -82,7 +82,7 @@
                                 <label class="block text-xm font-bold text-gray-700 mb-1 flex items-center gap-2"> eTEN </label>
                                 <div class="flex items-start gap-2">
                                     <div class="flex-1">
-                                        <TipTapEditor v-model="form.etenTnc.cn" :placeholder="'输入ETEN条款与条件 (中文)'" :disabled="loading" @update:modelValue="handleTncChange" />
+                                        <TipTapEditor v-model="form.etenTnc.cn" :placeholder="'输入ETEN条款与条件 (中文)'" :disabled="loading || !canUpdate" @update:modelValue="handleTncChange" />
                                     </div>
                                     <Button icon="pi pi-history" class="p-button-sm p-button-secondary h-fit" @click="showLog.etenTnc = true" tooltip="View Log History" :disabled="loading" />
                                 </div>
@@ -92,7 +92,7 @@
                 </TabView>
 
                 <!-- Action Buttons for T&C -->
-                <div class="flex justify-end gap-4 pt-4">
+                <div v-if="canUpdate" class="flex justify-end gap-4 pt-4">
                     <div class="w-32">
                         <Button
                             :label="hasTncChanges ? 'Revert' : 'Revert'"
@@ -126,7 +126,7 @@
                                 <label class="block text-xm font-bold text-gray-700 mb-1 flex items-center gap-2"> T-Care </label>
                                 <div class="flex items-start gap-2">
                                     <div class="flex-1">
-                                        <TipTapEditor v-model="form.carePolicy.en" :placeholder="'Enter T-Care (English)'" :disabled="loadingPolicy" @update:modelValue="handlePolicyChange" />
+                                        <TipTapEditor v-model="form.carePolicy.en" :placeholder="'Enter T-Care (English)'" :disabled="loadingPolicy || !canUpdate" @update:modelValue="handlePolicyChange" />
                                     </div>
                                     <Button icon="pi pi-history" class="p-button-sm h-fit" @click="showPolicyLog.carePolicy = true" tooltip="View Log History" :disabled="loadingPolicy" />
                                 </div>
@@ -137,7 +137,7 @@
                                 <label class="block text-xm font-bold text-gray-700 mb-1 flex items-center gap-2"> eTEN </label>
                                 <div class="flex items-start gap-2">
                                     <div class="flex-1">
-                                        <TipTapEditor v-model="form.etenPolicy.en" :placeholder="'Enter eTEN (English)'" :disabled="loadingPolicy" @update:modelValue="handlePolicyChange" />
+                                        <TipTapEditor v-model="form.etenPolicy.en" :placeholder="'Enter eTEN (English)'" :disabled="loadingPolicy || !canUpdate" @update:modelValue="handlePolicyChange" />
                                     </div>
                                     <Button icon="pi pi-history" class="p-button-sm h-fit" @click="showPolicyLog.etenPolicy = true" tooltip="View Log History" :disabled="loadingPolicy" />
                                 </div>
@@ -152,7 +152,7 @@
                                 <label class="block text-xm font-bold text-gray-700 mb-1 flex items-center gap-2"> T-Care </label>
                                 <div class="flex items-start gap-2">
                                     <div class="flex-1">
-                                        <TipTapEditor v-model="form.carePolicy.bm" :placeholder="'Masukkan Dasar Privasi Care (Bahasa Malaysia)'" :disabled="loadingPolicy" @update:modelValue="handlePolicyChange" />
+                                        <TipTapEditor v-model="form.carePolicy.bm" :placeholder="'Masukkan Dasar Privasi Care (Bahasa Malaysia)'" :disabled="loadingPolicy || !canUpdate" @update:modelValue="handlePolicyChange" />
                                     </div>
                                     <Button icon="pi pi-history" class="p-button-sm h-fit" @click="showPolicyLog.carePolicy = true" tooltip="View Log History" :disabled="loadingPolicy" />
                                 </div>
@@ -163,7 +163,7 @@
                                 <label class="block text-xm font-bold text-gray-700 mb-1 flex items-center gap-2"> eTEN </label>
                                 <div class="flex items-start gap-2">
                                     <div class="flex-1">
-                                        <TipTapEditor v-model="form.etenPolicy.bm" :placeholder="'Masukkan Dasar Privasi ETEN (Bahasa Malaysia)'" :disabled="loadingPolicy" @update:modelValue="handlePolicyChange" />
+                                        <TipTapEditor v-model="form.etenPolicy.bm" :placeholder="'Masukkan Dasar Privasi ETEN (Bahasa Malaysia)'" :disabled="loadingPolicy || !canUpdate" @update:modelValue="handlePolicyChange" />
                                     </div>
                                     <Button icon="pi pi-history" class="p-button-sm h-fit" @click="showPolicyLog.etenPolicy = true" tooltip="View Log History" :disabled="loadingPolicy" />
                                 </div>
@@ -178,7 +178,7 @@
                                 <label class="block text-xm font-bold text-gray-700 mb-1 flex items-center gap-2"> T-Care </label>
                                 <div class="flex items-start gap-2">
                                     <div class="flex-1">
-                                        <TipTapEditor v-model="form.carePolicy.cn" :placeholder="'输入Care隐私政策 (中文)'" :disabled="loadingPolicy" @update:modelValue="handlePolicyChange" />
+                                        <TipTapEditor v-model="form.carePolicy.cn" :placeholder="'输入Care隐私政策 (中文)'" :disabled="loadingPolicy || !canUpdate" @update:modelValue="handlePolicyChange" />
                                     </div>
                                     <Button icon="pi pi-history" class="p-button-sm h-fit" @click="showPolicyLog.carePolicy = true" tooltip="View Log History" :disabled="loadingPolicy" />
                                 </div>
@@ -189,7 +189,7 @@
                                 <label class="block text-xm font-bold text-gray-700 mb-1 flex items-center gap-2"> eTEN </label>
                                 <div class="flex items-start gap-2">
                                     <div class="flex-1">
-                                        <TipTapEditor v-model="form.etenPolicy.cn" :placeholder="'输入ETEN隐私政策 (中文)'" :disabled="loadingPolicy" @update:modelValue="handlePolicyChange" />
+                                        <TipTapEditor v-model="form.etenPolicy.cn" :placeholder="'输入ETEN隐私政策 (中文)'" :disabled="loadingPolicy || !canUpdate" @update:modelValue="handlePolicyChange" />
                                     </div>
                                     <Button icon="pi pi-history" class="p-button-sm h-fit" @click="showPolicyLog.etenPolicy = true" tooltip="View Log History" :disabled="loadingPolicy" />
                                 </div>
@@ -199,7 +199,7 @@
                 </TabView>
 
                 <!-- Action Buttons for Policy -->
-                <div class="flex justify-end gap-4 pt-4">
+                <div v-if="canUpdate" class="flex justify-end gap-4 pt-4">
                     <div class="w-32">
                         <Button
                             :label="hasPolicyChanges ? 'Revert' : 'Revert'"
@@ -450,12 +450,12 @@
 import { ref, onMounted, computed } from 'vue';
 import { useRouter } from 'vue-router';
 import { useToast } from 'primevue/usetoast';
-import Button from 'primevue/button';
-import Dialog from 'primevue/dialog';
-import TabView from 'primevue/tabview';
-import TabPanel from 'primevue/tabpanel';
 import TipTapEditor from '@/components/TipTapEditor.vue';
 import api from '@/service/api';
+
+import { useMenuStore } from '@/store/menu';
+const menuStore = useMenuStore();
+const canUpdate = computed(() => menuStore.canWrite('Terms & Conditions'));
 
 const router = useRouter();
 const toast = useToast();

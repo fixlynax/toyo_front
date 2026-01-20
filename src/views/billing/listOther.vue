@@ -59,7 +59,7 @@
                                 v-tooltip="selectedFiles.length > 0 ? `Download ${selectedFiles.length} selected files` : 'Select files to download'"
                             />
                             <Button icon="pi pi-refresh" class="p-button-info p-button-sm" @click="refreshData" :disabled="loading" v-tooltip="'Refresh data'" />
-                            <Button type="button" icon="pi pi-upload" label="Upload" class="p-button-info p-button-sm" @click="handleUploadClick" :loading="uploadLoading" :disabled="uploadLoading" />
+                            <Button v-if="canUpdate" type="button" icon="pi pi-upload" label="Upload" class="p-button-info p-button-sm" @click="handleUploadClick" :loading="uploadLoading" :disabled="uploadLoading" />
                             <i
                                 class="pi pi-info-circle cursor-pointer font-bold text-primary-400 text-lg mr-1"
                                 v-tooltip="{
@@ -291,12 +291,9 @@ import api from '@/service/api';
 import { FilterMatchMode, FilterOperator } from '@primevue/core/api';
 import LoadingPage from '@/components/LoadingPage.vue';
 import { useToast } from 'primevue/usetoast';
-import Calendar from 'primevue/calendar';
-import Button from 'primevue/button';
-import InputText from 'primevue/inputtext';
-import InputNumber from 'primevue/inputnumber';
-import Dialog from 'primevue/dialog';
-import ProgressBar from 'primevue/progressbar';
+import { useMenuStore } from '@/store/menu';
+const menuStore = useMenuStore();
+const canUpdate = computed(() => menuStore.canWrite('Others'));
 
 const toast = useToast();
 
