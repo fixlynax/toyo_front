@@ -61,7 +61,7 @@ const loadingCustomers = ref(false);
 const customerOptions = ref([]);
 const quarterOptions = ref([]);
 
-// ✅ Corrected Status Options based on your API data (0=pending,66=processing,77=delivery,1=completed)
+// ✅ Status Options based on API data
 const statusOptions = [
     { label: 'All Status', value: null },
     { label: 'Pending', value: 0 },
@@ -153,7 +153,7 @@ const exportExcel = async () => {
 
     exportLoading.value = true;
     try {
-        // Prepare filters for export - match backend expected format
+        // Prepare filters for export
         const exportFilters = {
             custAccountNo: filters.custAccountNo,
             status: filters.status,
@@ -164,10 +164,13 @@ const exportExcel = async () => {
             responseType: 'blob'
         });
 
+        // Check if response is blob
+        if (!response.data || !(response.data instanceof Blob)) {
+            throw new Error('Invalid response from server');
+        }
+
         // Create blob and download
-        const blob = new Blob([response.data], {
-            type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
-        });
+        const blob = response.data;
         const url = window.URL.createObjectURL(blob);
         const link = document.createElement('a');
 
@@ -181,7 +184,11 @@ const exportExcel = async () => {
         document.body.appendChild(link);
         link.click();
         link.remove();
-        window.URL.revokeObjectURL(url);
+        
+        // Clean up
+        setTimeout(() => {
+            window.URL.revokeObjectURL(url);
+        }, 100);
     } catch (error) {
         console.error('Error exporting Excel:', error);
         alert('Failed to export file. Please try again.');

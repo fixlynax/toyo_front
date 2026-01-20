@@ -139,10 +139,13 @@ const exportExcel = async () => {
             responseType: 'blob'
         });
 
+        // Check if response is blob
+        if (!response.data || !(response.data instanceof Blob)) {
+            throw new Error('Invalid response from server');
+        }
+
         // Create blob and download
-        const blob = new Blob([response.data], {
-            type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
-        });
+        const blob = response.data;
         const url = window.URL.createObjectURL(blob);
         const link = document.createElement('a');
 
@@ -156,7 +159,11 @@ const exportExcel = async () => {
         document.body.appendChild(link);
         link.click();
         link.remove();
-        window.URL.revokeObjectURL(url);
+        
+        // Clean up
+        setTimeout(() => {
+            window.URL.revokeObjectURL(url);
+        }, 100);
     } catch (error) {
         console.error('Error exporting Excel:', error);
         alert('Failed to export file. Please try again.');
