@@ -308,7 +308,7 @@ export default {
         },
         canUpdate() {
             const menuStore = useMenuStore();
-            return menuStore.canWrite('Maintenance Mode');
+            return menuStore.canWrite('Storage Location Maintenance');
         },
         activeTabName() {
             return this.tabItems[this.activeTabIndex]?.label || 'Normal Location';
