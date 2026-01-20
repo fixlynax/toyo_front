@@ -249,6 +249,11 @@ const model = ref([
                             }
                         ]
                     },
+                                        {
+                        label: 'Storage Location Maintenance',
+                        icon: 'pi pi-fw pi-warehouse',
+                        to: '/om/storageLocationMaintenance'
+                    },
                     {
                         label: 'Month End Closing',
                         icon: 'pi pi-fw pi-calendar-times',

@@ -126,7 +126,7 @@ const formatDate = (dateString) => {
 
 const formatDateTime = (dateString) => {
     if (!dateString) return '-';
-    
+
     const date = new Date(dateString);
     const options = {
         day: '2-digit',
@@ -137,14 +137,14 @@ const formatDateTime = (dateString) => {
         second: '2-digit',
         hour12: true
     };
-    
+
     let formatted = date.toLocaleString('en-MY', options);
-    
+
     // Convert AM/PM to uppercase regardless of case
     return formatted.replace(/\b(am|pm)\b/gi, (match) => match.toUpperCase());
 };
 
-// 🟢 Fetch return orders based on tab
+// 🟢 Fetch return orders based on tab - Modified to handle all customers by default
 const fetchReturnOrders = async (tabStatus = 'PENDING', mainAccountNo = null) => {
     loading.value = true;
     try {
@@ -160,18 +160,27 @@ const fetchReturnOrders = async (tabStatus = 'PENDING', mainAccountNo = null) =>
         // Prepare request parameters
         const params = { tabs: tabStatus };
 
-        // Add date range if applied
+        // Add date range if applied - by default show daily (today's) records
         if (hasDateFilterApplied.value && dateRange.value[0] && dateRange.value[1]) {
             // Format dates for backend (d/m/Y format)
             const formatDateForBackend = (date) => {
                 const d = new Date(date);
                 return `${d.getDate().toString().padStart(2, '0')}/${(d.getMonth() + 1).toString().padStart(2, '0')}/${d.getFullYear()}`;
             };
-
             params.date_range = `${formatDateForBackend(dateRange.value[0])} - ${formatDateForBackend(dateRange.value[1])}`;
+        } else {
+            // Default to today's date if no date range is selected
+            const today = new Date();
+            const formatDateForBackend = (date) => {
+                const d = new Date(date);
+                return `${d.getDate().toString().padStart(2, '0')}/${(d.getMonth() + 1).toString().padStart(2, '0')}/${d.getFullYear()}`;
+            };
+            params.date_range = `${formatDateForBackend(today)} - ${formatDateForBackend(today)}`;
+            dateRange.value = [today, today]; // Set default date range to today
+            hasDateFilterApplied.value = true; // Mark that default date is applied
         }
 
-        // Add dealer filter if selected
+        // Add dealer filter only if selected (not required by default)
         if (mainAccountNo) {
             params.custaccountno = mainAccountNo;
             params.mainBranch = 1; // Tell backend this is a main branch selection
@@ -206,28 +215,21 @@ const fetchReturnOrders = async (tabStatus = 'PENDING', mainAccountNo = null) =>
     }
 };
 
-// 🟢 Handle dealer selection (only main accounts in dropdown)
+// 🟢 Handle dealer selection - Modified to be optional
 const handleDealerChange = () => {
     const selectedTab = currentTab.value;
 
     if (selectedDealer.value) {
         isDealerSelected.value = true;
-
-        // Reset date range when changing dealer
-        dateRange.value = [null, null];
-        hasDateFilterApplied.value = false;
-
-        // Pass the main account number to fetchReturnOrders
-        // The API should handle filtering for main account + sub-accounts
         fetchReturnOrders(selectedTab.status, selectedDealer.value);
     } else {
         isDealerSelected.value = false;
-        listData.value = [];
-        loading.value = false;
+        // When no dealer selected, show all customers with current date range
+        fetchReturnOrders(selectedTab.status, null);
     }
 };
 
-// 🟢 Watch for tab change
+// 🟢 Watch for tab change - Modified to handle all customers
 watch(activeTabIndex, (newIndex, oldIndex) => {
     const selectedTab = statusTabs[newIndex];
 
@@ -235,85 +237,75 @@ watch(activeTabIndex, (newIndex, oldIndex) => {
     dateRange.value = [null, null];
     hasDateFilterApplied.value = false;
 
-    // Clear data when switching to tabs requiring date range and without initial load
+    // Always fetch data when changing tabs
     if (selectedTab?.requiresDateRange && !selectedTab?.initialLoad) {
-        listData.value = [];
-        loading.value = false;
-    } else if (selectedDealer.value && isDealerSelected.value) {
-        // If dealer is selected, fetch for that dealer
+        // For Rejected/Completed tabs, require date range
+        if (!hasDateFilterApplied.value) {
+            listData.value = [];
+            loading.value = false;
+        } else {
+            fetchReturnOrders(selectedTab.status, selectedDealer.value);
+        }
+    } else {
+        // For other tabs, fetch with current date range
         fetchReturnOrders(selectedTab.status, selectedDealer.value);
     }
 });
 
-// 🟢 Watch date range changes
+// 🟢 Watch date range changes - Modified to handle all customers
 watch(
     dateRange,
     (newRange, oldRange) => {
         const selectedTab = currentTab.value;
 
-        // Only trigger fetch when both dates are set AND dealer is selected
-        if (newRange[0] && newRange[1] && isDealerSelected.value && selectedDealer.value) {
+        // Only trigger fetch when both dates are set
+        if (newRange[0] && newRange[1]) {
             hasDateFilterApplied.value = true;
             fetchReturnOrders(selectedTab.status, selectedDealer.value);
         } else if (newRange[0] === null && newRange[1] === null && hasDateFilterApplied.value) {
-            // Handle clearing date range
+            // Handle clearing date range - reset to default (today)
             hasDateFilterApplied.value = false;
-
-            // For tabs with initial load, reload dealer data
-            if (selectedTab?.initialLoad && isDealerSelected.value && selectedDealer.value) {
-                fetchReturnOrders(selectedTab.status, selectedDealer.value);
-            } else {
-                // For tabs without initial load, clear data
-                listData.value = [];
-            }
+            const today = new Date();
+            dateRange.value = [today, today];
+            hasDateFilterApplied.value = true;
+            fetchReturnOrders(selectedTab.status, selectedDealer.value);
         }
     },
     { deep: true }
 );
 
-// 🟢 Watch dealer selection
+// 🟢 Watch dealer selection - Modified to be optional
 watch(selectedDealer, () => {
     handleDealerChange();
 });
 
-// 🟢 Clear date range
+// 🟢 Clear date range - Modified to reset to default (today)
 const clearDateRange = () => {
-    dateRange.value = [null, null];
-    hasDateFilterApplied.value = false;
-
-    // Reload data for tabs with initial load, clear for others
-    if (currentTab.value?.initialLoad && isDealerSelected.value && selectedDealer.value) {
-        fetchReturnOrders(currentTab.value.status, selectedDealer.value);
-    } else {
-        listData.value = [];
-    }
+    const today = new Date();
+    dateRange.value = [today, today];
+    hasDateFilterApplied.value = true;
+    fetchReturnOrders(currentTab.value.status, selectedDealer.value);
 };
 
-// 🟢 Clear Dealer Filter
+// 🟢 Clear Dealer Filter - Modified to show all customers
 const clearDealerFilter = () => {
     selectedDealer.value = null;
     isDealerSelected.value = false;
-    listData.value = [];
-    dateRange.value = [null, null];
-    hasDateFilterApplied.value = false;
-    loading.value = false;
+    fetchReturnOrders(currentTab.value.status, null);
 };
 
-// 🟢 Initial data load
+// 🟢 Initial data load - Modified to load data immediately
 onBeforeMount(async () => {
     initFilters();
     await fetchDealers(); // Load dealers first
 
-    const firstTab = statusTabs[activeTabIndex.value];
+    // Set default date range to today
+    const today = new Date();
+    dateRange.value = [today, today];
+    hasDateFilterApplied.value = true;
 
-    // Don't fetch if first tab requires date range and doesn't have initial load
-    if (firstTab?.requiresDateRange && !firstTab?.initialLoad) {
-        loading.value = false;
-        listData.value = [];
-    } else {
-        // Don't fetch until customer is selected
-        loading.value = false;
-    }
+    // Fetch initial data for the first tab (Pending)
+    fetchReturnOrders(statusTabs[0].status, null);
 });
 </script>
 
@@ -333,7 +325,7 @@ onBeforeMount(async () => {
                         <div class="flex items-center gap-2 w-full max-w-md">
                             <IconField class="flex-1">
                                 <InputIcon><i class="pi pi-search" /></InputIcon>
-                                <InputText v-model="filters['global'].value" placeholder="Quick Search" class="w-full" :disabled="!isDealerSelected" />
+                                <InputText v-model="filters['global'].value" placeholder="Quick Search" class="w-full" :disabled="loading" />
                             </IconField>
                         </div>
                     </div>
@@ -344,7 +336,7 @@ onBeforeMount(async () => {
                         <div class="flex items-center gap-2">
                             <span class="text-sm font-medium text-gray-700 whitespace-nowrap">Customer:</span>
                             <div class="relative">
-                                <Dropdown v-model="selectedDealer" :options="dealers" optionLabel="companyName" optionValue="custAccountNo" placeholder="Select Customer" class="w-100" :filter="true" :disabled="loading">
+                                <Dropdown v-model="selectedDealer" :options="dealers" optionLabel="companyName" optionValue="custAccountNo" placeholder="All Customers" class="w-100" :filter="true" :disabled="loading">
                                     <template #option="slotProps">
                                         <div class="flex items-center gap-2">
                                             <span class="text-blue-600 font-bold">🏢</span>
@@ -357,7 +349,7 @@ onBeforeMount(async () => {
                                             <span class="text-blue-600 font-bold">🏢</span>
                                             <span>{{ dealers.find((d) => d.custAccountNo === slotProps.value)?.companyName }}</span>
                                         </div>
-                                        <span v-else>{{ slotProps.placeholder }}</span>
+                                        <span v-else>All Customers</span>
                                     </template>
                                 </Dropdown>
                                 <Button v-if="selectedDealer" icon="pi pi-times" class="p-button-text p-button-sm ml-2" @click="clearDealerFilter" title="Clear customer filter" />
@@ -368,15 +360,15 @@ onBeforeMount(async () => {
                         <div class="flex items-center gap-2">
                             <span class="text-sm font-medium text-gray-700 whitespace-nowrap">Date Range:</span>
                             <div class="flex items-center gap-2">
-                                <Calendar v-model="dateRange[0]" placeholder="Start Date" dateFormat="yy-mm-dd" showIcon class="w-40" :disabled="loading || !isDealerSelected" />
+                                <Calendar v-model="dateRange[0]" placeholder="Start Date" dateFormat="yy-mm-dd" showIcon class="w-40" :disabled="loading" />
                                 <span class="text-gray-500">to</span>
-                                <Calendar v-model="dateRange[1]" placeholder="End Date" dateFormat="yy-mm-dd" showIcon class="w-40" :disabled="loading || !isDealerSelected" />
+                                <Calendar v-model="dateRange[1]" placeholder="End Date" dateFormat="yy-mm-dd" showIcon class="w-40" :disabled="loading" />
                             </div>
-                            <Button v-if="dateRange[0] || dateRange[1]" icon="pi pi-times" class="p-button-text p-button-sm" @click="clearDateRange" title="Clear date filter" :disabled="!isDealerSelected" />
+                            <Button v-if="dateRange[0] || dateRange[1]" icon="pi pi-times" class="p-button-text p-button-sm" @click="clearDateRange" title="Clear date filter" />
                         </div>
 
                         <!-- Show message only for Completed/Rejected tabs without date filter -->
-                        <div v-if="isDealerSelected && showDateRangeFilter && !currentTab?.initialLoad && !hasDateFilterApplied" class="text-sm text-blue-600 italic">Please select a date range to view {{ currentTabLabel }} orders</div>
+                        <div v-if="showDateRangeFilter && !currentTab?.initialLoad && !hasDateFilterApplied" class="text-sm text-blue-600 italic">Please select a date range to view {{ currentTabLabel }} orders</div>
                     </div>
                 </div>
             </div>
@@ -384,9 +376,9 @@ onBeforeMount(async () => {
             <!-- 🟢 Loading Page -->
             <LoadingPage v-if="loading" :message="'Loading Return Orders...'" :sub-message="'Fetching Return Order list...'" />
 
-            <!-- 🟢 DataTable (Only shown when customer is selected) -->
+            <!-- 🟢 DataTable (Always shown, loads all customers by default) -->
             <DataTable
-                v-if="!loading && isDealerSelected"
+                v-if="!loading"
                 :value="listData"
                 :paginator="true"
                 :rows="10"
@@ -405,14 +397,7 @@ onBeforeMount(async () => {
             >
                 <template #empty>
                     <div class="text-center py-4 text-gray-500">
-                        <template v-if="!isDealerSelected || !selectedDealer">
-                            <div class="flex flex-col items-center gap-2">
-                                <i class="pi pi-users text-3xl text-blue-400"></i>
-                                <span class="text-lg">Please select a customer first</span>
-                                <span class="text-sm text-gray-400">Choose a customer from the dropdown above to view their return orders</span>
-                            </div>
-                        </template>
-                        <template v-else-if="showDateRangeFilter && !currentTab?.initialLoad && !hasDateFilterApplied">
+                        <template v-if="showDateRangeFilter && !currentTab?.initialLoad && !hasDateFilterApplied">
                             <div class="flex flex-col items-center gap-2">
                                 <i class="pi pi-calendar text-3xl text-blue-400"></i>
                                 <span class="text-lg">Select a date range to view {{ currentTabLabel }} orders</span>
@@ -425,8 +410,7 @@ onBeforeMount(async () => {
                                 <span class="text-lg">Please select both start and end dates</span>
                             </div>
                         </template>
-                        <template v-else-if="selectedDealer"> No return orders found for the selected customer. </template>
-                        <template v-else> No return orders found for this status. </template>
+                        <template v-else> No return orders found for the selected criteria. </template>
                     </div>
                 </template>
 
@@ -496,15 +480,6 @@ onBeforeMount(async () => {
                     </template>
                 </Column>
             </DataTable>
-
-            <!-- Initial state when no customer is selected -->
-            <div v-if="!loading && !isDealerSelected" class="text-center py-12 bg-gray-50 rounded-lg border">
-                <div class="flex flex-col items-center gap-4">
-                    <i class="pi pi-users text-5xl text-blue-300"></i>
-                    <h3 class="text-xl font-semibold text-gray-700">No Customer Selected</h3>
-                    <p class="text-gray-500 max-w-md">Please select a customer from the dropdown above to view their return order history. The table will display return orders for the selected customer and all its branches.</p>
-                </div>
-            </div>
         </div>
     </div>
 </template>

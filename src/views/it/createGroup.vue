@@ -40,7 +40,7 @@
                         </small>
                     </div>
 
-                    <div class="md:col-span-2">
+                    <!-- <div class="md:col-span-2">
                         <div class="flex items-center gap-2">
                             <Checkbox v-model="form.is_super_admin" :binary="true" inputId="super_admin" :class="{ 'p-invalid': fieldErrors.is_super_admin }" />
                             <label for="super_admin" class="font-bold text-gray-700 cursor-pointer">Super Administrator</label>
@@ -60,7 +60,7 @@
                             <i class="pi pi-exclamation-circle text-xs mr-1"></i>
                             {{ fieldErrors.is_sales_person }}
                         </small>
-                    </div>
+                    </div> -->
                 </div>
 
                 <div class="flex justify-end mt-8 gap-2">

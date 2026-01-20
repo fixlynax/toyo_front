@@ -79,13 +79,13 @@
                             <Checkbox v-model="form.mod_order" :inputId="'mod_order'" :binary="true" class="mr-3" />
                             <label for="mod_order" class="text-gray-700 cursor-pointer"> Order Approval </label>
                         </div>
-                        <div class="flex items-center">
+                        <!-- <div class="flex items-center">
                             <Checkbox v-model="form.mod_order_placing" :inputId="'mod_order_placing'" :binary="true" class="mr-3" :disabled="!form.mod_order" />
                             <label for="mod_order_placing" class="text-gray-700 cursor-pointer" :class="{ 'opacity-60': !form.mod_order }">
                                 Order Placing
                                 <span v-if="!form.mod_order" class="text-xs text-blue-600 ml-1"> (requires Order Approval) </span>
                             </label>
-                        </div>
+                        </div> -->
                         <div class="flex items-center">
                             <Checkbox v-model="form.mod_warranty" :inputId="'mod_warranty'" :binary="true" class="mr-3" />
                             <label for="mod_warranty" class="text-gray-700 cursor-pointer"> Warranty </label>
@@ -265,7 +265,8 @@ const validateForm = () => {
 
     // Module validation for non-master users
     if (form.value.isMaster === 0) {
-        if (!form.value.mod_warranty && !form.value.mod_order && !form.value.mod_billing && !form.value.mod_sale && !form.value.mod_order_placing) {
+        // if (!form.value.mod_warranty && !form.value.mod_order && !form.value.mod_billing && !form.value.mod_sale && !form.value.mod_order_placing) {
+        if (!form.value.mod_warranty && !form.value.mod_order && !form.value.mod_billing && !form.value.mod_sale) {
             errors.value.modules = 'Please select at least one module for non-master users';
         }
 
@@ -297,7 +298,7 @@ const createFormData = () => {
     formData.append('mod_order', form.value.isMaster === 1 ? 1 : form.value.mod_order ? 1 : 0);
     formData.append('mod_billing', form.value.isMaster === 1 ? 1 : form.value.mod_billing ? 1 : 0);
     formData.append('mod_sale', form.value.isMaster === 1 ? 1 : form.value.mod_sale ? 1 : 0);
-    formData.append('mod_order_placing', form.value.isMaster === 1 ? 1 : form.value.mod_order_placing ? 1 : 0);
+    // formData.append('mod_order_placing', form.value.isMaster === 1 ? 1 : form.value.mod_order_placing ? 1 : 0);
 
     return formData;
 };
