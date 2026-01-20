@@ -119,7 +119,7 @@ import LoadingPage from '@/components/LoadingPage.vue';
 import { useMenuStore } from '@/store/menu';
 
 const menuStore = useMenuStore();
-const canUpdate = computed(() => menuStore.canWrite('Maintenance Mode'));
+const canUpdate = computed(() => menuStore.canWrite('Directship Container'));
 
 
 const toast = useToast();

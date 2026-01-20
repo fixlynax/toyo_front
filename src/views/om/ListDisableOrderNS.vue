@@ -333,7 +333,7 @@ export default {
         },    
         canUpdate() {
             const menuStore = useMenuStore();
-            return menuStore.canWrite('Maintenance Mode');
+            return menuStore.canWrite('Normal Order');
         }
     },
 

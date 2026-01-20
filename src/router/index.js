@@ -286,37 +286,37 @@ const router = createRouter({
                     path: 'om/listDisableOrderNS',
                     name: 'Disable-Order-NS',
                     component: () => import('@/views/om/ListDisableOrderNS.vue'),
-                    meta: { permission: 'Maintenance Mode', access: 'view' }
+                    meta: { permission: 'Normal Order', access: 'view' }
                 },
                 {
                     path: 'om/listDisableOrderDS',
                     name: 'Disable-Order-DS',
                     component: () => import('@/views/om/ListDisableOrderDS.vue'),
-                    meta: { permission: 'Maintenance Mode', access: 'view' }
+                    meta: { permission: 'TMDS Location', access: 'view' }
                 },
                 {
                     path: 'om/storageLocationMaintenance',
                     name: 'Storage-Location-Maintenance',
                     component: () => import('@/views/om/storageLocationMaintenance.vue'),
-                    meta: { permission: 'Maintenance Mode', access: 'view' }
+                    meta: { permission: 'Storage Location Maintenance', access: 'view' }
                 },
                 {
                     path: 'om/listMonthEndClosing',
                     name: 'Month-End-Closing',
                     component: () => import('@/views/om/listMonthEndClosing.vue'),
-                    meta: { permission: 'Maintenance Mode', access: 'view' }
+                    meta: { permission: 'Month End Closing', access: 'view' }
                 },
                 {
                     path: 'om/ListMaterialException',
                     name: 'Material-Exception',
                     component: () => import('@/views/om/listMaterialException.vue'),
-                    meta: { permission: 'Maintenance Mode', access: 'view' }
+                    meta: { permission: 'Material Exception', access: 'view' }
                 },
                 {
                     path: 'om/listContainer',
                     name: 'Container-List',
                     component: () => import('@/views/om/listContainer.vue'),
-                    meta: { permission: 'Maintenance Mode', access: 'view' }
+                    meta: { permission: 'Directship Container', access: 'view' }
                 },
                 {
                     path: 'om/settingMaterialQuantity',
