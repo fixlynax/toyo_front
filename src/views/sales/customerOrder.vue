@@ -53,6 +53,15 @@ const fetchDealers = async () => {
             const dealerData = response.data.admin_data;
             const mainDealerList = [];
 
+            // Add "All Customer" option at the beginning
+            mainDealerList.push({
+                custAccountNo: null, // Use null to represent "All Customer"
+                companyName: 'All Customer',
+                isMain: false,
+                hasSubBranches: false,
+                isAllCustomer: true // Flag to identify "All Customer" option
+            });
+
             // Process dealer data - only include main dealers (accounts ending with "00")
             Object.entries(dealerData).forEach(([custAccountNo, data]) => {
                 const mainShop = data.shop;
@@ -63,19 +72,38 @@ const fetchDealers = async () => {
                         custAccountNo: mainShop.custAccountNo,
                         companyName: trimCompanyName(mainShop.companyName1, mainShop.companyName2),
                         isMain: true,
-                        hasSubBranches: Object.keys(data.subBranches || {}).length > 0
+                        hasSubBranches: Object.keys(data.subBranches || {}).length > 0,
+                        isAllCustomer: false
                     });
                 }
             });
 
-            // Sort alphabetically by company name
-            dealers.value = mainDealerList.sort((a, b) => a.companyName.localeCompare(b.companyName));
+            // Sort alphabetically by company name, but keep "All Customer" at the top
+            dealers.value = mainDealerList.sort((a, b) => {
+                if (a.isAllCustomer) return -1; // "All Customer" always first
+                if (b.isAllCustomer) return 1;
+                return a.companyName.localeCompare(b.companyName);
+            });
         } else {
-            dealers.value = [];
+            // Add "All Customer" option even if no dealers are fetched
+            dealers.value = [{
+                custAccountNo: null,
+                companyName: 'All Customer',
+                isMain: false,
+                hasSubBranches: false,
+                isAllCustomer: true
+            }];
         }
     } catch (error) {
         console.error('Error fetching dealers:', error);
-        dealers.value = [];
+        // Add "All Customer" option even if there's an error
+        dealers.value = [{
+            custAccountNo: null,
+            companyName: 'All Customer',
+            isMain: false,
+            hasSubBranches: false,
+            isAllCustomer: true
+        }];
     }
 };
 
@@ -226,6 +254,10 @@ onBeforeMount(async () => {
     dateRange.value = [today, today];
     hasDateFilterApplied.value = true;
 
+    // Set "All Customer" as default selection
+    selectedDealer.value = null;
+    isDealerSelected.value = false;
+
     // Fetch initial data for the first tab (Processing)
     fetchOrders(statusTabs[0].status, true, null);
 });
@@ -338,23 +370,35 @@ const clearDealerFilter = () => {
                         <div class="flex items-center gap-2">
                             <span class="text-sm font-medium text-gray-700 whitespace-nowrap">Customer:</span>
                             <div class="relative">
-                                <Dropdown v-model="selectedDealer" :options="dealers" optionLabel="companyName" optionValue="custAccountNo" placeholder="All Customers" class="w-100" :filter="true" :disabled="loading">
+                                <Dropdown v-model="selectedDealer" :options="dealers" optionLabel="companyName" optionValue="custAccountNo" placeholder="All Customer" class="w-100" :filter="true" :disabled="loading">
                                     <template #option="slotProps">
                                         <div class="flex items-center gap-2">
-                                            <span class="text-blue-600 font-bold">🏢</span>
-                                            <span>{{ slotProps.option.companyName }}</span>
-                                            <span class="text-xs text-gray-400 ml-auto">{{ slotProps.option.custAccountNo }}</span>
+                                            <template v-if="slotProps.option.isAllCustomer">
+                                                <span class="text-gray-600 font-bold">👥</span>
+                                                <span class="font-semibold">{{ slotProps.option.companyName }}</span>
+                                            </template>
+                                            <template v-else>
+                                                <span class="text-blue-600 font-bold">🏢</span>
+                                                <span>{{ slotProps.option.companyName }}</span>
+                                                <span class="text-xs text-gray-400 ml-auto">{{ slotProps.option.custAccountNo }}</span>
+                                            </template>
                                         </div>
                                     </template>
                                     <template #value="slotProps">
                                         <div v-if="slotProps.value" class="flex items-center gap-2">
-                                            <span class="text-blue-600 font-bold">🏢</span>
-                                            <span>{{ dealers.find((d) => d.custAccountNo === slotProps.value)?.companyName }}</span>
+                                            <template v-if="slotProps.value === null">
+                                                <span class="text-gray-600 font-bold">👥</span>
+                                                <span class="font-semibold">All Customer</span>
+                                            </template>
+                                            <template v-else>
+                                                <span class="text-blue-600 font-bold">🏢</span>
+                                                <span>{{ dealers.find((d) => d.custAccountNo === slotProps.value)?.companyName }}</span>
+                                            </template>
                                         </div>
-                                        <span v-else>All Customers</span>
+                                        <span v-else>All Customer</span>
                                     </template>
                                 </Dropdown>
-                                <Button v-if="selectedDealer" icon="pi pi-times" class="p-button-text p-button-sm ml-2" @click="clearDealerFilter" title="Clear customer filter" />
+                                <Button v-if="selectedDealer !== null" icon="pi pi-times" class="p-button-text p-button-sm ml-2" @click="clearDealerFilter" title="Clear customer filter" />
                             </div>
                         </div>
 
