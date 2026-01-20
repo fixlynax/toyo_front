@@ -276,7 +276,7 @@ const router = createRouter({
                     path: 'om/editSalesProgram/:id',
                     name: 'Edit-Sales-Program',
                     component: () => import('@/views/om/editSalesProgram.vue'),
-                    meta: { permission: 'Sales Program', access: 'view' },
+                    meta: { permission: 'Sales Program', access: 'write' },
                     props: true
                 },
 
@@ -400,7 +400,7 @@ const router = createRouter({
                     path: 'marketing/detailCampaign/:id',
                     name: 'Detail-Campaign',
                     component: () => import('@/views/marketing/detailCampaign.vue'),
-                    meta: { permission: 'Campaign Management', access: 'write' },
+                    meta: { permission: 'Campaign Management', access: 'view' },
                     props: true
                 },
                 {
@@ -496,7 +496,7 @@ const router = createRouter({
                     path: 'marketing/detailEtenUser/:id',
                     name: 'Detail-Member',
                     component: () => import('@/views/marketing/detailEtenUser.vue'),
-                    meta: { permission: 'Member List', access: 'write' },
+                    meta: { permission: 'Member List', access: 'view' },
                     props: true
                 },
                 {
@@ -546,13 +546,13 @@ const router = createRouter({
                     path: 'marketing/listWarrantyRegistration',
                     name: 'List-Warranty-Registration',
                     component: () => import('@/views/marketing/listWarrantyRegistration.vue'),
-                    meta: { permission: 'Events Management', access: 'view' }
+                    meta: { permission: 'Warranty Registration', access: 'view' }
                 },
                 {
                     path: 'marketing/detailWarrantyRegistration/:id',
                     name: 'Detail-Warranty-Registration',
                     component: () => import('@/views/marketing/detailWarrantyRegistration.vue'),
-                    meta: { permission: 'Events Management', access: 'view' },
+                    meta: { permission: 'Warranty Registration', access: 'view' },
                     props: true
                 },
 
@@ -561,13 +561,13 @@ const router = createRouter({
                     path: 'marketing/listOERegistration',
                     name: 'List-OE-Registration',
                     component: () => import('@/views/marketing/listOERegistration.vue'),
-                    meta: { permission: 'Events Management', access: 'view' }
+                    meta: { permission: 'OE Registration', access: 'view' }
                 },
                 {
                     path: 'marketing/detailOERegistration/:id',
                     name: 'Detail-OE-Registration',
                     component: () => import('@/views/marketing/detailOERegistration.vue'),
-                    meta: { permission: 'Events Management', access: 'view' },
+                    meta: { permission: 'OE Registration', access: 'view' },
                     props: true
                 },
                 // Tire

@@ -2,7 +2,7 @@
     <Fluid>
         <div class="flex flex-col md:flex-row gap-8">
             <div class="card flex flex-col gap-6 w-full">
-                <div class="text-2xl font-bold text-gray-800 border-b pb-2 mb-1">List Directship Container</div>
+                <div class="text-2xl font-bold text-gray-800 border-b pb-2 mb-1">Directship Container</div>
 
                 <LoadingPage v-if="loading" :message="'Loading Container Sizes...'" :sub-message="'Fetching container size limits'" />
 
