@@ -75,48 +75,91 @@
                     </DataTable>
                 </div>
 
-                <!-- SAP Error Response Card (only for FAILED status with sapErrorResponse) -->
+                <!-- SAP Error Response Card -->
                 <div v-if="orderStatusText === 'FAILED' && orderData.sapErrorResponse" class="card flex flex-col w-full">
-                    <div class="flex items-center justify-between border-b pb-3">
-                        <div class="text-2xl font-bold text-black">SAP Error Details</div>
+                    <div class="border-b pb-3 mb-4">
+                        <div class="text-xl font-semibold text-gray-800">SAP Error Details</div>
                     </div>
-                    <div class="mt-4 p-4 bg-red-50 rounded-lg border border-red-200">
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-                            <div>
-                                <span class="text-sm font-semibold text-black">Error Code</span>
-                                <p class="text-lg font-medium text-red-600">{{ orderData.sapErrorResponse?.errorcode || '-' }}</p>
-                            </div>
-                            <div>
-                                <span class="text-sm font-semibold text-black">Error Number</span>
-                                <p class="text-lg font-medium text-red-600">{{ orderData.sapErrorResponse?.errornumber || '-' }}</p>
-                            </div>
-                            <div class="md:col-span-2">
-                                <span class="text-sm font-semibold text-black">Error Message</span>
-                                <p class="text-lg font-medium text-red-600">{{ orderData.sapErrorResponse?.message || '-' }}</p>
-                            </div>
-                        </div>
 
-                        <!-- Unfulfilled Items -->
-                        <div v-if="orderData.sapErrorResponse?.data?.unfulfilled_items" class="mb-4">
-                            <h4 class="font-semibold text-gray-700 mb-2">Unfulfilled Items:</h4>
-                            <div class="bg-white p-3 rounded border">
-                                <p class="text-red-600">Material: {{ orderData.sapErrorResponse.data.unfulfilled_items.materialid }} - Qty: {{ orderData.sapErrorResponse.data.unfulfilled_items.qty }}</p>
+                    <!-- Error Container with Red Background -->
+                    <div class="bg-red-50 border border-red-100 rounded-lg p-4">
+                        <!-- Basic Error Info -->
+                        <div class="mb-6">
+                            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                                <div>
+                                    <div class="text-sm text-gray-600 mb-1">Error Code</div>
+                                    <div class="font-semibold text-red-700">{{ orderData.sapErrorResponse?.errorcode || '-' }}</div>
+                                </div>
+                                <div>
+                                    <div class="text-sm text-gray-600 mb-1">Error Number</div>
+                                    <div class="font-semibold text-red-700">{{ orderData.sapErrorResponse?.errornumber || '-' }}</div>
+                                </div>
+                                <div class="md:col-span-1">
+                                    <div class="text-sm text-gray-600 mb-1">Error Message</div>
+                                    <div class="font-semibold text-red-700">{{ orderData.sapErrorResponse?.message || '-' }}</div>
+                                </div>
                             </div>
                         </div>
 
                         <!-- Error Result Set -->
-                        <div v-if="orderData.sapErrorResponse?.resultset && orderData.sapErrorResponse.resultset.length > 0">
-                            <h4 class="font-semibold text-gray-700 mb-2">Detailed Errors:</h4>
+                        <div v-if="orderData.sapErrorResponse?.data?.resultset && Array.isArray(orderData.sapErrorResponse.data.resultset) && orderData.sapErrorResponse.data.resultset.length > 0" class="mb-6">
+                            <div class="text-sm font-semibold text-gray-700 mb-3">Error Details</div>
                             <div class="space-y-2">
-                                <div v-for="(error, index) in orderData.sapErrorResponse.resultset" :key="index" class="bg-white p-3 rounded border border-red-200">
-                                    <div class="flex items-center gap-2">
-                                        <span class="px-2 py-1 bg-red-100 text-red-800 text-xs font-semibold rounded">
+                                <div v-for="(error, index) in orderData.sapErrorResponse.data.resultset" :key="index" class="p-3 bg-white rounded border border-red-200">
+                                    <div class="flex items-start gap-2 mb-1">
+                                        <span :class="['px-2 py-1 text-xs font-semibold rounded', error.type === 'E' ? 'bg-red-100 text-red-800' : error.type === 'S' ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800']">
                                             {{ error.type }}
                                         </span>
-                                        <span class="text-sm font-medium">{{ error.id }} ({{ error.number }})</span>
+                                        <span class="text-sm font-medium text-gray-700">{{ error.id }} ({{ error.number }})</span>
                                     </div>
-                                    <p class="mt-1 text-red-700">{{ error.message }}</p>
+                                    <div class="text-red-700 mt-1">{{ error.message }}</div>
                                 </div>
+                            </div>
+                        </div>
+
+                        <!-- Unfulfilled Items -->
+                        <div v-if="hasValidUnfulfilledItems" class="mb-2">
+                            <div class="text-sm font-semibold text-gray-700 mb-3">Unfulfilled Items</div>
+                            <div class="space-y-2">
+                                <!-- Array version -->
+                                <template v-if="Array.isArray(orderData.sapErrorResponse.data.unfulfilled_items)">
+                                    <div v-for="(item, index) in orderData.sapErrorResponse.data.unfulfilled_items" :key="index" class="p-3 bg-white rounded border border-red-200">
+                                        <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
+                                            <div>
+                                                <div class="text-xs text-gray-500 mb-1">Material ID</div>
+                                                <div class="font-medium">{{ item.materialid || '-' }}</div>
+                                            </div>
+                                            <div>
+                                                <div class="text-xs text-gray-500 mb-1">Quantity</div>
+                                                <div class="font-semibold text-red-700">{{ formatQuantity(item.qty) || '-' }}</div>
+                                            </div>
+                                            <div v-if="item.itemcategory">
+                                                <div class="text-xs text-gray-500 mb-1">Item Category</div>
+                                                <div class="font-medium">{{ item.itemcategory || '-' }}</div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </template>
+
+                                <!-- Single object version -->
+                                <template v-else-if="orderData.sapErrorResponse.data.unfulfilled_items && (orderData.sapErrorResponse.data.unfulfilled_items.materialid || orderData.sapErrorResponse.data.unfulfilled_items.qty)">
+                                    <div class="p-3 bg-white rounded border border-red-200">
+                                        <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
+                                            <div>
+                                                <div class="text-xs text-gray-500 mb-1">Material ID</div>
+                                                <div class="font-medium">{{ orderData.sapErrorResponse.data.unfulfilled_items.materialid || '-' }}</div>
+                                            </div>
+                                            <div>
+                                                <div class="text-xs text-gray-500 mb-1">Quantity</div>
+                                                <div class="font-semibold text-red-700">{{ formatQuantity(orderData.sapErrorResponse.data.unfulfilled_items.qty) || '-' }}</div>
+                                            </div>
+                                            <div v-if="orderData.sapErrorResponse.data.unfulfilled_items.itemcategory">
+                                                <div class="text-xs text-gray-500 mb-1">Item Category</div>
+                                                <div class="font-medium">{{ orderData.sapErrorResponse.data.unfulfilled_items.itemcategory || '-' }}</div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </template>
                             </div>
                         </div>
                     </div>
@@ -169,7 +212,7 @@
                                         <div class="flex items-center justify-end gap-2">
                                             <span>{{ orderData.so_no || '-' }}</span>
                                             <Button
-                                                v-if="!orderData.so_no || orderStatusText === 'TIMEOUT' && canUpdate"
+                                                v-if="!orderData.so_no || (orderStatusText === 'TIMEOUT' && canUpdate)"
                                                 icon="pi pi-pencil"
                                                 class="p-button-text p-button-info p-button-secondary text-sm"
                                                 size="small"
@@ -201,15 +244,19 @@
                                 </tr>
                                 <tr class="border-b">
                                     <td class="px-4 py-2 font-medium">ETA Date</td>
-                                    <td class="px-4 py-2 text-right font-medium">{{ formatDateTime(orderData.deliveryDate) || '-' }}</td>
+                                    <td class="px-4 py-2 text-right font-medium">{{ formatDate(orderData.deliveryDate) || '-' }}</td>
                                 </tr>
                                 <tr class="border-b">
                                     <td class="px-4 py-2 font-medium">Planned Date</td>
-                                    <td class="px-4 py-2 text-right font-medium">{{ formatDateTime(deliveryInfo.scheduled_delivery_time) || '-' }}</td>
+                                    <td class="px-4 py-2 text-right font-medium">{{ formatDate(deliveryInfo.scheduled_delivery_time) || '-' }}</td>
                                 </tr>
                                 <tr class="border-b">
                                     <td class="px-4 py-2 font-medium">Delivered Date</td>
-                                    <td class="px-4 py-2 text-right font-medium">{{ formatDateTime(deliveryInfo.delivered_datetime) || '-' }}</td>
+                                    <td class="px-4 py-2 text-right font-medium">{{ formatDate(deliveryInfo.delivered_datetime) || '-' }}</td>
+                                </tr>
+                                <tr class="border-b">
+                                    <td class="px-4 py-2 font-medium">Order Date</td>
+                                    <td class="px-4 py-2 text-right font-medium">{{ formatDate(orderData.orderDate) || '-' }}</td>
                                 </tr>
                                 <tr class="border-b">
                                     <td class="px-4 py-2 font-medium">Created On</td>
@@ -357,7 +404,7 @@ const formatDate = (dateString) => {
 
 const formatDateTime = (dateString) => {
     if (!dateString) return '-';
-    
+
     const date = new Date(dateString);
     const options = {
         day: '2-digit',
@@ -368,9 +415,9 @@ const formatDateTime = (dateString) => {
         second: '2-digit',
         hour12: true
     };
-    
+
     let formatted = date.toLocaleString('en-MY', options);
-    
+
     // Convert AM/PM to uppercase regardless of case
     return formatted.replace(/\b(am|pm)\b/gi, (match) => match.toUpperCase());
 };
@@ -383,7 +430,7 @@ const formatItemNo = (itemNo) => {
 // Address methods
 const getFullAddress = (data) => {
     if (!data) return '-';
-    const addressParts = [ data.addressLine2, data.addressLine3, data.addressLine4, data.city, data.postcode, data.state].filter((part) => part && part.trim() !== '');
+    const addressParts = [data.addressLine2, data.addressLine3, data.addressLine4, data.city, data.postcode, data.state].filter((part) => part && part.trim() !== '');
     return addressParts.join('') || '-';
 };
 
@@ -600,6 +647,51 @@ const fetchOrderDetail = async () => {
         console.error('Error fetching order details:', error);
         toast.add({ severity: 'error', summary: 'Error', detail: 'Failed to fetch order details', life: 3000 });
     }
+};
+
+// Add this computed property
+const hasValidUnfulfilledItems = computed(() => {
+    const unfulfilled = orderData.value.sapErrorResponse?.data?.unfulfilled_items;
+
+    if (!unfulfilled) return false;
+
+    // Check if it's an array with items
+    if (Array.isArray(unfulfilled) && unfulfilled.length > 0) {
+        return true;
+    }
+
+    // Check if it's a single object with materialid or qty
+    if (unfulfilled && (unfulfilled.materialid || unfulfilled.qty)) {
+        return true;
+    }
+
+    return false;
+});
+
+// Format quantity - remove trailing zeros and decimal point
+const formatQuantity = (qty) => {
+    if (!qty && qty !== 0) return '-';
+
+    // Convert to string
+    const qtyStr = String(qty);
+
+    // If it contains a decimal point
+    if (qtyStr.includes('.')) {
+        // Remove trailing zeros and decimal point if all zeros after decimal
+        const parts = qtyStr.split('.');
+        const decimalPart = parts[1].replace(/0+$/, ''); // Remove trailing zeros
+
+        // If decimal part is empty after removing zeros, return just the integer part
+        if (!decimalPart) {
+            return parts[0];
+        }
+
+        // Otherwise return with the non-zero decimal part
+        return `${parts[0]}.${decimalPart}`;
+    }
+
+    // If no decimal point, return as is
+    return qtyStr;
 };
 
 // Lifecycle
