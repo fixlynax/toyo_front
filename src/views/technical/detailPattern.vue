@@ -1,7 +1,6 @@
 <template>
     <Fluid>
         <div class="flex flex-col md:flex-row gap-8">
-            <div class="md:w-2/3 flex flex-col gap-6">
                 <!-- Tyre Specifications -->
                 <div class="card flex flex-col gap-6 w-full">
                     <div class="flex items-center justify-between border-b pb-2">
@@ -9,7 +8,7 @@
                         <Button icon="pi pi-arrow-left" class="p-button-text p-button-secondary" @click="$router.back()" />
                         <h2 class="text-2xl font-bold text-gray-800">Pattern Details</h2>
                         </div>
-                         <div class="inline-flex items-center gap-2">
+                         <div v-if="canUpdate" class="inline-flex items-center gap-2">
                             <Button label="Edit" class="p-button-info" size="small" @click="editPattern" />
                             <Button label="Delete" class="p-button-danger" size="small" @click="confirmDelete" />
                         </div>
@@ -47,7 +46,6 @@
                         </template>
                     </div>
                 </div>
-            </div>
 
         </div>
     </Fluid>
@@ -130,6 +128,10 @@ import { useRoute, useRouter } from 'vue-router';
 import api from '@/service/api';
 import Button from 'primevue/button';
 import { useToast } from 'primevue/usetoast';
+import { useMenuStore } from '@/store/menu';
+
+const menuStore = useMenuStore();
+const canUpdate = computed(() => menuStore.canWrite('Pattern List'));
 const props = defineProps(['id']);
 const toast = useToast();
 const loading = ref(true);

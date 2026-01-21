@@ -24,7 +24,7 @@
                                         placeholder="Enter points"
                                         class="w-full"
                                         :class="{ 'p-invalid': !form.referralPoint && form.referralPoint !== 0 }"
-                                        :disabled="loading"
+                                        :disabled="loading || !canUpdate"
                                     >
                                         <template #decrementbuttonicon></template>
                                     </InputNumber>
@@ -43,12 +43,12 @@
                                         placeholder="Enter quota"
                                         class="w-full"
                                         :class="{ 'p-invalid': !form.referralLimit && form.referralLimit !== 0 }"
-                                        :disabled="loading"
+                                        :disabled="loading || !canUpdate"
                                     />
                                     <div class="text-xs text-gray-500 mt-1">Maximum referrals per member per year</div>
                                     <small v-if="!form.referralLimit && form.referralLimit !== 0" class="p-error">Annual quota is required.</small>
                                 </div>
-                                <div>
+                                <div v-if="canUpdate">
                                     <label class="block font-bold text-gray-700 mb-2">Status</label>
                                     <div class="flex items-center gap-3 mt-2">
                                         <InputSwitch v-model="form.status" :disabled="loading" />
@@ -62,7 +62,7 @@
                     </div>
 
                     <!-- Action Buttons -->
-                    <div class="flex justify-end gap-4 mt-6">
+                    <div class="flex justify-end gap-4 mt-6" v-if="canUpdate">
                         <div class="w-32">
                             <Button label="Reset" class="w-full p-button-outlined p-button-secondary" @click="resetForm" :disabled="!hasChanges || loading" :loading="loadingReset" />
                         </div>
@@ -173,7 +173,7 @@
                             </template>
                         </Column>
 
-                        <Column header="Actions" style="min-width: 8rem">
+                        <Column v-if="canUpdate" header="Actions" style="min-width: 8rem">
                             <template #body="{ data }">
                                 <div class="flex gap-1">
                                     <Button
@@ -238,6 +238,9 @@ import { useToast } from 'primevue/usetoast';
 import { FilterMatchMode } from '@primevue/core/api';
 import api from '@/service/api';
 import LoadingPage from '@/components/LoadingPage.vue';
+import { useMenuStore } from '@/store/menu';
+const menuStore = useMenuStore();
+const canUpdate = computed(() => menuStore.canWrite('Referral Reward Point'));
 
 const toast = useToast();
 const loading = ref(false);

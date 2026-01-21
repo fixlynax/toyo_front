@@ -140,7 +140,7 @@
 
                         <!-- Warranty Certificates List -->
                         <div v-else class="p-4 space-y-4">
-                            <div class="grid grid-cols-1 gap-4">
+                            <div class="grid grid-cols-3 gap-4">
                                 <!-- Certificate Item -->
                                 <div v-for="cert in memberDetail.warrantyCerts" :key="cert.id" class="bg-gray-50 rounded-lg p-4 border border-gray-200 hover:bg-gray-100 transition-colors">
                                     <div class="flex justify-between items-start">
@@ -175,7 +175,6 @@
                                                     :class="cert.type === 'NORMAL' ? 'p-button-primary' : 'p-button-warning'"
                                                 />
                                             </RouterLink>
-                                            <span class="text-xs text-gray-500"> Click to view {{ cert.type === 'NORMAL' ? 'Normal' : 'OE' }} certificate details </span>
                                         </div>
                                     </div>
                                 </div>
@@ -263,7 +262,7 @@
                             </div>
 
                             <!-- Transaction List - Show only first 5 -->
-                            <div class="space-y-4">
+                            <div class="grid grid-cols-2 gap-4">
                                 <div v-for="(transaction, index) in limitedTransactions" :key="transaction.id || index" class="bg-gray-50 rounded-lg p-4 border border-gray-200">
                                     <!-- First Row: Ref No + Points -->
                                     <div class="flex justify-between items-center mb-2">
@@ -331,7 +330,7 @@
                     <template #footer>
                         <div class="flex justify-between items-center w-full">
                             <div class="text-sm text-gray-600">Total: {{ memberDetail.point_transactions.length }} transaction(s)</div>
-                            <Button label="Close" icon="pi pi-times" @click="showAllTransactions = false" class="p-button-text" />
+                            <Button label="Close" icon="pi pi-times" severity="primary" class="text-sm px-3 py-2" @click="showAllTransactions = false" />
                         </div>
                     </template>
                 </Dialog>

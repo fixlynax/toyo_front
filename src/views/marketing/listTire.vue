@@ -60,7 +60,6 @@
 
                 <!-- Export All Checkbox Column (EXACTLY like reference code) -->
 
-
                 <Column field="custAccountNo" header="Account No" style="min-width: 8rem" sortable>
                     <template #body="{ data }">
                         <RouterLink :to="`/marketing/detailGame/${data.id}`" class="hover:underline font-bold text-primary-400">
@@ -76,12 +75,9 @@
                 </Column>
 
                 <Column field="regionName" header="Region Area" style="min-width: 8rem" sortable>
-                    <template #body="{ data }">
-                        {{ data.regionName }},{{ data.areaName }}
-                    </template>
+                    <template #body="{ data }"> {{ data.regionName }},{{ data.areaName }} </template>
                 </Column>
 
-                
                 <Column field="address" header="Address" style="min-width: 10rem" sortable>
                     <template #body="{ data }">
                         {{ data.address }}
@@ -111,7 +107,6 @@
                         {{ formatDateTime(data.updated) }}
                     </template>
                 </Column>
-                
             </DataTable>
         </div>
     </div>
@@ -142,44 +137,41 @@ const filters = ref({
     global: { value: null, matchMode: FilterMatchMode.CONTAINS }
 });
 
-
-
 onMounted(async () => {
     await fetchTire();
 });
 const fetchTire = async () => {
-   try {
+    try {
         initialLoading.value = true;
         tableLoading.value = true;
 
         const response = await api.get('tire-shop');
 
         if (response.data.status === 1 && Array.isArray(response.data.admin_data)) {
-            listData.value = response.data.admin_data
-
+            listData.value = response.data.admin_data;
         } else {
-            toast.add({ 
-                severity: 'error', 
-                summary: 'Error', 
-                detail: response.data.message || 'Failed to load data', 
-                life: 3000 
+            toast.add({
+                severity: 'error',
+                summary: 'Error',
+                detail: response.data.message || 'Failed to load data',
+                life: 3000
             });
             listData.value = [];
         }
     } catch (error) {
         console.error('Error fetching game list:', error);
-        toast.add({ 
-            severity: 'error', 
-            summary: 'Error', 
-            detail: 'Failed to load data', 
-            life: 3000 
+        toast.add({
+            severity: 'error',
+            summary: 'Error',
+            detail: 'Failed to load data',
+            life: 3000
         });
         listData.value = [];
     } finally {
         initialLoading.value = false;
         tableLoading.value = false;
     }
-}
+};
 
 function formatDateTime(dateTimeString) {
     if (!dateTimeString) return '-';
@@ -191,21 +183,20 @@ function formatDateTime(dateTimeString) {
 
     if (isNaN(date)) return '-';
 
-    return date.toLocaleString('en-MY', {
-        year: 'numeric',
-        month: '2-digit',
-        day: '2-digit',
-        hour: '2-digit',
-        minute: '2-digit',
-        second: '2-digit',
-        hour12: true
-    }).toUpperCase();
+    return date
+        .toLocaleString('en-MY', {
+            year: 'numeric',
+            month: '2-digit',
+            day: '2-digit',
+            hour: '2-digit',
+            minute: '2-digit',
+            second: '2-digit',
+            hour12: true
+        })
+        .toUpperCase();
 }
 
-
-
 const handleExport = async () => {
-
     try {
         exportLoading1.value = true;
 
@@ -256,7 +247,6 @@ const handleImport = async (event) => {
             }
         });
         if (response.data.status === 1) {
-
             toast.add({
                 severity: 'success',
                 summary: 'Success',
@@ -287,9 +277,6 @@ const handleImport = async (event) => {
         }
     }
 };
-
-
-
 </script>
 
 <style scoped lang="scss">
@@ -345,7 +332,7 @@ const handleImport = async (event) => {
 :deep(.p-button-success) {
     background: linear-gradient(135deg, #10b981, #059669);
     border-color: #059669;
-    
+
     &:enabled:hover {
         background: linear-gradient(135deg, #059669, #047857);
         border-color: #047857;
@@ -357,7 +344,7 @@ const handleImport = async (event) => {
     .p-checkbox-box {
         border-radius: 6px;
         border: 2px solid #d1d5db;
-        
+
         &.p-highlight {
             background: #059669;
             border-color: #059669;
