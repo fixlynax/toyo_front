@@ -45,7 +45,7 @@
                             <!-- Single Export Button (like in reference code - green success button) -->
                             <Button type="button" label="Export" icon="pi pi-file-export" class="p-button-success" :loading="exportLoading" @click="handleExport" :disabled="exportLoading" />
 
-                            <RouterLink v-if="canUpdate" to="/marketing/CreateGame">
+                            <RouterLink v-if="canUpdate" to="/marketing/createCampaign">
                                 <Button type="button" label="Create" />
                             </RouterLink>
                         </div>
