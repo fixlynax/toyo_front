@@ -8,7 +8,7 @@
                         <div class="flex items-center justify-between border-b pb-2 mb-2">
                             <!-- LEFT SIDE -->
                             <div class="flex items-center gap-2">
-                                <RouterLink to="/om/listEten">
+                                <RouterLink to="/sales/customerList">
                                     <Button icon="pi pi-arrow-left font-bold" class="p-button-text p-button-secondary text-xl" size="big" v-tooltip="'Back'" />
                                 </RouterLink>
 
