@@ -18,7 +18,7 @@
                         <!-- Right Section: Edit & Delete Buttons -->
                         <div class="inline-flex items-center gap-2">
                             <RouterLink v-if="canUpdate" :to="`/marketing/editRedemption/${redemptionId}`">
-                                <Button label="Edit" class="p-button-info" size="small" />
+                                <Button label="Edit" style="width: fit-content" class="p-button-info"  />
                             </RouterLink>
                         </div>
                     </div>

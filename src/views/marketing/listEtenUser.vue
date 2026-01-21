@@ -44,7 +44,7 @@
                             type="button" 
                             label="Export" 
                             icon="pi pi-file-export" 
-                            class="p-button-danger" 
+                            class="p-button-success" 
                             @click="exportUsers" 
                         />
                     </div>

@@ -10,47 +10,37 @@
                             <RouterLink to="/marketing/listCatalogue">
                                 <Button icon="pi pi-arrow-left font-bold" class="p-button-text p-button-secondary text-xl" v-tooltip="'Back'" />
                             </RouterLink>
-                            <div class="text-2xl font-bold text-gray-800">Reward Catalogue Details </div>
-                        <Button icon="pi pi-download" label="Report" style="width: fit-content" class="p-button-primary p-button-sm" @click="fetchExport" />
+                            <div class="text-2xl font-bold text-gray-800">Reward Catalogue Details</div>
                         </div>
 
                         <!-- Edit & Delete Buttons -->
                         <div class="flex items-center gap-2">
+                            <Button icon="pi pi-download" label="Report" style="width: fit-content" class="p-button-primary " @click="fetchExport" />
                             <RouterLink v-if="canUpdate" :to="`/marketing/editCatalogue/${catalogue.id}`">
-                                <Button label="Edit" class="p-button-info" size="small" />
+                                <Button label="Edit" style="width: fit-content" class="p-button-info" />
                             </RouterLink>
-                            <Button v-if="canUpdate" label="Delete" class="p-button-danger" size="small" @click="confirmDelete" />
+                            <Button v-if="canUpdate" label="Delete" style="width: fit-content" class="p-button-danger"  @click="confirmDelete" />
                         </div>
                     </div>
 
                     <!-- List PIN Section -->
                     <div class="flex items-center justify-between mb-4">
                         <div class="flex items-center gap-3">
-                            <div class="text-2xl font-bold text-gray-800">🔑 List PIN</div>
+                            <div class="text-2xl font-bold text-gray-800">List PIN</div>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <Button icon="pi pi-file-export" label="Export Pin" v-tooltip="'Export PIN List'" @click="downloadEmptyTemplate" :loading="downloadingTemplate" />
                         </div>
                     </div>
 
                     <DataTable :value="processedPins" :paginator="true" :rows="10" dataKey="id" :rowHover="true" :loading="loading">
                         <template #header>
                             <div class="flex flex-col md:flex-row items-center justify-between gap-4 w-full">
-                                <!-- Summary Info -->
-                                <div class="flex gap-4 w-full md:w-auto">
-                                    <!-- <div class="w-32">
-                                        <label class="block font-medium text-gray-700 mb-1">Used</label>
-                                        <span class="text-gray-800 font-semibold">{{ usedPins }}</span> -->
-                                    <!-- </div>
-                                    <div class="w-32">
-                                        <label class="block font-medium text-gray-700 mb-1">Total</label>
-                                        <span class="text-gray-800 font-semibold">{{ catalogue.totalqty }}</span>
-                                    </div> -->
-                                </div>
-
                                 <!-- Action Buttons -->
                                 <div class="flex gap-4 items-end w-full md:w-72">
                                     <!-- <Button icon="pi pi-plus" class="p-button-text text-green-600 w-10 h-10 flex items-center justify-center" v-tooltip="'Add PIN'" @click="addPin" />
                                     <Button icon="pi pi-minus" class="p-button-text text-yellow-600 w-10 h-10 flex items-center justify-center" v-tooltip="'Remove PIN'" @click="removePin" /> -->
-                                    <Button icon="pi pi-file-export" label="Report" v-tooltip="'Export PIN List'" @click="downloadEmptyTemplate" :loading="downloadingTemplate" />
-                                    <Button v-if="canUpdate" icon="pi pi-file-import" label="Import" v-tooltip="'Import PIN List'" @click="importPinList" />
+                                    <!-- <Button v-if="canUpdate" icon="pi pi-file-import" label="Import" v-tooltip="'Import PIN List'" @click="importPinList" /> -->
                                 </div>
                             </div>
                         </template>
@@ -118,9 +108,8 @@
                             <RouterLink to="/marketing/listCatalogue">
                                 <Button icon="pi pi-arrow-left font-bold" class="p-button-text p-button-secondary text-xl" v-tooltip="'Back'" />
                             </RouterLink>
-                            <div class="text-2xl font-bold text-gray-800">Reward Catalogue Details </div>
-                        <Button icon="pi pi-download" label="Report" style="width: fit-content" class="p-button-primary p-button-sm" @click="fetchExport" />
-
+                            <div class="text-2xl font-bold text-gray-800">Reward Catalogue Details</div>
+                            <Button icon="pi pi-download" label="Report" style="width: fit-content" class="p-button-primary p-button-sm" @click="fetchExport" />
                         </div>
 
                         <!-- Edit & Delete Buttons -->
@@ -184,8 +173,8 @@
                             <RouterLink to="/marketing/listCatalogue">
                                 <Button icon="pi pi-arrow-left font-bold" class="p-button-text p-button-secondary text-xl" v-tooltip="'Back'" />
                             </RouterLink>
-                            <div class="text-2xl font-bold text-gray-800">Reward Catalogue Details </div>
-                        <Button icon="pi pi-download" label="Report" style="width: fit-content" class="p-button-primary p-button-sm" @click="fetchExport" />
+                            <div class="text-2xl font-bold text-gray-800">Reward Catalogue Details</div>
+                            <Button icon="pi pi-download" label="Report" style="width: fit-content" class="p-button-primary p-button-sm" @click="fetchExport" />
                         </div>
 
                         <!-- Edit & Delete Buttons -->
@@ -282,7 +271,7 @@
 
                         <!-- Export Button -->
                         <div class="flex items-center gap-2">
-                            <Button icon="pi pi-file-export" label="Report" class="p-button text-blue-600 p-2 flex items-center justify-center" v-tooltip="'Export Redemption List'" @click="exportToExcel" />
+                            <Button icon="pi pi-file-export" label="Export Redemption" class="p-button text-blue-600 p-2 flex items-center justify-center" v-tooltip="'Export Redemption List'" @click="exportToExcel" />
                         </div>
                     </div>
 
@@ -415,11 +404,10 @@ import { useToast } from 'primevue/usetoast';
 import { useConfirm } from 'primevue/useconfirm';
 import api from '@/service/api';
 import { useMenuStore } from '@/store/menu';
- 
+
 const menuStore = useMenuStore();
 const canUpdate = computed(() => menuStore.canWrite('Reward Catalogue'));
 const denyAccess = computed(() => menuStore.canTest('Reward Catalogue'));
-
 
 const route = useRoute();
 const router = useRouter();
@@ -501,14 +489,14 @@ const fetchCatalogueDetails = async () => {
             // Process image URL
             if (catalogue.value.imageURL) {
                 try {
-                    const blobUrl = (catalogue.value.imageURL);
+                    const blobUrl = catalogue.value.imageURL;
                     processedImageURL.value = blobUrl;
                 } catch (error) {
                     console.error('Error loading catalogue image:', error);
                     processedImageURL.value = catalogue.value.imageURL;
                 }
             } else {
-                processedImageURL.value ;
+                processedImageURL.value;
             }
 
             // Initialize point values for dialog
@@ -625,10 +613,7 @@ const fetchExport = async () => {
         exportLoading.value = true;
         const catalogueId = route.params.id;
 
-         const response = await api.getDownload(
-            `excel/export-catalog-history/${catalogueId}`,
-            { responseType: 'arraybuffer' }
-        );
+        const response = await api.getDownload(`excel/export-catalog-history/${catalogueId}`, { responseType: 'arraybuffer' });
 
         const blob = new Blob([response.data], {
             type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
@@ -647,7 +632,6 @@ const fetchExport = async () => {
             detail: 'Export completed',
             life: 3000
         });
-
     } catch (error) {
         console.error('Export error:', error);
         toast.add({
@@ -660,7 +644,6 @@ const fetchExport = async () => {
         exportLoading.value = false;
     }
 };
-
 
 const formatValueType = (valueType) => {
     const typeMap = {
@@ -690,8 +673,6 @@ const statusSeverity = (status) => {
     if (status === 1) return 'success';
     return 'secondary';
 };
-
-
 
 const toggleCatalogStatus = async () => {
     try {
@@ -1131,11 +1112,11 @@ const confirmSetPoint = async () => {
             });
         } else {
             toast.add({
-            severity: 'error',
-            summary: 'Error',
-            detail: 'Failed to update cost redeem points',
-            life: 3000
-        });
+                severity: 'error',
+                summary: 'Error',
+                detail: 'Failed to update cost redeem points',
+                life: 3000
+            });
         }
     } catch (error) {
         console.error('Error updating points:', error);

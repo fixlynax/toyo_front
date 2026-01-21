@@ -40,7 +40,7 @@
                         <!-- Right: Single Export Button (exactly like reference code) -->
                         <div class="flex items-center gap-2 ml-auto">
                             <!-- Single Export Button (like in reference code - green success button) -->
-                             <Button type="button" label="Export" icon="pi pi-file-export" class="p-button-success" :loading="exportLoading1" @click="handleExport" />
+                            <Button type="button" label="Export" icon="pi pi-file-export" class="p-button-success" :loading="exportLoading1" @click="handleExport" />
                             <Button type="button" label="Bulk Update" icon="pi pi-file-import" :loading="importLoading1" @click="importFileInput?.click()" />
                             <input ref="importFileInput" type="file" class="hidden" accept=".xlsx,.xls" @change="handleImport" />
                         </div>
@@ -62,9 +62,9 @@
 
                 <Column field="custAccountNo" header="Account No" style="min-width: 8rem" sortable>
                     <template #body="{ data }">
-                        <RouterLink :to="`/marketing/detailGame/${data.id}`" class="hover:underline font-bold text-primary-400">
+                        <span class="font-bold text-primary-400">
                             {{ data.custAccountNo }}
-                        </RouterLink>
+                        </span>
                     </template>
                 </Column>
 
@@ -123,7 +123,6 @@ const importLoading1 = ref(false);
 const importFileInput = ref();
 const toast = useToast();
 const menuStore = useMenuStore();
-
 
 // Data variables (EXACTLY like reference code)
 const listData = ref([]);
