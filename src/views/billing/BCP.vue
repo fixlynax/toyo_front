@@ -89,24 +89,28 @@
                     <div class="text-xl font-bold text-primary-600 border-b pb-2 mb-4">📄 Sales Order Details</div>
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div>
-                            <label class="block font-bold text-gray-700">Customer Account</label>
-                            <p class="text-gray-900">{{ sapDetails.admin_data.custaccountno || 'N/A' }}</p>
+                            <!-- <label class="block font-bold text-gray-700">Customer Account</label>
+                            <p class="text-gray-900">{{ sapDetails.admin_data.custaccountno || '-' }}</p> -->
+                            <label class="block font-bold text-gray-700">Customer</label>
+                            <p class="text-gray-900">{{ sapDetails.admin_data.dealerName || '-' }}</p>
                         </div>
                         <div>
+                            <!-- <label class="block font-bold text-gray-700">Ship To</label>
+                            <p class="text-gray-900">{{ sapDetails.admin_data.shipto || '-' }}</p> -->
                             <label class="block font-bold text-gray-700">Ship To</label>
-                            <p class="text-gray-900">{{ sapDetails.admin_data.shipto || 'N/A' }}</p>
+                            <p class="text-gray-900">{{ sapDetails.admin_data.shiptoName || '-' }}</p>
                         </div>
                         <div>
                             <label class="block font-bold text-gray-700">SAP Order No</label>
-                            <p class="text-gray-900">{{ sapDetails.admin_data.saporderno || 'N/A' }}</p>
+                            <p class="text-gray-900">{{ sapDetails.admin_data.saporderno || '-' }}</p>
                         </div>
                         <div>
                             <label class="block font-bold text-gray-700">ETEN Order No</label>
-                            <p class="text-green-600 font-semibold">{{ sapDetails.admin_data.etenorderno || 'N/A' }}</p>
+                            <p class="text-green-600 font-semibold">{{ sapDetails.admin_data.etenorderno || '-' }}</p>
                         </div>
                         <div>
                             <label class="block font-bold text-gray-700">Order Description</label>
-                            <p class="text-gray-900">{{ sapDetails.admin_data.orderdesc || 'N/A' }}</p>
+                            <p class="text-gray-900">{{ sapDetails.admin_data.orderdesc || '-' }}</p>
                         </div>
                     </div>
                 </div>
@@ -149,7 +153,12 @@
                     <div class="text-xl font-bold text-primary-600 border-b pb-2 mb-4">📦 Order Items ({{ sapItems.length }})</div>
                     <DataTable :value="sapItems" class="p-datatable-sm" stripedRows :paginator="sapItems.length > 5" :rows="5">
                         <Column field="materialid" header="Material ID" />
-                        <Column field="qty" header="Quantity" />
+                        <!-- In the Order Items DataTable section, update the Quantity column -->
+                        <Column field="qty" header="Quantity">
+                            <template #body="{ data }">
+                                {{ formatQuantity(data.qty) }}
+                            </template>
+                        </Column>
                         <Column field="unitprice" header="Unit Price">
                             <template #body="{ data }">RM {{ formatCurrency(data.unitprice || 0) }}</template>
                         </Column>
@@ -339,7 +348,7 @@ const formatCurrency = (value) => {
 };
 
 const formatDate = (dateString) => {
-    if (!dateString) return 'N/A';
+    if (!dateString) return '-';
     try {
         const date = new Date(dateString);
         if (isNaN(date.getTime())) {
@@ -395,6 +404,14 @@ const getOrderStatusSeverity = (statusCode) => {
         4: 'danger'
     };
     return severityMap[statusCode] || 'info';
+};
+
+// Add this function near other format functions
+const formatQuantity = (quantity) => {
+    if (quantity === null || quantity === undefined || quantity === '') return '0';
+    const num = parseFloat(quantity);
+    if (isNaN(num)) return '0';
+    return Math.round(num).toString();
 };
 
 // Fixed: Format date as yyyy-mm-dd for MySQL
