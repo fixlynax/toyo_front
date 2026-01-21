@@ -57,10 +57,10 @@
           <div class="overflow-x-auto">
             <table class="w-full text-sm text-left text-gray-700">
               <tbody>
-                <tr class="border-b">
+                <!-- <tr class="border-b">
                   <td class="px-4 py-2 font-medium">Username</td>
                   <td class="px-4 py-2 text-right">{{ logisticList.uname }}</td>
-                </tr>
+                </tr> -->
                 <tr class="border-b">
                   <td class="px-4 py-2 font-medium">Email</td>
                   <td class="px-4 py-2 text-right">{{ logisticList.emailaddress }}</td>

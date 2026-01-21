@@ -1,6 +1,6 @@
 <template>
     <div class="card">
-        <div class="text-2xl font-bold text-gray-800 border-b pb-2 mb-4">Setting Material Quantity</div>
+        <div class="text-2xl font-bold text-gray-800 border-b pb-2 mb-4">Material Quantity Setting</div>
 
         <LoadingPage v-if="globalLoading" message="Loading..." />
 

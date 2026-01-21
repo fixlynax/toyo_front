@@ -255,7 +255,7 @@ import { useToast } from 'primevue/usetoast';
 import { useMenuStore } from '@/store/menu';
 
 const menuStore = useMenuStore();
-const canUpdate = computed(() => menuStore.canWrite('Maintenance Mode'));
+const canUpdate = computed(() => menuStore.canWrite('Month End Closing'));
 
 const toast = useToast();
 

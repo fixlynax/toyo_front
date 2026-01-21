@@ -97,7 +97,7 @@ import { useToast } from 'primevue/usetoast';
 import { useMenuStore } from '@/store/menu';
 
 const menuStore = useMenuStore();
-const canUpdate = computed(() => menuStore.canWrite('Maintenance Mode'));
+const canUpdate = computed(() => menuStore.canWrite('Customer'));
 
 const toast = useToast();
 const router = useRouter();

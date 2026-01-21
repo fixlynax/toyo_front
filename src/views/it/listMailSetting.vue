@@ -12,8 +12,6 @@
             :loading="loading"
             :filters="filters1"
             filterDisplay="menu"
-            :expandedRows="expandedRows"
-            @row-toggle="onRowToggle"
             class="rounded-table"
             currentPageReportTemplate="Showing {first} to {last} of {totalRecords} entries"
             paginatorTemplate="CurrentPageReport FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink RowsPerPageDropdown"
@@ -42,12 +40,12 @@
                 </div>
             </template>
 
-            <Column :expander="true" headerStyle="width: 3rem" />
-
             <Column field="function" header="Function" style="min-width: 8rem" sortable>
                 <template #body="{ data }">
-                    <div class="flex items-center">
-                        <span class="font-semibold text-gray-800">{{ data.function }}</span>
+                    <div class="flex flex-col">
+                        <span class="font-bold text-gray-800">{{ data.function }}</span>
+                        <span v-if="data.description" class="font-semibold text-ms text-gray-500 mt-1 line-clamp-2">{{ data.description }}</span>
+                        <span v-else class="text-xm text-gray-400 italic mt-1">No description</span>
                     </div>
                 </template>
             </Column>
@@ -61,8 +59,24 @@
             <Column field="shippingPoint" header="Shipping Point" style="min-width: 10rem" sortable>
                 <template #body="{ data }">
                     <div class="flex items-center">
-                        <i class="pi pi-map-marker text-gray-400 mr-2"></i>
-                        <span class="text-gray-700">{{ data.shippingPoint || 'Not specified' }}</span>
+                        <i class="pi pi-map-marker text-primary mr-2"></i>
+                        <span class="text-black font-semibold">{{ data.shippingPoint || 'Not specified' }}</span>
+                    </div>
+                </template>
+            </Column>
+
+            <Column header="Email Recipients" style="min-width: 12rem">
+                <template #body="{ data }">
+                    <div class="flex items-center">
+                        <i class="pi pi-users text-primary mr-2"></i>
+                        <span class="text-gray-700">{{ data.emails.length }} recipient(s)</span>
+                        <Button 
+                            v-if="data.emails.length > 0"
+                            icon="pi pi-eye" 
+                            class="p-button-text p-button-sm ml-2"
+                            @click="viewEmails(data)"
+                            title="View emails"
+                        />
                     </div>
                 </template>
             </Column>
@@ -71,117 +85,217 @@
                 <template #body="{ data }">
                     <div class="space-y-1">
                         <div class="flex items-start">
-                            <i class="pi pi-calendar-plus text-green-500 mt-1 mr-2 text-sm"></i>
+                            <i class="pi pi-calendar-plus text-green-500 mt-1 mr-2 text-xm"></i>
                             <div>
                                 <div class="text-xs text-gray-500">Created On</div>
-                                <div class="text-sm font-medium text-gray-800">{{ formatDate(data.created) }}</div>
+                                <div class="text-xm font-semibold text-black">{{ formatDate(data.created) }}</div>
                             </div>
                         </div>
                         <div class="flex items-start">
-                            <i class="pi pi-history text-blue-500 mt-1 mr-2 text-sm"></i>
+                            <i class="pi pi-history text-blue-500 mr-2 text-sm mt-3"></i>
                             <div>
-                                <div class="text-xs text-gray-500">Last Updated</div>
-                                <div class="text-sm font-medium text-gray-800">{{ formatDate(data.lastUpdated) }}</div>
+                                <div class="text-xs text-gray-500 mt-2">Last Updated</div>
+                                <div class="text-xm font-semibold text-gray-800">{{ formatDate(data.lastUpdated) }}</div>
                             </div>
                         </div>
                     </div>
                 </template>
             </Column>
 
-            <Column header="Action" style="width: 100px">
+            <Column v-if="canUpdate" header="Action" style="width: 120px">
                 <template #body="{ data }">
                     <div class="flex gap-2">
-                        <Button v-if="editingId === data.id" icon="pi pi-check" class="p-button-text p-button-success p-button-sm" @click="saveSetting(data)" title="Save" />
-                        <Button v-if="editingId === data.id" icon="pi pi-times" class="p-button-text p-button-danger p-button-sm" @click="cancelEdit()" title="Cancel" />
-                        <Button v-else icon="pi pi-pencil" class="p-button-text p-button-primary p-button-sm" @click="editSetting(data)" title="Edit" />
+                        <Button 
+                            icon="pi pi-pencil" 
+                            class="p-button-text p-button-primary p-button-sm" 
+                            @click="editSetting(data)" 
+                            title="Edit" 
+                        />
                     </div>
                 </template>
             </Column>
+        </DataTable>
 
-            <template #expansion="{ data }">
-                <div class="p-4">
-                    <div class="flex items-center mb-4">
-                        <i class="pi pi-users text-lg text-gray-600 mr-2"></i>
-                        <div class="text-lg font-bold text-gray-800">Email Recipients</div>
-                        <Badge :value="data.emails.length" severity="secondary" class="ml-2" />
+        <!-- Edit Dialog -->
+        <Dialog 
+            v-model:visible="editDialogVisible" 
+            :style="{ width: '700px' }" 
+            header="Edit Email Setting"
+            :modal="true"
+            :closable="true"
+            :draggable="false"
+            @hide="cancelEdit"
+        >
+            <div v-if="editingSetting" class="py-4">
+                <div class="space-y-6">
+                    <!-- Function (Read-only) -->
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Function</label>
+                        <InputText 
+                            :value="editingSetting.function" 
+                            class="w-full bg-gray-50" 
+                            readonly 
+                        />
                     </div>
 
-                    <div v-if="editingId === data.id">
-                        <!-- Email Input with Tags -->
-                        <div class="mb-4">
-                            <label class="block text-sm font-medium text-gray-700 mb-2"> Edit Email Recipients </label>
-
-                            <!-- Current Email Tags Display -->
-                            <div class="flex flex-wrap gap-2 mb-3 p-3 bg-gray-50 border border-gray-200 rounded-md min-h-[3.5rem]">
-                                <div v-for="(emailObj, index) in emailObjects" :key="index" class="inline-flex items-center gap-1 bg-white border border-gray-300 rounded-full px-3 py-1 text-sm">
-                                    <span class="text-gray-700">
-                                        {{ emailObj.email }}
-                                    </span>
-                                    <button type="button" @click="removeEmail(index)" class="ml-1 text-gray-400 hover:text-red-500 focus:outline-none" title="Remove email">
-                                        <i class="pi pi-times text-xs"></i>
-                                    </button>
-                                </div>
-                                <span v-if="emailObjects.length === 0" class="text-gray-400 italic self-center"> No emails added </span>
-                            </div>
-
-                            <!-- Email Input Form -->
-                            <div class="grid grid-cols-1 md:grid-cols-8 gap-4 mb-2">
-                                <div class="md:col-span-7">
-                                    <InputText v-model="newEmail" placeholder="Enter email address" class="w-full" @keyup.enter="addEmail" ref="emailInput" />
-                                </div>
-                                <Button label="Add Email" icon="pi pi-plus" class="p-button-sm" @click="addEmail" :disabled="!newEmail.trim()" />
-                            </div>
-                        </div>
-
-                        <!-- Action Buttons -->
-                        <div class="flex justify-end gap-2 pt-4 border-t border-gray-200">
-                            <Button label="Cancel" icon="pi pi-times" class="p-button-outlined p-button-sm" @click="cancelEdit()" />
-                            <Button label="Save Changes" icon="pi pi-check" class="p-button p-button-sm" @click="saveSetting(data)" :disabled="emailObjects.length === 0" />
-                        </div>
+                    <!-- Storage Location -->
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">
+                            Shipping Point (Storage Location)
+                            <span class="text-gray-500 text-xs ml-1">Current: {{ editingSetting.shippingPoint || 'Not specified' }}</span>
+                        </label>
+                        <Dropdown 
+                            v-model="editForm.storageLocation"
+                            :options="storageLocationOptions"
+                            optionLabel="label"
+                            optionValue="value"
+                            placeholder="Select shipping point"
+                            class="w-full"
+                            :class="{ 'border-red-300': !editForm.storageLocation }"
+                        />
                     </div>
 
-                    <!-- Read-only Email List -->
+                    <!-- Description -->
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">
+                            Description
+                            <span v-if="editingSetting.description" class="text-gray-500 text-xs ml-1">Current: {{ editingSetting.description }}</span>
+                            <span v-else class="text-gray-500 text-xs ml-1">Current: No description</span>
+                        </label>
+                        <Textarea 
+                            v-model="editForm.description"
+                            :rows="3"
+                            class="w-full"
+                            placeholder="Enter description..."
+                        />
+                    </div>
+
+                    <!-- Email Recipients -->
+                    <div>
+                        <div class="flex items-center justify-between mb-2">
+                            <label class="block text-sm font-medium text-gray-700">
+                                Email Recipients
+                                <span class="text-gray-500 text-xs ml-1">Current: {{ editingSetting.emails.length }} email(s)</span>
+                            </label>
+                            <span class="text-xs text-gray-500">Enter email and press Enter or click Add</span>
+                        </div>
+
+                        <!-- Current Email Tags Display -->
+                        <div class="flex flex-wrap gap-2 mb-3 p-3 bg-gray-50 border border-gray-200 rounded-md min-h-[3.5rem]">
+                            <div v-for="(emailObj, index) in emailObjects" :key="index" 
+                                 class="inline-flex items-center gap-1 bg-white border border-gray-300 rounded-full px-3 py-1 text-sm">
+                                <span class="text-gray-700">
+                                    {{ emailObj.email }}
+                                    <span v-if="emailObj.tag" class="text-gray-500 text-xs">({{ emailObj.tag }})</span>
+                                </span>
+                                <button type="button" @click="removeEmail(index)" 
+                                        class="ml-1 text-gray-400 hover:text-red-500 focus:outline-none" 
+                                        title="Remove email">
+                                    <i class="pi pi-times text-xs"></i>
+                                </button>
+                            </div>
+                            <span v-if="emailObjects.length === 0" class="text-gray-400 italic self-center">No emails added</span>
+                        </div>
+
+                        <!-- Email Input Form -->
+                        <div class="grid grid-cols-1 md:grid-cols-8 gap-4 mb-2">
+                            <div class="md:col-span-7">
+                                <InputText 
+                                    v-model="newEmail" 
+                                    placeholder="Enter email address" 
+                                    class="w-full" 
+                                    @keyup.enter="addEmail" 
+                                    ref="emailInput" 
+                                />
+                            </div>
+                            <Button 
+                                label="Add" 
+                                icon="pi pi-plus" 
+                                class="p-button-sm" 
+                                @click="addEmail" 
+                                :disabled="!newEmail.trim()" 
+                            />
+                        </div>
+                        <div v-if="emailError" class="text-red-500 text-xs mt-1">{{ emailError }}</div>
+                    </div>
+                </div>
+
+                <!-- Action Buttons -->
+                <div class="flex justify-end gap-2 pt-6 mt-4">
+                    <Button 
+                        label="Cancel" 
+                        icon="pi pi-times" 
+                        class="p-button-outlined p-button-sm" 
+                        @click="cancelEdit" 
+                    />
+                    <Button 
+                        label="Save Changes" 
+                        icon="pi pi-check" 
+                        class="p-button p-button-sm" 
+                        @click="saveSetting" 
+                        :disabled="emailObjects.length === 0 || !editForm.storageLocation"
+                        :loading="saving"
+                    />
+                </div>
+            </div>
+        </Dialog>
+
+        <!-- View Emails Dialog -->
+        <Dialog 
+            v-model:visible="viewEmailsDialogVisible" 
+            :style="{ width: '500px' }" 
+            header="Email Recipients"
+            :modal="true"
+            :closable="true"
+        >
+            <div v-if="viewingSetting" class="py-4">
+                <div class="mb-4">
+                    <div class="text-lg font-semibold text-gray-800 mb-1">{{ viewingSetting.function }}</div>
+                    <div class="text-sm text-gray-500">{{ viewingSetting.emails.length }} recipient(s)</div>
+                </div>
+                
+                <div class="max-h-96 overflow-y-auto">
                     <DataTable
-                        v-else
-                        :value="getEmailData(data.emails)"
-                        :paginator="true"
-                        :rows="5"
-                        :rowsPerPageOptions="[5, 10, 20, 25, 50]"
+                        :value="viewingSetting.emails"
+                        :rows="10"
                         dataKey="email"
                         :rowHover="true"
                         responsiveLayout="scroll"
                         class="rounded-table"
-                        :alwaysShowPaginator="false"
-                        currentPageReportTemplate="Showing {first} to {last} of {totalRecords} entries"
-                        paginatorTemplate="CurrentPageReport FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink RowsPerPageDropdown"
                     >
                         <Column header="Email Address" style="min-width: 20rem">
                             <template #body="{ data }">
-                                <div class="flex items-center">
-                                    <span class="text-black hover:text-primary-800 flex-1">
-                                        {{ data.email }}
-                                    </span>
+                                <div class="flex items-center py-2">
+                                    <i class="pi pi-envelope text-gray-400 mr-3"></i>
+                                    <div class="flex-1">
+                                        <div class="text-gray-800">{{ data.email }}</div>
+                                        <div v-if="data.tag" class="text-xs text-gray-500 mt-1">
+                                            Tag: {{ data.tag }}
+                                        </div>
+                                    </div>
                                 </div>
                             </template>
                         </Column>
-
-                        <!-- <Column header="Status" style="width: 100px">
-                            <template #body="{ data }">
-                                <Badge value="Active" severity="success" class="text-xs font-normal" />
-                            </template>
-                        </Column> -->
 
                         <template #empty>
                             <div class="text-center py-6">
                                 <i class="pi pi-users text-3xl text-gray-300 mb-3"></i>
                                 <p class="text-gray-500">No email recipients configured</p>
-                                <p class="text-gray-400 text-sm mt-1">Click Edit to add email addresses</p>
                             </div>
                         </template>
                     </DataTable>
                 </div>
-            </template>
-        </DataTable>
+                
+                <div class="flex justify-end pt-4 border-t border-gray-200 mt-4">
+                    <Button 
+                        label="Close" 
+                        icon="pi pi-times" 
+                        class="p-button-outlined p-button-sm" 
+                        @click="viewEmailsDialogVisible = false" 
+                    />
+                </div>
+            </div>
+        </Dialog>
     </div>
 </template>
 
@@ -189,16 +303,19 @@
 import api from '@/service/api';
 import { useToast } from 'primevue/usetoast';
 import Badge from 'primevue/badge';
+import Dialog from 'primevue/dialog';
+import Dropdown from 'primevue/dropdown';
+import Textarea from 'primevue/textarea';
 import { computed } from 'vue';
 import { useMenuStore } from '@/store/menu';
-
-const menuStore = useMenuStore();
-const canUpdate = computed(() => menuStore.canWrite('Email Setting'));
 
 export default {
     name: 'MailSettingList',
     components: {
-        Badge
+        Badge,
+        Dialog,
+        Dropdown,
+        Textarea
     },
     setup() {
         const toast = useToast();
@@ -208,14 +325,37 @@ export default {
         return {
             listData: [],
             loading: true,
-            editingId: null,
-            expandedRows: {},
+            editDialogVisible: false,
+            viewEmailsDialogVisible: false,
+            editingSetting: null,
+            viewingSetting: null,
             filters1: { global: { value: null, matchMode: 'contains' } },
             // Email editing state
             newEmail: '',
-            newTag: '',
-            emailObjects: []
+            emailObjects: [],
+            emailError: '',
+            saving: false,
+            // Edit form
+            editForm: {
+                storageLocation: '',
+                description: ''
+            },
+            // Storage location options
+            storageLocationOptions: [
+                { label: 'RETP', value: 'RETP' },
+                { label: 'TMJB', value: 'TMJB' },
+                { label: 'TMSB', value: 'TMSB' },
+                { label: 'TMSA', value: 'TMSA' },
+                { label: 'TMSK', value: 'TMSK' },
+                { label: 'TMDS', value: 'TMDS' }
+            ]
         };
+    },    
+    computed: {  
+        canUpdate() {
+            const menuStore = useMenuStore();
+            return menuStore.canWrite('Email Setting');
+        }
     },
     methods: {
         async loadData() {
@@ -226,6 +366,7 @@ export default {
                     this.listData = res.data.email_settings.map((item) => ({
                         id: item.email_setting_id,
                         function: item.notification_type,
+                        description: item.description || null,
                         platform: 'TC',
                         shippingPoint: item.storage_location || '-',
                         created: item.created_date || '-',
@@ -280,20 +421,36 @@ export default {
                 .join(', ');
         },
 
-        getEmailData(emailObjects) {
-            return emailObjects;
+        viewEmails(setting) {
+            this.viewingSetting = setting;
+            this.viewEmailsDialogVisible = true;
         },
 
         editSetting(setting) {
-            if (this.editingId) this.cancelEdit();
+            if (!this.canUpdate) {
+                this.toast.add({
+                    severity: 'warn',
+                    summary: 'Permission Denied',
+                    detail: 'You do not have permission to edit email settings',
+                    life: 3000
+                });
+                return;
+            }
 
-            this.editingId = setting.id;
-            this.emailObjects = JSON.parse(JSON.stringify(setting.emails)); // Deep copy
+            this.editingSetting = { ...setting };
+            this.emailObjects = JSON.parse(JSON.stringify(setting.emails));
             this.newEmail = '';
-            this.newTag = '';
-            this.expandedRows = { [setting.id]: true };
+            this.emailError = '';
+            
+            // Initialize edit form with current values
+            this.editForm = {
+                storageLocation: setting.shippingPoint !== '-' ? setting.shippingPoint : '',
+                description: setting.description || ''
+            };
+            
+            this.editDialogVisible = true;
 
-            // Focus on email input
+            // Focus on email input after dialog opens
             this.$nextTick(() => {
                 if (this.$refs.emailInput) {
                     this.$refs.emailInput.$el.focus();
@@ -309,46 +466,31 @@ export default {
         },
 
         addEmail() {
+            this.emailError = '';
+            
             if (!this.newEmail.trim()) {
-                this.toast.add({
-                    severity: 'warn',
-                    summary: 'Warning',
-                    detail: 'Please enter an email address',
-                    life: 2000
-                });
+                this.emailError = 'Please enter an email address';
                 return;
             }
 
             if (!this.isValidEmail(this.newEmail.trim())) {
-                this.toast.add({
-                    severity: 'warn',
-                    summary: 'Invalid Email',
-                    detail: 'Please enter a valid email address',
-                    life: 2000
-                });
+                this.emailError = 'Please enter a valid email address';
                 return;
             }
 
             // Check for duplicate email
             if (this.emailObjects.some((obj) => obj.email.toLowerCase() === this.newEmail.trim().toLowerCase())) {
-                this.toast.add({
-                    severity: 'warn',
-                    summary: 'Duplicate',
-                    detail: 'This email is already added',
-                    life: 2000
-                });
+                this.emailError = 'This email is already added';
                 return;
             }
 
             this.emailObjects.push({
                 email: this.newEmail.trim(),
-                tag: this.newTag.trim() || null
+                tag: null // No tag input in current design
             });
 
-            // Clear inputs and focus back to email field
+            // Clear input and focus back
             this.newEmail = '';
-            this.newTag = '';
-
             this.$nextTick(() => {
                 if (this.$refs.emailInput) {
                     this.$refs.emailInput.$el.focus();
@@ -357,11 +499,10 @@ export default {
         },
 
         removeEmail(index) {
-            // Remove the email at the specified index
             this.emailObjects.splice(index, 1);
         },
 
-        async saveSetting(row) {
+        async saveSetting() {
             if (this.emailObjects.length === 0) {
                 this.toast.add({
                     severity: 'warn',
@@ -372,19 +513,33 @@ export default {
                 return;
             }
 
+            if (!this.editForm.storageLocation) {
+                this.toast.add({
+                    severity: 'warn',
+                    summary: 'Warning',
+                    detail: 'Please select a shipping point',
+                    life: 2000
+                });
+                return;
+            }
+
             try {
+                this.saving = true;
                 const emailString = this.formatEmailObjects(this.emailObjects);
                 const payload = {
                     email_addresses: emailString,
-                    storage_location: row.shippingPoint
+                    storage_location: this.editForm.storageLocation,
+                    description: this.editForm.description
                 };
 
-                await api.post(`emailSetting/update/${row.id}`, payload);
+                await api.post(`emailSetting/update/${this.editingSetting.id}`, payload);
 
                 // Update local data
-                const index = this.listData.findIndex((i) => i.id === row.id);
+                const index = this.listData.findIndex((i) => i.id === this.editingSetting.id);
                 if (index !== -1) {
                     this.listData[index].emails = [...this.emailObjects];
+                    this.listData[index].shippingPoint = this.editForm.storageLocation;
+                    this.listData[index].description = this.editForm.description;
                     this.listData[index].lastUpdated = new Date().toISOString();
                 }
 
@@ -403,6 +558,8 @@ export default {
                     life: 3000
                 });
                 console.error('Save error:', err);
+            } finally {
+                this.saving = false;
             }
         },
 
@@ -412,23 +569,15 @@ export default {
         },
 
         cancelEdit() {
-            this.editingId = null;
+            this.editDialogVisible = false;
+            this.editingSetting = null;
             this.emailObjects = [];
             this.newEmail = '';
-            this.newTag = '';
-            this.expandedRows = {};
-        },
-
-        onRowToggle(event) {
-            if (this.editingId && !event.data) {
-                this.toast.add({
-                    severity: 'info',
-                    summary: 'Edit Cancelled',
-                    detail: 'Changes were not saved',
-                    life: 2000
-                });
-                this.cancelEdit();
-            }
+            this.emailError = '';
+            this.editForm = {
+                storageLocation: '',
+                description: ''
+            };
         },
 
         formatDate(dateStr) {
@@ -445,7 +594,7 @@ export default {
                     day: '2-digit',
                     hour: '2-digit',
                     minute: '2-digit',
-                    hour12: true // Changed from false to true
+                    hour12: true
                 }).format(date);
 
                 // Convert am/pm to uppercase
@@ -501,13 +650,20 @@ export default {
     }
 }
 
-:deep(.p-datatable .p-row-expanded) {
-    background-color: #f8fafc !important;
-    border-left: 3px solid #3b82f6;
-}
-
-:deep(.p-datatable .p-row-editing) {
-    background-color: #eff6ff !important;
+:deep(.p-dialog) {
+    .p-dialog-header {
+        border-bottom: 1px solid #e5e7eb;
+        padding: 1.25rem 1.5rem;
+    }
+    
+    .p-dialog-content {
+        padding: 1.5rem;
+    }
+    
+    .p-dialog-footer {
+        border-top: 1px solid #e5e7eb;
+        padding: 1rem 1.5rem;
+    }
 }
 
 :deep(.p-badge) {
@@ -540,5 +696,13 @@ export default {
 
 .email-tag button:hover {
     color: #ef4444 !important;
+}
+
+/* Line clamp for description text */
+.line-clamp-2 {
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
 }
 </style>

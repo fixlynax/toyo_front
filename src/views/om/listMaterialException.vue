@@ -2,7 +2,7 @@
     <Fluid>
         <div class="flex flex-col md:flex-row gap-8">
             <div class="card flex flex-col gap-6 w-full">
-                <div class="text-2xl font-bold text-gray-800 border-b pb-2">List Material Exception</div>
+                <div class="text-2xl font-bold text-gray-800 border-b pb-2">Material Exception</div>
 
                 <LoadingPage v-if="loading" :message="'Loading Material Exception...'" :sub-message="'Fetching your Material Exception list'" />
 
@@ -62,7 +62,7 @@
                             <div class="flex items-center gap-2">
                                 <i class="pi pi-box text-blue-500"></i>
                                 <div>
-                                    <div class="font-semibold text-gray-800">{{ data.materialCode }}</div>
+                                    <div class="font-bold text-gray-800">{{ data.materialCode }}</div>
                                     <div class="text-sm text-gray-600">{{ data.materialDescription }}</div>
                                 </div>
                             </div>
@@ -71,17 +71,17 @@
 
                     <Column header="Type" style="min-width: 10rem">
                         <template #body="{ data }">
-                            <span :class="['px-3 py-1 text-base font-medium rounded-full', data.exceptionType === 'INCLUDE' ? 'text-green-700' : data.exceptionType === 'EXCLUDE' ? 'text-red-700' : 'text-gray-700']">
+                            <span :class="['px-3 py-1 text-base font-semibold rounded-full', data.exceptionType === 'INCLUDE' ? 'text-green-700' : data.exceptionType === 'EXCLUDE' ? 'text-red-700' : 'text-gray-700']">
                                 {{ data.exceptionType }}
                             </span>
                         </template>
                     </Column>
 
-                    <Column header="Dealers" style="min-width: 10rem">
+                    <Column header="Dealer" style="min-width: 10rem">
                         <template #body="{ data }">
-                            <div class="text-sm">
+                            <div class="text-xm font-semibold">
                                 <Badge :value="data.dealerCount" class="mr-2" />
-                                {{ data.dealerCount }} dealer(s)
+                                dealer(s)
                             </div>
                         </template>
                     </Column>
@@ -198,7 +198,7 @@ import LoadingPage from '@/components/LoadingPage.vue';
 import { useMenuStore } from '@/store/menu';
 
 const menuStore = useMenuStore();
-const canUpdate = computed(() => menuStore.canWrite('Maintenance Mode'));
+const canUpdate = computed(() => menuStore.canWrite('Material Exception'));
 
 const toast = useToast();
 const loading = ref(false);
@@ -241,8 +241,6 @@ const allDealers = computed(() =>
 
 const isDialogFormValid = computed(() => currentException.materialCode && currentException.exceptionType && currentException.dealers.length > 0);
 
-const getTypeSeverity = (type) => (type === 'INCLUDE' ? 'success' : 'warning');
-
 const onMaterialChange = () => {
     const selected = materialOptions.value.find((m) => m.materialid === currentException.materialCode);
     if (selected) {
@@ -271,7 +269,12 @@ const editException = async (data) => {
     showAddDialog.value = true;
     try {
         await fetchDealers();
-        Object.assign(currentException, { ...data, dealers: data.dealers.map((d) => d.id) });
+        Object.assign(currentException, { 
+            ...data, 
+            materialCode: data.materialCode, // materialid
+            materialDescription: data.materialDescription, // material description
+            dealers: data.dealers.map((d) => d.id) 
+        });
     } finally {
         dialogLoading.value = false;
     }
@@ -352,18 +355,8 @@ const fetchMaterialExceptions = async () => {
     loading.value = true;
 
     try {
-        // Fetch materials first to get descriptions
-        await fetchMaterials();
-
-        // Then fetch material exceptions
         const response = await api.get('maintenance/list-material-exception');
         const adminData = response.data.admin_data || [];
-
-        // Create a map for quick material description lookup
-        const materialMap = new Map();
-        materialOptions.value.forEach((material) => {
-            materialMap.set(material.materialid, material.material);
-        });
 
         materialExceptions.value = adminData.map((item) => {
             const includeIds =
@@ -387,13 +380,10 @@ const fetchMaterialExceptions = async () => {
                   }))
                 : [];
 
-            // Get material description from the map
-            const materialDescription = materialMap.get(item.materialid) || item.materialid;
-
             return {
                 id: item.id,
-                materialCode: item.materialid,
-                materialDescription: materialDescription,
+                materialCode: item.materialid, // materialid from API
+                materialDescription: item.materialdescription || item.materialid, // Use materialdescription from API response
                 exceptionType,
                 dealers: dealerDetails,
                 dealerCount: dealerDetails.length,

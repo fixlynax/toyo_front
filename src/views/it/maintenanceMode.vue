@@ -11,14 +11,14 @@
                 <DataTable :value="versionList" :loading="loading" class="rounded-table">
                     <Column field="type" header="Type" sortable>
                         <template #body="{ data }">
-                            <span class="font-medium">{{ getTypeLabel(data.type) }}</span>
+                            <span class="font-bold">{{ getTypeLabel(data.type) }}</span>
                         </template>
                     </Column>
-                    <Column field="currentVer" header="Current Version" sortable></Column>
-                    <Column field="newVer" header="New Version" sortable></Column>
+                    <Column field="currentVer" class="font-bold" header="Current Version" sortable></Column>
+                    <Column field="newVer" class="font-bold" header="New Version" sortable></Column>
                     <Column field="link" header="Link" sortable>
                         <template #body="{ data }">
-                            <a v-if="data.link" :href="data.link" target="_blank" class="text-blue-600 hover:underline">
+                            <a v-if="data.link" :href="data.link" target="_blank" class="text-blue-600 hover:underline font-medium">
                                 {{ truncateText(data.link, 30) }}
                             </a>
                             <span v-else class="text-gray-400">-</span>
@@ -84,11 +84,6 @@
                 <div>
                     <label class="block text-sm font-bold text-gray-700 mb-2">Maintenance Message</label>
                     <Textarea v-model="updateDialog.data.maintenanceMsg" rows="4" class="w-full" placeholder="Enter maintenance message (if maintenance mode is enabled)" />
-                </div>
-
-                <div>
-                    <label class="block text-sm font-bold text-gray-700 mb-2">Reason for Update *</label>
-                    <InputText v-model="updateDialog.reason" class="w-full" placeholder="Enter reason for update" />
                 </div>
             </div>
 
@@ -160,8 +155,7 @@ const updateDialog = ref({
         isForce: 0,
         isMaintainence: 0,
         maintenanceMsg: ''
-    },
-    reason: ''
+    }
 });
 
 const messageDialog = ref({
@@ -268,7 +262,6 @@ const openUpdateDialog = (data) => {
         isMaintainence: data.isMaintainence || 0,
         maintenanceMsg: data.maintenanceMsg || ''
     };
-    updateDialog.value.reason = '';
     updateDialog.value.visible = true;
 };
 
@@ -283,26 +276,14 @@ const closeUpdateDialog = () => {
         isMaintainence: 0,
         maintenanceMsg: ''
     };
-    updateDialog.value.reason = '';
 };
 
 const updateVersion = async () => {
-    if (!updateDialog.value.reason.trim()) {
-        toast.add({
-            severity: 'warn',
-            summary: 'Warning',
-            detail: 'Please enter a reason for update',
-            life: 3000
-        });
-        return;
-    }
-
     updating.value = true;
     try {
         const payload = {
             type: updateDialog.value.data.type,
             adminID: 1, // TODO: Replace with actual admin ID from auth
-            reason: updateDialog.value.reason,
             currentVer: updateDialog.value.data.currentVer || '',
             newVer: updateDialog.value.data.newVer || '',
             link: updateDialog.value.data.link || '',
@@ -389,7 +370,6 @@ const saveMaintenanceConfig = async () => {
             api.post('admin/update-version', {
                 type: type,
                 adminID: 1, // TODO: Replace with actual admin ID from auth
-                reason: activeChannel === 'NONE' ? 'Disable maintenance' : 'Maintenance update',
                 currentVer: currentVer,
                 newVer: newVer,
                 link: '',

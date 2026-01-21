@@ -277,7 +277,7 @@ const router = createRouter({
                     path: 'om/editSalesProgram/:id',
                     name: 'Edit-Sales-Program',
                     component: () => import('@/views/om/editSalesProgram.vue'),
-                    meta: { permission: 'Sales Program', access: 'view' },
+                    meta: { permission: 'Sales Program', access: 'write' },
                     props: true
                 },
 
@@ -286,31 +286,37 @@ const router = createRouter({
                     path: 'om/listDisableOrderNS',
                     name: 'Disable-Order-NS',
                     component: () => import('@/views/om/ListDisableOrderNS.vue'),
-                    meta: { permission: 'Maintenance Mode', access: 'view' }
+                    meta: { permission: 'Normal Order', access: 'view' }
                 },
                 {
                     path: 'om/listDisableOrderDS',
                     name: 'Disable-Order-DS',
                     component: () => import('@/views/om/ListDisableOrderDS.vue'),
-                    meta: { permission: 'Maintenance Mode', access: 'view' }
+                    meta: { permission: 'TMDS Location', access: 'view' }
+                },
+                {
+                    path: 'om/storageLocationMaintenance',
+                    name: 'Storage-Location-Maintenance',
+                    component: () => import('@/views/om/storageLocationMaintenance.vue'),
+                    meta: { permission: 'Storage Location Maintenance', access: 'view' }
                 },
                 {
                     path: 'om/listMonthEndClosing',
                     name: 'Month-End-Closing',
                     component: () => import('@/views/om/listMonthEndClosing.vue'),
-                    meta: { permission: 'Maintenance Mode', access: 'view' }
+                    meta: { permission: 'Month End Closing', access: 'view' }
                 },
                 {
                     path: 'om/ListMaterialException',
                     name: 'Material-Exception',
                     component: () => import('@/views/om/listMaterialException.vue'),
-                    meta: { permission: 'Maintenance Mode', access: 'view' }
+                    meta: { permission: 'Material Exception', access: 'view' }
                 },
                 {
                     path: 'om/listContainer',
                     name: 'Container-List',
                     component: () => import('@/views/om/listContainer.vue'),
-                    meta: { permission: 'Maintenance Mode', access: 'view' }
+                    meta: { permission: 'Directship Container', access: 'view' }
                 },
                 {
                     path: 'om/settingMaterialQuantity',
@@ -395,7 +401,7 @@ const router = createRouter({
                     path: 'marketing/detailCampaign/:id',
                     name: 'Detail-Campaign',
                     component: () => import('@/views/marketing/detailCampaign.vue'),
-                    meta: { permission: 'Campaign Management', access: 'write' },
+                    meta: { permission: 'Campaign Management', access: 'view' },
                     props: true
                 },
                 {
@@ -491,7 +497,7 @@ const router = createRouter({
                     path: 'marketing/detailEtenUser/:id',
                     name: 'Detail-Member',
                     component: () => import('@/views/marketing/detailEtenUser.vue'),
-                    meta: { permission: 'Member List', access: 'write' },
+                    meta: { permission: 'Member List', access: 'view' },
                     props: true
                 },
                 {
@@ -541,13 +547,13 @@ const router = createRouter({
                     path: 'marketing/listWarrantyRegistration',
                     name: 'List-Warranty-Registration',
                     component: () => import('@/views/marketing/listWarrantyRegistration.vue'),
-                    meta: { permission: 'Events Management', access: 'view' }
+                    meta: { permission: 'Warranty Registration', access: 'view' }
                 },
                 {
                     path: 'marketing/detailWarrantyRegistration/:id',
                     name: 'Detail-Warranty-Registration',
                     component: () => import('@/views/marketing/detailWarrantyRegistration.vue'),
-                    meta: { permission: 'Events Management', access: 'view' },
+                    meta: { permission: 'Warranty Registration', access: 'view' },
                     props: true
                 },
 
@@ -556,13 +562,13 @@ const router = createRouter({
                     path: 'marketing/listOERegistration',
                     name: 'List-OE-Registration',
                     component: () => import('@/views/marketing/listOERegistration.vue'),
-                    meta: { permission: 'Events Management', access: 'view' }
+                    meta: { permission: 'OE Registration', access: 'view' }
                 },
                 {
                     path: 'marketing/detailOERegistration/:id',
                     name: 'Detail-OE-Registration',
                     component: () => import('@/views/marketing/detailOERegistration.vue'),
-                    meta: { permission: 'Events Management', access: 'view' },
+                    meta: { permission: 'OE Registration', access: 'view' },
                     props: true
                 },
                 // Tire
@@ -648,7 +654,7 @@ const router = createRouter({
                     path: 'technical/listOETire',
                     name: 'List-OE-Tire',
                     component: () => import('@/views/technical/listOETire.vue'),
-                    meta: { permission: 'OE Tire LIst', access: 'view' }
+                    meta: { permission: 'OE Tyre List', access: 'view' }
                 },
                 {
                     path: 'technical/listPattern',
@@ -953,20 +959,20 @@ const router = createRouter({
                     path: 'billing/listOther',
                     name: 'List-Other',
                     component: () => import('@/views/billing/listOther.vue'),
-                    meta: { permission: 'Other', access: 'view' } 
+                    meta: { permission: 'Others', access: 'view' } 
                 },
                 {
                     path: 'billing/listOtherPersonal/:custAccNo',
                     name: 'List-Other-Personal',
                     component: () => import('@/views/billing/listOtherPersonal.vue'),
-                    meta: { permission: 'Other', access: 'view' },
+                    meta: { permission: 'Others', access: 'view' },
                     props: true
                 },
                 {
                     path: 'sales/listOtherSales',
                     name: 'List-Other-Sales',
                     component: () => import('@/views/sales/listOtherSales.vue'),
-                    meta: { permission: 'Other', access: 'view' }
+                    meta: { permission: 'Others', access: 'view' }
                 },
 
                 // Statements

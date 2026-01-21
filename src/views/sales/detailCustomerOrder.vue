@@ -113,7 +113,16 @@
                                 </tr>
                                 <tr class="border-b">
                                     <td class="px-4 py-2 font-medium">Order Type</td>
-                                    <td class="px-4 py-2 text-right font-medium">{{ orderData.orderDesc === 'Back Order'? 'NORMAL': order.orderDesc?.toUpperCase() || '-' }}</td>
+                                    <td class="px-4 py-2 text-right font-medium">
+                                        <span v-if="orderData.orderDesc === 'NORMAL'">NORMAL</span>
+                                        <span v-else-if="orderData.orderDesc === 'DIRECTSHIP'">DS</span>
+                                        <span v-else-if="orderData.orderDesc === 'OWN'">OWN USE</span>
+                                        <span v-else-if="orderData.orderDesc === 'Warranty'">WARRANTY</span>
+                                        <span v-else-if="orderData.orderDesc === 'Back Order'">NORMAL</span>
+                                        <span v-else>
+                                            {{ orderData.orderDesc || orderData.orderDesc || '-' }}
+                                        </span>
+                                    </td>
                                 </tr>
                                 <tr class="border-b">
                                     <td class="px-4 py-2 font-medium">Order SAP Type</td>
@@ -145,15 +154,19 @@
                                 </tr>
                                 <tr class="border-b">
                                     <td class="px-4 py-2 font-medium">ETA Date</td>
-                                    <td class="px-4 py-2 text-right font-medium">{{ formatDateTime(orderData.deliveryDate) || '-' }}</td>
+                                    <td class="px-4 py-2 text-right font-medium">{{ formatDate(orderData.deliveryDate) || '-' }}</td>
                                 </tr>
                                 <tr class="border-b">
                                     <td class="px-4 py-2 font-medium">Planned Date</td>
-                                    <td class="px-4 py-2 text-right font-medium">{{ formatDateTime(deliveryInfo.scheduled_delivery_time) || '-' }}</td>
+                                    <td class="px-4 py-2 text-right font-medium">{{ formatDate(deliveryInfo.scheduled_delivery_time) || '-' }}</td>
                                 </tr>
                                 <tr class="border-b">
                                     <td class="px-4 py-2 font-medium">Delivered Date</td>
-                                    <td class="px-4 py-2 text-right font-medium">{{ formatDateTime(deliveryInfo.delivered_datetime) || '-' }}</td>
+                                    <td class="px-4 py-2 text-right font-medium">{{ formatDate(deliveryInfo.delivered_datetime) || '-' }}</td>
+                                </tr>
+                                <tr class="border-b">
+                                    <td class="px-4 py-2 font-medium">Order Date</td>
+                                    <td class="px-4 py-2 text-right font-medium">{{ formatDate(orderData.orderDate) || '-' }}</td>
                                 </tr>
                                 <tr class="border-b">
                                     <td class="px-4 py-2 font-medium">Created On</td>
@@ -435,7 +448,7 @@ const formatDate = (dateString) => {
 
 const formatDateTime = (dateString) => {
     if (!dateString) return '-';
-    
+
     const date = new Date(dateString);
     const options = {
         day: '2-digit',
@@ -446,9 +459,9 @@ const formatDateTime = (dateString) => {
         second: '2-digit',
         hour12: true
     };
-    
+
     let formatted = date.toLocaleString('en-MY', options);
-    
+
     // Convert AM/PM to uppercase regardless of case
     return formatted.replace(/\b(am|pm)\b/gi, (match) => match.toUpperCase());
 };

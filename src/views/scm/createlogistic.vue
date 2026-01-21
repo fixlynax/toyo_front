@@ -6,10 +6,10 @@
                 <div class="text-2xl font-bold text-gray-800 border-b pb-2">Create 3PL Account</div>
                 <!-- Contact Details -->
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div>
+                    <!-- <div>
                         <label class="block font-bold text-gray-700 mb-2">Username</label>
                         <InputText v-model="form.username" type="text" placeholder="Enter Username" class="w-full" @keydown.space.prevent/>
-                    </div>
+                    </div> -->
                     <div>
                         <label class="block font-bold text-gray-700 mb-2">Email Address</label>
                         <InputText v-model="form.emailaddress" type="email" placeholder="Enter email Address" class="w-full" />
@@ -161,7 +161,7 @@ const loading = ref(true);
 
 // reactive form data
 const form = reactive({
-    username: '',
+    // username: '',
     companyname: '',
     addressline1: '',
     addressline2: '',
@@ -233,7 +233,7 @@ const statusCode = [
 // form validation
 const isFormValid = computed(() => {
     return (
-        form.username.trim() !== '' &&
+        // form.username.trim() !== '' &&
         form.companyname.trim() !== '' &&
         form.addressline1.trim() !== '' &&
         form.addressline2.trim() !== '' &&
@@ -282,7 +282,7 @@ const submitForm  = async () => {
         return;
     }
     const formData = new FormData();
-    formData.append('username', form.username);
+    // formData.append('username', form.username);
     formData.append('companyname', form.companyname);
     formData.append('addressline1', form.addressline1);
     formData.append('addressline2', form.addressline2);
@@ -309,7 +309,7 @@ const submitForm  = async () => {
             // ✅ Show dialog
             passwordDialogVisible.value = true;
                 Object.assign(form, {
-            username: '',
+            // username: '',
             companyname: '',
             addressline1: '',
             addressline2: '',

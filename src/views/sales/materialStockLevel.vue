@@ -18,6 +18,11 @@ const selectedExportIds = ref(new Set());
 const storageLocations = ref([]); // Changed to ref, will be populated from API
 const loadingLocations = ref(true); // Added loading state for storage locations
 
+// 🟢 New state for stock batch dialog
+const showStockBatchDialog = ref(false);
+const selectedMaterial = ref(null);
+const stockBatchDetails = ref([]);
+
 // 🟢 Removed hardcoded storage locations - will be fetched from API
 
 // 🟢 Filters
@@ -146,7 +151,9 @@ const fetchMaterialStock = async (storageLocation) => {
                           created: material.stock_level.created,
                           updated: material.stock_level.updated
                       }
-                    : null
+                    : null,
+                // Add stock_batch to material object
+                stock_batch: material.stock_batch || []
             }));
             visibleRows.value = materialData.value;
         } else {
@@ -242,7 +249,7 @@ const calculateTotalFromBatches = (stockLevelMaster) => {
 // 🟢 Format Date Time
 const formatDateTime = (dateString) => {
     if (!dateString) return '-';
-    
+
     const date = new Date(dateString);
     const options = {
         day: '2-digit',
@@ -253,9 +260,9 @@ const formatDateTime = (dateString) => {
         second: '2-digit',
         hour12: true
     };
-    
+
     let formatted = date.toLocaleString('en-MY', options);
-    
+
     // Convert AM/PM to uppercase regardless of case
     return formatted.replace(/\b(am|pm)\b/gi, (match) => match.toUpperCase());
 };
@@ -364,6 +371,36 @@ const stockSummary = computed(() => {
 const formatBoolean = (value) => {
     return value === 1 || value === true ? 'Yes' : 'No';
 };
+
+// 🟢 Show stock batch details dialog
+const showStockBatch = (material) => {
+    selectedMaterial.value = material;
+
+    // Prepare stock batch details
+    if (material.stock_batch && Array.isArray(material.stock_batch)) {
+        stockBatchDetails.value = material.stock_batch;
+    } else if (material.stock_batch && typeof material.stock_batch === 'object') {
+        stockBatchDetails.value = [material.stock_batch];
+    } else {
+        stockBatchDetails.value = [];
+    }
+
+    showStockBatchDialog.value = true;
+};
+
+// 🟢 Close stock batch dialog
+const closeStockBatchDialog = () => {
+    showStockBatchDialog.value = false;
+    selectedMaterial.value = null;
+    stockBatchDetails.value = [];
+};
+
+// 🟢 Calculate total batch quantity
+const calculateBatchTotal = computed(() => {
+    return stockBatchDetails.value.reduce((total, batch) => {
+        return total + parseFloat(batch.stockbalance || batch.stockBalance || 0);
+    }, 0);
+});
 </script>
 
 <template>
@@ -420,7 +457,7 @@ const formatBoolean = (value) => {
 
                         <!-- Storage Location Dropdown -->
                         <div class="flex items-center gap-2">
-                            <span class="text-sm font-medium text-gray-700 whitespace-nowrap">Storage:</span>
+                            <span class="text-xm font-medium text-gray-700 whitespace-nowrap">Storage:</span>
                             <Dropdown v-model="selectedStorage" :options="storageLocations" optionLabel="name" optionValue="code" placeholder="Select Storage" class="w-48" :filter="true" @change="handleStorageChange">
                                 <template #option="slotProps">
                                     <div class="flex items-center gap-2">
@@ -452,7 +489,7 @@ const formatBoolean = (value) => {
                     <div class="flex flex-col items-center gap-2">
                         <i class="pi pi-box text-3xl text-blue-400"></i>
                         <span class="text-lg">No materials found</span>
-                        <span class="text-sm text-gray-400">Out Of Stock data available for {{ selectedStorage }}</span>
+                        <span class="text-xm text-gray-400">Out Of Stock data available for {{ selectedStorage }}</span>
                     </div>
                 </div>
             </template>
@@ -479,9 +516,9 @@ const formatBoolean = (value) => {
                 <template #body="{ data }">
                     <div class="flex flex-col">
                         <!-- Top -->
-                        <div class="font-semibold text-blue-600">{{ data.materialid }}</div>
+                        <div class="font-bold text-xm text-black">{{ data.material }}</div>
                         <!-- Bottom -->
-                        <div class="text-gray-600 text-sm truncate max-w-xs">{{ data.material }}</div>
+                        <div class="text-gray-600 text-xm truncate max-w-xs font-medium">{{ data.materialid }}</div>
                     </div>
                 </template>
             </Column>
@@ -491,7 +528,7 @@ const formatBoolean = (value) => {
                 <template #body="{ data }">
                     <div class="flex flex-col">
                         <div class="font-medium">{{ data.pattern }}</div>
-                        <div class="text-gray-600 text-sm">{{ data.pattern_name }}</div>
+                        <div class="text-gray-600 text-xm">{{ data.pattern_name }}</div>
                     </div>
                 </template>
             </Column>
@@ -499,7 +536,7 @@ const formatBoolean = (value) => {
             <!-- Size Details -->
             <Column header="Rim Diameter" style="min-width: 8rem" sortable :sort-field="'rimdiameter'">
                 <template #body="{ data }">
-                    <div class="flex flex-col leading-relaxed text-sm text-gray-700">
+                    <div class="flex flex-col leading-relaxed text-xm text-gray-700">
                         <div class="flex items-center justify-between mb-2">
                             <span class="font-semibold">{{ data.rimdiameter }}"</span>
                         </div>
@@ -518,17 +555,19 @@ const formatBoolean = (value) => {
             <Column header="Stock Info" style="min-width: 14rem">
                 <template #body="{ data }">
                     <template v-if="data.stock_level">
-                        <div class="flex flex-col leading-relaxed text-sm text-gray-700">
+                        <div class="flex flex-col leading-relaxed text-xm text-gray-700">
                             <div class="flex items-center justify-between mb-2">
                                 <span class="text-gray-800 font-semibold">Balance:</span>
                                 <div class="flex items-center gap-2">
                                     <span
                                         :class="{
-                                            'font-bold text-lg': true,
+                                            'font-bold text-lg cursor-pointer hover:underline': true,
                                             'text-green-600': data.stock_level.stockBalance > 10,
                                             'text-yellow-600': data.stock_level.stockBalance > 0 && data.stock_level.stockBalance <= 10,
                                             'text-red-600': data.stock_level.stockBalance <= 0
                                         }"
+                                        @click="showStockBatch(data)"
+                                        title="Click to view batch details"
                                     >
                                         {{ data.stock_level.stockBalance || 0 }}
                                     </span>
@@ -564,15 +603,15 @@ const formatBoolean = (value) => {
                 <template #body="{ data }">
                     <div class="flex flex-col space-y-1">
                         <div class="flex items-center justify-between">
-                            <span class="text-gray-600 text-sm">Sell:</span>
+                            <span class="text-gray-600 text-xm">Sell:</span>
                             <Tag :value="formatBoolean(data.isSell)" :severity="data.isSell ? 'info' : 'secondary'" class="text-xs" />
                         </div>
                         <div class="flex items-center justify-between">
-                            <span class="text-gray-600 text-sm">Warranty:</span>
+                            <span class="text-gray-600 text-xm">Warranty:</span>
                             <Tag :value="formatBoolean(data.isWarranty)" :severity="data.isWarranty ? 'info' : 'secondary'" class="text-xs" />
                         </div>
                         <div class="flex items-center justify-between">
-                            <span class="text-gray-600 text-sm">TWP:</span>
+                            <span class="text-gray-600 text-xm">TWP:</span>
                             <Tag :value="formatBoolean(data.isTWP)" :severity="data.isTWP ? 'info' : 'secondary'" class="text-xs" />
                         </div>
                     </div>
@@ -582,7 +621,7 @@ const formatBoolean = (value) => {
             <!-- Last Updated -->
             <Column field="updated" header="Updated" style="min-width: 8rem" sortable>
                 <template #body="{ data }">
-                    <div class="text-sm">
+                    <div class="text-xm">
                         {{ formatDateTime(data.updated) }}
                     </div>
                 </template>
@@ -605,6 +644,53 @@ const formatBoolean = (value) => {
                 </Dropdown>
             </div>
         </div>
+
+        <!-- Stock Batch Dialog -->
+        <Dialog v-model:visible="showStockBatchDialog" modal header="Stock Batch Detail" :style="{ width: '600px' }">
+            <div v-if="selectedMaterial" class="space-y-4">
+                <!-- Total Summary -->
+                <div class="bg-blue-50 p-3 rounded-lg mb-4">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <span class="text-xm text-gray-600">Total Quantity:</span>
+                            <span class="ml-2 text-xl font-bold text-blue-700">{{ calculateBatchTotal }}</span>
+                        </div>
+                        <div>
+                            <span class="text-xm text-gray-600">Number of Batches:</span>
+                            <span class="ml-2 text-lg font-semibold text-gray-700">{{ stockBatchDetails.length }}</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Batch Details Table -->
+                <div v-if="stockBatchDetails.length > 0">
+                    <!-- <h4 class="text-lg font-medium text-gray-700 mb-2">Batch Details</h4> -->
+                    <DataTable :value="stockBatchDetails" class="rounded-table" :scrollable="true" scrollHeight="300px">
+                        <Column field="batchno" header="Batch No" style="min-width: 100px">
+                            <template #body="{ data }">
+                                <span class="font-medium">{{ data.batchno }}</span>
+                            </template>
+                        </Column>
+                        <Column field="stockbalance" header="Stock Balance" style="min-width: 120px">
+                            <template #body="{ data }">
+                                <div class="text-left">
+                                    <span class="font-semibold text-gray-800">{{ parseInt(parseFloat(data.stockbalance || data.stockBalance || 0)) }}</span>
+                                </div>
+                            </template>
+                        </Column>
+                        <template #empty>
+                            <div class="text-center py-4 text-gray-500">No batch information available</div>
+                        </template>
+                    </DataTable>
+                </div>
+
+                <!-- No Batch Information -->
+                <div v-else class="text-center py-6 bg-gray-50 rounded-lg">
+                    <i class="pi pi-box text-3xl text-gray-300 mb-2"></i>
+                    <p class="text-gray-500">No batch information available for this material</p>
+                </div>
+            </div>
+        </Dialog>
     </div>
 </template>
 <style scoped>
