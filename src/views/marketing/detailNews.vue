@@ -39,9 +39,10 @@
 
                     <!-- News Info -->
                     <div class="mt-6">
-                        <h1 class="text-2xl font-bold text-gray-800">{{ news.title }}</h1>
-                        <p class="text-lg font-medium">{{ news.headline }}</p>
-                        <p class="text-lg font-medium">{{ news.description }}</p>
+                        <h1 class="text-2xl font-bold text-gray-800">{{ !news.title || news.title === 'null' ? '-' : news.title }}</h1>
+                        <p class="text-lg font-medium">{{ !news.headline|| news.headline=== 'null' ? '-' : news.headline}}
+                        </p>
+                        <p class="text-lg font-medium">{{ !news.description|| news.description=== 'null' ? '-' : news.description}}</p>
                     </div>
                     <div class="flex flex-col md:flex-row gap-4">
                         <div class="w-full">
@@ -78,7 +79,7 @@
                                 </tr> -->
                                 <tr class="border-b">
                                     <td class="px-4 py-2 font-medium">Total View</td>
-                                    <td class="px-4 py-2 text-right">{{ news.view }}</td>
+                                    <td class="px-4 py-2 text-right">{{ !news.view || news.view === 'null' ? '0' : news.view }}</td>
                                 </tr>
                                 <tr class="border-b">
                                     <td class="px-4 py-2 font-medium">Created</td>
