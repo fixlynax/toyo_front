@@ -70,13 +70,7 @@
                     <div class="flex items-center">
                         <i class="pi pi-users text-primary mr-2"></i>
                         <span class="text-gray-700">{{ data.emails.length }} recipient(s)</span>
-                        <Button 
-                            v-if="data.emails.length > 0"
-                            icon="pi pi-eye" 
-                            class="p-button-text p-button-sm ml-2"
-                            @click="viewEmails(data)"
-                            title="View emails"
-                        />
+                        <Button v-if="data.emails.length > 0" icon="pi pi-eye" class="p-button-text p-button-sm ml-2" @click="viewEmails(data)" title="View emails" />
                     </div>
                 </template>
             </Column>
@@ -102,49 +96,29 @@
                 </template>
             </Column>
 
-            <Column v-if="canUpdate" header="Action" style="width: 120px">
+            <Column header="Action" style="width: 120px">
                 <template #body="{ data }">
                     <div class="flex gap-2">
-                        <Button 
-                            icon="pi pi-pencil" 
-                            class="p-button-text p-button-primary p-button-sm" 
-                            @click="editSetting(data)" 
-                            title="Edit" 
-                        />
+                        <Button icon="pi pi-pencil" class="p-button-text p-button-primary p-button-sm" @click="editSetting(data)" title="Edit" :disabled="!canUpdate" />
                     </div>
                 </template>
             </Column>
         </DataTable>
 
         <!-- Edit Dialog -->
-        <Dialog 
-            v-model:visible="editDialogVisible" 
-            :style="{ width: '700px' }" 
-            header="Edit Email Setting"
-            :modal="true"
-            :closable="true"
-            :draggable="false"
-            @hide="cancelEdit"
-        >
+        <Dialog v-model:visible="editDialogVisible" :style="{ width: '700px' }" header="Edit Email Setting" :modal="true" :closable="true" :draggable="false" @hide="cancelEdit">
             <div v-if="editingSetting" class="py-4">
                 <div class="space-y-6">
                     <!-- Function (Read-only) -->
                     <div>
                         <label class="block text-sm font-medium text-gray-700 mb-1">Function</label>
-                        <InputText 
-                            :value="editingSetting.function" 
-                            class="w-full bg-gray-50" 
-                            readonly 
-                        />
+                        <InputText :value="editingSetting.function" class="w-full bg-gray-50" readonly />
                     </div>
 
                     <!-- Storage Location -->
                     <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-1">
-                            Shipping Point (Storage Location)
-                            <span class="text-gray-500 text-xs ml-1">Current: {{ editingSetting.shippingPoint || 'Not specified' }}</span>
-                        </label>
-                        <Dropdown 
+                        <label class="block text-sm font-medium text-gray-700 mb-1"> Shipping Point (Storage Location)</label>
+                        <Dropdown
                             v-model="editForm.storageLocation"
                             :options="storageLocationOptions"
                             optionLabel="label"
@@ -152,22 +126,18 @@
                             placeholder="Select shipping point"
                             class="w-full"
                             :class="{ 'border-red-300': !editForm.storageLocation }"
+                            :disabled="editingSetting.shippingPoint !== '-' && editingSetting.shippingPoint !== null && editingSetting.shippingPoint !== ''"
                         />
+                        <div v-if="editingSetting.shippingPoint !== '-' && editingSetting.shippingPoint !== null && editingSetting.shippingPoint !== ''" class="text-xs text-gray-500 mt-1">
+                            <i class="pi pi-info-circle mr-1"></i>
+                            Shipping point cannot be changed once set
+                        </div>
                     </div>
 
                     <!-- Description -->
                     <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-1">
-                            Description
-                            <span v-if="editingSetting.description" class="text-gray-500 text-xs ml-1">Current: {{ editingSetting.description }}</span>
-                            <span v-else class="text-gray-500 text-xs ml-1">Current: No description</span>
-                        </label>
-                        <Textarea 
-                            v-model="editForm.description"
-                            :rows="3"
-                            class="w-full"
-                            placeholder="Enter description..."
-                        />
+                        <label class="block text-sm font-medium text-gray-700 mb-1"> Description </label>
+                        <Textarea v-model="editForm.description" :rows="3" class="w-full" placeholder="Enter description..." />
                     </div>
 
                     <!-- Email Recipients -->
@@ -177,100 +147,70 @@
                                 Email Recipients
                                 <span class="text-gray-500 text-xs ml-1">Current: {{ editingSetting.emails.length }} email(s)</span>
                             </label>
-                            <span class="text-xs text-gray-500">Enter email and press Enter or click Add</span>
                         </div>
 
                         <!-- Current Email Tags Display -->
                         <div class="flex flex-wrap gap-2 mb-3 p-3 bg-gray-50 border border-gray-200 rounded-md min-h-[3.5rem]">
-                            <div v-for="(emailObj, index) in emailObjects" :key="index" 
-                                 class="inline-flex items-center gap-1 bg-white border border-gray-300 rounded-full px-3 py-1 text-sm">
+                            <div v-for="(emailObj, index) in emailObjects" :key="index" class="inline-flex items-center gap-1 bg-white border border-gray-300 rounded-full px-3 py-1 text-sm">
                                 <span class="text-gray-700">
-                                    {{ emailObj.email }}
-                                    <span v-if="emailObj.tag" class="text-gray-500 text-xs">({{ emailObj.tag }})</span>
+                                    {{ emailObj.fullName }}
+                                    <span class="text-gray-500 text-xs ml-1">({{ emailObj.email }})</span>
                                 </span>
-                                <button type="button" @click="removeEmail(index)" 
-                                        class="ml-1 text-gray-400 hover:text-red-500 focus:outline-none" 
-                                        title="Remove email">
+                                <button type="button" @click="removeEmail(index)" class="ml-1 text-gray-400 hover:text-red-500 focus:outline-none" title="Remove email">
                                     <i class="pi pi-times text-xs"></i>
                                 </button>
                             </div>
                             <span v-if="emailObjects.length === 0" class="text-gray-400 italic self-center">No emails added</span>
                         </div>
 
-                        <!-- Email Input Form -->
-                        <div class="grid grid-cols-1 md:grid-cols-8 gap-4 mb-2">
-                            <div class="md:col-span-7">
-                                <InputText 
-                                    v-model="newEmail" 
-                                    placeholder="Enter email address" 
-                                    class="w-full" 
-                                    @keyup.enter="addEmail" 
-                                    ref="emailInput" 
-                                />
+                        <!-- Multi-Select Dropdown for Users -->
+                        <div class="mb-2">
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Select Email Recipients</label>
+                            <MultiSelect v-model="selectedUsers" :options="availableUsers" optionLabel="displayLabel" optionValue="email" placeholder="Search and select users..." :filter="true" class="w-full">
+                                <template #option="slotProps">
+                                    <div class="flex items-center">
+                                        <i class="pi pi-user text-gray-400 mr-2"></i>
+                                        <div>
+                                            <div class="font-medium text-gray-800">{{ slotProps.option.fullName }}</div>
+                                            <div class="text-xs text-gray-500">{{ slotProps.option.email }}</div>
+                                        </div>
+                                    </div>
+                                </template>
+                            </MultiSelect>
+                            <div class="flex justify-between mt-2">
+                                <span class="text-xs text-gray-500">{{ selectedUsers.length }} user(s) selected</span>
+                                <Button label="Add Selected" icon="pi pi-plus" class="p-button-sm p-button-outlined" @click="addSelectedEmails" :disabled="selectedUsers.length === 0" />
                             </div>
-                            <Button 
-                                label="Add" 
-                                icon="pi pi-plus" 
-                                class="p-button-sm" 
-                                @click="addEmail" 
-                                :disabled="!newEmail.trim()" 
-                            />
                         </div>
-                        <div v-if="emailError" class="text-red-500 text-xs mt-1">{{ emailError }}</div>
                     </div>
                 </div>
 
                 <!-- Action Buttons -->
                 <div class="flex justify-end gap-2 pt-6 mt-4">
-                    <Button 
-                        label="Cancel" 
-                        icon="pi pi-times" 
-                        class="p-button-outlined p-button-sm" 
-                        @click="cancelEdit" 
-                    />
-                    <Button 
-                        label="Save Changes" 
-                        icon="pi pi-check" 
-                        class="p-button p-button-sm" 
-                        @click="saveSetting" 
-                        :disabled="emailObjects.length === 0 || !editForm.storageLocation"
-                        :loading="saving"
-                    />
+                    <Button label="Cancel" icon="pi pi-times" class="p-button-outlined p-button-sm" @click="cancelEdit" />
+                    <Button label="Save Changes" icon="pi pi-check" class="p-button p-button-sm" @click="saveSetting" :disabled="emailObjects.length === 0 || !editForm.storageLocation" :loading="saving" />
                 </div>
             </div>
         </Dialog>
 
         <!-- View Emails Dialog -->
-        <Dialog 
-            v-model:visible="viewEmailsDialogVisible" 
-            :style="{ width: '500px' }" 
-            header="Email Recipients"
-            :modal="true"
-            :closable="true"
-        >
+        <Dialog v-model:visible="viewEmailsDialogVisible" :style="{ width: '600px' }" header="Email Recipients" :modal="true" :closable="true">
             <div v-if="viewingSetting" class="py-4">
                 <div class="mb-4">
                     <div class="text-lg font-semibold text-gray-800 mb-1">{{ viewingSetting.function }}</div>
                     <div class="text-sm text-gray-500">{{ viewingSetting.emails.length }} recipient(s)</div>
                 </div>
-                
+
                 <div class="max-h-96 overflow-y-auto">
-                    <DataTable
-                        :value="viewingSetting.emails"
-                        :rows="10"
-                        dataKey="email"
-                        :rowHover="true"
-                        responsiveLayout="scroll"
-                        class="rounded-table"
-                    >
+                    <DataTable :value="viewingSetting.emails" :rows="10" dataKey="email" :rowHover="true" responsiveLayout="scroll" class="rounded-table">
                         <Column header="Email Address" style="min-width: 20rem">
                             <template #body="{ data }">
                                 <div class="flex items-center py-2">
-                                    <i class="pi pi-envelope text-gray-400 mr-3"></i>
+                                    <i class="pi pi-user text-gray-400 mr-3"></i>
                                     <div class="flex-1">
-                                        <div class="text-gray-800">{{ data.email }}</div>
-                                        <div v-if="data.tag" class="text-xs text-gray-500 mt-1">
-                                            Tag: {{ data.tag }}
+                                        <div class="font-medium text-gray-800">{{ data.fullName }}</div>
+                                        <div class="text-xs text-gray-500 mt-1">
+                                            {{ data.email }}
                                         </div>
                                     </div>
                                 </div>
@@ -285,14 +225,9 @@
                         </template>
                     </DataTable>
                 </div>
-                
+
                 <div class="flex justify-end pt-4 border-t border-gray-200 mt-4">
-                    <Button 
-                        label="Close" 
-                        icon="pi pi-times" 
-                        class="p-button-outlined p-button-sm" 
-                        @click="viewEmailsDialogVisible = false" 
-                    />
+                    <Button label="Close" icon="pi pi-times" class="p-button-outlined p-button-sm" @click="viewEmailsDialogVisible = false" />
                 </div>
             </div>
         </Dialog>
@@ -306,6 +241,7 @@ import Badge from 'primevue/badge';
 import Dialog from 'primevue/dialog';
 import Dropdown from 'primevue/dropdown';
 import Textarea from 'primevue/textarea';
+import MultiSelect from 'primevue/multiselect';
 import { computed } from 'vue';
 import { useMenuStore } from '@/store/menu';
 
@@ -315,7 +251,8 @@ export default {
         Badge,
         Dialog,
         Dropdown,
-        Textarea
+        Textarea,
+        MultiSelect
     },
     setup() {
         const toast = useToast();
@@ -331,9 +268,9 @@ export default {
             viewingSetting: null,
             filters1: { global: { value: null, matchMode: 'contains' } },
             // Email editing state
-            newEmail: '',
             emailObjects: [],
-            emailError: '',
+            selectedUsers: [], // Array of selected email strings
+            allUsers: [], // All users from API
             saving: false,
             // Edit form
             editForm: {
@@ -350,11 +287,20 @@ export default {
                 { label: 'TMDS', value: 'TMDS' }
             ]
         };
-    },    
-    computed: {  
+    },
+    computed: {
         canUpdate() {
             const menuStore = useMenuStore();
             return menuStore.canWrite('Email Setting');
+        },
+
+        // Filter out already selected emails from available users
+        availableUsers() {
+            if (!this.allUsers.length) return [];
+
+            const selectedEmails = this.emailObjects.map((obj) => obj.email.toLowerCase());
+
+            return this.allUsers.filter((user) => !selectedEmails.includes(user.email.toLowerCase()));
         }
     },
     methods: {
@@ -394,29 +340,61 @@ export default {
             }
         },
 
+        async loadUserList() {
+            try {
+                const res = await api.get('admin/list-user');
+                if (res.data.status === 1) {
+                    this.allUsers = res.data.data
+                        .filter((user) => user.email && user.email.trim()) // Only users with email
+                        .map((user) => ({
+                            email: user.email.trim(),
+                            fullName: `${user.first_name || ''} ${user.last_name || ''}`.trim() || user.email,
+                            displayLabel: `${user.first_name || ''} ${user.last_name || ''}`.trim() ? `${user.first_name || ''} ${user.last_name || ''}`.trim() + ` (${user.email})` : user.email
+                        }));
+
+                    // Remove duplicates by email
+                    const seen = new Set();
+                    this.allUsers = this.allUsers.filter((user) => {
+                        const email = user.email.toLowerCase();
+                        if (seen.has(email)) return false;
+                        seen.add(email);
+                        return true;
+                    });
+                }
+            } catch (err) {
+                console.error('Failed to load user list:', err);
+                this.allUsers = [];
+            }
+        },
+
         parseEmailString(emailString) {
             if (!emailString) return [];
 
-            return emailString
-                .split(',')
-                .map((item) => {
-                    const trimmed = item.trim();
-                    // Match email with optional tag in parentheses
-                    const match = trimmed.match(/^([^\(]+?)(?:\s*\((.+)\))?$/);
-                    if (match) {
-                        const email = match[1].trim();
-                        const tag = match[2] ? match[2].trim() : null;
-                        return { email, tag };
-                    }
-                    return { email: trimmed, tag: null };
-                })
-                .filter((item) => item.email && item.email.length > 0);
+            return (
+                emailString
+                    .split(',')
+                    .map((item) => {
+                        const trimmed = item.trim();
+                        // Match pattern: Full Name (email) or just email
+                        const match = trimmed.match(/^([^\(]+)\s*\(([^\)]+)\)$/);
+                        if (match) {
+                            const fullName = match[1].trim();
+                            const email = match[2].trim();
+                            return { email, fullName };
+                        }
+                        // If no parentheses, treat entire string as email
+                        return { email: trimmed, fullName: trimmed };
+                    })
+                    .filter((item) => item.email && item.email.length > 0)
+                    // Remove duplicates
+                    .filter((item, index, self) => index === self.findIndex((t) => t.email.toLowerCase() === item.email.toLowerCase()))
+            );
         },
 
         formatEmailObjects(emailObjects) {
             return emailObjects
                 .map((obj) => {
-                    return obj.tag ? `${obj.email} (${obj.tag})` : obj.email;
+                    return `${obj.email}`;
                 })
                 .join(', ');
         },
@@ -426,7 +404,7 @@ export default {
             this.viewEmailsDialogVisible = true;
         },
 
-        editSetting(setting) {
+        async editSetting(setting) {
             if (!this.canUpdate) {
                 this.toast.add({
                     severity: 'warn',
@@ -439,23 +417,18 @@ export default {
 
             this.editingSetting = { ...setting };
             this.emailObjects = JSON.parse(JSON.stringify(setting.emails));
-            this.newEmail = '';
-            this.emailError = '';
-            
+            this.selectedUsers = [];
+
             // Initialize edit form with current values
             this.editForm = {
                 storageLocation: setting.shippingPoint !== '-' ? setting.shippingPoint : '',
                 description: setting.description || ''
             };
-            
-            this.editDialogVisible = true;
 
-            // Focus on email input after dialog opens
-            this.$nextTick(() => {
-                if (this.$refs.emailInput) {
-                    this.$refs.emailInput.$el.focus();
-                }
-            });
+            // Load user list for dropdown
+            await this.loadUserList();
+
+            this.editDialogVisible = true;
 
             this.toast.add({
                 severity: 'info',
@@ -465,40 +438,35 @@ export default {
             });
         },
 
-        addEmail() {
-            this.emailError = '';
-            
-            if (!this.newEmail.trim()) {
-                this.emailError = 'Please enter an email address';
-                return;
-            }
+        addSelectedEmails() {
+            if (this.selectedUsers.length === 0) return;
 
-            if (!this.isValidEmail(this.newEmail.trim())) {
-                this.emailError = 'Please enter a valid email address';
-                return;
-            }
+            const newEmails = [];
+            this.selectedUsers.forEach((email) => {
+                // Find user details from allUsers
+                const user = this.allUsers.find((u) => u.email === email);
+                if (user) {
+                    // Check if email already exists (double-check)
+                    const exists = this.emailObjects.some((obj) => obj.email.toLowerCase() === user.email.toLowerCase());
 
-            // Check for duplicate email
-            if (this.emailObjects.some((obj) => obj.email.toLowerCase() === this.newEmail.trim().toLowerCase())) {
-                this.emailError = 'This email is already added';
-                return;
-            }
-
-            this.emailObjects.push({
-                email: this.newEmail.trim(),
-                tag: null // No tag input in current design
-            });
-
-            // Clear input and focus back
-            this.newEmail = '';
-            this.$nextTick(() => {
-                if (this.$refs.emailInput) {
-                    this.$refs.emailInput.$el.focus();
+                    if (!exists) {
+                        newEmails.push({
+                            email: user.email,
+                            fullName: user.fullName
+                        });
+                    }
                 }
             });
+
+            // Add all new emails at once
+            this.emailObjects.push(...newEmails);
+
+            // Clear selection
+            this.selectedUsers = [];
         },
 
         removeEmail(index) {
+            // Remove the email from emailObjects
             this.emailObjects.splice(index, 1);
         },
 
@@ -563,17 +531,12 @@ export default {
             }
         },
 
-        isValidEmail(email) {
-            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-            return emailRegex.test(email);
-        },
-
         cancelEdit() {
             this.editDialogVisible = false;
             this.editingSetting = null;
             this.emailObjects = [];
-            this.newEmail = '';
-            this.emailError = '';
+            this.selectedUsers = [];
+            this.allUsers = [];
             this.editForm = {
                 storageLocation: '',
                 description: ''
@@ -655,11 +618,11 @@ export default {
         border-bottom: 1px solid #e5e7eb;
         padding: 1.25rem 1.5rem;
     }
-    
+
     .p-dialog-content {
         padding: 1.5rem;
     }
-    
+
     .p-dialog-footer {
         border-top: 1px solid #e5e7eb;
         padding: 1rem 1.5rem;
@@ -675,6 +638,12 @@ export default {
 :deep(.p-column-title) {
     font-weight: 600;
     color: #374151;
+}
+
+:deep(.p-multiselect) {
+    .p-multiselect-label {
+        padding: 0.5rem 0.75rem;
+    }
 }
 
 .card {
