@@ -11,7 +11,7 @@
                                 <Button icon="pi pi-arrow-left font-bold" class="p-button-text p-button-secondary text-xl" v-tooltip="'Back'" />
                             </RouterLink>
                             <div class="text-2xl font-bold text-gray-800">Reward Catalogue Details </div>
-                        <Button icon="pi pi-download" label="Export Report" style="width: fit-content" class="p-button-primary p-button-sm" @click="fetchExport" />
+                        <Button icon="pi pi-download" label="Report" style="width: fit-content" class="p-button-primary p-button-sm" @click="fetchExport" />
                         </div>
 
                         <!-- Edit & Delete Buttons -->
@@ -49,7 +49,7 @@
                                 <div class="flex gap-4 items-end w-full md:w-72">
                                     <!-- <Button icon="pi pi-plus" class="p-button-text text-green-600 w-10 h-10 flex items-center justify-center" v-tooltip="'Add PIN'" @click="addPin" />
                                     <Button icon="pi pi-minus" class="p-button-text text-yellow-600 w-10 h-10 flex items-center justify-center" v-tooltip="'Remove PIN'" @click="removePin" /> -->
-                                    <Button icon="pi pi-file-export" label="Export" v-tooltip="'Export PIN List'" @click="downloadEmptyTemplate" :loading="downloadingTemplate" />
+                                    <Button icon="pi pi-file-export" label="Report" v-tooltip="'Export PIN List'" @click="downloadEmptyTemplate" :loading="downloadingTemplate" />
                                     <Button v-if="canUpdate" icon="pi pi-file-import" label="Import" v-tooltip="'Import PIN List'" @click="importPinList" />
                                 </div>
                             </div>
@@ -119,7 +119,7 @@
                                 <Button icon="pi pi-arrow-left font-bold" class="p-button-text p-button-secondary text-xl" v-tooltip="'Back'" />
                             </RouterLink>
                             <div class="text-2xl font-bold text-gray-800">Reward Catalogue Details </div>
-                        <Button icon="pi pi-download" label="Export Report" style="width: fit-content" class="p-button-primary p-button-sm" @click="fetchExport" />
+                        <Button icon="pi pi-download" label="Report" style="width: fit-content" class="p-button-primary p-button-sm" @click="fetchExport" />
 
                         </div>
 
@@ -185,7 +185,7 @@
                                 <Button icon="pi pi-arrow-left font-bold" class="p-button-text p-button-secondary text-xl" v-tooltip="'Back'" />
                             </RouterLink>
                             <div class="text-2xl font-bold text-gray-800">Reward Catalogue Details </div>
-                        <Button icon="pi pi-download" label="Export Report" style="width: fit-content" class="p-button-primary p-button-sm" @click="fetchExport" />
+                        <Button icon="pi pi-download" label="Report" style="width: fit-content" class="p-button-primary p-button-sm" @click="fetchExport" />
                         </div>
 
                         <!-- Edit & Delete Buttons -->
@@ -282,7 +282,7 @@
 
                         <!-- Export Button -->
                         <div class="flex items-center gap-2">
-                            <Button icon="pi pi-file-export" label="Export" class="p-button text-blue-600 p-2 flex items-center justify-center" v-tooltip="'Export Redemption List'" @click="exportToExcel" />
+                            <Button icon="pi pi-file-export" label="Report" class="p-button text-blue-600 p-2 flex items-center justify-center" v-tooltip="'Export Redemption List'" @click="exportToExcel" />
                         </div>
                     </div>
 
