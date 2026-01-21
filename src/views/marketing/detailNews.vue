@@ -24,9 +24,9 @@
                         </div>
                         <div class="inline-flex items-center gap-2">
                             <RouterLink v-if="canUpdate" :to="`/marketing/editNews/${news.id}`">
-                                <Button label="Edit" class="p-button-info" size="small" />
+                                <Button label="Edit" class="p-button-info"  />
                             </RouterLink>
-                            <Button v-if="canUpdate" label="Delete" class="p-button-danger" size="small" @click="confirmDelete" />
+                            <Button v-if="canUpdate" label="Delete" class="p-button-danger"  @click="confirmDelete" />
                         </div>
                     </div>
 

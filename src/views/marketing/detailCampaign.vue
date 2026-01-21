@@ -15,14 +15,14 @@
                         <div class="inline-flex items-center gap-2">
                             <!-- Edit Event -->
                             <div>
-                                <Button v-if="canUpdate" label="Report" style="width: fit-content" class="p-button-sm p-button-success" :loading="exportLoading" @click="fetchExport1" :disabled="exportLoading" />
+                                <Button v-if="canUpdate" icon="pi pi-file-export" label="Export Campaign"  style="width: fit-content" class="p-button-primary" :loading="exportLoading" @click="fetchExport1" :disabled="exportLoading" />
                             </div>
                             <RouterLink v-if="canUpdate" :to="`/marketing/editCampaign/${campaignId}`">
-                                <Button label="Edit" class="p-button-info" size="small" />
+                                <Button label="Edit" style="width: fit-content" class="p-button-info"  />
                             </RouterLink>
 
                             <!-- Delete Event -->
-                            <Button v-if="canUpdate" label="Delete" class="p-button-danger" size="small" @click="confirmDelete" />
+                            <Button v-if="canUpdate" label="Delete" style="width: fit-content" class="p-button-danger"  @click="confirmDelete" />
                         </div>
                     </div>
 
@@ -111,10 +111,13 @@
                 <div class="card flex flex-col w-full">
                     <!-- Header with Invite Button -->
                     <div class="flex items-center justify-between border-b pb-2 mb-2">
+                        <div class="flex items-center gap-2">
                         <div class="text-2xl font-bold text-gray-800">Participating Dealer</div>
-                        <div class="inline-flex items-center gap-2">
-                            <Button v-if="canUpdate" label="Report" style="width: fit-content" class="p-button-sm p-button-danger" :loading="exportLoading" @click="fetchExport" :disabled="exportLoading" />
-                            <Button v-if="canUpdate" label="Assign Dealer" icon="pi pi-user-plus" style="width: fit-content" class="p-button-sm p-button-success" @click="openInviteDealerDialog" />
+
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <Button v-if="canUpdate" icon="pi pi-file-export" label="Export Participant" style="width: fit-content" class="p-button-primary " :loading="exportLoading" @click="fetchExport" :disabled="exportLoading" />
+                            <Button v-if="canUpdate" label="Assign Dealer" icon="pi pi-user-plus" style="width: fit-content"  class="p-button-success" @click="openInviteDealerDialog" />
                         </div>
                     </div>
 

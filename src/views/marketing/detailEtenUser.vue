@@ -5,12 +5,20 @@
                 <!-- Header -->
                 <div class="flex flex-col md:flex-row gap-8">
                     <div class="card flex flex-col gap-6 w-full">
-                        <div class="flex items-center gap-4 border-b pb-2">
-                            <RouterLink to="/marketing/listEtenUser">
-                                <Button icon="pi pi-arrow-left font-bold" class="p-button-text p-button-secondary text-xl" size="big" v-tooltip="'Back'" />
-                            </RouterLink>
+                        <div class="flex items-center justify-between gap-4 border-b pb-2">
+                            <div class="flex items-center gap-2">
+                                <RouterLink to="/marketing/listEtenUser">
+                                    <Button icon="pi pi-arrow-left font-bold" class="p-button-text p-button-secondary text-xl" size="big" v-tooltip="'Back'" />
+                                </RouterLink>
+                                <span class="text-2xl font-bold text-gray-800">Member Information</span>
+                            </div>
 
-                            <span class="text-2xl font-bold text-gray-800">Member Information</span>
+                            <div class="flex items-center gap-2">
+                                <!-- Edit Button -->
+                                <RouterLink v-if="canUpdate" :to="`/marketing/editEtenUser/${memberId}`">
+                                    <Button type="button" label="Edit" />
+                                </RouterLink>
+                            </div>
                         </div>
 
                         <!-- Loading State -->
@@ -24,11 +32,6 @@
                                     <span class="block text-xm font-bold text-black-700">Member Code.</span>
                                     <span class="text-lg font-medium">{{ memberDetail.memberCode || '-' }}</span>
                                 </div>
-
-                                <!-- Edit Button -->
-                                <RouterLink v-if="canUpdate" :to="`/marketing/editEtenUser/${memberId}`">
-                                    <Button type="button" label="Edit" />
-                                </RouterLink>
                             </div>
 
                             <!-- Personal Information Card -->

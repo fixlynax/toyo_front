@@ -15,11 +15,11 @@
                         <div class="inline-flex items-center gap-2">
                             <!-- Edit Event -->
                             <RouterLink v-if="canUpdate" :to="`/marketing/editEvent/${eventId}`">
-                                <Button label="Edit" class="p-button-info" size="small" />
+                                <Button label="Edit" class="p-button-info"  />
                             </RouterLink>
 
                             <!-- Delete Event -->
-                            <Button v-if="canUpdate" label="Delete" class="p-button-danger" size="small" @click="confirmDelete" />
+                            <Button v-if="canUpdate" label="Delete" class="p-button-danger"  @click="confirmDelete" />
                         </div>
                     </div>
 
@@ -68,7 +68,7 @@
                 <div class="card flex flex-col w-full" v-if="event.isSurvey === 'Yes' && surveyQuestions.length > 0">
                     <div class="flex items-center justify-between border-b pb-2 mb-2">
                         <div class="text-2xl font-bold text-gray-800">📋 Survey Info</div>
-                        <Button icon="pi pi-download" label="Report" style="width: fit-content" class="p-button-danger p-button-sm" @click="fetchExport" />
+                        <Button icon="pi pi-download" label="Report" style="width: fit-content" class="p-button-primary p-button-sm" @click="fetchExport" />
                     </div>
 
                     <div class="space-y-6">
@@ -167,7 +167,7 @@
                 <div class="card flex flex-col w-full" v-if="event.isSurvey === 'Yes' && participants.length > 0">
                     <div class="flex items-center justify-between border-b pb-3 mb-4">
                         <div class="text-2xl font-bold text-gray-800">👨🏻‍💻 Participant List</div>
-                        <Button icon="pi pi-file-export" label="Export" style="width: fit-content" class="p-button-danger p-button-sm" />
+                        <Button icon="pi pi-file-export" label="Export" style="width: fit-content" class="p-button-primary p-button-sm" />
                     </div>
                     <DataTable :value="participants" :paginator="true" :rows="10" dataKey="id" :rowHover="true" responsiveLayout="scroll" class="text-sm">
                         <Column header="User" style="min-width: 1rem">

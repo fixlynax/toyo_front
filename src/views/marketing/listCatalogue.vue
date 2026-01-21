@@ -19,11 +19,11 @@
                 <!-- Right: Create Button -->
                 <div class="flex items-center gap-2 ml-auto"></div>
                 <div>
-                    <Button type="button" label="Report" icon="pi pi-file-export" class="p-button-success" :loading="exportLoading" @click="fetchExport" />
+                    <Button type="button" label="Export" icon="pi pi-file-export"   style="width: fit-content" class="p-button-success" :loading="exportLoading" @click="fetchExport" />
                 </div>
                 <div>
                     <RouterLink v-if="canUpdate" to="/marketing/createCatalogue">
-                        <Button type="button" label="Create" />
+                        <Button type="button" label="Create"  style="width: fit-content" />
                     </RouterLink>
                 </div>
             </div>

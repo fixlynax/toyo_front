@@ -433,11 +433,42 @@ const processBackOrder = async (status) => {
             toast.add({ severity: 'success', summary: 'Success', detail: 'Back order processed successfully', life: 3000 });
             await fetchBackOrderDetail();
         } else {
-            toast.add({ severity: 'error', summary: 'Error', detail: response.data.error?.message || 'Failed to process back order', life: 3000 });
+            // Check if there's a specific error message from the API
+            let errorDetail = response.data.error?.message || 'Failed to process back order';
+            
+            // Check if the API returned a custom error message
+            if (response.data.error === 'All material do not has stock') {
+                errorDetail = 'All materials have no stock available';
+            } else if (typeof response.data.error === 'string') {
+                // Use the API error message if available
+                errorDetail = response.data.error;
+            }
+            
+            toast.add({ 
+                severity: 'error', 
+                summary: 'Error', 
+                detail: errorDetail, 
+                life: 3000 
+            });
         }
     } catch (error) {
         console.error('Error processing back order:', error);
-        toast.add({ severity: 'error', summary: 'Error', detail: 'Failed to process back order', life: 3000 });
+        
+        let errorDetail = 'Failed to process back order';
+        
+        // Check if the error response has specific message
+        if (error.response?.data?.error) {
+            errorDetail = error.response.data.error;
+        } else if (error.message) {
+            errorDetail = error.message;
+        }
+        
+        toast.add({ 
+            severity: 'error', 
+            summary: 'Error', 
+            detail: errorDetail, 
+            life: 3000 
+        });
     } finally {
         processing.value = false;
     }

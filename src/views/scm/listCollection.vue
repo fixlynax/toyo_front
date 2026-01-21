@@ -467,13 +467,12 @@ const generateReport = (report) => {
                     text-align: center;
                     font-size: 18px;
                     font-weight: bold;
-                    margin-top: 10px;
+                    margin-top: 5px;
                 }
                 .flex-box {
                     display: flex;
                     border: 1px solid #000;
-                    margin-top: 20px;
-                    min-height: 160px;
+                    margin-top: 10px;
                 }
                 .left-box {
                     flex: 2;
@@ -493,11 +492,11 @@ const generateReport = (report) => {
                     font-size: 12px;
                 }
                 .signature-line-new {
-                    margin-top: auto;         /* pushes signature to bottom */
                     border-top: 1px solid #000;
                     width: 100%;
                     padding-top: 5px;
                     text-align: center;
+                    margin-top: 50px;
                 }
                 .dealer-line {
                     margin-top: 5px;
@@ -505,7 +504,7 @@ const generateReport = (report) => {
                 table {
                     width: 100%;
                     border-collapse: collapse;
-                    margin-top: 20px;
+                    margin-top: 10px;
                     font-size: 13px;
                 }
                 th {
@@ -520,8 +519,9 @@ const generateReport = (report) => {
                     padding: 6px;
                 }
                 .store-use-container {
+                    page-break-inside: avoid;
                     border: 1px solid #000;
-                    margin-top: 20px;
+                    margin-top: 10px;
                 }
                 .store-use-header {
                     border-bottom: 1px solid #000;
@@ -531,7 +531,6 @@ const generateReport = (report) => {
                 }
                 .store-use-content {
                     display: flex;
-                    min-height: 160px;
                 }
                 .store-left {
                     flex: 1;
@@ -563,13 +562,31 @@ const generateReport = (report) => {
                     border: none;
                     border-top: 1px solid #000;
                 }
+                .sub-company-info { 
+                    font-size: 10px;
+                    padding-top: 4px;
+                    padding-bottom: 4px;
+                }
+                .sub-company-info2 { 
+                    font-size: 10px;
+                }
+                hr { 
+                    margin-top: 5px;
+                    margin-bottom: 5px;
+                }
             </style>
         </head>
         <body>
 
             <div class="header-logo"><img src="/etenadmin/demo/images/toyo_logo.png" alt="Logo" style="height: 25px; object-fit: contain"/></div>
-            <div class="sub-header">Toyo Tyre Sales And Marketing Malaysia Sdn Bhd <span class="sub-company-info">(Company No: 201501002742 (1128074 - X) )</span></div>
-
+            <div class="sub-header">Toyo Tyre Sales And Marketing Malaysia Sdn Bhd <span class="sub-company-info2">(Company No: 201501002742 (1128074 - X) )</span></div>
+            <hr style="border-width: 3px ;color: black;">
+            <div class="sub-company-info">
+                Level 2, Wisma Comcorp, No.37, Jalan Pelukis U1/46, Section U1, Temasya Industrial Park, 40150 Glenmarie,  Shah Alam, Selangor Darul Ehsan, Malaysia.
+            </div>
+            <div class="sub-company-info">
+                Tel: +603-5568 3188 &nbsp; | &nbsp; Fax: +603-5569 3809
+            </div>
             <div class="title-box">CLAIM TIRE COLLECTION</div>
 
             <div class="flex-box">
@@ -633,7 +650,6 @@ const generateReport = (report) => {
                             <strong>Branch Asst / Storehand</strong><br><br>
                             <div>Name: </div> <br>
                             <div>Date: </div> <br>
-                            <br><br><br><br>
                             <div class="signature-line-new">Customer's Chop and Signature</div>
                         </div>
 
