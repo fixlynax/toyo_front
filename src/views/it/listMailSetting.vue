@@ -112,7 +112,7 @@
                     <!-- Function (Read-only) -->
                     <div>
                         <label class="block text-sm font-medium text-gray-700 mb-1">Function</label>
-                        <InputText :value="editingSetting.function" class="w-full bg-gray-50" readonly />
+                        <InputText :value="editingSetting.function" class="w-full bg-gray-50" disabled />
                     </div>
 
                     <!-- Storage Location -->
