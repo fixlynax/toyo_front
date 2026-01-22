@@ -8,7 +8,7 @@
                             <Button icon="pi pi-arrow-left" class="p-button-text p-button-secondary" @click="$router.back()" />
                             <div class="text-2xl font-bold text-gray-800">Return Order Collection Details</div>
                             <Button v-if="returnList.delivery_status !== 'NEW'"
-                            label="Report"
+                            label="Download Report"
                             icon="pi pi-print" 
                             class="p-button-text p-button-sm" 
                             @click="fetchReport(returnList.id)" 
@@ -289,11 +289,11 @@
 
 <script setup>
 import api from '@/service/api';
+import { useMenuStore } from '@/store/menu';
 import Button from 'primevue/button';
 import { useToast } from 'primevue/usetoast';
-import { onMounted, ref, computed } from 'vue';
+import { computed, onMounted, ref } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
-import { useMenuStore } from '@/store/menu';
 
 const menuStore = useMenuStore();
 const canUpdate = computed(() => menuStore.canWrite('Return Order Collection'));
