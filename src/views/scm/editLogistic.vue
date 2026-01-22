@@ -225,6 +225,7 @@ const submitForm  = async () => {
         return;
     }
     const formData = new FormData();
+    formData.append('id', route.params.id);
     formData.append('username', form.uname);
     formData.append('companyname', form.companyname);
     formData.append('addressline1', form.addressline1);
