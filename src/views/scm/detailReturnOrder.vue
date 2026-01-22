@@ -1,13 +1,19 @@
 <template>
-    <Fluid>
         <div class="flex flex-col md:flex-row gap-8">
             <!-- LEFT SIDE -->
             <div class="md:w-2/3 flex flex-col">
                 <div class="card flex flex-col w-full">
                     <div class="flex items-center justify-between border-b pb-2">
-                        <div class="flex items-center gap-2">
+                        <div class="flex items-center gap-3">
                             <Button icon="pi pi-arrow-left" class="p-button-text p-button-secondary" @click="$router.back()" />
                             <div class="text-2xl font-bold text-gray-800">Return Order Collection Details</div>
+                            <Button v-if="returnList.delivery_status !== 'NEW'"
+                            label="Report"
+                            icon="pi pi-print" 
+                            class="p-button-text p-button-sm" 
+                            @click="fetchReport(returnList.id)" 
+                            tooltip="Print Report"
+                            />
                         </div>
                     </div>
                     <div class="font-bold text-xl border-b pb-2 mt-2">Customer Details</div>
@@ -239,7 +245,6 @@
                 </div> -->
             </div>
         </div>
-    </Fluid>
     <Dialog header="Update Pickup Date" v-model:visible="openDialog" modal :style="{ width: '500px' }" :closable="!loadingUpdate">
         <div class="flex flex-col gap-3">
             <!-- Schedule Date -->
@@ -474,7 +479,27 @@ const InitfetchData = async () => {
         loading.value = false;
     }
 };
-
+const fetchReport = async (id) => {
+    try {
+        loading.value = true;
+        const response = await api.get(`excel-return-order-detail/${id}`);
+        if (response.data.status == 1) {
+            generateReport(response.data.admin_data);
+        }
+        else{
+        toast.add({
+            severity: 'error',
+            summary: 'Failed',
+            detail: response.data.message || 'Failed to fetch report',
+            life: 3000
+        });
+        }
+    } catch (error) {
+        console.error('Error fetching report:', error);
+    } finally {
+        loading.value = false;
+    }
+}
 function getStatusSeverity(status) {
     switch (status) {
         case 'PENDING':
@@ -487,9 +512,238 @@ function getStatusSeverity(status) {
             return 'secondary';
     }
 }
+function formatTime(dateTimeString) {
+    if (!dateTimeString) return '';
+    const [, timePart] = dateTimeString.split(' ');
+    if (!timePart) return '';
+
+    let [hours, minutes, seconds] = timePart.split(':');
+    hours = parseInt(hours, 10);
+
+    const ampm = hours >= 12 ? 'PM' : 'AM';
+    hours = hours % 12;
+    hours = hours === 0 ? 12 : hours;
+
+    return `${hours}:${minutes}:${seconds} ${ampm}`;
+}
 onMounted(() => {
     InitfetchData();
 });
+const generateReport = (report) => {
+    const itemRows = (report.return_order_array || []).map((item, index) => `
+        <tr>
+            <td>${index + 1}</td>
+            <td>${item.materialid || '-'}</td>
+            <td>${item.materialdescription || '-'}</td>
+            <td>${item.qty || '-'}</td>
+        </tr>
+    `).join('');
+    const printWindow = window.open('', '_blank');
+    printWindow.document.write(`
+        <html>
+        <head>
+            <title>Tyre Return Form</title>
+            <style>
+                body { 
+                    font-family: Arial, 
+                    sans-serif; font-size: 13px; 
+                    padding: 20px; color: #000; 
+                }
+
+                .top-header {                     
+                    font-size: 32px;
+                    font-weight: 900;
+                    color: #d69c00;
+                    margin-bottom: 10px; 
+                }
+                .company-info { 
+                    font-size: 14px;
+                    margin-top: 5px;
+                    margin-bottom: 5px;
+                    font-weight:bold;
+                }
+                .sub-company-info { 
+                    font-size: 10px;
+                    margin-top: 5px;
+                    margin-bottom: 5px;
+                }
+
+                table { 
+                    width: 100%;
+                    border-collapse: collapse; 
+                    font-size: 12px; 
+                }
+                th, td { 
+                    border: 1px solid #000; 
+                    padding: 6px; 
+                }
+                .small-table td { 
+                    padding: 4px;
+                }
+                .small-table td table td {
+                    padding: 2px;
+                }
+                .item-table td { 
+                 text-align: center;
+                }
+                .section-title { 
+                    margin-top: 20px; 
+                    font-weight: bold; 
+                }
+                .note-wrapper {
+                    padding-top: 20px; 
+                }
+                .note-box {
+                    page-break-inside: avoid;
+                    break-inside: avoid;
+                    border: 1px solid #000;
+                    padding: 10px;
+                    font-size: 12px;
+                    text-align: justify;
+                    line-height: 1.4;
+                }
+                .signature-section {
+                    page-break-inside: avoid;
+                    break-inside: avoid;
+                    // margin-top: 20px;
+                    display: flex;
+                    padding-top: 20px;
+                    justify-content: space-between;
+                }
+                .signature-box {
+                    page-break-inside: avoid;
+                    break-inside: avoid;
+                    height: 200px;
+                    width: 30%;
+                    border: 1px solid #000;
+                    padding: 10px;
+                    font-size: 12px;
+                    display: flex;
+                    flex-direction: column;   /* stack items vertically */
+                }
+                .signature-line {
+                    margin-top: auto;         /* pushes signature to bottom */
+                    border-top: 1px solid #000;
+                    width: 100%;
+                    padding-top: 5px;
+                    text-align: center;
+                }
+            </style>
+        </head>
+        <body>
+
+            <div class="top-header"><img src="/demo/images/toyo_logo.png" alt="Logo" style="height: 25px; object-fit: contain" /></div>
+            <div class="company-info">
+                Toyo Tyre Sales And Marketing Malaysia Sdn Bhd <span class="sub-company-info">(Company No: 201501002742 (1128074 - X) )</span><br>
+            </div>
+            <hr style="border-width: 3px ;color: black;">
+            <div class="sub-company-info">
+                Level 2, Wisma Comcorp, No.37, Jalan Pelukis U1/46, Section U1, Temasya Industrial Park, 40150 Glenmarie,  Shah Alam, Selangor Darul Ehsan, Malaysia.
+            </div>
+            <div class="sub-company-info">
+                Tel: +603-5568 3188 &nbsp; | &nbsp; Fax: +603-5569 3809
+            </div>
+
+            <table class="small-table">
+                <tr>
+                    <td><strong>CUSTOMER :</strong> ${ report.dealerName ||  '-'}</td>
+                    <td><strong>BRANCH :</strong> ${ report.shiptoName ||  '-'}</td>
+                    <td><strong>TYRE RETURN FORM</strong></td>
+                </tr>
+                <tr>
+                    <td>
+                        <strong>PAY TO :</strong><br>
+                        ${ report.dealerAddress ||  '-'}
+                         <br>
+                        ${report.dealerPhoneNum ||  '-'}<br>
+                    </td>
+
+                    <td>
+                        <strong>SHIP TO :</strong><br>
+                        ${ report.shiptoAddress ||  '-'}
+                         <br>
+                        ${report.shiptoMobileNum ||  '-'}<br>
+                    </td>
+
+                    <td>
+                        <table style="border:0;">
+                            <tr>
+                                <td style="border:0;width: 100px;">REF NO</td>
+                                <td style="border:0; width:10px;">:</td>
+                                <td style="border:0;">${ report.return_orderNo_ref ||  '-'}</td>
+                            </tr>
+                            <tr>
+                                <td style="border:0;">DOC DATE</td>
+                                <td style="border:0;">:</td>
+                                <td style="border:0;">${ formatDate(report.sap_timestamp) || '-'} &nbsp; ${ formatTime(report.sap_timestamp) || ''}</td>
+                            </tr>
+                            <tr>
+                                <td style="border:0;width:115px;">RETURN REASON</td>
+                                <td style="border:0;">:</td>
+                                <td style="border:0;">${ report.reason_message ||  '-'}</td>
+                            </tr>
+                            <tr>
+                                <td style="border:0;width:115px;">RETURN REMARKS</td>
+                                <td style="border:0;">:</td>
+                                <td style="border:0;">${ report.remarks ||  '-'}</td>
+                            </tr>
+                        </table>
+                    </td>
+                </tr>
+            </table>
+
+            <br>
+
+            <table class="item-table">
+                <tr>
+                    <th>No</th>
+                    <th>Material ID</th>
+                    <th>Material Description</th>
+                    <th>Qty</th>
+                </tr>
+
+                ${ itemRows || `<tr><td colspan="3">-</td></tr>` }
+            </table>
+
+            <div class="signature-section">
+
+                <div class="signature-box">
+                    <strong>DELIVERY INFO</strong><br>
+                    <br><br>
+                    <div>TRUCK NO : ${ report.delivery?.driverPlateNo ||  '-'}</div><br>
+                    <div>DRIVER NAME : ${ report.delivery?.driverName ||  '-'}</div><br>
+                    <div>DRIVER IC :${ report.delivery?.driverIC ||  '-'}</div><br>
+                </div>
+
+                <div class="signature-box">
+                    <strong>ACKNOWLEDGED BY DEALER</strong><br>
+                    <br><br>
+                    <div>NAME :</div><br>
+                    <div>DATE :</div><br>
+                    
+                    <div class="signature-line">Customer's Chop and Signature</div>
+                </div>
+                            
+                <div class="signature-box">
+                    <strong>RECEIVED BY WHS</strong><br>
+                    <br><br>
+                    <div>NAME : </div><br>
+                    <div>DATE : </div><br>
+                </div>
+
+            </div>
+
+        </body>
+        </html>
+    `);
+
+    printWindow.document.close();
+
+    printWindow.onload = () => {
+        printWindow.print();
+        printWindow.close();
+    };
+};
 </script>
 <style scoped>
 :deep(.rounded-table) {
