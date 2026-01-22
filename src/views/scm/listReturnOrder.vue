@@ -144,7 +144,7 @@
                         <Tag :value="data.delivery_status" :severity="getStatusSeverity(data.delivery_status)" />
                     </template>
                 </Column>
-                <Column v-if="canUpdate" field="report" header="Report" style="min-width: 8rem">
+                <Column v-if="statusTabs[activeTabIndex]?.label !== 'New'" field="report" header="Report" style="min-width: 8rem">
                     <template #body="{ data }">
                         <Button 
                             icon="pi pi-print" 
@@ -563,7 +563,6 @@ const fetchReport = async (id) => {
     try {
         loading.value = true;
         const response = await api.get(`excel-return-order-detail/${id}`);
-        console.log(response)
         if (response.data.status == 1) {
             generateReport(response.data.admin_data);
         }

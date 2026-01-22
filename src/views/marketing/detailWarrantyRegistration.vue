@@ -215,7 +215,7 @@ const fetchWarrantyDetails = async () => {
             Warranty.value = response.data.admin_data;
 
             // Process private images
-            await processPrivateImages();
+            // await processPrivateImages();
         } else {
             toast.add({
                 severity: 'error',

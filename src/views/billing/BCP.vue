@@ -419,30 +419,47 @@ const formatDateToDDMMYYYY = (dateString) => {
     if (!dateString) return '';
 
     try {
+        // Handle UTC format: 2026-01-20T16:00:00.000000Z
+        if (dateString.includes('T') && dateString.includes('Z')) {
+            const date = new Date(dateString);
+            if (!isNaN(date.getTime())) {
+                // Get UTC date components to avoid timezone issues
+                const year = date.getUTCFullYear();
+                const month = String(date.getUTCMonth() + 1).padStart(2, '0');
+                const day = String(date.getUTCDate()).padStart(2, '0');
+                return `${year}-${month}-${day}`;
+            }
+        }
+        
+        // Handle other date formats
         const date = new Date(dateString);
-        if (isNaN(date.getTime())) {
-            // If dateString is already in yyyy-mm-dd format, return it as is
-            if (dateString.match(/^\d{4}-\d{2}-\d{2}$/)) {
-                return dateString;
-            }
-            // Try to parse dd-mm-yyyy or dd/mm/yyyy formats
-            const parts = dateString.split(/[-/]/);
-            if (parts.length === 3) {
-                // If format is dd-mm-yyyy or dd/mm/yyyy, convert to yyyy-mm-dd
-                if (parts[0].length === 2 && parts[1].length === 2 && parts[2].length === 4) {
-                    // dd-mm-yyyy format, convert to yyyy-mm-dd
-                    return `${parts[2]}-${parts[1]}-${parts[0]}`;
-                }
-            }
+        if (!isNaN(date.getTime())) {
+            // Get local date components for non-UTC dates
+            const year = date.getFullYear();
+            const month = String(date.getMonth() + 1).padStart(2, '0');
+            const day = String(date.getDate()).padStart(2, '0');
+            return `${year}-${month}-${day}`;
+        }
+        
+        // If dateString is already in yyyy-mm-dd format, return it as is
+        if (dateString.match(/^\d{4}-\d{2}-\d{2}$/)) {
             return dateString;
         }
-
-        // Format date to yyyy-mm-dd (MySQL format)
-        const year = date.getFullYear();
-        const month = String(date.getMonth() + 1).padStart(2, '0');
-        const day = String(date.getDate()).padStart(2, '0');
-
-        return `${year}-${month}-${day}`;
+        
+        // Try to parse dd-mm-yyyy or dd/mm/yyyy formats
+        const parts = dateString.split(/[-/]/);
+        if (parts.length === 3) {
+            // If format is dd-mm-yyyy or dd/mm/yyyy, convert to yyyy-mm-dd
+            if (parts[0].length === 2 && parts[1].length === 2 && parts[2].length === 4) {
+                // dd-mm-yyyy format, convert to yyyy-mm-dd
+                return `${parts[2]}-${parts[1]}-${parts[0]}`;
+            }
+        }
+        
+        // Return current date as fallback
+        const today = new Date();
+        return `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
+        
     } catch (error) {
         console.error('Error formatting date:', error);
         // Return current date as fallback
@@ -639,11 +656,13 @@ const createETENOrder = () => {
                 formData.append('division', sapData.division || '00');
                 formData.append('pricegroup', sapData.pricegroup || '04');
                 // Format orderdate as yyyy-mm-dd for MySQL
-                formData.append('orderdate', formatDateToDDMMYYYY(sapData.orderdate) || formatDateToDDMMYYYY(new Date().toISOString().split('T')[0]));
+                const formattedOrderDate = formatDateToDDMMYYYY(sapData.orderdate) || formatDateToDDMMYYYY(new Date().toISOString());
+                formData.append('orderdate', formattedOrderDate);
                 // Format requestdeliverydate as yyyy-mm-dd for MySQL
-                formData.append('requestdeliverydate', formatDateToDDMMYYYY(sapData.requestdeliverydate) || formatDateToDDMMYYYY(new Date().toISOString().split('T')[0]));
+                const formattedDeliveryDate = formatDateToDDMMYYYY(sapData.requestdeliverydate) || formatDateToDDMMYYYY(new Date().toISOString());
+                formData.append('requestdeliverydate', formattedDeliveryDate);
                 // Add deliveryDate field as well since the backend expects it (based on the SQL error)
-                formData.append('deliveryDate', formatDateToDDMMYYYY(sapData.requestdeliverydate) || formatDateToDDMMYYYY(new Date().toISOString().split('T')[0]));
+                formData.append('deliveryDate', formattedDeliveryDate);
                 formData.append('orderdesc', form.value.orderdesc);
                 formData.append('ordertype', sapData.ordertype || 'ZCPO');
                 formData.append('orderno', form.value.orderno);
